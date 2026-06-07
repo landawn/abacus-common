@@ -43,9 +43,9 @@ import com.landawn.abacus.annotation.SuppressFBWarnings;
  * <pre>{@code
  * ImmutableNavigableSet<Integer> set = ImmutableNavigableSet.of(1, 3, 5, 7, 9);
  *
- * System.out.println(set.floor(6));   // 5
- * System.out.println(set.higher(5));   // 7
- * System.out.println(set.descendingSet());   // [9, 7, 5, 3, 1]
+ * System.out.println(set.floor(6));          // prints 5
+ * System.out.println(set.higher(5));         // prints 7
+ * System.out.println(set.descendingSet());   // prints [9, 7, 5, 3, 1]
  * }</pre>
  *
  * @param <E> the type of elements maintained by this set
@@ -72,7 +72,7 @@ public final class ImmutableNavigableSet<E> extends ImmutableSortedSet<E> implem
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableNavigableSet<String> emptySet = ImmutableNavigableSet.empty();
-     * System.out.println(emptySet.size());   // 0
+     * System.out.println(emptySet.size());   // prints 0
      * }</pre>
      *
      * @param <E> the type of elements in the set
@@ -107,6 +107,13 @@ public final class ImmutableNavigableSet<E> extends ImmutableSortedSet<E> implem
      * Returns an ImmutableNavigableSet containing a single element.
      * The element must implement {@link Comparable} to determine its natural ordering.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * ImmutableNavigableSet<Integer> set = ImmutableNavigableSet.of(42);
+     * set.first();      // returns 42
+     * set.lower(42);    // returns null
+     * }</pre>
+     *
      * @param <E> the type of element, must extend Comparable
      * @param e1 the element to be contained in the set
      * @return an ImmutableNavigableSet containing only the specified element
@@ -125,7 +132,7 @@ public final class ImmutableNavigableSet<E> extends ImmutableSortedSet<E> implem
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableNavigableSet<String> set = ImmutableNavigableSet.of("beta", "alpha");
-     * System.out.println(set);   // [alpha, beta]
+     * System.out.println(set);   // prints [alpha, beta]
      * }</pre>
      *
      * @param <E> the type of elements, must extend Comparable
@@ -143,6 +150,14 @@ public final class ImmutableNavigableSet<E> extends ImmutableSortedSet<E> implem
      * The elements must implement Comparable to determine their natural ordering.
      * Duplicate elements will be removed, potentially resulting in a set with fewer elements.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * ImmutableNavigableSet<Integer> set = ImmutableNavigableSet.of(3, 1, 2);
+     * set.first();      // returns 1
+     * set.last();       // returns 3
+     * set.floor(2);     // returns 2
+     * }</pre>
+     *
      * @param <E> the type of elements, must extend Comparable
      * @param e1 the first element
      * @param e2 the second element
@@ -158,6 +173,14 @@ public final class ImmutableNavigableSet<E> extends ImmutableSortedSet<E> implem
      * Returns an ImmutableNavigableSet containing exactly four elements in sorted order.
      * The elements must implement Comparable to determine their natural ordering.
      * Duplicate elements will be removed, potentially resulting in a set with fewer elements.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * ImmutableNavigableSet<Integer> set = ImmutableNavigableSet.of(1, 2, 3, 4);
+     * set.size();       // returns 4
+     * set.ceiling(3);   // returns 3
+     * set.higher(4);    // returns null
+     * }</pre>
      *
      * @param <E> the type of elements, must extend Comparable
      * @param e1 the first element
@@ -175,6 +198,14 @@ public final class ImmutableNavigableSet<E> extends ImmutableSortedSet<E> implem
      * Returns an ImmutableNavigableSet containing exactly five elements in sorted order.
      * The elements must implement Comparable to determine their natural ordering.
      * Duplicate elements will be removed, potentially resulting in a set with fewer elements.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * ImmutableNavigableSet<Integer> set = ImmutableNavigableSet.of(1, 2, 3, 4, 5);
+     * set.lower(3);     // returns 2
+     * set.last();       // returns 5
+     * set.lower(1);     // returns null
+     * }</pre>
      *
      * @param <E> the type of elements, must extend Comparable
      * @param e1 the first element
@@ -194,6 +225,14 @@ public final class ImmutableNavigableSet<E> extends ImmutableSortedSet<E> implem
      * The elements must implement Comparable to determine their natural ordering.
      * Duplicate elements will be removed, potentially resulting in a set with fewer elements.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * ImmutableNavigableSet<Integer> set = ImmutableNavigableSet.of(1, 2, 3, 4, 5, 6);
+     * set.floor(4);     // returns 4
+     * set.higher(5);    // returns 6
+     * set.ceiling(7);   // returns null
+     * }</pre>
+     *
      * @param <E> the type of elements, must extend Comparable
      * @param e1 the first element
      * @param e2 the second element
@@ -212,6 +251,14 @@ public final class ImmutableNavigableSet<E> extends ImmutableSortedSet<E> implem
      * Returns an ImmutableNavigableSet containing exactly seven elements in sorted order.
      * The elements must implement Comparable to determine their natural ordering.
      * Duplicate elements will be removed, potentially resulting in a set with fewer elements.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * ImmutableNavigableSet<Integer> set = ImmutableNavigableSet.of(1, 2, 3, 4, 5, 6, 7);
+     * set.first();      // returns 1
+     * set.lower(7);     // returns 6
+     * set.higher(7);    // returns null
+     * }</pre>
      *
      * @param <E> the type of elements, must extend Comparable
      * @param e1 the first element
@@ -233,6 +280,14 @@ public final class ImmutableNavigableSet<E> extends ImmutableSortedSet<E> implem
      * Returns an ImmutableNavigableSet containing exactly eight elements in sorted order.
      * The elements must implement Comparable to determine their natural ordering.
      * Duplicate elements will be removed, potentially resulting in a set with fewer elements.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * ImmutableNavigableSet<Integer> set = ImmutableNavigableSet.of(1, 2, 3, 4, 5, 6, 7, 8);
+     * set.size();       // returns 8
+     * set.floor(8);     // returns 8
+     * set.ceiling(9);   // returns null
+     * }</pre>
      *
      * @param <E> the type of elements, must extend Comparable
      * @param e1 the first element
@@ -256,6 +311,14 @@ public final class ImmutableNavigableSet<E> extends ImmutableSortedSet<E> implem
      * The elements must implement Comparable to determine their natural ordering.
      * Duplicate elements will be removed, potentially resulting in a set with fewer elements.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * ImmutableNavigableSet<Integer> set = ImmutableNavigableSet.of(1, 2, 3, 4, 5, 6, 7, 8, 9);
+     * set.last();       // returns 9
+     * set.lower(5);     // returns 4
+     * set.higher(9);    // returns null
+     * }</pre>
+     *
      * @param <E> the type of elements, must extend Comparable
      * @param e1 the first element
      * @param e2 the second element
@@ -278,6 +341,14 @@ public final class ImmutableNavigableSet<E> extends ImmutableSortedSet<E> implem
      * Returns an ImmutableNavigableSet containing exactly ten elements in sorted order.
      * The elements must implement Comparable to determine their natural ordering.
      * Duplicate elements will be removed, potentially resulting in a set with fewer elements.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * ImmutableNavigableSet<Integer> set = ImmutableNavigableSet.of(1, 2, 3, 4, 5, 6, 7, 8, 9, 10);
+     * set.size();        // returns 10
+     * set.ceiling(10);   // returns 10
+     * set.higher(10);    // returns null
+     * }</pre>
      *
      * @param <E> the type of elements, must extend Comparable
      * @param e1 the first element
@@ -311,7 +382,7 @@ public final class ImmutableNavigableSet<E> extends ImmutableSortedSet<E> implem
      * <pre>{@code
      * List<String> list = Arrays.asList("charlie", "alpha", "beta");
      * ImmutableNavigableSet<String> set = ImmutableNavigableSet.copyOf(list);
-     * System.out.println(set);   // [alpha, beta, charlie]
+     * System.out.println(set);   // prints [alpha, beta, charlie]
      * }</pre>
      *
      * @param <E> the type of elements in the collection
@@ -347,7 +418,7 @@ public final class ImmutableNavigableSet<E> extends ImmutableSortedSet<E> implem
      * <pre>{@code
      * NavigableSet<String> mutableSet = new TreeSet<>();
      * ImmutableNavigableSet<String> immutableView = ImmutableNavigableSet.wrap(mutableSet);
-     * mutableSet.add("new element");   // This change is visible in immutableView!
+     * mutableSet.add("new element");   // this change is visible in immutableView!
      * }</pre>
      *
      * @param <E> the type of elements in the NavigableSet
@@ -371,6 +442,12 @@ public final class ImmutableNavigableSet<E> extends ImmutableSortedSet<E> implem
      * Use {@link #wrap(NavigableSet)} for NavigableSet or {@link ImmutableSortedSet#wrap(SortedSet)}
      * for regular SortedSets.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * SortedSet<Integer> sorted = new TreeSet<>();
+     * ImmutableNavigableSet.wrap(sorted);   // throws UnsupportedOperationException
+     * }</pre>
+     *
      * @param <E> the type of elements
      * @param sortedSet ignored
      * @return never returns normally
@@ -389,9 +466,9 @@ public final class ImmutableNavigableSet<E> extends ImmutableSortedSet<E> implem
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableNavigableSet<Integer> set = ImmutableNavigableSet.of(1, 3, 5, 7, 9);
-     * System.out.println(set.lower(5));   // 3
-     * System.out.println(set.lower(6));   // 5
-     * System.out.println(set.lower(1));   // null
+     * System.out.println(set.lower(5));   // prints 3
+     * System.out.println(set.lower(6));   // prints 5
+     * System.out.println(set.lower(1));   // prints null
      * }</pre>
      *
      * @param e the value to match
@@ -412,9 +489,9 @@ public final class ImmutableNavigableSet<E> extends ImmutableSortedSet<E> implem
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableNavigableSet<Integer> set = ImmutableNavigableSet.of(1, 3, 5, 7, 9);
-     * System.out.println(set.floor(5));   // 5
-     * System.out.println(set.floor(6));   // 5
-     * System.out.println(set.floor(0));   // null
+     * System.out.println(set.floor(5));   // prints 5
+     * System.out.println(set.floor(6));   // prints 5
+     * System.out.println(set.floor(0));   // prints null
      * }</pre>
      *
      * @param e the value to match
@@ -435,9 +512,9 @@ public final class ImmutableNavigableSet<E> extends ImmutableSortedSet<E> implem
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableNavigableSet<Integer> set = ImmutableNavigableSet.of(1, 3, 5, 7, 9);
-     * System.out.println(set.ceiling(5));    // 5
-     * System.out.println(set.ceiling(6));    // 7
-     * System.out.println(set.ceiling(10));   // null
+     * System.out.println(set.ceiling(5));    // prints 5
+     * System.out.println(set.ceiling(6));    // prints 7
+     * System.out.println(set.ceiling(10));   // prints null
      * }</pre>
      *
      * @param e the value to match
@@ -458,9 +535,9 @@ public final class ImmutableNavigableSet<E> extends ImmutableSortedSet<E> implem
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableNavigableSet<Integer> set = ImmutableNavigableSet.of(1, 3, 5, 7, 9);
-     * System.out.println(set.higher(5));   // 7
-     * System.out.println(set.higher(6));   // 7
-     * System.out.println(set.higher(9));   // null
+     * System.out.println(set.higher(5));   // prints 7
+     * System.out.println(set.higher(6));   // prints 7
+     * System.out.println(set.higher(9));   // prints null
      * }</pre>
      *
      * @param e the value to match
@@ -512,7 +589,7 @@ public final class ImmutableNavigableSet<E> extends ImmutableSortedSet<E> implem
      * <pre>{@code
      * ImmutableNavigableSet<Integer> set = ImmutableNavigableSet.of(1, 3, 5, 7, 9);
      * ImmutableNavigableSet<Integer> descending = set.descendingSet();
-     * System.out.println(descending);   // [9, 7, 5, 3, 1]
+     * System.out.println(descending);   // prints [9, 7, 5, 3, 1]
      * }</pre>
      *
      * @return a reverse order view of this set
@@ -531,7 +608,7 @@ public final class ImmutableNavigableSet<E> extends ImmutableSortedSet<E> implem
      * ImmutableNavigableSet<String> set = ImmutableNavigableSet.of("a", "b", "c");
      * ObjIterator<String> iter = set.descendingIterator();
      * while (iter.hasNext()) {
-     *     System.out.print(iter.next() + " ");   // c b a
+     *     System.out.print(iter.next() + " ");   // prints "c b a "
      * }
      * }</pre>
      *
@@ -552,7 +629,7 @@ public final class ImmutableNavigableSet<E> extends ImmutableSortedSet<E> implem
      * <pre>{@code
      * ImmutableNavigableSet<Integer> set = ImmutableNavigableSet.of(1, 2, 3, 4, 5);
      * ImmutableNavigableSet<Integer> sub = set.subSet(2, true, 4, false);
-     * System.out.println(sub);   // [2, 3]
+     * System.out.println(sub);   // prints [2, 3]
      * }</pre>
      *
      * @param fromElement low endpoint of the elements in the returned set
@@ -578,7 +655,7 @@ public final class ImmutableNavigableSet<E> extends ImmutableSortedSet<E> implem
      * <pre>{@code
      * ImmutableNavigableSet<Integer> set = ImmutableNavigableSet.of(1, 2, 3, 4, 5);
      * ImmutableNavigableSet<Integer> head = set.headSet(3, false);
-     * System.out.println(head);   // [1, 2]
+     * System.out.println(head);   // prints [1, 2]
      * }</pre>
      *
      * @param toElement high endpoint of the elements in the returned set
@@ -602,7 +679,7 @@ public final class ImmutableNavigableSet<E> extends ImmutableSortedSet<E> implem
      * <pre>{@code
      * ImmutableNavigableSet<Integer> set = ImmutableNavigableSet.of(1, 2, 3, 4, 5);
      * ImmutableNavigableSet<Integer> tail = set.tailSet(3, false);
-     * System.out.println(tail);   // [4, 5]
+     * System.out.println(tail);   // prints [4, 5]
      * }</pre>
      *
      * @param fromElement low endpoint of the elements in the returned set

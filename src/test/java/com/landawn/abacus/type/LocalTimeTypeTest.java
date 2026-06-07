@@ -107,6 +107,26 @@ public class LocalTimeTypeTest extends TestBase {
     }
 
     @Test
+    public void testValueOf_ParsesLocalTimeToString() {
+        // Every form produced by LocalTime.toString() must round-trip through valueOf.
+        LocalTime[] values = { //
+                LocalTime.of(10, 30), // minute precision, "10:30"
+                LocalTime.of(10, 30, 45), // seconds, "10:30:45"
+                LocalTime.of(10, 30, 45, 123000000), // millis
+                LocalTime.of(10, 30, 45, 123456789), // nanos
+                LocalTime.MIDNIGHT, // "00:00"
+                LocalTime.NOON, //
+                LocalTime.now() };
+
+        for (LocalTime value : values) {
+            String text = value.toString();
+            LocalTime result = localTimeType.valueOf(text);
+            assertNotNull(result, () -> "Failed to parse: " + text);
+            assertEquals(value, result, () -> "Mismatch for: " + text);
+        }
+    }
+
+    @Test
     public void testValueOf_CharArray_Null() {
         assertNull(localTimeType.valueOf(null, 0, 0));
     }

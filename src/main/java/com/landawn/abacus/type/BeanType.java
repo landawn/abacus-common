@@ -107,9 +107,16 @@ public final class BeanType<T> extends AbstractType<T> {
      * Serializes a bean instance to its JSON string representation.
      * Uses the internal JSON parser with default serialization configuration.
      *
+     * <p>The returned string is a serializable representation designed to be parsed back into an equivalent value
+     * via {@link #valueOf(String)}; {@code stringOf} and {@code valueOf} are inverse operations that round-trip. This
+     * is the key distinction from {@link Object#toString()}, whose result is not guaranteed to be convertible back
+     * into the original value.</p>
+     *
      * @param x the bean instance to serialize; may be {@code null}
      * @return the JSON string representation of the bean,
      *         or {@code null} if {@code x} is {@code null}
+     * @see #valueOf(String)
+     * @see #valueOf(Object)
      */
     @Override
     public String stringOf(final T x) {
@@ -120,9 +127,15 @@ public final class BeanType<T> extends AbstractType<T> {
      * Deserializes a JSON string into a new bean instance of type {@code T}.
      * Uses the internal JSON parser targeting the reflection type of this handler.
      *
+     * <p>This method is the inverse of {@code stringOf} and round-trips with it: it parses the string produced by
+     * {@code stringOf} back into a value of this type. Strings produced by {@link Object#toString()} are not
+     * guaranteed to be parseable in this way.</p>
+     *
      * @param str the JSON string to deserialize; may be {@code null} or empty
      * @return a new bean instance populated from the JSON data,
      *         or {@code null} if {@code str} is {@code null} or empty
+     * @see #valueOf(Object)
+     * @see #stringOf(Object)
      */
     @Override
     public T valueOf(final String str) {

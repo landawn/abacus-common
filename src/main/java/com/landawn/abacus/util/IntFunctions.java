@@ -86,19 +86,19 @@ import com.landawn.abacus.util.function.IntFunction;
  * <pre>{@code
  * // Create a function for ArrayList with initial capacity
  * IntFunction<List<String>> listCreator = IntFunctions.ofList();
- * List<String> list = listCreator.apply(100);   // ArrayList with capacity 100
+ * List<String> list = listCreator.apply(100);   // returns ArrayList with capacity 100
  *
  * // Create a function for HashSet with initial capacity
  * IntFunction<Set<Integer>> setCreator = IntFunctions.ofSet();
- * Set<Integer> set = setCreator.apply(50);   // HashSet with capacity 50
+ * Set<Integer> set = setCreator.apply(50);   // returns HashSet with capacity 50
  *
  * // Create a function for HashMap with initial capacity
  * IntFunction<Map<String, Object>> mapCreator = IntFunctions.ofMap();
- * Map<String, Object> map = mapCreator.apply(200);   // HashMap with capacity 200
+ * Map<String, Object> map = mapCreator.apply(200);   // returns HashMap with capacity 200
  *
  * // Create a function for primitive arrays
  * IntFunction<int[]> arrayCreator = IntFunctions.ofIntArray();
- * int[] array = arrayCreator.apply(1000);   // int array with length 1000
+ * int[] array = arrayCreator.apply(1000);   // returns int array with length 1000
  *
  * // Dynamic collection type creation
  * IntFunction<? extends Collection<String>> dynamicCreator =
@@ -296,6 +296,14 @@ public final class IntFunctions {
      * <p>The returned function creates new {@code boolean[]} arrays with all elements initialized to {@code false}.
      * The same shared function instance is returned on every call.</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * IntFunction<boolean[]> arrayCreator = IntFunctions.ofBooleanArray();
+     * boolean[] array = arrayCreator.apply(10);       // returns new boolean[10]
+     * boolean[] empty = arrayCreator.apply(0);        // returns new boolean[0]
+     * arrayCreator.apply(-1);                         // throws NegativeArraySizeException
+     * }</pre>
+     *
      * @return an {@code IntFunction} that, given a length, creates a new {@code boolean[]} of that length
      */
     public static IntFunction<boolean[]> ofBooleanArray() {
@@ -307,6 +315,14 @@ public final class IntFunctions {
      *
      * <p>The returned function creates new {@code char[]} arrays with all elements initialized to the null character.
      * The same shared function instance is returned on every call.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * IntFunction<char[]> arrayCreator = IntFunctions.ofCharArray();
+     * char[] array = arrayCreator.apply(10);           // returns new char[10]
+     * char[] empty = arrayCreator.apply(0);            // returns new char[0]
+     * arrayCreator.apply(-1);                          // throws NegativeArraySizeException
+     * }</pre>
      *
      * @return an {@code IntFunction} that, given a length, creates a new {@code char[]} of that length
      */
@@ -320,6 +336,14 @@ public final class IntFunctions {
      * <p>The returned function creates new {@code byte[]} arrays with all elements initialized to {@code 0}.
      * The same shared function instance is returned on every call.</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * IntFunction<byte[]> arrayCreator = IntFunctions.ofByteArray();
+     * byte[] array = arrayCreator.apply(10);            // returns new byte[10]
+     * byte[] empty = arrayCreator.apply(0);             // returns new byte[0]
+     * arrayCreator.apply(-1);                           // throws NegativeArraySizeException
+     * }</pre>
+     *
      * @return an {@code IntFunction} that, given a length, creates a new {@code byte[]} of that length
      */
     public static IntFunction<byte[]> ofByteArray() {
@@ -331,6 +355,14 @@ public final class IntFunctions {
      *
      * <p>The returned function creates new {@code short[]} arrays with all elements initialized to {@code 0}.
      * The same shared function instance is returned on every call.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * IntFunction<short[]> arrayCreator = IntFunctions.ofShortArray();
+     * short[] array = arrayCreator.apply(10);           // returns new short[10]
+     * short[] empty = arrayCreator.apply(0);            // returns new short[0]
+     * arrayCreator.apply(-1);                           // throws NegativeArraySizeException
+     * }</pre>
      *
      * @return an {@code IntFunction} that, given a length, creates a new {@code short[]} of that length
      */
@@ -344,6 +376,14 @@ public final class IntFunctions {
      * <p>The returned function creates new {@code int[]} arrays with all elements initialized to {@code 0}.
      * The same shared function instance is returned on every call.</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * IntFunction<int[]> arrayCreator = IntFunctions.ofIntArray();
+     * int[] array = arrayCreator.apply(10);              // returns new int[10]
+     * int[] empty = arrayCreator.apply(0);               // returns new int[0]
+     * arrayCreator.apply(-1);                            // throws NegativeArraySizeException
+     * }</pre>
+     *
      * @return an {@code IntFunction} that, given a length, creates a new {@code int[]} of that length
      */
     public static IntFunction<int[]> ofIntArray() {
@@ -355,6 +395,14 @@ public final class IntFunctions {
      *
      * <p>The returned function creates new {@code long[]} arrays with all elements initialized to {@code 0L}.
      * The same shared function instance is returned on every call.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * IntFunction<long[]> arrayCreator = IntFunctions.ofLongArray();
+     * long[] array = arrayCreator.apply(10);             // returns new long[10]
+     * long[] empty = arrayCreator.apply(0);              // returns new long[0]
+     * arrayCreator.apply(-1);                            // throws NegativeArraySizeException
+     * }</pre>
      *
      * @return an {@code IntFunction} that, given a length, creates a new {@code long[]} of that length
      */
@@ -368,6 +416,14 @@ public final class IntFunctions {
      * <p>The returned function creates new {@code float[]} arrays with all elements initialized to {@code 0.0f}.
      * The same shared function instance is returned on every call.</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * IntFunction<float[]> arrayCreator = IntFunctions.ofFloatArray();
+     * float[] array = arrayCreator.apply(10);            // returns new float[10]
+     * float[] empty = arrayCreator.apply(0);             // returns new float[0]
+     * arrayCreator.apply(-1);                            // throws NegativeArraySizeException
+     * }</pre>
+     *
      * @return an {@code IntFunction} that, given a length, creates a new {@code float[]} of that length
      */
     public static IntFunction<float[]> ofFloatArray() {
@@ -379,6 +435,14 @@ public final class IntFunctions {
      *
      * <p>The returned function creates new {@code double[]} arrays with all elements initialized to {@code 0.0}.
      * The same shared function instance is returned on every call.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * IntFunction<double[]> arrayCreator = IntFunctions.ofDoubleArray();
+     * double[] array = arrayCreator.apply(10);           // returns new double[10]
+     * double[] empty = arrayCreator.apply(0);            // returns new double[0]
+     * arrayCreator.apply(-1);                            // throws NegativeArraySizeException
+     * }</pre>
      *
      * @return an {@code IntFunction} that, given a length, creates a new {@code double[]} of that length
      */
@@ -392,6 +456,14 @@ public final class IntFunctions {
      * <p>The returned function creates new {@code String[]} arrays with all elements initialized to {@code null}.
      * The same shared function instance is returned on every call.</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * IntFunction<String[]> arrayCreator = IntFunctions.ofStringArray();
+     * String[] array = arrayCreator.apply(10);           // returns new String[10]
+     * String[] empty = arrayCreator.apply(0);            // returns new String[0]
+     * arrayCreator.apply(-1);                            // throws NegativeArraySizeException
+     * }</pre>
+     *
      * @return an {@code IntFunction} that, given a length, creates a new {@code String[]} of that length
      */
     public static IntFunction<String[]> ofStringArray() {
@@ -404,6 +476,14 @@ public final class IntFunctions {
      * <p>The returned function creates new {@code Object[]} arrays with all elements initialized to {@code null}.
      * The same shared function instance is returned on every call.</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * IntFunction<Object[]> arrayCreator = IntFunctions.ofObjectArray();
+     * Object[] array = arrayCreator.apply(10);           // returns new Object[10]
+     * Object[] empty = arrayCreator.apply(0);            // returns new Object[0]
+     * arrayCreator.apply(-1);                            // throws NegativeArraySizeException
+     * }</pre>
+     *
      * @return an {@code IntFunction} that, given a length, creates a new {@code Object[]} of that length
      */
     public static IntFunction<Object[]> ofObjectArray() {
@@ -415,6 +495,13 @@ public final class IntFunctions {
      *
      * <p>{@code BooleanList} is a specialized list implementation for primitive {@code boolean} values,
      * avoiding boxing/unboxing overhead. The same shared function instance is returned on every call.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * IntFunction<BooleanList> listCreator = IntFunctions.ofBooleanList();
+     * BooleanList list = listCreator.apply(10);          // returns empty BooleanList with capacity 10
+     * BooleanList empty = listCreator.apply(0);          // returns empty BooleanList with capacity 0
+     * }</pre>
      *
      * @return an {@code IntFunction} that, given an initial capacity, creates a new {@code BooleanList}
      * @see BooleanList
@@ -429,6 +516,13 @@ public final class IntFunctions {
      * <p>{@code CharList} is a specialized list implementation for primitive {@code char} values,
      * avoiding boxing/unboxing overhead. The same shared function instance is returned on every call.</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * IntFunction<CharList> listCreator = IntFunctions.ofCharList();
+     * CharList list = listCreator.apply(10);             // returns empty CharList with capacity 10
+     * CharList empty = listCreator.apply(0);             // returns empty CharList with capacity 0
+     * }</pre>
+     *
      * @return an {@code IntFunction} that, given an initial capacity, creates a new {@code CharList}
      * @see CharList
      */
@@ -441,6 +535,13 @@ public final class IntFunctions {
      *
      * <p>{@code ByteList} is a specialized list implementation for primitive {@code byte} values,
      * avoiding boxing/unboxing overhead. The same shared function instance is returned on every call.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * IntFunction<ByteList> listCreator = IntFunctions.ofByteList();
+     * ByteList list = listCreator.apply(10);             // returns empty ByteList with capacity 10
+     * ByteList empty = listCreator.apply(0);             // returns empty ByteList with capacity 0
+     * }</pre>
      *
      * @return an {@code IntFunction} that, given an initial capacity, creates a new {@code ByteList}
      * @see ByteList
@@ -455,6 +556,13 @@ public final class IntFunctions {
      * <p>{@code ShortList} is a specialized list implementation for primitive {@code short} values,
      * avoiding boxing/unboxing overhead. The same shared function instance is returned on every call.</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * IntFunction<ShortList> listCreator = IntFunctions.ofShortList();
+     * ShortList list = listCreator.apply(10);            // returns empty ShortList with capacity 10
+     * ShortList empty = listCreator.apply(0);            // returns empty ShortList with capacity 0
+     * }</pre>
+     *
      * @return an {@code IntFunction} that, given an initial capacity, creates a new {@code ShortList}
      * @see ShortList
      */
@@ -467,6 +575,13 @@ public final class IntFunctions {
      *
      * <p>{@code IntList} is a specialized list implementation for primitive {@code int} values,
      * avoiding boxing/unboxing overhead. The same shared function instance is returned on every call.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * IntFunction<IntList> listCreator = IntFunctions.ofIntList();
+     * IntList list = listCreator.apply(10);               // returns empty IntList with capacity 10
+     * IntList empty = listCreator.apply(0);               // returns empty IntList with capacity 0
+     * }</pre>
      *
      * @return an {@code IntFunction} that, given an initial capacity, creates a new {@code IntList}
      * @see IntList
@@ -481,6 +596,13 @@ public final class IntFunctions {
      * <p>{@code LongList} is a specialized list implementation for primitive {@code long} values,
      * avoiding boxing/unboxing overhead. The same shared function instance is returned on every call.</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * IntFunction<LongList> listCreator = IntFunctions.ofLongList();
+     * LongList list = listCreator.apply(10);             // returns empty LongList with capacity 10
+     * LongList empty = listCreator.apply(0);             // returns empty LongList with capacity 0
+     * }</pre>
+     *
      * @return an {@code IntFunction} that, given an initial capacity, creates a new {@code LongList}
      * @see LongList
      */
@@ -493,6 +615,13 @@ public final class IntFunctions {
      *
      * <p>{@code FloatList} is a specialized list implementation for primitive {@code float} values,
      * avoiding boxing/unboxing overhead. The same shared function instance is returned on every call.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * IntFunction<FloatList> listCreator = IntFunctions.ofFloatList();
+     * FloatList list = listCreator.apply(10);            // returns empty FloatList with capacity 10
+     * FloatList empty = listCreator.apply(0);            // returns empty FloatList with capacity 0
+     * }</pre>
      *
      * @return an {@code IntFunction} that, given an initial capacity, creates a new {@code FloatList}
      * @see FloatList
@@ -507,6 +636,13 @@ public final class IntFunctions {
      * <p>{@code DoubleList} is a specialized list implementation for primitive {@code double} values,
      * avoiding boxing/unboxing overhead. The same shared function instance is returned on every call.</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * IntFunction<DoubleList> listCreator = IntFunctions.ofDoubleList();
+     * DoubleList list = listCreator.apply(10);           // returns empty DoubleList with capacity 10
+     * DoubleList empty = listCreator.apply(0);           // returns empty DoubleList with capacity 0
+     * }</pre>
+     *
      * @return an {@code IntFunction} that, given an initial capacity, creates a new {@code DoubleList}
      * @see DoubleList
      */
@@ -520,6 +656,13 @@ public final class IntFunctions {
      * <p>The returned function creates new {@code ArrayList} instances pre-sized with the given initial
      * capacity to avoid resizing during element addition. The same shared function instance is returned
      * on every call.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * IntFunction<List<String>> listCreator = IntFunctions.ofList();
+     * List<String> list = listCreator.apply(100);        // returns ArrayList with capacity 100
+     * List<String> empty = listCreator.apply(0);         // returns ArrayList with capacity 0
+     * }</pre>
      *
      * @param <T> the type of elements in the list
      * @return an {@code IntFunction} that, given an initial capacity, creates a new {@code ArrayList}
@@ -537,6 +680,13 @@ public final class IntFunctions {
      * is ignored, as {@code LinkedList} does not support an initial capacity. The same shared function
      * instance is returned on every call.</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * IntFunction<LinkedList<String>> listCreator = IntFunctions.ofLinkedList();
+     * LinkedList<String> list = listCreator.apply(100);   // returns empty LinkedList (capacity ignored)
+     * LinkedList<String> empty = listCreator.apply(0);    // returns empty LinkedList
+     * }</pre>
+     *
      * @param <T> the type of elements in the list
      * @return an {@code IntFunction} that creates a new {@code LinkedList} (the capacity argument is ignored)
      */
@@ -552,6 +702,13 @@ public final class IntFunctions {
      * <p>The returned function creates new {@code HashSet} instances pre-sized for the given expected
      * element count to avoid rehashing during element addition. The same shared function instance is
      * returned on every call.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * IntFunction<Set<String>> setCreator = IntFunctions.ofSet();
+     * Set<String> set = setCreator.apply(100);             // returns HashSet sized for 100 elements
+     * Set<String> empty = setCreator.apply(0);             // returns HashSet with capacity 0
+     * }</pre>
      *
      * @param <T> the type of elements in the set
      * @return an {@code IntFunction} that, given an expected element count, creates a new {@code HashSet}
@@ -569,6 +726,13 @@ public final class IntFunctions {
      * order and are pre-sized for the given expected element count. The same shared function instance
      * is returned on every call.</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * IntFunction<Set<String>> setCreator = IntFunctions.ofLinkedHashSet();
+     * Set<String> set = setCreator.apply(100);             // returns LinkedHashSet sized for 100 elements
+     * Set<String> empty = setCreator.apply(0);             // returns LinkedHashSet with capacity 0
+     * }</pre>
+     *
      * @param <T> the type of elements in the set
      * @return an {@code IntFunction} that, given an expected element count, creates a new {@code LinkedHashSet}
      */
@@ -583,6 +747,13 @@ public final class IntFunctions {
      * <p>The returned function creates new {@code TreeSet} instances that maintain elements in sorted
      * order. Note that the capacity argument is ignored, as {@code TreeSet} does not support an initial
      * capacity. The same shared function instance is returned on every call.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * IntFunction<SortedSet<String>> setCreator = IntFunctions.ofSortedSet();
+     * SortedSet<String> set = setCreator.apply(100);      // returns TreeSet (capacity ignored)
+     * SortedSet<String> empty = setCreator.apply(0);      // returns empty TreeSet
+     * }</pre>
      *
      * @param <T> the type of elements in the set
      * @return an {@code IntFunction} that creates a new {@code TreeSet} as a {@code SortedSet} (the capacity argument is ignored)
@@ -600,6 +771,13 @@ public final class IntFunctions {
      * as {@code TreeSet} does not support an initial capacity. The same shared function instance is
      * returned on every call.</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * IntFunction<NavigableSet<String>> setCreator = IntFunctions.ofNavigableSet();
+     * NavigableSet<String> set = setCreator.apply(100);   // returns TreeSet (capacity ignored)
+     * NavigableSet<String> empty = setCreator.apply(0);   // returns empty TreeSet
+     * }</pre>
+     *
      * @param <T> the type of elements in the set
      * @return an {@code IntFunction} that creates a new {@code TreeSet} as a {@code NavigableSet} (the capacity argument is ignored)
      */
@@ -615,6 +793,13 @@ public final class IntFunctions {
      * order. Note that the capacity argument is ignored, as {@code TreeSet} does not support an initial
      * capacity. The same shared function instance is returned on every call.</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * IntFunction<TreeSet<String>> setCreator = IntFunctions.ofTreeSet();
+     * TreeSet<String> set = setCreator.apply(100);        // returns empty TreeSet (capacity ignored)
+     * TreeSet<String> empty = setCreator.apply(0);        // returns empty TreeSet
+     * }</pre>
+     *
      * @param <T> the type of elements in the set
      * @return an {@code IntFunction} that creates a new {@code TreeSet} (the capacity argument is ignored)
      */
@@ -629,6 +814,13 @@ public final class IntFunctions {
      * <p>The returned function creates new {@code LinkedList} instances that implement the {@code Queue}
      * interface. Note that the capacity argument is ignored, as {@code LinkedList} does not support an
      * initial capacity. The same shared function instance is returned on every call.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * IntFunction<Queue<String>> queueCreator = IntFunctions.ofQueue();
+     * Queue<String> queue = queueCreator.apply(100);      // returns LinkedList as Queue (capacity ignored)
+     * Queue<String> empty = queueCreator.apply(0);        // returns empty LinkedList as Queue
+     * }</pre>
      *
      * @param <T> the type of elements in the queue
      * @return an {@code IntFunction} that creates a new {@code Queue} backed by {@code LinkedList} (the capacity argument is ignored)
@@ -646,6 +838,13 @@ public final class IntFunctions {
      * is ignored, as {@code LinkedList} does not support an initial capacity. The same shared function
      * instance is returned on every call.</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * IntFunction<Deque<String>> dequeCreator = IntFunctions.ofDeque();
+     * Deque<String> deque = dequeCreator.apply(100);      // returns LinkedList as Deque (capacity ignored)
+     * Deque<String> empty = dequeCreator.apply(0);        // returns empty LinkedList as Deque
+     * }</pre>
+     *
      * @param <T> the type of elements in the deque
      * @return an {@code IntFunction} that creates a new {@code Deque} backed by {@code LinkedList} (the capacity argument is ignored)
      */
@@ -660,6 +859,13 @@ public final class IntFunctions {
      * <p>The returned function creates new {@code ArrayDeque} instances pre-sized with the given initial
      * capacity to avoid resizing during element addition. The same shared function instance is returned
      * on every call.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * IntFunction<ArrayDeque<String>> dequeCreator = IntFunctions.ofArrayDeque();
+     * ArrayDeque<String> deque = dequeCreator.apply(100); // returns ArrayDeque with capacity 100
+     * ArrayDeque<String> empty = dequeCreator.apply(0);   // returns ArrayDeque with capacity 0
+     * }</pre>
      *
      * @param <T> the type of elements to be stored in the ArrayDeque
      * @return an {@code IntFunction} that, given an initial capacity, creates a new {@code ArrayDeque}
@@ -676,6 +882,13 @@ public final class IntFunctions {
      * <p>The returned function creates new thread-safe, optionally-bounded blocking queues backed by
      * linked nodes. The same shared function instance is returned on every call.</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * IntFunction<LinkedBlockingQueue<String>> queueCreator = IntFunctions.ofLinkedBlockingQueue();
+     * LinkedBlockingQueue<String> queue = queueCreator.apply(100); // returns LinkedBlockingQueue with capacity 100
+     * LinkedBlockingQueue<String> bounded = queueCreator.apply(1); // returns LinkedBlockingQueue with capacity 1
+     * }</pre>
+     *
      * @param <T> the type of elements to be stored in the LinkedBlockingQueue
      * @return an {@code IntFunction} that, given a capacity, creates a new {@code LinkedBlockingQueue}
      * @see LinkedBlockingQueue#LinkedBlockingQueue(int)
@@ -691,6 +904,13 @@ public final class IntFunctions {
      * <p>The returned function creates new fixed-size, thread-safe blocking queues backed by an array.
      * The same shared function instance is returned on every call.</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * IntFunction<ArrayBlockingQueue<String>> queueCreator = IntFunctions.ofArrayBlockingQueue();
+     * ArrayBlockingQueue<String> queue = queueCreator.apply(100); // returns ArrayBlockingQueue with capacity 100
+     * ArrayBlockingQueue<String> bounded = queueCreator.apply(1); // returns ArrayBlockingQueue with capacity 1
+     * }</pre>
+     *
      * @param <T> the type of elements to be stored in the ArrayBlockingQueue
      * @return an {@code IntFunction} that, given a capacity, creates a new {@code ArrayBlockingQueue}
      * @see ArrayBlockingQueue#ArrayBlockingQueue(int)
@@ -705,6 +925,13 @@ public final class IntFunctions {
      *
      * <p>The returned function creates new thread-safe, optionally-bounded blocking deques backed by
      * linked nodes. The same shared function instance is returned on every call.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * IntFunction<LinkedBlockingDeque<String>> dequeCreator = IntFunctions.ofLinkedBlockingDeque();
+     * LinkedBlockingDeque<String> deque = dequeCreator.apply(100); // returns LinkedBlockingDeque with capacity 100
+     * LinkedBlockingDeque<String> bounded = dequeCreator.apply(1); // returns LinkedBlockingDeque with capacity 1
+     * }</pre>
      *
      * @param <T> the type of elements to be stored in the LinkedBlockingDeque
      * @return an {@code IntFunction} that, given a capacity, creates a new {@code LinkedBlockingDeque}
@@ -722,6 +949,13 @@ public final class IntFunctions {
      * Note that the capacity argument is ignored, as {@code ConcurrentLinkedQueue} is always unbounded.
      * The same shared function instance is returned on every call.</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * IntFunction<ConcurrentLinkedQueue<String>> queueCreator = IntFunctions.ofConcurrentLinkedQueue();
+     * ConcurrentLinkedQueue<String> queue = queueCreator.apply(100); // returns ConcurrentLinkedQueue (capacity ignored)
+     * ConcurrentLinkedQueue<String> empty = queueCreator.apply(0);   // returns empty ConcurrentLinkedQueue
+     * }</pre>
+     *
      * @param <T> the type of elements to be stored in the ConcurrentLinkedQueue
      * @return an {@code IntFunction} that creates a new {@code ConcurrentLinkedQueue} (the capacity argument is ignored)
      * @see ConcurrentLinkedQueue#ConcurrentLinkedQueue()
@@ -736,6 +970,13 @@ public final class IntFunctions {
      *
      * <p>The returned function creates new unbounded priority queues ordered by their natural ordering.
      * The same shared function instance is returned on every call.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * IntFunction<PriorityQueue<String>> queueCreator = IntFunctions.ofPriorityQueue();
+     * PriorityQueue<String> queue = queueCreator.apply(100); // returns PriorityQueue with capacity 100
+     * PriorityQueue<String> small = queueCreator.apply(1);   // returns PriorityQueue with capacity 1
+     * }</pre>
      *
      * @param <T> the type of elements to be stored in the PriorityQueue
      * @return an {@code IntFunction} that, given an initial capacity, creates a new {@code PriorityQueue}
@@ -752,6 +993,13 @@ public final class IntFunctions {
      *
      * <p>The returned function creates new {@code HashMap} instances pre-sized to avoid rehashing.
      * The same shared function instance is returned on every call.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * IntFunction<Map<String, Integer>> mapCreator = IntFunctions.ofMap();
+     * Map<String, Integer> map = mapCreator.apply(100);    // returns HashMap with capacity 100
+     * Map<String, Integer> empty = mapCreator.apply(0);    // returns HashMap with capacity 0
+     * }</pre>
      *
      * @param <K> the type of keys maintained by the map
      * @param <V> the type of mapped values
@@ -770,6 +1018,13 @@ public final class IntFunctions {
      * <p>The returned function creates new {@code LinkedHashMap} instances that maintain insertion order
      * and are pre-sized to avoid rehashing. The same shared function instance is returned on every call.</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * IntFunction<Map<String, Integer>> mapCreator = IntFunctions.ofLinkedHashMap();
+     * Map<String, Integer> map = mapCreator.apply(100);    // returns LinkedHashMap with capacity 100
+     * Map<String, Integer> empty = mapCreator.apply(0);    // returns LinkedHashMap with capacity 0
+     * }</pre>
+     *
      * @param <K> the type of keys maintained by the map
      * @param <V> the type of mapped values
      * @return an {@code IntFunction} that, given an expected element count, creates a new {@code LinkedHashMap}
@@ -787,6 +1042,13 @@ public final class IntFunctions {
      * object-equality ({@code equals}) when comparing keys. The same shared function instance is returned
      * on every call.</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * IntFunction<IdentityHashMap<String, Integer>> mapCreator = IntFunctions.ofIdentityHashMap();
+     * IdentityHashMap<String, Integer> map = mapCreator.apply(100); // returns IdentityHashMap sized for 100 entries
+     * IdentityHashMap<String, Integer> empty = mapCreator.apply(0); // returns IdentityHashMap with capacity 0
+     * }</pre>
+     *
      * @param <K> the type of keys maintained by the map
      * @param <V> the type of mapped values
      * @return an {@code IntFunction} that, given an expected maximum size, creates a new {@code IdentityHashMap}
@@ -803,6 +1065,13 @@ public final class IntFunctions {
      * <p>The returned function creates new Red-Black tree based navigable map instances that maintain
      * keys in sorted order. Note that the capacity argument is ignored, as {@code TreeMap} does not
      * support an initial capacity. The same shared function instance is returned on every call.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * IntFunction<SortedMap<String, Integer>> mapCreator = IntFunctions.ofSortedMap();
+     * SortedMap<String, Integer> map = mapCreator.apply(100); // returns TreeMap (capacity ignored)
+     * SortedMap<String, Integer> empty = mapCreator.apply(0); // returns empty TreeMap
+     * }</pre>
      *
      * @param <K> the type of keys maintained by the map
      * @param <V> the type of mapped values
@@ -822,6 +1091,13 @@ public final class IntFunctions {
      * as {@code TreeMap} does not support an initial capacity. The same shared function instance is
      * returned on every call.</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * IntFunction<NavigableMap<String, Integer>> mapCreator = IntFunctions.ofNavigableMap();
+     * NavigableMap<String, Integer> map = mapCreator.apply(100); // returns TreeMap (capacity ignored)
+     * NavigableMap<String, Integer> empty = mapCreator.apply(0); // returns empty TreeMap
+     * }</pre>
+     *
      * @param <K> the type of keys maintained by the map
      * @param <V> the type of mapped values
      * @return an {@code IntFunction} that creates a new {@code TreeMap} as a {@code NavigableMap} (the capacity argument is ignored)
@@ -838,6 +1114,13 @@ public final class IntFunctions {
      * <p>The returned function creates new Red-Black tree based maps that maintain keys in sorted
      * order. Note that the capacity argument is ignored, as {@code TreeMap} does not support an
      * initial capacity. The same shared function instance is returned on every call.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * IntFunction<TreeMap<String, Integer>> mapCreator = IntFunctions.ofTreeMap();
+     * TreeMap<String, Integer> map = mapCreator.apply(100); // returns empty TreeMap (capacity ignored)
+     * TreeMap<String, Integer> empty = mapCreator.apply(0); // returns empty TreeMap
+     * }</pre>
      *
      * @param <K> the type of keys maintained by the map
      * @param <V> the type of mapped values
@@ -856,6 +1139,13 @@ public final class IntFunctions {
      * <p>The returned function creates new thread-safe, hash table based map instances.
      * The same shared function instance is returned on every call.</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * IntFunction<ConcurrentMap<String, Integer>> mapCreator = IntFunctions.ofConcurrentMap();
+     * ConcurrentMap<String, Integer> map = mapCreator.apply(100); // returns ConcurrentHashMap with capacity 100
+     * ConcurrentMap<String, Integer> empty = mapCreator.apply(0); // returns ConcurrentHashMap with capacity 0
+     * }</pre>
+     *
      * @param <K> the type of keys maintained by the map
      * @param <V> the type of mapped values
      * @return an {@code IntFunction} that, given an initial capacity, creates a new {@code ConcurrentHashMap} as a {@code ConcurrentMap}
@@ -871,6 +1161,13 @@ public final class IntFunctions {
      *
      * <p>The returned function creates new thread-safe, hash table based map instances.
      * The same shared function instance is returned on every call.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * IntFunction<ConcurrentHashMap<String, Integer>> mapCreator = IntFunctions.ofConcurrentHashMap();
+     * ConcurrentHashMap<String, Integer> map = mapCreator.apply(100); // returns ConcurrentHashMap with capacity 100
+     * ConcurrentHashMap<String, Integer> empty = mapCreator.apply(0); // returns ConcurrentHashMap with capacity 0
+     * }</pre>
      *
      * @param <K> the type of keys maintained by the map
      * @param <V> the type of mapped values
@@ -888,6 +1185,13 @@ public final class IntFunctions {
      * <p>{@code BiMap} is a bidirectional map that preserves the uniqueness of its values as well as
      * that of its keys. The same shared function instance is returned on every call.</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * IntFunction<BiMap<String, Integer>> mapCreator = IntFunctions.ofBiMap();
+     * BiMap<String, Integer> map = mapCreator.apply(100);  // returns BiMap with capacity 100
+     * BiMap<String, Integer> empty = mapCreator.apply(0);  // returns BiMap with capacity 0
+     * }</pre>
+     *
      * @param <K> the type of keys maintained by the BiMap
      * @param <V> the type of mapped values
      * @return an {@code IntFunction} that, given an initial capacity, creates a new {@code BiMap}
@@ -902,6 +1206,13 @@ public final class IntFunctions {
      *
      * <p>A {@code Multiset} is a collection that supports order-independent equality and may contain
      * duplicate elements. The same shared function instance is returned on every call.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * IntFunction<Multiset<String>> multisetCreator = IntFunctions.ofMultiset();
+     * Multiset<String> multiset = multisetCreator.apply(100); // returns Multiset with capacity 100
+     * Multiset<String> empty = multisetCreator.apply(0);      // returns Multiset with capacity 0
+     * }</pre>
      *
      * @param <T> the type of elements in the Multiset
      * @return an {@code IntFunction} that, given an initial capacity, creates a new {@code Multiset}
@@ -918,6 +1229,13 @@ public final class IntFunctions {
      * maintains insertion order of values for a given key. The same shared function instance is
      * returned on every call.</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * IntFunction<ListMultimap<String, Integer>> multimapCreator = IntFunctions.ofListMultimap();
+     * ListMultimap<String, Integer> multimap = multimapCreator.apply(100); // returns ListMultimap with capacity 100
+     * ListMultimap<String, Integer> empty = multimapCreator.apply(0);      // returns ListMultimap with capacity 0
+     * }</pre>
+     *
      * @param <K> the type of keys maintained by the multimap
      * @param <E> the type of mapped values
      * @return an {@code IntFunction} that, given an initial capacity, creates a new {@code ListMultimap}
@@ -932,6 +1250,13 @@ public final class IntFunctions {
      *
      * <p>A {@code SetMultimap} is a {@code Multimap} that cannot hold duplicate key-value pairs.
      * The same shared function instance is returned on every call.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * IntFunction<SetMultimap<String, Integer>> multimapCreator = IntFunctions.ofSetMultimap();
+     * SetMultimap<String, Integer> multimap = multimapCreator.apply(100); // returns SetMultimap with capacity 100
+     * SetMultimap<String, Integer> empty = multimapCreator.apply(0);      // returns SetMultimap with capacity 0
+     * }</pre>
      *
      * @param <K> the type of keys maintained by the multimap
      * @param <E> the type of mapped values
@@ -948,6 +1273,14 @@ public final class IntFunctions {
      * <p>The {@code DisposableObjArray} is created lazily on the first {@code apply} call and reused
      * for all subsequent calls. Because the same array instance is reused, the returned function
      * must not be saved, cached, or used in parallel streams.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * IntFunction<DisposableObjArray> func = IntFunctions.ofDisposableArray();
+     * DisposableObjArray array1 = func.apply(10);         // returns a DisposableObjArray of length 10
+     * DisposableObjArray array2 = func.apply(20);         // returns the same instance (length ignored)
+     * assert array1 == array2;                            // same instance reused
+     * }</pre>
      *
      * @return a stateful {@code IntFunction} that, given a length, lazily creates and then reuses a
      *         {@code DisposableObjArray} of that length
@@ -982,6 +1315,14 @@ public final class IntFunctions {
      * {@code null}, a {@link NullPointerException} is thrown later by the first {@code apply} call
      * when the backing array is created.</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * IntFunction<DisposableArray<String>> func = IntFunctions.ofDisposableArray(String.class);
+     * DisposableArray<String> array1 = func.apply(10);    // returns typed DisposableArray
+     * DisposableArray<String> array2 = func.apply(20);    // returns the same instance (length ignored)
+     * assert array1 == array2;                            // same instance reused
+     * }</pre>
+     *
      * @param <T> the component type of the array
      * @param componentType the {@code Class} object representing the component type of the array; must not be {@code null}
      * @return a stateful {@code IntFunction} that, given a length, lazily creates and then reuses a
@@ -1015,6 +1356,18 @@ public final class IntFunctions {
      * <p>This method supports all standard {@code Collection} implementations and uses reflection to
      * find an appropriate constructor or factory for custom types. The returned function is cached
      * per target type for performance.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * IntFunction<? extends Collection<String>> func = IntFunctions.ofCollection(ArrayList.class);
+     * Collection<String> coll = func.apply(100);           // returns ArrayList with capacity 100
+     *
+     * IntFunction<? extends Collection<String>> hashFunc = IntFunctions.ofCollection(HashSet.class);
+     * Collection<String> set = hashFunc.apply(50);         // returns HashSet sized for 50 elements
+     *
+     * IntFunctions.ofCollection(String.class);             // throws IllegalArgumentException (not a Collection)
+     * IntFunctions.ofCollection(null);                     // throws NullPointerException
+     * }</pre>
      *
      * @param <T> the type of elements in the collection
      * @param targetType the {@code Class} object representing the desired {@code Collection} implementation, must not be {@code null}
@@ -1122,6 +1475,18 @@ public final class IntFunctions {
      * an appropriate constructor or factory for custom types. The returned function is cached per
      * target type for performance.</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * IntFunction<? extends Map<String, Integer>> func = IntFunctions.ofMap(HashMap.class);
+     * Map<String, Integer> map = func.apply(100);           // returns HashMap with capacity 100
+     *
+     * IntFunction<? extends Map<String, Integer>> treeFunc = IntFunctions.ofMap(TreeMap.class);
+     * Map<String, Integer> tree = treeFunc.apply(50);       // returns TreeMap (capacity ignored)
+     *
+     * IntFunctions.ofMap(String.class);                     // throws IllegalArgumentException (not a Map)
+     * IntFunctions.ofMap(null);                             // throws NullPointerException
+     * }</pre>
+     *
      * @param <K> the type of keys maintained by the map
      * @param <V> the type of mapped values
      * @param targetType the {@code Class} object representing the desired {@code Map} implementation, must not be {@code null}
@@ -1209,6 +1574,16 @@ public final class IntFunctions {
      * <p>The registered creator will be used by {@link #ofCollection(Class)} to create instances of
      * the target class. Built-in collection classes cannot be registered.</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * // Register a custom collection creator
+     * boolean registered = IntFunctions.registerForCollection(MyCollection.class, MyCollection::new);
+     * // Attempting to register a built-in class throws IllegalArgumentException
+     * IntFunctions.registerForCollection(ArrayList.class, ArrayList::new); // throws IllegalArgumentException
+     * IntFunctions.registerForCollection(null, ArrayList::new);            // throws IllegalArgumentException
+     * IntFunctions.registerForCollection(ArrayList.class, null);           // throws IllegalArgumentException
+     * }</pre>
+     *
      * @param <T> the type of Collection to register
      * @param targetClass the {@code Class} object representing the {@code Collection} type to register, must not be {@code null}
      * @param creator the {@code IntFunction} that creates instances of the target class with the specified capacity, must not be {@code null}
@@ -1238,6 +1613,16 @@ public final class IntFunctions {
      * <p>The registered creator will be used by {@link #ofMap(Class)} to create instances of the
      * target class. Built-in map classes cannot be registered.</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * // Register a custom map creator
+     * boolean registered = IntFunctions.registerForMap(MyMap.class, MyMap::new);
+     * // Attempting to register a built-in class throws IllegalArgumentException
+     * IntFunctions.registerForMap(HashMap.class, HashMap::new); // throws IllegalArgumentException
+     * IntFunctions.registerForMap(null, HashMap::new);          // throws IllegalArgumentException
+     * IntFunctions.registerForMap(HashMap.class, null);         // throws IllegalArgumentException
+     * }</pre>
+     *
      * @param <T> the type of Map to register
      * @param targetClass the {@code Class} object representing the {@code Map} type to register, must not be {@code null}
      * @param creator the {@code IntFunction} that creates instances of the target class with the specified capacity, must not be {@code null}
@@ -1266,6 +1651,12 @@ public final class IntFunctions {
      * Returns an {@code IntFunction} for creating {@link ImmutableList} instances.
      * This operation is not supported and always throws {@link UnsupportedOperationException}.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * // This method is deprecated and always throws UnsupportedOperationException
+     * IntFunctions.ofImmutableList();                       // throws UnsupportedOperationException
+     * }</pre>
+     *
      * @return never returns normally
      * @throws UnsupportedOperationException always
      * @deprecated unsupported operation
@@ -1279,6 +1670,12 @@ public final class IntFunctions {
      * Returns an {@code IntFunction} for creating {@link ImmutableSet} instances.
      * This operation is not supported and always throws {@link UnsupportedOperationException}.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * // This method is deprecated and always throws UnsupportedOperationException
+     * IntFunctions.ofImmutableSet();                         // throws UnsupportedOperationException
+     * }</pre>
+     *
      * @return never returns normally
      * @throws UnsupportedOperationException always
      * @deprecated unsupported operation
@@ -1291,6 +1688,12 @@ public final class IntFunctions {
     /**
      * Returns an {@code IntFunction} for creating {@link ImmutableMap} instances.
      * This operation is not supported and always throws {@link UnsupportedOperationException}.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * // This method is deprecated and always throws UnsupportedOperationException
+     * IntFunctions.ofImmutableMap();                         // throws UnsupportedOperationException
+     * }</pre>
      *
      * @return never returns normally
      * @throws UnsupportedOperationException always

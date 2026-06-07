@@ -43,6 +43,7 @@ public interface ByteFunction<R> extends Throwables.ByteFunction<R, RuntimeExcep
      * ByteFunction<Byte> boxer = ByteFunction.BOX;
      * Byte boxed = boxer.apply((byte) 42);   // Returns Byte.valueOf((byte) 42)
      * }</pre>
+     *
      */
     ByteFunction<Byte> BOX = value -> value;
 

@@ -64,6 +64,7 @@ public class ParsingException extends RuntimeException {
      * <pre>{@code
      * throw new ParsingException();
      * }</pre>
+     *
      */
     public ParsingException() {
         super();

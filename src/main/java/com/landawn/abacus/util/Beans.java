@@ -102,44 +102,47 @@ import com.landawn.abacus.util.stream.Stream;
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * // Bean validation and introspection
- * boolean isBean = Beans.isBeanClass(User.class);                // Check if class follows bean pattern
- * List<String> properties = Beans.getPropNameList(User.class);   // Get all property names
+ * boolean isBean = Beans.isBeanClass(User.class);                // returns true for a standard bean class
+ * List<String> properties = Beans.getPropNameList(User.class);   // returns cached property names
  * Tuple3<Class<?>, com.landawn.abacus.util.function.Supplier<Object>, com.landawn.abacus.util.function.Function<Object, Object>> builderInfo =
- *         Beans.getBuilderInfo(User.class);   // Get builder info
+ *         Beans.getBuilderInfo(User.class);   // returns null if User has no builder pattern
  *
  * // Property access operations
  * User user = new User();
- * Beans.setPropValue(user, "name", "John Doe");     // Set property value
- * String name = Beans.getPropValue(user, "name");   // Get property value
+ * Beans.setPropValue(user, "name", "John Doe");     // user is updated with name "John Doe"
+ * String name = Beans.getPropValue(user, "name");   // returns "John Doe"
  *
  * // Object creation and instantiation
- * User newUser = Beans.newBean(User.class);     // Create new instance
- * User copied = Beans.copyAs(user, User.class);   // Create copy with type conversion
- * User cloned = Beans.deepCopy(user);              // Deep clone existing object
+ * User newUser = Beans.newBean(User.class);       // returns a new User instance
+ * User copied = Beans.copyAs(user, User.class);   // returns a copy with matching properties
+ * User cloned = Beans.deepCopy(user);             // returns a deep copy
  *
  * // Bean to Map conversion (various formats)
- * Map<String, Object> flatMap = Beans.beanToMap(user);       // Map conversion
- * Map<String, Object> deepMap = Beans.deepBeanToMap(user);   // Deep map conversion
- * Map<String, Object> selectedMap = Beans.beanToMap(user, Arrays.asList("name", "email"));   // Selected properties
+ * // Bean to Map conversion
+ * Map<String, Object> flatMap = Beans.beanToMap(user);                                       // returns a map of non-null properties
+ * Map<String, Object> deepMap = Beans.deepBeanToMap(user);                                   // returns nested bean properties as maps
+ * Map<String, Object> selectedMap = Beans.beanToMap(user, Arrays.asList("name", "email"));   // returns selected properties only
  *
  * // Map to Bean conversion
  * Map<String, Object> userData = Map.of("name", "Jane", "age", 25, "email", "jane@example.com");
- * User userFromMap = Beans.mapToBean(userData, User.class);                             // Convert map to bean
- * User userFromMapIgnoreUnknown = Beans.mapToBean(userData, false, true, User.class);   // Ignore unknown properties
+ * User userFromMap = Beans.mapToBean(userData, User.class);                             // returns a populated User
+ * User userFromMapIgnoreUnknown = Beans.mapToBean(userData, false, true, User.class);   // treats unknown properties as ignored
  *
  * // Object merging with strategies
  * User source = new User("John", 30, "john@example.com");
  * User target = new User("Jane", 25, null);
- * Beans.copyInto(source, target);   // Merge source into target
- * Beans.copyInto(source, target, (sourceVal, targetVal) -> sourceVal);   // Custom merge function
+ * Beans.copyInto(source, target);                                        // target is updated from source
+ * Beans.copyInto(source, target, (sourceVal, targetVal) -> sourceVal);   // uses source values
  *
  * // Object comparison operations
- * boolean isEqual = Beans.equalsByProps(user1, user2, Arrays.asList("name"));   // Equality check by props
+ * User user1 = new User("John", 30);
+ * User user2 = new User("John", 40);
+ * boolean isEqual = Beans.equalsByProps(user1, user2, Arrays.asList("name"));   // returns true
  *
  * // Null-safe operations
- * Map<String, Object> nullSafeMap = Beans.beanToMap(null);   // Returns empty map
- * User nullSafeUser = Beans.mapToBean(null, User.class);     // Returns null
- * boolean nullClassCheck = Beans.isBeanClass(null);         // Returns false
+ * Map<String, Object> nullSafeMap = Beans.beanToMap(null);   // returns empty map
+ * User nullSafeUser = Beans.mapToBean(null, User.class);     // returns null
+ * boolean nullClassCheck = Beans.isBeanClass(null);          // returns false
  * }</pre>
  *
  * <p><b>Bean-to-Map Conversion Options:</b>
@@ -252,7 +255,7 @@ import com.landawn.abacus.util.stream.Stream;
  *   <li><b>{@link java.beans.BeanInfo}:</b> Standard Java bean introspection</li>
  * </ul>
  *
- * <p><b>Usage Examples: Complex Object Processing</b>
+ * <p><b>Usage Examples: Complex Object Processing</b></p>
  * <pre>{@code
  * // Complex bean processing example
  * @Entity
@@ -272,32 +275,32 @@ import com.landawn.abacus.util.stream.Stream;
  * user.setRoles(Arrays.asList("admin", "user"));
  *
  * // Deep introspection
- * List<String> allProps = Beans.getPropNameList(User.class);   // [name, age, address, roles]
+ * List<String> allProps = Beans.getPropNameList(User.class);   // allProps contains name, age, address, and roles
  *
  * // Complex conversion operations
- * Map<String, Object> deepMap = Beans.deepBeanToMap(user);      // Deep nested conversion
- * Map<String, Object> flatMap = Beans.beanToFlatMap(user, Arrays.asList("address"));       // Flatten address properties
- * Map<String, Object> filteredMap = Beans.beanToMap(user, Arrays.asList("name", "age"));   // Only name and age
+ * Map<String, Object> deepMap = Beans.deepBeanToMap(user);      // returns nested bean properties as maps
+ * Map<String, Object> flatMap = Beans.beanToFlatMap(user, Arrays.asList("address"));       // returns flattened address properties
+ * Map<String, Object> filteredMap = Beans.beanToMap(user, Arrays.asList("name", "age"));   // returns name and age only
  *
  * // Advanced copying with transformations
- * UserDTO dto = Beans.copyAs(user, UserDTO.class);   // Convert to DTO
- * User cloned = Beans.deepCopy(user);   // Deep clone
- * User partial = Beans.copyAs(user, Arrays.asList("name", "age"), User.class);   // Partial copy
+ * UserDTO dto = Beans.copyAs(user, UserDTO.class);   // returns a DTO with matching properties
+ * User cloned = Beans.deepCopy(user);   // returns a deep copy
+ * User partial = Beans.copyAs(user, Arrays.asList("name", "age"), User.class);   // returns a partial copy
  *
  * // Merging with different strategies
  * User updates = new User();
  * updates.setName("Jane Doe");
  *
- * Beans.copyInto(updates, user);   // Merge updates into user
+ * Beans.copyInto(updates, user);   // user is updated from updates
  * Beans.copyInto(updates, user, (source, target) ->
- *     source != null && !source.equals("") ? source : target);   // Custom merge logic
+ *     source != null && !source.equals("") ? source : target);
  *
  * // Validation and comparison
  * boolean isValid = Beans.isBeanClass(User.class);
  * boolean isEqual = Beans.equalsByProps(user, cloned, Arrays.asList("name", "age"));
  * }</pre>
  *
- * <p><b>Usage Examples: Configuration Management</b>
+ * <p><b>Usage Examples: Configuration Management</b></p>
  * <pre>{@code
  * // Configuration bean processing
  * public class DatabaseConfig {
@@ -311,15 +314,10 @@ import com.landawn.abacus.util.stream.Stream;
  * }
  *
  * // Load configuration from multiple sources
- * Map<String, Object> envVars = System.getenv().entrySet().stream()
- *     .filter(entry -> entry.getKey().startsWith("DB_"))
- *     .collect(Collectors.toMap(
- *         entry -> Strings.toCamelCase(entry.getKey().substring(3).toLowerCase()),
- *         Map.Entry::getValue
- *     ));
- *
- * Map<String, Object> properties = loadPropertiesFile("database.properties");
- * Map<String, Object> defaults = Beans.beanToMap(new DatabaseConfig());   // Get defaults
+ * // Merge configuration from multiple sources
+ * Map<String, Object> envVars = N.asMap("host", "db.example.com", "username", "app");
+ * Map<String, Object> properties = N.asMap("port", 5433, "database", "orders");
+ * Map<String, Object> defaults = Beans.beanToMap(new DatabaseConfig());   // returns default property values
  *
  * // Merge configurations with precedence: env vars > properties > defaults
  * Map<String, Object> finalConfig = new HashMap<>(defaults);
@@ -482,8 +480,10 @@ public final class Beans {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * boolean isBean = Beans.isBeanClass(User.class);        // true for typical POJO
-     * boolean isNotBean = Beans.isBeanClass(String.class);   // false
+     * Beans.isBeanClass(User.class);      // returns true  (typical POJO with getters/setters)
+     * Beans.isBeanClass(Integer.class);   // returns false (Number subclass)
+     * Beans.isBeanClass(String.class);    // returns false (CharSequence)
+     * Beans.isBeanClass(null);            // returns false
      * }</pre>
      *
      * @param cls the class to be checked.
@@ -518,7 +518,10 @@ public final class Beans {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * record Point(int x, int y) {}
-     * boolean isRec = Beans.isRecordClass(Point.class);   // true
+     * Beans.isRecordClass(Point.class);    // returns true  (extends java.lang.Record)
+     * Beans.isRecordClass(User.class);     // returns false (regular bean)
+     * Beans.isRecordClass(String.class);   // returns false
+     * Beans.isRecordClass(null);           // returns false
      * }</pre>
      *
      * @param cls the class to be checked.
@@ -541,11 +544,12 @@ public final class Beans {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * BeanInfo beanInfo = Beans.getBeanInfo(User.class);
-     * List<PropInfo> properties = beanInfo.propInfoList;
-     * for (PropInfo prop : properties) {
-     *     System.out.println(prop.name + ": " + prop.clazz);
+     * BeanInfo beanInfo = Beans.getBeanInfo(User.class);   // beanInfo is cached metadata for User
+     * for (PropInfo prop : beanInfo.propInfoList) {
+     *     System.out.println(prop.name + ": " + prop.clazz);   // prints e.g. "name: class java.lang.String"
      * }
+     *
+     * Beans.getBeanInfo(String.class);   // throws IllegalArgumentException (not a bean class)
      * }</pre>
      *
      * @param beanType the bean type to get bean information for.
@@ -592,12 +596,15 @@ public final class Beans {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Tuple3<Class<?>, com.landawn.abacus.util.function.Supplier<Object>, com.landawn.abacus.util.function.Function<Object, Object>> builderInfo =
-     *     Beans.getBuilderInfo(Person.class);
+     * // Person has a static builder() method returning a Builder with a build() method
+     * var builderInfo = Beans.getBuilderInfo(Person.class);   // returns a non-null Tuple3
      * if (builderInfo != null) {
-     *     Object builder = builderInfo._2.get();   // Create builder
-     *     Object instance = builderInfo._3.apply(builder);   // Build instance
+     *     Object builder = builderInfo._2.get();             // returns a new builder
+     *     Object instance = builderInfo._3.apply(builder);   // returns the built instance
      * }
+     *
+     * Beans.getBuilderInfo(User.class);   // returns null (no builder pattern detected)
+     * Beans.getBuilderInfo(null);         // throws IllegalArgumentException
      * }</pre>
      *
      * @param cls the class for which the builder information is to be retrieved.
@@ -729,9 +736,12 @@ public final class Beans {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * // Register a custom value class
+     * Beans.isBeanClass(Money.class);        // returns true before registration
+     *
+     * // From now on Money is treated as a simple value type during introspection.
      * Beans.registerNonBeanClass(Money.class);
-     * Beans.registerNonBeanClass(PhoneNumber.class);
+     *
+     * Beans.registerNonBeanClass(Money.class);   // no exception thrown
      * }</pre>
      *
      * @param cls the class to be registered as a non-bean class.
@@ -762,9 +772,12 @@ public final class Beans {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * // Exclude 'getInternal' from being treated as a property getter
-     * Beans.registerNonPropertyAccessor(MyClass.class, "internal");
+     * // Exclude the "internal" property (getInternal/setInternal) from introspection
      * // Now MyClass.getInternal() won't be considered a property getter
+     * Beans.registerNonPropertyAccessor(MyClass.class, "internal");
+     *
+     * // Registering a name that is not even a property is harmless (no exception)
+     * Beans.registerNonPropertyAccessor(MyClass.class, "nonexistent");
      * }</pre>
      *
      * @param cls the class for which the non-property get/set method is to be registered.
@@ -789,8 +802,12 @@ public final class Beans {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Method customGetter = MyClass.class.getMethod("getFullName");
-     * Beans.registerPropertyAccessor("name", customGetter);
+     *
      * // Now getFullName() is registered as the getter for property "name"
+     * Beans.registerPropertyAccessor("name", customGetter);
+     *
+     * Method toString = Object.class.getMethod("toString");
+     * Beans.registerPropertyAccessor("x", toString);   // throws IllegalArgumentException (not a getter/setter)
      * }</pre>
      *
      * @param propName the name of the property to associate with the method.
@@ -853,9 +870,11 @@ public final class Beans {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * // Register JAXB-generated class
-     * Beans.registerXmlBindingClass(JAXBGeneratedClass.class);
-     * // Now collection properties with only getters are recognized
+     * Beans.isRegisteredXmlBindingClass(JaxbBean.class);   // returns false initially
+     * Beans.registerXmlBindingClass(JaxbBean.class);
+     * Beans.isRegisteredXmlBindingClass(JaxbBean.class);   // returns true
+     *
+     * Beans.registerXmlBindingClass(JaxbBean.class);   // no exception thrown
      * }</pre>
      *
      * @param cls the class to be registered for XML binding.
@@ -886,9 +905,9 @@ public final class Beans {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * if (Beans.isRegisteredXmlBindingClass(MyClass.class)) {
-     *     // Handle XML binding specific logic
-     * }
+     * Beans.isRegisteredXmlBindingClass(JaxbBean.class);   // returns false (not registered yet)
+     * Beans.registerXmlBindingClass(JaxbBean.class);
+     * Beans.isRegisteredXmlBindingClass(JaxbBean.class);   // returns true
      * }</pre>
      *
      * @param cls the class to check.
@@ -911,8 +930,10 @@ public final class Beans {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Method getter = User.class.getMethod("getName");
-     * String propName = Beans.getPropNameByMethod(getter);   // Returns "name"
+     * Beans.getPropNameByMethod(User.class.getMethod("getName"));           // returns "name"
+     * Beans.getPropNameByMethod(User.class.getMethod("setAge", int.class)); // returns "age"
+     * Beans.getPropNameByMethod(User.class.getMethod("getActive"));         // returns "active"
+     * Beans.getPropNameByMethod(null);                                      // throws NullPointerException
      * }</pre>
      *
      * @param getSetMethod the method whose property name is to be retrieved.
@@ -997,8 +1018,9 @@ public final class Beans {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * ImmutableList<String> props = Beans.getPropNameList(User.class);
-     * // Returns ["id", "name", "email", "age"] for a typical User class
+     * // class User { String name; int age; Boolean active; ...accessors... }
+     * Beans.getPropNameList(User.class);   // returns ["name", "age", "active"] (field-declaration order)
+     * Beans.getPropNameList(null);         // throws IllegalArgumentException
      * }</pre>
      *
      * @param cls the class whose property names are to be retrieved; must not be {@code null}.
@@ -1023,8 +1045,11 @@ public final class Beans {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * List<String> props = Beans.getPropNames(User.class, Arrays.asList("password", "ssn"));
-     * // Returns all properties except "password" and "ssn"
+     * // class User { String name; int age; Boolean active; ... }
+     * Beans.getPropNames(User.class, Arrays.asList("age"));           // returns ["name", "active"]
+     * Beans.getPropNames(User.class, Arrays.asList("age", "active")); // returns ["name"]
+     * Beans.getPropNames(User.class, (Collection<String>) null);      // returns ["name", "age", "active"]
+     * Beans.getPropNames((Class<?>) null, Arrays.asList("age"));      // throws IllegalArgumentException
      * }</pre>
      *
      * @param cls the class whose property names are to be retrieved; must not be {@code null}.
@@ -1058,9 +1083,11 @@ public final class Beans {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Set<String> excluded = Set.of("password", "internalId");
-     * List<String> props = Beans.getPropNames(User.class, excluded);
-     * // Returns ["id", "name", "email"] if User has those properties
+     * // class User { String name; int age; Boolean active; ... }
+     * Beans.getPropNames(User.class, Set.of("age", "active"));   // returns ["name"]
+     * Beans.getPropNames(User.class, Set.of());                  // returns ["name", "age", "active"]
+     * Beans.getPropNames(User.class, (Set<String>) null);        // returns ["name", "age", "active"]
+     * Beans.getPropNames((Class<?>) null, Set.of());             // throws IllegalArgumentException
      * }</pre>
      *
      * @param cls the class whose property names are to be retrieved; must not be {@code null}.
@@ -1096,15 +1123,10 @@ public final class Beans {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * User user = new User("John", null, "john@email.com");
+     * User user = new User("John", 25);
      *
-     * // Get all properties
-     * List<String> allProps = Beans.getPropNames(user, false);
-     * // Returns ["name", "age", "email"]
-     *
-     * // Get only non-null properties
-     * List<String> nonNullProps = Beans.getPropNames(user, true);
-     * // Returns ["name", "email"] (age is null)
+     * Beans.getPropNames(user, false);   // returns ["name", "age", "active"] (all props)
+     * Beans.getPropNames(user, true);    // returns ["name", "age"] (active is null, excluded)
      * }</pre>
      *
      * @param bean the bean object whose property names are to be retrieved.
@@ -1127,11 +1149,11 @@ public final class Beans {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * User user = new User("John", 25, "john@email.com");
+     * User user = new User("John", 25);
      *
-     * // Get properties starting with "e"
-     * List<String> eProps = Beans.getPropNames(user, name -> name.startsWith("e"));
-     * // Returns ["email"]
+     * Beans.getPropNames(user, name -> name.startsWith("a"));   // returns ["age", "active"]
+     * Beans.getPropNames(user, name -> false);                  // returns [] (empty)
+     * Beans.getPropNames(user, name -> true);                   // returns ["name", "age", "active"]
      * }</pre>
      *
      * @param bean the bean object whose property names are to be retrieved.
@@ -1160,17 +1182,15 @@ public final class Beans {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * User user = new User("John", 25, "john@email.com");
+     * User user = new User("John", 25);
+     * user.setActive(true);
      *
-     * // Get string properties with non-empty values
-     * List<String> nonEmptyStrings = Beans.getPropNames(user,
-     *     (name, value) -> value instanceof String && !((String)value).isEmpty());
-     * // Returns ["name", "email"]
-     *
-     * // Get numeric properties greater than 20
-     * List<String> largeNumbers = Beans.getPropNames(user,
-     *     (name, value) -> value instanceof Number && ((Number)value).intValue() > 20);
-     * // Returns ["age"]
+     * // String-valued properties
+     * Beans.getPropNames(user,
+     *     (name, value) -> value instanceof String);   // returns ["name"]
+     * // Numeric properties greater than 20
+     * Beans.getPropNames(user,
+     *     (name, value) -> value instanceof Number && ((Number) value).intValue() > 20);   // returns ["age"]
      * }</pre>
      *
      * @param bean the bean object whose property names are to be retrieved.
@@ -1206,8 +1226,8 @@ public final class Beans {
      *     private Date lastModified;
      * }
      *
-     * ImmutableSet<String> ignored = Beans.getIgnoredPropNamesForDiff(User.class);
-     * // Returns ["lastModified"]
+     * Beans.getIgnoredPropNamesForDiff(User.class);    // returns ["lastModified"]
+     * Beans.getIgnoredPropNamesForDiff(Address.class); // returns [] (no @DiffIgnore properties)
      * }</pre>
      *
      * @param cls the class for which the diff-ignored property names are to be retrieved.
@@ -1741,11 +1761,9 @@ public final class Beans {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Field nameField = Beans.getPropField(User.class, "name");
-     * // Returns the field backing the "name" property
-     *
-     * Field idField = Beans.getPropField(User.class, "ID");
-     * // Case-insensitive matching finds "id" field
+     * Beans.getPropField(User.class, "name").getName();   // returns "name" (the backing field)
+     * Beans.getPropField(User.class, "NAME").getName();   // returns "name" (case-insensitive match)
+     * Beans.getPropField(User.class, "nonExistent");      // returns null (no such property)
      * }</pre>
      *
      * @param cls the class from which the field is to be retrieved.
@@ -1813,9 +1831,9 @@ public final class Beans {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableMap<String, Field> fields = Beans.getPropFields(User.class);
-     * for (Map.Entry<String, Field> entry : fields.entrySet()) {
-     *     System.out.println(entry.getKey() + " -> " + entry.getValue().getType());
-     * }
+     * fields.containsKey("name");          // returns true
+     * fields.get("name").getType();        // returns class java.lang.String
+     * fields.get("nonExistent");           // returns null
      * }</pre>
      *
      * @param cls the class whose property fields are to be retrieved.
@@ -1842,10 +1860,9 @@ public final class Beans {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Method getter = Beans.getPropGetter(User.class, "name");
-     * // Returns the getName() method
-     *
-     * Object value = getter.invoke(userInstance);
+     * Beans.getPropGetter(User.class, "name").getName();   // returns "getName"
+     * Beans.getPropGetter(User.class, "NAME").getName();   // returns "getName" (case-insensitive)
+     * Beans.getPropGetter(User.class, "nonExistent");      // returns null
      * }</pre>
      *
      * @param cls the class from which the property get method is to be retrieved.
@@ -1901,7 +1918,9 @@ public final class Beans {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableMap<String, Method> getters = Beans.getPropGetters(User.class);
-     * // Map: {"name" -> getName(), "age" -> getAge(), ...}
+     * getters.get("name").getName();   // returns "getName"
+     * getters.containsKey("age");      // returns true
+     * getters.get("nonExistent");      // returns null
      * }</pre>
      *
      * @param cls the class from which the property getter methods are to be retrieved.
@@ -1928,10 +1947,9 @@ public final class Beans {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Method setter = Beans.getPropSetter(User.class, "name");
-     * // Returns the setName(String) method
-     *
-     * setter.invoke(userInstance, "John");
+     * Beans.getPropSetter(User.class, "name").getName();   // returns "setName"
+     * Beans.getPropSetter(User.class, "NAME").getName();   // returns "setName" (case-insensitive)
+     * Beans.getPropSetter(User.class, "nonExistent");      // returns null
      * }</pre>
      *
      * @param cls the class from which the property set method is to be retrieved.
@@ -1987,7 +2005,9 @@ public final class Beans {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableMap<String, Method> setters = Beans.getPropSetters(User.class);
-     * // Map: {"name" -> setName(String), "age" -> setAge(int), ...}
+     * setters.get("name").getName();   // returns "setName"
+     * setters.containsKey("age");      // returns true
+     * setters.get("nonExistent");      // returns null
      * }</pre>
      *
      * @param cls the class from which the property setter methods are to be retrieved.
@@ -2009,9 +2029,12 @@ public final class Beans {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
+     * User user = new User("John", 25);
      * Method getName = User.class.getMethod("getName");
-     * String name = Beans.getPropValue(userInstance, getName);
-     * // Equivalent to: String name = userInstance.getName();
+     * Beans.getPropValue(user, getName);   // returns "John" (same as user.getName())
+     *
+     * Method getAge = User.class.getMethod("getAge");
+     * int age = Beans.getPropValue(user, getAge);   // returns 25
      * }</pre>
      *
      * @param <T> the type of the property value.
@@ -2041,8 +2064,9 @@ public final class Beans {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * User user = new User("John", 25);
-     * String name = Beans.getPropValue(user, "name");   // Returns "John"
-     * Integer age = Beans.getPropValue(user, "age");    // Returns 25
+     * String name = Beans.getPropValue(user, "name");    // returns "John"
+     * Integer age = Beans.getPropValue(user, "age");     // returns 25
+     * Beans.getPropValue(user, "nonExistent");           // throws IllegalArgumentException
      * }</pre>
      *
      * @param <T> the type of the property value.
@@ -2069,16 +2093,18 @@ public final class Beans {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * User user = new User("John", new Address("NYC"));
+     * Order order = new Order();
+     * order.setAddress(new Address("NYC"));
      *
      * // Simple property
-     * String name = Beans.getPropValue(user, "name", false);   // "John"
+     * Beans.getPropValue(order, "id", false);            // returns null (id not set)
      *
-     * // Nested property
-     * String city = Beans.getPropValue(user, "address.city", false);   // "NYC"
+     * // Nested property via dot notation
+     * Beans.getPropValue(order, "address.city", false);  // returns "NYC"
      *
      * // Non-existent property with ignore flag
-     * Object value = Beans.getPropValue(user, "unknown", true);   // null
+     * Beans.getPropValue(order, "unknown", true);        // returns null
+     * Beans.getPropValue(order, "unknown", false);       // throws IllegalArgumentException
      * }</pre>
      *
      * @param <T> the type of the property value.
@@ -2164,13 +2190,13 @@ public final class Beans {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
+     * User user = new User();
      * Method setName = User.class.getMethod("setName", String.class);
-     * Beans.setPropValue(userInstance, setName, "John");
-     * // Equivalent to: userInstance.setName("John");
+     * Beans.setPropValue(user, setName, "John");   // user is updated with name "John"
      *
-     * // With type conversion
+     * // null value on a primitive setter applies the type default (0 for int)
      * Method setAge = User.class.getMethod("setAge", int.class);
-     * Beans.setPropValue(userInstance, setAge, "25");   // String converted to int
+     * Beans.setPropValue(user, setAge, null);      // user is updated with age 0
      * }</pre>
      *
      * @param bean the object on which the property value is to be set.
@@ -2232,8 +2258,9 @@ public final class Beans {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * User user = new User();
-     * Beans.setPropValue(user, "name", "John");
-     * Beans.setPropValue(user, "age", 25);
+     * Beans.setPropValue(user, "name", "John");   // user is updated with name "John"
+     * Beans.setPropValue(user, "age", 25);        // user is updated with age 25
+     * Beans.setPropValue(user, "nonExistent", 1); // throws IllegalArgumentException
      * }</pre>
      *
      * @param bean the object on which the property value is to be set.
@@ -2257,15 +2284,12 @@ public final class Beans {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * User user = new User();
-     *
      * // Set simple property
-     * Beans.setPropValue(user, "name", "John", false);
+     * Beans.setPropValue(user, "name", "John", false);            // returns true
      *
      * // Ignore unmatched property
-     * boolean set = Beans.setPropValue(user, "unknown", "value", true);   // Returns false
-     *
-     * // Set nested property
-     * Beans.setPropValue(user, "address.city", "NYC", false);
+     * Beans.setPropValue(user, "unknown", "value", true);         // returns false (not found, ignored)
+     * Beans.setPropValue(user, "unknown", "value", false);        // throws IllegalArgumentException
      * }</pre>
      *
      * @param bean the object on which the property value is to be set.
@@ -2297,9 +2321,15 @@ public final class Beans {
      * <pre>{@code
      * // For a JAXB bean with: List<String> getTags() { return tags; }
      * Method getTags = bean.getClass().getMethod("getTags");
-     * List<String> newTags = Arrays.asList("tag1", "tag2");
-     * Beans.setPropValueByGetter(bean, getTags, newTags);
-     * // The bean's tags list is cleared and populated with newTags
+     *
+     * // bean.getTags() is cleared and repopulated with ["tag1", "tag2"]
+     * Beans.setPropValueByGetter(bean, getTags, Arrays.asList("tag1", "tag2"));
+     *
+     * Beans.setPropValueByGetter(bean, getTags, null);   // no change
+     *
+     * // Getter returning a non-collection/non-map type is rejected:
+     * Method getName = User.class.getMethod("getName");
+     * Beans.setPropValueByGetter(new User(), getName, "x");   // throws IllegalArgumentException
      * }</pre>
      *
      * @param bean the object on which the property value is to be set.
@@ -2343,9 +2373,10 @@ public final class Beans {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * String formal = Beans.normalizePropName("user_name");     // Returns "userName"
-     * String formal2 = Beans.normalizePropName("first_name");   // Returns "firstName"
-     * String formal3 = Beans.normalizePropName("class");        // Returns "clazz"
+     * Beans.normalizePropName("user_name");       // returns "userName"
+     * Beans.normalizePropName("class");           // returns "clazz" (reserved keyword)
+     * Beans.normalizePropName("ID");              // returns "id"
+     * Beans.normalizePropName("address_line_1");  // returns "addressLine1"
      * }</pre>
      *
      * @param str the property name to be normalized; returned as-is if {@code null} or empty.
@@ -2380,9 +2411,11 @@ public final class Beans {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * String camel = Beans.toCamelCase("user_name");         // Returns "userName"
-     * String camel2 = Beans.toCamelCase("FIRST_NAME");       // Returns "firstName"
-     * String camel3 = Beans.toCamelCase("address-line-1");   // Returns "addressLine1"
+     * Beans.toCamelCase("user_name");        // returns "userName"
+     * Beans.toCamelCase("FIRST_NAME");       // returns "firstName"
+     * Beans.toCamelCase("address-line-1");   // returns "addressLine1"
+     * Beans.toCamelCase("");                 // returns "" (unchanged)
+     * Beans.toCamelCase((String) null);      // returns null
      * }</pre>
      *
      * @param str the string to be converted; returned as-is if {@code null} or empty.
@@ -2409,9 +2442,11 @@ public final class Beans {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * String snake = Beans.toSnakeCase("userName");     // Returns "user_name"
-     * String snake2 = Beans.toSnakeCase("FirstName");   // Returns "first_name"
-     * String snake3 = Beans.toSnakeCase("userID");      // Returns "user_id"
+     * Beans.toSnakeCase("userName");      // returns "user_name"
+     * Beans.toSnakeCase("FirstName");     // returns "first_name"
+     * Beans.toSnakeCase("userID");        // returns "user_id"
+     * Beans.toSnakeCase("");              // returns "" (unchanged)
+     * Beans.toSnakeCase((String) null);   // returns null
      * }</pre>
      *
      * @param str the string to be converted; returned as-is if {@code null} or empty.
@@ -2437,9 +2472,11 @@ public final class Beans {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * String upper = Beans.toScreamingSnakeCase("userName");     // Returns "USER_NAME"
-     * String upper2 = Beans.toScreamingSnakeCase("firstName");   // Returns "FIRST_NAME"
-     * String upper3 = Beans.toScreamingSnakeCase("userID");      // Returns "USER_ID"
+     * Beans.toScreamingSnakeCase("userName");      // returns "USER_NAME"
+     * Beans.toScreamingSnakeCase("firstName");     // returns "FIRST_NAME"
+     * Beans.toScreamingSnakeCase("userID");        // returns "USER_ID"
+     * Beans.toScreamingSnakeCase("");              // returns "" (unchanged)
+     * Beans.toScreamingSnakeCase((String) null);   // returns null
      * }</pre>
      *
      * @param str the string to be converted; returned as-is if {@code null} or empty.
@@ -2486,13 +2523,11 @@ public final class Beans {
      * map.put("first_name", "Jane");
      * map.put("email_address", "john@example.com");
      *
-     * Beans.replaceKeysWithCamelCase(map);
      * // map now contains: {userName=John, firstName=Jane, emailAddress=john@example.com}
-     *
+     * Beans.replaceKeysWithCamelCase(map);
      * // Useful when converting database column names to Java property names
      * Map<String, Object> dbRow = queryRow("SELECT user_id, created_at FROM users");
-     * Beans.replaceKeysWithCamelCase(dbRow);
-     * // dbRow now contains: {userId=..., createdAt=...}
+     * Beans.replaceKeysWithCamelCase(dbRow); // dbRow contains {userId=..., createdAt=...}
      * }</pre>
      *
      * <p><b>Notes:</b></p>
@@ -2544,13 +2579,11 @@ public final class Beans {
      * map.put("firstName", "Jane");
      * map.put("emailAddress", "john@example.com");
      *
-     * Beans.replaceKeysWithSnakeCase(map);
      * // map now contains: {user_name=John, first_name=Jane, email_address=john@example.com}
-     *
+     * Beans.replaceKeysWithSnakeCase(map);
      * // Useful when converting Java bean properties to database column names
      * Map<String, Object> beanProps = Beans.beanToMap(user);
-     * Beans.replaceKeysWithSnakeCase(beanProps);
-     * // Ready for database insertion with snake_case column names
+     * Beans.replaceKeysWithSnakeCase(beanProps); // beanProps is ready for database insertion (snake_case keys)
      * }</pre>
      *
      * <p><b>Notes:</b></p>
@@ -2605,13 +2638,11 @@ public final class Beans {
      * map.put("firstName", "Jane");
      * map.put("maxRetryCount", 3);
      *
-     * Beans.replaceKeysWithScreamingSnakeCase(map);
      * // map now contains: {USER_NAME=John, FIRST_NAME=Jane, MAX_RETRY_COUNT=3}
-     *
+     * Beans.replaceKeysWithScreamingSnakeCase(map);
      * // Useful when converting configuration properties to environment variable format
      * Map<String, Object> config = loadConfig();
-     * Beans.replaceKeysWithScreamingSnakeCase(config);
-     * // Keys now match environment variable naming convention
+     * Beans.replaceKeysWithScreamingSnakeCase(config); // keys are SCREAMING_SNAKE_CASE for env-variable naming
      * }</pre>
      *
      * <p><b>Notes:</b></p>
@@ -2647,16 +2678,15 @@ public final class Beans {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * // Example with a User bean class
+     * // class User { String name; int age; Boolean active; ... }
      * Map<String, Object> userMap = new HashMap<>();
      * userMap.put("name", "John");
      * userMap.put("age", 25);
-     * userMap.put("email", "john@example.com");
      *
+     * // user.getName() returns "John", user.getAge() returns 25
      * User user = Beans.mapToBean(userMap, User.class);
-     * // user.getName() returns "John"
-     * // user.getAge() returns 25
-     * // user.getEmail() returns "john@example.com"
+     *
+     * Beans.mapToBean((Map<String, Object>) null, User.class);   // returns null
      * }</pre>
      *
      * @param <T> the type of the bean object to be returned.
@@ -2681,21 +2711,17 @@ public final class Beans {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * // Example with ignoring null properties
      * Map<String, Object> userMap = new HashMap<>();
      * userMap.put("name", "John");
      * userMap.put("age", null);
-     * userMap.put("unknownField", "value");   // This field doesn't exist in User class
+     * userMap.put("unknownField", "value");
      *
      * // Ignore null properties and unmatched properties
+     * // user.getName() returns "John"; age stays at default 0; unknownField ignored
      * User user = Beans.mapToBean(userMap, true, true, User.class);
-     * // user.getName() returns "John"
-     * // user.getAge() remains unchanged (not set to null)
-     * // unknownField is ignored
      *
-     * // Don't ignore null, but throw exception for unmatched properties
-     * User user2 = Beans.mapToBean(userMap, false, false, User.class);
-     * // This would throw an exception due to "unknownField"
+     * // Don't ignore unmatched properties -> fails on "unknownField"
+     * Beans.mapToBean(userMap, false, false, User.class);   // throws IllegalArgumentException
      * }</pre>
      *
      * @param <T> the type of the bean object to be returned.
@@ -2761,19 +2787,15 @@ public final class Beans {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * // Example with selected properties
      * Map<String, Object> userMap = new HashMap<>();
      * userMap.put("name", "John");
      * userMap.put("age", 25);
-     * userMap.put("email", "john@example.com");
-     * userMap.put("password", "secret");
      *
-     * // Only include name and email
-     * Collection<String> selectedProps = Arrays.asList("name", "email");
-     * User user = Beans.mapToBean(userMap, selectedProps, User.class);
-     * // user.getName() returns "John"
-     * // user.getEmail() returns "john@example.com"
-     * // user.getAge() and user.getPassword() remain unset
+     * // Only include the "name" property
+     * // user.getName() returns "John"; user.getAge() stays at default 0
+     * User user = Beans.mapToBean(userMap, Arrays.asList("name"), User.class);
+     *
+     * Beans.mapToBean((Map<String, Object>) null, Arrays.asList("name"), User.class);   // returns null
      * }</pre>
      *
      * @param <T> the type of the bean object to be returned.
@@ -2826,22 +2848,14 @@ public final class Beans {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * // Example with a list of user maps
      * List<Map<String, Object>> userMaps = new ArrayList<>();
+     * userMaps.add(Map.of("name", "John", "age", 25));
+     * userMaps.add(Map.of("name", "Jane", "age", 30));
      *
-     * Map<String, Object> user1 = new HashMap<>();
-     * user1.put("name", "John");
-     * user1.put("age", 25);
-     * userMaps.add(user1);
-     *
-     * Map<String, Object> user2 = new HashMap<>();
-     * user2.put("name", "Jane");
-     * user2.put("age", 30);
-     * userMaps.add(user2);
-     *
+     * // users.size() == 2; users.get(0).getName() == "John"; users.get(1).getName() == "Jane"
      * List<User> users = Beans.mapToBean(userMaps, User.class);
-     * // users.get(0).getName() returns "John"
-     * // users.get(1).getName() returns "Jane"
+     *
+     * Beans.mapToBean(Collections.emptyList(), User.class);   // returns [] (empty list)
      * }</pre>
      *
      * @param <T> the type of the bean objects to be returned.
@@ -2865,9 +2879,7 @@ public final class Beans {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * // Example with null handling
      * List<Map<String, Object>> userMaps = new ArrayList<>();
-     *
      * Map<String, Object> user1 = new HashMap<>();
      * user1.put("name", "John");
      * user1.put("age", null);
@@ -2876,9 +2888,7 @@ public final class Beans {
      *
      * // Ignore null values and unmatched properties
      * List<User> users = Beans.mapToBean(userMaps, true, true, User.class);
-     * // users.get(0).getName() returns "John"
-     * // users.get(0).getAge() remains unchanged (not set to null)
-     * // unknownField is ignored
+     * // users.get(0).getName() returns "John"; age stays at default 0; unknownField ignored
      * }</pre>
      *
      * @param <T> the type of the bean objects to be returned.
@@ -2911,22 +2921,13 @@ public final class Beans {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * // Example with selected properties
      * List<Map<String, Object>> userMaps = new ArrayList<>();
+     * userMaps.add(Map.of("name", "John", "age", 25));
+     * userMaps.add(Map.of("name", "Jane", "age", 30));
      *
-     * Map<String, Object> user1 = new HashMap<>();
-     * user1.put("name", "John");
-     * user1.put("age", 25);
-     * user1.put("email", "john@example.com");
-     * user1.put("password", "secret1");
-     * userMaps.add(user1);
-     *
-     * // Only include name and email
-     * Collection<String> selectedProps = Arrays.asList("name", "email");
-     * List<User> users = Beans.mapToBean(userMaps, selectedProps, User.class);
-     * // users.get(0).getName() returns "John"
-     * // users.get(0).getEmail() returns "john@example.com"
-     * // age and password remain unset
+     * // Only include the "name" property
+     * List<User> users = Beans.mapToBean(userMaps, Arrays.asList("name"), User.class);
+     * // users.get(0).getName() returns "John"; age stays at default 0
      * }</pre>
      *
      * @param <T> the type of the bean objects to be returned.
@@ -2959,14 +2960,15 @@ public final class Beans {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * // Example with a User bean
-     * User user = new User();
-     * user.setName("John");
-     * user.setAge(25);
-     * user.setEmail("john@example.com");
+     * User user = new User("John", 25);
+     * user.setActive(true);
      *
-     * Map<String, Object> userMap = Beans.beanToMap(user);
-     * // userMap: {name=John, age=25, email=john@example.com}
+     * Beans.beanToMap(user);   // returns {name=John, age=25, active=true}
+     *
+     * user.setActive(null);
+     * Beans.beanToMap(user);   // returns {name=John, age=25} (null "active" omitted)
+     *
+     * Beans.beanToMap((Object) null);   // returns {} (empty map)
      * }</pre>
      *
      * @param bean the bean object to be converted into a map; if {@code null}, an empty map is returned.
@@ -2985,18 +2987,12 @@ public final class Beans {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * // Example with a custom map type
-     * User user = new User();
-     * user.setName("John");
-     * user.setAge(25);
-     *
-     * // Using TreeMap to get sorted properties
+     * User user = new User("John", 25);
+     * // Using TreeMap to get keys sorted
+     * // sortedMap: {age=25, name=John} (sorted by key; null "active" omitted)
      * TreeMap<String, Object> sortedMap = Beans.beanToMap(user, size -> new TreeMap<>());
-     * // sortedMap: {age=25, name=John} (sorted by key)
      *
-     * // Using HashMap for better performance
-     * HashMap<String, Object> hashMap = Beans.beanToMap(user, HashMap::new);
-     * // hashMap: {name=John, age=25} (order not guaranteed)
+     * Beans.beanToMap((Object) null, HashMap::new);   // returns {} (empty map)
      * }</pre>
      *
      * @param <M> the type of the resulting Map.
@@ -3018,18 +3014,13 @@ public final class Beans {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * // Example with selected properties
-     * User user = new User();
-     * user.setName("John");
-     * user.setAge(25);
-     * user.setEmail("john@example.com");
-     * user.setPassword("secret");
+     * User user = new User("John", 25);
+     * user.setActive(true);
      *
-     * // Only include name and email
-     * Collection<String> selectedProps = Arrays.asList("name", "email");
-     * Map<String, Object> userMap = Beans.beanToMap(user, selectedProps);
-     * // userMap: {name=John, email=john@example.com}
-     * // age and password are not included
+     * // Only include "name" and "age"
+     * Beans.beanToMap(user, Arrays.asList("name", "age"));   // returns {name=John, age=25}
+     *
+     * Beans.beanToMap(user, (Collection<String>) null);     // returns all non-null props
      * }</pre>
      *
      * @param bean the bean object to be converted into a map; if {@code null}, an empty map is returned.
@@ -3052,15 +3043,11 @@ public final class Beans {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * // Example with selected properties and custom map type
-     * User user = new User();
-     * user.setName("John");
-     * user.setAge(25);
-     * user.setEmail("john@example.com");
+     * User user = new User("John", 25);
+     * user.setActive(true);
      *
-     * // Only include name and age, using TreeMap
-     * Collection<String> selectedProps = Arrays.asList("name", "age");
-     * TreeMap<String, Object> sortedMap = Beans.beanToMap(user, selectedProps, size -> new TreeMap<>());
+     * // Only include "name" and "age", using a TreeMap
+     * TreeMap<String, Object> sortedMap = Beans.beanToMap(user, Arrays.asList("name", "age"), size -> new TreeMap<>());
      * // sortedMap: {age=25, name=John} (sorted by key)
      * }</pre>
      *
@@ -3086,19 +3073,17 @@ public final class Beans {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * // Example with naming policy
+     * // class User { String firstName; String lastName; ... }
      * User user = new User();
      * user.setFirstName("John");
      * user.setLastName("Doe");
-     *
-     * // Convert to snake_case
      * Collection<String> props = Arrays.asList("firstName", "lastName");
-     * Map<String, Object> snakeMap = Beans.beanToMap(user, props, NamingPolicy.SNAKE_CASE, HashMap::new);
-     * // snakeMap: {first_name=John, last_name=Doe}
      *
-     * // Convert to SCREAMING_SNAKE_CASE
-     * Map<String, Object> upperMap = Beans.beanToMap(user, props, NamingPolicy.SCREAMING_SNAKE_CASE, HashMap::new);
-     * // upperMap: {FIRST_NAME=John, LAST_NAME=Doe}
+     * Beans.beanToMap(user, props, NamingPolicy.SNAKE_CASE, HashMap::new);
+     * // returns {first_name=John, last_name=Doe}
+     *
+     * Beans.beanToMap(user, props, NamingPolicy.SCREAMING_SNAKE_CASE, HashMap::new);
+     * // returns {FIRST_NAME=John, LAST_NAME=Doe}
      * }</pre>
      *
      * @param <M> the type of the map to be returned.
@@ -3129,16 +3114,16 @@ public final class Beans {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * // Example with existing map
-     * User user = new User();
-     * user.setName("John");
-     * user.setAge(25);
+     * User user = new User("John", 25);
+     * user.setActive(true);
      *
      * Map<String, Object> existingMap = new HashMap<>();
      * existingMap.put("id", 123);
      *
+     * // existingMap now also contains name=John, age=25, active=true (id=123 preserved)
      * Beans.beanToMap(user, existingMap);
-     * // existingMap: {id=123, name=John, age=25}
+     *
+     * Beans.beanToMap(null, existingMap);   // existingMap is unchanged
      * }</pre>
      *
      * @param <M> the type of the map to be filled.
@@ -3157,19 +3142,14 @@ public final class Beans {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * // Example with existing map and selected properties
-     * User user = new User();
-     * user.setName("John");
-     * user.setAge(25);
-     * user.setEmail("john@example.com");
+     * User user = new User("John", 25);
+     * user.setActive(true);
      *
      * Map<String, Object> existingMap = new HashMap<>();
      * existingMap.put("id", 123);
      *
-     * Collection<String> selectedProps = Arrays.asList("name", "email");
-     * Beans.beanToMap(user, selectedProps, existingMap);
-     * // existingMap: {id=123, name=John, email=john@example.com}
-     * // age is not included
+     * Beans.beanToMap(user, Arrays.asList("name"), existingMap);
+     * // existingMap now also contains name=John (id=123 preserved; age/active not included)
      * }</pre>
      *
      * @param <M> the type of the map to be filled.
@@ -3192,16 +3172,13 @@ public final class Beans {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * // Example with naming policy and output map
+     * // class User { String firstName; String lastName; ... }
      * User user = new User();
      * user.setFirstName("John");
      * user.setLastName("Doe");
      *
      * Map<String, Object> outputMap = new LinkedHashMap<>();
-     * Collection<String> props = Arrays.asList("firstName", "lastName");
-     *
-     * // Convert property names to snake_case
-     * Beans.beanToMap(user, props, NamingPolicy.SNAKE_CASE, outputMap);
+     * Beans.beanToMap(user, Arrays.asList("firstName", "lastName"), NamingPolicy.SNAKE_CASE, outputMap);
      * // outputMap: {first_name=John, last_name=Doe}
      * }</pre>
      *
@@ -3254,19 +3231,13 @@ public final class Beans {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * // Example with null property filtering
-     * User user = new User();
-     * user.setName("John");
-     * user.setAge(null);
-     * user.setEmail("john@example.com");
+     * User user = new User("John", 25);
      *
      * // Include null properties
-     * Map<String, Object> mapWithNulls = Beans.beanToMap(user, false);
-     * // mapWithNulls: {name=John, age=null, email=john@example.com}
+     * Beans.beanToMap(user, false);   // returns {name=John, age=25, active=null}
      *
      * // Ignore null properties
-     * Map<String, Object> mapWithoutNulls = Beans.beanToMap(user, true);
-     * // mapWithoutNulls: {name=John, email=john@example.com}
+     * Beans.beanToMap(user, true);    // returns {name=John, age=25}
      * }</pre>
      *
      * @param bean the bean object to be converted into a map; if {@code null}, an empty map is returned.
@@ -3285,19 +3256,12 @@ public final class Beans {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * // Example with null filtering and ignored properties
-     * User user = new User();
-     * user.setName("John");
-     * user.setAge(null);
-     * user.setEmail("john@example.com");
-     * user.setPassword("secret");
+     * User user = new User("John", 25);
+     * Set<String> ignoredProps = new HashSet<>(Arrays.asList("age"));
      *
-     * Set<String> ignoredProps = new HashSet<>(Arrays.asList("password"));
-     *
-     * // Ignore null properties and password field
-     * Map<String, Object> filteredMap = Beans.beanToMap(user, true, ignoredProps);
-     * // filteredMap: {name=John, email=john@example.com}
-     * // age (null) and password (ignored) are not included
+     * // Ignore null properties and the "age" property
+     * Beans.beanToMap(user, true, ignoredProps);
+     * // returns {name=John} (active is null, age is ignored)
      * }</pre>
      *
      * @param bean the bean object to be converted into a map; if {@code null}, an empty map is returned.
@@ -3327,6 +3291,7 @@ public final class Beans {
      * Set<String> ignoredProps = new HashSet<>(Arrays.asList("password"));
      *
      * // Create TreeMap ignoring null properties
+     * // returns TreeMap ignoring null properties
      * TreeMap<String, Object> sortedMap = Beans.beanToMap(user, true, ignoredProps, size -> new TreeMap<>());
      * // sortedMap: {email=john@example.com, name=John} (sorted by key)
      * }</pre>
@@ -3395,6 +3360,7 @@ public final class Beans {
      * Set<String> ignoredProps = new HashSet<>(Arrays.asList("password"));
      *
      * // Create custom map with snake_case keys, ignoring nulls and password
+     * // custom map with snake_case keys, ignoring nulls and password
      * TreeMap<String, Object> customMap = Beans.beanToMap(user, true, ignoredProps,
      *     NamingPolicy.SNAKE_CASE, size -> new TreeMap<>());
      * // customMap: {first_name=John, last_name=Doe}
@@ -3432,19 +3398,13 @@ public final class Beans {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * // Example with existing map and null filtering
-     * User user = new User();
-     * user.setName("John");
-     * user.setAge(null);
-     * user.setEmail("john@example.com");
+     * User user = new User("John", 25);
      *
      * Map<String, Object> existingMap = new HashMap<>();
      * existingMap.put("id", 123);
      *
      * // Add properties to existing map, ignoring nulls
-     * Beans.beanToMap(user, true, existingMap);
-     * // existingMap: {id=123, name=John, email=john@example.com}
-     * // age is not included because it's null
+     * Beans.beanToMap(user, true, existingMap); // existingMap contains name=John, age=25 (active omitted; id=123 preserved)
      * }</pre>
      *
      * @param <M> the type of the output map.
@@ -3464,19 +3424,14 @@ public final class Beans {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * // Example with existing map, null filtering, and ignored properties
-     * User user = new User();
-     * user.setName("John");
-     * user.setAge(null);
-     * user.setEmail("john@example.com");
-     * user.setPassword("secret");
+     * User user = new User("John", 25);
+     * user.setActive(true);
      *
      * Map<String, Object> existingMap = new HashMap<>();
-     * Set<String> ignoredProps = new HashSet<>(Arrays.asList("password"));
+     * Set<String> ignoredProps = new HashSet<>(Arrays.asList("active"));
      *
      * Beans.beanToMap(user, true, ignoredProps, existingMap);
-     * // existingMap: {name=John, email=john@example.com}
-     * // age (null) and password (ignored) are not included
+     * // existingMap: {name=John, age=25} (active is ignored)
      * }</pre>
      *
      * @param <M> the type of the output map.
@@ -3603,7 +3558,6 @@ public final class Beans {
      * Address address = new Address();
      * address.setCity("New York");
      * user.setAddress(address);
-     *
      * // Using TreeMap for sorted keys
      * TreeMap<String, Object> sortedDeepMap = Beans.deepBeanToMap(user, size -> new TreeMap<>());
      * // sortedDeepMap: {
@@ -3898,8 +3852,8 @@ public final class Beans {
      * <pre>{@code
      * // Given a User bean with nested Address
      * User user = new User("John", 25, new Address("NYC", "10001"));
-     * Map<String, Object> result = deepBeanToMap(user, false);
      * // result: {name=John, age=25, address={city=NYC, zipCode=10001}}
+     * Map<String, Object> result = deepBeanToMap(user, false);
      *
      * // With ignoreNullProperty=true
      * User userWithNull = new User("Jane", null, null);
@@ -3948,6 +3902,7 @@ public final class Beans {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Create a TreeMap instead of default LinkedHashMap
+     * // a TreeMap instead of default LinkedHashMap
      * User user = new User("John", 25, new Address("NYC"));
      * TreeMap<String, Object> result = deepBeanToMap(user, false, null,
      *     size -> new TreeMap<>());
@@ -3980,8 +3935,8 @@ public final class Beans {
      * user.setLastName("Doe");
      *
      * Map<String, Object> snakeCase = deepBeanToMap(user, false, null,
-     *     NamingPolicy.SNAKE_CASE);
      * // snakeCase: {first_name=John, last_name=Doe}
+     *     NamingPolicy.SNAKE_CASE);
      *
      * Map<String, Object> upperCase = deepBeanToMap(user, false, null,
      *     NamingPolicy.SCREAMING_SNAKE_CASE);
@@ -4054,8 +4009,7 @@ public final class Beans {
      * existingMap.put("timestamp", System.currentTimeMillis());
      *
      * User user = new User("John", 25);
-     * deepBeanToMap(user, false, existingMap);
-     * // existingMap now contains: {timestamp=..., name=John, age=25}
+     * deepBeanToMap(user, false, existingMap); // existingMap contains {timestamp=..., name=John, age=25}
      * }</pre>
      *
      * @param <M> the type of Map to populate.
@@ -4104,7 +4058,7 @@ public final class Beans {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Full control over in-place conversion
-     * Map<String, Object> output = new TreeMap<>();   // Sorted map
+     * Map<String, Object> output = new TreeMap<>();
      * Set<String> ignored = new HashSet<>(Arrays.asList("id"));
      *
      * Product product = new Product("Widget", 29.99, new Category("Electronics"));
@@ -4198,8 +4152,8 @@ public final class Beans {
      * <pre>{@code
      * // Given nested beans
      * User user = new User("John", new Address("NYC", "10001"));
-     * Map<String, Object> flat = beanToFlatMap(user);
      * // flat: {name=John, address.city=NYC, address.zipCode=10001}
+     * Map<String, Object> flat = beanToFlatMap(user);
      *
      * // Deep nesting
      * Company company = new Company("TechCorp",
@@ -4226,6 +4180,7 @@ public final class Beans {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Create a sorted flat map
+     * // a sorted flat map
      * User user = new User("John", new Address("NYC", "10001"));
      * TreeMap<String, Object> sortedFlat = beanToFlatMap(user,
      *     size -> new TreeMap<>());
@@ -4253,8 +4208,8 @@ public final class Beans {
      * // Select specific properties including nested ones
      * User user = new User("John", 25, new Address("NYC", "10001"));
      * Collection<String> select = Arrays.asList("name", "address");
-     * Map<String, Object> result = beanToFlatMap(user, select);
      * // result: {name=John, address.city=NYC, address.zipCode=10001}
+     * Map<String, Object> result = beanToFlatMap(user, select);
      *
      * // Select only top-level properties
      * Collection<String> topLevel = Arrays.asList("name", "age");
@@ -4473,8 +4428,8 @@ public final class Beans {
      * <pre>{@code
      * // Include null properties
      * User user = new User("John", 0, new Address("NYC", (String) null));
-     * Map<String, Object> withNulls = beanToFlatMap(user, false);
      * // withNulls: {name=John, age=null, address.city=NYC, address.zipCode=null}
+     * Map<String, Object> withNulls = beanToFlatMap(user, false);
      *
      * // Exclude null properties
      * Map<String, Object> noNulls = beanToFlatMap(user, true);
@@ -4592,10 +4547,11 @@ public final class Beans {
      *
      * LinkedHashMap<String, Object> result = beanToFlatMap(order, true, ignored,
      *     NamingPolicy.SCREAMING_SNAKE_CASE,
-     *     size -> new LinkedHashMap<>(size * 2));   // larger initial capacity
      * // result: {ORDER_ID=ORD-123, CUSTOMER.NAME=John,
      * //          CUSTOMER.ADDRESS.CITY=NYC, CUSTOMER.ADDRESS.ZIP_CODE=10001}
      * // (amount null excluded, internal_notes ignored, ordered map)
+     *     size -> new LinkedHashMap<>(size * 2));
+     *
      * }</pre>
      *
      * @param <M> the type of Map to be returned.
@@ -4687,7 +4643,7 @@ public final class Beans {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Full control in-place flattening
-     * Map<String, Object> output = new TreeMap<>();   // sorted output
+     * Map<String, Object> output = new TreeMap<>();
      * Set<String> ignored = new HashSet<>(Arrays.asList("metadata"));
      *
      * Document doc = new Document("Report", null,
@@ -4790,8 +4746,9 @@ public final class Beans {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * User user = Beans.newBean(User.class);
-     * // Equivalent to: User user = new User();
+     * // user.getName() returns null; user.getAge() returns 0
+     * User user = Beans.newBean(User.class);   // returns a new User instance
+     *
      * }</pre>
      *
      * @param <T> the type of the object to be created.
@@ -4817,13 +4774,15 @@ public final class Beans {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * User originalUser = new User("John", 25);
-     * originalUser.setAddress(new Address("123 Main St"));
+     * User original = new User("John", 25);
      *
-     * User clonedUser = Beans.deepCopy(originalUser);
-     * // clonedUser is a deep copy - modifying it won't affect originalUser
-     * clonedUser.getAddress().setStreet("456 Oak St");
-     * // originalUser.getAddress().getStreet() is still "123 Main St"
+     * User clone = Beans.deepCopy(original);
+     *
+     * // clone != original but clone.getName().equals("John")
+     * // original.getName() is still "John"
+     * clone.setName("Jane");
+     *
+     * Beans.deepCopy(null);   // returns null
      * }</pre>
      *
      * @param <T> the type of the object to be cloned.
@@ -4854,13 +4813,14 @@ public final class Beans {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * UserDTO userDTO = new UserDTO("John", 25);
+     * User user = new User("John", 25);
+     * User copy = Beans.deepCopyAs(user, User.class);   // returns a populated User copy
      *
-     * // Clone and convert to User entity
-     * User user = Beans.deepCopyAs(userDTO, User.class);
+     * // Null source produces a new empty (non-null) instance
+     * // null source produces a new empty (non-null) instance
+     * User empty = Beans.deepCopyAs(null, User.class);  // returns a new empty User
      *
-     * // Clone null object - creates new instance
-     * User emptyUser = Beans.deepCopyAs(null, User.class);
+     * Beans.deepCopyAs(user, null);   // throws IllegalArgumentException
      * }</pre>
      *
      * @param <T> the type of the target object.
@@ -4911,14 +4871,12 @@ public final class Beans {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * User originalUser = new User("John", 25);
-     * originalUser.setAddress(new Address("123 Main St"));
+     * User original = new User("John", 25);
      *
-     * User copiedUser = Beans.copy(originalUser);
-     * // copiedUser has same property values as originalUser
-     * // But nested objects are shared references
-     * copiedUser.getAddress().setStreet("456 Oak St");
-     * // originalUser.getAddress().getStreet() is now also "456 Oak St"
+     * // copy != original; copy.getName() returns "John", copy.getAge() returns 25
+     * User copy = Beans.copy(original);
+     *
+     * Beans.copy((User) null);   // returns null
      * }</pre>
      *
      * @param <T> the type of the source bean.
@@ -4945,16 +4903,13 @@ public final class Beans {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * User originalUser = new User("John", 25);
-     * originalUser.setEmail("john@example.com");
-     * originalUser.setPhone("123-456-7890");
+     * User original = new User("John", 25);
      *
-     * // Copy only name and email
-     * User partialCopy = Beans.copy(originalUser, Arrays.asList("name", "email"));
-     * // partialCopy.getName() returns "John"
-     * // partialCopy.getEmail() returns "john@example.com"
-     * // partialCopy.getAge() returns 0 (default value)
-     * // partialCopy.getPhone() returns null
+     * // Copy only "name"
+     * // partial.getName() returns "John"; partial.getAge() returns 0 (default)
+     * User partial = Beans.copy(original, Arrays.asList("name"));
+     *
+     * Beans.copy(original, Collections.emptyList());   // returns an empty copy (no props set)
      * }</pre>
      *
      * @param <T> the type of the source bean.
@@ -4981,18 +4936,12 @@ public final class Beans {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * User originalUser = new User("John", 25);
-     * originalUser.setEmail("john@example.com");
-     * originalUser.setPhone(null);
+     * User original = new User("John", 25);
      *
-     * // Copy only non-null properties
-     * User copiedUser = Beans.copy(originalUser,
-     *     (propName, propValue) -> propValue != null);
-     * // copiedUser will have name, age, and email but not phone
-     *
-     * // Copy only string properties
-     * User stringPropsOnly = Beans.copy(originalUser,
+     * // Copy only String-valued properties
+     * User copy = Beans.copy(original,
      *     (propName, propValue) -> propValue instanceof String);
+     * // copy.getName() returns "John"; copy.getAge() returns 0 (age is int, filtered out)
      * }</pre>
      *
      * @param <T> the type of the source bean.
@@ -5023,11 +4972,13 @@ public final class Beans {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * UserEntity entity = new UserEntity("John", 25, "john@example.com");
+     * User user = new User("John", 25);
      *
-     * // Convert entity to DTO
-     * UserDTO dto = Beans.copyAs(entity, UserDTO.class);
-     * // dto will have matching properties copied from entity
+     * // Convert/copy to another bean type that shares property names
+     * UserDTO dto = Beans.copyAs(user, UserDTO.class);   // returns UserDTO with matching properties
+     *
+     * Beans.copyAs(null, User.class);          // returns a new empty (non-null) instance
+     * Beans.copyAs(user, (Class<User>) null);  // throws IllegalArgumentException
      * }</pre>
      *
      * @param <T> the type of the target bean.
@@ -5055,8 +5006,7 @@ public final class Beans {
      * // Convert to DTO excluding sensitive data
      * UserDTO dto = Beans.copyAs(entity,
      *     Arrays.asList("name", "age", "email"),
-     *     UserDTO.class);
-     * // dto will have name, age, and email but not password
+     *     UserDTO.class); // dto has name, age, and email but not password
      * }</pre>
      *
      * @param <T> the type of the target bean.
@@ -5089,7 +5039,7 @@ public final class Beans {
      *
      * UserDTO dto = Beans.copyAs(entity,
      *     Arrays.asList("firstName", "lastName"),
-     *     propName -> Strings.toSnakeCase(propName),  // Convert camelCase to snake_case
+     *     propName -> Strings.toSnakeCase(propName),
      *     UserDTO.class);
      * // dto.first_name will be "John"
      * // dto.last_name will be "Doe"
@@ -5155,8 +5105,7 @@ public final class Beans {
      * // Copy only non-null and non-sensitive properties
      * UserDTO dto = Beans.copyAs(entity,
      *     (propName, propValue) -> propValue != null && !propName.equals("password"),
-     *     UserDTO.class);
-     * // dto will have name and age but not email (null) or password
+     *     UserDTO.class); // dto has name and age but not email (null) or password
      * }</pre>
      *
      * @param <T> the type of the target bean.
@@ -5261,10 +5210,9 @@ public final class Beans {
      *
      * // Copy all properties except sensitive ones
      * UserDTO dto = Beans.copyAs(entity,
-     *     true,  // Ignore properties that don't exist in DTO
+     *     true,
      *     N.asSet("password", "internalId"),
-     *     UserDTO.class);
-     * // dto will have all properties except password and internalId
+     *     UserDTO.class); // dto has all properties except password and internalId
      * }</pre>
      *
      * @param <T> the type of the target bean.
@@ -5325,12 +5273,14 @@ public final class Beans {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * User existingUser = new User("John", 25);
-     * User updates = new User("John", 26);
-     * updates.setEmail("john@example.com");
+     * User source = new User("Jane", 30);
+     * User target = new User("John", 25);
      *
-     * Beans.copyInto(updates, existingUser);
-     * // existingUser now has age=26 and email="john@example.com"
+     * // target.getName() returns "Jane"; target.getAge() returns 30
+     * Beans.copyInto(source, target);
+     *
+     * Beans.copyInto(null, target);   // target is unchanged
+     * Beans.copyInto(source, null);   // throws IllegalArgumentException
      * }</pre>
      *
      * @param <T> the type of the target bean.
@@ -5351,20 +5301,17 @@ public final class Beans {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * User existingUser = new User("John", 25);
-     * existingUser.setScore(100);
-     * User updates = new User("John", 26);
-     * updates.setScore(50);
+     * User source = new User("A", 5);
+     * User target = new User("B", 10);
      *
-     * // Merge using max value for numeric properties
-     * Beans.copyInto(updates, existingUser,
-     *     (sourceVal, targetVal) -> {
-     *         if (sourceVal instanceof Integer && targetVal instanceof Integer) {
-     *             return Math.max((Integer) sourceVal, (Integer) targetVal);
-     *         }
-     *         return sourceVal != null ? sourceVal : targetVal;
-     *     });
-     * // existingUser.getScore() is now 100 (max of 100 and 50)
+     * // Sum numeric properties; otherwise keep the source value
+     * Beans.copyInto(source, target, (sourceVal, targetVal) -> {
+     *     if (sourceVal instanceof Integer && targetVal instanceof Integer) {
+     *         return ((Integer) sourceVal) + ((Integer) targetVal);
+     *     }
+     *     return sourceVal;
+     * });
+     * // target.getName() returns "A"; target.getAge() returns 15 (5 + 10)
      * }</pre>
      *
      * @param <T> the type of the target bean.
@@ -5672,7 +5619,7 @@ public final class Beans {
      * <pre>{@code
      * SourceBean source = new SourceBean();
      * source.setFirstName("John");
-     * source.setLastName("");   // Empty string
+     * source.setLastName("");   // source is set with an empty lastName
      *
      * TargetBean target = new TargetBean();
      *
@@ -5776,9 +5723,10 @@ public final class Beans {
      *
      * // Merge all except password
      * Beans.copyInto(source, target,
-     *     true,  // Ignore if source has properties not in target
-     *     N.asSet("password"));
      * // target: name="John", age=30, email="john@example.com", password="oldpass"
+     *     true,
+     *     N.asSet("password")); // keeps target password unchanged
+     *
      * }</pre>
      *
      * @param <T> the type of the target bean.
@@ -6021,13 +5969,14 @@ public final class Beans {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * User user = new User("John", 25, "john@example.com");
+     * User user = new User("John", 25);
+     * user.setActive(true);
      *
-     * // Clear sensitive data
-     * Beans.clearProps(user, "email", "password");
-     * // user.getEmail() returns null
-     * // user.getPassword() returns null
-     * // user.getName() still returns "John"
+     * // user.getName() returns null; user.getAge() returns 0; user.getActive() still true
+     * Beans.clearProps(user, "name", "age");
+     *
+     * Beans.clearProps(user, new String[0]);   // no change
+     * Beans.clearProps(null, "name");          // no change
      * }</pre>
      *
      * @param bean the bean object whose properties are to be cleared; if {@code null}, the method does nothing.
@@ -6053,13 +6002,14 @@ public final class Beans {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * User user = new User("John", 25, "john@example.com");
+     * User user = new User("John", 25);
+     * user.setActive(true);
      *
-     * List<String> propsToErase = Arrays.asList("age", "email", "phone");
-     * Beans.clearProps(user, propsToErase);
-     * // user.getAge() returns 0
-     * // user.getEmail() returns null
-     * // user.getPhone() returns null
+     * // user.getName() returns null; user.getAge() returns 0; user.getActive() still true
+     * Beans.clearProps(user, Arrays.asList("name", "age"));
+     *
+     * Beans.clearProps(user, Collections.emptyList());   // no change
+     * Beans.clearProps(null, Arrays.asList("name"));     // no change
      * }</pre>
      *
      * @param bean the bean object whose properties are to be cleared; if {@code null}, the method does nothing.
@@ -6089,16 +6039,13 @@ public final class Beans {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * User user = new User("John", 25, "john@example.com");
-     * user.setPhone("123-456-7890");
+     * User user = new User("John", 25);
+     * user.setActive(true);
      *
-     * // Clear all data
+     * // user.getName() returns null; user.getAge() returns 0; user.getActive() returns null
      * Beans.clearAllProps(user);
-     * // All properties are now set to default values
-     * // user.getName() returns null
-     * // user.getAge() returns 0
-     * // user.getEmail() returns null
-     * // user.getPhone() returns null
+     *
+     * Beans.clearAllProps(null);   // no change
      * }</pre>
      *
      * @param bean the bean object whose properties are to be erased. If this is {@code null}, the method does nothing.
@@ -6134,10 +6081,12 @@ public final class Beans {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Person person = new Person();
-     * Beans.randomize(person);
-     * // person now has all properties filled with random values
-     * System.out.println(person.getName());   // e.g., "a1b2c3d4-e5f6-78"
+     * User user = new User();
+     * // every property is now filled with a random value
+     * // user.getName() is a non-null random String (e.g. a 16-char UUID fragment)
+     * Beans.randomize(user);
+     *
+     * Beans.randomize((Object) null);   // throws IllegalArgumentException
      * }</pre>
      *
      * @param bean the bean object to populate; must not be {@code null} and must be a valid bean class.
@@ -6161,8 +6110,8 @@ public final class Beans {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * User user = new User();
-     * Beans.randomize(user, Arrays.asList("username", "email"));
-     * // Only username and email are filled, other properties remain unchanged
+     * Beans.randomize(user, Arrays.asList("name"));
+     * // user.getName() is now a non-null random value; user.getAge() stays 0; active stays null
      * }</pre>
      *
      * @param bean the bean object to populate; must not be {@code null} and must be a valid bean class.
@@ -6184,11 +6133,10 @@ public final class Beans {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * // Create a fully populated test object
-     * Customer customer = Beans.newRandomBean(Customer.class);
-     * // Use the customer object in tests
-     * assertNotNull(customer.getName());
-     * assertNotNull(customer.getAddress());
+     * // user is non-null with every property filled (user.getName() is non-null)
+     * User user = Beans.newRandomBean(User.class);
+     *
+     * Beans.newRandomBean((Class<?>) null);   // throws IllegalArgumentException
      * }</pre>
      *
      * @param <T> the type of the bean.
@@ -6210,9 +6158,10 @@ public final class Beans {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * // Create a user with only required fields filled
-     * User user = Beans.newRandomBean(User.class, Arrays.asList("id", "username", "email"));
-     * // Other fields like address, phone, etc. remain null/default
+     * // class User { String name; int age; Boolean active; ... }
+     * User user = Beans.newRandomBean(User.class, Arrays.asList("name"));
+     *
+     * // user.getName() is a non-null random value; user.getAge() stays 0; active stays null
      * }</pre>
      *
      * @param <T> the type of the bean.
@@ -6257,10 +6206,10 @@ public final class Beans {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * // Generate 50 test users
-     * List<User> testUsers = Beans.newRandomBeanList(User.class, 50);
-     * // Use in batch operations or performance tests
-     * userService.saveAll(testUsers);
+     * // users.size() == 3; each element has every property filled with a random value
+     * List<User> users = Beans.newRandomBeanList(User.class, 3);
+     *
+     * Beans.newRandomBeanList(User.class, 0);   // returns [] (empty list)
      * }</pre>
      *
      * @param <T> the type of the bean.
@@ -6285,13 +6234,11 @@ public final class Beans {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * // Create test data with only essential fields
-     * List<Product> products = Beans.newRandomBeanList(
-     *     Product.class,
-     *     Arrays.asList("id", "name", "price"),
-     *     100
-     * );
-     * // Each product has random id, name, and price, but other fields are default
+     * // class User { String name; int age; Boolean active; ... }
+     * // users.size() == 2; each user has a random name but age stays 0 and active stays null
+     * List<User> users = Beans.newRandomBeanList(User.class, Arrays.asList("name"), 2);
+     *
+     * Beans.newRandomBeanList(User.class, Arrays.asList("name"), 0);   // returns [] (empty list)
      * }</pre>
      *
      * @param <T> the type of the bean.
@@ -6391,10 +6338,15 @@ public final class Beans {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * UserDTO dto = new UserDTO("John", 25);
-     * UserEntity entity = new UserEntity("John", 25, "john@example.com");
-     * boolean equal = Beans.equalsByCommonProps(dto, entity);
-     * // Returns true if common properties (name, age) are equal
+     * // BeanA has properties {name, age}; BeanB has {name, email} -> common property is "name"
+     * BeanA a = new BeanA(); a.setName("John");
+     * BeanB b = new BeanB(); b.setName("John");
+     * Beans.equalsByCommonProps(a, b);   // returns true ("name" matches)
+     *
+     * b.setName("Jane");
+     * Beans.equalsByCommonProps(a, b);   // returns false
+     *
+     * Beans.equalsByCommonProps(a, null);   // throws IllegalArgumentException
      * }</pre>
      *
      * @param bean1 the first bean to compare; must not be {@code null}.
@@ -6429,10 +6381,13 @@ public final class Beans {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * User user1 = new User("John", 25, "john@example.com");
-     * User user2 = new User("John", 30, "john@example.com");
-     * boolean equal = Beans.equalsByProps(user1, user2, Arrays.asList("name", "email"));
-     * // Returns true because name and email are equal, age is not compared
+     * User user1 = new User("John", 25);
+     * User user2 = new User("John", 30);
+     *
+     * Beans.equalsByProps(user1, user2, Arrays.asList("name"));          // returns true (age not compared)
+     * Beans.equalsByProps(user1, user2, Arrays.asList("age"));           // returns false
+     * Beans.equalsByProps(user1, user2, Arrays.asList("name", "age"));   // returns false
+     * Beans.equalsByProps(user1, user2, Collections.emptyList());        // throws IllegalArgumentException
      * }</pre>
      *
      * @param bean1 the first bean to compare; must not be {@code null}.
@@ -6459,8 +6414,11 @@ public final class Beans {
      * <pre>{@code
      * User user1 = new User("Alice", 25);
      * User user2 = new User("Bob", 30);
-     * int result = Beans.compareByProps(user1, user2, Arrays.asList("name"));
-     * // Returns negative value because "Alice" < "Bob"
+     *
+     * Beans.compareByProps(user1, user2, Arrays.asList("name"));   // returns < 0 ("Alice" < "Bob")
+     * Beans.compareByProps(user2, user1, Arrays.asList("name"));   // returns > 0
+     * Beans.compareByProps(user1, user1, Arrays.asList("name"));   // returns 0
+     * Beans.compareByProps(user1, null, Arrays.asList("name"));    // throws IllegalArgumentException
      * }</pre>
      *
      * <p><b>Note:</b> This method uses reflection to access properties which may impact
@@ -6524,10 +6482,14 @@ public final class Beans {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * User user = new User("John", 25, "john@example.com");
-     * Beans.stream(user)
-     *     .forEach(entry -> System.out.println(entry.getKey() + ": " + entry.getValue()));
-     * // Outputs: name: John, age: 25, email: john@example.com
+     * User user = new User("John", 25);
+     * user.setActive(true);
+     *
+     * Beans.stream(user).count();   // returns 3 (one entry per property)
+     * // Outputs: name: John / age: 25 / active: true
+     * Beans.stream(user).forEach(e -> System.out.println(e.getKey() + ": " + e.getValue()));
+     *
+     * Beans.stream(null);   // throws IllegalArgumentException
      * }</pre>
      *
      * @param bean the bean object to extract properties from; must not be {@code null}.
@@ -6552,10 +6514,13 @@ public final class Beans {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * User user = new User("John", 25, null);
-     * Beans.stream(user, (name, value) -> value != null)
-     *     .forEach(entry -> System.out.println(entry.getKey() + ": " + entry.getValue()));
-     * // Only outputs non-null properties: name: John, age: 25
+     * User user = new User("John", 25);
+     *
+     * // Only String-valued properties
+     * Beans.stream(user, (name, value) -> value instanceof String).count();   // returns 1 (name)
+     *
+     * // Only non-null properties (active is null, excluded)
+     * Beans.stream(user, (name, value) -> value != null).count();             // returns 2 (name, age)
      * }</pre>
      *
      * @param bean the bean object to extract properties from; must not be {@code null}.

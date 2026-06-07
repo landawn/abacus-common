@@ -168,18 +168,18 @@ public class DoubleTypeTest extends TestBase {
     }
 
     @Test
-    public void test_writeCharacter_null() throws Exception {
+    public void test_serializeTo_null() throws Exception {
         CharacterWriter writer = mock(BufferedJsonWriter.class);
 
-        type.writeCharacter(writer, null, null);
+        type.serializeTo(writer, null, null);
         verify(writer).write("null".toCharArray());
     }
 
     @Test
-    public void test_writeCharacter_withValue() throws Exception {
+    public void test_serializeTo_withValue() throws Exception {
         CharacterWriter writer = mock(BufferedJsonWriter.class);
 
-        type.writeCharacter(writer, 42.5, null);
+        type.serializeTo(writer, 42.5, null);
         verify(writer).write(42.5);
     }
 

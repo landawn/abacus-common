@@ -62,21 +62,21 @@ import java.lang.annotation.Target;
  *
  *     @NonUpdatable
  *     @Column(name = "order_number")
- *     private String orderNumber;  // Set once at creation
+ *     private String orderNumber;  // orderNumber is set once at creation
  *
  *     @NonUpdatable
  *     @Column(name = "customer_id")
- *     private Long customerId;  // Cannot change customer after creation
+ *     private Long customerId;  // customerId is fixed after creation
  *
  *     @NonUpdatable
  *     @Column(name = "created_date")
- *     private Date createdDate;  // Immutable creation timestamp
+ *     private Date createdDate;  // createdDate is an immutable creation timestamp
  *
  *     @Column(name = "status")
- *     private String status;  // Can be updated
+ *     private String status;  // status is updatable
  *
  *     @Column(name = "total_amount")
- *     private BigDecimal totalAmount;  // Can be updated
+ *     private BigDecimal totalAmount;  // totalAmount is updatable
  * }
  * }</pre>
  *

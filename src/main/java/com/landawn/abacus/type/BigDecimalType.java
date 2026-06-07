@@ -34,7 +34,7 @@ import com.landawn.abacus.util.Strings;
  * <p>String representation: produced by {@link java.math.BigDecimal#toString()}, which may use
  * scientific notation. Plain string format (no scientific notation) can be requested via
  * {@link com.landawn.abacus.parser.JsonXmlSerConfig#isWriteBigDecimalAsPlain()} in
- * {@link #writeCharacter(CharacterWriter, BigDecimal, com.landawn.abacus.parser.JsonXmlSerConfig)}.</p>
+ * {@link #serializeTo(CharacterWriter, BigDecimal, com.landawn.abacus.parser.JsonXmlSerConfig)}.</p>
  * <p>JDBC mapping: stored and retrieved using
  * {@link java.sql.PreparedStatement#setBigDecimal(int, java.math.BigDecimal)} /
  * {@link java.sql.ResultSet#getBigDecimal(int)}.</p>
@@ -72,9 +72,16 @@ public final class BigDecimalType extends NumberType<BigDecimal> {
      * Delegates to {@link java.math.BigDecimal#toString()}, which may use scientific notation
      * for very large or very small values.
      *
+     * <p>The returned string is a serializable representation designed to be parsed back into an equivalent value
+     * via {@link #valueOf(String)}; {@code stringOf} and {@code valueOf} are inverse operations that round-trip. This
+     * is the key distinction from {@link Object#toString()}, whose result is not guaranteed to be convertible back
+     * into the original value.</p>
+     *
      * @param x the {@code BigDecimal} to convert; may be {@code null}
      * @return the string representation of the value (potentially in scientific notation),
      *         or {@code null} if {@code x} is {@code null}
+     * @see #valueOf(String)
+     * @see #valueOf(Object)
      */
     @Override
     public String stringOf(final BigDecimal x) {
@@ -86,10 +93,16 @@ public final class BigDecimalType extends NumberType<BigDecimal> {
      * Leading and trailing whitespace is trimmed before parsing.
      * Parsing uses {@link java.math.MathContext#UNLIMITED}, so no rounding occurs.
      *
+     * <p>This method is the inverse of {@code stringOf} and round-trips with it: it parses the string produced by
+     * {@code stringOf} back into a value of this type. Strings produced by {@link Object#toString()} are not
+     * guaranteed to be parseable in this way.</p>
+     *
      * @param str the string to parse; may be {@code null} or empty
      * @return a new {@code BigDecimal} with unlimited precision,
      *         or {@code null} if {@code str} is {@code null} or empty
      * @throws NumberFormatException if {@code str} cannot be parsed as a valid {@code BigDecimal}
+     * @see #valueOf(Object)
+     * @see #stringOf(BigDecimal)
      */
     @Override
     public BigDecimal valueOf(final String str) {
@@ -175,6 +188,15 @@ public final class BigDecimalType extends NumberType<BigDecimal> {
      * {@link com.landawn.abacus.parser.JsonXmlSerConfig#isWriteBigDecimalAsPlain()} returns {@code true},
      * the value is written using {@link java.math.BigDecimal#toPlainString()} (no scientific notation);
      * otherwise {@link java.math.BigDecimal#toString()} is used.
+     * <p>
+     * This method is specifically designed for JSON/XML serialization: it writes the serialized form of {@code x} to the
+     * {@code CharacterWriter}, applying string quotation and character escaping according to the supplied serialization
+     * config (a {@code null} config means no surrounding quotation). It is the streaming counterpart of {@code stringOf}
+     * and is invoked by the JSON/XML serializers.
+     * <p>
+     * <b>serializeTo vs. appendTo:</b> {@code serializeTo} produces machine-readable JSON/XML (quoted and escaped),
+     * whereas {@code appendTo} produces a plain, human-readable {@code toString()}-style rendering without JSON/XML
+     * quoting or escaping.
      *
      * @param writer the {@code CharacterWriter} to write to
      * @param x the {@code BigDecimal} value to write; may be {@code null}
@@ -182,7 +204,7 @@ public final class BigDecimalType extends NumberType<BigDecimal> {
      * @throws IOException if an I/O error occurs during writing
      */
     @Override
-    public void writeCharacter(final CharacterWriter writer, final BigDecimal x, final JsonXmlSerConfig<?> config) throws IOException {
+    public void serializeTo(final CharacterWriter writer, final BigDecimal x, final JsonXmlSerConfig<?> config) throws IOException {
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {

@@ -54,16 +54,16 @@ public class ShortArrayTypeTest extends TestBase {
     }
 
     @Test
-    public void test_writeCharacter() throws IOException {
+    public void test_serializeTo() throws IOException {
         CharacterWriter writer = mock(BufferedJsonWriter.class);
         JsonXmlSerConfig<?> config = mock(JsonXmlSerConfig.class);
 
         Short[] arr = new Short[] { (short) 1, (short) 2 };
-        shortArrayType.writeCharacter(writer, arr, config);
+        shortArrayType.serializeTo(writer, arr, config);
         verify(writer, atLeastOnce()).write(any(String.class));
 
         reset(writer);
-        shortArrayType.writeCharacter(writer, null, config);
+        shortArrayType.serializeTo(writer, null, config);
         verify(writer).write(NULL_CHAR_ARRAY);
     }
 

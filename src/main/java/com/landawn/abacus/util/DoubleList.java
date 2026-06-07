@@ -78,31 +78,31 @@ import com.landawn.abacus.util.stream.DoubleStream;
  * <pre>{@code
  * // Creating and initializing double lists
  * DoubleList prices = DoubleList.of(100.50, 101.25, 99.75, 102.10);
- * DoubleList repeated = DoubleList.repeat(0.0, 10);                // [0.0, 0.0, ..., 0.0] (10 elements)
- * DoubleList measurements = new DoubleList(10000);                  // Pre-sized for large dataset
- * DoubleList random = DoubleList.random(1000);                      // 1000 random doubles
+ * DoubleList repeated = DoubleList.repeat(0.0, 10);                // returns [0.0, 0.0, ..., 0.0] (10 elements)
+ * DoubleList measurements = new DoubleList(10000);
+ * DoubleList random = DoubleList.random(1000);                     // returns 1000 random doubles
  *
  * // Basic operations
- * prices.add(103.45);   // Append double value
+ * prices.add(103.45);                  // Append double value
  * double firstPrice = prices.get(0);   // Access by index: 100.50
- * prices.set(1, 101.50);   // Modify existing value
+ * prices.set(1, 101.50);               // Modify existing value
  *
  * // Mathematical operations for high-precision data
- * OptionalDouble min = prices.min();   // Find minimum value
- * OptionalDouble max = prices.max();   // Find maximum value
- * OptionalDouble median = prices.median();   // Calculate median value
- * double sum = prices.stream().sum();   // Calculate sum
+ * OptionalDouble min = prices.min();                        // Find minimum value
+ * OptionalDouble max = prices.max();                        // Find maximum value
+ * OptionalDouble median = prices.median();                  // Calculate median value
+ * double sum = prices.stream().sum();                       // Calculate sum
  * double average = prices.stream().average().orElse(0.0);   // Calculate average
  *
  * // Set operations for data analysis
  * DoubleList set1 = DoubleList.of(1.0, 2.5, 3.7, 4.2);
  * DoubleList set2 = DoubleList.of(3.7, 4.2, 5.1, 6.8);
- * DoubleList intersection = set1.intersection(set2);   // [3.7, 4.2]
- * DoubleList difference = set1.difference(set2);   // [1.0, 2.5]
+ * DoubleList intersection = set1.intersection(set2);   // returns [3.7, 4.2]
+ * DoubleList difference = set1.difference(set2);       // returns [1.0, 2.5]
  *
  * // High-performance sorting and searching
- * prices.sort();   // Sort in ascending order
- * prices.parallelSort();   // Parallel sort for large datasets
+ * prices.sort();                             // Sort in ascending order
+ * prices.parallelSort();                     // Parallel sort for large datasets
  * int index = prices.binarySearch(101.25);   // Fast lookup
  *
  * // Statistical and functional operations
@@ -115,7 +115,7 @@ import com.landawn.abacus.util.stream.DoubleStream;
  *     .mapToFloat(d -> (float) d)
  *     .collect(FloatList::new, FloatList::add, FloatList::addAll);
  * double[] primitiveArray = prices.toArray();   // To primitive array
- * List<Double> boxedList = prices.boxed();   // To boxed collection
+ * List<Double> boxedList = prices.boxed();      // To boxed collection
  * }</pre>
  *
  * <p><b>Performance Characteristics:</b>
@@ -338,6 +338,15 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * Constructs an empty DoubleList with an initial capacity of zero.
      * The internal array will be initialized to an empty array and will grow
      * as needed when elements are added.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * DoubleList list = new DoubleList();
+     * list.size();      // returns 0
+     * list.isEmpty();   // returns true
+     * list.add(1.0);    // list is now [1.0]
+     * }</pre>
+     *
      */
     public DoubleList() {
     }
@@ -347,6 +356,15 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      *
      * <p>This constructor is useful when the approximate size of the list is known in advance,
      * as it can help avoid the performance overhead of array resizing during element additions.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * DoubleList list = new DoubleList(100);
+     * list.size();      // returns 0 (capacity is pre-allocated, but no elements yet)
+     * list.isEmpty();   // returns true
+     *
+     * new DoubleList(-1);   // throws IllegalArgumentException
+     * }</pre>
      *
      * @param initialCapacity the initial capacity of the list. Must be non-negative.
      * @throws IllegalArgumentException if the specified initial capacity is negative
@@ -364,6 +382,15 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * Modifications to the list will directly affect the provided array.
      * The size of the list will be equal to the length of the array.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * double[] data = {1.0, 2.0, 3.0};
+     * DoubleList list = new DoubleList(data);
+     * list.size();      // returns 3
+     * list.get(0);      // returns 1.0
+     * list.set(0, 9.0); // data[0] is now 9.0 too (backing array is shared)
+     * }</pre>
+     *
      * @param a the array to be used as the backing array for this list. Must not be {@code null}.
      * @throws NullPointerException if the specified array is {@code null}
      */
@@ -376,6 +403,16 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * The array is used directly without copying. Only the first {@code size} elements of the array
      * are considered part of the list. This constructor is useful when working with arrays
      * that are larger than the actual data they contain.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * double[] data = {1.0, 2.0, 3.0, 0.0, 0.0};
+     * DoubleList list = new DoubleList(data, 3);
+     * list.size();   // returns 3
+     * list.get(2);   // returns 3.0
+     *
+     * new DoubleList(data, 6);   // throws IndexOutOfBoundsException (6 > data.length)
+     * }</pre>
      *
      * @param a the array to be used as the backing array for this list. Must not be {@code null}.
      * @param size the number of elements in the list. Must be between 0 and {@code a.length} (inclusive).
@@ -394,6 +431,14 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * as the backing array without copying, so subsequent modifications to the array will affect the list.
      * If the input array is {@code null}, an empty list is returned.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * DoubleList list = DoubleList.of(1.0, 2.0, 3.0);         // returns [1.0, 2.0, 3.0]
+     * DoubleList single = DoubleList.of(5.0);                 // returns [5.0]
+     * DoubleList empty = DoubleList.of();                     // returns [] (empty)
+     * DoubleList fromNull = DoubleList.of((double[]) null);   // returns [] (empty)
+     * }</pre>
+     *
      * @param a the array of elements to be included in the new list. Can be {@code null}.
      * @return a new DoubleList containing the elements from the specified array, or an empty list if the array is {@code null}
      */
@@ -405,6 +450,15 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * Creates a new DoubleList containing the first {@code size} elements of the specified array.
      * The array is used directly as the backing array without copying for efficiency.
      * If the input array is {@code null}, it is treated as an empty array.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * double[] data = {1.0, 2.0, 3.0, 4.0};
+     * DoubleList list = DoubleList.of(data, 2);   // returns [1.0, 2.0]
+     * list.size();                                // returns 2
+     *
+     * DoubleList.of(data, 5);   // throws IndexOutOfBoundsException (5 > data.length)
+     * }</pre>
      *
      * @param a the array of double values to be used as the backing array. Can be {@code null}.
      * @param size the number of elements from the array to include in the list.
@@ -426,6 +480,15 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      *
      * <p>If the input array is {@code null}, an empty list is returned.</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * double[] data = {1.0, 2.0, 3.0};
+     * DoubleList list = DoubleList.copyOf(data);   // returns [1.0, 2.0, 3.0]
+     * list.set(0, 9.0);                            // data[0] is still 1.0 (defensive copy)
+     *
+     * DoubleList empty = DoubleList.copyOf(null);  // returns [] (empty)
+     * }</pre>
+     *
      * @param a the array to be copied. Can be {@code null}.
      * @return a new DoubleList containing a copy of the elements from the specified array,
      *         or an empty list if the array is {@code null}
@@ -439,6 +502,15 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      *
      * <p>This method creates a defensive copy of the elements in the range [fromIndex, toIndex),
      * ensuring that modifications to the returned list do not affect the original array.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * double[] data = {1.0, 2.0, 3.0, 4.0, 5.0};
+     * DoubleList list = DoubleList.copyOf(data, 1, 4);   // returns [2.0, 3.0, 4.0]
+     * DoubleList empty = DoubleList.copyOf(data, 2, 2);  // returns [] (empty range)
+     *
+     * DoubleList.copyOf(data, 0, 6);   // throws IndexOutOfBoundsException (6 > data.length)
+     * }</pre>
      *
      * @param a the array from which a range is to be copied. Must not be {@code null}.
      * @param fromIndex the initial index of the range to be copied, inclusive.
@@ -455,6 +527,14 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * Creates a new DoubleList with the specified element repeated a given number of times.
      * This method is useful for initializing a list with a default value.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * DoubleList list = DoubleList.repeat(7.5, 3);   // returns [7.5, 7.5, 7.5]
+     * DoubleList empty = DoubleList.repeat(7.5, 0);  // returns [] (empty)
+     *
+     * DoubleList.repeat(1.0, -1);   // throws IllegalArgumentException
+     * }</pre>
+     *
      * @param element the double value to be repeated
      * @param len the number of times to repeat the element. Must be non-negative.
      * @return a new DoubleList containing <i>len</i> copies of the specified element
@@ -469,9 +549,16 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * Each element is a random double value between 0.0 (inclusive) and 1.0 (exclusive),
      * generated using a secure random number generator.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * DoubleList list = DoubleList.random(5);   // returns 5 random doubles, e.g. [0.13, 0.87, ...]
+     * list.size();                              // returns 5
+     * DoubleList empty = DoubleList.random(0);  // returns [] (empty)
+     * }</pre>
+     *
      * @param len the number of random double values to generate. Must be non-negative.
      * @return a new DoubleList containing <i>len</i> random double values
-     * @throws IllegalArgumentException if len is negative
+     * @throws NegativeArraySizeException if len is negative
      */
     public static DoubleList random(final int len) {
         final double[] a = new double[len];
@@ -509,6 +596,15 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     /**
      * Returns the element at the specified position in this list.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * DoubleList list = DoubleList.of(1.0, 2.0, 3.0);
+     * list.get(0);   // returns 1.0
+     * list.get(2);   // returns 3.0
+     *
+     * list.get(3);   // throws IndexOutOfBoundsException
+     * }</pre>
+     *
      * @param index the index of the element to return
      * @return the element at the specified position in this list
      * @throws IndexOutOfBoundsException if {@code index < 0 || index >= size()}
@@ -521,6 +617,15 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
 
     /**
      * Replaces the element at the specified position in this list with the specified element.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * DoubleList list = DoubleList.of(1.0, 2.0, 3.0);
+     * double old = list.set(1, 9.0);   // returns 2.0, list is now [1.0, 9.0, 3.0]
+     * list.set(0, 5.0);                // returns 1.0, list is now [5.0, 9.0, 3.0]
+     *
+     * list.set(3, 0.0);   // throws IndexOutOfBoundsException
+     * }</pre>
      *
      * @param index the index of the element to replace
      * @param e the element to be stored at the specified position
@@ -545,6 +650,14 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * resized to accommodate the new element, all existing elements will be copied to
      * a new, larger array.</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * DoubleList list = new DoubleList();
+     * list.add(1.0);          // list is now [1.0]
+     * list.add(2.0);          // list is now [1.0, 2.0]
+     * list.add(Double.NaN);   // list is now [1.0, 2.0, NaN]
+     * }</pre>
+     *
      * @param e the element to be appended to this list
      */
     public void add(final double e) {
@@ -560,6 +673,16 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      *
      * <p>This method runs in linear time in the worst case (when inserting at the beginning
      * of the list), as it may need to shift all existing elements.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * DoubleList list = DoubleList.of(1.0, 2.0, 3.0);
+     * list.add(1, 9.0);   // list is now [1.0, 9.0, 2.0, 3.0]
+     * list.add(0, 5.0);   // list is now [5.0, 1.0, 9.0, 2.0, 3.0]
+     * list.add(5, 7.0);   // list is now [5.0, 1.0, 9.0, 2.0, 3.0, 7.0] (append at end)
+     *
+     * list.add(99, 0.0);  // throws IndexOutOfBoundsException
+     * }</pre>
      *
      * @param index the index at which the specified element is to be inserted
      * @param e the element to be inserted
@@ -705,6 +828,13 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      *
      * <p><b>Note:</b> This method removes by value. To remove by index, use {@link #removeAt(int)}.</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * DoubleList list = DoubleList.of(1.0, 2.0, 3.0, 2.0);
+     * boolean removed = list.remove(2.0);    // returns true, list is now [1.0, 3.0, 2.0]
+     * boolean notFound = list.remove(99.0);  // returns false, list unchanged
+     * }</pre>
+     *
      * @param e the element to be removed from this list, if present
      * @return {@code true} if this list contained the specified element (and it was removed);
      *         {@code false} otherwise
@@ -726,6 +856,13 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * Removes all occurrences of the specified element from this list.
      * The list is compacted after removal, and all remaining elements maintain their relative order.
      * Elements are compared using {@code Double.compare} for accurate floating-point comparison.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * DoubleList list = DoubleList.of(1.0, 2.0, 3.0, 2.0, 4.0, 2.0);
+     * boolean removed = list.removeAllOccurrences(2.0);   // returns true, list is now [1.0, 3.0, 4.0]
+     * boolean notFound = list.removeAllOccurrences(9.0);  // returns false, list unchanged
+     * }</pre>
      *
      * @param e the element to be removed from this list
      * @return {@code true} if at least one occurrence was removed from the list
@@ -803,6 +940,15 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * Removes all elements from this list that satisfy the given predicate.
      * The elements are tested in order, and those for which the predicate returns {@code true} are removed.
      * The relative order of retained elements is preserved.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * DoubleList list = DoubleList.of(1.0, -2.0, 3.0, -4.0, 5.0);
+     * boolean removed = list.removeIf(d -> d < 0);   // returns true, list is now [1.0, 3.0, 5.0]
+     *
+     * DoubleList list2 = DoubleList.of(1.0, 2.0, 3.0);
+     * boolean none = list2.removeIf(d -> d > 100);   // returns false, list unchanged
+     * }</pre>
      *
      * @param p the predicate which returns {@code true} for elements to be removed. Must not be {@code null}.
      * @return {@code true} if any elements were removed
@@ -973,6 +1119,15 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * <p>This is the preferred index-based removal method.
      * Unlike {@link #remove(double)}, this method removes by index, not by value.</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * DoubleList list = DoubleList.of(1.0, 2.0, 3.0);
+     * double removed = list.removeAt(1);   // returns 2.0, list is now [1.0, 3.0]
+     * double first = list.removeAt(0);     // returns 1.0, list is now [3.0]
+     *
+     * list.removeAt(5);   // throws IndexOutOfBoundsException
+     * }</pre>
+     *
      * @param index the index of the element to remove
      * @return the removed element
      * @throws IndexOutOfBoundsException if the index is out of range ({@code index < 0 || index >= size()})
@@ -1083,6 +1238,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * @param toIndex the ending index of the range to be replaced (exclusive)
      * @param replacement the DoubleList whose elements will replace the specified range
      * @throws IndexOutOfBoundsException if fromIndex &lt; 0, toIndex &gt; size(), or fromIndex &gt; toIndex
+     * @throws OutOfMemoryError if the resulting size would exceed the maximum supported array size
      */
     @Override
     public void replaceRange(final int fromIndex, final int toIndex, final DoubleList replacement) throws IndexOutOfBoundsException {
@@ -1130,6 +1286,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * @param toIndex the ending index of the range to be replaced (exclusive)
      * @param replacement the array whose elements will replace the specified range
      * @throws IndexOutOfBoundsException if fromIndex &lt; 0, toIndex &gt; size(), or fromIndex &gt; toIndex
+     * @throws OutOfMemoryError if the resulting size would exceed the maximum supported array size
      */
     @Override
     public void replaceRange(final int fromIndex, final int toIndex, final double[] replacement) throws IndexOutOfBoundsException {
@@ -1171,6 +1328,15 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * Replaces all occurrences of a specified value with a new value throughout the list.
      * Values are compared using {@code Double.compare} for accurate floating-point comparison.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * DoubleList list = DoubleList.of(1.0, 2.0, 1.0, 3.0, 1.0);
+     * int count = list.replaceAll(1.0, 9.0);   // returns 3, list is now [9.0, 2.0, 9.0, 3.0, 9.0]
+     *
+     * DoubleList list2 = DoubleList.of(1.0, 2.0, 3.0);
+     * int none = list2.replaceAll(99.0, 0.0);  // returns 0, list unchanged
+     * }</pre>
+     *
      * @param oldVal the value to be replaced
      * @param newVal the value to replace oldVal
      * @return the number of elements that were replaced
@@ -1197,6 +1363,13 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * Replaces each element of this list with the result of applying the specified operator to that element.
      * The operator is applied to each element in order from index 0 to size-1.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * DoubleList list = DoubleList.of(1.0, 2.0, 3.0);
+     * list.replaceAll(d -> d * 2);   // list is now [2.0, 4.0, 6.0]
+     * list.replaceAll(d -> d + 1);   // list is now [3.0, 5.0, 7.0]
+     * }</pre>
+     *
      * @param operator the operator to apply to each element. Must not be {@code null}.
      * @throws NullPointerException if the specified operator is {@code null}
      */
@@ -1212,6 +1385,15 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * Replaces all elements that satisfy the given predicate with the specified new value.
      * Elements are tested with the predicate in order, and those for which it returns {@code true}
      * are replaced with newValue.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * DoubleList list = DoubleList.of(1.0, -2.0, 3.0, -4.0);
+     * boolean changed = list.replaceIf(d -> d < 0, 0.0);   // returns true, list is now [1.0, 0.0, 3.0, 0.0]
+     *
+     * DoubleList list2 = DoubleList.of(1.0, 2.0, 3.0);
+     * boolean none = list2.replaceIf(d -> d > 100, 0.0);   // returns false, list unchanged
+     * }</pre>
      *
      * @param predicate the predicate to test elements. Must not be {@code null}.
      * @param newValue the value to replace matching elements with
@@ -1238,6 +1420,15 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * Replaces all elements in this list with the specified value.
      * After this operation, every element in the list will have the same value.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * DoubleList list = DoubleList.of(1.0, 2.0, 3.0);
+     * list.fill(0.0);   // list is now [0.0, 0.0, 0.0]
+     *
+     * DoubleList empty = new DoubleList();
+     * empty.fill(5.0);  // empty stays [] (no elements to fill)
+     * }</pre>
+     *
      * @param val the value to fill the list with
      */
     public void fill(final double val) {
@@ -1247,6 +1438,14 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     /**
      * Replaces elements in the specified range with the specified value.
      * The range extends from fromIndex (inclusive) to toIndex (exclusive).
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * DoubleList list = DoubleList.of(1.0, 2.0, 3.0, 4.0, 5.0);
+     * list.fill(1, 4, 0.0);   // list is now [1.0, 0.0, 0.0, 0.0, 5.0]
+     *
+     * list.fill(0, 10, 9.0);  // throws IndexOutOfBoundsException (10 > size())
+     * }</pre>
      *
      * @param fromIndex the starting index of the range to fill (inclusive)
      * @param toIndex the ending index of the range to fill (exclusive)
@@ -1266,6 +1465,16 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * This comparison method correctly handles NaN and signed zero values.
      *
      * <p>This method performs a linear search through the list.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * DoubleList list = DoubleList.of(1.0, 2.0, 3.0);
+     * list.contains(2.0);   // returns true
+     * list.contains(9.0);   // returns false
+     *
+     * DoubleList withNaN = DoubleList.of(1.0, Double.NaN);
+     * withNaN.contains(Double.NaN);   // returns true (Double.compare treats NaN as equal to NaN)
+     * }</pre>
      *
      * @param valueToFind the element whose presence in this list is to be tested
      * @return {@code true} if this list contains the specified element, {@code false} otherwise
@@ -1417,12 +1626,12 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * <pre>{@code
      * DoubleList list1 = DoubleList.of(1.0, 1.0, 2.0, 3.0);
      * DoubleList list2 = DoubleList.of(1.0, 2.0, 2.0, 4.0);
-     * DoubleList result = list1.intersection(list2);   // result will be [1.0, 2.0]
+     * DoubleList result = list1.intersection(list2);   // returns result will be [1.0, 2.0]
      * // One occurrence of '1.0' (minimum count in both lists) and one occurrence of '2.0'
      *
      * DoubleList list3 = DoubleList.of(5.0, 5.0, 6.0);
      * DoubleList list4 = DoubleList.of(5.0, 7.0);
-     * DoubleList result2 = list3.intersection(list4);   // result will be [5.0]
+     * DoubleList result2 = list3.intersection(list4);   // returns result will be [5.0]
      * // One occurrence of '5.0' (minimum count in both lists)
      * }</pre>
      *
@@ -1463,12 +1672,12 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * <pre>{@code
      * DoubleList list1 = DoubleList.of(1.0, 1.0, 2.0, 3.0);
      * double[] array = new double[] {1.0, 2.0, 2.0, 4.0};
-     * DoubleList result = list1.intersection(array);   // result will be [1.0, 2.0]
+     * DoubleList result = list1.intersection(array);   // returns result will be [1.0, 2.0]
      * // One occurrence of '1.0' (minimum count in both sources) and one occurrence of '2.0'
      *
      * DoubleList list2 = DoubleList.of(5.0, 5.0, 6.0);
      * double[] array2 = new double[] {5.0, 7.0};
-     * DoubleList result2 = list2.intersection(array2);   // result will be [5.0]
+     * DoubleList result2 = list2.intersection(array2);   // returns result will be [5.0]
      * // One occurrence of '5.0' (minimum count in both sources)
      * }</pre>
      *
@@ -1500,12 +1709,12 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * <pre>{@code
      * DoubleList list1 = DoubleList.of(1.0, 1.0, 2.0, 3.0);
      * DoubleList list2 = DoubleList.of(1.0, 4.0);
-     * DoubleList result = list1.difference(list2);   // result will be [1.0, 2.0, 3.0]
+     * DoubleList result = list1.difference(list2);   // returns result will be [1.0, 2.0, 3.0]
      * // One '1.0' remains because list1 has two occurrences and list2 has one
      *
      * DoubleList list3 = DoubleList.of(5.0, 6.0);
      * DoubleList list4 = DoubleList.of(5.0, 5.0, 6.0);
-     * DoubleList result2 = list3.difference(list4);   // result will be [] (empty)
+     * DoubleList result2 = list3.difference(list4);   // returns result will be [] (empty)
      * // No elements remain because list4 has at least as many occurrences of each value as list3
      * }</pre>
      *
@@ -1546,12 +1755,12 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * <pre>{@code
      * DoubleList list1 = DoubleList.of(1.0, 1.0, 2.0, 3.0);
      * double[] array = new double[] {1.0, 4.0};
-     * DoubleList result = list1.difference(array);   // result will be [1.0, 2.0, 3.0]
+     * DoubleList result = list1.difference(array);   // returns result will be [1.0, 2.0, 3.0]
      * // One '1.0' remains because list1 has two occurrences and array has one
      *
      * DoubleList list2 = DoubleList.of(5.0, 6.0);
      * double[] array2 = new double[] {5.0, 5.0, 6.0};
-     * DoubleList result2 = list2.difference(array2);   // result will be [] (empty)
+     * DoubleList result2 = list2.difference(array2);   // returns result will be [] (empty)
      * // No elements remain because array2 has at least as many occurrences of each value as list2
      * }</pre>
      *
@@ -1678,6 +1887,14 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * Counts the number of occurrences of the specified value in this list.
      * Elements are compared using {@code Double.compare} for accurate floating-point comparison.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * DoubleList list = DoubleList.of(1.0, 2.0, 2.0, 3.0, 2.0);
+     * list.frequency(2.0);   // returns 3
+     * list.frequency(1.0);   // returns 1
+     * list.frequency(9.0);   // returns 0
+     * }</pre>
+     *
      * @param valueToFind the value to count occurrences of
      * @return the number of times the specified value appears in this list
      */
@@ -1702,6 +1919,13 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * or {@code N.INDEX_NOT_FOUND} (-1) if this list does not contain the element. The search starts from index 0.
      * Elements are compared using {@code Double.compare} for accurate floating-point comparison.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * DoubleList list = DoubleList.of(1.0, 2.0, 3.0, 2.0);
+     * list.indexOf(2.0);   // returns 1 (first occurrence)
+     * list.indexOf(9.0);   // returns -1 (not found)
+     * }</pre>
+     *
      * @param valueToFind the element to search for
      * @return the index of the first occurrence of the specified element, or {@code N.INDEX_NOT_FOUND} (-1) if not found
      */
@@ -1713,6 +1937,13 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * Returns the index of the first occurrence of the specified element in this list,
      * starting the search at the specified index, or {@code N.INDEX_NOT_FOUND} (-1) if the element is not found.
      * Elements are compared using {@code Double.compare} for accurate floating-point comparison.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * DoubleList list = DoubleList.of(1.0, 2.0, 3.0, 2.0);
+     * list.indexOf(2.0, 2);   // returns 3 (first occurrence at or after index 2)
+     * list.indexOf(1.0, 1);   // returns -1 (1.0 only appears before index 1)
+     * }</pre>
      *
      * @param valueToFind the element to search for
      * @param fromIndex the index to start the search from (inclusive)
@@ -1739,6 +1970,13 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * The search starts from the end of the list and proceeds backwards.
      * Elements are compared using {@code Double.compare} for accurate floating-point comparison.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * DoubleList list = DoubleList.of(1.0, 2.0, 3.0, 2.0);
+     * list.lastIndexOf(2.0);   // returns 3 (last occurrence)
+     * list.lastIndexOf(9.0);   // returns -1 (not found)
+     * }</pre>
+     *
      * @param valueToFind the element to search for
      * @return the index of the last occurrence of the specified element,
      *         or {@code N.INDEX_NOT_FOUND} (-1) if not found
@@ -1752,6 +1990,13 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * searching backwards from the specified index, or {@code N.INDEX_NOT_FOUND} (-1) if not found.
      * Elements are compared using {@code Double.compare} for accurate floating-point comparison.
      * If {@code startIndexFromBack} is negative or the list is empty, {@code N.INDEX_NOT_FOUND} is returned.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * DoubleList list = DoubleList.of(1.0, 2.0, 3.0, 2.0);
+     * list.lastIndexOf(2.0, 2);    // returns 1 (last occurrence at or before index 2)
+     * list.lastIndexOf(2.0, -1);   // returns -1 (negative start index)
+     * }</pre>
      *
      * @param valueToFind the element to search for
      * @param startIndexFromBack the index to start searching backwards from (inclusive);
@@ -1776,7 +2021,13 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     /**
      * Returns the minimum element in this list wrapped in an OptionalDouble.
      * If the list is empty, returns an empty OptionalDouble.
-     * For lists containing NaN values, the behavior follows the standard double comparison rules.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * DoubleList list = DoubleList.of(5.0, 2.0, 8.0, 1.0, 9.0);
+     * OptionalDouble min = list.min();               // returns OptionalDouble[1.0]
+     * OptionalDouble empty = new DoubleList().min(); // returns OptionalDouble.empty
+     * }</pre>
      *
      * @return an OptionalDouble containing the minimum element, or empty if the list is empty
      */
@@ -1788,6 +2039,12 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * Returns the minimum element in the specified range of this list wrapped in an OptionalDouble.
      * If the range is empty (fromIndex == toIndex), returns an empty OptionalDouble.
      * For ranges containing NaN values, the behavior follows the standard double comparison rules.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * DoubleList list = DoubleList.of(5.0, 2.0, 8.0, 1.0, 9.0);
+     * OptionalDouble min = list.min(1, 4);  // returns min of [2.0, 8.0, 1.0] = OptionalDouble[1.0]
+     * }</pre>
      *
      * @param fromIndex the starting index of the range (inclusive)
      * @param toIndex the ending index of the range (exclusive)
@@ -1805,6 +2062,13 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * If the list is empty, returns an empty OptionalDouble.
      * For lists containing NaN values, the behavior follows the standard double comparison rules.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * DoubleList list = DoubleList.of(5.0, 2.0, 8.0, 1.0, 9.0);
+     * OptionalDouble max = list.max();               // returns OptionalDouble[9.0]
+     * OptionalDouble empty = new DoubleList().max(); // returns OptionalDouble.empty
+     * }</pre>
+     *
      * @return an OptionalDouble containing the maximum element, or empty if the list is empty
      */
     public OptionalDouble max() {
@@ -1815,6 +2079,12 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * Returns the maximum element in the specified range of this list wrapped in an OptionalDouble.
      * If the range is empty (fromIndex == toIndex), returns an empty OptionalDouble.
      * For ranges containing NaN values, the behavior follows the standard double comparison rules.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * DoubleList list = DoubleList.of(5.0, 2.0, 8.0, 1.0, 9.0);
+     * OptionalDouble max = list.max(1, 4);  // returns max of [2.0, 8.0, 1.0] = OptionalDouble[8.0]
+     * }</pre>
      *
      * @param fromIndex the starting index of the range (inclusive)
      * @param toIndex the ending index of the range (exclusive)
@@ -1834,6 +2104,12 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * an odd number of elements, this is the exact middle element. For lists with an even number of
      * elements, this method returns the lower of the two middle elements (not the average).</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * DoubleList list = DoubleList.of(5.0, 2.0, 8.0, 1.0, 9.0);
+     * OptionalDouble median = list.median();  // returns sorted: [1.0, 2.0, 5.0, 8.0, 9.0]; median = OptionalDouble[5.0]
+     * }</pre>
+     *
      * @return an OptionalDouble containing the median value if the list is non-empty, or an empty OptionalDouble if the list is empty
      */
     public OptionalDouble median() {
@@ -1846,6 +2122,12 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * <p>The median is computed for elements from {@code fromIndex} (inclusive) to {@code toIndex} (exclusive).
      * For ranges with an odd number of elements, this returns the exact middle element when sorted.
      * For ranges with an even number of elements, this returns the lower of the two middle elements.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * DoubleList list = DoubleList.of(5.0, 2.0, 8.0, 1.0, 9.0);
+     * OptionalDouble median = list.median(1, 4);  // returns median of [2.0, 8.0, 1.0] = OptionalDouble[2.0]
+     * }</pre>
      *
      * @param fromIndex the starting index (inclusive) of the range to calculate median for
      * @param toIndex the ending index (exclusive) of the range to calculate median for
@@ -1864,6 +2146,15 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * an exception.
      *
      * <p>This method iterates through all elements from index 0 to size-1.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * DoubleList list = DoubleList.of(1.0, 2.0, 3.0);
+     * double[] sum = {0.0};
+     * list.forEach(d -> sum[0] += d);   // sum[0] is now 6.0
+     *
+     * new DoubleList().forEach(d -> sum[0] += d);   // no-op on empty list, sum[0] still 6.0
+     * }</pre>
      *
      * @param action the action to be performed for each element. Must not be {@code null}.
      * @throws NullPointerException if the specified action is {@code null}
@@ -1885,6 +2176,16 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      *
      * <p>Special case: if {@code toIndex == -1} and {@code fromIndex > toIndex},
      * iteration starts from fromIndex down to 0 (inclusive).</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * DoubleList list = DoubleList.of(1.0, 2.0, 3.0, 4.0, 5.0);
+     * DoubleList collected = new DoubleList();
+     * list.forEach(1, 4, collected::add);   // collected is now [2.0, 3.0, 4.0]
+     *
+     * DoubleList reversed = new DoubleList();
+     * list.forEach(4, -1, reversed::add);   // reversed is now [5.0, 4.0, 3.0, 2.0, 1.0] (reverse to start)
+     * }</pre>
      *
      * @param fromIndex the index of the first element (inclusive) to be processed
      * @param toIndex the index of the last element (exclusive) to be processed,
@@ -1917,6 +2218,14 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * <p>This method provides a null-safe way to access the first element without
      * risking an exception when the list is empty.</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * DoubleList list = DoubleList.of(1.0, 2.0, 3.0);
+     * list.first().getAsDouble();   // returns 1.0
+     *
+     * new DoubleList().first().isPresent();   // returns false
+     * }</pre>
+     *
      * @return an {@code OptionalDouble} containing the first element if present,
      *         otherwise an empty {@code OptionalDouble}
      */
@@ -1930,6 +2239,14 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      *
      * <p>This method provides a null-safe way to access the last element without
      * risking an exception when the list is empty.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * DoubleList list = DoubleList.of(1.0, 2.0, 3.0);
+     * list.last().getAsDouble();   // returns 3.0
+     *
+     * new DoubleList().last().isPresent();   // returns false
+     * }</pre>
      *
      * @return an {@code OptionalDouble} containing the last element if present,
      *         otherwise an empty {@code OptionalDouble}
@@ -2004,8 +2321,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * Sorts the elements of this list into ascending order.
      *
      * <p>This method modifies the list in-place, arranging all elements according
-     * to their natural ordering. The sort is stable: equal elements will not be
-     * reordered as a result of the sort.</p>
+     * to their natural ordering. The sort is not guaranteed to be stable.</p>
      *
      * <p>The sorting algorithm is a Dual-Pivot Quicksort by Vladimir Yaroslavskiy,
      * Jon Bentley, and Joshua Bloch. This algorithm offers O(n log(n)) performance
@@ -2031,6 +2347,16 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * lists, the overhead of parallelization may make it slower than {@link #sort()}.</p>
      *
      * <p>If the list contains fewer than 2 elements, no sorting is performed.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * DoubleList list = DoubleList.of(5.0, 2.0, 8.0, 1.0, 9.0);
+     * list.parallelSort();   // list is now [1.0, 2.0, 5.0, 8.0, 9.0]
+     *
+     * DoubleList single = DoubleList.of(1.0);
+     * single.parallelSort(); // single stays [1.0] (fewer than 2 elements)
+     * }</pre>
+     *
      */
     public void parallelSort() {
         if (size > 1) {
@@ -2064,6 +2390,14 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      *
      * <p>This method runs in O(log n) time for a list of size n.</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * DoubleList list = DoubleList.of(1.0, 3.0, 5.0, 7.0);   // must be sorted
+     * list.binarySearch(5.0);                                // returns 2 (found at index 2)
+     * list.binarySearch(4.0);                                // returns -3 (-(insertion point 2) - 1)
+     * list.binarySearch(9.0);                                // returns -5 (-(insertion point 4) - 1)
+     * }</pre>
+     *
      * @param valueToFind the value to search for
      * @return the index of the search key, if it is contained in the list;
      *         otherwise, {@code (-(insertion point) - 1)}. The insertion point is
@@ -2084,6 +2418,13 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * elements with the specified value, there is no guarantee which one will be found.</p>
      *
      * <p>This method runs in O(log(toIndex - fromIndex)) time.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * DoubleList list = DoubleList.of(1.0, 3.0, 5.0, 7.0, 9.0);   // must be sorted
+     * list.binarySearch(1, 4, 5.0);                               // returns 2 (found within range [3.0, 5.0, 7.0])
+     * list.binarySearch(1, 4, 4.0);                               // returns -3 (-(insertion point 2) - 1)
+     * }</pre>
      *
      * @param fromIndex the index of the first element (inclusive) to be searched
      * @param toIndex the index of the last element (exclusive) to be searched
@@ -2502,6 +2843,13 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * <p>This method creates a stream that will iterate over all elements in
      * this list in the order they appear.</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * DoubleList list = DoubleList.of(1.0, 2.0, 3.0);
+     * double sum = list.stream().sum();                        // returns 6.0
+     * long count = list.stream().filter(d -> d > 1).count();   // returns 2
+     * }</pre>
+     *
      * @return a sequential {@code DoubleStream} over the elements in this list
      */
     public DoubleStream stream() {
@@ -2515,6 +2863,14 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * <p>This method creates a stream that will iterate over the elements from
      * {@code fromIndex} (inclusive) to {@code toIndex} (exclusive) in the order
      * they appear in the list.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * DoubleList list = DoubleList.of(1.0, 2.0, 3.0, 4.0, 5.0);
+     * double sum = list.stream(1, 4).sum();   // returns 9.0 (2.0 + 3.0 + 4.0)
+     *
+     * list.stream(0, 10);   // throws IndexOutOfBoundsException (10 > size())
+     * }</pre>
      *
      * @param fromIndex the index of the first element (inclusive) to be included
      * @param toIndex the index of the last element (exclusive) to be included
@@ -2534,6 +2890,14 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * <p>This method provides direct access to the first element without creating
      * an {@code Optional} wrapper, but will throw an exception if the list is empty.</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * DoubleList list = DoubleList.of(1.0, 2.0, 3.0);
+     * list.getFirst();   // returns 1.0
+     *
+     * new DoubleList().getFirst();   // throws NoSuchElementException
+     * }</pre>
+     *
      * @return the first double value in the list
      * @throws NoSuchElementException if this list is empty
      * @see #first()
@@ -2550,6 +2914,14 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      *
      * <p>This method provides direct access to the last element without creating
      * an {@code Optional} wrapper, but will throw an exception if the list is empty.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * DoubleList list = DoubleList.of(1.0, 2.0, 3.0);
+     * list.getLast();   // returns 3.0
+     *
+     * new DoubleList().getLast();   // throws NoSuchElementException
+     * }</pre>
      *
      * @return the last double value in the list
      * @throws NoSuchElementException if this list is empty
@@ -2569,6 +2941,15 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * elements to the right (adds one to their indices). This operation has
      * O(n) time complexity where n is the size of the list.</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * DoubleList list = DoubleList.of(2.0, 3.0);
+     * list.addFirst(1.0);   // list is now [1.0, 2.0, 3.0]
+     *
+     * DoubleList empty = new DoubleList();
+     * empty.addFirst(5.0);  // empty is now [5.0]
+     * }</pre>
+     *
      * @param e the element to add at the beginning of the list
      */
     public void addFirst(final double e) {
@@ -2580,6 +2961,15 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      *
      * <p>This is equivalent to calling {@code add(e)} and has amortized
      * constant time complexity.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * DoubleList list = DoubleList.of(1.0, 2.0);
+     * list.addLast(3.0);   // list is now [1.0, 2.0, 3.0]
+     *
+     * DoubleList empty = new DoubleList();
+     * empty.addLast(5.0);  // empty is now [5.0]
+     * }</pre>
      *
      * @param e the element to add at the end of the list
      */
@@ -2594,6 +2984,14 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * indices). This operation has O(n) time complexity where n is the size
      * of the list.</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * DoubleList list = DoubleList.of(1.0, 2.0, 3.0);
+     * double removed = list.removeFirst();   // returns 1.0, list is now [2.0, 3.0]
+     *
+     * new DoubleList().removeFirst();   // throws NoSuchElementException
+     * }</pre>
+     *
      * @return the first double value that was removed from the list
      * @throws NoSuchElementException if this list is empty
      */
@@ -2607,6 +3005,14 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * Removes and returns the last element from this list.
      *
      * <p>This operation has O(1) time complexity.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * DoubleList list = DoubleList.of(1.0, 2.0, 3.0);
+     * double removed = list.removeLast();   // returns 3.0, list is now [1.0, 2.0]
+     *
+     * new DoubleList().removeLast();   // throws NoSuchElementException
+     * }</pre>
      *
      * @return the last double value that was removed from the list
      * @throws NoSuchElementException if this list is empty

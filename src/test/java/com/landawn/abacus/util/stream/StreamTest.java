@@ -11718,16 +11718,14 @@ public class StreamTest extends AbstractTest {
     @Test
     public void testMergeCollection_twoStreams_uncovered() {
         final List<Stream<Integer>> streams = N.asList(Stream.of(1, 4, 7), Stream.of(2, 5, 8));
-        assertEquals(N.asList(1, 2, 4, 5, 7, 8),
-                Stream.merge(streams, (x, y) -> x <= y ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND).toList());
+        assertEquals(N.asList(1, 2, 4, 5, 7, 8), Stream.merge(streams, (x, y) -> x <= y ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND).toList());
     }
 
     // merge(Collection<Stream>, nextSelector): size>=3 iterative path (lines 26376-26383).
     @Test
     public void testMergeCollection_threeStreams_uncovered() {
         final List<Stream<Integer>> streams = N.asList(Stream.of(1, 4, 7), Stream.of(2, 5, 8), Stream.of(3, 6, 9));
-        assertEquals(N.asList(1, 2, 3, 4, 5, 6, 7, 8, 9),
-                Stream.merge(streams, (x, y) -> x <= y ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND).toList());
+        assertEquals(N.asList(1, 2, 3, 4, 5, 6, 7, 8, 9), Stream.merge(streams, (x, y) -> x <= y ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND).toList());
     }
 
     @Test
@@ -11748,8 +11746,7 @@ public class StreamTest extends AbstractTest {
     @Test
     public void testMergeIterators_single_uncovered() {
         final List<Iterator<Integer>> iterators = N.asList(N.asList(1, 2, 3).iterator());
-        assertEquals(N.asList(1, 2, 3),
-                Stream.mergeIterators(iterators, (x, y) -> x <= y ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND).toList());
+        assertEquals(N.asList(1, 2, 3), Stream.mergeIterators(iterators, (x, y) -> x <= y ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND).toList());
     }
 
     // mergeIterators(Collection<Iterator>, nextSelector): size==2 (lines 26447-26449).
@@ -11833,6 +11830,21 @@ public class StreamTest extends AbstractTest {
     @Test
     public void testOfNullable_null_uncovered() {
         assertEquals(0, Stream.ofNullable(null).count());
+    }
+
+    @Test
+    public void testDeferCloseInvokesSupplierAndCloseHandlers() {
+        final AtomicInteger calls = new AtomicInteger();
+        final AtomicInteger closed = new AtomicInteger();
+        final Stream<Integer> stream = Stream.defer(() -> {
+            calls.incrementAndGet();
+            return Stream.of(1).onClose(closed::incrementAndGet);
+        });
+
+        stream.close();
+
+        assertEquals(1, calls.get());
+        assertEquals(1, closed.get());
     }
 
 }

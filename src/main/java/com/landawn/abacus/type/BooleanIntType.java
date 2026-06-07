@@ -37,7 +37,7 @@ import com.landawn.abacus.util.CharacterWriter;
 @SuppressWarnings("java:S2160")
 public final class BooleanIntType extends AbstractType<Boolean> {
 
-    private static final String typeName = "BooleanInt";
+    private static final String TYPE_NAME = "BooleanInt";
     private static final String _0 = "0";
     private static final String _1 = "1";
 
@@ -46,7 +46,7 @@ public final class BooleanIntType extends AbstractType<Boolean> {
      * Instances are created by {@link TypeFactory}; do not instantiate directly.
      */
     BooleanIntType() {
-        super(typeName);
+        super(TYPE_NAME);
     }
 
     /**
@@ -84,8 +84,15 @@ public final class BooleanIntType extends AbstractType<Boolean> {
      * Converts a {@link Boolean} to its integer string representation.
      * Maps {@code true} to {@code "1"} and {@code false} / {@code null} to {@code "0"}.
      *
+     * <p>The returned string is a serializable representation designed to be parsed back into an equivalent value
+     * via {@link #valueOf(String)}; {@code stringOf} and {@code valueOf} are inverse operations that round-trip. This
+     * is the key distinction from {@link Object#toString()}, whose result is not guaranteed to be convertible back
+     * into the original value.</p>
+     *
      * @param b the {@code Boolean} value to convert; may be {@code null}
      * @return {@code "1"} if {@code b} is {@link Boolean#TRUE}, {@code "0"} otherwise
+     * @see #valueOf(String)
+     * @see #valueOf(Object)
      */
     @Override
     public String stringOf(final Boolean b) {
@@ -97,9 +104,15 @@ public final class BooleanIntType extends AbstractType<Boolean> {
      * Only the exact string {@code "1"} yields {@code true}; any other value (including
      * {@code null}) yields {@code false}.
      *
+     * <p>This method is the inverse of {@code stringOf} and round-trips with it: it parses the string produced by
+     * {@code stringOf} back into a value of this type. Strings produced by {@link Object#toString()} are not
+     * guaranteed to be parseable in this way.</p>
+     *
      * @param str the string to parse (typically {@code "0"} or {@code "1"}); may be {@code null}
      * @return {@link Boolean#TRUE} if {@code str} equals {@code "1"},
      *         {@link Boolean#FALSE} otherwise
+     * @see #valueOf(Object)
+     * @see #stringOf(Boolean)
      */
     @Override
     public Boolean valueOf(final String str) {
@@ -203,10 +216,19 @@ public final class BooleanIntType extends AbstractType<Boolean> {
      * Appends a {@link Boolean} value to an {@link Appendable} as a 0/1 string.
      * Appends {@code "1"} if {@code x} is {@code true}; appends {@code "0"} otherwise
      * (including when {@code x} is {@code null}).
+     * <p>
+     * <b>appendTo vs. serializeTo:</b> {@code appendTo} produces a plain, {@code toString()}-style rendering with no
+     * JSON/XML quoting or escaping (for general text output), whereas {@code serializeTo} produces the JSON/XML
+     * serialized form (applying string quotation and character escaping per the serialization config) and is used by the
+     * JSON/XML serializers.
      *
      * @param appendable the target {@code Appendable}
      * @param x the {@code Boolean} value to append; may be {@code null}
      * @throws IOException if an I/O error occurs during appending
+     * @implNote
+     * This implementation appends {@code stringOf(x)} to {@code appendable}: {@code "1"} for {@code true} and
+     * {@code "0"} for {@code false} or {@code null}. The appended text is therefore identical to {@code stringOf(x)}
+     * and round-trips through {@link #valueOf(String)}.
      */
     @Override
     public void appendTo(final Appendable appendable, final Boolean x) throws IOException {
@@ -217,6 +239,15 @@ public final class BooleanIntType extends AbstractType<Boolean> {
      * Writes a {@link Boolean} value to a {@link CharacterWriter} as a {@code 0}/{@code 1} string.
      * If {@code config} specifies a non-zero character quotation character, the value is wrapped
      * in that quotation character; otherwise the raw {@code "1"} or {@code "0"} string is written.
+     * <p>
+     * This method is specifically designed for JSON/XML serialization: it writes the serialized form of {@code x} to the
+     * {@code CharacterWriter}, applying string quotation and character escaping according to the supplied serialization
+     * config (a {@code null} config means no surrounding quotation). It is the streaming counterpart of {@code stringOf}
+     * and is invoked by the JSON/XML serializers.
+     * <p>
+     * <b>serializeTo vs. appendTo:</b> {@code serializeTo} produces machine-readable JSON/XML (quoted and escaped),
+     * whereas {@code appendTo} produces a plain, human-readable {@code toString()}-style rendering without JSON/XML
+     * quoting or escaping.
      *
      * @param writer the {@code CharacterWriter} to write to
      * @param x the {@code Boolean} value to write; may be {@code null}
@@ -226,7 +257,7 @@ public final class BooleanIntType extends AbstractType<Boolean> {
      * @throws IOException if an I/O error occurs during writing
      */
     @Override
-    public void writeCharacter(final CharacterWriter writer, final Boolean x, final JsonXmlSerConfig<?> config) throws IOException {
+    public void serializeTo(final CharacterWriter writer, final Boolean x, final JsonXmlSerConfig<?> config) throws IOException {
         final char ch = config == null ? 0 : config.getCharQuotation();
 
         if (ch == 0) {

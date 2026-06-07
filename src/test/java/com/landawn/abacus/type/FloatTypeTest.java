@@ -168,10 +168,10 @@ public class FloatTypeTest extends TestBase {
     }
 
     @Test
-    public void test_writeCharacter_null() throws Exception {
+    public void test_serializeTo_null() throws Exception {
         CharacterWriter writer = mock(BufferedJsonWriter.class);
 
-        type.writeCharacter(writer, null, null);
+        type.serializeTo(writer, null, null);
         verify(writer).write("null".toCharArray());
     }
 

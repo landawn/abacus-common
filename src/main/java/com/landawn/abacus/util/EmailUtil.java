@@ -71,6 +71,7 @@ import javax.mail.internet.MimeMultipart;
  *     props
  * );
  * }</pre>
+ *
  */
 public final class EmailUtil {
 

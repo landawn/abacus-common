@@ -172,7 +172,7 @@ abstract class ImmutableIterator<T> implements java.util.Iterator<T>, Immutable 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableIterator<String> iter = ImmutableList.of("a", "b", "c").iterator();
-     * iter.next();   // Skip first element
+     * iter.next();   // element is skipped (the first one)
      * long remaining = iter.count();
      * System.out.println(remaining);        // 2
      * System.out.println(iter.hasNext());   // false (iterator exhausted)

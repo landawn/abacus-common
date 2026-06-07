@@ -41,6 +41,7 @@ public interface CharFunction<R> extends Throwables.CharFunction<R, RuntimeExcep
      * CharFunction<Character> boxer = CharFunction.BOX;
      * Character boxed = boxer.apply('A');   // Returns Character.valueOf('A')
      * }</pre>
+     *
      */
     CharFunction<Character> BOX = value -> value;
 

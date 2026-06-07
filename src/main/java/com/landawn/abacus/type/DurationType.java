@@ -89,8 +89,15 @@ public class DurationType extends AbstractType<Duration> {
      * Converts a {@link Duration} to its string representation.
      * The duration is serialized as its millisecond count (e.g., {@code "5000"} for 5 seconds).
      *
+     * <p>The returned string is a serializable representation designed to be parsed back into an equivalent value
+     * via {@link #valueOf(String)}; {@code stringOf} and {@code valueOf} are inverse operations that round-trip. This
+     * is the key distinction from {@link Object#toString()}, whose result is not guaranteed to be convertible back
+     * into the original value.</p>
+     *
      * @param x the {@link Duration} to convert; may be {@code null}
      * @return a string containing the millisecond count, or {@code null} if {@code x} is {@code null}
+     * @see #valueOf(String)
+     * @see #valueOf(Object)
      */
     @Override
     public String stringOf(final Duration x) {
@@ -101,9 +108,15 @@ public class DurationType extends AbstractType<Duration> {
      * Parses a millisecond-count string back into a {@link Duration}.
      * The string must contain a valid {@code long} value (e.g., {@code "5000"} for 5 seconds).
      *
+     * <p>This method is the inverse of {@code stringOf} and round-trips with it: it parses the string produced by
+     * {@code stringOf} back into a value of this type. Strings produced by {@link Object#toString()} are not
+     * guaranteed to be parseable in this way.</p>
+     *
      * @param str the millisecond count as a string; may be {@code null} or empty
      * @return the corresponding {@link Duration}, or {@code null} if {@code str} is {@code null} or empty
      * @throws NumberFormatException if {@code str} is non-empty but does not contain a parsable {@code long}
+     * @see #valueOf(Object)
+     * @see #stringOf(Duration)
      */
     @Override
     public Duration valueOf(final String str) {
@@ -187,10 +200,24 @@ public class DurationType extends AbstractType<Duration> {
     /**
      * Appends a {@link Duration} value to an {@link Appendable} as its millisecond count.
      * If {@code x} is {@code null}, the literal {@code null} is appended.
+     * <p>
+     * <b>appendTo vs. serializeTo:</b> {@code appendTo} produces a plain, {@code toString()}-style rendering with no
+     * JSON/XML quoting or escaping (for general text output), whereas {@code serializeTo} produces the JSON/XML
+     * serialized form (applying string quotation and character escaping per the serialization config) and is used by the
+     * JSON/XML serializers.
      *
      * @param appendable the {@link Appendable} to write to
      * @param x          the {@link Duration} to append; may be {@code null}
      * @throws IOException if an I/O error occurs during writing
+     * @implNote
+     * This method appends a string representation of {@code x} to {@code appendable} (the literal {@code "null"} for a
+     * {@code null} value). Conceptually this is the human-readable form produced by {@code toString()}, <i>not</i> the
+     * value returned by {@code stringOf}, which is a formatted, serializable representation (typically a JSON string)
+     * that {@link #valueOf(String)} can convert back into an equivalent value. For values whose nested structure makes
+     * the two forms differ (collections, maps, arrays), {@code appendTo} emits the unquoted, {@code toString()}-style
+     * form; it is therefore not, in the general contract, a plain
+     * {@code appendable.append(x == null ? NULL_STRING : stringOf(x))}. (For value types whose human-readable and
+     * serialized forms coincide, the appended text is naturally identical to {@code stringOf(x)}.)
      */
     @Override
     public void appendTo(final Appendable appendable, final Duration x) throws IOException {
@@ -205,6 +232,15 @@ public class DurationType extends AbstractType<Duration> {
      * Writes a {@link Duration} value to a {@link CharacterWriter} as its millisecond count,
      * using the writer's optimized {@code long}-write method.
      * If {@code x} is {@code null}, the literal {@code null} is written.
+     * <p>
+     * This method is specifically designed for JSON/XML serialization: it writes the serialized form of {@code x} to the
+     * {@code CharacterWriter}, applying string quotation and character escaping according to the supplied serialization
+     * config (a {@code null} config means no surrounding quotation). It is the streaming counterpart of {@code stringOf}
+     * and is invoked by the JSON/XML serializers.
+     * <p>
+     * <b>serializeTo vs. appendTo:</b> {@code serializeTo} produces machine-readable JSON/XML (quoted and escaped),
+     * whereas {@code appendTo} produces a plain, human-readable {@code toString()}-style rendering without JSON/XML
+     * quoting or escaping.
      *
      * @param writer the {@link CharacterWriter} to write to
      * @param x      the {@link Duration} to write; may be {@code null}
@@ -212,7 +248,7 @@ public class DurationType extends AbstractType<Duration> {
      * @throws IOException if an I/O error occurs during writing
      */
     @Override
-    public void writeCharacter(final CharacterWriter writer, final Duration x, final JsonXmlSerConfig<?> config) throws IOException {
+    public void serializeTo(final CharacterWriter writer, final Duration x, final JsonXmlSerConfig<?> config) throws IOException {
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {

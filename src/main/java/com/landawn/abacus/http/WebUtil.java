@@ -129,12 +129,10 @@ public final class WebUtil {
                 final String header = tokens.get(++i);
                 final int idx = header.indexOf(':');
                 if (idx > 0) {
-                    headers.append(indent)
-                            .append(".header(\"")
-                            .append(header.substring(0, idx).trim())
-                            .append("\", \"")
-                            .append(escapeJava(header.substring(idx + 1).trim()))
-                            .append("\")"); //NOSONAR
+                    final String headerName = header.substring(0, idx).trim();
+                    final String headerValue = header.substring(idx + 1).trim();
+
+                    headers.append(indent).append(".header(\"").append(headerName).append("\", \"").append(escapeJava(headerValue)).append("\")"); //NOSONAR
                 }
             } else if (isDataOptionToken(token)) {
                 hasDataOption = true;
@@ -292,15 +290,13 @@ public final class WebUtil {
                 final String header = tokens.get(++i);
                 final int idx = header.indexOf(':');
                 if (idx > 0) {
-                    headers.append(indent)
-                            .append(".header(\"")
-                            .append(header.substring(0, idx).trim())
-                            .append("\", \"")
-                            .append(escapeJava(header.substring(idx + 1).trim()))
-                            .append("\")"); //NOSONAR
+                    final String headerName = header.substring(0, idx).trim();
+                    final String headerValue = header.substring(idx + 1).trim();
 
-                    if ("Content-Type".equalsIgnoreCase(header.substring(0, idx).trim())) {
-                        mediaType = "MediaType.parse(\"" + escapeJava(header.substring(idx + 1).trim()) + "\")";
+                    headers.append(indent).append(".header(\"").append(headerName).append("\", \"").append(escapeJava(headerValue)).append("\")"); //NOSONAR
+
+                    if ("Content-Type".equalsIgnoreCase(headerName)) {
+                        mediaType = "MediaType.parse(\"" + escapeJava(headerValue) + "\")";
                     }
                 }
             } else if (isDataOptionToken(token)) {

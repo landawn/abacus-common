@@ -42,6 +42,7 @@ public interface ToDoubleFunction<T> extends Throwables.ToDoubleFunction<T, Runt
      * double primitive = ToDoubleFunction.UNBOX.applyAsDouble(boxed);     // returns 3.14
      * double defaultValue = ToDoubleFunction.UNBOX.applyAsDouble(null);   // returns 0.0
      * }</pre>
+     *
      */
     ToDoubleFunction<Double> UNBOX = value -> value == null ? 0 : value;
     /**
@@ -60,6 +61,7 @@ public interface ToDoubleFunction<T> extends Throwables.ToDoubleFunction<T, Runt
      *
      * double defaultValue = ToDoubleFunction.FROM_NUM.applyAsDouble(null);   // returns 0.0
      * }</pre>
+     *
      */
     ToDoubleFunction<Number> FROM_NUM = value -> value == null ? 0 : Numbers.toDouble(value);
 

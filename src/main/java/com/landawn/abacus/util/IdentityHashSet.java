@@ -60,6 +60,7 @@ public final class IdentityHashSet<T> extends AbstractSet<T> {
      * <pre>{@code
      * IdentityHashSet<Object> set = new IdentityHashSet<>();
      * }</pre>
+     *
      */
     public IdentityHashSet() {
         map = new IdentityHashMap<>();
@@ -414,6 +415,7 @@ public final class IdentityHashSet<T> extends AbstractSet<T> {
      * set.clear();
      * // set.isEmpty() == true
      * }</pre>
+     *
      */
     @Override
     public void clear() {
@@ -460,15 +462,17 @@ public final class IdentityHashSet<T> extends AbstractSet<T> {
     }
 
     /**
-     * Returns the hash code value for this set, computed as the sum of the
-     * {@linkplain System#identityHashCode(Object) identity hash codes} of the elements in the
-     * set. Two {@code IdentityHashSet}s for which {@link #equals(Object)} returns {@code true}
-     * will have the same hash code, satisfying the contract relative to this class's
-     * (identity-based) {@code equals}.
+     * Returns a hash code for this set as defined by {@link java.util.AbstractSet#hashCode()} —
+     * the sum of {@link Object#hashCode()} of each element.
+     * Note: this uses {@code hashCode()}, not {@link System#identityHashCode(Object)}.
      *
-     * <p>Because this set uses reference equality, the returned value is generally different
-     * from {@link java.util.Set#hashCode()} (which sums {@code Object.hashCode()}) on a
-     * conventional set containing the same elements.</p>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * IdentityHashSet<String> set = new IdentityHashSet<>();
+     * set.add("a");
+     * set.add("b");
+     * int hash = set.hashCode();   // returns the sum of the elements' hashCode() values
+     * }</pre>
      *
      * @return the hash code value for this set
      */

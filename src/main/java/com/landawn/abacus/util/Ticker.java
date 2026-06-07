@@ -37,7 +37,7 @@ package com.landawn.abacus.util;
  * // Custom ticker for testing
  * Ticker testTicker = new Ticker() {
  *     private long time = 0;
- *     public long read() { return time += 1000000; } // advances by 1ms each call
+ *     public long read() { return time += 1000000; }
  * };
  * }</pre>
  *
@@ -67,6 +67,15 @@ public abstract class Ticker {
      * <p><b>Implementation note:</b> Subclasses must ensure that the values returned are
      * monotonically non-decreasing (i.e., later calls never return a smaller value than
      * earlier calls).</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Ticker ticker = Ticker.systemTicker();
+     * long start = ticker.read();
+     * long end = ticker.read();
+     * end >= start;                    // true (readings are monotonically non-decreasing)
+     * long elapsedNanos = end - start; // the elapsed time between the two readings, in nanoseconds
+     * }</pre>
      *
      * @return the current reading of the ticker, in nanoseconds
      */

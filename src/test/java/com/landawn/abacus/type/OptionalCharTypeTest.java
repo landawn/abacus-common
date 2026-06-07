@@ -219,47 +219,47 @@ public class OptionalCharTypeTest extends TestBase {
     }
 
     @Test
-    public void testWriteCharacterWithNull() throws IOException {
-        optionalCharType.writeCharacter(writer, null, config);
+    public void testSerializeToWithNull() throws IOException {
+        optionalCharType.serializeTo(writer, null, config);
         verify(writer).write(any(char[].class));
     }
 
     @Test
-    public void testWriteCharacterWithEmpty() throws IOException {
+    public void testSerializeToWithEmpty() throws IOException {
         OptionalChar empty = OptionalChar.empty();
-        optionalCharType.writeCharacter(writer, empty, config);
+        optionalCharType.serializeTo(writer, empty, config);
         verify(writer).write(any(char[].class));
     }
 
     @Test
-    public void testWriteCharacterWithValueNoQuotation() throws IOException {
+    public void testSerializeToWithValueNoQuotation() throws IOException {
         when(config.getCharQuotation()).thenReturn((char) 0);
         OptionalChar opt = OptionalChar.of('@');
-        optionalCharType.writeCharacter(writer, opt, config);
+        optionalCharType.serializeTo(writer, opt, config);
         verify(writer).writeCharacter('@');
     }
 
     @Test
-    public void testWriteCharacterWithValueWithQuotation() throws IOException {
+    public void testSerializeToWithValueWithQuotation() throws IOException {
         when(config.getCharQuotation()).thenReturn('\'');
         OptionalChar opt = OptionalChar.of('#');
-        optionalCharType.writeCharacter(writer, opt, config);
+        optionalCharType.serializeTo(writer, opt, config);
         verify(writer, times(2)).write('\'');
         verify(writer).writeCharacter('#');
     }
 
     @Test
-    public void testWriteCharacterWithNullConfig() throws IOException {
+    public void testSerializeToWithNullConfig() throws IOException {
         OptionalChar opt = OptionalChar.of('*');
-        optionalCharType.writeCharacter(writer, opt, null);
+        optionalCharType.serializeTo(writer, opt, null);
         verify(writer).writeCharacter('*');
     }
 
     @Test
-    public void testWriteCharacterEscapesSingleQuoteWhenQuotedBySingleQuote() throws IOException {
+    public void testSerializeToEscapesSingleQuoteWhenQuotedBySingleQuote() throws IOException {
         when(config.getCharQuotation()).thenReturn('\'');
         OptionalChar opt = OptionalChar.of('\'');
-        optionalCharType.writeCharacter(writer, opt, config);
+        optionalCharType.serializeTo(writer, opt, config);
         verify(writer, times(2)).write('\'');
         verify(writer).write('\\');
         verify(writer).writeCharacter('\'');

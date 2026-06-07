@@ -27,7 +27,7 @@ package com.landawn.abacus.type;
  * Type<Short> type = TypeFactory.getType(short.class);
  *
  * // Convert string to short
- * Short value = type.valueOf("100");   // Returns (short) 100
+ * Short value = type.valueOf("100");     // Returns (short) 100
  * Short value2 = type.valueOf("-128");   // Returns (short) -128
  *
  * // Get default value
@@ -40,6 +40,7 @@ package com.landawn.abacus.type;
  *     }
  * }
  * }</pre>
+ *
  */
 @SuppressWarnings("java:S2160")
 public final class PrimitiveShortType extends AbstractShortType {

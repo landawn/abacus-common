@@ -65,9 +65,16 @@ public class BytesType extends AbstractType<byte[]> {
      * Encodes a {@code byte[]} as a Base64 string.
      * Uses {@link com.landawn.abacus.util.Strings#base64Encode(byte[])} internally.
      *
+     * <p>The returned string is a serializable representation designed to be parsed back into an equivalent value
+     * via {@link #valueOf(String)}; {@code stringOf} and {@code valueOf} are inverse operations that round-trip. This
+     * is the key distinction from {@link Object#toString()}, whose result is not guaranteed to be convertible back
+     * into the original value.</p>
+     *
      * @param x the byte array to encode; may be {@code null}
      * @return the Base64-encoded string representation of the array,
      *         or {@code null} if {@code x} is {@code null}
+     * @see #valueOf(String)
+     * @see #valueOf(Object)
      */
     @Override
     public String stringOf(final byte[] x) {
@@ -78,9 +85,15 @@ public class BytesType extends AbstractType<byte[]> {
      * Decodes a Base64-encoded string back to a {@code byte[]}.
      * Uses {@link com.landawn.abacus.util.Strings#base64Decode(String)} internally.
      *
+     * <p>This method is the inverse of {@code stringOf} and round-trips with it: it parses the string produced by
+     * {@code stringOf} back into a value of this type. Strings produced by {@link Object#toString()} are not
+     * guaranteed to be parseable in this way.</p>
+     *
      * @param str the Base64-encoded string to decode; may be {@code null}
      * @return the decoded byte array, or {@code null} if {@code str} is {@code null}
      * @throws IllegalArgumentException if {@code str} contains characters outside the Base64 alphabet
+     * @see #valueOf(Object)
+     * @see #stringOf(byte[])
      */
     @Override
     public byte[] valueOf(final String str) {

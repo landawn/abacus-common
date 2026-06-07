@@ -69,19 +69,19 @@ import com.landawn.abacus.annotation.Internal;
  * );
  *
  * // Forward lookup (key to value)
- * Integer aliceId = userIdMap.get("alice");   // 1001
+ * Integer aliceId = userIdMap.get("alice");   // returns 1001
  *
  * // Reverse lookup (value to key)
- * String userName = userIdMap.getByValue(1002);   // "bob"
+ * String userName = userIdMap.getByValue(1002);   // returns "bob"
  *
  * // Inverse view with swapped keys and values
  * BiMap<Integer, String> idUserMap = userIdMap.inverse();
- * String user = idUserMap.get(1003);   // "charlie"
+ * String user = idUserMap.get(1003);   // returns "charlie"
  *
  * // Bijective constraint enforcement
  * // userIdMap.put("david", 1001);   // Would throw IllegalArgumentException: value 1001 already exists
- * userIdMap.forcePut("david", 1001);   // Forces mapping, removes "alice" -> 1001
- * userIdMap.forcePut("eve", 1002);   // Forces mapping, removes conflicting entries
+ * userIdMap.forcePut("david", 1001);   // forces mapping, removes "alice" -> 1001
+ * userIdMap.forcePut("eve", 1002);     // forces mapping, removes conflicting entries
  *
  * // Builder pattern for complex construction
  * BiMap<String, String> countryMap = BiMap.<String, String>builder()
@@ -92,7 +92,7 @@ import com.landawn.abacus.annotation.Internal;
  *
  * // Custom underlying map types
  * BiMap<String, Integer> linkedMap = new BiMap<>(
- *     LinkedHashMap::new,  // Preserves insertion order
+ *     LinkedHashMap::new,
  *     LinkedHashMap::new
  * );
  * }</pre>
@@ -270,6 +270,7 @@ public final class BiMap<K, V> implements Map<K, V> {
      * map.put("one", 1);
      * map.put("two", 2);
      * }</pre>
+     *
      */
     public BiMap() {
         this(DEFAULT_INITIAL_CAPACITY);
@@ -280,7 +281,7 @@ public final class BiMap<K, V> implements Map<K, V> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * BiMap<String, Integer> map = new BiMap<>(100);   // Pre-size for 100 entries
+     * BiMap<String, Integer> map = new BiMap<>(100);
      * }</pre>
      *
      * @param initialCapacity the initial capacity of the BiMap
@@ -295,7 +296,7 @@ public final class BiMap<K, V> implements Map<K, V> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * BiMap<String, Integer> map = new BiMap<>(100, 0.9f);   // Custom capacity and load factor
+     * BiMap<String, Integer> map = new BiMap<>(100, 0.9f);
      * }</pre>
      *
      * @param initialCapacity the initial capacity of the BiMap
@@ -1222,6 +1223,7 @@ public final class BiMap<K, V> implements Map<K, V> {
      * map.clear();
      * map.isEmpty();   // returns true
      * }</pre>
+     *
      */
     @Override
     public void clear() {

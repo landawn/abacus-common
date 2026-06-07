@@ -98,6 +98,7 @@ import com.landawn.abacus.util.stream.Stream;
  *
  * <p>This class is marked as {@code @Internal} and is not intended for direct use
  * by application code. It provides low-level utilities for the parser framework.</p>
+ *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * // Get bean metadata
@@ -510,6 +511,30 @@ public final class ParserUtil {
      * @throws IllegalArgumentException if the custom name contains leading/trailing whitespace
      */
     static JsonNameTag[] getJsonNameTags(final String propName, final Field field) {
+        final String jsonXmlFieldName = getCustomFieldName(field);
+
+        final NamingPolicy[] namingPolicies = NAMING_POLICIES;
+        final String[] names = new String[namingPolicies.length];
+        final boolean hasCustomName = Strings.isNotEmpty(jsonXmlFieldName);
+
+        for (int i = 0, len = namingPolicies.length; i < len; i++) {
+            names[i] = hasCustomName ? jsonXmlFieldName : convertName(propName, namingPolicies[i]);
+        }
+
+        return buildJsonNameTags(names);
+    }
+
+    /**
+     * Resolves the custom JSON/XML field name for a property from naming annotations.
+     *
+     * <p>Checks {@code @JsonXmlField(name=...)}, then {@code @JSONField(name=...)}, then
+     * {@code @JsonProperty(value=...)}, returning the first non-empty value found.</p>
+     *
+     * @param field the field to inspect (may be {@code null})
+     * @return the custom field name, or {@code null} if none is specified
+     * @throws IllegalArgumentException if the custom name contains leading/trailing whitespace
+     */
+    private static String getCustomFieldName(final Field field) {
         String jsonXmlFieldName = null;
 
         if (field != null) {
@@ -545,15 +570,7 @@ public final class ParserUtil {
                     "JsonXmlFieldName name: \"" + jsonXmlFieldName + "\" must not start or end with any whitespace for field: " + field);
         }
 
-        final NamingPolicy[] namingPolicies = NAMING_POLICIES;
-        final String[] names = new String[namingPolicies.length];
-        final boolean hasCustomName = Strings.isNotEmpty(jsonXmlFieldName);
-
-        for (int i = 0, len = namingPolicies.length; i < len; i++) {
-            names[i] = hasCustomName ? jsonXmlFieldName : convertName(propName, namingPolicies[i]);
-        }
-
-        return buildJsonNameTags(names);
+        return jsonXmlFieldName;
     }
 
     /**
@@ -576,40 +593,7 @@ public final class ParserUtil {
      * @throws IllegalArgumentException if the custom name contains leading/trailing whitespace
      */
     static XmlNameTag[] getXmlNameTags(final String propName, final Field field, final String typeName, final boolean isBean) {
-        String jsonXmlFieldName = null;
-
-        if (field != null) {
-            if (field.isAnnotationPresent(JsonXmlField.class) && Strings.isNotEmpty(field.getAnnotation(JsonXmlField.class).name())) {
-                jsonXmlFieldName = field.getAnnotation(JsonXmlField.class).name();
-            } else {
-                if (Strings.isEmpty(jsonXmlFieldName)) {
-                    try {
-                        if (field.isAnnotationPresent(com.alibaba.fastjson2.annotation.JSONField.class)
-                                && Strings.isNotEmpty(field.getAnnotation(com.alibaba.fastjson2.annotation.JSONField.class).name())) {
-                            jsonXmlFieldName = field.getAnnotation(com.alibaba.fastjson2.annotation.JSONField.class).name();
-                        }
-                    } catch (final Throwable e) { // NOSONAR
-                        // ignore
-                    }
-                }
-
-                if (Strings.isEmpty(jsonXmlFieldName)) {
-                    try {
-                        if (field.isAnnotationPresent(com.fasterxml.jackson.annotation.JsonProperty.class)
-                                && Strings.isNotEmpty(field.getAnnotation(com.fasterxml.jackson.annotation.JsonProperty.class).value())) {
-                            jsonXmlFieldName = field.getAnnotation(com.fasterxml.jackson.annotation.JsonProperty.class).value();
-                        }
-                    } catch (final Throwable e) { // NOSONAR
-                        // ignore
-                    }
-                }
-            }
-        }
-
-        if (Strings.isNotEmpty(jsonXmlFieldName) && !jsonXmlFieldName.equals(Strings.strip(jsonXmlFieldName))) {
-            throw new IllegalArgumentException(
-                    "JsonXmlFieldName name: \"" + jsonXmlFieldName + "\" must not start or end with any whitespace for field: " + field);
-        }
+        final String jsonXmlFieldName = getCustomFieldName(field);
 
         final NamingPolicy[] namingPolicies = NAMING_POLICIES;
         final String[] names = new String[namingPolicies.length];
@@ -797,7 +781,7 @@ public final class ParserUtil {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * char[] chars = "hello world".toCharArray();
-     * int hash = ParserUtil.hashCode(chars, 0, 5);   // Hash of "hello"
+     * int hash = ParserUtil.hashCode(chars, 0, 5);   // hash is computed for "hello"
      * }</pre>
      *
      * @param a the character array
@@ -921,6 +905,16 @@ public final class ParserUtil {
      * <p>This method is primarily intended for internal framework use and testing scenarios
      * where bean definitions may change at runtime (e.g., through bytecode manipulation or
      * dynamic class reloading).</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * BeanInfo first = ParserUtil.getBeanInfo(User.class);
+     * BeanInfo cached = ParserUtil.getBeanInfo(User.class);   // same cached instance as first
+     *
+     * ParserUtil.refreshBeanPropInfo(User.class);             // evicts the cached BeanInfo for User.class
+     *
+     * BeanInfo recreated = ParserUtil.getBeanInfo(User.class);  // a new BeanInfo instance (not the cached one)
+     * }</pre>
      *
      * @param beanType the java type of the bean class to refresh
      * @deprecated This method is for internal use only and should not be called by application code.
@@ -1468,13 +1462,9 @@ public final class ParserUtil {
                 // set method mask to avoid querying next time.
                 if (propInfoOpt == null) {
                     propInfoOpt = Optional.empty();
-                } else {
-                    if (propInfoOpt.isEmpty()) {
-                        // ignore.
-                    } else {
-                        propInfo = propInfoOpt.orElseThrow();
-                        hashPropInfoMap.put(ParserUtil.hashCode(propInfo.jsonNameTags[defaultNameIndex].name), propInfo);
-                    }
+                } else if (propInfoOpt.isPresent()) {
+                    propInfo = propInfoOpt.orElseThrow();
+                    hashPropInfoMap.put(ParserUtil.hashCode(propInfo.jsonNameTags[defaultNameIndex].name), propInfo);
                 }
 
                 propInfoMap.put(propName, propInfoOpt);
@@ -2146,7 +2136,7 @@ public final class ParserUtil {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Get property value
-     * PropInfo propInfo = ... // obtained from BeanInfo
+     * PropInfo propInfo = ... // propInfo is obtained from BeanInfo
      * Object value = propInfo.getPropValue(myObject);
      *
      * // Set property value with automatic type conversion
@@ -2588,8 +2578,8 @@ public final class ParserUtil {
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * Person person = new Person("John", 30);
-         * PropInfo nameProp = ... // property info for "name"
-         * String name = nameProp.getPropValue(person);   // returns "John"
+         * PropInfo nameProp = ...                      // nameProp is property info for "name"
+         * String name = nameProp.getPropValue(person); // returns "John"
          * }</pre>
          *
          * @param <T> the expected type of the property value
@@ -2637,9 +2627,9 @@ public final class ParserUtil {
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * Person person = new Person();
-         * PropInfo ageProp = ... // property info for "age"
+         * PropInfo ageProp = ... // ageProp is property info for "age"
          * ageProp.setPropValue(person, 25);
-         * ageProp.setPropValue(person, "30");   // automatic conversion from String
+         * ageProp.setPropValue(person, "30");   // value is converted from String
          * }</pre>
          *
          * @param obj the object to set the property value on
@@ -3076,10 +3066,10 @@ public final class ParserUtil {
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * PropInfo dateProp = ... // property with date format "yyyy-MM-dd"
+         * PropInfo dateProp = ... // dateProp has date format "yyyy-MM-dd"
          * Date date = (Date) dateProp.readPropValue("2023-12-25");
          *
-         * PropInfo longDateProp = ... // property with "long" date format
+         * PropInfo longDateProp = ... // longDateProp has "long" date format
          * Date date2 = (Date) longDateProp.readPropValue("1703462400000");
          * }</pre>
          *
@@ -3136,7 +3126,7 @@ public final class ParserUtil {
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * PropInfo dateProp = ... // property with date format
+         * PropInfo dateProp = ... // dateProp has date format
          * CharacterWriter writer = new CharacterWriter();
          * Date now = new Date();
          * dateProp.writePropValue(writer, now, config);
@@ -3185,7 +3175,7 @@ public final class ParserUtil {
                     writer.write(jsonXmlType.stringOf(x));
                 }
             } else {
-                jsonXmlType.writeCharacter(writer, x, config);
+                jsonXmlType.serializeTo(writer, x, config);
             }
         }
 

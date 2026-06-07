@@ -769,4 +769,9 @@ public class DurationTest extends TestBase {
         assertSame(Duration.ZERO, Duration.ofDays(0));
     }
 
+    @Test
+    public void testToStringLongMinValueUsesSingleLeadingSign() {
+        assertEquals("PT-2562047788015H12M55.808S", Duration.ofMillis(Long.MIN_VALUE).toString());
+    }
+
 }

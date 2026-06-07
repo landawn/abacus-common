@@ -19,7 +19,7 @@ import com.landawn.abacus.util.Throwables;
 
 /**
  * Represents an operation that accepts two float-valued arguments and returns no result.
- * This is the two-arity specialization of {@link java.util.function.Consumer} for {@code float} values.
+ * This is the primitive type specialization of {@link java.util.function.BiConsumer} for {@code float}.
  * Unlike most other functional interfaces, {@code FloatBiConsumer} is expected to operate via side-effects.
  *
  * <p>This is a functional interface whose functional method is {@link #accept(float, float)}.</p>

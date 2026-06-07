@@ -54,16 +54,16 @@ public class FloatArrayTypeTest extends TestBase {
     }
 
     @Test
-    public void test_writeCharacter() throws IOException {
+    public void test_serializeTo() throws IOException {
         CharacterWriter writer = mock(BufferedJsonWriter.class);
         JsonXmlSerConfig<?> config = mock(JsonXmlSerConfig.class);
 
         Float[] arr = new Float[] { 1.1f, 2.2f };
-        type.writeCharacter(writer, arr, config);
+        type.serializeTo(writer, arr, config);
         verify(writer, atLeastOnce()).write(any(String.class));
 
         reset(writer);
-        type.writeCharacter(writer, null, config);
+        type.serializeTo(writer, null, config);
         verify(writer).write(NULL_CHAR_ARRAY);
     }
 

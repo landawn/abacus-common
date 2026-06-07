@@ -32,7 +32,7 @@ import com.landawn.abacus.util.Throwables;
  * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
  *
  * @see java.util.function.BinaryOperator
- * @see java.util.function.IntUnaryOperator
+ * @see java.util.function.IntBinaryOperator
  */
 @FunctionalInterface
 public interface IntBinaryOperator extends Throwables.IntBinaryOperator<RuntimeException>, java.util.function.IntBinaryOperator { //NOSONAR

@@ -127,6 +127,36 @@ public class OffsetDateTimeTypeTest extends TestBase {
     }
 
     @Test
+    public void testValueOfParsesOffsetDateTimeToString() {
+        // Every form produced by OffsetDateTime.toString() must round-trip through valueOf.
+        OffsetDateTime[] values = { //
+                OffsetDateTime.of(2023, 10, 15, 10, 30, 0, 0, ZoneOffset.UTC), // seconds omitted, "...:30Z"
+                OffsetDateTime.of(2023, 10, 15, 10, 30, 45, 0, ZoneOffset.UTC), // seconds, "...:45Z"
+                OffsetDateTime.of(2023, 10, 15, 10, 30, 45, 123000000, ZoneOffset.UTC), // millis, "...45.123Z"
+                OffsetDateTime.of(2023, 10, 15, 10, 30, 45, 123456789, ZoneOffset.UTC), // nanos
+                OffsetDateTime.of(2023, 10, 15, 10, 30, 45, 0, ZoneOffset.ofHours(1)), // numeric offset
+                OffsetDateTime.of(2023, 10, 15, 10, 30, 0, 0, ZoneOffset.ofHours(-8)), // offset, seconds omitted
+                OffsetDateTime.of(2023, 10, 15, 10, 30, 45, 0, ZoneOffset.ofHoursMinutes(5, 30)), // +05:30
+                OffsetDateTime.of(2023, 10, 15, 10, 30, 45, 123456789, ZoneOffset.ofHoursMinutesSeconds(5, 30, 15)) // +05:30:15
+        };
+
+        for (OffsetDateTime value : values) {
+            String text = value.toString();
+            OffsetDateTime result = offsetDateTimeType.valueOf(text);
+            assertNotNull(result, () -> "Failed to parse: " + text);
+            assertEquals(value.toInstant(), result.toInstant(), () -> "Instant mismatch for: " + text);
+            assertEquals(value, result, () -> "Value mismatch for: " + text);
+        }
+    }
+
+    @Test
+    public void testValueOfParsesOffsetDateTimeNowToString() {
+        OffsetDateTime value = OffsetDateTime.now();
+        OffsetDateTime result = offsetDateTimeType.valueOf(value.toString());
+        assertEquals(value, result);
+    }
+
+    @Test
     public void testValueOfWithCharArray() {
         String dateStr = "2023-05-15T03:30:45.000Z";
         char[] chars = dateStr.toCharArray();
@@ -227,55 +257,55 @@ public class OffsetDateTimeTypeTest extends TestBase {
     }
 
     @Test
-    public void testWriteCharacterWithNull() throws IOException {
-        offsetDateTimeType.writeCharacter(writer, null, config);
+    public void testSerializeToWithNull() throws IOException {
+        offsetDateTimeType.serializeTo(writer, null, config);
         verify(writer).write(any(char[].class));
     }
 
     @Test
-    public void testWriteCharacterWithValueNoConfig() throws IOException {
+    public void testSerializeToWithValueNoConfig() throws IOException {
         OffsetDateTime dateTime = OffsetDateTime.now();
-        offsetDateTimeType.writeCharacter(writer, dateTime, null);
+        offsetDateTimeType.serializeTo(writer, dateTime, null);
         verify(writer).write(anyString());
     }
 
     @Test
-    public void testWriteCharacterWithLongFormat() throws IOException {
+    public void testSerializeToWithLongFormat() throws IOException {
         OffsetDateTime dateTime = OffsetDateTime.now();
         when(config.getDateTimeFormat()).thenReturn(DateTimeFormat.LONG);
         when(config.getStringQuotation()).thenReturn((char) 0);
 
-        offsetDateTimeType.writeCharacter(writer, dateTime, config);
+        offsetDateTimeType.serializeTo(writer, dateTime, config);
         verify(writer).write(anyLong());
     }
 
     @Test
-    public void testWriteCharacterWithISO8601DateTimeFormat() throws IOException {
+    public void testSerializeToWithISO8601DateTimeFormat() throws IOException {
         OffsetDateTime dateTime = OffsetDateTime.now();
         when(config.getDateTimeFormat()).thenReturn(DateTimeFormat.ISO_8601_DATE_TIME);
         when(config.getStringQuotation()).thenReturn((char) 0);
 
-        offsetDateTimeType.writeCharacter(writer, dateTime, config);
+        offsetDateTimeType.serializeTo(writer, dateTime, config);
         verify(writer).write(anyString());
     }
 
     @Test
-    public void testWriteCharacterWithISO8601TimestampFormat() throws IOException {
+    public void testSerializeToWithISO8601TimestampFormat() throws IOException {
         OffsetDateTime dateTime = OffsetDateTime.now();
         when(config.getDateTimeFormat()).thenReturn(DateTimeFormat.ISO_8601_TIMESTAMP);
         when(config.getStringQuotation()).thenReturn((char) 0);
 
-        offsetDateTimeType.writeCharacter(writer, dateTime, config);
+        offsetDateTimeType.serializeTo(writer, dateTime, config);
         verify(writer).write(anyString());
     }
 
     @Test
-    public void testWriteCharacterWithQuotation() throws IOException {
+    public void testSerializeToWithQuotation() throws IOException {
         OffsetDateTime dateTime = OffsetDateTime.now();
         when(config.getDateTimeFormat()).thenReturn(DateTimeFormat.ISO_8601_DATE_TIME);
         when(config.getStringQuotation()).thenReturn('"');
 
-        offsetDateTimeType.writeCharacter(writer, dateTime, config);
+        offsetDateTimeType.serializeTo(writer, dateTime, config);
         verify(writer, times(2)).write('"'); // Opening and closing quotes
         verify(writer).write(anyString());
     }

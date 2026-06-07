@@ -97,8 +97,14 @@ public class GregorianCalendarType extends AbstractCalendarType<GregorianCalenda
      *   <li>Date/time strings: parsed according to standard date formats</li>
      * </ul>
      *
+     * <p>This method is the inverse of {@code stringOf} and round-trips with it: it parses the string produced by
+     * {@code stringOf} back into a value of this type. Strings produced by {@link Object#toString()} are not
+     * guaranteed to be parseable in this way.</p>
+     *
      * @param str the string to parse into a {@code GregorianCalendar}; may be {@code null} or empty
      * @return the parsed {@code GregorianCalendar} instance, or {@code null} if {@code str} is {@code null} or empty
+     * @see #valueOf(Object)
+     * @see #stringOf(java.util.Calendar)
      */
     @Override
     public GregorianCalendar valueOf(final String str) {
@@ -147,7 +153,7 @@ public class GregorianCalendarType extends AbstractCalendarType<GregorianCalenda
     @Override
     public GregorianCalendar get(final ResultSet rs, final int columnIndex) throws SQLException {
         final Timestamp ts = rs.getTimestamp(columnIndex);
-        return ts == null ? null : asGregorianCalendar(ts);
+        return ts == null ? null : Dates.createGregorianCalendar(ts);
     }
 
     /**
@@ -163,24 +169,6 @@ public class GregorianCalendarType extends AbstractCalendarType<GregorianCalenda
     @Override
     public GregorianCalendar get(final ResultSet rs, final String columnName) throws SQLException {
         final Timestamp ts = rs.getTimestamp(columnName);
-        return ts == null ? null : asGregorianCalendar(ts);
-    }
-
-    /**
-     * Converts a {@link java.sql.Timestamp} to a {@link GregorianCalendar} instance.
-     *
-     * @param value the {@link java.sql.Timestamp} to convert; may be {@code null}
-     * @return a new {@link GregorianCalendar} set to the timestamp's time,
-     *         or {@code null} if {@code value} is {@code null}
-     */
-    private static GregorianCalendar asGregorianCalendar(final Timestamp value) {
-        if (value == null) {
-            return null; // NOSONAR
-        }
-
-        final GregorianCalendar gc = new GregorianCalendar();
-        gc.setTimeInMillis(value.getTime());
-
-        return gc;
+        return ts == null ? null : Dates.createGregorianCalendar(ts);
     }
 }

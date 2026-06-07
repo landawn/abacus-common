@@ -1360,7 +1360,7 @@ public final class PropertiesUtil {
                                 bw.write("<" + elementPropName + ">");
                             }
 
-                            type.writeCharacter(bw, e, xsc);
+                            type.serializeTo(bw, e, xsc);
 
                             bw.write("</" + elementPropName + ">");
                         }
@@ -1383,7 +1383,7 @@ public final class PropertiesUtil {
                         bw.write("<" + propName + ">");
                     }
 
-                    type.writeCharacter(bw, propValue, xsc);
+                    type.serializeTo(bw, propValue, xsc);
 
                     bw.write("</" + propName + ">");
                 }

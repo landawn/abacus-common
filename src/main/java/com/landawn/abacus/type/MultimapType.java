@@ -169,10 +169,17 @@ public class MultimapType<K, E, V extends Collection<E>, T extends Multimap<K, E
      * {@link Multimap#toMap()}, where each key maps to its collection of values,
      * and the resulting map is then serialized as JSON.
      *
+     * <p>The returned string is a serializable representation designed to be parsed back into an equivalent value
+     * via {@link #valueOf(String)}; {@code stringOf} and {@code valueOf} are inverse operations that round-trip. This
+     * is the key distinction from {@link Object#toString()}, whose result is not guaranteed to be convertible back
+     * into the original value.</p>
+     *
      * @param x the {@code Multimap} object to convert, may be {@code null}
      * @return the JSON string representation of the {@code Multimap}
      *         (e.g., {@code {"colors":["red","blue"],"sizes":["large"]}}),
      *         or {@code null} if the input is {@code null}
+     * @see #valueOf(String)
+     * @see #valueOf(Object)
      */
     @Override
     public String stringOf(final T x) {
@@ -188,8 +195,14 @@ public class MultimapType<K, E, V extends Collection<E>, T extends Multimap<K, E
      * {@link java.util.Set}; otherwise a {@link com.landawn.abacus.util.ListMultimap ListMultimap}-backed
      * multimap is returned. In both cases the result preserves insertion order (a linked implementation).
      *
+     * <p>This method is the inverse of {@code stringOf} and round-trips with it: it parses the string produced by
+     * {@code stringOf} back into a value of this type. Strings produced by {@link Object#toString()} are not
+     * guaranteed to be parseable in this way.</p>
+     *
      * @param str the JSON string to parse; may be {@code null} or blank
      * @return the parsed {@code Multimap} object, or {@code null} if the input is {@code null} or blank
+     * @see #valueOf(Object)
+     * @see #stringOf(Multimap)
      */
     @Override
     public T valueOf(final String str) {
@@ -229,13 +242,13 @@ public class MultimapType<K, E, V extends Collection<E>, T extends Multimap<K, E
 
             return (T) multiMap;
         } else {
-            final Multimap<K, E, V> multimap = (Multimap<K, E, V>) N.newLinkedListMultimap(map.size());
+            final Multimap<K, E, V> multiMap = (Multimap<K, E, V>) N.newLinkedListMultimap(map.size());
 
             for (final Map.Entry<K, Collection<E>> entry : map.entrySet()) {
-                multimap.putValues(entry.getKey(), entry.getValue());
+                multiMap.putValues(entry.getKey(), entry.getValue());
             }
 
-            return (T) multimap;
+            return (T) multiMap;
         }
     }
 

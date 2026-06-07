@@ -39,7 +39,7 @@ import com.landawn.abacus.annotation.Beta;
  * <pre>{@code
  * Collection<String> mutable = Arrays.asList("a", "b", "c");
  * ImmutableCollection<String> immutable = ImmutableCollection.wrap(mutable);
- * System.out.println(immutable.contains("b"));   // true
+ * System.out.println(immutable.contains("b"));   // returns true
  * // immutable.add("d");   // throws UnsupportedOperationException
  * }</pre>
  *
@@ -80,8 +80,8 @@ public class ImmutableCollection<E> extends AbstractCollection<E> implements Imm
      * List<String> mutableList = new ArrayList<>();
      * mutableList.add("hello");
      * ImmutableCollection<String> wrapped = ImmutableCollection.wrap(mutableList);
-     * mutableList.add("world");             // This change is visible in wrapped!
-     * System.out.println(wrapped.size());   // 2
+     * mutableList.add("world");             // this change is visible in wrapped!
+     * System.out.println(wrapped.size());   // prints 2
      * }</pre>
      *
      * @param <E> the type of elements in the collection
@@ -212,8 +212,8 @@ public class ImmutableCollection<E> extends AbstractCollection<E> implements Imm
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableCollection<String> collection = ImmutableList.of("a", "b", "c");
-     * System.out.println(collection.contains("b"));   // true
-     * System.out.println(collection.contains("d"));   // false
+     * System.out.println(collection.contains("b"));   // returns true
+     * System.out.println(collection.contains("d"));   // returns false
      * }</pre>
      *
      * @param valueToFind element whose presence in this collection is to be tested
@@ -259,7 +259,7 @@ public class ImmutableCollection<E> extends AbstractCollection<E> implements Imm
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableCollection<String> collection = ImmutableList.of("x", "y", "z");
-     * System.out.println(collection.size());   // 3
+     * System.out.println(collection.size());   // returns 3
      * }</pre>
      *
      * @return the number of elements in this collection
@@ -280,7 +280,7 @@ public class ImmutableCollection<E> extends AbstractCollection<E> implements Imm
      * <pre>{@code
      * ImmutableCollection<String> collection = ImmutableList.of("a", "b", "c");
      * Object[] array = collection.toArray();
-     * System.out.println(Arrays.toString(array));   // [a, b, c]
+     * System.out.println(Arrays.toString(array));   // returns [a, b, c]
      * }</pre>
      *
      * @return an array containing all of the elements in this collection
@@ -305,7 +305,7 @@ public class ImmutableCollection<E> extends AbstractCollection<E> implements Imm
      * <pre>{@code
      * ImmutableCollection<String> collection = ImmutableList.of("x", "y", "z");
      * String[] array = collection.toArray(new String[0]);
-     * System.out.println(Arrays.toString(array));   // [x, y, z]
+     * System.out.println(Arrays.toString(array));   // returns [x, y, z]
      * }</pre>
      *
      * @param <T> the runtime type of the array to contain the collection
@@ -333,8 +333,8 @@ public class ImmutableCollection<E> extends AbstractCollection<E> implements Imm
      * ImmutableCollection<Integer> col1 = ImmutableList.of(1, 2, 3);
      * ImmutableCollection<Integer> col2 = ImmutableList.of(1, 2, 3);
      * ImmutableCollection<Integer> col3 = ImmutableList.of(4, 5, 6);
-     * System.out.println(col1.equals(col2));   // true
-     * System.out.println(col1.equals(col3));   // false
+     * System.out.println(col1.equals(col2));   // returns true
+     * System.out.println(col1.equals(col3));   // returns false
      * }</pre>
      *
      * @param obj the object to be compared for equality with this collection
@@ -377,7 +377,7 @@ public class ImmutableCollection<E> extends AbstractCollection<E> implements Imm
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableCollection<Integer> collection = ImmutableList.of(1, 2, 3);
-     * System.out.println(collection.toString());   // [1, 2, 3]
+     * System.out.println(collection.toString());   // returns [1, 2, 3]
      * }</pre>
      *
      * @return a string representation of this collection

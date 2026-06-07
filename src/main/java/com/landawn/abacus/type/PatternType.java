@@ -35,6 +35,7 @@ import com.landawn.abacus.util.Strings;
  * Pattern restored = patternType.valueOf("^[A-Za-z0-9+_.-]+@(.+)$");
  * boolean matches = restored.matcher("test@example.com").matches();   // true
  * }</pre>
+ *
  */
 public class PatternType extends AbstractType<Pattern> {
 
@@ -64,12 +65,19 @@ public class PatternType extends AbstractType<Pattern> {
      * Returns the pattern string by calling toString() on the Pattern object.
      * Returns {@code null} if the input Pattern is {@code null}.
      *
-     * @param t the Pattern object to convert
+     * <p>The returned string is a serializable representation designed to be parsed back into an equivalent value
+     * via {@link #valueOf(String)}; {@code stringOf} and {@code valueOf} are inverse operations that round-trip. This
+     * is the key distinction from {@link Object#toString()}, whose result is not guaranteed to be convertible back
+     * into the original value.</p>
+     *
+     * @param x the Pattern object to convert
      * @return the pattern string, or {@code null} if the input is null
+     * @see #valueOf(String)
+     * @see #valueOf(Object)
      */
     @Override
-    public String stringOf(final Pattern t) {
-        return (t == null) ? null : t.toString();
+    public String stringOf(final Pattern x) {
+        return (x == null) ? null : x.toString();
     }
 
     /**
@@ -77,8 +85,14 @@ public class PatternType extends AbstractType<Pattern> {
      * Compiles the string into a Pattern using Pattern.compile().
      * Returns {@code null} if the input string is {@code null} or empty.
      *
+     * <p>This method is the inverse of {@code stringOf} and round-trips with it: it parses the string produced by
+     * {@code stringOf} back into a value of this type. Strings produced by {@link Object#toString()} are not
+     * guaranteed to be parseable in this way.</p>
+     *
      * @param str the regular expression string to compile
      * @return a compiled Pattern object, or {@code null} if the input is {@code null} or empty
+     * @see #valueOf(Object)
+     * @see #stringOf(Pattern)
      */
     @Override
     public Pattern valueOf(final String str) {

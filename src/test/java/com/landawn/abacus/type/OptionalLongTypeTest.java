@@ -222,22 +222,22 @@ public class OptionalLongTypeTest extends TestBase {
     }
 
     @Test
-    public void testWriteCharacterWithNull() throws IOException {
-        optionalLongType.writeCharacter(writer, null, config);
+    public void testSerializeToWithNull() throws IOException {
+        optionalLongType.serializeTo(writer, null, config);
         verify(writer).write(any(char[].class));
     }
 
     @Test
-    public void testWriteCharacterWithEmpty() throws IOException {
+    public void testSerializeToWithEmpty() throws IOException {
         OptionalLong empty = OptionalLong.empty();
-        optionalLongType.writeCharacter(writer, empty, config);
+        optionalLongType.serializeTo(writer, empty, config);
         verify(writer).write(any(char[].class));
     }
 
     @Test
-    public void testWriteCharacterWithValue() throws IOException {
+    public void testSerializeToWithValue() throws IOException {
         OptionalLong opt = OptionalLong.of(2023L);
-        optionalLongType.writeCharacter(writer, opt, config);
+        optionalLongType.serializeTo(writer, opt, config);
         verify(writer).write(2023L);
     }
 }

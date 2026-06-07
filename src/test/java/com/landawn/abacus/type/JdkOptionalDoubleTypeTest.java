@@ -46,6 +46,15 @@ public class JdkOptionalDoubleTypeTest extends TestBase {
     }
 
     @Test
+    public void testCompare() {
+        assertEquals(0, optionalDoubleType.compare(OptionalDouble.of(1.5), OptionalDouble.of(1.5)));
+        assertTrue(optionalDoubleType.compare(OptionalDouble.of(1.5), OptionalDouble.of(2.5)) < 0);
+        assertTrue(optionalDoubleType.compare(OptionalDouble.of(2.5), OptionalDouble.of(1.5)) > 0);
+        assertTrue(optionalDoubleType.compare(OptionalDouble.empty(), OptionalDouble.of(1.5)) < 0);
+        assertEquals(0, optionalDoubleType.compare(OptionalDouble.empty(), OptionalDouble.empty()));
+    }
+
+    @Test
     public void test_isCsvQuoteRequired() {
         assertFalse(optionalDoubleType.isCsvQuoteRequired());
     }
@@ -195,31 +204,31 @@ public class JdkOptionalDoubleTypeTest extends TestBase {
     }
 
     @Test
-    public void testWriteCharacter_Null() throws IOException {
-        optionalDoubleType.writeCharacter(characterWriter, null, null);
+    public void testSerializeTo_Null() throws IOException {
+        optionalDoubleType.serializeTo(characterWriter, null, null);
         verify(characterWriter).write(any(char[].class));
     }
 
     @Test
-    public void testWriteCharacter_Empty() throws IOException {
-        optionalDoubleType.writeCharacter(characterWriter, OptionalDouble.empty(), null);
+    public void testSerializeTo_Empty() throws IOException {
+        optionalDoubleType.serializeTo(characterWriter, OptionalDouble.empty(), null);
         verify(characterWriter).write(any(char[].class));
     }
 
     @Test
-    public void testWriteCharacter_Present() throws IOException {
+    public void testSerializeTo_Present() throws IOException {
         OptionalDouble opt = OptionalDouble.of(42.5);
 
-        optionalDoubleType.writeCharacter(characterWriter, opt, null);
+        optionalDoubleType.serializeTo(characterWriter, opt, null);
         verify(characterWriter).write(42.5);
     }
 
     @Test
-    public void testWriteCharacter_WithConfig() throws IOException {
+    public void testSerializeTo_WithConfig() throws IOException {
         OptionalDouble opt = OptionalDouble.of(42.5);
         JsonXmlSerConfig<?> config = mock(JsonXmlSerConfig.class);
 
-        optionalDoubleType.writeCharacter(characterWriter, opt, config);
+        optionalDoubleType.serializeTo(characterWriter, opt, config);
         verify(characterWriter).write(42.5);
     }
 }

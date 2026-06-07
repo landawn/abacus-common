@@ -56,7 +56,7 @@ public class ClobType extends AbstractType<Clob> {
      *
      * @param clazz the specific {@link Clob} implementation class to handle
      */
-    ClobType(Class<? extends Clob> clazz) {
+    ClobType(final Class<? extends Clob> clazz) {
         super(CLOB);
         this.clazz = (Class<Clob>) clazz;
     }

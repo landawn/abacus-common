@@ -177,20 +177,20 @@ public class AbstractLongTypeTest extends TestBase {
     }
 
     @Test
-    public void testWriteCharacter() throws IOException {
-        longType.writeCharacter(writer, null, null);
+    public void testSerializeTo() throws IOException {
+        longType.serializeTo(writer, null, null);
         verify(writer).write(any(char[].class));
 
-        longType.writeCharacter(writer, 123456789L, null);
+        longType.serializeTo(writer, 123456789L, null);
         verify(writer).write(123456789L);
 
         when(config.isWriteNullNumberAsZero()).thenReturn(true);
-        longType.writeCharacter(writer, null, config);
+        longType.serializeTo(writer, null, config);
         verify(writer).write(0L);
 
         when(config.isWriteLongAsString()).thenReturn(true);
         when(config.getStringQuotation()).thenReturn('"');
-        longType.writeCharacter(writer, 987654321L, config);
+        longType.serializeTo(writer, 987654321L, config);
         verify(writer).write(987654321L);
     }
 

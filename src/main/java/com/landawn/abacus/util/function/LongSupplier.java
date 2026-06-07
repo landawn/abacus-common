@@ -19,7 +19,7 @@ import com.landawn.abacus.util.Throwables;
  * Represents a supplier of {@code long}-valued results. This is the {@code long}-producing
  * primitive specialization of {@link java.util.function.Supplier}.
  *
- * <p>There is no requirement that a distinct result be returned each time the supplier is invoked.
+ * <p>There is no requirement that a new or distinct result be returned each time the supplier is invoked.
  *
  * <p>This interface extends both {@link java.util.function.LongSupplier} and
  * {@link com.landawn.abacus.util.Throwables.LongSupplier}, providing compatibility with the standard Java
@@ -44,6 +44,7 @@ public interface LongSupplier extends Throwables.LongSupplier<RuntimeException>,
      * LongSupplier zeroSupplier = LongSupplier.ZERO;
      * long value = zeroSupplier.getAsLong();   // returns 0L
      * }</pre>
+     *
      */
     LongSupplier ZERO = () -> 0;
     /**
@@ -58,6 +59,7 @@ public interface LongSupplier extends Throwables.LongSupplier<RuntimeException>,
      * long value1 = randomSupplier.getAsLong();   // returns a random long
      * long value2 = randomSupplier.getAsLong();   // returns another random long
      * }</pre>
+     *
      */
     LongSupplier RANDOM = Util.RAND_LONG::nextLong;
 

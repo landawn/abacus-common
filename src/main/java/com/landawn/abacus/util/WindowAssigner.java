@@ -17,8 +17,8 @@ package com.landawn.abacus.util;
 
 /**
  * An abstract class that defines how elements in a stream should be assigned to windows.
- * This class is designed to work with the {@code Stream.window()} operations for grouping
- * stream elements into logical windows based on various criteria such as count or custom logic.
+ * This class supports windowing operations that group stream elements into logical windows
+ * based on various criteria such as count or custom logic.
  *
  * <p>WindowAssigner implementations determine the boundaries of windows and control how
  * elements are grouped together for processing. Common windowing strategies include:</p>
@@ -29,7 +29,8 @@ package com.landawn.abacus.util;
  *   <li>Session windows (e.g., grouped by activity with gaps)</li>
  * </ul>
  *
- * <p>This is an internal class used by the Stream API's windowing operations.</p>
+ * <p>This is an internal class used by the Stream API's windowing operations. Concrete
+ * windowing strategies subclass it and implement {@link #process(ObjIterator)}.</p>
  */
 public abstract class WindowAssigner {
 

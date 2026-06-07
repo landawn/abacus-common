@@ -104,7 +104,7 @@ public @interface AccessFieldByMethod {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * @AccessFieldByMethod              // Sufficient; equivalent to @AccessFieldByMethod("").
+     * @AccessFieldByMethod              // uses the default empty value; equivalent to @AccessFieldByMethod("").
      * public class User { ... }
      * }</pre>
      *

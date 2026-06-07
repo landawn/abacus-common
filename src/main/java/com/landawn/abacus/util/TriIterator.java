@@ -111,6 +111,13 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
     /**
      * Returns an empty TriIterator.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * TriIterator<String, Integer, Boolean> iter = TriIterator.empty();
+     * boolean has = iter.hasNext();                                // returns false
+     * List<Triple<String, Integer, Boolean>> list = iter.toList(); // returns empty list
+     * }</pre>
+     *
      * @param <A> the first type of elements returned by this iterator
      * @param <B> the second type of elements returned by this iterator
      * @param <C> the third type of elements returned by this iterator
@@ -165,8 +172,8 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
      * <pre>{@code
      * AtomicInteger counter = new AtomicInteger(0);
      * TriIterator<Integer, String, Boolean> iter = TriIterator.generate(
-     *     () -> counter.get() < 5,  // hasNext logic
-     *     triple -> {               // output logic
+     *     () -> counter.get() < 5,
+     *     triple -> {
      *         int n = counter.getAndIncrement();
      *         triple.setLeft(n);
      *         triple.setMiddle("Item " + n);
@@ -461,6 +468,19 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
      * The resulting TriIterator will iterate over triples of elements from the three iterables.
      * If the iterables have different lengths, the resulting TriIterator will have the length of the shortest iterable.
      * If any of the iterables is {@code null}, returns an empty TriIterator.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<String> names = Arrays.asList("Alice", "Bob", "Charlie");
+     * List<Integer> ages = Arrays.asList(25, 30);
+     * List<String> cities = Arrays.asList("NYC", "LA", "Chicago");
+     * TriIterator<String, Integer, String> iter = TriIterator.zip(names, ages, cities);
+     * List<Triple<String, Integer, String>> list = iter.toList(); // stops at shortest: size is 2
+     * // list -> [(Alice, 25, NYC), (Bob, 30, LA)]
+     *
+     * TriIterator<String, Integer, String> none = TriIterator.zip((List<String>) null, ages, cities);
+     * boolean has = none.hasNext();                 // returns false (null iterable -> empty)
+     * }</pre>
      *
      * @param <A> the type of elements in the first iterable
      * @param <B> the type of elements in the second iterable
@@ -796,8 +816,8 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
      * List<String> data = Arrays.asList("John:Developer:5", "Jane:Manager:8", "Bob:Analyst:3");
      * TriIterator<String, String, Integer> iter = TriIterator.unzip(data.iterator(), (item, triple) -> {
      *     String[] parts = item.split(":");
-     *     triple.setLeft(parts[0]);         // name
-     *     triple.setMiddle(parts[1]);       // role
+     *     triple.setLeft(parts[0]);                    // name
+     *     triple.setMiddle(parts[1]);                  // role
      *     triple.setRight(Integer.parseInt(parts[2])); // years
      * });
      * iter.forEachRemaining((name, role, years) ->
@@ -811,8 +831,11 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
      * @param iter the input iterator
      * @param unzipFunction a BiConsumer that accepts an element of type T and a Triple&lt;A, B, C&gt; and populates the triple with the unzipped values
      * @return a TriIterator that iterates over the unzipped elements
+     * @throws IllegalArgumentException if {@code unzipFunction} is {@code null}
      */
     public static <T, A, B, C> TriIterator<A, B, C> unzip(final Iterator<? extends T> iter, final BiConsumer<? super T, Triple<A, B, C>> unzipFunction) {
+        N.checkArgNotNull(unzipFunction, cs.function);
+
         if (iter == null) {
             return TriIterator.empty();
         }
@@ -857,12 +880,15 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
      * Performs the given action for each remaining element in the iterator until all elements have been processed or the action throws an exception.
      *
      * @param action the action to be performed for each remaining element, must not be {@code null}
+     * @throws IllegalArgumentException if {@code action} is {@code null}
      * @deprecated use {@link #forEachRemaining(TriConsumer)} to avoid creating the unnecessary {@code Triple} objects.
      * @see #forEachRemaining(TriConsumer)
      */
     @Deprecated
     @Override
     public void forEachRemaining(final Consumer<? super Triple<A, B, C>> action) {
+        N.checkArgNotNull(action, cs.action);
+
         super.forEachRemaining(action);
     }
 
@@ -900,7 +926,7 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
      *         List.of(20, 30),
      *         List.of("A", "B"));
      * iter.foreachRemaining((id, age, level) -> {
-     *     consume(id, age, level); // method may throw checked exception
+     *     consume(id, age, level);
      * });
      * }</pre>
      *
@@ -1294,6 +1320,16 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
     /**
      * Converts the elements in this TriIterator to an array of the specified type.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * String[] names = {"Alice", "Bob"};
+     * Integer[] ages = {25, 30};
+     * String[] cities = {"NYC", "LA"};
+     * Triple<String, Integer, String>[] arr =
+     *     TriIterator.zip(names, ages, cities).toArray(new Triple[0]); // length is 2
+     * // arr[0] -> (Alice, 25, NYC), arr[1] -> (Bob, 30, LA)
+     * }</pre>
+     *
      * @param <T> the type of the array elements; it should be a super type of {@code Triple}
      * @param a the array into which the elements of this TriIterator are to be stored, if it is big enough;
      *          otherwise, a new array of the same runtime type is allocated for this purpose
@@ -1335,9 +1371,9 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
      * Boolean[] active = {true, false, true};
      * Triple<List<String>, List<Integer>, List<Boolean>> result =
      *     TriIterator.zip(names, ages, active).toMultiList(ArrayList::new);
-     * List<String> nameList = result.left();       // [Alice, Bob, Charlie]
-     * List<Integer> ageList = result.middle();     // [25, 30, 35]
-     * List<Boolean> activeList = result.right();   // [true, false, true]
+     * List<String> nameList = result.left();       // returns [Alice, Bob, Charlie]
+     * List<Integer> ageList = result.middle();     // returns [25, 30, 35]
+     * List<Boolean> activeList = result.right();   // returns [true, false, true]
      * }</pre>
      *
      * @param supplier a Supplier that is invoked three times to provide a new {@code List} instance for
@@ -1371,9 +1407,9 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
      * Boolean[] active = {true, false, true};
      * Triple<Set<String>, Set<Integer>, Set<Boolean>> result =
      *     TriIterator.zip(names, ages, active).toMultiSet(HashSet::new);
-     * Set<String> nameSet = result.left();       // [Alice, Bob] (duplicates removed)
-     * Set<Integer> ageSet = result.middle();     // [25, 30]
-     * Set<Boolean> activeSet = result.right();   // [true, false]
+     * Set<String> nameSet = result.left();       // returns [Alice, Bob] (duplicates removed)
+     * Set<Integer> ageSet = result.middle();     // returns [25, 30]
+     * Set<Boolean> activeSet = result.right();   // returns [true, false]
      * }</pre>
      *
      * @param supplier a Supplier that is invoked three times to provide a new {@code Set} instance for
@@ -1383,16 +1419,16 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
      * @throws NullPointerException if {@code supplier} is {@code null} or returns {@code null}
      */
     public Triple<Set<A>, Set<B>, Set<C>> toMultiSet(@SuppressWarnings("rawtypes") final Supplier<? extends Set> supplier) {
-        final Set<A> listA = supplier.get();
-        final Set<B> listB = supplier.get();
-        final Set<C> listC = supplier.get();
+        final Set<A> setA = supplier.get();
+        final Set<B> setB = supplier.get();
+        final Set<C> setC = supplier.get();
 
         this.foreachRemaining((a, b, c) -> {
-            listA.add(a);
-            listB.add(b);
-            listC.add(c);
+            setA.add(a);
+            setB.add(b);
+            setC.add(c);
         });
 
-        return Triple.of(listA, listB, listC);
+        return Triple.of(setA, setB, setC);
     }
 }

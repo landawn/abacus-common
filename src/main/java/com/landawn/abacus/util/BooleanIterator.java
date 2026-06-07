@@ -87,7 +87,7 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BooleanIterator iter = BooleanIterator.empty();
-     * System.out.println(iter.hasNext());   // false
+     * System.out.println(iter.hasNext());   // returns false
      * }</pre>
      *
      * @return an empty {@code BooleanIterator}
@@ -297,6 +297,13 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
     /**
      * Returns the next boolean value in the iteration as a boxed Boolean.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * BooleanIterator iter = BooleanIterator.of(true, false);
+     * Boolean boxed = iter.next();            // returns true (boxed) — avoid this
+     * boolean primitive = iter.nextBoolean(); // returns false — prefer this
+     * }</pre>
+     *
      * @return the next boolean value as a boxed {@link Boolean} object
      * @throws NoSuchElementException if the iteration has no more elements
      * @deprecated use {@link #nextBoolean()} instead to avoid boxing overhead
@@ -313,8 +320,8 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BooleanIterator iter = BooleanIterator.of(true, false);
-     * boolean first = iter.nextBoolean();    // true
-     * boolean second = iter.nextBoolean();   // false
+     * boolean first = iter.nextBoolean();    // returns true
+     * boolean second = iter.nextBoolean();   // returns false
      * }</pre>
      *
      * @return the next boolean value
@@ -330,7 +337,7 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
      * <pre>{@code
      * BooleanIterator iter = BooleanIterator.of(true, false, true, false);
      * BooleanIterator skipped = iter.skip(2);
-     * boolean value = skipped.nextBoolean();   // true (third element)
+     * boolean value = skipped.nextBoolean();   // returns true (third element)
      * }</pre>
      *
      * @param n the number of elements to skip; must be non-negative
@@ -492,7 +499,7 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
      * // array = [true, false, true]
      *
      * // Empty iterator returns empty array
-     * boolean[] empty = BooleanIterator.empty().toArray();   // empty.length == 0
+     * boolean[] empty = BooleanIterator.empty().toArray();   // returns empty.length == 0
      * }</pre>
      *
      * @return a {@code boolean} array containing all remaining elements; an empty array if there are none
@@ -515,7 +522,7 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
      * // list contains [true, false, true]
      *
      * // Empty iterator returns empty list
-     * BooleanList empty = BooleanIterator.empty().toList();   // empty.size() == 0
+     * BooleanList empty = BooleanIterator.empty().toList();   // returns empty.size() == 0
      * }</pre>
      *
      * @return a {@link BooleanList} containing all remaining elements; an empty list if there are none
@@ -540,7 +547,7 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
      * BooleanIterator iter = BooleanIterator.of(true, false, true);
      * long trueCount = iter.stream()
      *     .filter(b -> b)
-     *     .count();   // Returns 2
+     *     .count();   // returns 2
      * }</pre>
      *
      * @return a {@link Stream}{@code <Boolean>} backed by this iterator
@@ -605,6 +612,12 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
     /**
      * Performs the given action for each remaining element, boxing each {@code boolean} to a {@link Boolean}.
      * This method is deprecated because it causes boxing overhead.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * BooleanIterator iter = BooleanIterator.of(true, false, true);
+     * iter.forEachRemaining(value -> System.out.println(value));   // Boxes each boolean — avoid this
+     * }</pre>
      *
      * @param action the action to be performed for each element; must not be {@code null}
      * @throws NullPointerException if {@code action} is {@code null}

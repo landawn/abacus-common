@@ -27,7 +27,7 @@ package com.landawn.abacus.type;
  * Type<Character> type = TypeFactory.getType(char.class);
  *
  * // Convert string to char
- * Character value = type.valueOf("A");   // Returns 'A'
+ * Character value = type.valueOf("A");    // Returns 'A'
  * Character value2 = type.valueOf("9");   // Returns '9'
  *
  * // Get default value
@@ -40,6 +40,7 @@ package com.landawn.abacus.type;
  *     }
  * }
  * }</pre>
+ *
  */
 @SuppressWarnings("java:S2160")
 public final class PrimitiveCharType extends AbstractCharacterType {

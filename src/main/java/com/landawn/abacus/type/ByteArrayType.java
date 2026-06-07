@@ -54,9 +54,16 @@ public final class ByteArrayType extends ObjectArrayType<Byte> {
      * The result is a bracket-enclosed, comma-separated list of element values.
      * {@code null} elements are rendered as the literal string {@code "null"}.
      *
+     * <p>The returned string is a serializable representation designed to be parsed back into an equivalent value
+     * via {@link #valueOf(String)}; {@code stringOf} and {@code valueOf} are inverse operations that round-trip. This
+     * is the key distinction from {@link Object#toString()}, whose result is not guaranteed to be convertible back
+     * into the original value.</p>
+     *
      * @param x the {@code Byte[]} to convert; may be {@code null}
      * @return {@code "[1, 2, null]"} style string, {@code "[]"} for an empty array,
      *         or {@code null} if {@code x} is {@code null}
+     * @see #valueOf(String)
+     * @see #valueOf(Object)
      */
     @Override
     public String stringOf(final Byte[] x) {
@@ -75,10 +82,16 @@ public final class ByteArrayType extends ObjectArrayType<Byte> {
      * Returns {@code null} for a {@code null}, empty, or blank input string.
      * Returns an empty array for the string {@code "[]"}.
      *
+     * <p>This method is the inverse of {@code stringOf} and round-trips with it: it parses the string produced by
+     * {@code stringOf} back into a value of this type. Strings produced by {@link Object#toString()} are not
+     * guaranteed to be parseable in this way.</p>
+     *
      * @param str the string to parse; may be {@code null}, empty, or blank
      * @return the parsed {@code Byte[]} array, an empty array for {@code "[]"},
      *         or {@code null} if {@code str} is {@code null}, empty, or blank
      * @throws NumberFormatException if any non-null element cannot be parsed as a valid {@code byte}
+     * @see #valueOf(Object)
+     * @see #stringOf(Byte[])
      */
     @Override
     public Byte[] valueOf(final String str) {
@@ -198,10 +211,24 @@ public final class ByteArrayType extends ObjectArrayType<Byte> {
      * Appends the literal {@code "null"} string if {@code x} is {@code null}.
      * Each {@code null} element is written as {@code "null"};
      * non-null elements are written as their decimal string values.
+     * <p>
+     * <b>appendTo vs. serializeTo:</b> {@code appendTo} produces a plain, {@code toString()}-style rendering with no
+     * JSON/XML quoting or escaping (for general text output), whereas {@code serializeTo} produces the JSON/XML
+     * serialized form (applying string quotation and character escaping per the serialization config) and is used by the
+     * JSON/XML serializers.
      *
      * @param appendable the target {@code Appendable}
      * @param x the {@code Byte[]} array to append; may be {@code null}
      * @throws IOException if an I/O error occurs during appending
+     * @implNote
+     * This method appends a string representation of {@code x} to {@code appendable} (the literal {@code "null"} for a
+     * {@code null} value). Conceptually this is the human-readable form produced by {@code toString()}, <i>not</i> the
+     * value returned by {@code stringOf}, which is a formatted, serializable representation (typically a JSON string)
+     * that {@link #valueOf(String)} can convert back into an equivalent value. For values whose nested structure makes
+     * the two forms differ (collections, maps, arrays), {@code appendTo} emits the unquoted, {@code toString()}-style
+     * form; it is therefore not, in the general contract, a plain
+     * {@code appendable.append(x == null ? NULL_STRING : stringOf(x))}. (For value types whose human-readable and
+     * serialized forms coincide, the appended text is naturally identical to {@code stringOf(x)}.)
      */
     @Override
     public void appendTo(final Appendable appendable, final Byte[] x) throws IOException {
@@ -231,6 +258,15 @@ public final class ByteArrayType extends ObjectArrayType<Byte> {
      * Uses the writer's optimized byte-write method for non-null elements.
      * The format is identical to {@link #appendTo(Appendable, Byte[])}.
      * {@code config} is not used.
+     * <p>
+     * This method is specifically designed for JSON/XML serialization: it writes the serialized form of {@code x} to the
+     * {@code CharacterWriter}, applying string quotation and character escaping according to the supplied serialization
+     * config (a {@code null} config means no surrounding quotation). It is the streaming counterpart of {@code stringOf}
+     * and is invoked by the JSON/XML serializers.
+     * <p>
+     * <b>serializeTo vs. appendTo:</b> {@code serializeTo} produces machine-readable JSON/XML (quoted and escaped),
+     * whereas {@code appendTo} produces a plain, human-readable {@code toString()}-style rendering without JSON/XML
+     * quoting or escaping.
      *
      * @param writer the {@code CharacterWriter} to write to
      * @param x the {@code Byte[]} array to write; may be {@code null}
@@ -238,7 +274,7 @@ public final class ByteArrayType extends ObjectArrayType<Byte> {
      * @throws IOException if an I/O error occurs during writing
      */
     @Override
-    public void writeCharacter(final CharacterWriter writer, final Byte[] x, final JsonXmlSerConfig<?> config) throws IOException {
+    public void serializeTo(final CharacterWriter writer, final Byte[] x, final JsonXmlSerConfig<?> config) throws IOException {
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {

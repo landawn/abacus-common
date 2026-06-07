@@ -89,11 +89,11 @@ public class IndexedTypeTest extends TestBase {
     }
 
     @Test
-    public void testWriteCharacter() throws IOException {
-        indexedType.writeCharacter(characterWriter, null, config);
+    public void testSerializeTo() throws IOException {
+        indexedType.serializeTo(characterWriter, null, config);
 
         Indexed<String> indexed = Indexed.of("value", 10);
-        indexedType.writeCharacter(characterWriter, indexed, config);
+        indexedType.serializeTo(characterWriter, indexed, config);
         assertNotNull(indexed);
     }
 

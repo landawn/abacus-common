@@ -3763,4 +3763,22 @@ public class MultisetTest extends AbstractTest {
     public void testConstructorWithMapSupplier_null() {
         assertThrows(NullPointerException.class, () -> new Multiset<>((Supplier<Map<String, ?>>) null));
     }
+
+    @Test
+    public void testRemoveAllSelfClearsWithoutConcurrentModification() {
+        Multiset<String> set = Multiset.of("a", "a", "b");
+
+        assertTrue(set.removeAll(set));
+        assertTrue(set.isEmpty());
+
+        assertFalse(set.removeAll(set));
+    }
+
+    @Test
+    public void testRemoveAllOccurrencesSelfClearsWithoutConcurrentModification() {
+        Multiset<String> set = Multiset.of("a", "a", "b");
+
+        assertTrue(set.removeAllOccurrences(set));
+        assertTrue(set.isEmpty());
+    }
 }

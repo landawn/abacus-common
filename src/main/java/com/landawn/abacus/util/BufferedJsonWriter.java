@@ -155,6 +155,7 @@ public final class BufferedJsonWriter extends CharacterWriter {
      * writer.write("{\"key\":\"value\"}");
      * String json = writer.toString();
      * }</pre>
+     *
      */
     BufferedJsonWriter() {
         super(REPLACEMENT_CHARS);

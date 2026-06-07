@@ -13,6 +13,8 @@
  */
 package com.landawn.abacus.util.function;
 
+import com.landawn.abacus.util.Throwables;
+
 /**
  * Represents a function that accepts a float-valued argument and produces an int-valued result.
  * This is a functional interface whose functional method is {@link #applyAsInt(float)}.
@@ -28,7 +30,7 @@ package com.landawn.abacus.util.function;
  * @see java.util.function.ToIntFunction
  */
 @FunctionalInterface
-public interface FloatToIntFunction {
+public interface FloatToIntFunction extends Throwables.FloatToIntFunction<RuntimeException> {
     /**
      * A default function that converts a float value to int through narrowing primitive conversion (casting).
      * This truncates the decimal portion and may result in overflow if the float value exceeds int range.
@@ -58,5 +60,6 @@ public interface FloatToIntFunction {
      * @param value the float function argument
      * @return the int function result
      */
+    @Override
     int applyAsInt(float value);
 }

@@ -37,7 +37,7 @@ package com.landawn.abacus.util;
  * writer.append("Hello")
  *       .append(' ')
  *       .append("World!");
- * String result = writer.toString();   // "Hello World!"
+ * String result = writer.toString();   // returns "Hello World!"
  * }</pre>
  *
  * @see AppendableWriter
@@ -56,6 +56,7 @@ public final class StringWriter extends AppendableWriter {
      * StringWriter writer = new StringWriter();
      * writer.write("Hello, World!");
      * }</pre>
+     *
      */
     public StringWriter() {
         this(new StringBuilder());
@@ -319,7 +320,7 @@ public final class StringWriter extends AppendableWriter {
      * StringWriter writer = new StringWriter();
      * writer.write("Hello");
      * writer.append(" World!");
-     * String result = writer.toString();   // "Hello World!"
+     * String result = writer.toString();   // returns "Hello World!"
      * }</pre>
      *
      * @return a string containing the current buffer content

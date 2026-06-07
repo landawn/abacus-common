@@ -224,22 +224,22 @@ public class OptionalFloatTypeTest extends TestBase {
     }
 
     @Test
-    public void testWriteCharacterWithNull() throws IOException {
-        optionalFloatType.writeCharacter(writer, null, config);
+    public void testSerializeToWithNull() throws IOException {
+        optionalFloatType.serializeTo(writer, null, config);
         verify(writer).write(any(char[].class));
     }
 
     @Test
-    public void testWriteCharacterWithEmpty() throws IOException {
+    public void testSerializeToWithEmpty() throws IOException {
         OptionalFloat empty = OptionalFloat.empty();
-        optionalFloatType.writeCharacter(writer, empty, config);
+        optionalFloatType.serializeTo(writer, empty, config);
         verify(writer).write(any(char[].class));
     }
 
     @Test
-    public void testWriteCharacterWithValue() throws IOException {
+    public void testSerializeToWithValue() throws IOException {
         OptionalFloat opt = OptionalFloat.of(1.25f);
-        optionalFloatType.writeCharacter(writer, opt, config);
+        optionalFloatType.serializeTo(writer, opt, config);
         verify(writer).write(1.25f);
     }
 }

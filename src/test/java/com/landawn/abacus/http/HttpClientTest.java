@@ -327,6 +327,20 @@ public class HttpClientTest extends TestBase {
     }
 
     @Test
+    public void testOpenConnectionMergesClientAndRequestHeaders() throws IOException {
+        HttpSettings baseSettings = HttpSettings.create().header("X-Base", "base").header("X-Override", "base");
+        HttpClient client = HttpClient.create(baseUrl, 16, 5000L, 10000L, baseSettings);
+        HttpSettings requestSettings = HttpSettings.create().header("X-Request", "request").header("X-Override", "request");
+
+        HttpURLConnection connection = client.openConnection(HttpMethod.GET, requestSettings, false, String.class);
+
+        assertEquals("base", connection.getRequestProperty("X-Base"));
+        assertEquals("request", connection.getRequestProperty("X-Request"));
+        assertEquals("request", connection.getRequestProperty("X-Override"));
+        connection.disconnect();
+    }
+
+    @Test
     public void testGet() throws IOException {
         server.enqueue(new MockResponse().setBody("Hello World"));
         HttpClient client = HttpClient.create(baseUrl);

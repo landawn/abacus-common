@@ -19,7 +19,6 @@ package com.landawn.abacus.util.function;
  *
  * <p>This is a functional interface whose functional method is {@link #applyAsBoolean(char)}.
  *
- *
  * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
  *
  * @see java.util.function.Function
@@ -39,6 +38,7 @@ public interface CharToBooleanFunction {
      * boolean result1 = defaultConversion.applyAsBoolean('Y');   // Returns true
      * boolean result2 = defaultConversion.applyAsBoolean('N');   // Returns false
      * }</pre>
+     *
      */
     CharToBooleanFunction DEFAULT = value -> (value == 'Y' || value == 'y' || value == '1');
 

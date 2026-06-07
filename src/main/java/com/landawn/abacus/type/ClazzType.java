@@ -72,6 +72,12 @@ public class ClazzType extends AbstractType<Class> {
      * Returns the parameter class wrapped by this {@code Clazz<T>} type
      * (e.g. {@code Integer.class} for {@code Clazz<Integer>}).
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * ClazzType type = (ClazzType) TypeFactory.getType("Clazz<java.lang.Integer>");
+     * type.getParameterClass();   // returns Integer.class
+     * }</pre>
+     *
      * @return the parameter class
      */
     public Class getParameterClass() {
@@ -93,8 +99,15 @@ public class ClazzType extends AbstractType<Class> {
      * Converts a {@link Class} object to its canonical string name.
      * Uses {@link com.landawn.abacus.util.ClassUtil#getCanonicalClassName(Class)} for serialization.
      *
+     * <p>The returned string is a serializable representation designed to be parsed back into an equivalent value
+     * via {@link #valueOf(String)}; {@code stringOf} and {@code valueOf} are inverse operations that round-trip. This
+     * is the key distinction from {@link Object#toString()}, whose result is not guaranteed to be convertible back
+     * into the original value.</p>
+     *
      * @param x the {@link Class} to convert; may be {@code null}
      * @return the canonical class name, or {@code null} if {@code x} is {@code null}
+     * @see #valueOf(String)
+     * @see #valueOf(Object)
      */
     @Override
     public String stringOf(final Class x) {
@@ -106,9 +119,15 @@ public class ClazzType extends AbstractType<Class> {
      * Delegates to {@link com.landawn.abacus.util.ClassUtil#forName(String)}, which supports
      * primitive type names (e.g., {@code "int"}) and array notations.
      *
+     * <p>This method is the inverse of {@code stringOf} and round-trips with it: it parses the string produced by
+     * {@code stringOf} back into a value of this type. Strings produced by {@link Object#toString()} are not
+     * guaranteed to be parseable in this way.</p>
+     *
      * @param str the class name to resolve; may be {@code null} or empty
      * @return the resolved {@link Class} object, or {@code null} if {@code str} is {@code null} or empty
      * @throws IllegalArgumentException if the class cannot be found or loaded
+     * @see #valueOf(Object)
+     * @see #stringOf(Class)
      */
     @Override
     public Class valueOf(final String str) {

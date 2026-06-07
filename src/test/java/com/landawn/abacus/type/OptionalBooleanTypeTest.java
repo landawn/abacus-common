@@ -252,29 +252,29 @@ public class OptionalBooleanTypeTest extends TestBase {
     }
 
     @Test
-    public void testWriteCharacterWithNull() throws IOException {
-        optionalBooleanType.writeCharacter(writer, null, config);
+    public void testSerializeToWithNull() throws IOException {
+        optionalBooleanType.serializeTo(writer, null, config);
         verify(writer).write(any(char[].class));
     }
 
     @Test
-    public void testWriteCharacterWithEmpty() throws IOException {
+    public void testSerializeToWithEmpty() throws IOException {
         OptionalBoolean empty = OptionalBoolean.empty();
-        optionalBooleanType.writeCharacter(writer, empty, config);
+        optionalBooleanType.serializeTo(writer, empty, config);
         verify(writer).write(any(char[].class));
     }
 
     @Test
-    public void testWriteCharacterWithTrue() throws IOException {
+    public void testSerializeToWithTrue() throws IOException {
         OptionalBoolean opt = OptionalBoolean.of(true);
-        optionalBooleanType.writeCharacter(writer, opt, config);
+        optionalBooleanType.serializeTo(writer, opt, config);
         verify(writer).write(any(char[].class));
     }
 
     @Test
-    public void testWriteCharacterWithFalse() throws IOException {
+    public void testSerializeToWithFalse() throws IOException {
         OptionalBoolean opt = OptionalBoolean.of(false);
-        optionalBooleanType.writeCharacter(writer, opt, config);
+        optionalBooleanType.serializeTo(writer, opt, config);
         verify(writer).write(any(char[].class));
     }
 }

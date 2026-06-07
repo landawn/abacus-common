@@ -41,7 +41,7 @@ import com.landawn.abacus.annotation.SuppressFBWarnings;
  * <pre>{@code
  * // Formatting
  * Date date = new Date();
- * String iso = ISO8601Util.format(date);   // "2023-12-25T10:30:45Z"
+ * String iso = ISO8601Util.format(date);                   // "2023-12-25T10:30:45Z"
  * String isoWithMillis = ISO8601Util.format(date, true);   // "2023-12-25T10:30:45.123Z"
  *
  * // Parsing
@@ -223,7 +223,7 @@ final class ISO8601Util {
      * <pre>{@code
      * ParsePosition pos = new ParsePosition(0);
      * Date date = ISO8601Util.parse("2023-12-25T10:30:45Z extra text", pos);
-     * int toIndex = pos.getIndex();   // Position after the parsed date
+     * int toIndex = pos.getIndex();   // toIndex is the position after the parsed date
      * }</pre>
      *
      * @param date the ISO8601 string to parse
@@ -266,6 +266,7 @@ final class ISO8601Util {
                 final Calendar calendar = new GregorianCalendar(TIMEZONE_Z);
 
                 calendar.clear();
+                calendar.setLenient(false);
                 calendar.set(year, month - 1, day);
 
                 pos.setIndex(offset);

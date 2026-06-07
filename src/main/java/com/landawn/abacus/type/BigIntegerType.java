@@ -65,9 +65,16 @@ public final class BigIntegerType extends NumberType<BigInteger> {
      * Converts a {@link java.math.BigInteger} to its base-10 decimal string representation.
      * Delegates to {@link java.math.BigInteger#toString(int) BigInteger.toString(10)}.
      *
+     * <p>The returned string is a serializable representation designed to be parsed back into an equivalent value
+     * via {@link #valueOf(String)}; {@code stringOf} and {@code valueOf} are inverse operations that round-trip. This
+     * is the key distinction from {@link Object#toString()}, whose result is not guaranteed to be convertible back
+     * into the original value.</p>
+     *
      * @param x the {@code BigInteger} to convert; may be {@code null}
      * @return the decimal string representation of the value,
      *         or {@code null} if {@code x} is {@code null}
+     * @see #valueOf(String)
+     * @see #valueOf(Object)
      */
     @Override
     public String stringOf(final BigInteger x) {
@@ -78,10 +85,16 @@ public final class BigIntegerType extends NumberType<BigInteger> {
      * Parses a base-10 decimal string and returns a new {@link java.math.BigInteger}.
      * Leading and trailing whitespace is trimmed before parsing.
      *
+     * <p>This method is the inverse of {@code stringOf} and round-trips with it: it parses the string produced by
+     * {@code stringOf} back into a value of this type. Strings produced by {@link Object#toString()} are not
+     * guaranteed to be parseable in this way.</p>
+     *
      * @param str the decimal string to parse; may be {@code null} or empty
      * @return a new {@code BigInteger} parsed from the string,
      *         or {@code null} if {@code str} is {@code null} or empty
      * @throws NumberFormatException if {@code str} cannot be parsed as a valid {@code BigInteger}
+     * @see #valueOf(Object)
+     * @see #stringOf(BigInteger)
      */
     @Override
     public BigInteger valueOf(final String str) {

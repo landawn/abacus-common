@@ -64,8 +64,8 @@ import com.landawn.abacus.util.stream.Stream;
  * // Generate values
  * int[] count = {0};
  * ObjIterator<Integer> counter = ObjIterator.generate(
- *     () -> count[0] < 10,  // hasNext
- *     () -> count[0]++      // next
+ *     () -> count[0] < 10,
+ *     () -> count[0]++
  * );
  * }</pre>
  *
@@ -109,6 +109,13 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
      * and {@code next()} always throws {@link NoSuchElementException}. A shared
      * singleton instance is returned.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * ObjIterator<String> iter = ObjIterator.empty();
+     * boolean has = iter.hasNext();   // returns false
+     * iter.next();                    // throws NoSuchElementException
+     * }</pre>
+     *
      * @param <T> the type of elements (not) returned by the iterator
      * @return an empty {@code ObjIterator}
      */
@@ -124,8 +131,8 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ObjIterator<String> single = ObjIterator.just("Hello");
-     * single.next();      // Returns "Hello"
-     * single.hasNext();   // Returns false
+     * single.next();      // returns "Hello"
+     * single.hasNext();   // returns false
      * }</pre>
      *
      * @param <T> the type of the element
@@ -257,6 +264,17 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
      * <p>This method is useful for converting a standard Java {@code Iterator}
      * to an {@code ObjIterator} to access the additional functional operations.</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Iterator<String> src = Arrays.asList("a", "b", "c").iterator();
+     * ObjIterator<String> iter = ObjIterator.of(src);
+     * String first = iter.next();       // returns "a"
+     * boolean has = iter.hasNext();     // returns true
+     *
+     * ObjIterator<String> empty = ObjIterator.of((Iterator<String>) null);
+     * boolean none = empty.hasNext();   // returns false (null -> empty iterator)
+     * }</pre>
+     *
      * @param <T> the type of elements in the iterator
      * @param iter the {@code Iterator} to wrap
      * @return an {@code ObjIterator} wrapping the given iterator
@@ -289,7 +307,7 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
      * <pre>{@code
      * List<String> list = Arrays.asList("apple", "banana", "cherry");
      * ObjIterator<String> iter = ObjIterator.of(list);
-     * iter.toList();   // Returns ["apple", "banana", "cherry"]
+     * iter.toList();   // returns ["apple", "banana", "cherry"]
      *
      * Set<Integer> set = new HashSet<>(Arrays.asList(1, 2, 3));
      * ObjIterator<Integer> setIter = ObjIterator.of(set);
@@ -423,8 +441,8 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
      * <pre>{@code
      * int[] counter = {0};
      * ObjIterator<Integer> counting = ObjIterator.generate(
-     *     () -> counter[0] < 10,           // hasNext
-     *     () -> counter[0]++               // supplier
+     *     () -> counter[0] < 10,
+     *     () -> counter[0]++
      * );
      * // Generates: 0, 1, 2, 3, 4, 5, 6, 7, 8, 9
      * }</pre>
@@ -467,9 +485,9 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
      * <pre>{@code
      * // Generate Fibonacci numbers
      * ObjIterator<Integer> fib = ObjIterator.generate(
-     *     new int[] {0, 1},                     // initial state
-     *     state -> state[1] < 100,             // continue while < 100
-     *     state -> {                           // generate next
+     *     new int[] {0, 1},
+     *     state -> state[1] < 100,
+     *     state -> {
      *         int next = state[0] + state[1];
      *         state[0] = state[1];
      *         state[1] = next;
@@ -519,9 +537,9 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
      * <pre>{@code
      * // Generate a sequence where each element depends on the previous
      * ObjIterator<String> iter = ObjIterator.generate(
-     *     "",                                      // initial state
-     *     (state, prev) -> prev == null || prev.length() < 5,  // continue condition
-     *     (state, prev) -> prev == null ? "a" : prev + "a"     // generation
+     *     "",
+     *     (state, prev) -> prev == null || prev.length() < 5,
+     *     (state, prev) -> prev == null ? "a" : prev + "a"     // generate the next element
      * );
      * // Generates: "a", "aa", "aaa", "aaaa", "aaaaa"
      * }</pre>
@@ -800,7 +818,7 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ObjIterator<String> iter = ObjIterator.of(null, null, "found", "next");
-     * Optional<String> first = iter.firstNonNull();   // Optional.of("found")
+     * Optional<String> first = iter.firstNonNull();   // returns Optional.of("found")
      * }</pre>
      *
      * @return an {@code Optional} containing the first {@code non-null} element,
@@ -851,10 +869,10 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ObjIterator<String> iter = ObjIterator.of("x", "y", "z");
-     * Object[] array = iter.toArray();   // Object[]{"x", "y", "z"}
+     * Object[] array = iter.toArray();   // returns Object[]{"x", "y", "z"}
      *
      * ObjIterator<Integer> numbers = ObjIterator.of(10, 20, 30);
-     * Object[] numArray = numbers.toArray();   // Object[]{10, 20, 30}
+     * Object[] numArray = numbers.toArray();   // returns Object[]{10, 20, 30}
      * }</pre>
      *
      * @return an {@code Object[]} containing all remaining elements
@@ -875,7 +893,7 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ObjIterator<String> iter = ObjIterator.of("a", "b", "c");
-     * String[] array = iter.toArray(new String[0]);   // {"a", "b", "c"}
+     * String[] array = iter.toArray(new String[0]);   // returns {"a", "b", "c"}
      * }</pre>
      *
      * @param <A> the component type of the array
@@ -897,7 +915,7 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ObjIterator<Integer> iter = ObjIterator.of(1, 2, 3);
-     * List<Integer> list = iter.toList();   // [1, 2, 3]
+     * List<Integer> list = iter.toList();   // returns [1, 2, 3]
      * }</pre>
      *
      * @return a mutable {@code List} containing all remaining elements
@@ -924,7 +942,7 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
      * ObjIterator<String> iter = ObjIterator.of("a", "b", "c");
      * long count = iter.stream()
      *     .filter(s -> s.length() > 0)
-     *     .count();   // 3
+     *     .count();   // returns 3
      * }</pre>
      *
      * @return a {@code Stream} of the remaining elements

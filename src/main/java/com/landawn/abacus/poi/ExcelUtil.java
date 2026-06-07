@@ -163,6 +163,7 @@ public final class ExcelUtil {
      * Function<Row, List<Object>> mapper = RowMappers.toList(CELL_GETTER);
      * List<List<Object>> rows = ExcelUtil.readSheet(file, 0, true, mapper);
      * }</pre>
+     *
      */
     public static final Function<Cell, Object> CELL_GETTER = cell -> switch (cell.getCellType()) {
         case STRING -> cell.getStringCellValue();
@@ -195,6 +196,7 @@ public final class ExcelUtil {
      * Function<Row, List<String>> stringMapper = RowMappers.toList(CELL_TO_STRING);
      * List<List<String>> rows = ExcelUtil.readSheet(file, 0, true, stringMapper);
      * }</pre>
+     *
      */
     public static final Function<Cell, String> CELL_TO_STRING = cell -> switch (cell.getCellType()) {
         case STRING -> cell.getStringCellValue();
@@ -303,7 +305,7 @@ public final class ExcelUtil {
             final TriConsumer<? super String[], ? super Row, ? super Object[]> rowExtractor) {
         try (InputStream is = new FileInputStream(excelFile); //
              Workbook workbook = WorkbookFactory.create(is)) {
-            Sheet sheet = getRequiredSheet(workbook, sheetName);
+            final Sheet sheet = getRequiredSheet(workbook, sheetName);
             return loadSheet(sheet, rowExtractor);
 
         } catch (IOException e) {
@@ -438,8 +440,8 @@ public final class ExcelUtil {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Function<Row, Product> rowToProduct = row -> new Product(
-     *     row.getCell(0).getStringCellValue(),  // name
-     *     row.getCell(1).getNumericCellValue()  // price
+     *     row.getCell(0).getStringCellValue(),  // returns name
+     *     row.getCell(1).getNumericCellValue()  // returns price
      * );
      * List<Product> products = ExcelUtil.readSheet(
      *     new File("products.xlsx"),
@@ -462,7 +464,7 @@ public final class ExcelUtil {
             final Function<? super Row, ? extends T> rowMapper) {
         try (InputStream is = new FileInputStream(excelFile); //
              Workbook workbook = WorkbookFactory.create(is)) {
-            Sheet sheet = getRequiredSheet(workbook, sheetName);
+            final Sheet sheet = getRequiredSheet(workbook, sheetName);
             return readSheet(sheet, skipFirstRow, rowMapper);
 
         } catch (IOException e) {
@@ -740,7 +742,7 @@ public final class ExcelUtil {
     public static void writeSheet(final String sheetName, final List<?> headers, final List<? extends Collection<?>> rows,
             final Consumer<? super Sheet> sheetSetter, final File outputExcelFile) {
         try (Workbook workbook = newWorkbookForOutput(outputExcelFile)) {
-            Sheet sheet = workbook.createSheet(sheetName);
+            final Sheet sheet = workbook.createSheet(sheetName);
 
             final int columnCount = headers.size();
 
@@ -813,7 +815,7 @@ public final class ExcelUtil {
      * <pre>{@code
      * SheetCreateOptions options = SheetCreateOptions.builder()
      *     .autoSizeColumn(true)
-     *     .freezePane(new FreezePane(2, 1))  // Freeze first 2 columns and first row
+     *     .freezePane(new FreezePane(2, 1))  // freezePane is first 2 columns and first row
      *     .build();
      *
      * ExcelUtil.writeSheet("Analysis", dataset, options, new File("analysis.xlsx"));
@@ -863,7 +865,7 @@ public final class ExcelUtil {
      */
     public static void writeSheet(final String sheetName, final Dataset dataset, final Consumer<? super Sheet> sheetSetter, final File outputExcelFile) {
         try (Workbook workbook = newWorkbookForOutput(outputExcelFile)) {
-            Sheet sheet = workbook.createSheet(sheetName);
+            final Sheet sheet = workbook.createSheet(sheetName);
 
             final int columnCount = dataset.columnCount();
 
@@ -896,7 +898,7 @@ public final class ExcelUtil {
         }
     }
 
-    static void setCellValue(Cell cell, Object cellValue) {
+    static void setCellValue(final Cell cell, final Object cellValue) {
         if (cellValue == null) {
             cell.setBlank();
         } else if (cellValue instanceof String val) {
@@ -1070,7 +1072,7 @@ public final class ExcelUtil {
      * @throws UncheckedException if an I/O error occurs or if the file is not a valid Excel file
      * @throws IllegalArgumentException if the sheet name is not found in the workbook
      */
-    public static void saveSheetAsCsv(final File excelFile, final String sheetName, List<String> csvHeaders, final Writer outputWriter) {
+    public static void saveSheetAsCsv(final File excelFile, final String sheetName, final List<String> csvHeaders, final Writer outputWriter) {
         try (InputStream is = new FileInputStream(excelFile); //
              Workbook workbook = WorkbookFactory.create(is)) {
             final Sheet sheet = getRequiredSheet(workbook, sheetName);
@@ -1081,7 +1083,7 @@ public final class ExcelUtil {
         }
     }
 
-    private static void saveSheetAsCsv(final Sheet sheet, List<String> csvHeaders, final Writer output) throws IOException {
+    private static void saveSheetAsCsv(final Sheet sheet, final List<String> csvHeaders, final Writer output) throws IOException {
         final Type<Object> strType = Type.of(String.class);
         final char separator = SK._COMMA;
 
@@ -1102,7 +1104,7 @@ public final class ExcelUtil {
             }
 
             boolean skipFirstRow = N.notEmpty(csvHeaders);
-            int rowIndex = skipFirstRow ? 1 : 0;
+            int linesWritten = skipFirstRow ? 1 : 0;
 
             for (Row row : sheet) {
                 if (skipFirstRow) {
@@ -1110,11 +1112,11 @@ public final class ExcelUtil {
                     continue;
                 }
 
-                if (rowIndex++ > 0) {
+                if (linesWritten++ > 0) {
                     bw.write(IOUtil.LINE_SEPARATOR_UNIX);
                 }
 
-                final int cellCount = row.getLastCellNum();
+                final int cellCount = Math.max(row.getLastCellNum(), 0);
 
                 for (int i = 0; i < cellCount; i++) {
                     if (i > 0) {
@@ -1171,7 +1173,7 @@ public final class ExcelUtil {
      * List<List<Object>> rows = ExcelUtil.readSheet(
      *     new File("data.xlsx"),
      *     0,
-     *     true,  // Skip header row
+     *     true,  // uses skip for header row
      *     RowMappers.DEFAULT
      * );
      *
@@ -1222,7 +1224,7 @@ public final class ExcelUtil {
          * List<List<Object>> rows = ExcelUtil.readSheet(
          *     new File("data.xlsx"),
          *     0,
-         *     true,  // Skip first row (headers)
+         *     true,  // uses skip for first row (headers)
          *     RowMappers.DEFAULT
          * );
          *
@@ -1233,6 +1235,7 @@ public final class ExcelUtil {
          *     Boolean flag = (Boolean) row.get(2);
          * }
          * }</pre>
+         *
          */
         public static final Function<Row, List<Object>> DEFAULT = toList(CELL_GETTER);
 
@@ -1260,6 +1263,7 @@ public final class ExcelUtil {
          * // Print or log row data
          * rowStrings.forEach(System.out::println);
          * }</pre>
+         *
          */
         public static final Function<Row, String> ROW2STRING = toDelimitedString(Strings.ELEMENT_SEPARATOR);
 
@@ -1314,17 +1318,16 @@ public final class ExcelUtil {
         public static Function<Row, String> toDelimitedString(final String cellSeparator, final Function<Cell, String> cellMapper) {
             return row -> {
                 final StringBuilder sb = Objectory.createStringBuilder();
-                boolean first = true;
+                final int cellCount = Math.max(row.getLastCellNum(), 0);
 
                 try {
-                    for (Cell cell : row) {
-                        if (first) {
-                            first = false;
-                        } else {
+                    for (int i = 0; i < cellCount; i++) {
+                        if (i > 0) {
                             sb.append(cellSeparator);
                         }
 
-                        sb.append(cellMapper.apply(cell));
+                        final Cell cell = row.getCell(i);
+                        sb.append(cell == null ? "" : cellMapper.apply(cell));
                     }
 
                     return sb.toString();
@@ -1362,10 +1365,12 @@ public final class ExcelUtil {
          */
         public static <T> Function<Row, List<T>> toList(final Function<Cell, T> cellMapper) {
             return row -> {
-                final List<T> list = new ArrayList<>(row.getPhysicalNumberOfCells());
+                final int cellCount = Math.max(row.getLastCellNum(), 0);
+                final List<T> list = new ArrayList<>(cellCount);
 
-                for (Cell cell : row) {
-                    list.add(cellMapper.apply(cell));
+                for (int i = 0; i < cellCount; i++) {
+                    final Cell cell = row.getCell(i);
+                    list.add(cell == null ? null : cellMapper.apply(cell));
                 }
 
                 return list;
@@ -1444,14 +1449,15 @@ public final class ExcelUtil {
          * // Load Excel sheet into Dataset with type preservation
          * Dataset dataset = ExcelUtil.loadSheet(
          *     new File("sales.xlsx"),
-         *     0,  // First sheet
+         *     0,  // uses first sheet
          *     RowExtractors.DEFAULT
          * );
          *
          * // Access data with original types preserved
-         * List<Object> productCol = dataset.getColumn("Product");   // Strings
-         * List<Object> priceCol = dataset.getColumn("Price");       // Doubles
+         * List<Object> productCol = dataset.getColumn("Product");   // values are Strings
+         * List<Object> priceCol = dataset.getColumn("Price");       // values are Doubles
          * }</pre>
+         *
          */
         public static final TriConsumer<String[], Row, Object[]> DEFAULT = create(CELL_GETTER);
 
@@ -1529,8 +1535,8 @@ public final class ExcelUtil {
      * // Advanced formatting with custom freeze pane
      * SheetCreateOptions advancedOptions = SheetCreateOptions.builder()
      *     .autoSizeColumn(true)
-     *     .freezePane(new FreezePane(2, 1))  // Freeze first 2 columns and first row
-     *     .autoFilter(new CellRangeAddress(0, 0, 0, 5))  // Filter first 6 columns
+     *     .freezePane(new FreezePane(2, 1))              // freezePane is first 2 columns and first row
+     *     .autoFilter(new CellRangeAddress(0, 0, 0, 5))  // autoFilter is first 6 columns
      *     .build();
      *
      * ExcelUtil.writeSheet("Detailed Analysis", dataset, advancedOptions, new File("analysis.xlsx"));
@@ -1553,6 +1559,19 @@ public final class ExcelUtil {
          * All boolean flags are initialized to {@code false}, and object references are {@code null},
          * resulting in no special formatting being applied to the generated sheet. This is the
          * fastest option as it skips all post-processing formatting operations.
+         *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * SheetCreateOptions options = new SheetCreateOptions();
+         * options.isAutoSizeColumn();       // returns false (boolean flags default to false)
+         * options.isFreezeFirstRow();       // returns false
+         * options.getFreezePane();          // returns null (object references default to null)
+         * options.getAutoFilter();          // returns null
+         *
+         * options.setAutoSizeColumn(true);  // @Data generates setters
+         * options.isAutoSizeColumn();       // returns true
+         * }</pre>
+         *
          */
         public SheetCreateOptions() {
         }

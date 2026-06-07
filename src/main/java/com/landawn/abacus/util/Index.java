@@ -91,30 +91,30 @@ import com.landawn.abacus.util.u.OptionalInt;
  * <pre>{@code
  * // Basic element searching
  * int[] numbers = {1, 2, 3, 4, 5, 3, 2, 1};
- * OptionalInt firstIndex = Index.of(numbers, 3);   // Returns OptionalInt[2]
- * OptionalInt lastIndex = Index.last(numbers, 3);   // Returns OptionalInt[5]
+ * OptionalInt firstIndex = Index.of(numbers, 3);    // returns OptionalInt[2]
+ * OptionalInt lastIndex = Index.last(numbers, 3);   // returns OptionalInt[5]
  *
  * // Handle "not found" cases gracefully
  * Index.of(numbers, 10).ifPresent(i -> System.out.println("Found at: " + i));
- * int index = Index.of(numbers, 10).orElse(-1);   // Traditional fallback
+ * int index = Index.of(numbers, 10).orElse(-1);        // Traditional fallback
  * boolean exists = Index.of(numbers, 3).isPresent();   // Existence check
  *
  * // Range-based searching
- * OptionalInt fromIndex = Index.of(numbers, 2, 3);   // Start search from index 3
+ * OptionalInt fromIndex = Index.of(numbers, 2, 3);     // Start search from index 3
  * OptionalInt backIndex = Index.last(numbers, 1, 6);   // Search backward from index 6
  *
  * // String operations
- * OptionalInt charIndex = Index.of("Hello World", 'o');   // Returns OptionalInt[4]
- * OptionalInt subIndex = Index.of("Hello World", "World");   // Returns OptionalInt[6]
- * OptionalInt ignoreCase = Index.ofIgnoreCase("Hello World", "WORLD");   // Returns OptionalInt[6]
+ * OptionalInt charIndex = Index.of("Hello World", 'o');                  // returns OptionalInt[4]
+ * OptionalInt subIndex = Index.of("Hello World", "World");               // returns OptionalInt[6]
+ * OptionalInt ignoreCase = Index.ofIgnoreCase("Hello World", "WORLD");   // returns OptionalInt[6]
  *
  * // Collection searching
  * List<String> words = Arrays.asList("apple", "banana", "cherry", "apple");
- * OptionalInt wordIndex = Index.of(words, "banana");   // Returns OptionalInt[1]
- * OptionalInt lastApple = Index.last(words, "apple");   // Returns OptionalInt[3]
+ * OptionalInt wordIndex = Index.of(words, "banana");    // returns OptionalInt[1]
+ * OptionalInt lastApple = Index.last(words, "apple");   // returns OptionalInt[3]
  *
  * // Find all occurrences
- * BitSet allOccurrences = Index.allOf(numbers, 1);   // Returns BitSet with bits 0 and 7 set
+ * BitSet allOccurrences = Index.allOf(numbers, 1);   // returns BitSet with bits 0 and 7 set
  * List<Integer> indices = allOccurrences.stream().boxed().collect(Collectors.toList());
  * }</pre>
  *
@@ -123,7 +123,7 @@ import com.landawn.abacus.util.u.OptionalInt;
  * // Subarray searching
  * int[] source = {1, 2, 3, 4, 5, 6, 7};
  * int[] pattern = {3, 4, 5};
- * OptionalInt subArrayIndex = Index.ofSubArray(source, pattern);   // Returns OptionalInt[2]
+ * OptionalInt subArrayIndex = Index.ofSubArray(source, pattern);   // returns OptionalInt[2]
  *
  * // Partial subarray matching
  * OptionalInt partialMatch = Index.ofSubArray(source, 1, pattern, 0, 2);   // Match {3, 4} starting from index 1
@@ -131,12 +131,12 @@ import com.landawn.abacus.util.u.OptionalInt;
  * // Sublist operations with custom objects
  * List<String> document = Arrays.asList("The", "quick", "brown", "fox", "jumps");
  * List<String> phrase = Arrays.asList("quick", "brown");
- * OptionalInt phraseIndex = Index.ofSubList(document, phrase);   // Returns OptionalInt[1]
+ * OptionalInt phraseIndex = Index.ofSubList(document, phrase);   // returns OptionalInt[1]
  *
  * // Complex pattern searching
  * boolean[] flags = {true, false, true, true, false, true, true, false};
  * boolean[] pattern = {true, true, false};
- * OptionalInt lastPattern = Index.lastOfSubArray(flags, pattern);   // Returns OptionalInt[5]
+ * OptionalInt lastPattern = Index.lastOfSubArray(flags, pattern);   // returns OptionalInt[5]
  * }</pre>
  *
  * <p><b>Predicate-Based Searching:</b>
@@ -144,7 +144,7 @@ import com.landawn.abacus.util.u.OptionalInt;
  * // Custom predicate matching
  * String[] words = {"apple", "apricot", "banana", "avocado"};
  * Predicate<String> startsWithA = s -> s.startsWith("a");
- * BitSet aWords = Index.allOf(words, startsWithA);   // Returns BitSet with bits 0, 1, 3 set
+ * BitSet aWords = Index.allOf(words, startsWithA);   // returns BitSet with bits 0, 1, 3 set
  *
  * // Complex predicate combinations
  * Integer[] numbers = {1, 4, 9, 16, 25, 36, 49};
@@ -165,9 +165,9 @@ import com.landawn.abacus.util.u.OptionalInt;
  * double target = 2.0;
  * double tolerance = 0.01;
  *
- * OptionalInt closeMatch = Index.of(measurements, target, tolerance);   // Returns OptionalInt[1]
- * OptionalInt lastMatch = Index.last(measurements, target, tolerance);   // Returns OptionalInt[3]
- * BitSet allMatches = Index.allOf(measurements, target, tolerance);   // BitSet with bits 1, 3 set
+ * OptionalInt closeMatch = Index.of(measurements, target, tolerance);    // returns OptionalInt[1]
+ * OptionalInt lastMatch = Index.last(measurements, target, tolerance);   // returns OptionalInt[3]
+ * BitSet allMatches = Index.allOf(measurements, target, tolerance);      // returns BitSet with bits 1, 3 set
  *
  * // High precision requirements
  * double strictTolerance = 0.001;
@@ -242,7 +242,7 @@ import com.landawn.abacus.util.u.OptionalInt;
  *   <li>Using inappropriate tolerance values for floating-point comparisons</li>
  * </ul>
  *
- * <p><b>Usage Examples: Complex Search Pipeline</b>
+ * <p><b>Usage Examples: Complex Search Pipeline</b></p>
  * <pre>{@code
  * // Advanced search combining multiple techniques
  * public class DocumentSearcher {
@@ -404,6 +404,15 @@ public final class Index {
      * <p>
      * This method works identically to {@link #of(boolean[], boolean)} for {@code byte} values.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * byte[] arr = {(byte) 0, (byte) 10, (byte) 20, (byte) 30, (byte) 40};
+     * Index.of(arr, (byte) 10).get();                 // returns 1
+     * Index.of(arr, (byte) 20).get();                 // returns 2
+     * Index.of(arr, (byte) 90).isPresent();           // returns false
+     * Index.of((byte[]) null, (byte) 10).isPresent(); // returns false
+     * }</pre>
+     *
      * @param source the byte array to be searched, may be {@code null}
      * @param valueToFind the byte value to search for
      * @return an OptionalInt containing the zero-based index of the first occurrence of the value,
@@ -420,6 +429,15 @@ public final class Index {
      * Returns the index of the first occurrence of the specified byte value in the array, starting from the specified index.
      * <p>
      * This method works identically to {@link #of(boolean[], boolean, int)} for {@code byte} values.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * byte[] arr = {(byte) 0, (byte) 10, (byte) 20, (byte) 30, (byte) 40};
+     * Index.of(arr, (byte) 10, 0).get();         // returns 1
+     * Index.of(arr, (byte) 20, 2).get();         // returns 2
+     * Index.of(arr, (byte) 90, 0).isPresent();   // returns false
+     * Index.of(arr, (byte) 10, 10).isPresent();  // returns false
+     * }</pre>
      *
      * @param source the byte array to be searched, may be {@code null}
      * @param valueToFind the byte value to search for
@@ -439,6 +457,15 @@ public final class Index {
      * <p>
      * This method works identically to {@link #of(boolean[], boolean)} for {@code short} values.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * short[] arr = {(short) 0, (short) 10, (short) 20, (short) 30, (short) 40};
+     * Index.of(arr, (short) 10).get();                  // returns 1
+     * Index.of(arr, (short) 20).get();                  // returns 2
+     * Index.of(arr, (short) 90).isPresent();            // returns false
+     * Index.of((short[]) null, (short) 10).isPresent(); // returns false
+     * }</pre>
+     *
      * @param source the short array to be searched, may be {@code null}
      * @param valueToFind the short value to search for
      * @return an OptionalInt containing the zero-based index of the first occurrence of the value,
@@ -455,6 +482,15 @@ public final class Index {
      * Returns the index of the first occurrence of the specified short value in the array, starting from the specified index.
      * <p>
      * This method works identically to {@link #of(boolean[], boolean, int)} for {@code short} values.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * short[] arr = {(short) 0, (short) 10, (short) 20, (short) 30, (short) 40};
+     * Index.of(arr, (short) 10, 0).get();         // returns 1
+     * Index.of(arr, (short) 20, 2).get();         // returns 2
+     * Index.of(arr, (short) 90, 0).isPresent();   // returns false
+     * Index.of(arr, (short) 10, 10).isPresent();  // returns false
+     * }</pre>
      *
      * @param source the short array to be searched, may be {@code null}
      * @param valueToFind the short value to search for
@@ -474,6 +510,15 @@ public final class Index {
      * <p>
      * This method works identically to {@link #of(boolean[], boolean)} for {@code int} values.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * int[] arr = {0, 10, 20, 30, 40};
+     * Index.of(arr, 10).get();                // returns 1
+     * Index.of(arr, 20).get();                // returns 2
+     * Index.of(arr, 90).isPresent();          // returns false
+     * Index.of((int[]) null, 10).isPresent(); // returns false
+     * }</pre>
+     *
      * @param source the int array to be searched, may be {@code null}
      * @param valueToFind the int value to search for
      * @return an OptionalInt containing the zero-based index of the first occurrence of the value,
@@ -490,6 +535,15 @@ public final class Index {
      * Returns the index of the first occurrence of the specified int value in the array, starting from the specified index.
      * <p>
      * This method works identically to {@link #of(boolean[], boolean, int)} for {@code int} values.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * int[] arr = {0, 10, 20, 30, 40};
+     * Index.of(arr, 10, 0).get();         // returns 1
+     * Index.of(arr, 20, 2).get();         // returns 2
+     * Index.of(arr, 90, 0).isPresent();   // returns false
+     * Index.of(arr, 10, 10).isPresent();  // returns false
+     * }</pre>
      *
      * @param source the int array to be searched, may be {@code null}
      * @param valueToFind the int value to search for
@@ -509,6 +563,15 @@ public final class Index {
      * <p>
      * This method works identically to {@link #of(boolean[], boolean)} for {@code long} values.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * long[] arr = {0L, 10L, 20L, 30L, 40L};
+     * Index.of(arr, 10L).get();                 // returns 1
+     * Index.of(arr, 20L).get();                 // returns 2
+     * Index.of(arr, 90L).isPresent();           // returns false
+     * Index.of((long[]) null, 10L).isPresent(); // returns false
+     * }</pre>
+     *
      * @param source the long array to be searched, may be {@code null}
      * @param valueToFind the long value to search for
      * @return an OptionalInt containing the zero-based index of the first occurrence of the value,
@@ -525,6 +588,15 @@ public final class Index {
      * Returns the index of the first occurrence of the specified long value in the array, starting from the specified index.
      * <p>
      * This method works identically to {@link #of(boolean[], boolean, int)} for {@code long} values.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * long[] arr = {0L, 10L, 20L, 30L, 40L};
+     * Index.of(arr, 10L, 0).get();         // returns 1
+     * Index.of(arr, 20L, 2).get();         // returns 2
+     * Index.of(arr, 90L, 0).isPresent();   // returns false
+     * Index.of(arr, 10L, 10).isPresent();  // returns false
+     * }</pre>
      *
      * @param source the long array to be searched, may be {@code null}
      * @param valueToFind the long value to search for
@@ -545,6 +617,15 @@ public final class Index {
      * This method works identically to {@link #of(boolean[], boolean)} for {@code float} values.
      * Comparison is performed using {@link Float#compare(float, float)}, which handles NaN and -0.0/+0.0 correctly.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * float[] arr = {1.0f, 2.0f, 3.0f, 2.0f, 4.0f};
+     * Index.of(arr, 2.0f).get();                  // returns 1
+     * Index.of(arr, 1.0f).get();                  // returns 0
+     * Index.of(arr, 5.0f).isPresent();            // returns false
+     * Index.of((float[]) null, 1.0f).isPresent(); // returns false
+     * }</pre>
+     *
      * @param source the float array to be searched, may be {@code null}
      * @param valueToFind the float value to search for
      * @return an OptionalInt containing the zero-based index of the first occurrence of the value,
@@ -562,6 +643,15 @@ public final class Index {
      * <p>
      * This method works identically to {@link #of(boolean[], boolean, int)} for {@code float} values.
      * Comparison is performed using {@link Float#compare(float, float)}.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * float[] arr = {1.0f, 2.0f, 3.0f, 2.0f, 4.0f};
+     * Index.of(arr, 2.0f, 0).get();          // returns 1
+     * Index.of(arr, 2.0f, 2).get();          // returns 3
+     * Index.of(arr, 5.0f, 0).isPresent();    // returns false
+     * Index.of(arr, 1.0f, 10).isPresent();   // returns false
+     * }</pre>
      *
      * @param source the float array to be searched, may be {@code null}
      * @param valueToFind the float value to search for
@@ -582,6 +672,15 @@ public final class Index {
      * This method works identically to {@link #of(boolean[], boolean)} for {@code double} values.
      * Comparison is performed using {@link Double#compare(double, double)}, which handles NaN and -0.0/+0.0 correctly.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * double[] arr = {1.0, 2.0, 3.0, 2.0, 4.0};
+     * Index.of(arr, 2.0).get();                    // returns 1
+     * Index.of(arr, 1.0).get();                    // returns 0
+     * Index.of(arr, 5.0).isPresent();              // returns false
+     * Index.of((double[]) null, 1.0).isPresent();  // returns false
+     * }</pre>
+     *
      * @param source the double array to be searched, may be {@code null}
      * @param valueToFind the double value to search for
      * @return an OptionalInt containing the zero-based index of the first occurrence of the value,
@@ -600,6 +699,15 @@ public final class Index {
      * <p>
      * This method works identically to {@link #of(boolean[], boolean, int)} for {@code double} values.
      * Comparison is performed using {@link Double#compare(double, double)}.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * double[] arr = {1.0, 2.0, 3.0, 2.0, 4.0};
+     * Index.of(arr, 2.0, 0).get();           // returns 1
+     * Index.of(arr, 2.0, 2).get();           // returns 3
+     * Index.of(arr, 5.0, 0).isPresent();     // returns false
+     * Index.of(arr, 1.0, 10).isPresent();    // returns false
+     * }</pre>
      *
      * @param source the double array to be searched, may be {@code null}
      * @param valueToFind the double value to search for
@@ -622,6 +730,15 @@ public final class Index {
      * {@code [valueToFind - tolerance, valueToFind + tolerance]} in the given double array.
      * This is useful for comparing floating-point values where exact equality may not be reliable.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * double[] arr = {1.0, 2.1, 3.0, 2.2, 4.0};
+     * Index.of(arr, 2.0, 0.2).get();                   // returns 1
+     * Index.of(arr, 3.0, 0.1).get();                   // returns 2
+     * Index.of(arr, 5.0, 0.1).isPresent();             // returns false
+     * Index.of((double[]) null, 2.0, 0.1).isPresent(); // returns false
+     * }</pre>
+     *
      * @param source the double array to be searched, may be {@code null}
      * @param valueToFind the double value to search for
      * @param tolerance the tolerance for matching; must be non-negative and not NaN. A value matches if it's within
@@ -643,6 +760,15 @@ public final class Index {
      * This method searches for the first occurrence of a value that falls within the range
      * {@code [valueToFind - tolerance, valueToFind + tolerance]} in the given double array,
      * beginning at the specified {@code fromIndex}. Negative {@code fromIndex} values are treated as 0.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * double[] arr = {1.0, 2.1, 3.0, 2.2, 4.0};
+     * Index.of(arr, 2.0, 0.2, 0).get();           // returns 1
+     * Index.of(arr, 2.0, 0.2, 2).isPresent();     // returns false (2.2 - 2.0 = 0.200...018 > 0.2)
+     * Index.of(arr, 5.0, 0.1, 0).isPresent();     // returns false
+     * Index.of(arr, 2.0, 0.2, 5).isPresent();     // returns false
+     * }</pre>
      *
      * @param source the double array to be searched, may be {@code null}
      * @param valueToFind the double value to search for
@@ -691,6 +817,15 @@ public final class Index {
      * beginning at the specified {@code fromIndex}. Uses {@code equals()} for comparison.
      * Negative {@code fromIndex} values are treated as 0.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * String[] arr = {"a", "b", "c", "b", "a"};
+     * Index.of(arr, "b", 0).get();             // returns 1
+     * Index.of(arr, "b", 2).get();             // returns 3
+     * Index.of(arr, "b", 4).isPresent();       // returns false
+     * Index.of(arr, "a", 0).get();             // returns 0
+     * }</pre>
+     *
      * @param source the object array to be searched, may be {@code null}
      * @param valueToFind the object to search for, may be {@code null}
      * @param fromIndex the index to start the search from (inclusive); negative values are treated as 0
@@ -708,6 +843,15 @@ public final class Index {
      * This method searches for the first occurrence of {@code valueToFind} in the given collection
      * using {@code equals()} for comparison. The index represents the position in iteration order.
      * {@code null} values are handled correctly.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<String> list = Arrays.asList("a", "b", "c", "b");
+     * Index.of(list, "b").get();                  // returns 1
+     * Index.of(list, "a").get();                  // returns 0
+     * Index.of(list, "x").isPresent();            // returns false
+     * Index.of((List<?>) null, "a").isPresent();  // returns false
+     * }</pre>
      *
      * @param source the collection to be searched, may be {@code null}
      * @param valueToFind the object to search for, may be {@code null}
@@ -750,6 +894,14 @@ public final class Index {
      * and using {@code equals()} for comparison. The iterator will be consumed up to and including the matching element.
      * Note that the iterator cannot be reset, so this operation is destructive.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<String> list = Arrays.asList("a", "b", "c");
+     * Index.of(list.iterator(), "b").get();          // returns 1
+     * Index.of(list.iterator(), "x").isPresent();    // returns false
+     * Index.of((Iterator<?>) null, "a").isPresent(); // returns false
+     * }</pre>
+     *
      * @param source the iterator to be searched, may be {@code null}
      * @param valueToFind the object to search for, may be {@code null}
      * @return an OptionalInt containing the zero-based index (in iteration order) of the first occurrence of the value,
@@ -767,6 +919,14 @@ public final class Index {
      * for comparison. The iterator will be consumed up to and including the matching element (or exhausted if not found).
      * Note that the iterator cannot be reset, so this operation is destructive. Negative {@code fromIndex} values are treated as 0.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<String> list = Arrays.asList("a", "b", "c", "b");
+     * Index.of(list.iterator(), "b", 1).get();          // returns 1
+     * Index.of(list.iterator(), "x", 0).isPresent();    // returns false
+     * Index.of((Iterator<?>) null, "a", 0).isPresent(); // returns false
+     * }</pre>
+     *
      * @param source the iterator to be searched, may be {@code null}
      * @param valueToFind the object to search for, may be {@code null}
      * @param fromIndex the index to start the search from (inclusive); negative values are treated as 0
@@ -783,6 +943,14 @@ public final class Index {
      * <p>
      * This method searches for the first occurrence of the character (represented as an int Unicode code point)
      * in the given string. If the string is {@code null} or empty, an empty OptionalInt is returned.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Index.of("hello", 'o').get();             // returns 4
+     * Index.of("hello", 'h').get();             // returns 0
+     * Index.of("hello", 'x').isPresent();       // returns false
+     * Index.of((String) null, 'a').isPresent(); // returns false
+     * }</pre>
      *
      * @param source the string to be searched, may be {@code null}
      * @param charValueToFind the character value (Unicode code point) to search for
@@ -859,8 +1027,9 @@ public final class Index {
      * @param source the string to be searched, may be {@code null}
      * @param valueToFind the substring to search for, may be {@code null}
      * @param fromIndex the index to start the search from (inclusive); negative values are treated as 0
-     * @return an OptionalInt containing the zero-based index of the first occurrence of the substring at or after {@code fromIndex},
-     *         or an empty OptionalInt if the substring is not found, either parameter is {@code null}, or {@code fromIndex >= str.length()}
+     * @return an OptionalInt containing the zero-based index of the first occurrence of the substring at or after {@code fromIndex}
+     *         (an empty substring returns {@code Math.min(fromIndex, source.length())}), or an empty OptionalInt if the substring is not found or either
+     *         parameter is {@code null}
      * @see #of(String, String)
      * @see #ofIgnoreCase(String, String, int)
      * @see Strings#indexOf(String, String, int)
@@ -875,6 +1044,14 @@ public final class Index {
      * <p>
      * This method performs a case-insensitive search for {@code valueToFind} within {@code source}.
      * Both ASCII and Unicode characters are compared case-insensitively.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Index.ofIgnoreCase("Hello World", "world").get();     // returns 6
+     * Index.ofIgnoreCase("Hello World", "HELLO").get();     // returns 0
+     * Index.ofIgnoreCase("Hello World", "bye").isPresent(); // returns false
+     * Index.ofIgnoreCase((String) null, "a").isPresent();   // returns false
+     * }</pre>
      *
      * @param source the string to be searched, may be {@code null}
      * @param valueToFind the substring to search for (case-insensitive), may be {@code null}
@@ -893,11 +1070,20 @@ public final class Index {
      * This method performs a case-insensitive search for {@code valueToFind} within {@code source},
      * beginning at the specified {@code fromIndex}. Negative {@code fromIndex} values are treated as 0.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Index.ofIgnoreCase("Hello Hello", "HELLO", 1).get(); // returns 6
+     * Index.ofIgnoreCase("Hello World", "WORLD", 0).get(); // returns 6
+     * Index.ofIgnoreCase("Hello", "bye", 0).isPresent();   // returns false
+     * Index.ofIgnoreCase("Hello", "HELLO", 5).isPresent(); // returns false
+     * }</pre>
+     *
      * @param source the string to be searched, may be {@code null}
      * @param valueToFind the substring to search for (case-insensitive), may be {@code null}
      * @param fromIndex the index to start the search from (inclusive); negative values are treated as 0
-     * @return an OptionalInt containing the zero-based index of the first occurrence of the substring (ignoring case) at or after {@code fromIndex},
-     *         or an empty OptionalInt if the substring is not found, either parameter is {@code null}, or {@code fromIndex >= str.length()}
+     * @return an OptionalInt containing the zero-based index of the first occurrence of the substring (ignoring case) at or after {@code fromIndex}
+     *         (an empty substring returns {@code Math.min(fromIndex, source.length())}), or an empty OptionalInt if the substring is not found or either
+     *         parameter is {@code null}
      * @see #ofIgnoreCase(String, String)
      * @see Strings#indexOfIgnoreCase(String, String, int)
      */
@@ -973,6 +1159,17 @@ public final class Index {
      *   <li>If {@code fromIndex} is negative, it's treated as 0</li>
      *   <li>If {@code fromIndex >= source.length}, returns empty OptionalInt</li>
      * </ul>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * boolean[] source = {true, false, true, true, false};
+     * boolean[] sub = {true, true, false};
+     * Index.ofSubArray(source, 0, sub, 0, 2).getAsInt();            // returns 2
+     * Index.ofSubArray(source, 0, sub, 0, 3).getAsInt();            // returns 2
+     * Index.ofSubArray(source, 3, sub, 0, 2).isPresent();           // returns false
+     * Index.ofSubArray(source, 3, sub, 0, 0).getAsInt();            // returns 3 (empty match clamped to fromIndex)
+     * Index.ofSubArray((boolean[]) null, 0, sub, 0, 2).isPresent(); // returns false
+     * }</pre>
      *
      * @param source the array to be searched, may be {@code null}
      * @param fromIndex the index to start the search from (inclusive); negative values are treated as 0
@@ -1171,6 +1368,15 @@ public final class Index {
      * This is particularly useful for binary data pattern matching.
      * It's similar to {@link String#indexOf(String)} but for byte arrays.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * byte[] source = {(byte) 0, (byte) 10, (byte) 20, (byte) 30, (byte) 40, (byte) 50};
+     * byte[] sub = {(byte) 30, (byte) 40};
+     * Index.ofSubArray(source, sub).get();              // returns 3
+     * Index.ofSubArray(new byte[0], sub).isPresent();   // returns false
+     * Index.ofSubArray((byte[]) null, sub).isPresent(); // returns false
+     * }</pre>
+     *
      * @param source the array to be searched, may be {@code null}
      * @param subArrayToFind the subarray to search for, may be {@code null}
      * @return an OptionalInt containing the zero-based index where the subarray starts,
@@ -1294,6 +1500,15 @@ public final class Index {
      * Returns the index of the first occurrence of the specified subarray in the given source array.
      * <p>
      * This method works identically to {@link #ofSubArray(boolean[], boolean[])} for {@code short} arrays.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * short[] source = {(short) 0, (short) 10, (short) 20, (short) 30, (short) 40, (short) 50};
+     * short[] sub = {(short) 30, (short) 40};
+     * Index.ofSubArray(source, sub).get();               // returns 3
+     * Index.ofSubArray(new short[0], sub).isPresent();   // returns false
+     * Index.ofSubArray((short[]) null, sub).isPresent(); // returns false
+     * }</pre>
      *
      * @param source the array to be searched, may be {@code null}
      * @param subArrayToFind the subarray to search for, may be {@code null}
@@ -1421,6 +1636,15 @@ public final class Index {
      * <p>
      * This method works identically to {@link #ofSubArray(boolean[], boolean[])} for {@code int} arrays.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * int[] source = {0, 10, 20, 30, 40, 50};
+     * int[] sub = {30, 40};
+     * Index.ofSubArray(source, sub).get();             // returns 3
+     * Index.ofSubArray(new int[0], sub).isPresent();   // returns false
+     * Index.ofSubArray((int[]) null, sub).isPresent(); // returns false
+     * }</pre>
+     *
      * @param source the array to be searched, may be {@code null}
      * @param subArrayToFind the subarray to search for, may be {@code null}
      * @return an OptionalInt containing the zero-based index where the subarray starts,
@@ -1438,6 +1662,16 @@ public final class Index {
      * Returns the index of the first occurrence of the specified subarray in the given source array, starting from the specified index.
      * <p>
      * This method works identically to {@link #ofSubArray(boolean[], int, boolean[])} for {@code int} arrays.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * int[] source = {0, 10, 20, 30, 40, 50};
+     * int[] sub = {20, 30};
+     * Index.ofSubArray(source, 0, sub).get();             // returns 2
+     * Index.ofSubArray(source, 3, sub).isPresent();       // returns false
+     * Index.ofSubArray(source, 10, sub).isPresent();      // returns false
+     * Index.ofSubArray((int[]) null, 0, sub).isPresent(); // returns false
+     * }</pre>
      *
      * @param source the array to be searched, may be {@code null}
      * @param fromIndex the index to start the search from (inclusive); negative values are treated as 0
@@ -1470,6 +1704,17 @@ public final class Index {
      *   <li>If {@code fromIndex} is negative, it's treated as 0</li>
      *   <li>If {@code fromIndex >= source.length}, returns empty OptionalInt</li>
      * </ul>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * int[] source = {1, 2, 3, 2, 3, 4};
+     * int[] sub = {2, 3, 9};
+     * Index.ofSubArray(source, 0, sub, 0, 2).getAsInt();        // returns 1
+     * Index.ofSubArray(source, 2, sub, 0, 2).getAsInt();        // returns 3
+     * Index.ofSubArray(source, 0, sub, 0, 3).isPresent();       // returns false
+     * Index.ofSubArray(source, 2, sub, 0, 0).getAsInt();        // returns 2 (empty match clamped to fromIndex)
+     * Index.ofSubArray((int[]) null, 0, sub, 0, 2).isPresent(); // returns false
+     * }</pre>
      *
      * @param source the array to be searched, may be {@code null}
      * @param fromIndex the index to start the search from (inclusive); negative values are treated as 0
@@ -1528,6 +1773,15 @@ public final class Index {
      * <p>
      * This method works identically to {@link #ofSubArray(boolean[], boolean[])} for {@code long} arrays.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * long[] source = {0L, 10L, 20L, 30L, 40L, 50L};
+     * long[] sub = {30L, 40L};
+     * Index.ofSubArray(source, sub).get();              // returns 3
+     * Index.ofSubArray(new long[0], sub).isPresent();   // returns false
+     * Index.ofSubArray((long[]) null, sub).isPresent(); // returns false
+     * }</pre>
+     *
      * @param source the array to be searched, may be {@code null}
      * @param subArrayToFind the subarray to search for, may be {@code null}
      * @return an OptionalInt containing the zero-based index where the subarray starts,
@@ -1545,6 +1799,16 @@ public final class Index {
      * Returns the index of the first occurrence of the specified subarray in the given source array, starting from the specified index.
      * <p>
      * This method works identically to {@link #ofSubArray(boolean[], int, boolean[])} for {@code long} arrays.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * long[] source = {0L, 10L, 20L, 30L, 40L, 50L};
+     * long[] sub = {20L, 30L};
+     * Index.ofSubArray(source, 0, sub).get();              // returns 2
+     * Index.ofSubArray(source, 3, sub).isPresent();        // returns false
+     * Index.ofSubArray(source, 10, sub).isPresent();       // returns false
+     * Index.ofSubArray((long[]) null, 0, sub).isPresent(); // returns false
+     * }</pre>
      *
      * @param source the array to be searched, may be {@code null}
      * @param fromIndex the index to start the search from (inclusive); negative values are treated as 0
@@ -1577,6 +1841,17 @@ public final class Index {
      *   <li>If {@code fromIndex} is negative, it's treated as 0</li>
      *   <li>If {@code fromIndex >= source.length}, returns empty OptionalInt</li>
      * </ul>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * long[] source = {1L, 2L, 3L, 2L, 3L, 4L};
+     * long[] sub = {2L, 3L, 9L};
+     * Index.ofSubArray(source, 0, sub, 0, 2).getAsInt();         // returns 1
+     * Index.ofSubArray(source, 2, sub, 0, 2).getAsInt();         // returns 3
+     * Index.ofSubArray(source, 0, sub, 0, 3).isPresent();        // returns false
+     * Index.ofSubArray(source, 2, sub, 0, 0).getAsInt();         // returns 2 (empty match clamped to fromIndex)
+     * Index.ofSubArray((long[]) null, 0, sub, 0, 2).isPresent(); // returns false
+     * }</pre>
      *
      * @param source the array to be searched, may be {@code null}
      * @param fromIndex the index to start the search from (inclusive); negative values are treated as 0
@@ -1636,6 +1911,15 @@ public final class Index {
      * This method works identically to {@link #ofSubArray(boolean[], boolean[])} for {@code float} arrays.
      * Elements are compared using {@link N#equals(float, float)}, consistent with {@link Float#compare(float, float)}.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * float[] source = {0.0f, 10.0f, 20.0f, 30.0f, 40.0f, 50.0f};
+     * float[] sub = {30.0f, 40.0f};
+     * Index.ofSubArray(source, sub).get();               // returns 3
+     * Index.ofSubArray(new float[0], sub).isPresent();   // returns false
+     * Index.ofSubArray((float[]) null, sub).isPresent(); // returns false
+     * }</pre>
+     *
      * @param source the array to be searched, may be {@code null}
      * @param subArrayToFind the subarray to search for, may be {@code null}
      * @return an OptionalInt containing the zero-based index where the subarray starts,
@@ -1653,6 +1937,16 @@ public final class Index {
      * Returns the index of the first occurrence of the specified subarray in the given source array, starting from the specified index.
      * <p>
      * This method works identically to {@link #ofSubArray(boolean[], int, boolean[])} for {@code float} arrays.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * float[] source = {0.0f, 10.0f, 20.0f, 30.0f, 40.0f, 50.0f};
+     * float[] sub = {20.0f, 30.0f};
+     * Index.ofSubArray(source, 0, sub).get();               // returns 2
+     * Index.ofSubArray(source, 3, sub).isPresent();         // returns false
+     * Index.ofSubArray(source, 10, sub).isPresent();        // returns false
+     * Index.ofSubArray((float[]) null, 0, sub).isPresent(); // returns false
+     * }</pre>
      *
      * @param source the array to be searched, may be {@code null}
      * @param fromIndex the index to start the search from (inclusive); negative values are treated as 0
@@ -1684,6 +1978,17 @@ public final class Index {
      *   <li>If {@code fromIndex} is negative, it's treated as 0</li>
      *   <li>If {@code fromIndex >= source.length}, returns empty OptionalInt</li>
      * </ul>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * float[] source = {1f, 2f, 3f, 2f, 3f, 4f};
+     * float[] sub = {2f, 3f, 9f};
+     * Index.ofSubArray(source, 0, sub, 0, 2).getAsInt();          // returns 1
+     * Index.ofSubArray(source, 2, sub, 0, 2).getAsInt();          // returns 3
+     * Index.ofSubArray(source, 0, sub, 0, 3).isPresent();         // returns false
+     * Index.ofSubArray(source, 2, sub, 0, 0).getAsInt();          // returns 2 (empty match clamped to fromIndex)
+     * Index.ofSubArray((float[]) null, 0, sub, 0, 2).isPresent(); // returns false
+     * }</pre>
      *
      * @param source the array to be searched, may be {@code null}
      * @param fromIndex the index to start the search from (inclusive); negative values are treated as 0
@@ -1743,6 +2048,15 @@ public final class Index {
      * This method works identically to {@link #ofSubArray(boolean[], boolean[])} for {@code double} arrays.
      * Elements are compared using {@link N#equals(double, double)}, consistent with {@link Double#compare(double, double)}.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * double[] source = {0.0, 10.0, 20.0, 30.0, 40.0, 50.0};
+     * double[] sub = {30.0, 40.0};
+     * Index.ofSubArray(source, sub).get();                // returns 3
+     * Index.ofSubArray(new double[0], sub).isPresent();   // returns false
+     * Index.ofSubArray((double[]) null, sub).isPresent(); // returns false
+     * }</pre>
+     *
      * @param source the array to be searched, may be {@code null}
      * @param subArrayToFind the subarray to search for, may be {@code null}
      * @return an OptionalInt containing the zero-based index where the subarray starts,
@@ -1760,6 +2074,16 @@ public final class Index {
      * Returns the index of the first occurrence of the specified subarray in the given source array, starting from the specified index.
      * <p>
      * This method works identically to {@link #ofSubArray(boolean[], int, boolean[])} for {@code double} arrays.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * double[] source = {0.0, 10.0, 20.0, 30.0, 40.0, 50.0};
+     * double[] sub = {20.0, 30.0};
+     * Index.ofSubArray(source, 0, sub).get();                // returns 2
+     * Index.ofSubArray(source, 3, sub).isPresent();          // returns false
+     * Index.ofSubArray(source, 10, sub).isPresent();         // returns false
+     * Index.ofSubArray((double[]) null, 0, sub).isPresent(); // returns false
+     * }</pre>
      *
      * @param source the array to be searched, may be {@code null}
      * @param fromIndex the index to start the search from (inclusive); negative values are treated as 0
@@ -1791,6 +2115,17 @@ public final class Index {
      *   <li>If {@code fromIndex} is negative, it's treated as 0</li>
      *   <li>If {@code fromIndex >= source.length}, returns empty OptionalInt</li>
      * </ul>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * double[] source = {1d, 2d, 3d, 2d, 3d, 4d};
+     * double[] sub = {2d, 3d, 9d};
+     * Index.ofSubArray(source, 0, sub, 0, 2).getAsInt();           // returns 1
+     * Index.ofSubArray(source, 2, sub, 0, 2).getAsInt();           // returns 3
+     * Index.ofSubArray(source, 0, sub, 0, 3).isPresent();          // returns false
+     * Index.ofSubArray(source, 2, sub, 0, 0).getAsInt();           // returns 2 (empty match clamped to fromIndex)
+     * Index.ofSubArray((double[]) null, 0, sub, 0, 2).isPresent(); // returns false
+     * }</pre>
      *
      * @param source the array to be searched, may be {@code null}
      * @param fromIndex the index to start the search from (inclusive); negative values are treated as 0
@@ -2166,6 +2501,15 @@ public final class Index {
      * This method searches backwards from the end of the array for the last occurrence of {@code valueToFind}.
      * If the array is {@code null} or empty, an empty OptionalInt is returned.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * boolean[] arr = {false, true, false, true};
+     * Index.last(arr, true).get();                    // returns 3
+     * Index.last(arr, false).get();                   // returns 2
+     * Index.last(arr, true).orElse(-1);               // returns 3
+     * Index.last((boolean[]) null, true).isPresent(); // returns false
+     * }</pre>
+     *
      * @param source the boolean array to be searched, may be {@code null}
      * @param valueToFind the boolean value to search for
      * @return an OptionalInt containing the zero-based index of the last occurrence of the value,
@@ -2184,6 +2528,15 @@ public final class Index {
      * If {@code startIndexFromBack} is greater than or equal to the array length, the entire array is searched.
      * If the array is {@code null} or empty, an empty OptionalInt is returned.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * boolean[] arr = {false, true, false, true, false};
+     * Index.last(arr, true, 3).get();          // returns 3
+     * Index.last(arr, true, 1).get();          // returns 1
+     * Index.last(arr, false, 3).get();         // returns 2
+     * Index.last(arr, true, 10).get();         // returns 3
+     * }</pre>
+     *
      * @param source the boolean array to be searched, may be {@code null}
      * @param valueToFind the boolean value to search for
      * @param startIndexFromBack the position to start the backwards search from (inclusive)
@@ -2201,6 +2554,15 @@ public final class Index {
      * <p>
      * This method works identically to {@link #last(boolean[], boolean)} for {@code char} values.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * char[] arr = {'h', 'e', 'l', 'l', 'o'};
+     * Index.last(arr, 'l').get();                 // returns 3
+     * Index.last(arr, 'h').get();                 // returns 0
+     * Index.last(arr, 'x').isPresent();           // returns false
+     * Index.last((char[]) null, 'a').isPresent(); // returns false
+     * }</pre>
+     *
      * @param source the char array to be searched, may be {@code null}
      * @param valueToFind the char value to search for
      * @return an OptionalInt containing the zero-based index of the last occurrence of the value,
@@ -2217,6 +2579,15 @@ public final class Index {
      * Returns the index of the last occurrence of the specified char value in the given array, searching backwards from the specified position.
      * <p>
      * This method works identically to {@link #last(boolean[], boolean, int)} for {@code char} values.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * char[] arr = {'h', 'e', 'l', 'l', 'o'};
+     * Index.last(arr, 'l', 3).get();          // returns 3
+     * Index.last(arr, 'l', 2).get();          // returns 2
+     * Index.last(arr, 'h', 0).get();          // returns 0
+     * Index.last(arr, 'x', 3).isPresent();    // returns false
+     * }</pre>
      *
      * @param source the char array to be searched, may be {@code null}
      * @param valueToFind the char value to search for
@@ -2237,6 +2608,15 @@ public final class Index {
      * <p>
      * This method works identically to {@link #last(boolean[], boolean)} for {@code byte} values.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * byte[] arr = {(byte) 0, (byte) 10, (byte) 20, (byte) 30, (byte) 40};
+     * Index.last(arr, (byte) 10).get();                 // returns 1
+     * Index.last(arr, (byte) 20).get();                 // returns 2
+     * Index.last(arr, (byte) 90).isPresent();           // returns false
+     * Index.last((byte[]) null, (byte) 10).isPresent(); // returns false
+     * }</pre>
+     *
      * @param source the byte array to be searched, may be {@code null}
      * @param valueToFind the byte value to search for
      * @return an OptionalInt containing the zero-based index of the last occurrence of the value,
@@ -2253,6 +2633,15 @@ public final class Index {
      * Returns the index of the last occurrence of the specified byte value in the given array, searching backwards from the specified position.
      * <p>
      * This method works identically to {@link #last(boolean[], boolean, int)} for {@code byte} values.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * byte[] arr = {(byte) 0, (byte) 10, (byte) 20, (byte) 30, (byte) 40};
+     * Index.last(arr, (byte) 10, 2).get();       // returns 1
+     * Index.last(arr, (byte) 20, 4).get();       // returns 2
+     * Index.last(arr, (byte) 90, 3).isPresent(); // returns false
+     * Index.last(arr, (byte) 10, 10).get();      // returns 1
+     * }</pre>
      *
      * @param source the byte array to be searched, may be {@code null}
      * @param valueToFind the byte value to search for
@@ -2273,6 +2662,15 @@ public final class Index {
      * <p>
      * This method works identically to {@link #last(boolean[], boolean)} for {@code short} values.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * short[] arr = {(short) 0, (short) 10, (short) 20, (short) 30, (short) 40};
+     * Index.last(arr, (short) 10).get();                  // returns 1
+     * Index.last(arr, (short) 20).get();                  // returns 2
+     * Index.last(arr, (short) 90).isPresent();            // returns false
+     * Index.last((short[]) null, (short) 10).isPresent(); // returns false
+     * }</pre>
+     *
      * @param source the short array to be searched, may be {@code null}
      * @param valueToFind the short value to search for
      * @return an OptionalInt containing the zero-based index of the last occurrence of the value,
@@ -2289,6 +2687,15 @@ public final class Index {
      * Returns the index of the last occurrence of the specified short value in the given array, searching backwards from the specified position.
      * <p>
      * This method works identically to {@link #last(boolean[], boolean, int)} for {@code short} values.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * short[] arr = {(short) 0, (short) 10, (short) 20, (short) 30, (short) 40};
+     * Index.last(arr, (short) 10, 2).get();       // returns 1
+     * Index.last(arr, (short) 20, 4).get();       // returns 2
+     * Index.last(arr, (short) 90, 3).isPresent(); // returns false
+     * Index.last(arr, (short) 10, 10).get();      // returns 1
+     * }</pre>
      *
      * @param source the short array to be searched, may be {@code null}
      * @param valueToFind the short value to search for
@@ -2309,6 +2716,15 @@ public final class Index {
      * <p>
      * This method works identically to {@link #last(boolean[], boolean)} for {@code int} values.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * int[] arr = {0, 10, 20, 30, 40};
+     * Index.last(arr, 10).get();                // returns 1
+     * Index.last(arr, 20).get();                // returns 2
+     * Index.last(arr, 90).isPresent();          // returns false
+     * Index.last((int[]) null, 10).isPresent(); // returns false
+     * }</pre>
+     *
      * @param source the int array to be searched, may be {@code null}
      * @param valueToFind the int value to search for
      * @return an OptionalInt containing the zero-based index of the last occurrence of the value,
@@ -2325,6 +2741,15 @@ public final class Index {
      * Returns the index of the last occurrence of the specified int value in the given array, searching backwards from the specified position.
      * <p>
      * This method works identically to {@link #last(boolean[], boolean, int)} for {@code int} values.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * int[] arr = {0, 10, 20, 30, 40};
+     * Index.last(arr, 10, 2).get();       // returns 1
+     * Index.last(arr, 20, 4).get();       // returns 2
+     * Index.last(arr, 90, 3).isPresent(); // returns false
+     * Index.last(arr, 10, 10).get();      // returns 1
+     * }</pre>
      *
      * @param source the int array to be searched, may be {@code null}
      * @param valueToFind the int value to search for
@@ -2345,6 +2770,15 @@ public final class Index {
      * <p>
      * This method works identically to {@link #last(boolean[], boolean)} for {@code long} values.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * long[] arr = {0L, 10L, 20L, 30L, 40L};
+     * Index.last(arr, 10L).get();                 // returns 1
+     * Index.last(arr, 20L).get();                 // returns 2
+     * Index.last(arr, 90L).isPresent();           // returns false
+     * Index.last((long[]) null, 10L).isPresent(); // returns false
+     * }</pre>
+     *
      * @param source the long array to be searched, may be {@code null}
      * @param valueToFind the long value to search for
      * @return an OptionalInt containing the zero-based index of the last occurrence of the value,
@@ -2361,6 +2795,15 @@ public final class Index {
      * Returns the index of the last occurrence of the specified long value in the given array, searching backwards from the specified position.
      * <p>
      * This method works identically to {@link #last(boolean[], boolean, int)} for {@code long} values.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * long[] arr = {0L, 10L, 20L, 30L, 40L};
+     * Index.last(arr, 10L, 2).get();       // returns 1
+     * Index.last(arr, 20L, 4).get();       // returns 2
+     * Index.last(arr, 90L, 3).isPresent(); // returns false
+     * Index.last(arr, 10L, 10).get();      // returns 1
+     * }</pre>
      *
      * @param source the long array to be searched, may be {@code null}
      * @param valueToFind the long value to search for
@@ -2382,6 +2825,15 @@ public final class Index {
      * This method works identically to {@link #last(boolean[], boolean)} for {@code float} values.
      * Comparison is performed using {@link Float#compare(float, float)}, which handles NaN and -0.0/+0.0 correctly.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * float[] arr = {1.0f, 2.0f, 3.0f, 2.0f, 4.0f};
+     * Index.last(arr, 2.0f).get();                  // returns 3
+     * Index.last(arr, 1.0f).get();                  // returns 0
+     * Index.last(arr, 5.0f).isPresent();            // returns false
+     * Index.last((float[]) null, 1.0f).isPresent(); // returns false
+     * }</pre>
+     *
      * @param source the float array to be searched, may be {@code null}
      * @param valueToFind the float value to search for
      * @return an OptionalInt containing the zero-based index of the last occurrence of the value,
@@ -2400,6 +2852,15 @@ public final class Index {
      * <p>
      * This method works identically to {@link #last(boolean[], boolean, int)} for {@code float} values.
      * Comparison is performed using {@link Float#compare(float, float)}, which handles NaN and -0.0/+0.0 correctly.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * float[] arr = {1.0f, 2.0f, 3.0f, 2.0f, 4.0f};
+     * Index.last(arr, 2.0f, 3).get();         // returns 3
+     * Index.last(arr, 2.0f, 1).get();         // returns 1
+     * Index.last(arr, 5.0f, 2).isPresent();   // returns false
+     * Index.last(arr, 1.0f, 0).get();         // returns 0
+     * }</pre>
      *
      * @param source the float array to be searched, may be {@code null}
      * @param valueToFind the float value to search for
@@ -2421,6 +2882,15 @@ public final class Index {
      * This method works identically to {@link #last(boolean[], boolean)} for {@code double} values.
      * Comparison is performed using {@link Double#compare(double, double)}, which handles NaN and -0.0/+0.0 correctly.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * double[] arr = {1.0, 2.0, 3.0, 2.0, 4.0};
+     * Index.last(arr, 2.0).get();                    // returns 3
+     * Index.last(arr, 1.0).get();                    // returns 0
+     * Index.last(arr, 5.0).isPresent();              // returns false
+     * Index.last((double[]) null, 1.0).isPresent();  // returns false
+     * }</pre>
+     *
      * @param source the double array to be searched, may be {@code null}
      * @param valueToFind the double value to search for
      * @return an OptionalInt containing the zero-based index of the last occurrence of the value,
@@ -2439,6 +2909,15 @@ public final class Index {
      * <p>
      * This method works identically to {@link #last(boolean[], boolean, int)} for {@code double} values.
      * Comparison is performed using {@link Double#compare(double, double)}, which handles NaN and -0.0/+0.0 correctly.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * double[] arr = {1.0, 2.0, 3.0, 2.0, 4.0};
+     * Index.last(arr, 2.0, 3).get();          // returns 3
+     * Index.last(arr, 2.0, 1).get();          // returns 1
+     * Index.last(arr, 5.0, 2).isPresent();    // returns false
+     * Index.last(arr, 1.0, 0).get();          // returns 0
+     * }</pre>
      *
      * @param source the double array to be searched, may be {@code null}
      * @param valueToFind the double value to search for
@@ -2460,6 +2939,15 @@ public final class Index {
      * This method searches backwards from the end of the array for the last occurrence of a value
      * that falls within the range {@code [valueToFind - tolerance, valueToFind + tolerance]}.
      * This is useful for comparing floating-point values where exact equality may not be reliable.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * double[] arr = {1.0, 2.1, 3.0, 2.2, 4.0};
+     * Index.last(arr, 2.0, 0.2).get();                   // returns 3
+     * Index.last(arr, 4.0, 0.1).get();                   // returns 4
+     * Index.last(arr, 5.0, 0.1).isPresent();             // returns false
+     * Index.last((double[]) null, 2.0, 0.1).isPresent(); // returns false
+     * }</pre>
      *
      * @param source the double array to be searched, may be {@code null}
      * @param valueToFind the double value to search for
@@ -2483,6 +2971,15 @@ public final class Index {
      * This method searches backwards from {@code startIndexFromBack} for the last occurrence of a value
      * that falls within the range {@code [valueToFind - tolerance, valueToFind + tolerance]}.
      * Matching uses {@link Numbers#fuzzyEquals(double, double, double)}.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * double[] arr = {1.0, 2.1, 3.0, 2.2, 4.0};
+     * Index.last(arr, 2.0, 0.2, 4).get();                   // returns 3
+     * Index.last(arr, 2.0, 0.2, 2).get();                   // returns 1
+     * Index.last(arr, 5.0, 0.1, 3).isPresent();             // returns false
+     * Index.last((double[]) null, 2.0, 0.1, 4).isPresent(); // returns false
+     * }</pre>
      *
      * @param source the double array to be searched, may be {@code null}
      * @param valueToFind the double value to search for
@@ -2590,6 +3087,15 @@ public final class Index {
      * for the last occurrence of {@code valueToFind}. Elements are compared using {@link N#equals(Object, Object)},
      * which handles {@code null} values correctly.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<String> list = Arrays.asList("a", "b", "c", "b");
+     * Index.last(list, "b", 3).get();           // returns 3
+     * Index.last(list, "b", 2).get();           // returns 1
+     * Index.last(list, "a", 0).get();           // returns 0
+     * Index.last(list, "x", 2).isPresent();     // returns false
+     * }</pre>
+     *
      * @param source the collection to be searched, may be {@code null}
      * @param valueToFind the value to find in the collection, may be {@code null}
      * @param startIndexFromBack the index to start the search from (inclusive), searching backwards
@@ -2606,6 +3112,14 @@ public final class Index {
      * Returns the index of the last occurrence of the specified character in the given string.
      * <p>
      * If the string is {@code null}, an empty OptionalInt is returned.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Index.last("hello", 'l').get();             // returns 3
+     * Index.last("hello", 'o').get();             // returns 4
+     * Index.last("hello", 'x').isPresent();       // returns false
+     * Index.last((String) null, 'a').isPresent(); // returns false
+     * }</pre>
      *
      * @param source the string to be searched, may be {@code null}
      * @param charValueToFind the character value (Unicode code point) to search for
@@ -2624,6 +3138,14 @@ public final class Index {
      * <p>
      * This method searches backwards from {@code startIndexFromBack} for the last occurrence of the character.
      * If the string is {@code null}, an empty OptionalInt is returned.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Index.last("hello", 'l', 3).get();        // returns 3
+     * Index.last("hello", 'l', 2).get();        // returns 2
+     * Index.last("hello", 'h', 0).get();        // returns 0
+     * Index.last("hello", 'x', 3).isPresent();  // returns false
+     * }</pre>
      *
      * @param source the string to be searched, may be {@code null}
      * @param charValueToFind the character value (Unicode code point) to search for
@@ -2670,6 +3192,14 @@ public final class Index {
      * This method searches backwards from {@code startIndexFromBack} for the last occurrence of {@code valueToFind}
      * within {@code source}. If the string is {@code null}, an empty OptionalInt is returned.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Index.last("hello world hello", "hello", 12).get();  // returns 12
+     * Index.last("hello world hello", "hello", 6).get();   // returns 0
+     * Index.last("hello", "bye", 4).isPresent();           // returns false
+     * Index.last("hello", "he", 1).get();                  // returns 0
+     * }</pre>
+     *
      * @param source the string to be searched, may be {@code null}
      * @param valueToFind the substring to search for, may be {@code null}
      * @param startIndexFromBack the position to start the backwards search from (inclusive)
@@ -2689,6 +3219,14 @@ public final class Index {
      * This method performs a case-insensitive backwards search for {@code valueToFind} within {@code source},
      * starting from the end of the string. Both ASCII and Unicode characters are compared case-insensitively.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Index.lastOfIgnoreCase("Hello World Hello", "Hello").get();  // returns 12
+     * Index.lastOfIgnoreCase("Hello World", "WORLD").get();        // returns 6
+     * Index.lastOfIgnoreCase("Hello", "bye").isPresent();          // returns false
+     * Index.lastOfIgnoreCase((String) null, "a").isPresent();      // returns false
+     * }</pre>
+     *
      * @param source the string to be searched, may be {@code null}
      * @param valueToFind the substring to search for (case-insensitive), may be {@code null}
      * @return an OptionalInt containing the zero-based index of the last occurrence of the substring (ignoring case),
@@ -2705,6 +3243,14 @@ public final class Index {
      * <p>
      * This method performs a case-insensitive backwards search for {@code valueToFind} within {@code source},
      * starting from the specified {@code startIndexFromBack}. Both ASCII and Unicode characters are compared case-insensitively.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Index.lastOfIgnoreCase("Hello World Hello", "HELLO", 12).get(); // returns 12
+     * Index.lastOfIgnoreCase("Hello World Hello", "HELLO", 6).get();  // returns 0
+     * Index.lastOfIgnoreCase("Hello", "bye", 4).isPresent();          // returns false
+     * Index.lastOfIgnoreCase("Hello", "he", 1).get();                 // returns 0
+     * }</pre>
      *
      * @param source the string to be searched, may be {@code null}
      * @param valueToFind the substring to search for (case-insensitive), may be {@code null}
@@ -2724,6 +3270,15 @@ public final class Index {
      * This method searches backwards from the end of the array for the last occurrence of {@code subArrayToFind}
      * as a contiguous sequence within {@code source}.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * boolean[] source = {true, false, true, true, false, true, true};
+     * boolean[] sub = {true, true};
+     * Index.lastOfSubArray(source, sub).get();                 // returns 5
+     * Index.lastOfSubArray(source, new boolean[0]).get();      // returns 7
+     * Index.lastOfSubArray((boolean[]) null, sub).isPresent(); // returns false
+     * }</pre>
+     *
      * @param source the array to be searched, may be {@code null}
      * @param subArrayToFind the subarray to search for, may be {@code null}
      * @return an OptionalInt containing the zero-based index where the last occurrence of the subarray starts,
@@ -2741,6 +3296,16 @@ public final class Index {
      * <p>
      * This method searches backwards from {@code startIndexFromBack} for the last occurrence of {@code subArrayToFind}
      * as a contiguous sequence within {@code source}.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * boolean[] source = {true, false, true, true, false, true, true};
+     * boolean[] sub = {true, true};
+     * Index.lastOfSubArray(source, 6, sub).get();                 // returns 5
+     * Index.lastOfSubArray(source, 2, sub).get();                 // returns 2
+     * Index.lastOfSubArray(source, 1, sub).isPresent();           // returns false
+     * Index.lastOfSubArray((boolean[]) null, 0, sub).isPresent(); // returns false
+     * }</pre>
      *
      * @param source the array to be searched, may be {@code null}
      * @param startIndexFromBack the position to start the backwards search from; the search includes this position
@@ -2770,6 +3335,17 @@ public final class Index {
      *   <li>If {@code startIndexFromBack < 0}, returns empty OptionalInt</li>
      *   <li>If {@code source.length < sizeToMatch}, returns empty OptionalInt</li>
      * </ul>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * boolean[] source = {true, true, false, true, true, false};
+     * boolean[] sub = {true, true, false};
+     * Index.lastOfSubArray(source, 5, sub, 0, 2).getAsInt();            // returns 3
+     * Index.lastOfSubArray(source, 2, sub, 0, 2).getAsInt();            // returns 0
+     * Index.lastOfSubArray(source, -1, sub, 0, 2).isPresent();          // returns false
+     * Index.lastOfSubArray(source, 5, sub, 0, 0).getAsInt();            // returns 5 (empty match)
+     * Index.lastOfSubArray((boolean[]) null, 5, sub, 0, 2).isPresent(); // returns false
+     * }</pre>
      *
      * @param source the array to be searched, may be {@code null}
      * @param startIndexFromBack the position to start the backwards search from; the search includes this position
@@ -2824,6 +3400,15 @@ public final class Index {
      * <p>
      * This method works identically to {@link #lastOfSubArray(boolean[], boolean[])} for {@code char} arrays.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * char[] source = {'h', 'e', 'l', 'l', 'o', ' ', 'w', 'o', 'r', 'l', 'd'};
+     * char[] sub = {'l', 'l'};
+     * Index.lastOfSubArray(source, sub).get();                        // returns 2
+     * Index.lastOfSubArray(source, new char[]{'x', 'y'}).isPresent(); // returns false
+     * Index.lastOfSubArray((char[]) null, sub).isPresent();           // returns false
+     * }</pre>
+     *
      * @param source the array to be searched, may be {@code null}
      * @param subArrayToFind the subarray to search for, may be {@code null}
      * @return an OptionalInt containing the zero-based index where the last occurrence of the subarray starts,
@@ -2840,6 +3425,16 @@ public final class Index {
      * Returns the index of the last occurrence of the specified subarray in the given source array, searching backwards from the specified position.
      * <p>
      * This method works identically to {@link #lastOfSubArray(boolean[], int, boolean[])} for {@code char} arrays.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * char[] source = {'h', 'e', 'l', 'l', 'o', ' ', 'w', 'o', 'r', 'l', 'd'};
+     * char[] sub = {'l', 'l'};
+     * Index.lastOfSubArray(source, 10, sub).get();             // returns 2
+     * Index.lastOfSubArray(source, 1, sub).isPresent();        // returns false
+     * Index.lastOfSubArray(source, 6, sub).get();              // returns 2
+     * Index.lastOfSubArray((char[]) null, 0, sub).isPresent(); // returns false
+     * }</pre>
      *
      * @param source the array to be searched, may be {@code null}
      * @param startIndexFromBack the position to start the backwards search from; the search includes this position
@@ -2871,6 +3466,17 @@ public final class Index {
      *   <li>If {@code startIndexFromBack < 0}, returns empty OptionalInt</li>
      *   <li>If {@code source.length < sizeToMatch}, returns empty OptionalInt</li>
      * </ul>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * char[] source = {'a', 'b', 'c', 'b', 'c', 'd'};
+     * char[] sub = {'b', 'c', 'z'};
+     * Index.lastOfSubArray(source, 5, sub, 0, 2).getAsInt();         // returns 3
+     * Index.lastOfSubArray(source, 2, sub, 0, 2).getAsInt();         // returns 1
+     * Index.lastOfSubArray(source, -1, sub, 0, 2).isPresent();       // returns false
+     * Index.lastOfSubArray(source, 5, sub, 0, 0).getAsInt();         // returns 5 (empty match)
+     * Index.lastOfSubArray((char[]) null, 5, sub, 0, 2).isPresent(); // returns false
+     * }</pre>
      *
      * @param source the array to be searched, may be {@code null}
      * @param startIndexFromBack the position to start the backwards search from; the search includes this position
@@ -2923,6 +3529,15 @@ public final class Index {
      * <p>
      * This method works identically to {@link #lastOfSubArray(boolean[], boolean[])} for {@code byte} arrays.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * byte[] source = {(byte) 0, (byte) 10, (byte) 20, (byte) 30, (byte) 40, (byte) 50, (byte) 60};
+     * byte[] sub = {(byte) 10, (byte) 20};
+     * Index.lastOfSubArray(source, sub).get();              // returns 1
+     * Index.lastOfSubArray(new byte[0], sub).isPresent();   // returns false
+     * Index.lastOfSubArray((byte[]) null, sub).isPresent(); // returns false
+     * }</pre>
+     *
      * @param source the array to be searched, may be {@code null}
      * @param subArrayToFind the subarray to search for, may be {@code null}
      * @return an OptionalInt containing the zero-based index where the last occurrence of the subarray starts,
@@ -2939,6 +3554,16 @@ public final class Index {
      * Returns the index of the last occurrence of the specified subarray in the given source array, searching backwards from the specified position.
      * <p>
      * This method works identically to {@link #lastOfSubArray(boolean[], int, boolean[])} for {@code byte} arrays.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * byte[] source = {(byte) 0, (byte) 10, (byte) 20, (byte) 30, (byte) 40, (byte) 50, (byte) 60};
+     * byte[] sub = {(byte) 10, (byte) 20};
+     * Index.lastOfSubArray(source, 6, sub).get();              // returns 1
+     * Index.lastOfSubArray(source, 0, sub).isPresent();        // returns false
+     * Index.lastOfSubArray(source, 10, sub).get();             // returns 1
+     * Index.lastOfSubArray((byte[]) null, 0, sub).isPresent(); // returns false
+     * }</pre>
      *
      * @param source the array to be searched, may be {@code null}
      * @param startIndexFromBack the position to start the backwards search from; the search includes this position
@@ -2970,6 +3595,17 @@ public final class Index {
      *   <li>If {@code startIndexFromBack < 0}, returns empty OptionalInt</li>
      *   <li>If {@code source.length < sizeToMatch}, returns empty OptionalInt</li>
      * </ul>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * byte[] source = {1, 2, 3, 2, 3, 4};
+     * byte[] sub = {2, 3, 9};
+     * Index.lastOfSubArray(source, 5, sub, 0, 2).getAsInt();         // returns 3
+     * Index.lastOfSubArray(source, 2, sub, 0, 2).getAsInt();         // returns 1
+     * Index.lastOfSubArray(source, -1, sub, 0, 2).isPresent();       // returns false
+     * Index.lastOfSubArray(source, 5, sub, 0, 0).getAsInt();         // returns 5 (empty match)
+     * Index.lastOfSubArray((byte[]) null, 5, sub, 0, 2).isPresent(); // returns false
+     * }</pre>
      *
      * @param source the array to be searched, may be {@code null}
      * @param startIndexFromBack the position to start the backwards search from; the search includes this position
@@ -3022,6 +3658,15 @@ public final class Index {
      * <p>
      * This method works identically to {@link #lastOfSubArray(boolean[], boolean[])} for {@code short} arrays.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * short[] source = {(short) 0, (short) 10, (short) 20, (short) 30, (short) 40, (short) 50, (short) 60};
+     * short[] sub = {(short) 10, (short) 20};
+     * Index.lastOfSubArray(source, sub).get();               // returns 1
+     * Index.lastOfSubArray(new short[0], sub).isPresent();   // returns false
+     * Index.lastOfSubArray((short[]) null, sub).isPresent(); // returns false
+     * }</pre>
+     *
      * @param source the array to be searched, may be {@code null}
      * @param subArrayToFind the subarray to search for, may be {@code null}
      * @return an OptionalInt containing the zero-based index where the last occurrence of the subarray starts,
@@ -3039,6 +3684,16 @@ public final class Index {
      * Returns the index of the last occurrence of the specified subarray in the given source array, searching backwards from the specified position.
      * <p>
      * This method works identically to {@link #lastOfSubArray(boolean[], int, boolean[])} for {@code short} arrays.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * short[] source = {(short) 0, (short) 10, (short) 20, (short) 30, (short) 40, (short) 50, (short) 60};
+     * short[] sub = {(short) 10, (short) 20};
+     * Index.lastOfSubArray(source, 6, sub).get();               // returns 1
+     * Index.lastOfSubArray(source, 0, sub).isPresent();         // returns false
+     * Index.lastOfSubArray(source, 10, sub).get();              // returns 1
+     * Index.lastOfSubArray((short[]) null, 0, sub).isPresent(); // returns false
+     * }</pre>
      *
      * @param source the array to be searched, may be {@code null}
      * @param startIndexFromBack the position to start the backwards search from; the search includes this position
@@ -3072,6 +3727,17 @@ public final class Index {
      *   <li>If {@code startIndexFromBack < 0}, returns empty OptionalInt</li>
      *   <li>If {@code source.length < sizeToMatch}, returns empty OptionalInt</li>
      * </ul>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * short[] source = {1, 2, 3, 2, 3, 4};
+     * short[] sub = {2, 3, 9};
+     * Index.lastOfSubArray(source, 5, sub, 0, 2).getAsInt();          // returns 3
+     * Index.lastOfSubArray(source, 2, sub, 0, 2).getAsInt();          // returns 1
+     * Index.lastOfSubArray(source, -1, sub, 0, 2).isPresent();        // returns false
+     * Index.lastOfSubArray(source, 5, sub, 0, 0).getAsInt();          // returns 5 (empty match)
+     * Index.lastOfSubArray((short[]) null, 5, sub, 0, 2).isPresent(); // returns false
+     * }</pre>
      *
      * @param source the array to be searched, may be {@code null}
      * @param startIndexFromBack the position to start the backwards search from; the search includes this position
@@ -3124,6 +3790,15 @@ public final class Index {
      * <p>
      * This method works identically to {@link #lastOfSubArray(boolean[], boolean[])} for {@code int} arrays.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * int[] source = {0, 10, 20, 30, 40, 50, 60};
+     * int[] sub = {10, 20};
+     * Index.lastOfSubArray(source, sub).get();             // returns 1
+     * Index.lastOfSubArray(new int[0], sub).isPresent();   // returns false
+     * Index.lastOfSubArray((int[]) null, sub).isPresent(); // returns false
+     * }</pre>
+     *
      * @param source the array to be searched, may be {@code null}
      * @param subArrayToFind the subarray to search for, may be {@code null}
      * @return an OptionalInt containing the zero-based index where the last occurrence of the subarray starts,
@@ -3141,6 +3816,16 @@ public final class Index {
      * Returns the index of the last occurrence of the specified subarray in the given source array, searching backwards from the specified position.
      * <p>
      * This method works identically to {@link #lastOfSubArray(boolean[], int, boolean[])} for {@code int} arrays.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * int[] source = {0, 10, 20, 30, 40, 50, 60};
+     * int[] sub = {10, 20};
+     * Index.lastOfSubArray(source, 6, sub).get();             // returns 1
+     * Index.lastOfSubArray(source, 0, sub).isPresent();       // returns false
+     * Index.lastOfSubArray(source, 10, sub).get();            // returns 1
+     * Index.lastOfSubArray((int[]) null, 0, sub).isPresent(); // returns false
+     * }</pre>
      *
      * @param source the array to be searched, may be {@code null}
      * @param startIndexFromBack the position to start the backwards search from; the search includes this position
@@ -3174,6 +3859,17 @@ public final class Index {
      *   <li>If {@code startIndexFromBack < 0}, returns empty OptionalInt</li>
      *   <li>If {@code source.length < sizeToMatch}, returns empty OptionalInt</li>
      * </ul>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * int[] source = {1, 2, 3, 2, 3, 4};
+     * int[] sub = {2, 3, 9};
+     * Index.lastOfSubArray(source, 5, sub, 0, 2).getAsInt();        // returns 3
+     * Index.lastOfSubArray(source, 2, sub, 0, 2).getAsInt();        // returns 1
+     * Index.lastOfSubArray(source, -1, sub, 0, 2).isPresent();      // returns false
+     * Index.lastOfSubArray(source, 5, sub, 0, 0).getAsInt();        // returns 5 (empty match)
+     * Index.lastOfSubArray((int[]) null, 5, sub, 0, 2).isPresent(); // returns false
+     * }</pre>
      *
      * @param source the array to be searched, may be {@code null}
      * @param startIndexFromBack the position to start the backwards search from; the search includes this position
@@ -3226,6 +3922,15 @@ public final class Index {
      * <p>
      * This method works identically to {@link #lastOfSubArray(boolean[], boolean[])} for {@code long} arrays.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * long[] source = {0L, 10L, 20L, 30L, 40L, 50L, 60L};
+     * long[] sub = {10L, 20L};
+     * Index.lastOfSubArray(source, sub).get();              // returns 1
+     * Index.lastOfSubArray(new long[0], sub).isPresent();   // returns false
+     * Index.lastOfSubArray((long[]) null, sub).isPresent(); // returns false
+     * }</pre>
+     *
      * @param source the array to be searched, may be {@code null}
      * @param subArrayToFind the subarray to search for, may be {@code null}
      * @return an OptionalInt containing the zero-based index where the last occurrence of the subarray starts,
@@ -3243,6 +3948,16 @@ public final class Index {
      * Returns the index of the last occurrence of the specified subarray in the given source array, searching backwards from the specified position.
      * <p>
      * This method works identically to {@link #lastOfSubArray(boolean[], int, boolean[])} for {@code long} arrays.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * long[] source = {0L, 10L, 20L, 30L, 40L, 50L, 60L};
+     * long[] sub = {10L, 20L};
+     * Index.lastOfSubArray(source, 6, sub).get();              // returns 1
+     * Index.lastOfSubArray(source, 0, sub).isPresent();        // returns false
+     * Index.lastOfSubArray(source, 10, sub).get();             // returns 1
+     * Index.lastOfSubArray((long[]) null, 0, sub).isPresent(); // returns false
+     * }</pre>
      *
      * @param source the array to be searched, may be {@code null}
      * @param startIndexFromBack the position to start the backwards search from; the search includes this position
@@ -3276,6 +3991,17 @@ public final class Index {
      *   <li>If {@code startIndexFromBack < 0}, returns empty OptionalInt</li>
      *   <li>If {@code source.length < sizeToMatch}, returns empty OptionalInt</li>
      * </ul>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * long[] source = {1L, 2L, 3L, 2L, 3L, 4L};
+     * long[] sub = {2L, 3L, 9L};
+     * Index.lastOfSubArray(source, 5, sub, 0, 2).getAsInt();         // returns 3
+     * Index.lastOfSubArray(source, 2, sub, 0, 2).getAsInt();         // returns 1
+     * Index.lastOfSubArray(source, -1, sub, 0, 2).isPresent();       // returns false
+     * Index.lastOfSubArray(source, 5, sub, 0, 0).getAsInt();         // returns 5 (empty match)
+     * Index.lastOfSubArray((long[]) null, 5, sub, 0, 2).isPresent(); // returns false
+     * }</pre>
      *
      * @param source the array to be searched, may be {@code null}
      * @param startIndexFromBack the position to start the backwards search from; the search includes this position
@@ -3329,6 +4055,15 @@ public final class Index {
      * This method works identically to {@link #lastOfSubArray(boolean[], boolean[])} for {@code float} arrays.
      * Elements are compared using {@link N#equals(float, float)}, consistent with {@link Float#compare(float, float)}.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * float[] source = {0.0f, 10.0f, 20.0f, 30.0f, 40.0f, 50.0f, 60.0f};
+     * float[] sub = {10.0f, 20.0f};
+     * Index.lastOfSubArray(source, sub).get();               // returns 1
+     * Index.lastOfSubArray(new float[0], sub).isPresent();   // returns false
+     * Index.lastOfSubArray((float[]) null, sub).isPresent(); // returns false
+     * }</pre>
+     *
      * @param source the array to be searched, may be {@code null}
      * @param subArrayToFind the subarray to search for, may be {@code null}
      * @return an OptionalInt containing the zero-based index where the last occurrence of the subarray starts,
@@ -3346,6 +4081,16 @@ public final class Index {
      * Returns the index of the last occurrence of the specified subarray in the given source array, searching backwards from the specified position.
      * <p>
      * This method works identically to {@link #lastOfSubArray(boolean[], int, boolean[])} for {@code float} arrays.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * float[] source = {0.0f, 10.0f, 20.0f, 30.0f, 40.0f, 50.0f, 60.0f};
+     * float[] sub = {10.0f, 20.0f};
+     * Index.lastOfSubArray(source, 6, sub).get();               // returns 1
+     * Index.lastOfSubArray(source, 0, sub).isPresent();         // returns false
+     * Index.lastOfSubArray(source, 10, sub).get();              // returns 1
+     * Index.lastOfSubArray((float[]) null, 0, sub).isPresent(); // returns false
+     * }</pre>
      *
      * @param source the array to be searched, may be {@code null}
      * @param startIndexFromBack the position to start the backwards search from; the search includes this position
@@ -3380,6 +4125,17 @@ public final class Index {
      *   <li>If {@code startIndexFromBack < 0}, returns empty OptionalInt</li>
      *   <li>If {@code source.length < sizeToMatch}, returns empty OptionalInt</li>
      * </ul>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * float[] source = {1f, 2f, 3f, 2f, 3f, 4f};
+     * float[] sub = {2f, 3f, 9f};
+     * Index.lastOfSubArray(source, 5, sub, 0, 2).getAsInt();          // returns 3
+     * Index.lastOfSubArray(source, 2, sub, 0, 2).getAsInt();          // returns 1
+     * Index.lastOfSubArray(source, -1, sub, 0, 2).isPresent();        // returns false
+     * Index.lastOfSubArray(source, 5, sub, 0, 0).getAsInt();          // returns 5 (empty match)
+     * Index.lastOfSubArray((float[]) null, 5, sub, 0, 2).isPresent(); // returns false
+     * }</pre>
      *
      * @param source the array to be searched, may be {@code null}
      * @param startIndexFromBack the position to start the backwards search from; the search includes this position
@@ -3433,6 +4189,15 @@ public final class Index {
      * This method works identically to {@link #lastOfSubArray(boolean[], boolean[])} for {@code double} arrays.
      * Elements are compared using {@link N#equals(double, double)}, consistent with {@link Double#compare(double, double)}.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * double[] source = {0.0, 10.0, 20.0, 30.0, 40.0, 50.0, 60.0};
+     * double[] sub = {10.0, 20.0};
+     * Index.lastOfSubArray(source, sub).get();                // returns 1
+     * Index.lastOfSubArray(new double[0], sub).isPresent();   // returns false
+     * Index.lastOfSubArray((double[]) null, sub).isPresent(); // returns false
+     * }</pre>
+     *
      * @param source the array to be searched, may be {@code null}
      * @param subArrayToFind the subarray to search for, may be {@code null}
      * @return an OptionalInt containing the zero-based index where the last occurrence of the subarray starts,
@@ -3450,6 +4215,16 @@ public final class Index {
      * Returns the index of the last occurrence of the specified subarray in the given source array, searching backwards from the specified position.
      * <p>
      * This method works identically to {@link #lastOfSubArray(boolean[], int, boolean[])} for {@code double} arrays.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * double[] source = {0.0, 10.0, 20.0, 30.0, 40.0, 50.0, 60.0};
+     * double[] sub = {10.0, 20.0};
+     * Index.lastOfSubArray(source, 6, sub).get();                // returns 1
+     * Index.lastOfSubArray(source, 0, sub).isPresent();          // returns false
+     * Index.lastOfSubArray(source, 10, sub).get();               // returns 1
+     * Index.lastOfSubArray((double[]) null, 0, sub).isPresent(); // returns false
+     * }</pre>
      *
      * @param source the array to be searched, may be {@code null}
      * @param startIndexFromBack the position to start the backwards search from; the search includes this position
@@ -3484,6 +4259,17 @@ public final class Index {
      *   <li>If {@code startIndexFromBack < 0}, returns empty OptionalInt</li>
      *   <li>If {@code source.length < sizeToMatch}, returns empty OptionalInt</li>
      * </ul>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * double[] source = {1d, 2d, 3d, 2d, 3d, 4d};
+     * double[] sub = {2d, 3d, 9d};
+     * Index.lastOfSubArray(source, 5, sub, 0, 2).getAsInt();           // returns 3
+     * Index.lastOfSubArray(source, 2, sub, 0, 2).getAsInt();           // returns 1
+     * Index.lastOfSubArray(source, -1, sub, 0, 2).isPresent();         // returns false
+     * Index.lastOfSubArray(source, 5, sub, 0, 0).getAsInt();           // returns 5 (empty match)
+     * Index.lastOfSubArray((double[]) null, 5, sub, 0, 2).isPresent(); // returns false
+     * }</pre>
      *
      * @param source the array to be searched, may be {@code null}
      * @param startIndexFromBack the position to start the backwards search from; the search includes this position
@@ -3538,6 +4324,15 @@ public final class Index {
      * as a contiguous sequence within {@code source}. Elements are compared using {@link N#equals(Object, Object)},
      * which handles {@code null} values correctly.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * String[] source = {"a", "b", "c", "d", "c", "d", "e"};
+     * String[] sub = {"c", "d"};
+     * Index.lastOfSubArray(source, sub).get();                          // returns 4
+     * Index.lastOfSubArray(source, new String[]{"x", "y"}).isPresent(); // returns false
+     * Index.lastOfSubArray((String[]) null, sub).isPresent();           // returns false
+     * }</pre>
+     *
      * @param source the array to be searched, may be {@code null}
      * @param subArrayToFind the subarray to search for, may be {@code null}
      * @return an OptionalInt containing the zero-based index where the last occurrence of the subarray starts,
@@ -3556,6 +4351,16 @@ public final class Index {
      * This method searches backwards from {@code startIndexFromBack} for the last occurrence of {@code subArrayToFind}
      * as a contiguous sequence within {@code source}. Elements are compared using {@link N#equals(Object, Object)},
      * which handles {@code null} values correctly.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * String[] source = {"a", "b", "c", "d", "c", "d", "e"};
+     * String[] sub = {"c", "d"};
+     * Index.lastOfSubArray(source, 6, sub).get();                // returns 4
+     * Index.lastOfSubArray(source, 2, sub).get();                // returns 2
+     * Index.lastOfSubArray(source, 1, sub).isPresent();          // returns false
+     * Index.lastOfSubArray((String[]) null, 0, sub).isPresent(); // returns false
+     * }</pre>
      *
      * @param source the array to be searched, may be {@code null}
      * @param startIndexFromBack the position to start the backwards search from; the search includes this position
@@ -3586,6 +4391,17 @@ public final class Index {
      *   <li>If {@code startIndexFromBack < 0}, returns empty OptionalInt</li>
      *   <li>If {@code source.length < sizeToMatch}, returns empty OptionalInt</li>
      * </ul>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * String[] source = {"a", "b", "c", "b", "c", "d"};
+     * String[] sub = {"b", "c", "z"};
+     * Index.lastOfSubArray(source, 5, sub, 0, 2).getAsInt();           // returns 3
+     * Index.lastOfSubArray(source, 2, sub, 0, 2).getAsInt();           // returns 1
+     * Index.lastOfSubArray(source, -1, sub, 0, 2).isPresent();         // returns false
+     * Index.lastOfSubArray(source, 5, sub, 0, 0).getAsInt();           // returns 5 (empty match)
+     * Index.lastOfSubArray((Object[]) null, 5, sub, 0, 2).isPresent(); // returns false
+     * }</pre>
      *
      * @param source the array to be searched, may be {@code null}
      * @param startIndexFromBack the position to start the backwards search from; the search includes this position
@@ -3640,6 +4456,15 @@ public final class Index {
      * as a contiguous sequence within {@code source}. Elements are compared using {@link N#equals(Object, Object)},
      * which handles {@code null} values correctly.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<String> source = Arrays.asList("a", "b", "c", "d", "c", "d", "e");
+     * List<String> sub = Arrays.asList("c", "d");
+     * Index.lastOfSubList(source, sub).get();               // returns 4
+     * Index.lastOfSubList(source, Arrays.asList()).get();   // returns 7
+     * Index.lastOfSubList((List<?>) null, sub).isPresent(); // returns false
+     * }</pre>
+     *
      * @param source the list to be searched, may be {@code null}
      * @param subListToFind the sub-list to find in the source list, may be {@code null}
      * @return an OptionalInt containing the zero-based index where the last occurrence of the sub-list starts,
@@ -3657,6 +4482,16 @@ public final class Index {
      * This method searches backwards from {@code startIndexFromBack} for the last occurrence of {@code subListToFind}
      * as a contiguous sequence within {@code source}. Elements are compared using {@link N#equals(Object, Object)},
      * which handles {@code null} values correctly.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<String> source = Arrays.asList("a", "b", "c", "d", "c", "d", "e");
+     * List<String> sub = Arrays.asList("c", "d");
+     * Index.lastOfSubList(source, 6, sub).get();               // returns 4
+     * Index.lastOfSubList(source, 3, sub).get();               // returns 2
+     * Index.lastOfSubList(source, 1, sub).isPresent();         // returns false
+     * Index.lastOfSubList((List<?>) null, 0, sub).isPresent(); // returns false
+     * }</pre>
      *
      * @param source the list to be searched, may be {@code null}
      * @param startIndexFromBack the position to start the backwards search from; the search includes this position
@@ -3688,6 +4523,17 @@ public final class Index {
      *   <li>If {@code startIndexFromBack < 0}, returns empty OptionalInt</li>
      *   <li>If {@code source.size() < sizeToMatch}, returns empty OptionalInt</li>
      * </ul>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<String> source = Arrays.asList("a", "b", "c", "b", "c", "d");
+     * List<String> sub = Arrays.asList("b", "c", "z");
+     * Index.lastOfSubList(source, 5, sub, 0, 2).getAsInt();          // returns 3
+     * Index.lastOfSubList(source, 2, sub, 0, 2).getAsInt();          // returns 1
+     * Index.lastOfSubList(source, -1, sub, 0, 2).isPresent();        // returns false
+     * Index.lastOfSubList(source, 5, sub, 0, 0).getAsInt();          // returns 5 (empty match)
+     * Index.lastOfSubList((List<?>) null, 5, sub, 0, 2).isPresent(); // returns false
+     * }</pre>
      *
      * @param source the list to be searched, may be {@code null}
      * @param startIndexFromBack the position to start the backwards search from; the search includes this position
@@ -3746,6 +4592,15 @@ public final class Index {
      * This method finds all positions where {@code valueToFind} appears in the array and returns
      * them as a BitSet. Each set bit in the BitSet corresponds to an index where the value was found.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * boolean[] arr = {true, false, true, false, true};
+     * Index.allOf(arr, true).cardinality();           // returns 3
+     * Index.allOf(arr, true).get(0);                  // returns true
+     * Index.allOf(arr, true).toString();              // returns "{0, 2, 4}"
+     * Index.allOf((boolean[]) null, true).isEmpty();  // returns true
+     * }</pre>
+     *
      * @param source the boolean array to be searched, may be {@code null}
      * @param valueToFind the boolean value to search for
      * @return a BitSet containing the zero-based indices of all occurrences of the value in the array;
@@ -3759,6 +4614,14 @@ public final class Index {
 
     /**
      * Returns the indices of all occurrences of the specified boolean value in the given array, starting from the specified index.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * boolean[] arr = {true, false, true, false, true};
+     * Index.allOf(arr, true, 0).cardinality();   // returns 3
+     * Index.allOf(arr, true, 2).toString();      // returns "{2, 4}"
+     * Index.allOf(arr, false, 0).cardinality();  // returns 2
+     * }</pre>
      *
      * @param source the boolean array to be searched, may be {@code null}
      * @param valueToFind the boolean value to search for
@@ -3791,6 +4654,14 @@ public final class Index {
      * This method finds all positions where {@code valueToFind} appears in the array and returns
      * them as a BitSet. Each set bit corresponds to an index where the value was found.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * byte[] arr = {(byte) 0, (byte) 10, (byte) 20, (byte) 30, (byte) 40};
+     * Index.allOf(arr, (byte) 10).cardinality();   // returns 1
+     * Index.allOf(arr, (byte) 10).toString();      // returns "{1}"
+     * Index.allOf(arr, (byte) 90).isEmpty();       // returns true
+     * }</pre>
+     *
      * @param source the byte array to be searched, may be {@code null}
      * @param valueToFind the byte value to search for
      * @return a BitSet containing the zero-based indices of all occurrences of the value;
@@ -3804,6 +4675,14 @@ public final class Index {
 
     /**
      * Returns the indices of all occurrences of the specified byte value in the given array, starting from the specified index.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * byte[] arr = {(byte) 0, (byte) 10, (byte) 20, (byte) 30, (byte) 40};
+     * Index.allOf(arr, (byte) 10, 0).cardinality(); // returns 1
+     * Index.allOf(arr, (byte) 20, 2).cardinality(); // returns 1
+     * Index.allOf(arr, (byte) 90, 0).isEmpty();     // returns true
+     * }</pre>
      *
      * @param source the byte array to be searched, may be {@code null}
      * @param valueToFind the byte value to search for
@@ -3836,6 +4715,15 @@ public final class Index {
      * This method finds all positions where {@code valueToFind} appears in the array and returns
      * them as a BitSet. Each set bit corresponds to an index where the value was found.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * char[] arr = {'h', 'e', 'l', 'l', 'o'};
+     * Index.allOf(arr, 'l').cardinality();    // returns 2
+     * Index.allOf(arr, 'l').get(2);           // returns true
+     * Index.allOf(arr, 'l').toString();       // returns "{2, 3}"
+     * Index.allOf(arr, 'x').isEmpty();        // returns true
+     * }</pre>
+     *
      * @param source the char array to be searched, may be {@code null}
      * @param valueToFind the char value to search for
      * @return a BitSet containing the zero-based indices of all occurrences of the value;
@@ -3849,6 +4737,14 @@ public final class Index {
 
     /**
      * Returns the indices of all occurrences of the specified char value in the given array, starting from the specified index.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * char[] arr = {'h', 'e', 'l', 'l', 'o'};
+     * Index.allOf(arr, 'l', 0).cardinality();  // returns 2
+     * Index.allOf(arr, 'l', 3).toString();     // returns "{3}"
+     * Index.allOf(arr, 'x', 0).isEmpty();      // returns true
+     * }</pre>
      *
      * @param source the char array to be searched, may be {@code null}
      * @param valueToFind the char value to search for
@@ -3881,6 +4777,14 @@ public final class Index {
      * This method finds all positions where {@code valueToFind} appears in the array and returns
      * them as a BitSet. Each set bit corresponds to an index where the value was found.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * short[] arr = {(short) 0, (short) 10, (short) 20, (short) 30, (short) 40};
+     * Index.allOf(arr, (short) 10).cardinality();   // returns 1
+     * Index.allOf(arr, (short) 10).toString();      // returns "{1}"
+     * Index.allOf(arr, (short) 90).isEmpty();       // returns true
+     * }</pre>
+     *
      * @param source the short array to be searched, may be {@code null}
      * @param valueToFind the short value to search for
      * @return a BitSet containing the zero-based indices of all occurrences of the value;
@@ -3894,6 +4798,14 @@ public final class Index {
 
     /**
      * Returns the indices of all occurrences of the specified short value in the given array, starting from the specified index.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * short[] arr = {(short) 0, (short) 10, (short) 20, (short) 30, (short) 40};
+     * Index.allOf(arr, (short) 10, 0).cardinality(); // returns 1
+     * Index.allOf(arr, (short) 20, 2).cardinality(); // returns 1
+     * Index.allOf(arr, (short) 90, 0).isEmpty();     // returns true
+     * }</pre>
      *
      * @param source the short array to be searched, may be {@code null}
      * @param valueToFind the short value to search for
@@ -3926,6 +4838,14 @@ public final class Index {
      * This method finds all positions where {@code valueToFind} appears in the array and returns
      * them as a BitSet. Each set bit corresponds to an index where the value was found.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * int[] arr = {0, 10, 20, 30, 40};
+     * Index.allOf(arr, 10).cardinality();   // returns 1
+     * Index.allOf(arr, 10).toString();      // returns "{1}"
+     * Index.allOf(arr, 90).isEmpty();       // returns true
+     * }</pre>
+     *
      * @param source the int array to be searched, may be {@code null}
      * @param valueToFind the int value to search for
      * @return a BitSet containing the zero-based indices of all occurrences of the value;
@@ -3939,6 +4859,14 @@ public final class Index {
 
     /**
      * Returns the indices of all occurrences of the specified int value in the given array, starting from the specified index.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * int[] arr = {0, 10, 20, 30, 40};
+     * Index.allOf(arr, 10, 0).cardinality(); // returns 1
+     * Index.allOf(arr, 20, 2).cardinality(); // returns 1
+     * Index.allOf(arr, 90, 0).isEmpty();     // returns true
+     * }</pre>
      *
      * @param source the int array to be searched, may be {@code null}
      * @param valueToFind the int value to search for
@@ -3971,6 +4899,14 @@ public final class Index {
      * This method finds all positions where {@code valueToFind} appears in the array and returns
      * them as a BitSet. Each set bit corresponds to an index where the value was found.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * long[] arr = {0L, 10L, 20L, 30L, 40L};
+     * Index.allOf(arr, 10L).cardinality();   // returns 1
+     * Index.allOf(arr, 10L).toString();      // returns "{1}"
+     * Index.allOf(arr, 90L).isEmpty();       // returns true
+     * }</pre>
+     *
      * @param source the long array to be searched, may be {@code null}
      * @param valueToFind the long value to search for
      * @return a BitSet containing the zero-based indices of all occurrences of the value;
@@ -3984,6 +4920,14 @@ public final class Index {
 
     /**
      * Returns the indices of all occurrences of the specified long value in the given array, starting from the specified index.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * long[] arr = {0L, 10L, 20L, 30L, 40L};
+     * Index.allOf(arr, 10L, 0).cardinality(); // returns 1
+     * Index.allOf(arr, 20L, 2).cardinality(); // returns 1
+     * Index.allOf(arr, 90L, 0).isEmpty();     // returns true
+     * }</pre>
      *
      * @param source the long array to be searched, may be {@code null}
      * @param valueToFind the long value to search for
@@ -4017,6 +4961,14 @@ public final class Index {
      * them as a BitSet. Comparison is performed using {@link Float#compare(float, float)},
      * which handles NaN and -0.0/+0.0 correctly.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * float[] arr = {1.0f, 2.0f, 3.0f, 2.0f, 4.0f};
+     * Index.allOf(arr, 2.0f).cardinality();  // returns 2
+     * Index.allOf(arr, 2.0f).toString();     // returns "{1, 3}"
+     * Index.allOf(arr, 5.0f).isEmpty();      // returns true
+     * }</pre>
+     *
      * @param source the float array to be searched, may be {@code null}
      * @param valueToFind the float value to search for
      * @return a BitSet containing the zero-based indices of all occurrences of the value;
@@ -4032,6 +4984,14 @@ public final class Index {
      * Returns the indices of all occurrences of the specified float value in the given array, starting from the specified index.
      * <p>
      * Comparison is performed using {@link Float#compare(float, float)}.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * float[] arr = {1.0f, 2.0f, 3.0f, 2.0f, 4.0f};
+     * Index.allOf(arr, 2.0f, 0).cardinality();  // returns 2
+     * Index.allOf(arr, 2.0f, 2).toString();     // returns "{3}"
+     * Index.allOf(arr, 5.0f, 0).isEmpty();      // returns true
+     * }</pre>
      *
      * @param source the float array to be searched, may be {@code null}
      * @param valueToFind the float value to search for
@@ -4066,6 +5026,14 @@ public final class Index {
      * which handles NaN and -0.0/+0.0 correctly. For tolerance-based matching, use
      * {@link #allOf(double[], double, double)}.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * double[] arr = {1.0, 2.0, 3.0, 2.0, 4.0};
+     * Index.allOf(arr, 2.0).cardinality();  // returns 2
+     * Index.allOf(arr, 2.0).toString();     // returns "{1, 3}"
+     * Index.allOf(arr, 5.0).isEmpty();      // returns true
+     * }</pre>
+     *
      * @param source the double array to be searched, may be {@code null}
      * @param valueToFind the double value to search for
      * @return a BitSet containing the zero-based indices of all occurrences of the value;
@@ -4082,6 +5050,14 @@ public final class Index {
      * Returns the indices of all occurrences of the specified double value in the given array, starting from the specified index.
      * <p>
      * Comparison is performed using {@link Double#compare(double, double)}.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * double[] arr = {1.0, 2.0, 3.0, 2.0, 4.0};
+     * Index.allOf(arr, 2.0, 0).cardinality();  // returns 2
+     * Index.allOf(arr, 2.0, 2).toString();     // returns "{3}"
+     * Index.allOf(arr, 5.0, 0).isEmpty();      // returns true
+     * }</pre>
      *
      * @param source the double array to be searched, may be {@code null}
      * @param valueToFind the double value to search for
@@ -4116,6 +5092,14 @@ public final class Index {
      * {@code [valueToFind - tolerance, valueToFind + tolerance]} and returns them as a BitSet.
      * This is useful for comparing floating-point values where exact equality may not be reliable.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * double[] arr = {1.0, 2.1, 3.0, 2.2, 4.0};
+     * Index.allOf(arr, 2.0, 0.2).cardinality();  // returns 1  (only 2.1 matches; 2.2 - 2.0 = 0.200...018 > 0.2)
+     * Index.allOf(arr, 2.0, 0.2).toString();     // returns "{1}"
+     * Index.allOf(arr, 5.0, 0.1).isEmpty();      // returns true
+     * }</pre>
+     *
      * @param source the double array to be searched, may be {@code null}
      * @param valueToFind the double value to search for
      * @param tolerance the tolerance for matching; must be non-negative and not NaN. A value matches if it's within
@@ -4136,6 +5120,14 @@ public final class Index {
      * Matching uses {@link Numbers#fuzzyEquals(double, double, double)}, which is consistent with
      * {@link #of(double[], double, double, int)} and {@link #last(double[], double, double, int)}.
      * In particular, two {@link Double#NaN} values are considered equal, and infinities of the same sign match.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * double[] arr = {1.0, 2.1, 3.0, 2.2, 4.0};
+     * Index.allOf(arr, 2.0, 0.2, 0).cardinality(); // returns 1  (only 2.1 matches; 2.2 - 2.0 = 0.200...018 > 0.2)
+     * Index.allOf(arr, 2.0, 0.2, 2).isEmpty();     // returns true (no match from index 2)
+     * Index.allOf(arr, 5.0, 0.1, 0).isEmpty();     // returns true
+     * }</pre>
      *
      * @param source the double array to be searched, may be {@code null}
      * @param valueToFind the double value to search for
@@ -4208,6 +5200,14 @@ public final class Index {
      * <p>
      * Elements are compared using {@link N#equals(Object, Object)}, which handles {@code null} values correctly.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * String[] arr = {"a", "b", "c", "b", "a"};
+     * Index.allOf(arr, "b", 0).cardinality();   // returns 2
+     * Index.allOf(arr, "b", 2).toString();      // returns "{3}"
+     * Index.allOf(arr, "x", 0).isEmpty();       // returns true
+     * }</pre>
+     *
      * @param source the array to be searched, may be {@code null}
      * @param valueToFind the value to find in the array, may be {@code null}
      * @param fromIndex the index to start the search from (inclusive); negative values are treated as 0
@@ -4273,6 +5273,14 @@ public final class Index {
      * <p>
      * Elements are compared (in iteration order) using {@link N#equals(Object, Object)}, which handles
      * {@code null} values correctly. The implementation is optimized for {@link RandomAccess} lists.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<String> list = Arrays.asList("a", "b", "c", "b");
+     * Index.allOf(list, "b", 0).cardinality(); // returns 2
+     * Index.allOf(list, "b", 2).toString();    // returns "{3}"
+     * Index.allOf(list, "x", 0).isEmpty();     // returns true
+     * }</pre>
      *
      * @param source the collection to be searched, may be {@code null}
      * @param valueToFind the value to find in the collection, may be {@code null}
@@ -4349,6 +5357,15 @@ public final class Index {
      * and returns a BitSet containing the indices of all elements for which the predicate returns {@code true}.
      * Negative {@code fromIndex} values are treated as 0.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * String[] arr = {"apple", "banana", "avocado", "cherry", "apricot"};
+     * Index.allOf(arr, s -> s.startsWith("a"), 1).toString(); // returns "{2, 4}"
+     * Index.allOf(arr, s -> s.startsWith("a"), 0).toString(); // returns "{0, 2, 4}"
+     * Index.allOf(arr, s -> s.startsWith("z"), 0).isEmpty();  // returns true
+     * Index.allOf(arr, s -> s.startsWith("a"), 10).isEmpty(); // returns true (fromIndex past end)
+     * }</pre>
+     *
      * @param <T> the type of elements in the array
      * @param source the array to be searched, may be {@code null}
      * @param predicate the predicate to test elements; must not be {@code null}
@@ -4391,13 +5408,13 @@ public final class Index {
      * <p><b>Common Mistakes:</b></p>
      * <pre>{@code
      * // DON'T: Pass null predicate
-     * Index.allOf(collection, null);   // NullPointerException!
+     * Index.allOf(collection, null);   // returns NullPointerException!
      *
      * // DO: Provide valid predicate
      * Index.allOf(collection, Objects::nonNull);
      *
      * // DON'T: Assume predicate won't receive nulls
-     * Index.allOf(Arrays.asList(1, null, 3), x -> x > 0);   // NPE inside predicate!
+     * Index.allOf(Arrays.asList(1, null, 3), x -> x > 0);   // returns NPE inside predicate!
      *
      * // DO: Handle nulls in predicate
      * Index.allOf(Arrays.asList(1, null, 3), x -> x != null && x > 0);
@@ -4421,6 +5438,15 @@ public final class Index {
      * against the predicate and returns a BitSet containing the indices of all elements for which the predicate
      * returns {@code true}. Negative {@code fromIndex} values are treated as 0. The implementation is optimized
      * for {@link RandomAccess} lists.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<String> list = Arrays.asList("apple", "banana", "avocado", "cherry", "apricot");
+     * Index.allOf(list, s -> s.startsWith("a"), 1).toString(); // returns "{2, 4}"
+     * Index.allOf(list, s -> s.startsWith("a"), 0).toString(); // returns "{0, 2, 4}"
+     * Index.allOf(list, s -> s.startsWith("z"), 0).isEmpty();  // returns true
+     * Index.allOf(list, s -> s.startsWith("a"), 10).isEmpty(); // returns true (fromIndex past end)
+     * }</pre>
      *
      * @param <T> the type of the elements in the collection
      * @param source the collection to be searched, may be {@code null}

@@ -101,9 +101,10 @@ public final class Reflection<T> {
      * }</pre>
      *
      * @param <T> the type of the class
-     * @param clsName the fully qualified name of the class
+     * @param clsName the fully qualified name of the class; must not be {@code null}
      * @return a Reflection instance for the specified class
      * @throws IllegalArgumentException if the class with the given name cannot be located
+     * @throws NullPointerException if {@code clsName} is {@code null}
      * @see ClassUtil#forName(String)
      */
     public static <T> Reflection<T> on(final String clsName) {

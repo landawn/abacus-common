@@ -283,6 +283,13 @@ public final class Suppliers {
      * in certain contexts. It's part of a family of shorthand methods like {@code p()} for Predicate
      * and others.</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Supplier<String> original = () -> "value";
+     * Supplier<String> same = Suppliers.of(original);   // returns the same supplier instance
+     * String s = same.get();                            // returns "value"
+     * }</pre>
+     *
      * @param <T> the type of results supplied by the supplier
      * @param supplier the supplier to return
      * @return the supplier unchanged
@@ -307,6 +314,14 @@ public final class Suppliers {
      * <p>Note: the function is applied on every call to the returned supplier's
      * {@code get()} method, not memoized.</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * String input = "hello";
+     * Function<String, Integer> lenFn = String::length;
+     * Supplier<Integer> supplier = Suppliers.of(input, lenFn);
+     * int result = supplier.get();   // returns 5
+     * }</pre>
+     *
      * @param <A> the type of the input value
      * @param <T> the type of results supplied by the supplier
      * @param a the value to be processed by the function
@@ -330,6 +345,13 @@ public final class Suppliers {
      * <p>This method creates a supplier that always returns the provided instance,
      * useful for creating constant suppliers.</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Supplier<String> constant = Suppliers.ofInstance("Hello");
+     * String s1 = constant.get();   // returns "Hello"
+     * String s2 = constant.get();   // returns "Hello" (same instance)
+     * }</pre>
+     *
      * @param <T> the type of the instance
      * @param instance the instance to be supplied
      * @return a supplier that always returns the same instance
@@ -343,6 +365,12 @@ public final class Suppliers {
      *
      * <p>Each call to the supplier's get() method will generate a new unique identifier (UUID) string.</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Supplier<String> uuidSupplier = Suppliers.ofUuid();
+     * String uuid = uuidSupplier.get();   // returns e.g. "550e8400-e29b-41d4-a716-446655440000"
+     * }</pre>
+     *
      * @return a supplier that generates unique identifier (UUID) strings
      * @see #ofUuidWithoutHyphens()
      */
@@ -354,6 +382,12 @@ public final class Suppliers {
      * Returns a supplier that generates unique identifier (UUID) strings without hyphens.
      *
      * <p>Each call to the supplier's get() method will generate a new unique identifier (UUID) string without hyphens.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Supplier<String> guidSupplier = Suppliers.ofUuidWithoutHyphens();
+     * String guid = guidSupplier.get();   // returns e.g. "550e8400e29b41d4a716446655440000"
+     * }</pre>
      *
      * @return a supplier that generates unique identifier (UUID) strings without hyphens
      * @see #ofUuid()
@@ -367,6 +401,12 @@ public final class Suppliers {
      *
      * <p>This supplier always returns the same empty boolean array instance for efficiency.</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Supplier<boolean[]> supplier = Suppliers.ofEmptyBooleanArray();
+     * boolean[] arr = supplier.get();   // returns a zero-length boolean[]
+     * }</pre>
+     *
      * @return a supplier that returns an empty boolean array
      */
     public static Supplier<boolean[]> ofEmptyBooleanArray() {
@@ -377,6 +417,12 @@ public final class Suppliers {
      * Returns a supplier that supplies empty char arrays.
      *
      * <p>This supplier always returns the same empty char array instance for efficiency.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Supplier<char[]> supplier = Suppliers.ofEmptyCharArray();
+     * char[] arr = supplier.get();   // returns a zero-length char[]
+     * }</pre>
      *
      * @return a supplier that returns an empty char array
      */
@@ -389,6 +435,12 @@ public final class Suppliers {
      *
      * <p>This supplier always returns the same empty byte array instance for efficiency.</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Supplier<byte[]> supplier = Suppliers.ofEmptyByteArray();
+     * byte[] arr = supplier.get();   // returns a zero-length byte[]
+     * }</pre>
+     *
      * @return a supplier that returns an empty byte array
      */
     public static Supplier<byte[]> ofEmptyByteArray() {
@@ -399,6 +451,12 @@ public final class Suppliers {
      * Returns a supplier that supplies empty short arrays.
      *
      * <p>This supplier always returns the same empty short array instance for efficiency.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Supplier<short[]> supplier = Suppliers.ofEmptyShortArray();
+     * short[] arr = supplier.get();   // returns a zero-length short[]
+     * }</pre>
      *
      * @return a supplier that returns an empty short array
      */
@@ -411,6 +469,12 @@ public final class Suppliers {
      *
      * <p>This supplier always returns the same empty int array instance for efficiency.</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Supplier<int[]> supplier = Suppliers.ofEmptyIntArray();
+     * int[] arr = supplier.get();   // returns a zero-length int[]
+     * }</pre>
+     *
      * @return a supplier that returns an empty int array
      */
     public static Supplier<int[]> ofEmptyIntArray() {
@@ -421,6 +485,12 @@ public final class Suppliers {
      * Returns a supplier that supplies empty long arrays.
      *
      * <p>This supplier always returns the same empty long array instance for efficiency.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Supplier<long[]> supplier = Suppliers.ofEmptyLongArray();
+     * long[] arr = supplier.get();   // returns a zero-length long[]
+     * }</pre>
      *
      * @return a supplier that returns an empty long array
      */
@@ -433,6 +503,12 @@ public final class Suppliers {
      *
      * <p>This supplier always returns the same empty float array instance for efficiency.</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Supplier<float[]> supplier = Suppliers.ofEmptyFloatArray();
+     * float[] arr = supplier.get();   // returns a zero-length float[]
+     * }</pre>
+     *
      * @return a supplier that returns an empty float array
      */
     public static Supplier<float[]> ofEmptyFloatArray() {
@@ -443,6 +519,12 @@ public final class Suppliers {
      * Returns a supplier that supplies empty double arrays.
      *
      * <p>This supplier always returns the same empty double array instance for efficiency.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Supplier<double[]> supplier = Suppliers.ofEmptyDoubleArray();
+     * double[] arr = supplier.get();   // returns a zero-length double[]
+     * }</pre>
      *
      * @return a supplier that returns an empty double array
      */
@@ -455,6 +537,12 @@ public final class Suppliers {
      *
      * <p>This supplier always returns the same empty String array instance for efficiency.</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Supplier<String[]> supplier = Suppliers.ofEmptyStringArray();
+     * String[] arr = supplier.get();   // returns a zero-length String[]
+     * }</pre>
+     *
      * @return a supplier that returns an empty String array
      */
     public static Supplier<String[]> ofEmptyStringArray() {
@@ -465,6 +553,12 @@ public final class Suppliers {
      * Returns a supplier that supplies empty Object arrays.
      *
      * <p>This supplier always returns the same empty Object array instance for efficiency.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Supplier<Object[]> supplier = Suppliers.ofEmptyObjectArray();
+     * Object[] arr = supplier.get();   // returns a zero-length Object[]
+     * }</pre>
      *
      * @return a supplier that returns an empty Object array
      */
@@ -477,6 +571,12 @@ public final class Suppliers {
      *
      * <p>This supplier always returns the same empty string instance.</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Supplier<String> supplier = Suppliers.ofEmptyString();
+     * String s = supplier.get();   // returns ""
+     * }</pre>
+     *
      * @return a supplier that returns an empty string
      */
     public static Supplier<String> ofEmptyString() {
@@ -487,6 +587,12 @@ public final class Suppliers {
      * Returns a supplier that creates new BooleanList instances.
      *
      * <p>Each call to the supplier's get() method will create a new, empty BooleanList.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Supplier<BooleanList> supplier = Suppliers.ofBooleanList();
+     * BooleanList list = supplier.get();   // returns new BooleanList()
+     * }</pre>
      *
      * @return a supplier that creates new BooleanList instances
      */
@@ -499,6 +605,12 @@ public final class Suppliers {
      *
      * <p>Each call to the supplier's get() method will create a new, empty CharList.</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Supplier<CharList> supplier = Suppliers.ofCharList();
+     * CharList list = supplier.get();   // returns new CharList()
+     * }</pre>
+     *
      * @return a supplier that creates new CharList instances
      */
     public static Supplier<CharList> ofCharList() {
@@ -509,6 +621,12 @@ public final class Suppliers {
      * Returns a supplier that creates new ByteList instances.
      *
      * <p>Each call to the supplier's get() method will create a new, empty ByteList.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Supplier<ByteList> supplier = Suppliers.ofByteList();
+     * ByteList list = supplier.get();   // returns new ByteList()
+     * }</pre>
      *
      * @return a supplier that creates new ByteList instances
      */
@@ -521,6 +639,12 @@ public final class Suppliers {
      *
      * <p>Each call to the supplier's get() method will create a new, empty ShortList.</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Supplier<ShortList> supplier = Suppliers.ofShortList();
+     * ShortList list = supplier.get();   // returns new ShortList()
+     * }</pre>
+     *
      * @return a supplier that creates new ShortList instances
      */
     public static Supplier<ShortList> ofShortList() {
@@ -531,6 +655,12 @@ public final class Suppliers {
      * Returns a supplier that creates new IntList instances.
      *
      * <p>Each call to the supplier's get() method will create a new, empty IntList.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Supplier<IntList> supplier = Suppliers.ofIntList();
+     * IntList list = supplier.get();   // returns new IntList()
+     * }</pre>
      *
      * @return a supplier that creates new IntList instances
      */
@@ -543,6 +673,12 @@ public final class Suppliers {
      *
      * <p>Each call to the supplier's get() method will create a new, empty LongList.</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Supplier<LongList> supplier = Suppliers.ofLongList();
+     * LongList list = supplier.get();   // returns new LongList()
+     * }</pre>
+     *
      * @return a supplier that creates new LongList instances
      */
     public static Supplier<LongList> ofLongList() {
@@ -553,6 +689,12 @@ public final class Suppliers {
      * Returns a supplier that creates new FloatList instances.
      *
      * <p>Each call to the supplier's get() method will create a new, empty FloatList.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Supplier<FloatList> supplier = Suppliers.ofFloatList();
+     * FloatList list = supplier.get();   // returns new FloatList()
+     * }</pre>
      *
      * @return a supplier that creates new FloatList instances
      */
@@ -565,6 +707,12 @@ public final class Suppliers {
      *
      * <p>Each call to the supplier's get() method will create a new, empty DoubleList.</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Supplier<DoubleList> supplier = Suppliers.ofDoubleList();
+     * DoubleList list = supplier.get();   // returns new DoubleList()
+     * }</pre>
+     *
      * @return a supplier that creates new DoubleList instances
      */
     public static Supplier<DoubleList> ofDoubleList() {
@@ -575,6 +723,12 @@ public final class Suppliers {
      * Returns a supplier that creates new List instances (ArrayList).
      *
      * <p>Each call to the supplier's get() method will create a new, empty ArrayList.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Supplier<List<String>> supplier = Suppliers.ofList();
+     * List<String> list = supplier.get();   // returns a new empty ArrayList
+     * }</pre>
      *
      * @param <T> the type of elements in the list
      * @return a supplier that creates new ArrayList instances
@@ -589,6 +743,12 @@ public final class Suppliers {
      *
      * <p>Each call to the supplier's get() method will create a new, empty LinkedList.</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Supplier<LinkedList<String>> supplier = Suppliers.ofLinkedList();
+     * LinkedList<String> list = supplier.get();   // returns new LinkedList<>()
+     * }</pre>
+     *
      * @param <T> the type of elements in the list
      * @return a supplier that creates new LinkedList instances
      */
@@ -601,6 +761,12 @@ public final class Suppliers {
      * Returns a supplier that creates new Set instances (HashSet).
      *
      * <p>Each call to the supplier's get() method will create a new, empty HashSet.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Supplier<Set<Integer>> supplier = Suppliers.ofSet();
+     * Set<Integer> set = supplier.get();   // returns new HashSet<>()
+     * }</pre>
      *
      * @param <T> the type of elements in the set
      * @return a supplier that creates new HashSet instances
@@ -615,6 +781,12 @@ public final class Suppliers {
      *
      * <p>Each call to the supplier's get() method will create a new, empty LinkedHashSet.</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Supplier<Set<String>> supplier = Suppliers.ofLinkedHashSet();
+     * Set<String> set = supplier.get();   // returns new LinkedHashSet<>()
+     * }</pre>
+     *
      * @param <T> the type of elements in the set
      * @return a supplier that creates new LinkedHashSet instances
      */
@@ -627,6 +799,12 @@ public final class Suppliers {
      * Returns a supplier that creates new SortedSet instances (TreeSet).
      *
      * <p>Each call to the supplier's get() method will create a new, empty TreeSet.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Supplier<SortedSet<String>> supplier = Suppliers.ofSortedSet();
+     * SortedSet<String> set = supplier.get();   // returns new TreeSet<>()
+     * }</pre>
      *
      * @param <T> the type of elements in the set
      * @return a supplier that creates new TreeSet instances
@@ -641,6 +819,12 @@ public final class Suppliers {
      *
      * <p>Each call to the supplier's get() method will create a new, empty TreeSet.</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Supplier<NavigableSet<String>> supplier = Suppliers.ofNavigableSet();
+     * NavigableSet<String> set = supplier.get();   // returns new TreeSet<>()
+     * }</pre>
+     *
      * @param <T> the type of elements in the set
      * @return a supplier that creates new TreeSet instances
      */
@@ -653,6 +837,12 @@ public final class Suppliers {
      * Returns a supplier that creates new TreeSet instances.
      *
      * <p>Each call to the supplier's get() method will create a new, empty TreeSet.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Supplier<TreeSet<String>> supplier = Suppliers.ofTreeSet();
+     * TreeSet<String> set = supplier.get();   // returns new TreeSet<>()
+     * }</pre>
      *
      * @param <T> the type of elements in the set
      * @return a supplier that creates new TreeSet instances
@@ -667,6 +857,12 @@ public final class Suppliers {
      *
      * <p>Each call to the supplier's get() method will create a new, empty LinkedList as a Queue.</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Supplier<Queue<String>> supplier = Suppliers.ofQueue();
+     * Queue<String> queue = supplier.get();   // returns new LinkedList<>()
+     * }</pre>
+     *
      * @param <T> the type of elements in the queue
      * @return a supplier that creates new LinkedList instances as Queue
      */
@@ -680,6 +876,12 @@ public final class Suppliers {
      *
      * <p>Each call to the supplier's get() method will create a new, empty LinkedList as a Deque.</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Supplier<Deque<String>> supplier = Suppliers.ofDeque();
+     * Deque<String> deque = supplier.get();   // returns new LinkedList<>()
+     * }</pre>
+     *
      * @param <T> the type of elements in the deque
      * @return a supplier that creates new LinkedList instances as Deque
      */
@@ -692,6 +894,12 @@ public final class Suppliers {
      * Returns a supplier that creates new ArrayDeque instances.
      *
      * <p>Each call to the supplier's get() method will create a new, empty ArrayDeque.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Supplier<ArrayDeque<String>> supplier = Suppliers.ofArrayDeque();
+     * ArrayDeque<String> deque = supplier.get();   // returns new ArrayDeque<>()
+     * }</pre>
      *
      * @param <T> the type of elements in the deque
      * @return a supplier that creates new ArrayDeque instances
@@ -707,6 +915,12 @@ public final class Suppliers {
      * <p>Each call to the supplier's get() method will create a new, empty LinkedBlockingQueue
      * with unbounded capacity.</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Supplier<LinkedBlockingQueue<String>> supplier = Suppliers.ofLinkedBlockingQueue();
+     * LinkedBlockingQueue<String> queue = supplier.get();   // returns new LinkedBlockingQueue<>()
+     * }</pre>
+     *
      * @param <T> the type of elements in the queue
      * @return a supplier that creates new LinkedBlockingQueue instances
      */
@@ -721,6 +935,12 @@ public final class Suppliers {
      * <p>Each call to the supplier's get() method will create a new, empty LinkedBlockingDeque
      * with unbounded capacity.</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Supplier<LinkedBlockingDeque<String>> supplier = Suppliers.ofLinkedBlockingDeque();
+     * LinkedBlockingDeque<String> deque = supplier.get();   // returns new LinkedBlockingDeque<>()
+     * }</pre>
+     *
      * @param <T> the type of elements in the deque
      * @return a supplier that creates new LinkedBlockingDeque instances
      */
@@ -733,6 +953,12 @@ public final class Suppliers {
      * Returns a supplier that creates new ConcurrentLinkedQueue instances.
      *
      * <p>Each call to the supplier's get() method will create a new, empty ConcurrentLinkedQueue.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Supplier<ConcurrentLinkedQueue<String>> supplier = Suppliers.ofConcurrentLinkedQueue();
+     * ConcurrentLinkedQueue<String> queue = supplier.get();   // returns new ConcurrentLinkedQueue<>()
+     * }</pre>
      *
      * @param <T> the type of elements in the queue
      * @return a supplier that creates new ConcurrentLinkedQueue instances
@@ -748,6 +974,12 @@ public final class Suppliers {
      * <p>Each call to the supplier's get() method will create a new, empty PriorityQueue
      * with natural ordering.</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Supplier<PriorityQueue<Integer>> supplier = Suppliers.ofPriorityQueue();
+     * PriorityQueue<Integer> queue = supplier.get();   // returns new PriorityQueue<>()
+     * }</pre>
+     *
      * @param <T> the type of elements in the queue
      * @return a supplier that creates new PriorityQueue instances
      */
@@ -760,6 +992,12 @@ public final class Suppliers {
      * Returns a supplier that creates new Map instances (HashMap).
      *
      * <p>Each call to the supplier's get() method will create a new, empty HashMap.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Supplier<Map<String, Integer>> supplier = Suppliers.ofMap();
+     * Map<String, Integer> map = supplier.get();   // returns new HashMap<>()
+     * }</pre>
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -774,6 +1012,12 @@ public final class Suppliers {
      * Returns a supplier that creates new LinkedHashMap instances.
      *
      * <p>Each call to the supplier's get() method will create a new, empty LinkedHashMap.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Supplier<Map<String, Integer>> supplier = Suppliers.ofLinkedHashMap();
+     * Map<String, Integer> map = supplier.get();   // returns new LinkedHashMap<>()
+     * }</pre>
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -790,6 +1034,12 @@ public final class Suppliers {
      * <p>Each call to the supplier's get() method will create a new, empty IdentityHashMap.
      * IdentityHashMap uses reference equality (==) instead of object equality (equals).</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Supplier<IdentityHashMap<String, Integer>> supplier = Suppliers.ofIdentityHashMap();
+     * IdentityHashMap<String, Integer> map = supplier.get();   // returns new IdentityHashMap<>()
+     * }</pre>
+     *
      * @param <K> the key type
      * @param <V> the value type
      * @return a supplier that creates new IdentityHashMap instances
@@ -803,6 +1053,12 @@ public final class Suppliers {
      * Returns a supplier that creates new SortedMap instances (TreeMap).
      *
      * <p>Each call to the supplier's get() method will create a new, empty TreeMap.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Supplier<SortedMap<String, Integer>> supplier = Suppliers.ofSortedMap();
+     * SortedMap<String, Integer> map = supplier.get();   // returns new TreeMap<>()
+     * }</pre>
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -818,6 +1074,12 @@ public final class Suppliers {
      *
      * <p>Each call to the supplier's get() method will create a new, empty TreeMap.</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Supplier<NavigableMap<String, Integer>> supplier = Suppliers.ofNavigableMap();
+     * NavigableMap<String, Integer> map = supplier.get();   // returns new TreeMap<>()
+     * }</pre>
+     *
      * @param <K> the key type
      * @param <V> the value type
      * @return a supplier that creates new TreeMap instances
@@ -831,6 +1093,12 @@ public final class Suppliers {
      * Returns a supplier that creates new TreeMap instances.
      *
      * <p>Each call to the supplier's get() method will create a new, empty TreeMap.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Supplier<TreeMap<String, Integer>> supplier = Suppliers.ofTreeMap();
+     * TreeMap<String, Integer> map = supplier.get();   // returns new TreeMap<>()
+     * }</pre>
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -846,6 +1114,12 @@ public final class Suppliers {
      *
      * <p>Each call to the supplier's get() method will create a new, empty ConcurrentHashMap.</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Supplier<ConcurrentMap<String, Integer>> supplier = Suppliers.ofConcurrentMap();
+     * ConcurrentMap<String, Integer> map = supplier.get();   // returns new ConcurrentHashMap<>()
+     * }</pre>
+     *
      * @param <K> the key type
      * @param <V> the value type
      * @return a supplier that creates new ConcurrentHashMap instances
@@ -859,6 +1133,12 @@ public final class Suppliers {
      * Returns a supplier that creates new ConcurrentHashMap instances.
      *
      * <p>Each call to the supplier's get() method will create a new, empty ConcurrentHashMap.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Supplier<ConcurrentHashMap<String, Integer>> supplier = Suppliers.ofConcurrentHashMap();
+     * ConcurrentHashMap<String, Integer> map = supplier.get();   // returns new ConcurrentHashMap<>()
+     * }</pre>
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -874,6 +1154,12 @@ public final class Suppliers {
      *
      * <p>Each call to the supplier's get() method will create a new, empty ConcurrentSkipListMap.</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Supplier<ConcurrentNavigableMap<String, Integer>> supplier = Suppliers.ofConcurrentNavigableMap();
+     * ConcurrentNavigableMap<String, Integer> map = supplier.get();   // returns new ConcurrentSkipListMap<>()
+     * }</pre>
+     *
      * @param <K> the key type
      * @param <V> the value type
      * @return a supplier that creates new ConcurrentSkipListMap instances
@@ -888,6 +1174,12 @@ public final class Suppliers {
      *
      * <p>Each call to the supplier's get() method will create a new, empty Set backed by ConcurrentHashMap.</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Supplier<Set<String>> supplier = Suppliers.ofConcurrentHashSet();
+     * Set<String> set = supplier.get();   // returns a new empty concurrent Set (ConcurrentHashMap.newKeySet())
+     * }</pre>
+     *
      * @param <T> the type of elements in the set
      * @return a supplier that creates new concurrent Set instances
      */
@@ -901,6 +1193,12 @@ public final class Suppliers {
      *
      * <p>Each call to the supplier's get() method will create a new, empty BiMap.
      * A BiMap maintains a bidirectional mapping between keys and values.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Supplier<BiMap<String, Integer>> supplier = Suppliers.ofBiMap();
+     * BiMap<String, Integer> map = supplier.get();   // returns new BiMap<>()
+     * }</pre>
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -917,6 +1215,15 @@ public final class Suppliers {
      * <p>Each call to the supplier's get() method will create a new, empty Multiset.
      * A Multiset is a collection that allows duplicate elements and counts their occurrences.</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Supplier<Multiset<String>> supplier = Suppliers.ofMultiset();
+     * Multiset<String> multiset = supplier.get();
+     * multiset.add("apple");
+     * multiset.add("apple");
+     * int count = multiset.count("apple");   // returns 2
+     * }</pre>
+     *
      * @param <T> the type of elements in the multiset
      * @return a supplier that creates new Multiset instances
      */
@@ -930,6 +1237,14 @@ public final class Suppliers {
      *
      * <p>Each call to the supplier's get() method will create a new, empty Multiset
      * backed by the specified type of Map.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Supplier<Multiset<String>> supplier = Suppliers.ofMultiset(LinkedHashMap.class);
+     * Multiset<String> multiset = supplier.get();   // returns a new empty Multiset backed by a LinkedHashMap
+     * multiset.add("apple");
+     * int count = multiset.count("apple");   // returns 1
+     * }</pre>
      *
      * @param <T> the type of elements in the multiset
      * @param valueMapType the class of {@code Map} to use for storing element counts, must not be {@code null}
@@ -946,6 +1261,15 @@ public final class Suppliers {
      * <p>Each call to the supplier's get() method will create a new, empty Multiset
      * backed by a Map created by the provided supplier.</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Supplier<Multiset<String>> supplier = Suppliers.ofMultiset(java.util.TreeMap::new);
+     * Multiset<String> multiset = supplier.get();   // returns a new empty Multiset backed by a TreeMap
+     * multiset.add("apple");
+     * multiset.add("apple");
+     * int count = multiset.count("apple");   // returns 2
+     * }</pre>
+     *
      * @param <T> the type of elements in the multiset
      * @param mapSupplier supplier to create the backing {@code Map} used for storing element counts, must not be {@code null}
      * @return a supplier that creates new Multiset instances backed by maps from the given supplier
@@ -959,6 +1283,15 @@ public final class Suppliers {
      *
      * <p>The returned supplier creates ListMultimaps backed by HashMap and ArrayList.
      * Each invocation of the supplier creates a new empty ListMultimap instance.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Supplier<ListMultimap<String, Integer>> supplier = Suppliers.ofListMultimap();
+     * ListMultimap<String, Integer> multimap = supplier.get();
+     * multimap.put("key1", 1);
+     * multimap.put("key1", 2);
+     * List<Integer> values = multimap.get("key1");   // returns [1, 2]
+     * }</pre>
      *
      * @param <K> the type of keys maintained by the multimap
      * @param <E> the type of mapped values
@@ -975,6 +1308,15 @@ public final class Suppliers {
      * <p>The returned supplier creates ListMultimaps backed by the specified Map type and ArrayList.
      * Each invocation of the supplier creates a new empty ListMultimap instance.</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Supplier<ListMultimap<String, Integer>> supplier = Suppliers.ofListMultimap(LinkedHashMap.class);
+     * ListMultimap<String, Integer> multimap = supplier.get();   // returns a new empty ListMultimap backed by LinkedHashMap
+     * multimap.put("key1", 1);
+     * multimap.put("key1", 2);
+     * List<Integer> values = multimap.get("key1");   // returns [1, 2]
+     * }</pre>
+     *
      * @param <K> the type of keys maintained by the multimap
      * @param <E> the type of mapped values
      * @param mapType the Class object representing the Map implementation to use, must not be {@code null}
@@ -990,6 +1332,15 @@ public final class Suppliers {
      *
      * <p>The returned supplier creates ListMultimaps backed by the specified Map and List implementations.
      * Each invocation of the supplier creates a new empty ListMultimap instance.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Supplier<ListMultimap<String, Integer>> supplier = Suppliers.ofListMultimap(LinkedHashMap.class, LinkedList.class);
+     * ListMultimap<String, Integer> multimap = supplier.get();   // backed by LinkedHashMap with LinkedList values
+     * multimap.put("key1", 1);
+     * multimap.put("key1", 2);
+     * List<Integer> values = multimap.get("key1");   // returns [1, 2]
+     * }</pre>
      *
      * @param <K> the type of keys maintained by the multimap
      * @param <E> the type of mapped values
@@ -1009,6 +1360,16 @@ public final class Suppliers {
      * and the List instances used for values. This allows for complete control over the multimap's
      * internal structure.</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Supplier<ListMultimap<String, Integer>> supplier =
+     *         Suppliers.ofListMultimap(LinkedHashMap::new, LinkedList::new);
+     * ListMultimap<String, Integer> multimap = supplier.get();   // backed by LinkedHashMap with LinkedList values
+     * multimap.put("key1", 1);
+     * multimap.put("key1", 2);
+     * List<Integer> values = multimap.get("key1");   // returns [1, 2]
+     * }</pre>
+     *
      * @param <K> the type of keys maintained by the multimap
      * @param <E> the type of mapped values
      * @param mapSupplier supplier that creates the backing Map instances, must not be {@code null}
@@ -1026,6 +1387,15 @@ public final class Suppliers {
      * <p>The returned supplier creates SetMultimaps backed by HashMap and HashSet.
      * Each invocation of the supplier creates a new empty SetMultimap instance.</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Supplier<SetMultimap<String, Integer>> supplier = Suppliers.ofSetMultimap();
+     * SetMultimap<String, Integer> multimap = supplier.get();
+     * multimap.put("key1", 1);
+     * multimap.put("key1", 1);
+     * Set<Integer> values = multimap.get("key1");   // returns [1]
+     * }</pre>
+     *
      * @param <K> the type of keys maintained by the multimap
      * @param <E> the type of mapped values
      * @return a Supplier that creates new SetMultimap instances
@@ -1040,6 +1410,15 @@ public final class Suppliers {
      *
      * <p>The returned supplier creates SetMultimaps backed by the specified Map type and HashSet.
      * Each invocation of the supplier creates a new empty SetMultimap instance.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Supplier<SetMultimap<String, Integer>> supplier = Suppliers.ofSetMultimap(LinkedHashMap.class);
+     * SetMultimap<String, Integer> multimap = supplier.get();   // returns a new empty SetMultimap backed by LinkedHashMap
+     * multimap.put("key1", 1);
+     * multimap.put("key1", 1);
+     * Set<Integer> values = multimap.get("key1");   // returns [1] (duplicates collapsed)
+     * }</pre>
      *
      * @param <K> the type of keys maintained by the multimap
      * @param <E> the type of mapped values
@@ -1056,6 +1435,15 @@ public final class Suppliers {
      *
      * <p>The returned supplier creates SetMultimaps backed by the specified Map and Set implementations.
      * Each invocation of the supplier creates a new empty SetMultimap instance.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Supplier<SetMultimap<String, Integer>> supplier = Suppliers.ofSetMultimap(LinkedHashMap.class, LinkedHashSet.class);
+     * SetMultimap<String, Integer> multimap = supplier.get();   // backed by LinkedHashMap with LinkedHashSet values
+     * multimap.put("key1", 1);
+     * multimap.put("key1", 1);
+     * Set<Integer> values = multimap.get("key1");   // returns [1] (duplicates collapsed)
+     * }</pre>
      *
      * @param <K> the type of keys maintained by the multimap
      * @param <E> the type of mapped values
@@ -1075,6 +1463,16 @@ public final class Suppliers {
      * and the Set instances used for values. This allows for complete control over the multimap's
      * internal structure.</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Supplier<SetMultimap<String, Integer>> supplier =
+     *         Suppliers.ofSetMultimap(LinkedHashMap::new, LinkedHashSet::new);
+     * SetMultimap<String, Integer> multimap = supplier.get();   // backed by LinkedHashMap with LinkedHashSet values
+     * multimap.put("key1", 1);
+     * multimap.put("key1", 1);
+     * Set<Integer> values = multimap.get("key1");   // returns [1] (duplicates collapsed)
+     * }</pre>
+     *
      * @param <K> the type of keys maintained by the multimap
      * @param <E> the type of mapped values
      * @param mapSupplier supplier that creates the backing Map instances, must not be {@code null}
@@ -1093,6 +1491,16 @@ public final class Suppliers {
      * The returned supplier creates Multimaps using custom suppliers for both the backing Map
      * and the Collection instances used for values.</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Supplier<Multimap<String, Integer, List<Integer>>> supplier =
+     *         Suppliers.ofMultimap(HashMap::new, ArrayList::new);
+     * Multimap<String, Integer, List<Integer>> multimap = supplier.get();   // backed by HashMap with ArrayList values
+     * multimap.put("key1", 1);
+     * multimap.put("key1", 2);
+     * List<Integer> values = multimap.get("key1");   // returns [1, 2]
+     * }</pre>
+     *
      * @param <K> the type of keys maintained by the multimap
      * @param <E> the type of mapped values
      * @param <V> the type of Collection used to store values
@@ -1109,6 +1517,12 @@ public final class Suppliers {
      * Returns a Supplier that creates new StringBuilder instances.
      *
      * <p>Each invocation of the supplier creates a new empty StringBuilder with default initial capacity.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Supplier<StringBuilder> supplier = Suppliers.ofStringBuilder();
+     * StringBuilder sb = supplier.get();   // returns new StringBuilder()
+     * }</pre>
      *
      * @return a Supplier that creates new StringBuilder instances
      */
@@ -1140,6 +1554,12 @@ public final class Suppliers {
      *   <li>{@code ImmutableList} (and subtypes) - returns ArrayList supplier</li>
      *   <li>{@code ImmutableSet} (and subtypes) - returns HashSet supplier</li>
      * </ul>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Supplier<? extends Collection<String>> supplier = Suppliers.ofCollection(LinkedHashSet.class);
+     * Collection<String> coll = supplier.get();   // returns new LinkedHashSet<>()
+     * }</pre>
      *
      * @param <T> the element type of the collection
      * @param targetType the Class object representing the desired Collection implementation
@@ -1234,6 +1654,12 @@ public final class Suppliers {
      *   <li>{@code ImmutableMap} (and subtypes) - returns HashMap supplier</li>
      * </ul>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Supplier<? extends Map<String, Integer>> supplier = Suppliers.ofMap(TreeMap.class);
+     * Map<String, Integer> map = supplier.get();   // returns new TreeMap<>()
+     * }</pre>
+     *
      * @param <K> the type of keys maintained by the map
      * @param <V> the type of mapped values
      * @param targetType the Class object representing the desired Map implementation
@@ -1306,6 +1732,13 @@ public final class Suppliers {
      *
      * <p>Note: Built-in classes (like ArrayList, HashSet, etc.) cannot be registered with custom suppliers.</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * // Register a custom collection type
+     * Suppliers.registerForCollection(MyCustomList.class, MyCustomList::new);
+     * Supplier<? extends Collection<String>> supplier = Suppliers.ofCollection(MyCustomList.class);
+     * }</pre>
+     *
      * @param <T> the Collection type
      * @param targetClass the Class object of the Collection implementation to register
      * @param supplier the Supplier that creates instances of the target class
@@ -1339,6 +1772,13 @@ public final class Suppliers {
      *
      * <p>Note: Built-in classes (like HashMap, TreeMap, etc.) cannot be registered with custom suppliers.</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * // Register a custom Map type
+     * Suppliers.registerForMap(MyCustomMap.class, MyCustomMap::new);
+     * Supplier<? extends Map<String, Integer>> supplier = Suppliers.ofMap(MyCustomMap.class);
+     * }</pre>
+     *
      * @param <T> the Map type
      * @param targetClass the Class object of the Map implementation to register
      * @param supplier the Supplier that creates instances of the target class
@@ -1366,6 +1806,11 @@ public final class Suppliers {
     /**
      * Throws UnsupportedOperationException. ImmutableList creation is not supported.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Suppliers.ofImmutableList();   // throws UnsupportedOperationException
+     * }</pre>
+     *
      * @return never returns normally
      * @throws UnsupportedOperationException always
      * @deprecated unsupported operation. An {@link ImmutableList} is immutable and cannot be populated through a no-arg supplier; there is no replacement.
@@ -1378,6 +1823,11 @@ public final class Suppliers {
     /**
      * Throws UnsupportedOperationException. ImmutableSet creation is not supported.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Suppliers.ofImmutableSet();   // throws UnsupportedOperationException
+     * }</pre>
+     *
      * @return never returns normally
      * @throws UnsupportedOperationException always
      * @deprecated unsupported operation. An {@link ImmutableSet} is immutable and cannot be populated through a no-arg supplier; there is no replacement.
@@ -1389,6 +1839,11 @@ public final class Suppliers {
 
     /**
      * Throws UnsupportedOperationException. ImmutableMap creation is not supported.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Suppliers.ofImmutableMap();   // throws UnsupportedOperationException
+     * }</pre>
      *
      * @return never returns normally
      * @throws UnsupportedOperationException always
@@ -1406,6 +1861,12 @@ public final class Suppliers {
      *
      * <p>Each invocation of the supplier creates a new Exception with no message or cause.</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Supplier<Exception> exceptionSupplier = Suppliers.newException();
+     * Exception ex = exceptionSupplier.get();   // returns new Exception()
+     * }</pre>
+     *
      * @return a Supplier that creates new Exception instances
      */
     @Beta
@@ -1420,6 +1881,12 @@ public final class Suppliers {
      *
      * <p>Each invocation of the supplier creates a new RuntimeException with no message or cause.</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Supplier<RuntimeException> supplier = Suppliers.newRuntimeException();
+     * RuntimeException ex = supplier.get();   // returns new RuntimeException()
+     * }</pre>
+     *
      * @return a Supplier that creates new RuntimeException instances
      */
     @Beta
@@ -1433,6 +1900,12 @@ public final class Suppliers {
      * Returns a Supplier that creates new NoSuchElementException instances.
      *
      * <p>Each invocation of the supplier creates a new NoSuchElementException with no message.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Supplier<NoSuchElementException> supplier = Suppliers.newNoSuchElementException();
+     * NoSuchElementException ex = supplier.get();   // returns new NoSuchElementException()
+     * }</pre>
      *
      * @return a Supplier that creates new NoSuchElementException instances
      */

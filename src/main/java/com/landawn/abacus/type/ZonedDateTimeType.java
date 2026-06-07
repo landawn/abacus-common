@@ -124,8 +124,15 @@ public class ZonedDateTimeType extends AbstractTemporalType<ZonedDateTime> {
      * String str = type.stringOf(zdt);   // e.g. "2023-10-15T10:30:00+01:00"
      * }</pre>
      *
+     * <p>The returned string is a serializable representation designed to be parsed back into an equivalent value
+     * via {@link #valueOf(String)}; {@code stringOf} and {@code valueOf} are inverse operations that round-trip. This
+     * is the key distinction from {@link Object#toString()}, whose result is not guaranteed to be convertible back
+     * into the original value.</p>
+     *
      * @param x the ZonedDateTime instance to convert to string
      * @return the ISO 8601 string representation, or {@code null} if the input is null
+     * @see #valueOf(String)
+     * @see #valueOf(Object)
      */
     @Override
     public String stringOf(final ZonedDateTime x) {
@@ -172,18 +179,39 @@ public class ZonedDateTimeType extends AbstractTemporalType<ZonedDateTime> {
      *   <li>Numeric strings are interpreted as epoch milliseconds</li>
      *   <li>ISO 8601 date-time strings with 'Z' suffix (20 chars) are parsed as ISO date-time</li>
      *   <li>ISO 8601 timestamp strings with 'Z' suffix (24 chars) are parsed as ISO timestamp</li>
-     *   <li>Other formats are parsed using the default ZonedDateTime parser</li>
+     *   <li>Any other value is parsed with the default {@link ZonedDateTime#parse(CharSequence)} parser</li>
+     * </ul>
+     *
+     * <p>Every string produced by {@link ZonedDateTime#toString()} can be parsed back into an equivalent value,
+     * including:</p>
+     * <ul>
+     *   <li>the seconds-omitted form (e.g. {@code "2023-10-15T10:30Z"})</li>
+     *   <li>fractional seconds of any precision (e.g. {@code "2023-10-15T10:30:45.123456789Z"})</li>
+     *   <li>numeric UTC offsets, with optional offset-seconds (e.g. {@code "2023-10-15T10:30:45+05:45"})</li>
+     *   <li>the region-zone suffix (e.g. {@code "2023-10-15T10:30:45-07:00[America/Los_Angeles]"}), whose
+     *       {@link java.time.ZoneId} is preserved</li>
      * </ul>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ZonedDateTime zdt1 = type.valueOf("2023-10-15T10:30:00Z");   // ISO 8601 format
      * ZonedDateTime zdt2 = type.valueOf("SYS_TIME");               // Current time
+     *
+     * // Round-trips the output of ZonedDateTime.toString(), region zone included
+     * ZonedDateTime src = ZonedDateTime.now(ZoneId.of("America/Los_Angeles"));
+     * ZonedDateTime copy = type.valueOf(src.toString());          // equal to src
      * }</pre>
+     *
+     * <p>This method is the inverse of {@code stringOf} and round-trips with it: it parses the string produced by
+     * {@code stringOf} back into a value of this type. It additionally accepts the output of
+     * {@link ZonedDateTime#toString()} — including the region-zone suffix shown above, which {@code stringOf} itself
+     * does not emit — so values written with {@code toString()} round-trip as well.</p>
      *
      * @param str the string to convert to ZonedDateTime
      * @return a ZonedDateTime instance, or {@code null} if the string is {@code null}, empty, or the literal "null"
      * @throws DateTimeParseException if the string cannot be parsed as a valid date/time
+     * @see #valueOf(Object)
+     * @see #stringOf(ZonedDateTime)
      */
     @Override
     public ZonedDateTime valueOf(final String str) {
@@ -198,15 +226,28 @@ public class ZonedDateTimeType extends AbstractTemporalType<ZonedDateTime> {
         if (isPossibleMillis(str)) {
             try {
                 return ZonedDateTime.ofInstant(Instant.ofEpochMilli(Numbers.toLong(str)), DEFAULT_ZONE_ID);
-            } catch (final NumberFormatException e2) {
+            } catch (final NumberFormatException e) {
                 // ignore;
             }
         }
 
         final int len = str.length();
 
-        return len == 20 && str.charAt(19) == 'Z' ? ZonedDateTime.parse(str, iso8601DateTimeDTF)
-                : (len == 24 && str.charAt(23) == 'Z' ? ZonedDateTime.parse(str, iso8601TimestampDTF) : ZonedDateTime.parse(str));
+        // Fast path for the two most common ISO-8601 UTC forms produced by stringOf/serializeTo. If the fast-path
+        // formatter rejects the input, fall back to the general parser below so that every ZonedDateTime.toString()
+        // form remains parseable.
+        if ((len == 20 && str.charAt(19) == 'Z') || (len == 24 && str.charAt(23) == 'Z')) {
+            try {
+                return ZonedDateTime.parse(str, len == 20 ? iso8601DateTimeDTF : iso8601TimestampDTF);
+            } catch (final DateTimeParseException e) {
+                // fall through to the general parser below.
+            }
+        }
+
+        // General path: ISO_ZONED_DATE_TIME, which parses every form produced by ZonedDateTime.toString(),
+        // including the optional region-zone suffix, numeric offsets (with optional offset-seconds),
+        // fractional seconds of any precision, and the seconds-omitted form.
+        return ZonedDateTime.parse(str);
     }
 
     /**
@@ -353,10 +394,24 @@ public class ZonedDateTimeType extends AbstractTemporalType<ZonedDateTime> {
      * StringBuilder sb = new StringBuilder();
      * type.appendTo(sb, ZonedDateTime.now());   // Appends formatted date/time
      * }</pre>
+     * <p>
+     * <b>appendTo vs. serializeTo:</b> {@code appendTo} produces a plain, {@code toString()}-style rendering with no
+     * JSON/XML quoting or escaping (for general text output), whereas {@code serializeTo} produces the JSON/XML
+     * serialized form (applying string quotation and character escaping per the serialization config) and is used by the
+     * JSON/XML serializers.
      *
      * @param appendable the Appendable to write to
      * @param x the ZonedDateTime value to append
      * @throws IOException if an I/O error occurs during the append operation
+     * @implNote
+     * This method appends a string representation of {@code x} to {@code appendable} (the literal {@code "null"} for a
+     * {@code null} value). Conceptually this is the human-readable form produced by {@code toString()}, <i>not</i> the
+     * value returned by {@code stringOf}, which is a formatted, serializable representation (typically a JSON string)
+     * that {@link #valueOf(String)} can convert back into an equivalent value. For values whose nested structure makes
+     * the two forms differ (collections, maps, arrays), {@code appendTo} emits the unquoted, {@code toString()}-style
+     * form; it is therefore not, in the general contract, a plain
+     * {@code appendable.append(x == null ? NULL_STRING : stringOf(x))}. (For value types whose human-readable and
+     * serialized forms coincide, the appended text is naturally identical to {@code stringOf(x)}.)
      */
     @Override
     public void appendTo(final Appendable appendable, final ZonedDateTime x) throws IOException {
@@ -386,8 +441,17 @@ public class ZonedDateTimeType extends AbstractTemporalType<ZonedDateTime> {
      * <pre>{@code
      * CharacterWriter writer = new CharacterWriter();
      * JsonXmlSerConfig<?> config = JsonXmlSerConfig.of();
-     * type.writeCharacter(writer, ZonedDateTime.now(), config);   // Writes formatted date/time
+     * type.serializeTo(writer, ZonedDateTime.now(), config);   // Writes formatted date/time
      * }</pre>
+     * <p>
+     * This method is specifically designed for JSON/XML serialization: it writes the serialized form of {@code x} to the
+     * {@code CharacterWriter}, applying string quotation and character escaping according to the supplied serialization
+     * config (a {@code null} config means no surrounding quotation). It is the streaming counterpart of {@code stringOf}
+     * and is invoked by the JSON/XML serializers.
+     * <p>
+     * <b>serializeTo vs. appendTo:</b> {@code serializeTo} produces machine-readable JSON/XML (quoted and escaped),
+     * whereas {@code appendTo} produces a plain, human-readable {@code toString()}-style rendering without JSON/XML
+     * quoting or escaping.
      *
      * @param writer the CharacterWriter to write to
      * @param x the ZonedDateTime value to write
@@ -396,7 +460,7 @@ public class ZonedDateTimeType extends AbstractTemporalType<ZonedDateTime> {
      */
     @SuppressWarnings("null")
     @Override
-    public void writeCharacter(final CharacterWriter writer, final ZonedDateTime x, final JsonXmlSerConfig<?> config) throws IOException {
+    public void serializeTo(final CharacterWriter writer, final ZonedDateTime x, final JsonXmlSerConfig<?> config) throws IOException {
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {

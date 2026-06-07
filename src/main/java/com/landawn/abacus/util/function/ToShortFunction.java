@@ -29,7 +29,6 @@ import com.landawn.abacus.util.Throwables;
  *
  * <p>This is a functional interface whose functional method is {@link #applyAsShort(Object)}.
  *
- *
  * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
  *
  * @param <T> the type of the input to the function
@@ -46,6 +45,7 @@ public interface ToShortFunction<T> extends Throwables.ToShortFunction<T, Runtim
      * short primitive = ToShortFunction.UNBOX.applyAsShort(boxed);     // returns 42
      * short defaultValue = ToShortFunction.UNBOX.applyAsShort(null);   // returns 0
      * }</pre>
+     *
      */
     ToShortFunction<Short> UNBOX = value -> value == null ? 0 : value;
     /**
@@ -69,6 +69,7 @@ public interface ToShortFunction<T> extends Throwables.ToShortFunction<T, Runtim
      *
      * short defaultValue = ToShortFunction.FROM_NUM.applyAsShort(null);   // returns 0
      * }</pre>
+     *
      */
     ToShortFunction<Number> FROM_NUM = value -> value == null ? 0 : value.shortValue();
 

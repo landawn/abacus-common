@@ -33,7 +33,7 @@ public class DoubleIteratorExTest extends TestBase {
         Assertions.assertThrows(NoSuchElementException.class, () -> iter.nextDouble());
         Assertions.assertEquals(0, iter.count());
         Assertions.assertArrayEquals(new double[0], iter.toArray());
-        iter.close();
+        iter.closeResource();
     }
 
     // ---- of(double[] a, int fromIndex, int toIndex) ----
@@ -300,7 +300,7 @@ public class DoubleIteratorExTest extends TestBase {
 
         Assertions.assertEquals(1, iter.count());
 
-        iter.close();
+        iter.closeResource();
     }
 
     @Test
@@ -354,12 +354,12 @@ public class DoubleIteratorExTest extends TestBase {
         Assertions.assertFalse(iter.hasNext());
     }
 
-    // ---- close() ----
+    // ---- closeResource() ----
 
     @Test
-    public void testClose() {
+    public void testCloseResource() {
         DoubleIteratorEx iter = DoubleIteratorEx.of(1.0, 2.0, 3.0);
-        iter.close();
+        iter.closeResource();
         assertNotNull(iter);
     }
 

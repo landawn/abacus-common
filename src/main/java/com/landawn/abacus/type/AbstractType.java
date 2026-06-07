@@ -51,7 +51,7 @@ import com.landawn.abacus.util.TypeAttrParser;
  *       as {@code VARCHAR}, so subclasses with native JDBC support (numbers, dates, blobs) should
  *       override these.</li>
  *   <li>Append/write operations via {@link #appendTo(Appendable, Object)} and
- *       {@link #writeCharacter(CharacterWriter, Object, JsonXmlSerConfig)}, both honoring the
+ *       {@link #serializeTo(CharacterWriter, Object, JsonXmlSerConfig)}, both honoring the
  *       textual {@code "null"} marker for {@code null} values.</li>
  *   <li>Type classification predicates ({@link #isPrimitive()}, {@link #isNumber()},
  *       {@link #isDate()}, etc.) which all return {@code false} by default; subclasses override
@@ -267,7 +267,6 @@ public abstract class AbstractType<T> implements Type<T> {
      */
     @Override
     public String declaringName() {
-
         return name;
     }
 
@@ -750,11 +749,11 @@ public abstract class AbstractType<T> implements Type<T> {
     @SuppressWarnings("unchecked")
     @Override
     public int compare(final T x, final T y) {
-        if (isComparable()) {
-            return (x == null) ? ((y == null) ? 0 : (-1)) : ((y == null) ? 1 : ((Comparable<? super T>) x).compareTo(y));
-        } else {
+        if (!isComparable()) {
             throw new UnsupportedOperationException(name() + " does not support compare operation");
         }
+
+        return (x == null) ? ((y == null) ? 0 : (-1)) : ((y == null) ? 1 : ((Comparable<? super T>) x).compareTo(y));
     }
 
     /**
@@ -863,7 +862,7 @@ public abstract class AbstractType<T> implements Type<T> {
      *
      * @param stmt the {@code CallableStatement}
      * @param parameterName the parameter name
-     * @param x the value to set
+     * @param x the value to set, may be {@code null}
      * @throws SQLException if a database access error occurs
      */
     @Override
@@ -913,10 +912,25 @@ public abstract class AbstractType<T> implements Type<T> {
      * Appends the string representation of a value to an {@code Appendable}.
      * Appends the literal {@code "null"} string for {@code null} values;
      * otherwise delegates to {@link #stringOf(Object)}.
+     * <p>
+     * <b>appendTo vs. serializeTo:</b> {@code appendTo} produces a plain, {@code toString()}-style rendering with no
+     * JSON/XML quoting or escaping (for general text output), whereas
+     * {@link #serializeTo(CharacterWriter, Object, JsonXmlSerConfig)} produces the JSON/XML-serialized form (with
+     * string quotation and character escaping applied per the supplied {@link JsonXmlSerConfig}) and is used by the
+     * JSON/XML serializers.
      *
      * @param appendable the target to append to
      * @param x the value to append
      * @throws IOException if an I/O error occurs
+     * @implNote
+     * {@code appendTo} writes a string representation of {@code x} for general text output. Conceptually this is the
+     * human-readable form produced by {@code toString()}, as opposed to {@link #stringOf(Object)}, which returns a
+     * formatted, serializable representation (typically a JSON string) that {@link #valueOf(String)} can convert back
+     * into an equivalent value. This default implementation delegates to {@link #stringOf(Object)}, which is adequate
+     * for the simple, leaf value types where the human-readable and serialized forms coincide; subclasses that
+     * represent structured values (collections, maps, arrays) override it to emit the unquoted,
+     * {@code toString()}-style form, so that in the general contract {@code appendTo} is not a plain
+     * {@code appendable.append(x == null ? NULL_STRING : stringOf(x))}.
      */
     @Override
     public void appendTo(final Appendable appendable, final T x) throws IOException {
@@ -931,6 +945,15 @@ public abstract class AbstractType<T> implements Type<T> {
      * Writes a value to a {@code CharacterWriter} with optional configuration.
      * Writes {@code "null"} for a {@code null} value; otherwise serializes via
      * {@link #stringOf(Object)} and applies string quotation from {@code config} if specified.
+     * <p>
+     * This method is specifically designed for JSON/XML serialization: it writes the serialized form of {@code x} to
+     * the {@code CharacterWriter}, applying string quotation and character escaping according to the supplied
+     * {@link JsonXmlSerConfig} (a {@code null} config means no surrounding quotation). It is the streaming counterpart
+     * of {@link #stringOf(Object)} and is invoked by the JSON/XML serializers.
+     * <p>
+     * <b>serializeTo vs. appendTo:</b> {@code serializeTo} produces machine-readable JSON/XML (quoted and
+     * escaped), whereas {@link #appendTo(Appendable, Object)} produces a plain, human-readable {@code toString()}-style
+     * rendering without JSON/XML quoting or escaping.
      *
      * @param writer the CharacterWriter to write to
      * @param x the value to write
@@ -938,7 +961,7 @@ public abstract class AbstractType<T> implements Type<T> {
      * @throws IOException if an I/O error occurs
      */
     @Override
-    public void writeCharacter(final CharacterWriter writer, final T x, final JsonXmlSerConfig<?> config) throws IOException {
+    public void serializeTo(final CharacterWriter writer, final T x, final JsonXmlSerConfig<?> config) throws IOException {
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {
@@ -1289,10 +1312,6 @@ public abstract class AbstractType<T> implements Type<T> {
             }
         }
 
-        if (len == 0) {
-            return 0;
-        }
-
         switch (len) {
             case 1: {
                 ch = cbuf[offset];
@@ -1361,10 +1380,6 @@ public abstract class AbstractType<T> implements Type<T> {
             if (len == 0 || (cbuf[offset + len - 1] < '0' || cbuf[offset + len - 1] > '9')) {
                 throw new NumberFormatException("Invalid numeric String: \"" + ch + "\""); //NOSONAR
             }
-        }
-
-        if (len == 0) {
-            return 0;
         }
 
         switch (len) {

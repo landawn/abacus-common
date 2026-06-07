@@ -29,8 +29,8 @@ import java.util.function.Supplier;
  * <pre>{@code
  * LazyInitializer<ExpensiveObject> lazy = LazyInitializer.of(() -> new ExpensiveObject());
  * // Object is not created yet
- * ExpensiveObject obj = lazy.get();   // Object is created here
- * ExpensiveObject same = lazy.get();   // Returns the same cached instance
+ * ExpensiveObject obj = lazy.get();    // creates the object here
+ * ExpensiveObject same = lazy.get();   // returns the same cached instance
  * }</pre>
  *
  * @param <T> the type of the lazily initialized object
@@ -94,8 +94,8 @@ final class LazyInitializer<T> implements com.landawn.abacus.util.function.Suppl
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * LazyInitializer<Connection> dbConnection = LazyInitializer.of(() -> createConnection());
-     * Connection conn = dbConnection.get();   // Creates connection on first call
-     * Connection same = dbConnection.get();   // Returns cached connection
+     * Connection conn = dbConnection.get();   // creates connection on first call
+     * Connection same = dbConnection.get();   // returns cached connection
      * }</pre>
      *
      * @return the lazily initialized value (may be {@code null} if the supplier returns {@code null})

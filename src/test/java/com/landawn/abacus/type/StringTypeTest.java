@@ -166,40 +166,40 @@ public class StringTypeTest extends TestBase {
     }
 
     @Test
-    public void test_writeCharacter_withoutConfig() throws Exception {
+    public void test_serializeTo_withoutConfig() throws Exception {
         CharacterWriter writer = mock(BufferedJsonWriter.class);
 
         // Test value
-        type.writeCharacter(writer, "Test", null);
+        type.serializeTo(writer, "Test", null);
         verify(writer).writeCharacter("Test");
     }
 
     @Test
-    public void test_writeCharacter_withConfig_noQuotation() throws Exception {
+    public void test_serializeTo_withConfig_noQuotation() throws Exception {
         CharacterWriter writer = mock(BufferedJsonWriter.class);
         JsonXmlSerConfig<?> config = mock(JsonXmlSerConfig.class);
         when(config.getStringQuotation()).thenReturn((char) 0);
 
-        type.writeCharacter(writer, "Test", config);
+        type.serializeTo(writer, "Test", config);
         verify(writer).writeCharacter("Test");
     }
 
     @Test
-    public void test_writeCharacter_null_withConfig_writeNullAsEmpty() throws Exception {
+    public void test_serializeTo_null_withConfig_writeNullAsEmpty() throws Exception {
         CharacterWriter writer = mock(BufferedJsonWriter.class);
         JsonXmlSerConfig<?> config = mock(JsonXmlSerConfig.class);
         when(config.isWriteNullStringAsEmpty()).thenReturn(true);
         when(config.getStringQuotation()).thenReturn((char) 0);
 
-        type.writeCharacter(writer, null, config);
+        type.serializeTo(writer, null, config);
         verify(writer).writeCharacter("");
     }
 
     @Test
-    public void test_writeCharacter_null_withoutConfig() throws Exception {
+    public void test_serializeTo_null_withoutConfig() throws Exception {
         CharacterWriter writer = mock(BufferedJsonWriter.class);
 
-        type.writeCharacter(writer, null, null);
+        type.serializeTo(writer, null, null);
         verify(writer).write("null".toCharArray());
     }
 }

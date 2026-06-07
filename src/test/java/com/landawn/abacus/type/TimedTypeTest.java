@@ -91,14 +91,14 @@ public class TimedTypeTest extends TestBase {
     }
 
     @Test
-    public void testWriteCharacter() throws IOException {
+    public void testSerializeTo() throws IOException {
         CharacterWriter writer = createCharacterWriter();
         JsonXmlSerConfig<?> config = mock(JsonXmlSerConfig.class);
 
         Timed<String> timed = Timed.of("test", 123456789L);
-        timedType.writeCharacter(writer, timed, config);
+        timedType.serializeTo(writer, timed, config);
 
-        timedType.writeCharacter(writer, null, config);
+        timedType.serializeTo(writer, null, config);
         assertNotNull(timed);
     }
 

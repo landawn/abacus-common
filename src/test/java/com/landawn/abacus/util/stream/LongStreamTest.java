@@ -4446,8 +4446,29 @@ public class LongStreamTest extends TestBase {
     }
 
     @Test
+    public void testRangeWithLongMinStepDoesNotRecurseForever() {
+        assertArrayEquals(new long[] { 0L }, LongStream.range(0L, Long.MIN_VALUE, Long.MIN_VALUE).toArray());
+        assertArrayEquals(new long[] { 0L, Long.MIN_VALUE }, LongStream.rangeClosed(0L, Long.MIN_VALUE, Long.MIN_VALUE).toArray());
+    }
+
+    @Test
     public void testOnlyOneWithMultipleElements() {
         assertThrows(TooManyElementsException.class, () -> createLongStream(1L, 2L).onlyOne());
+    }
+
+    @Test
+    public void testDeferCloseInvokesSupplierAndCloseHandlers() {
+        final AtomicInteger calls = new AtomicInteger();
+        final AtomicInteger closed = new AtomicInteger();
+        final LongStream stream = LongStream.defer(() -> {
+            calls.incrementAndGet();
+            return LongStream.of(1L).onClose(closed::incrementAndGet);
+        });
+
+        stream.close();
+
+        assertEquals(1, calls.get());
+        assertEquals(1, closed.get());
     }
 
 }

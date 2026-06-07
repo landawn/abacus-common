@@ -65,8 +65,15 @@ public class CurrencyType extends AbstractType<Currency> {
     /**
      * Converts a {@link Currency} to its ISO 4217 currency code string (e.g., {@code "USD"}).
      *
+     * <p>The returned string is a serializable representation designed to be parsed back into an equivalent value
+     * via {@link #valueOf(String)}; {@code stringOf} and {@code valueOf} are inverse operations that round-trip. This
+     * is the key distinction from {@link Object#toString()}, whose result is not guaranteed to be convertible back
+     * into the original value.</p>
+     *
      * @param x the {@link Currency} to convert; may be {@code null}
      * @return the ISO 4217 currency code, or {@code null} if {@code x} is {@code null}
+     * @see #valueOf(String)
+     * @see #valueOf(Object)
      */
     @Override
     public String stringOf(final Currency x) {
@@ -77,10 +84,16 @@ public class CurrencyType extends AbstractType<Currency> {
      * Creates a {@link Currency} from its ISO 4217 currency code string (e.g., {@code "USD"}, {@code "EUR"}).
      * Delegates to {@link Currency#getInstance(String)}.
      *
+     * <p>This method is the inverse of {@code stringOf} and round-trips with it: it parses the string produced by
+     * {@code stringOf} back into a value of this type. Strings produced by {@link Object#toString()} are not
+     * guaranteed to be parseable in this way.</p>
+     *
      * @param str a valid ISO 4217 currency code; may be {@code null} or empty
      * @return the corresponding {@link Currency} instance,
      *         or {@code null} if {@code str} is {@code null} or empty
      * @throws IllegalArgumentException if {@code str} is not a supported ISO 4217 currency code
+     * @see #valueOf(Object)
+     * @see #stringOf(Currency)
      */
     @Override
     public Currency valueOf(final String str) {

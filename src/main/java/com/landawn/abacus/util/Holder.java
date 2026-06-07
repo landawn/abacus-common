@@ -127,6 +127,7 @@ public final class Holder<T> implements Mutable {
      * Holder<String> holder = new Holder<>();
      * holder.setValue("Hello");
      * }</pre>
+     *
      */
     public Holder() {
         this(null);
@@ -229,7 +230,7 @@ public final class Holder<T> implements Mutable {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Holder<String> holder = Holder.of("old");
-     * String previous = holder.getAndSet("new");   // previous = "old", holder now contains "new"
+     * String previous = holder.getAndSet("new");   // returns previous = "old", holder now contains "new"
      * }</pre>
      *
      * @param value the new value to be set, may be {@code null}.
@@ -251,7 +252,7 @@ public final class Holder<T> implements Mutable {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Holder<Integer> holder = Holder.of(10);
-     * Integer newValue = holder.setAndGet(20);   // newValue = 20, holder contains 20
+     * Integer newValue = holder.setAndGet(20);   // returns newValue = 20, holder contains 20
      * }</pre>
      *
      * @param value the new value to be set, may be {@code null}.
@@ -275,7 +276,7 @@ public final class Holder<T> implements Mutable {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Holder<Integer> holder = Holder.of(5);
-     * Integer old = holder.getAndUpdate(n -> n * 2);   // old = 5, holder now contains 10
+     * Integer old = holder.getAndUpdate(n -> n * 2);   // returns old = 5, holder now contains 10
      * }</pre>
      *
      * @param <E> the type of exception that the update function may throw.
@@ -303,7 +304,7 @@ public final class Holder<T> implements Mutable {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Holder<Integer> holder = Holder.of(5);
-     * Integer updated = holder.updateAndGet(n -> n * 2);   // updated = 10, holder contains 10
+     * Integer updated = holder.updateAndGet(n -> n * 2);   // returns updated = 10, holder contains 10
      * }</pre>
      *
      * @param <E> the type of exception that the update function may throw.
@@ -461,7 +462,7 @@ public final class Holder<T> implements Mutable {
      * holder.ifNotNullOrElse(
      *     value -> System.out.println("Value: " + value),
      *     () -> System.out.println("No value present")
-     * );   // prints "No value present"
+     * );
      * }</pre>
      *
      * @param <E> the type of exception that the action may throw.
@@ -566,10 +567,10 @@ public final class Holder<T> implements Mutable {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Holder<String> holder = Holder.of("hello");
-     * Nullable<Integer> length = holder.mapIfNotNull(String::length);   // Nullable.of(5)
+     * Nullable<Integer> length = holder.mapIfNotNull(String::length);   // returns Nullable.of(5)
      *
      * Holder<String> nullHolder = Holder.of(null);
-     * Nullable<Integer> empty = nullHolder.mapIfNotNull(String::length);   // Nullable.empty()
+     * Nullable<Integer> empty = nullHolder.mapIfNotNull(String::length);   // returns Nullable.empty()
      * }</pre>
      *
      * @param <U> the type of the result of the mapping function.
@@ -603,10 +604,10 @@ public final class Holder<T> implements Mutable {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Holder<String> holder = Holder.of("test");
-     * Optional<Integer> length = holder.mapToNonNullIfNotNull(String::length);   // Optional.of(4)
+     * Optional<Integer> length = holder.mapToNonNullIfNotNull(String::length);   // returns Optional.of(4)
      *
      * Holder<String> nullHolder = Holder.of(null);
-     * Optional<Integer> empty = nullHolder.mapToNonNullIfNotNull(String::length);   // Optional.empty()
+     * Optional<Integer> empty = nullHolder.mapToNonNullIfNotNull(String::length);   // returns Optional.empty()
      * }</pre>
      *
      * @param <U> the type of the result of the mapping function.
@@ -641,7 +642,7 @@ public final class Holder<T> implements Mutable {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Holder<Integer> holder = Holder.of(10);
-     * Nullable<Integer> filtered = holder.filter(n -> n != null && n > 5);   // Nullable.of(10)
+     * Nullable<Integer> filtered = holder.filter(n -> n != null && n > 5);   // returns Nullable.of(10)
      * }</pre>
      *
      * @param <E> the type of exception that the predicate may throw.
@@ -670,10 +671,10 @@ public final class Holder<T> implements Mutable {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Holder<Integer> holder = Holder.of(10);
-     * Optional<Integer> filtered = holder.filterIfNotNull(n -> n > 5);   // Optional.of(10)
+     * Optional<Integer> filtered = holder.filterIfNotNull(n -> n > 5);   // returns Optional.of(10)
      *
      * Holder<Integer> nullHolder = Holder.of(null);
-     * Optional<Integer> empty = nullHolder.filterIfNotNull(n -> n > 5);  // Optional.empty()
+     * Optional<Integer> empty = nullHolder.filterIfNotNull(n -> n > 5);  // returns Optional.empty()
      * }</pre>
      *
      * @param <E> the type of exception that the predicate may throw.
@@ -726,7 +727,7 @@ public final class Holder<T> implements Mutable {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Holder<String> holder = Holder.of(null);
-     * String value = holder.orElseGetIfNull(() -> computeExpensiveDefault());   // supplier only called if needed
+     * String value = holder.orElseGetIfNull(() -> computeExpensiveDefault());
      * }</pre>
      *
      * @param other the supplier whose result is returned if the held value is {@code null};

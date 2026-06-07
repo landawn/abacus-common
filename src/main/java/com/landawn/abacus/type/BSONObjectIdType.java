@@ -58,9 +58,16 @@ public class BSONObjectIdType extends AbstractType<ObjectId> {
      * Converts an {@link org.bson.types.ObjectId} to its 24-character hexadecimal string representation.
      * Delegates to {@link org.bson.types.ObjectId#toHexString()}.
      *
+     * <p>The returned string is a serializable representation designed to be parsed back into an equivalent value
+     * via {@link #valueOf(String)}; {@code stringOf} and {@code valueOf} are inverse operations that round-trip. This
+     * is the key distinction from {@link Object#toString()}, whose result is not guaranteed to be convertible back
+     * into the original value.</p>
+     *
      * @param x the {@code ObjectId} to convert; may be {@code null}
      * @return the 24-character lowercase hexadecimal string representing the 12-byte ObjectId,
      *         or {@code null} if {@code x} is {@code null}
+     * @see #valueOf(String)
+     * @see #valueOf(Object)
      */
     @Override
     public String stringOf(final ObjectId x) {
@@ -71,10 +78,16 @@ public class BSONObjectIdType extends AbstractType<ObjectId> {
      * Parses a 24-character hexadecimal string and returns a new {@link org.bson.types.ObjectId}.
      * Leading and trailing whitespace is trimmed before parsing.
      *
+     * <p>This method is the inverse of {@code stringOf} and round-trips with it: it parses the string produced by
+     * {@code stringOf} back into a value of this type. Strings produced by {@link Object#toString()} are not
+     * guaranteed to be parseable in this way.</p>
+     *
      * @param str the 24-character hexadecimal string to parse; may be {@code null} or blank
      * @return a new {@code ObjectId} created from the hexadecimal string,
      *         or {@code null} if {@code str} is {@code null}, empty, or blank
      * @throws IllegalArgumentException if {@code str} is not a valid 24-character hexadecimal string
+     * @see #valueOf(Object)
+     * @see #stringOf(ObjectId)
      */
     @Override
     public ObjectId valueOf(final String str) {

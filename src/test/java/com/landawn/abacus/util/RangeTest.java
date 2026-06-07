@@ -1378,4 +1378,16 @@ public class RangeTest extends AbstractTest {
         assertEquals("[-20, -10]", Range.closed(-20, -10).toString());
     }
 
+    @Test
+    public void testIntersectionWithEmptyRange() {
+        final Range<Integer> empty = Range.open(2, 2);
+        final Range<Integer> range = Range.closed(1, 3);
+
+        assertTrue(empty.isEmpty());
+        assertFalse(empty.isOverlappedBy(range));
+        assertFalse(range.isOverlappedBy(empty));
+        assertFalse(empty.intersection(range).isPresent());
+        assertFalse(range.intersection(empty).isPresent());
+    }
+
 }

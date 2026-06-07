@@ -137,16 +137,16 @@ public class MutableFloatTypeTest extends TestBase {
     }
 
     @Test
-    public void testWriteCharacterWithNull() throws IOException {
+    public void testSerializeToWithNull() throws IOException {
         assertDoesNotThrow(() -> {
-            mutableFloatType.writeCharacter(characterWriter, null, null);
+            mutableFloatType.serializeTo(characterWriter, null, null);
         });
     }
 
     @Test
-    public void testWriteCharacterWithNonNull() throws IOException {
+    public void testSerializeToWithNonNull() throws IOException {
         assertDoesNotThrow(() -> {
-            mutableFloatType.writeCharacter(characterWriter, MutableFloat.of(3.0f), null);
+            mutableFloatType.serializeTo(characterWriter, MutableFloat.of(3.0f), null);
         });
     }
 }

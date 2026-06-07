@@ -628,6 +628,21 @@ public class Builder<T> {
      * type (List, Set, Map, etc.), a specialized builder is returned. Otherwise, a generic Builder
      * is returned.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * String result = Builder.of("hello").val();    // returns "hello"
+     * 
+     * List<String> list = Builder.of(new ArrayList<String>())
+     *     .add("a").add("b")
+     *     .val();                                     // returns [a, b]
+     * 
+     * try {
+     *     Builder.of(null);
+     * } catch (IllegalArgumentException e) {
+     *     // null value rejected
+     * }
+     * }</pre>
+     *
      * @param <T> the type of the value to wrap
      * @param val the value to wrap in a builder; must not be {@code null}
      * @return an appropriate {@code Builder} instance for the given value; never {@code null}
@@ -673,6 +688,16 @@ public class Builder<T> {
      *
      * <p>The same object reference passed to (or detected by) the factory method is returned;
      * any mutations performed through this builder are reflected in the returned object.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * String str = Builder.of("hello").val();        // returns "hello"
+     * 
+     * IntList list = Builder.of(IntList.of(1, 2, 3)).val();  // returns [1, 2, 3]
+     * 
+     * Map<String, Integer> map = Builder.of(new HashMap<String, Integer>())
+     *     .put("a", 1).put("b", 2).val();            // returns {a=1, b=2}
+     * }</pre>
      *
      * @return the wrapped value; never {@code null}
      */
@@ -778,6 +803,17 @@ public class Builder<T> {
         /**
          * Sets the element at the specified position in the list to the specified value.
          *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * BooleanListBuilder lb = Builder.of(BooleanList.of(true, false, true));
+         * BooleanList result = lb.set(0, false).val();          // replaces first element
+         * try {
+         *     lb.set(10, false);
+         * } catch (IndexOutOfBoundsException e) {
+         *     // invalid index
+         * }
+         * }</pre>
+         *
          * @param index the index of the element to replace
          * @param e the boolean value to be stored at the specified position
          * @return this builder instance
@@ -790,6 +826,13 @@ public class Builder<T> {
 
         /**
          * Appends the specified boolean value to the end of the list.
+         *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * BooleanListBuilder lb = Builder.of(BooleanList.of(true, false));
+         * BooleanList result = lb.add(true).val();                          // returns [true, false, true]
+         * BooleanList empty = Builder.of(BooleanList.of()).add(true).val(); // returns [true]
+         * }</pre>
          *
          * @param e the boolean value to append
          * @return this builder instance
@@ -805,6 +848,17 @@ public class Builder<T> {
          * Shifts the element currently at that position (if any) and any subsequent
          * elements to the right.
          *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * BooleanListBuilder lb = Builder.of(BooleanList.of(true, false, true));
+         * BooleanList result = lb.add(1, false).val();            // returns [true, false, false, true]
+         * try {
+         *     lb.add(10, false);
+         * } catch (IndexOutOfBoundsException e) {
+         *     // index out of range
+         * }
+         * }</pre>
+         *
          * @param index the index at which the specified element is to be inserted
          * @param e the boolean value to be inserted
          * @return this builder instance
@@ -819,6 +873,13 @@ public class Builder<T> {
          * Appends all of the elements in the specified BooleanList to the end of this list,
          * in the order that they are returned by the specified list's iterator.
          *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * BooleanListBuilder lb = Builder.of(BooleanList.of(true, false));
+         * BooleanList result = lb.addAll(BooleanList.of(true, false)).val(); // returns [true,false,true,false]
+         * lb.addAll(BooleanList.of()).val();                                 // unchanged (empty argument)
+         * }</pre>
+         *
          * @param c the BooleanList containing elements to be added to this list
          * @return this builder instance
          */
@@ -831,6 +892,17 @@ public class Builder<T> {
         /**
          * Inserts all of the elements in the specified BooleanList into this list,
          * starting at the specified position.
+         *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * BooleanListBuilder lb = Builder.of(BooleanList.of(true, false, true));
+         * BooleanList result = lb.addAll(1, BooleanList.of(false, true)).val(); // insert at index 1
+         * try {
+         *     lb.addAll(10, BooleanList.of(false));
+         * } catch (IndexOutOfBoundsException e) {
+         *     // index out of range
+         * }
+         * }</pre>
          *
          * @param index the index at which to insert the first element from the specified list
          * @param c the BooleanList containing elements to be added to this list
@@ -845,6 +917,13 @@ public class Builder<T> {
         /**
          * Removes the first occurrence of the specified boolean value from this list, if it is present.
          *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * BooleanListBuilder lb = Builder.of(BooleanList.of(true, false, true));
+         * BooleanList result = lb.remove(false).val();           // returns [true, true]
+         * lb.remove(true); lb.remove(true);                      // removes both true elements; list is now []
+         * }</pre>
+         *
          * @param e the boolean value to be removed from this list, if present
          * @return this builder instance
          */
@@ -856,6 +935,13 @@ public class Builder<T> {
 
         /**
          * Removes from this list all of its elements that are contained in the specified BooleanList.
+         *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * BooleanListBuilder lb = Builder.of(BooleanList.of(true, false, true, false));
+         * BooleanList result = lb.removeAll(BooleanList.of(true, true)).val(); // returns [false,false]
+         * lb.removeAll(BooleanList.of()).val();                                // unchanged (empty argument)
+         * }</pre>
          *
          * @param c the BooleanList containing elements to be removed from this list
          * @return this builder instance
@@ -884,6 +970,17 @@ public class Builder<T> {
         /**
          * Sets the element at the specified position in the list to the specified value.
          *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * CharListBuilder lb = Builder.of(CharList.of('a', 'b', 'c'));
+         * CharList result = lb.set(0, 'd').val();          // replaces first element
+         * try {
+         *     lb.set(10, 'd');
+         * } catch (IndexOutOfBoundsException e) {
+         *     // invalid index
+         * }
+         * }</pre>
+         *
          * @param index the index of the element to replace
          * @param e the char value to be stored at the specified position
          * @return this builder instance
@@ -896,6 +993,13 @@ public class Builder<T> {
 
         /**
          * Appends the specified char value to the end of the list.
+         *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * CharListBuilder lb = Builder.of(CharList.of('a', 'b'));
+         * CharList result = lb.add('c').val();                       // returns ['a', 'b', 'c']
+         * CharList empty = Builder.of(CharList.of()).add('a').val(); // returns ['a']
+         * }</pre>
          *
          * @param e the char value to append
          * @return this builder instance
@@ -911,6 +1015,17 @@ public class Builder<T> {
          * Shifts the element currently at that position (if any) and any subsequent
          * elements to the right.
          *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * CharListBuilder lb = Builder.of(CharList.of('a', 'b', 'c'));
+         * CharList result = lb.add(1, 'd').val();            // returns ['a', 'd', 'b', 'c']
+         * try {
+         *     lb.add(10, 'd');
+         * } catch (IndexOutOfBoundsException e) {
+         *     // index out of range
+         * }
+         * }</pre>
+         *
          * @param index the index at which the specified element is to be inserted
          * @param e the char value to be inserted
          * @return this builder instance
@@ -925,6 +1040,13 @@ public class Builder<T> {
          * Appends all of the elements in the specified CharList to the end of this list,
          * in the order that they are returned by the specified list's iterator.
          *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * CharListBuilder lb = Builder.of(CharList.of('a', 'b'));
+         * CharList result = lb.addAll(CharList.of('c', 'd')).val(); // returns ['a','b','c','d']
+         * lb.addAll(CharList.of()).val();                           // unchanged (empty argument)
+         * }</pre>
+         *
          * @param c the CharList containing elements to be added to this list
          * @return this builder instance
          */
@@ -937,6 +1059,17 @@ public class Builder<T> {
         /**
          * Inserts all of the elements in the specified CharList into this list,
          * starting at the specified position.
+         *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * CharListBuilder lb = Builder.of(CharList.of('a', 'b', 'c'));
+         * CharList result = lb.addAll(1, CharList.of('d', 'e')).val(); // insert at index 1
+         * try {
+         *     lb.addAll(10, CharList.of('d'));
+         * } catch (IndexOutOfBoundsException e) {
+         *     // index out of range
+         * }
+         * }</pre>
          *
          * @param index the index at which to insert the first element from the specified list
          * @param c the CharList containing elements to be added to this list
@@ -951,6 +1084,13 @@ public class Builder<T> {
         /**
          * Removes the first occurrence of the specified char value from this list, if it is present.
          *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * CharListBuilder lb = Builder.of(CharList.of('a', 'b', 'c'));
+         * CharList result = lb.remove('b').val();           // returns ['a', 'c']
+         * lb.remove('a'); lb.remove('a');                   // second remove is no-op
+         * }</pre>
+         *
          * @param e the char value to be removed from this list, if present
          * @return this builder instance
          */
@@ -962,6 +1102,13 @@ public class Builder<T> {
 
         /**
          * Removes from this list all of its elements that are contained in the specified CharList.
+         *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * CharListBuilder lb = Builder.of(CharList.of('a', 'b', 'c', 'd'));
+         * CharList result = lb.removeAll(CharList.of('a', 'c')).val(); // returns ['b','d']
+         * lb.removeAll(CharList.of()).val();                           // unchanged (empty argument)
+         * }</pre>
          *
          * @param c the CharList containing elements to be removed from this list
          * @return this builder instance
@@ -990,6 +1137,17 @@ public class Builder<T> {
         /**
          * Sets the element at the specified position in the list to the specified value.
          *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * ByteListBuilder lb = Builder.of(ByteList.of((byte)1, (byte)2, (byte)3));
+         * ByteList result = lb.set(0, (byte)4).val();          // replaces first element
+         * try {
+         *     lb.set(10, (byte)4);
+         * } catch (IndexOutOfBoundsException e) {
+         *     // invalid index
+         * }
+         * }</pre>
+         *
          * @param index the index of the element to replace
          * @param e the byte value to be stored at the specified position
          * @return this builder instance
@@ -1002,6 +1160,13 @@ public class Builder<T> {
 
         /**
          * Appends the specified byte value to the end of the list.
+         *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * ByteListBuilder lb = Builder.of(ByteList.of((byte)1, (byte)2));
+         * ByteList result = lb.add((byte)3).val();                       // returns [(byte)1, (byte)2, (byte)3]
+         * ByteList empty = Builder.of(ByteList.of()).add((byte)1).val(); // returns [(byte)1]
+         * }</pre>
          *
          * @param e the byte value to append
          * @return this builder instance
@@ -1017,6 +1182,17 @@ public class Builder<T> {
          * Shifts the element currently at that position (if any) and any subsequent
          * elements to the right.
          *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * ByteListBuilder lb = Builder.of(ByteList.of((byte)1, (byte)2, (byte)3));
+         * ByteList result = lb.add(1, (byte)4).val();            // returns [(byte)1, (byte)4, (byte)2, (byte)3]
+         * try {
+         *     lb.add(10, (byte)4);
+         * } catch (IndexOutOfBoundsException e) {
+         *     // index out of range
+         * }
+         * }</pre>
+         *
          * @param index the index at which the specified element is to be inserted
          * @param e the byte value to be inserted
          * @return this builder instance
@@ -1031,6 +1207,13 @@ public class Builder<T> {
          * Appends all of the elements in the specified ByteList to the end of this list,
          * in the order that they are returned by the specified list's iterator.
          *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * ByteListBuilder lb = Builder.of(ByteList.of((byte)1, (byte)2));
+         * ByteList result = lb.addAll(ByteList.of((byte)3, (byte)4)).val(); // returns [(byte)1,(byte)2,(byte)3,(byte)4]
+         * lb.addAll(ByteList.of()).val();                                   // unchanged (empty argument)
+         * }</pre>
+         *
          * @param c the ByteList containing elements to be added to this list
          * @return this builder instance
          */
@@ -1043,6 +1226,17 @@ public class Builder<T> {
         /**
          * Inserts all of the elements in the specified ByteList into this list,
          * starting at the specified position.
+         *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * ByteListBuilder lb = Builder.of(ByteList.of((byte)1, (byte)2, (byte)3));
+         * ByteList result = lb.addAll(1, ByteList.of((byte)4, (byte)5)).val(); // insert at index 1
+         * try {
+         *     lb.addAll(10, ByteList.of((byte)4));
+         * } catch (IndexOutOfBoundsException e) {
+         *     // index out of range
+         * }
+         * }</pre>
          *
          * @param index the index at which to insert the first element from the specified list
          * @param c the ByteList containing elements to be added to this list
@@ -1057,6 +1251,13 @@ public class Builder<T> {
         /**
          * Removes the first occurrence of the specified byte value from this list, if it is present.
          *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * ByteListBuilder lb = Builder.of(ByteList.of((byte)1, (byte)2, (byte)3));
+         * ByteList result = lb.remove((byte)2).val();           // returns [(byte)1, (byte)3]
+         * lb.remove((byte)1); lb.remove((byte)1);               // second remove is no-op
+         * }</pre>
+         *
          * @param e the byte value to be removed from this list, if present
          * @return this builder instance
          */
@@ -1068,6 +1269,13 @@ public class Builder<T> {
 
         /**
          * Removes from this list all of its elements that are contained in the specified ByteList.
+         *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * ByteListBuilder lb = Builder.of(ByteList.of((byte)1, (byte)2, (byte)3, (byte)4));
+         * ByteList result = lb.removeAll(ByteList.of((byte)1, (byte)3)).val(); // returns [(byte)2,(byte)4]
+         * lb.removeAll(ByteList.of()).val();                                   // unchanged (empty argument)
+         * }</pre>
          *
          * @param c the ByteList containing elements to be removed from this list
          * @return this builder instance
@@ -1096,6 +1304,17 @@ public class Builder<T> {
         /**
          * Sets the element at the specified position in the list to the specified value.
          *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * ShortListBuilder lb = Builder.of(ShortList.of((short)10, (short)20, (short)30));
+         * ShortList result = lb.set(0, (short)40).val();          // replaces first element
+         * try {
+         *     lb.set(10, (short)40);
+         * } catch (IndexOutOfBoundsException e) {
+         *     // invalid index
+         * }
+         * }</pre>
+         *
          * @param index the index of the element to replace
          * @param e the short value to be stored at the specified position
          * @return this builder instance
@@ -1108,6 +1327,13 @@ public class Builder<T> {
 
         /**
          * Appends the specified short value to the end of the list.
+         *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * ShortListBuilder lb = Builder.of(ShortList.of((short)10, (short)20));
+         * ShortList result = lb.add((short)30).val();                        // returns [(short)10, (short)20, (short)30]
+         * ShortList empty = Builder.of(ShortList.of()).add((short)10).val(); // returns [(short)10]
+         * }</pre>
          *
          * @param e the short value to append
          * @return this builder instance
@@ -1123,6 +1349,17 @@ public class Builder<T> {
          * Shifts the element currently at that position (if any) and any subsequent
          * elements to the right.
          *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * ShortListBuilder lb = Builder.of(ShortList.of((short)10, (short)20, (short)30));
+         * ShortList result = lb.add(1, (short)40).val();            // returns [(short)10, (short)40, (short)20, (short)30]
+         * try {
+         *     lb.add(10, (short)40);
+         * } catch (IndexOutOfBoundsException e) {
+         *     // index out of range
+         * }
+         * }</pre>
+         *
          * @param index the index at which the specified element is to be inserted
          * @param e the short value to be inserted
          * @return this builder instance
@@ -1137,6 +1374,13 @@ public class Builder<T> {
          * Appends all of the elements in the specified ShortList to the end of this list,
          * in the order that they are returned by the specified list's iterator.
          *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * ShortListBuilder lb = Builder.of(ShortList.of((short)10, (short)20));
+         * ShortList result = lb.addAll(ShortList.of((short)30, (short)40)).val(); // returns [(short)10,(short)20,(short)30,(short)40]
+         * lb.addAll(ShortList.of()).val();                                        // unchanged (empty argument)
+         * }</pre>
+         *
          * @param c the ShortList containing elements to be added to this list
          * @return this builder instance
          */
@@ -1149,6 +1393,17 @@ public class Builder<T> {
         /**
          * Inserts all of the elements in the specified ShortList into this list,
          * starting at the specified position.
+         *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * ShortListBuilder lb = Builder.of(ShortList.of((short)10, (short)20, (short)30));
+         * ShortList result = lb.addAll(1, ShortList.of((short)40, (short)50)).val(); // insert at index 1
+         * try {
+         *     lb.addAll(10, ShortList.of((short)40));
+         * } catch (IndexOutOfBoundsException e) {
+         *     // index out of range
+         * }
+         * }</pre>
          *
          * @param index the index at which to insert the first element from the specified list
          * @param c the ShortList containing elements to be added to this list
@@ -1163,6 +1418,13 @@ public class Builder<T> {
         /**
          * Removes the first occurrence of the specified short value from this list, if it is present.
          *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * ShortListBuilder lb = Builder.of(ShortList.of((short)10, (short)20, (short)30));
+         * ShortList result = lb.remove((short)20).val();           // returns [(short)10, (short)30]
+         * lb.remove((short)10); lb.remove((short)10);              // second remove is no-op
+         * }</pre>
+         *
          * @param e the short value to be removed from this list, if present
          * @return this builder instance
          */
@@ -1174,6 +1436,13 @@ public class Builder<T> {
 
         /**
          * Removes from this list all of its elements that are contained in the specified ShortList.
+         *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * ShortListBuilder lb = Builder.of(ShortList.of((short)10, (short)20, (short)30, (short)40));
+         * ShortList result = lb.removeAll(ShortList.of((short)10, (short)30)).val(); // returns [(short)20,(short)40]
+         * lb.removeAll(ShortList.of()).val();                                        // unchanged (empty argument)
+         * }</pre>
          *
          * @param c the ShortList containing elements to be removed from this list
          * @return this builder instance
@@ -1202,6 +1471,17 @@ public class Builder<T> {
         /**
          * Sets the element at the specified position in the list to the specified value.
          *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * IntListBuilder lb = Builder.of(IntList.of(1, 2, 3));
+         * IntList result = lb.set(0, 4).val();          // replaces first element
+         * try {
+         *     lb.set(10, 4);
+         * } catch (IndexOutOfBoundsException e) {
+         *     // invalid index
+         * }
+         * }</pre>
+         *
          * @param index the index of the element to replace
          * @param e the int value to be stored at the specified position
          * @return this builder instance
@@ -1214,6 +1494,13 @@ public class Builder<T> {
 
         /**
          * Appends the specified int value to the end of the list.
+         *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * IntListBuilder lb = Builder.of(IntList.of(1, 2));
+         * IntList result = lb.add(3).val();                      // returns [1, 2, 3]
+         * IntList empty = Builder.of(IntList.of()).add(1).val(); // returns [1]
+         * }</pre>
          *
          * @param e the int value to append
          * @return this builder instance
@@ -1229,6 +1516,17 @@ public class Builder<T> {
          * Shifts the element currently at that position (if any) and any subsequent
          * elements to the right.
          *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * IntListBuilder lb = Builder.of(IntList.of(1, 2, 3));
+         * IntList result = lb.add(1, 4).val();            // returns [1, 4, 2, 3]
+         * try {
+         *     lb.add(10, 4);
+         * } catch (IndexOutOfBoundsException e) {
+         *     // index out of range
+         * }
+         * }</pre>
+         *
          * @param index the index at which the specified element is to be inserted
          * @param e the int value to be inserted
          * @return this builder instance
@@ -1243,6 +1541,13 @@ public class Builder<T> {
          * Appends all of the elements in the specified IntList to the end of this list,
          * in the order that they are returned by the specified list's iterator.
          *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * IntListBuilder lb = Builder.of(IntList.of(1, 2));
+         * IntList result = lb.addAll(IntList.of(3, 4)).val(); // returns [1,2,3,4]
+         * lb.addAll(IntList.of()).val();                      // unchanged (empty argument)
+         * }</pre>
+         *
          * @param c the IntList containing elements to be added to this list
          * @return this builder instance
          */
@@ -1255,6 +1560,17 @@ public class Builder<T> {
         /**
          * Inserts all of the elements in the specified IntList into this list,
          * starting at the specified position.
+         *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * IntListBuilder lb = Builder.of(IntList.of(1, 2, 3));
+         * IntList result = lb.addAll(1, IntList.of(4, 5)).val(); // insert at index 1
+         * try {
+         *     lb.addAll(10, IntList.of(4));
+         * } catch (IndexOutOfBoundsException e) {
+         *     // index out of range
+         * }
+         * }</pre>
          *
          * @param index the index at which to insert the first element from the specified list
          * @param c the IntList containing elements to be added to this list
@@ -1269,6 +1585,13 @@ public class Builder<T> {
         /**
          * Removes the first occurrence of the specified int value from this list, if it is present.
          *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * IntListBuilder lb = Builder.of(IntList.of(1, 2, 3));
+         * IntList result = lb.remove(2).val();           // returns [1, 3]
+         * lb.remove(1); lb.remove(1);                    // second remove is no-op
+         * }</pre>
+         *
          * @param e the int value to be removed from this list, if present
          * @return this builder instance
          */
@@ -1280,6 +1603,13 @@ public class Builder<T> {
 
         /**
          * Removes from this list all of its elements that are contained in the specified IntList.
+         *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * IntListBuilder lb = Builder.of(IntList.of(1, 2, 3, 4));
+         * IntList result = lb.removeAll(IntList.of(1, 3)).val(); // returns [2,4]
+         * lb.removeAll(IntList.of()).val();                      // unchanged (empty argument)
+         * }</pre>
          *
          * @param c the IntList containing elements to be removed from this list
          * @return this builder instance
@@ -1308,6 +1638,17 @@ public class Builder<T> {
         /**
          * Sets the element at the specified position in the list to the specified value.
          *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * LongListBuilder lb = Builder.of(LongList.of(100L, 200L, 300L));
+         * LongList result = lb.set(0, 400L).val();          // replaces first element
+         * try {
+         *     lb.set(10, 400L);
+         * } catch (IndexOutOfBoundsException e) {
+         *     // invalid index
+         * }
+         * }</pre>
+         *
          * @param index the index of the element to replace
          * @param e the long value to be stored at the specified position
          * @return this builder instance
@@ -1320,6 +1661,13 @@ public class Builder<T> {
 
         /**
          * Appends the specified long value to the end of the list.
+         *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * LongListBuilder lb = Builder.of(LongList.of(100L, 200L));
+         * LongList result = lb.add(300L).val();                       // returns [100L, 200L, 300L]
+         * LongList empty = Builder.of(LongList.of()).add(100L).val(); // returns [100L]
+         * }</pre>
          *
          * @param e the long value to append
          * @return this builder instance
@@ -1335,6 +1683,17 @@ public class Builder<T> {
          * Shifts the element currently at that position (if any) and any subsequent
          * elements to the right.
          *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * LongListBuilder lb = Builder.of(LongList.of(100L, 200L, 300L));
+         * LongList result = lb.add(1, 400L).val();            // returns [100L, 400L, 200L, 300L]
+         * try {
+         *     lb.add(10, 400L);
+         * } catch (IndexOutOfBoundsException e) {
+         *     // index out of range
+         * }
+         * }</pre>
+         *
          * @param index the index at which the specified element is to be inserted
          * @param e the long value to be inserted
          * @return this builder instance
@@ -1349,6 +1708,13 @@ public class Builder<T> {
          * Appends all of the elements in the specified LongList to the end of this list,
          * in the order that they are returned by the specified list's iterator.
          *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * LongListBuilder lb = Builder.of(LongList.of(100L, 200L));
+         * LongList result = lb.addAll(LongList.of(300L, 400L)).val(); // returns [100L,200L,300L,400L]
+         * lb.addAll(LongList.of()).val();                             // unchanged (empty argument)
+         * }</pre>
+         *
          * @param c the LongList containing elements to be added to this list
          * @return this builder instance
          */
@@ -1361,6 +1727,17 @@ public class Builder<T> {
         /**
          * Inserts all of the elements in the specified LongList into this list,
          * starting at the specified position.
+         *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * LongListBuilder lb = Builder.of(LongList.of(100L, 200L, 300L));
+         * LongList result = lb.addAll(1, LongList.of(400L, 500L)).val(); // insert at index 1
+         * try {
+         *     lb.addAll(10, LongList.of(400L));
+         * } catch (IndexOutOfBoundsException e) {
+         *     // index out of range
+         * }
+         * }</pre>
          *
          * @param index the index at which to insert the first element from the specified list
          * @param c the LongList containing elements to be added to this list
@@ -1375,6 +1752,13 @@ public class Builder<T> {
         /**
          * Removes the first occurrence of the specified long value from this list, if it is present.
          *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * LongListBuilder lb = Builder.of(LongList.of(100L, 200L, 300L));
+         * LongList result = lb.remove(200L).val();           // returns [100L, 300L]
+         * lb.remove(100L); lb.remove(100L);                  // second remove is no-op
+         * }</pre>
+         *
          * @param e the long value to be removed from this list, if present
          * @return this builder instance
          */
@@ -1386,6 +1770,13 @@ public class Builder<T> {
 
         /**
          * Removes from this list all of its elements that are contained in the specified LongList.
+         *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * LongListBuilder lb = Builder.of(LongList.of(100L, 200L, 300L, 400L));
+         * LongList result = lb.removeAll(LongList.of(100L, 300L)).val(); // returns [200L,400L]
+         * lb.removeAll(LongList.of()).val();                             // unchanged (empty argument)
+         * }</pre>
          *
          * @param c the LongList containing elements to be removed from this list
          * @return this builder instance
@@ -1414,6 +1805,17 @@ public class Builder<T> {
         /**
          * Sets the element at the specified position in the list to the specified value.
          *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * FloatListBuilder lb = Builder.of(FloatList.of(1.5f, 2.5f, 3.5f));
+         * FloatList result = lb.set(0, 4.5f).val();          // replaces first element
+         * try {
+         *     lb.set(10, 4.5f);
+         * } catch (IndexOutOfBoundsException e) {
+         *     // invalid index
+         * }
+         * }</pre>
+         *
          * @param index the index of the element to replace
          * @param e the float value to be stored at the specified position
          * @return this builder instance
@@ -1426,6 +1828,13 @@ public class Builder<T> {
 
         /**
          * Appends the specified float value to the end of the list.
+         *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * FloatListBuilder lb = Builder.of(FloatList.of(1.5f, 2.5f));
+         * FloatList result = lb.add(3.5f).val();                        // returns [1.5f, 2.5f, 3.5f]
+         * FloatList empty = Builder.of(FloatList.of()).add(1.5f).val(); // returns [1.5f]
+         * }</pre>
          *
          * @param e the float value to append
          * @return this builder instance
@@ -1441,6 +1850,17 @@ public class Builder<T> {
          * Shifts the element currently at that position (if any) and any subsequent
          * elements to the right.
          *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * FloatListBuilder lb = Builder.of(FloatList.of(1.5f, 2.5f, 3.5f));
+         * FloatList result = lb.add(1, 4.5f).val();            // returns [1.5f, 4.5f, 2.5f, 3.5f]
+         * try {
+         *     lb.add(10, 4.5f);
+         * } catch (IndexOutOfBoundsException e) {
+         *     // index out of range
+         * }
+         * }</pre>
+         *
          * @param index the index at which the specified element is to be inserted
          * @param e the float value to be inserted
          * @return this builder instance
@@ -1455,6 +1875,13 @@ public class Builder<T> {
          * Appends all of the elements in the specified FloatList to the end of this list,
          * in the order that they are returned by the specified list's iterator.
          *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * FloatListBuilder lb = Builder.of(FloatList.of(1.5f, 2.5f));
+         * FloatList result = lb.addAll(FloatList.of(3.5f, 4.5f)).val(); // returns [1.5f,2.5f,3.5f,4.5f]
+         * lb.addAll(FloatList.of()).val();                              // unchanged (empty argument)
+         * }</pre>
+         *
          * @param c the FloatList containing elements to be added to this list
          * @return this builder instance
          */
@@ -1467,6 +1894,17 @@ public class Builder<T> {
         /**
          * Inserts all of the elements in the specified FloatList into this list,
          * starting at the specified position.
+         *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * FloatListBuilder lb = Builder.of(FloatList.of(1.5f, 2.5f, 3.5f));
+         * FloatList result = lb.addAll(1, FloatList.of(4.5f, 5.5f)).val(); // insert at index 1
+         * try {
+         *     lb.addAll(10, FloatList.of(4.5f));
+         * } catch (IndexOutOfBoundsException e) {
+         *     // index out of range
+         * }
+         * }</pre>
          *
          * @param index the index at which to insert the first element from the specified list
          * @param c the FloatList containing elements to be added to this list
@@ -1481,6 +1919,13 @@ public class Builder<T> {
         /**
          * Removes the first occurrence of the specified float value from this list, if it is present.
          *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * FloatListBuilder lb = Builder.of(FloatList.of(1.5f, 2.5f, 3.5f));
+         * FloatList result = lb.remove(2.5f).val();           // returns [1.5f, 3.5f]
+         * lb.remove(1.5f); lb.remove(1.5f);                   // second remove is no-op
+         * }</pre>
+         *
          * @param e the float value to be removed from this list, if present
          * @return this builder instance
          */
@@ -1492,6 +1937,13 @@ public class Builder<T> {
 
         /**
          * Removes from this list all of its elements that are contained in the specified FloatList.
+         *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * FloatListBuilder lb = Builder.of(FloatList.of(1.5f, 2.5f, 3.5f, 4.5f));
+         * FloatList result = lb.removeAll(FloatList.of(1.5f, 3.5f)).val(); // returns [2.5f,4.5f]
+         * lb.removeAll(FloatList.of()).val();                              // unchanged (empty argument)
+         * }</pre>
          *
          * @param c the FloatList containing elements to be removed from this list
          * @return this builder instance
@@ -1520,6 +1972,17 @@ public class Builder<T> {
         /**
          * Sets the element at the specified position in the list to the specified value.
          *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * DoubleListBuilder lb = Builder.of(DoubleList.of(1.0, 2.0, 3.0));
+         * DoubleList result = lb.set(0, 4.0).val();          // replaces first element
+         * try {
+         *     lb.set(10, 4.0);
+         * } catch (IndexOutOfBoundsException e) {
+         *     // invalid index
+         * }
+         * }</pre>
+         *
          * @param index the index of the element to replace
          * @param e the double value to be stored at the specified position
          * @return this builder instance
@@ -1532,6 +1995,13 @@ public class Builder<T> {
 
         /**
          * Appends the specified double value to the end of the list.
+         *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * DoubleListBuilder lb = Builder.of(DoubleList.of(1.0, 2.0));
+         * DoubleList result = lb.add(3.0).val();                         // returns [1.0, 2.0, 3.0]
+         * DoubleList empty = Builder.of(DoubleList.of()).add(1.0).val(); // returns [1.0]
+         * }</pre>
          *
          * @param e the double value to append
          * @return this builder instance
@@ -1547,6 +2017,17 @@ public class Builder<T> {
          * Shifts the element currently at that position (if any) and any subsequent
          * elements to the right.
          *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * DoubleListBuilder lb = Builder.of(DoubleList.of(1.0, 2.0, 3.0));
+         * DoubleList result = lb.add(1, 4.0).val();            // returns [1.0, 4.0, 2.0, 3.0]
+         * try {
+         *     lb.add(10, 4.0);
+         * } catch (IndexOutOfBoundsException e) {
+         *     // index out of range
+         * }
+         * }</pre>
+         *
          * @param index the index at which the specified element is to be inserted
          * @param e the double value to be inserted
          * @return this builder instance
@@ -1561,6 +2042,13 @@ public class Builder<T> {
          * Appends all of the elements in the specified DoubleList to the end of this list,
          * in the order that they are returned by the specified list's iterator.
          *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * DoubleListBuilder lb = Builder.of(DoubleList.of(1.0, 2.0));
+         * DoubleList result = lb.addAll(DoubleList.of(3.0, 4.0)).val(); // returns [1.0,2.0,3.0,4.0]
+         * lb.addAll(DoubleList.of()).val();                             // unchanged (empty argument)
+         * }</pre>
+         *
          * @param c the DoubleList containing elements to be added to this list
          * @return this builder instance
          */
@@ -1573,6 +2061,17 @@ public class Builder<T> {
         /**
          * Inserts all of the elements in the specified DoubleList into this list,
          * starting at the specified position.
+         *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * DoubleListBuilder lb = Builder.of(DoubleList.of(1.0, 2.0, 3.0));
+         * DoubleList result = lb.addAll(1, DoubleList.of(4.0, 5.0)).val(); // insert at index 1
+         * try {
+         *     lb.addAll(10, DoubleList.of(4.0));
+         * } catch (IndexOutOfBoundsException e) {
+         *     // index out of range
+         * }
+         * }</pre>
          *
          * @param index the index at which to insert the first element from the specified list
          * @param c the DoubleList containing elements to be added to this list
@@ -1587,6 +2086,13 @@ public class Builder<T> {
         /**
          * Removes the first occurrence of the specified double value from this list, if it is present.
          *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * DoubleListBuilder lb = Builder.of(DoubleList.of(1.0, 2.0, 3.0));
+         * DoubleList result = lb.remove(2.0).val();           // returns [1.0, 3.0]
+         * lb.remove(1.0); lb.remove(1.0);                     // second remove is no-op
+         * }</pre>
+         *
          * @param e the double value to be removed from this list, if present
          * @return this builder instance
          */
@@ -1598,6 +2104,13 @@ public class Builder<T> {
 
         /**
          * Removes from this list all of its elements that are contained in the specified DoubleList.
+         *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * DoubleListBuilder lb = Builder.of(DoubleList.of(1.0, 2.0, 3.0, 4.0));
+         * DoubleList result = lb.removeAll(DoubleList.of(1.0, 3.0)).val(); // returns [2.0,4.0]
+         * lb.removeAll(DoubleList.of()).val();                             // unchanged (empty argument)
+         * }</pre>
          *
          * @param c the DoubleList containing elements to be removed from this list
          * @return this builder instance
@@ -1630,6 +2143,13 @@ public class Builder<T> {
         /**
          * Appends the specified element to the end of the list.
          *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * ListBuilder<String, ArrayList<String>> lb = Builder.of(new ArrayList<String>());
+         * List<String> result = lb.add("Alice").add("Bob").val();  // returns [Alice, Bob]
+         * lb.add(null);                                            // null allowed if list permits
+         * }</pre>
+         *
          * @param e the element to append; may be {@code null} if the underlying list permits {@code null} elements
          * @return this builder instance for method chaining
          */
@@ -1644,6 +2164,13 @@ public class Builder<T> {
          * Appends all of the elements in the specified collection to the end of the list,
          * in the order that they are returned by the specified collection's iterator.
          * Does nothing if the collection is {@code null} or empty.
+         *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * ListBuilder<String, ArrayList<String>> lb = Builder.of(new ArrayList<String>());
+         * lb.addAll(Arrays.asList("Alice", "Bob")).val();  // returns [Alice, Bob]
+         * lb.addAll(null).val();                           // returns no change - null is ignored
+         * }</pre>
          *
          * @param c the collection containing elements to be added to the list
          * @return this builder instance for method chaining
@@ -1662,6 +2189,13 @@ public class Builder<T> {
          * in the order that they appear in the array. Does nothing if the array is
          * {@code null} or empty.
          *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * ListBuilder<String, ArrayList<String>> lb = Builder.of(new ArrayList<String>());
+         * lb.addAll("Alice", "Bob").val();                 // returns [Alice, Bob]
+         * lb.addAll((String[]) null).val();                // returns no change - null is ignored
+         * }</pre>
+         *
          * @param a the array containing elements to be added to the list
          * @return this builder instance for method chaining
          */
@@ -1679,6 +2213,14 @@ public class Builder<T> {
          * Removes the first occurrence of the specified element from the list, if it is present.
          * If the list does not contain the element, it is unchanged.
          *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * ListBuilder<String, ArrayList<String>> lb = Builder.of(new ArrayList<>());
+         * lb.add("Alice").add("Bob");
+         * lb.remove("Alice").val();                         // returns [Bob]
+         * lb.remove("Zed").val();                           // returns no change - not present
+         * }</pre>
+         *
          * @param e the element to be removed from the list, if present
          * @return this builder instance for method chaining
          */
@@ -1693,6 +2235,14 @@ public class Builder<T> {
         /**
          * Removes from the list all of its elements that are contained in the specified collection.
          * Does nothing if the collection is {@code null} or empty.
+         *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * ListBuilder<String, ArrayList<String>> lb = Builder.of(new ArrayList<>());
+         * lb.addAll("Alice", "Bob", "Charlie");
+         * lb.removeAll(Arrays.asList("Alice", "Charlie")).val(); // returns [Bob]
+         * lb.removeAll(null).val();                              // returns no change - null is ignored
+         * }</pre>
          *
          * @param c the collection containing elements to be removed from the list
          * @return this builder instance for method chaining
@@ -1710,6 +2260,14 @@ public class Builder<T> {
         /**
          * Removes from the list all of its elements that are contained in the specified array.
          * Does nothing if the array is {@code null} or empty.
+         *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * ListBuilder<String, ArrayList<String>> lb = Builder.of(new ArrayList<>());
+         * lb.addAll("Alice", "Bob", "Charlie");
+         * lb.removeAll("Alice", "Charlie").val();          // returns [Bob]
+         * lb.removeAll((String[]) null).val();             // returns no change - null is ignored
+         * }</pre>
          *
          * @param a the array containing elements to be removed from the list
          * @return this builder instance for method chaining
@@ -1729,6 +2287,18 @@ public class Builder<T> {
          * Shifts the element currently at that position (if any) and any subsequent
          * elements to the right.
          *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * ListBuilder<String, ArrayList<String>> lb = Builder.of(new ArrayList<>());
+         * lb.add("Alice").add("Charlie");
+         * lb.add(1, "Bob").val();                          // returns [Alice, Bob, Charlie]
+         * try {
+         *     lb.add(10, "X");
+         * } catch (IndexOutOfBoundsException e) {
+         *     // index out of range
+         * }
+         * }</pre>
+         *
          * @param index the index at which the specified element is to be inserted
          * @param e the element to be inserted
          * @return this builder instance
@@ -1743,6 +2313,18 @@ public class Builder<T> {
          * Inserts all of the elements in the specified collection into this list,
          * starting at the specified position. Shifts the element currently at that
          * position (if any) and any subsequent elements to the right.
+         *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * ListBuilder<String, ArrayList<String>> lb = Builder.of(new ArrayList<>());
+         * lb.add("Alice").add("David");
+         * lb.addAll(1, Arrays.asList("Bob", "Charlie")).val(); // returns [Alice,Bob,Charlie,David]
+         * try {
+         *     lb.addAll(10, Arrays.asList("X"));
+         * } catch (IndexOutOfBoundsException e) {
+         *     // index out of range
+         * }
+         * }</pre>
          *
          * @param index the index at which to insert the first element from the specified collection
          * @param c the collection containing elements to be added to this list
@@ -1760,6 +2342,18 @@ public class Builder<T> {
         /**
          * Removes the element at the specified position in this list.
          * Shifts any subsequent elements to the left.
+         *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * ListBuilder<String, ArrayList<String>> lb = Builder.of(new ArrayList<>());
+         * lb.addAll("Alice", "Bob", "Charlie");
+         * lb.remove(1).val();                               // returns [Alice, Charlie]
+         * try {
+         *     lb.remove(10);
+         * } catch (IndexOutOfBoundsException e) {
+         *     // index out of range
+         * }
+         * }</pre>
          *
          * @param index the index of the element to be removed
          * @return this builder instance
@@ -1792,6 +2386,13 @@ public class Builder<T> {
         /**
          * Adds the specified element to this collection.
          *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * CollectionBuilder<String, HashSet<String>> cb = Builder.of(new HashSet<String>());
+         * Set<String> result = cb.add("apple").add("banana").val(); // returns [apple, banana]
+         * cb.add("apple");
+         * }</pre>
+         *
          * @param e the element to add
          * @return this builder instance
          */
@@ -1804,6 +2405,13 @@ public class Builder<T> {
         /**
          * Adds all of the elements in the specified collection to this collection.
          * Does nothing if the collection is {@code null} or empty.
+         *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * CollectionBuilder<String, HashSet<String>> cb = Builder.of(new HashSet<String>());
+         * cb.addAll(Arrays.asList("apple", "banana")).val();  // returns [apple, banana]
+         * cb.addAll(null).val();                              // returns no change - null is ignored
+         * }</pre>
          *
          * @param c the collection containing elements to be added to this collection
          * @return this builder instance
@@ -1820,6 +2428,13 @@ public class Builder<T> {
          * Adds all of the elements in the specified array to this collection.
          * Does nothing if the array is {@code null} or empty.
          *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * CollectionBuilder<String, HashSet<String>> cb = Builder.of(new HashSet<String>());
+         * cb.addAll("apple", "banana").val();                 // returns [apple, banana]
+         * cb.addAll((String[]) null).val();                   // returns no change - null is ignored
+         * }</pre>
+         *
          * @param a the array containing elements to be added to this collection
          * @return this builder instance
          */
@@ -1834,6 +2449,14 @@ public class Builder<T> {
         /**
          * Removes a single instance of the specified element from this collection,
          * if it is present.
+         *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * CollectionBuilder<String, HashSet<String>> cb = Builder.of(new HashSet<String>());
+         * cb.add("apple").add("banana");
+         * cb.remove("apple").val();                           // returns [banana]
+         * cb.remove("nope").val();                            // returns no change - not present
+         * }</pre>
          *
          * @param e the element to be removed from this collection, if present
          * @return this builder instance
@@ -1851,6 +2474,14 @@ public class Builder<T> {
          * no elements in common with the specified collection.
          * Does nothing if the collection is {@code null} or empty.
          *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * CollectionBuilder<String, HashSet<String>> cb = Builder.of(new HashSet<String>());
+         * cb.add("apple").add("banana").add("cherry");
+         * cb.removeAll(Arrays.asList("apple", "cherry")).val(); // returns [banana]
+         * cb.removeAll(null).val();                             // returns no change - null is ignored
+         * }</pre>
+         *
          * @param c the collection containing elements to be removed from this collection
          * @return this builder instance
          */
@@ -1866,6 +2497,14 @@ public class Builder<T> {
         /**
          * Removes all of this collection's elements that are also contained in the
          * specified array. Does nothing if the array is {@code null} or empty.
+         *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * CollectionBuilder<String, HashSet<String>> cb = Builder.of(new HashSet<String>());
+         * cb.add("apple").add("banana").add("cherry");
+         * cb.removeAll("apple", "cherry").val();             // returns [banana]
+         * cb.removeAll((String[]) null).val();               // returns no change - null is ignored
+         * }</pre>
          *
          * @param a the array containing elements to be removed from this collection
          * @return this builder instance
@@ -1898,6 +2537,19 @@ public class Builder<T> {
          * If the element is not already in the multiset and occurrences is positive,
          * it will be added. If occurrences is zero, the element will be removed entirely.
          *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * MultisetBuilder<String> mb = Builder.of(new Multiset<String>());
+         * Multiset<String> result = mb.setCount("apple", 3).val(); // returns count of apple = 3
+         * mb.setCount("banana", 0).val();                          // removes banana entirely
+         * mb.setCount("banana", 1).val();                          // adds banana
+         * try {
+         *     mb.setCount("apple", -1);
+         * } catch (IllegalArgumentException e) {
+         *     // negative count rejected
+         * }
+         * }</pre>
+         *
          * @param e the element whose count is to be set
          * @param occurrences the desired count of the element; must be non-negative
          * @return this builder instance
@@ -1913,6 +2565,13 @@ public class Builder<T> {
         /**
          * Adds a single occurrence of the specified element to this multiset.
          *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * MultisetBuilder<String> mb = Builder.of(new Multiset<String>());
+         * mb.add("apple").add("apple").add("banana").val();  // returns apple count=2, banana count=1
+         * mb.add(null).val();                                // null may not be allowed
+         * }</pre>
+         *
          * @param e the element to add
          * @return this builder instance
          */
@@ -1925,6 +2584,18 @@ public class Builder<T> {
         /**
          * Adds the specified number of occurrences of the specified element to this multiset.
          * Adding zero occurrences leaves the multiset unchanged.
+         *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * MultisetBuilder<String> mb = Builder.of(new Multiset<String>());
+         * mb.add("apple", 3).val();                          // returns apple count = 3
+         * mb.add("apple", 0).val();                          // returns no change - zero occurrences
+         * try {
+         *     mb.add("apple", -1);
+         * } catch (IllegalArgumentException e) {
+         *     // negative occurrences rejected
+         * }
+         * }</pre>
          *
          * @param e the element to add
          * @param occurrencesToAdd the number of occurrences to add; must be non-negative
@@ -1942,6 +2613,14 @@ public class Builder<T> {
         /**
          * Removes a single occurrence of the specified element from this multiset, if present.
          *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * MultisetBuilder<String> mb = Builder.of(new Multiset<String>());
+         * mb.add("apple", 3);
+         * mb.remove("apple").val();                           // returns apple count = 2
+         * mb.remove("banana").val();                          // returns no change - not present
+         * }</pre>
+         *
          * @param e the element to remove one occurrence of
          * @return this builder instance
          */
@@ -1956,6 +2635,19 @@ public class Builder<T> {
          * Removes the specified number of occurrences of the specified element from this multiset.
          * If the multiset contains fewer than this number of occurrences, all occurrences
          * will be removed.
+         *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * MultisetBuilder<String> mb = Builder.of(new Multiset<String>());
+         * mb.add("apple", 5);
+         * mb.remove("apple", 2).val();                       // returns apple count = 3
+         * mb.remove("apple", 10).val();                      // returns apple removed entirely
+         * try {
+         *     mb.remove("apple", -1);
+         * } catch (IllegalArgumentException e) {
+         *     // negative occurrences rejected
+         * }
+         * }</pre>
          *
          * @param e the element to remove occurrences of
          * @param occurrencesToRemove the number of occurrences to remove; must be non-negative
@@ -1972,6 +2664,14 @@ public class Builder<T> {
         /**
          * Removes all occurrences of all elements in the specified collection from this multiset.
          *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * MultisetBuilder<String> mb = Builder.of(new Multiset<String>());
+         * mb.add("apple", 2).add("banana", 3).add("cherry", 1);
+         * mb.removeAll(Arrays.asList("apple", "banana")).val(); // returns all apple+banana removed
+         * mb.removeAll(Arrays.asList()).val();                  // returns no change - empty collection
+         * }</pre>
+         *
          * @param c the collection of elements to remove all occurrences of
          * @return this builder instance
          * @see #removeAllOccurrences(Collection)
@@ -1985,6 +2685,14 @@ public class Builder<T> {
         /**
          * Removes all occurrences of the specified element from this multiset.
          *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * MultisetBuilder<String> mb = Builder.of(new Multiset<String>());
+         * mb.add("apple", 3).add("banana", 2);
+         * mb.removeAllOccurrences("apple").val();            // returns apple removed entirely
+         * mb.removeAllOccurrences("nope").val();             // returns no change - not present
+         * }</pre>
+         *
          * @param e the element to remove all occurrences of
          * @return this builder instance
          */
@@ -1996,6 +2704,14 @@ public class Builder<T> {
 
         /**
          * Removes all occurrences of all elements in the specified collection from this multiset.
+         *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * MultisetBuilder<String> mb = Builder.of(new Multiset<String>());
+         * mb.add("apple", 2).add("banana", 3).add("cherry", 1);
+         * mb.removeAllOccurrences(Arrays.asList("apple", "banana")).val(); // returns both removed
+         * mb.removeAllOccurrences(Arrays.asList()).val();                  // returns no change - empty collection
+         * }</pre>
          *
          * @param c the collection of elements to remove all occurrences of
          * @return this builder instance
@@ -2028,6 +2744,13 @@ public class Builder<T> {
          * Associates the specified value with the specified key in this map.
          * If the map previously contained a mapping for the key, the old value is replaced.
          *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * MapBuilder<String, Integer, HashMap<String, Integer>> mb = Builder.of(new HashMap<>());
+         * mb.put("Alice", 95).put("Bob", 87).val();          // returns {Alice=95, Bob=87}
+         * mb.put("Alice", 100).val();                        // replaces Alice -> 100
+         * }</pre>
+         *
          * @param k the key with which the specified value is to be associated
          * @param v the value to be associated with the specified key
          * @return this builder instance
@@ -2043,6 +2766,14 @@ public class Builder<T> {
          * The effect of this call is equivalent to that of calling {@code put(k, v)}
          * on this map once for each mapping from key {@code k} to value {@code v} in the
          * specified map. Does nothing if the specified map is {@code null} or empty.
+         *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * MapBuilder<String, Integer, HashMap<String, Integer>> mb = Builder.of(new HashMap<>());
+         * Map<String, Integer> data = Map.of("Alice", 95, "Bob", 87);
+         * mb.putAll(data).val();                             // returns {Alice=95, Bob=87}
+         * mb.putAll(null).val();                             // returns no change - null is ignored
+         * }</pre>
          *
          * @param m the mappings to be stored in this map
          * @return this builder instance
@@ -2061,6 +2792,15 @@ public class Builder<T> {
          *
          * <br />
          * Absent -> key is not found in the specified map or found with {@code null} value.
+         *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * MapBuilder<String, Integer, HashMap<String, Integer>> mb = Builder.of(new HashMap<>());
+         * mb.put("Alice", 95);
+         * mb.putIfAbsent("Alice", 100).val();                // returns {Alice=95} - already present
+         * mb.putIfAbsent("Bob", 87).val();                   // returns {Alice=95, Bob=87} - absent
+         * mb.putIfAbsent("Charlie", null).val();             // null stored if absent
+         * }</pre>
          *
          * @param key the key with which the specified value is to be associated
          * @param value the value to be associated with the specified key
@@ -2083,6 +2823,14 @@ public class Builder<T> {
          * <br />
          * Absent -> key is not found in the specified map or found with {@code null} value.
          *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * MapBuilder<String, Integer, HashMap<String, Integer>> mb = Builder.of(new HashMap<>());
+         * mb.put("Alice", 95);
+         * mb.putIfAbsent("Alice", () -> 100).val();          // returns {Alice=95} - supplier not invoked
+         * mb.putIfAbsent("Bob", () -> 87).val();             // returns {Alice=95, Bob=87}
+         * }</pre>
+         *
          * @param key the key with which the specified value is to be associated
          * @param supplier the supplier that produces the value to be associated with the specified key
          * @return this builder instance
@@ -2102,6 +2850,14 @@ public class Builder<T> {
         /**
          * Removes the mapping for a key from this map if it is present.
          *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * MapBuilder<String, Integer, HashMap<String, Integer>> mb = Builder.of(new HashMap<>());
+         * mb.put("Alice", 95).put("Bob", 87);
+         * mb.remove("Alice").val();                          // returns {Bob=87}
+         * mb.remove("Charlie").val();                        // returns no change - not present
+         * }</pre>
+         *
          * @param k the key whose mapping is to be removed from the map
          * @return this builder instance
          */
@@ -2118,6 +2874,14 @@ public class Builder<T> {
          * This is equivalent to calling {@link Map#remove(Object)} for each key in the
          * provided collection, but with the added convenience of method chaining.
          * If the collection is empty or {@code null}, no changes are made to the map.
+         *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * MapBuilder<String, Integer, HashMap<String, Integer>> mb = Builder.of(new HashMap<>());
+         * mb.put("Alice", 95).put("Bob", 87).put("Charlie", 92);
+         * mb.removeAll(Arrays.asList("Alice", "Charlie")).val(); // returns {Bob=87}
+         * mb.removeAll(null).val();                              // returns no change - null is ignored
+         * }</pre>
          *
          * @param keysToRemove the collection containing keys to be removed from the map
          * @return this builder instance for method chaining
@@ -2241,7 +3005,7 @@ public class Builder<T> {
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * Multimap<String, String> source = // ... another multimap
+         * // source is a Multimap whose entries should be copied
          * multimapBuilder.putMany(source);
          * }</pre>
          *
@@ -2357,7 +3121,7 @@ public class Builder<T> {
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * Multimap<String, String> toRemove = // ... another multimap
+         * // toRemove is a Multimap whose mappings should be removed
          * multimapBuilder.removeMany(toRemove);
          * }</pre>
          *
@@ -3071,7 +3835,7 @@ public class Builder<T> {
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * Dataset header = // ... dataset with header rows
+         * // header is a Dataset with the same columns as this builder's Dataset
          * datasetBuilder.prepend(header);
          * }</pre>
          *
@@ -3091,7 +3855,7 @@ public class Builder<T> {
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * Dataset moreData = // ... dataset with additional rows
+         * // moreData is a Dataset with the same columns as this builder's Dataset
          * datasetBuilder.append(moreData);
          * }</pre>
          *
@@ -3822,6 +4586,7 @@ public class Builder<T> {
      *     .compare(person1.getAge(), person2.getAge())
      *     .result();
      * }</pre>
+     *
      */
     public static final class ComparisonBuilder {
 
@@ -4318,6 +5083,7 @@ public class Builder<T> {
      *     .equals(person1.getAge(), person2.getAge())
      *     .result();
      * }</pre>
+     *
      */
     public static final class EquivalenceBuilder {
 
@@ -4692,6 +5458,7 @@ public class Builder<T> {
      *     .hash(age)
      *     .result();
      * }</pre>
+     *
      */
     public static final class HashCodeBuilder {
 

@@ -78,20 +78,20 @@ import com.landawn.abacus.util.stream.CharStream;
  * <pre>{@code
  * // Creating and initializing character lists
  * CharList buffer = CharList.of('H', 'e', 'l', 'l', 'o');
- * CharList alphabet = CharList.rangeClosed('A', 'Z');   // ['A', 'B', 'C', ..., 'Z']
- * CharList digits = CharList.rangeClosed('0', '9');   // ['0', '1', '2', ..., '9']
- * CharList textBuffer = new CharList(1000);   // Pre-sized for text processing
+ * CharList alphabet = CharList.rangeClosed('A', 'Z');   // returns ['A', 'B', 'C', ..., 'Z']
+ * CharList digits = CharList.rangeClosed('0', '9');     // returns ['0', '1', '2', ..., '9']
+ * CharList textBuffer = new CharList(1000);
  *
  * // String integration
  * CharList fromString = CharList.of("Hello World".toCharArray());   // Convert from string
- * String result = buffer.toString();   // Bracketed form: "[H, e, l, l, o]"
- * char[] charArray = buffer.toArray();   // Convert to char array: ['H', 'e', 'l', 'l', 'o']
+ * String result = buffer.toString();                                // Bracketed form: "[H, e, l, l, o]"
+ * char[] charArray = buffer.toArray();                              // Convert to char array: ['H', 'e', 'l', 'l', 'o']
  *
  * // Text manipulation operations
- * buffer.add(' ');   // Append space
+ * buffer.add(' ');                        // Append space
  * buffer.addAll("World".toCharArray());   // Append more characters
- * char firstChar = buffer.get(0);   // Access by index: 'H'
- * buffer.set(0, 'h');   // Modify: "hello World"
+ * char firstChar = buffer.get(0);         // Access by index: 'H'
+ * buffer.set(0, 'h');                     // Modify: "hello World"
  *
  * // Character searching and analysis
  * int spaceIndex = buffer.indexOf(' ');   // Find space character
@@ -106,10 +106,10 @@ import com.landawn.abacus.util.stream.CharStream;
  * // Set operations for character analysis
  * CharList vowels = CharList.of('a', 'e', 'i', 'o', 'u');
  * CharList consonants = alphabet.difference(vowels);   // Remove vowels
- * CharList common = buffer.intersection(vowels);   // Find vowels in text
+ * CharList common = buffer.intersection(vowels);       // Find vowels in text
  *
  * // High-performance sorting and searching
- * buffer.sort();   // Sort characters
+ * buffer.sort();                          // Sort characters
  * int index = buffer.binarySearch('e');   // Fast character lookup
  *
  * // Efficient text building
@@ -323,7 +323,9 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
     @Serial
     private static final long serialVersionUID = 7293826835233022514L;
 
+    /** Shared random number generator used by {@link #random(int)}. */
     static final Random RAND = new SecureRandom();
+    /** The number of distinct char values; used to map a non-negative random int to the full char range. */
     static final int BOUND = Character.MAX_VALUE + 1;
 
     /**
@@ -340,6 +342,15 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * Constructs an empty CharList with an initial capacity of zero.
      * The internal array will be initialized to an empty array and will grow
      * as needed when elements are added.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * CharList list = new CharList();
+     * list.size();      // returns 0
+     * list.isEmpty();   // returns true
+     * list.add('a');    // list is now ['a']
+     * }</pre>
+     *
      */
     public CharList() {
     }
@@ -349,6 +360,13 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      *
      * <p>This constructor is useful when the approximate size of the list is known in advance,
      * as it can help avoid the performance overhead of array resizing during element additions.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * CharList list = new CharList(100);   // capacity for 100 chars, but still empty
+     * list.size();                         // returns 0
+     * new CharList(-1);                    // throws IllegalArgumentException
+     * }</pre>
      *
      * @param initialCapacity the initial capacity of the list. Must be non-negative.
      * @throws IllegalArgumentException if the specified initial capacity is negative
@@ -365,6 +383,14 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * The CharList instance uses the specified array as its backing array without copying.
      * Changes to the array will be reflected in the list and vice versa.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * char[] arr = {'a', 'b', 'c'};
+     * CharList list = new CharList(arr);   // list is ['a', 'b', 'c'], backed by arr
+     * arr[0] = 'x';                        // list is now ['x', 'b', 'c'] (shares array)
+     * new CharList((char[]) null);         // throws NullPointerException
+     * }</pre>
+     *
      * @param a the array whose elements are to be used as the backing array for this list; must not be {@code null}
      * @throws NullPointerException if the specified array is {@code null}
      */
@@ -376,6 +402,14 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * Constructs a CharList using the specified array as the element array for this list without copying action.
      * The first {@code size} elements of the array will be used as the initial elements of the list.
      * Changes to the array will be reflected in the list and vice versa.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * char[] arr = {'a', 'b', 'c', 'd'};
+     * CharList list = new CharList(arr, 2);   // list is ['a', 'b'] (only first 2 used)
+     * list.size();                            // returns 2
+     * new CharList(arr, 5);                   // throws IndexOutOfBoundsException (5 > arr.length)
+     * }</pre>
      *
      * @param a the array to be used as the element array for this list
      * @param size the number of elements in the list
@@ -393,6 +427,13 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * as the backing array without copying, so subsequent modifications to the array will affect the list.
      * If the input array is {@code null}, an empty list is returned.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * CharList list = CharList.of('a', 'b', 'c');           // list is ['a', 'b', 'c']
+     * CharList empty = CharList.of();                       // list is [] (empty)
+     * CharList fromArr = CharList.of("hi".toCharArray());   // list is ['h', 'i']
+     * }</pre>
+     *
      * @param a the array of elements to be included in the new list. Can be {@code null}.
      * @return a new CharList containing the elements from the specified array, or an empty list if the array is {@code null}
      */
@@ -404,6 +445,14 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * Creates a new CharList containing the first {@code size} elements of the specified array.
      * The array is used directly as the backing array without copying for efficiency.
      * If the input array is {@code null}, it is treated as an empty array.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * char[] arr = {'a', 'b', 'c'};
+     * CharList list = CharList.of(arr, 2);   // list is ['a', 'b']
+     * CharList all = CharList.of(arr, 3);    // list is ['a', 'b', 'c']
+     * CharList.of(arr, 4);                   // throws IndexOutOfBoundsException
+     * }</pre>
      *
      * @param a the array of char values to be used as the backing array. Can be {@code null}.
      * @param size the number of elements from the array to include in the list.
@@ -425,6 +474,14 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      *
      * <p>If the input array is {@code null}, an empty list is returned.</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * char[] arr = {'a', 'b', 'c'};
+     * CharList list = CharList.copyOf(arr);   // list is ['a', 'b', 'c']
+     * arr[0] = 'x';                           // list is still ['a', 'b', 'c'] (defensive copy)
+     * CharList empty = CharList.copyOf(null); // list is [] (empty)
+     * }</pre>
+     *
      * @param a the array to be copied. Can be {@code null}.
      * @return a new CharList containing a copy of the elements from the specified array,
      *         or an empty list if the array is {@code null}
@@ -438,6 +495,14 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      *
      * <p>This method creates a defensive copy of the elements in the range [fromIndex, toIndex),
      * ensuring that modifications to the returned list do not affect the original array.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * char[] arr = {'a', 'b', 'c', 'd'};
+     * CharList list = CharList.copyOf(arr, 1, 3);   // list is ['b', 'c']
+     * CharList empty = CharList.copyOf(arr, 2, 2);  // list is [] (empty range)
+     * CharList.copyOf(arr, 0, 5);                   // throws IndexOutOfBoundsException
+     * }</pre>
      *
      * @param a the array from which a range is to be copied; must not be {@code null}
      * @param fromIndex the initial index of the range to be copied, inclusive.
@@ -455,6 +520,13 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      *
      * <p>For example, {@code range('a', 'd')} returns a list containing ['a', 'b', 'c'].
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * CharList list = CharList.range('a', 'd');   // returns ['a', 'b', 'c']
+     * CharList one = CharList.range('a', 'b');    // returns ['a']
+     * CharList empty = CharList.range('a', 'a');  // returns [] (empty)
+     * }</pre>
+     *
      * @param startInclusive the starting value (inclusive)
      * @param endExclusive the ending value (exclusive)
      * @return a new CharList containing the range of values
@@ -468,6 +540,13 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * incrementing by the specified step.
      *
      * <p>For example, {@code range('a', 'g', 2)} returns a list containing ['a', 'c', 'e'].
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * CharList list = CharList.range('a', 'g', 2);    // returns ['a', 'c', 'e']
+     * CharList one = CharList.range('a', 'c', 5);     // returns ['a']
+     * CharList empty = CharList.range('a', 'a', 2);   // returns [] (empty)
+     * }</pre>
      *
      * @param startInclusive the starting value (inclusive)
      * @param endExclusive the ending value (exclusive)
@@ -484,6 +563,13 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      *
      * <p>For example, {@code rangeClosed('a', 'd')} returns a list containing ['a', 'b', 'c', 'd'].
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * CharList list = CharList.rangeClosed('a', 'd');   // returns ['a', 'b', 'c', 'd']
+     * CharList one = CharList.rangeClosed('a', 'a');    // returns ['a']
+     * CharList digits = CharList.rangeClosed('0', '9'); // returns ['0', '1', ..., '9']
+     * }</pre>
+     *
      * @param startInclusive the starting value (inclusive)
      * @param endInclusive the ending value (inclusive)
      * @return a new CharList containing the range of values
@@ -497,6 +583,13 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * incrementing by the specified step.
      *
      * <p>For example, {@code rangeClosed('a', 'g', 2)} returns a list containing ['a', 'c', 'e', 'g'].
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * CharList list = CharList.rangeClosed('a', 'g', 2);   // returns ['a', 'c', 'e', 'g']
+     * CharList one = CharList.rangeClosed('a', 'a', 2);    // returns ['a']
+     * CharList two = CharList.rangeClosed('a', 'd', 3);    // returns ['a', 'd']
+     * }</pre>
      *
      * @param startInclusive the starting value (inclusive)
      * @param endInclusive the ending value (inclusive)
@@ -513,6 +606,13 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      *
      * <p>For example, {@code repeat('a', 3)} returns a list containing ['a', 'a', 'a'].
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * CharList list = CharList.repeat('a', 3);   // returns ['a', 'a', 'a']
+     * CharList empty = CharList.repeat('a', 0);  // returns [] (empty)
+     * CharList one = CharList.repeat('z', 1);    // returns ['z']
+     * }</pre>
+     *
      * @param element the element to repeat
      * @param len the number of times to repeat the element
      * @return a new CharList containing the repeated element
@@ -525,6 +625,13 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
     /**
      * Creates a CharList of the specified length filled with random char values.
      * Each character will be randomly generated from the entire range of possible char values (0 to 65535).
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * CharList list = CharList.random(5);     // returns a list of 5 random chars, e.g. size() == 5
+     * CharList empty = CharList.random(0);    // returns [] (empty)
+     * CharList.random(-1);                    // throws NegativeArraySizeException
+     * }</pre>
      *
      * @param len the length of the list to create
      * @return a new CharList containing random char values
@@ -543,6 +650,13 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
     /**
      * Creates a CharList of the specified length filled with random char values within the specified range.
      * Each character will be randomly generated from startInclusive (inclusive) to endExclusive (exclusive).
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * CharList list = CharList.random('a', 'z', 4);   // returns 4 random chars in ['a', 'z'), e.g. size() == 4
+     * CharList empty = CharList.random('a', 'z', 0);  // returns [] (empty)
+     * CharList.random('z', 'a', 3);                   // throws IllegalArgumentException (start >= end)
+     * }</pre>
      *
      * @param startInclusive the minimum value (inclusive)
      * @param endExclusive the maximum value (exclusive)
@@ -569,6 +683,14 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
     /**
      * Creates a CharList of the specified length by randomly selecting from the provided candidate chars.
      * Each element in the returned list is randomly chosen from the candidates array with uniform distribution.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * char[] candidates = {'a', 'b', 'c'};
+     * CharList list = CharList.random(candidates, 5);   // returns 5 chars, each one of 'a'/'b'/'c'
+     * CharList empty = CharList.random(candidates, 0);  // returns [] (empty)
+     * CharList.random(new char[0], 3);                  // throws IllegalArgumentException (empty candidates)
+     * }</pre>
      *
      * @param candidates the array of candidate chars to choose from; must not be {@code null}, empty,
      *                   or of length {@code Integer.MAX_VALUE}
@@ -621,6 +743,14 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
     /**
      * Returns the element at the specified position in this list.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * CharList list = CharList.of('a', 'b', 'c');
+     * char c = list.get(0);   // returns 'a'
+     * char d = list.get(2);   // returns 'c'
+     * list.get(3);            // throws IndexOutOfBoundsException
+     * }</pre>
+     *
      * @param index the index of the element to return
      * @return the element at the specified position in this list
      * @throws IndexOutOfBoundsException if {@code index < 0 || index >= size()}
@@ -633,6 +763,13 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
 
     /**
      * Replaces the element at the specified position in this list with the specified element.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * CharList list = CharList.of('a', 'b', 'c');
+     * char old = list.set(1, 'x');   // returns 'b', list is now ['a', 'x', 'c']
+     * list.set(3, 'z');              // throws IndexOutOfBoundsException
+     * }</pre>
      *
      * @param index the index of the element to replace
      * @param e the element to be stored at the specified position
@@ -656,6 +793,13 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * resized to accommodate the new element, all existing elements will be copied to
      * a new, larger array.</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * CharList list = CharList.of('a', 'b');
+     * list.add('c');   // list is now ['a', 'b', 'c']
+     * list.add('d');   // list is now ['a', 'b', 'c', 'd']
+     * }</pre>
+     *
      * @param e the element to be appended to this list
      */
     public void add(final char e) {
@@ -671,6 +815,14 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      *
      * <p>This method runs in linear time in the worst case (when inserting at the beginning
      * of the list), as it may need to shift all existing elements.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * CharList list = CharList.of('a', 'c');
+     * list.add(1, 'b');   // list is now ['a', 'b', 'c']
+     * list.add(0, 'x');   // list is now ['x', 'a', 'b', 'c']
+     * list.add(10, 'z');  // throws IndexOutOfBoundsException
+     * }</pre>
      *
      * @param index the index at which the specified element is to be inserted
      * @param e the element to be inserted
@@ -812,6 +964,13 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * <p>This method runs in linear time, as it may need to search through the entire list.</p>
      * <p><b>Note:</b> This method removes by value. To remove by index, use {@link #removeAt(int)}.</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * CharList list = CharList.of('a', 'b', 'a', 'c');
+     * boolean removed = list.remove('a');     // returns true, list is now ['b', 'a', 'c']
+     * boolean notFound = list.remove('z');    // returns false, list unchanged
+     * }</pre>
+     *
      * @param e the element to be removed from this list, if present
      * @return {@code true} if this list contained the specified element (and it was removed);
      *         {@code false} otherwise
@@ -832,6 +991,13 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
     /**
      * Removes all occurrences of the specified element from this list.
      * The list is compacted after removal, maintaining the order of remaining elements.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * CharList list = CharList.of('a', 'b', 'a', 'c', 'a');
+     * boolean removed = list.removeAllOccurrences('a');   // returns true, list is now ['b', 'c']
+     * boolean notFound = list.removeAllOccurrences('z');  // returns false, list unchanged
+     * }</pre>
      *
      * @param e the element to be removed from this list
      * @return {@code true} if this list was modified (at least one element was removed)
@@ -908,6 +1074,13 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * Errors or runtime exceptions thrown during iteration or by the predicate
      * are relayed to the caller.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * CharList list = CharList.of('a', 'b', 'c', 'd');
+     * boolean removed = list.removeIf(c -> c > 'b');   // returns true, list is now ['a', 'b']
+     * boolean noChange = list.removeIf(c -> c > 'z');  // returns false, list unchanged
+     * }</pre>
+     *
      * @param p a predicate which returns {@code true} for elements to be removed; must not be {@code null}
      * @return {@code true} if any elements were removed; {@code false} if the list was unchanged
      * @throws NullPointerException if {@code p} is {@code null}
@@ -937,6 +1110,13 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
     /**
      * Removes all duplicate elements from this list, keeping only the first occurrence of each element.
      * The order of elements is preserved.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * CharList list = CharList.of('a', 'b', 'a', 'c', 'b');
+     * boolean removed = list.removeDuplicates();                          // returns true, list is now ['a', 'b', 'c']
+     * boolean noChange = CharList.of('a', 'b', 'c').removeDuplicates();   // returns false
+     * }</pre>
      *
      * @return {@code true} if any duplicates were removed
      */
@@ -1078,6 +1258,13 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * <p>This is the preferred index-based removal method.
      * Unlike {@link #remove(char)}, this method removes by index, not by value.</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * CharList list = CharList.of('a', 'b', 'c');
+     * char removed = list.removeAt(1);   // returns 'b', list is now ['a', 'c']
+     * list.removeAt(5);                  // throws IndexOutOfBoundsException
+     * }</pre>
+     *
      * @param index the index of the element to remove
      * @return the removed element
      * @throws IndexOutOfBoundsException if the index is out of range ({@code index < 0 || index >= size()})
@@ -1096,6 +1283,13 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * Removes all elements at the specified indices from this list.
      * The indices array will be sorted internally, and duplicates will be removed.
      * Elements are removed in descending order of indices to maintain correctness.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * CharList list = CharList.of('a', 'b', 'c', 'd', 'e');
+     * list.removeAt(0, 2, 4);   // list is now ['b', 'd']
+     * list.removeAt();          // list unchanged (no indices)
+     * }</pre>
      *
      * @param indices the indices of elements to be removed
      * @throws IndexOutOfBoundsException if any index is out of range ({@code index < 0 || index >= size()})
@@ -1126,6 +1320,13 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * Removes from this list all of the elements whose index is between
      * {@code fromIndex}, inclusive, and {@code toIndex}, exclusive.
      * Shifts any succeeding elements to the left (reduces their index).
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * CharList list = CharList.of('a', 'b', 'c', 'd', 'e');
+     * list.removeRange(1, 3);   // list is now ['a', 'd', 'e']
+     * list.removeRange(0, 0);   // list unchanged (empty range)
+     * }</pre>
      *
      * @param fromIndex the index of the first element to be removed
      * @param toIndex the index after the last element to be removed
@@ -1158,6 +1359,12 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * so that the element originally at fromIndex will be at newPositionAfterMove.
      * Other elements are shifted as necessary to accommodate the move.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * CharList list = CharList.of('a', 'b', 'c', 'd', 'e');
+     * list.moveRange(0, 2, 3);   // moves ['a','b'] to start at index 3; list is now ['c', 'd', 'e', 'a', 'b']
+     * }</pre>
+     *
      * @param fromIndex the starting index (inclusive) of the range to be moved
      * @param toIndex the ending index (exclusive) of the range to be moved
      * @param newPositionAfterMove the zero-based index where the first element of the range will be placed after the move;
@@ -1176,6 +1383,15 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * from the replacement CharList. The range extends from {@code fromIndex} (inclusive)
      * to {@code toIndex} (exclusive). If the replacement has a different size than the
      * range being replaced, the list will grow or shrink accordingly.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * CharList list = CharList.of('a', 'b', 'c', 'd');
+     * list.replaceRange(1, 3, CharList.of('x', 'y', 'z'));   // list is now ['a', 'x', 'y', 'z', 'd']
+     *
+     * CharList list2 = CharList.of('a', 'b', 'c', 'd');
+     * list2.replaceRange(1, 3, new CharList());              // empty replacement removes range; list2 is now ['a', 'd']
+     * }</pre>
      *
      * @param fromIndex the starting index (inclusive) of the range to replace
      * @param toIndex the ending index (exclusive) of the range to replace
@@ -1226,6 +1442,15 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * to {@code toIndex} (exclusive). If the replacement has a different length than the
      * range being replaced, the list will grow or shrink accordingly.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * CharList list = CharList.of('a', 'b', 'c', 'd');
+     * list.replaceRange(1, 3, new char[] {'x'});   // shorter replacement shrinks list; list is now ['a', 'x', 'd']
+     *
+     * CharList list2 = CharList.of('a', 'b', 'c', 'd');
+     * list2.replaceRange(1, 3, new char[0]);        // empty replacement removes range; list2 is now ['a', 'd']
+     * }</pre>
+     *
      * @param fromIndex the starting index (inclusive) of the range to replace
      * @param toIndex the ending index (exclusive) of the range to replace
      * @param replacement the array whose elements will replace the specified range. If {@code null} or empty,
@@ -1272,6 +1497,13 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
     /**
      * Replaces all occurrences of the specified value with the new value in this list.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * CharList list = CharList.of('a', 'b', 'a', 'c');
+     * int count = list.replaceAll('a', 'x');    // returns 2, list is now ['x', 'b', 'x', 'c']
+     * int none = list.replaceAll('z', 'y');     // returns 0, list unchanged
+     * }</pre>
+     *
      * @param oldVal the old value to be replaced
      * @param newVal the new value to replace the old value
      * @return the number of elements replaced
@@ -1297,6 +1529,13 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
     /**
      * Replaces each element of this list with the result of applying the operator to that element.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * CharList list = CharList.of('a', 'b', 'c');
+     * list.replaceAll(c -> Character.toUpperCase(c));   // list is now ['A', 'B', 'C']
+     * new CharList().replaceAll(c -> c);                // empty list unchanged
+     * }</pre>
+     *
      * @param operator the operator to apply to each element; must not be {@code null}
      * @throws NullPointerException if {@code operator} is {@code null}
      */
@@ -1310,6 +1549,13 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
 
     /**
      * Replaces all elements that satisfy the given predicate with the specified new value.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * CharList list = CharList.of('a', 'b', 'c', 'd');
+     * boolean replaced = list.replaceIf(c -> c > 'b', 'z');   // returns true, list is now ['a', 'b', 'z', 'z']
+     * boolean noChange = list.replaceIf(c -> c > 'z', 'x');   // returns false, list unchanged
+     * }</pre>
      *
      * @param predicate the predicate to test elements; must not be {@code null}
      * @param newValue the value to replace matching elements with
@@ -1334,6 +1580,13 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
     /**
      * Replaces all elements in this list with the specified value.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * CharList list = CharList.of('a', 'b', 'c');
+     * list.fill('x');             // list is now ['x', 'x', 'x']
+     * new CharList().fill('x');   // empty list unchanged
+     * }</pre>
+     *
      * @param val the value to be stored in all elements of the list
      */
     public void fill(final char val) {
@@ -1343,6 +1596,13 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
     /**
      * Replaces the elements in the specified range of this list with the specified value.
      * The range extends from {@code fromIndex} (inclusive) to {@code toIndex} (exclusive).
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * CharList list = CharList.of('a', 'b', 'c', 'd');
+     * list.fill(1, 3, 'x');     // list is now ['a', 'x', 'x', 'd']
+     * list.fill(0, 5, 'z');     // throws IndexOutOfBoundsException
+     * }</pre>
      *
      * @param fromIndex the index of the first element (inclusive) to be filled with the specified value
      * @param toIndex the index after the last element (exclusive) to be filled with the specified value
@@ -1362,6 +1622,13 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      *
      * <p>This method performs a linear search through the list.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * CharList list = CharList.of('a', 'b', 'c');
+     * boolean has = list.contains('b');      // returns true
+     * boolean missing = list.contains('z');  // returns false
+     * }</pre>
+     *
      * @param valueToFind the element whose presence in this list is to be tested
      * @return {@code true} if this list contains the specified element, {@code false} otherwise
      */
@@ -1371,6 +1638,13 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
 
     /**
      * Returns {@code true} if this list contains any element from the specified CharList.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * CharList list = CharList.of('a', 'b', 'c');
+     * boolean any = list.containsAny(CharList.of('c', 'z'));     // returns true ('c' is shared)
+     * boolean none = list.containsAny(CharList.of('x', 'z'));    // returns false
+     * }</pre>
      *
      * @param c the CharList to check for common elements
      * @return {@code true} if this list contains at least one element from the specified CharList
@@ -1387,6 +1661,13 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
     /**
      * Returns {@code true} if this list contains any element from the specified array.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * CharList list = CharList.of('a', 'b', 'c');
+     * boolean any = list.containsAny(new char[] {'c', 'z'});     // returns true ('c' is shared)
+     * boolean none = list.containsAny(new char[] {'x', 'z'});    // returns false
+     * }</pre>
+     *
      * @param a the array to check for common elements
      * @return {@code true} if this list contains at least one element from the specified array
      */
@@ -1401,6 +1682,14 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
 
     /**
      * Returns {@code true} if this list contains all of the elements in the specified CharList.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * CharList list = CharList.of('a', 'b', 'c');
+     * boolean all = list.containsAll(CharList.of('a', 'b'));     // returns true
+     * boolean notAll = list.containsAll(CharList.of('a', 'z'));  // returns false ('z' missing)
+     * boolean empty = list.containsAll(new CharList());          // returns true (empty is always contained)
+     * }</pre>
      *
      * @param c the CharList to be checked for containment in this list
      * @return {@code true} if this list contains all of the elements in the specified CharList
@@ -1434,6 +1723,14 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
 
     /**
      * Returns {@code true} if this list contains all of the elements in the specified array.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * CharList list = CharList.of('a', 'b', 'c');
+     * boolean all = list.containsAll(new char[] {'a', 'b'});     // returns true
+     * boolean notAll = list.containsAll(new char[] {'a', 'z'});  // returns false ('z' missing)
+     * boolean empty = list.containsAll(new char[0]);             // returns true (empty is always contained)
+     * }</pre>
      *
      * @param a the array to be checked for containment in this list
      * @return {@code true} if this list contains all of the elements in the specified array
@@ -1504,12 +1801,12 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * <pre>{@code
      * CharList list1 = CharList.of('a', 'a', 'b', 'c');
      * CharList list2 = CharList.of('a', 'b', 'b', 'd');
-     * CharList result = list1.intersection(list2);   // result will be ['a', 'b']
+     * CharList result = list1.intersection(list2);   // returns result will be ['a', 'b']
      * // One occurrence of 'a' (minimum count in both lists) and one occurrence of 'b'
      *
      * CharList list3 = CharList.of('x', 'x', 'y');
      * CharList list4 = CharList.of('x', 'z');
-     * CharList result2 = list3.intersection(list4);   // result will be ['x']
+     * CharList result2 = list3.intersection(list4);   // returns result will be ['x']
      * // One occurrence of 'x' (minimum count in both lists)
      * }</pre>
      *
@@ -1549,12 +1846,12 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * <pre>{@code
      * CharList list1 = CharList.of('a', 'a', 'b', 'c');
      * char[] array = new char[] {'a', 'b', 'b', 'd'};
-     * CharList result = list1.intersection(array);   // result will be ['a', 'b']
+     * CharList result = list1.intersection(array);   // returns result will be ['a', 'b']
      * // One occurrence of 'a' (minimum count in both sources) and one occurrence of 'b'
      *
      * CharList list2 = CharList.of('x', 'x', 'y');
      * char[] array2 = new char[] {'x', 'z'};
-     * CharList result2 = list2.intersection(array2);   // result will be ['x']
+     * CharList result2 = list2.intersection(array2);   // returns result will be ['x']
      * // One occurrence of 'x' (minimum count in both sources)
      * }</pre>
      *
@@ -1584,12 +1881,12 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * <pre>{@code
      * CharList list1 = CharList.of('a', 'a', 'b', 'c');
      * CharList list2 = CharList.of('a', 'd');
-     * CharList result = list1.difference(list2);   // result will be ['a', 'b', 'c']
+     * CharList result = list1.difference(list2);   // returns result will be ['a', 'b', 'c']
      * // One 'a' remains because list1 has two occurrences and list2 has one
      *
      * CharList list3 = CharList.of('e', 'f');
      * CharList list4 = CharList.of('e', 'e', 'f');
-     * CharList result2 = list3.difference(list4);   // result will be [] (empty)
+     * CharList result2 = list3.difference(list4);   // returns result will be [] (empty)
      * // No elements remain because list4 has at least as many occurrences of each value as list3
      * }</pre>
      *
@@ -1628,12 +1925,12 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * <pre>{@code
      * CharList list1 = CharList.of('a', 'a', 'b', 'c');
      * char[] array = new char[] {'a', 'd'};
-     * CharList result = list1.difference(array);   // result will be ['a', 'b', 'c']
+     * CharList result = list1.difference(array);   // returns result will be ['a', 'b', 'c']
      * // One 'a' remains because list1 has two occurrences and array has one
      *
      * CharList list2 = CharList.of('e', 'f');
      * char[] array2 = new char[] {'e', 'e', 'f'};
-     * CharList result2 = list2.difference(array2);   // result will be [] (empty)
+     * CharList result2 = list2.difference(array2);   // returns result will be [] (empty)
      * // No elements remain because array2 has at least as many occurrences of each value as list2
      * }</pre>
      *
@@ -1664,7 +1961,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * <pre>{@code
      * CharList list1 = CharList.of('a', 'b', 'c');
      * CharList list2 = CharList.of('b', 'c', 'd');
-     * CharList result = list1.symmetricDifference(list2);   // result will be ['a', 'd']
+     * CharList result = list1.symmetricDifference(list2);   // returns result will be ['a', 'd']
      * }</pre>
      *
      * @param b the CharList to find the symmetric difference with
@@ -1709,6 +2006,13 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * The symmetric difference consists of elements that are in either this list or the specified array,
      * but not in both. Occurrences are considered.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * CharList list = CharList.of('a', 'b', 'c');
+     * CharList result = list.symmetricDifference(new char[] {'b', 'c', 'd'});   // returns ['a', 'd']
+     * CharList all = list.symmetricDifference(new char[0]);                     // returns ['a', 'b', 'c'] (copy)
+     * }</pre>
+     *
      * @param b the array to find the symmetric difference with
      * @return a new CharList containing elements that are in either the list or array but not in both,
      *         considering the number of occurrences
@@ -1729,6 +2033,13 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
 
     /**
      * Returns the number of occurrences of the specified value in this list.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * CharList list = CharList.of('a', 'b', 'a', 'c', 'a');
+     * int count = list.frequency('a');     // returns 3
+     * int none = list.frequency('z');      // returns 0
+     * }</pre>
      *
      * @param valueToFind the value whose occurrences are to be counted
      * @return the number of times the specified value appears in this list
@@ -1753,6 +2064,13 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * Returns the index of the first occurrence of the specified element in this list,
      * or -1 if this list does not contain the element.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * CharList list = CharList.of('a', 'b', 'c', 'b');
+     * int idx = list.indexOf('b');       // returns 1
+     * int missing = list.indexOf('z');   // returns -1
+     * }</pre>
+     *
      * @param valueToFind the element to search for
      * @return the index of the first occurrence of the specified element in this list,
      *         or -1 if this list does not contain the element
@@ -1764,6 +2082,13 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
     /**
      * Returns the index of the first occurrence of the specified element in this list,
      * starting the search at the specified index, or -1 if the element is not found.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * CharList list = CharList.of('a', 'b', 'c', 'b');
+     * int idx = list.indexOf('b', 2);       // returns 3 (search starts at index 2)
+     * int missing = list.indexOf('a', 1);   // returns -1 (no 'a' at or after index 1)
+     * }</pre>
      *
      * @param valueToFind the element to search for
      * @param fromIndex the index to start the search from (inclusive)
@@ -1788,6 +2113,13 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * Returns the index of the last occurrence of the specified element in this list,
      * or -1 if this list does not contain the element.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * CharList list = CharList.of('a', 'b', 'c', 'b');
+     * int idx = list.lastIndexOf('b');       // returns 3
+     * int missing = list.lastIndexOf('z');   // returns -1
+     * }</pre>
+     *
      * @param valueToFind the element to search for
      * @return the index of the last occurrence of the specified element in this list,
      *         or -1 if this list does not contain the element
@@ -1800,6 +2132,13 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * Returns the index of the last occurrence of the specified element in this list,
      * searching backwards from the specified index, or -1 if the element is not found.
      * If {@code startIndexFromBack} is negative or the list is empty, -1 is returned.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * CharList list = CharList.of('a', 'b', 'c', 'b');
+     * int idx = list.lastIndexOf('b', 2);       // returns 1 (searching back from index 2)
+     * int missing = list.lastIndexOf('c', 1);   // returns -1 (no 'c' at or before index 1)
+     * }</pre>
      *
      * @param valueToFind the element to search for
      * @param startIndexFromBack the index to start the backward search from (inclusive);
@@ -1824,6 +2163,13 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
     /**
      * Returns the minimum element in this list.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * CharList list = CharList.of('e', 'b', 'h', 'a', 'i');
+     * OptionalChar min = list.min();               // returns OptionalChar['a']
+     * OptionalChar empty = new CharList().min();   // returns OptionalChar.empty
+     * }</pre>
+     *
      * @return an OptionalChar containing the minimum element, or an empty OptionalChar if this list is empty
      */
     public OptionalChar min() {
@@ -1832,6 +2178,12 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
 
     /**
      * Returns the minimum element in the specified range of this list.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * CharList list = CharList.of('e', 'b', 'h', 'a', 'i');
+     * OptionalChar min = list.min(1, 4);  // returns min of ['b', 'h', 'a'] = OptionalChar['a']
+     * }</pre>
      *
      * @param fromIndex the starting index (inclusive) of the range to search
      * @param toIndex the ending index (exclusive) of the range to search
@@ -1848,6 +2200,13 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
     /**
      * Returns the maximum element in this list.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * CharList list = CharList.of('e', 'b', 'h', 'a', 'i');
+     * OptionalChar max = list.max();               // returns OptionalChar['i']
+     * OptionalChar empty = new CharList().max();   // returns OptionalChar.empty
+     * }</pre>
+     *
      * @return an OptionalChar containing the maximum element, or an empty OptionalChar if this list is empty
      */
     public OptionalChar max() {
@@ -1856,6 +2215,12 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
 
     /**
      * Returns the maximum element in the specified range of this list.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * CharList list = CharList.of('e', 'b', 'h', 'a', 'i');
+     * OptionalChar max = list.max(1, 4);  // returns max of ['b', 'h', 'a'] = OptionalChar['h']
+     * }</pre>
      *
      * @param fromIndex the starting index (inclusive) of the range to search
      * @param toIndex the ending index (exclusive) of the range to search
@@ -1876,6 +2241,12 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * an odd number of elements, this is the exact middle element. For lists with an even number of
      * elements, this method returns the lower of the two middle elements (not the average).</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * CharList list = CharList.of('e', 'b', 'h', 'a', 'i');
+     * OptionalChar median = list.median();  // returns sorted: ['a', 'b', 'e', 'h', 'i']; median = OptionalChar['e']
+     * }</pre>
+     *
      * @return an OptionalChar containing the median value if the list is non-empty, or an empty OptionalChar if the list is empty
      */
     public OptionalChar median() {
@@ -1888,6 +2259,12 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * <p>The median is computed for elements from {@code fromIndex} (inclusive) to {@code toIndex} (exclusive).
      * For ranges with an odd number of elements, this returns the exact middle element when sorted.
      * For ranges with an even number of elements, this returns the lower of the two middle elements.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * CharList list = CharList.of('e', 'b', 'h', 'a', 'i');
+     * OptionalChar median = list.median(1, 4);  // returns median of ['b', 'h', 'a'] = OptionalChar['b']
+     * }</pre>
      *
      * @param fromIndex the starting index (inclusive) of the range to calculate median for
      * @param toIndex the ending index (exclusive) of the range to calculate median for
@@ -1902,6 +2279,13 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
 
     /**
      * Performs the given action for each element of this list in sequential order.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * CharList list = CharList.of('a', 'b', 'c');
+     * StringBuilder sb = new StringBuilder();
+     * list.forEach(sb::append);   // sb is now "abc"
+     * }</pre>
      *
      * @param action the action to be performed for each element; must not be {@code null}
      * @throws NullPointerException if {@code action} is {@code null}
@@ -1922,6 +2306,15 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      *   <li>If {@code fromIndex > toIndex}: iterates backward from {@code fromIndex} (inclusive) to {@code toIndex} (exclusive)</li>
      *   <li>If {@code toIndex == -1}: treated as backward iteration from {@code fromIndex} to the beginning of the list</li>
      * </ul>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * CharList list = CharList.of('a', 'b', 'c', 'd');
+     * StringBuilder fwd = new StringBuilder();
+     * list.forEach(1, 3, fwd::append);    // forward over indices 1,2; fwd is now "bc"
+     * StringBuilder back = new StringBuilder();
+     * list.forEach(3, -1, back::append);  // backward from index 3 to start; back is now "dcba"
+     * }</pre>
      *
      * @param fromIndex the starting index (inclusive)
      * @param toIndex the ending index (exclusive), or {@code -1} for backward iteration to the start
@@ -1947,6 +2340,13 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
     /**
      * Returns the first element in this list wrapped in an OptionalChar.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * CharList list = CharList.of('a', 'b', 'c');
+     * char f = list.first().get();                          // returns 'a'
+     * boolean empty = new CharList().first().isPresent();   // returns false
+     * }</pre>
+     *
      * @return an OptionalChar containing the first element, or an empty OptionalChar if this list is empty
      */
     public OptionalChar first() {
@@ -1955,6 +2355,13 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
 
     /**
      * Returns the last element in this list wrapped in an OptionalChar.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * CharList list = CharList.of('a', 'b', 'c');
+     * char l = list.last().get();                          // returns 'c'
+     * boolean empty = new CharList().last().isPresent();   // returns false
+     * }</pre>
      *
      * @return an OptionalChar containing the last element, or an empty OptionalChar if this list is empty
      */
@@ -1965,6 +2372,13 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
     /**
      * Returns a new CharList containing only the distinct elements from the specified range of this list.
      * The order of elements is preserved (keeps the first occurrence of each element).
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * CharList list = CharList.of('a', 'b', 'a', 'c', 'b');
+     * CharList distinct = list.distinct(0, 5);   // returns ['a', 'b', 'c']
+     * CharList part = list.distinct(1, 3);       // returns ['b', 'a']
+     * }</pre>
      *
      * @param fromIndex the index of the first element (inclusive) to include
      * @param toIndex the index after the last element (exclusive) to include
@@ -1986,6 +2400,12 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * Checks whether this list contains any duplicate elements.
      * An element is considered a duplicate if it appears more than once in the list.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * boolean dup = CharList.of('a', 'b', 'c', 'a').containsDuplicates();   // returns true
+     * boolean unique = CharList.of('a', 'b', 'c').containsDuplicates();     // returns false
+     * }</pre>
+     *
      * @return {@code true} if the list contains at least one duplicate element, {@code false} otherwise
      */
     @Override
@@ -1998,6 +2418,12 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * according to their Unicode values.
      * An empty list or a list with a single element is considered sorted.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * boolean sorted = CharList.of('a', 'b', 'c').isSorted();     // returns true
+     * boolean notSorted = CharList.of('c', 'b', 'a').isSorted();  // returns false
+     * }</pre>
+     *
      * @return {@code true} if all elements are in ascending order (allowing equal consecutive values),
      *         {@code false} otherwise
      */
@@ -2009,6 +2435,13 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
     /**
      * Sorts all elements in this list in ascending order (by Unicode value).
      * This method modifies the list in place using an efficient sorting algorithm.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * CharList list = CharList.of('c', 'a', 'b');
+     * list.sort();   // list is now ['a', 'b', 'c']
+     * }</pre>
+     *
      */
     @Override
     public void sort() {
@@ -2021,6 +2454,13 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * Sorts all elements in this list in ascending order using a parallel sorting algorithm.
      * This method modifies the list in place and may offer better performance than {@link #sort()}
      * for large lists on multi-core systems. For small lists it may be slower due to thread overhead.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * CharList list = CharList.of('c', 'a', 'b');
+     * list.parallelSort();   // list is now ['a', 'b', 'c']
+     * }</pre>
+     *
      */
     public void parallelSort() {
         if (size > 1) {
@@ -2032,6 +2472,13 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * Sorts all elements in this list in descending order (by Unicode value).
      * This method first sorts the list in ascending order, then reverses it.
      * The list is modified in place.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * CharList list = CharList.of('c', 'a', 'b');
+     * list.reverseSort();   // list is now ['c', 'b', 'a']
+     * }</pre>
+     *
      */
     @Override
     public void reverseSort() {
@@ -2049,6 +2496,13 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * <p>If the list contains multiple elements equal to the specified value,
      * there is no guarantee which one will be found.</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * CharList sorted = CharList.of('a', 'c', 'e', 'g');
+     * int found = sorted.binarySearch('e');       // returns 2
+     * int notFound = sorted.binarySearch('b');    // returns -2 (would insert at index 1)
+     * }</pre>
+     *
      * @param valueToFind the value to search for
      * @return the index of the search key if it is contained in the list;
      *         otherwise, {@code (-(insertion point) - 1)}. The insertion point is defined
@@ -2065,6 +2519,13 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      *
      * <p>If the range contains multiple elements equal to the specified value,
      * there is no guarantee which one will be found.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * CharList sorted = CharList.of('a', 'c', 'e', 'g');
+     * int found = sorted.binarySearch(0, 4, 'e');       // returns 2
+     * int notFound = sorted.binarySearch(0, 4, 'b');    // returns -2 (would insert at index 1)
+     * }</pre>
      *
      * @param fromIndex the starting index (inclusive) of the range to search
      * @param toIndex the ending index (exclusive) of the range to search
@@ -2086,6 +2547,13 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * After this method returns, the first element becomes the last,
      * the second element becomes the second to last, and so on.
      * This method modifies the list in place.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * CharList list = CharList.of('a', 'b', 'c', 'd');
+     * list.reverse();   // list is now ['d', 'c', 'b', 'a']
+     * }</pre>
+     *
      */
     @Override
     public void reverse() {
@@ -2099,6 +2567,12 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * After this method returns, the element at {@code fromIndex} becomes the element
      * at {@code toIndex - 1}, and vice versa. Elements outside the specified range
      * are not affected. This method modifies the list in place.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * CharList list = CharList.of('a', 'b', 'c', 'd');
+     * list.reverse(1, 3);   // reverses indices 1,2; list is now ['a', 'c', 'b', 'd']
+     * }</pre>
      *
      * @param fromIndex the starting index (inclusive) of the range to reverse
      * @param toIndex the ending index (exclusive) of the range to reverse
@@ -2123,6 +2597,15 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * while negative values rotate towards lower indices (left rotation).
      * The list is modified in place.</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * CharList list = CharList.of('a', 'b', 'c', 'd', 'e');
+     * list.rotate(2);    // right rotation; list is now ['d', 'e', 'a', 'b', 'c']
+     *
+     * CharList list2 = CharList.of('a', 'b', 'c', 'd', 'e');
+     * list2.rotate(-1);  // left rotation; list2 is now ['b', 'c', 'd', 'e', 'a']
+     * }</pre>
+     *
      * @param distance the distance to rotate the list. Positive values rotate right,
      *                 negative values rotate left
      * @see N#rotate(char[], int)
@@ -2138,6 +2621,14 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * Randomly shuffles all elements in this list.
      * After this method returns, the elements will be in a random order.
      * This method uses a default source of randomness and modifies the list in place.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * CharList list = CharList.of('a', 'b', 'c', 'd');
+     * list.shuffle();        // elements are reordered randomly; size() is still 4
+     * // the same chars remain, only their order changes
+     * }</pre>
+     *
      */
     @Override
     public void shuffle() {
@@ -2151,6 +2642,12 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * After this method returns, the elements will be in a random order determined by
      * the given Random object. This method modifies the list in place.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * CharList list = CharList.of('a', 'b', 'c', 'd');
+     * list.shuffle(new Random(42));   // deterministic order for a fixed seed; size() is still 4
+     * }</pre>
+     *
      * @param rnd the source of randomness to use for shuffling
      */
     @Override
@@ -2163,6 +2660,13 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
     /**
      * Swaps the elements at the specified positions in this list.
      * If {@code i} and {@code j} are equal, this method leaves the list unchanged.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * CharList list = CharList.of('a', 'b', 'c', 'd');
+     * list.swap(0, 3);   // list is now ['d', 'b', 'c', 'a']
+     * list.swap(1, 1);   // list unchanged (same index)
+     * }</pre>
      *
      * @param i the index of the first element to swap
      * @param j the index of the second element to swap
@@ -2182,6 +2686,13 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * The returned list is independent of this list, so changes to the
      * returned list will not affect this list and vice versa.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * CharList list = CharList.of('a', 'b', 'c');
+     * CharList copy = list.copy();   // returns an independent copy ['a', 'b', 'c']
+     * copy.set(0, 'x');              // copy is ['x', 'b', 'c'], list still ['a', 'b', 'c']
+     * }</pre>
+     *
      * @return a new CharList containing all elements from this list
      */
     @Override
@@ -2193,6 +2704,13 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * Returns a new CharList containing a copy of elements in the specified range of this list.
      * The returned list is independent of this list, so changes to the
      * returned list will not affect this list and vice versa.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * CharList list = CharList.of('a', 'b', 'c', 'd');
+     * CharList sub = list.copy(1, 3);   // returns ['b', 'c']
+     * CharList empty = list.copy(2, 2); // returns [] (empty range)
+     * }</pre>
      *
      * @param fromIndex the starting index (inclusive) of the range to copy
      * @param toIndex the ending index (exclusive) of the range to copy
@@ -2299,6 +2817,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
     /**
      * Removes all elements from this list. The list will be empty after this call returns.
      * The capacity of the list is not changed.
+     *
      */
     @Override
     public void clear() {
@@ -2336,6 +2855,13 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * <p>This method is useful when you need to work with APIs that require
      * {@code List<Character>} rather than primitive char arrays.</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * CharList list = CharList.of('a', 'b', 'c');
+     * List<Character> boxed = list.boxed();   // returns [a, b, c] as List<Character>
+     * boxed.get(0);                           // returns Character 'a'
+     * }</pre>
+     *
      * @return a new List&lt;Character&gt; containing all elements from this list
      */
     @Override
@@ -2350,6 +2876,12 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      *
      * <p>This method is useful when you need to work with APIs that require
      * {@code List<Character>} rather than primitive char arrays.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * CharList list = CharList.of('a', 'b', 'c', 'd');
+     * List<Character> boxed = list.boxed(1, 3);   // returns [b, c] as List<Character>
+     * }</pre>
      *
      * @param fromIndex the starting index (inclusive) of the range to box
      * @param toIndex the ending index (exclusive) of the range to box
@@ -2373,6 +2905,13 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
     /**
      * Returns a new array containing all elements of this list in proper sequence.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * CharList list = CharList.of('a', 'b', 'c');
+     * char[] arr = list.toArray();   // returns ['a', 'b', 'c']
+     * arr[0] = 'x';                  // list unchanged (independent array)
+     * }</pre>
+     *
      * @return a new char array containing all elements of this list
      */
     @Override
@@ -2384,6 +2923,12 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * Converts this CharList to an IntList.
      * Each char value is widened to an int value, preserving its Unicode code point.
      * The returned IntList is independent of this list.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * CharList list = CharList.of('a', 'b', 'c');
+     * IntList ints = list.toIntList();   // returns [97, 98, 99] (Unicode code points)
+     * }</pre>
      *
      * @return a new IntList containing the Unicode code point values of all elements in this list
      */
@@ -2500,6 +3045,12 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * (inclusive) to {@code toIndex} (exclusive). The stream operates on primitive char
      * values, avoiding boxing overhead.</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * CharList list = CharList.of('a', 'b', 'c', 'd');
+     * long count = list.stream(1, 3).count();   // returns 2 (elements at indices 1,2)
+     * }</pre>
+     *
      * @param fromIndex the index of the first element (inclusive) to include in the stream
      * @param toIndex the index after the last element (exclusive) to include in the stream
      * @return a CharStream over the specified range of elements
@@ -2518,6 +3069,13 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * <p>This method provides constant-time access to the first element without removing it
      * from the list.</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * CharList list = CharList.of('a', 'b', 'c');
+     * char first = list.getFirst();   // returns 'a'
+     * new CharList().getFirst();      // throws NoSuchElementException
+     * }</pre>
+     *
      * @return the first char value in the list
      * @throws NoSuchElementException if the list is empty
      */
@@ -2532,6 +3090,13 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      *
      * <p>This method provides constant-time access to the last element without removing it
      * from the list.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * CharList list = CharList.of('a', 'b', 'c');
+     * char last = list.getLast();   // returns 'c'
+     * new CharList().getLast();     // throws NoSuchElementException
+     * }</pre>
      *
      * @return the last char value in the list
      * @throws NoSuchElementException if the list is empty
@@ -2551,6 +3116,12 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      *
      * <p>If the list's capacity needs to be increased, it will be grown automatically.</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * CharList list = CharList.of('b', 'c');
+     * list.addFirst('a');   // list is now ['a', 'b', 'c']
+     * }</pre>
+     *
      * @param e the char element to add at the beginning of the list
      */
     public void addFirst(final char e) {
@@ -2566,6 +3137,12 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      *
      * <p>This method is equivalent to {@code add(e)}.</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * CharList list = CharList.of('a', 'b');
+     * list.addLast('c');   // list is now ['a', 'b', 'c']
+     * }</pre>
+     *
      * @param e the char element to append to the list
      */
     public void addLast(final char e) {
@@ -2578,6 +3155,13 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * <p>This method removes the element at index 0 and shifts all remaining elements one
      * position to the left (decreasing their indices by 1). This operation has O(n) time
      * complexity where n is the size of the list.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * CharList list = CharList.of('a', 'b', 'c');
+     * char removed = list.removeFirst();   // returns 'a', list is now ['b', 'c']
+     * new CharList().removeFirst();        // throws NoSuchElementException
+     * }</pre>
      *
      * @return the first char value that was removed from the list
      * @throws NoSuchElementException if the list is empty
@@ -2593,6 +3177,13 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      *
      * <p>This method removes the element at the last position. This operation has O(1)
      * time complexity.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * CharList list = CharList.of('a', 'b', 'c');
+     * char removed = list.removeLast();   // returns 'c', list is now ['a', 'b']
+     * new CharList().removeLast();        // throws NoSuchElementException
+     * }</pre>
      *
      * @return the last char value that was removed from the list
      * @throws NoSuchElementException if the list is empty

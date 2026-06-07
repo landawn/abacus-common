@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
+import com.landawn.abacus.util.Throwables;
 
 public class FloatToIntFunctionTest extends TestBase {
 
@@ -40,6 +41,13 @@ public class FloatToIntFunctionTest extends TestBase {
     public void testFunctionalInterfaceContract() {
         final FloatToIntFunction function = value -> (int) value;
         assertNotNull(function);
+        assertEquals(42, function.applyAsInt(42.5f));
+    }
+
+    @Test
+    public void testThrowableFunctionCompatibility() {
+        final Throwables.FloatToIntFunction<RuntimeException> function = FloatToIntFunction.DEFAULT;
+
         assertEquals(42, function.applyAsInt(42.5f));
     }
 }

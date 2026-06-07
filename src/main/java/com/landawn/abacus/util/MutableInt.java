@@ -59,8 +59,9 @@ public final class MutableInt extends Number implements Comparable<MutableInt>, 
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * MutableInt num = new MutableInt();   // value is 0
+     * MutableInt num = new MutableInt();
      * }</pre>
+     *
      */
     MutableInt() {
     }
@@ -70,7 +71,7 @@ public final class MutableInt extends Number implements Comparable<MutableInt>, 
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * MutableInt num = new MutableInt(42);   // value is 42
+     * MutableInt num = new MutableInt(42);
      * }</pre>
      *
      * @param value the initial value to store
@@ -114,6 +115,18 @@ public final class MutableInt extends Number implements Comparable<MutableInt>, 
 
     /**
      * Gets the value as a primitive int.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * MutableInt num = MutableInt.of(42);
+     * int val = num.getValue();          // returns 42, value is unchanged
+     *
+     * num.setValue(7);
+     * val = num.getValue();              // returns 7, value is unchanged
+     *
+     * MutableInt max = MutableInt.of(Integer.MAX_VALUE);
+     * val = max.getValue();              // returns 2147483647 (Integer.MAX_VALUE)
+     * }</pre>
      *
      * @return the current int value
      * @deprecated replaced by {@link #value()}.
@@ -214,6 +227,7 @@ public final class MutableInt extends Number implements Comparable<MutableInt>, 
      * MutableInt num = MutableInt.of(10);
      * num.increment();   // value is now 11
      * }</pre>
+     *
      */
     public void increment() {
         value++;
@@ -227,6 +241,7 @@ public final class MutableInt extends Number implements Comparable<MutableInt>, 
      * MutableInt num = MutableInt.of(10);
      * num.decrement();   // value is now 9
      * }</pre>
+     *
      */
     public void decrement() {
         value--;
@@ -243,7 +258,7 @@ public final class MutableInt extends Number implements Comparable<MutableInt>, 
      * num.add(5);   // value is now 15
      * }</pre>
      *
-     * @param delta the value to add
+     * @param delta the value to add to the current value
      */
     public void add(final int delta) {
         value += delta;
@@ -258,7 +273,7 @@ public final class MutableInt extends Number implements Comparable<MutableInt>, 
      * num.subtract(3);   // value is now 7
      * }</pre>
      *
-     * @param delta the value to subtract
+     * @param delta the value to subtract from the current value
      */
     public void subtract(final int delta) {
         value -= delta;
@@ -333,7 +348,7 @@ public final class MutableInt extends Number implements Comparable<MutableInt>, 
      * int old = num.getAndAdd(5);   // returns 10, value is now 15
      * }</pre>
      *
-     * @param delta the value to add
+     * @param delta the value to add to the current value
      * @return the value before adding
      */
     public int getAndAdd(final int delta) {
@@ -351,7 +366,7 @@ public final class MutableInt extends Number implements Comparable<MutableInt>, 
      * int newVal = num.addAndGet(5);   // returns 15, value is now 15
      * }</pre>
      *
-     * @param delta the value to add
+     * @param delta the value to add to the current value
      * @return the value after adding
      */
     public int addAndGet(final int delta) {
@@ -471,7 +486,7 @@ public final class MutableInt extends Number implements Comparable<MutableInt>, 
      * }</pre>
      *
      * @param obj the object to compare with, {@code null} returns false
-     * @return {@code true} if the objects are the same; {@code false} otherwise
+     * @return {@code true} if the objects represent the same int value; {@code false} otherwise
      */
     @Override
     public boolean equals(final Object obj) {

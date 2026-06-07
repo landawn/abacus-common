@@ -43,6 +43,26 @@ public class ArrayStreamTest extends TestBase {
     private Integer[] integerArray;
     private String[] emptyArray;
 
+    private static final class DistinctItem {
+        private final int id;
+        private final int rank;
+
+        private DistinctItem(final int id, final int rank) {
+            this.id = id;
+            this.rank = rank;
+        }
+
+        @Override
+        public boolean equals(final Object obj) {
+            return obj instanceof DistinctItem && id == ((DistinctItem) obj).id;
+        }
+
+        @Override
+        public int hashCode() {
+            return id;
+        }
+    }
+
     @BeforeEach
     public void setUp() {
         stringArray = new String[] { "apple", "banana", "cherry", "date", "elderberry" };
@@ -1493,6 +1513,20 @@ public class ArrayStreamTest extends TestBase {
         Optional<Integer> result = stream.kthLargest(2, Integer::compareTo);
         assertTrue(result.isPresent());
         assertEquals(Integer.valueOf(4), result.get());
+    }
+
+    @Test
+    public void testDistinctAfterCustomSortUsesEqualityForNonAdjacentDuplicates() {
+        DistinctItem first = new DistinctItem(1, 1);
+        DistinctItem second = new DistinctItem(2, 2);
+        DistinctItem duplicateOfFirst = new DistinctItem(1, 3);
+
+        List<DistinctItem> result = Stream.of(new DistinctItem[] { first, second, duplicateOfFirst })
+                .sorted(Comparator.comparingInt(item -> item.rank))
+                .distinct()
+                .toList();
+
+        assertEquals(Arrays.asList(first, second), result);
     }
 
     @Test

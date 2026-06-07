@@ -19,7 +19,7 @@ import com.landawn.abacus.util.Throwables;
 
 /**
  * Represents an operation that accepts two char-valued arguments and returns no result.
- * This is the two-arity specialization of {@link CharConsumer}.
+ * This is the primitive type specialization of {@link java.util.function.BiConsumer} for {@code char}.
  * Unlike most other functional interfaces, {@code CharBiConsumer} is expected to operate via side-effects.
  *
  * <p>This is a functional interface whose functional method is {@link #accept(char, char)}.

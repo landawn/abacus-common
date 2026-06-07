@@ -203,6 +203,16 @@ public class MedianTest extends TestBase {
     }
 
     @Test
+    public void testMedianOfGenericArrayWithNullAwareComparator() {
+        Integer[] arr = { 3, null, 1, 2 };
+        Pair<Integer, Optional<Integer>> result = Median.of(arr, Comparator.nullsFirst(Integer::compareTo));
+
+        assertEquals(1, result.left());
+        Assertions.assertTrue(result.right().isPresent());
+        assertEquals(2, result.right().get());
+    }
+
+    @Test
     public void testMedianOfGenericArrayWithRangeAndComparator() {
         String[] arr = { "apple", "banana", "cherry", "date", "elderberry", "fig" };
 
@@ -240,6 +250,16 @@ public class MedianTest extends TestBase {
         assertEquals("aa", result.left());
         Assertions.assertTrue(result.right().isPresent());
         assertEquals("dd", result.right().get());
+    }
+
+    @Test
+    public void testMedianOfCollectionWithNullAwareComparator() {
+        List<Integer> list = Arrays.asList(3, null, 1, 2);
+        Pair<Integer, Optional<Integer>> result = Median.of(list, Comparator.nullsFirst(Integer::compareTo));
+
+        assertEquals(1, result.left());
+        Assertions.assertTrue(result.right().isPresent());
+        assertEquals(2, result.right().get());
     }
 
     @Test

@@ -261,29 +261,29 @@ public class AbstractBooleanTypeTest extends TestBase {
     }
 
     @Test
-    public void testWriteCharacter_Null_NoConfig() throws IOException {
-        type.writeCharacter(characterWriter, null, null);
+    public void testSerializeTo_Null_NoConfig() throws IOException {
+        type.serializeTo(characterWriter, null, null);
     }
 
     @Test
-    public void testWriteCharacter_True_NoConfig() throws IOException {
-        type.writeCharacter(characterWriter, Boolean.TRUE, null);
+    public void testSerializeTo_True_NoConfig() throws IOException {
+        type.serializeTo(characterWriter, Boolean.TRUE, null);
     }
 
     @Test
-    public void testWriteCharacter_False_NoConfig() throws IOException {
-        type.writeCharacter(characterWriter, Boolean.FALSE, null);
+    public void testSerializeTo_False_NoConfig() throws IOException {
+        type.serializeTo(characterWriter, Boolean.FALSE, null);
     }
 
     @Test
-    public void testWriteCharacter_Null_WithWriteNullBooleanAsFalse() throws IOException {
+    public void testSerializeTo_Null_WithWriteNullBooleanAsFalse() throws IOException {
         when(config.isWriteNullBooleanAsFalse()).thenReturn(true);
-        type.writeCharacter(characterWriter, null, config);
+        type.serializeTo(characterWriter, null, config);
     }
 
     @Test
-    public void testWriteCharacter_Null_WithoutWriteNullBooleanAsFalse() throws IOException {
+    public void testSerializeTo_Null_WithoutWriteNullBooleanAsFalse() throws IOException {
         when(config.isWriteNullBooleanAsFalse()).thenReturn(false);
-        type.writeCharacter(characterWriter, null, config);
+        type.serializeTo(characterWriter, null, config);
     }
 }

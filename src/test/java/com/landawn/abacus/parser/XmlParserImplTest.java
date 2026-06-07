@@ -151,6 +151,29 @@ public class XmlParserImplTest extends TestBase {
         }
     }
 
+    public static class RawXmlBean {
+        private String name;
+
+        @JsonXmlField(isJsonRawValue = true)
+        private String payload;
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(final String name) {
+            this.name = name;
+        }
+
+        public String getPayload() {
+            return payload;
+        }
+
+        public void setPayload(final String payload) {
+            this.payload = payload;
+        }
+    }
+
     public static class CircularRefBean {
         private String name;
         private CircularRefBean reference;
@@ -293,6 +316,21 @@ public class XmlParserImplTest extends TestBase {
     }
 
     @Test
+    public void testSerializeJsonRawValueWritesPayloadVerbatim() {
+        final RawXmlBean bean = new RawXmlBean();
+        bean.setName("doc");
+        bean.setPayload("{\"k\":\"v\"}");
+
+        String xml = staxParser.serialize(bean);
+        Assertions.assertTrue(xml.contains("{\"k\":\"v\"}"), xml);
+        Assertions.assertFalse(xml.contains("\\\"k\\\""), xml);
+
+        xml = domParser.serialize(bean);
+        Assertions.assertTrue(xml.contains("{\"k\":\"v\"}"), xml);
+        Assertions.assertFalse(xml.contains("\\\"k\\\""), xml);
+    }
+
+    @Test
     public void testSerializeWithCollections() {
         TestBean bean = new TestBean("Jane", 25);
         bean.setTags(Arrays.asList("tag1", "tag2", "tag3"));
@@ -332,6 +370,13 @@ public class XmlParserImplTest extends TestBase {
         int[] intArray = { 1, 2, 3, 4, 5 };
         String xml = staxParser.serialize(intArray);
         Assertions.assertNotNull(xml);
+        Assertions.assertTrue(xml.contains("1"));
+        Assertions.assertTrue(xml.contains("5"));
+
+        xml = domParser.serialize(intArray);
+        Assertions.assertNotNull(xml);
+        Assertions.assertTrue(xml.contains("1"));
+        Assertions.assertTrue(xml.contains("5"));
 
         String[] stringArray = { "one", "two", "three" };
         xml = staxParser.serialize(stringArray);
@@ -473,6 +518,20 @@ public class XmlParserImplTest extends TestBase {
         xml = staxParser.serialize(bean, config);
         Assertions.assertNotNull(xml);
         Assertions.assertTrue(xml.contains("<tags"));
+    }
+
+    @Test
+    public void testSerializeUsesDefaultConfigForCircularReference() {
+        XmlSerConfig config = new XmlSerConfig().setSupportCircularReference(true);
+        XmlParserImpl parser = new XmlParserImpl(XmlParserType.StAX, config, null);
+        CircularRefBean bean = new CircularRefBean();
+        bean.setName("cycle");
+        bean.setReference(bean);
+
+        String xml = parser.serialize(bean);
+
+        Assertions.assertNotNull(xml);
+        Assertions.assertTrue(xml.contains("cycle"));
     }
 
     @Test

@@ -172,7 +172,7 @@ import com.landawn.abacus.util.stream.Stream;
  * });
  *
  * // File splitting for large files
- * IOUtil.splitBySize(largeFile, 1024 * 1024);   // 1MB parts
+ * IOUtil.splitBySize(largeFile, 1024 * 1024);   // Split into 1MB parts
  * IOUtil.split(file, 10);   // Split into 10 equal parts
  *
  * // Content comparison
@@ -298,7 +298,7 @@ import com.landawn.abacus.util.stream.Stream;
  *   <li><b>{@link com.landawn.abacus.util.stream.Stream}:</b> Enhanced stream processing</li>
  * </ul>
  *
- * <p><b>Usage Examples: Complete File Processing Pipeline</b>
+ * <p><b>Usage Examples: Complete File Processing Pipeline</b></p>
  * <pre>{@code
  * // Process large log files with parallel processing
  * File logDirectory = new File("/var/logs");
@@ -803,7 +803,7 @@ public final class IOUtil {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * try {
-     *     long freeSpace = IOUtil.freeDiskSpaceInKB(5000);   // 5-second timeout
+     *     long freeSpace = IOUtil.freeDiskSpaceInKB(5000);   // returns free disk space in KB (5000 = 5s timeout)
      *     System.out.println("Free disk space: " + freeSpace + " KB");
      * } catch (UncheckedIOException e) {
      *     System.err.println("Failed to get free disk space within the specified timeout: " + e.getMessage());
@@ -978,7 +978,7 @@ public final class IOUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * byte[] bytes = new byte[] {72, 101, 108, 108, 111};  // "Hello"
+     * byte[] bytes = new byte[] {72, 101, 108, 108, 111};
      * char[] chars = IOUtil.bytesToChars(bytes);
      * IOUtil.bytesToChars(null);   // returns empty char array
      * }</pre>
@@ -995,7 +995,7 @@ public final class IOUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * byte[] bytes = new byte[] {72, 101, 108, 108, 111};  // "Hello" in UTF-8
+     * byte[] bytes = new byte[] {72, 101, 108, 108, 111};
      * char[] chars = IOUtil.bytesToChars(bytes, StandardCharsets.UTF_8);
      * }</pre>
      *
@@ -1016,7 +1016,7 @@ public final class IOUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * byte[] bytes = new byte[] {72, 101, 108, 108, 111};  // "Hello" in UTF-8
+     * byte[] bytes = new byte[] {72, 101, 108, 108, 111};
      * // Convert the sub-array {101, 108, 108}
      * char[] chars = IOUtil.bytesToChars(bytes, 1, 3, StandardCharsets.UTF_8);
      * }</pre>
@@ -1262,6 +1262,9 @@ public final class IOUtil {
      * @throws IllegalArgumentException if {@code offset} or {@code maxLen} is negative.
      */
     public static byte[] readBytes(final File source, final long offset, final int maxLen) throws IOException {
+        N.checkArgNotNegative(offset, cs.offset);
+        N.checkArgNotNegative(maxLen, cs.maxLen);
+
         final Holder<ZipFile> outputZipFile = new Holder<>();
         InputStream is = null;
 
@@ -1347,6 +1350,10 @@ public final class IOUtil {
 
         try {
             while (count < maxLen && EOF != (cnt = read(source, byteArray, count, (int) Math.min(maxLen - count, arrayLength - count)))) { // NOSONAR
+                if (cnt == 0) {
+                    break;
+                }
+
                 count += cnt;
 
                 if (count < maxLen && count >= arrayLength) {
@@ -1452,7 +1459,7 @@ public final class IOUtil {
      * try (InputStream inputStream = new FileInputStream("text_file.txt")) {
      *     char[] allChars = IOUtil.readAllChars(inputStream);
      *     // Process the characters
-     * } catch (IOException e) {
+     * } catch (UncheckedIOException e) {
      *     System.err.println("Error reading from stream: " + e.getMessage());
      * }
      * }</pre>
@@ -1849,6 +1856,10 @@ public final class IOUtil {
 
         try {
             while (count < maxLen && EOF != (cnt = read(source, charArray, count, (int) Math.min(maxLen - count, arrayLength - count)))) { // NOSONAR
+                if (cnt == 0) {
+                    break;
+                }
+
                 count += cnt;
 
                 if (count < maxLen && count >= arrayLength) {
@@ -4293,6 +4304,7 @@ public final class IOUtil {
      * File output = new File("output.bin");
      * IOUtil.write(data, output);
      * }</pre>
+     *
      * @param bytes  the byte array to be written.
      * @param output the File where the byte array is to be written.
      *      if the file exists, it will be overwritten. if the file's parent directory doesn't exist, it will be created.
@@ -4316,6 +4328,7 @@ public final class IOUtil {
      * File output = new File("output.bin");
      * IOUtil.write(data, 7, 5, output);  // Writes "World"
      * }</pre>
+     *
      * @param bytes  the byte array to be written.
      * @param offset the starting position in the byte array.
      * @param count  the number of bytes to be written from the byte array.
@@ -4779,6 +4792,10 @@ public final class IOUtil {
             int cnt = 0;
 
             while ((totalCount < count) && (EOF != (cnt = read(source, buf, 0, (int) Math.min(count - totalCount, bufLength))))) {
+                if (cnt == 0) {
+                    break;
+                }
+
                 output.write(buf, 0, cnt);
 
                 totalCount += cnt;
@@ -4844,7 +4861,7 @@ public final class IOUtil {
      * <pre>{@code
      * try (Reader reader = new FileReader("source.txt")) {
      *     File output = new File("output.txt");
-     *     long charsWritten = IOUtil.write(reader, 100, 500, output);  // Skip first 100 chars, write next 500
+     *     long charsWritten = IOUtil.write(reader, 100, 500, output);
      * }
      * }</pre>
      *
@@ -4926,7 +4943,7 @@ public final class IOUtil {
      * <pre>{@code
      * try (Reader reader = new FileReader("source.txt");
      *      Writer writer = new FileWriter("dest.txt")) {
-     *     long charsWritten = IOUtil.write(reader, 100, 500, writer);  // Skip first 100 chars, write next 500
+     *     long charsWritten = IOUtil.write(reader, 100, 500, writer);
      * }
      * }</pre>
      *
@@ -4969,7 +4986,7 @@ public final class IOUtil {
      * <pre>{@code
      * try (Reader reader = new FileReader("source.txt");
      *      Writer writer = new FileWriter("dest.txt")) {
-     *     long charsWritten = IOUtil.write(reader, 100, 500, writer, true);  // Skip 100, write 500, flush
+     *     long charsWritten = IOUtil.write(reader, 100, 500, writer, true);
      * }
      * }</pre>
      *
@@ -5006,6 +5023,10 @@ public final class IOUtil {
             int cnt = 0;
 
             while ((totalCount < count) && (EOF != (cnt = read(source, buf, 0, (int) Math.min(count - totalCount, bufLength))))) {
+                if (cnt == 0) {
+                    break;
+                }
+
                 output.write(buf, 0, cnt);
 
                 totalCount += cnt;
@@ -5168,6 +5189,14 @@ public final class IOUtil {
      * Appends the content of the character array to the target file.
      * The content to be appended starts at the specified offset and extends count characters.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * File file = File.createTempFile("data", ".txt");                            // throws IOException
+     * IOUtil.append("hello".toCharArray(), 0, 3, StandardCharsets.UTF_8, file);   // appends "hel"
+     * IOUtil.append("hello".toCharArray(), 2, 0, StandardCharsets.UTF_8, file);   // count 0: no-op
+     * String content = IOUtil.readAllToString(file);                              // returns "hel"
+     * }</pre>
+     *
      * @param chars      the character array to append to the file.
      * @param offset     the initial offset in the character array.
      * @param count      the number of characters to append.
@@ -5192,6 +5221,13 @@ public final class IOUtil {
     /**
      * Appends the content of the CharSequence to the target file.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * File log = new File("app.log");
+     * IOUtil.append("Hello World", log);           // appends "Hello World" to the file
+     * IOUtil.append("", log);                      // appends empty string (no change)
+     * }</pre>
+     *
      * @param cs         the CharSequence to append to the file.
      * @param targetFile the file to which the CharSequence will be appended, must not be {@code null}.
      *      if the file exists, it will be appended. if the file's parent directory doesn't exist, it will be created.
@@ -5203,6 +5239,13 @@ public final class IOUtil {
 
     /**
      * Appends the content of the CharSequence to the target file.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * File log = new File("app.log");
+     * IOUtil.append("Hello", StandardCharsets.UTF_8, log);      // appends using UTF-8
+     * IOUtil.append("", StandardCharsets.UTF_16, log);          // appends empty string
+     * }</pre>
      *
      * @param cs         the CharSequence to append to the file.
      * @param charset    the Charset to be used to encode the CharSequence into a sequence of bytes.
@@ -5276,6 +5319,15 @@ public final class IOUtil {
      * Appends the content of the InputStream to the target file.
      * The content to be appended is read from the InputStream.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * File file = File.createTempFile("data", ".txt");   // throws IOException
+     * try (InputStream is = new ByteArrayInputStream("abc".getBytes())) {
+     *     long n = IOUtil.append(is, file);   // returns 3
+     * }
+     * String content = IOUtil.readAllToString(file);   // returns "abc"
+     * }</pre>
+     *
      * @param source     the InputStream to read from, must not be {@code null}.
      * @param targetFile the file to which the InputStream content will be appended, must not be {@code null}.
      *      if the file exists, it will be appended. if the file's parent directory doesn't exist, it will be created.
@@ -5289,6 +5341,16 @@ public final class IOUtil {
     /**
      * Appends the content of the InputStream to the target file.
      * The content to be appended is read from the InputStream starting from the specified offset in bytes and up to the specified count.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * File log = new File("app.log");
+     * byte[] data = "substring".getBytes();
+     * try (InputStream is = new ByteArrayInputStream(data)) {
+     *     IOUtil.append(is, 0, 3, log);                // appends first 3 bytes ("sub")
+     *     IOUtil.append(is, 0, 6, log);                // returns 6 ("string" appended)
+     * }
+     * }</pre>
      *
      * @param source     the InputStream to read from, must not be {@code null}.
      * @param offset     the starting point in bytes from where to read in the InputStream.
@@ -5341,6 +5403,15 @@ public final class IOUtil {
      * Appends the content of a {@code Reader} to a file using the specified character set.
      * The input reader is not closed by this method.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * File file = File.createTempFile("data", ".txt");   // throws IOException
+     * try (Reader r = new StringReader("world")) {
+     *     long n = IOUtil.append(r, StandardCharsets.UTF_8, file);   // returns 5
+     * }
+     * String content = IOUtil.readAllToString(file);   // returns "world"
+     * }</pre>
+     *
      * @param source the {@code Reader} to read from, must not be {@code null}.
      * @param charset the character set to use for encoding, if {@code null} the platform's default charset is used.
      * @param targetFile the file where the {@code Reader}'s content is to be appended, must not be {@code null}.
@@ -5357,6 +5428,15 @@ public final class IOUtil {
      * The content to be appended is read from the Reader starting from the specified offset in characters and up to the specified count.
      * This file is opened to write with the default charset.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * File log = new File("app.log");
+     * try (Reader reader = new StringReader("hello world")) {
+     *     IOUtil.append(reader, 0, 5, log);                 // appends first 5 chars ("hello")
+     *     IOUtil.append(reader, 1, 5, log);                 // returns 5 ("world" appended after skipping the space)
+     * }
+     * }</pre>
+     *
      * @param source     the Reader to read from, must not be {@code null}.
      * @param offset     the position in the Reader to start reading from.
      * @param count      the maximum number of characters to read from the Reader.
@@ -5372,6 +5452,15 @@ public final class IOUtil {
     /**
      * Appends the content of a {@code Reader} to a file using the specified character set, starting from a given offset and up to a specified count.
      * The input reader is not closed by this method.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * File log = new File("app.log");
+     * try (Reader reader = new StringReader("hello world")) {
+     *     IOUtil.append(reader, 0, 5, StandardCharsets.UTF_8, log);    // appends "hello" using UTF-8
+     *     IOUtil.append(reader, 1, 5, StandardCharsets.UTF_8, log);    // returns 5 ("world" appended using UTF-8)
+     * }
+     * }</pre>
      *
      * @param source the {@code Reader} to read from, must not be {@code null}.
      * @param offset the starting position in characters from where to begin reading, must be &gt;= 0.
@@ -5408,6 +5497,13 @@ public final class IOUtil {
      * Appends the string representation of the specified object as a new line to the target file.
      * The string representation is obtained by invoking the {@code N.toString(Object)} method.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * File log = new File("app.log");
+     * IOUtil.appendLine("Log entry", log);      // appends "Log entry" + newline using default charset
+     * IOUtil.appendLine(12345, log);            // appends "12345" + newline using default charset
+     * }</pre>
+     *
      * @param obj        the object whose string representation is to be appended to the file.
      * @param targetFile the file to which the object's string representation will be appended, must not be {@code null}.
      *      if the file exists, it will be appended. if the file's parent directory doesn't exist, it will be created.
@@ -5422,6 +5518,13 @@ public final class IOUtil {
     /**
      * Appends the string representation of the specified object as a new line to the target file.
      * The string representation is obtained by invoking the {@code N.toString(Object)} method.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * File log = new File("app.log");
+     * IOUtil.appendLine("Log entry", StandardCharsets.UTF_8, log);   // appends "Log entry" + newline using UTF-8
+     * IOUtil.appendLine(12345, StandardCharsets.UTF_8, log);         // appends "12345" + newline using UTF-8
+     * }</pre>
      *
      * @param obj        the object whose string representation is to be appended to the file.
      * @param charset    the Charset to be used to encode string representation of the specified object into a sequence of bytes.
@@ -5441,6 +5544,14 @@ public final class IOUtil {
      * Appends the string representation of each object in the provided iterable as a new line to the target file.
      * The string representation is obtained by invoking the {@code N.toString(Object)} method.
      * This file is opened to write with the default charset.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * File log = new File("app.log");
+     * List<String> entries = Arrays.asList("line1", "line2", "line3");
+     * IOUtil.appendLines(entries, log);                          // appends all lines
+     * IOUtil.appendLines(Collections.<String>emptyList(), log);  // empty list: no lines written (creates the file if it does not exist)
+     * }</pre>
      *
      * @param lines      the iterable whose elements' string representations are to be appended to the file.
      * @param targetFile the file to which the elements' string representations will be appended, must not be {@code null}.
@@ -5462,6 +5573,14 @@ public final class IOUtil {
      * Appends the string representation of each object in the provided iterable as a new line to the target file.
      * The string representation is obtained by invoking the {@code N.toString(Object)} method.
      * This file is opened to write with the provided charset.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * File log = new File("app.log");
+     * List<String> entries = Arrays.asList("line1", "line2", "line3");
+     * IOUtil.appendLines(entries, StandardCharsets.UTF_8, log);                          // appends using UTF-8
+     * IOUtil.appendLines(Collections.<String>emptyList(), StandardCharsets.UTF_8, log);  // empty list: no lines written (creates the file if it does not exist)
+     * }</pre>
      *
      * @param lines      the iterable whose elements' string representations are to be appended to the file.
      * @param charset    the Charset to be used to open the specified file for writing.
@@ -5517,6 +5636,19 @@ public final class IOUtil {
     /**
      * Skips over and discards a specified number of bytes from the input stream.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * try (InputStream is = new ByteArrayInputStream("0123456789".getBytes())) {
+     *     long skipped = IOUtil.skip(is, 3);   // returns 3
+     *     int next = is.read();                // returns '3' (51)
+     * }
+     * try (InputStream is = new ByteArrayInputStream("ab".getBytes())) {
+     *     long skipped = IOUtil.skip(is, 100); // returns 2 (capped at end of stream)
+     *     long none = IOUtil.skip(is, 0);      // returns 0
+     *     // IOUtil.skip(is, -1);              // throws IllegalArgumentException
+     * }
+     * }</pre>
+     *
      * @param input       the {@code InputStream} from which bytes are to be skipped, must not be {@code null}.
      * @param bytesToSkip the number of bytes to be skipped, must be &gt;= 0.
      * @return the actual number of bytes skipped, which may be less than {@code bytesToSkip} if the end of the stream is reached.
@@ -5537,7 +5669,7 @@ public final class IOUtil {
             while (remain > 0) {
                 final long n = read(input, buf, 0, (int) Math.min(remain, buf.length));
 
-                if (n < 0) { // EOF
+                if (n <= 0) { // EOF or no progress
 
                     break;
                 }
@@ -5553,6 +5685,18 @@ public final class IOUtil {
 
     /**
      * Skips over and discards a specified number of characters from the input reader.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * try (Reader reader = new StringReader("abcdefghij")) {
+     *     long skipped = IOUtil.skip(reader, 3);         // skips "abc", returns 3
+     *     char[] buf = new char[7];
+     *     IOUtil.read(reader, buf);                      // reads "defghij"
+     * }
+     * try (Reader reader = new StringReader("abc")) {
+     *     long skipped = IOUtil.skip(reader, 10);        // skips all 3 chars, returns 3 (not 10)
+     * }
+     * }</pre>
      *
      * @param input       the {@code Reader} from which characters are to be skipped, must not be {@code null}.
      * @param charsToSkip the number of characters to be skipped, must be &gt;= 0.
@@ -5574,7 +5718,7 @@ public final class IOUtil {
             while (remain > 0) {
                 final long n = read(input, buf, 0, (int) Math.min(remain, buf.length));
 
-                if (n < 0) { // EOF
+                if (n <= 0) { // EOF or no progress
 
                     break;
                 }
@@ -5594,7 +5738,7 @@ public final class IOUtil {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * try (InputStream is = new FileInputStream("data.bin")) {
-     *     IOUtil.skipFully(is, 1024);  // Skip first 1024 bytes
+     *     IOUtil.skipFully(is, 1024);
      *     byte[] data = IOUtil.readAllBytes(is);
      * }
      * }</pre>
@@ -5617,7 +5761,7 @@ public final class IOUtil {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * try (Reader reader = new FileReader("data.txt")) {
-     *     IOUtil.skipFully(reader, 1024);  // Skip first 1024 characters
+     *     IOUtil.skipFully(reader, 1024);
      *     char[] data = IOUtil.readAllChars(reader);
      * }
      * }</pre>
@@ -5789,10 +5933,11 @@ public final class IOUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * String simplified = IOUtil.simplifyPath("/a/./b/./c/");   // Returns "/a/b/c"
-     * String simplified2 = IOUtil.simplifyPath("a/b/./c");      // Returns "a/b/c"
-     * String simplified3 = IOUtil.simplifyPath("a/b/../c");     // Returns "a/c"
+     * String simplified = IOUtil.simplifyPath("/a/./b/./c/");   // returns "/a/b/c"
+     * String simplified2 = IOUtil.simplifyPath("a/b/./c");      // returns "a/b/c"
+     * String simplified3 = IOUtil.simplifyPath("a/b/../c");     // returns "a/c"
      * }</pre>
+     *
      * @param pathname the file path to simplify.
      * @return the simplified path string with redundant elements removed.
      * @see java.nio.file.Path#normalize()
@@ -5851,8 +5996,9 @@ public final class IOUtil {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * File file = new File("document.pdf");
-     * String ext = IOUtil.getFileExtension(file);  // Returns "pdf"
+     * String ext = IOUtil.getFileExtension(file);  // returns "pdf"
      * }</pre>
+     *
      * @param file the file whose extension is to be retrieved.
      * @return the file extension, or {@code null} if the file is {@code null}.
      * @see FilenameUtil#getExtension(String)
@@ -5871,9 +6017,10 @@ public final class IOUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * String ext = IOUtil.getFileExtension("document.pdf");   // Returns "pdf"
-     * String noExt = IOUtil.getFileExtension("README");       // Returns ""
+     * String ext = IOUtil.getFileExtension("document.pdf");   // returns "pdf"
+     * String noExt = IOUtil.getFileExtension("README");       // returns ""
      * }</pre>
+     *
      * @param fileName the name of the file whose extension is to be retrieved.
      * @return the file extension, or {@code null} if the specified file name is {@code null}.
      * @see FilenameUtil#getExtension(String)
@@ -5889,8 +6036,9 @@ public final class IOUtil {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * File file = new File("document.pdf");
-     * String name = IOUtil.getNameWithoutExtension(file);  // Returns "document"
+     * String name = IOUtil.getNameWithoutExtension(file);  // returns "document"
      * }</pre>
+     *
      * @param file the file whose name without extension is to be retrieved.
      * @return the file name without extension, or {@code null} if the file is {@code null}.
      * @see FilenameUtil#removeExtension(String)
@@ -5911,14 +6059,13 @@ public final class IOUtil {
      * from the given filename. If no extension is found, the original filename is returned
      * unchanged.</p>
      *
-     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * IOUtil.getNameWithoutExtension("foo.txt");       // Returns "foo"
-     * IOUtil.getNameWithoutExtension("a\\b\\c.jpg");   // Returns "a\\b\\c"
-     * IOUtil.getNameWithoutExtension("a\\b\\c");       // Returns "a\\b\\c"
-     * IOUtil.getNameWithoutExtension("a.b\\c");        // Returns "a.b\\c"
-     * IOUtil.getNameWithoutExtension(null);            // Returns null
+     * IOUtil.getNameWithoutExtension("foo.txt");       // returns "foo"
+     * IOUtil.getNameWithoutExtension("a\\b\\c.jpg");   // returns "a\\b\\c"
+     * IOUtil.getNameWithoutExtension("a\\b\\c");       // returns "a\\b\\c"
+     * IOUtil.getNameWithoutExtension("a.b\\c");        // returns "a.b\\c"
+     * IOUtil.getNameWithoutExtension(null);            // returns null
      * }</pre>
      *
      * @param fileName the filename to query, {@code null} returns null.
@@ -5958,6 +6105,7 @@ public final class IOUtil {
      * writer.write("Hello, World!");
      * String result = writer.toString();
      * }</pre>
+     *
      * @return a new instance of StringWriter.
      */
     public static StringWriter newStringWriter() {
@@ -6008,6 +6156,7 @@ public final class IOUtil {
      * baos.write(65);  // Write byte value 65 ('A')
      * byte[] result = baos.toByteArray();
      * }</pre>
+     *
      * @return a new instance of ByteArrayOutputStream.
      */
     public static ByteArrayOutputStream newByteArrayOutputStream() {
@@ -6112,7 +6261,7 @@ public final class IOUtil {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * File file = new File("output.txt");
-     * try (FileOutputStream fos = IOUtil.newFileOutputStream(file, true)) {  // Append mode
+     * try (FileOutputStream fos = IOUtil.newFileOutputStream(file, true)) {
      *     fos.write("Appended content".getBytes());
      * }
      * }</pre>
@@ -6261,7 +6410,7 @@ public final class IOUtil {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * File file = new File("log.txt");
-     * try (FileWriter writer = IOUtil.newFileWriter(file, StandardCharsets.UTF_8, true)) {  // Append
+     * try (FileWriter writer = IOUtil.newFileWriter(file, StandardCharsets.UTF_8, true)) {
      *     writer.write("New log entry\n");
      * }
      * }</pre>
@@ -6375,7 +6524,6 @@ public final class IOUtil {
      *
      * @param is the InputStream to be wrapped.
      * @return a new BufferedInputStream instance.
-     * @throws UncheckedIOException if an I/O error occurs.
      * @see BufferedInputStream#BufferedInputStream(InputStream)
      */
     public static BufferedInputStream newBufferedInputStream(final InputStream is) throws UncheckedIOException {
@@ -6452,7 +6600,6 @@ public final class IOUtil {
      *
      * @param os the OutputStream to be wrapped.
      * @return a new BufferedOutputStream instance.
-     * @throws UncheckedIOException if an I/O error occurs.
      * @see BufferedOutputStream#BufferedOutputStream(OutputStream)
      */
     public static BufferedOutputStream newBufferedOutputStream(final OutputStream os) throws UncheckedIOException {
@@ -6515,7 +6662,6 @@ public final class IOUtil {
      *
      * @param reader the Reader to be wrapped.
      * @return a new BufferedReader instance.
-     * @throws UncheckedIOException if an I/O error occurs.
      * @see java.io.BufferedReader#BufferedReader(Reader)
      */
     public static java.io.BufferedReader newBufferedReader(final Reader reader) throws UncheckedIOException {
@@ -7087,6 +7233,16 @@ public final class IOUtil {
     /**
      * Closes the provided {@code URLConnection} by calling {@link HttpURLConnection#disconnect()} if it is an {@code HttpURLConnection}; otherwise does nothing.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * URLConnection conn = new URL("http://example.com").openConnection();   // throws IOException
+     * try {
+     *     // ... use the connection ...
+     * } finally {
+     *     IOUtil.close(conn);   // disconnects if it is an HttpURLConnection; otherwise no-op
+     * }
+     * }</pre>
+     *
      * @param conn the connection to close.
      */
     public static void close(final URLConnection conn) {
@@ -7167,6 +7323,14 @@ public final class IOUtil {
      * added as suppressed exceptions. If an object is {@code null}, it is ignored.
      * </p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * InputStream a = new ByteArrayInputStream("x".getBytes());
+     * InputStream b = new ByteArrayInputStream("y".getBytes());
+     * IOUtil.closeAll(a, b, null);   // closes a and b in order; null is ignored
+     * IOUtil.closeAll();             // empty varargs: no-op
+     * }</pre>
+     *
      * @param closeables the AutoCloseable objects to be closed. It may contain {@code null} elements.
      * @throws RuntimeException if an I/O error occurs during any of the close operations.
      */
@@ -7185,6 +7349,13 @@ public final class IOUtil {
      * is wrapped in a {@code RuntimeException} and rethrown, with any subsequent exceptions
      * added as suppressed exceptions. If an object is {@code null}, it is ignored.
      * </p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<AutoCloseable> closeables = Arrays.asList(new FileInputStream("a.txt"), new FileInputStream("b.txt"));
+     * IOUtil.closeAll(closeables);                              // closes all in order
+     * IOUtil.closeAll(Collections.<AutoCloseable>emptyList());  // empty collection, no-op
+     * }</pre>
      *
      * @param closeables the Iterable of AutoCloseable objects to be closed. It may contain {@code null} elements.
      * @throws RuntimeException if an I/O error occurs during any of the close operations.
@@ -7251,6 +7422,14 @@ public final class IOUtil {
      * Closes all provided AutoCloseable objects quietly.
      * Any exceptions that occur during the closing operation are ignored.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * InputStream a = new ByteArrayInputStream("x".getBytes());
+     * AutoCloseable failing = () -> { throw new IOException("boom"); };
+     * IOUtil.closeAllQuietly(a, failing, null);   // closes a; the thrown exception is suppressed; null ignored
+     * IOUtil.closeAllQuietly();                   // empty varargs: no-op
+     * }</pre>
+     *
      * @param closeables the AutoCloseable objects to be closed. It may contain {@code null} elements.
      */
     public static void closeAllQuietly(final AutoCloseable... closeables) {
@@ -7264,6 +7443,13 @@ public final class IOUtil {
     /**
      * Closes all provided AutoCloseable objects quietly.
      * Any exceptions that occur during the closing operation are ignored.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<AutoCloseable> closeables = Arrays.asList(new FileInputStream("a.txt"), new FileInputStream("b.txt"));
+     * IOUtil.closeAllQuietly(closeables);                              // closes all, suppresses exceptions
+     * IOUtil.closeAllQuietly(Collections.<AutoCloseable>emptyList());  // empty collection, no-op
+     * }</pre>
      *
      * @param closeables the Iterable of AutoCloseable objects to be closed. It may contain {@code null} elements.
      */
@@ -7324,6 +7510,15 @@ public final class IOUtil {
      * Copies the specified source file or directory to the specified destination directory.
      * If the source is a directory, it is recreated (by its own name) inside the destination directory,
      * along with all of its contents.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * File srcDir = ...;    // a directory containing "keep.txt" and "skip.log"
+     * File destDir = ...;   // an existing destination directory
+     * // copy only files whose name ends with ".txt"
+     * IOUtil.copyToDirectory(srcDir, destDir, false, (parent, file) -> file.getName().endsWith(".txt"));
+     * // destDir/<srcDir-name>/keep.txt exists; skip.log is not copied
+     * }</pre>
      *
      * @param <E>              the type of the exception that may be thrown by the filter.
      * @param srcFile          the source file or directory to be copied. It must not be {@code null}.
@@ -7808,6 +8003,15 @@ public final class IOUtil {
     /**
      * Copies a file or directory from the source path to the target path.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Path source = ...;                           // an existing file path
+     * Path target = ...;                           // the (non-existing) destination path
+     * Path result = IOUtil.copy(source, target);   // returns target; file contents copied
+     * // overwrite an existing target:
+     * IOUtil.copy(source, target, StandardCopyOption.REPLACE_EXISTING);   // returns target
+     * }</pre>
+     *
      * @param source  the source path of the file or directory to be copied.
      * @param target  the target path where the file or directory will be copied to.
      * @param options optional arguments that specify how the copy should be done.
@@ -7822,6 +8026,15 @@ public final class IOUtil {
     /**
      * Copies the content of the given InputStream to the specified target Path.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Path target = Paths.get("output.dat");
+     * try (InputStream in = new ByteArrayInputStream("data".getBytes())) {
+     *     IOUtil.copy(in, target);                                       // copies to file (creates new)
+     *     IOUtil.copy(in, target, StandardCopyOption.REPLACE_EXISTING);  // overwrites existing file
+     * }
+     * }</pre>
+     *
      * @param in      the InputStream to be copied.
      * @param target  the target Path where the InputStream content will be copied to.
      * @param options optional arguments that specify how the copy should be done.
@@ -7835,6 +8048,19 @@ public final class IOUtil {
 
     /**
      * Copies the content of the file at the given source Path to the specified OutputStream.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Path source = Paths.get("input.dat");
+     * try (OutputStream os = new FileOutputStream("output.dat")) {
+     *     IOUtil.copy(source, os);  // copies file content to output stream
+     * }
+     * // Edge: empty file
+     * Path emptyFile = Paths.get("empty.dat");
+     * try (OutputStream os = new FileOutputStream("output.dat")) {
+     *     IOUtil.copy(emptyFile, os);  // copies empty file, returns 0
+     * }
+     * }</pre>
      *
      * @param source the source Path of the file to be copied.
      * @param output the OutputStream where the file content will be copied to.
@@ -7879,6 +8105,14 @@ public final class IOUtil {
      * Moves a file from the source file to the target directory.
      * if the destination directory does not exist, it will be created.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * File srcFile = ...;   // an existing file named "data.txt"
+     * File destDir = ...;   // the destination directory
+     * IOUtil.move(srcFile, destDir, StandardCopyOption.REPLACE_EXISTING);
+     * // srcFile no longer exists; destDir/data.txt now holds the content
+     * }</pre>
+     *
      * @param srcFile the source file to be moved.
      * @param destDir the target directory where the file will be moved to.
      * @param options optional arguments that specify how the move should be done.
@@ -7897,6 +8131,14 @@ public final class IOUtil {
 
     /**
      * Moves a file from the source path to the target path.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Path source = Paths.get("old_name.txt");
+     * Path target = Paths.get("new_name.txt");
+     * IOUtil.move(source, target);                                       // moves/renames file
+     * IOUtil.move(source, target, StandardCopyOption.REPLACE_EXISTING);  // overwrites if target exists
+     * }</pre>
      *
      * @param source  the source Path of the file to be moved.
      * @param target  the target Path where the file will be moved to.
@@ -8346,6 +8588,14 @@ public final class IOUtil {
     /**
      * Checks if the provided Reader is an instance of {@code java.io.BufferedReader}.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Reader br = new BufferedReader(new StringReader("x"));
+     * boolean a = IOUtil.isBufferedReader(br);   // returns true
+     * Reader sr = new StringReader("x");
+     * boolean b = IOUtil.isBufferedReader(sr);   // returns false
+     * }</pre>
+     *
      * @param reader the Reader to be checked.
      * @return {@code true} if the Reader is an instance of BufferedReader, {@code false} otherwise.
      */
@@ -8355,6 +8605,16 @@ public final class IOUtil {
 
     /**
      * Checks if the provided Writer is an instance of {@code java.io.BufferedWriter}.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * try (Writer bw = new BufferedWriter(new FileWriter("test.txt"))) {
+     *     boolean result = IOUtil.isBufferedWriter(bw);  // returns true
+     * }
+     * try (Writer fw = new FileWriter("test.txt")) {
+     *     boolean result = IOUtil.isBufferedWriter(fw);  // returns false
+     * }
+     * }</pre>
      *
      * @param writer the Writer to be checked.
      * @return {@code true} if the Writer is an instance of BufferedWriter, {@code false} otherwise.
@@ -8453,6 +8713,15 @@ public final class IOUtil {
 
     /**
      * Checks if the specified {@code File} is a file or not.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * File file = ...;                                         // an existing regular file
+     * boolean a = IOUtil.isFile(file);                         // returns true
+     * boolean b = IOUtil.isFile(file.getParentFile());         // returns false (it is a directory)
+     * boolean c = IOUtil.isFile(new File("does_not_exist"));   // returns false
+     * boolean d = IOUtil.isFile(null);                         // returns false
+     * }</pre>
      *
      * @param file the {@code File} to check.
      * @return {@code true} if the {@code File} exists and is a file, {@code false} otherwise.
@@ -8574,6 +8843,16 @@ public final class IOUtil {
 
     /**
      * Returns the size of the specified file or directory.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * File file = ...;                          // a file containing the 5 bytes "hello"
+     * long size = IOUtil.sizeOf(file, false);   // returns 5
+     * File missing = new File("missing_file.tmp");
+     * long zero = IOUtil.sizeOf(missing, true);   // returns 0 (treated as empty)
+     * // IOUtil.sizeOf(missing, false);           // throws FileNotFoundException
+     * }</pre>
+     *
      * @param file the file or directory whose size is to be calculated, must not be {@code null}.
      * @param considerNonExistingFileAsEmpty if {@code true}, the size of non-existing file is considered as 0.
      * @return the total size in bytes. For directories, this is the recursive sum of all files within it.
@@ -8827,6 +9106,14 @@ public final class IOUtil {
     /**
      * Compresses the specified source files or directories and writes the compressed data to the target file using the ZIP compression algorithm.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * File a = ...;                         // a file containing "aaa"
+     * File b = ...;                         // a file containing "bbb"
+     * File zip = ...;                       // the target archive
+     * IOUtil.zip(Arrays.asList(a, b), zip); // writes a ZIP with one entry per source file
+     * }</pre>
+     *
      * @param sourceFiles the collection of files or directories to be compressed. Each must be a valid file or directory.
      * @param targetFile  the file to which the compressed data will be written. This must be a valid file.
      * @throws UncheckedIOException if an I/O error occurs.
@@ -8927,6 +9214,10 @@ public final class IOUtil {
             int count = 0;
 
             while (EOF != (count = read(is, buf, 0, buf.length))) {
+                if (count == 0) {
+                    break;
+                }
+
                 zos.write(buf, 0, count);
             }
         } finally {
@@ -8994,6 +9285,10 @@ public final class IOUtil {
                     int count = 0;
 
                     while (EOF != (count = read(is, buf, 0, bufLength))) {
+                        if (count == 0) {
+                            break;
+                        }
+
                         os.write(buf, 0, count);
                     }
 
@@ -9171,6 +9466,8 @@ public final class IOUtil {
      * @see #split(File, int)
      */
     public static void splitBySize(final File file, final long sizeOfPart) throws IOException {
+        N.checkArgNotNull(file, cs.file);
+
         splitBySize(file, sizeOfPart, file.getParentFile());
     }
 
@@ -9254,6 +9551,10 @@ public final class IOUtil {
 
                 try {
                     while (partLength > 0 && EOF != (count = read(input, buf, 0, (int) Math.min(buf.length, partLength)))) {
+                        if (count == 0) {
+                            break;
+                        }
+
                         output.write(buf, 0, count);
 
                         partLength = partLength - count;
@@ -9434,6 +9735,15 @@ public final class IOUtil {
     /**
      * Merges the given source files into the specified destination file.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * File a = ...;   // a file containing "foo"
+     * File b = ...;   // a file containing "bar"
+     * File merged = ...;
+     * long n = IOUtil.merge(Arrays.asList(a, b), merged);             // returns 6; merged holds "foobar"
+     * long m = IOUtil.merge(Collections.<File>emptyList(), merged);   // returns 0 (nothing written)
+     * }</pre>
+     *
      * @param sourceFiles a collection of files to be merged. These must be valid files.
      * @param destFile    the destination file where the merged content will be written. This must be a valid file.
      * @return the number of bytes written to the destination file.
@@ -9490,6 +9800,10 @@ public final class IOUtil {
 
                     int count = 0;
                     while (EOF != (count = read(input, buf, 0, buf.length))) {
+                        if (count == 0) {
+                            break;
+                        }
+
                         output.write(buf, 0, count);
 
                         totalCount += count;
@@ -9747,6 +10061,13 @@ public final class IOUtil {
      * Additionally, malformed percent-encoded octets are handled leniently by
      * passing them through literally.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * File file = IOUtil.toFile(new URL("file:///my%20docs/file.txt"));   // path contains "my docs/file.txt" (decoded)
+     * // IOUtil.toFile(new URL("http://example.com/x.txt"));             // throws IllegalArgumentException (not a file URL)
+     * // IOUtil.toFile(null);                                            // throws IllegalArgumentException
+     * }</pre>
+     *
      * @param url the file URL to convert, must not be {@code null}.
      * @return a File object corresponding to the input URL.
      * @throws IllegalArgumentException if {@code url} is {@code null} or the URL is not a file URL.
@@ -9822,6 +10143,14 @@ public final class IOUtil {
      * Syntax such as {@code file:///my%20docs/file.txt} will be
      * correctly decoded to {@code /my docs/file.txt}.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * URL url1 = new File("file1.txt").toURI().toURL();
+     * URL url2 = new File("file2.txt").toURI().toURL();
+     * File[] files = IOUtil.toFiles(new URL[] { url1, url2 });   // converts URLs to Files
+     * File[] empty = IOUtil.toFiles(new URL[0]);                 // returns empty array
+     * }</pre>
+     *
      * @param urls the file URLs to convert; {@code null} or empty returns an empty array.
      * @return a non-{@code null} array of Files matching the input.
      * @throws IllegalArgumentException if any URL is {@code null} or is not a file URL.
@@ -9842,6 +10171,14 @@ public final class IOUtil {
 
     /**
      * Converts a collection of URLs into a list of corresponding File objects.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * URL url1 = new File("file1.txt").toURI().toURL();
+     * URL url2 = new File("file2.txt").toURI().toURL();
+     * List<File> files = IOUtil.toFiles(Arrays.asList(url1, url2));         // converts to list of Files
+     * List<File> empty = IOUtil.toFiles(Collections.<URL>emptyList());      // returns empty list
+     * }</pre>
      *
      * @param urls the collection of URLs to be converted, must not be {@code null}.
      * @return a list of File objects corresponding to the input URLs; an empty list if {@code urls} is empty.
@@ -10044,6 +10381,18 @@ public final class IOUtil {
      * before resorting to line-by-line comparison of the contents.
      * </p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * File a = ...;                                               // a file containing "line1\nline2"
+     * File b = ...;                                               // a file containing "line1\r\nline2" (same text, different EOL)
+     * File c = ...;                                               // a file containing "line1\nDIFFERENT"
+     * boolean x = IOUtil.contentEqualsIgnoreEOL(a, b, "UTF-8");   // returns true (EOL differences ignored)
+     * boolean y = IOUtil.contentEqualsIgnoreEOL(a, c, "UTF-8");   // returns false
+     * boolean z = IOUtil.contentEqualsIgnoreEOL(a, b, null);      // returns true (null charsetName uses default)
+     * // two non-existing files compare equal:
+     * boolean w = IOUtil.contentEqualsIgnoreEOL(new File("nope1"), new File("nope2"), "UTF-8");   // returns true
+     * }</pre>
+     *
      * @param file1       the first file.
      * @param file2       the second file.
      * @param charsetName the name of the requested charset.
@@ -10094,6 +10443,18 @@ public final class IOUtil {
      * If both inputs are the same reference or both are {@code null}, returns {@code true}.
      * If only one is {@code null}, returns {@code false}.
      * </p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * try (InputStream is1 = new ByteArrayInputStream("abc".getBytes());
+     *      InputStream is2 = new ByteArrayInputStream("abc".getBytes())) {
+     *     boolean equal = IOUtil.contentEquals(is1, is2);   // returns true
+     * }
+     * try (InputStream is1 = new ByteArrayInputStream("abc".getBytes());
+     *      InputStream is2 = new ByteArrayInputStream("xyz".getBytes())) {
+     *     boolean equal = IOUtil.contentEquals(is1, is2);   // returns false
+     * }
+     * }</pre>
      *
      * @param input1 the first stream.
      * @param input2 the second stream.
@@ -10166,6 +10527,18 @@ public final class IOUtil {
      * If only one is {@code null}, returns {@code false}.
      * </p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * try (Reader r1 = new StringReader("abc");
+     *      Reader r2 = new StringReader("abc")) {
+     *     boolean equal = IOUtil.contentEquals(r1, r2);   // returns true
+     * }
+     * try (Reader r1 = new StringReader("abc");
+     *      Reader r2 = new StringReader("xyz")) {
+     *     boolean equal = IOUtil.contentEquals(r1, r2);   // returns false
+     * }
+     * }</pre>
+     *
      * @param input1 the first reader.
      * @param input2 the second reader.
      * @return {@code true} if the content of the readers are equal (or both are {@code null}), {@code false} otherwise.
@@ -10234,6 +10607,18 @@ public final class IOUtil {
      * {@link BufferedReader} if they are not already buffered.
      * </p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * try (Reader r1 = new StringReader("a\nb\nc");
+     *      Reader r2 = new StringReader("a\r\nb\r\nc")) {
+     *     boolean equal = IOUtil.contentEqualsIgnoreEOL(r1, r2);  // returns true (EOL differences ignored)
+     * }
+     * try (Reader r1 = new StringReader("abc");
+     *      Reader r2 = new StringReader("xyz")) {
+     *     boolean equal = IOUtil.contentEqualsIgnoreEOL(r1, r2);  // returns false (content differs)
+     * }
+     * }</pre>
+     *
      * @param input1 the first reader.
      * @param input2 the second reader.
      * @return {@code true} if the content of the readers are equal (ignoring EOL differences), {@code false} otherwise.
@@ -10277,6 +10662,14 @@ public final class IOUtil {
     /**
      * Parses the specified file/directory line by line.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * File file = new File("data.txt");
+     * IOUtil.forLines(file, line -> System.out.println(line));
+     * // Edge: empty file
+     * IOUtil.forLines(new File("empty.txt"), line -> System.out.println(line));
+     * }</pre>
+     *
      * @param <E>        the type of exception that the lineAction can throw.
      * @param source     the source file to be parsed.
      * @param lineAction a Consumer that takes a line of the file as a String and performs the desired operation.
@@ -10292,6 +10685,18 @@ public final class IOUtil {
 
     /**
      * Parses the specified file/directory line by line.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * File file = new File("data.txt");
+     * IOUtil.forLines(file,
+     *     line -> System.out.println(line),
+     *     () -> System.out.println("Done"));
+     * // Edge: non-existent file
+     * IOUtil.forLines(new File("nonexistent.txt"),
+     *     line -> System.out.println(line),
+     *     () -> System.out.println("Done"));
+     * }</pre>
      *
      * @param <E> the type of exception that the lineAction may throw during line processing.
      * @param <E2> the type of exception that the onComplete callback may throw after all lines are processed.
@@ -10312,6 +10717,13 @@ public final class IOUtil {
     /**
      * Parses the specified file/directory line by line.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * File file = new File("data.txt");
+     * IOUtil.forLines(file, 0, 100, line -> System.out.println(line));     // process first 100 lines
+     * IOUtil.forLines(file, 10, 5, line -> System.out.println(line));
+     * }</pre>
+     *
      * @param <E> the type of exception that the lineAction may throw during line processing.
      * @param source the file or directory to process. If a directory, all files within it are processed recursively.
      * @param lineOffset the number of lines to skip from the beginning.
@@ -10329,6 +10741,17 @@ public final class IOUtil {
 
     /**
      * Parses the specified file/directory line by line.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * File file = new File("data.txt");
+     * IOUtil.forLines(file, 0, 100,
+     *     line -> System.out.println(line),
+     *     () -> System.out.println("Done"));  // process first 100 lines
+     * IOUtil.forLines(file, 10, 5,
+     *     line -> System.out.println(line),
+     *     () -> System.out.println("Done"));
+     * }</pre>
      *
      * @param <E> the type of exception that the lineAction may throw during line processing.
      * @param <E2> the type of exception that the onComplete callback may throw after all lines are processed.
@@ -10387,6 +10810,18 @@ public final class IOUtil {
     /**
      * Parses the specified file/directory line by line.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * File file = new File("data.txt");
+     * IOUtil.forLines(file, 0, 100, 4, 1024,
+     *     line -> System.out.println(line),
+     *     () -> System.out.println("Done"));
+     * // Edge: empty file
+     * IOUtil.forLines(new File("empty.txt"), 0, 100, 1, 512,
+     *     line -> System.out.println(line),
+     *     () -> System.out.println("Done"));
+     * }</pre>
+     *
      * @param <E>              the type of exception that the lineAction can throw.
      * @param <E2>             the type of exception that the onComplete can throw.
      * @param source           the source file/directory to be parsed.
@@ -10412,6 +10847,14 @@ public final class IOUtil {
     /**
      * Parses the given collection of file line by line using the provided lineAction.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<File> files = Arrays.asList(new File("a.txt"), new File("b.txt"));
+     * IOUtil.forLines(files, line -> System.out.println(line));
+     * // Edge: empty file list
+     * IOUtil.forLines(Collections.<File>emptyList(), line -> System.out.println(line));
+     * }</pre>
+     *
      * @param <E>        the type of exception that the lineAction can throw.
      * @param files      the collection of files to be parsed.
      * @param lineAction a Consumer that takes a line of the file as a String and performs the desired operation.
@@ -10427,6 +10870,18 @@ public final class IOUtil {
 
     /**
      * Parses the given collection of file line by line using the provided lineAction.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<File> files = Arrays.asList(new File("a.txt"), new File("b.txt"));
+     * IOUtil.forLines(files,
+     *     line -> System.out.println(line),
+     *     () -> System.out.println("Done"));
+     * // Edge: empty file list
+     * IOUtil.forLines(Collections.<File>emptyList(),
+     *     line -> System.out.println(line),
+     *     () -> System.out.println("Done"));
+     * }</pre>
      *
      * @param <E> the type of exception that the lineAction may throw during line processing.
      * @param <E2> the type of exception that the onComplete callback may throw after all lines are processed.
@@ -10447,6 +10902,14 @@ public final class IOUtil {
     /**
      * Parses the given collection of file line by line using the provided lineAction.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<File> files = Arrays.asList(new File("a.txt"), new File("b.txt"));
+     * IOUtil.forLines(files, 0, 100, line -> System.out.println(line));     // process first 100 lines
+     * // Edge: empty file list
+     * IOUtil.forLines(Collections.<File>emptyList(), 0, 100, line -> System.out.println(line));
+     * }</pre>
+     *
      * @param <E>        the type of exception that the lineAction may throw during line processing.
      * @param files      the collection of files/directories to process. Directories are processed recursively.
      * @param lineOffset the number of lines to skip from the beginning.
@@ -10464,6 +10927,18 @@ public final class IOUtil {
 
     /**
      * Parses the given collection of file line by line using the provided lineAction.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<File> files = Arrays.asList(new File("a.txt"), new File("b.txt"));
+     * IOUtil.forLines(files, 0, 100,
+     *     line -> System.out.println(line),
+     *     () -> System.out.println("Done"));
+     * // Edge: skip 10 lines, read 5 across multiple files
+     * IOUtil.forLines(files, 10, 5,
+     *     line -> System.out.println(line),
+     *     () -> System.out.println("Done"));
+     * }</pre>
      *
      * @param <E>        the type of exception that the lineAction may throw during line processing.
      * @param <E2>       the type of exception that the onComplete callback may throw after all lines are processed.
@@ -10486,6 +10961,14 @@ public final class IOUtil {
     /**
      * Parses the given collection of file line by line using the provided lineAction.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<File> files = Arrays.asList(new File("a.txt"), new File("b.txt"));
+     * IOUtil.forLines(files, 0, 100, 4, 1024, line -> System.out.println(line));   // 4 workers
+     * // Edge: empty file list
+     * IOUtil.forLines(Collections.<File>emptyList(), 0, 100, 1, 512, line -> System.out.println(line));
+     * }</pre>
+     *
      * @param <E>              the type of exception that the lineAction may throw during line processing.
      * @param files            the collection of files/directories to process. Directories are processed recursively.
      * @param lineOffset       the number of lines to skip from the beginning.
@@ -10505,6 +10988,18 @@ public final class IOUtil {
 
     /**
      * Parses the given collection of file line by line using the provided lineAction.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<File> files = Arrays.asList(new File("a.txt"), new File("b.txt"));
+     * IOUtil.forLines(files, 0, 100, 4, 1024,
+     *     line -> System.out.println(line),
+     *     () -> System.out.println("Done"));
+     * // Edge: empty file list
+     * IOUtil.forLines(Collections.<File>emptyList(), 0, 100, 1, 512,
+     *     line -> System.out.println(line),
+     *     () -> System.out.println("Done"));
+     * }</pre>
      *
      * @param <E>              the type of exception that the lineAction can throw.
      * @param <E2>             the type of exception that the onComplete can throw.
@@ -10558,6 +11053,14 @@ public final class IOUtil {
     /**
      * Parses the specified file/directory line by line.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * File file = new File("data.txt");
+     * IOUtil.forLines(file, 1, 4, 1024, line -> System.out.println(line));   // 1 reader thread, 4 workers
+     * // Edge: non-existent file
+     * IOUtil.forLines(new File("nonexistent.txt"), 1, 1, 512, line -> System.out.println(line));
+     * }</pre>
+     *
      * @param <E>              the type of exception that the lineAction may throw during line processing.
      * @param source           the file or directory to process. Directories are processed recursively.
      * @param readThreadNum    the number of threads for reading files.
@@ -10576,6 +11079,18 @@ public final class IOUtil {
 
     /**
      * Parses the specified file/directory line by line.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * File file = new File("data.txt");
+     * IOUtil.forLines(file, 1, 4, 1024,
+     *     line -> System.out.println(line),
+     *     () -> System.out.println("Done"));
+     * // Edge: non-existent file
+     * IOUtil.forLines(new File("nonexistent.txt"), 1, 1, 512,
+     *     line -> System.out.println(line),
+     *     () -> System.out.println("Done"));
+     * }</pre>
      *
      * @param <E>              the type of exception that the lineAction may throw during line processing.
      * @param <E2>             the type of exception that the onComplete callback may throw after all lines are processed.
@@ -10600,6 +11115,14 @@ public final class IOUtil {
     /**
      * Parses the specified file/directory line by line.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * File file = new File("data.txt");
+     * IOUtil.forLines(file, 0, 100, 1, 4, 1024, line -> System.out.println(line));  // 1 reader, 4 workers
+     * // Edge: empty file
+     * IOUtil.forLines(new File("empty.txt"), 0, 100, 1, 1, 512, line -> System.out.println(line));
+     * }</pre>
+     *
      * @param <E>              the type of exception that the lineAction may throw during line processing.
      * @param source           the file or directory to process. Directories are processed recursively.
      * @param lineOffset       the number of lines to skip from the beginning.
@@ -10620,6 +11143,18 @@ public final class IOUtil {
 
     /**
      * Parses the specified file/directory line by line.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * File file = new File("data.txt");
+     * IOUtil.forLines(file, 0, 100, 1, 4, 1024,
+     *     line -> System.out.println(line),
+     *     () -> System.out.println("Done"));
+     * // Edge: empty file
+     * IOUtil.forLines(new File("empty.txt"), 0, 100, 1, 1, 512,
+     *     line -> System.out.println(line),
+     *     () -> System.out.println("Done"));
+     * }</pre>
      *
      * @param <E>              the type of exception that the lineAction may throw during line processing.
      * @param <E2>             the type of exception that the onComplete callback may throw after all lines are processed.
@@ -10647,6 +11182,14 @@ public final class IOUtil {
     /**
      * Parses the given collection of file line by line using the provided lineAction.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<File> files = Arrays.asList(new File("a.txt"), new File("b.txt"));
+     * IOUtil.forLines(files, 1, 4, 1024, line -> System.out.println(line));   // 1 reader, 4 workers
+     * // Edge: empty file list
+     * IOUtil.forLines(Collections.<File>emptyList(), 1, 1, 512, line -> System.out.println(line));
+     * }</pre>
+     *
      * @param <E>              the type of exception that the lineAction may throw during line processing.
      * @param files            the collection of files/directories to process. Directories are processed recursively.
      * @param readThreadNum    the number of threads for reading files.
@@ -10665,6 +11208,18 @@ public final class IOUtil {
 
     /**
      * Parses the given collection of file line by line using the provided lineAction.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<File> files = Arrays.asList(new File("a.txt"), new File("b.txt"));
+     * IOUtil.forLines(files, 1, 4, 1024,
+     *     line -> System.out.println(line),
+     *     () -> System.out.println("Done"));
+     * // Edge: empty file list
+     * IOUtil.forLines(Collections.<File>emptyList(), 1, 1, 512,
+     *     line -> System.out.println(line),
+     *     () -> System.out.println("Done"));
+     * }</pre>
      *
      * @param <E>              the type of exception that the lineAction may throw during line processing.
      * @param <E2>             the type of exception that the onComplete callback may throw after all lines are processed.
@@ -10689,6 +11244,14 @@ public final class IOUtil {
     /**
      * Parses the given collection of file line by line using the provided lineAction.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<File> files = Arrays.asList(new File("a.txt"), new File("b.txt"));
+     * IOUtil.forLines(files, 0, 100, 1, 4, 1024, line -> System.out.println(line));  // 1 reader, 4 workers
+     * // Edge: empty file list
+     * IOUtil.forLines(Collections.<File>emptyList(), 0, 100, 1, 1, 512, line -> System.out.println(line));
+     * }</pre>
+     *
      * @param <E>              the type of exception that the lineAction may throw during line processing.
      * @param files            the collection of files/directories to process. Directories are processed recursively.
      * @param lineOffset       the number of lines to skip from the beginning.
@@ -10709,6 +11272,18 @@ public final class IOUtil {
 
     /**
      * Parses the given collection of file line by line using the provided lineAction.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<File> files = Arrays.asList(new File("a.txt"), new File("b.txt"));
+     * IOUtil.forLines(files, 0, 100, 1, 4, 1024,
+     *     line -> System.out.println(line),
+     *     () -> System.out.println("Done"));
+     * // Edge: empty file list
+     * IOUtil.forLines(Collections.<File>emptyList(), 0, 100, 1, 1, 512,
+     *     line -> System.out.println(line),
+     *     () -> System.out.println("Done"));
+     * }</pre>
      *
      * @param <E>              the type of exception that the lineAction may throw during line processing.
      * @param <E2>             the type of exception that the onComplete callback may throw after all lines are processed.
@@ -10763,6 +11338,17 @@ public final class IOUtil {
     /**
      * Parses the specified InputStream line by line.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * try (InputStream is = new ByteArrayInputStream("line1\nline2\nline3".getBytes())) {
+     *     IOUtil.forLines(is, line -> System.out.println(line));
+     * }
+     * // Edge: empty stream
+     * try (InputStream is = new ByteArrayInputStream(new byte[0])) {
+     *     IOUtil.forLines(is, line -> System.out.println(line));
+     * }
+     * }</pre>
+     *
      * @param <E>        the type of exception that the lineAction may throw during line processing.
      * @param source     the InputStream to read lines from.
      * @param lineAction the action to perform on each line.
@@ -10778,6 +11364,21 @@ public final class IOUtil {
 
     /**
      * Parses the specified InputStream line by line.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * try (InputStream is = new ByteArrayInputStream("line1\nline2\nline3".getBytes())) {
+     *     IOUtil.forLines(is,
+     *         line -> System.out.println(line),
+     *         () -> System.out.println("Done"));
+     * }
+     * // Edge: empty stream
+     * try (InputStream is = new ByteArrayInputStream(new byte[0])) {
+     *     IOUtil.forLines(is,
+     *         line -> System.out.println(line),
+     *         () -> System.out.println("Done"));
+     * }
+     * }</pre>
      *
      * @param <E>        the type of exception that the lineAction may throw during line processing.
      * @param <E2>       the type of exception that the onComplete callback may throw after all lines are processed.
@@ -10798,6 +11399,17 @@ public final class IOUtil {
     /**
      * Parses the specified InputStream line by line.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * try (InputStream is = new ByteArrayInputStream("line1\nline2\nline3".getBytes())) {
+     *     IOUtil.forLines(is, 0, 10, line -> System.out.println(line));   // process first 10 lines
+     * }
+     * // Edge: skip 1 line
+     * try (InputStream is = new ByteArrayInputStream("line1\nline2\nline3".getBytes())) {
+     *     IOUtil.forLines(is, 1, 10, line -> System.out.println(line));
+     * }
+     * }</pre>
+     *
      * @param <E>        the type of exception that the lineAction may throw during line processing.
      * @param source     the InputStream to read lines from.
      * @param lineOffset the number of lines to skip from the beginning.
@@ -10815,6 +11427,21 @@ public final class IOUtil {
 
     /**
      * Parses the specified InputStream line by line.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * try (InputStream is = new ByteArrayInputStream("line1\nline2\nline3".getBytes())) {
+     *     IOUtil.forLines(is, 0, 10,
+     *         line -> System.out.println(line),
+     *         () -> System.out.println("Done"));
+     * }
+     * // Edge: skip 1 line
+     * try (InputStream is = new ByteArrayInputStream("line1\nline2\nline3".getBytes())) {
+     *     IOUtil.forLines(is, 1, 10,
+     *         line -> System.out.println(line),
+     *         () -> System.out.println("Done"));
+     * }
+     * }</pre>
      *
      * @param <E>        the type of exception that the lineAction may throw during line processing.
      * @param <E2>       the type of exception that the onComplete callback may throw after all lines are processed.
@@ -10837,6 +11464,17 @@ public final class IOUtil {
     /**
      * Parses the specified InputStream line by line.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * try (InputStream is = new ByteArrayInputStream("line1\nline2\nline3".getBytes())) {
+     *     IOUtil.forLines(is, 0, 10, 4, 1024, line -> System.out.println(line));   // 4 processing threads
+     * }
+     * // Edge: empty stream
+     * try (InputStream is = new ByteArrayInputStream(new byte[0])) {
+     *     IOUtil.forLines(is, 0, 10, 1, 512, line -> System.out.println(line));
+     * }
+     * }</pre>
+     *
      * @param <E>              the type of exception that the lineAction may throw during line processing.
      * @param source           the InputStream to read lines from.
      * @param lineOffset       the number of lines to skip from the beginning.
@@ -10856,6 +11494,21 @@ public final class IOUtil {
 
     /**
      * Parses the specified InputStream line by line.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * try (InputStream is = new ByteArrayInputStream("line1\nline2\nline3".getBytes())) {
+     *     IOUtil.forLines(is, 0, 10, 4, 1024,
+     *         line -> System.out.println(line),
+     *         () -> System.out.println("Done"));
+     * }
+     * // Edge: empty stream
+     * try (InputStream is = new ByteArrayInputStream(new byte[0])) {
+     *     IOUtil.forLines(is, 0, 10, 1, 512,
+     *         line -> System.out.println(line),
+     *         () -> System.out.println("Done"));
+     * }
+     * }</pre>
      *
      * @param <E>              the type of exception that the lineAction may throw during line processing.
      * @param <E2>             the type of exception that the onComplete callback may throw after all lines are processed.
@@ -10887,6 +11540,17 @@ public final class IOUtil {
     /**
      * Parses the specified Reader line by line.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * try (Reader reader = new StringReader("line1\nline2\nline3")) {
+     *     IOUtil.forLines(reader, line -> System.out.println(line));
+     * }
+     * // Edge: empty reader
+     * try (Reader reader = new StringReader("")) {
+     *     IOUtil.forLines(reader, line -> System.out.println(line));
+     * }
+     * }</pre>
+     *
      * @param <E>        the type of exception that the lineAction may throw during line processing.
      * @param source     the Reader to read lines from.
      * @param lineAction the action to perform on each line.
@@ -10902,6 +11566,21 @@ public final class IOUtil {
 
     /**
      * Parses the specified Reader line by line.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * try (Reader reader = new StringReader("line1\nline2\nline3")) {
+     *     IOUtil.forLines(reader,
+     *         line -> System.out.println(line),
+     *         () -> System.out.println("Done"));
+     * }
+     * // Edge: empty reader
+     * try (Reader reader = new StringReader("")) {
+     *     IOUtil.forLines(reader,
+     *         line -> System.out.println(line),
+     *         () -> System.out.println("Done"));
+     * }
+     * }</pre>
      *
      * @param <E>        the type of exception that the lineAction may throw during line processing.
      * @param <E2>       the type of exception that the onComplete callback may throw after all lines are processed.
@@ -10922,6 +11601,17 @@ public final class IOUtil {
     /**
      * Parses the specified Reader line by line.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * try (Reader reader = new StringReader("line1\nline2\nline3")) {
+     *     IOUtil.forLines(reader, 0, 10, line -> System.out.println(line));   // process first 10 lines
+     * }
+     * // Edge: skip 1 line
+     * try (Reader reader = new StringReader("line1\nline2\nline3")) {
+     *     IOUtil.forLines(reader, 1, 10, line -> System.out.println(line));
+     * }
+     * }</pre>
+     *
      * @param <E>        the type of exception that the lineAction may throw during line processing.
      * @param source     the Reader to read lines from.
      * @param lineOffset the number of lines to skip from the beginning.
@@ -10939,6 +11629,21 @@ public final class IOUtil {
 
     /**
      * Parses the specified Reader line by line.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * try (Reader reader = new StringReader("line1\nline2\nline3")) {
+     *     IOUtil.forLines(reader, 0, 10,
+     *         line -> System.out.println(line),
+     *         () -> System.out.println("Done"));
+     * }
+     * // Edge: skip 1 line
+     * try (Reader reader = new StringReader("line1\nline2\nline3")) {
+     *     IOUtil.forLines(reader, 1, 10,
+     *         line -> System.out.println(line),
+     *         () -> System.out.println("Done"));
+     * }
+     * }</pre>
      *
      * @param <E>        the type of exception that the lineAction may throw during line processing.
      * @param <E2>       the type of exception that the onComplete callback may throw after all lines are processed.
@@ -10961,6 +11666,17 @@ public final class IOUtil {
     /**
      * Parses the specified Reader line by line.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * try (Reader reader = new StringReader("line1\nline2\nline3")) {
+     *     IOUtil.forLines(reader, 0, 10, 4, 1024, line -> System.out.println(line));   // 4 processing threads
+     * }
+     * // Edge: empty reader
+     * try (Reader reader = new StringReader("")) {
+     *     IOUtil.forLines(reader, 0, 10, 1, 512, line -> System.out.println(line));
+     * }
+     * }</pre>
+     *
      * @param <E>              the type of exception that the lineAction may throw during line processing.
      * @param source           the Reader to read lines from.
      * @param lineOffset       the number of lines to skip from the beginning.
@@ -10980,6 +11696,21 @@ public final class IOUtil {
 
     /**
      * Parses the specified Reader line by line.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * try (Reader reader = new StringReader("line1\nline2\nline3")) {
+     *     IOUtil.forLines(reader, 0, 10, 4, 1024,
+     *         line -> System.out.println(line),
+     *         () -> System.out.println("Done"));
+     * }
+     * // Edge: empty reader
+     * try (Reader reader = new StringReader("")) {
+     *     IOUtil.forLines(reader, 0, 10, 1, 512,
+     *         line -> System.out.println(line),
+     *         () -> System.out.println("Done"));
+     * }
+     * }</pre>
      *
      * @param <E>              the type of exception that the lineAction may throw during line processing.
      * @param <E2>             the type of exception that the onComplete callback may throw after all lines are processed.

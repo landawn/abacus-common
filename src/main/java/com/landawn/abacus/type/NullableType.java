@@ -129,8 +129,15 @@ public class NullableType<T> extends AbstractOptionalType<Nullable<T>> {
      * delegates to {@link com.landawn.abacus.util.N#stringOf(Object)}, which selects
      * a converter based on the runtime class of the contained value.
      *
+     * <p>The returned string is a serializable representation designed to be parsed back into an equivalent value
+     * via {@link #valueOf(String)}; {@code stringOf} and {@code valueOf} are inverse operations that round-trip. This
+     * is the key distinction from {@link Object#toString()}, whose result is not guaranteed to be convertible back
+     * into the original value.</p>
+     *
      * @param x the {@code Nullable} object to convert
      * @return the string representation of the contained value, or {@code null} if empty or null-valued
+     * @see #valueOf(String)
+     * @see #valueOf(Object)
      */
     @Override
     public String stringOf(final Nullable<T> x) {
@@ -142,8 +149,14 @@ public class NullableType<T> extends AbstractOptionalType<Nullable<T>> {
      * If the string is {@code null}, returns an empty {@code Nullable}. Otherwise,
      * delegates to the element type's valueOf method and wraps the result.
      *
+     * <p>This method is the inverse of {@code stringOf} and round-trips with it: it parses the string produced by
+     * {@code stringOf} back into a value of this type. Strings produced by {@link Object#toString()} are not
+     * guaranteed to be parseable in this way.</p>
+     *
      * @param str the string to convert
      * @return a {@code Nullable} containing the parsed value, or empty {@code Nullable} if input is null
+     * @see #valueOf(Object)
+     * @see #stringOf(Nullable)
      */
     @Override
     public Nullable<T> valueOf(final String str) {
@@ -216,10 +229,24 @@ public class NullableType<T> extends AbstractOptionalType<Nullable<T>> {
      * Appends the string representation of a {@link Nullable} to an {@link Appendable}.
      * Writes {@code "null"} if {@code x} is {@code null} or wraps a {@code null} value;
      * otherwise delegates to the runtime type handler of the contained value.
+     * <p>
+     * <b>appendTo vs. serializeTo:</b> {@code appendTo} produces a plain, {@code toString()}-style rendering with no
+     * JSON/XML quoting or escaping (for general text output), whereas {@code serializeTo} produces the JSON/XML
+     * serialized form (applying string quotation and character escaping per the serialization config) and is used by the
+     * JSON/XML serializers.
      *
      * @param appendable the target to write to
      * @param x the {@code Nullable} value to append, may be {@code null}
      * @throws IOException if an I/O error occurs during the append operation
+     * @implNote
+     * This method appends a string representation of {@code x} to {@code appendable} (the literal {@code "null"} for a
+     * {@code null} value). Conceptually this is the human-readable form produced by {@code toString()}, <i>not</i> the
+     * value returned by {@code stringOf}, which is a formatted, serializable representation (typically a JSON string)
+     * that {@link #valueOf(String)} can convert back into an equivalent value. For values whose nested structure makes
+     * the two forms differ (collections, maps, arrays), {@code appendTo} emits the unquoted, {@code toString()}-style
+     * form; it is therefore not, in the general contract, a plain
+     * {@code appendable.append(x == null ? NULL_STRING : stringOf(x))}. (For value types whose human-readable and
+     * serialized forms coincide, the appended text is naturally identical to {@code stringOf(x)}.)
      */
     @Override
     public void appendTo(final Appendable appendable, final Nullable<T> x) throws IOException {
@@ -235,6 +262,15 @@ public class NullableType<T> extends AbstractOptionalType<Nullable<T>> {
      * Writes the character representation of a {@link Nullable} to a {@link CharacterWriter}.
      * Writes {@code NULL_CHAR_ARRAY} if {@code x} is {@code null} or wraps a {@code null} value;
      * otherwise delegates to the runtime type handler of the contained value.
+     * <p>
+     * This method is specifically designed for JSON/XML serialization: it writes the serialized form of {@code x} to the
+     * {@code CharacterWriter}, applying string quotation and character escaping according to the supplied serialization
+     * config (a {@code null} config means no surrounding quotation). It is the streaming counterpart of {@code stringOf}
+     * and is invoked by the JSON/XML serializers.
+     * <p>
+     * <b>serializeTo vs. appendTo:</b> {@code serializeTo} produces machine-readable JSON/XML (quoted and escaped),
+     * whereas {@code appendTo} produces a plain, human-readable {@code toString()}-style rendering without JSON/XML
+     * quoting or escaping.
      *
      * @param writer the {@code CharacterWriter} to write to
      * @param x the {@code Nullable} value to write, may be {@code null}
@@ -242,12 +278,12 @@ public class NullableType<T> extends AbstractOptionalType<Nullable<T>> {
      * @throws IOException if an I/O error occurs during the write operation
      */
     @Override
-    public void writeCharacter(final CharacterWriter writer, final Nullable<T> x, final JsonXmlSerConfig<?> config) throws IOException {
+    public void serializeTo(final CharacterWriter writer, final Nullable<T> x, final JsonXmlSerConfig<?> config) throws IOException {
         if (x == null || x.isNull()) {
             writer.write(NULL_CHAR_ARRAY);
         } else {
-            // elementType.writeCharacter(writer, x.get(), config);
-            Type.<Object> of(x.get().getClass()).writeCharacter(writer, x.get(), config);
+            // elementType.serializeTo(writer, x.get(), config);
+            Type.<Object> of(x.get().getClass()).serializeTo(writer, x.get(), config);
         }
     }
 }

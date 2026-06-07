@@ -132,9 +132,16 @@ public class MultisetType<E> extends AbstractType<Multiset<E>> {
      * The {@code Multiset} is first converted to a {@link java.util.Map} via {@link Multiset#toMap()}
      * where each element maps to its occurrence count, and the resulting map is then serialized as JSON.
      *
+     * <p>The returned string is a serializable representation designed to be parsed back into an equivalent value
+     * via {@link #valueOf(String)}; {@code stringOf} and {@code valueOf} are inverse operations that round-trip. This
+     * is the key distinction from {@link Object#toString()}, whose result is not guaranteed to be convertible back
+     * into the original value.</p>
+     *
      * @param x the {@code Multiset} object to convert, may be {@code null}
      * @return the JSON string representation of the {@code Multiset} as an element-to-count map
      *         (e.g., {@code {"apple":3,"orange":2}}), or {@code null} if the input is {@code null}
+     * @see #valueOf(String)
+     * @see #valueOf(Object)
      */
     @Override
     public String stringOf(final Multiset<E> x) {
@@ -146,8 +153,14 @@ public class MultisetType<E> extends AbstractType<Multiset<E>> {
      * The JSON must be an object where each key is an element and its value is the occurrence count,
      * e.g. {@code {"apple":3,"orange":2,"banana":1}}.
      *
+     * <p>This method is the inverse of {@code stringOf} and round-trips with it: it parses the string produced by
+     * {@code stringOf} back into a value of this type. Strings produced by {@link Object#toString()} are not
+     * guaranteed to be parseable in this way.</p>
+     *
      * @param str the JSON string to parse; may be {@code null} or blank
      * @return the parsed {@code Multiset} object, or {@code null} if the input is {@code null} or blank
+     * @see #valueOf(Object)
+     * @see #stringOf(Multiset)
      */
     @Override
     public Multiset<E> valueOf(final String str) {

@@ -89,11 +89,10 @@ public @interface SuppressFBWarnings {
      * The set of FindBugs warnings that are to be suppressed in an annotated element.
      * The value can be a bug category, kind, or specific pattern.
      *
-     * <p><b>Value types:</b></p>
+     * <p>The value matches either a broad bug <i>category</i> or a specific bug <i>pattern</i>:</p>
      * <ul>
-     *   <li><b>Bug categories:</b> "SECURITY", "PERFORMANCE", "CORRECTNESS", etc.</li>
+     *   <li><b>Bug categories:</b> "SECURITY", "PERFORMANCE", "CORRECTNESS", "MT_CORRECTNESS", "STYLE", etc.</li>
      *   <li><b>Bug patterns:</b> "NP_NULL_ON_SOME_PATH", "EI_EXPOSE_REP", etc.</li>
-     *   <li><b>Bug kinds:</b> "SECURITY", "STYLE", "MT_CORRECTNESS", etc.</li>
      * </ul>
      *
      * <p><b>Usage Examples:</b></p>

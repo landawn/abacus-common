@@ -40,6 +40,7 @@ public interface FloatFunction<R> extends Throwables.FloatFunction<R, RuntimeExc
      * FloatFunction<Float> boxer = FloatFunction.BOX;
      * Float boxed = boxer.apply(3.14f);   // Returns Float.valueOf(3.14f)
      * }</pre>
+     *
      */
     FloatFunction<Float> BOX = value -> value;
 

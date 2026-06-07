@@ -198,18 +198,18 @@ public class ReaderTypeTest extends TestBase {
     }
 
     @Test
-    public void testWriteCharacter() throws IOException {
+    public void testSerializeTo() throws IOException {
         CharacterWriter writer = createCharacterWriter();
         JsonXmlSerConfig<?> config = mock(JsonXmlSerConfig.class);
 
         Reader reader = new StringReader("test");
-        readerType.writeCharacter(writer, reader, config);
+        readerType.serializeTo(writer, reader, config);
 
-        readerType.writeCharacter(writer, null, config);
+        readerType.serializeTo(writer, null, config);
 
         when(config.getStringQuotation()).thenReturn('"');
         reader = new StringReader("test");
-        readerType.writeCharacter(writer, reader, config);
+        readerType.serializeTo(writer, reader, config);
         assertNotNull(reader);
     }
 

@@ -147,15 +147,15 @@ public class AbstractIntegerTypeTest extends TestBase {
     }
 
     @Test
-    public void testWriteCharacter() throws IOException {
-        integerType.writeCharacter(writer, null, null);
+    public void testSerializeTo() throws IOException {
+        integerType.serializeTo(writer, null, null);
         verify(writer).write(any(char[].class));
 
-        integerType.writeCharacter(writer, 123, null);
+        integerType.serializeTo(writer, 123, null);
         verify(writer).writeInt(123);
 
         when(config.isWriteNullNumberAsZero()).thenReturn(true);
-        integerType.writeCharacter(writer, null, config);
+        integerType.serializeTo(writer, null, config);
         verify(writer).writeInt(0);
     }
 

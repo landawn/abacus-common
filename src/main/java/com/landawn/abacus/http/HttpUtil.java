@@ -411,7 +411,7 @@ public final class HttpUtil {
      * <pre>{@code
      * HttpURLConnection conn = (HttpURLConnection) new URL("http://example.com/api").openConnection();
      * conn.connect();
-     * String contentType = HttpUtil.getContentType(conn);  // e.g. "application/json"
+     * String contentType = HttpUtil.getContentType(conn);  // "application/json", for example
      * }</pre>
      *
      * @param connection The HTTP connection
@@ -499,7 +499,7 @@ public final class HttpUtil {
      * <pre>{@code
      * HttpURLConnection conn = (HttpURLConnection) new URL("http://example.com/api").openConnection();
      * conn.connect();
-     * String encoding = HttpUtil.getContentEncoding(conn);  // e.g. "gzip"
+     * String encoding = HttpUtil.getContentEncoding(conn);  // "gzip", for example
      * }</pre>
      *
      * @param connection The HTTP connection
@@ -795,6 +795,13 @@ public final class HttpUtil {
      * Gets the content type string for a ContentFormat.
      * For example, {@link ContentFormat#JSON} returns {@code "application/json"}.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * String json = HttpUtil.getContentType(ContentFormat.JSON);          // returns "application/json"
+     * String xmlGzip = HttpUtil.getContentType(ContentFormat.XML_GZIP);   // returns "application/xml"
+     * String none = HttpUtil.getContentType(ContentFormat.NONE);          // returns "" (empty string)
+     * }</pre>
+     *
      * @param contentFormat The content format
      * @return The content type string, or an empty string {@code ""} if {@code contentFormat} is {@code null},
      *         {@link ContentFormat#NONE}, or a format that has no associated content type
@@ -810,6 +817,13 @@ public final class HttpUtil {
     /**
      * Gets the content encoding string for a ContentFormat.
      * For example, {@link ContentFormat#JSON_GZIP} returns {@code "gzip"}.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * String gzip = HttpUtil.getContentEncoding(ContentFormat.JSON_GZIP);   // returns "gzip"
+     * String lz4 = HttpUtil.getContentEncoding(ContentFormat.XML_LZ4);      // returns "lz4"
+     * String none = HttpUtil.getContentEncoding(ContentFormat.JSON);        // returns "" (no compression)
+     * }</pre>
      *
      * @param contentFormat The content format
      * @return The content encoding string, or an empty string {@code ""} if {@code contentFormat} is {@code null},
@@ -899,6 +913,15 @@ public final class HttpUtil {
      * Gets the ContentFormat from an HttpURLConnection.
      * Determines the format based on the Content-Type and Content-Encoding headers.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * HttpURLConnection conn = (HttpURLConnection) new URL("http://example.com/api").openConnection();
+     * conn.connect();
+     * ContentFormat format = HttpUtil.getContentFormat(conn);
+     * // For a "Content-Type: application/json" + "Content-Encoding: gzip" response,
+     * // returns ContentFormat.JSON_GZIP (when executed against a live server)
+     * }</pre>
+     *
      * @param connection The HTTP connection
      * @return The ContentFormat, or ContentFormat.NONE if not determined
      */
@@ -911,6 +934,19 @@ public final class HttpUtil {
      * If the response doesn't specify a Content-Type, falls back to the request format's content type.
      * The Content-Encoding is always taken from the response headers (no fallback) to avoid
      * incorrectly applying decompression to a response that wasn't compressed.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Map<String, String> respHeaders = new HashMap<>();
+     * respHeaders.put("Content-Type", "application/json");
+     * respHeaders.put("Content-Encoding", "gzip");
+     * ContentFormat format = HttpUtil.getResponseContentFormat(respHeaders, null);
+     * // returns ContentFormat.JSON_GZIP
+     *
+     * // When the response omits Content-Type, the request format supplies it as a fallback:
+     * ContentFormat fallback = HttpUtil.getResponseContentFormat(new HashMap<>(), ContentFormat.XML);
+     * // returns ContentFormat.XML
+     * }</pre>
      *
      * @param respHeaders The response headers
      * @param requestContentFormat The request content format (used only as a content-type fallback, may be {@code null})
@@ -937,6 +973,13 @@ public final class HttpUtil {
      * Gets the parser for a specific ContentFormat.
      * The parser is used for serialization and deserialization of request/response bodies.
      * If {@code contentFormat} is {@code null}, the default JSON parser is returned.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Parser<?, ?> jsonParser = HttpUtil.getParser(ContentFormat.JSON);   // a JSON parser
+     * Parser<?, ?> xmlParser = HttpUtil.getParser(ContentFormat.XML);     // an XML parser
+     * Parser<?, ?> defaultParser = HttpUtil.getParser(null);              // the default JSON parser
+     * }</pre>
      *
      * @param <SC> The serialization config type
      * @param <DC> The deserialization config type
@@ -1038,6 +1081,16 @@ public final class HttpUtil {
      * Sets Content-Type and Content-Encoding headers based on the content format,
      * and wraps the stream with compression if needed.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * HttpURLConnection conn = (HttpURLConnection) new URL("http://example.com/api").openConnection();
+     * conn.setRequestMethod("POST");
+     * conn.setDoOutput(true);
+     * OutputStream os = HttpUtil.getOutputStream(conn, ContentFormat.JSON_GZIP, null, null);
+     * // sets "Content-Type: application/json" and "Content-Encoding: gzip" on the connection,
+     * // then returns a GZIP-wrapping output stream (when executed against a live server)
+     * }</pre>
+     *
      * @param connection The HTTP connection
      * @param contentFormat The content format for the request body
      * @param contentType The Content-Type header value (can be null)
@@ -1071,6 +1124,15 @@ public final class HttpUtil {
      * Automatically handles both successful responses and error streams,
      * and wraps the stream with decompression based on the content format.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * HttpURLConnection conn = (HttpURLConnection) new URL("http://example.com/api").openConnection();
+     * conn.connect();
+     * InputStream is = HttpUtil.getInputStream(conn, ContentFormat.JSON_GZIP);
+     * // returns a GZIP-decompressing input stream over the response body
+     * // (falls back to the error stream on a non-2xx response; when executed against a live server)
+     * }</pre>
+     *
      * @param connection The HTTP connection
      * @param contentFormat The content format for decompression
      * @return The input stream, possibly wrapped with decompression
@@ -1086,6 +1148,13 @@ public final class HttpUtil {
     /**
      * Flushes an output stream, handling special cases for compression streams.
      * For LZ4 and GZIP streams, calls finish() before flush() to ensure all data is written.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * OutputStream os = HttpUtil.wrapOutputStream(connection.getOutputStream(), ContentFormat.JSON_GZIP);
+     * os.write(payloadBytes);
+     * HttpUtil.flush(os);  // finishes the GZIP stream, then flushes all buffered data
+     * }</pre>
      *
      * @param os The output stream to flush
      * @throws IOException if an I/O error occurs
@@ -1105,6 +1174,16 @@ public final class HttpUtil {
      * Extracts the charset from the Content-Type header if present,
      * otherwise returns the default charset (UTF-8).
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * HttpHeaders headers = HttpHeaders.create().setContentType("application/json; charset=ISO-8859-1");
+     * Charset charset = HttpUtil.getRequestCharset(headers);   // returns ISO-8859-1
+     *
+     * // No charset parameter -> the default (UTF-8) is used
+     * Charset dft = HttpUtil.getRequestCharset(HttpHeaders.create().setContentType("application/json"));
+     * // returns UTF-8
+     * }</pre>
+     *
      * @param headers The HTTP headers
      * @return The charset to use for the request
      */
@@ -1117,6 +1196,16 @@ public final class HttpUtil {
      * Extracts the charset from the Content-Type header if present,
      * otherwise returns the request charset as a fallback.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Map<String, String> respHeaders = new HashMap<>();
+     * respHeaders.put("Content-Type", "text/html; charset=UTF-16");
+     * Charset charset = HttpUtil.getResponseCharset(respHeaders, Charsets.UTF_8);  // returns UTF-16
+     *
+     * // No charset in the response -> the request charset is used as a fallback
+     * Charset fallback = HttpUtil.getResponseCharset(new HashMap<>(), Charsets.UTF_8);  // returns UTF-8
+     * }</pre>
+     *
      * @param headers The response headers
      * @param requestCharset The charset used in the request (as fallback)
      * @return The charset to use for the response
@@ -1128,6 +1217,13 @@ public final class HttpUtil {
     /**
      * Extracts the charset from a Content-Type header value.
      * Parses strings like "text/html; charset=UTF-8" to extract the charset.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Charset charset = HttpUtil.getCharset("text/html; charset=ISO-8859-1");  // returns ISO-8859-1
+     * Charset dft = HttpUtil.getCharset("application/json");                   // returns UTF-8 (no charset)
+     * Charset blank = HttpUtil.getCharset(null);                               // returns UTF-8 (default)
+     * }</pre>
      *
      * @param contentType The Content-Type header value
      * @return The charset, or the default charset (UTF-8) if not found

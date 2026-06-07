@@ -45,8 +45,8 @@ import com.landawn.abacus.util.stream.EntryStream;
  *         .add(Arrays.asList("a", "b"), "foo")
  *         .build();
  *
- * table.get(Arrays.asList("a", "b", "c"));   // Optional["foo"]
- * table.get(Arrays.asList("a"));             // Optional.empty()
+ * table.get(Arrays.asList("a", "b", "c"));   // returns Optional["foo"]
+ * table.get(Arrays.asList("a"));             // returns Optional.empty()
  * }</pre>
  *
  * <br />
@@ -65,6 +65,18 @@ public final class PrefixSearchTable<K, V> {
 
     /**
      * Searches the table for the longest prefix match of {@code compoundKey}.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * PrefixSearchTable<String, String> table = PrefixSearchTable.<String, String>builder()
+     *         .add(Arrays.asList("a", "b"), "foo")
+     *         .add(Arrays.asList("a"), "bar")
+     *         .build();
+     *
+     * table.get(Arrays.asList("a", "b", "c"));   // returns Optional["foo"] (longest match)
+     * table.get(Arrays.asList("a"));             // returns Optional["bar"]
+     * table.get(Arrays.asList("x"));             // returns Optional.empty()
+     * }</pre>
      *
      * @param compoundKey the non-empty compound key to search for; elements must not be {@code null}
      * @return an {@code Optional} holding the value mapped to the longest (non-empty) prefix of
@@ -86,6 +98,17 @@ public final class PrefixSearchTable<K, V> {
      * If no non-empty prefix exists in the table, an empty {@code EntryStream} is returned.
      *
      * <p>To get only the longest matched prefix, use {@link #get(List)} instead.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * PrefixSearchTable<String, String> table = PrefixSearchTable.<String, String>builder()
+     *         .add(Arrays.asList("a"), "bar")
+     *         .add(Arrays.asList("a", "b"), "foo")
+     *         .build();
+     *
+     * EntryStream<List<String>, String> results = table.getAll(Arrays.asList("a", "b", "c"));
+     * // Streams: [a] -> "bar", then [a, b] -> "foo"
+     * }</pre>
      *
      * @param compoundKey the non-empty compound key to search for; elements must not be {@code null}
      * @return a lazy {@code EntryStream} pairing each matched prefix of {@code compoundKey}
@@ -147,6 +170,17 @@ public final class PrefixSearchTable<K, V> {
      * The returned builder can be used to add further mappings and produce a new table
      * without modifying this instance.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * PrefixSearchTable<String, String> table = PrefixSearchTable.<String, String>builder()
+     *         .add(Arrays.asList("a"), "foo")
+     *         .build();
+     *
+     * PrefixSearchTable<String, String> extended = table.toBuilder()
+     *         .add(Arrays.asList("a", "b"), "bar")
+     *         .build();
+     * }</pre>
+     *
      * @return a new builder containing all current mappings of this table
      */
     public Builder<K, V> toBuilder() {
@@ -158,6 +192,16 @@ public final class PrefixSearchTable<K, V> {
     /**
      * Returns a string representation of this table derived from its internal node map.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * PrefixSearchTable<String, String> table = PrefixSearchTable.<String, String>builder()
+     *         .add(Arrays.asList("a", "b"), "foo")
+     *         .build();
+     *
+     * System.out.println(table);
+     * // Prints the internal node-map structure of the table.
+     * }</pre>
+     *
      * @return a string representation of this table
      */
     @Override
@@ -167,6 +211,13 @@ public final class PrefixSearchTable<K, V> {
 
     /**
      * Returns a new builder.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * PrefixSearchTable<String, Integer> table = PrefixSearchTable.<String, Integer>builder()
+     *         .add(Arrays.asList("a", "b"), 1)
+     *         .build();
+     * }</pre>
      *
      * @param <K> the type of key elements in the compound prefix
      * @param <V> the type of values stored in the table
@@ -187,6 +238,14 @@ public final class PrefixSearchTable<K, V> {
 
         /**
          * Adds the mapping from {@code compoundKey} to {@code value}.
+         *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * PrefixSearchTable<String, String> table = PrefixSearchTable.<String, String>builder()
+         *         .add(Arrays.asList("a", "b"), "foo")
+         *         .add(Arrays.asList("a", "b", "c"), "bar")
+         *         .build();
+         * }</pre>
          *
          * @param compoundKey the non-empty compound key to add
          * @param value the non-{@code null} value to associate with the compound key
@@ -218,6 +277,17 @@ public final class PrefixSearchTable<K, V> {
          *
          * <p>A {@code null} or empty {@code mappings} map is treated as a no-op; no entry is added.
          *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * Map<List<String>, String> mappings = new HashMap<>();
+         * mappings.put(Arrays.asList("a", "b"), "foo");
+         * mappings.put(Arrays.asList("x", "y"), "bar");
+         *
+         * PrefixSearchTable<String, String> table = PrefixSearchTable.<String, String>builder()
+         *         .addAll(mappings)
+         *         .build();
+         * }</pre>
+         *
          * @param mappings the mappings to add; an empty compound key, or a {@code null} compound key
          *     element or value within an entry, is not permitted
          * @return this builder
@@ -231,6 +301,14 @@ public final class PrefixSearchTable<K, V> {
 
         /**
          * Builds an immutable {@link PrefixSearchTable} from the accumulated mappings.
+         *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * PrefixSearchTable<String, String> table = PrefixSearchTable.<String, String>builder()
+         *         .add(Arrays.asList("a", "b"), "foo")
+         *         .add(Arrays.asList("c"), "bar")
+         *         .build();
+         * }</pre>
          *
          * @return a new {@code PrefixSearchTable} containing all mappings added to this builder
          */

@@ -50,7 +50,7 @@ import com.landawn.abacus.util.stream.Stream;
  *
  * // Stream all pages
  * userPages.stream()
- *     .flattMap(List::stream)
+ *     .flatMap(List::stream)
  *     .forEach(user -> process(user));
  *
  * // Iterate through pages
@@ -252,7 +252,7 @@ public interface Paginated<T> extends Iterable<T> {
      *
      * // Process all transactions across all pages
      * long totalAmount = transactions.stream()
-     *     .flattMap(List::stream)
+     *     .flatMap(List::stream)
      *     .mapToLong(Transaction::getAmount)
      *     .sum();
      *

@@ -28,8 +28,8 @@ package com.landawn.abacus.util;
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * IndexedByte ib = IndexedByte.of((byte) 42, 5);
- * System.out.println(ib.value());   // prints: 42
- * System.out.println(ib.index());   // prints: 5
+ * System.out.println(ib.value());   // prints 42
+ * System.out.println(ib.index());   // prints 5
  * }</pre>
  *
  * @see Indexed
@@ -104,6 +104,13 @@ public final class IndexedByte extends AbstractIndexed {
      *
      * <p>The index associated with this value can be retrieved through the {@link #index()}
      * method inherited from {@link AbstractIndexed}.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * IndexedByte indexed = IndexedByte.of((byte) 10, 3);
+     * byte v = indexed.value();   // returns (byte) 10
+     * int i = indexed.index();    // returns 3
+     * }</pre>
      *
      * @return the byte value associated with this index
      */

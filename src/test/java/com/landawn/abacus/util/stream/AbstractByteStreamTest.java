@@ -598,6 +598,13 @@ public class AbstractByteStreamTest extends TestBase {
     }
 
     @Test
+    public void testArrayStepIteratorCountConsumes() {
+        ByteIterator iter = ByteStream.of(new byte[] { 1, 2, 3, 4, 5, 6 }).step(2).iterator();
+        assertEquals(3, iter.count());
+        assertFalse(iter.hasNext());
+    }
+
+    @Test
     public void testStepWithInvalidStep() {
         assertThrows(IllegalArgumentException.class, () -> stream.step(0));
     }

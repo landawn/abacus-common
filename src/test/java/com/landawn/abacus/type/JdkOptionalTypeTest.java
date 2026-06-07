@@ -189,23 +189,23 @@ public class JdkOptionalTypeTest extends TestBase {
     }
 
     @Test
-    public void testWriteCharacter_Null() throws IOException {
-        optionalStringType.writeCharacter(characterWriter, null, null);
+    public void testSerializeTo_Null() throws IOException {
+        optionalStringType.serializeTo(characterWriter, null, null);
         verify(characterWriter).write(any(char[].class));
     }
 
     @Test
-    public void testWriteCharacter_Empty() throws IOException {
-        optionalStringType.writeCharacter(characterWriter, Optional.empty(), null);
+    public void testSerializeTo_Empty() throws IOException {
+        optionalStringType.serializeTo(characterWriter, Optional.empty(), null);
         verify(characterWriter).write(any(char[].class));
     }
 
     @Test
-    public void testWriteCharacter_Present() throws IOException {
+    public void testSerializeTo_Present() throws IOException {
         Optional<String> opt = Optional.of("test");
         JsonXmlSerConfig<?> config = mock(JsonXmlSerConfig.class);
 
-        optionalStringType.writeCharacter(characterWriter, opt, config);
+        optionalStringType.serializeTo(characterWriter, opt, config);
         verify(characterWriter, times(1)).writeCharacter(anyString());
     }
 

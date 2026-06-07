@@ -156,22 +156,22 @@ public class PrimitiveBooleanListTypeTest extends TestBase {
     }
 
     @Test
-    public void testWriteCharacterWithNull() throws IOException {
-        booleanListType.writeCharacter(writer, null, config);
+    public void testSerializeToWithNull() throws IOException {
+        booleanListType.serializeTo(writer, null, config);
         verify(writer).write(any(char[].class));
     }
 
     @Test
-    public void testWriteCharacterWithEmptyList() throws IOException {
+    public void testSerializeToWithEmptyList() throws IOException {
         BooleanList emptyList = BooleanList.of(new boolean[0]);
-        booleanListType.writeCharacter(writer, emptyList, config);
+        booleanListType.serializeTo(writer, emptyList, config);
         verify(writer, atLeastOnce()).write(anyChar());
     }
 
     @Test
-    public void testWriteCharacterWithList() throws IOException {
+    public void testSerializeToWithList() throws IOException {
         BooleanList list = BooleanList.of(true, false);
-        booleanListType.writeCharacter(writer, list, config);
+        booleanListType.serializeTo(writer, list, config);
         verify(writer, atLeastOnce()).write(anyChar());
         verify(writer, atLeastOnce()).write(any(char[].class));
     }

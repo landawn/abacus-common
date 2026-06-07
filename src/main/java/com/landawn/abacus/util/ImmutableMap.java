@@ -83,7 +83,7 @@ public class ImmutableMap<K, V> extends AbstractImmutableMap<K, V> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableMap<String, Integer> emptyMap = ImmutableMap.empty();
-     * System.out.println(emptyMap.size());   // 0
+     * System.out.println(emptyMap.size());   // returns 0
      * }</pre>
      *
      * @param <K> the type of keys.
@@ -102,7 +102,7 @@ public class ImmutableMap<K, V> extends AbstractImmutableMap<K, V> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableMap<String, Integer> singleEntry = ImmutableMap.of("count", 42);
-     * System.out.println(singleEntry.get("count"));   // 42
+     * System.out.println(singleEntry.get("count"));   // returns 42
      * }</pre>
      *
      * @param <K> the type of keys.
@@ -453,7 +453,7 @@ public class ImmutableMap<K, V> extends AbstractImmutableMap<K, V> {
      * mutable.put("b", 2);
      * ImmutableMap<String, Integer> immutable = ImmutableMap.copyOf(mutable);
      * mutable.put("c", 3);                    // Does not affect immutable
-     * System.out.println(immutable.size());   // Still 2
+     * System.out.println(immutable.size());   // still prints 2
      * }</pre>
      *
      * @param <K> the type of keys in the map.
@@ -488,7 +488,7 @@ public class ImmutableMap<K, V> extends AbstractImmutableMap<K, V> {
      * mutable.put("a", 1);
      * ImmutableMap<String, Integer> wrapped = ImmutableMap.wrap(mutable);
      * mutable.put("b", 2);                  // This change IS visible in wrapped!
-     * System.out.println(wrapped.size());   // 2
+     * System.out.println(wrapped.size());   // prints 2
      * }</pre>
      *
      * @param <K> the type of keys in the map.

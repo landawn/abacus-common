@@ -73,6 +73,7 @@ import com.landawn.abacus.util.Objectory;
  * type.set(stmt, 1, largeText);
  * stmt.executeUpdate();
  * }</pre>
+ *
  */
 @SuppressWarnings("java:S2160")
 public class ReaderType extends AbstractType<Reader> {
@@ -182,9 +183,16 @@ public class ReaderType extends AbstractType<Reader> {
      * System.out.println(nullStr);   // Output: null
      * }</pre>
      *
+     * <p>The returned string is a serializable representation designed to be parsed back into an equivalent value
+     * via {@link #valueOf(String)}; {@code stringOf} and {@code valueOf} are inverse operations that round-trip. This
+     * is the key distinction from {@link Object#toString()}, whose result is not guaranteed to be convertible back
+     * into the original value.</p>
+     *
      * @param x the Reader to convert to string
      * @return the string containing all content read from the Reader, or {@code null} if the input is null
      * @throws UncheckedIOException if an I/O error occurs while reading from the Reader
+     * @see #valueOf(String)
+     * @see #valueOf(Object)
      */
     @Override
     public String stringOf(final Reader x) {
@@ -207,9 +215,15 @@ public class ReaderType extends AbstractType<Reader> {
      * System.out.println(nullReader);   // Output: null
      * }</pre>
      *
+     * <p>This method is the inverse of {@code stringOf} and round-trips with it: it parses the string produced by
+     * {@code stringOf} back into a value of this type. Strings produced by {@link Object#toString()} are not
+     * guaranteed to be parseable in this way.</p>
+     *
      * @param str the string to create a Reader from
      * @return a Reader containing the string content, or {@code null} if the input string is null
      * @throws RuntimeException if the constructor invocation fails
+     * @see #valueOf(Object)
+     * @see #stringOf(Reader)
      */
     @Override
     public Reader valueOf(final String str) {
@@ -427,10 +441,24 @@ public class ReaderType extends AbstractType<Reader> {
      * type.appendTo(writer, reader2);
      * System.out.println(writer.toString());   // Output: Content
      * }</pre>
+     * <p>
+     * <b>appendTo vs. serializeTo:</b> {@code appendTo} produces a plain, {@code toString()}-style rendering with no
+     * JSON/XML quoting or escaping (for general text output), whereas {@code serializeTo} produces the JSON/XML
+     * serialized form (applying string quotation and character escaping per the serialization config) and is used by the
+     * JSON/XML serializers.
      *
      * @param appendable the Appendable to write to (e.g., StringBuilder, Writer)
      * @param x the Reader whose content should be appended
      * @throws IOException if an I/O error occurs during the append operation
+     * @implNote
+     * This method appends a string representation of {@code x} to {@code appendable} (the literal {@code "null"} for a
+     * {@code null} value). Conceptually this is the human-readable form produced by {@code toString()}, <i>not</i> the
+     * value returned by {@code stringOf}, which is a formatted, serializable representation (typically a JSON string)
+     * that {@link #valueOf(String)} can convert back into an equivalent value. For values whose nested structure makes
+     * the two forms differ (collections, maps, arrays), {@code appendTo} emits the unquoted, {@code toString()}-style
+     * form; it is therefore not, in the general contract, a plain
+     * {@code appendable.append(x == null ? NULL_STRING : stringOf(x))}. (For value types whose human-readable and
+     * serialized forms coincide, the appended text is naturally identical to {@code stringOf(x)}.)
      */
     @Override
     public void appendTo(final Appendable appendable, final Reader x) throws IOException {
@@ -457,15 +485,24 @@ public class ReaderType extends AbstractType<Reader> {
      * CharacterWriter writer = new CharacterWriter();
      * JsonXmlSerConfig<?> config = new JsonXmlSerConfig<>();
      * config.setStringQuotation('"');
-     * type.writeCharacter(writer, reader, config);
+     * type.serializeTo(writer, reader, config);
      * System.out.println(writer.toString());   // Output: "Sample text"
      *
      * // Without quotation
      * Reader reader2 = new StringReader("No quotes");
      * CharacterWriter writer2 = new CharacterWriter();
-     * type.writeCharacter(writer2, reader2, null);
+     * type.serializeTo(writer2, reader2, null);
      * System.out.println(writer2.toString());   // Output: No quotes
      * }</pre>
+     * <p>
+     * This method is specifically designed for JSON/XML serialization: it writes the serialized form of {@code x} to the
+     * {@code CharacterWriter}, applying string quotation and character escaping according to the supplied serialization
+     * config (a {@code null} config means no surrounding quotation). It is the streaming counterpart of {@code stringOf}
+     * and is invoked by the JSON/XML serializers.
+     * <p>
+     * <b>serializeTo vs. appendTo:</b> {@code serializeTo} produces machine-readable JSON/XML (quoted and escaped),
+     * whereas {@code appendTo} produces a plain, human-readable {@code toString()}-style rendering without JSON/XML
+     * quoting or escaping.
      *
      * @param writer the CharacterWriter to write to
      * @param x the Reader whose content should be written
@@ -474,7 +511,7 @@ public class ReaderType extends AbstractType<Reader> {
      * @throws UncheckedIOException if an I/O error occurs while reading from the Reader
      */
     @Override
-    public void writeCharacter(final CharacterWriter writer, final Reader x, final JsonXmlSerConfig<?> config) throws IOException {
+    public void serializeTo(final CharacterWriter writer, final Reader x, final JsonXmlSerConfig<?> config) throws IOException {
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {

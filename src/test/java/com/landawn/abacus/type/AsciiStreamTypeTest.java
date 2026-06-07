@@ -126,34 +126,34 @@ public class AsciiStreamTypeTest extends TestBase {
     }
 
     @Test
-    public void testWriteCharacterWithNull() throws IOException {
-        asciiStreamType.writeCharacter(writer, null, null);
+    public void testSerializeToWithNull() throws IOException {
+        asciiStreamType.serializeTo(writer, null, null);
         verify(writer).write(any(char[].class));
     }
 
     @Test
-    public void testWriteCharacterWithStream() throws IOException {
+    public void testSerializeToWithStream() throws IOException {
         InputStream stream = new ByteArrayInputStream("test data".getBytes());
 
-        asciiStreamType.writeCharacter(writer, stream, null);
+        asciiStreamType.serializeTo(writer, stream, null);
         verify(writer, atLeastOnce()).writeCharacter(any(char[].class), anyInt(), anyInt());
     }
 
     @Test
-    public void testWriteCharacterWithQuotation() throws IOException {
+    public void testSerializeToWithQuotation() throws IOException {
         InputStream stream = new ByteArrayInputStream("test".getBytes());
         when(config.getStringQuotation()).thenReturn('"');
 
-        asciiStreamType.writeCharacter(writer, stream, config);
+        asciiStreamType.serializeTo(writer, stream, config);
         verify(writer, times(2)).write('"');
         verify(writer, atLeastOnce()).writeCharacter(any(char[].class), anyInt(), anyInt());
     }
 
-    // Bug: writeCharacter previously caught IOException and rethrew it as UncheckedIOException,
+    // Bug: serializeTo previously caught IOException and rethrew it as UncheckedIOException,
     // even though the method already declares "throws IOException".
     // Stream-read failures must propagate as the typed checked IOException.
     @Test
-    public void testWriteCharacter_PropagatesIOExceptionFromStream() {
+    public void testSerializeTo_PropagatesIOExceptionFromStream() {
         final IOException expected = new IOException("read failed");
         final InputStream failing = new InputStream() {
             @Override
@@ -167,7 +167,7 @@ public class AsciiStreamTypeTest extends TestBase {
             }
         };
 
-        IOException actual = org.junit.jupiter.api.Assertions.assertThrows(IOException.class, () -> asciiStreamType.writeCharacter(writer, failing, null));
+        IOException actual = org.junit.jupiter.api.Assertions.assertThrows(IOException.class, () -> asciiStreamType.serializeTo(writer, failing, null));
         org.junit.jupiter.api.Assertions.assertSame(expected, actual);
     }
 }

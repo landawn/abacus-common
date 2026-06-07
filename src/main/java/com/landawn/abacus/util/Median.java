@@ -16,9 +16,11 @@
 package com.landawn.abacus.util;
 
 import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.Iterator;
+import java.util.List;
 import java.util.PriorityQueue;
 import java.util.Queue;
 
@@ -83,8 +85,8 @@ import com.landawn.abacus.util.u.OptionalShort;
  * // Basic median calculation for primitive arrays
  * int[] numbers = {5, 2, 8, 1, 9, 3};
  * Pair<Integer, OptionalInt> result = Median.of(numbers);
- * int median1 = result.left();  // First median (smaller for even length)
- * OptionalInt median2 = result.right();  // Second median (empty for odd length)
+ * int median1 = result.left();           // the first median (smaller, for even length)
+ * OptionalInt median2 = result.right();  // the second median (empty for odd length)
  *
  * // Handle odd vs even length results
  * if (median2.isPresent()) {
@@ -97,12 +99,12 @@ import com.landawn.abacus.util.u.OptionalShort;
  * }
  *
  * // Range-based median calculation
- * Pair<Integer, OptionalInt> rangeResult = Median.of(numbers, 1, 4);   // Elements at indices 1-3
+ * Pair<Integer, OptionalInt> rangeResult = Median.of(numbers, 1, 4);   // considers elements at indices 1-3
  *
  * // Collection with natural ordering
  * List<String> words = Arrays.asList("zebra", "apple", "banana", "cherry");
  * Pair<String, Optional<String>> wordMedian = Median.of(words);
- * String medianWord = wordMedian.left();  // "banana" (alphabetically)
+ * String medianWord = wordMedian.left();  // returns "banana" (alphabetically)
  *
  * // Collection with custom comparator
  * Comparator<String> lengthComparator = Comparator.comparing(String::length);
@@ -234,7 +236,7 @@ import com.landawn.abacus.util.u.OptionalShort;
  *   <li><b>{@link PriorityQueue}:</b> Underlying data structure for the algorithm</li>
  * </ul>
  *
- * <p><b>Usage Examples: Statistical Analysis Workflow</b>
+ * <p><b>Usage Examples: Statistical Analysis Workflow</b></p>
  * <pre>{@code
  * public class DataAnalysis {
  *     public StatisticalSummary analyzeDataset(double[] dataset) {
@@ -299,7 +301,7 @@ public final class Median {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Pair<Character, OptionalChar> median = Median.of('z', 'a', 'm');
-     * char medianValue = median.left();  // 'm'
+     * char medianValue = median.left();  // returns 'm'
      * }</pre>
      *
      * @param source the array of characters to find the median from. Must not be {@code null} or empty.
@@ -411,7 +413,7 @@ public final class Median {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Pair<Byte, OptionalByte> median = Median.of((byte)10, (byte)5, (byte)15);
-     * byte medianValue = median.left();  // 10
+     * byte medianValue = median.left();  // returns 10
      * }</pre>
      *
      * @param source the array of bytes to find the median from. Must not be {@code null} or empty.
@@ -522,7 +524,7 @@ public final class Median {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Pair<Short, OptionalShort> median = Median.of((short)100, (short)50, (short)200);
-     * short medianValue = median.left();  // 100
+     * short medianValue = median.left();  // returns 100
      * }</pre>
      *
      * @param source the array of short integers to find the median from. Must not be {@code null} or empty.
@@ -633,8 +635,8 @@ public final class Median {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Pair<Integer, OptionalInt> median = Median.of(10, 5, 20, 15);
-     * int lowerMedian = median.left();  // 10
-     * int upperMedian = median.right().get();   // 15
+     * int lowerMedian = median.left();         // returns 10
+     * int upperMedian = median.right().get();  // returns 15
      * }</pre>
      *
      * @param source the array of integers to find the median from. Must not be {@code null} or empty.
@@ -745,8 +747,8 @@ public final class Median {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Pair<Long, OptionalLong> median = Median.of(1000L, 500L, 1500L, 750L);
-     * long lowerMedian = median.left();  // 750
-     * long upperMedian = median.right().get();   // 1000
+     * long lowerMedian = median.left();         // returns 750
+     * long upperMedian = median.right().get();  // returns 1000
      * }</pre>
      *
      * @param source the array of long integers to find the median from. Must not be {@code null} or empty.
@@ -859,7 +861,7 @@ public final class Median {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Pair<Float, OptionalFloat> median = Median.of(10.5f, 5.2f, 20.8f);
-     * float medianValue = median.left();  // 10.5f
+     * float medianValue = median.left();  // returns 10.5f
      * }</pre>
      *
      * @param source the array of float values to find the median from. Must not be {@code null} or empty.
@@ -974,8 +976,8 @@ public final class Median {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Pair<Double, OptionalDouble> median = Median.of(10.5, 5.2, 20.8, 15.1);
-     * double lowerMedian = median.left();  // 10.5
-     * double upperMedian = median.right().get();   // 15.1
+     * double lowerMedian = median.left();         // returns 10.5
+     * double upperMedian = median.right().get();  // returns 15.1
      * }</pre>
      *
      * @param source the array of double values to find the median from. Must not be {@code null} or empty.
@@ -1090,7 +1092,7 @@ public final class Median {
      * <pre>{@code
      * String[] words = {"apple", "banana", "cherry"};
      * Pair<String, Optional<String>> median = Median.of(words);
-     * String medianWord = median.left();  // "banana"
+     * String medianWord = median.left();  // returns "banana"
      * }</pre>
      *
      * @param <T> the type of elements in the array, which must implement {@code Comparable}.
@@ -1172,7 +1174,7 @@ public final class Median {
      * <pre>{@code
      * String[] words = {"apple", "pie", "banana"};
      * Pair<String, Optional<String>> median = Median.of(words, Comparator.comparing(String::length));
-     * String medianWord = median.left();  // "apple" (middle length)
+     * String medianWord = median.left();  // returns "apple" (middle length)
      * }</pre>
      *
      * @param <T> the type of elements in the array.
@@ -1259,6 +1261,22 @@ public final class Median {
         } else if (len == 3) {
             return Pair.of(N.median(source, fromIndex, toIndex, cmp), Optional.empty());
         } else {
+            boolean hasNull = false;
+
+            for (int i = fromIndex; i < toIndex; i++) {
+                if (source[i] == null) {
+                    hasNull = true;
+                    break;
+                }
+            }
+
+            if (hasNull) {
+                final T[] copy = N.copyOfRange(source, fromIndex, toIndex);
+                Arrays.sort(copy, cmp);
+
+                return len % 2 == 0 ? Pair.of(copy[len / 2 - 1], Optional.of(copy[len / 2])) : Pair.of(copy[len / 2], Optional.empty());
+            }
+
             final int k = len / 2 + 1;
             final Queue<T> queue = new PriorityQueue<>(k, cmp);
 
@@ -1300,7 +1318,7 @@ public final class Median {
      * <pre>{@code
      * List<Integer> numbers = Arrays.asList(10, 5, 20, 15, 25);
      * Pair<Integer, Optional<Integer>> median = Median.of(numbers);
-     * int medianValue = median.left();  // 15
+     * int medianValue = median.left();  // returns 15
      * }</pre>
      *
      * @param <T> the type of elements in the collection, which must implement Comparable.
@@ -1342,7 +1360,7 @@ public final class Median {
      * <pre>{@code
      * Set<String> words = new HashSet<>(Arrays.asList("apple", "pie", "banana"));
      * Pair<String, Optional<String>> median = Median.of(words, Comparator.comparing(String::length));
-     * String medianWord = median.left();  // Word with median length
+     * String medianWord = median.left();  // the word with the median length
      * }</pre>
      *
      * @param <T> the type of elements in the collection.
@@ -1376,6 +1394,13 @@ public final class Median {
         } else if (len == 3) {
             return Pair.of(N.median(source, cmp), Optional.empty());
         } else {
+            if (source.contains(null)) {
+                final List<T> copy = new ArrayList<>(source);
+                copy.sort(cmp);
+
+                return len % 2 == 0 ? Pair.of(copy.get(len / 2 - 1), Optional.of(copy.get(len / 2))) : Pair.of(copy.get(len / 2), Optional.empty());
+            }
+
             final int k = len / 2 + 1;
             final Queue<T> queue = new PriorityQueue<>(k, cmp);
 

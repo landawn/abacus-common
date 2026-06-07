@@ -31,7 +31,7 @@ package com.landawn.abacus.util;
  *
  * // Convert from stored integer
  * int storedValue = 2;
- * ServiceStatus restoredStatus = ServiceStatus.fromCode(storedValue);   // SUSPENDED
+ * ServiceStatus restoredStatus = ServiceStatus.fromCode(storedValue);   // returns SUSPENDED
  * }</pre>
  *
  * @see AccountStatus

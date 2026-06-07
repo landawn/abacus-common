@@ -175,22 +175,22 @@ public class PairTypeTest extends TestBase {
     }
 
     @Test
-    public void testWriteCharacterWithNull() throws IOException {
-        stringIntPairType.writeCharacter(writer, null, config);
+    public void testSerializeToWithNull() throws IOException {
+        stringIntPairType.serializeTo(writer, null, config);
         verify(writer).write(any(char[].class));
     }
 
     @Test
-    public void testWriteCharacterWithPair() throws IOException {
+    public void testSerializeToWithPair() throws IOException {
         Pair<String, Integer> pair = Pair.of("test", 456);
-        stringIntPairType.writeCharacter(writer, pair, config);
+        stringIntPairType.serializeTo(writer, pair, config);
         verify(writer, atLeastOnce()).write(anyChar());
     }
 
     @Test
-    public void testWriteCharacterWithNullElements() throws IOException {
+    public void testSerializeToWithNullElements() throws IOException {
         Pair<String, Integer> pair = Pair.of(null, null);
-        stringIntPairType.writeCharacter(writer, pair, config);
+        stringIntPairType.serializeTo(writer, pair, config);
         verify(writer, atLeastOnce()).write(any(char[].class));
     }
 
@@ -200,5 +200,30 @@ public class PairTypeTest extends TestBase {
         assertNotNull(longStringPairType);
         assertTrue(longStringPairType.name().contains("Long"));
         assertTrue(longStringPairType.name().contains("String"));
+    }
+
+    @Test
+    public void testAppendTo_unquotedToStringForm() throws IOException {
+        StringBuilder sb = new StringBuilder();
+        stringIntPairType.appendTo(sb, Pair.of("a", 1));
+        // appendTo emits the plain, toString()-style form: the String element is NOT quoted
+        assertEquals("[a, 1]", sb.toString());
+    }
+
+    @Test
+    public void testSerializeTo_jsonQuotedForm() throws IOException {
+        Pair<String, Integer> pair = Pair.of("a", 1);
+        com.landawn.abacus.util.BufferedJsonWriter writer = com.landawn.abacus.util.Objectory.createBufferedJsonWriter();
+        stringIntPairType.serializeTo(writer, pair, com.landawn.abacus.parser.JsonSerConfig.create());
+        String json = writer.toString();
+        com.landawn.abacus.util.Objectory.recycle(writer);
+
+        // serializeTo emits JSON: the String element IS quoted; equals stringOf and differs from appendTo
+        assertEquals("[\"a\", 1]", json);
+        assertEquals(stringIntPairType.stringOf(pair), json);
+
+        StringBuilder sb = new StringBuilder();
+        stringIntPairType.appendTo(sb, pair);
+        org.junit.jupiter.api.Assertions.assertNotEquals(sb.toString(), json);
     }
 }

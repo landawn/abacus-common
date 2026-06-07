@@ -41,6 +41,7 @@ package com.landawn.abacus.type;
  *     }
  * }
  * }</pre>
+ *
  */
 @SuppressWarnings("java:S2160")
 public final class PrimitiveByteType extends AbstractByteType {

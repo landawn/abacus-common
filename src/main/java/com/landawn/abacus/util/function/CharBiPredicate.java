@@ -23,7 +23,6 @@ import com.landawn.abacus.util.Throwables;
  *
  * <p>This is a functional interface whose functional method is {@link #test(char, char)}.
  *
- *
  * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
  *
  * @see java.util.function.BiPredicate
@@ -39,6 +38,7 @@ public interface CharBiPredicate extends Throwables.CharBiPredicate<RuntimeExcep
      * boolean result = CharBiPredicate.ALWAYS_TRUE.test('a', 'b');    // Always returns true
      * boolean result2 = CharBiPredicate.ALWAYS_TRUE.test('x', 'x');   // Always returns true
      * }</pre>
+     *
      */
     CharBiPredicate ALWAYS_TRUE = (a, b) -> true;
     /**
@@ -49,6 +49,7 @@ public interface CharBiPredicate extends Throwables.CharBiPredicate<RuntimeExcep
      * boolean result = CharBiPredicate.ALWAYS_FALSE.test('a', 'b');    // Always returns false
      * boolean result2 = CharBiPredicate.ALWAYS_FALSE.test('x', 'x');   // Always returns false
      * }</pre>
+     *
      */
     CharBiPredicate ALWAYS_FALSE = (a, b) -> false;
     /**
@@ -59,6 +60,7 @@ public interface CharBiPredicate extends Throwables.CharBiPredicate<RuntimeExcep
      * boolean result = CharBiPredicate.EQUAL.test('a', 'a');    // Returns true
      * boolean result2 = CharBiPredicate.EQUAL.test('a', 'b');   // Returns false
      * }</pre>
+     *
      */
     CharBiPredicate EQUAL = (a, b) -> a == b;
     /**
@@ -69,6 +71,7 @@ public interface CharBiPredicate extends Throwables.CharBiPredicate<RuntimeExcep
      * boolean result = CharBiPredicate.NOT_EQUAL.test('a', 'b');    // Returns true
      * boolean result2 = CharBiPredicate.NOT_EQUAL.test('a', 'a');   // Returns false
      * }</pre>
+     *
      */
     CharBiPredicate NOT_EQUAL = (a, b) -> a != b;
     /**
@@ -79,6 +82,7 @@ public interface CharBiPredicate extends Throwables.CharBiPredicate<RuntimeExcep
      * boolean result = CharBiPredicate.GREATER_THAN.test('b', 'a');    // Returns true
      * boolean result2 = CharBiPredicate.GREATER_THAN.test('a', 'b');   // Returns false
      * }</pre>
+     *
      */
     CharBiPredicate GREATER_THAN = (a, b) -> a > b;
     /**
@@ -90,6 +94,7 @@ public interface CharBiPredicate extends Throwables.CharBiPredicate<RuntimeExcep
      * boolean result2 = CharBiPredicate.GREATER_THAN_OR_EQUAL.test('a', 'a');   // Returns true
      * boolean result3 = CharBiPredicate.GREATER_THAN_OR_EQUAL.test('a', 'b');   // Returns false
      * }</pre>
+     *
      */
     CharBiPredicate GREATER_THAN_OR_EQUAL = (a, b) -> a >= b;
     /**
@@ -100,6 +105,7 @@ public interface CharBiPredicate extends Throwables.CharBiPredicate<RuntimeExcep
      * boolean result = CharBiPredicate.LESS_THAN.test('a', 'b');    // Returns true
      * boolean result2 = CharBiPredicate.LESS_THAN.test('b', 'a');   // Returns false
      * }</pre>
+     *
      */
     CharBiPredicate LESS_THAN = (a, b) -> a < b;
     /**
@@ -111,6 +117,7 @@ public interface CharBiPredicate extends Throwables.CharBiPredicate<RuntimeExcep
      * boolean result2 = CharBiPredicate.LESS_THAN_OR_EQUAL.test('a', 'a');   // Returns true
      * boolean result3 = CharBiPredicate.LESS_THAN_OR_EQUAL.test('b', 'a');   // Returns false
      * }</pre>
+     *
      */
     CharBiPredicate LESS_THAN_OR_EQUAL = (a, b) -> a <= b;
 

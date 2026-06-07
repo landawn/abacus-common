@@ -35,10 +35,10 @@ package com.landawn.abacus.util;
  * <pre>{@code
  * // Using status in an entity
  * UnifiedStatus orderStatus = UnifiedStatus.PROCESSING;
- * int statusCode = orderStatus.code();   // Returns 32
+ * int statusCode = orderStatus.code();   // returns 32
  *
  * // Retrieving status from code
- * UnifiedStatus retrieved = UnifiedStatus.fromCode(32);   // Returns PROCESSING
+ * UnifiedStatus retrieved = UnifiedStatus.fromCode(32);   // returns PROCESSING
  *
  * // Checking status
  * if (userStatus == UnifiedStatus.ACTIVE) {
@@ -365,7 +365,7 @@ public enum UnifiedStatus {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * UnifiedStatus status = UnifiedStatus.ACTIVE;
-     * int code = status.code();   // Returns 1
+     * int code = status.code();   // returns 1
      * }</pre>
      *
      * @return the numeric code for this status
@@ -393,8 +393,8 @@ public enum UnifiedStatus {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * UnifiedStatus status = UnifiedStatus.fromCode(1);     // Returns ACTIVE
-     * UnifiedStatus invalid = UnifiedStatus.fromCode(999);   // Returns null
+     * UnifiedStatus status = UnifiedStatus.fromCode(1);      // returns ACTIVE
+     * UnifiedStatus invalid = UnifiedStatus.fromCode(999);   // returns null
      * }</pre>
      *
      * <p>Not every value in the {@code [0, 128)} range is assigned (there are intentional

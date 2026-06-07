@@ -342,30 +342,30 @@ public class BooleanTypeTest extends TestBase {
     }
 
     @Test
-    public void test_writeCharacter_withoutConfig() throws Exception {
+    public void test_serializeTo_withoutConfig() throws Exception {
         CharacterWriter writer = mock(BufferedJsonWriter.class);
 
         // Test true
-        type.writeCharacter(writer, Boolean.TRUE, null);
+        type.serializeTo(writer, Boolean.TRUE, null);
         verify(writer).write("true".toCharArray());
 
         // Test false
-        type.writeCharacter(writer, Boolean.FALSE, null);
+        type.serializeTo(writer, Boolean.FALSE, null);
         verify(writer).write("false".toCharArray());
 
         // Test null
-        type.writeCharacter(writer, null, null);
+        type.serializeTo(writer, null, null);
         verify(writer).write("null".toCharArray());
     }
 
     @Test
-    public void test_writeCharacter_withConfig_writeNullAsFalse() throws Exception {
+    public void test_serializeTo_withConfig_writeNullAsFalse() throws Exception {
         CharacterWriter writer = mock(BufferedJsonWriter.class);
         JsonXmlSerConfig<?> config = mock(JsonXmlSerConfig.class);
         when(config.isWriteNullBooleanAsFalse()).thenReturn(true);
 
         // Test null with writeNullBooleanAsFalse
-        type.writeCharacter(writer, null, config);
+        type.serializeTo(writer, null, config);
         verify(writer).write("false".toCharArray());
     }
 

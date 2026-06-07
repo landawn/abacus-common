@@ -104,9 +104,15 @@ public class JodaDateTimeType extends AbstractJodaDateTimeType<DateTime> {
      *   <li>All other values: parsed as a timestamp via the default timestamp parser</li>
      * </ul>
      *
+     * <p>This method is the inverse of {@code stringOf} and round-trips with it: it parses the string produced by
+     * {@code stringOf} back into a value of this type. Strings produced by {@link Object#toString()} are not
+     * guaranteed to be parseable in this way.</p>
+     *
      * @param str the string to parse; may be {@code null} or empty
      * @return the parsed Joda {@link DateTime}, or {@code null} if {@code str} is {@code null} or a null-datetime string
      * @throws IllegalArgumentException if the string format is not recognized
+     * @see #valueOf(Object)
+     * @see #stringOf(org.joda.time.base.AbstractInstant)
      */
     @Override
     public DateTime valueOf(final String str) {

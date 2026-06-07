@@ -51,16 +51,16 @@ import com.landawn.abacus.util.EnumType;
  * <pre>{@code
  * public class User {
  *     @Type(name = "EncryptedString", scope = Scope.PERSISTENCE)
- *     private String password;  // Encrypted when saved to DB
+ *     private String password;  // password is encrypted when saved to DB
  *
  *     @Type(enumerated = EnumType.ORDINAL)
- *     private Status status;  // Stored as integer in DB
+ *     private Status status;  // status is stored as integer in DB
  *
  *     @Type(clazz = CustomDateType.class)
- *     private Date createdDate;  // Uses custom date formatting
+ *     private Date createdDate;  // uses custom date formatting
  *
  *     @Type(name = "JsonString", scope = Scope.SERIALIZATION)
- *     private Object metadata;  // Serialized as JSON string in output
+ *     private Object metadata;  // metadata is serialized as JSON string in output
  * }
  * }</pre>
  *
@@ -240,6 +240,7 @@ public @interface Type {
      *     private Object metadata;
      * }
      * }</pre>
+     *
      */
     enum Scope {
         /**
@@ -260,8 +261,9 @@ public @interface Type {
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * @Type(name = "ISO8601", scope = Scope.SERIALIZATION)
-         * private Date timestamp;  // Only affects JSON/XML, not database
+         * private Date timestamp;  // timestamp is affected only in JSON/XML, not database
          * }</pre>
+         *
          */
         SERIALIZATION,
 
@@ -283,8 +285,9 @@ public @interface Type {
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * @Type(name = "EncryptedString", scope = Scope.PERSISTENCE)
-         * private String password;  // Only affects database, not JSON/XML
+         * private String password;  // password is affected only in database, not JSON/XML
          * }</pre>
+         *
          */
         PERSISTENCE,
 
@@ -306,8 +309,9 @@ public @interface Type {
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * @Type(name = "JsonString", scope = Scope.ALL)
-         * private Map<String, Object> settings;  // Affects both DB and JSON/XML
+         * private Map<String, Object> settings;  // settings is affected for both DB and JSON/XML
          * }</pre>
+         *
          */
         ALL
     }

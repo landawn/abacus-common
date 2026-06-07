@@ -79,23 +79,23 @@ public class PrimitiveLongListTypeTest extends TestBase {
     }
 
     @Test
-    public void testWriteCharacterEmptyList() throws IOException {
+    public void testSerializeToEmptyList() throws IOException {
         CharacterWriter writer = createCharacterWriter();
         LongList list = LongList.of(new long[0]);
         JsonXmlSerConfig<?> config = mock(JsonXmlSerConfig.class);
 
-        type.writeCharacter(writer, list, config);
+        type.serializeTo(writer, list, config);
         verify(writer).write('[');
         verify(writer).write(']');
     }
 
     @Test
-    public void testWriteCharacterNonEmptyList() throws IOException {
+    public void testSerializeToNonEmptyList() throws IOException {
         CharacterWriter writer = createCharacterWriter();
         LongList list = LongList.of(new long[] { 1L, 2L });
         JsonXmlSerConfig<?> config = mock(JsonXmlSerConfig.class);
 
-        type.writeCharacter(writer, list, config);
+        type.serializeTo(writer, list, config);
         verify(writer).write('[');
         verify(writer).write(1L);
         verify(writer).write(", ");

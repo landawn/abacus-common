@@ -188,46 +188,46 @@ public class IntegerArrayTypeTest extends TestBase {
     }
 
     @Test
-    public void test_writeCharacter() throws IOException {
+    public void test_serializeTo() throws IOException {
         CharacterWriter writer = mock(BufferedJsonWriter.class);
         JsonXmlSerConfig<?> config = mock(JsonXmlSerConfig.class);
 
         Integer[] arr = new Integer[] { 1, 2, 3 };
-        type.writeCharacter(writer, arr, config);
+        type.serializeTo(writer, arr, config);
         verify(writer, atLeastOnce()).write(any(String.class));
 
         reset(writer);
-        type.writeCharacter(writer, null, config);
+        type.serializeTo(writer, null, config);
         verify(writer).write(NULL_CHAR_ARRAY);
     }
 
     @Test
-    public void testWriteCharacter_Null() throws IOException {
-        integerArrayType.writeCharacter(characterWriter, null, null);
+    public void testSerializeTo_Null() throws IOException {
+        integerArrayType.serializeTo(characterWriter, null, null);
         verify(characterWriter).write(any(char[].class));
     }
 
     @Test
-    public void testWriteCharacter_EmptyArray() throws IOException {
+    public void testSerializeTo_EmptyArray() throws IOException {
         Integer[] arr = new Integer[0];
-        integerArrayType.writeCharacter(characterWriter, arr, null);
+        integerArrayType.serializeTo(characterWriter, arr, null);
         verify(characterWriter).write('[');
         verify(characterWriter).write(']');
     }
 
     @Test
-    public void testWriteCharacter_SingleElement() throws IOException {
+    public void testSerializeTo_SingleElement() throws IOException {
         Integer[] arr = { 42 };
-        integerArrayType.writeCharacter(characterWriter, arr, null);
+        integerArrayType.serializeTo(characterWriter, arr, null);
         verify(characterWriter).write('[');
         verify(characterWriter).writeInt(42);
         verify(characterWriter).write(']');
     }
 
     @Test
-    public void testWriteCharacter_MultipleElements() throws IOException {
+    public void testSerializeTo_MultipleElements() throws IOException {
         Integer[] arr = { 1, 2, 3 };
-        integerArrayType.writeCharacter(characterWriter, arr, null);
+        integerArrayType.serializeTo(characterWriter, arr, null);
         verify(characterWriter).write('[');
         verify(characterWriter).writeInt(1);
         verify(characterWriter, times(2)).write(", ");
@@ -237,9 +237,9 @@ public class IntegerArrayTypeTest extends TestBase {
     }
 
     @Test
-    public void testWriteCharacter_WithNullElements() throws IOException {
+    public void testSerializeTo_WithNullElements() throws IOException {
         Integer[] arr = { 1, null, 3 };
-        integerArrayType.writeCharacter(characterWriter, arr, null);
+        integerArrayType.serializeTo(characterWriter, arr, null);
         verify(characterWriter).write('[');
         verify(characterWriter).writeInt(1);
         verify(characterWriter, times(2)).write(", ");
@@ -249,11 +249,11 @@ public class IntegerArrayTypeTest extends TestBase {
     }
 
     @Test
-    public void testWriteCharacter_WithConfig() throws IOException {
+    public void testSerializeTo_WithConfig() throws IOException {
         Integer[] arr = { 1, 2, 3 };
         JsonXmlSerConfig<?> config = mock(JsonXmlSerConfig.class);
 
-        integerArrayType.writeCharacter(characterWriter, arr, config);
+        integerArrayType.serializeTo(characterWriter, arr, config);
         verify(characterWriter).write('[');
         verify(characterWriter).writeInt(1);
         verify(characterWriter, times(2)).write(", ");

@@ -97,8 +97,8 @@ import com.landawn.abacus.annotation.NullSafe;
  * int[][][] unboxedCube = Array.unbox(cube, 0);
  *
  * // Null-safe operations
- * int[] result = Array.unbox((Integer[]) null, 42);        // Returns null
- * int[][] transposed2 = Array.transpose((int[][]) null);   // Returns null
+ * int[] result = Array.unbox((Integer[]) null, 42);        // returns null
+ * int[][] transposed2 = Array.transpose((int[][]) null);   // returns null
  * }</pre>
  *
  * <p><b>Boxing Operations:</b>
@@ -216,8 +216,8 @@ import com.landawn.abacus.annotation.NullSafe;
  *
  * // Work with 2D arrays
  * Integer[][] matrix = {{1, 2, 3}, {4, null, 6}, {7, 8, 9}};
- * int[][] cleanMatrix = Array.unbox(matrix, 0);        // Replace nulls with 0
- * int[][] transposed = Array.transpose(cleanMatrix);   // Transpose the matrix
+ * int[][] cleanMatrix = Array.unbox(matrix, 0);        // nulls are replaced with 0
+ * int[][] transposed = Array.transpose(cleanMatrix);   // returns {{1, 4, 7}, {2, 0, 8}, {3, 6, 9}}
  *
  * // Dynamic array creation
  * double[] doubles = Array.newInstance(double.class, 10);
@@ -225,6 +225,7 @@ import com.landawn.abacus.annotation.NullSafe;
  *
  * // Multi-dimensional processing
  * Double[][][] cube = new Double[2][3][4];
+ *
  * // Fill with some data...
  * double[][][] processedCube = Array.unbox(cube, 0.0);
  * }</pre>
@@ -241,13 +242,13 @@ import com.landawn.abacus.annotation.NullSafe;
  *
  * // Working with null-containing matrices
  * Double[][] sparseMatrix = {{1.0, null, 3.0}, {null, 5.0, null}};
- * double[][] denseMatrix = Array.unbox(sparseMatrix, 0.0);   // Fill nulls with 0.0
+ * double[][] denseMatrix = Array.unbox(sparseMatrix, 0.0);   // nulls are replaced with 0.0
  * double[][] result = Array.transpose(denseMatrix);
  *
  * // Validate matrix structure
  * try {
- *     double[][] invalid = {{1.0, 2.0}, {3.0}};           // Irregular matrix
- *     double[][] transposed = Array.transpose(invalid);   // Throws IllegalArgumentException
+ *     double[][] invalid = {{1.0, 2.0}, {3.0}};
+ *     double[][] transposed = Array.transpose(invalid);   // throws IllegalArgumentException
  * } catch (IllegalArgumentException e) {
  *     // Handle validation errors
  * }
@@ -572,7 +573,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Integer[] array = {1, 2, 3};
-     * Array.set(array, 1, 4);   // array now is {1, 4, 3}
+     * Array.set(array, 1, 4);   // array is {1, 4, 3}
      * }</pre>
      *
      * @param array the array in which to set the value.
@@ -595,7 +596,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * boolean[] array = {true, false, true};
-     * Array.setBoolean(array, 1, true);   // array now is {true, true, true}
+     * Array.setBoolean(array, 1, true);   // array is {true, true, true}
      * }</pre>
      *
      * @param array the array in which to set the boolean value.
@@ -618,7 +619,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * byte[] array = {1, 2, 3};
-     * Array.setByte(array, 1, (byte)4);   // array now is {1, 4, 3}
+     * Array.setByte(array, 1, (byte)4);   // array is {1, 4, 3}
      * }</pre>
      *
      * @param array the array in which to set the byte value.
@@ -641,7 +642,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * char[] array = {'a', 'b', 'c'};
-     * Array.setChar(array, 1, 'd');   // array now is {'a', 'd', 'c'}
+     * Array.setChar(array, 1, 'd');   // array is {'a', 'd', 'c'}
      * }</pre>
      *
      * @param array the array in which to set the char value.
@@ -664,7 +665,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * short[] array = {1, 2, 3};
-     * Array.setShort(array, 1, (short)4);   // array now is {1, 4, 3}
+     * Array.setShort(array, 1, (short)4);   // array is {1, 4, 3}
      * }</pre>
      *
      * @param array the array in which to set the short value.
@@ -687,7 +688,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * int[] array = {1, 2, 3};
-     * Array.setInt(array, 1, 4);   // array now is {1, 4, 3}
+     * Array.setInt(array, 1, 4);   // array is {1, 4, 3}
      * }</pre>
      *
      * @param array the array in which to set the integer value.
@@ -710,7 +711,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * long[] array = {1L, 2L, 3L};
-     * Array.setLong(array, 1, 4L);   // array now is {1L, 4L, 3L}
+     * Array.setLong(array, 1, 4L);   // array is {1L, 4L, 3L}
      * }</pre>
      *
      * @param array the array in which to set the long value.
@@ -733,7 +734,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * float[] array = {1.1f, 2.2f, 3.3f};
-     * Array.setFloat(array, 1, 4.4f);   // array now is {1.1f, 4.4f, 3.3f}
+     * Array.setFloat(array, 1, 4.4f);   // array is {1.1f, 4.4f, 3.3f}
      * }</pre>
      *
      * @param array the array in which to set the float value.
@@ -756,7 +757,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * double[] array = {1.1, 2.2, 3.3};
-     * Array.setDouble(array, 1, 4.4);   // array now is {1.1, 4.4, 3.3}
+     * Array.setDouble(array, 1, 4.4);   // array is {1.1, 4.4, 3.3}
      * }</pre>
      *
      * @param array the array in which to set the double value.
@@ -790,13 +791,13 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * <pre>{@code
      * String[] array = {"a", "b", "c"};
      * List<String> list = Array.asList(array);
-     * list.set(0, "x");   // Modifies both list and original array
+     * list.set(0, "x");   // array is {"x", "b", "c"}
      *
      * String[] emptyArray = {};
-     * List<String> emptyList = Array.asList(emptyArray);   // Returns empty list
+     * List<String> emptyList = Array.asList(emptyArray);   // returns empty list
      *
      * String[] nullArray = null;
-     * List<String> nullList = Array.asList(nullArray);   // Returns empty list
+     * List<String> nullList = Array.asList(nullArray);   // returns empty list
      * }</pre>
      *
      * @param <T> the type of elements in the array and returned list.
@@ -1041,6 +1042,12 @@ public abstract sealed class Array permits Array.ArrayUtil {
     /**
      * Returns the input array as-is without any modification or copying.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Integer[] a = Array.oF(1, 2, 3);   // returns [1, 2, 3] (the same array reference)
+     * String[] b = Array.oF("x", "y");   // returns ["x", "y"]
+     * }</pre>
+     *
      * @param <T> the type of the elements in the array.
      * @param a the input array.
      * @return the same input array.
@@ -1056,6 +1063,12 @@ public abstract sealed class Array permits Array.ArrayUtil {
 
     /**
      * Returns the input array as-is without any modification or copying.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Integer[] a = Array.ofValues(1, 2, 3);   // returns [1, 2, 3] (the same array reference)
+     * String[] b = Array.ofValues("x", "y");   // returns ["x", "y"]
+     * }</pre>
      *
      * @param <T> the type of the elements in the array.
      * @param a the input array.
@@ -1428,7 +1441,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * <pre>{@code
      * long[] longs = Array.range(0L, 1000L, 100L);                // returns {0, 100, 200, ..., 900}
      * long[] reverse = Array.range(5000L, 1000L, -500L);          // returns {5000, 4500, 4000, ..., 1500}
-     * long[] timestamps = Array.range(0L, 86400000L, 3600000L);   // hourly timestamps for a day
+     * long[] timestamps = Array.range(0L, 86400000L, 3600000L);   // 24 hourly values from 0 to 82800000
      * }</pre>
      *
      * @param startInclusive the first long integer (inclusive) in the long array.
@@ -1871,7 +1884,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * <pre>{@code
      * long[] longs = Array.rangeClosed(0L, 1000L, 100L);                // returns {0, 100, 200, ..., 900, 1000}
      * long[] reverse = Array.rangeClosed(5000L, 1000L, -500L);          // returns {5000, 4500, 4000, ..., 1500, 1000}
-     * long[] timestamps = Array.rangeClosed(0L, 86400000L, 3600000L);   // hourly timestamps for a day (inclusive)
+     * long[] timestamps = Array.rangeClosed(0L, 86400000L, 3600000L);   // 25 hourly values from 0 to 86400000
      * }</pre>
      *
      * @param startInclusive the first long integer (inclusive) in the long array.
@@ -2593,6 +2606,14 @@ public abstract sealed class Array permits Array.ArrayUtil {
     /**
      * Generates a new array of a specified length, with all elements set to the <i>element</i> value.
      * The type of the array is determined by the type of <i>element</i>.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * String[] words = Array.repeat("hello", 3);                   // returns ["hello", "hello", "hello"]
+     * Integer[] nums = Array.repeat(Integer.valueOf(42), 5);       // returns [42, 42, 42, 42, 42]
+     * String[] empty = Array.repeat("x", 0);                       // returns empty String[]
+     * Array.repeat((Object) null, 3);                              // throws IllegalArgumentException
+     * }</pre>
      *
      * @param <T> the type of the elements in the array.
      * @param element the value to be repeated in the array.
@@ -4396,6 +4417,13 @@ public abstract sealed class Array permits Array.ArrayUtil {
     /**
      * Converts a two-dimensional array of primitive booleans to a two-dimensional array of Boolean objects.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * boolean[][] in = {{true, false}, {false, true}};
+     * Boolean[][] boxed = Array.box(in);                       // returns {{true, false}, {false, true}}
+     * Boolean[][] nullResult = Array.box((boolean[][]) null);  // returns null
+     * }</pre>
+     *
      * @param a the two-dimensional array of primitive booleans to be converted.
      * @return a two-dimensional array of Boolean objects, {@code null} if the input array is {@code null}.
      * @see #box(boolean[])
@@ -4417,6 +4445,13 @@ public abstract sealed class Array permits Array.ArrayUtil {
 
     /**
      * Converts a two-dimensional array of primitive chars to a two-dimensional array of Character objects.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * char[][] chars = {{'a', 'b'}, {'c', 'd'}};
+     * Character[][] boxed = Array.box(chars);                // returns {{'a', 'b'}, {'c', 'd'}}
+     * Character[][] nullResult = Array.box((char[][]) null); // returns null
+     * }</pre>
      *
      * @param a the two-dimensional array of primitive chars to be converted.
      * @return a two-dimensional array of Character objects, {@code null} if the input array is {@code null}.
@@ -4440,6 +4475,13 @@ public abstract sealed class Array permits Array.ArrayUtil {
     /**
      * Converts a two-dimensional array of primitive bytes to a two-dimensional array of Byte objects.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * byte[][] bytes = {{1, 2}, {3, 4}};
+     * Byte[][] boxed = Array.box(bytes);                 // returns {{1, 2}, {3, 4}}
+     * Byte[][] nullResult = Array.box((byte[][]) null);  // returns null
+     * }</pre>
+     *
      * @param a the two-dimensional array of primitive bytes to be converted.
      * @return a two-dimensional array of Byte objects, {@code null} if the input array is {@code null}.
      * @see #box(byte[])
@@ -4461,6 +4503,13 @@ public abstract sealed class Array permits Array.ArrayUtil {
 
     /**
      * Converts a two-dimensional array of primitive shorts to a two-dimensional array of Short objects.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * short[][] shorts = {{1, 2}, {3, 4}};
+     * Short[][] boxed = Array.box(shorts);                // returns {{1, 2}, {3, 4}}
+     * Short[][] nullResult = Array.box((short[][]) null); // returns null
+     * }</pre>
      *
      * @param a the two-dimensional array of primitive shorts to be converted.
      * @return a two-dimensional array of Short objects, {@code null} if the input array is {@code null}.
@@ -4484,6 +4533,13 @@ public abstract sealed class Array permits Array.ArrayUtil {
     /**
      * Converts a two-dimensional array of primitive integers to a two-dimensional array of Integer objects.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * int[][] ints = {{1, 2}, {3, 4}};
+     * Integer[][] boxed = Array.box(ints);                // returns {{1, 2}, {3, 4}}
+     * Integer[][] nullResult = Array.box((int[][]) null); // returns null
+     * }</pre>
+     *
      * @param a the two-dimensional array of primitive integers to be converted.
      * @return a two-dimensional array of Integer objects, {@code null} if the input array is {@code null}.
      * @see #box(int[])
@@ -4505,6 +4561,13 @@ public abstract sealed class Array permits Array.ArrayUtil {
 
     /**
      * Converts a two-dimensional array of primitive longs to a two-dimensional array of Long objects.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * long[][] longs = {{1L, 2L}, {3L, 4L}};
+     * Long[][] boxed = Array.box(longs);                 // returns {{1L, 2L}, {3L, 4L}}
+     * Long[][] nullResult = Array.box((long[][]) null);  // returns null
+     * }</pre>
      *
      * @param a the two-dimensional array of primitive longs to be converted.
      * @return a two-dimensional array of Long objects, {@code null} if the input array is {@code null}.
@@ -4528,6 +4591,13 @@ public abstract sealed class Array permits Array.ArrayUtil {
     /**
      * Converts a two-dimensional array of primitive floats to a two-dimensional array of Float objects.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * float[][] floats = {{1.0f, 2.0f}, {3.0f, 4.0f}};
+     * Float[][] boxed = Array.box(floats);                // returns {{1.0f, 2.0f}, {3.0f, 4.0f}}
+     * Float[][] nullResult = Array.box((float[][]) null); // returns null
+     * }</pre>
+     *
      * @param a the two-dimensional array of primitive floats to be converted.
      * @return a two-dimensional array of Float objects, {@code null} if the input array is {@code null}.
      * @see #box(float[])
@@ -4550,6 +4620,13 @@ public abstract sealed class Array permits Array.ArrayUtil {
     /**
      * Converts a two-dimensional array of primitive doubles to a two-dimensional array of Double objects.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * double[][] doubles = {{1.0, 2.0}, {3.0, 4.0}};
+     * Double[][] boxed = Array.box(doubles);                // returns {{1.0, 2.0}, {3.0, 4.0}}
+     * Double[][] nullResult = Array.box((double[][]) null); // returns null
+     * }</pre>
+     *
      * @param a the two-dimensional array of primitive doubles to be converted.
      * @return a two-dimensional array of Double objects, {@code null} if the input array is {@code null}.
      * @see #box(double[])
@@ -4571,6 +4648,13 @@ public abstract sealed class Array permits Array.ArrayUtil {
 
     /**
      * Converts a three-dimensional array of primitive booleans to a three-dimensional array of Boolean objects.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * boolean[][][] cube = {{{true, false}}, {{false, true}}};
+     * Boolean[][][] boxed = Array.box(cube);                      // returns wrapped 3D array
+     * Boolean[][][] nullResult = Array.box((boolean[][][]) null); // returns null
+     * }</pre>
      *
      * @param a the three-dimensional array of primitive booleans to be converted.
      * @return a three-dimensional array of Boolean objects, {@code null} if the input array is {@code null}.
@@ -4595,6 +4679,13 @@ public abstract sealed class Array permits Array.ArrayUtil {
     /**
      * Converts a three-dimensional array of primitive chars to a three-dimensional array of Character objects.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * char[][][] cube = {{{'a', 'b'}}, {{'c', 'd'}}};
+     * Character[][][] boxed = Array.box(cube);                   // returns wrapped 3D array
+     * Character[][][] nullResult = Array.box((char[][][]) null); // returns null
+     * }</pre>
+     *
      * @param a the three-dimensional array of primitive chars to be converted.
      * @return a three-dimensional array of Character objects, {@code null} if the input array is {@code null}.
      * @see #box(char[])
@@ -4617,6 +4708,13 @@ public abstract sealed class Array permits Array.ArrayUtil {
 
     /**
      * Converts a three-dimensional array of primitive bytes to a three-dimensional array of Byte objects.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * byte[][][] cube = {{{1, 2}}, {{3, 4}}};
+     * Byte[][][] boxed = Array.box(cube);                   // returns wrapped 3D array
+     * Byte[][][] nullResult = Array.box((byte[][][]) null); // returns null
+     * }</pre>
      *
      * @param a the three-dimensional array of primitive bytes to be converted.
      * @return a three-dimensional array of Byte objects, {@code null} if the input array is {@code null}.
@@ -4641,6 +4739,13 @@ public abstract sealed class Array permits Array.ArrayUtil {
     /**
      * Converts a three-dimensional array of primitive shorts to a three-dimensional array of Short objects.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * short[][][] cube = {{{1, 2}}, {{3, 4}}};
+     * Short[][][] boxed = Array.box(cube);                    // returns wrapped 3D array
+     * Short[][][] nullResult = Array.box((short[][][]) null); // returns null
+     * }</pre>
+     *
      * @param a the three-dimensional array of primitive shorts to be converted.
      * @return a three-dimensional array of Short objects, {@code null} if the input array is {@code null}.
      * @see #box(short[])
@@ -4663,6 +4768,13 @@ public abstract sealed class Array permits Array.ArrayUtil {
 
     /**
      * Converts a three-dimensional array of primitive integers to a three-dimensional array of Integer objects.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * int[][][] cube = {{{1, 2}}, {{3, 4}}};
+     * Integer[][][] boxed = Array.box(cube);                  // returns wrapped 3D array
+     * Integer[][][] nullResult = Array.box((int[][][]) null); // returns null
+     * }</pre>
      *
      * @param a the three-dimensional array of primitive integers to be converted.
      * @return a three-dimensional array of Integer objects, {@code null} if the input array is {@code null}.
@@ -4687,6 +4799,13 @@ public abstract sealed class Array permits Array.ArrayUtil {
     /**
      * Converts a three-dimensional array of primitive longs to a three-dimensional array of Long objects.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * long[][][] cube = {{{1L, 2L}}, {{3L, 4L}}};
+     * Long[][][] boxed = Array.box(cube);                   // returns wrapped 3D array
+     * Long[][][] nullResult = Array.box((long[][][]) null); // returns null
+     * }</pre>
+     *
      * @param a the three-dimensional array of primitive longs to be converted.
      * @return a three-dimensional array of Long objects, {@code null} if the input array is {@code null}.
      * @see #box(long[])
@@ -4710,6 +4829,13 @@ public abstract sealed class Array permits Array.ArrayUtil {
     /**
      * Converts a three-dimensional array of primitive floats to a three-dimensional array of Float objects.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * float[][][] cube = {{{1.0f, 2.0f}}, {{3.0f, 4.0f}}};
+     * Float[][][] boxed = Array.box(cube);                    // returns wrapped 3D array
+     * Float[][][] nullResult = Array.box((float[][][]) null); // returns null
+     * }</pre>
+     *
      * @param a the three-dimensional array of primitive floats to be converted.
      * @return a three-dimensional array of Float objects, {@code null} if the input array is {@code null}.
      * @see #box(float[])
@@ -4732,6 +4858,13 @@ public abstract sealed class Array permits Array.ArrayUtil {
 
     /**
      * Converts a three-dimensional array of primitive doubles to a three-dimensional array of Double objects.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * double[][][] cube = {{{1.0, 2.0}}, {{3.0, 4.0}}};
+     * Double[][][] boxed = Array.box(cube);                     // returns wrapped 3D array
+     * Double[][][] nullResult = Array.box((double[][][]) null); // returns null
+     * }</pre>
      *
      * @param a the three-dimensional array of primitive doubles to be converted.
      * @return a three-dimensional array of Double objects, {@code null} if the input array is {@code null}.
@@ -4846,6 +4979,13 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * Converts an array of Character objects into an array of primitive chars.
      * If a {@code null} value is encountered in the input array, it is replaced with the default value {@code (char) 0}.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * char[] chars = Array.unbox('a', null, 'c');          // returns {'a', (char) 0, 'c'}
+     * char[] nullResult = Array.unbox((Character[]) null); // returns null
+     * char[] empty = Array.unbox(new Character[] {});      // returns empty char[]
+     * }</pre>
+     *
      * @param a the array of Character objects to be converted. May be {@code null}.
      * @return an array of primitive chars, or {@code null} if the input array is {@code null}.
      * @see #unbox(Character[], char)
@@ -4859,6 +4999,14 @@ public abstract sealed class Array permits Array.ArrayUtil {
     /**
      * Converts an array of Character objects into an array of primitive chars.
      * If a {@code null} value is encountered in the input array, it is replaced with the specified default value.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Character[] objects = {'a', null, 'c', null, 'e'};
+     * char[] chars = Array.unbox(objects, '-');            // returns {'a', '-', 'c', '-', 'e'}
+     * char[] nullResult = Array.unbox(null, '-');          // returns null
+     * char[] empty = Array.unbox(new Character[] {}, '-'); // returns empty char[]
+     * }</pre>
      *
      * @param a the array of Character objects to be converted. May be {@code null}.
      * @param valueForNull the value to be used for {@code null} values in the input array.
@@ -4877,6 +5025,15 @@ public abstract sealed class Array permits Array.ArrayUtil {
     /**
      * Converts a portion of an array of Character objects into an array of primitive chars.
      * If a {@code null} value is encountered in the input array, it is replaced with the specified default value.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Character[] objects = {'a', null, 'c', null, 'e'};
+     * char[] subset = Array.unbox(objects, 1, 4, '-');   // returns {'-', 'c', '-'}
+     * char[] empty = Array.unbox(objects, 2, 2, '-');    // returns empty char[]
+     * char[] nullResult = Array.unbox(null, 0, 1, '-');  // returns null
+     * Array.unbox(objects, 0, 10, '-');                  // throws IndexOutOfBoundsException
+     * }</pre>
      *
      * @param a the array of Character objects to be converted. May be {@code null}.
      * @param fromIndex the starting index (inclusive) in the array to be converted.
@@ -4913,6 +5070,13 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * Converts an array of Byte objects into an array of primitive bytes.
      * If a {@code null} value is encountered in the input array, it is replaced with the default value {@code (byte) 0}.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Byte[] objects = {1, null, 3, null, 5};
+     * byte[] bytes = Array.unbox(objects);               // returns {1, 0, 3, 0, 5}
+     * byte[] nullResult = Array.unbox((Byte[]) null);    // returns null
+     * }</pre>
+     *
      * @param a the array of Byte objects to be converted. May be {@code null}.
      * @return an array of primitive bytes, or {@code null} if the input array is {@code null}.
      * @see #unbox(Byte[], byte)
@@ -4926,6 +5090,13 @@ public abstract sealed class Array permits Array.ArrayUtil {
     /**
      * Converts an array of Byte objects into an array of primitive bytes.
      * If a {@code null} value is encountered in the input array, it is replaced with the specified default value.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Byte[] objects = {1, null, 3, null, 5};
+     * byte[] bytes = Array.unbox(objects, (byte) -1);    // returns {1, -1, 3, -1, 5}
+     * byte[] nullResult = Array.unbox(null, (byte) -1);  // returns null
+     * }</pre>
      *
      * @param a the array of Byte objects to be converted. May be {@code null}.
      * @param valueForNull the value to be used for {@code null} values in the input array.
@@ -4944,6 +5115,14 @@ public abstract sealed class Array permits Array.ArrayUtil {
     /**
      * Converts a portion of an array of Byte objects into an array of primitive bytes.
      * If a {@code null} value is encountered in the input array, it is replaced with the specified default value.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Byte[] objects = {1, null, 3, null, 5};
+     * byte[] subset = Array.unbox(objects, 1, 4, (byte) -1);  // returns {-1, 3, -1}
+     * byte[] empty = Array.unbox(objects, 2, 2, (byte) -1);   // returns empty byte[]
+     * byte[] nullResult = Array.unbox(null, 0, 1, (byte) -1); // returns null
+     * }</pre>
      *
      * @param a the array of Byte objects to be converted. May be {@code null}.
      * @param fromIndex the starting index (inclusive) in the array to be converted.
@@ -4980,6 +5159,13 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * Converts an array of Short objects into an array of primitive shorts.
      * If a {@code null} value is encountered in the input array, it is replaced with the default value {@code (short) 0}.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Short[] objects = {1, null, 3, null, 5};
+     * short[] shorts = Array.unbox(objects);             // returns {1, 0, 3, 0, 5}
+     * short[] nullResult = Array.unbox((Short[]) null);  // returns null
+     * }</pre>
+     *
      * @param a the array of Short objects to be converted. May be {@code null}.
      * @return an array of primitive shorts, or {@code null} if the input array is {@code null}.
      * @see #unbox(Short[], short)
@@ -4993,6 +5179,13 @@ public abstract sealed class Array permits Array.ArrayUtil {
     /**
      * Converts an array of Short objects into an array of primitive shorts.
      * If a {@code null} value is encountered in the input array, it is replaced with the specified default value.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Short[] objects = {1, null, 3, null, 5};
+     * short[] shorts = Array.unbox(objects, (short) -1);  // returns {1, -1, 3, -1, 5}
+     * short[] nullResult = Array.unbox(null, (short) -1); // returns null
+     * }</pre>
      *
      * @param a the array of Short objects to be converted. May be {@code null}.
      * @param valueForNull the value to be used for {@code null} values in the input array.
@@ -5011,6 +5204,14 @@ public abstract sealed class Array permits Array.ArrayUtil {
     /**
      * Converts a portion of an array of Short objects into an array of primitive shorts.
      * If a {@code null} value is encountered in the input array, it is replaced with the specified default value.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Short[] objects = {1, null, 3, null, 5};
+     * short[] subset = Array.unbox(objects, 1, 4, (short) -1);  // returns {-1, 3, -1}
+     * short[] empty = Array.unbox(objects, 2, 2, (short) -1);   // returns empty short[]
+     * short[] nullResult = Array.unbox(null, 0, 1, (short) -1); // returns null
+     * }</pre>
      *
      * @param a the array of Short objects to be converted. May be {@code null}.
      * @param fromIndex the starting index (inclusive) in the array to be converted.
@@ -5225,6 +5426,13 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * Converts an array of Float objects into an array of primitive floats.
      * If a {@code null} value is encountered in the input array, it is replaced with the default value {@code 0.0f}.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * float[] floats = Array.unbox(1.1f, null, 3.3f);    // returns {1.1f, 0.0f, 3.3f}
+     * float[] nullResult = Array.unbox((Float[]) null);  // returns null
+     * float[] empty = Array.unbox(new Float[] {});       // returns empty float[]
+     * }</pre>
+     *
      * @param a the array of Float objects to be converted. May be {@code null}.
      * @return an array of primitive floats, or {@code null} if the input array is {@code null}.
      * @see #unbox(Float[], float)
@@ -5238,6 +5446,14 @@ public abstract sealed class Array permits Array.ArrayUtil {
     /**
      * Converts an array of Float objects into an array of primitive floats.
      * If a {@code null} value is encountered in the input array, it is replaced with the specified default value.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Float[] objects = {1.1f, null, 3.3f, null, 5.5f};
+     * float[] floats = Array.unbox(objects, -1.0f);      // returns {1.1f, -1.0f, 3.3f, -1.0f, 5.5f}
+     * float[] nullResult = Array.unbox(null, -1.0f);     // returns null
+     * float[] withZeros = Array.unbox(objects, 0.0f);    // returns {1.1f, 0.0f, 3.3f, 0.0f, 5.5f}
+     * }</pre>
      *
      * @param a the array of Float objects to be converted. May be {@code null}.
      * @param valueForNull the value to be used for {@code null} values in the input array.
@@ -5257,6 +5473,15 @@ public abstract sealed class Array permits Array.ArrayUtil {
     /**
      * Converts a portion of an array of Float objects into an array of primitive floats.
      * If a {@code null} value is encountered in the input array, it is replaced with the specified default value.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Float[] objects = {1.1f, null, 3.3f, null, 5.5f};
+     * float[] subset = Array.unbox(objects, 1, 4, -1.0f);  // returns {-1.0f, 3.3f, -1.0f}
+     * float[] empty = Array.unbox(objects, 2, 2, -1.0f);   // returns empty float[]
+     * float[] nullResult = Array.unbox(null, 0, 1, -1.0f); // returns null
+     * Array.unbox(objects, 0, 10, -1.0f);                  // throws IndexOutOfBoundsException
+     * }</pre>
      *
      * @param a the array of Float objects to be converted. May be {@code null}.
      * @param fromIndex the starting index (inclusive) in the array to be converted.
@@ -5382,6 +5607,13 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * Converts a two-dimensional array of Boolean objects into a two-dimensional array of primitive booleans.
      * If a {@code null} value is encountered in the input array, it is replaced with the default value {@code false}.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Boolean[][] in = {{true, null}, {false, true}};
+     * boolean[][] primitives = Array.unbox(in);                  // returns {{true, false}, {false, true}}
+     * boolean[][] nullResult = Array.unbox((Boolean[][]) null);  // returns null
+     * }</pre>
+     *
      * @param a the two-dimensional array of Boolean objects to be converted. May be {@code null}.
      * @return a two-dimensional array of primitive booleans, or {@code null} if the input array is {@code null}.
      * @see #unbox(Boolean[][], boolean)
@@ -5395,6 +5627,13 @@ public abstract sealed class Array permits Array.ArrayUtil {
     /**
      * Converts a two-dimensional array of Boolean objects into a two-dimensional array of primitive booleans.
      * If a {@code null} value is encountered in the input array, it is replaced with the specified default value.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Boolean[][] objects = {{true, null}, {false, true}};
+     * boolean[][] primitives = Array.unbox(objects, true);            // returns {{true, true}, {false, true}}
+     * boolean[][] nullResult = Array.unbox((Boolean[][]) null, true); // returns null
+     * }</pre>
      *
      * @param a the two-dimensional array of Boolean objects to be converted. May be {@code null}.
      * @param valueForNull the value to be used for {@code null} values in the input array.
@@ -5420,6 +5659,13 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * Converts a two-dimensional array of Character objects into a two-dimensional array of primitive chars.
      * If a {@code null} value is encountered in the input array, it is replaced with the default value {@code (char) 0}.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Character[][] objects = {{'a', null}, {'c', 'd'}};
+     * char[][] chars = Array.unbox(objects);                   // returns {{'a', (char) 0}, {'c', 'd'}}
+     * char[][] nullResult = Array.unbox((Character[][]) null); // returns null
+     * }</pre>
+     *
      * @param a the two-dimensional array of Character objects to be converted. May be {@code null}.
      * @return a two-dimensional array of primitive chars, or {@code null} if the input array is {@code null}.
      * @see #unbox(Character[][], char)
@@ -5433,6 +5679,13 @@ public abstract sealed class Array permits Array.ArrayUtil {
     /**
      * Converts a two-dimensional array of Character objects into a two-dimensional array of primitive chars.
      * If a {@code null} value is encountered in the input array, it is replaced with the specified default value.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Character[][] objects = {{'a', null}, {'c', 'd'}};
+     * char[][] chars = Array.unbox(objects, '-');                   // returns {{'a', '-'}, {'c', 'd'}}
+     * char[][] nullResult = Array.unbox((Character[][]) null, '-'); // returns null
+     * }</pre>
      *
      * @param a the two-dimensional array of Character objects to be converted. May be {@code null}.
      * @param valueForNull the value to be used for {@code null} values in the input array.
@@ -5458,6 +5711,13 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * Converts a two-dimensional array of Byte objects into a two-dimensional array of primitive bytes.
      * If a {@code null} value is encountered in the input array, it is replaced with the default value {@code (byte) 0}.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Byte[][] objects = {{1, null}, {3, 4}};
+     * byte[][] bytes = Array.unbox(objects);              // returns {{1, 0}, {3, 4}}
+     * byte[][] nullResult = Array.unbox((Byte[][]) null); // returns null
+     * }</pre>
+     *
      * @param a the two-dimensional array of Byte objects to be converted. May be {@code null}.
      * @return a two-dimensional array of primitive bytes, or {@code null} if the input array is {@code null}.
      * @see #unbox(Byte[][], byte)
@@ -5471,6 +5731,13 @@ public abstract sealed class Array permits Array.ArrayUtil {
     /**
      * Converts a two-dimensional array of Byte objects into a two-dimensional array of primitive bytes.
      * If a {@code null} value is encountered in the input array, it is replaced with the specified default value.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Byte[][] objects = {{1, null}, {3, 4}};
+     * byte[][] bytes = Array.unbox(objects, (byte) -1);              // returns {{1, -1}, {3, 4}}
+     * byte[][] nullResult = Array.unbox((Byte[][]) null, (byte) -1); // returns null
+     * }</pre>
      *
      * @param a the two-dimensional array of Byte objects to be converted. May be {@code null}.
      * @param valueForNull the value to be used for {@code null} values in the input array.
@@ -5496,6 +5763,13 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * Converts a two-dimensional array of Short objects into a two-dimensional array of primitive shorts.
      * If a {@code null} value is encountered in the input array, it is replaced with the default value {@code (short) 0}.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Short[][] objects = {{1, null}, {3, 4}};
+     * short[][] shorts = Array.unbox(objects);              // returns {{1, 0}, {3, 4}}
+     * short[][] nullResult = Array.unbox((Short[][]) null); // returns null
+     * }</pre>
+     *
      * @param a the two-dimensional array of Short objects to be converted. May be {@code null}.
      * @return a two-dimensional array of primitive shorts, or {@code null} if the input array is {@code null}.
      * @see #unbox(Short[][], short)
@@ -5509,6 +5783,13 @@ public abstract sealed class Array permits Array.ArrayUtil {
     /**
      * Converts a two-dimensional array of Short objects into a two-dimensional array of primitive shorts.
      * If a {@code null} value is encountered in the input array, it is replaced with the specified default value.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Short[][] objects = {{1, null}, {3, 4}};
+     * short[][] shorts = Array.unbox(objects, (short) -1);              // returns {{1, -1}, {3, 4}}
+     * short[][] nullResult = Array.unbox((Short[][]) null, (short) -1); // returns null
+     * }</pre>
      *
      * @param a the two-dimensional array of Short objects to be converted. May be {@code null}.
      * @param valueForNull the value to be used for {@code null} values in the input array.
@@ -5534,6 +5815,13 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * Converts a two-dimensional array of Integer objects into a two-dimensional array of primitive integers.
      * If a {@code null} value is encountered in the input array, it is replaced with the default value {@code 0}.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Integer[][] objects = {{1, null}, {3, 4}};
+     * int[][] ints = Array.unbox(objects);                  // returns {{1, 0}, {3, 4}}
+     * int[][] nullResult = Array.unbox((Integer[][]) null); // returns null
+     * }</pre>
+     *
      * @param a the two-dimensional array of Integer objects to be converted. May be {@code null}.
      * @return a two-dimensional array of primitive integers, or {@code null} if the input array is {@code null}.
      * @see #unbox(Integer[][], int)
@@ -5547,6 +5835,13 @@ public abstract sealed class Array permits Array.ArrayUtil {
     /**
      * Converts a two-dimensional array of Integer objects into a two-dimensional array of primitive integers.
      * If a {@code null} value is encountered in the input array, it is replaced with the specified default value.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Integer[][] objects = {{1, null}, {3, 4}};
+     * int[][] ints = Array.unbox(objects, -1);                  // returns {{1, -1}, {3, 4}}
+     * int[][] nullResult = Array.unbox((Integer[][]) null, -1); // returns null
+     * }</pre>
      *
      * @param a the two-dimensional array of Integer objects to be converted. May be {@code null}.
      * @param valueForNull the value to be used for {@code null} values in the input array.
@@ -5572,6 +5867,13 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * Converts a two-dimensional array of Long objects into a two-dimensional array of primitive longs.
      * If a {@code null} value is encountered in the input array, it is replaced with the default value {@code 0L}.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Long[][] objects = {{1L, null}, {3L, 4L}};
+     * long[][] longs = Array.unbox(objects);              // returns {{1L, 0L}, {3L, 4L}}
+     * long[][] nullResult = Array.unbox((Long[][]) null); // returns null
+     * }</pre>
+     *
      * @param a the two-dimensional array of Long objects to be converted. May be {@code null}.
      * @return a two-dimensional array of primitive longs, or {@code null} if the input array is {@code null}.
      * @see #unbox(Long[][], long)
@@ -5585,6 +5887,13 @@ public abstract sealed class Array permits Array.ArrayUtil {
     /**
      * Converts a two-dimensional array of Long objects into a two-dimensional array of primitive longs.
      * If a {@code null} value is encountered in the input array, it is replaced with the specified default value.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Long[][] objects = {{1L, null}, {3L, 4L}};
+     * long[][] longs = Array.unbox(objects, -1L);              // returns {{1L, -1L}, {3L, 4L}}
+     * long[][] nullResult = Array.unbox((Long[][]) null, -1L); // returns null
+     * }</pre>
      *
      * @param a the two-dimensional array of Long objects to be converted. May be {@code null}.
      * @param valueForNull the value to be used for {@code null} values in the input array.
@@ -5610,6 +5919,13 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * Converts a two-dimensional array of Float objects into a two-dimensional array of primitive floats.
      * If a {@code null} value is encountered in the input array, it is replaced with the default value {@code 0.0f}.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Float[][] objects = {{1.0f, null}, {3.0f, 4.0f}};
+     * float[][] floats = Array.unbox(objects);              // returns {{1.0f, 0.0f}, {3.0f, 4.0f}}
+     * float[][] nullResult = Array.unbox((Float[][]) null); // returns null
+     * }</pre>
+     *
      * @param a the two-dimensional array of Float objects to be converted. May be {@code null}.
      * @return a two-dimensional array of primitive floats, or {@code null} if the input array is {@code null}.
      * @see #unbox(Float[][], float)
@@ -5623,6 +5939,13 @@ public abstract sealed class Array permits Array.ArrayUtil {
     /**
      * Converts a two-dimensional array of Float objects into a two-dimensional array of primitive floats.
      * If a {@code null} value is encountered in the input array, it is replaced with the specified default value.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Float[][] objects = {{1.0f, null}, {3.0f, 4.0f}};
+     * float[][] floats = Array.unbox(objects, -1.0f);              // returns {{1.0f, -1.0f}, {3.0f, 4.0f}}
+     * float[][] nullResult = Array.unbox((Float[][]) null, -1.0f); // returns null
+     * }</pre>
      *
      * @param a the two-dimensional array of Float objects to be converted. May be {@code null}.
      * @param valueForNull the value to be used for {@code null} values in the input array.
@@ -5648,6 +5971,13 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * Converts a two-dimensional array of Double objects into a two-dimensional array of primitive doubles.
      * If a {@code null} value is encountered in the input array, it is replaced with the default value {@code 0.0}.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Double[][] objects = {{1.0, null}, {3.0, 4.0}};
+     * double[][] doubles = Array.unbox(objects);              // returns {{1.0, 0.0}, {3.0, 4.0}}
+     * double[][] nullResult = Array.unbox((Double[][]) null); // returns null
+     * }</pre>
+     *
      * @param a the two-dimensional array of Double objects to be converted. May be {@code null}.
      * @return a two-dimensional array of primitive doubles, or {@code null} if the input array is {@code null}.
      * @see #unbox(Double[][], double)
@@ -5661,6 +5991,13 @@ public abstract sealed class Array permits Array.ArrayUtil {
     /**
      * Converts a two-dimensional array of Double objects into a two-dimensional array of primitive doubles.
      * If a {@code null} value is encountered in the input array, it is replaced with the specified default value.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Double[][] objects = {{1.0, null}, {3.0, 4.0}};
+     * double[][] doubles = Array.unbox(objects, -1.0);              // returns {{1.0, -1.0}, {3.0, 4.0}}
+     * double[][] nullResult = Array.unbox((Double[][]) null, -1.0); // returns null
+     * }</pre>
      *
      * @param a the two-dimensional array of Double objects to be converted. May be {@code null}.
      * @param valueForNull the value to be used for {@code null} values in the input array.
@@ -5686,6 +6023,13 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * Converts a three-dimensional array of Boolean objects into a three-dimensional array of primitive booleans.
      * If a {@code null} value is encountered in the input array, it is replaced with the default value {@code false}.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Boolean[][][] objects = {{{true, null}}, {{false, true}}};
+     * boolean[][][] primitives = Array.unbox(objects);              // returns 3D primitive array
+     * boolean[][][] nullResult = Array.unbox((Boolean[][][]) null); // returns null
+     * }</pre>
+     *
      * @param a the three-dimensional array of Boolean objects to be converted. May be {@code null}.
      * @return a three-dimensional array of primitive booleans, or {@code null} if the input array is {@code null}.
      * @see #unbox(Boolean[][][], boolean)
@@ -5698,6 +6042,13 @@ public abstract sealed class Array permits Array.ArrayUtil {
     /**
      * Converts a three-dimensional array of Boolean objects into a three-dimensional array of primitive booleans.
      * If a {@code null} value is encountered in the input array, it is replaced with the specified default value.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Boolean[][][] objects = {{{true, null}}, {{false, true}}};
+     * boolean[][][] primitives = Array.unbox(objects, true);              // nulls are replaced with true
+     * boolean[][][] nullResult = Array.unbox((Boolean[][][]) null, true); // returns null
+     * }</pre>
      *
      * @param a the three-dimensional array of Boolean objects to be converted. May be {@code null}.
      * @param valueForNull the value to be used for {@code null} values in the input array.
@@ -5723,6 +6074,13 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * Converts a three-dimensional array of Character objects into a three-dimensional array of primitive chars.
      * If a {@code null} value is encountered in the input array, it is replaced with the default value {@code (char) 0}.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Character[][][] objects = {{{'a', null}}, {{'c', 'd'}}};
+     * char[][][] chars = Array.unbox(objects);                     // returns 3D primitive array, null->(char)0
+     * char[][][] nullResult = Array.unbox((Character[][][]) null); // returns null
+     * }</pre>
+     *
      * @param a the three-dimensional array of Character objects to be converted. May be {@code null}.
      * @return a three-dimensional array of primitive chars, or {@code null} if the input array is {@code null}.
      * @see #unbox(Character[][][], char)
@@ -5735,6 +6093,13 @@ public abstract sealed class Array permits Array.ArrayUtil {
     /**
      * Converts a three-dimensional array of Character objects into a three-dimensional array of primitive chars.
      * If a {@code null} value is encountered in the input array, it is replaced with the specified default value.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Character[][][] objects = {{{'a', null}}, {{'c', 'd'}}};
+     * char[][][] chars = Array.unbox(objects, '-');                     // nulls are replaced with '-'
+     * char[][][] nullResult = Array.unbox((Character[][][]) null, '-'); // returns null
+     * }</pre>
      *
      * @param a the three-dimensional array of Character objects to be converted. May be {@code null}.
      * @param valueForNull the value to be used for {@code null} values in the input array.
@@ -5760,6 +6125,13 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * Converts a three-dimensional array of Byte objects into a three-dimensional array of primitive bytes.
      * If a {@code null} value is encountered in the input array, it is replaced with the default value {@code (byte) 0}.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Byte[][][] objects = {{{1, null}}, {{3, 4}}};
+     * byte[][][] bytes = Array.unbox(objects);                // returns 3D primitive array, null->0
+     * byte[][][] nullResult = Array.unbox((Byte[][][]) null); // returns null
+     * }</pre>
+     *
      * @param a the three-dimensional array of Byte objects to be converted. May be {@code null}.
      * @return a three-dimensional array of primitive bytes, or {@code null} if the input array is {@code null}.
      * @see #unbox(Byte[][][], byte)
@@ -5772,6 +6144,13 @@ public abstract sealed class Array permits Array.ArrayUtil {
     /**
      * Converts a three-dimensional array of Byte objects into a three-dimensional array of primitive bytes.
      * If a {@code null} value is encountered in the input array, it is replaced with the specified default value.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Byte[][][] objects = {{{1, null}}, {{3, 4}}};
+     * byte[][][] bytes = Array.unbox(objects, (byte) -1);                // nulls are replaced with -1
+     * byte[][][] nullResult = Array.unbox((Byte[][][]) null, (byte) -1); // returns null
+     * }</pre>
      *
      * @param a the three-dimensional array of Byte objects to be converted. May be {@code null}.
      * @param valueForNull the value to be used for {@code null} values in the input array.
@@ -5797,6 +6176,13 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * Converts a three-dimensional array of Short objects into a three-dimensional array of primitive shorts.
      * If a {@code null} value is encountered in the input array, it is replaced with the default value {@code (short) 0}.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Short[][][] objects = {{{1, null}}, {{3, 4}}};
+     * short[][][] shorts = Array.unbox(objects);                // returns 3D primitive array, null->0
+     * short[][][] nullResult = Array.unbox((Short[][][]) null); // returns null
+     * }</pre>
+     *
      * @param a the three-dimensional array of Short objects to be converted. May be {@code null}.
      * @return a three-dimensional array of primitive shorts, or {@code null} if the input array is {@code null}.
      * @see #unbox(Short[][][], short)
@@ -5809,6 +6195,13 @@ public abstract sealed class Array permits Array.ArrayUtil {
     /**
      * Converts a three-dimensional array of Short objects into a three-dimensional array of primitive shorts.
      * If a {@code null} value is encountered in the input array, it is replaced with the specified default value.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Short[][][] objects = {{{1, null}}, {{3, 4}}};
+     * short[][][] shorts = Array.unbox(objects, (short) -1);                // nulls are replaced with -1
+     * short[][][] nullResult = Array.unbox((Short[][][]) null, (short) -1); // returns null
+     * }</pre>
      *
      * @param a the three-dimensional array of Short objects to be converted. May be {@code null}.
      * @param valueForNull the value to be used for {@code null} values in the input array.
@@ -5834,6 +6227,13 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * Converts a three-dimensional array of Integer objects into a three-dimensional array of primitive integers.
      * If a {@code null} value is encountered in the input array, it is replaced with the default value {@code 0}.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Integer[][][] objects = {{{1, null}}, {{3, 4}}};
+     * int[][][] ints = Array.unbox(objects);                    // returns 3D primitive array, null->0
+     * int[][][] nullResult = Array.unbox((Integer[][][]) null); // returns null
+     * }</pre>
+     *
      * @param a the three-dimensional array of Integer objects to be converted. May be {@code null}.
      * @return a three-dimensional array of primitive integers, or {@code null} if the input array is {@code null}.
      * @see #unbox(Integer[][][], int)
@@ -5846,6 +6246,13 @@ public abstract sealed class Array permits Array.ArrayUtil {
     /**
      * Converts a three-dimensional array of Integer objects into a three-dimensional array of primitive integers.
      * If a {@code null} value is encountered in the input array, it is replaced with the specified default value.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Integer[][][] objects = {{{1, null}}, {{3, 4}}};
+     * int[][][] ints = Array.unbox(objects, -1);                    // nulls are replaced with -1
+     * int[][][] nullResult = Array.unbox((Integer[][][]) null, -1); // returns null
+     * }</pre>
      *
      * @param a the three-dimensional array of Integer objects to be converted. May be {@code null}.
      * @param valueForNull the value to be used for {@code null} values in the input array.
@@ -5871,6 +6278,13 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * Converts a three-dimensional array of Long objects into a three-dimensional array of primitive longs.
      * If a {@code null} value is encountered in the input array, it is replaced with the default value {@code 0L}.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Long[][][] objects = {{{1L, null}}, {{3L, 4L}}};
+     * long[][][] longs = Array.unbox(objects);                // returns 3D primitive array, null->0L
+     * long[][][] nullResult = Array.unbox((Long[][][]) null); // returns null
+     * }</pre>
+     *
      * @param a the three-dimensional array of Long objects to be converted. May be {@code null}.
      * @return a three-dimensional array of primitive longs, or {@code null} if the input array is {@code null}.
      * @see #unbox(Long[][][], long)
@@ -5883,6 +6297,13 @@ public abstract sealed class Array permits Array.ArrayUtil {
     /**
      * Converts a three-dimensional array of Long objects into a three-dimensional array of primitive longs.
      * If a {@code null} value is encountered in the input array, it is replaced with the specified default value.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Long[][][] objects = {{{1L, null}}, {{3L, 4L}}};
+     * long[][][] longs = Array.unbox(objects, -1L);                // nulls are replaced with -1L
+     * long[][][] nullResult = Array.unbox((Long[][][]) null, -1L); // returns null
+     * }</pre>
      *
      * @param a the three-dimensional array of Long objects to be converted. May be {@code null}.
      * @param valueForNull the value to be used for {@code null} values in the input array.
@@ -5908,6 +6329,13 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * Converts a three-dimensional array of Float objects into a three-dimensional array of primitive floats.
      * If a {@code null} value is encountered in the input array, it is replaced with the default value {@code 0.0f}.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Float[][][] objects = {{{1.0f, null}}, {{3.0f, 4.0f}}};
+     * float[][][] floats = Array.unbox(objects);                // returns 3D primitive array, null->0.0f
+     * float[][][] nullResult = Array.unbox((Float[][][]) null); // returns null
+     * }</pre>
+     *
      * @param a the three-dimensional array of Float objects to be converted. May be {@code null}.
      * @return a three-dimensional array of primitive floats, or {@code null} if the input array is {@code null}.
      * @see #unbox(Float[][][], float)
@@ -5920,6 +6348,13 @@ public abstract sealed class Array permits Array.ArrayUtil {
     /**
      * Converts a three-dimensional array of Float objects into a three-dimensional array of primitive floats.
      * If a {@code null} value is encountered in the input array, it is replaced with the specified default value.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Float[][][] objects = {{{1.0f, null}}, {{3.0f, 4.0f}}};
+     * float[][][] floats = Array.unbox(objects, -1.0f);                // nulls are replaced with -1.0f
+     * float[][][] nullResult = Array.unbox((Float[][][]) null, -1.0f); // returns null
+     * }</pre>
      *
      * @param a the three-dimensional array of Float objects to be converted. May be {@code null}.
      * @param valueForNull the value to be used for {@code null} values in the input array.
@@ -5945,6 +6380,13 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * Converts a three-dimensional array of Double objects into a three-dimensional array of primitive doubles.
      * If a {@code null} value is encountered in the input array, it is replaced with the default value {@code 0.0}.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Double[][][] objects = {{{1.0, null}}, {{3.0, 4.0}}};
+     * double[][][] doubles = Array.unbox(objects);                // returns 3D primitive array, null->0.0
+     * double[][][] nullResult = Array.unbox((Double[][][]) null); // returns null
+     * }</pre>
+     *
      * @param a the three-dimensional array of Double objects to be converted. May be {@code null}.
      * @return a three-dimensional array of primitive doubles, or {@code null} if the input array is {@code null}.
      * @see #unbox(Double[][][], double)
@@ -5957,6 +6399,13 @@ public abstract sealed class Array permits Array.ArrayUtil {
     /**
      * Converts a three-dimensional array of Double objects into a three-dimensional array of primitive doubles.
      * If a {@code null} value is encountered in the input array, it is replaced with the specified default value.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Double[][][] objects = {{{1.0, null}}, {{3.0, 4.0}}};
+     * double[][][] doubles = Array.unbox(objects, -1.0);                // nulls are replaced with -1.0
+     * double[][][] nullResult = Array.unbox((Double[][][]) null, -1.0); // returns null
+     * }</pre>
      *
      * @param a the three-dimensional array of Double objects to be converted. May be {@code null}.
      * @param valueForNull the value to be used for {@code null} values in the input array.
@@ -6040,6 +6489,14 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * If the input is a matrix of size m x n, then the output will be another matrix of size n x m.
      * This method will return {@code null} if the input array is {@code null}.</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * char[][] matrix = {{'a', 'b', 'c'}, {'d', 'e', 'f'}};
+     * char[][] trans = Array.transpose(matrix);               // returns {{'a', 'd'}, {'b', 'e'}, {'c', 'f'}}
+     * char[][] nullResult = Array.transpose((char[][]) null); // returns null
+     * Array.transpose(new char[][] {{'a'}, {'b', 'c'}});      // throws IllegalArgumentException
+     * }</pre>
+     *
      * @param a the two-dimensional array to be transposed. May be {@code null}.
      * @return the transposed two-dimensional array, or {@code null} if the input array is {@code null}.
      * @throws IllegalArgumentException if the input array is not a valid matrix (i.e. contains a {@code null} sub-array or sub-arrays of differing lengths).
@@ -6083,6 +6540,14 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * <p>The transpose of a matrix is obtained by moving the rows data to the column and columns data to the rows.
      * If the input is a matrix of size m x n, then the output will be another matrix of size n x m.
      * This method will return {@code null} if the input array is {@code null}.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * byte[][] matrix = {{1, 2, 3}, {4, 5, 6}};
+     * byte[][] trans = Array.transpose(matrix);               // returns {{1, 4}, {2, 5}, {3, 6}}
+     * byte[][] nullResult = Array.transpose((byte[][]) null); // returns null
+     * Array.transpose(new byte[][] {{1}, {2, 3}});            // throws IllegalArgumentException
+     * }</pre>
      *
      * @param a the two-dimensional array to be transposed. May be {@code null}.
      * @return the transposed two-dimensional array, or {@code null} if the input array is {@code null}.
@@ -6128,6 +6593,13 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * If the input is a matrix of size m x n, then the output will be another matrix of size n x m.
      * This method will return {@code null} if the input array is {@code null}.</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * short[][] matrix = {{1, 2, 3}, {4, 5, 6}};
+     * short[][] trans = Array.transpose(matrix);                // returns {{1, 4}, {2, 5}, {3, 6}}
+     * short[][] nullResult = Array.transpose((short[][]) null); // returns null
+     * }</pre>
+     *
      * @param a the two-dimensional array to be transposed. May be {@code null}.
      * @return the transposed two-dimensional array, or {@code null} if the input array is {@code null}.
      * @throws IllegalArgumentException if the input array is not a valid matrix (i.e. contains a {@code null} sub-array or sub-arrays of differing lengths).
@@ -6171,6 +6643,13 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * <p>The transpose of a matrix is obtained by moving the rows data to the column and columns data to the rows.
      * If the input is a matrix of size m x n, then the output will be another matrix of size n x m.
      * This method will return {@code null} if the input array is {@code null}.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * int[][] matrix = {{1, 2, 3}, {4, 5, 6}};
+     * int[][] trans = Array.transpose(matrix);              // returns {{1, 4}, {2, 5}, {3, 6}}
+     * int[][] nullResult = Array.transpose((int[][]) null); // returns null
+     * }</pre>
      *
      * @param a the two-dimensional array to be transposed. May be {@code null}.
      * @return the transposed two-dimensional array, or {@code null} if the input array is {@code null}.
@@ -6216,6 +6695,13 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * If the input is a matrix of size m x n, then the output will be another matrix of size n x m.
      * This method will return {@code null} if the input array is {@code null}.</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * long[][] matrix = {{1L, 2L, 3L}, {4L, 5L, 6L}};
+     * long[][] trans = Array.transpose(matrix);               // returns {{1L, 4L}, {2L, 5L}, {3L, 6L}}
+     * long[][] nullResult = Array.transpose((long[][]) null); // returns null
+     * }</pre>
+     *
      * @param a the two-dimensional array to be transposed. May be {@code null}.
      * @return the transposed two-dimensional array, or {@code null} if the input array is {@code null}.
      * @throws IllegalArgumentException if the input array is not a valid matrix (i.e. contains a {@code null} sub-array or sub-arrays of differing lengths).
@@ -6260,6 +6746,13 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * If the input is a matrix of size m x n, then the output will be another matrix of size n x m.
      * This method will return {@code null} if the input array is {@code null}.</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * float[][] matrix = {{1.0f, 2.0f, 3.0f}, {4.0f, 5.0f, 6.0f}};
+     * float[][] trans = Array.transpose(matrix);                // returns {{1.0f, 4.0f}, {2.0f, 5.0f}, {3.0f, 6.0f}}
+     * float[][] nullResult = Array.transpose((float[][]) null); // returns null
+     * }</pre>
+     *
      * @param a the two-dimensional array to be transposed. May be {@code null}.
      * @return the transposed two-dimensional array, or {@code null} if the input array is {@code null}.
      * @throws IllegalArgumentException if the input array is not a valid matrix (i.e. contains a {@code null} sub-array or sub-arrays of differing lengths).
@@ -6303,6 +6796,13 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * <p>The transpose of a matrix is obtained by moving the rows data to the column and columns data to the rows.
      * If the input is a matrix of size m x n, then the output will be another matrix of size n x m.
      * This method will return {@code null} if the input array is {@code null}.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * double[][] matrix = {{1.0, 2.0, 3.0}, {4.0, 5.0, 6.0}};
+     * double[][] trans = Array.transpose(matrix);                 // returns {{1.0, 4.0}, {2.0, 5.0}, {3.0, 6.0}}
+     * double[][] nullResult = Array.transpose((double[][]) null); // returns null
+     * }</pre>
      *
      * @param a the two-dimensional array to be transposed. May be {@code null}.
      * @return the transposed two-dimensional array, or {@code null} if the input array is {@code null}.

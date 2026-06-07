@@ -45,7 +45,7 @@ import com.landawn.abacus.annotation.SuppressFBWarnings;
  * user.set("name", "John");
  * user.set("age", 30);
  *
- * String name = user.get("name");   // returns "John"
+ * String name = user.get("name");             // returns "John"
  * int age = user.get("age", Integer.class);   // returns 30
  * }</pre>
  *
@@ -136,7 +136,7 @@ public final class MapEntity implements Serializable {
      * user.set("email", "john@example.com");
      *
      * String email = user.get("email");            // returns "john@example.com"
-     * String sameEmail = user.get("User.email");   // also returns "john@example.com"
+     * String sameEmail = user.get("User.email");   // returns "john@example.com"
      * }</pre>
      *
      * @param <T> the type of the property value
@@ -488,7 +488,7 @@ public final class MapEntity implements Serializable {
      * <pre>{@code
      * MapEntity user = new MapEntity("User");
      * user.set("name", "John").set("age", 30);
-     * String str = user.toString();   // e.g. "{name=John, age=30}" (property order is not guaranteed)
+     * String str = user.toString();   // returns e.g. "{name=John, age=30}" (property order is not guaranteed)
      * }</pre>
      *
      * @return a string representation of this object
@@ -532,6 +532,7 @@ public final class MapEntity implements Serializable {
      *     .put("price", 19.99)
      *     .build();
      * }</pre>
+     *
      */
     public static class MapEntityBuilder {
         private final MapEntity mapEntity;

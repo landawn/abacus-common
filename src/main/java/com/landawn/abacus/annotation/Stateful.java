@@ -60,7 +60,7 @@ import java.lang.annotation.Target;
  *     private int count = 0;
  *
  *     public int increment() {
- *         return ++count;  // Not thread-safe!
+ *         return ++count;  // this is not thread-safe!
  *     }
  *
  *     public int getCount() {
@@ -82,7 +82,7 @@ import java.lang.annotation.Target;
  *
  *     public StreamBuilder<T> add(T element) {
  *         elements.add(element);
- *         return this;  // Modifies internal state
+ *         return this;  // maintains internal state
  *     }
  * }
  * }</pre>

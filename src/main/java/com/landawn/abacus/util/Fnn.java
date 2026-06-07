@@ -104,7 +104,7 @@ import com.landawn.abacus.util.stream.Stream;
  *
  * // Rate-limited operations
  * Throwables.Consumer<ApiRequest, IOException> rateLimitedApi =
- *     Fnn.rateLimiter(10.0);   // 10 requests per second
+ *     Fnn.rateLimiter(10.0);   // returns 10 requests per second
  *
  * // Map entry manipulation
  * Map<String, Integer> scores = entryStream
@@ -267,8 +267,8 @@ public final class Fnn {
      * // Expensive database connection initialization
      * Throwables.Supplier<Connection, SQLException> dbSupplier =
      *     Fnn.memoize(() -> DriverManager.getConnection(url, user, pass));
-     * Connection conn1 = dbSupplier.get();   // Creates connection
-     * Connection conn2 = dbSupplier.get();   // Returns same connection
+     * Connection conn1 = dbSupplier.get();   // returns connection
+     * Connection conn2 = dbSupplier.get();   // returns same connection
      * }</pre>
      *
      * @param <T> the type of results supplied by this supplier
@@ -532,7 +532,7 @@ public final class Fnn {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Convert stream elements to strings
-     * Seq<Object, IOException> objects = ...;
+     * Seq<Object, IOException> objects = Seq.of(1, "a", null);
      * Seq<String, IOException> strings = objects.map(Fnn.toStr());
      *
      * // Use in exception-throwing context
@@ -556,14 +556,14 @@ public final class Fnn {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Extract keys from map entries
-     * Map<String, Integer> map = ...;
+     * Map<String, Integer> map = N.asMap("a", 1, "b", 2);
      * List<String> keys = map.entrySet().stream()
      *     .map(Fnn.key())
      *     .collect(Collectors.toList());
      *
      * // Use in exception-throwing context
-     * Seq<Map.Entry<String, User>, IOException> entries = ...;
-     * Seq<String, IOException> keys = entries.map(Fnn.key());
+     * Seq<Map.Entry<String, Integer>, IOException> entries = Seq.of(new java.util.AbstractMap.SimpleEntry<>("a", 1));
+     * Seq<String, IOException> entryKeys = entries.map(Fnn.key());
      * }</pre>
      *
      * @param <K> the type of keys in the entry
@@ -586,14 +586,14 @@ public final class Fnn {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Extract values from map entries
-     * Map<String, Integer> map = ...;
+     * Map<String, Integer> map = N.asMap("a", 1, "b", 2);
      * List<Integer> values = map.entrySet().stream()
      *     .map(Fnn.value())
      *     .collect(Collectors.toList());
      *
      * // Use in exception-throwing context
-     * Seq<Map.Entry<String, User>, IOException> entries = ...;
-     * Seq<User, IOException> users = entries.map(Fnn.value());
+     * Seq<Map.Entry<String, Integer>, IOException> entries = Seq.of(new java.util.AbstractMap.SimpleEntry<>("a", 1));
+     * Seq<Integer, IOException> entryValues = entries.map(Fnn.value());
      * }</pre>
      *
      * @param <K> the type of keys in the entry
@@ -617,14 +617,14 @@ public final class Fnn {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Create inverted map
-     * Map<String, Integer> original = ...;
+     * Map<String, Integer> original = N.asMap("a", 1, "b", 2);
      * Map<Integer, String> inverted = original.entrySet().stream()
      *     .map(Fnn.invert())
      *     .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
      *
      * // Reverse lookup
-     * Seq<Entry<UserId, UserName>, Exception> entries = ...;
-     * Seq<Entry<UserName, UserId>, Exception> inverted = entries.map(Fnn.invert());
+     * Seq<Entry<Integer, String>, Exception> entries = Seq.of(new java.util.AbstractMap.SimpleEntry<>(1, "Alice"));
+     * Seq<Entry<String, Integer>, Exception> invertedEntries = entries.map(Fnn.invert());
      * }</pre>
      *
      * @param <K> the type of keys in the original entry (becomes value type in result)
@@ -648,8 +648,8 @@ public final class Fnn {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Create entries from parallel lists
-     * List<String> keys = ...;
-     * List<Integer> values = ...;
+     * List<String> keys = N.asList("a", "b");
+     * List<Integer> values = N.asList(1, 2);
      * Map<String, Integer> map = IntStream.range(0, keys.size())
      *     .mapToObj(i -> Fnn.<String, Integer, RuntimeException>entry()
      *         .apply(keys.get(i), values.get(i)))
@@ -676,7 +676,7 @@ public final class Fnn {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Create pairs from stream elements
-     * Seq<String, Exception> names = ...;
+     * Seq<String, Exception> names = Seq.of("a", "bb", "ccc");
      * Seq<Pair<String, Integer>, Exception> namesWithLengths = names
      *     .map(name -> Fnn.<String, Integer, Exception>pair()
      *         .apply(name, name.length()));
@@ -966,6 +966,13 @@ public final class Fnn {
      * interrupted, the interrupt flag is restored and a {@link RuntimeException} is thrown.
      * A zero or negative {@code millis} results in no sleep.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Throwables.Consumer<String, Exception> sleeper = Fnn.sleep(100);
+     * sleeper.accept("hello");   // sleeps 100ms, returns normally
+     * Fnn.sleep(0).accept(null); // no sleep, returns immediately
+     * }</pre>
+     *
      * @param <T> the type of the input to the consumer
      * @param <E> the type of exception that may be thrown
      * @param millis the number of milliseconds to sleep; zero or negative results in no sleep
@@ -982,6 +989,13 @@ public final class Fnn {
      * The consumer ignores its input and calls {@link N#sleepUninterruptibly(long)}.
      * Unlike {@link #sleep(long)}, interruptions are suppressed and the sleep continues for the full duration.
      * A zero or negative {@code millis} results in no sleep.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Throwables.Consumer<String, Exception> sleeper = Fnn.sleepUninterruptibly(100);
+     * sleeper.accept("hello");                  // sleeps 100ms uninterruptibly
+     * Fnn.sleepUninterruptibly(0).accept(null); // no sleep, returns immediately
+     * }</pre>
      *
      * @param <T> the type of the input to the consumer
      * @param <E> the type of exception that may be thrown
@@ -1000,6 +1014,13 @@ public final class Fnn {
      * until a permit is available. This consumer is stateful and should not be saved or cached for reuse,
      * but it can be used in parallel streams.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Throwables.Consumer<String, Exception> limiter = Fnn.rateLimiter(10.0);
+     * limiter.accept("request1"); // acquires permit, may block
+     * limiter.accept("request2"); // acquires permit, may block
+     * }</pre>
+     *
      * @param <T> the type of the input to the consumer
      * @param <E> the type of exception that may be thrown
      * @param permitsPerSecond the desired throughput in permits per second; must be positive
@@ -1017,6 +1038,13 @@ public final class Fnn {
      * The consumer calls {@link RateLimiter#acquire()} before allowing each invocation to proceed,
      * blocking until a permit is available. This consumer is stateful and should not be saved or cached
      * for reuse, but it can be used in parallel streams.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * RateLimiter limiter = RateLimiter.create(10.0);
+     * Throwables.Consumer<String, Exception> consumer = Fnn.rateLimiter(limiter);
+     * consumer.accept("request1"); // acquires permit from provided limiter
+     * }</pre>
      *
      * @param <T> the type of the input to the consumer
      * @param <E> the type of exception that may be thrown
@@ -1041,6 +1069,13 @@ public final class Fnn {
      * The consumer calls {@link AutoCloseable#close()} on the resource if it is not {@code null};
      * a {@code null} input is silently ignored. Any exception thrown by {@code close()} is propagated.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Throwables.Consumer<AutoCloseable, Exception> closer = Fnn.close();
+     * closer.accept(new StringReader("data")); // closes the reader
+     * closer.accept(null);                     // no-op, does not throw
+     * }</pre>
+     *
      * @param <T> the type of {@code AutoCloseable} accepted by the consumer
      * @return a Consumer that closes the {@code AutoCloseable} resource, propagating any exception from {@code close()}
      * @see #closeQuietly()
@@ -1054,6 +1089,13 @@ public final class Fnn {
      * Returns a {@code Throwables.Consumer} that closes an {@link AutoCloseable} resource quietly.
      * The consumer closes the resource (if not {@code null}) while suppressing any exception thrown
      * by {@code close()}, so the returned consumer never throws.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Throwables.Consumer<AutoCloseable, Exception> closer = Fnn.closeQuietly();
+     * closer.accept(new StringReader("data")); // closes quietly, any exception suppressed
+     * closer.accept(null);                     // no-op, does not throw
+     * }</pre>
      *
      * @param <T> the type of {@code AutoCloseable} accepted by the consumer
      * @param <E> the type of exception that may be thrown (though none will be)
@@ -1155,6 +1197,14 @@ public final class Fnn {
      * The predicate returns {@code true} if the CharSequence is {@code null}, empty, or contains only
      * whitespace characters.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Fnn.<CharSequence, Exception>isBlank().test("");        // returns true
+     * Fnn.<CharSequence, Exception>isBlank().test("  ");      // returns true
+     * Fnn.<CharSequence, Exception>isBlank().test(null);      // returns true
+     * Fnn.<CharSequence, Exception>isBlank().test("hello");   // returns false
+     * }</pre>
+     *
      * @param <T> the type of CharSequence
      * @param <E> the type of exception that may be thrown
      * @return a Predicate that returns {@code true} if the CharSequence is {@code null}, empty, or whitespace-only
@@ -1168,6 +1218,13 @@ public final class Fnn {
     /**
      * Returns a Throwables.Predicate that tests if an array is empty.
      * The predicate returns {@code true} if the array is {@code null} or has length 0.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Fnn.<String, Exception>isEmptyArray().test(new String[]{});    // returns true
+     * Fnn.<String, Exception>isEmptyArray().test(null);              // returns true
+     * Fnn.<String, Exception>isEmptyArray().test(new String[]{"a"}); // returns false
+     * }</pre>
      *
      * @param <T> the component type of the array
      * @param <E> the type of exception that may be thrown
@@ -1184,6 +1241,13 @@ public final class Fnn {
      * Returns a Throwables.Predicate that tests if a Collection is empty.
      * The predicate returns {@code true} if the Collection is {@code null} or has size 0.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Fnn.<Collection, Exception>isEmptyCollection().test(new ArrayList<>()); // returns true
+     * Fnn.<Collection, Exception>isEmptyCollection().test(null);              // returns true
+     * Fnn.<Collection, Exception>isEmptyCollection().test(List.of("a"));      // returns false
+     * }</pre>
+     *
      * @param <T> the type of Collection
      * @param <E> the type of exception that may be thrown
      * @return a Predicate that returns {@code true} if the Collection is {@code null} or empty
@@ -1199,6 +1263,13 @@ public final class Fnn {
      * Returns a Throwables.Predicate that tests if a Map is empty.
      * The predicate returns {@code true} if the Map is {@code null} or has size 0.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Fnn.<Map, Exception>isEmptyMap().test(new HashMap<>()); // returns true
+     * Fnn.<Map, Exception>isEmptyMap().test(null);            // returns true
+     * Fnn.<Map, Exception>isEmptyMap().test(Map.of("a", 1));  // returns false
+     * }</pre>
+     *
      * @param <T> the type of Map
      * @param <E> the type of exception that may be thrown
      * @return a Predicate that returns {@code true} if the Map is {@code null} or empty
@@ -1212,6 +1283,12 @@ public final class Fnn {
 
     /**
      * Returns a Predicate that tests whether its input is not {@code null}.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Fnn.<String, Exception>notNull().test("hello"); // returns true
+     * Fnn.<String, Exception>notNull().test(null);    // returns false
+     * }</pre>
      *
      * @param <T> the type of the input to the predicate
      * @param <E> the type of the exception that may be thrown
@@ -1227,6 +1304,13 @@ public final class Fnn {
      * Returns a Predicate that tests whether a CharSequence is not empty.
      * A CharSequence is considered not empty if it is not {@code null} and has a length greater than 0.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Fnn.<String, Exception>notEmpty().test("hello"); // returns true
+     * Fnn.<String, Exception>notEmpty().test("");      // returns false
+     * Fnn.<String, Exception>notEmpty().test(null);    // returns false
+     * }</pre>
+     *
      * @param <T> the type of the CharSequence to test
      * @param <E> the type of the exception that may be thrown
      * @return a Predicate that returns {@code true} if the input CharSequence is not empty, {@code false} otherwise
@@ -1241,6 +1325,14 @@ public final class Fnn {
      * A CharSequence is considered not blank if it is not {@code null}, not empty,
      * and contains at least one non-whitespace character.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Fnn.<String, Exception>notBlank().test("hello"); // returns true
+     * Fnn.<String, Exception>notBlank().test("  ");    // returns false
+     * Fnn.<String, Exception>notBlank().test("");      // returns false
+     * Fnn.<String, Exception>notBlank().test(null);    // returns false
+     * }</pre>
+     *
      * @param <T> the type of the CharSequence to test
      * @param <E> the type of the exception that may be thrown
      * @return a Predicate that returns {@code true} if the input CharSequence is not blank, {@code false} otherwise
@@ -1253,6 +1345,13 @@ public final class Fnn {
     /**
      * Returns a Predicate that tests whether an array is not empty.
      * An array is considered not empty if it is not {@code null} and has a length greater than 0.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Fnn.<String, Exception>notEmptyArray().test(new String[]{"a"}); // returns true
+     * Fnn.<String, Exception>notEmptyArray().test(new String[]{});    // returns false
+     * Fnn.<String, Exception>notEmptyArray().test(null);              // returns false
+     * }</pre>
      *
      * @param <T> the component type of the array
      * @param <E> the type of the exception that may be thrown
@@ -1269,6 +1368,13 @@ public final class Fnn {
      * Returns a Predicate that tests whether a Collection is not empty.
      * A Collection is considered not empty if it is not {@code null} and has a size greater than 0.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Fnn.<Collection, Exception>notEmptyCollection().test(List.of("a"));      // returns true
+     * Fnn.<Collection, Exception>notEmptyCollection().test(new ArrayList<>()); // returns false
+     * Fnn.<Collection, Exception>notEmptyCollection().test(null);              // returns false
+     * }</pre>
+     *
      * @param <T> the type of the Collection to test
      * @param <E> the type of the exception that may be thrown
      * @return a Predicate that returns {@code true} if the input Collection is not empty, {@code false} otherwise
@@ -1283,6 +1389,13 @@ public final class Fnn {
     /**
      * Returns a Predicate that tests whether a Map is not empty.
      * A Map is considered not empty if it is not {@code null} and has a size greater than 0.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Fnn.<Map, Exception>notEmptyMap().test(Map.of("a", 1));  // returns true
+     * Fnn.<Map, Exception>notEmptyMap().test(new HashMap<>()); // returns false
+     * Fnn.<Map, Exception>notEmptyMap().test(null);            // returns false
+     * }</pre>
      *
      * @param <T> the type of the Map to test
      * @param <E> the type of the exception that may be thrown
@@ -1300,6 +1413,12 @@ public final class Fnn {
      * that duplicate keys are not allowed. This merger is typically used in {@code Collectors.toMap()}
      * when duplicate keys should cause an immediate failure rather than silent merging.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Throwables.BinaryOperator<String, Exception> merger = Fnn.throwingMerger();
+     * merger.apply("a", "b");  // throws IllegalStateException
+     * }</pre>
+     *
      * @param <T> the type of the operands and result of the operator
      * @param <E> the type of the exception that may be thrown
      * @return a BinaryOperator that always throws {@code IllegalStateException} with a message describing the duplicate values
@@ -1315,6 +1434,13 @@ public final class Fnn {
      * Returns a BinaryOperator that ignores the second value and returns the first value.
      * This merger is typically used in {@code Collectors.toMap()} when keeping the first occurrence
      * of duplicate keys is the desired behavior.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Throwables.BinaryOperator<String, Exception> merger = Fnn.ignoringMerger();
+     * merger.apply("first", "second");  // returns "first"
+     * merger.apply("a", "b");           // returns "a"
+     * }</pre>
      *
      * @param <T> the type of the operands and result of the operator
      * @param <E> the type of the exception that may be thrown
@@ -1332,6 +1458,13 @@ public final class Fnn {
      * This merger is typically used in {@code Collectors.toMap()} when keeping the last occurrence
      * of duplicate keys is the desired behavior.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Throwables.BinaryOperator<String, Exception> merger = Fnn.replacingMerger();
+     * merger.apply("first", "second");  // returns "second"
+     * merger.apply("a", "b");           // returns "b"
+     * }</pre>
+     *
      * @param <T> the type of the operands and result of the operator
      * @param <E> the type of the exception that may be thrown
      * @return a BinaryOperator that always returns the second operand, discarding the first
@@ -1346,6 +1479,14 @@ public final class Fnn {
     /**
      * Returns a Predicate that tests Map.Entry objects by applying the given predicate to the entry's key.
      * The returned predicate extracts the key from the Map.Entry and applies the provided key predicate to it.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Fnn.<String, Integer, Exception>testByKey(k -> k.startsWith("a")).test(new AbstractMap.SimpleEntry<>("apple", 1)); // returns true
+     * Fnn.testByKey((Throwables.Predicate<String, Exception>) k -> k.length() > 3).test(Map.entry("hello", 1));          // returns true
+     * Fnn.testByKey((Throwables.Predicate<String, Exception>) k -> k.length() > 3).test(Map.entry("hi", 2));             // returns false
+     * Fnn.testByKey(null);                                                                                               // throws IllegalArgumentException
+     * }</pre>
      *
      * @param <K> the type of the key
      * @param <V> the type of the value
@@ -1366,6 +1507,13 @@ public final class Fnn {
      * Returns a Predicate that tests Map.Entry objects by applying the given predicate to the entry's value.
      * The returned predicate extracts the value from the Map.Entry and applies the provided value predicate to it.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Fnn.testByValue((Throwables.Predicate<Integer, Exception>) v -> v > 0).test(Map.entry("a", 5));  // returns true
+     * Fnn.testByValue((Throwables.Predicate<Integer, Exception>) v -> v > 0).test(Map.entry("a", -1)); // returns false
+     * Fnn.testByValue(null);                                                                           // throws IllegalArgumentException
+     * }</pre>
+     *
      * @param <K> the type of the key
      * @param <V> the type of the value
      * @param <E> the type of the exception that may be thrown
@@ -1384,6 +1532,13 @@ public final class Fnn {
     /**
      * Returns a Consumer that accepts Map.Entry objects and applies the given consumer to the entry's key.
      * The returned consumer extracts the key from the Map.Entry and passes it to the provided key consumer.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<String> keys = new ArrayList<>();
+     * Fnn.acceptByKey((Throwables.Consumer<String, Exception>) keys::add).accept(Map.entry("a", 1)); // keys now contains "a"
+     * Fnn.acceptByKey(null);                                                                         // throws IllegalArgumentException
+     * }</pre>
      *
      * @param <K> the type of the key
      * @param <V> the type of the value
@@ -1404,6 +1559,13 @@ public final class Fnn {
      * Returns a Consumer that accepts Map.Entry objects and applies the given consumer to the entry's value.
      * The returned consumer extracts the value from the Map.Entry and passes it to the provided value consumer.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<Integer> values = new ArrayList<>();
+     * Fnn.acceptByValue((Throwables.Consumer<Integer, Exception>) values::add).accept(Map.entry("a", 1)); // values now contains 1
+     * Fnn.acceptByValue(null);                                                                            // throws IllegalArgumentException
+     * }</pre>
+     *
      * @param <K> the type of the key
      * @param <V> the type of the value
      * @param <E> the type of the exception that may be thrown
@@ -1422,6 +1584,13 @@ public final class Fnn {
     /**
      * Returns a Function that applies the given function to a Map.Entry's key.
      * The returned function extracts the key from the Map.Entry and applies the provided key function to it.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Fnn.<String, Integer, Integer, Exception>applyByKey(k -> k.length()).apply(Map.entry("hello", 1));  // returns 5
+     * Fnn.<String, Integer, String, Exception>applyByKey(String::toUpperCase).apply(Map.entry("abc", 2)); // returns "ABC"
+     * Fnn.applyByKey(null);                                                                               // throws IllegalArgumentException
+     * }</pre>
      *
      * @param <K> the type of the key
      * @param <V> the type of the value
@@ -1442,6 +1611,13 @@ public final class Fnn {
     /**
      * Returns a Function that applies the given function to a Map.Entry's value.
      * The returned function extracts the value from the Map.Entry and applies the provided value function to it.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Fnn.<String, Integer, String, Exception>applyByValue(v -> "val:" + v).apply(Map.entry("a", 42)); // returns "val:42"
+     * Fnn.<String, Integer, Integer, Exception>applyByValue(v -> v * 2).apply(Map.entry("a", 5));      // returns 10
+     * Fnn.applyByValue(null);                                                                          // throws IllegalArgumentException
+     * }</pre>
      *
      * @param <K> the type of the key
      * @param <V> the type of the value
@@ -1466,6 +1642,12 @@ public final class Fnn {
      * Returns a BinaryOperator that always returns the first of its two operands.
      * This operator ignores the second operand and returns the first operand unchanged.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Fnn.<String, Exception>selectFirst().apply("a", "b");  // returns "a"
+     * Fnn.<Integer, Exception>selectFirst().apply(1, 2);     // returns 1
+     * }</pre>
+     *
      * @param <T> the type of the operands and result of the operator
      * @param <E> the type of the exception that may be thrown
      * @return a BinaryOperator that returns the first operand
@@ -1482,6 +1664,12 @@ public final class Fnn {
     /**
      * Returns a BinaryOperator that always returns the second of its two operands.
      * This operator ignores the first operand and returns the second operand unchanged.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Fnn.<String, Exception>selectSecond().apply("a", "b");  // returns "b"
+     * Fnn.<Integer, Exception>selectSecond().apply(1, 2);     // returns 2
+     * }</pre>
      *
      * @param <T> the type of the operands and result of the operator
      * @param <E> the type of the exception that may be thrown
@@ -1501,6 +1689,12 @@ public final class Fnn {
      * Returns a BinaryOperator that returns the minimum of two Comparable values.
      * The comparison is performed using the natural ordering of the Comparable type.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Fnn.<Integer, Exception>min().apply(3, 5);    // returns 3
+     * Fnn.<String, Exception>min().apply("a", "b"); // returns "a"
+     * }</pre>
+     *
      * @param <T> the type of the Comparable operands and result
      * @param <E> the type of the exception that may be thrown
      * @return a BinaryOperator that returns the smaller of two Comparable values
@@ -1514,6 +1708,13 @@ public final class Fnn {
     /**
      * Returns a BinaryOperator that returns the minimum of two values according to the specified Comparator.
      * If the comparator indicates the values are equal, the first value is returned.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Fnn.min(Comparator.naturalOrder()).apply(3, 5);  // returns 3
+     * Fnn.min(Comparator.reverseOrder()).apply(3, 5);  // returns 5
+     * Fnn.min(null);                                   // throws IllegalArgumentException
+     * }</pre>
      *
      * @param <T> the type of the operands and result of the operator
      * @param <E> the type of the exception that may be thrown
@@ -1531,6 +1732,13 @@ public final class Fnn {
     /**
      * Returns a BinaryOperator that returns the minimum of two values by comparing the results of applying a key extractor function.
      * The key extractor function is applied to both operands and the resulting Comparable values are compared.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Fnn.<String, Exception>minBy(String::length).apply("hi", "hello"); // returns "hi"
+     * Fnn.<String, Exception>minBy(String::length).apply("ab", "cd");    // returns "ab" (equal length, first returned)
+     * Fnn.minBy(null);                                                   // throws IllegalArgumentException
+     * }</pre>
      *
      * @param <T> the type of the operands and result of the operator
      * @param <E> the type of the exception that may be thrown
@@ -1611,6 +1819,12 @@ public final class Fnn {
      * Returns a BinaryOperator that returns the maximum of two Comparable values.
      * The comparison is performed using the natural ordering of the Comparable type.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Fnn.<Integer, Exception>max().apply(3, 5);    // returns 5
+     * Fnn.<String, Exception>max().apply("a", "b"); // returns "b"
+     * }</pre>
+     *
      * @param <T> the type of the Comparable operands and result
      * @param <E> the type of the exception that may be thrown
      * @return a BinaryOperator that returns the larger of two Comparable values
@@ -1624,6 +1838,13 @@ public final class Fnn {
     /**
      * Returns a BinaryOperator that returns the maximum of two values according to the specified Comparator.
      * If the comparator indicates the values are equal, the first value is returned.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Fnn.max(Comparator.naturalOrder()).apply(3, 5);  // returns 5
+     * Fnn.max(Comparator.reverseOrder()).apply(3, 5);  // returns 3
+     * Fnn.max(null);                                   // throws IllegalArgumentException
+     * }</pre>
      *
      * @param <T> the type of the operands and result of the operator
      * @param <E> the type of the exception that may be thrown
@@ -1641,6 +1862,13 @@ public final class Fnn {
     /**
      * Returns a BinaryOperator that returns the maximum of two values by comparing the results of applying a key extractor function.
      * The key extractor function is applied to both operands and the resulting Comparable values are compared.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Fnn.<String, Exception>maxBy(String::length).apply("hi", "hello"); // returns "hello"
+     * Fnn.<String, Exception>maxBy(String::length).apply("ab", "cd");    // returns "ab" (equal length, first returned)
+     * Fnn.maxBy(null);                                                   // throws IllegalArgumentException
+     * }</pre>
      *
      * @param <T> the type of the operands and result of the operator
      * @param <E> the type of the exception that may be thrown
@@ -1666,6 +1894,12 @@ public final class Fnn {
      * Returns a BinaryOperator that returns the maximum of two Map.Entry objects by comparing their keys.
      * The keys must be Comparable and are compared using their natural ordering.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Fnn.<String, Integer, Exception>maxByKey().apply(Map.entry("a", 1), Map.entry("b", 2)); // returns Entry("b",2)
+     * Fnn.<String, Integer, Exception>maxByKey().apply(Map.entry("x", 1), Map.entry("x", 2)); // returns Entry("x",1)
+     * }</pre>
+     *
      * @param <K> the type of the Comparable key
      * @param <V> the type of the value
      * @param <E> the type of the exception that may be thrown
@@ -1687,6 +1921,12 @@ public final class Fnn {
      * Returns a BinaryOperator that returns the maximum of two Map.Entry objects by comparing their values.
      * The values must be Comparable and are compared using their natural ordering.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Fnn.<String, Integer, Exception>maxByValue().apply(Map.entry("a", 1), Map.entry("b", 2)); // returns Entry("b",2)
+     * Fnn.<String, Integer, Exception>maxByValue().apply(Map.entry("a", 5), Map.entry("b", 5)); // returns Entry("a",5)
+     * }</pre>
+     *
      * @param <K> the type of the key
      * @param <V> the type of the Comparable value
      * @param <E> the type of the exception that may be thrown
@@ -1702,6 +1942,13 @@ public final class Fnn {
     /**
      * Returns a Predicate that represents the logical negation of the given predicate.
      * When evaluated, the returned predicate returns {@code true} if the given predicate returns {@code false}, and vice versa.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Fnn.not((Throwables.Predicate<String, Exception>) s -> s.isEmpty()).test("");      // returns false
+     * Fnn.not((Throwables.Predicate<String, Exception>) s -> s.isEmpty()).test("hello"); // returns true
+     * Fnn.not(null);                                                                     // throws IllegalArgumentException
+     * }</pre>
      *
      * @param <T> the type of the input to the predicate
      * @param <E> the type of the exception that may be thrown
@@ -1719,6 +1966,13 @@ public final class Fnn {
     /**
      * Returns a BiPredicate that represents the logical negation of the given bi-predicate.
      * When evaluated, the returned bi-predicate returns {@code true} if the given bi-predicate returns {@code false}, and vice versa.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Fnn.not((Throwables.BiPredicate<String, Integer, Exception>) (s, i) -> s.length() > i).test("hi", 5);    // returns true
+     * Fnn.not((Throwables.BiPredicate<String, Integer, Exception>) (s, i) -> s.length() > i).test("hello", 3); // returns false
+     * Fnn.not((Throwables.BiPredicate<String, Integer, Exception>) null);                                      // throws IllegalArgumentException
+     * }</pre>
      *
      * @param <T> the type of the first argument to the predicate
      * @param <U> the type of the second argument to the predicate
@@ -1738,6 +1992,13 @@ public final class Fnn {
     /**
      * Returns a TriPredicate that represents the logical negation of the given tri-predicate.
      * When evaluated, the returned tri-predicate returns {@code true} if the given tri-predicate returns {@code false}, and vice versa.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Fnn.not((Throwables.TriPredicate<String, Integer, Boolean, Exception>) (s, i, b) -> s.length() > i && b)
+     *     .test("hi", 5, true);  // returns true (negation of false && true)
+     * Fnn.not(null);             // throws IllegalArgumentException
+     * }</pre>
      *
      * @param <A> the type of the first argument to the predicate
      * @param <B> the type of the second argument to the predicate
@@ -1761,6 +2022,15 @@ public final class Fnn {
      * and can be used in parallel streams.
      *
      * <p><b>Note:</b> This predicate is stateful and should not be saved or cached for reuse.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Throwables.Predicate<String, Exception> pred = Fnn.atMost(2);
+     * pred.test("a");  // returns true (first call)
+     * pred.test("b");  // returns true (second call)
+     * pred.test("c");  // returns false (count exhausted)
+     * Fnn.atMost(-1);  // throws IllegalArgumentException
+     * }</pre>
      *
      * @param <T> the type of the input to the predicate
      * @param <E> the type of the exception that may be thrown
@@ -1788,6 +2058,13 @@ public final class Fnn {
      * Converts a standard Java Supplier to a Throwables.Supplier.
      * If the input is already a Throwables.Supplier, it is returned as-is.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * java.util.function.Supplier<String> javaSupplier = () -> "hello";
+     * Throwables.Supplier<String, Exception> throwableSupplier = Fnn.from(javaSupplier);
+     * throwableSupplier.get();  // returns "hello"
+     * }</pre>
+     *
      * @param <T> the type of results supplied by the supplier
      * @param <E> the type of the exception that may be thrown
      * @param supplier the Java Supplier to convert
@@ -1803,6 +2080,13 @@ public final class Fnn {
     /**
      * Converts a standard Java IntFunction to a Throwables.IntFunction.
      * If the input is already a Throwables.IntFunction, it is returned as-is.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * java.util.function.IntFunction<String> javaFunc = i -> "value" + i;
+     * Throwables.IntFunction<String, Exception> throwableFunc = Fnn.from(javaFunc);
+     * throwableFunc.apply(5);  // returns "value5"
+     * }</pre>
      *
      * @param <T> the type of the result of the function
      * @param <E> the type of the exception that may be thrown
@@ -1820,6 +2104,13 @@ public final class Fnn {
      * Converts a standard Java Predicate to a Throwables.Predicate.
      * If the input is already a Throwables.Predicate, it is returned as-is.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * java.util.function.Predicate<String> javaPred = s -> s.length() > 3;
+     * Throwables.Predicate<String, Exception> throwablePred = Fnn.from(javaPred);
+     * throwablePred.test("hello");  // returns true
+     * }</pre>
+     *
      * @param <T> the type of the input to the predicate
      * @param <E> the type of the exception that may be thrown
      * @param predicate the Java Predicate to convert
@@ -1835,6 +2126,13 @@ public final class Fnn {
     /**
      * Converts a standard Java BiPredicate to a Throwables.BiPredicate.
      * If the input is already a Throwables.BiPredicate, it is returned as-is.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * java.util.function.BiPredicate<String, Integer> javaPred = (s, i) -> s.length() > i;
+     * Throwables.BiPredicate<String, Integer, Exception> throwablePred = Fnn.from(javaPred);
+     * throwablePred.test("hello", 3);  // returns true
+     * }</pre>
      *
      * @param <T> the type of the first argument to the predicate
      * @param <U> the type of the second argument to the predicate
@@ -1853,6 +2151,13 @@ public final class Fnn {
      * Converts a standard Java Consumer to a Throwables.Consumer.
      * If the input is already a Throwables.Consumer, it is returned as-is.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * java.util.function.Consumer<String> javaConsumer = s -> System.out.println(s);
+     * Throwables.Consumer<String, Exception> throwableConsumer = Fnn.from(javaConsumer);
+     * throwableConsumer.accept("hello");  // prints "hello"
+     * }</pre>
+     *
      * @param <T> the type of the input to the consumer
      * @param <E> the type of the exception that may be thrown
      * @param consumer the Java Consumer to convert
@@ -1868,6 +2173,13 @@ public final class Fnn {
     /**
      * Converts a standard Java BiConsumer to a Throwables.BiConsumer.
      * If the input is already a Throwables.BiConsumer, it is returned as-is.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * java.util.function.BiConsumer<String, Integer> javaBiConsumer = (s, i) -> System.out.println(s + "=" + i);
+     * Throwables.BiConsumer<String, Integer, Exception> throwableBiConsumer = Fnn.from(javaBiConsumer);
+     * throwableBiConsumer.accept("count", 5);  // prints "count=5"
+     * }</pre>
      *
      * @param <T> the type of the first argument to the consumer
      * @param <U> the type of the second argument to the consumer
@@ -1886,6 +2198,13 @@ public final class Fnn {
      * Converts a standard Java Function to a Throwables.Function.
      * If the input is already a Throwables.Function, it is returned as-is.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * java.util.function.Function<String, Integer> javaFunc = String::length;
+     * Throwables.Function<String, Integer, Exception> throwableFunc = Fnn.from(javaFunc);
+     * throwableFunc.apply("hello");  // returns 5
+     * }</pre>
+     *
      * @param <T> the type of the input to the function
      * @param <R> the type of the result of the function
      * @param <E> the type of the exception that may be thrown
@@ -1902,6 +2221,13 @@ public final class Fnn {
     /**
      * Converts a standard Java BiFunction to a Throwables.BiFunction.
      * If the input is already a Throwables.BiFunction, it is returned as-is.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * java.util.function.BiFunction<String, Integer, String> javaFunc = (s, i) -> s + i;
+     * Throwables.BiFunction<String, Integer, String, Exception> throwableFunc = Fnn.from(javaFunc);
+     * throwableFunc.apply("val", 5);  // returns "val5"
+     * }</pre>
      *
      * @param <T> the type of the first argument to the function
      * @param <U> the type of the second argument to the function
@@ -1991,7 +2317,7 @@ public final class Fnn {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Throwables.Function<Integer, String, IOException> func = i -> readLine(i);
-     * Throwables.Supplier<String, IOException> supplier = Fnn.s(5, func); // Reads line 5
+     * Throwables.Supplier<String, IOException> supplier = Fnn.s(5, func); // returns a supplier that reads line 5
      * }</pre>
      *
      * @param <A> the type of the fixed argument
@@ -2035,7 +2361,7 @@ public final class Fnn {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Throwables.BiPredicate<String, Integer, IOException> biPred = (prefix, len) -> checkLength(prefix, len);
-     * Throwables.Predicate<Integer, IOException> pred = Fnn.p("test", biPred); // Fixed prefix "test"
+     * Throwables.Predicate<Integer, IOException> pred = Fnn.p("test", biPred); // returns Fixed prefix "test"
      * }</pre>
      *
      * @param <A> the type of the fixed first argument
@@ -2184,7 +2510,7 @@ public final class Fnn {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Throwables.BiConsumer<String, Integer, IOException> biCons = (prefix, num) -> write(prefix, num);
-     * Throwables.Consumer<Integer, IOException> cons = Fnn.c("Log:", biCons); // Fixed prefix
+     * Throwables.Consumer<Integer, IOException> cons = Fnn.c("Log:", biCons); // returns Fixed prefix
      * }</pre>
      *
      * @param <A> the type of the fixed first argument
@@ -2513,7 +2839,7 @@ public final class Fnn {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Using mc() to help with type inference in a stream operation
-     * Seq<List<String>, Exception> seq = ...;
+     * Seq<List<String>, Exception> seq = Seq.of(N.asList("a", "b"), N.asList("c"));
      * Seq<String, Exception> flatSeq = seq.mapMulti(
      *     Fnn.mc((List<String> list, java.util.function.Consumer<String> consumer) -> {
      *         for (String item : list) {
@@ -2628,6 +2954,15 @@ public final class Fnn {
      * This method is used to convert a standard BiPredicate to a Throwables.BiPredicate, allowing
      * it to be used in contexts where checked exceptions are expected.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * com.landawn.abacus.util.function.BiPredicate<String, Integer> biPred = (s, len) -> s.length() == len;
+     * Throwables.BiPredicate<String, Integer, IOException> throwablePred = Fnn.pp(biPred);
+     * throwablePred.test("hello", 5);               // returns true
+     * throwablePred.test("hello", 3);               // returns false
+     * Fnn.pp((BiPredicate<String, Integer>) null);  // throws IllegalArgumentException
+     * }</pre>
+     *
      * @param <T> the type of the first argument to the predicate
      * @param <U> the type of the second argument to the predicate
      * @param <E> the type of the checked exception that the returned predicate may throw
@@ -2647,6 +2982,14 @@ public final class Fnn {
      * Returns a BiPredicate that partially applies the first argument to a TriPredicate.
      * The returned BiPredicate will test its two arguments along with the pre-supplied
      * first argument against the original TriPredicate.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * TriPredicate<String, String, String> triPred = (a, t, u) -> (a + t).equals(u);
+     * Throwables.BiPredicate<String, String, IOException> biPred = Fnn.pp("foo", triPred);
+     * biPred.test("bar", "foobar");  // returns true
+     * biPred.test("bar", "foobaz");  // returns false
+     * }</pre>
      *
      * @param <A> the type of the first argument to the TriPredicate
      * @param <T> the type of the second argument to the TriPredicate (first argument to the returned BiPredicate)
@@ -2670,6 +3013,14 @@ public final class Fnn {
      * This method is used to convert a standard TriPredicate to a Throwables.TriPredicate, allowing
      * it to be used in contexts where checked exceptions are expected.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * TriPredicate<Integer, Integer, Integer> triPred = (a, b, c) -> a + b == c;
+     * Throwables.TriPredicate<Integer, Integer, Integer, IOException> throwablePred = Fnn.pp(triPred);
+     * throwablePred.test(2, 3, 5);  // returns true
+     * throwablePred.test(2, 3, 6);  // returns false
+     * }</pre>
+     *
      * @param <A> the type of the first argument to the predicate
      * @param <B> the type of the second argument to the predicate
      * @param <C> the type of the third argument to the predicate
@@ -2691,6 +3042,14 @@ public final class Fnn {
      * This method is used to convert a standard Consumer to a Throwables.Consumer, allowing
      * it to be used in contexts where checked exceptions are expected.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * com.landawn.abacus.util.function.Consumer<String> consumer = s -> System.out.println(s);
+     * Throwables.Consumer<String, IOException> throwableConsumer = Fnn.cc(consumer);
+     * throwableConsumer.accept("hello");  // prints "hello"
+     * Fnn.cc(null);                       // throws IllegalArgumentException
+     * }</pre>
+     *
      * @param <T> the type of the input to the consumer
      * @param <E> the type of the checked exception that the returned consumer may throw
      * @param consumer the Consumer to wrap
@@ -2709,6 +3068,14 @@ public final class Fnn {
      * Returns a Consumer that partially applies the first argument to a BiConsumer.
      * The returned Consumer will accept its argument along with the pre-supplied
      * first argument to the original BiConsumer.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<String> sink = new ArrayList<>();
+     * Throwables.Consumer<String, IOException> consumer = Fnn.cc(sink, (list, s) -> list.add(s));
+     * consumer.accept("a");  // adds "a" to sink
+     * consumer.accept("b");  // adds "b" to sink, sink is now [a, b]
+     * }</pre>
      *
      * @param <A> the type of the first argument to the BiConsumer
      * @param <T> the type of the second argument to the BiConsumer (argument to the returned Consumer)
@@ -2730,6 +3097,13 @@ public final class Fnn {
      * Returns a Consumer that partially applies the first two arguments to a TriConsumer.
      * The returned Consumer will accept its argument along with the pre-supplied
      * first two arguments to the original TriConsumer.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Map<String, String> sink = new HashMap<>();
+     * Throwables.Consumer<String, IOException> consumer = Fnn.cc(sink, "key", (map, k, v) -> map.put(k, v));
+     * consumer.accept("value");  // puts ("key", "value") into sink
+     * }</pre>
      *
      * @param <A> the type of the first argument to the TriConsumer
      * @param <B> the type of the second argument to the TriConsumer
@@ -2754,6 +3128,15 @@ public final class Fnn {
      * This method is used to convert a standard BiConsumer to a Throwables.BiConsumer, allowing
      * it to be used in contexts where checked exceptions are expected.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Map<String, Integer> sink = new HashMap<>();
+     * com.landawn.abacus.util.function.BiConsumer<String, Integer> biConsumer = sink::put;
+     * Throwables.BiConsumer<String, Integer, IOException> throwableConsumer = Fnn.cc(biConsumer);
+     * throwableConsumer.accept("a", 1);            // puts ("a", 1) into sink
+     * Fnn.cc((BiConsumer<String, Integer>) null);  // throws IllegalArgumentException
+     * }</pre>
+     *
      * @param <T> the type of the first argument to the consumer
      * @param <U> the type of the second argument to the consumer
      * @param <E> the type of the checked exception that the returned consumer may throw
@@ -2773,6 +3156,14 @@ public final class Fnn {
      * Returns a BiConsumer that partially applies the first argument to a TriConsumer.
      * The returned BiConsumer will accept its two arguments along with the pre-supplied
      * first argument to the original TriConsumer.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Map<String, Integer> sink = new HashMap<>();
+     * Throwables.BiConsumer<String, Integer, IOException> biConsumer = Fnn.cc(sink, (map, k, v) -> map.put(k, v));
+     * biConsumer.accept("a", 1);  // puts ("a", 1) into sink
+     * biConsumer.accept("b", 2);  // puts ("b", 2) into sink
+     * }</pre>
      *
      * @param <A> the type of the first argument to the TriConsumer
      * @param <T> the type of the second argument to the TriConsumer (first argument to the returned BiConsumer)
@@ -2796,6 +3187,14 @@ public final class Fnn {
      * This method is used to convert a standard TriConsumer to a Throwables.TriConsumer, allowing
      * it to be used in contexts where checked exceptions are expected.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<Integer> sink = new ArrayList<>();
+     * TriConsumer<Integer, Integer, Integer> triConsumer = (a, b, c) -> sink.add(a + b + c);
+     * Throwables.TriConsumer<Integer, Integer, Integer, IOException> throwableConsumer = Fnn.cc(triConsumer);
+     * throwableConsumer.accept(1, 2, 3);  // adds 6 to sink
+     * }</pre>
+     *
      * @param <A> the type of the first argument to the consumer
      * @param <B> the type of the second argument to the consumer
      * @param <C> the type of the third argument to the consumer
@@ -2816,6 +3215,14 @@ public final class Fnn {
      * This method is used to convert a standard Function to a Throwables.Function, allowing
      * it to be used in contexts where checked exceptions are expected.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * com.landawn.abacus.util.function.Function<String, Integer> func = String::length;
+     * Throwables.Function<String, Integer, IOException> throwableFunc = Fnn.ff(func);
+     * throwableFunc.apply("hello");  // returns 5
+     * Fnn.ff(null);                  // throws IllegalArgumentException
+     * }</pre>
+     *
      * @param <T> the type of the input to the function
      * @param <R> the type of the result of the function
      * @param <E> the type of the checked exception that the returned function may throw
@@ -2835,6 +3242,13 @@ public final class Fnn {
      * Returns a Function that partially applies the first argument to a BiFunction.
      * The returned Function will apply its argument along with the pre-supplied
      * first argument to the original BiFunction.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Throwables.Function<Integer, Integer, IOException> func = Fnn.ff(10, (a, t) -> a + t);
+     * func.apply(5);   // returns 15
+     * func.apply(20);  // returns 30
+     * }</pre>
      *
      * @param <A> the type of the first argument to the BiFunction
      * @param <T> the type of the second argument to the BiFunction (argument to the returned Function)
@@ -2857,6 +3271,13 @@ public final class Fnn {
      * Returns a Function that partially applies the first two arguments to a TriFunction.
      * The returned Function will apply its argument along with the pre-supplied
      * first two arguments to the original TriFunction.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Throwables.Function<Integer, Integer, IOException> func = Fnn.ff(10, 20, (a, b, t) -> a + b + t);
+     * func.apply(5);  // returns 35
+     * func.apply(0);  // returns 30
+     * }</pre>
      *
      * @param <A> the type of the first argument to the TriFunction
      * @param <B> the type of the second argument to the TriFunction
@@ -2882,6 +3303,14 @@ public final class Fnn {
      * This method is used to convert a standard BiFunction to a Throwables.BiFunction, allowing
      * it to be used in contexts where checked exceptions are expected.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * com.landawn.abacus.util.function.BiFunction<Integer, Integer, Integer> biFunc = (a, b) -> a + b;
+     * Throwables.BiFunction<Integer, Integer, Integer, IOException> throwableFunc = Fnn.ff(biFunc);
+     * throwableFunc.apply(2, 3);                             // returns 5
+     * Fnn.ff((BiFunction<Integer, Integer, Integer>) null);  // throws IllegalArgumentException
+     * }</pre>
+     *
      * @param <T> the type of the first argument to the function
      * @param <U> the type of the second argument to the function
      * @param <R> the type of the result of the function
@@ -2902,6 +3331,13 @@ public final class Fnn {
      * Returns a BiFunction that partially applies the first argument to a TriFunction.
      * The returned BiFunction will apply its two arguments along with the pre-supplied
      * first argument to the original TriFunction.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Throwables.BiFunction<Integer, Integer, Integer, IOException> biFunc = Fnn.ff(100, (a, t, u) -> a + t + u);
+     * biFunc.apply(2, 3);  // returns 105
+     * biFunc.apply(0, 0);  // returns 100
+     * }</pre>
      *
      * @param <A> the type of the first argument to the TriFunction
      * @param <T> the type of the second argument to the TriFunction (first argument to the returned BiFunction)
@@ -2925,6 +3361,13 @@ public final class Fnn {
      * Returns a TriFunction that can throw checked exceptions by wrapping the provided TriFunction.
      * This method is used to convert a standard TriFunction to a Throwables.TriFunction, allowing
      * it to be used in contexts where checked exceptions are expected.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * TriFunction<Integer, Integer, Integer, Integer> triFunc = (a, b, c) -> a + b + c;
+     * Throwables.TriFunction<Integer, Integer, Integer, Integer, IOException> throwableFunc = Fnn.ff(triFunc);
+     * throwableFunc.apply(1, 2, 3);  // returns 6
+     * }</pre>
      *
      * @param <A> the type of the first argument to the function
      * @param <B> the type of the second argument to the function
@@ -2979,6 +3422,14 @@ public final class Fnn {
      * and executes it within a synchronized block. All calls to the returned predicate's test method
      * will be synchronized on the specified mutex object.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Object lock = new Object();
+     * Throwables.Predicate<Integer, IOException> pred = Fnn.sp(lock, 10, (a, t) -> t > a);
+     * pred.test(15);  // returns true
+     * pred.test(5);   // returns false
+     * }</pre>
+     *
      * @param <A> the type of the first argument to the BiPredicate
      * @param <T> the type of the second argument to the BiPredicate (argument to the returned Predicate)
      * @param <E> the type of the checked exception that the predicate may throw
@@ -3005,6 +3456,14 @@ public final class Fnn {
      * Returns a synchronized BiPredicate that executes the provided BiPredicate within a synchronized block.
      * All calls to the returned BiPredicate's test method will be synchronized on the specified mutex object.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Object lock = new Object();
+     * Throwables.BiPredicate<String, Integer, IOException> pred = Fnn.sp(lock, (s, len) -> s.length() == len);
+     * pred.test("hello", 5);  // returns true
+     * pred.test("hello", 3);  // returns false
+     * }</pre>
+     *
      * @param <T> the type of the first argument to the predicate
      * @param <U> the type of the second argument to the predicate
      * @param <E> the type of the checked exception that the predicate may throw
@@ -3030,6 +3489,15 @@ public final class Fnn {
      * Returns a synchronized Consumer that executes the provided consumer within a synchronized block.
      * All calls to the returned consumer's accept method will be synchronized on the specified mutex object.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<String> sink = new ArrayList<>();
+     * Object lock = sink;
+     * Throwables.Consumer<String, IOException> consumer = Fnn.sc(lock, (String s) -> sink.add(s));
+     * consumer.accept("a");  // adds "a" to sink (synchronized on lock)
+     * consumer.accept("b");  // adds "b" to sink, sink is now [a, b]
+     * }</pre>
+     *
      * @param <T> the type of the input to the consumer
      * @param <E> the type of the checked exception that the consumer may throw
      * @param mutex the object to synchronize on
@@ -3054,6 +3522,15 @@ public final class Fnn {
      * Returns a synchronized Consumer that partially applies the first argument to a BiConsumer
      * and executes it within a synchronized block. All calls to the returned consumer's accept method
      * will be synchronized on the specified mutex object.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<String> sink = new ArrayList<>();
+     * Object lock = new Object();
+     * Throwables.Consumer<String, IOException> consumer = Fnn.sc(lock, sink, (list, s) -> list.add(s));
+     * consumer.accept("a");  // adds "a" to sink (synchronized on lock)
+     * consumer.accept("b");  // adds "b" to sink, sink is now [a, b]
+     * }</pre>
      *
      * @param <A> the type of the first argument to the BiConsumer
      * @param <T> the type of the second argument to the BiConsumer (argument to the returned Consumer)
@@ -3081,6 +3558,15 @@ public final class Fnn {
      * Returns a synchronized BiConsumer that executes the provided BiConsumer within a synchronized block.
      * All calls to the returned BiConsumer's accept method will be synchronized on the specified mutex object.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Map<String, Integer> sink = new HashMap<>();
+     * Object lock = new Object();
+     * Throwables.BiConsumer<String, Integer, IOException> consumer = Fnn.sc(lock, sink::put);
+     * consumer.accept("a", 1);  // puts ("a", 1) into sink (synchronized on lock)
+     * consumer.accept("b", 2);  // puts ("b", 2) into sink
+     * }</pre>
+     *
      * @param <T> the type of the first argument to the consumer
      * @param <U> the type of the second argument to the consumer
      * @param <E> the type of the checked exception that the consumer may throw
@@ -3105,6 +3591,14 @@ public final class Fnn {
     /**
      * Returns a synchronized Function that executes the provided function within a synchronized block.
      * All calls to the returned function's apply method will be synchronized on the specified mutex object.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Object lock = new Object();
+     * Throwables.Function<String, Integer, IOException> func = Fnn.sf(lock, String::length);
+     * func.apply("hello");  // returns 5
+     * func.apply("");       // returns 0
+     * }</pre>
      *
      * @param <T> the type of the input to the function
      * @param <R> the type of the result of the function
@@ -3132,6 +3626,14 @@ public final class Fnn {
      * and executes it within a synchronized block. All calls to the returned function's apply method
      * will be synchronized on the specified mutex object.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Object lock = new Object();
+     * Throwables.Function<Integer, Integer, IOException> func = Fnn.sf(lock, 10, (a, t) -> a + t);
+     * func.apply(5);   // returns 15
+     * func.apply(20);  // returns 30
+     * }</pre>
+     *
      * @param <A> the type of the first argument to the BiFunction
      * @param <T> the type of the second argument to the BiFunction (argument to the returned Function)
      * @param <R> the type of the result of the function
@@ -3158,6 +3660,14 @@ public final class Fnn {
     /**
      * Returns a synchronized BiFunction that executes the provided BiFunction within a synchronized block.
      * All calls to the returned BiFunction's apply method will be synchronized on the specified mutex object.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Object lock = new Object();
+     * Throwables.BiFunction<Integer, Integer, Integer, IOException> func = Fnn.sf(lock, (a, b) -> a + b);
+     * func.apply(2, 3);    // returns 5
+     * func.apply(10, 20);  // returns 30
+     * }</pre>
      *
      * @param <T> the type of the first argument to the function
      * @param <U> the type of the second argument to the function
@@ -3245,6 +3755,14 @@ public final class Fnn {
      * The returned function will execute the consumer's accept method on its inputs
      * and then return {@code null}.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Throwables.BiConsumer<String, Integer, IOException> biCons = (s, i) -> writeToFile(s, i);
+     * Throwables.BiFunction<String, Integer, Void, IOException> func = Fnn.c2f(biCons);
+     * func.apply("data", 42);                                             // returns null (side effect: writes to file)
+     * Fnn.c2f((Throwables.BiConsumer<String, Integer, Exception>) null);  // throws IllegalArgumentException
+     * }</pre>
+     *
      * @param <T> the type of the first argument to the consumer/function
      * @param <U> the type of the second argument to the consumer/function
      * @param <E> the type of the checked exception that may be thrown
@@ -3268,6 +3786,14 @@ public final class Fnn {
      * Converts a BiConsumer to a BiFunction that returns a specified value after executing the consumer.
      * The returned function will execute the consumer's accept method on its inputs
      * and then return the specified value.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Throwables.BiConsumer<String, Integer, IOException> biCons = (s, i) -> writeToFile(s, i);
+     * Throwables.BiFunction<String, Integer, Boolean, IOException> func = Fnn.c2f(biCons, true);
+     * func.apply("data", 42);                                                   // returns true (side effect: writes to file)
+     * Fnn.c2f((Throwables.BiConsumer<String, Integer, Exception>) null, true);  // throws IllegalArgumentException
+     * }</pre>
      *
      * @param <T> the type of the first argument to the consumer/function
      * @param <U> the type of the second argument to the consumer/function
@@ -3295,6 +3821,14 @@ public final class Fnn {
      * The returned function will execute the consumer's accept method on its inputs
      * and then return {@code null}.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Throwables.TriConsumer<String, Integer, Boolean, IOException> triCons = (s, i, b) -> log(s, i, b);
+     * Throwables.TriFunction<String, Integer, Boolean, Void, IOException> func = Fnn.c2f(triCons);
+     * func.apply("msg", 1, true);                                                   // returns null (side effect: logs)
+     * Fnn.c2f((Throwables.TriConsumer<String, Integer, Boolean, Exception>) null);  // throws IllegalArgumentException
+     * }</pre>
+     *
      * @param <A> the type of the first argument to the consumer/function
      * @param <B> the type of the second argument to the consumer/function
      * @param <C> the type of the third argument to the consumer/function
@@ -3319,6 +3853,14 @@ public final class Fnn {
      * Converts a TriConsumer to a TriFunction that returns a specified value after executing the consumer.
      * The returned function will execute the consumer's accept method on its inputs
      * and then return the specified value.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Throwables.TriConsumer<String, Integer, Boolean, IOException> triCons = (s, i, b) -> log(s, i, b);
+     * Throwables.TriFunction<String, Integer, Boolean, Boolean, IOException> func = Fnn.c2f(triCons, true);
+     * func.apply("msg", 1, true);                                                         // returns true (side effect: logs)
+     * Fnn.c2f((Throwables.TriConsumer<String, Integer, Boolean, Exception>) null, true);  // throws IllegalArgumentException
+     * }</pre>
      *
      * @param <A> the type of the first argument to the consumer/function
      * @param <B> the type of the second argument to the consumer/function
@@ -3372,6 +3914,14 @@ public final class Fnn {
      * The returned consumer will execute the function's apply method on its inputs
      * and discard the result.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Throwables.BiFunction<String, Integer, String, IOException> func = (s, i) -> s + i;
+     * Throwables.BiConsumer<String, Integer, IOException> consumer = Fnn.f2c(func);
+     * consumer.accept("val", 5);                                                  // executes function, discards "val5"
+     * Fnn.f2c((Throwables.BiFunction<String, Integer, String, Exception>) null);  // throws IllegalArgumentException
+     * }</pre>
+     *
      * @param <T> the type of the first argument to the function/consumer
      * @param <U> the type of the second argument to the function/consumer
      * @param <R> the type of the result of the function (ignored)
@@ -3392,6 +3942,14 @@ public final class Fnn {
      * Converts a TriFunction to a TriConsumer that ignores the function's return value.
      * The returned consumer will execute the function's apply method on its inputs
      * and discard the result.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Throwables.TriFunction<String, Integer, Boolean, String, IOException> func = (s, i, b) -> s + i;
+     * Throwables.TriConsumer<String, Integer, Boolean, IOException> consumer = Fnn.f2c(func);
+     * consumer.accept("val", 5, true);                                                      // executes function, discards result
+     * Fnn.f2c((Throwables.TriFunction<String, Integer, Boolean, String, Exception>) null);  // throws IllegalArgumentException
+     * }</pre>
      *
      * @param <A> the type of the first argument to the function/consumer
      * @param <B> the type of the second argument to the function/consumer

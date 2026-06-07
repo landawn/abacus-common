@@ -56,25 +56,25 @@ import java.lang.annotation.Target;
  *     private String email;
  *
  *     @DiffIgnore
- *     private Timestamp lastModified;  // Changes on every update.
+ *     private Timestamp lastModified;  // lastModified is changed on every update.
  *
  *     @DiffIgnore
- *     private Integer version;         // Optimistic locking field.
+ *     private Integer version;         // version is an optimistic locking field.
  *
  *     @DiffIgnore
- *     private String sessionToken;     // Transient runtime data.
+ *     private String sessionToken;     // sessionToken holds transient runtime data.
  * }
  *
  * User user1 = repository.findById(42L);
- * User user2 = repository.findById(42L);   // Same row, re-loaded later.
+ * User user2 = repository.findById(42L);   // user2 is the same row, re-loaded later.
  * user2.setEmail("new@example.com");
  *
  * // Compares every property except lastModified, version, sessionToken.
  * BeanDifference<Map<String, Object>, Map<String, Object>, Map<String, Pair<Object, Object>>> diff
  *         = Difference.BeanDifference.of(user1, user2);
  *
- * diff.inCommon();        // -> {id=42, username=..., ...}
- * diff.differentValues(); // -> {email=Pair.of("old@example.com", "new@example.com")}
+ * diff.inCommon();        // {id=42, username=..., ...}
+ * diff.differentValues(); // {email=Pair.of("old@example.com", "new@example.com")}
  *
  * // Explicit property list: @DiffIgnore is NOT honored here.
  * Difference.BeanDifference.of(user1, user2, List.of("email", "lastModified"));

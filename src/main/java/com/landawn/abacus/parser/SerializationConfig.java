@@ -67,6 +67,15 @@ public abstract class SerializationConfig<C extends SerializationConfig<C>> exte
      * <p>The exclusion strategy determines which fields should be excluded from serialization
      * based on their values or other criteria.</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * KryoSerConfig config = new KryoSerConfig();
+     * Exclusion current = config.getExclusion();  // returns null (default, no exclusion set)
+     *
+     * config.setExclusion(Exclusion.NULL);
+     * Exclusion updated = config.getExclusion();  // returns Exclusion.NULL
+     * }</pre>
+     *
      * @return the current {@link Exclusion} strategy, or {@code null} if no exclusion is set
      * @see Exclusion
      */
@@ -82,9 +91,9 @@ public abstract class SerializationConfig<C extends SerializationConfig<C>> exte
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * config.setExclusion(Exclusion.NULL);      // Exclude null fields
-     * config.setExclusion(Exclusion.DEFAULT);   // Exclude fields with default values
-     * config.setExclusion(Exclusion.NONE);      // Include all fields
+     * config.setExclusion(Exclusion.NULL);      // removes null fields
+     * config.setExclusion(Exclusion.DEFAULT);   // removes fields with default values
+     * config.setExclusion(Exclusion.NONE);      // keeps all fields
      * }</pre>
      *
      * @param exclusion the exclusion strategy to use, or {@code null} for no exclusion
@@ -103,6 +112,15 @@ public abstract class SerializationConfig<C extends SerializationConfig<C>> exte
      * <p>When {@code true}, fields marked with the {@code transient} keyword or
      * {@code @Transient} annotation will be excluded from serialization.</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * KryoSerConfig config = new KryoSerConfig();
+     * boolean skips = config.isSkipTransientField();  // returns true (default)
+     *
+     * config.setSkipTransientField(false);
+     * boolean keeps = config.isSkipTransientField();  // returns false
+     * }</pre>
+     *
      * @return {@code true} if transient fields should be skipped, {@code false} otherwise
      */
     public boolean isSkipTransientField() {
@@ -118,8 +136,8 @@ public abstract class SerializationConfig<C extends SerializationConfig<C>> exte
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * config.setSkipTransientField(true);    // Skip transient fields
-     * config.setSkipTransientField(false);   // Include transient fields
+     * config.setSkipTransientField(true);    // removes transient fields
+     * config.setSkipTransientField(false);   // keeps transient fields
      * }</pre>
      *
      * @param skipTransientField {@code true} to skip transient fields, {@code false} to include them

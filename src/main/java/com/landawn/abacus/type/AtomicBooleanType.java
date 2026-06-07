@@ -66,9 +66,16 @@ public class AtomicBooleanType extends AbstractAtomicType<AtomicBoolean> {
      * The boolean value is read via {@link java.util.concurrent.atomic.AtomicBoolean#get()} and
      * converted to either {@code "true"} or {@code "false"}.
      *
+     * <p>The returned string is a serializable representation designed to be parsed back into an equivalent value
+     * via {@link #valueOf(String)}; {@code stringOf} and {@code valueOf} are inverse operations that round-trip. This
+     * is the key distinction from {@link Object#toString()}, whose result is not guaranteed to be convertible back
+     * into the original value.</p>
+     *
      * @param x the {@code AtomicBoolean} to convert; may be {@code null}
      * @return {@code "true"} if the contained value is {@code true}, {@code "false"} if it is {@code false},
      *         or {@code null} if {@code x} is {@code null}
+     * @see #valueOf(String)
+     * @see #valueOf(Object)
      */
     @Override
     public String stringOf(final AtomicBoolean x) {
@@ -83,9 +90,15 @@ public class AtomicBooleanType extends AbstractAtomicType<AtomicBoolean> {
      * {@link Boolean#valueOf(String)} (case-insensitive {@code "true"} yields {@code true}); any other
      * value yields {@code false}.
      *
+     * <p>This method is the inverse of {@code stringOf} and round-trips with it: it parses the string produced by
+     * {@code stringOf} back into a value of this type. Strings produced by {@link Object#toString()} are not
+     * guaranteed to be parseable in this way.</p>
+     *
      * @param str the string to parse; may be {@code null} or blank
      * @return a new {@code AtomicBoolean} containing the parsed boolean value,
      *         or {@code null} if {@code str} is {@code null}, empty, or blank
+     * @see #valueOf(Object)
+     * @see #stringOf(AtomicBoolean)
      */
     @Override
     public AtomicBoolean valueOf(final String str) {
@@ -169,10 +182,24 @@ public class AtomicBooleanType extends AbstractAtomicType<AtomicBoolean> {
     /**
      * Appends an {@link java.util.concurrent.atomic.AtomicBoolean} value to an {@link Appendable}.
      * Appends {@code "null"} if {@code x} is {@code null}; otherwise appends {@code "true"} or {@code "false"}.
+     * <p>
+     * <b>appendTo vs. serializeTo:</b> {@code appendTo} produces a plain, {@code toString()}-style rendering with no
+     * JSON/XML quoting or escaping (for general text output), whereas {@code serializeTo} produces the JSON/XML
+     * serialized form (applying string quotation and character escaping per the serialization config) and is used by the
+     * JSON/XML serializers.
      *
      * @param appendable the target {@code Appendable}
      * @param x the {@code AtomicBoolean} value to append; may be {@code null}
      * @throws IOException if an I/O error occurs during appending
+     * @implNote
+     * This method appends a string representation of {@code x} to {@code appendable} (the literal {@code "null"} for a
+     * {@code null} value). Conceptually this is the human-readable form produced by {@code toString()}, <i>not</i> the
+     * value returned by {@code stringOf}, which is a formatted, serializable representation (typically a JSON string)
+     * that {@link #valueOf(String)} can convert back into an equivalent value. For values whose nested structure makes
+     * the two forms differ (collections, maps, arrays), {@code appendTo} emits the unquoted, {@code toString()}-style
+     * form; it is therefore not, in the general contract, a plain
+     * {@code appendable.append(x == null ? NULL_STRING : stringOf(x))}. (For value types whose human-readable and
+     * serialized forms coincide, the appended text is naturally identical to {@code stringOf(x)}.)
      */
     @Override
     public void appendTo(final Appendable appendable, final AtomicBoolean x) throws IOException {
@@ -182,6 +209,15 @@ public class AtomicBooleanType extends AbstractAtomicType<AtomicBoolean> {
     /**
      * Writes an {@link java.util.concurrent.atomic.AtomicBoolean} value to a {@link CharacterWriter}.
      * Delegates to {@link #appendTo(Appendable, AtomicBoolean)}; {@code config} is not used.
+     * <p>
+     * This method is specifically designed for JSON/XML serialization: it writes the serialized form of {@code x} to the
+     * {@code CharacterWriter}, applying string quotation and character escaping according to the supplied serialization
+     * config (a {@code null} config means no surrounding quotation). It is the streaming counterpart of {@code stringOf}
+     * and is invoked by the JSON/XML serializers.
+     * <p>
+     * <b>serializeTo vs. appendTo:</b> {@code serializeTo} produces machine-readable JSON/XML (quoted and escaped),
+     * whereas {@code appendTo} produces a plain, human-readable {@code toString()}-style rendering without JSON/XML
+     * quoting or escaping.
      *
      * @param writer the {@code CharacterWriter} to write to
      * @param x the {@code AtomicBoolean} value to write; may be {@code null}
@@ -189,7 +225,7 @@ public class AtomicBooleanType extends AbstractAtomicType<AtomicBoolean> {
      * @throws IOException if an I/O error occurs during writing
      */
     @Override
-    public void writeCharacter(final CharacterWriter writer, final AtomicBoolean x, final JsonXmlSerConfig<?> config) throws IOException {
+    public void serializeTo(final CharacterWriter writer, final AtomicBoolean x, final JsonXmlSerConfig<?> config) throws IOException {
         appendTo(writer, x);
     }
 }

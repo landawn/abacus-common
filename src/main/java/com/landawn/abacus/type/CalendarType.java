@@ -106,8 +106,14 @@ public class CalendarType extends AbstractCalendarType<Calendar> {
      *   <li>All other values: parsed by {@link com.landawn.abacus.util.Dates#parseCalendar(String)}</li>
      * </ul>
      *
+     * <p>This method is the inverse of {@code stringOf} and round-trips with it: it parses the string produced by
+     * {@code stringOf} back into a value of this type. Strings produced by {@link Object#toString()} are not
+     * guaranteed to be parseable in this way.</p>
+     *
      * @param str the string to parse; may be {@code null} or empty
      * @return a {@link Calendar} parsed from {@code str}, or {@code null} if {@code str} is {@code null} or empty
+     * @see #valueOf(Object)
+     * @see #stringOf(java.util.Calendar)
      */
     @Override
     public Calendar valueOf(final String str) {

@@ -83,6 +83,11 @@ public final class SnappyOutputStream extends OutputStream {
      * <p>Note: Writing single bytes is generally less efficient than writing
      * arrays of bytes due to compression overhead.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * snappyOut.write(65);   // Write the byte 'A'
+     * }</pre>
+     *
      * @param b the byte to write (as an integer, where only the low-order byte is used)
      * @throws IOException if an I/O error occurs
      */
@@ -149,6 +154,12 @@ public final class SnappyOutputStream extends OutputStream {
      * the compressor to output data that might otherwise be further compressed with
      * subsequent writes.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * snappyOut.write("Hello".getBytes());
+     * snappyOut.flush();   // Force compression and output
+     * }</pre>
+     *
      * @throws IOException if an I/O error occurs
      */
     @Override
@@ -165,6 +176,16 @@ public final class SnappyOutputStream extends OutputStream {
      * Calling write methods after close() will result in an IOException.
      *
      * <p>This method is idempotent - multiple calls to close() have no additional effect.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * SnappyOutputStream snappyOut = new SnappyOutputStream(new FileOutputStream("data.snappy"));
+     * try {
+     *     snappyOut.write("Hello, World!".getBytes());
+     * } finally {
+     *     snappyOut.close();   // Flush and release resources
+     * }
+     * }</pre>
      *
      * @throws IOException if an I/O error occurs during closing
      */

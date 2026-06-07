@@ -3870,7 +3870,7 @@ public final class RowDataset implements Dataset, Cloneable {
                     if (type == null) {
                         bw.write(NULL_CHAR_ARRAY);
                     } else if (type.isSerializable()) {
-                        type.writeCharacter(bw, element, jsc);
+                        type.serializeTo(bw, element, jsc);
                     } else {
                         // jsonParser.serialize(bw, element, jsc);
 
@@ -3879,7 +3879,7 @@ public final class RowDataset implements Dataset, Cloneable {
                         } catch (final Exception e) {
                             // ignore.
 
-                            strType.writeCharacter(bw, N.toString(element), jsc);
+                            strType.serializeTo(bw, N.toString(element), jsc);
                         }
                     }
                 }
@@ -4102,7 +4102,7 @@ public final class RowDataset implements Dataset, Cloneable {
                     if (type == null) {
                         bw.write(NULL_CHAR_ARRAY);
                     } else if (type.isSerializable()) {
-                        type.writeCharacter(bw, element, xsc);
+                        type.serializeTo(bw, element, xsc);
                     } else {
                         // xmlParser.serialize(bw, element, xsc);
 
@@ -4111,7 +4111,7 @@ public final class RowDataset implements Dataset, Cloneable {
                         } catch (final Exception e) {
                             // ignore.
 
-                            strType.writeCharacter(bw, N.toString(element), xsc);
+                            strType.serializeTo(bw, N.toString(element), xsc);
                         }
                     }
 

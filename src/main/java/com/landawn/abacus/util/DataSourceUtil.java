@@ -164,7 +164,7 @@ public final class DataSourceUtil {
      * try {
      *     // Process results
      * } finally {
-     *     DataSourceUtil.close(rs, true);   // Also closes the statement
+     *     DataSourceUtil.close(rs, true);   // also closes the statement
      * }
      * }</pre>
      *
@@ -442,7 +442,7 @@ public final class DataSourceUtil {
      * try {
      *     // Process results
      * } finally {
-     *     DataSourceUtil.closeQuietly(rs, true);   // Also closes statement
+     *     DataSourceUtil.closeQuietly(rs, true);   // also closes statement
      * }
      * }</pre>
      *

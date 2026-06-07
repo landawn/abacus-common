@@ -98,11 +98,11 @@ import com.landawn.abacus.util.stream.Stream;
  *
  * // Search operations
  * Iterator<String> letters = Arrays.asList("A", "B", "C", "B", "D").iterator();
- * long index = Iterators.indexOf(letters, "B");                // Returns 1
+ * long index = Iterators.indexOf(letters, "B");                // returns 1
  *
  * // Counting operations
  * Iterator<Integer> numbers = Arrays.asList(1, 2, 3, 4, 5).iterator();
- * long evenCount = Iterators.count(numbers, n -> n % 2 == 0);  // Returns 2
+ * long evenCount = Iterators.count(numbers, n -> n % 2 == 0);  // returns 2
  *
  * // Transformation operations
  * Iterator<String> words = Arrays.asList("hello", "world", "java").iterator();
@@ -223,7 +223,7 @@ import com.landawn.abacus.util.stream.Stream;
  *   <li><b>{@link java.util.stream.Stream}:</b> Java 8+ Stream API</li>
  * </ul>
  *
- * <p><b>Usage Examples: Large Dataset Processing</b>
+ * <p><b>Usage Examples: Large Dataset Processing</b></p>
  * <pre>{@code
  * // Processing large datasets with memory efficiency
  * Iterator<String> largeDataset = getMillionRecordIterator();
@@ -238,7 +238,7 @@ import com.landawn.abacus.util.stream.Stream;
  * long validCount = Iterators.count(filtered, r -> r.getScore() > 0);
  * }</pre>
  *
- * <p><b>Usage Examples: Data Pipeline with Functional Operations</b>
+ * <p><b>Usage Examples: Data Pipeline with Functional Operations</b></p>
  * <pre>{@code
  * // Building a data processing pipeline
  * Iterator<RawData> source = dataSource.iterator();
@@ -2612,10 +2612,13 @@ public final class Iterators {
      * @param c the third iterator to be zipped, or {@code null} which is treated as an empty iterator.
      * @param zipFunction a {@code TriFunction} that takes an element from each iterator and returns a new element for the resulting {@code ObjIterator}.
      * @return an {@code ObjIterator} that will iterate over the elements created by {@code zipFunction}. The resulting iterator stops as soon as any input iterator is exhausted.
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}.
      * @see #zip(Iterator, Iterator, Iterator, Object, Object, Object, TriFunction)
      */
     public static <A, B, C, R> ObjIterator<R> zip(final Iterator<A> a, final Iterator<B> b, final Iterator<C> c,
             final TriFunction<? super A, ? super B, ? super C, ? extends R> zipFunction) {
+        N.checkArgNotNull(zipFunction, cs.function);
+
         return new ObjIterator<>() {
             private final Iterator<A> iterA = a == null ? ObjIterator.<A> empty() : a;
             private final Iterator<B> iterB = b == null ? ObjIterator.<B> empty() : b;
@@ -2690,10 +2693,13 @@ public final class Iterators {
      * @param valueForNoneB the default value to be used when the second Iterator is exhausted.
      * @param zipFunction a BiFunction that takes an element from each Iterator and returns a new element for the resulting ObjIterator.
      * @return an ObjIterator that will iterate over the elements created by <i>zipFunction</i>. The resulting iterator continues until both input iterators are exhausted, substituting the corresponding default value for an exhausted iterator.
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}.
      * @see #zip(Iterator, Iterator, BiFunction)
      */
     public static <A, B, R> ObjIterator<R> zip(final Iterator<A> a, final Iterator<B> b, final A valueForNoneA, final B valueForNoneB,
             final BiFunction<? super A, ? super B, ? extends R> zipFunction) {
+        N.checkArgNotNull(zipFunction, cs.function);
+
         return new ObjIterator<>() {
             private final Iterator<A> iterA = a == null ? ObjIterator.<A> empty() : a;
             private final Iterator<B> iterB = b == null ? ObjIterator.<B> empty() : b;
@@ -2776,10 +2782,13 @@ public final class Iterators {
      * @param valueForNoneC the default value to be used when the third Iterator is exhausted.
      * @param zipFunction a TriFunction that takes an element from each Iterator and returns a new element for the resulting ObjIterator.
      * @return an ObjIterator that will iterate over the elements created by <i>zipFunction</i>. The resulting iterator continues until all input iterators are exhausted, substituting the corresponding default value for an exhausted iterator.
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}.
      * @see #zip(Iterator, Iterator, Iterator, TriFunction)
      */
     public static <A, B, C, R> ObjIterator<R> zip(final Iterator<A> a, final Iterator<B> b, final Iterator<C> c, final A valueForNoneA, final B valueForNoneB,
             final C valueForNoneC, final TriFunction<? super A, ? super B, ? super C, ? extends R> zipFunction) {
+        N.checkArgNotNull(zipFunction, cs.function);
+
         return new ObjIterator<>() {
             private final Iterator<A> iterA = a == null ? ObjIterator.<A> empty() : a;
             private final Iterator<B> iterB = b == null ? ObjIterator.<B> empty() : b;
@@ -4039,6 +4048,8 @@ public final class Iterators {
      */
     @Beta
     public static <T, U> ObjIterator<U> flatMap(final Iterable<? extends T> c, final Function<? super T, ? extends Iterable<? extends U>> mapper) {
+        N.checkArgNotNull(mapper, cs.mapper);
+
         if (c == null) {
             return ObjIterator.empty();
         }
@@ -4132,6 +4143,8 @@ public final class Iterators {
      */
     @Beta
     public static <T, U> ObjIterator<U> flatmap(final Iterable<? extends T> c, final Function<? super T, ? extends U[]> mapper) { //NOSONAR
+        N.checkArgNotNull(mapper, cs.mapper);
+
         if (c == null) {
             return ObjIterator.empty();
         }
@@ -4251,7 +4264,7 @@ public final class Iterators {
      * <pre>{@code
      * Iterator<Integer> iter = Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8).iterator();
      * Iterators.forEach(iter, 2, 3, i -> System.out.println(i));
-     * // Prints: 3, 4, 5 (skips first 2, processes next 3)
+     * // prints: 3, 4, 5 (skips first 2, processes next 3)
      * }</pre>
      *
      * @param <T> the type of elements in the original iterator.

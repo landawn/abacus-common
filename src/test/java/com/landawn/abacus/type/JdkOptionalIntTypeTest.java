@@ -46,6 +46,15 @@ public class JdkOptionalIntTypeTest extends TestBase {
     }
 
     @Test
+    public void testCompare() {
+        assertEquals(0, optionalIntType.compare(OptionalInt.of(1), OptionalInt.of(1)));
+        assertTrue(optionalIntType.compare(OptionalInt.of(1), OptionalInt.of(2)) < 0);
+        assertTrue(optionalIntType.compare(OptionalInt.of(2), OptionalInt.of(1)) > 0);
+        assertTrue(optionalIntType.compare(OptionalInt.empty(), OptionalInt.of(1)) < 0);
+        assertEquals(0, optionalIntType.compare(OptionalInt.empty(), OptionalInt.empty()));
+    }
+
+    @Test
     public void test_isCsvQuoteRequired() {
         assertFalse(optionalIntType.isCsvQuoteRequired());
     }
@@ -187,31 +196,31 @@ public class JdkOptionalIntTypeTest extends TestBase {
     }
 
     @Test
-    public void testWriteCharacter_Null() throws IOException {
-        optionalIntType.writeCharacter(characterWriter, null, null);
+    public void testSerializeTo_Null() throws IOException {
+        optionalIntType.serializeTo(characterWriter, null, null);
         verify(characterWriter).write(any(char[].class));
     }
 
     @Test
-    public void testWriteCharacter_Empty() throws IOException {
-        optionalIntType.writeCharacter(characterWriter, OptionalInt.empty(), null);
+    public void testSerializeTo_Empty() throws IOException {
+        optionalIntType.serializeTo(characterWriter, OptionalInt.empty(), null);
         verify(characterWriter).write(any(char[].class));
     }
 
     @Test
-    public void testWriteCharacter_Present() throws IOException {
+    public void testSerializeTo_Present() throws IOException {
         OptionalInt opt = OptionalInt.of(42);
 
-        optionalIntType.writeCharacter(characterWriter, opt, null);
+        optionalIntType.serializeTo(characterWriter, opt, null);
         verify(characterWriter).writeInt(42);
     }
 
     @Test
-    public void testWriteCharacter_WithConfig() throws IOException {
+    public void testSerializeTo_WithConfig() throws IOException {
         OptionalInt opt = OptionalInt.of(42);
         JsonXmlSerConfig<?> config = mock(JsonXmlSerConfig.class);
 
-        optionalIntType.writeCharacter(characterWriter, opt, config);
+        optionalIntType.serializeTo(characterWriter, opt, config);
         verify(characterWriter).writeInt(42);
     }
 }

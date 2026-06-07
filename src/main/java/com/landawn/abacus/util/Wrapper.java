@@ -47,7 +47,7 @@ import java.util.function.ToIntFunction;
  *
  * Map<Wrapper<int[]>, String> map = new HashMap<>();
  * map.put(Wrapper.of(array1), "value");
- * String result = map.get(Wrapper.of(array2));   // Returns "value"
+ * String result = map.get(Wrapper.of(array2));   // returns "value"
  *
  * // Custom wrapper with specific hash/equals logic
  * Person person = new Person("John", 30);
@@ -150,8 +150,8 @@ public abstract class Wrapper<T> implements Immutable {
      * // Wrap a Person object but only consider the ID for equality
      * Person person = new Person(123, "John", 30);
      * Wrapper<Person> wrapper = Wrapper.of(person,
-     *     p -> p.getId(),                      // Hash by ID
-     *     (p1, p2) -> p1.getId() == p2.getId() // Compare by ID
+     *     p -> p.getId(),
+     *     (p1, p2) -> p1.getId() == p2.getId()
      * );
      *
      * // Use in a Set - only unique IDs allowed
@@ -198,15 +198,15 @@ public abstract class Wrapper<T> implements Immutable {
      * // Complete custom behavior for a complex object
      * ComplexObject obj = new ComplexObject(123, "data", Arrays.asList(1, 2, 3));
      * Wrapper<ComplexObject> wrapper = Wrapper.of(obj,
-     *     o -> o.computeCustomHash(),        // Custom hash function
-     *     (o1, o2) -> o1.isEquivalent(o2),   // Custom equals logic
-     *     o -> o.toDisplayString()           // Custom toString for debugging
+     *     o -> o.computeCustomHash(),
+     *     (o1, o2) -> o1.isEquivalent(o2),
+     *     o -> o.toDisplayString()
      * );
      *
      * // Use in collections with custom display
      * Map<Wrapper<ComplexObject>, String> map = new HashMap<>();
      * map.put(wrapper, "value");
-     * System.out.println(wrapper);  // Uses custom toString
+     * System.out.println(wrapper);  // prints using custom toString
      *
      * // Wrapper for records/tuples with specific formatting
      * Tuple<String, Integer> tuple = new Tuple<>("key", 100);
@@ -250,7 +250,7 @@ public abstract class Wrapper<T> implements Immutable {
      * // Retrieve the wrapped array
      * int[] array = {1, 2, 3};
      * Wrapper<int[]> wrapper = Wrapper.of(array);
-     * int[] unwrapped = wrapper.value();   // Returns the original array
+     * int[] unwrapped = wrapper.value();   // returns the original array
      *
      * // Access wrapped object in a map
      * Map<Wrapper<String[]>, String> map = new HashMap<>();

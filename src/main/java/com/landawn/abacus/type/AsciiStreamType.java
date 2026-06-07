@@ -154,18 +154,32 @@ public class AsciiStreamType extends InputStreamType {
      * If {@code x} is {@code null}, the literal string {@code "null"} is appended.
      * When {@code appendable} is a {@link java.io.Writer}, the stream is copied directly for efficiency.
      * Otherwise the entire stream is read into a {@code String} first, then appended.
+     * <p>
+     * <b>appendTo vs. serializeTo:</b> {@code appendTo} produces a plain, {@code toString()}-style rendering with no
+     * JSON/XML quoting or escaping (for general text output), whereas {@code serializeTo} produces the JSON/XML
+     * serialized form (applying string quotation and character escaping per the serialization config) and is used by the
+     * JSON/XML serializers.
      *
      * @param appendable the target {@code Appendable} to append to
      * @param x the {@code InputStream} containing ASCII-encoded data to append; may be {@code null}
      * @throws IOException if an I/O error occurs during reading or appending
+     * @implNote
+     * This method appends a string representation of {@code x} to {@code appendable} (the literal {@code "null"} for a
+     * {@code null} value). Conceptually this is the human-readable form produced by {@code toString()}, <i>not</i> the
+     * value returned by {@code stringOf}, which is a formatted, serializable representation (typically a JSON string)
+     * that {@link #valueOf(String)} can convert back into an equivalent value. For values whose nested structure makes
+     * the two forms differ (collections, maps, arrays), {@code appendTo} emits the unquoted, {@code toString()}-style
+     * form; it is therefore not, in the general contract, a plain
+     * {@code appendable.append(x == null ? NULL_STRING : stringOf(x))}. (For value types whose human-readable and
+     * serialized forms coincide, the appended text is naturally identical to {@code stringOf(x)}.)
      */
     @Override
     public void appendTo(final Appendable appendable, final InputStream x) throws IOException {
         if (x == null) {
             appendable.append(NULL_STRING);
         } else {
-            if (appendable instanceof Writer) {
-                IOUtil.write(IOUtil.newInputStreamReader(x, Charsets.US_ASCII), (Writer) appendable); // NOSONAR
+            if (appendable instanceof Writer writer) {
+                IOUtil.write(IOUtil.newInputStreamReader(x, Charsets.US_ASCII), writer); // NOSONAR
             } else {
                 appendable.append(IOUtil.readAllToString(x, Charsets.US_ASCII));
             }
@@ -177,6 +191,15 @@ public class AsciiStreamType extends InputStreamType {
      * surrounding the value with the string-quotation character specified in {@code config}.
      * If {@code x} is {@code null}, the literal {@code "null"} character array is written.
      * The stream is read in chunks using a pooled character buffer for efficiency.
+     * <p>
+     * This method is specifically designed for JSON/XML serialization: it writes the serialized form of {@code x} to the
+     * {@code CharacterWriter}, applying string quotation and character escaping according to the supplied serialization
+     * config (a {@code null} config means no surrounding quotation). It is the streaming counterpart of {@code stringOf}
+     * and is invoked by the JSON/XML serializers.
+     * <p>
+     * <b>serializeTo vs. appendTo:</b> {@code serializeTo} produces machine-readable JSON/XML (quoted and escaped),
+     * whereas {@code appendTo} produces a plain, human-readable {@code toString()}-style rendering without JSON/XML
+     * quoting or escaping.
      *
      * @param writer the {@code CharacterWriter} to write to
      * @param x the {@code InputStream} containing ASCII-encoded data to write; may be {@code null}
@@ -186,7 +209,7 @@ public class AsciiStreamType extends InputStreamType {
      * @throws IOException if an I/O error occurs during reading or writing
      */
     @Override
-    public void writeCharacter(final CharacterWriter writer, final InputStream x, final JsonXmlSerConfig<?> config) throws IOException {
+    public void serializeTo(final CharacterWriter writer, final InputStream x, final JsonXmlSerConfig<?> config) throws IOException {
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {

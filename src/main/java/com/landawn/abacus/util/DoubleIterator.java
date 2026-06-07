@@ -99,7 +99,7 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * DoubleIterator iter = DoubleIterator.empty();
-     * System.out.println(iter.hasNext());   // false
+     * System.out.println(iter.hasNext());   // returns false
      * }</pre>
      *
      * @return an empty {@code DoubleIterator}
@@ -332,6 +332,13 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
      * Returns the next element as a boxed {@link Double}.
      * This method is deprecated; use {@link #nextDouble()} instead for better performance.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * DoubleIterator iter = DoubleIterator.of(1.0, 2.0);
+     * Double boxed = iter.next();           // returns 1.0 (boxed) — avoid this
+     * double primitive = iter.nextDouble(); // returns 2.0 — prefer this
+     * }</pre>
+     *
      * @return the next double value as a {@code Double} object
      * @throws NoSuchElementException if the iteration has no more elements
      * @deprecated use {@link #nextDouble()} instead to avoid boxing overhead
@@ -348,8 +355,8 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * DoubleIterator iter = DoubleIterator.of(1.0, 2.0, 3.0);
-     * double first = iter.nextDouble();    // 1.0
-     * double second = iter.nextDouble();   // 2.0
+     * double first = iter.nextDouble();    // returns 1.0
+     * double second = iter.nextDouble();   // returns 2.0
      * }</pre>
      *
      * @return the next double value
@@ -528,7 +535,7 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
      * // array = [1.0, 2.0, 3.0, 4.0, 5.0]
      *
      * // Empty iterator returns empty array
-     * double[] empty = DoubleIterator.empty().toArray();   // empty.length == 0
+     * double[] empty = DoubleIterator.empty().toArray();   // returns empty.length == 0
      * }</pre>
      *
      * @return a {@code double} array containing all remaining elements; an empty array if there are none
@@ -551,7 +558,7 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
      * // list contains [1.0, 2.0, 3.0, 4.0, 5.0]
      *
      * // Empty iterator returns empty list
-     * DoubleList empty = DoubleIterator.empty().toList();   // empty.size() == 0
+     * DoubleList empty = DoubleIterator.empty().toList();   // returns empty.size() == 0
      * }</pre>
      *
      * @return a {@link DoubleList} containing all remaining elements; an empty list if there are none
@@ -649,6 +656,12 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
      * Performs the given action for each remaining element, boxing each {@code double} to a {@link Double}.
      * This method is deprecated; use {@link #foreachRemaining(Throwables.DoubleConsumer)} instead
      * to avoid boxing overhead.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * DoubleIterator iter = DoubleIterator.of(1.0, 2.0, 3.0);
+     * iter.forEachRemaining(value -> System.out.println(value));   // Boxes each double — avoid this
+     * }</pre>
      *
      * @param action the action to perform on each element; must not be {@code null}
      * @deprecated use {@link #foreachRemaining(Throwables.DoubleConsumer)} instead to avoid boxing overhead

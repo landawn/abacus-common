@@ -295,6 +295,14 @@ public final class XmlMappers {
      * Serializes the specified object to an XML output stream using a custom serialization configuration.
      * The stream is not closed by this method.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * SerializationConfig config = XmlMappers.createSerializationConfig().with(SerializationFeature.INDENT_OUTPUT);
+     * ByteArrayOutputStream out = new ByteArrayOutputStream();
+     * XmlMappers.toXml(N.asMap("name", "Bob"), out, config);   // writes indented <ImmutableMap>...</ImmutableMap>
+     * String xml = out.toString();                             // contains "<name>Bob</name>"
+     * }</pre>
+     *
      * @param obj the object to serialize
      * @param output the output stream to write the XML to
      * @param config the serialization configuration to use
@@ -341,6 +349,14 @@ public final class XmlMappers {
      * Serializes the specified object to an XML writer using a custom serialization configuration.
      * The writer is not closed by this method.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * SerializationConfig config = XmlMappers.createSerializationConfig().with(SerializationFeature.INDENT_OUTPUT);
+     * StringWriter writer = new StringWriter();
+     * XmlMappers.toXml(N.asMap("name", "Bob"), writer, config);   // writes indented XML to the writer
+     * String xml = writer.toString();                             // contains "<name>Bob</name>"
+     * }</pre>
+     *
      * @param obj the object to serialize
      * @param output the writer to write the XML to
      * @param config the serialization configuration to use
@@ -362,6 +378,14 @@ public final class XmlMappers {
      * Serializes the specified object to a DataOutput using default configuration.
      * This method is useful for writing XML to binary protocols.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+     * DataOutput out = new DataOutputStream(bytes);
+     * XmlMappers.toXml(N.asMap("name", "Bob"), out);   // writes <ImmutableMap><name>Bob</name></ImmutableMap>
+     * String xml = bytes.toString();                   // contains "<name>Bob</name>"
+     * }</pre>
+     *
      * @param obj the object to serialize
      * @param output the DataOutput to write the XML to
      * @throws RuntimeException if an I/O error occurs
@@ -376,6 +400,15 @@ public final class XmlMappers {
 
     /**
      * Serializes the specified object to a DataOutput using a custom serialization configuration.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * SerializationConfig config = XmlMappers.createSerializationConfig().with(SerializationFeature.INDENT_OUTPUT);
+     * ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+     * DataOutput out = new DataOutputStream(bytes);
+     * XmlMappers.toXml(N.asMap("name", "Bob"), out, config);   // writes indented XML
+     * String xml = bytes.toString();                           // contains "<name>Bob</name>"
+     * }</pre>
      *
      * @param obj the object to serialize
      * @param output the DataOutput to write the XML to
@@ -420,6 +453,13 @@ public final class XmlMappers {
 
     /**
      * Deserializes XML from a portion of a byte array into an object of the specified type.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * byte[] bytes = "##<LinkedHashMap><name>Bob</name></LinkedHashMap>".getBytes();
+     * Map<String, Object> map = XmlMappers.fromXml(bytes, 2, bytes.length - 2, Map.class);
+     * // map -> {name=Bob}; the leading "##" is skipped via offset 2
+     * }</pre>
      *
      * @param <T> the type of the object to return
      * @param xml the XML byte array containing the data
@@ -491,6 +531,14 @@ public final class XmlMappers {
     /**
      * Deserializes an XML string into an object of the specified type using a custom deserialization configuration.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * DeserializationConfig config = XmlMappers.createDeserializationConfig()
+     *     .without(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
+     * String xml = "<LinkedHashMap><name>Bob</name></LinkedHashMap>";
+     * Map<String, Object> map = XmlMappers.fromXml(xml, Map.class, config);   // map -> {name=Bob}
+     * }</pre>
+     *
      * @param <T> the type of the object to return
      * @param xml the XML string to deserialize
      * @param targetType the class of the object to deserialize to
@@ -537,6 +585,14 @@ public final class XmlMappers {
 
     /**
      * Deserializes XML from a file into an object of the specified type using a custom deserialization configuration.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * DeserializationConfig config = XmlMappers.createDeserializationConfig()
+     *     .without(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
+     * File xmlFile = new File("person.xml");
+     * Person person = XmlMappers.fromXml(xmlFile, Person.class, config);
+     * }</pre>
      *
      * @param <T> the type of the object to return
      * @param xml the XML file to read from
@@ -588,6 +644,15 @@ public final class XmlMappers {
      * Deserializes XML from an input stream into an object of the specified type using a custom deserialization configuration.
      * The stream is not closed by this method.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * DeserializationConfig config = XmlMappers.createDeserializationConfig();
+     * String xml = "<LinkedHashMap><name>Bob</name></LinkedHashMap>";
+     * try (InputStream in = new ByteArrayInputStream(xml.getBytes())) {
+     *     Map<String, Object> map = XmlMappers.fromXml(in, Map.class, config);   // map -> {name=Bob}
+     * }
+     * }</pre>
+     *
      * @param <T> the type of the object to return
      * @param xml the input stream containing XML data
      * @param targetType the class of the object to deserialize to
@@ -637,6 +702,15 @@ public final class XmlMappers {
     /**
      * Deserializes XML from a reader into an object of the specified type using a custom deserialization configuration.
      * The reader is not closed by this method.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * DeserializationConfig config = XmlMappers.createDeserializationConfig();
+     * String xml = "<LinkedHashMap><name>Bob</name></LinkedHashMap>";
+     * try (Reader reader = new StringReader(xml)) {
+     *     Map<String, Object> map = XmlMappers.fromXml(reader, Map.class, config);   // map -> {name=Bob}
+     * }
+     * }</pre>
      *
      * @param <T> the type of the object to return
      * @param xml the reader containing XML data
@@ -688,6 +762,13 @@ public final class XmlMappers {
      * Deserializes XML from a URL into an object of the specified type using a custom deserialization configuration.
      * The URL may use any supported protocol (e.g., {@code http}, {@code file}, {@code jar}).
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * DeserializationConfig config = XmlMappers.createDeserializationConfig();
+     * URL xmlUrl = new File("person.xml").toURI().toURL();
+     * Person person = XmlMappers.fromXml(xmlUrl, Person.class, config);
+     * }</pre>
+     *
      * @param <T> the type of the object to return
      * @param xml the URL pointing to XML data
      * @param targetType the class of the object to deserialize to
@@ -713,6 +794,14 @@ public final class XmlMappers {
      * Deserializes XML from a DataInput into an object of the specified type.
      * This method is useful for reading XML from binary protocols.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * DataInput in = new DataInputStream(new ByteArrayInputStream(xmlBytes));
+     * // Note: the underlying Jackson XML format does not support reading from a DataInput
+     * // source, so this call throws an UnsupportedOperationException at runtime.
+     * Person person = XmlMappers.fromXml(in, Person.class);   // throws UnsupportedOperationException
+     * }</pre>
+     *
      * @param <T> the type of the object to return
      * @param xml the DataInput containing XML data
      * @param targetType the class of the object to deserialize to
@@ -730,6 +819,15 @@ public final class XmlMappers {
 
     /**
      * Deserializes XML from a DataInput into an object of the specified type using a custom deserialization configuration.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * DeserializationConfig config = XmlMappers.createDeserializationConfig();
+     * DataInput in = new DataInputStream(new ByteArrayInputStream(xmlBytes));
+     * // Note: the underlying Jackson XML format does not support reading from a DataInput
+     * // source, so this call throws an UnsupportedOperationException at runtime.
+     * Person person = XmlMappers.fromXml(in, Person.class, config);   // throws UnsupportedOperationException
+     * }</pre>
      *
      * @param <T> the type of the object to return
      * @param xml the DataInput containing XML data
@@ -779,6 +877,14 @@ public final class XmlMappers {
     /**
      * Deserializes XML from a portion of a byte array into an object of the specified generic type.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * byte[] bytes = "##<List><item>a</item><item>b</item></List>".getBytes();
+     * List<String> list = XmlMappers.fromXml(bytes, 2, bytes.length - 2,
+     *         new TypeReference<List<String>>() {});
+     * // list -> [a, b]; the leading "##" is skipped via offset 2
+     * }</pre>
+     *
      * @param <T> the type of the object to return
      * @param xml the XML byte array containing the data
      * @param offset the start offset in the array
@@ -824,6 +930,13 @@ public final class XmlMappers {
     /**
      * Deserializes an XML string into an object of the specified generic type with custom deserialization features.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * String xml = "<List><item>a</item><item>b</item></List>";
+     * List<String> list = XmlMappers.fromXml(xml, new TypeReference<List<String>>() {},
+     *         DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY);   // list -> [a, b]
+     * }</pre>
+     *
      * @param <T> the type of the object to return
      * @param xml the XML string to deserialize
      * @param targetType the type reference describing the target type
@@ -840,6 +953,13 @@ public final class XmlMappers {
 
     /**
      * Deserializes an XML string into an object of the specified generic type using a custom deserialization configuration.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * DeserializationConfig config = XmlMappers.createDeserializationConfig();
+     * String xml = "<List><item>a</item><item>b</item></List>";
+     * List<String> list = XmlMappers.fromXml(xml, new TypeReference<List<String>>() {}, config);   // list -> [a, b]
+     * }</pre>
      *
      * @param <T> the type of the object to return
      * @param xml the XML string to deserialize
@@ -864,6 +984,12 @@ public final class XmlMappers {
     /**
      * Deserializes XML from a file into an object of the specified generic type.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * File xmlFile = new File("items.xml");                                                    // contains <List><item>a</item><item>b</item></List>
+     * List<String> list = XmlMappers.fromXml(xmlFile, new TypeReference<List<String>>() {});   // list -> [a, b]
+     * }</pre>
+     *
      * @param <T> the type of the object to return
      * @param xml the XML file to read from
      * @param targetType the type reference describing the target type, can be the {@code Type} of {@code Bean/Array/Collection/Map}
@@ -881,6 +1007,13 @@ public final class XmlMappers {
 
     /**
      * Deserializes XML from a file into an object of the specified generic type using a custom deserialization configuration.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * DeserializationConfig config = XmlMappers.createDeserializationConfig();
+     * File xmlFile = new File("items.xml");                                                            // contains <List><item>a</item><item>b</item></List>
+     * List<String> list = XmlMappers.fromXml(xmlFile, new TypeReference<List<String>>() {}, config);   // list -> [a, b]
+     * }</pre>
      *
      * @param <T> the type of the object to return
      * @param xml the XML file to read from
@@ -906,6 +1039,14 @@ public final class XmlMappers {
      * Deserializes XML from an input stream into an object of the specified generic type.
      * The stream is not closed by this method.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * String xml = "<List><item>a</item><item>b</item></List>";
+     * try (InputStream in = new ByteArrayInputStream(xml.getBytes())) {
+     *     List<String> list = XmlMappers.fromXml(in, new TypeReference<List<String>>() {});   // list -> [a, b]
+     * }
+     * }</pre>
+     *
      * @param <T> the type of the object to return
      * @param xml the input stream containing XML data
      * @param targetType the type reference describing the target type, can be the {@code Type} of {@code Bean/Array/Collection/Map}
@@ -924,6 +1065,15 @@ public final class XmlMappers {
     /**
      * Deserializes XML from an input stream into an object of the specified generic type using a custom deserialization configuration.
      * The stream is not closed by this method.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * DeserializationConfig config = XmlMappers.createDeserializationConfig();
+     * String xml = "<List><item>a</item><item>b</item></List>";
+     * try (InputStream in = new ByteArrayInputStream(xml.getBytes())) {
+     *     List<String> list = XmlMappers.fromXml(in, new TypeReference<List<String>>() {}, config);   // list -> [a, b]
+     * }
+     * }</pre>
      *
      * @param <T> the type of the object to return
      * @param xml the input stream containing XML data
@@ -949,6 +1099,14 @@ public final class XmlMappers {
      * Deserializes XML from a reader into an object of the specified generic type.
      * The reader is not closed by this method.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * String xml = "<List><item>a</item><item>b</item></List>";
+     * try (Reader reader = new StringReader(xml)) {
+     *     List<String> list = XmlMappers.fromXml(reader, new TypeReference<List<String>>() {});   // list -> [a, b]
+     * }
+     * }</pre>
+     *
      * @param <T> the type of the object to return
      * @param xml the reader containing XML data
      * @param targetType the type reference describing the target type, can be the {@code Type} of {@code Bean/Array/Collection/Map}
@@ -967,6 +1125,15 @@ public final class XmlMappers {
     /**
      * Deserializes XML from a reader into an object of the specified generic type using a custom deserialization configuration.
      * The reader is not closed by this method.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * DeserializationConfig config = XmlMappers.createDeserializationConfig();
+     * String xml = "<List><item>a</item><item>b</item></List>";
+     * try (Reader reader = new StringReader(xml)) {
+     *     List<String> list = XmlMappers.fromXml(reader, new TypeReference<List<String>>() {}, config);   // list -> [a, b]
+     * }
+     * }</pre>
      *
      * @param <T> the type of the object to return
      * @param xml the reader containing XML data
@@ -992,6 +1159,12 @@ public final class XmlMappers {
      * Deserializes XML from a URL into an object of the specified generic type.
      * The URL may use any supported protocol (e.g., {@code http}, {@code file}, {@code jar}).
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * URL xmlUrl = new File("items.xml").toURI().toURL();                                     // file contains a <List> of items
+     * List<String> list = XmlMappers.fromXml(xmlUrl, new TypeReference<List<String>>() {});   // list -> [a, b]
+     * }</pre>
+     *
      * @param <T> the type of the object to return
      * @param xml the URL pointing to XML data
      * @param targetType the type reference describing the target type
@@ -1011,6 +1184,13 @@ public final class XmlMappers {
     /**
      * Deserializes XML from a URL into an object of the specified generic type using a custom deserialization configuration.
      * The URL may use any supported protocol (e.g., {@code http}, {@code file}, {@code jar}).
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * DeserializationConfig config = XmlMappers.createDeserializationConfig();
+     * URL xmlUrl = new File("items.xml").toURI().toURL();                                             // file contains a <List> of items
+     * List<String> list = XmlMappers.fromXml(xmlUrl, new TypeReference<List<String>>() {}, config);   // list -> [a, b]
+     * }</pre>
      *
      * @param <T> the type of the object to return
      * @param xml the URL pointing to XML data
@@ -1037,6 +1217,14 @@ public final class XmlMappers {
      * Deserializes XML from a DataInput into an object of the specified generic type.
      * This method is useful for reading XML from binary protocols.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * DataInput in = new DataInputStream(new ByteArrayInputStream(xmlBytes));
+     * // Note: the underlying Jackson XML format does not support reading from a DataInput
+     * // source, so this call throws an UnsupportedOperationException at runtime.
+     * List<String> list = XmlMappers.fromXml(in, new TypeReference<List<String>>() {});   // throws UnsupportedOperationException
+     * }</pre>
+     *
      * @param <T> the type of the object to return
      * @param xml the DataInput containing XML data
      * @param targetType the type reference describing the target type
@@ -1054,6 +1242,15 @@ public final class XmlMappers {
 
     /**
      * Deserializes XML from a DataInput into an object of the specified generic type using a custom deserialization configuration.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * DeserializationConfig config = XmlMappers.createDeserializationConfig();
+     * DataInput in = new DataInputStream(new ByteArrayInputStream(xmlBytes));
+     * // Note: the underlying Jackson XML format does not support reading from a DataInput
+     * // source, so this call throws an UnsupportedOperationException at runtime.
+     * List<String> list = XmlMappers.fromXml(in, new TypeReference<List<String>>() {}, config);   // throws UnsupportedOperationException
+     * }</pre>
      *
      * @param <T> the type of the object to return
      * @param xml the DataInput containing XML data
@@ -1234,9 +1431,10 @@ public final class XmlMappers {
      *
      * // Use the wrapped mapper for multiple operations
      * String xml1 = xmlMappers.toXml(object1);
-     * String xml2 = xmlMappers.toXml(object2, true);   // with pretty print
+     * String xml2 = xmlMappers.toXml(object2, true);   // returns with pretty print
      * Person person = xmlMappers.fromXml(xmlString, Person.class);
      * }</pre>
+     *
      */
     public static final class One {
         private final XmlMapper xmlMapper;
@@ -1281,6 +1479,13 @@ public final class XmlMappers {
          * Serializes the specified object to an XML string with optional pretty formatting
          * using the wrapped XmlMapper.
          *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * XmlMappers.One xmlMappers = XmlMappers.wrap(new XmlMapper());
+         * String compact = xmlMappers.toXml(N.asMap("name", "Bob"), false);   // <ImmutableMap><name>Bob</name></ImmutableMap>
+         * String pretty = xmlMappers.toXml(N.asMap("name", "Bob"), true);     // same content, indented across lines
+         * }</pre>
+         *
          * @param obj the object to serialize
          * @param prettyFormat {@code true} to enable pretty printing with indentation
          * @return the XML string representation of the object
@@ -1301,6 +1506,13 @@ public final class XmlMappers {
         /**
          * Serializes the specified object to an XML file using the wrapped XmlMapper.
          *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * XmlMappers.One xmlMappers = XmlMappers.wrap(new XmlMapper());
+         * File output = new File("person.xml");
+         * xmlMappers.toXml(N.asMap("name", "Bob"), output);   // writes <ImmutableMap><name>Bob</name></ImmutableMap>
+         * }</pre>
+         *
          * @param obj the object to serialize
          * @param output the output file to write the XML to
          * @throws RuntimeException if an I/O error occurs
@@ -1316,6 +1528,13 @@ public final class XmlMappers {
         /**
          * Serializes the specified object to an output stream using the wrapped XmlMapper.
          * The stream is not closed by this method.
+         *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * XmlMappers.One xmlMappers = XmlMappers.wrap(new XmlMapper());
+         * ByteArrayOutputStream out = new ByteArrayOutputStream();
+         * xmlMappers.toXml(N.asMap("name", "Bob"), out);   // writes XML; out contains "<name>Bob</name>"
+         * }</pre>
          *
          * @param obj the object to serialize
          * @param output the output stream to write the XML to
@@ -1333,6 +1552,13 @@ public final class XmlMappers {
          * Serializes the specified object to a writer using the wrapped XmlMapper.
          * The writer is not closed by this method.
          *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * XmlMappers.One xmlMappers = XmlMappers.wrap(new XmlMapper());
+         * StringWriter writer = new StringWriter();
+         * xmlMappers.toXml(N.asMap("name", "Bob"), writer);   // writer.toString() contains "<name>Bob</name>"
+         * }</pre>
+         *
          * @param obj the object to serialize
          * @param output the writer to write the XML to
          * @throws RuntimeException if an I/O error occurs
@@ -1347,6 +1573,14 @@ public final class XmlMappers {
 
         /**
          * Serializes the specified object to a DataOutput using the wrapped XmlMapper.
+         *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * XmlMappers.One xmlMappers = XmlMappers.wrap(new XmlMapper());
+         * ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+         * DataOutput out = new DataOutputStream(bytes);
+         * xmlMappers.toXml(N.asMap("name", "Bob"), out);   // bytes.toString() contains "<name>Bob</name>"
+         * }</pre>
          *
          * @param obj the object to serialize
          * @param output the DataOutput to write the XML to
@@ -1363,6 +1597,13 @@ public final class XmlMappers {
         /**
          * Deserializes XML from a byte array into an object of the specified type
          * using the wrapped XmlMapper.
+         *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * XmlMappers.One xmlMappers = XmlMappers.wrap(new XmlMapper());
+         * byte[] bytes = "<LinkedHashMap><name>Bob</name></LinkedHashMap>".getBytes();
+         * Map<String, Object> map = xmlMappers.fromXml(bytes, Map.class);   // map -> {name=Bob}
+         * }</pre>
          *
          * @param <T> the type of the object to return
          * @param xml the XML byte array to deserialize
@@ -1382,6 +1623,13 @@ public final class XmlMappers {
         /**
          * Deserializes XML from a portion of a byte array into an object of the specified type
          * using the wrapped XmlMapper.
+         *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * XmlMappers.One xmlMappers = XmlMappers.wrap(new XmlMapper());
+         * byte[] bytes = "##<LinkedHashMap><name>Bob</name></LinkedHashMap>".getBytes();
+         * Map<String, Object> map = xmlMappers.fromXml(bytes, 2, bytes.length - 2, Map.class);   // map -> {name=Bob}
+         * }</pre>
          *
          * @param <T> the type of the object to return
          * @param xml the XML byte array containing the data
@@ -1429,6 +1677,13 @@ public final class XmlMappers {
          * Deserializes XML from a file into an object of the specified type
          * using the wrapped XmlMapper.
          *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * XmlMappers.One xmlMappers = XmlMappers.wrap(new XmlMapper());
+         * File xmlFile = new File("person.xml");
+         * Person person = xmlMappers.fromXml(xmlFile, Person.class);
+         * }</pre>
+         *
          * @param <T> the type of the object to return
          * @param xml the XML file to read from
          * @param targetType the class of the object to deserialize to
@@ -1448,6 +1703,15 @@ public final class XmlMappers {
          * Deserializes XML from an input stream into an object of the specified type
          * using the wrapped XmlMapper. The stream is not closed by this method.
          *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * XmlMappers.One xmlMappers = XmlMappers.wrap(new XmlMapper());
+         * String xml = "<LinkedHashMap><name>Bob</name></LinkedHashMap>";
+         * try (InputStream in = new ByteArrayInputStream(xml.getBytes())) {
+         *     Map<String, Object> map = xmlMappers.fromXml(in, Map.class);   // map -> {name=Bob}
+         * }
+         * }</pre>
+         *
          * @param <T> the type of the object to return
          * @param xml the input stream containing XML data
          * @param targetType the class of the object to deserialize to
@@ -1466,6 +1730,15 @@ public final class XmlMappers {
         /**
          * Deserializes XML from a reader into an object of the specified type
          * using the wrapped XmlMapper. The reader is not closed by this method.
+         *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * XmlMappers.One xmlMappers = XmlMappers.wrap(new XmlMapper());
+         * String xml = "<LinkedHashMap><name>Bob</name></LinkedHashMap>";
+         * try (Reader reader = new StringReader(xml)) {
+         *     Map<String, Object> map = xmlMappers.fromXml(reader, Map.class);   // map -> {name=Bob}
+         * }
+         * }</pre>
          *
          * @param <T> the type of the object to return
          * @param xml the reader containing XML data
@@ -1487,6 +1760,13 @@ public final class XmlMappers {
          * using the wrapped XmlMapper.
          * The URL may use any supported protocol (e.g., {@code http}, {@code file}, {@code jar}).
          *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * XmlMappers.One xmlMappers = XmlMappers.wrap(new XmlMapper());
+         * URL xmlUrl = new File("person.xml").toURI().toURL();
+         * Person person = xmlMappers.fromXml(xmlUrl, Person.class);
+         * }</pre>
+         *
          * @param <T> the type of the object to return
          * @param xml the URL pointing to XML data
          * @param targetType the class of the object to deserialize to
@@ -1507,6 +1787,15 @@ public final class XmlMappers {
          * Deserializes XML from a DataInput into an object of the specified type
          * using the wrapped XmlMapper.
          *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * XmlMappers.One xmlMappers = XmlMappers.wrap(new XmlMapper());
+         * DataInput in = new DataInputStream(new ByteArrayInputStream(xmlBytes));
+         * // Note: the underlying Jackson XML format does not support reading from a DataInput
+         * // source, so this call throws an UnsupportedOperationException at runtime.
+         * Person person = xmlMappers.fromXml(in, Person.class);   // throws UnsupportedOperationException
+         * }</pre>
+         *
          * @param <T> the type of the object to return
          * @param xml the DataInput containing XML data
          * @param targetType the class of the object to deserialize to
@@ -1526,6 +1815,13 @@ public final class XmlMappers {
          * Deserializes XML from a byte array into an object of the specified generic type
          * using the wrapped XmlMapper.
          *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * XmlMappers.One xmlMappers = XmlMappers.wrap(new XmlMapper());
+         * byte[] bytes = "<List><item>a</item><item>b</item></List>".getBytes();
+         * List<String> list = xmlMappers.fromXml(bytes, new TypeReference<List<String>>() {});   // list -> [a, b]
+         * }</pre>
+         *
          * @param <T> the type of the object to return
          * @param xml the XML byte array to deserialize
          * @param targetType the type reference describing the target type
@@ -1544,6 +1840,14 @@ public final class XmlMappers {
         /**
          * Deserializes XML from a portion of a byte array into an object of the specified generic type
          * using the wrapped XmlMapper.
+         *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * XmlMappers.One xmlMappers = XmlMappers.wrap(new XmlMapper());
+         * byte[] bytes = "##<List><item>a</item><item>b</item></List>".getBytes();
+         * List<String> list = xmlMappers.fromXml(bytes, 2, bytes.length - 2,
+         *         new TypeReference<List<String>>() {});   // list -> [a, b]
+         * }</pre>
          *
          * @param <T> the type of the object to return
          * @param xml the XML byte array containing the data
@@ -1591,6 +1895,13 @@ public final class XmlMappers {
          * Deserializes XML from a file into an object of the specified generic type
          * using the wrapped XmlMapper.
          *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * XmlMappers.One xmlMappers = XmlMappers.wrap(new XmlMapper());
+         * File xmlFile = new File("items.xml");                                                    // contains <List><item>a</item><item>b</item></List>
+         * List<String> list = xmlMappers.fromXml(xmlFile, new TypeReference<List<String>>() {});   // list -> [a, b]
+         * }</pre>
+         *
          * @param <T> the type of the object to return
          * @param xml the XML file to read from
          * @param targetType the type reference describing the target type, can be the {@code Type} of {@code Bean/Array/Collection/Map}
@@ -1610,6 +1921,15 @@ public final class XmlMappers {
          * Deserializes XML from an input stream into an object of the specified generic type
          * using the wrapped XmlMapper. The stream is not closed by this method.
          *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * XmlMappers.One xmlMappers = XmlMappers.wrap(new XmlMapper());
+         * String xml = "<List><item>a</item><item>b</item></List>";
+         * try (InputStream in = new ByteArrayInputStream(xml.getBytes())) {
+         *     List<String> list = xmlMappers.fromXml(in, new TypeReference<List<String>>() {});   // list -> [a, b]
+         * }
+         * }</pre>
+         *
          * @param <T> the type of the object to return
          * @param xml the InputStream containing XML data
          * @param targetType the type reference describing the target type, can be the {@code Type} of {@code Bean/Array/Collection/Map}
@@ -1628,6 +1948,15 @@ public final class XmlMappers {
         /**
          * Deserializes XML from a reader into an object of the specified generic type
          * using the wrapped XmlMapper. The reader is not closed by this method.
+         *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * XmlMappers.One xmlMappers = XmlMappers.wrap(new XmlMapper());
+         * String xml = "<List><item>a</item><item>b</item></List>";
+         * try (Reader reader = new StringReader(xml)) {
+         *     List<String> list = xmlMappers.fromXml(reader, new TypeReference<List<String>>() {});   // list -> [a, b]
+         * }
+         * }</pre>
          *
          * @param <T> the type of the object to return
          * @param xml the reader containing XML data
@@ -1649,6 +1978,13 @@ public final class XmlMappers {
          * using the wrapped XmlMapper.
          * The URL may use any supported protocol (e.g., {@code http}, {@code file}, {@code jar}).
          *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * XmlMappers.One xmlMappers = XmlMappers.wrap(new XmlMapper());
+         * URL xmlUrl = new File("items.xml").toURI().toURL();                                     // file contains a <List> of items
+         * List<String> list = xmlMappers.fromXml(xmlUrl, new TypeReference<List<String>>() {});   // list -> [a, b]
+         * }</pre>
+         *
          * @param <T> the type of the object to return
          * @param xml the URL pointing to XML data
          * @param targetType the type reference describing the target type, can be the {@code Type} of {@code Bean/Array/Collection/Map}
@@ -1668,6 +2004,15 @@ public final class XmlMappers {
         /**
          * Deserializes XML from a DataInput into an object of the specified generic type
          * using the wrapped XmlMapper.
+         *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * XmlMappers.One xmlMappers = XmlMappers.wrap(new XmlMapper());
+         * DataInput in = new DataInputStream(new ByteArrayInputStream(xmlBytes));
+         * // Note: the underlying Jackson XML format does not support reading from a DataInput
+         * // source, so this call throws an UnsupportedOperationException at runtime.
+         * List<String> list = xmlMappers.fromXml(in, new TypeReference<List<String>>() {});   // throws UnsupportedOperationException
+         * }</pre>
          *
          * @param <T> the type of the object to return
          * @param xml the DataInput containing XML data

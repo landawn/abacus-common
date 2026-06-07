@@ -37,7 +37,7 @@ import static java.lang.Character.MIN_SURROGATE;
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * String text = "Hello 世界";
- * int utf8Length = Utf8.encodedLength(text);   // More efficient than text.getBytes("UTF-8").length
+ * int utf8Length = Utf8.encodedLength(text);   // more efficient than text.getBytes("UTF-8").length
  *
  * byte[] bytes = getDataFromNetwork();
  * if (Utf8.isWellFormed(bytes)) {
@@ -67,14 +67,18 @@ public class Utf8 {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String ascii = "Hello World";
-     * int length1 = Utf8.encodedLength(ascii);   // Returns 11 (1 byte per char)
+     * int length1 = Utf8.encodedLength(ascii);   // returns 11 (1 byte per char)
      *
      * String unicode = "Hello 世界";
-     * int length2 = Utf8.encodedLength(unicode);   // Returns 12 (6 + 3 + 3)
+     * int length2 = Utf8.encodedLength(unicode);   // returns 12 (6 + 3 + 3)
      *
      * String emoji = "Hello 👋";
-     * int length3 = Utf8.encodedLength(emoji);   // Accounts for surrogate pairs
+     * int length3 = Utf8.encodedLength(emoji);   // accounts for surrogate pairs
      * }</pre>
+     *
+     * @implNote Unlike the lone-surrogate-tolerant {@code char}-search methods in {@link Strings}, this method
+     *           must reject unpaired surrogates because a lone surrogate has no valid UTF-8 encoding (it is not a
+     *           Unicode scalar value); do not "relax" this to match {@code Strings} — there is no byte length to return.
      *
      * @param sequence the character sequence to measure
      * @return the number of bytes needed to encode the sequence in UTF-8
@@ -165,10 +169,10 @@ public class Utf8 {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * byte[] validUtf8 = "Hello 世界".getBytes(StandardCharsets.UTF_8);
-     * boolean valid1 = Utf8.isWellFormed(validUtf8);   // Returns true
+     * boolean valid1 = Utf8.isWellFormed(validUtf8);   // returns true
      *
-     * byte[] invalid = {(byte)0xC0, (byte)0x80};  // Overlong encoding of NULL
-     * boolean valid2 = Utf8.isWellFormed(invalid);   // Returns false
+     * byte[] invalid = {(byte)0xC0, (byte)0x80};
+     * boolean valid2 = Utf8.isWellFormed(invalid);  // returns false
      * }</pre>
      *
      * @param bytes the byte array to validate
@@ -202,7 +206,7 @@ public class Utf8 {
      * @param len the number of bytes to validate from the buffer
      * @return {@code true} if the specified byte range forms a valid UTF-8 sequence
      * @throws NullPointerException if {@code bytes} is {@code null}
-     * @throws IllegalArgumentException if {@code len} is negative
+     * @throws IndexOutOfBoundsException if {@code len} is negative
      * @throws IndexOutOfBoundsException if {@code off} is negative, or
      *         {@code off + len} is greater than {@code bytes.length}
      */

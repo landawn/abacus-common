@@ -30,6 +30,7 @@ import com.landawn.abacus.util.Strings;
  * UUID uuid = type.valueOf("550e8400-e29b-41d4-a716-446655440000");
  * String str = type.stringOf(uuid);   // Returns the UUID string representation
  * }</pre>
+ *
  */
 public class UUIDType extends AbstractType<UUID> {
 
@@ -81,8 +82,15 @@ public class UUIDType extends AbstractType<UUID> {
      * String str = type.stringOf(uuid);   // Returns "550e8400-e29b-41d4-a716-446655440000"
      * }</pre>
      *
+     * <p>The returned string is a serializable representation designed to be parsed back into an equivalent value
+     * via {@link #valueOf(String)}; {@code stringOf} and {@code valueOf} are inverse operations that round-trip. This
+     * is the key distinction from {@link Object#toString()}, whose result is not guaranteed to be convertible back
+     * into the original value.</p>
+     *
      * @param x the UUID instance to convert to string
      * @return the string representation of the UUID, or {@code null} if the input is null
+     * @see #valueOf(String)
+     * @see #valueOf(Object)
      */
     @Override
     public String stringOf(final UUID x) {
@@ -105,9 +113,15 @@ public class UUIDType extends AbstractType<UUID> {
      * // uuid represents the parsed UUID object
      * }</pre>
      *
+     * <p>This method is the inverse of {@code stringOf} and round-trips with it: it parses the string produced by
+     * {@code stringOf} back into a value of this type. Strings produced by {@link Object#toString()} are not
+     * guaranteed to be parseable in this way.</p>
+     *
      * @param str the string to convert to a UUID
      * @return a UUID instance created from the string, or {@code null} if the string is {@code null}, empty, or blank
      * @throws IllegalArgumentException if the string is not in the correct UUID format
+     * @see #valueOf(Object)
+     * @see #stringOf(UUID)
      */
     @Override
     public UUID valueOf(final String str) {

@@ -1199,7 +1199,7 @@ public class IndexTest extends TestBase {
         assertEquals(OptionalInt.of(0), Index.of("", ""));
         assertEquals(OptionalInt.of(0), Index.of("hello", ""));
         assertEquals(OptionalInt.of(3), Index.of("hello", "", 3));
-        assertEquals(OptionalInt.empty(), Index.of("hello", "", 10));
+        assertEquals(OptionalInt.of(5), Index.of("hello", "", 10));
 
         String special = "a\tb\nc\rd\0e";
         assertEquals(OptionalInt.of(1), Index.of(special, '\t'));

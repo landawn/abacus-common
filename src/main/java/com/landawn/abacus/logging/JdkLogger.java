@@ -41,6 +41,7 @@ import java.util.logging.LogRecord;
  * Exception exception = new Exception("Connection error");
  * logger.error("Failed to connect", exception);
  * }</pre>
+ *
  */
 class JdkLogger extends AbstractLogger {
 
@@ -343,19 +344,19 @@ class JdkLogger extends AbstractLogger {
             }
         }
 
-        int found = -1;
+        int callerIndex = -1;
         if (selfIndex >= 0) {
             for (int i = selfIndex + 1; i < steArray.length; i++) {
                 final String className = steArray[i].getClassName();
                 if (!(className.equals(callerFQCN) || className.equals(SUPER))) {
-                    found = i;
+                    callerIndex = i;
                     break;
                 }
             }
         }
 
-        if (found != -1) {
-            final StackTraceElement ste = steArray[found];
+        if (callerIndex != -1) {
+            final StackTraceElement ste = steArray[callerIndex];
             // setting the class name has the side effect of setting
             // the needToInferCaller variable to false.
             logRecord.setSourceClassName(ste.getClassName());

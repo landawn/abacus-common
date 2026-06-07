@@ -158,11 +158,12 @@ final class XmlParserImpl extends AbstractXmlParser {
             return Strings.EMPTY;
         }
 
+        final XmlSerConfig configToUse = check(config);
         final BufferedXmlWriter bw = Objectory.createBufferedXmlWriter();
-        final IdentityHashSet<Object> serializedObjects = config == null || !config.isSupportCircularReference() ? null : new IdentityHashSet<>();
+        final IdentityHashSet<Object> serializedObjects = !configToUse.isSupportCircularReference() ? null : new IdentityHashSet<>();
 
         try {
-            write(obj, config, null, serializedObjects, bw, false);
+            write(obj, configToUse, null, serializedObjects, bw, false);
 
             return bw.toString();
         } catch (final IOException e) {
@@ -240,11 +241,12 @@ final class XmlParserImpl extends AbstractXmlParser {
      */
     @Override
     public void serialize(final Object obj, final XmlSerConfig config, final OutputStream output) {
+        final XmlSerConfig configToUse = check(config);
         final BufferedXmlWriter bw = Objectory.createBufferedXmlWriter(output);
-        final IdentityHashSet<Object> serializedObjects = config == null || !config.isSupportCircularReference() ? null : new IdentityHashSet<>();
+        final IdentityHashSet<Object> serializedObjects = !configToUse.isSupportCircularReference() ? null : new IdentityHashSet<>();
 
         try {
-            write(obj, config, null, serializedObjects, bw, true);
+            write(obj, configToUse, null, serializedObjects, bw, true);
         } catch (final IOException e) {
             throw new UncheckedIOException(e);
         } finally {
@@ -280,12 +282,13 @@ final class XmlParserImpl extends AbstractXmlParser {
      */
     @Override
     public void serialize(final Object obj, final XmlSerConfig config, final Writer output) {
+        final XmlSerConfig configToUse = check(config);
         final boolean isBufferedWriter = output instanceof BufferedXmlWriter;
         final BufferedXmlWriter bw = isBufferedWriter ? (BufferedXmlWriter) output : Objectory.createBufferedXmlWriter(output);
-        final IdentityHashSet<Object> serializedObjects = config == null || !config.isSupportCircularReference() ? null : new IdentityHashSet<>();
+        final IdentityHashSet<Object> serializedObjects = !configToUse.isSupportCircularReference() ? null : new IdentityHashSet<>();
 
         try {
-            write(obj, config, null, serializedObjects, bw, true);
+            write(obj, configToUse, null, serializedObjects, bw, true);
         } catch (final IOException e) {
             throw new UncheckedIOException(e);
         } finally {
@@ -330,7 +333,7 @@ final class XmlParserImpl extends AbstractXmlParser {
                 } else if (type.isCollection()) {
                     writeCollection((Collection<?>) obj, configToUse, indentation, serializedObjects, type, bw);
                 } else {
-                    type.writeCharacter(bw, obj, configToUse);
+                    type.serializeTo(bw, obj, configToUse);
                 }
 
                 break;
@@ -533,7 +536,7 @@ final class XmlParserImpl extends AbstractXmlParser {
                 }
 
                 if (propInfo.isJsonRawValue) {
-                    // Raw JSON: write the serialized payload verbatim. strType.writeCharacter
+                    // Raw JSON: write the serialized payload verbatim. strType.serializeTo
                     // would quote/escape it and produce <metadata>"{\"k\":\"v\"}"</metadata>.
                     bw.write(jsonParser.serialize(propValue, getJSC(config)));
                 } else if (propInfo.hasFormat) {
@@ -805,7 +808,7 @@ final class XmlParserImpl extends AbstractXmlParser {
         if (isSerializableByJson) {
             // jsonParser.serialize(bw, a);
 
-            strType.writeCharacter(bw, jsonParser.serialize(a, getJSC(config)), config);
+            strType.serializeTo(bw, jsonParser.serialize(a, getJSC(config)), config);
         } else {
             for (final Object e : a) {
                 if (e == null) {
@@ -887,7 +890,7 @@ final class XmlParserImpl extends AbstractXmlParser {
         if (isSerializableByJson) {
             // jsonParser.serialize(bw, c);
 
-            strType.writeCharacter(bw, jsonParser.serialize(c, getJSC(config)), config);
+            strType.serializeTo(bw, jsonParser.serialize(c, getJSC(config)), config);
         } else {
             for (final Object e : c) {
                 if (e == null) {
@@ -942,12 +945,12 @@ final class XmlParserImpl extends AbstractXmlParser {
             if (valueType.isObjectArray() || valueType.isCollection()) {
                 // jsonParser.serialize(bw, value);
 
-                strType.writeCharacter(bw, jsonParser.serialize(value, getJSC(config)), config);
+                strType.serializeTo(bw, jsonParser.serialize(value, getJSC(config)), config);
             } else {
                 if (propInfo != null && propInfo.hasFormat) {
                     propInfo.writePropValue(bw, value, config);
                 } else {
-                    valueType.writeCharacter(bw, value, config);
+                    valueType.serializeTo(bw, value, config);
                 }
             }
         } else if (valueType.isObjectArray()) {
@@ -957,7 +960,7 @@ final class XmlParserImpl extends AbstractXmlParser {
             if (isSerializableByJson) {
                 // jsonParser.serialize(bw, a);
 
-                strType.writeCharacter(bw, jsonParser.serialize(a, getJSC(config)), config);
+                strType.serializeTo(bw, jsonParser.serialize(a, getJSC(config)), config);
             } else {
                 for (final Object e : a) {
                     if (e == null) {
@@ -985,7 +988,7 @@ final class XmlParserImpl extends AbstractXmlParser {
             if (isSerializableByJson) {
                 // jsonParser.serialize(bw, c);
 
-                strType.writeCharacter(bw, jsonParser.serialize(c, getJSC(config)), config);
+                strType.serializeTo(bw, jsonParser.serialize(c, getJSC(config)), config);
             } else {
                 for (final Object e : c) {
                     if (e == null) {
@@ -1798,7 +1801,6 @@ final class XmlParserImpl extends AbstractXmlParser {
      * @throws XMLStreamException if an error occurs while reading the XML stream
      * @throws ParsingException if the XML nesting depth exceeds the allowed maximum
      */
-    @SuppressWarnings({})
     protected <T> T readByStreamParser(final XMLStreamReader xmlReader, final XmlDeserConfig config, PropInfo propInfo, Type<?> propType, Type<?> targetType)
             throws XMLStreamException {
         enterXmlNesting();

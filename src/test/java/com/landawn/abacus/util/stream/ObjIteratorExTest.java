@@ -29,7 +29,7 @@ public class ObjIteratorExTest extends TestBase {
         Assertions.assertFalse(iter.hasNext());
         Assertions.assertThrows(NoSuchElementException.class, () -> iter.next());
         Assertions.assertEquals(0, iter.count());
-        iter.close();
+        iter.closeResource();
     }
 
     @Test
@@ -314,7 +314,7 @@ public class ObjIteratorExTest extends TestBase {
 
         Assertions.assertEquals(1, iter.count());
 
-        iter.close();
+        iter.closeResource();
     }
 
     @Test
@@ -379,7 +379,7 @@ public class ObjIteratorExTest extends TestBase {
     }
 
     @Test
-    public void testDeferClose_NonObjIteratorEx() {
+    public void testDeferClose_Resource_NonObjIteratorEx() {
         List<String> list = Arrays.asList("a", "b", "c");
         // Supplier returns a plain Iterator (not ObjIteratorEx), close should not throw
         Supplier<Iterator<String>> supplier = () -> list.iterator();
@@ -387,22 +387,22 @@ public class ObjIteratorExTest extends TestBase {
 
         // Force initialization by calling hasNext
         Assertions.assertTrue(iter.hasNext());
-        iter.close();
+        iter.closeResource();
         Assertions.assertNotNull(iter);
     }
 
     @Test
-    public void testDeferCloseBeforeInit() {
+    public void testDeferCloseResourceBeforeInit() {
         Supplier<Iterator<String>> supplier = () -> Arrays.asList("a").iterator();
         ObjIteratorEx<String> iter = ObjIteratorEx.defer(supplier);
         // Close without using - should init and close without exception
-        iter.close();
+        iter.closeResource();
     }
 
     @Test
-    public void testClose() {
+    public void testCloseResource() {
         ObjIteratorEx<String> iter = ObjIteratorEx.of("a", "b", "c");
-        iter.close();
+        iter.closeResource();
         assertNotNull(iter);
     }
 

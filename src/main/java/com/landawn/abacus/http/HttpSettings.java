@@ -82,6 +82,14 @@ public final class HttpSettings {
 
     /**
      * Creates a new HttpSettings instance with default values.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * HttpSettings settings = new HttpSettings();   // all values at their defaults
+     * settings.setConnectTimeout(5000);             // connect timeout = 5000 ms
+     * settings.useCaches(false);                    // caching disabled (the default)
+     * }</pre>
+     *
      */
     public HttpSettings() { //NOSONAR
     }
@@ -106,6 +114,15 @@ public final class HttpSettings {
     /**
      * Gets the connection timeout in milliseconds.
      * The connection timeout is the time to wait for a connection to be established.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * HttpSettings settings = HttpSettings.create();
+     * settings.getConnectTimeout();                  // returns 0 (not set yet)
+     *
+     * settings.setConnectTimeout(5000);
+     * settings.getConnectTimeout();                  // returns 5000
+     * }</pre>
      *
      * @return the connection timeout in milliseconds, or 0 if not set
      * @see #setConnectTimeout(long)
@@ -141,7 +158,7 @@ public final class HttpSettings {
      *
      * // Set different timeouts for connection and read operations
      * settings.setConnectTimeout(5000)   // 5s to establish connection
-     *         .setReadTimeout(10000);   // 10s to read response
+     *         .setReadTimeout(10000);    // 10s to read response
      * }</pre>
      *
      * @param connectTimeout the connection timeout in milliseconds (0 = infinite)
@@ -156,6 +173,15 @@ public final class HttpSettings {
     /**
      * Gets the read timeout in milliseconds.
      * The read timeout is the time to wait for data to be available for reading.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * HttpSettings settings = HttpSettings.create();
+     * settings.getReadTimeout();                     // returns 0 (not set yet)
+     *
+     * settings.setReadTimeout(10000);
+     * settings.getReadTimeout();                     // returns 10000
+     * }</pre>
      *
      * @return the read timeout in milliseconds, or 0 if not set
      * @see #setReadTimeout(long)
@@ -188,6 +214,16 @@ public final class HttpSettings {
     /**
      * Gets the SSL socket factory used for HTTPS connections.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * HttpSettings settings = HttpSettings.create();
+     * settings.getSSLSocketFactory();                // returns null (not set yet)
+     *
+     * SSLSocketFactory factory = (SSLSocketFactory) SSLSocketFactory.getDefault();
+     * settings.setSSLSocketFactory(factory);
+     * settings.getSSLSocketFactory();                // returns the configured factory
+     * }</pre>
+     *
      * @return the SSL socket factory, or {@code null} if not set
      */
     public SSLSocketFactory getSSLSocketFactory() {
@@ -216,6 +252,17 @@ public final class HttpSettings {
 
     /**
      * Gets the proxy configuration.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * HttpSettings settings = HttpSettings.create();
+     * settings.getProxy();                           // returns null (not set yet)
+     *
+     * Proxy proxy = new Proxy(Proxy.Type.HTTP,
+     *     new InetSocketAddress("proxy.example.com", 8080));
+     * settings.setProxy(proxy);
+     * settings.getProxy();                           // returns the configured proxy
+     * }</pre>
      *
      * @return the proxy, or {@code null} if not set
      */
@@ -246,6 +293,15 @@ public final class HttpSettings {
     /**
      * Gets whether to use caches.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * HttpSettings settings = HttpSettings.create();
+     * settings.useCaches();                          // returns false (the default)
+     *
+     * settings.useCaches(true);
+     * settings.useCaches();                          // returns true
+     * }</pre>
+     *
      * @return {@code true} if caches should be used, {@code false} otherwise
      */
     public boolean useCaches() { // NOSONAR
@@ -260,8 +316,8 @@ public final class HttpSettings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * settings.useCaches(false);   // Disable caching (default)
-     * settings.useCaches(true);    // Enable caching
+     * settings.useCaches(false);   // false disables caching (default)
+     * settings.useCaches(true);    // true enables caching
      * }</pre>
      *
      * @param useCaches {@code true} to use caches, {@code false} otherwise
@@ -276,6 +332,15 @@ public final class HttpSettings {
     /**
      * Gets whether the connection will be used for input.
      * This corresponds to HttpURLConnection's doInput property.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * HttpSettings settings = HttpSettings.create();
+     * settings.doInput();                            // returns true (the default)
+     *
+     * settings.doInput(false);
+     * settings.doInput();                            // returns false
+     * }</pre>
      *
      * @return {@code true} if the connection will be used for input
      * @see java.net.HttpURLConnection#setDoInput(boolean)
@@ -292,8 +357,8 @@ public final class HttpSettings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * settings.doInput(true);    // Enable input (default)
-     * settings.doInput(false);   // Disable input (rare)
+     * settings.doInput(true);    // true enables input (default)
+     * settings.doInput(false);   // false disables input (rare)
      * }</pre>
      *
      * @param doInput {@code true} if the connection will be used for input
@@ -310,6 +375,15 @@ public final class HttpSettings {
      * Gets whether the connection will be used for output.
      * This corresponds to HttpURLConnection's doOutput property.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * HttpSettings settings = HttpSettings.create();
+     * settings.doOutput();                           // returns true (the default)
+     *
+     * settings.doOutput(false);
+     * settings.doOutput();                           // returns false
+     * }</pre>
+     *
      * @return {@code true} if the connection will be used for output
      * @see java.net.HttpURLConnection#setDoOutput(boolean)
      */
@@ -325,8 +399,8 @@ public final class HttpSettings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * settings.doOutput(true);    // Enable output (default)
-     * settings.doOutput(false);   // Disable output for GET requests
+     * settings.doOutput(true);    // true enables output (default)
+     * settings.doOutput(false);   // false disables output for GET requests
      * }</pre>
      *
      * @param doOutput {@code true} if the connection will be used for output
@@ -343,6 +417,15 @@ public final class HttpSettings {
      * Checks if this is a one-way request (fire-and-forget).
      * One-way requests don't wait for or process the response.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * HttpSettings settings = HttpSettings.create();
+     * settings.isOneWayRequest();                    // returns false (the default)
+     *
+     * settings.setOneWayRequest(true);
+     * settings.isOneWayRequest();                    // returns true
+     * }</pre>
+     *
      * @return {@code true} if this is a one-way request
      */
     public boolean isOneWayRequest() {
@@ -353,6 +436,13 @@ public final class HttpSettings {
      * Sets whether this is a one-way request (fire-and-forget).
      * When {@code true}, the request will be sent but the response will not be read.
      * This can improve performance for requests where the response is not needed.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * HttpSettings settings = HttpSettings.create()
+     *     .setOneWayRequest(true);                   // enable fire-and-forget
+     * settings.isOneWayRequest();                    // returns true
+     * }</pre>
      *
      * @param isOneWayRequest {@code true} for one-way requests
      * @return this HttpSettings instance for method chaining
@@ -367,6 +457,15 @@ public final class HttpSettings {
      * Gets the content format for request/response serialization.
      * If no content format has been explicitly set (or it is {@link ContentFormat#NONE}) and headers
      * are present, the format is derived from the {@code Content-Type} and {@code Content-Encoding} headers.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * HttpSettings settings = HttpSettings.create();
+     * settings.getContentFormat();                   // returns null (none set, no headers)
+     *
+     * settings.setContentFormat(ContentFormat.JSON);
+     * settings.getContentFormat();                   // returns ContentFormat.JSON
+     * }</pre>
      *
      * @return the content format, or {@code null} if none was set and none could be derived from the headers
      */
@@ -403,6 +502,19 @@ public final class HttpSettings {
      * If not explicitly set but a content format is configured,
      * the content type will be derived from the content format and stored
      * back into the headers as a side-effect.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * HttpSettings settings = HttpSettings.create();
+     * settings.getContentType();                     // returns null (no header, no format)
+     *
+     * settings.setContentType("application/json");
+     * settings.getContentType();                     // returns "application/json"
+     *
+     * // Derived from a configured content format
+     * HttpSettings fmt = HttpSettings.create().setContentFormat(ContentFormat.JSON);
+     * fmt.getContentType();                          // returns "application/json"
+     * }</pre>
      *
      * @return The Content-Type header value, or {@code null} if not set and no content format is configured
      */
@@ -450,6 +562,19 @@ public final class HttpSettings {
      * If not explicitly set but a content format is configured,
      * the content encoding will be derived from the content format and stored
      * back into the headers as a side-effect.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * HttpSettings settings = HttpSettings.create();
+     * settings.getContentEncoding();                 // returns null (no header, no format)
+     *
+     * settings.setContentEncoding("gzip");
+     * settings.getContentEncoding();                 // returns "gzip"
+     *
+     * // Derived from a compressing content format
+     * HttpSettings fmt = HttpSettings.create().setContentFormat(ContentFormat.JSON_GZIP);
+     * fmt.getContentEncoding();                      // returns "gzip"
+     * }</pre>
      *
      * @return The Content-Encoding header value, or {@code null} if not set and no content format is configured
      */
@@ -537,6 +662,14 @@ public final class HttpSettings {
      * Sets two HTTP headers with the specified names and values.
      * If this settings object already has any headers with those names, they are all replaced.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * HttpSettings settings = HttpSettings.create()
+     *     .headers("Accept", "application/json", "User-Agent", "MyApp/1.0");
+     * settings.headers().get("Accept");              // returns "application/json"
+     * settings.headers().get("User-Agent");          // returns "MyApp/1.0"
+     * }</pre>
+     *
      * @param name1 the first header name
      * @param value1 the first header value
      * @param name2 the second header name
@@ -554,6 +687,17 @@ public final class HttpSettings {
     /**
      * Sets three HTTP headers with the specified names and values.
      * If this settings object already has any headers with those names, they are all replaced.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * HttpSettings settings = HttpSettings.create().headers(
+     *     "Accept", "application/json",
+     *     "User-Agent", "MyApp/1.0",
+     *     "X-Request-Id", "abc-123");
+     * settings.headers().get("Accept");              // returns "application/json"
+     * settings.headers().get("User-Agent");          // returns "MyApp/1.0"
+     * settings.headers().get("X-Request-Id");        // returns "abc-123"
+     * }</pre>
      *
      * @param name1 the first header name
      * @param value1 the first header value
@@ -598,6 +742,16 @@ public final class HttpSettings {
 
     /**
      * Removes all headers on this settings object and adds the specified headers.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * HttpHeaders custom = HttpHeaders.create().set("Accept", "application/json");
+     * HttpSettings settings = HttpSettings.create().header("Old", "value");
+     *
+     * settings.headers(custom);                      // replaces all prior headers
+     * settings.headers().get("Accept");              // returns "application/json"
+     * settings.headers().get("Old");                 // returns null (cleared)
+     * }</pre>
      *
      * @param headers the HttpHeaders to set
      * @return this HttpSettings instance for method chaining

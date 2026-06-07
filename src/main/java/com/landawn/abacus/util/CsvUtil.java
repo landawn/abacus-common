@@ -93,6 +93,7 @@ public final class CsvUtil {
      * String[] headers = CSV_HEADER_PARSER.apply("Name,Age,\"Address, City\"");
      * // Result: ["Name", "Age", "Address, City"]
      * }</pre>
+     *
      */
     public static final Function<String, String[]> CSV_HEADER_PARSER = csvParser::parseLineToArray;
 
@@ -106,6 +107,7 @@ public final class CsvUtil {
      * CSV_LINE_PARSER.accept("John,30,\"New York, NY\"", row);
      * // row contains: ["John", "30", "New York, NY"]
      * }</pre>
+     *
      */
     public static final BiConsumer<String, String[]> CSV_LINE_PARSER = csvParser::parseLineToArray;
 
@@ -119,6 +121,7 @@ public final class CsvUtil {
      * String[] headers = CSV_HEADER_PARSER_BY_SPLITTER.apply("\"Name\",\"Age\",\"City\"");
      * // Result: ["Name", "Age", "City"]
      * }</pre>
+     *
      */
     public static final Function<String, String[]> CSV_HEADER_PARSER_BY_SPLITTER = it -> {
         final String[] strs = lineSplitter.splitToArray(it);
@@ -146,6 +149,7 @@ public final class CsvUtil {
      * CSV_LINE_PARSER_BY_SPLITTER.accept("\"John\",\"30\",\"NYC\"", row);
      * // row contains: ["John", "30", "NYC"]
      * }</pre>
+     *
      */
     public static final BiConsumer<String, String[]> CSV_LINE_PARSER_BY_SPLITTER = (it, output) -> {
         lineSplitter.splitToArray(it, output);
@@ -169,6 +173,7 @@ public final class CsvUtil {
      * String[] headers = CSV_HEADER_PARSER_IN_JSON.apply("[\"Name\",\"Age\",\"City\"]");
      * // Result: ["Name", "Age", "City"]
      * }</pre>
+     *
      */
     public static final Function<String, String[]> CSV_HEADER_PARSER_IN_JSON = line -> jsonParser.parse(line, jdc, String[].class);
 
@@ -182,6 +187,7 @@ public final class CsvUtil {
      * CSV_LINE_PARSER_IN_JSON.accept("[\"John\",\"30\",\"NYC\"]", row);
      * // row contains: ["John", "30", "NYC"]
      * }</pre>
+     *
      */
     public static final BiConsumer<String, String[]> CSV_LINE_PARSER_IN_JSON = (line, output) -> jsonParser.parse(line, jdc, output);
 
@@ -203,7 +209,7 @@ public final class CsvUtil {
      * // Use JSON format for headers in current thread
      * CsvUtil.setHeaderParser(CsvUtil.CSV_HEADER_PARSER_IN_JSON);
      * try {
-     *     Dataset ds = CsvUtil.load(file);   // Will use JSON parser
+     *     Dataset ds = CsvUtil.load(file);   // will use JSON parser
      * } finally {
      *     CsvUtil.resetHeaderParser();          // Reset to default
      * }
@@ -231,7 +237,7 @@ public final class CsvUtil {
      * // Use splitter for simple CSV files in current thread
      * CsvUtil.setLineParser(CsvUtil.CSV_LINE_PARSER_BY_SPLITTER);
      * try {
-     *     Dataset ds = CsvUtil.load(file);   // Will use splitter parser
+     *     Dataset ds = CsvUtil.load(file);   // will use splitter parser
      * } finally {
      *     CsvUtil.resetLineParser();            // Reset to default
      * }
@@ -258,7 +264,7 @@ public final class CsvUtil {
      * // Use JSON format for headers in current thread
      * CsvUtil.setHeaderParser(CsvUtil.CSV_HEADER_PARSER_IN_JSON);
      * try {
-     *     Dataset ds = CsvUtil.load(file);   // Will use JSON parser
+     *     Dataset ds = CsvUtil.load(file);   // will use JSON parser
      * } finally {
      *     CsvUtil.resetHeaderParser();          // Reset to default
      * }
@@ -281,7 +287,7 @@ public final class CsvUtil {
      * // Use splitter for simple CSV files in current thread
      * CsvUtil.setLineParser(CsvUtil.CSV_LINE_PARSER_BY_SPLITTER);
      * try {
-     *     Dataset ds = CsvUtil.load(file);   // Will use splitter parser
+     *     Dataset ds = CsvUtil.load(file);   // will use splitter parser
      * } finally {
      *     CsvUtil.resetLineParser();            // Reset to default
      * }
@@ -408,10 +414,10 @@ public final class CsvUtil {
         if (value == null) {
             writer.write(Strings.NULL_CHAR_ARRAY);
         } else if (valType.isCsvQuoteRequired()) {
-            strType.writeCharacter(writer, valType.stringOf(value), config);
+            strType.serializeTo(writer, valType.stringOf(value), config);
         } else {
             // writer.write(valType.stringOf(value));
-            valType.writeCharacter(writer, value, config);
+            valType.serializeTo(writer, value, config);
         }
     }
 
@@ -1419,9 +1425,9 @@ public final class CsvUtil {
      * <pre>{@code
      * TriConsumer<List<String>, DisposableArray<String>, Object[]> extractor =
      *     (columns, row, output) -> {
-     *         output[0] = row.get(0);   // name as String
+     *         output[0] = row.get(0);                     // name as String
      *         output[1] = Integer.parseInt(row.get(1));   // age as int
-     *         output[2] = LocalDate.parse(row.get(2));   // date as LocalDate
+     *         output[2] = LocalDate.parse(row.get(2));    // date as LocalDate
      *     };
      *
      * Dataset ds = CsvUtil.load(new File("data.csv"), extractor);
@@ -1508,6 +1514,28 @@ public final class CsvUtil {
      * Loads CSV data from a File source with full control over column selection, pagination, row filtering,
      * and custom row extraction.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * TriConsumer<List<String>, DisposableArray<String>, Object[]> extractor =
+     *     (columns, row, output) -> {
+     *         output[0] = row.get(0);                     // name
+     *         output[1] = Integer.parseInt(row.get(1));   // age
+     *     };
+     *
+     * // Load all rows matching the filter with custom extraction
+     * Predicate<String[]> filter = row -> Integer.parseInt(row[1]) > 18;
+     * Dataset ds = CsvUtil.load(new File("data.csv"), Arrays.asList("name", "age"), 0, 100, filter, extractor);
+     *
+     * // Load with no filtering (null filter = always true)
+     * Dataset ds2 = CsvUtil.load(new File("data.csv"), null, 50, 200, null, extractor);
+     *
+     * // Load from empty file returns empty Dataset
+     * Dataset ds3 = CsvUtil.load(new File("empty.csv"), null, 0, Long.MAX_VALUE, null, extractor);
+     *
+     * // Load with all columns selected and zero offset
+     * Dataset ds4 = CsvUtil.load(new File("small.csv"), null, 0, Long.MAX_VALUE, row -> true, extractor);
+     * }</pre>
+     *
      * @param source the File source to load CSV data from, must not be {@code null}
      * @param selectColumnNames a Collection of column names to select, {@code null} to include all columns
      * @param offset the number of data rows to skip from the beginning (after header)
@@ -1577,8 +1605,8 @@ public final class CsvUtil {
      * Reader reader = new FileReader("employees.csv");
      * List<String> columns = Arrays.asList("name", "department", "salary");
      * Dataset result = CsvUtil.load(reader, columns, (columnNames, rowData, output) -> {
-     *     output[0] = rowData.get(0);   // name
-     *     output[1] = rowData.get(1);   // department
+     *     output[0] = rowData.get(0);                       // name
+     *     output[1] = rowData.get(1);                       // department
      *     output[2] = Double.parseDouble(rowData.get(2));   // salary as double
      * });
      * }</pre>
@@ -1635,6 +1663,34 @@ public final class CsvUtil {
     /**
      * Loads CSV data from a Reader source with full control over column selection, pagination, row filtering,
      * and custom row extraction.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * TriConsumer<List<String>, DisposableArray<String>, Object[]> extractor =
+     *     (columns, row, output) -> {
+     *         output[0] = row.get(0).toUpperCase();        // uppercase name
+     *         output[1] = Double.parseDouble(row.get(1));  // price as double
+     *     };
+     *
+     * // Load with filter and custom extraction from a Reader
+     * try (Reader reader = new FileReader("data.csv")) {
+     *     Predicate<String[]> filter = row -> !row[0].isEmpty();
+     *     Dataset ds = CsvUtil.load(reader, Arrays.asList("name", "price"), 0, 500, filter, extractor);
+     * }
+     *
+     * // Load with null filter (all rows included)
+     * try (Reader reader = new StringReader(csvContent)) {
+     *     Dataset ds2 = CsvUtil.load(reader, null, 10, 50, null, extractor);
+     * }
+     *
+     * // Load from empty Reader returns empty Dataset
+     * try (Reader reader = new StringReader("")) {
+     *     Dataset ds3 = CsvUtil.load(reader, null, 0, Long.MAX_VALUE, null, extractor);
+     * }
+     *
+     * // Load with negative offset throws IllegalArgumentException
+     * // CsvUtil.load(reader, null, -1, 10, null, extractor);
+     * }</pre>
      *
      * @param source the Reader source to load CSV data from, must not be {@code null}
      * @param selectColumnNames a Collection of column names to select, {@code null} to include all columns
@@ -1904,7 +1960,7 @@ public final class CsvUtil {
      * Reader reader = new StringReader(csvData);
      * try (Stream<Person> stream = CsvUtil.stream(reader, Person.class, true)) {
      *     stream.forEach(System.out::println);
-     * } // reader is closed automatically
+     * }
      * }</pre>
      *
      * @param <T> the type of the elements in the stream
@@ -1982,7 +2038,7 @@ public final class CsvUtil {
      *     try (Stream<Sale> stream = CsvUtil.stream(
      *             reader,
      *             Arrays.asList("date", "product", "amount"),
-     *             100, 500,  // skip 100, take 500
+     *             100, 500,
      *             highValueFilter,
      *             Sale.class,
      *             true)) {
@@ -2305,7 +2361,7 @@ public final class CsvUtil {
      * try (Stream<CustomDTO> stream = CsvUtil.stream(
      *         new File("data.csv"),
      *         Arrays.asList("id", "name", "value"),
-     *         100, 500,  // skip 100, take 500
+     *         100, 500,
      *         validFilter,
      *         (columns, row) -> new CustomDTO(row.get(0), row.get(1), row.get(2)))) {
      *     stream.forEach(System.out::println);
@@ -2461,7 +2517,7 @@ public final class CsvUtil {
      *     try (Stream<Transaction> stream = CsvUtil.stream(
      *             reader,
      *             Arrays.asList("id", "amount", "date"),
-     *             100, 1000,  // skip 100, take 1000
+     *             100, 1000,
      *             validFilter,
      *             (columns, row) -> new Transaction(
      *                 UUID.fromString(row.get(0)),
@@ -2772,7 +2828,7 @@ public final class CsvUtil {
      * <pre>{@code
      * try (Reader csvReader = new FileReader("data.csv");
      *      Writer jsonWriter = new FileWriter("data.json")) {
-     *     long rowCount = CsvUtil.csvToJson(
+     *     long rowCount      = CsvUtil.csvToJson(
      *         csvReader,
      *         Arrays.asList("name", "age"),
      *         jsonWriter,
@@ -2903,9 +2959,9 @@ public final class CsvUtil {
                         bw.write(titles[i]);
                         bw.write("\":");
                         if (columnType[i] == strType) {
-                            columnType[i].writeCharacter(bw, rowData[i], config);
+                            columnType[i].serializeTo(bw, rowData[i], config);
                         } else {
-                            columnType[i].writeCharacter(bw, columnType[i].valueOf(rowData[i]), config);
+                            columnType[i].serializeTo(bw, columnType[i].valueOf(rowData[i]), config);
                         }
                     }
                 }
@@ -2939,6 +2995,27 @@ public final class CsvUtil {
      *
      * <p>The JSON file must contain an array of objects where each object represents a row.
      * The first object's properties will be used as CSV headers.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * // Convert entire JSON file to CSV
+     * long rowCount = CsvUtil.jsonToCsv(
+     *     new File("data/employees.json"),
+     *     new File("output/employees.csv")
+     * );
+     * System.out.println("Converted " + rowCount + " rows");
+     *
+     * // Convert from a simple JSON array of objects
+     * // Input: [{"name":"John","age":30},{"name":"Jane","age":25}]
+     * // Output: "name","age"\n"John",30\n"Jane",25
+     * long count = CsvUtil.jsonToCsv(new File("input.json"), new File("output.csv"));
+     *
+     * // Null file throws IllegalArgumentException
+     * // CsvUtil.jsonToCsv(null, new File("out.csv"));
+     *
+     * // Empty JSON array returns 0 rows
+     * long zero = CsvUtil.jsonToCsv(new File("empty.json"), new File("empty.csv"));
+     * }</pre>
      *
      * @param jsonFile the source JSON file to convert
      * @param csvFile the destination CSV file to create
@@ -3021,7 +3098,7 @@ public final class CsvUtil {
      * <pre>{@code
      * try (Reader jsonReader = new FileReader("data.json");
      *      Writer csvWriter = new FileWriter("data.csv")) {
-     *     long rowCount = CsvUtil.jsonToCsv(
+     *     long rowCount     = CsvUtil.jsonToCsv(
      *         jsonReader,
      *         Arrays.asList("name", "age", "department"),
      *         csvWriter
@@ -3209,6 +3286,26 @@ public final class CsvUtil {
         /**
          * Sets a custom header parser function for parsing the CSV header line.
          *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * CsvUtil.loader()
+         *     .setHeaderParser(line -> line.split(";"))
+         *     .source(new File("data.csv"))
+         *     .load();
+         *
+         * // Use JSON format header parser
+         * CsvUtil.converter()
+         *     .setHeaderParser(CsvUtil.CSV_HEADER_PARSER_IN_JSON)
+         *     .source(new File("data.json"))
+         *     .csvToJson(new File("output.json"));
+         *
+         * // Null parser throws IllegalArgumentException
+         * // CsvUtil.loader().setHeaderParser(null);
+         *
+         * // Passing null does NOT reset to default; it throws IllegalArgumentException
+         * CsvUtil.loader().setHeaderParser(null);   // throws, must not be null
+         * }</pre>
+         *
          * @param headerParser function that parses the header line into column names
          * @return this instance for method chaining
          * @throws IllegalArgumentException if headerParser is {@code null}
@@ -3223,6 +3320,34 @@ public final class CsvUtil {
 
         /**
          * Sets a custom line parser for parsing CSV data lines.
+         *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * BiConsumer<String, String[]> splitter = (line, output) -> {
+         *     String[] parts = line.split(",");
+         *     System.arraycopy(parts, 0, output, 0, parts.length);
+         * };
+         * CsvUtil.loader()
+         *     .setLineParser(splitter)
+         *     .source(new File("data.csv"))
+         *     .load();
+         *
+         * // Use JSON format line parser
+         * CsvUtil.converter()
+         *     .setLineParser(CsvUtil.CSV_LINE_PARSER_IN_JSON)
+         *     .source(new File("data.json"))
+         *     .csvToJson(new File("output.json"));
+         *
+         * // Null parser throws IllegalArgumentException
+         * // CsvUtil.loader().setLineParser(null);
+         *
+         * // Method chaining with multiple configurations
+         * CsvUtil.loader()
+         *     .setHeaderParser(CsvUtil.CSV_HEADER_PARSER_IN_JSON)
+         *     .setLineParser(CsvUtil.CSV_LINE_PARSER_IN_JSON)
+         *     .source(new File("data.csv"))
+         *     .load();
+         * }</pre>
          *
          * @param lineParser consumer that parses a line and populates the output array
          * @return this instance for method chaining
@@ -3239,6 +3364,30 @@ public final class CsvUtil {
         /**
          * Configures the writer to use backslash as the escape character when writing CSV.
          *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * // Enable backslash escaping for CSV-to-JSON conversion
+         * CsvUtil.converter()
+         *     .setEscapeCharToBackSlashForWrite()
+         *     .source(new File("data.csv"))
+         *     .csvToJson(new File("output.json"));
+         *
+         * // Use with loader for custom parsing with backslash escape
+         * CsvUtil.loader()
+         *     .setEscapeCharToBackSlashForWrite()
+         *     .source(new File("data.csv"))
+         *     .load();
+         *
+         * // Chaining with other configurations
+         * CsvUtil.converter()
+         *     .setEscapeCharToBackSlashForWrite()
+         *     .selectColumns(Arrays.asList("name", "age"))
+         *     .source(new File("data.csv"))
+         *     .jsonToCsv(new File("output.csv"));
+         *
+         * // No direct error case; always succeeds
+         * }</pre>
+         *
          * @return this instance for method chaining
          */
         public This setEscapeCharToBackSlashForWrite() {
@@ -3249,6 +3398,25 @@ public final class CsvUtil {
 
         /**
          * Sets the source file for CSV/JSON operations.
+         *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * // Set file source for loading
+         * Dataset ds = CsvUtil.loader()
+         *     .source(new File("data.csv"))
+         *     .load();
+         *
+         * // Set file source for CSV-to-JSON conversion
+         * long rowCount = CsvUtil.converter()
+         *     .source(new File("input.csv"))
+         *     .csvToJson(new File("output.json"));
+         *
+         * // Null source throws IllegalArgumentException
+         * // CsvUtil.loader().source((File) null);
+         *
+         * // Cannot set both File and Reader source
+         * // CsvUtil.loader().source(new File("data.csv")).source(new FileReader("data.csv"));
+         * }</pre>
          *
          * @param source the File to read CSV/JSON data from
          * @return this instance for method chaining
@@ -3269,6 +3437,29 @@ public final class CsvUtil {
         /**
          * Sets the source reader for CSV/JSON operations.
          *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * // Set reader source for loading
+         * try (Reader reader = new FileReader("data.csv")) {
+         *     Dataset ds = CsvUtil.loader()
+         *         .source(reader)
+         *         .load();
+         * }
+         *
+         * // Set reader source for JSON-to-CSV conversion
+         * try (Reader jsonReader = new FileReader("data.json")) {
+         *     long count = CsvUtil.converter()
+         *         .source(jsonReader)
+         *         .jsonToCsv(new File("output.csv"));
+         * }
+         *
+         * // Null reader throws IllegalArgumentException
+         * // CsvUtil.loader().source((Reader) null);
+         *
+         * // Cannot set both File and Reader source
+         * // CsvUtil.loader().source(new StringReader("csv")).source(new File("data.csv"));
+         * }</pre>
+         *
          * @param source the Reader to read CSV/JSON data from
          * @return this instance for method chaining
          * @throws IllegalArgumentException if source is {@code null} or if a File source is already set
@@ -3288,6 +3479,30 @@ public final class CsvUtil {
         /**
          * Specifies which columns to select from the CSV/JSON data.
          *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * // Select specific columns for loading
+         * Dataset ds = CsvUtil.loader()
+         *     .selectColumns(Arrays.asList("name", "age"))
+         *     .source(new File("data.csv"))
+         *     .load();
+         *
+         * // Select columns for CSV-to-JSON conversion
+         * long count = CsvUtil.converter()
+         *     .selectColumns(Arrays.asList("id", "name", "price"))
+         *     .source(new File("products.csv"))
+         *     .csvToJson(new File("products.json"));
+         *
+         * // Pass null to include all columns
+         * Dataset ds2 = CsvUtil.loader()
+         *     .selectColumns(null)
+         *     .source(new File("data.csv"))
+         *     .load();
+         *
+         * // Non-existent column names will throw at load time
+         * // CsvUtil.loader().selectColumns(Arrays.asList("badColumn")).source(file).load();
+         * }</pre>
+         *
          * @param selectColumnNames collection of column names to include, {@code null} for all columns
          * @return this instance for method chaining
          */
@@ -3299,6 +3514,31 @@ public final class CsvUtil {
 
         /**
          * Sets the number of data rows to skip from the beginning (after header for CSV).
+         *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * // Skip first 100 rows, process remaining
+         * Dataset ds = CsvUtil.loader()
+         *     .offset(100)
+         *     .source(new File("large.csv"))
+         *     .load();
+         *
+         * // Combine with count for pagination (rows 100-199)
+         * Dataset page = CsvUtil.loader()
+         *     .offset(100)
+         *     .count(100)
+         *     .source(new File("large.csv"))
+         *     .load();
+         *
+         * // Zero offset (default) processes from the first row
+         * Dataset ds2 = CsvUtil.loader()
+         *     .offset(0)
+         *     .source(new File("data.csv"))
+         *     .load();
+         *
+         * // Negative offset throws IllegalArgumentException at load time
+         * // CsvUtil.loader().offset(-1).source(file).load();
+         * }</pre>
          *
          * @param offset the number of rows to skip
          * @return this instance for method chaining
@@ -3312,6 +3552,37 @@ public final class CsvUtil {
         /**
          * Sets the maximum number of rows to process.
          *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * // Load only first 50 rows
+         * Dataset ds = CsvUtil.loader()
+         *     .count(50)
+         *     .source(new File("large.csv"))
+         *     .load();
+         *
+         * // Combine with offset for pagination (rows 200-299)
+         * Dataset page = CsvUtil.loader()
+         *     .offset(200)
+         *     .count(100)
+         *     .source(new File("large.csv"))
+         *     .load();
+         *
+         * // Long.MAX_VALUE (default) processes all remaining rows
+         * Dataset allRows = CsvUtil.loader()
+         *     .count(Long.MAX_VALUE)
+         *     .source(new File("data.csv"))
+         *     .load();
+         *
+         * // Zero count loads no data rows
+         * Dataset empty = CsvUtil.loader()
+         *     .count(0)
+         *     .source(new File("data.csv"))
+         *     .load();
+         *
+         * // Negative count throws IllegalArgumentException at load time
+         * // CsvUtil.loader().count(-10).source(file).load();
+         * }</pre>
+         *
          * @param count the maximum number of rows to process
          * @return this instance for method chaining
          */
@@ -3324,6 +3595,26 @@ public final class CsvUtil {
         /**
          * Sets the bean class for automatic type conversion during CSV reading.
          * Column types are inferred from the bean class properties.
+         *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * // Use bean class for type conversion during CSV-to-JSON
+         * long count = CsvUtil.converter()
+         *     .beanClassForColumnTypeInference(Person.class)
+         *     .source(new File("people.csv"))
+         *     .csvToJson(new File("people.json"));
+         *
+         * // Use bean class for type conversion when loading
+         * Dataset ds = CsvUtil.loader()
+         *     .beanClassForColumnTypeInference(Employee.class)
+         *     .source(new File("employees.csv"))
+         *     .load();
+         *
+         * // Null class throws IllegalArgumentException
+         * // CsvUtil.loader().beanClassForColumnTypeInference(null);
+         *
+         * // Cannot be used together with columnTypeMap (CSVLoader) or repeated conflicting type configs
+         * }</pre>
          *
          * @param beanClassForColumnTypeInference the bean class defining property types
          * @return this instance for method chaining
@@ -3404,6 +3695,27 @@ public final class CsvUtil {
          * Column types are inferred from the bean class properties.
          * Cannot be used together with {@code columnTypeMap}.
          *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * // Load CSV with type conversion using bean class
+         * Dataset ds = CsvUtil.loader()
+         *     .beanClassForColumnTypeInference(Person.class)
+         *     .source(new File("people.csv"))
+         *     .load();
+         *
+         * // Use bean class for CSV-to-JSON conversion with typed output
+         * long count = CsvUtil.converter()
+         *     .beanClassForColumnTypeInference(Employee.class)
+         *     .source(new File("employees.csv"))
+         *     .csvToJson(new File("employees.json"));
+         *
+         * // Null class throws IllegalArgumentException
+         * // CsvUtil.loader().beanClassForColumnTypeInference(null);
+         *
+         * // Cannot be used together with columnTypeMap
+         * // CsvUtil.loader().beanClassForColumnTypeInference(Person.class).columnTypeMap(typeMap);
+         * }</pre>
+         *
          * @param beanClassForColumnTypeInference the bean class defining property types
          * @return this instance for method chaining
          * @throws IllegalArgumentException if beanClassForColumnTypeInference is {@code null} or if columnTypeMap is already set
@@ -3425,6 +3737,33 @@ public final class CsvUtil {
          * Sets the column type mapping for type conversion during CSV loading.
          * Cannot be used together with {@code beanClassForColumnTypeInference}.
          *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * // Load CSV with explicit column type mapping
+         * Map<String, Type<?>> typeMap = new HashMap<>();
+         * typeMap.put("id", Type.of(Long.class));
+         * typeMap.put("price", Type.of(Double.class));
+         * Dataset ds = CsvUtil.loader()
+         *     .columnTypeMap(typeMap)
+         *     .source(new File("products.csv"))
+         *     .load();
+         *
+         * // Use type map with column selection and filtering
+         * Dataset ds2 = CsvUtil.loader()
+         *     .columnTypeMap(typeMap)
+         *     .selectColumns(Arrays.asList("id", "price"))
+         *     .offset(100)
+         *     .count(500)
+         *     .source(new File("products.csv"))
+         *     .load();
+         *
+         * // Null type map throws IllegalArgumentException
+         * // CsvUtil.loader().columnTypeMap(null);
+         *
+         * // Cannot be used together with beanClassForColumnTypeInference
+         * // CsvUtil.loader().columnTypeMap(typeMap).beanClassForColumnTypeInference(Person.class);
+         * }</pre>
+         *
          * @param columnTypeMap mapping of column names to their Types
          * @return this instance for method chaining
          * @throws IllegalArgumentException if columnTypeMap is {@code null} or if beanClassForColumnTypeInference is already set
@@ -3443,6 +3782,35 @@ public final class CsvUtil {
         /**
          * Sets a row filter predicate to include only matching rows.
          *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * // Filter for active records only
+         * Predicate<String[]> activeFilter = row -> "true".equals(row[3]);
+         * Dataset ds = CsvUtil.loader()
+         *     .rowFilter(activeFilter)
+         *     .source(new File("data.csv"))
+         *     .load();
+         *
+         * // Complex filter with multiple conditions
+         * Predicate<String[]> complexFilter = row ->
+         *     !row[0].isEmpty() && Integer.parseInt(row[2]) > 30;
+         * Dataset ds2 = CsvUtil.loader()
+         *     .rowFilter(complexFilter)
+         *     .source(new File("employees.csv"))
+         *     .load();
+         *
+         * // Null filter throws IllegalArgumentException
+         * // CsvUtil.loader().rowFilter(null);
+         *
+         * // Combined with other builder methods
+         * CsvUtil.loader()
+         *     .rowFilter(row -> row.length >= 4)
+         *     .offset(50)
+         *     .count(100)
+         *     .source(new File("large.csv"))
+         *     .load();
+         * }</pre>
+         *
          * @param rowFilter predicate to filter rows
          * @return this instance for method chaining
          * @throws IllegalArgumentException if rowFilter is {@code null}
@@ -3458,6 +3826,37 @@ public final class CsvUtil {
          * Loads the CSV data into a Dataset using the configured options.
          * A source (file or reader) must be configured before calling this method.
          * Type configuration is optional; when omitted, all values are loaded as strings.
+         *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * // Load all data from file with type conversion
+         * Dataset ds = CsvUtil.loader()
+         *     .source(new File("data.csv"))
+         *     .beanClassForColumnTypeInference(Person.class)
+         *     .load();
+         *
+         * // Load with column selection, pagination, and filtering
+         * Dataset ds2 = CsvUtil.loader()
+         *     .source(new File("large.csv"))
+         *     .selectColumns(Arrays.asList("name", "age"))
+         *     .offset(100)
+         *     .count(500)
+         *     .rowFilter(row -> Integer.parseInt(row[1]) >= 18)
+         *     .load();
+         *
+         * // Load from Reader with column type map
+         * try (Reader reader = new FileReader("data.csv")) {
+         *     Map<String, Type<?>> typeMap = new HashMap<>();
+         *     typeMap.put("price", Type.of(Double.class));
+         *     Dataset ds3 = CsvUtil.loader()
+         *         .source(reader)
+         *         .columnTypeMap(typeMap)
+         *         .load();
+         * }
+         *
+         * // Missing source throws IllegalArgumentException
+         * // CsvUtil.loader().load();
+         * }</pre>
          *
          * @return a Dataset containing the loaded CSV data
          * @throws IllegalArgumentException if no source has been set
@@ -3493,6 +3892,34 @@ public final class CsvUtil {
         /**
          * Loads the CSV data into a Dataset using a custom row extractor function.
          * A source (file or reader) must be configured before calling this method.
+         *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * // Custom row extraction with type conversion
+         * TriConsumer<List<String>, DisposableArray<String>, Object[]> extractor =
+         *     (columns, row, output) -> {
+         *         output[0] = row.get(0);                       // name as String
+         *         output[1] = Integer.parseInt(row.get(1));     // age as int
+         *         output[2] = Boolean.parseBoolean(row.get(2)); // active as boolean
+         *     };
+         * Dataset ds = CsvUtil.loader()
+         *     .source(new File("data.csv"))
+         *     .load(extractor);
+         *
+         * // Custom extraction with column selection and offset
+         * Dataset ds2 = CsvUtil.loader()
+         *     .source(new File("large.csv"))
+         *     .selectColumns(Arrays.asList("name", "age"))
+         *     .offset(500)
+         *     .count(100)
+         *     .load(extractor);
+         *
+         * // Null extractor throws IllegalArgumentException
+         * // CsvUtil.loader().source(file).load(null);
+         *
+         * // Missing source throws IllegalArgumentException
+         * // CsvUtil.loader().load(extractor);
+         * }</pre>
          *
          * @param rowExtractor function to extract data from each row; must not be {@code null}.
          *        The first parameter is the selected column names, the second is the disposable row data array,
@@ -3530,6 +3957,33 @@ public final class CsvUtil {
          * when the stream is closed; use {@link #stream(BiFunction, boolean)} with {@code true} for
          * automatic reader closing.
          *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * // Stream rows as custom DTOs from a file
+         * try (Stream<MyDTO> stream = CsvUtil.loader()
+         *         .source(new File("data.csv"))
+         *         .selectColumns(Arrays.asList("name", "value"))
+         *         .<MyDTO>stream((columns, row) -> new MyDTO(row.get(0), Double.parseDouble(row.get(1))))) {
+         *     stream.forEach(System.out::println);
+         * }
+         *
+         * // Stream from Reader (reader NOT closed when stream closes)
+         * try (Reader reader = new FileReader("data.csv")) {
+         *     try (Stream<Object[]> stream = CsvUtil.loader()
+         *             .source(reader)
+         *             .<Object[]>stream((cols, row) -> new Object[] {row.get(0), row.get(1)})) {
+         *         stream.limit(10).forEach(System.out::println);
+         *     }
+         *     // Reader can still be used after stream closes
+         * }
+         *
+         * // Null rowMapper throws IllegalArgumentException
+         * // CsvUtil.loader().source(file).stream(null);
+         *
+         * // Missing source throws IllegalArgumentException
+         * // CsvUtil.loader().stream((cols, row) -> row.get(0));
+         * }</pre>
+         *
          * @param <T> the type of elements in the stream
          * @param rowMapper function to convert each row to the target type; must not be {@code null}.
          *        The first argument is the selected column names, the second is the disposable row data array
@@ -3542,6 +3996,35 @@ public final class CsvUtil {
 
         /**
          * Creates a Stream of elements using a custom row mapper function with optional reader closing.
+         *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * // Stream from file (auto-closed)
+         * try (Stream<CustomType> stream = CsvUtil.loader()
+         *         .source(new File("data.csv"))
+         *         .selectColumns(Arrays.asList("id", "name"))
+         *         .<CustomType>stream((cols, row) -> new CustomType(row.get(0), row.get(1)), true)) {
+         *     List<CustomType> results = stream.collect(Collectors.toList());
+         * }
+         *
+         * // Stream from Reader with auto-close enabled
+         * try (Reader reader = new FileReader("data.csv");
+         *      Stream<Map<String, String>> stream = CsvUtil.loader()
+         *          .source(reader)
+         *          .<Map<String, String>>stream((cols, row) -> {
+         *              Map<String, String> map = new HashMap<>();
+         *              map.put(cols.get(0), row.get(0));
+         *              return map;
+         *          }, true)) {
+         *     stream.limit(5).forEach(System.out::println);
+         * }
+         *
+         * // Null rowMapper throws IllegalArgumentException
+         * // CsvUtil.loader().source(file).stream(null, true);
+         *
+         * // Missing source throws IllegalArgumentException
+         * // CsvUtil.loader().stream((cols, row) -> row, true);
+         * }</pre>
          *
          * @param <T> the type of elements in the stream
          * @param rowMapper function to convert each row to the target type; must not be {@code null}.
@@ -3644,6 +4127,31 @@ public final class CsvUtil {
         /**
          * Converts CSV data to JSON format and writes to the specified output file.
          *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * // Convert CSV to JSON with all default settings
+         * long rowCount = CsvUtil.converter()
+         *     .source(new File("data.csv"))
+         *     .csvToJson(new File("output.json"));
+         *
+         * // Convert with column selection and type inference
+         * long count2 = CsvUtil.converter()
+         *     .source(new File("employees.csv"))
+         *     .selectColumns(Arrays.asList("name", "age"))
+         *     .beanClassForColumnTypeInference(Employee.class)
+         *     .csvToJson(new File("employees.json"));
+         *
+         * // Convert with offset and count for paginated conversion
+         * long count3 = CsvUtil.converter()
+         *     .source(new File("large.csv"))
+         *     .offset(1000)
+         *     .count(500)
+         *     .csvToJson(new File("partial.json"));
+         *
+         * // Null output file throws IllegalArgumentException
+         * // CsvUtil.converter().source(file).csvToJson(null);
+         * }</pre>
+         *
          * @param outputJsonFile the file to write JSON output to
          * @return the number of rows converted
          * @throws IllegalArgumentException if outputJsonFile is {@code null} or source is not set
@@ -3677,6 +4185,30 @@ public final class CsvUtil {
         /**
          * Converts CSV data to JSON format and writes to the specified Writer.
          *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * // Convert CSV to JSON writing to a StringWriter
+         * StringWriter sw = new StringWriter();
+         * long rowCount = CsvUtil.converter()
+         *     .source(new File("data.csv"))
+         *     .csvToJson(sw);
+         * String jsonResult = sw.toString();
+         *
+         * // Convert with a FileWriter
+         * try (Writer writer = new FileWriter("output.json")) {
+         *     long count = CsvUtil.converter()
+         *         .source(new File("data.csv"))
+         *         .selectColumns(Arrays.asList("id", "name"))
+         *         .csvToJson(writer);
+         * }
+         *
+         * // Null Writer throws IllegalArgumentException
+         * // CsvUtil.converter().source(file).csvToJson(null);
+         *
+         * // Missing source throws IllegalArgumentException
+         * // CsvUtil.converter().csvToJson(new StringWriter());
+         * }</pre>
+         *
          * @param outputJsonWriter the Writer to write JSON output to
          * @return the number of rows converted
          * @throws IllegalArgumentException if outputJsonWriter is {@code null} or source is not set
@@ -3704,6 +4236,31 @@ public final class CsvUtil {
 
         /**
          * Converts JSON data to CSV format and writes to the specified output file.
+         *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * // Convert JSON to CSV with all default settings
+         * long rowCount = CsvUtil.converter()
+         *     .source(new File("data.json"))
+         *     .jsonToCsv(new File("output.csv"));
+         *
+         * // Convert with column selection and backslash escaping
+         * long count2 = CsvUtil.converter()
+         *     .source(new File("data.json"))
+         *     .selectColumns(Arrays.asList("name", "department"))
+         *     .setEscapeCharToBackSlashForWrite()
+         *     .jsonToCsv(new File("output.csv"));
+         *
+         * // Convert from Reader source
+         * try (Reader jsonReader = new FileReader("data.json")) {
+         *     long count3 = CsvUtil.converter()
+         *         .source(jsonReader)
+         *         .jsonToCsv(new File("output.csv"));
+         * }
+         *
+         * // Null file throws IllegalArgumentException
+         * // CsvUtil.converter().source(file).jsonToCsv(null);
+         * }</pre>
          *
          * @param outputCsvFile the file to write CSV output to
          * @return the number of rows converted
@@ -3737,6 +4294,32 @@ public final class CsvUtil {
 
         /**
          * Converts JSON data to CSV format and writes to the specified Writer.
+         *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * // Convert JSON to CSV writing to a StringWriter
+         * StringWriter sw = new StringWriter();
+         * long rowCount = CsvUtil.converter()
+         *     .source(new File("data.json"))
+         *     .jsonToCsv(sw);
+         * String csvResult = sw.toString();
+         *
+         * // Convert with a FileWriter and column selection
+         * try (Writer writer = new FileWriter("output.csv")) {
+         *     long count = CsvUtil.converter()
+         *         .source(new File("data.json"))
+         *         .selectColumns(Arrays.asList("id", "name"))
+         *         .offset(100)
+         *         .count(500)
+         *         .jsonToCsv(writer);
+         * }
+         *
+         * // Null Writer throws IllegalArgumentException
+         * // CsvUtil.converter().source(file).jsonToCsv(null);
+         *
+         * // Missing source throws IllegalArgumentException
+         * // CsvUtil.converter().jsonToCsv(new StringWriter());
+         * }</pre>
          *
          * @param outputCsvWriter the Writer to write CSV output to
          * @return the number of rows converted

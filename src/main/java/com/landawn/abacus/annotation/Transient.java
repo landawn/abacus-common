@@ -70,13 +70,13 @@ import java.lang.annotation.Target;
  *     private BigDecimal price;
  *
  *     @Transient
- *     private BigDecimal priceWithTax;   // Computed at runtime.
+ *     private BigDecimal priceWithTax;   // priceWithTax is computed at runtime.
  *
  *     @Transient
- *     private boolean modified;          // UI/runtime state.
+ *     private boolean modified;          // modified is UI/runtime state.
  *
  *     @Transient
- *     private List<Review> reviews;      // Loaded by a separate query.
+ *     private List<Review> reviews;      // reviews are loaded by a separate query.
  * }
  * }</pre>
  *

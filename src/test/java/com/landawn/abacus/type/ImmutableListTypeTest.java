@@ -90,12 +90,31 @@ public class ImmutableListTypeTest extends TestBase {
 
     @Test
     public void testAppendTo() throws IOException {
-        StringWriter writer = new StringWriter();
-        assertNotNull(writer);
+        StringBuilder sb = new StringBuilder();
+        immutableListType.appendTo(sb, ImmutableList.of("a", "b"));
+        // appendTo emits the plain, toString()-style form: string elements are NOT quoted
+        assertEquals("[a, b]", sb.toString());
+
+        sb.setLength(0);
+        immutableListType.appendTo(sb, null);
+        assertEquals("null", sb.toString());
     }
 
     @Test
-    public void testWriteCharacter() throws IOException {
+    public void testSerializeTo() throws IOException {
+        ImmutableList<String> list = ImmutableList.of("a", "b");
+        com.landawn.abacus.util.BufferedJsonWriter writer = com.landawn.abacus.util.Objectory.createBufferedJsonWriter();
+        immutableListType.serializeTo(writer, list, com.landawn.abacus.parser.JsonSerConfig.create());
+        String json = writer.toString();
+        com.landawn.abacus.util.Objectory.recycle(writer);
+
+        // serializeTo emits JSON: string elements ARE quoted; equals stringOf and differs from appendTo
+        assertEquals("[\"a\", \"b\"]", json);
+        assertEquals(immutableListType.stringOf(list), json);
+
+        StringBuilder sb = new StringBuilder();
+        immutableListType.appendTo(sb, list);
+        org.junit.jupiter.api.Assertions.assertNotEquals(sb.toString(), json);
     }
 
     @Test

@@ -152,15 +152,15 @@ public class InputStreamTypeTest extends TestBase {
     }
 
     @Test
-    public void testWriteCharacter() throws IOException {
-        inputStreamType.writeCharacter(characterWriter, null, null);
+    public void testSerializeTo() throws IOException {
+        inputStreamType.serializeTo(characterWriter, null, null);
 
         InputStream stream = new ByteArrayInputStream(new byte[0]);
-        inputStreamType.writeCharacter(characterWriter, stream, null);
+        inputStreamType.serializeTo(characterWriter, stream, null);
 
         when(config.getStringQuotation()).thenReturn('"');
         stream = new ByteArrayInputStream(new byte[0]);
-        inputStreamType.writeCharacter(characterWriter, stream, config);
+        inputStreamType.serializeTo(characterWriter, stream, config);
         assertNotNull(stream);
     }
 }

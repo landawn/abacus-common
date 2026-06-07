@@ -175,22 +175,22 @@ public class ObjectArrayTypeTest extends TestBase {
     }
 
     @Test
-    public void testWriteCharacterWithNull() throws IOException {
-        stringArrayType.writeCharacter(writer, null, config);
+    public void testSerializeToWithNull() throws IOException {
+        stringArrayType.serializeTo(writer, null, config);
         verify(writer).write(any(char[].class));
     }
 
     @Test
-    public void testWriteCharacterWithEmptyArray() throws IOException {
+    public void testSerializeToWithEmptyArray() throws IOException {
         String[] emptyArray = new String[0];
-        stringArrayType.writeCharacter(writer, emptyArray, config);
+        stringArrayType.serializeTo(writer, emptyArray, config);
         verify(writer, times(2)).write(anyChar());
     }
 
     @Test
-    public void testWriteCharacterWithArray() throws IOException {
+    public void testSerializeToWithArray() throws IOException {
         String[] array = { "test" };
-        stringArrayType.writeCharacter(writer, array, config);
+        stringArrayType.serializeTo(writer, array, config);
         verify(writer, atLeastOnce()).write(anyChar());
     }
 

@@ -22,6 +22,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.AfterEach;
@@ -1153,6 +1154,27 @@ public class ParallelIteratorStreamTest extends TestBase {
         List<Integer> result = createIteratorParallelStream(data).collect(com.landawn.abacus.util.stream.Collectors.toList());
         assertNotNull(result);
         assertEquals(5, result.size());
+    }
+
+    @Test
+    public void testConcurrentOrderedCollectorUsesIndependentContainers() {
+        final AtomicInteger supplierCount = new AtomicInteger();
+        final Collector<Integer, ?, List<Integer>> concurrentOrderedCollector = Collector.of(() -> {
+            supplierCount.incrementAndGet();
+            return Collections.synchronizedList(new ArrayList<Integer>());
+        }, List::add, (left, right) -> {
+            left.addAll(right);
+            return left;
+        }, Collector.Characteristics.CONCURRENT);
+
+        final List<Integer> data = Stream.rangeClosed(1, 100).toList();
+
+        try (Stream<Integer> local = createIteratorParallelStream(data)) {
+            final List<Integer> result = local.collect(concurrentOrderedCollector);
+
+            assertTrue(supplierCount.get() > 1);
+            assertHaveSameElements(data, result);
+        }
     }
 
     @Test

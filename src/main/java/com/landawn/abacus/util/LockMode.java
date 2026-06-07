@@ -29,7 +29,7 @@ package com.landawn.abacus.util;
  *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
- * LockMode mode = LockMode.RU;  // Prevents read by ID and update
+ * LockMode mode = LockMode.RU;  // mode is RU (prevents read by ID and update)
  * if (mode.isXLockOf(LockMode.R)) {
  *     // This lock includes read restriction
  * }
@@ -170,7 +170,7 @@ public enum LockMode {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * int value = LockMode.RU.intValue();   // Returns 5 (1 + 4)
+     * int value = LockMode.RU.intValue();   // returns 5 (1 + 4)
      * }</pre>
      *
      * @return the integer value of this lock mode
@@ -185,8 +185,8 @@ public enum LockMode {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * LockMode mode = LockMode.valueOf(5);     // Returns LockMode.RU
-     * LockMode mode2 = LockMode.valueOf(12);   // Returns LockMode.UD
+     * LockMode mode = LockMode.valueOf(5);     // returns LockMode.RU
+     * LockMode mode2 = LockMode.valueOf(12);   // returns LockMode.UD
      * }</pre>
      *
      * @param intValue the integer value to convert to a LockMode
@@ -254,11 +254,11 @@ public enum LockMode {
      * <pre>{@code
      * LockMode currentLock = LockMode.R;
      * LockMode checkLock = LockMode.RU;
-     * boolean isLocked = currentLock.isXLockOf(checkLock);   // Returns true
+     * boolean isLocked = currentLock.isXLockOf(checkLock);   // returns true
      *
      * LockMode currentLock2 = LockMode.UD;
      * LockMode checkLock2 = LockMode.R;
-     * boolean isLocked2 = currentLock2.isXLockOf(checkLock2);   // Returns false
+     * boolean isLocked2 = currentLock2.isXLockOf(checkLock2);   // returns false
      * }</pre>
      *
      * @param lockMode the LockMode to check against

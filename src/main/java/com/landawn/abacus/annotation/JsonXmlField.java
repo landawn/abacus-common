@@ -39,7 +39,6 @@ import com.landawn.abacus.util.EnumType;
  *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
- *
  * public class User {
  *     @JsonXmlField(name = "user_id")
  *     private Long id;
@@ -74,7 +73,7 @@ public @interface JsonXmlField {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * @JsonXmlField(name = "user_id")
-     * private Long id;  // Serialized as "user_id" instead of "id"
+     * private Long id;  // maps to "user_id" instead of "id"
      * }</pre>
      *
      * @return the field name for serialization, or an empty string for the default Java field name
@@ -103,7 +102,7 @@ public @interface JsonXmlField {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * @JsonXmlField(type = "java.util.Date")
-     * private Object dateValue;  // Forces treatment as Date type
+     * private Object dateValue;  // treats value as Date type
      * }</pre>
      *
      * @return the explicit type string, or an empty string for automatic type detection
@@ -117,10 +116,10 @@ public @interface JsonXmlField {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * @JsonXmlField(dateFormat = "yyyy-MM-dd HH:mm:ss")
-     * private Date created;  // Serialized as "2023-12-25 10:30:45"
+     * private Date created;  // "2023-12-25 10:30:45"
      *
      * @JsonXmlField(dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
-     * private Instant timestamp;  // Serialized as "2023-12-25T10:30:45.123Z"
+     * private Instant timestamp;  // "2023-12-25T10:30:45.123Z"
      * }</pre>
      *
      * @return the date format pattern, or an empty string for the default format
@@ -148,10 +147,10 @@ public @interface JsonXmlField {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * @JsonXmlField(numberFormat = "#.##")
-     * private Double price;  // Serialized with 2 decimal places: "19.99"
+     * private Double price;  // "19.99" with 2 decimal places
      *
      * @JsonXmlField(numberFormat = "###,###.00")
-     * private BigDecimal amount;  // Serialized with comma separators: "1,234.56"
+     * private BigDecimal amount;  // "1,234.56" with comma separators
      * }</pre>
      *
      * @return the number format pattern, or an empty string for default formatting
@@ -172,7 +171,7 @@ public @interface JsonXmlField {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * @JsonXmlField(enumerated = EnumType.ORDINAL)
-     * private Status status;  // Serialized as 0, 1, 2... instead of "ACTIVE", "INACTIVE"...
+     * private Status status;  // 0, 1, 2... instead of "ACTIVE", "INACTIVE"...
      * }</pre>
      *
      * @return the enum serialization strategy
@@ -189,10 +188,10 @@ public @interface JsonXmlField {
      *     private String username;
      *
      *     @JsonXmlField(ignore = true)
-     *     private String password;  // Never included in JSON/XML
+     *     private String password;  // field is never included in JSON/XML
      *
      *     @JsonXmlField(ignore = true)
-     *     private String internalId;  // Hidden from serialization
+     *     private String internalId;  // field is hidden from serialization
      * }
      * }</pre>
      *
@@ -214,7 +213,7 @@ public @interface JsonXmlField {
      *     private String title;
      *
      *     @JsonXmlField(isJsonRawValue = true)
-     *     private String metadata;  // Contains already-serialized JSON, e.g. {"key":"value"}
+     *     private String metadata;  // contains already-serialized JSON, e.g. {"key":"value"}
      *     // Result:    {"title":"My Doc","metadata":{"key":"value"}}
      *     // Instead of: {"title":"My Doc","metadata":"{\"key\":\"value\"}"}
      * }
@@ -238,10 +237,10 @@ public @interface JsonXmlField {
      * <pre>{@code
      * public class User {
      *     @JsonXmlField(direction = Direction.SERIALIZE_ONLY)
-     *     private String displayName;  // Written to JSON but not read from it
+     *     private String displayName;  // field is written to JSON but not read from it
      *
      *     @JsonXmlField(direction = Direction.DESERIALIZE_ONLY)
-     *     private String tempPassword;  // Read from JSON but not written to it
+     *     private String tempPassword;  // field is read from JSON but not written to it
      * }
      * }</pre>
      *
@@ -268,6 +267,7 @@ public @interface JsonXmlField {
      *     private String password;
      * }
      * }</pre>
+     *
      */
     enum Direction {
         /**
@@ -290,11 +290,12 @@ public @interface JsonXmlField {
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * @JsonXmlField(direction = Direction.SERIALIZE_ONLY)
-         * private String displayName;  // Computed from firstName + lastName
+         * private String displayName;  // field is computed from firstName + lastName
          *
          * @JsonXmlField(direction = Direction.SERIALIZE_ONLY)
-         * private Long userId;  // Auto-generated ID
+         * private Long userId;  // field is auto-generated
          * }</pre>
+         *
          */
         SERIALIZE_ONLY,
 
@@ -312,11 +313,12 @@ public @interface JsonXmlField {
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * @JsonXmlField(direction = Direction.DESERIALIZE_ONLY)
-         * private String password;  // Accepted but never returned
+         * private String password;  // field is accepted but never returned
          *
          * @JsonXmlField(direction = Direction.DESERIALIZE_ONLY)
-         * private String resetToken;  // Used for validation, not exposed in output
+         * private String resetToken;  // field is used for validation, not exposed in output
          * }</pre>
+         *
          */
         DESERIALIZE_ONLY
     }

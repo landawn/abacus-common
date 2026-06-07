@@ -148,60 +148,60 @@ public class JodaInstantTypeTest extends TestBase {
     }
 
     @Test
-    public void testWriteCharacter_Null() throws IOException {
-        instantType.writeCharacter(characterWriter, null, null);
+    public void testSerializeTo_Null() throws IOException {
+        instantType.serializeTo(characterWriter, null, null);
         verify(characterWriter).write(any(char[].class));
     }
 
     @Test
-    public void testWriteCharacter_NoConfig() throws IOException {
+    public void testSerializeTo_NoConfig() throws IOException {
         Instant instant = new Instant(1703502645123L);
 
-        instantType.writeCharacter(characterWriter, instant, null);
+        instantType.serializeTo(characterWriter, instant, null);
         verify(characterWriter).write(anyString());
     }
 
     @Test
-    public void testWriteCharacter_LongFormat() throws IOException {
+    public void testSerializeTo_LongFormat() throws IOException {
         Instant instant = new Instant(1703502645123L);
         JsonXmlSerConfig<?> config = mock(JsonXmlSerConfig.class);
         when(config.getDateTimeFormat()).thenReturn(DateTimeFormat.LONG);
         when(config.getStringQuotation()).thenReturn((char) 0);
 
-        instantType.writeCharacter(characterWriter, instant, config);
+        instantType.serializeTo(characterWriter, instant, config);
         verify(characterWriter).write(1703502645123L);
     }
 
     @Test
-    public void testWriteCharacter_ISO8601DateTime() throws IOException {
+    public void testSerializeTo_ISO8601DateTime() throws IOException {
         Instant instant = new Instant(1703502645123L);
         JsonXmlSerConfig<?> config = mock(JsonXmlSerConfig.class);
         when(config.getDateTimeFormat()).thenReturn(DateTimeFormat.ISO_8601_DATE_TIME);
         when(config.getStringQuotation()).thenReturn((char) 0);
 
-        instantType.writeCharacter(characterWriter, instant, config);
+        instantType.serializeTo(characterWriter, instant, config);
         verify(characterWriter).write(anyString());
     }
 
     @Test
-    public void testWriteCharacter_ISO8601Timestamp() throws IOException {
+    public void testSerializeTo_ISO8601Timestamp() throws IOException {
         Instant instant = new Instant(1703502645123L);
         JsonXmlSerConfig<?> config = mock(JsonXmlSerConfig.class);
         when(config.getDateTimeFormat()).thenReturn(DateTimeFormat.ISO_8601_TIMESTAMP);
         when(config.getStringQuotation()).thenReturn((char) 0);
 
-        instantType.writeCharacter(characterWriter, instant, config);
+        instantType.serializeTo(characterWriter, instant, config);
         verify(characterWriter).write(anyString());
     }
 
     @Test
-    public void testWriteCharacter_WithQuotes() throws IOException {
+    public void testSerializeTo_WithQuotes() throws IOException {
         Instant instant = new Instant(1703502645123L);
         JsonXmlSerConfig<?> config = mock(JsonXmlSerConfig.class);
         when(config.getDateTimeFormat()).thenReturn(DateTimeFormat.ISO_8601_TIMESTAMP);
         when(config.getStringQuotation()).thenReturn('"');
 
-        instantType.writeCharacter(characterWriter, instant, config);
+        instantType.serializeTo(characterWriter, instant, config);
         verify(characterWriter, times(2)).write('"');
         verify(characterWriter).write(anyString());
     }

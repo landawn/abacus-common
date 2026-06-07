@@ -267,18 +267,18 @@ public class LongTypeTest extends TestBase {
     }
 
     @Test
-    public void test_writeCharacter_null() throws Exception {
+    public void test_serializeTo_null() throws Exception {
         CharacterWriter writer = mock(BufferedJsonWriter.class);
 
-        longType.writeCharacter(writer, null, null);
+        longType.serializeTo(writer, null, null);
         verify(writer).write("null".toCharArray());
     }
 
     @Test
-    public void test_writeCharacter_withValue() throws Exception {
+    public void test_serializeTo_withValue() throws Exception {
         CharacterWriter writer = mock(BufferedJsonWriter.class);
 
-        longType.writeCharacter(writer, 42L, null);
+        longType.serializeTo(writer, 42L, null);
         verify(writer).write(42L);
     }
 }

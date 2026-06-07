@@ -114,8 +114,8 @@ public sealed class ImmutableList<E> extends ImmutableCollection<E> implements L
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableList<String> empty = ImmutableList.empty();
-     * System.out.println(empty.size());      // prints: 0
-     * System.out.println(empty.isEmpty());   // prints: true
+     * System.out.println(empty.size());      // prints 0
+     * System.out.println(empty.isEmpty());   // prints true
      * }</pre>
      *
      * @param <E> the type of elements in the list.
@@ -448,7 +448,7 @@ public sealed class ImmutableList<E> extends ImmutableCollection<E> implements L
      *
      * ImmutableList<String> wrapped = ImmutableList.wrap(mutable);
      * mutable.add("added later");           // This WILL be visible in wrapped!
-     * System.out.println(wrapped.get(1));   // prints: "added later"
+     * System.out.println(wrapped.get(1));   // prints "added later"
      * }</pre>
      *
      * @param <E> the type of elements in the list.
@@ -472,6 +472,12 @@ public sealed class ImmutableList<E> extends ImmutableCollection<E> implements L
     /**
      * This method is deprecated and will always throw an UnsupportedOperationException.
      * Use {@link #wrap(List)} or {@link #copyOf(Collection)} instead.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Collection<String> c = Arrays.asList("a", "b");
+     * ImmutableList.wrap(c);   // throws UnsupportedOperationException
+     * }</pre>
      *
      * @param <E> the type of elements.
      * @param c the collection to wrap.
@@ -1235,7 +1241,7 @@ public sealed class ImmutableList<E> extends ImmutableCollection<E> implements L
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * ImmutableList<String> finalList = builder.build();
-         * System.out.println(finalList.size());   // Number of elements added
+         * System.out.println(finalList.size());   // prints the number of elements added
          * }</pre>
          *
          * @return a new ImmutableList containing all added elements in the order they were added.

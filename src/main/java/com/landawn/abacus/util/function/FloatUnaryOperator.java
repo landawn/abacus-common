@@ -29,7 +29,7 @@ import com.landawn.abacus.util.Throwables;
  * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
  *
  * @see java.util.function.UnaryOperator
- * @see java.util.function.DoubleUnaryOperator
+ * @see FloatBinaryOperator
  */
 @FunctionalInterface
 public interface FloatUnaryOperator extends Throwables.FloatUnaryOperator<RuntimeException> { //NOSONAR

@@ -177,31 +177,31 @@ public class AbstractCharacterTypeTest extends TestBase {
     }
 
     @Test
-    public void testWriteCharacter_Character_NoQuotation() throws IOException {
-        type.writeCharacter(characterWriter, 'A', null);
+    public void testSerializeTo_Character_NoQuotation() throws IOException {
+        type.serializeTo(characterWriter, 'A', null);
     }
 
     @Test
-    public void testWriteCharacter_Character_NoQuotation_WithConfig() throws IOException {
+    public void testSerializeTo_Character_NoQuotation_WithConfig() throws IOException {
         when(config.getCharQuotation()).thenReturn((char) 0);
-        type.writeCharacter(characterWriter, 'A', config);
+        type.serializeTo(characterWriter, 'A', config);
     }
 
     @Test
-    public void testWriteCharacter_Character_WithDoubleQuotes() throws IOException {
+    public void testSerializeTo_Character_WithDoubleQuotes() throws IOException {
         when(config.getCharQuotation()).thenReturn('"');
-        type.writeCharacter(characterWriter, 'A', config);
+        type.serializeTo(characterWriter, 'A', config);
     }
 
     @Test
-    public void testWriteCharacter_Character_WithSingleQuotes() throws IOException {
+    public void testSerializeTo_Character_WithSingleQuotes() throws IOException {
         when(config.getCharQuotation()).thenReturn('\'');
-        type.writeCharacter(characterWriter, 'A', config);
+        type.serializeTo(characterWriter, 'A', config);
     }
 
     @Test
-    public void testWriteCharacter_SingleQuote_WithSingleQuoteQuotation() throws IOException {
+    public void testSerializeTo_SingleQuote_WithSingleQuoteQuotation() throws IOException {
         when(config.getCharQuotation()).thenReturn('\'');
-        type.writeCharacter(characterWriter, '\'', config);
+        type.serializeTo(characterWriter, '\'', config);
     }
 }

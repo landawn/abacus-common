@@ -109,12 +109,12 @@ public class AbstractTypeTest extends TestBase {
         }
     }
 
-    // writeCharacter with null value writes NULL_CHAR_ARRAY via AbstractType default implementation
+    // serializeTo with null value writes NULL_CHAR_ARRAY via AbstractType default implementation
     @Test
-    public void testWriteCharacter_NullValue_WritesNullArray() throws IOException {
+    public void testSerializeTo_NullValue_WritesNullArray() throws IOException {
         BufferedJsonWriter writer = mock(BufferedJsonWriter.class);
         TestSplitType type = new TestSplitType();
-        type.writeCharacter(writer, null, null);
+        type.serializeTo(writer, null, null);
         verify(writer, times(1)).write(AbstractType.NULL_CHAR_ARRAY);
     }
 
@@ -502,26 +502,26 @@ public class AbstractTypeTest extends TestBase {
     }
 
     @Test
-    @DisplayName("Test writeCharacter() without config")
-    public void testWriteCharacterNoConfig() throws IOException {
+    @DisplayName("Test serializeTo() without config")
+    public void testSerializeToNoConfig() throws IOException {
         CharacterWriter writer = mock(BufferedJsonWriter.class);
 
-        stringType.writeCharacter(writer, "test", null);
+        stringType.serializeTo(writer, "test", null);
         verify(writer).writeCharacter("test");
 
-        stringType.writeCharacter(writer, null, null);
+        stringType.serializeTo(writer, null, null);
         verify(writer).write("null".toCharArray());
     }
 
     @Test
-    @DisplayName("Test writeCharacter() with config")
-    public void testWriteCharacterWithConfig() throws IOException {
+    @DisplayName("Test serializeTo() with config")
+    public void testSerializeToWithConfig() throws IOException {
         CharacterWriter writer = mock(BufferedJsonWriter.class);
 
         JsonXmlSerConfig<?> config = mock(JsonXmlSerConfig.class);
         when(config.getStringQuotation()).thenReturn('"');
 
-        stringType.writeCharacter(writer, "test", config);
+        stringType.serializeTo(writer, "test", config);
         verify(writer, times(2)).write('"');
         verify(writer).writeCharacter("test");
     }

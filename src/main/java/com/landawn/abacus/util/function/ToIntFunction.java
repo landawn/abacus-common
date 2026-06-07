@@ -41,6 +41,7 @@ public interface ToIntFunction<T> extends Throwables.ToIntFunction<T, RuntimeExc
      * int primitive = ToIntFunction.UNBOX.applyAsInt(boxed);     // returns 42
      * int defaultValue = ToIntFunction.UNBOX.applyAsInt(null);   // returns 0
      * }</pre>
+     *
      */
     ToIntFunction<Integer> UNBOX = value -> value == null ? 0 : value;
     /**
@@ -64,6 +65,7 @@ public interface ToIntFunction<T> extends Throwables.ToIntFunction<T, RuntimeExc
      *
      * int defaultValue = ToIntFunction.FROM_NUM.applyAsInt(null);   // returns 0
      * }</pre>
+     *
      */
     ToIntFunction<Number> FROM_NUM = value -> value == null ? 0 : value.intValue();
 

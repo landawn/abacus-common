@@ -23,9 +23,9 @@ package com.landawn.abacus.util;
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * IndexedKeyed<String, User> indexed = IndexedKeyed.of("user123", new User("John"), 0);
- * System.out.println(indexed.index()); // 0
- * System.out.println(indexed.key());   // user123
- * System.out.println(indexed.val());   // User("John")
+ * System.out.println(indexed.index()); // prints 0
+ * System.out.println(indexed.key());   // prints user123
+ * System.out.println(indexed.val());   // prints User("John")
  * }</pre>
  *
  * @param <K> the type of the key component
@@ -56,6 +56,14 @@ public final class IndexedKeyed<K, T> extends Keyed<K, T> {
     /**
      * Creates an {@code IndexedKeyed} with the specified key, value, and index.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * IndexedKeyed<String, Integer> ik = IndexedKeyed.of("user123", 42, 5);
+     * ik.key();     // returns "user123"
+     * ik.val();     // returns 42
+     * ik.index();   // returns 5
+     * }</pre>
+     *
      * @param <K> the type of the key component
      * @param <T> the type of the value component
      * @param key the key component (can be {@code null})
@@ -69,6 +77,12 @@ public final class IndexedKeyed<K, T> extends Keyed<K, T> {
 
     /**
      * Returns the index component of this {@code IndexedKeyed}.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * IndexedKeyed<String, Integer> ik = IndexedKeyed.of("k", 1, 7);
+     * int idx = ik.index();   // returns 7
+     * }</pre>
      *
      * @return the index value
      */

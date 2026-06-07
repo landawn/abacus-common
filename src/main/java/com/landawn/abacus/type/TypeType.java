@@ -107,8 +107,15 @@ public class TypeType extends AbstractType<Type> {
      * Returns the name of the given {@code Type} instance by calling {@link Type#name()},
      * or {@code null} if the input is {@code null}.
      *
+     * <p>The returned string is a serializable representation designed to be parsed back into an equivalent value
+     * via {@link #valueOf(String)}; {@code stringOf} and {@code valueOf} are inverse operations that round-trip. This
+     * is the key distinction from {@link Object#toString()}, whose result is not guaranteed to be convertible back
+     * into the original value.</p>
+     *
      * @param x the {@code Type} instance to convert to string, may be {@code null}
      * @return the type name, or {@code null} if the input is {@code null}
+     * @see #valueOf(String)
+     * @see #valueOf(Object)
      */
     @Override
     public String stringOf(final Type x) {
@@ -127,9 +134,15 @@ public class TypeType extends AbstractType<Type> {
      * such as {@code "String"}, {@code "Integer"}, {@code "List<String>"}, etc.
      * </p>
      *
+     * <p>This method is the inverse of {@code stringOf} and round-trips with it: it parses the string produced by
+     * {@code stringOf} back into a value of this type. Strings produced by {@link Object#toString()} are not
+     * guaranteed to be parseable in this way.</p>
+     *
      * @param str the type name string to convert to a {@code Type} instance
      * @return the {@code Type} instance corresponding to the type name, or {@code null} if the string is {@code null} or empty
      * @throws IllegalArgumentException if the type name format is invalid
+     * @see #valueOf(Object)
+     * @see #stringOf(Type)
      */
     @Override
     public Type valueOf(final String str) {

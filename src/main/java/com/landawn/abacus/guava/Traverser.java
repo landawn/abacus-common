@@ -227,7 +227,7 @@ public final class Traverser<T> {
      *
      * // Find all people within 3 degrees of separation
      * Set<Person> network = socialTraverser.breadthFirst(person)
-     *     .limit(1000)  // Limit traversal
+     *     .limit(1000)  // stops after 1000 nodes
      *     .toSet();
      * }</pre>
      *

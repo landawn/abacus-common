@@ -263,7 +263,7 @@ public class EventBus {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * EventBus eventBus = EventBus.create("myBus");
-     * String id = eventBus.identifier();   // Returns "myBus"
+     * String id = eventBus.identifier();   // returns "myBus"
      * }</pre>
      *
      * @return the identifier of this {@code EventBus}
@@ -468,25 +468,7 @@ public class EventBus {
         }
 
         if (N.notEmpty(oldSubEvents)) {
-            synchronized (registeredEventIdSubMap) {
-                final List<String> keyToRemove = new ArrayList<>();
-
-                for (final Map.Entry<String, Set<SubIdentifier>> entry : registeredEventIdSubMap.entrySet()) {
-                    entry.getValue().removeAll(oldSubEvents);
-
-                    if (entry.getValue().isEmpty()) {
-                        keyToRemove.add(entry.getKey());
-                    }
-
-                    listOfEventIdSubMap.remove(entry.getKey());
-                }
-
-                if (N.notEmpty(keyToRemove)) {
-                    for (final String key : keyToRemove) {
-                        registeredEventIdSubMap.remove(key);
-                    }
-                }
-            }
+            removeFromEventIdSubMap(oldSubEvents);
         }
 
         if (Strings.isEmpty(eventId)) {
@@ -695,28 +677,39 @@ public class EventBus {
         }
 
         if (N.notEmpty(subEvents)) {
-            synchronized (registeredEventIdSubMap) {
-                final List<String> keyToRemove = new ArrayList<>();
-
-                for (final Map.Entry<String, Set<SubIdentifier>> entry : registeredEventIdSubMap.entrySet()) {
-                    entry.getValue().removeAll(subEvents);
-
-                    if (entry.getValue().isEmpty()) {
-                        keyToRemove.add(entry.getKey());
-                    }
-
-                    listOfEventIdSubMap.remove(entry.getKey());
-                }
-
-                if (N.notEmpty(keyToRemove)) {
-                    for (final String key : keyToRemove) {
-                        registeredEventIdSubMap.remove(key);
-                    }
-                }
-            }
+            removeFromEventIdSubMap(subEvents);
         }
 
         return this;
+    }
+
+    /**
+     * Removes the given subscriber identifiers from the event-id index ({@code registeredEventIdSubMap})
+     * and invalidates the corresponding cached snapshots in {@code listOfEventIdSubMap}. Any event ID
+     * whose subscriber set becomes empty as a result is removed from the index entirely.
+     *
+     * @param subEventsToRemove the subscriber identifiers to remove; must be non-empty
+     */
+    private void removeFromEventIdSubMap(final Set<SubIdentifier> subEventsToRemove) {
+        synchronized (registeredEventIdSubMap) {
+            final List<String> keyToRemove = new ArrayList<>();
+
+            for (final Map.Entry<String, Set<SubIdentifier>> entry : registeredEventIdSubMap.entrySet()) {
+                entry.getValue().removeAll(subEventsToRemove);
+
+                if (entry.getValue().isEmpty()) {
+                    keyToRemove.add(entry.getKey());
+                }
+
+                listOfEventIdSubMap.remove(entry.getKey());
+            }
+
+            if (N.notEmpty(keyToRemove)) {
+                for (final String key : keyToRemove) {
+                    registeredEventIdSubMap.remove(key);
+                }
+            }
+        }
     }
 
     /**
@@ -979,6 +972,7 @@ public class EventBus {
      * eventBus.removeAllStickyEvents();
      * // All sticky events are cleared
      * }</pre>
+     *
      */
     public void removeAllStickyEvents() {
         synchronized (stickyEventMap) {

@@ -53,6 +53,7 @@ public class TooManyElementsException extends IllegalStateException {
      * <pre>{@code
      * throw new TooManyElementsException();
      * }</pre>
+     *
      */
     public TooManyElementsException() {
         super();

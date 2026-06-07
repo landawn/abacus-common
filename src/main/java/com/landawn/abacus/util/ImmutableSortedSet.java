@@ -74,7 +74,7 @@ public class ImmutableSortedSet<E> extends ImmutableSet<E> implements SortedSet<
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableSortedSet<String> emptySet = ImmutableSortedSet.empty();
-     * System.out.println(emptySet.size());   // 0
+     * System.out.println(emptySet.size());   // prints 0
      * }</pre>
      *
      * @param <E> the type of elements in the set
@@ -109,6 +109,12 @@ public class ImmutableSortedSet<E> extends ImmutableSet<E> implements SortedSet<
      * Returns an ImmutableSortedSet containing a single element in sorted order.
      * The element must implement {@link Comparable} to determine its natural ordering.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * ImmutableSortedSet<Integer> set = ImmutableSortedSet.of(42);
+     * System.out.println(set.first());   // prints 42
+     * }</pre>
+     *
      * @param <E> the type of element, must extend {@link Comparable}
      * @param e1 the element to be contained in the set
      * @return an {@code ImmutableSortedSet} containing only the specified element
@@ -128,7 +134,7 @@ public class ImmutableSortedSet<E> extends ImmutableSet<E> implements SortedSet<
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableSortedSet<String> set = ImmutableSortedSet.of("beta", "alpha");
-     * System.out.println(set);   // [alpha, beta]
+     * System.out.println(set);   // prints [alpha, beta]
      * }</pre>
      *
      * @param <E> the type of elements, must extend {@link Comparable}
@@ -146,6 +152,12 @@ public class ImmutableSortedSet<E> extends ImmutableSet<E> implements SortedSet<
      * The elements must implement {@link Comparable} to determine their natural ordering.
      * Duplicate elements will be removed, potentially resulting in a set with fewer elements.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * ImmutableSortedSet<String> set = ImmutableSortedSet.of("gamma", "alpha", "beta");
+     * System.out.println(set);   // prints [alpha, beta, gamma]
+     * }</pre>
+     *
      * @param <E> the type of elements, must extend {@link Comparable}
      * @param e1 the first element
      * @param e2 the second element
@@ -161,6 +173,12 @@ public class ImmutableSortedSet<E> extends ImmutableSet<E> implements SortedSet<
      * Returns an ImmutableSortedSet containing exactly four elements in sorted order.
      * The elements must implement {@link Comparable} to determine their natural ordering.
      * Duplicate elements will be removed, potentially resulting in a set with fewer elements.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * ImmutableSortedSet<Integer> set = ImmutableSortedSet.of(3, 1, 4, 2);
+     * System.out.println(set);   // prints [1, 2, 3, 4]
+     * }</pre>
      *
      * @param <E> the type of elements, must extend {@link Comparable}
      * @param e1 the first element
@@ -178,6 +196,12 @@ public class ImmutableSortedSet<E> extends ImmutableSet<E> implements SortedSet<
      * Returns an ImmutableSortedSet containing exactly five elements in sorted order.
      * The elements must implement {@link Comparable} to determine their natural ordering.
      * Duplicate elements will be removed, potentially resulting in a set with fewer elements.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * ImmutableSortedSet<String> set = ImmutableSortedSet.of("Mon", "Tue", "Wed", "Thu", "Fri");
+     * System.out.println(set);   // prints [Fri, Mon, Thu, Tue, Wed]
+     * }</pre>
      *
      * @param <E> the type of elements, must extend {@link Comparable}
      * @param e1 the first element
@@ -197,6 +221,12 @@ public class ImmutableSortedSet<E> extends ImmutableSet<E> implements SortedSet<
      * The elements must implement {@link Comparable} to determine their natural ordering.
      * Duplicate elements will be removed, potentially resulting in a set with fewer elements.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * ImmutableSortedSet<Integer> set = ImmutableSortedSet.of(6, 1, 4, 2, 3, 5);
+     * System.out.println(set);   // prints [1, 2, 3, 4, 5, 6]
+     * }</pre>
+     *
      * @param <E> the type of elements, must extend {@link Comparable}
      * @param e1 the first element
      * @param e2 the second element
@@ -215,6 +245,15 @@ public class ImmutableSortedSet<E> extends ImmutableSet<E> implements SortedSet<
      * Returns an ImmutableSortedSet containing exactly seven elements in sorted order.
      * The elements must implement {@link Comparable} to determine their natural ordering.
      * Duplicate elements will be removed, potentially resulting in a set with fewer elements.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * ImmutableSortedSet<String> set = ImmutableSortedSet.of(
+     *     "Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"
+     * );
+     * System.out.println(set.first());   // prints Fri
+     * System.out.println(set.last());    // prints Wed
+     * }</pre>
      *
      * @param <E> the type of elements, must extend {@link Comparable}
      * @param e1 the first element
@@ -236,6 +275,12 @@ public class ImmutableSortedSet<E> extends ImmutableSet<E> implements SortedSet<
      * Returns an ImmutableSortedSet containing exactly eight elements in sorted order.
      * The elements must implement {@link Comparable} to determine their natural ordering.
      * Duplicate elements will be removed, potentially resulting in a set with fewer elements.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * ImmutableSortedSet<Integer> set = ImmutableSortedSet.of(8, 3, 5, 1, 2, 7, 4, 6);
+     * System.out.println(set);   // prints [1, 2, 3, 4, 5, 6, 7, 8]
+     * }</pre>
      *
      * @param <E> the type of elements, must extend {@link Comparable}
      * @param e1 the first element
@@ -259,6 +304,12 @@ public class ImmutableSortedSet<E> extends ImmutableSet<E> implements SortedSet<
      * The elements must implement {@link Comparable} to determine their natural ordering.
      * Duplicate elements will be removed, potentially resulting in a set with fewer elements.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * ImmutableSortedSet<Integer> set = ImmutableSortedSet.of(1, 2, 3, 4, 5, 6, 7, 8, 9);
+     * System.out.println(set.last());   // prints 9
+     * }</pre>
+     *
      * @param <E> the type of elements, must extend {@link Comparable}
      * @param e1 the first element
      * @param e2 the second element
@@ -281,6 +332,12 @@ public class ImmutableSortedSet<E> extends ImmutableSet<E> implements SortedSet<
      * Returns an ImmutableSortedSet containing exactly ten elements in sorted order.
      * The elements must implement {@link Comparable} to determine their natural ordering.
      * Duplicate elements will be removed, potentially resulting in a set with fewer elements.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * ImmutableSortedSet<Integer> set = ImmutableSortedSet.of(1, 2, 3, 4, 5, 6, 7, 8, 9, 10);
+     * System.out.println(set.size());   // prints 10
+     * }</pre>
      *
      * @param <E> the type of elements, must extend {@link Comparable}
      * @param e1 the first element
@@ -314,7 +371,7 @@ public class ImmutableSortedSet<E> extends ImmutableSet<E> implements SortedSet<
      * <pre>{@code
      * List<String> list = Arrays.asList("charlie", "alpha", "beta");
      * ImmutableSortedSet<String> set = ImmutableSortedSet.copyOf(list);
-     * System.out.println(set);   // [alpha, beta, charlie]
+     * System.out.println(set);   // prints [alpha, beta, charlie]
      * }</pre>
      *
      * @param <E> the type of elements in the collection
@@ -350,7 +407,7 @@ public class ImmutableSortedSet<E> extends ImmutableSet<E> implements SortedSet<
      * <pre>{@code
      * SortedSet<String> mutableSet = new TreeSet<>();
      * ImmutableSortedSet<String> immutableView = ImmutableSortedSet.wrap(mutableSet);
-     * mutableSet.add("new element");   // This change is visible in immutableView!
+     * mutableSet.add("new element");   // this change is visible in immutableView!
      * }</pre>
      *
      * @param <E> the type of elements in the set
@@ -375,6 +432,12 @@ public class ImmutableSortedSet<E> extends ImmutableSet<E> implements SortedSet<
      * This method is deprecated and always throws an {@link UnsupportedOperationException}.
      * Use {@link #wrap(SortedSet)} for a {@code SortedSet} or {@link ImmutableSet#wrap(Set)} for a regular {@code Set}.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Set<String> set = new HashSet<>();
+     * ImmutableSortedSet.wrap(set);   // throws UnsupportedOperationException
+     * }</pre>
+     *
      * @param <E> the type of elements
      * @param set the set parameter (ignored)
      * @return never returns normally
@@ -394,13 +457,13 @@ public class ImmutableSortedSet<E> extends ImmutableSet<E> implements SortedSet<
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableSortedSet<String> naturalOrder = ImmutableSortedSet.of("a", "b", "c");
-     * System.out.println(naturalOrder.comparator());   // null
+     * System.out.println(naturalOrder.comparator());   // prints null
      *
      * Comparator<String> reverseOrder = Comparator.reverseOrder();
      * SortedSet<String> customSet = new TreeSet<>(reverseOrder);
      * customSet.add("a");
      * ImmutableSortedSet<String> customOrder = ImmutableSortedSet.wrap(customSet);
-     * System.out.println(customOrder.comparator() == reverseOrder);   // true
+     * System.out.println(customOrder.comparator() == reverseOrder);   // prints true
      * }</pre>
      *
      * @return the comparator used to order the elements in this set, or {@code null}
@@ -423,7 +486,7 @@ public class ImmutableSortedSet<E> extends ImmutableSet<E> implements SortedSet<
      * <pre>{@code
      * ImmutableSortedSet<Integer> set = ImmutableSortedSet.of(1, 2, 3, 4, 5);
      * ImmutableSortedSet<Integer> subset = set.subSet(2, 4);
-     * System.out.println(subset);   // [2, 3]
+     * System.out.println(subset);   // prints [2, 3]
      * }</pre>
      *
      * @param fromElement low endpoint (inclusive) of the returned set
@@ -453,7 +516,7 @@ public class ImmutableSortedSet<E> extends ImmutableSet<E> implements SortedSet<
      * <pre>{@code
      * ImmutableSortedSet<String> set = ImmutableSortedSet.of("a", "b", "c", "d");
      * ImmutableSortedSet<String> headSet = set.headSet("c");
-     * System.out.println(headSet);   // [a, b]
+     * System.out.println(headSet);   // prints [a, b]
      * }</pre>
      *
      * @param toElement high endpoint (exclusive) of the returned set
@@ -479,7 +542,7 @@ public class ImmutableSortedSet<E> extends ImmutableSet<E> implements SortedSet<
      * <pre>{@code
      * ImmutableSortedSet<Integer> set = ImmutableSortedSet.of(10, 20, 30, 40);
      * ImmutableSortedSet<Integer> tailSet = set.tailSet(25);
-     * System.out.println(tailSet);   // [30, 40]
+     * System.out.println(tailSet);   // prints [30, 40]
      * }</pre>
      *
      * @param fromElement low endpoint (inclusive) of the returned set
@@ -503,7 +566,7 @@ public class ImmutableSortedSet<E> extends ImmutableSet<E> implements SortedSet<
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableSortedSet<String> set = ImmutableSortedSet.of("banana", "apple", "cherry");
-     * System.out.println(set.first());   // "apple"
+     * System.out.println(set.first());   // prints "apple"
      * }</pre>
      *
      * @return the first (lowest) element currently in this set
@@ -520,7 +583,7 @@ public class ImmutableSortedSet<E> extends ImmutableSet<E> implements SortedSet<
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableSortedSet<Integer> set = ImmutableSortedSet.of(3, 1, 4, 1, 5);
-     * System.out.println(set.last());   // 5
+     * System.out.println(set.last());   // prints 5
      * }</pre>
      *
      * @return the last (highest) element currently in this set

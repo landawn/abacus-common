@@ -294,8 +294,8 @@ public abstract sealed class CharacterWriter extends BufferedWriter permits Buff
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * String hex = getHexString(0x1F);   // Returns "&#x1f;"
-     * String hex2 = getHexString(0xA9);  // Returns "&#xa9;"
+     * String hex = getHexString(0x1F);   // returns "&#x1f;"
+     * String hex2 = getHexString(0xA9);  // returns "&#xa9;"
      * }</pre>
      *
      * @param ch the character code to convert
@@ -314,8 +314,8 @@ public abstract sealed class CharacterWriter extends BufferedWriter permits Buff
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * String unicode = getCharNum('\u2028');   // Returns "\u2028"
-     * String ctrl    = getCharNum((char) 0x01);   // Returns "\u0001"
+     * String unicode = getCharNum('\u2028');      // returns "\u2028"
+     * String ctrl    = getCharNum((char) 0x01);   // returns "\u0001"
      * }</pre>
      *
      * @param ch the character to convert

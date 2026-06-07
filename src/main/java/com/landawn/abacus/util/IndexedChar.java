@@ -28,8 +28,8 @@ package com.landawn.abacus.util;
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * IndexedChar ic = IndexedChar.of('A', 0);
- * System.out.println(ic.value());   // prints: A
- * System.out.println(ic.index());   // prints: 0
+ * System.out.println(ic.value());   // prints A
+ * System.out.println(ic.index());   // prints 0
  * }</pre>
  *
  * @see Indexed
@@ -104,6 +104,13 @@ public final class IndexedChar extends AbstractIndexed {
      *
      * <p>The index associated with this value can be retrieved through the {@link #index()}
      * method inherited from {@link AbstractIndexed}.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * IndexedChar indexed = IndexedChar.of('X', 5);
+     * char v = indexed.value();   // returns 'X'
+     * int i = indexed.index();    // returns 5
+     * }</pre>
      *
      * @return the char value associated with this index
      */

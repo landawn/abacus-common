@@ -25,9 +25,9 @@ package com.landawn.abacus.util;
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * WeekDay today = WeekDay.MONDAY;
- * int dayValue = today.intValue();   // Returns 1
+ * int dayValue = today.intValue();   // returns 1
  *
- * WeekDay sunday = WeekDay.valueOf(0);   // Returns WeekDay.SUNDAY
+ * WeekDay sunday = WeekDay.valueOf(0);   // returns WeekDay.SUNDAY
  * }</pre>
  *
  * @see Color
@@ -89,8 +89,8 @@ public enum WeekDay {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * int mondayValue = WeekDay.MONDAY.intValue();       // Returns 1
-     * int saturdayValue = WeekDay.SATURDAY.intValue();   // Returns 6
+     * int mondayValue = WeekDay.MONDAY.intValue();       // returns 1
+     * int saturdayValue = WeekDay.SATURDAY.intValue();   // returns 6
      * }</pre>
      *
      * @return the integer value of this weekday (0-6)
@@ -103,10 +103,13 @@ public enum WeekDay {
      * Returns the WeekDay enum constant corresponding to the specified integer value.
      * This method provides a way to convert from integer representation to the enum constant.
      *
+     * <p>Note: this is distinct from the implicitly declared {@code valueOf(String)} method
+     * inherited by every enum, which looks up a constant by its name.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * WeekDay day = WeekDay.valueOf(1);       // Returns WeekDay.MONDAY
-     * WeekDay weekend = WeekDay.valueOf(6);   // Returns WeekDay.SATURDAY
+     * WeekDay day = WeekDay.valueOf(1);       // returns WeekDay.MONDAY
+     * WeekDay weekend = WeekDay.valueOf(6);   // returns WeekDay.SATURDAY
      * }</pre>
      *
      * @param intValue the integer value to convert (must be 0-6)

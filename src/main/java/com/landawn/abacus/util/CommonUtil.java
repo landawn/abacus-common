@@ -172,12 +172,12 @@ import com.landawn.abacus.util.function.ToFloatFunction;
  * com.landawn.abacus.util.function.Function<String, String> classifier = s -> s.substring(0, 1);
  * com.landawn.abacus.util.function.Function<String, String> converter = String::toUpperCase;
  *
- * // Null-safe operations
+ * // throws IllegalArgumentException-safe operations
  * boolean isEmpty = N.isEmpty(collection);
  * String safe = N.defaultIfNull(value, "default");
  *
  * // Array operations
- * N.sort(array);   // array is now sorted
+ * N.sort(array);   // array is sorted
  * boolean contains = N.contains(array, element);
  *
  * // Collection operations
@@ -189,7 +189,7 @@ import com.landawn.abacus.util.function.ToFloatFunction;
  * String trimmed = Strings.trim(text);
  *
  * // Type conversions
- * int parsed = Numbers.toInt(value);   // Throws NumberFormatException if invalid
+ * int parsed = Numbers.toInt(value);   // throws NumberFormatException if invalid
  * List<String> converted = N.map(list, converter);
  * }</pre>
  *
@@ -262,7 +262,7 @@ import com.landawn.abacus.util.function.ToFloatFunction;
  *   <li><b>{@link com.landawn.abacus.util.IOUtil}:</b> Input/output stream utilities</li>
  * </ul>
  *
- * <p><b>Usage Examples: Comprehensive Usage</b>
+ * <p><b>Usage Examples: Comprehensive Usage</b></p>
  * <pre>{@code
  * // Working with collections safely
  * List<String> names = Arrays.asList("Alice", null, "Bob", "", "Charlie");
@@ -282,9 +282,9 @@ import com.landawn.abacus.util.function.ToFloatFunction;
  * // Array operations
  * String[] array = validNames.toArray(new String[0]);
  * boolean contains = N.contains(array, "Alice");
- * N.sort(array);   // array is now sorted
+ * N.sort(array);   // array is sorted
  *
- * // Null-safe operations
+ * // throws IllegalArgumentException-safe operations
  * String result = N.defaultIfNull(N.firstOrNullIfEmpty(validNames), "No names");
  * boolean isEmpty = N.isEmpty(validNames);
  * }</pre>
@@ -698,16 +698,12 @@ sealed class CommonUtil permits N {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * int[] array = {1, 2, 3, 4, 5};
-     *
-     * // Valid range checks - no exception thrown
-     * checkFromToIndex(0, 5, array.length);    // Full array
-     * checkFromToIndex(1, 4, array.length);    // Partial range
-     * checkFromToIndex(2, 2, array.length);    // Empty range (valid)
-     *
-     * // Invalid range checks - throw IndexOutOfBoundsException
-     * checkFromToIndex(-1, 3, array.length);   // Negative fromIndex
-     * checkFromToIndex(3, 2, array.length);    // fromIndex > toIndex
-     * checkFromToIndex(2, 6, array.length);    // toIndex > length
+     * N.checkFromToIndex(0, 5, array.length);  // no exception thrown
+     * N.checkFromToIndex(1, 4, array.length);  // no exception thrown
+     * N.checkFromToIndex(2, 2, array.length);  // no exception thrown
+     * N.checkFromToIndex(-1, 3, array.length); // throws IndexOutOfBoundsException
+     * N.checkFromToIndex(3, 2, array.length);  // throws IndexOutOfBoundsException
+     * N.checkFromToIndex(2, 6, array.length);  // throws IndexOutOfBoundsException
      * }</pre>
      *
      * @param fromIndex the starting index (inclusive) - must be non-negative and ≤ toIndex
@@ -746,16 +742,12 @@ sealed class CommonUtil permits N {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * int[] array = {1, 2, 3, 4, 5};
-     *
-     * // Valid range checks - no exception thrown
-     * checkFromIndexSize(0, 5, array.length);    // Full array
-     * checkFromIndexSize(1, 3, array.length);    // Partial range
-     * checkFromIndexSize(2, 0, array.length);    // Size zero (valid)
-     *
-     * // Invalid range checks - throw IndexOutOfBoundsException
-     * checkFromIndexSize(-1, 3, array.length);   // Negative fromIndex
-     * checkFromIndexSize(2, -1, array.length);   // throws IllegalArgumentException (negative size)
-     * checkFromIndexSize(3, 3, array.length);    // fromIndex + size > length
+     * N.checkFromIndexSize(0, 5, array.length);  // no exception thrown
+     * N.checkFromIndexSize(1, 3, array.length);  // no exception thrown
+     * N.checkFromIndexSize(2, 0, array.length);  // no exception thrown
+     * N.checkFromIndexSize(-1, 3, array.length); // throws IndexOutOfBoundsException
+     * N.checkFromIndexSize(2, -1, array.length); // throws IllegalArgumentException
+     * N.checkFromIndexSize(3, 3, array.length);  // throws IndexOutOfBoundsException
      * }</pre>
      *
      * @param fromIndex the starting index (inclusive) - must be non-negative
@@ -787,6 +779,12 @@ sealed class CommonUtil permits N {
      * Ensures that {@code index} specifies a valid <i>element</i> in an array, list or string of size
      * {@code size}. An element index may range from zero, inclusive, to {@code size}, exclusive.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.checkIndex(1, 3);  // returns 1
+     * N.checkIndex(3, 3);  // throws IndexOutOfBoundsException
+     * }</pre>
+     *
      * @param index a user-supplied index identifying an element of an array, list or string
      * @param size the size of that array, list or string
      * @return the value of {@code index}
@@ -816,16 +814,12 @@ sealed class CommonUtil permits N {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * int[] array = {1, 2, 3, 4, 5};
-     *
-     * // Valid element index checks - no exception thrown
-     * checkElementIndex(0, array.length);    // First element
-     * checkElementIndex(4, array.length);    // Last element
-     * checkElementIndex(2, array.length);    // Middle element
-     *
-     * // Invalid element index checks - throw exception
-     * checkElementIndex(-1, array.length);   // Negative index
-     * checkElementIndex(5, array.length);    // Index equals size (out of bounds)
-     * checkElementIndex(0, -1);              // Negative size
+     * N.checkElementIndex(0, array.length);  // returns 0
+     * N.checkElementIndex(4, array.length);  // returns 4
+     * N.checkElementIndex(2, array.length);  // returns 2
+     * N.checkElementIndex(-1, array.length); // throws IndexOutOfBoundsException
+     * N.checkElementIndex(5, array.length);  // throws IndexOutOfBoundsException
+     * N.checkElementIndex(0, -1);            // throws IllegalArgumentException
      * }</pre>
      *
      * @param index a user-supplied index identifying an element of an array, list or string - must be non-negative and less than {@code size}
@@ -855,14 +849,10 @@ sealed class CommonUtil permits N {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * int[] array = {1, 2, 3, 4, 5};
-     *
-     * // Valid element index checks - no exception thrown
-     * checkElementIndex(0, array.length, "arrayIndex");    // First element
-     * checkElementIndex(4, array.length, "arrayIndex");    // Last element
-     *
-     * // Invalid element index checks - throw exception with custom description
-     * checkElementIndex(-1, array.length, "arrayIndex");   // Negative index
-     * checkElementIndex(5, array.length, "arrayIndex");    // Index equals size
+     * N.checkElementIndex(0, array.length, "arrayIndex");  // returns 0
+     * N.checkElementIndex(4, array.length, "arrayIndex");  // returns 4
+     * N.checkElementIndex(-1, array.length, "arrayIndex"); // throws IndexOutOfBoundsException
+     * N.checkElementIndex(5, array.length, "arrayIndex");  // throws IndexOutOfBoundsException
      * }</pre>
      *
      * @param index a user-supplied index identifying an element of an array, list or string - must be non-negative and less than {@code size}
@@ -918,16 +908,12 @@ sealed class CommonUtil permits N {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<String> list = Arrays.asList("a", "b", "c");
-     *
-     * // Valid position index checks - no exception thrown
-     * checkPositionIndex(0, list.size());    // Beginning position
-     * checkPositionIndex(3, list.size());    // End position (valid for insertion)
-     * checkPositionIndex(2, list.size());    // Middle position
-     *
-     * // Invalid position index checks - throw exception
-     * checkPositionIndex(-1, list.size());   // Negative index
-     * checkPositionIndex(4, list.size());    // Index greater than size
-     * checkPositionIndex(0, -1);             // Negative size
+     * N.checkPositionIndex(0, list.size());  // returns 0
+     * N.checkPositionIndex(3, list.size());  // returns 3
+     * N.checkPositionIndex(2, list.size());  // returns 2
+     * N.checkPositionIndex(-1, list.size()); // throws IndexOutOfBoundsException
+     * N.checkPositionIndex(4, list.size());  // throws IndexOutOfBoundsException
+     * N.checkPositionIndex(0, -1);           // throws IllegalArgumentException
      * }</pre>
      *
      * @param index a user-supplied index identifying a position in an array, list or string - must be non-negative and not greater than {@code size}
@@ -964,14 +950,10 @@ sealed class CommonUtil permits N {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<String> list = Arrays.asList("a", "b", "c");
-     *
-     * // Valid position index checks - no exception thrown
-     * checkPositionIndex(0, list.size(), "insertPos");    // Beginning position
-     * checkPositionIndex(3, list.size(), "insertPos");    // End position (valid for insertion)
-     *
-     * // Invalid position index checks - throw exception with custom description
-     * checkPositionIndex(-1, list.size(), "insertPos");   // Negative index
-     * checkPositionIndex(4, list.size(), "insertPos");    // Index greater than size
+     * N.checkPositionIndex(0, list.size(), "insertPos");  // returns 0
+     * N.checkPositionIndex(3, list.size(), "insertPos");  // returns 3
+     * N.checkPositionIndex(-1, list.size(), "insertPos"); // throws IndexOutOfBoundsException
+     * N.checkPositionIndex(4, list.size(), "insertPos");  // throws IndexOutOfBoundsException
      * }</pre>
      *
      * @param index a user-supplied index identifying a position in an array, list or string - must be non-negative and not greater than {@code size}
@@ -1012,9 +994,9 @@ sealed class CommonUtil permits N {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String value = "test";
-     * checkArgNotNull(value);   // returns "test"
+     * N.checkArgNotNull(value);   // returns "test"
      *
-     * checkArgNotNull(null);    // throws IllegalArgumentException
+     * N.checkArgNotNull(null);    // throws IllegalArgumentException
      * }</pre>
      *
      * <p><b>When to use:</b> Use this method to validate <em>method arguments</em> at public API boundaries.
@@ -1042,10 +1024,10 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * String value = checkArgNotNull("test", "value");   // returns "test"
+     * String value = N.checkArgNotNull("test", "value");   // returns "test"
      *
-     * checkArgNotNull(null, "value");                    // throws IllegalArgumentException: 'value' cannot be null
-     * checkArgNotNull(null, "Value must not be null");   // throws IllegalArgumentException: Value must not be null
+     * N.checkArgNotNull(null, "value");                    // throws IllegalArgumentException: 'value' cannot be null
+     * N.checkArgNotNull(null, "Value must not be null");   // throws IllegalArgumentException: Value must not be null
      * }</pre>
      *
      * <p><b>When to use:</b> Use this method to validate <em>method arguments</em> at public API boundaries.
@@ -1084,13 +1066,13 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * // Valid - no exception thrown
-     * checkArgNotEmpty("hello", "username");   // Regular string
-     * checkArgNotEmpty("  ", "username");      // Whitespace-only (NOT empty)
+     * // returns the argument - no exception thrown
+     * N.checkArgNotEmpty("hello", "username");   // returns "hello"
+     * N.checkArgNotEmpty("  ", "username");      // returns "  "
      *
      * // Invalid - throws IllegalArgumentException
-     * checkArgNotEmpty("", "username");        // Empty string
-     * checkArgNotEmpty((CharSequence) null, "username");      // Null
+     * N.checkArgNotEmpty("", "username");                       // throws IllegalArgumentException
+     * N.checkArgNotEmpty((CharSequence) null, "username");      // throws IllegalArgumentException
      * }</pre>
      *
      * @param <T> the type of the argument, which extends CharSequence
@@ -1115,10 +1097,10 @@ sealed class CommonUtil permits N {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * boolean[] array = {true, false};
-     * checkArgNotEmpty(array, "array");   // returns array
+     * N.checkArgNotEmpty(array, "array");   // returns array
      *
-     * checkArgNotEmpty(new boolean[0], "array");   // throws IllegalArgumentException
-     * checkArgNotEmpty((boolean[]) null, "array");             // throws IllegalArgumentException
+     * N.checkArgNotEmpty(new boolean[0], "array");     // throws IllegalArgumentException
+     * N.checkArgNotEmpty((boolean[]) null, "array");   // throws IllegalArgumentException
      * }</pre>
      *
      * @param arg the boolean array argument to check
@@ -1142,10 +1124,10 @@ sealed class CommonUtil permits N {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * char[] array = {'a', 'b'};
-     * checkArgNotEmpty(array, "array");   // returns array
+     * N.checkArgNotEmpty(array, "array");   // returns array
      *
-     * checkArgNotEmpty(new char[0], "array");   // throws IllegalArgumentException
-     * checkArgNotEmpty((char[]) null, "array");          // throws IllegalArgumentException
+     * N.checkArgNotEmpty(new char[0], "array");     // throws IllegalArgumentException
+     * N.checkArgNotEmpty((char[]) null, "array");   // throws IllegalArgumentException
      * }</pre>
      *
      * @param arg the char array argument to check
@@ -1169,10 +1151,10 @@ sealed class CommonUtil permits N {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * byte[] array = {1, 2};
-     * checkArgNotEmpty(array, "array");   // returns array
+     * N.checkArgNotEmpty(array, "array");   // returns array
      *
-     * checkArgNotEmpty(new byte[0], "array");   // throws IllegalArgumentException
-     * checkArgNotEmpty((byte[]) null, "array");          // throws IllegalArgumentException
+     * N.checkArgNotEmpty(new byte[0], "array");     // throws IllegalArgumentException
+     * N.checkArgNotEmpty((byte[]) null, "array");   // throws IllegalArgumentException
      * }</pre>
      *
      * @param arg the byte array argument to check
@@ -1196,10 +1178,10 @@ sealed class CommonUtil permits N {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * short[] array = {1, 2};
-     * checkArgNotEmpty(array, "array");   // returns array
+     * N.checkArgNotEmpty(array, "array");   // returns array
      *
-     * checkArgNotEmpty(new short[0], "array");   // throws IllegalArgumentException
-     * checkArgNotEmpty((short[]) null, "array");           // throws IllegalArgumentException
+     * N.checkArgNotEmpty(new short[0], "array");     // throws IllegalArgumentException
+     * N.checkArgNotEmpty((short[]) null, "array");   // throws IllegalArgumentException
      * }</pre>
      *
      * @param arg the short array argument to check
@@ -1223,10 +1205,10 @@ sealed class CommonUtil permits N {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * int[] array = {1, 2};
-     * checkArgNotEmpty(array, "array");   // returns array
+     * N.checkArgNotEmpty(array, "array");   // returns array
      *
-     * checkArgNotEmpty(new int[0], "array");   // throws IllegalArgumentException
-     * checkArgNotEmpty((int[]) null, "array");         // throws IllegalArgumentException
+     * N.checkArgNotEmpty(new int[0], "array");     // throws IllegalArgumentException
+     * N.checkArgNotEmpty((int[]) null, "array");   // throws IllegalArgumentException
      * }</pre>
      *
      * @param arg the int array argument to check
@@ -1250,10 +1232,10 @@ sealed class CommonUtil permits N {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * long[] array = {1L, 2L};
-     * checkArgNotEmpty(array, "array");   // returns array
+     * N.checkArgNotEmpty(array, "array");   // returns array
      *
-     * checkArgNotEmpty(new long[0], "array");   // throws IllegalArgumentException
-     * checkArgNotEmpty((long[]) null, "array");          // throws IllegalArgumentException
+     * N.checkArgNotEmpty(new long[0], "array");     // throws IllegalArgumentException
+     * N.checkArgNotEmpty((long[]) null, "array");   // throws IllegalArgumentException
      * }</pre>
      *
      * @param arg the long array argument to check
@@ -1277,10 +1259,10 @@ sealed class CommonUtil permits N {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * float[] array = {1.0f, 2.0f};
-     * checkArgNotEmpty(array, "array");   // returns array
+     * N.checkArgNotEmpty(array, "array");   // returns array
      *
-     * checkArgNotEmpty(new float[0], "array");   // throws IllegalArgumentException
-     * checkArgNotEmpty((float[]) null, "array");           // throws IllegalArgumentException
+     * N.checkArgNotEmpty(new float[0], "array");     // throws IllegalArgumentException
+     * N.checkArgNotEmpty((float[]) null, "array");   // throws IllegalArgumentException
      * }</pre>
      *
      * @param arg the float array argument to check
@@ -1304,10 +1286,10 @@ sealed class CommonUtil permits N {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * double[] array = {1.0, 2.0};
-     * checkArgNotEmpty(array, "array");   // returns array
+     * N.checkArgNotEmpty(array, "array");   // returns array
      *
-     * checkArgNotEmpty(new double[0], "array");   // throws IllegalArgumentException
-     * checkArgNotEmpty((double[]) null, "array");            // throws IllegalArgumentException
+     * N.checkArgNotEmpty(new double[0], "array");     // throws IllegalArgumentException
+     * N.checkArgNotEmpty((double[]) null, "array");   // throws IllegalArgumentException
      * }</pre>
      *
      * @param arg the double array argument to check
@@ -1331,10 +1313,10 @@ sealed class CommonUtil permits N {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String[] array = {"a", "b"};
-     * checkArgNotEmpty(array, "array");   // returns array
+     * N.checkArgNotEmpty(array, "array");   // returns array
      *
-     * checkArgNotEmpty(new String[0], "array");   // throws IllegalArgumentException
-     * checkArgNotEmpty((Object[]) null, "array");            // throws IllegalArgumentException
+     * N.checkArgNotEmpty(new String[0], "array");     // throws IllegalArgumentException
+     * N.checkArgNotEmpty((Object[]) null, "array");   // throws IllegalArgumentException
      * }</pre>
      *
      * @param <T> the type of the array elements
@@ -1360,14 +1342,14 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * // Valid - no exception thrown
-     * checkArgNotEmpty(Arrays.asList("a", "b"), "items");       // Collection with elements
-     * checkArgNotEmpty(Collections.singleton(null), "items");   // Collection containing null (NOT empty)
+     * // returns the argument - no exception thrown
+     * N.checkArgNotEmpty(Arrays.asList("a", "b"), "items");       // returns list
+     * N.checkArgNotEmpty(Collections.singleton(null), "items");   // returns collection
      *
      * // Invalid - throws IllegalArgumentException
-     * checkArgNotEmpty(Collections.emptyList(), "items");       // Empty collection
-     * checkArgNotEmpty(new ArrayList<>(), "items");             // Empty collection
-     * checkArgNotEmpty((Collection<?>) null, "items");                          // Null
+     * N.checkArgNotEmpty(Collections.emptyList(), "items");       // throws IllegalArgumentException
+     * N.checkArgNotEmpty(new ArrayList<>(), "items");             // throws IllegalArgumentException
+     * N.checkArgNotEmpty((Collection<?>) null, "items");          // throws IllegalArgumentException
      * }</pre>
      *
      * @param <T> the type of the collection
@@ -1392,13 +1374,13 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * // Valid - no exception thrown
+     * // returns the argument - no exception thrown
      * Iterable<String> iterable = Arrays.asList("a", "b");
-     * checkArgNotEmpty(iterable, "iterable");   // Returns iterable
+     * N.checkArgNotEmpty(iterable, "iterable");   // returns iterable
      *
      * // Invalid - throws IllegalArgumentException
-     * checkArgNotEmpty(Collections.emptyList(), "iterable");   // Empty iterable
-     * checkArgNotEmpty((Iterable<?>) null, "iterable");                      // Null
+     * N.checkArgNotEmpty(Collections.emptyList(), "iterable");   // throws IllegalArgumentException
+     * N.checkArgNotEmpty((Iterable<?>) null, "iterable");        // throws IllegalArgumentException
      * }</pre>
      *
      * @param <T> the type of the Iterable
@@ -1425,13 +1407,13 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * // Valid - no exception thrown
+     * // returns the argument - no exception thrown
      * Iterator<String> iterator = Arrays.asList("a", "b").iterator();
-     * checkArgNotEmpty(iterator, "iterator");   // Returns iterator
+     * N.checkArgNotEmpty(iterator, "iterator");   // returns iterator
      *
      * // Invalid - throws IllegalArgumentException
-     * checkArgNotEmpty(Collections.emptyIterator(), "iterator");   // Empty iterator
-     * checkArgNotEmpty((Iterator<?>) null, "iterator");                          // Null
+     * N.checkArgNotEmpty(Collections.emptyIterator(), "iterator");   // throws IllegalArgumentException
+     * N.checkArgNotEmpty((Iterator<?>) null, "iterator");            // throws IllegalArgumentException
      * }</pre>
      *
      * @param <T> the type of the Iterator
@@ -1456,15 +1438,15 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * // Valid - no exception thrown
+     * // returns the argument - no exception thrown
      * Map<String, String> map = new HashMap<>();
      * map.put("key", "value");
-     * checkArgNotEmpty(map, "map");   // Returns map
+     * N.checkArgNotEmpty(map, "map");   // returns map
      *
      * // Invalid - throws IllegalArgumentException
-     * checkArgNotEmpty(Collections.emptyMap(), "map");   // Empty map
-     * checkArgNotEmpty(new HashMap<>(), "map");          // Empty map
-     * checkArgNotEmpty((Map<?, ?>) null, "map");                     // Null
+     * N.checkArgNotEmpty(Collections.emptyMap(), "map");   // throws IllegalArgumentException
+     * N.checkArgNotEmpty(new HashMap<>(), "map");          // throws IllegalArgumentException
+     * N.checkArgNotEmpty((Map<?, ?>) null, "map");         // throws IllegalArgumentException
      * }</pre>
      *
      * @param <T> the type of the Map
@@ -1490,13 +1472,13 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * // Valid - no exception thrown
+     * // returns the argument - no exception thrown
      * IntList intList = IntList.of(1, 2, 3);
-     * checkArgNotEmpty(intList, "intList");   // Returns intList
+     * N.checkArgNotEmpty(intList, "intList");   // returns intList
      *
      * // Invalid - throws IllegalArgumentException
-     * checkArgNotEmpty(IntList.of(), "intList");      // Empty list
-     * checkArgNotEmpty((PrimitiveList<?, ?, ?>) null, "intList");              // Null
+     * N.checkArgNotEmpty(IntList.of(), "intList");                       // throws IllegalArgumentException
+     * N.checkArgNotEmpty((PrimitiveList<?, ?, ?>) null, "intList");      // throws IllegalArgumentException
      * }</pre>
      *
      * @param <T> the type of the PrimitiveList
@@ -1521,13 +1503,13 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * // Valid - no exception thrown
+     * // returns the argument - no exception thrown
      * Multiset<String> multiset = Multiset.of("a", "b", "a");
-     * checkArgNotEmpty(multiset, "multiset");   // Returns multiset
+     * N.checkArgNotEmpty(multiset, "multiset");   // returns multiset
      *
      * // Invalid - throws IllegalArgumentException
-     * checkArgNotEmpty(Multiset.of(), "multiset");   // Empty multiset
-     * checkArgNotEmpty((Multiset<?>) null, "multiset");            // Null
+     * N.checkArgNotEmpty(Multiset.of(), "multiset");        // throws IllegalArgumentException
+     * N.checkArgNotEmpty((Multiset<?>) null, "multiset");   // throws IllegalArgumentException
      * }</pre>
      *
      * @param <T> the type of elements in the Multiset
@@ -1552,13 +1534,13 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * // Valid - no exception thrown
+     * // returns the argument - no exception thrown
      * ListMultimap<String, Integer> multimap = ListMultimap.of("a", 1, "b", 2);
-     * checkArgNotEmpty(multimap, "multimap");   // Returns multimap
+     * N.checkArgNotEmpty(multimap, "multimap");   // returns multimap
      *
      * // Invalid - throws IllegalArgumentException
-     * checkArgNotEmpty(N.newListMultimap(), "multimap");   // Empty multimap
-     * checkArgNotEmpty((Multimap<?, ?, ?>) null, "multimap");                // Null
+     * N.checkArgNotEmpty(N.newListMultimap(), "multimap");        // throws IllegalArgumentException
+     * N.checkArgNotEmpty((Multimap<?, ?, ?>) null, "multimap");   // throws IllegalArgumentException
      * }</pre>
      *
      * @param <T> the type of the Multimap
@@ -1583,13 +1565,13 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * // Valid - no exception thrown
+     * // returns the argument - no exception thrown
      * Dataset dataset = Dataset.rows(Arrays.asList("name"), new Object[][] {{"Alice"}});
-     * checkArgNotEmpty(dataset, "dataset");   // Returns dataset
+     * N.checkArgNotEmpty(dataset, "dataset");   // returns dataset
      *
      * // Invalid - throws IllegalArgumentException
-     * checkArgNotEmpty(Dataset.rows(Arrays.asList("name"), new Object[0][0]), "dataset");   // Empty dataset
-     * checkArgNotEmpty((Dataset) null, "dataset");                        // Null
+     * N.checkArgNotEmpty(Dataset.rows(Arrays.asList("name"), new Object[0][0]), "dataset");   // throws IllegalArgumentException
+     * N.checkArgNotEmpty((Dataset) null, "dataset");                                          // throws IllegalArgumentException
      * }</pre>
      *
      * @param <T> the type of the Dataset
@@ -1623,13 +1605,13 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * // Valid - no exception thrown
-     * checkArgNotBlank("hello", "username");   // Regular string
+     * // returns the argument - no exception thrown
+     * N.checkArgNotBlank("hello", "username");   // returns "hello"
      *
      * // Invalid - throws IllegalArgumentException
-     * checkArgNotBlank("", "username");      // Empty string
-     * checkArgNotBlank("   ", "username");   // Blank (whitespace-only)
-     * checkArgNotBlank(null, "username");    // Null
+     * N.checkArgNotBlank("", "username");      // throws IllegalArgumentException
+     * N.checkArgNotBlank("   ", "username");   // throws IllegalArgumentException
+     * N.checkArgNotBlank(null, "username");    // throws IllegalArgumentException
      * }</pre>
      *
      * @param <T> the type of the argument, which extends CharSequence
@@ -1655,10 +1637,10 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * checkArgNotNegative((byte) 1, "value");    // returns 1
-     * checkArgNotNegative((byte) 0, "value");    // returns 0
+     * N.checkArgNotNegative((byte) 1, "value");    // returns 1
+     * N.checkArgNotNegative((byte) 0, "value");    // returns 0
      *
-     * checkArgNotNegative((byte) -1, "value");   // throws IllegalArgumentException
+     * N.checkArgNotNegative((byte) -1, "value");   // throws IllegalArgumentException
      * }</pre>
      *
      * @param arg the byte argument to check
@@ -1684,10 +1666,10 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * checkArgNotNegative((short) 1, "value");    // returns 1
-     * checkArgNotNegative((short) 0, "value");    // returns 0
+     * N.checkArgNotNegative((short) 1, "value");    // returns 1
+     * N.checkArgNotNegative((short) 0, "value");    // returns 0
      *
-     * checkArgNotNegative((short) -1, "value");   // throws IllegalArgumentException
+     * N.checkArgNotNegative((short) -1, "value");   // throws IllegalArgumentException
      * }</pre>
      *
      * @param arg the short argument to check
@@ -1713,10 +1695,10 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * checkArgNotNegative(1, "value");    // returns 1
-     * checkArgNotNegative(0, "value");    // returns 0
+     * N.checkArgNotNegative(1, "value");    // returns 1
+     * N.checkArgNotNegative(0, "value");    // returns 0
      *
-     * checkArgNotNegative(-1, "value");   // throws IllegalArgumentException
+     * N.checkArgNotNegative(-1, "value");   // throws IllegalArgumentException
      * }</pre>
      *
      * @param arg the int argument to check
@@ -1743,10 +1725,10 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * checkArgNotNegative(1L, "value");    // returns 1L
-     * checkArgNotNegative(0L, "value");    // returns 0L
+     * N.checkArgNotNegative(1L, "value");    // returns 1L
+     * N.checkArgNotNegative(0L, "value");    // returns 0L
      *
-     * checkArgNotNegative(-1L, "value");   // throws IllegalArgumentException
+     * N.checkArgNotNegative(-1L, "value");   // throws IllegalArgumentException
      * }</pre>
      *
      * @param arg the long argument to check
@@ -1773,10 +1755,10 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * checkArgNotNegative(1.0f, "value");    // returns 1.0f
-     * checkArgNotNegative(0.0f, "value");    // returns 0.0f
+     * N.checkArgNotNegative(1.0f, "value");    // returns 1.0f
+     * N.checkArgNotNegative(0.0f, "value");    // returns 0.0f
      *
-     * checkArgNotNegative(-1.0f, "value");   // throws IllegalArgumentException
+     * N.checkArgNotNegative(-1.0f, "value");   // throws IllegalArgumentException
      * }</pre>
      *
      * @param arg the float argument to check
@@ -1802,10 +1784,10 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * checkArgNotNegative(1.0, "value");    // returns 1.0
-     * checkArgNotNegative(0.0, "value");    // returns 0.0
+     * N.checkArgNotNegative(1.0, "value");    // returns 1.0
+     * N.checkArgNotNegative(0.0, "value");    // returns 0.0
      *
-     * checkArgNotNegative(-1.0, "value");   // throws IllegalArgumentException
+     * N.checkArgNotNegative(-1.0, "value");   // throws IllegalArgumentException
      * }</pre>
      *
      * @param arg the double argument to check
@@ -1831,10 +1813,10 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * checkArgPositive((byte) 1, "value");   // returns 1
+     * N.checkArgPositive((byte) 1, "value");   // returns 1
      *
-     * checkArgPositive((byte) 0, "value");    // throws IllegalArgumentException
-     * checkArgPositive((byte) -1, "value");   // throws IllegalArgumentException
+     * N.checkArgPositive((byte) 0, "value");    // throws IllegalArgumentException
+     * N.checkArgPositive((byte) -1, "value");   // throws IllegalArgumentException
      * }</pre>
      *
      * @param arg the byte argument to check
@@ -1860,10 +1842,10 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * checkArgPositive((short) 1, "value");   // returns 1
+     * N.checkArgPositive((short) 1, "value");   // returns 1
      *
-     * checkArgPositive((short) 0, "value");    // throws IllegalArgumentException
-     * checkArgPositive((short) -1, "value");   // throws IllegalArgumentException
+     * N.checkArgPositive((short) 0, "value");    // throws IllegalArgumentException
+     * N.checkArgPositive((short) -1, "value");   // throws IllegalArgumentException
      * }</pre>
      *
      * @param arg the short argument to check
@@ -1889,10 +1871,10 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * checkArgPositive(1, "value");   // returns 1
+     * N.checkArgPositive(1, "value");   // returns 1
      *
-     * checkArgPositive(0, "value");    // throws IllegalArgumentException
-     * checkArgPositive(-1, "value");   // throws IllegalArgumentException
+     * N.checkArgPositive(0, "value");    // throws IllegalArgumentException
+     * N.checkArgPositive(-1, "value");   // throws IllegalArgumentException
      * }</pre>
      *
      * @param arg the int argument to check
@@ -1919,10 +1901,10 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * checkArgPositive(1L, "value");   // returns 1L
+     * N.checkArgPositive(1L, "value");   // returns 1L
      *
-     * checkArgPositive(0L, "value");    // throws IllegalArgumentException
-     * checkArgPositive(-1L, "value");   // throws IllegalArgumentException
+     * N.checkArgPositive(0L, "value");    // throws IllegalArgumentException
+     * N.checkArgPositive(-1L, "value");   // throws IllegalArgumentException
      * }</pre>
      *
      * @param arg the long argument to check
@@ -1949,10 +1931,10 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * checkArgPositive(1.0f, "value");   // returns 1.0f
+     * N.checkArgPositive(1.0f, "value");   // returns 1.0f
      *
-     * checkArgPositive(0.0f, "value");    // throws IllegalArgumentException
-     * checkArgPositive(-1.0f, "value");   // throws IllegalArgumentException
+     * N.checkArgPositive(0.0f, "value");    // throws IllegalArgumentException
+     * N.checkArgPositive(-1.0f, "value");   // throws IllegalArgumentException
      * }</pre>
      *
      * @param arg the float argument to check
@@ -1978,10 +1960,10 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * checkArgPositive(1.0, "value");   // returns 1.0
+     * N.checkArgPositive(1.0, "value");   // returns 1.0
      *
-     * checkArgPositive(0.0, "value");    // throws IllegalArgumentException
-     * checkArgPositive(-1.0, "value");   // throws IllegalArgumentException
+     * N.checkArgPositive(0.0, "value");    // throws IllegalArgumentException
+     * N.checkArgPositive(-1.0, "value");   // throws IllegalArgumentException
      * }</pre>
      *
      * @param arg the double argument to check
@@ -2009,10 +1991,10 @@ sealed class CommonUtil permits N {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String[] array = {"a", "b"};
-     * checkElementNotNull(array);   // Valid
+     * N.checkElementNotNull(array);   // no exception thrown
      *
      * String[] arrayWithNull = {"a", null};
-     * checkElementNotNull(arrayWithNull);   // throws IllegalArgumentException
+     * N.checkElementNotNull(arrayWithNull);   // throws IllegalArgumentException
      * }</pre>
      *
      * @param a the array to check
@@ -2036,10 +2018,10 @@ sealed class CommonUtil permits N {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String[] array = {"a", "b"};
-     * checkElementNotNull(array, "array");   // Valid
+     * N.checkElementNotNull(array, "array");   // no exception thrown
      *
      * String[] arrayWithNull = {"a", null};
-     * checkElementNotNull(arrayWithNull, "array");   // throws IllegalArgumentException
+     * N.checkElementNotNull(arrayWithNull, "array");   // throws IllegalArgumentException
      * }</pre>
      *
      * @param a the array to check
@@ -2068,10 +2050,10 @@ sealed class CommonUtil permits N {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<String> list = Arrays.asList("a", "b");
-     * checkElementNotNull(list);   // Valid
+     * N.checkElementNotNull(list);   // no exception thrown
      *
      * List<String> listWithNull = Arrays.asList("a", null);
-     * checkElementNotNull(listWithNull);   // throws IllegalArgumentException
+     * N.checkElementNotNull(listWithNull);   // throws IllegalArgumentException
      * }</pre>
      *
      * @param c the collection to check
@@ -2095,10 +2077,10 @@ sealed class CommonUtil permits N {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<String> list = Arrays.asList("a", "b");
-     * checkElementNotNull(list, "list");   // Valid
+     * N.checkElementNotNull(list, "list");   // no exception thrown
      *
      * List<String> listWithNull = Arrays.asList("a", null);
-     * checkElementNotNull(listWithNull, "list");   // throws IllegalArgumentException
+     * N.checkElementNotNull(listWithNull, "list");   // throws IllegalArgumentException
      * }</pre>
      *
      * @param c the collection to check
@@ -2128,11 +2110,11 @@ sealed class CommonUtil permits N {
      * <pre>{@code
      * Map<String, String> map = new HashMap<>();
      * map.put("key", "value");
-     * checkKeyNotNull(map);   // Valid
+     * N.checkKeyNotNull(map);   // no exception thrown
      *
      * Map<String, String> mapWithNullKey = new HashMap<>();
      * mapWithNullKey.put(null, "value");
-     * checkKeyNotNull(mapWithNullKey);   // throws IllegalArgumentException
+     * N.checkKeyNotNull(mapWithNullKey);   // throws IllegalArgumentException
      * }</pre>
      *
      * @param m the map to check
@@ -2157,11 +2139,11 @@ sealed class CommonUtil permits N {
      * <pre>{@code
      * Map<String, String> map = new HashMap<>();
      * map.put("key", "value");
-     * checkKeyNotNull(map, "map");   // Valid
+     * N.checkKeyNotNull(map, "map");   // no exception thrown
      *
      * Map<String, String> mapWithNullKey = new HashMap<>();
      * mapWithNullKey.put(null, "value");
-     * checkKeyNotNull(mapWithNullKey, "map");   // throws IllegalArgumentException
+     * N.checkKeyNotNull(mapWithNullKey, "map");   // throws IllegalArgumentException
      * }</pre>
      *
      * @param m the map to check
@@ -2191,11 +2173,11 @@ sealed class CommonUtil permits N {
      * <pre>{@code
      * Map<String, String> map = new HashMap<>();
      * map.put("key", "value");
-     * checkValueNotNull(map);   // Valid
+     * N.checkValueNotNull(map);   // no exception thrown
      *
      * Map<String, String> mapWithNullValue = new HashMap<>();
      * mapWithNullValue.put("key", null);
-     * checkValueNotNull(mapWithNullValue);   // throws IllegalArgumentException
+     * N.checkValueNotNull(mapWithNullValue);   // throws IllegalArgumentException
      * }</pre>
      *
      * @param m the map to check
@@ -2220,11 +2202,11 @@ sealed class CommonUtil permits N {
      * <pre>{@code
      * Map<String, String> map = new HashMap<>();
      * map.put("key", "value");
-     * checkValueNotNull(map, "map");   // Valid
+     * N.checkValueNotNull(map, "map");   // no exception thrown
      *
      * Map<String, String> mapWithNullValue = new HashMap<>();
      * mapWithNullValue.put("key", null);
-     * checkValueNotNull(mapWithNullValue, "map");   // throws IllegalArgumentException
+     * N.checkValueNotNull(mapWithNullValue, "map");   // throws IllegalArgumentException
      * }</pre>
      *
      * @param m the map to check
@@ -2252,9 +2234,8 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * int count = 1;
-     * checkArgument(count > 0);   // Valid if count > 0
-     * checkArgument(false);       // throws IllegalArgumentException
+     * N.checkArgument(true);  // no exception thrown
+     * N.checkArgument(false); // throws IllegalArgumentException
      * }</pre>
      *
      * @param expression a boolean expression
@@ -2271,8 +2252,8 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * int count = 1;
-     * checkArgument(count > 0, "Count must be positive");
+     * N.checkArgument(true, "message");  // no exception thrown
+     * N.checkArgument(false, "message"); // throws IllegalArgumentException
      * }</pre>
      *
      * @param expression a boolean expression
@@ -2290,10 +2271,8 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * int i = 1;
-     * int j = 2;
-     * checkArgument(i >= 0, "Argument was %s but expected nonnegative", i);
-     * checkArgument(i < j, "Expected i < j, but %s >= %s", i, j);
+     * N.checkArgument(true, "{}", (Object) "value");   // no exception thrown
+     * N.checkArgument(false, "{}", (Object) "value");  // throws IllegalArgumentException
      * }</pre>
      *
      * @param expression a boolean expression
@@ -2313,7 +2292,8 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * checkArgument(c == 'a', "Expected 'a' but got %s", c);
+     * N.checkArgument(true, "{}", 'A');   // no exception thrown
+     * N.checkArgument(false, "{}", 'A');  // throws IllegalArgumentException
      * }</pre>
      *
      * @param expression a boolean expression
@@ -2332,8 +2312,8 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * int count = 1;
-     * checkArgument(count > 0, "Count must be positive: %s", count);
+     * N.checkArgument(true, "{}", 2);   // no exception thrown
+     * N.checkArgument(false, "{}", 2);  // throws IllegalArgumentException
      * }</pre>
      *
      * @param expression a boolean expression
@@ -2352,8 +2332,8 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * int count = 1;
-     * checkArgument(count > 0, "Count must be positive: %s", count);
+     * N.checkArgument(true, "{}", 2L);   // no exception thrown
+     * N.checkArgument(false, "{}", 2L);  // throws IllegalArgumentException
      * }</pre>
      *
      * @param expression a boolean expression
@@ -2372,7 +2352,8 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * checkArgument(val > 0.0, "Value must be positive: %s", val);
+     * N.checkArgument(true, "{}", 2.5d);   // no exception thrown
+     * N.checkArgument(false, "{}", 2.5d);  // throws IllegalArgumentException
      * }</pre>
      *
      * @param expression a boolean expression
@@ -2391,7 +2372,8 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * checkArgument(obj != null, "Object must not be null: %s", obj);
+     * N.checkArgument(true, "{}", (Object) "value");   // no exception thrown
+     * N.checkArgument(false, "{}", (Object) "value");  // throws IllegalArgumentException
      * }</pre>
      *
      * @param expression a boolean expression
@@ -2410,7 +2392,8 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * checkArgument(c1 != c2, "Chars must be different: %s, %s", c1, c2);
+     * N.checkArgument(true, "{}, {}", 'A', 'Z');   // no exception thrown
+     * N.checkArgument(false, "{}, {}", 'A', 'Z');  // throws IllegalArgumentException
      * }</pre>
      *
      * @param expression a boolean expression
@@ -2431,8 +2414,8 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * int i = 1;
-     * checkArgument(c != i, "Char and int must be different: %s, %s", c, i);
+     * N.checkArgument(true, "{}, {}", 'A', 12);   // no exception thrown
+     * N.checkArgument(false, "{}, {}", 'A', 12);  // throws IllegalArgumentException
      * }</pre>
      *
      * @param expression a boolean expression
@@ -2453,8 +2436,8 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * long l = 10L;
-     * checkArgument(c != l, "Char and long must be different: %s, %s", c, l);
+     * N.checkArgument(true, "{}, {}", 'A', 12L);   // no exception thrown
+     * N.checkArgument(false, "{}, {}", 'A', 12L);  // throws IllegalArgumentException
      * }</pre>
      *
      * @param expression a boolean expression
@@ -2475,8 +2458,8 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * double d = 2.0;
-     * checkArgument(c != d, "Char %s must not equal double %s", c, d);
+     * N.checkArgument(true, "{}, {}", 'A', 12.5d);   // no exception thrown
+     * N.checkArgument(false, "{}, {}", 'A', 12.5d);  // throws IllegalArgumentException
      * }</pre>
      *
      * @param expression a boolean expression
@@ -2497,6 +2480,12 @@ sealed class CommonUtil permits N {
      *
      * <p>This overload accepts specific primitive parameter types for performance optimization, avoiding autoboxing overhead.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.checkArgument(true, "{}, {}", 'A', "value");   // no exception thrown
+     * N.checkArgument(false, "{}, {}", 'A', "value");  // throws IllegalArgumentException
+     * }</pre>
+     *
      * @param expression a boolean expression
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
      * @param arg1 the parameter to be used in the exception message
@@ -2514,6 +2503,12 @@ sealed class CommonUtil permits N {
      * Checks if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
      *
      * <p>This overload accepts specific primitive parameter types for performance optimization, avoiding autoboxing overhead.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.checkArgument(true, "{}, {}", 2, 'Z');   // no exception thrown
+     * N.checkArgument(false, "{}, {}", 2, 'Z');  // throws IllegalArgumentException
+     * }</pre>
      *
      * @param expression a boolean expression
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
@@ -2533,6 +2528,12 @@ sealed class CommonUtil permits N {
      *
      * <p>This overload accepts specific primitive parameter types for performance optimization, avoiding autoboxing overhead.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.checkArgument(true, "{}, {}", 2, 12);   // no exception thrown
+     * N.checkArgument(false, "{}, {}", 2, 12);  // throws IllegalArgumentException
+     * }</pre>
+     *
      * @param expression a boolean expression
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
      * @param arg1 the parameter to be used in the exception message
@@ -2550,6 +2551,12 @@ sealed class CommonUtil permits N {
      * Checks if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
      *
      * <p>This overload accepts specific primitive parameter types for performance optimization, avoiding autoboxing overhead.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.checkArgument(true, "{}, {}", 2, 12L);   // no exception thrown
+     * N.checkArgument(false, "{}, {}", 2, 12L);  // throws IllegalArgumentException
+     * }</pre>
      *
      * @param expression a boolean expression
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
@@ -2569,6 +2576,12 @@ sealed class CommonUtil permits N {
      *
      * <p>This overload accepts specific primitive parameter types for performance optimization, avoiding autoboxing overhead.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.checkArgument(true, "{}, {}", 2, 12.5d);   // no exception thrown
+     * N.checkArgument(false, "{}, {}", 2, 12.5d);  // throws IllegalArgumentException
+     * }</pre>
+     *
      * @param expression a boolean expression
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
      * @param arg1 the parameter to be used in the exception message
@@ -2586,6 +2599,12 @@ sealed class CommonUtil permits N {
      * Checks if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
      *
      * <p>This overload accepts specific primitive parameter types for performance optimization, avoiding autoboxing overhead.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.checkArgument(true, "{}, {}", 2, (Object) "other");   // no exception thrown
+     * N.checkArgument(false, "{}, {}", 2, (Object) "other");  // throws IllegalArgumentException
+     * }</pre>
      *
      * @param expression a boolean expression
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
@@ -2605,6 +2624,12 @@ sealed class CommonUtil permits N {
      *
      * <p>This overload accepts specific primitive parameter types for performance optimization, avoiding autoboxing overhead.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.checkArgument(true, "{}, {}", 2L, 'Z');   // no exception thrown
+     * N.checkArgument(false, "{}, {}", 2L, 'Z');  // throws IllegalArgumentException
+     * }</pre>
+     *
      * @param expression a boolean expression
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
      * @param arg1 the parameter to be used in the exception message
@@ -2622,6 +2647,12 @@ sealed class CommonUtil permits N {
      * Checks if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
      *
      * <p>This overload accepts specific primitive parameter types for performance optimization, avoiding autoboxing overhead.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.checkArgument(true, "{}, {}", 2L, 12);   // no exception thrown
+     * N.checkArgument(false, "{}, {}", 2L, 12);  // throws IllegalArgumentException
+     * }</pre>
      *
      * @param expression a boolean expression
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
@@ -2641,6 +2672,12 @@ sealed class CommonUtil permits N {
      *
      * <p>This overload accepts specific primitive parameter types for performance optimization, avoiding autoboxing overhead.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.checkArgument(true, "{}, {}", 2L, 12L);   // no exception thrown
+     * N.checkArgument(false, "{}, {}", 2L, 12L);  // throws IllegalArgumentException
+     * }</pre>
+     *
      * @param expression a boolean expression
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
      * @param arg1 the parameter to be used in the exception message
@@ -2658,6 +2695,12 @@ sealed class CommonUtil permits N {
      * Checks if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
      *
      * <p>This overload accepts specific primitive parameter types for performance optimization, avoiding autoboxing overhead.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.checkArgument(true, "{}, {}", 2L, 12.5d);   // no exception thrown
+     * N.checkArgument(false, "{}, {}", 2L, 12.5d);  // throws IllegalArgumentException
+     * }</pre>
      *
      * @param expression a boolean expression
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
@@ -2677,6 +2720,12 @@ sealed class CommonUtil permits N {
      *
      * <p>This overload accepts specific primitive parameter types for performance optimization, avoiding autoboxing overhead.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.checkArgument(true, "{}, {}", 2L, (Object) "other");   // no exception thrown
+     * N.checkArgument(false, "{}, {}", 2L, (Object) "other");  // throws IllegalArgumentException
+     * }</pre>
+     *
      * @param expression a boolean expression
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
      * @param arg1 the parameter to be used in the exception message
@@ -2694,6 +2743,12 @@ sealed class CommonUtil permits N {
      * Checks if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
      *
      * <p>This overload accepts specific primitive parameter types for performance optimization, avoiding autoboxing overhead.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.checkArgument(true, "{}, {}", 2.5d, 'Z');   // no exception thrown
+     * N.checkArgument(false, "{}, {}", 2.5d, 'Z');  // throws IllegalArgumentException
+     * }</pre>
      *
      * @param expression a boolean expression
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
@@ -2713,6 +2768,12 @@ sealed class CommonUtil permits N {
      *
      * <p>This overload accepts specific primitive parameter types for performance optimization, avoiding autoboxing overhead.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.checkArgument(true, "{}, {}", 2.5d, 12);   // no exception thrown
+     * N.checkArgument(false, "{}, {}", 2.5d, 12);  // throws IllegalArgumentException
+     * }</pre>
+     *
      * @param expression a boolean expression
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
      * @param arg1 the parameter to be used in the exception message
@@ -2730,6 +2791,12 @@ sealed class CommonUtil permits N {
      * Checks if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
      *
      * <p>This overload accepts specific primitive parameter types for performance optimization, avoiding autoboxing overhead.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.checkArgument(true, "{}, {}", 2.5d, 12L);   // no exception thrown
+     * N.checkArgument(false, "{}, {}", 2.5d, 12L);  // throws IllegalArgumentException
+     * }</pre>
      *
      * @param expression a boolean expression
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
@@ -2749,6 +2816,12 @@ sealed class CommonUtil permits N {
      *
      * <p>This overload accepts specific primitive parameter types for performance optimization, avoiding autoboxing overhead.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.checkArgument(true, "{}, {}", 2.5d, 12.5d);   // no exception thrown
+     * N.checkArgument(false, "{}, {}", 2.5d, 12.5d);  // throws IllegalArgumentException
+     * }</pre>
+     *
      * @param expression a boolean expression
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
      * @param arg1 the parameter to be used in the exception message
@@ -2766,6 +2839,12 @@ sealed class CommonUtil permits N {
      * Checks if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
      *
      * <p>This overload accepts specific primitive parameter types for performance optimization, avoiding autoboxing overhead.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.checkArgument(true, "{}, {}", 2.5d, (Object) "other");   // no exception thrown
+     * N.checkArgument(false, "{}, {}", 2.5d, (Object) "other");  // throws IllegalArgumentException
+     * }</pre>
      *
      * @param expression a boolean expression
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
@@ -2785,6 +2864,12 @@ sealed class CommonUtil permits N {
      *
      * <p>This overload accepts specific primitive parameter types for performance optimization, avoiding autoboxing overhead.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.checkArgument(true, "{}, {}", (Object) "value", 'Z');   // no exception thrown
+     * N.checkArgument(false, "{}, {}", (Object) "value", 'Z');  // throws IllegalArgumentException
+     * }</pre>
+     *
      * @param expression a boolean expression
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
      * @param arg1 the parameter to be used in the exception message
@@ -2802,6 +2887,12 @@ sealed class CommonUtil permits N {
      * Checks if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
      *
      * <p>This overload accepts specific primitive parameter types for performance optimization, avoiding autoboxing overhead.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.checkArgument(true, "{}, {}", (Object) "value", 12);   // no exception thrown
+     * N.checkArgument(false, "{}, {}", (Object) "value", 12);  // throws IllegalArgumentException
+     * }</pre>
      *
      * @param expression a boolean expression
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
@@ -2821,6 +2912,12 @@ sealed class CommonUtil permits N {
      *
      * <p>This overload accepts specific primitive parameter types for performance optimization, avoiding autoboxing overhead.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.checkArgument(true, "{}, {}", (Object) "value", 12L);   // no exception thrown
+     * N.checkArgument(false, "{}, {}", (Object) "value", 12L);  // throws IllegalArgumentException
+     * }</pre>
+     *
      * @param expression a boolean expression
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
      * @param arg1 the parameter to be used in the exception message
@@ -2838,6 +2935,12 @@ sealed class CommonUtil permits N {
      * Checks if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
      *
      * <p>This overload accepts specific primitive parameter types for performance optimization, avoiding autoboxing overhead.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.checkArgument(true, "{}, {}", (Object) "value", 12.5d);   // no exception thrown
+     * N.checkArgument(false, "{}, {}", (Object) "value", 12.5d);  // throws IllegalArgumentException
+     * }</pre>
      *
      * @param expression a boolean expression
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
@@ -2858,6 +2961,12 @@ sealed class CommonUtil permits N {
      * <p>The exception message, if thrown, is built by substituting {@code arg1} and {@code arg2} into
      * {@code errorMessageTemplate}.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.checkArgument(true, "{}, {}", (Object) "value", (Object) "other");   // no exception thrown
+     * N.checkArgument(false, "{}, {}", (Object) "value", (Object) "other");  // throws IllegalArgumentException
+     * }</pre>
+     *
      * @param expression a boolean expression
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
      * @param arg1 the parameter to be used in the exception message
@@ -2876,6 +2985,12 @@ sealed class CommonUtil permits N {
      *
      * <p>The exception message, if thrown, is built by substituting {@code arg1}, {@code arg2} and
      * {@code arg3} into {@code errorMessageTemplate}.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.checkArgument(true, "{}, {}, {}", (Object) "value", (Object) "other", (Object) "other");   // no exception thrown
+     * N.checkArgument(false, "{}, {}, {}", (Object) "value", (Object) "other", (Object) "other");  // throws IllegalArgumentException
+     * }</pre>
      *
      * @param expression a boolean expression
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
@@ -2897,6 +3012,12 @@ sealed class CommonUtil permits N {
      * <p>The exception message, if thrown, is built by substituting {@code arg1}, {@code arg2},
      * {@code arg3} and {@code arg4} into {@code errorMessageTemplate}.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.checkArgument(true, "{}, {}, {}, {}", (Object) "value", (Object) "other", (Object) "other", (Object) "other");   // no exception thrown
+     * N.checkArgument(false, "{}, {}, {}, {}", (Object) "value", (Object) "other", (Object) "other", (Object) "other");  // throws IllegalArgumentException
+     * }</pre>
+     *
      * @param expression a boolean expression
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
      * @param arg1 the parameter to be used in the exception message
@@ -2917,6 +3038,12 @@ sealed class CommonUtil permits N {
      *
      * <p>The error message is obtained lazily from {@code errorMessageSupplier} only when the check fails,
      * avoiding the cost of building the message when the expression is {@code true}.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.checkArgument(true, () -> "message");   // no exception thrown
+     * N.checkArgument(false, () -> "message");  // throws IllegalArgumentException
+     * }</pre>
      *
      * @param expression a boolean expression
      * @param errorMessageSupplier a supplier of the exception message to use if the check fails; will not be invoked if the check passes
@@ -3180,9 +3307,8 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * boolean initialized = true;
-     * checkState(initialized);   // Valid if initialized is true
-     * checkState(false);         // throws IllegalStateException
+     * N.checkState(true);  // no exception thrown
+     * N.checkState(false); // throws IllegalStateException
      * }</pre>
      *
      * @param expression a boolean expression
@@ -3199,8 +3325,8 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * boolean initialized = true;
-     * checkState(initialized, "Not initialized");
+     * N.checkState(true, "message");  // no exception thrown
+     * N.checkState(false, "message"); // throws IllegalStateException
      * }</pre>
      *
      * @param expression a boolean expression
@@ -3218,8 +3344,8 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Object state = new Object();
-     * checkState(state != null, "Not initialized: %s", state);
+     * N.checkState(true, "{}", (Object) "value");   // no exception thrown
+     * N.checkState(false, "{}", (Object) "value");  // throws IllegalStateException
      * }</pre>
      *
      * @param expression a boolean expression
@@ -3238,8 +3364,8 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * char status = 'A';
-     * checkState(status == 'A', "Status must be 'A' but was %s", status);
+     * N.checkState(true, "{}", 'A');   // no exception thrown
+     * N.checkState(false, "{}", 'A');  // throws IllegalStateException
      * }</pre>
      *
      * @param expression a boolean expression
@@ -3258,8 +3384,8 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * int size = 1;
-     * checkState(size > 0, "Size must be positive: %s", size);
+     * N.checkState(true, "{}", 2);   // no exception thrown
+     * N.checkState(false, "{}", 2);  // throws IllegalStateException
      * }</pre>
      *
      * @param expression a boolean expression
@@ -3278,8 +3404,8 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * int count = 1;
-     * checkState(count > 0, "Count must be positive: %s", count);
+     * N.checkState(true, "{}", 2L);   // no exception thrown
+     * N.checkState(false, "{}", 2L);  // throws IllegalStateException
      * }</pre>
      *
      * @param expression a boolean expression
@@ -3298,8 +3424,8 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * double val = 1.0;
-     * checkState(val > 0.0, "Value must be positive: %s", val);
+     * N.checkState(true, "{}", 2.5d);   // no exception thrown
+     * N.checkState(false, "{}", 2.5d);  // throws IllegalStateException
      * }</pre>
      *
      * @param expression a boolean expression
@@ -3318,7 +3444,8 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * checkState(obj != null, "Object must not be null: %s", obj);
+     * N.checkState(true, "{}", (Object) "value");   // no exception thrown
+     * N.checkState(false, "{}", (Object) "value");  // throws IllegalStateException
      * }</pre>
      *
      * @param expression a boolean expression
@@ -3337,7 +3464,8 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * checkState(c1 != c2, "Characters must be different: %s and %s", c1, c2);
+     * N.checkState(true, "{}, {}", 'A', 'Z');   // no exception thrown
+     * N.checkState(false, "{}, {}", 'A', 'Z');  // throws IllegalStateException
      * }</pre>
      *
      * @param expression a boolean expression
@@ -3357,6 +3485,12 @@ sealed class CommonUtil permits N {
      *
      * <p>This overload accepts specific primitive parameter types for performance optimization, avoiding autoboxing overhead.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.checkState(true, "{}, {}", 'A', 42);   // no exception thrown
+     * N.checkState(false, "{}, {}", 'A', 42);  // throws IllegalStateException
+     * }</pre>
+     *
      * @param expression a boolean expression
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
      * @param arg1 the parameter to be used in the exception message
@@ -3374,6 +3508,12 @@ sealed class CommonUtil permits N {
      *
      * <p>This overload accepts specific primitive parameter types for performance optimization, avoiding autoboxing overhead.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.checkState(true, "{}, {}", 'A', 12L);   // no exception thrown
+     * N.checkState(false, "{}, {}", 'A', 12L);  // throws IllegalStateException
+     * }</pre>
+     *
      * @param expression a boolean expression
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
      * @param arg1 the parameter to be used in the exception message
@@ -3390,6 +3530,12 @@ sealed class CommonUtil permits N {
      * Checks if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
      *
      * <p>This overload accepts specific primitive parameter types for performance optimization, avoiding autoboxing overhead.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.checkState(true, "{}, {}", 'A', 12.5d);   // no exception thrown
+     * N.checkState(false, "{}, {}", 'A', 12.5d);  // throws IllegalStateException
+     * }</pre>
      *
      * @param expression a boolean expression
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
@@ -3409,6 +3555,12 @@ sealed class CommonUtil permits N {
      *
      * <p>This overload accepts specific primitive parameter types for performance optimization, avoiding autoboxing overhead.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.checkState(true, "{}, {}", 'A', (Object) "other");   // no exception thrown
+     * N.checkState(false, "{}, {}", 'A', (Object) "other");  // throws IllegalStateException
+     * }</pre>
+     *
      * @param expression a boolean expression
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
      * @param arg1 the parameter to be used in the exception message
@@ -3427,6 +3579,12 @@ sealed class CommonUtil permits N {
      *
      * <p>This overload accepts specific primitive parameter types for performance optimization, avoiding autoboxing overhead.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.checkState(true, "{}, {}", 2, 'Z');   // no exception thrown
+     * N.checkState(false, "{}, {}", 2, 'Z');  // throws IllegalStateException
+     * }</pre>
+     *
      * @param expression a boolean expression
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
      * @param arg1 the parameter to be used in the exception message
@@ -3443,6 +3601,12 @@ sealed class CommonUtil permits N {
      * Checks if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
      *
      * <p>This overload accepts specific primitive parameter types for performance optimization, avoiding autoboxing overhead.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.checkState(true, "{}, {}", 2, 12);   // no exception thrown
+     * N.checkState(false, "{}, {}", 2, 12);  // throws IllegalStateException
+     * }</pre>
      *
      * @param expression a boolean expression
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
@@ -3461,6 +3625,12 @@ sealed class CommonUtil permits N {
      *
      * <p>This overload accepts specific primitive parameter types for performance optimization, avoiding autoboxing overhead.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.checkState(true, "{}, {}", 2, 12L);   // no exception thrown
+     * N.checkState(false, "{}, {}", 2, 12L);  // throws IllegalStateException
+     * }</pre>
+     *
      * @param expression a boolean expression
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
      * @param arg1 the parameter to be used in the exception message
@@ -3477,6 +3647,12 @@ sealed class CommonUtil permits N {
      * Checks if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
      *
      * <p>This overload accepts specific primitive parameter types for performance optimization, avoiding autoboxing overhead.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.checkState(true, "{}, {}", 2, 12.5d);   // no exception thrown
+     * N.checkState(false, "{}, {}", 2, 12.5d);  // throws IllegalStateException
+     * }</pre>
      *
      * @param expression a boolean expression
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
@@ -3495,6 +3671,12 @@ sealed class CommonUtil permits N {
      *
      * <p>This overload accepts specific primitive parameter types for performance optimization, avoiding autoboxing overhead.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.checkState(true, "{}, {}", 2, (Object) "other");   // no exception thrown
+     * N.checkState(false, "{}, {}", 2, (Object) "other");  // throws IllegalStateException
+     * }</pre>
+     *
      * @param expression a boolean expression
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
      * @param arg1 the parameter to be used in the exception message
@@ -3511,6 +3693,12 @@ sealed class CommonUtil permits N {
      * Checks if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
      *
      * <p>This overload accepts specific primitive parameter types for performance optimization, avoiding autoboxing overhead.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.checkState(true, "{}, {}", 2L, 'Z');   // no exception thrown
+     * N.checkState(false, "{}, {}", 2L, 'Z');  // throws IllegalStateException
+     * }</pre>
      *
      * @param expression a boolean expression
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
@@ -3529,6 +3717,12 @@ sealed class CommonUtil permits N {
      *
      * <p>This overload accepts specific primitive parameter types for performance optimization, avoiding autoboxing overhead.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.checkState(true, "{}, {}", 2L, 12);   // no exception thrown
+     * N.checkState(false, "{}, {}", 2L, 12);  // throws IllegalStateException
+     * }</pre>
+     *
      * @param expression a boolean expression
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
      * @param arg1 the parameter to be used in the exception message
@@ -3546,6 +3740,12 @@ sealed class CommonUtil permits N {
      *
      * <p>This overload accepts specific primitive parameter types for performance optimization, avoiding autoboxing overhead.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.checkState(true, "{}, {}", 2L, 12L);   // no exception thrown
+     * N.checkState(false, "{}, {}", 2L, 12L);  // throws IllegalStateException
+     * }</pre>
+     *
      * @param expression a boolean expression
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
      * @param arg1 the parameter to be used in the exception message
@@ -3562,6 +3762,12 @@ sealed class CommonUtil permits N {
      * Checks if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
      *
      * <p>This overload accepts specific primitive parameter types for performance optimization, avoiding autoboxing overhead.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.checkState(true, "{}, {}", 2L, 12.5d);   // no exception thrown
+     * N.checkState(false, "{}, {}", 2L, 12.5d);  // throws IllegalStateException
+     * }</pre>
      *
      * @param expression a boolean expression
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
@@ -3581,6 +3787,12 @@ sealed class CommonUtil permits N {
      *
      * <p>This overload accepts specific primitive parameter types for performance optimization, avoiding autoboxing overhead.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.checkState(true, "{}, {}", 2L, (Object) "other");   // no exception thrown
+     * N.checkState(false, "{}, {}", 2L, (Object) "other");  // throws IllegalStateException
+     * }</pre>
+     *
      * @param expression a boolean expression
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
      * @param arg1 the parameter to be used in the exception message
@@ -3598,6 +3810,12 @@ sealed class CommonUtil permits N {
      * Checks if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
      *
      * <p>This overload accepts specific primitive parameter types for performance optimization, avoiding autoboxing overhead.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.checkState(true, "{}, {}", 2.5d, 'Z');   // no exception thrown
+     * N.checkState(false, "{}, {}", 2.5d, 'Z');  // throws IllegalStateException
+     * }</pre>
      *
      * @param expression a boolean expression
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
@@ -3617,6 +3835,12 @@ sealed class CommonUtil permits N {
      *
      * <p>This overload accepts specific primitive parameter types for performance optimization, avoiding autoboxing overhead.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.checkState(true, "{}, {}", 2.5d, 12);   // no exception thrown
+     * N.checkState(false, "{}, {}", 2.5d, 12);  // throws IllegalStateException
+     * }</pre>
+     *
      * @param expression a boolean expression
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
      * @param arg1 the parameter to be used in the exception message
@@ -3633,6 +3857,12 @@ sealed class CommonUtil permits N {
      * Checks if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
      *
      * <p>This overload accepts specific primitive parameter types for performance optimization, avoiding autoboxing overhead.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.checkState(true, "{}, {}", 2.5d, 12L);   // no exception thrown
+     * N.checkState(false, "{}, {}", 2.5d, 12L);  // throws IllegalStateException
+     * }</pre>
      *
      * @param expression a boolean expression
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
@@ -3652,6 +3882,12 @@ sealed class CommonUtil permits N {
      *
      * <p>This overload accepts specific primitive parameter types for performance optimization, avoiding autoboxing overhead.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.checkState(true, "{}, {}", 2.5d, 12.5d);   // no exception thrown
+     * N.checkState(false, "{}, {}", 2.5d, 12.5d);  // throws IllegalStateException
+     * }</pre>
+     *
      * @param expression a boolean expression
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
      * @param arg1 the parameter to be used in the exception message
@@ -3669,6 +3905,12 @@ sealed class CommonUtil permits N {
      * Checks if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
      *
      * <p>This overload accepts specific primitive parameter types for performance optimization, avoiding autoboxing overhead.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.checkState(true, "{}, {}", 2.5d, (Object) "other");   // no exception thrown
+     * N.checkState(false, "{}, {}", 2.5d, (Object) "other");  // throws IllegalStateException
+     * }</pre>
      *
      * @param expression a boolean expression
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
@@ -3688,6 +3930,12 @@ sealed class CommonUtil permits N {
      *
      * <p>This overload accepts specific primitive parameter types for performance optimization, avoiding autoboxing overhead.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.checkState(true, "{}, {}", (Object) "value", 'Z');   // no exception thrown
+     * N.checkState(false, "{}, {}", (Object) "value", 'Z');  // throws IllegalStateException
+     * }</pre>
+     *
      * @param expression a boolean expression
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
      * @param arg1 the parameter to be used in the exception message
@@ -3706,6 +3954,12 @@ sealed class CommonUtil permits N {
      *
      * <p>This overload accepts specific primitive parameter types for performance optimization, avoiding autoboxing overhead.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.checkState(true, "{}, {}", (Object) "value", 12);   // no exception thrown
+     * N.checkState(false, "{}, {}", (Object) "value", 12);  // throws IllegalStateException
+     * }</pre>
+     *
      * @param expression a boolean expression
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
      * @param arg1 the parameter to be used in the exception message
@@ -3722,6 +3976,12 @@ sealed class CommonUtil permits N {
      * Checks if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
      *
      * <p>This overload accepts specific primitive parameter types for performance optimization, avoiding autoboxing overhead.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.checkState(true, "{}, {}", (Object) "value", 12L);   // no exception thrown
+     * N.checkState(false, "{}, {}", (Object) "value", 12L);  // throws IllegalStateException
+     * }</pre>
      *
      * @param expression a boolean expression
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
@@ -3740,6 +4000,12 @@ sealed class CommonUtil permits N {
      * Checks if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
      *
      * <p>This overload accepts specific primitive parameter types for performance optimization, avoiding autoboxing overhead.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.checkState(true, "{}, {}", (Object) "value", 12.5d);   // no exception thrown
+     * N.checkState(false, "{}, {}", (Object) "value", 12.5d);  // throws IllegalStateException
+     * }</pre>
      *
      * @param expression a boolean expression
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
@@ -3760,6 +4026,12 @@ sealed class CommonUtil permits N {
      * <p>The exception message, if thrown, is built by substituting {@code arg1} and {@code arg2} into
      * {@code errorMessageTemplate}.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.checkState(true, "{}, {}", (Object) "value", (Object) "other");   // no exception thrown
+     * N.checkState(false, "{}, {}", (Object) "value", (Object) "other");  // throws IllegalStateException
+     * }</pre>
+     *
      * @param expression a boolean expression
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
      * @param arg1 the parameter to be used in the exception message
@@ -3775,6 +4047,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Checks if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.checkState(true, "{}, {}, {}", (Object) "value", (Object) "other", (Object) "other");   // no exception thrown
+     * N.checkState(false, "{}, {}, {}", (Object) "value", (Object) "other", (Object) "other");  // throws IllegalStateException
+     * }</pre>
      *
      * @param expression a boolean expression
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
@@ -3792,6 +4070,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Checks if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.checkState(true, "{}, {}, {}, {}", (Object) "value", (Object) "other", (Object) "other", (Object) "other");   // no exception thrown
+     * N.checkState(false, "{}, {}, {}, {}", (Object) "value", (Object) "other", (Object) "other", (Object) "other");  // throws IllegalStateException
+     * }</pre>
      *
      * @param expression a boolean expression
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
@@ -3811,6 +4095,12 @@ sealed class CommonUtil permits N {
     /**
      * Checks if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.checkState(true, () -> "message");   // no exception thrown
+     * N.checkState(false, () -> "message");  // throws IllegalStateException
+     * }</pre>
+     *
      * @param expression a boolean expression
      * @param errorMessageSupplier a supplier of the exception message to use if the check fails; will not be invoked if the check passes
      * @throws IllegalStateException if {@code expression} is false
@@ -3826,8 +4116,8 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * requireNonNull("not null");   // Returns "not null"
-     * requireNonNull(null);         // throws NullPointerException
+     * N.requireNonNull("not null");   // returns "not null"
+     * N.requireNonNull(null);         // throws NullPointerException
      * }</pre>
      *
      * <p><b>When to use:</b> Use this method for internal state or invariant checks — situations where a
@@ -3861,7 +4151,7 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * requireNonNull(null, "Object cannot be null");   // throws NullPointerException
+     * N.requireNonNull(null, "Object cannot be null");   // throws NullPointerException
      * }</pre>
      *
      * <p><b>When to use:</b> Use this method for internal state or invariant checks, not for validating public
@@ -3935,6 +4225,12 @@ sealed class CommonUtil permits N {
     /**
      * Compares two boolean values for equality.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.equals(true, true);  // returns true
+     * N.equals(true, false); // returns false
+     * }</pre>
+     *
      * @param a the first boolean value
      * @param b the second boolean value
      * @return {@code true} if the boolean values are equal, {@code false} otherwise
@@ -3946,6 +4242,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Compares two char values for equality.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.equals('a', 'a'); // returns true
+     * N.equals('a', 'b'); // returns false
+     * }</pre>
      *
      * @param a the first char value
      * @param b the second char value
@@ -3960,6 +4262,12 @@ sealed class CommonUtil permits N {
     /**
      * Compares two byte values for equality.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.equals((byte) 1, (byte) 1); // returns true
+     * N.equals((byte) 1, (byte) 2); // returns false
+     * }</pre>
+     *
      * @param a the first byte value
      * @param b the second byte value
      * @return {@code true} if the byte values are equal, {@code false} otherwise
@@ -3972,6 +4280,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Compares two short values for equality.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.equals((short) 1, (short) 1); // returns true
+     * N.equals((short) 1, (short) 2); // returns false
+     * }</pre>
      *
      * @param a the first short value
      * @param b the second short value
@@ -3986,6 +4300,12 @@ sealed class CommonUtil permits N {
     /**
      * Compares two int values for equality.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.equals(1, 1); // returns true
+     * N.equals(1, 2); // returns false
+     * }</pre>
+     *
      * @param a the first int value
      * @param b the second int value
      * @return {@code true} if the int values are equal, {@code false} otherwise
@@ -3998,6 +4318,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Compares two long values for equality.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.equals(1L, 1L); // returns true
+     * N.equals(1L, 2L); // returns false
+     * }</pre>
      *
      * @param a the first long value
      * @param b the second long value
@@ -4014,6 +4340,12 @@ sealed class CommonUtil permits N {
      * <p>This method treats {@code NaN} as equal to itself and distinguishes between
      * positive and negative zero, unlike the {@code ==} operator.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.equals(1.0f, 1.0f);      // returns true
+     * N.equals(1.0f, Float.NaN); // returns false
+     * }</pre>
+     *
      * @param a the first float value
      * @param b the second float value
      * @return {@code true} if the float values are equal, {@code false} otherwise
@@ -4029,6 +4361,12 @@ sealed class CommonUtil permits N {
      * <p>This method treats {@code NaN} as equal to itself and distinguishes between
      * positive and negative zero, unlike the {@code ==} operator.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.equals(1.0d, 1.0d);       // returns true
+     * N.equals(1.0d, Double.NaN); // returns false
+     * }</pre>
+     *
      * @param a the first double value
      * @param b the second double value
      * @return {@code true} if the double values are equal, {@code false} otherwise
@@ -4042,6 +4380,12 @@ sealed class CommonUtil permits N {
     /**
      * Compares two strings for equality. Two {@code null} arguments are considered equal.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.equals("abc", "abc"); // returns true
+     * N.equals("abc", null);  // returns false
+     * }</pre>
+     *
      * @param a the first string, may be {@code null}
      * @param b the second string, may be {@code null}
      * @return {@code true} if the strings are equal, {@code false} otherwise
@@ -4053,6 +4397,12 @@ sealed class CommonUtil permits N {
     /**
      * Compares two strings for equality, ignoring case differences.
      * Two {@code null} arguments are considered equal.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.equalsIgnoreCase("Abc", "abc"); // returns true
+     * N.equalsIgnoreCase("Abc", null);  // returns false
+     * }</pre>
      *
      * @param a the first string, may be {@code null}
      * @param b the second string, may be {@code null}
@@ -4066,6 +4416,12 @@ sealed class CommonUtil permits N {
     /**
      * Compares two objects for equality. If the objects are arrays, the appropriate {@code Arrays.equals} method will be used.
      * Two {@code null} arguments are considered equal.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.equals((Object) "abc", (Object) "abc");                           // returns true
+     * N.equals((Object) new int[] {1, 2}, (Object) new int[] {1, 2});     // returns true
+     * }</pre>
      *
      * @param a the first object, may be {@code null}
      * @param b the second object, may be {@code null}
@@ -4101,6 +4457,12 @@ sealed class CommonUtil permits N {
      *   <li>Both reference the same array object, or</li>
      *   <li>Both have the same length and all corresponding elements are equal</li>
      * </ul>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.equals(new boolean[] {true, false}, new boolean[] {true, false}); // returns true
+     * N.equals(new boolean[] {true, false}, new boolean[] {true, true});  // returns false
+     * }</pre>
      *
      * @param a the first array, may be {@code null}
      * @param b the second array, may be {@code null}
@@ -4155,6 +4517,12 @@ sealed class CommonUtil permits N {
     /**
      * Compares two arrays for equality.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.equals(new char[] {'a', 'b'}, new char[] {'a', 'b'}); // returns true
+     * N.equals(new char[] {'a', 'b'}, new char[] {'a', 'c'}); // returns false
+     * }</pre>
+     *
      * @param a the first array
      * @param b the second array
      * @return {@code true} if the arrays are equal, {@code false} otherwise
@@ -4206,6 +4574,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Compares two arrays for equality.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.equals(new byte[] {1, 2}, new byte[] {1, 2}); // returns true
+     * N.equals(new byte[] {1, 2}, new byte[] {1, 3}); // returns false
+     * }</pre>
      *
      * @param a the first array
      * @param b the second array
@@ -4259,6 +4633,12 @@ sealed class CommonUtil permits N {
     /**
      * Compares two arrays for equality.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.equals(new short[] {1, 2}, new short[] {1, 2}); // returns true
+     * N.equals(new short[] {1, 2}, new short[] {1, 3}); // returns false
+     * }</pre>
+     *
      * @param a the first array
      * @param b the second array
      * @return {@code true} if the arrays are equal, {@code false} otherwise
@@ -4310,6 +4690,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Compares two arrays for equality.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.equals(new int[] {1, 2}, new int[] {1, 2}); // returns true
+     * N.equals(new int[] {1, 2}, new int[] {1, 3}); // returns false
+     * }</pre>
      *
      * @param a the first array
      * @param b the second array
@@ -4363,6 +4749,12 @@ sealed class CommonUtil permits N {
     /**
      * Compares two arrays for equality.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.equals(new long[] {1L, 2L}, new long[] {1L, 2L}); // returns true
+     * N.equals(new long[] {1L, 2L}, new long[] {1L, 3L}); // returns false
+     * }</pre>
+     *
      * @param a the first array
      * @param b the second array
      * @return {@code true} if the arrays are equal, {@code false} otherwise
@@ -4414,6 +4806,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Compares two arrays for equality.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.equals(new float[] {1.0f, 2.0f}, new float[] {1.0f, 2.0f}); // returns true
+     * N.equals(new float[] {1.0f, 2.0f}, new float[] {1.0f, 3.0f}); // returns false
+     * }</pre>
      *
      * @param a the first array
      * @param b the second array
@@ -4504,6 +4902,12 @@ sealed class CommonUtil permits N {
     /**
      * Compares two arrays for equality.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.equals(new double[] {1.0d, 2.0d}, new double[] {1.0d, 2.0d}); // returns true
+     * N.equals(new double[] {1.0d, 2.0d}, new double[] {1.0d, 3.0d}); // returns false
+     * }</pre>
+     *
      * @param a the first array
      * @param b the second array
      * @return {@code true} if the arrays are equal, {@code false} otherwise
@@ -4593,6 +4997,12 @@ sealed class CommonUtil permits N {
     /**
      * Compares two arrays for equality.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.equals(new String[] {"a", "b"}, new String[] {"a", "b"}); // returns true
+     * N.equals(new String[] {"a", "b"}, new String[] {"a", "c"}); // returns false
+     * }</pre>
+     *
      * @param a the first array
      * @param b the second array
      * @return {@code true} if the arrays are equal, {@code false} otherwise
@@ -4616,6 +5026,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Compares two arrays for equality within the specified range.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.equals(new String[] {"a", "b"}, 0, new String[] {"a", "b"}, 0, 2); // returns true
+     * N.equals(new String[] {"a", "b"}, 0, new String[] {"a", "c"}, 0, 2); // returns false
+     * }</pre>
      *
      * @param a the first array, must not be {@code null}
      * @param fromIndexA the starting index in the first array, inclusive
@@ -4657,6 +5073,12 @@ sealed class CommonUtil permits N {
      * </ul>
      * If the objects are arrays, this method uses recursive comparison to check
      * all nested elements.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.deepEquals(new Object[] {new int[] {1, 2}}, new Object[] {new int[] {1, 2}}); // returns true
+     * N.deepEquals(new Object[] {new int[] {1, 2}}, new Object[] {new int[] {1, 3}}); // returns false
+     * }</pre>
      *
      * @param a the first object to compare, which may be {@code null}
      * @param b the second object to compare, which may be {@code null}
@@ -4718,6 +5140,12 @@ sealed class CommonUtil permits N {
     /**
      * Compares two arrays for deep equality.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.deepEquals(new Object[] {new int[] {1, 2}}, new Object[] {new int[] {1, 2}}); // returns true
+     * N.deepEquals(new Object[] {new int[] {1, 2}}, new Object[] {new int[] {1, 3}}); // returns false
+     * }</pre>
+     *
      * @param a the first array
      * @param b the second array
      * @return {@code true} if the arrays are equal, {@code false} otherwise
@@ -4729,6 +5157,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Compares two arrays for deep equality within the specified range.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.deepEquals(new Object[] {new int[] {1, 2}}, new Object[] {new int[] {1, 2}}); // returns true
+     * N.deepEquals(new Object[] {new int[] {1, 2}}, new Object[] {new int[] {1, 3}}); // returns false
+     * }</pre>
      *
      * @param a the first array, must not be {@code null}
      * @param fromIndexA the starting index in the first array, inclusive
@@ -4762,6 +5196,12 @@ sealed class CommonUtil permits N {
     /**
      * Compares two arrays of Strings, ignoring case considerations.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.equalsIgnoreCase(new String[] {"Abc", "Def"}, new String[] {"abc", "def"}); // returns true
+     * N.equalsIgnoreCase(new String[] {"Abc"}, new String[] {"xyz"});               // returns false
+     * }</pre>
+     *
      * @param a the first array of Strings to compare, which may be {@code null}
      * @param b the second array of Strings to compare, which may be {@code null}
      * @return {@code true} if the arrays are equal, ignoring case considerations, or both are {@code null}; {@code false} otherwise
@@ -4772,6 +5212,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Compares two arrays of Strings, ignoring case considerations, within the specified range.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.equalsIgnoreCase(new String[] {"Abc", "Def"}, 0, new String[] {"abc", "xyz"}, 0, 1); // returns true
+     * N.equalsIgnoreCase(new String[] {"Abc", "Def"}, 0, new String[] {"abc", "xyz"}, 0, 2); // returns false
+     * }</pre>
      *
      * @param a the first array of Strings to compare, which may be {@code null}
      * @param fromIndexA the starting index in the first array, inclusive
@@ -4817,6 +5263,17 @@ sealed class CommonUtil permits N {
      * differs from {@link Collection#equals(Object)}, which may or may not consider order depending
      * on the specific collection implementation.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<String> a = Arrays.asList("a", "b");
+     * List<String> b = Arrays.asList("a", "b");
+     * List<String> c = Arrays.asList("b", "a");
+     *
+     * N.equalsInOrder(a, b);                          // returns true
+     * N.equalsInOrder(a, c);                          // returns false
+     * N.equalsInOrder(null, Collections.emptyList()); // returns true
+     * }</pre>
+     *
      * @param a the first collection to compare; may be {@code null}
      * @param b the second collection to compare; may be {@code null}
      * @return {@code true} if the two collections have the same size and their elements match in the
@@ -4859,6 +5316,23 @@ sealed class CommonUtil permits N {
      * be used when the sequence of entries matters—for example, when comparing instances of
      * {@link java.util.LinkedHashMap} or other ordered map implementations.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Map<String, Integer> a = new LinkedHashMap<>();
+     * a.put("one", 1);                            // returns null
+     * a.put("two", 2);                            // returns null
+     * Map<String, Integer> b = new LinkedHashMap<>();
+     * b.put("one", 1);                            // returns null
+     * b.put("two", 2);                            // returns null
+     * Map<String, Integer> c = new LinkedHashMap<>();
+     * c.put("two", 2);                            // returns null
+     * c.put("one", 1);                            // returns null
+     *
+     * N.equalsInOrder(a, b);                         // returns true
+     * N.equalsInOrder(a, c);                         // returns false
+     * N.equalsInOrder(null, Collections.emptyMap()); // returns true
+     * }</pre>
+     *
      * @param a the first map to compare; may be {@code null}
      * @param b the second map to compare; may be {@code null}
      * @return {@code true} if the two maps contain the same entries in the same iteration order
@@ -4892,6 +5366,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Compares two maps for equality based on the specified keys.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.equalsByKeys(N.asMap("id", 1, "name", "Bob"), N.asMap("id", 1, "name", "Ann"), N.asList("id")); // returns true
+     * N.equalsByKeys(N.asMap("id", 1), N.asMap("id", 2), N.asList("id"));                               // returns false
+     * }</pre>
      *
      * @param <K> the type of keys in the maps
      * @param map1 the first map to compare, it can be {@code null}
@@ -4928,6 +5408,12 @@ sealed class CommonUtil permits N {
     /**
      * Compares the properties of two beans to determine if they are equal.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.equalsByProps(N.asMap("id", 1), N.asMap("id", 1), "id"); // returns true
+     * N.equalsByProps(N.asMap("id", 1), N.asMap("id", 2), "id"); // returns false
+     * }</pre>
+     *
      * @param bean1 the first bean to compare, must not be {@code null}
      * @param bean2 the second bean to compare, must not be {@code null}
      * @param propNamesToCompare the collection of property names to compare, must not be {@code null} or empty
@@ -4943,6 +5429,12 @@ sealed class CommonUtil permits N {
     /**
      * Compares the properties of two beans to determine if they are equal by common properties.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.equalsByCommonProps(N.asMap("id", 1), N.asMap("id", 1)); // returns true
+     * N.equalsByCommonProps(N.asMap("id", 1), N.asMap("id", 2)); // returns false
+     * }</pre>
+     *
      * @param bean1 the first bean to compare, must not be {@code null}
      * @param bean2 the second bean to compare, must not be {@code null}
      * @return {@code true} if all the common properties of the beans are equal, {@code false} otherwise
@@ -4955,7 +5447,13 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Returns {@code true} if the given {@link Collection}s contain exactly the same elements with exactly the same cardinalities.
+     * Unsupported operation; always throws {@code UnsupportedOperationException}. Use {@link N#isEqualCollection(Collection, Collection)} to test whether two {@link Collection}s contain exactly the same elements with exactly the same cardinalities.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.equalsCollection(Arrays.asList("a", "b"), Arrays.asList("b", "a")); // throws UnsupportedOperationException
+     * N.equalsCollection(null, null);                                       // throws UnsupportedOperationException
+     * }</pre>
      *
      * @param a the first collection to compare, which may be {@code null}
      * @param b the second collection to compare, which may be {@code null}
@@ -4973,6 +5471,12 @@ sealed class CommonUtil permits N {
     /**
      * Returns the hash code for a boolean value.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.hashCode(true);  // returns 1231
+     * N.hashCode(false); // returns 1237
+     * }</pre>
+     *
      * @param value the boolean value
      * @return the hash code
      * @see Boolean#hashCode(boolean)
@@ -4984,6 +5488,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Returns the hash code for a char value.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.hashCode('\u0001'); // returns 1
+     * N.hashCode('\u0002'); // returns 2
+     * }</pre>
      *
      * @param value the char value
      * @return the hash code
@@ -4997,6 +5507,12 @@ sealed class CommonUtil permits N {
     /**
      * Returns the hash code for a byte value.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.hashCode((byte) 1); // returns 1
+     * N.hashCode((byte) 2); // returns 2
+     * }</pre>
+     *
      * @param value the byte value
      * @return the hash code
      * @see Byte#hashCode(byte)
@@ -5008,6 +5524,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Returns the hash code for a short value.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.hashCode((short) 1); // returns 1
+     * N.hashCode((short) 2); // returns 2
+     * }</pre>
      *
      * @param value the short value
      * @return the hash code
@@ -5021,6 +5543,12 @@ sealed class CommonUtil permits N {
     /**
      * Returns the hash code for an int value.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.hashCode(1); // returns 1
+     * N.hashCode(2); // returns 2
+     * }</pre>
+     *
      * @param value the int value
      * @return the hash code
      * @see Integer#hashCode(int)
@@ -5032,6 +5560,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Returns the hash code for a long value.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.hashCode(1L); // returns 1
+     * N.hashCode(2L); // returns 2
+     * }</pre>
      *
      * @param value the long value
      * @return the hash code
@@ -5045,6 +5579,12 @@ sealed class CommonUtil permits N {
     /**
      * Returns the hash code for a float value.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.hashCode(0.0f);  // returns 0
+     * N.hashCode(-0.0f); // returns -2147483648
+     * }</pre>
+     *
      * @param value the float value
      * @return the hash code
      * @see Float#hashCode(float)
@@ -5056,6 +5596,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Returns the hash code for a double value.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.hashCode(0.0d);  // returns 0
+     * N.hashCode(-0.0d); // returns -2147483648
+     * }</pre>
      *
      * @param value the double value
      * @return the hash code
@@ -5069,6 +5615,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Returns the hash code for an object. If the object is an array, the appropriate {@code Arrays.hashCode} method will be used.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.hashCode(null);               // returns 0
+     * N.hashCode(Integer.valueOf(1)); // returns 1
+     * }</pre>
      *
      * @param obj the object for which the hash code is to be calculated
      * @return the hash code of the object, or {@code 0} if the object is {@code null}
@@ -5088,6 +5640,12 @@ sealed class CommonUtil permits N {
     /**
      * Returns the hash code for an array of booleans.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.hashCode((boolean[]) null); // returns 0
+     * N.hashCode(new boolean[0]);   // returns 1
+     * }</pre>
+     *
      * @param a the array of booleans, may be {@code null}
      * @return the hash code of the array
      * @see Arrays#hashCode(boolean[])
@@ -5103,7 +5661,7 @@ sealed class CommonUtil permits N {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * boolean[] a = {true, false, true};
-     * int hash = hashCode(a, 0, 2);   // hash code for {true, false}
+     * int hash = N.hashCode(a, 0, 2);   // returns hash code for {true, false}
      * }</pre>
      *
      * @param a the array of booleans
@@ -5131,6 +5689,12 @@ sealed class CommonUtil permits N {
     /**
      * Returns the hash code for an array of chars.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.hashCode((char[]) null); // returns 0
+     * N.hashCode(new char[0]);   // returns 1
+     * }</pre>
+     *
      * @param a the array of chars, may be {@code null}
      * @return the hash code of the array
      * @see Arrays#hashCode(char[])
@@ -5145,7 +5709,7 @@ sealed class CommonUtil permits N {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * char[] a = {'a', 'b', 'c'};
-     * int hash = hashCode(a, 0, 2);   // hash code for {'a', 'b'}
+     * int hash = N.hashCode(a, 0, 2);   // returns hash code for {'a', 'b'}
      * }</pre>
      *
      * @param a the array of chars
@@ -5173,6 +5737,12 @@ sealed class CommonUtil permits N {
     /**
      * Returns the hash code for an array of bytes.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.hashCode((byte[]) null); // returns 0
+     * N.hashCode(new byte[0]);   // returns 1
+     * }</pre>
+     *
      * @param a the array of bytes, may be {@code null}
      * @return the hash code of the array
      * @see Arrays#hashCode(byte[])
@@ -5187,7 +5757,7 @@ sealed class CommonUtil permits N {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * byte[] a = {1, 2, 3};
-     * int hash = hashCode(a, 0, 2);   // hash code for {1, 2}
+     * int hash = N.hashCode(a, 0, 2);   // returns hash code for {1, 2}
      * }</pre>
      *
      * @param a the array of bytes
@@ -5215,6 +5785,12 @@ sealed class CommonUtil permits N {
     /**
      * Returns the hash code for an array of shorts.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.hashCode((short[]) null); // returns 0
+     * N.hashCode(new short[0]);   // returns 1
+     * }</pre>
+     *
      * @param a the array of shorts, may be {@code null}
      * @return the hash code of the array
      * @see Arrays#hashCode(short[])
@@ -5229,7 +5805,7 @@ sealed class CommonUtil permits N {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * short[] a = {1, 2, 3};
-     * int hash = hashCode(a, 0, 2);   // hash code for {1, 2}
+     * int hash = N.hashCode(a, 0, 2);   // returns hash code for {1, 2}
      * }</pre>
      *
      * @param a the array of shorts
@@ -5257,6 +5833,12 @@ sealed class CommonUtil permits N {
     /**
      * Returns the hash code for an array of ints.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.hashCode((int[]) null); // returns 0
+     * N.hashCode(new int[0]);   // returns 1
+     * }</pre>
+     *
      * @param a the array of ints, may be {@code null}
      * @return the hash code of the array
      * @see Arrays#hashCode(int[])
@@ -5271,7 +5853,7 @@ sealed class CommonUtil permits N {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * int[] a = {1, 2, 3};
-     * int hash = hashCode(a, 0, 2);   // hash code for {1, 2}
+     * int hash = N.hashCode(a, 0, 2);   // returns hash code for {1, 2}
      * }</pre>
      *
      * @param a the array of ints
@@ -5299,6 +5881,12 @@ sealed class CommonUtil permits N {
     /**
      * Returns the hash code for an array of longs.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.hashCode((long[]) null); // returns 0
+     * N.hashCode(new long[0]);   // returns 1
+     * }</pre>
+     *
      * @param a the array of longs, may be {@code null}
      * @return the hash code of the array
      * @see Arrays#hashCode(long[])
@@ -5313,7 +5901,7 @@ sealed class CommonUtil permits N {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * long[] a = {1L, 2L, 3L};
-     * int hash = hashCode(a, 0, 2);   // hash code for {1L, 2L}
+     * int hash = N.hashCode(a, 0, 2);   // returns hash code for {1L, 2L}
      * }</pre>
      *
      * @param a the array of longs
@@ -5341,6 +5929,12 @@ sealed class CommonUtil permits N {
     /**
      * Returns the hash code for an array of floats.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.hashCode((float[]) null); // returns 0
+     * N.hashCode(new float[0]);   // returns 1
+     * }</pre>
+     *
      * @param a the array of floats, may be {@code null}
      * @return the hash code of the array
      * @see Arrays#hashCode(float[])
@@ -5355,7 +5949,7 @@ sealed class CommonUtil permits N {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * float[] a = {1.0f, 2.0f, 3.0f};
-     * int hash = hashCode(a, 0, 2);   // hash code for {1.0f, 2.0f}
+     * int hash = N.hashCode(a, 0, 2);   // returns hash code for {1.0f, 2.0f}
      * }</pre>
      *
      * @param a the array of floats
@@ -5383,6 +5977,12 @@ sealed class CommonUtil permits N {
     /**
      * Returns the hash code for an array of doubles.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.hashCode((double[]) null); // returns 0
+     * N.hashCode(new double[0]);   // returns 1
+     * }</pre>
+     *
      * @param a the array of doubles, may be {@code null}
      * @return the hash code of the array
      * @see Arrays#hashCode(double[])
@@ -5397,7 +5997,7 @@ sealed class CommonUtil permits N {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * double[] a = {1.0, 2.0, 3.0};
-     * int hash = hashCode(a, 0, 2);   // hash code for {1.0, 2.0}
+     * int hash = N.hashCode(a, 0, 2);   // returns hash code for {1.0, 2.0}
      * }</pre>
      *
      * @param a the array of doubles
@@ -5425,6 +6025,12 @@ sealed class CommonUtil permits N {
     /**
      * Returns the hash code for an array of Objects.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.hashCode((Object[]) null); // returns 0
+     * N.hashCode(new String[0]);   // returns 1
+     * }</pre>
+     *
      * @param a the array of Objects, may be {@code null}
      * @return the hash code of the array
      * @see Arrays#hashCode(Object[])
@@ -5439,7 +6045,7 @@ sealed class CommonUtil permits N {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String[] a = {"a", "b", "c"};
-     * int hash = hashCode(a, 0, 2);   // hash code for {"a", "b"}
+     * int hash = N.hashCode(a, 0, 2);   // returns hash code for {"a", "b"}
      * }</pre>
      *
      * @param a the array of Objects
@@ -5470,8 +6076,8 @@ sealed class CommonUtil permits N {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * int[] array = {1, 2};
-     * int deepHash = deepHashCode(array);   // deep hash code of array
-     * int hash = deepHashCode("string");    // hash code of string
+     * int deepHash = N.deepHashCode(array);   // returns deep hash code of array
+     * int hash = N.deepHashCode("string");    // returns hash code of string
      * }</pre>
      *
      * @param obj the object for which the hash code is to be calculated
@@ -5534,7 +6140,7 @@ sealed class CommonUtil permits N {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String[] array = {"a", "b"};
-     * int deepHash = deepHashCode(array);   // deep hash code of array
+     * int deepHash = N.deepHashCode(array);   // returns deep hash code of array
      * }</pre>
      *
      * @param a the array of Objects, may be {@code null}
@@ -5551,7 +6157,7 @@ sealed class CommonUtil permits N {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String[] array = {"a", "b", "c"};
-     * int deepHash = deepHashCode(array, 0, 2);   // deep hash code of {"a", "b"}
+     * int deepHash = N.deepHashCode(array, 0, 2);   // returns deep hash code of {"a", "b"}
      * }</pre>
      *
      * @param a the array of Objects
@@ -5595,8 +6201,8 @@ sealed class CommonUtil permits N {
      * <pre>{@code
      * Map<String, Object[]> map = new HashMap<>();
      * map.put("values", new Object[] {1, "a"});
-     * List<Map<String, Object[]>> complexObject = asList(map);
-     * long hashCode = hashCodeEverything(complexObject);
+     * List<Map<String, Object[]>> complexObject = N.asList(map);
+     * long hashCode = N.hashCodeEverything(complexObject);
      * }</pre>
      *
      * @param obj the object whose full structure should be hashed, may be {@code null}
@@ -5655,8 +6261,8 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * toString(true);    // returns "true"
-     * toString(false);   // returns "false"
+     * N.toString(true);    // returns "true"
+     * N.toString(false);   // returns "false"
      * }</pre>
      *
      * @param value the boolean value to be represented as a string
@@ -5671,7 +6277,7 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * toString('a');   // returns "a"
+     * N.toString('a');   // returns "a"
      * }</pre>
      *
      * @param value the char value to be represented as a string
@@ -5686,7 +6292,7 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * toString((byte) 1);   // returns "1"
+     * N.toString((byte) 1);   // returns "1"
      * }</pre>
      *
      * @param value the byte value to be represented as a string
@@ -5701,7 +6307,7 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * toString((short) 1);   // returns "1"
+     * N.toString((short) 1);   // returns "1"
      * }</pre>
      *
      * @param value the short value to be represented as a string
@@ -5716,7 +6322,7 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * toString(1);   // returns "1"
+     * N.toString(1);   // returns "1"
      * }</pre>
      *
      * @param value the int value to be represented as a string
@@ -5731,7 +6337,7 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * toString(1L);   // returns "1"
+     * N.toString(1L);   // returns "1"
      * }</pre>
      *
      * @param value the long value to be represented as a string
@@ -5746,7 +6352,7 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * toString(1.0f);   // returns "1.0"
+     * N.toString(1.0f);   // returns "1.0"
      * }</pre>
      *
      * @param value the float value to be represented as a string
@@ -5761,7 +6367,7 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * toString(1.0);   // returns "1.0"
+     * N.toString(1.0);   // returns "1.0"
      * }</pre>
      *
      * @param value the double value to be represented as a string
@@ -5776,8 +6382,8 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * toString(1);      // returns "1"
-     * toString(null);   // returns "null"
+     * N.toString(1);      // returns "1"
+     * N.toString(null);   // returns "null"
      * }</pre>
      *
      * @param obj the object to be represented as a string, may be {@code null}
@@ -5841,8 +6447,8 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * toString(1, "default");      // returns "1"
-     * toString(null, "default");   // returns "default"
+     * N.toString(1, "default");      // returns "1"
+     * N.toString(null, "default");   // returns "default"
      * }</pre>
      *
      * @param obj the object to be represented as a string
@@ -5859,7 +6465,7 @@ sealed class CommonUtil permits N {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * boolean[] array = {true, false};
-     * toString(array);   // returns "[true, false]"
+     * N.toString(array);   // returns "[true, false]"
      * }</pre>
      *
      * @param a the boolean array to be represented as a string, may be {@code null}
@@ -5882,7 +6488,7 @@ sealed class CommonUtil permits N {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * boolean[] array = {true, false, true};
-     * toString(array, 0, 2);   // returns "[true, false]"
+     * N.toString(array, 0, 2);   // returns "[true, false]"
      * }</pre>
      *
      * @param a the boolean array to be represented as a string
@@ -5933,7 +6539,7 @@ sealed class CommonUtil permits N {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * char[] array = {'a', 'b'};
-     * toString(array);   // returns "[a, b]"
+     * N.toString(array);   // returns "[a, b]"
      * }</pre>
      *
      * @param a the char array to be represented as a string, may be {@code null}
@@ -5956,7 +6562,7 @@ sealed class CommonUtil permits N {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * char[] array = {'a', 'b', 'c'};
-     * toString(array, 0, 2);   // returns "[a, b]"
+     * N.toString(array, 0, 2);   // returns "[a, b]"
      * }</pre>
      *
      * @param a the char array to be represented as a string
@@ -6009,7 +6615,7 @@ sealed class CommonUtil permits N {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * byte[] array = {1, 2};
-     * toString(array);   // returns "[1, 2]"
+     * N.toString(array);   // returns "[1, 2]"
      * }</pre>
      *
      * @param a the byte array to be represented as a string, may be {@code null}
@@ -6032,7 +6638,7 @@ sealed class CommonUtil permits N {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * byte[] array = {1, 2, 3};
-     * toString(array, 0, 2);   // returns "[1, 2]"
+     * N.toString(array, 0, 2);   // returns "[1, 2]"
      * }</pre>
      *
      * @param a the byte array to be represented as a string
@@ -6083,7 +6689,7 @@ sealed class CommonUtil permits N {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * short[] array = {1, 2};
-     * toString(array);   // returns "[1, 2]"
+     * N.toString(array);   // returns "[1, 2]"
      * }</pre>
      *
      * @param a the short array to be represented as a string, may be {@code null}
@@ -6106,7 +6712,7 @@ sealed class CommonUtil permits N {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * short[] array = {1, 2, 3};
-     * toString(array, 0, 2);   // returns "[1, 2]"
+     * N.toString(array, 0, 2);   // returns "[1, 2]"
      * }</pre>
      *
      * @param a the short array to be represented as a string
@@ -6157,7 +6763,7 @@ sealed class CommonUtil permits N {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * int[] array = {1, 2};
-     * toString(array);   // returns "[1, 2]"
+     * N.toString(array);   // returns "[1, 2]"
      * }</pre>
      *
      * @param a the int array to be represented as a string, may be {@code null}
@@ -6180,7 +6786,7 @@ sealed class CommonUtil permits N {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * int[] array = {1, 2, 3};
-     * toString(array, 0, 2);   // returns "[1, 2]"
+     * N.toString(array, 0, 2);   // returns "[1, 2]"
      * }</pre>
      *
      * @param a the int array to be represented as a string
@@ -6231,7 +6837,7 @@ sealed class CommonUtil permits N {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * long[] array = {1L, 2L};
-     * toString(array);   // returns "[1, 2]"
+     * N.toString(array);   // returns "[1, 2]"
      * }</pre>
      *
      * @param a the long array to be represented as a string, may be {@code null}
@@ -6254,7 +6860,7 @@ sealed class CommonUtil permits N {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * long[] array = {1L, 2L, 3L};
-     * toString(array, 0, 2);   // returns "[1, 2]"
+     * N.toString(array, 0, 2);   // returns "[1, 2]"
      * }</pre>
      *
      * @param a the long array to be represented as a string
@@ -6305,7 +6911,7 @@ sealed class CommonUtil permits N {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * float[] array = {1.0f, 2.0f};
-     * toString(array);   // returns "[1.0, 2.0]"
+     * N.toString(array);   // returns "[1.0, 2.0]"
      * }</pre>
      *
      * @param a the float array to be represented as a string, may be {@code null}
@@ -6328,7 +6934,7 @@ sealed class CommonUtil permits N {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * float[] array = {1.0f, 2.0f, 3.0f};
-     * toString(array, 0, 2);   // returns "[1.0, 2.0]"
+     * N.toString(array, 0, 2);   // returns "[1.0, 2.0]"
      * }</pre>
      *
      * @param a the float array to be represented as a string
@@ -6379,7 +6985,7 @@ sealed class CommonUtil permits N {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * double[] array = {1.0, 2.0};
-     * toString(array);   // returns "[1.0, 2.0]"
+     * N.toString(array);   // returns "[1.0, 2.0]"
      * }</pre>
      *
      * @param a the double array to be represented as a string, may be {@code null}
@@ -6402,7 +7008,7 @@ sealed class CommonUtil permits N {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * double[] array = {1.0, 2.0, 3.0};
-     * toString(array, 0, 2);   // returns "[1.0, 2.0]"
+     * N.toString(array, 0, 2);   // returns "[1.0, 2.0]"
      * }</pre>
      *
      * @param a the double array to be represented as a string
@@ -6469,7 +7075,7 @@ sealed class CommonUtil permits N {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String[] array = {"a", "b"};
-     * toString(array);   // returns "[a, b]"
+     * N.toString(array);   // returns "[a, b]"
      * }</pre>
      *
      * @param a the Object array to be represented as a string, may be {@code null}
@@ -6492,7 +7098,7 @@ sealed class CommonUtil permits N {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String[] array = {"a", "b", "c"};
-     * toString(array, 0, 2);   // returns "[a, b]"
+     * N.toString(array, 0, 2);   // returns "[a, b]"
      * }</pre>
      *
      * @param a the Object array to be represented as a string
@@ -6560,8 +7166,8 @@ sealed class CommonUtil permits N {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * int[] array = {1, 2};
-     * deepToString(array);      // returns "[1, 2]"
-     * deepToString("string");   // returns "string"
+     * N.deepToString(array);      // returns "[1, 2]"
+     * N.deepToString("string");   // returns "string"
      * }</pre>
      *
      * @param obj the object to be represented as a string
@@ -6626,7 +7232,7 @@ sealed class CommonUtil permits N {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String[] array = {"a", "b"};
-     * deepToString(array);   // returns "[a, b]"
+     * N.deepToString(array);   // returns "[a, b]"
      * }</pre>
      *
      * @param a the object array to be represented as a string, may be {@code null}
@@ -6647,6 +7253,11 @@ sealed class CommonUtil permits N {
     /**
      * Returns a string representation of the "deep contents" of the specified range of elements in an Object array.
      * This method recursively converts the object and its nested objects to a string.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.deepToString(new Object[] {new int[] {1, 2}, "a", "b"}, 0, 2); // returns "[[1, 2], a]"
+     * }</pre>
      *
      * @param a the Object array to be represented as a string
      * @param fromIndex the starting index (inclusive)
@@ -6783,6 +7394,12 @@ sealed class CommonUtil permits N {
     /**
      * Returns a string representation of the "deep contents" of the specified array. If the object is {@code null}, the specified default value is returned.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.deepToString(new Object[] {new int[] {1, 2}, "a"}); // returns "[[1, 2], a]"
+     * N.deepToString(null);                                 // returns "null"
+     * }</pre>
+     *
      * @param a the Object array to be represented as a string
      * @param defaultIfNull the default value to be returned if the object is {@code null}
      * @return the String representation of the object, or the default value if the object is {@code null}
@@ -6801,9 +7418,9 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * len(null);    // returns 0
-     * len("");      // returns 0
-     * len("abc");   // returns 3
+     * N.len(null);    // returns 0
+     * N.len("");      // returns 0
+     * N.len("abc");   // returns 3
      * }</pre>
      *
      * @param s the CharSequence to check
@@ -6818,9 +7435,9 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * len((boolean[]) null);              // returns 0
-     * len(new boolean[0]);                // returns 0
-     * len(new boolean[] {true, false});   // returns 2
+     * N.len((boolean[]) null);              // returns 0
+     * N.len(new boolean[0]);                // returns 0
+     * N.len(new boolean[] {true, false});   // returns 2
      * }</pre>
      *
      * @param a the array to check
@@ -6835,9 +7452,9 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * len((char[]) null);           // returns 0
-     * len(new char[0]);             // returns 0
-     * len(new char[] {'a', 'b'});   // returns 2
+     * N.len((char[]) null);           // returns 0
+     * N.len(new char[0]);             // returns 0
+     * N.len(new char[] {'a', 'b'});   // returns 2
      * }</pre>
      *
      * @param a the array to check
@@ -6852,9 +7469,9 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * len((byte[]) null);          // returns 0
-     * len(new byte[0]);            // returns 0
-     * len(new byte[] {1, 2, 3});   // returns 3
+     * N.len((byte[]) null);          // returns 0
+     * N.len(new byte[0]);            // returns 0
+     * N.len(new byte[] {1, 2, 3});   // returns 3
      * }</pre>
      *
      * @param a the array to check
@@ -6869,9 +7486,9 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * len((short[]) null);          // returns 0
-     * len(new short[0]);            // returns 0
-     * len(new short[] {1, 2, 3});   // returns 3
+     * N.len((short[]) null);          // returns 0
+     * N.len(new short[0]);            // returns 0
+     * N.len(new short[] {1, 2, 3});   // returns 3
      * }</pre>
      *
      * @param a the array to check
@@ -6886,9 +7503,9 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * len((int[]) null);          // returns 0
-     * len(new int[0]);            // returns 0
-     * len(new int[] {1, 2, 3});   // returns 3
+     * N.len((int[]) null);          // returns 0
+     * N.len(new int[0]);            // returns 0
+     * N.len(new int[] {1, 2, 3});   // returns 3
      * }</pre>
      *
      * @param a the array to check
@@ -6903,9 +7520,9 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * len((long[]) null);             // returns 0
-     * len(new long[0]);               // returns 0
-     * len(new long[] {1L, 2L, 3L});   // returns 3
+     * N.len((long[]) null);             // returns 0
+     * N.len(new long[0]);               // returns 0
+     * N.len(new long[] {1L, 2L, 3L});   // returns 3
      * }</pre>
      *
      * @param a the array to check
@@ -6920,9 +7537,9 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * len((float[]) null);             // returns 0
-     * len(new float[0]);               // returns 0
-     * len(new float[] {1.0f, 2.0f});   // returns 2
+     * N.len((float[]) null);             // returns 0
+     * N.len(new float[0]);               // returns 0
+     * N.len(new float[] {1.0f, 2.0f});   // returns 2
      * }</pre>
      *
      * @param a the array to check
@@ -6937,9 +7554,9 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * len((double[]) null);           // returns 0
-     * len(new double[0]);             // returns 0
-     * len(new double[] {1.0, 2.0});   // returns 2
+     * N.len((double[]) null);           // returns 0
+     * N.len(new double[0]);             // returns 0
+     * N.len(new double[] {1.0, 2.0});   // returns 2
      * }</pre>
      *
      * @param a the array to check
@@ -6954,9 +7571,9 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * len((Object[]) null);   // returns 0
-     * len(new String[0]);     // returns 0
-     * len(new String[3]);     // returns 3
+     * N.len((Object[]) null);   // returns 0
+     * N.len(new String[0]);     // returns 0
+     * N.len(new String[3]);     // returns 3
      * }</pre>
      *
      * @param a the array to check
@@ -6971,9 +7588,9 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * size(null);                      // returns 0
-     * size(Collections.emptyList());   // returns 0
-     * size(Arrays.asList("a", "b"));   // returns 2
+     * N.size(null);                      // returns 0
+     * N.size(Collections.emptyList());   // returns 0
+     * N.size(Arrays.asList("a", "b"));   // returns 2
      * }</pre>
      *
      * @param c the collection to check, may be {@code null}
@@ -6988,9 +7605,9 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * size(null);                                 // returns 0
-     * size(Collections.emptyMap());               // returns 0
-     * size(Collections.singletonMap("k", "v"));   // returns 1
+     * N.size(null);                                 // returns 0
+     * N.size(Collections.emptyMap());               // returns 0
+     * N.size(Collections.singletonMap("k", "v"));   // returns 1
      * }</pre>
      *
      * @param m the map to check, may be {@code null}
@@ -7005,8 +7622,8 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * size((PrimitiveList) null);   // returns 0
-     * size(IntList.of(1, 2, 3));    // returns 3
+     * N.size((PrimitiveList) null);   // returns 0
+     * N.size(IntList.of(1, 2, 3));    // returns 3
      * }</pre>
      *
      * @param c the {@code PrimitiveList} to check, may be {@code null}
@@ -7026,11 +7643,11 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * isEmpty(null);                  // returns true
-     * isEmpty("");                    // returns true
-     * isEmpty("   ");                 // returns false (contains spaces)
-     * isEmpty("abc");                 // returns false
-     * isEmpty(new StringBuilder());   // returns true
+     * N.isEmpty(null);                  // returns true
+     * N.isEmpty("");                    // returns true
+     * N.isEmpty("   ");                 // returns false (contains spaces)
+     * N.isEmpty("abc");                 // returns false
+     * N.isEmpty(new StringBuilder());   // returns true
      * }</pre>
      *
      * @param cs the CharSequence to be checked, may be {@code null}
@@ -7049,9 +7666,9 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * isEmpty((boolean[]) null);   // returns true
-     * isEmpty(new boolean[0]);     // returns true
-     * isEmpty(new boolean[1]);     // returns false
+     * N.isEmpty((boolean[]) null);   // returns true
+     * N.isEmpty(new boolean[0]);     // returns true
+     * N.isEmpty(new boolean[1]);     // returns false
      * }</pre>
      *
      * @param a the boolean array to be checked, may be {@code null}
@@ -7068,9 +7685,9 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * isEmpty((char[]) null);   // returns true
-     * isEmpty(new char[0]);     // returns true
-     * isEmpty(new char[1]);     // returns false
+     * N.isEmpty((char[]) null);   // returns true
+     * N.isEmpty(new char[0]);     // returns true
+     * N.isEmpty(new char[1]);     // returns false
      * }</pre>
      *
      * @param a the char array to be checked, may be {@code null}
@@ -7087,9 +7704,9 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * isEmpty((byte[]) null);   // returns true
-     * isEmpty(new byte[0]);     // returns true
-     * isEmpty(new byte[1]);     // returns false
+     * N.isEmpty((byte[]) null);   // returns true
+     * N.isEmpty(new byte[0]);     // returns true
+     * N.isEmpty(new byte[1]);     // returns false
      * }</pre>
      *
      * @param a the byte array to be checked, may be {@code null}
@@ -7106,9 +7723,9 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * isEmpty((short[]) null);   // returns true
-     * isEmpty(new short[0]);     // returns true
-     * isEmpty(new short[1]);     // returns false
+     * N.isEmpty((short[]) null);   // returns true
+     * N.isEmpty(new short[0]);     // returns true
+     * N.isEmpty(new short[1]);     // returns false
      * }</pre>
      *
      * @param a the short array to be checked, may be {@code null}
@@ -7125,9 +7742,9 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * isEmpty((int[]) null);   // returns true
-     * isEmpty(new int[0]);     // returns true
-     * isEmpty(new int[1]);     // returns false
+     * N.isEmpty((int[]) null);   // returns true
+     * N.isEmpty(new int[0]);     // returns true
+     * N.isEmpty(new int[1]);     // returns false
      * }</pre>
      *
      * @param a the int array to be checked, may be {@code null}
@@ -7144,9 +7761,9 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * isEmpty((long[]) null);   // returns true
-     * isEmpty(new long[0]);     // returns true
-     * isEmpty(new long[1]);     // returns false
+     * N.isEmpty((long[]) null);   // returns true
+     * N.isEmpty(new long[0]);     // returns true
+     * N.isEmpty(new long[1]);     // returns false
      * }</pre>
      *
      * @param a the long array to be checked, may be {@code null}
@@ -7163,9 +7780,9 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * isEmpty((float[]) null);   // returns true
-     * isEmpty(new float[0]);     // returns true
-     * isEmpty(new float[1]);     // returns false
+     * N.isEmpty((float[]) null);   // returns true
+     * N.isEmpty(new float[0]);     // returns true
+     * N.isEmpty(new float[1]);     // returns false
      * }</pre>
      *
      * @param a the float array to be checked, may be {@code null}
@@ -7182,9 +7799,9 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * isEmpty((double[]) null);   // returns true
-     * isEmpty(new double[0]);     // returns true
-     * isEmpty(new double[1]);     // returns false
+     * N.isEmpty((double[]) null);   // returns true
+     * N.isEmpty(new double[0]);     // returns true
+     * N.isEmpty(new double[1]);     // returns false
      * }</pre>
      *
      * @param a the double array to be checked, may be {@code null}
@@ -7201,9 +7818,9 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * isEmpty((Object[]) null);   // returns true
-     * isEmpty(new Object[0]);     // returns true
-     * isEmpty(new Object[1]);     // returns false
+     * N.isEmpty((Object[]) null);   // returns true
+     * N.isEmpty(new Object[0]);     // returns true
+     * N.isEmpty(new Object[1]);     // returns false
      * }</pre>
      *
      * @param a the object array to be checked, may be {@code null}
@@ -7220,9 +7837,9 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * isEmpty((Collection) null);    // returns true
-     * isEmpty(new ArrayList<>());    // returns true
-     * isEmpty(Arrays.asList("a"));   // returns false
+     * N.isEmpty((Collection) null);    // returns true
+     * N.isEmpty(new ArrayList<>());    // returns true
+     * N.isEmpty(Arrays.asList("a"));   // returns false
      * }</pre>
      *
      * @param c the Collection to be checked, may be {@code null}
@@ -7241,9 +7858,9 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * isEmpty((Iterable) null);      // returns true
-     * isEmpty(Arrays.asList());      // returns true
-     * isEmpty(Arrays.asList("a"));   // returns false
+     * N.isEmpty((Iterable) null);      // returns true
+     * N.isEmpty(Arrays.asList());      // returns true
+     * N.isEmpty(Arrays.asList("a"));   // returns false
      * }</pre>
      *
      * @param c the Iterable to be checked, may be {@code null}
@@ -7287,9 +7904,9 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * isEmpty((Iterator) null);                 // returns true
-     * isEmpty(Collections.emptyIterator());     // returns true
-     * isEmpty(Arrays.asList("a").iterator());   // returns false
+     * N.isEmpty((Iterator) null);                 // returns true
+     * N.isEmpty(Collections.emptyIterator());     // returns true
+     * N.isEmpty(Arrays.asList("a").iterator());   // returns false
      * }</pre>
      *
      * @param iter the Iterator to be checked, may be {@code null}
@@ -7307,9 +7924,9 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * isEmpty((Map) null);                           // returns true
-     * isEmpty(Collections.emptyMap());               // returns true
-     * isEmpty(Collections.singletonMap("k", "v"));   // returns false
+     * N.isEmpty((Map) null);                           // returns true
+     * N.isEmpty(Collections.emptyMap());               // returns true
+     * N.isEmpty(Collections.singletonMap("k", "v"));   // returns false
      * }</pre>
      *
      * @param m the Map to be checked, may be {@code null}
@@ -7326,9 +7943,9 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * isEmpty((PrimitiveList) null);   // returns true
-     * isEmpty(IntList.of());           // returns true
-     * isEmpty(IntList.of(1));          // returns false
+     * N.isEmpty((PrimitiveList) null);   // returns true
+     * N.isEmpty(IntList.of());           // returns true
+     * N.isEmpty(IntList.of(1));          // returns false
      * }</pre>
      *
      * @param list the PrimitiveList to be checked, may be {@code null}
@@ -7346,11 +7963,11 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * isEmpty((Multiset) null);   // returns true
+     * N.isEmpty((Multiset) null);   // returns true
      * Multiset<String> multiset = new Multiset<>();
-     * isEmpty(multiset);   // returns true
+     * N.isEmpty(multiset);   // returns true
      * multiset.add("a");
-     * isEmpty(multiset);   // returns false
+     * N.isEmpty(multiset);   // returns false
      * }</pre>
      *
      * @param s the Multiset to be checked, may be {@code null}
@@ -7367,11 +7984,11 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * isEmpty((Multimap) null);   // returns true
+     * N.isEmpty((Multimap) null);   // returns true
      * Multimap<String, String> multimap = new ListMultimap<>();
-     * isEmpty(multimap);   // returns true
+     * N.isEmpty(multimap);   // returns true
      * multimap.put("k", "v");
-     * isEmpty(multimap);   // returns false
+     * N.isEmpty(multimap);   // returns false
      * }</pre>
      *
      * @param m the Multimap to be checked, may be {@code null}
@@ -7388,9 +8005,8 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * isEmpty((Dataset) null);   // returns true
-     * // Dataset ds = ...
-     * // isEmpty(ds);
+     * N.isEmpty(N.newDataset("id"));    // returns true
+     * N.isEmpty((Dataset) null);        // returns true
      * }</pre>
      *
      * @param ds the Dataset to be checked, may be {@code null}
@@ -7405,10 +8021,10 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * isBlank(null);    // returns true
-     * isBlank("");      // returns true
-     * isBlank("   ");   // returns true
-     * isBlank("abc");   // returns false
+     * N.isBlank(null);    // returns true
+     * N.isBlank("");      // returns true
+     * N.isBlank("   ");   // returns true
+     * N.isBlank("abc");   // returns false
      * }</pre>
      *
      * @param cs the CharSequence to check
@@ -7434,9 +8050,9 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * isTrue(Boolean.TRUE);    // returns true
-     * isTrue(Boolean.FALSE);   // returns false
-     * isTrue(null);            // returns false
+     * N.isTrue(Boolean.TRUE);    // returns true
+     * N.isTrue(Boolean.FALSE);   // returns false
+     * N.isTrue(null);            // returns false
      * }</pre>
      *
      * @param bool the Boolean to check
@@ -7455,9 +8071,9 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * isNotTrue(Boolean.FALSE);   // returns true
-     * isNotTrue(null);            // returns true
-     * isNotTrue(Boolean.TRUE);    // returns false
+     * N.isNotTrue(Boolean.FALSE);   // returns true
+     * N.isNotTrue(null);            // returns true
+     * N.isNotTrue(Boolean.TRUE);    // returns false
      * }</pre>
      *
      * @param bool the Boolean to check
@@ -7477,9 +8093,9 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * isFalse(Boolean.FALSE);   // returns true
-     * isFalse(Boolean.TRUE);    // returns false
-     * isFalse(null);            // returns false
+     * N.isFalse(Boolean.FALSE);   // returns true
+     * N.isFalse(Boolean.TRUE);    // returns false
+     * N.isFalse(null);            // returns false
      * }</pre>
      *
      * @param bool the Boolean to check
@@ -7498,9 +8114,9 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * isNotFalse(Boolean.TRUE);    // returns true
-     * isNotFalse(null);            // returns true
-     * isNotFalse(Boolean.FALSE);   // returns false
+     * N.isNotFalse(Boolean.TRUE);    // returns true
+     * N.isNotFalse(null);            // returns true
+     * N.isNotFalse(Boolean.FALSE);   // returns false
      * }</pre>
      *
      * @param bool the Boolean to check
@@ -7519,9 +8135,9 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * notEmpty("abc");   // returns true
-     * notEmpty("");      // returns false
-     * notEmpty(null);    // returns false
+     * N.notEmpty("abc");   // returns true
+     * N.notEmpty("");      // returns false
+     * N.notEmpty(null);    // returns false
      * }</pre>
      *
      * @param cs the CharSequence to check
@@ -7537,9 +8153,9 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * notEmpty(new boolean[] {true});   // returns true
-     * notEmpty(new boolean[0]);         // returns false
-     * notEmpty(null);                   // returns false
+     * N.notEmpty(new boolean[] {true});   // returns true
+     * N.notEmpty(new boolean[0]);         // returns false
+     * N.notEmpty(null);                   // returns false
      * }</pre>
      *
      * @param a the boolean array to check
@@ -7554,9 +8170,9 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * notEmpty(new char[] {'a'});   // returns true
-     * notEmpty(new char[0]);        // returns false
-     * notEmpty(null);               // returns false
+     * N.notEmpty(new char[] {'a'});   // returns true
+     * N.notEmpty(new char[0]);        // returns false
+     * N.notEmpty(null);               // returns false
      * }</pre>
      *
      * @param a the char array to check
@@ -7571,9 +8187,9 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * notEmpty(new byte[] {1});   // returns true
-     * notEmpty(new byte[0]);      // returns false
-     * notEmpty(null);             // returns false
+     * N.notEmpty(new byte[] {1});   // returns true
+     * N.notEmpty(new byte[0]);      // returns false
+     * N.notEmpty(null);             // returns false
      * }</pre>
      *
      * @param a the byte array to check
@@ -7588,9 +8204,9 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * notEmpty(new short[] {1});   // returns true
-     * notEmpty(new short[0]);      // returns false
-     * notEmpty(null);              // returns false
+     * N.notEmpty(new short[] {1});   // returns true
+     * N.notEmpty(new short[0]);      // returns false
+     * N.notEmpty(null);              // returns false
      * }</pre>
      *
      * @param a the short array to check
@@ -7605,9 +8221,9 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * notEmpty(new int[] {1});   // returns true
-     * notEmpty(new int[0]);      // returns false
-     * notEmpty(null);            // returns false
+     * N.notEmpty(new int[] {1});   // returns true
+     * N.notEmpty(new int[0]);      // returns false
+     * N.notEmpty(null);            // returns false
      * }</pre>
      *
      * @param a the int array to check
@@ -7622,9 +8238,9 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * notEmpty(new long[] {1L});   // returns true
-     * notEmpty(new long[0]);       // returns false
-     * notEmpty(null);              // returns false
+     * N.notEmpty(new long[] {1L});   // returns true
+     * N.notEmpty(new long[0]);       // returns false
+     * N.notEmpty(null);              // returns false
      * }</pre>
      *
      * @param a the long array to check
@@ -7639,9 +8255,9 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * notEmpty(new float[] {1.0f});   // returns true
-     * notEmpty(new float[0]);         // returns false
-     * notEmpty(null);                 // returns false
+     * N.notEmpty(new float[] {1.0f});   // returns true
+     * N.notEmpty(new float[0]);         // returns false
+     * N.notEmpty(null);                 // returns false
      * }</pre>
      *
      * @param a the float array to check
@@ -7656,9 +8272,9 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * notEmpty(new double[] {1.0});   // returns true
-     * notEmpty(new double[0]);        // returns false
-     * notEmpty(null);                 // returns false
+     * N.notEmpty(new double[] {1.0});   // returns true
+     * N.notEmpty(new double[0]);        // returns false
+     * N.notEmpty(null);                 // returns false
      * }</pre>
      *
      * @param a the double array to check
@@ -7673,9 +8289,9 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * notEmpty(new Object[] {1});   // returns true
-     * notEmpty(new Object[0]);      // returns false
-     * notEmpty(null);               // returns false
+     * N.notEmpty(new Object[] {1});   // returns true
+     * N.notEmpty(new Object[0]);      // returns false
+     * N.notEmpty(null);               // returns false
      * }</pre>
      *
      * @param a the object array to check
@@ -7690,9 +8306,9 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * notEmpty(Arrays.asList("a"));   // returns true
-     * notEmpty(new ArrayList<>());    // returns false
-     * notEmpty(null);                 // returns false
+     * N.notEmpty(Arrays.asList("a"));   // returns true
+     * N.notEmpty(new ArrayList<>());    // returns false
+     * N.notEmpty(null);                 // returns false
      * }</pre>
      *
      * @param c the Collection to check
@@ -7707,9 +8323,9 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * notEmpty(Arrays.asList("a"));   // returns true
-     * notEmpty(Arrays.asList());      // returns false
-     * notEmpty(null);                 // returns false
+     * N.notEmpty(Arrays.asList("a"));   // returns true
+     * N.notEmpty(Arrays.asList());      // returns false
+     * N.notEmpty(null);                 // returns false
      * }</pre>
      *
      * @param iter the Iterable to check
@@ -7733,9 +8349,9 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * notEmpty(Arrays.asList("a").iterator());   // returns true
-     * notEmpty(Collections.emptyIterator());     // returns false
-     * notEmpty(null);                            // returns false
+     * N.notEmpty(Arrays.asList("a").iterator());   // returns true
+     * N.notEmpty(Collections.emptyIterator());     // returns false
+     * N.notEmpty(null);                            // returns false
      * }</pre>
      *
      * @param iter the Iterator to check
@@ -7751,9 +8367,9 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * notEmpty(Collections.singletonMap("k", "v"));   // returns true
-     * notEmpty(Collections.emptyMap());               // returns false
-     * notEmpty(null);                                 // returns false
+     * N.notEmpty(Collections.singletonMap("k", "v"));   // returns true
+     * N.notEmpty(Collections.emptyMap());               // returns false
+     * N.notEmpty(null);                                 // returns false
      * }</pre>
      *
      * @param m the Map to check
@@ -7768,9 +8384,9 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * notEmpty(IntList.of(1));          // returns true
-     * notEmpty(IntList.of());           // returns false
-     * notEmpty((PrimitiveList) null);   // returns false
+     * N.notEmpty(IntList.of(1));          // returns true
+     * N.notEmpty(IntList.of());           // returns false
+     * N.notEmpty((PrimitiveList) null);   // returns false
      * }</pre>
      *
      * @param list the PrimitiveList to check
@@ -7788,9 +8404,9 @@ sealed class CommonUtil permits N {
      * <pre>{@code
      * Multiset<String> multiset = new Multiset<>();
      * multiset.add("a");
-     * notEmpty(multiset);           // returns true
-     * notEmpty(new Multiset<>());   // returns false
-     * notEmpty((Multiset) null);    // returns false
+     * N.notEmpty(multiset);           // returns true
+     * N.notEmpty(new Multiset<>());   // returns false
+     * N.notEmpty((Multiset) null);    // returns false
      * }</pre>
      *
      * @param s the Multiset to check
@@ -7807,9 +8423,9 @@ sealed class CommonUtil permits N {
      * <pre>{@code
      * Multimap<String, String> multimap = new ListMultimap<>();
      * multimap.put("k", "v");
-     * notEmpty(multimap);               // returns true
-     * notEmpty(new ListMultimap<>());   // returns false
-     * notEmpty((Multimap) null);        // returns false
+     * N.notEmpty(multimap);               // returns true
+     * N.notEmpty(new ListMultimap<>());   // returns false
+     * N.notEmpty((Multimap) null);        // returns false
      * }</pre>
      *
      * @param m the Multimap to check
@@ -7824,9 +8440,8 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * // Dataset ds = ...
-     * // notEmpty(ds);
-     * notEmpty((Dataset) null);   // returns false
+     * N.notEmpty(N.newDataset("id"));   // returns false
+     * N.notEmpty((Dataset) null);       // returns false
      * }</pre>
      *
      * @param dataset the Dataset to check
@@ -7841,10 +8456,10 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * notBlank("abc");   // returns true
-     * notBlank("");      // returns false
-     * notBlank("   ");   // returns false
-     * notBlank(null);    // returns false
+     * N.notBlank("abc");   // returns true
+     * N.notBlank("");      // returns false
+     * N.notBlank("   ");   // returns false
+     * N.notBlank(null);    // returns false
      * }</pre>
      *
      * @param cs the CharSequence to check
@@ -7870,6 +8485,12 @@ sealed class CommonUtil permits N {
     /**
      * Checks if any of the specified objects is {@code null}.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.anyNull("a", "b");       // returns false
+     * N.anyNull("a", null, "c"); // returns true
+     * }</pre>
+     *
      * @param a the first object to check
      * @param b the second object to check
      * @return {@code true} if any of the objects is {@code null}, otherwise {@code false}
@@ -7880,6 +8501,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Checks if any of the specified objects is {@code null}.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.anyNull("a", "b");       // returns false
+     * N.anyNull("a", null, "c"); // returns true
+     * }</pre>
      *
      * @param a the first object to check
      * @param b the second object to check
@@ -7895,9 +8522,9 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * anyNull("a", null);         // returns true
-     * anyNull("a", "b");          // returns false
-     * anyNull((Object[]) null);   // returns false (null/empty array)
+     * N.anyNull("a", null);         // returns true
+     * N.anyNull("a", "b");          // returns false
+     * N.anyNull((Object[]) null);   // returns false (null/empty array)
      * }</pre>
      *
      * @param a the array of objects to check
@@ -7922,9 +8549,9 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * anyNull(Arrays.asList("a", null));   // returns true
-     * anyNull(Arrays.asList("a", "b"));    // returns false
-     * anyNull(Collections.emptyList());    // returns false
+     * N.anyNull(Arrays.asList("a", null));   // returns true
+     * N.anyNull(Arrays.asList("a", "b"));    // returns false
+     * N.anyNull(Collections.emptyList());    // returns false
      * }</pre>
      *
      * @param c the collection of objects to check
@@ -7947,6 +8574,12 @@ sealed class CommonUtil permits N {
     /**
      * Checks if any of the specified CharSequences is empty ("") or {@code null}.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.anyEmpty("a", "b");     // returns false
+     * N.anyEmpty("a", "", "c"); // returns true
+     * }</pre>
+     *
      * @param a the first CharSequence to check
      * @param b the second CharSequence to check
      * @return {@code true} if any of the CharSequences is empty, otherwise {@code false}
@@ -7958,6 +8591,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Checks if any of the specified CharSequences is empty ("") or {@code null}.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.anyEmpty("a", "b");     // returns false
+     * N.anyEmpty("a", "", "c"); // returns true
+     * }</pre>
      *
      * @param a the first CharSequence to check
      * @param b the second CharSequence to check
@@ -7974,16 +8613,8 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * anyEmpty((String) null)       = true
-     * anyEmpty((String[]) null)     = false
-     * anyEmpty(null, "foo")         = true
-     * anyEmpty("", "bar")           = true
-     * anyEmpty("bob", "")           = true
-     * anyEmpty("  bob  ", null)     = true
-     * anyEmpty(" ", "bar")          = false
-     * anyEmpty("foo", "bar")        = false
-     * anyEmpty(new String[] {})     = false
-     * anyEmpty(new String[] {""})   = true
+     * N.anyEmpty("a", "b");     // returns false
+     * N.anyEmpty("a", "", "c"); // returns true
      * }</pre>
      *
      * @param css the CharSequences to check, may be {@code null} or empty
@@ -7999,9 +8630,9 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * anyEmpty(Arrays.asList("a", ""));    // returns true
-     * anyEmpty(Arrays.asList("a", "b"));   // returns false
-     * anyEmpty(Collections.emptyList());   // returns false
+     * N.anyEmpty(Arrays.asList("a", ""));    // returns true
+     * N.anyEmpty(Arrays.asList("a", "b"));   // returns false
+     * N.anyEmpty(Collections.emptyList());   // returns false
      * }</pre>
      *
      * @param css the collection of CharSequence objects to check
@@ -8017,8 +8648,8 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * anyEmpty(new Object[0], new Object[]{1});     // returns true
-     * anyEmpty(new Object[]{1}, new Object[]{2});   // returns false
+     * N.anyEmpty(new Object[0], new Object[]{1});     // returns true
+     * N.anyEmpty(new Object[]{1}, new Object[]{2});   // returns false
      * }</pre>
      *
      * @param a the first array to check
@@ -8034,8 +8665,8 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * anyEmpty(new Object[0], new Object[]{1}, new Object[]{2});     // returns true
-     * anyEmpty(new Object[]{1}, new Object[]{2}, new Object[]{3});   // returns false
+     * N.anyEmpty(new Object[0], new Object[]{1}, new Object[]{2});     // returns true
+     * N.anyEmpty(new Object[]{1}, new Object[]{2}, new Object[]{3});   // returns false
      * }</pre>
      *
      * @param a the first array to check
@@ -8052,8 +8683,8 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * anyEmpty(new ArrayList<>(), Arrays.asList("a"));    // returns true
-     * anyEmpty(Arrays.asList("a"), Arrays.asList("b"));   // returns false
+     * N.anyEmpty(new ArrayList<>(), Arrays.asList("a"));    // returns true
+     * N.anyEmpty(Arrays.asList("a"), Arrays.asList("b"));   // returns false
      * }</pre>
      *
      * @param a the first collection to check
@@ -8069,8 +8700,8 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * anyEmpty(new ArrayList<>(), Arrays.asList("a"), Arrays.asList("b"));    // returns true
-     * anyEmpty(Arrays.asList("a"), Arrays.asList("b"), Arrays.asList("c"));   // returns false
+     * N.anyEmpty(new ArrayList<>(), Arrays.asList("a"), Arrays.asList("b"));    // returns true
+     * N.anyEmpty(Arrays.asList("a"), Arrays.asList("b"), Arrays.asList("c"));   // returns false
      * }</pre>
      *
      * @param a the first collection to check
@@ -8087,8 +8718,8 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * anyEmpty(new HashMap<>(), Collections.singletonMap("k", "v"));                          // returns true
-     * anyEmpty(Collections.singletonMap("k1", "v1"), Collections.singletonMap("k2", "v2"));   // returns false
+     * N.anyEmpty(new HashMap<>(), Collections.singletonMap("k", "v"));                          // returns true
+     * N.anyEmpty(Collections.singletonMap("k1", "v1"), Collections.singletonMap("k2", "v2"));   // returns false
      * }</pre>
      *
      * @param a the first map to check
@@ -8104,8 +8735,8 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * anyEmpty(new HashMap<>(), Collections.singletonMap("k", "v"), Collections.singletonMap("k2", "v2"));                          // returns true
-     * anyEmpty(Collections.singletonMap("k1", "v1"), Collections.singletonMap("k2", "v2"), Collections.singletonMap("k3", "v3"));   // returns false
+     * N.anyEmpty(new HashMap<>(), Collections.singletonMap("k", "v"), Collections.singletonMap("k2", "v2"));                          // returns true
+     * N.anyEmpty(Collections.singletonMap("k1", "v1"), Collections.singletonMap("k2", "v2"), Collections.singletonMap("k3", "v3"));   // returns false
      * }</pre>
      *
      * @param a the first map to check
@@ -8122,8 +8753,8 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * anyBlank(" ", "abc");     // returns true
-     * anyBlank("abc", "def");   // returns false
+     * N.anyBlank(" ", "abc");     // returns true
+     * N.anyBlank("abc", "def");   // returns false
      * }</pre>
      *
      * @param a the first CharSequence to check
@@ -8140,8 +8771,8 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * anyBlank(" ", "abc", "def");     // returns true
-     * anyBlank("abc", "def", "ghi");   // returns false
+     * N.anyBlank(" ", "abc", "def");     // returns true
+     * N.anyBlank("abc", "def", "ghi");   // returns false
      * }</pre>
      *
      * @param a the first CharSequence to check
@@ -8161,17 +8792,17 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * anyBlank((String) null)       = true
-     * anyBlank((String[]) null)     = false
-     * anyBlank(null, "foo")         = true
-     * anyBlank(null, null)          = true
-     * anyBlank("", "bar")           = true
-     * anyBlank("bob", "")           = true
-     * anyBlank("  bob  ", null)     = true
-     * anyBlank(" ", "bar")          = true
-     * anyBlank(new String[] {})     = false
-     * anyBlank(new String[] {""})   = true
-     * anyBlank("foo", "bar")        = false
+     * N.anyBlank((String) null)       = true
+     * N.anyBlank((String[]) null)     = false
+     * N.anyBlank(null, "foo")         = true
+     * N.anyBlank(null, null)          = true
+     * N.anyBlank("", "bar")           = true
+     * N.anyBlank("bob", "")           = true
+     * N.anyBlank("  bob  ", null)     = true
+     * N.anyBlank(" ", "bar")          = true
+     * N.anyBlank(new String[] {})     = false
+     * N.anyBlank(new String[] {""})   = true
+     * N.anyBlank("foo", "bar")        = false
      * }</pre>
      *
      * @param css the CharSequences to check, may be {@code null} or empty
@@ -8197,9 +8828,9 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * anyBlank(Arrays.asList(" ", "abc"));     // returns true
-     * anyBlank(Arrays.asList("abc", "def"));   // returns false
-     * anyBlank(Collections.emptyList());       // returns false
+     * N.anyBlank(Arrays.asList(" ", "abc"));     // returns true
+     * N.anyBlank(Arrays.asList("abc", "def"));   // returns false
+     * N.anyBlank(Collections.emptyList());       // returns false
      * }</pre>
      *
      * @param css the collection of CharSequences to check
@@ -8225,8 +8856,8 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * allNull(null, null);   // returns true
-     * allNull("a", null);    // returns false
+     * N.allNull(null, null);   // returns true
+     * N.allNull("a", null);    // returns false
      * }</pre>
      *
      * @param a the first object to check
@@ -8242,8 +8873,8 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * allNull(null, null, null);   // returns true
-     * allNull("a", null, null);    // returns false
+     * N.allNull(null, null, null);   // returns true
+     * N.allNull("a", null, null);    // returns false
      * }</pre>
      *
      * @param a the first object to check
@@ -8262,9 +8893,9 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * allNull(null, null);        // returns true
-     * allNull("a", null);         // returns false
-     * allNull((Object[]) null);   // returns true
+     * N.allNull(null, null);        // returns true
+     * N.allNull("a", null);         // returns false
+     * N.allNull((Object[]) null);   // returns true
      * }</pre>
      *
      * @param a the objects to check, may be {@code null}
@@ -8289,9 +8920,9 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * allNull(Arrays.asList(null, null));   // returns true
-     * allNull(Arrays.asList("a", null));    // returns false
-     * allNull(Collections.emptyList());     // returns true
+     * N.allNull(Arrays.asList(null, null));   // returns true
+     * N.allNull(Arrays.asList("a", null));    // returns false
+     * N.allNull(Collections.emptyList());     // returns true
      * }</pre>
      *
      * @param c the collection of objects to check
@@ -8316,8 +8947,8 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * allEmpty("", null);   // returns true
-     * allEmpty("a", "");    // returns false
+     * N.allEmpty("", null);   // returns true
+     * N.allEmpty("a", "");    // returns false
      * }</pre>
      *
      * @param a the first CharSequence to check
@@ -8334,8 +8965,8 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * allEmpty("", null, "");    // returns true
-     * allEmpty("a", "", null);   // returns false
+     * N.allEmpty("", null, "");    // returns true
+     * N.allEmpty("a", "", null);   // returns false
      * }</pre>
      *
      * @param a the first CharSequence to check
@@ -8353,15 +8984,15 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * allEmpty(null)              = true
-     * allEmpty(null, "")          = true
-     * allEmpty(new String[] {})   = true
-     * allEmpty(null, "foo")       = false
-     * allEmpty("", "bar")         = false
-     * allEmpty("bob", "")         = false
-     * allEmpty("  bob  ", null)   = false
-     * allEmpty(" ", "bar")        = false
-     * allEmpty("foo", "bar")      = false
+     * N.allEmpty(null)              = true
+     * N.allEmpty(null, "")          = true
+     * N.allEmpty(new String[] {})   = true
+     * N.allEmpty(null, "foo")       = false
+     * N.allEmpty("", "bar")         = false
+     * N.allEmpty("bob", "")         = false
+     * N.allEmpty("  bob  ", null)   = false
+     * N.allEmpty(" ", "bar")        = false
+     * N.allEmpty("foo", "bar")      = false
      * }</pre>
      *
      * @param css the CharSequences to check, may be {@code null} or empty
@@ -8387,9 +9018,9 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * allEmpty(Arrays.asList("", null));   // returns true
-     * allEmpty(Arrays.asList("a", ""));    // returns false
-     * allEmpty(Collections.emptyList());   // returns true
+     * N.allEmpty(Arrays.asList("", null));   // returns true
+     * N.allEmpty(Arrays.asList("a", ""));    // returns false
+     * N.allEmpty(Collections.emptyList());   // returns true
      * }</pre>
      *
      * @param css the collection of CharSequences to check, may be {@code null} or empty
@@ -8414,8 +9045,8 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * allEmpty(new Object[0], new Object[0]);     // returns true
-     * allEmpty(new Object[]{1}, new Object[0]);   // returns false
+     * N.allEmpty(new Object[0], new Object[0]);     // returns true
+     * N.allEmpty(new Object[]{1}, new Object[0]);   // returns false
      * }</pre>
      *
      * @param a the first object array to check, which may be {@code null}
@@ -8431,8 +9062,8 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * allEmpty(new Object[0], new Object[0], new Object[0]);     // returns true
-     * allEmpty(new Object[]{1}, new Object[0], new Object[0]);   // returns false
+     * N.allEmpty(new Object[0], new Object[0], new Object[0]);     // returns true
+     * N.allEmpty(new Object[]{1}, new Object[0], new Object[0]);   // returns false
      * }</pre>
      *
      * @param a the first object array to check, which may be {@code null}
@@ -8449,8 +9080,8 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * allEmpty(Collections.emptyList(), new HashSet<>());      // returns true
-     * allEmpty(Arrays.asList("a"), Collections.emptyList());   // returns false
+     * N.allEmpty(Collections.emptyList(), new HashSet<>());      // returns true
+     * N.allEmpty(Arrays.asList("a"), Collections.emptyList());   // returns false
      * }</pre>
      *
      * @param a the first collection to check, which may be {@code null}
@@ -8466,8 +9097,8 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * allEmpty(Collections.emptyList(), new HashSet<>(), new ArrayList<>());            // returns true
-     * allEmpty(Arrays.asList("a"), Collections.emptyList(), Collections.emptyList());   // returns false
+     * N.allEmpty(Collections.emptyList(), new HashSet<>(), new ArrayList<>());            // returns true
+     * N.allEmpty(Arrays.asList("a"), Collections.emptyList(), Collections.emptyList());   // returns false
      * }</pre>
      *
      * @param a the first collection to check, which may be {@code null}
@@ -8484,8 +9115,8 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * allEmpty(Collections.emptyMap(), new HashMap<>());                      // returns true
-     * allEmpty(Collections.singletonMap("k", "v"), Collections.emptyMap());   // returns false
+     * N.allEmpty(Collections.emptyMap(), new HashMap<>());                      // returns true
+     * N.allEmpty(Collections.singletonMap("k", "v"), Collections.emptyMap());   // returns false
      * }</pre>
      *
      * @param a the first map to check, which may be {@code null}
@@ -8501,8 +9132,8 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * allEmpty(Collections.emptyMap(), new HashMap<>(), new TreeMap<>());                             // returns true
-     * allEmpty(Collections.singletonMap("k", "v"), Collections.emptyMap(), Collections.emptyMap());   // returns false
+     * N.allEmpty(Collections.emptyMap(), new HashMap<>(), new TreeMap<>());                             // returns true
+     * N.allEmpty(Collections.singletonMap("k", "v"), Collections.emptyMap(), Collections.emptyMap());   // returns false
      * }</pre>
      *
      * @param a the first map to check, which may be {@code null}
@@ -8519,8 +9150,8 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * allBlank("  ", null);   // returns true
-     * allBlank("a", "  ");    // returns false
+     * N.allBlank("  ", null);   // returns true
+     * N.allBlank("a", "  ");    // returns false
      * }</pre>
      *
      * @param a the first CharSequence to check
@@ -8537,8 +9168,8 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * allBlank("  ", null, "");    // returns true
-     * allBlank("a", "  ", null);   // returns false
+     * N.allBlank("  ", null, "");    // returns true
+     * N.allBlank("a", "  ", null);   // returns false
      * }</pre>
      *
      * @param a the first CharSequence to check
@@ -8558,15 +9189,15 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * allBlank(null)              = true
-     * allBlank(null, "foo")       = false
-     * allBlank(null, null)        = true
-     * allBlank("", "bar")         = false
-     * allBlank("bob", "")         = false
-     * allBlank("  bob  ", null)   = false
-     * allBlank(" ", "bar")        = false
-     * allBlank("foo", "bar")      = false
-     * allBlank(new String[] {})   = true
+     * N.allBlank(null)              = true
+     * N.allBlank(null, "foo")       = false
+     * N.allBlank(null, null)        = true
+     * N.allBlank("", "bar")         = false
+     * N.allBlank("bob", "")         = false
+     * N.allBlank("  bob  ", null)   = false
+     * N.allBlank(" ", "bar")        = false
+     * N.allBlank("foo", "bar")      = false
+     * N.allBlank(new String[] {})   = true
      * }</pre>
      *
      * @param css the CharSequences to check, may be {@code null} or empty
@@ -8592,9 +9223,9 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * allBlank(Arrays.asList("  ", null));   // returns true
-     * allBlank(Arrays.asList("a", "  "));    // returns false
-     * allBlank(Collections.emptyList());     // returns true
+     * N.allBlank(Arrays.asList("  ", null));   // returns true
+     * N.allBlank(Arrays.asList("a", "  "));    // returns false
+     * N.allBlank(Collections.emptyList());     // returns true
      * }</pre>
      *
      * @param css the collection of CharSequences to check
@@ -8624,8 +9255,8 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * nullToEmpty(null);    // returns ""
-     * nullToEmpty("abc");   // returns "abc"
+     * N.nullToEmpty(null);    // returns ""
+     * N.nullToEmpty("abc");   // returns "abc"
      * }</pre>
      *
      * @param str the string to check
@@ -8643,8 +9274,8 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * nullToEmpty((List) null);         // returns immutable empty list
-     * nullToEmpty(new ArrayList<>());   // returns the original list
+     * N.nullToEmpty((List) null);         // returns immutable empty list
+     * N.nullToEmpty(new ArrayList<>());   // returns the original list
      * }</pre>
      *
      * @param <T> the type of elements in the list
@@ -8661,8 +9292,8 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * nullToEmpty((Set) null);        // returns immutable empty set
-     * nullToEmpty(new HashSet<>());   // returns the original set
+     * N.nullToEmpty((Set) null);        // returns immutable empty set
+     * N.nullToEmpty(new HashSet<>());   // returns the original set
      * }</pre>
      *
      * @param <T> the type of elements in the set
@@ -8679,8 +9310,8 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * nullToEmpty((SortedSet) null);   // returns immutable empty sorted set
-     * nullToEmpty(new TreeSet<>());    // returns the original set
+     * N.nullToEmpty((SortedSet) null);   // returns immutable empty sorted set
+     * N.nullToEmpty(new TreeSet<>());    // returns the original set
      * }</pre>
      *
      * @param <T> the type of elements in the set
@@ -8697,8 +9328,8 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * nullToEmpty((NavigableSet) null);   // returns immutable empty navigable set
-     * nullToEmpty(new TreeSet<>());       // returns the original set
+     * N.nullToEmpty((NavigableSet) null);   // returns immutable empty navigable set
+     * N.nullToEmpty(new TreeSet<>());       // returns the original set
      * }</pre>
      *
      * @param <T> the type of elements in the set
@@ -8715,8 +9346,8 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * nullToEmpty((Collection) null);   // returns immutable empty list
-     * nullToEmpty(new ArrayList<>());   // returns the original collection
+     * N.nullToEmpty((Collection) null);   // returns immutable empty list
+     * N.nullToEmpty(new ArrayList<>());   // returns the original collection
      * }</pre>
      *
      * @param <T> the type of elements in the collection
@@ -8737,8 +9368,8 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * nullToEmpty((Map) null);        // returns immutable empty map
-     * nullToEmpty(new HashMap<>());   // returns the original map
+     * N.nullToEmpty((Map) null);        // returns immutable empty map
+     * N.nullToEmpty(new HashMap<>());   // returns the original map
      * }</pre>
      *
      * @param <K> the key type
@@ -8756,8 +9387,8 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * nullToEmpty((SortedMap) null);   // returns immutable empty sorted map
-     * nullToEmpty(new TreeMap<>());    // returns the original map
+     * N.nullToEmpty((SortedMap) null);   // returns immutable empty sorted map
+     * N.nullToEmpty(new TreeMap<>());    // returns the original map
      * }</pre>
      *
      * @param <K> the key type
@@ -8775,8 +9406,8 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * nullToEmpty((NavigableMap) null);   // returns immutable empty navigable map
-     * nullToEmpty(new TreeMap<>());       // returns the original map
+     * N.nullToEmpty((NavigableMap) null);   // returns immutable empty navigable map
+     * N.nullToEmpty(new TreeMap<>());       // returns the original map
      * }</pre>
      *
      * @param <K> the key type
@@ -8794,8 +9425,8 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * nullToEmpty((Iterator) null);                      // returns immutable empty iterator
-     * nullToEmpty(Arrays.asList("a", "b").iterator());   // returns the original iterator
+     * N.nullToEmpty((Iterator) null);                      // returns immutable empty iterator
+     * N.nullToEmpty(Arrays.asList("a", "b").iterator());   // returns the original iterator
      * }</pre>
      *
      * @param <T> the type of elements returned by this iterator
@@ -8812,8 +9443,8 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * nullToEmpty((ListIterator) null);                      // returns immutable empty list iterator
-     * nullToEmpty(Arrays.asList("a", "b").listIterator());   // returns the original list iterator
+     * N.nullToEmpty((ListIterator) null);                      // returns immutable empty list iterator
+     * N.nullToEmpty(Arrays.asList("a", "b").listIterator());   // returns the original list iterator
      * }</pre>
      *
      * @param <T> the type of elements returned by this list iterator
@@ -8830,8 +9461,8 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * nullToEmpty((boolean[]) null);       // returns empty boolean array
-     * nullToEmpty(new boolean[] {true});   // returns the original array
+     * N.nullToEmpty((boolean[]) null);       // returns empty boolean array
+     * N.nullToEmpty(new boolean[] {true});   // returns the original array
      * }</pre>
      *
      * @param a the boolean array to check
@@ -8846,8 +9477,8 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * nullToEmpty((char[]) null);      // returns empty char array
-     * nullToEmpty(new char[] {'a'});   // returns the original array
+     * N.nullToEmpty((char[]) null);      // returns empty char array
+     * N.nullToEmpty(new char[] {'a'});   // returns the original array
      * }</pre>
      *
      * @param a the char array to check
@@ -8862,8 +9493,8 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * nullToEmpty((byte[]) null);    // returns empty byte array
-     * nullToEmpty(new byte[] {1});   // returns the original array
+     * N.nullToEmpty((byte[]) null);    // returns empty byte array
+     * N.nullToEmpty(new byte[] {1});   // returns the original array
      * }</pre>
      *
      * @param a the byte array to check
@@ -8878,8 +9509,8 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * nullToEmpty((short[]) null);    // returns empty short array
-     * nullToEmpty(new short[] {1});   // returns the original array
+     * N.nullToEmpty((short[]) null);    // returns empty short array
+     * N.nullToEmpty(new short[] {1});   // returns the original array
      * }</pre>
      *
      * @param a the short array to check
@@ -8894,8 +9525,8 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * nullToEmpty((int[]) null);    // returns empty int array
-     * nullToEmpty(new int[] {1});   // returns the original array
+     * N.nullToEmpty((int[]) null);    // returns empty int array
+     * N.nullToEmpty(new int[] {1});   // returns the original array
      * }</pre>
      *
      * @param a the int array to check
@@ -8910,8 +9541,8 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * nullToEmpty((long[]) null);     // returns empty long array
-     * nullToEmpty(new long[] {1L});   // returns the original array
+     * N.nullToEmpty((long[]) null);     // returns empty long array
+     * N.nullToEmpty(new long[] {1L});   // returns the original array
      * }</pre>
      *
      * @param a the long array to check
@@ -8926,8 +9557,8 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * nullToEmpty((float[]) null);       // returns empty float array
-     * nullToEmpty(new float[] {1.0f});   // returns the original array
+     * N.nullToEmpty((float[]) null);       // returns empty float array
+     * N.nullToEmpty(new float[] {1.0f});   // returns the original array
      * }</pre>
      *
      * @param a the float array to check
@@ -8942,8 +9573,8 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * nullToEmpty((double[]) null);      // returns empty double array
-     * nullToEmpty(new double[] {1.0});   // returns the original array
+     * N.nullToEmpty((double[]) null);      // returns empty double array
+     * N.nullToEmpty(new double[] {1.0});   // returns the original array
      * }</pre>
      *
      * @param a the double array to check
@@ -8958,8 +9589,8 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * nullToEmpty((BigInteger[]) null);                 // returns empty BigInteger array
-     * nullToEmpty(new BigInteger[] {BigInteger.ONE});   // returns the original array
+     * N.nullToEmpty((BigInteger[]) null);                 // returns empty BigInteger array
+     * N.nullToEmpty(new BigInteger[] {BigInteger.ONE});   // returns the original array
      * }</pre>
      *
      * @param a the BigInteger array to check
@@ -8974,8 +9605,8 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * nullToEmpty((BigDecimal[]) null);                 // returns empty BigDecimal array
-     * nullToEmpty(new BigDecimal[] {BigDecimal.ONE});   // returns the original array
+     * N.nullToEmpty((BigDecimal[]) null);                 // returns empty BigDecimal array
+     * N.nullToEmpty(new BigDecimal[] {BigDecimal.ONE});   // returns the original array
      * }</pre>
      *
      * @param a the BigDecimal array to check
@@ -8990,8 +9621,8 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * nullToEmpty((String[]) null);      // returns empty String array
-     * nullToEmpty(new String[] {"a"});   // returns the original array
+     * N.nullToEmpty((String[]) null);      // returns empty String array
+     * N.nullToEmpty(new String[] {"a"});   // returns the original array
      * }</pre>
      *
      * @param a the String array to check
@@ -9009,8 +9640,8 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * nullToEmpty((java.util.Date[]) null);                       // returns empty Date array
-     * nullToEmpty(new java.util.Date[] {new java.util.Date()});   // returns the original array
+     * N.nullToEmpty((java.util.Date[]) null);                       // returns empty Date array
+     * N.nullToEmpty(new java.util.Date[] {new java.util.Date()});   // returns the original array
      * }</pre>
      *
      * @param a the Date array to check
@@ -9025,8 +9656,8 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * nullToEmpty((java.sql.Date[]) null);                       // returns empty Date array
-     * nullToEmpty(new java.sql.Date[] {new java.sql.Date(0)});   // returns the original array
+     * N.nullToEmpty((java.sql.Date[]) null);                       // returns empty Date array
+     * N.nullToEmpty(new java.sql.Date[] {new java.sql.Date(0)});   // returns the original array
      * }</pre>
      *
      * @param a the Date array to check
@@ -9041,8 +9672,8 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * nullToEmpty((java.sql.Time[]) null);                       // returns empty Time array
-     * nullToEmpty(new java.sql.Time[] {new java.sql.Time(0)});   // returns the original array
+     * N.nullToEmpty((java.sql.Time[]) null);                       // returns empty Time array
+     * N.nullToEmpty(new java.sql.Time[] {new java.sql.Time(0)});   // returns the original array
      * }</pre>
      *
      * @param a the Time array to check
@@ -9057,8 +9688,8 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * nullToEmpty((java.sql.Timestamp[]) null);                            // returns empty Timestamp array
-     * nullToEmpty(new java.sql.Timestamp[] {new java.sql.Timestamp(0)});   // returns the original array
+     * N.nullToEmpty((java.sql.Timestamp[]) null);                            // returns empty Timestamp array
+     * N.nullToEmpty(new java.sql.Timestamp[] {new java.sql.Timestamp(0)});   // returns the original array
      * }</pre>
      *
      * @param a the Timestamp array to check
@@ -9073,8 +9704,8 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * nullToEmpty((Calendar[]) null);                         // returns empty Calendar array
-     * nullToEmpty(new Calendar[] {Calendar.getInstance()});   // returns the original array
+     * N.nullToEmpty((Calendar[]) null);                         // returns empty Calendar array
+     * N.nullToEmpty(new Calendar[] {Calendar.getInstance()});   // returns the original array
      * }</pre>
      *
      * @param a the Calendar array to check
@@ -9089,8 +9720,8 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * nullToEmpty((Object[]) null);    // returns empty Object array
-     * nullToEmpty(new Object[] {1});   // returns the original array
+     * N.nullToEmpty((Object[]) null);    // returns empty Object array
+     * N.nullToEmpty(new Object[] {1});   // returns the original array
      * }</pre>
      *
      * @param a the Object array to check
@@ -9105,9 +9736,9 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * nullToEmpty(null, String[].class);   // returns empty String array
+     * N.nullToEmpty(null, String[].class);   // returns empty String array
      * String[] array = {"a"};
-     * nullToEmpty(array, String[].class);   // returns the original array
+     * N.nullToEmpty(array, String[].class);   // returns the original array
      * }</pre>
      *
      * @param <T> the component type of the array
@@ -9124,8 +9755,8 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * nullToEmpty((ImmutableCollection) null);   // returns immutable empty collection
-     * nullToEmpty(ImmutableList.of(1));          // returns the original collection
+     * N.nullToEmpty((ImmutableCollection) null);   // returns immutable empty collection
+     * N.nullToEmpty(ImmutableList.of(1));          // returns the original collection
      * }</pre>
      *
      * @param <T> the type of elements in the collection
@@ -9141,8 +9772,8 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * nullToEmpty((ImmutableList) null);   // returns immutable empty list
-     * nullToEmpty(ImmutableList.of(1));    // returns the original list
+     * N.nullToEmpty((ImmutableList) null);   // returns immutable empty list
+     * N.nullToEmpty(ImmutableList.of(1));    // returns the original list
      * }</pre>
      *
      * @param <T> the type of elements in the list
@@ -9158,8 +9789,8 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * nullToEmpty((ImmutableSet) null);   // returns immutable empty set
-     * nullToEmpty(ImmutableSet.of(1));    // returns the original set
+     * N.nullToEmpty((ImmutableSet) null);   // returns immutable empty set
+     * N.nullToEmpty(ImmutableSet.of(1));    // returns the original set
      * }</pre>
      *
      * @param <T> the type of elements in the set
@@ -9175,8 +9806,8 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * nullToEmpty((ImmutableSortedSet) null);   // returns immutable empty sorted set
-     * nullToEmpty(ImmutableSortedSet.of(1));    // returns the original set
+     * N.nullToEmpty((ImmutableSortedSet) null);   // returns immutable empty sorted set
+     * N.nullToEmpty(ImmutableSortedSet.of(1));    // returns the original set
      * }</pre>
      *
      * @param <T> the type of elements in the set
@@ -9192,8 +9823,8 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * nullToEmpty((ImmutableNavigableSet) null);   // returns immutable empty navigable set
-     * nullToEmpty(ImmutableNavigableSet.of(1));    // returns the original set
+     * N.nullToEmpty((ImmutableNavigableSet) null);   // returns immutable empty navigable set
+     * N.nullToEmpty(ImmutableNavigableSet.of(1));    // returns the original set
      * }</pre>
      *
      * @param <T> the type of elements in the set
@@ -9209,8 +9840,8 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * nullToEmpty((ImmutableMap) null);         // returns immutable empty map
-     * nullToEmpty(ImmutableMap.of("k", "v"));   // returns the original map
+     * N.nullToEmpty((ImmutableMap) null);         // returns immutable empty map
+     * N.nullToEmpty(ImmutableMap.of("k", "v"));   // returns the original map
      * }</pre>
      *
      * @param <K> the type of keys in the map
@@ -9227,8 +9858,8 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * nullToEmpty((ImmutableSortedMap) null);         // returns immutable empty sorted map
-     * nullToEmpty(ImmutableSortedMap.of("k", "v"));   // returns the original map
+     * N.nullToEmpty((ImmutableSortedMap) null);         // returns immutable empty sorted map
+     * N.nullToEmpty(ImmutableSortedMap.of("k", "v"));   // returns the original map
      * }</pre>
      *
      * @param <K> the type of keys in the map
@@ -9245,8 +9876,8 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * nullToEmpty((ImmutableNavigableMap) null);         // returns immutable empty navigable map
-     * nullToEmpty(ImmutableNavigableMap.of("k", "v"));   // returns the original map
+     * N.nullToEmpty((ImmutableNavigableMap) null);         // returns immutable empty navigable map
+     * N.nullToEmpty(ImmutableNavigableMap.of("k", "v"));   // returns the original map
      * }</pre>
      *
      * @param <K> the type of keys in the map
@@ -9263,8 +9894,8 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * nullToEmpty((ImmutableBiMap) null);         // returns immutable empty bi-map
-     * nullToEmpty(ImmutableBiMap.of("k", "v"));   // returns the original bi-map
+     * N.nullToEmpty((ImmutableBiMap) null);         // returns immutable empty bi-map
+     * N.nullToEmpty(ImmutableBiMap.of("k", "v"));   // returns the original bi-map
      * }</pre>
      *
      * @param <K> the type of keys in the bi-map
@@ -9281,8 +9912,8 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * defaultIfNull((Boolean) null);   // returns false
-     * defaultIfNull(Boolean.TRUE);     // returns true
+     * N.defaultIfNull((Boolean) null);   // returns false
+     * N.defaultIfNull(Boolean.TRUE);     // returns true
      * }</pre>
      *
      * @param b the Boolean value to check, may be {@code null}
@@ -9301,8 +9932,8 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * defaultIfNull((Boolean) null, true);   // returns true
-     * defaultIfNull(Boolean.FALSE, true);    // returns false
+     * N.defaultIfNull((Boolean) null, true);   // returns true
+     * N.defaultIfNull(Boolean.FALSE, true);    // returns false
      * }</pre>
      *
      * @param b the Boolean value to check, may be {@code null}
@@ -9322,8 +9953,8 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * defaultIfNull((Character) null);   // returns '\0'
-     * defaultIfNull('a');                // returns 'a'
+     * N.defaultIfNull((Character) null);   // returns '\0'
+     * N.defaultIfNull('a');                // returns 'a'
      * }</pre>
      *
      * @param c the Character value to check, may be {@code null}
@@ -9342,8 +9973,8 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * defaultIfNull((Character) null, 'b');   // returns 'b'
-     * defaultIfNull('a', 'b');                // returns 'a'
+     * N.defaultIfNull((Character) null, 'b');   // returns 'b'
+     * N.defaultIfNull('a', 'b');                // returns 'a'
      * }</pre>
      *
      * @param c the Character value to check, may be {@code null}
@@ -9363,8 +9994,8 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * defaultIfNull((Byte) null);   // returns 0
-     * defaultIfNull((byte) 1);      // returns 1
+     * N.defaultIfNull((Byte) null);   // returns 0
+     * N.defaultIfNull((byte) 1);      // returns 1
      * }</pre>
      *
      * @param b the Byte value to check, may be {@code null}
@@ -9383,8 +10014,8 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * defaultIfNull((Byte) null, (byte) 2);   // returns 2
-     * defaultIfNull((byte) 1, (byte) 2);      // returns 1
+     * N.defaultIfNull((Byte) null, (byte) 2);   // returns 2
+     * N.defaultIfNull((byte) 1, (byte) 2);      // returns 1
      * }</pre>
      *
      * @param b the Byte value to check, may be {@code null}
@@ -9404,8 +10035,8 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * defaultIfNull((Short) null);   // returns 0
-     * defaultIfNull((short) 1);      // returns 1
+     * N.defaultIfNull((Short) null);   // returns 0
+     * N.defaultIfNull((short) 1);      // returns 1
      * }</pre>
      *
      * @param b the Short value to check, may be {@code null}
@@ -9424,8 +10055,8 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * defaultIfNull((Short) null, (short) 2);   // returns 2
-     * defaultIfNull((short) 1, (short) 2);      // returns 1
+     * N.defaultIfNull((Short) null, (short) 2);   // returns 2
+     * N.defaultIfNull((short) 1, (short) 2);      // returns 1
      * }</pre>
      *
      * @param b the Short value to check, may be {@code null}
@@ -9445,8 +10076,8 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * defaultIfNull((Integer) null);   // returns 0
-     * defaultIfNull(1);                // returns 1
+     * N.defaultIfNull((Integer) null);   // returns 0
+     * N.defaultIfNull(1);                // returns 1
      * }</pre>
      *
      * @param b the Integer value to check, may be {@code null}
@@ -9465,8 +10096,8 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * defaultIfNull((Integer) null, 2);   // returns 2
-     * defaultIfNull(1, 2);                // returns 1
+     * N.defaultIfNull((Integer) null, 2);   // returns 2
+     * N.defaultIfNull(1, 2);                // returns 1
      * }</pre>
      *
      * @param b the Integer value to check, may be {@code null}
@@ -9486,12 +10117,12 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * defaultIfNull((Long) null);   // returns 0L
-     * defaultIfNull(1L);            // returns 1L
+     * N.defaultIfNull((Long) null);   // returns 0L
+     * N.defaultIfNull(1L);            // returns 1L
      * }</pre>
      *
      * @param b the Long value to check, may be {@code null}
-     * @return the primitive long value, or {@code 0} if {@code b} is {@code null}
+     * @return the primitive long value, or {@code 0L} if {@code b} is {@code null}
      */
     public static long defaultIfNull(final Long b) {
         if (b == null) {
@@ -9506,8 +10137,8 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * defaultIfNull((Long) null, 2L);   // returns 2L
-     * defaultIfNull(1L, 2L);            // returns 1L
+     * N.defaultIfNull((Long) null, 2L);   // returns 2L
+     * N.defaultIfNull(1L, 2L);            // returns 1L
      * }</pre>
      *
      * @param b the Long value to check, may be {@code null}
@@ -9527,12 +10158,12 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * defaultIfNull((Float) null);   // returns 0.0f
-     * defaultIfNull(1.0f);           // returns 1.0f
+     * N.defaultIfNull((Float) null);   // returns 0.0f
+     * N.defaultIfNull(1.0f);           // returns 1.0f
      * }</pre>
      *
      * @param b the Float value to check, may be {@code null}
-     * @return the primitive float value, or {@code 0} if {@code b} is {@code null}
+     * @return the primitive float value, or {@code 0.0f} if {@code b} is {@code null}
      */
     public static float defaultIfNull(final Float b) {
         if (b == null) {
@@ -9547,8 +10178,8 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * defaultIfNull((Float) null, 2.0f);   // returns 2.0f
-     * defaultIfNull(1.0f, 2.0f);           // returns 1.0f
+     * N.defaultIfNull((Float) null, 2.0f);   // returns 2.0f
+     * N.defaultIfNull(1.0f, 2.0f);           // returns 1.0f
      * }</pre>
      *
      * @param b the Float value to check, may be {@code null}
@@ -9568,12 +10199,12 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * defaultIfNull((Double) null);   // returns 0.0
-     * defaultIfNull(1.0);             // returns 1.0
+     * N.defaultIfNull((Double) null);   // returns 0.0
+     * N.defaultIfNull(1.0);             // returns 1.0
      * }</pre>
      *
      * @param b the Double value to check, may be {@code null}
-     * @return the primitive double value, or {@code 0} if {@code b} is {@code null}
+     * @return the primitive double value, or {@code 0.0} if {@code b} is {@code null}
      */
     public static double defaultIfNull(final Double b) {
         if (b == null) {
@@ -9588,8 +10219,8 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * defaultIfNull((Double) null, 2.0);   // returns 2.0
-     * defaultIfNull(1.0, 2.0);             // returns 1.0
+     * N.defaultIfNull((Double) null, 2.0);   // returns 2.0
+     * N.defaultIfNull(1.0, 2.0);             // returns 1.0
      * }</pre>
      *
      * @param b the Double value to check, may be {@code null}
@@ -9609,8 +10240,8 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * defaultIfNull(null, "default");      // returns "default"
-     * defaultIfNull("value", "default");   // returns "value"
+     * N.defaultIfNull(null, "default");      // returns "default"
+     * N.defaultIfNull("value", "default");   // returns "value"
      * }</pre>
      *
      * @param <T> the type of the object
@@ -9655,9 +10286,9 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * defaultIfEmpty("", "default");        // returns "default"
-     * defaultIfEmpty("value", "default");   // returns "value"
-     * defaultIfEmpty(null, "default");      // returns "default"
+     * N.defaultIfEmpty("", "default");        // returns "default"
+     * N.defaultIfEmpty("value", "default");   // returns "value"
+     * N.defaultIfEmpty(null, "default");      // returns "default"
      * }</pre>
      *
      * @param <T> the type of the CharSequence
@@ -9703,9 +10334,9 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * defaultIfBlank("   ", "default");     // returns "default"
-     * defaultIfBlank("value", "default");   // returns "value"
-     * defaultIfBlank(null, "default");      // returns "default"
+     * N.defaultIfBlank("   ", "default");     // returns "default"
+     * N.defaultIfBlank("value", "default");   // returns "value"
+     * N.defaultIfBlank(null, "default");      // returns "default"
      * }</pre>
      *
      * @param <T> the type of CharSequence
@@ -9751,9 +10382,9 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * defaultIfEmpty(Collections.emptyList(), Arrays.asList("default"));   // returns ["default"]
-     * defaultIfEmpty(Arrays.asList("a"), Arrays.asList("default"));        // returns ["a"]
-     * defaultIfEmpty(null, Arrays.asList("default"));                      // returns ["default"]
+     * N.defaultIfEmpty(Collections.emptyList(), Arrays.asList("default"));   // returns ["default"]
+     * N.defaultIfEmpty(Arrays.asList("a"), Arrays.asList("default"));        // returns ["a"]
+     * N.defaultIfEmpty(null, Arrays.asList("default"));                      // returns ["default"]
      * }</pre>
      *
      * @param <T> the type of Collection
@@ -9773,9 +10404,9 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * defaultIfEmpty(Collections.emptyMap(), Collections.singletonMap("k", "v"));               // returns {"k"="v"}
-     * defaultIfEmpty(Collections.singletonMap("a", "b"), Collections.singletonMap("k", "v"));   // returns {"a"="b"}
-     * defaultIfEmpty(null, Collections.singletonMap("k", "v"));                                 // returns {"k"="v"}
+     * N.defaultIfEmpty(Collections.emptyMap(), Collections.singletonMap("k", "v"));               // returns {"k"="v"}
+     * N.defaultIfEmpty(Collections.singletonMap("a", "b"), Collections.singletonMap("k", "v"));   // returns {"a"="b"}
+     * N.defaultIfEmpty(null, Collections.singletonMap("k", "v"));                                 // returns {"k"="v"}
      * }</pre>
      *
      * @param <T> the type of Map
@@ -9795,9 +10426,9 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * defaultValueOf(int.class);       // returns 0
-     * defaultValueOf(boolean.class);   // returns false
-     * defaultValueOf(String.class);    // returns null
+     * N.defaultValueOf(int.class);       // returns 0
+     * N.defaultValueOf(boolean.class);   // returns false
+     * N.defaultValueOf(String.class);    // returns null
      * }</pre>
      *
      * @param <T> the type to return the default value for
@@ -9815,8 +10446,8 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * defaultValueOf(Integer.class, true);    // returns 0
-     * defaultValueOf(Integer.class, false);   // returns null
+     * N.defaultValueOf(Integer.class, true);    // returns 0
+     * N.defaultValueOf(Integer.class, false);   // returns null
      * }</pre>
      *
      * @param <T> the type to return the default value for
@@ -9843,7 +10474,7 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Type<String> type = typeOf("java.lang.String");
+     * Type<String> type = N.typeOf("java.lang.String");
      * }</pre>
      *
      * @param <T> the Java type represented by the returned {@code Type} instance
@@ -9862,9 +10493,9 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Type<String> stringType = typeOf(String.class);
-     * Type<Integer> intType = typeOf(Integer.class);
-     * Type<List> listType = typeOf(List.class);
+     * Type<String> stringType = N.typeOf(String.class);
+     * Type<Integer> intType = N.typeOf(Integer.class);
+     * Type<List> listType = N.typeOf(List.class);
      * }</pre>
      *
      * @param <T> the type represented by the class
@@ -9883,8 +10514,8 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * stringOf(true);    // returns "true"
-     * stringOf(false);   // returns "false"
+     * N.stringOf(true);    // returns "true"
+     * N.stringOf(false);   // returns "false"
      * }</pre>
      *
      * @param val the value to be converted.
@@ -9899,9 +10530,9 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * stringOf('a');    // returns "a"
-     * stringOf('1');    // returns "1"
-     * stringOf('\n');   // returns "\n"
+     * N.stringOf('a');    // returns "a"
+     * N.stringOf('1');    // returns "1"
+     * N.stringOf('\n');   // returns "\n"
      * }</pre>
      *
      * @param val the char value to be converted
@@ -9920,9 +10551,9 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * stringOf((byte) 0);     // returns "0"
-     * stringOf((byte) 127);   // returns "127"
-     * stringOf((byte) -1);    // returns "-1"
+     * N.stringOf((byte) 0);     // returns "0"
+     * N.stringOf((byte) 127);   // returns "127"
+     * N.stringOf((byte) -1);    // returns "-1"
      * }</pre>
      *
      * @param val the byte value to be converted
@@ -9944,9 +10575,9 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * stringOf((short) 0);      // returns "0"
-     * stringOf((short) 1000);   // returns "1000"
-     * stringOf((short) -500);   // returns "-500"
+     * N.stringOf((short) 0);      // returns "0"
+     * N.stringOf((short) 1000);   // returns "1000"
+     * N.stringOf((short) -500);   // returns "-500"
      * }</pre>
      *
      * @param val the short value to be converted
@@ -9965,9 +10596,9 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * stringOf(0);      // returns "0"
-     * stringOf(123);    // returns "123"
-     * stringOf(-456);   // returns "-456"
+     * N.stringOf(0);      // returns "0"
+     * N.stringOf(123);    // returns "123"
+     * N.stringOf(-456);   // returns "-456"
      * }</pre>
      *
      * @param val the int value to be converted
@@ -9986,9 +10617,9 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * stringOf(0L);            // returns "0"
-     * stringOf(123456789L);    // returns "123456789"
-     * stringOf(-987654321L);   // returns "-987654321"
+     * N.stringOf(0L);            // returns "0"
+     * N.stringOf(123456789L);    // returns "123456789"
+     * N.stringOf(-987654321L);   // returns "-987654321"
      * }</pre>
      *
      * @param val the long value to be converted
@@ -10007,9 +10638,9 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * stringOf(0.0f);    // returns "0.0"
-     * stringOf(3.14f);   // returns "3.14"
-     * stringOf(-2.5f);   // returns "-2.5"
+     * N.stringOf(0.0f);    // returns "0.0"
+     * N.stringOf(3.14f);   // returns "3.14"
+     * N.stringOf(-2.5f);   // returns "-2.5"
      * }</pre>
      *
      * @param val the float value to be converted
@@ -10024,9 +10655,9 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * stringOf(0.0);       // returns "0.0"
-     * stringOf(3.14159);   // returns "3.14159"
-     * stringOf(-2.718);    // returns "-2.718"
+     * N.stringOf(0.0);       // returns "0.0"
+     * N.stringOf(3.14159);   // returns "3.14159"
+     * N.stringOf(-2.718);    // returns "-2.718"
      * }</pre>
      *
      * @param val the double value to be converted
@@ -10039,8 +10670,25 @@ sealed class CommonUtil permits N {
     /**
      * Converts the given value to its corresponding String representation by {@code Type.stringOf(Object)}.
      *
+     * <p>Unlike {@link Object#toString()}, this method returns a <i>formatted</i> string (typically a JSON-format
+     * string for collections, maps, arrays and beans) that is intended to be parseable back into an equivalent
+     * object via {@link #valueOf(String, Class)}. In other words, {@code stringOf} is the serialization counterpart
+     * of {@code valueOf} and the two are designed to round-trip:
+     * {@code N.valueOf(N.stringOf(obj), obj.getClass())} should yield a value equal to the original {@code obj}.
+     * By contrast, {@code toString()} only produces a human-readable representation that generally cannot be
+     * converted back into the original object.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.stringOf("hello");               // returns "hello"
+     * N.stringOf(Arrays.asList(1, 2));   // returns "[1, 2]"
+     * N.stringOf((Object) 123);          // returns "123"
+     * N.stringOf((Object) null);         // returns null
+     * }</pre>
+     *
      * @param obj the value to be converted.
-     * @return the String representation of the given value, or {@code null} if the specified object is {@code null}
+     * @return the formatted String representation of the given value (round-trippable via {@link #valueOf(String, Class)}),
+     *         or {@code null} if the specified object is {@code null}
      * @see #valueOf(String, Class)
      * @see Type#stringOf(Object)
      */
@@ -10051,6 +10699,18 @@ sealed class CommonUtil permits N {
 
     /**
      * Converts the given string to its corresponding value of the specified target type by {@code typeOf(targetType).valueOf(str)}.
+     *
+     * <p>This method is the inverse of {@link #stringOf(Object)}: it parses a formatted string (typically the
+     * JSON-format string produced by {@code stringOf}) back into an object of the specified target type. The two
+     * methods are designed to round-trip, so {@code N.valueOf(N.stringOf(obj), obj.getClass())} should yield a value
+     * equal to the original {@code obj}. Note that this generally does not hold for strings produced by
+     * {@link Object#toString()}, which are not guaranteed to be parseable back into the original object.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.valueOf("123", Integer.class); // returns 123
+     * N.valueOf(null, int.class);      // returns 0
+     * }</pre>
      *
      * @param <T> the type of the target object after conversion.
      * @param str the string to be converted.
@@ -10072,6 +10732,12 @@ sealed class CommonUtil permits N {
     /**
      * Registers a converter for a specific source class. The converter is a function that takes an object of the source class
      * and a target class, and converts the source object into an instance of the target class.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.registerConverter(StringBuilder.class, (value, targetType) -> value.toString()); // returns true if not already registered
+     * N.registerConverter(String.class, (value, targetType) -> value);                   // throws IllegalArgumentException
+     * }</pre>
      *
      * @param srcClass the source class that the converter can convert from. This must not be a built-in class.
      * @param converter the converter function that takes a source object and a target class, and returns an instance of the target class.
@@ -10127,6 +10793,12 @@ sealed class CommonUtil permits N {
      * If the source object is {@code null}, the default value of the target type is returned.
      * If the source object can be converted to the target type, an instance of the target type is returned.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.convert("123", Integer.class); // returns 123
+     * N.convert(null, int.class);      // returns 0
+     * }</pre>
+     *
      * @param <T> the type of the target object after conversion.
      * @param srcObj the source object to be converted. If {@code null}, the default value of the target type is returned.
      * @param targetType the class of the target type to which the source object is to be converted.
@@ -10157,6 +10829,12 @@ sealed class CommonUtil permits N {
      * Converts the given source object to the specified target type using the provided Type instance.
      * If the source object is {@code null}, the default value of the target type is returned.
      * If the source object can be converted to the target type, an instance of the target type is returned.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.convert("123", N.typeOf(Integer.class)); // returns 123
+     * N.convert(null, N.typeOf(int.class));      // returns 0
+     * }</pre>
      *
      * @param <T> the type of the target object after conversion.
      * @param srcObj the source object to be converted.
@@ -10451,6 +11129,12 @@ sealed class CommonUtil permits N {
      * If the object is {@code null} or cannot be assigned to the target type, an empty {@code Nullable} is returned.
      * Note that {@code null} can be assigned to any Object type except primitive types: boolean/char/byte/short/int/long/float/double.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.castIfAssignable("abc", String.class);  // returns Nullable.of("abc")
+     * N.castIfAssignable("abc", Integer.class); // returns Nullable.empty()
+     * }</pre>
+     *
      * @param <T> the type of the target object after casting.
      * @param val the object to be casted, may be {@code null}
      * @param targetType the class of the target type to which the object is to be casted.
@@ -10470,6 +11154,12 @@ sealed class CommonUtil permits N {
      * Casts the given object to the specified target type if possible using the provided Type instance.
      * If the object is {@code null} or cannot be assigned to the target type, an empty {@code Nullable} is returned.
      * Note that {@code null} can be assigned to any Object type except primitive types: boolean/char/byte/short/int/long/float/double.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.castIfAssignable("abc", N.typeOf(String.class));  // returns Nullable.of("abc")
+     * N.castIfAssignable("abc", N.typeOf(Integer.class)); // returns Nullable.empty()
+     * }</pre>
      *
      * @param <T> the type of the target object after casting.
      * @param val the object to be casted, may be {@code null}
@@ -10492,9 +11182,9 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * N.negate(Boolean.TRUE);    // Boolean.FALSE
-     * N.negate(Boolean.FALSE);   // Boolean.TRUE
-     * N.negate(null);            // null
+     * N.negate(Boolean.TRUE);    // returns Boolean.FALSE
+     * N.negate(Boolean.FALSE);   // returns Boolean.TRUE
+     * N.negate(null);            // returns null
      * }</pre>
      *
      * @param bool the Boolean to negate, which may be {@code null}
@@ -10754,27 +11444,27 @@ sealed class CommonUtil permits N {
      *       during mutation are considered modifiable</li>
      * </ul>
      *
-     * <p><b>Usage Examples:</b>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * // Null collection
-     * isUnmodifiable((Collection) null);   // returns true
+     * // null collections are considered unmodifiable
+     * N.isUnmodifiable((Collection) null);   // returns true
      *
      * // Unmodifiable collections
-     * isUnmodifiable(Collections.emptyList());                           // returns true
-     * isUnmodifiable(Collections.unmodifiableList(new ArrayList<>()));   // returns true
-     * isUnmodifiable(List.of("a", "b"));                                 // returns true
-     * isUnmodifiable(Collections.singleton("value"));                    // returns true
+     * N.isUnmodifiable(Collections.emptyList());                           // returns true
+     * N.isUnmodifiable(Collections.unmodifiableList(new ArrayList<>()));   // returns true
+     * N.isUnmodifiable(List.of("a", "b"));                                 // returns true
+     * N.isUnmodifiable(Collections.singleton("value"));                    // returns true
      *
      * // Modifiable collections
-     * isUnmodifiable(new ArrayList<>());                                 // returns false
-     * isUnmodifiable(new HashSet<>());                                   // returns false
-     * isUnmodifiable(new LinkedList<>());                                // returns false
+     * N.isUnmodifiable(new ArrayList<>());                                 // returns false
+     * N.isUnmodifiable(new HashSet<>());                                   // returns false
+     * N.isUnmodifiable(new LinkedList<>());                                // returns false
      *
      * // Cached behavior (second call uses cache)
      * Collection<String> c1 = new ArrayList<>();
-     * isUnmodifiable(c1);  // performs mutation test
+     * N.isUnmodifiable(c1);  // returns false after mutation test
      * Collection<String> c2 = new ArrayList<>();
-     * isUnmodifiable(c2);  // uses cached result from c1's class
+     * N.isUnmodifiable(c2);  // returns false using cached result from c1's class
      * }</pre>
      *
      * <p><b>Exception Handling:</b>
@@ -10786,6 +11476,7 @@ sealed class CommonUtil permits N {
      * @param c the Collection to check, may be {@code null}
      * @return {@code true} if the Collection is {@code null} or unmodifiable (throws {@code UnsupportedOperationException}
      *         on mutation attempts), {@code false} if the Collection is modifiable or throws other exceptions
+     *
      * @see #isUnmodifiable(Map)
      * @see #unmodifiableCollection(Collection)
      * @see #unmodifiableList(List)
@@ -10888,26 +11579,26 @@ sealed class CommonUtil permits N {
      *       during mutation are considered modifiable</li>
      * </ul>
      *
-     * <p><b>Usage Examples:</b>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * // Null map
-     * isUnmodifiable((Map) null);   // returns true
+     * // null maps are considered unmodifiable
+     * N.isUnmodifiable((Map) null);   // returns true
      *
      * // Unmodifiable maps
-     * isUnmodifiable(Collections.emptyMap());                         // returns true
-     * isUnmodifiable(Collections.unmodifiableMap(new HashMap<>()));   // returns true
-     * isUnmodifiable(Map.of("k", "v"));                               // returns true
+     * N.isUnmodifiable(Collections.emptyMap());                         // returns true
+     * N.isUnmodifiable(Collections.unmodifiableMap(new HashMap<>()));   // returns true
+     * N.isUnmodifiable(Map.of("k", "v"));                               // returns true
      *
      * // Modifiable maps
-     * isUnmodifiable(new HashMap<>());                                // returns false
-     * isUnmodifiable(new TreeMap<>());                                // returns false
-     * isUnmodifiable(new LinkedHashMap<>());                          // returns false
+     * N.isUnmodifiable(new HashMap<>());                                // returns false
+     * N.isUnmodifiable(new TreeMap<>());                                // returns false
+     * N.isUnmodifiable(new LinkedHashMap<>());                          // returns false
      *
      * // Cached behavior (second call uses cache)
      * Map<String, String> map1 = new HashMap<>();
-     * isUnmodifiable(map1);  // performs mutation test
+     * N.isUnmodifiable(map1);  // returns false after mutation test
      * Map<String, String> map2 = new HashMap<>();
-     * isUnmodifiable(map2);  // uses cached result from map1's class
+     * N.isUnmodifiable(map2);  // returns false using cached result from map1's class
      * }</pre>
      *
      * <p><b>Exception Handling:</b>
@@ -10919,6 +11610,7 @@ sealed class CommonUtil permits N {
      * @param m the Map to check, may be {@code null}
      * @return {@code true} if the Map is {@code null} or unmodifiable (throws {@code UnsupportedOperationException}
      *         on mutation attempts), {@code false} if the Map is modifiable or throws other exceptions
+     *
      * @see #isUnmodifiable(Collection)
      * @see #unmodifiableMap(Map)
      * @see Collections#unmodifiableMap(Map)
@@ -11003,25 +11695,17 @@ sealed class CommonUtil permits N {
      *   <li>Wrapping the collection in an unmodifiable wrapper otherwise</li>
      * </ul>
      *
-     * <p><b>Examples:</b>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * // Returns the collection unchanged (already unmodifiable)
-     * Collection<String> immutable = List.of("a", "b", "c");
-     * Collection<String> result = N.unmodifiableCollection(immutable);  // same instance
-     *
-     * // Returns an unmodifiable wrapper
      * Collection<String> list = new ArrayList<>(Arrays.asList("a", "b", "c"));
      * Collection<String> unmodifiable = N.unmodifiableCollection(list);
-     * // unmodifiable.add("d");  // throws UnsupportedOperationException
-     *
-     * // Returns empty list for null input
-     * N.unmodifiableCollection(null);  // returns empty list
+     * unmodifiable.add("d");          // throws UnsupportedOperationException
+     * N.unmodifiableCollection(null); // returns empty list
      * }</pre>
      *
      * @param <T> the type of elements in the collection
      * @param c the {@code Collection} to wrap, may be {@code null}
      * @return an unmodifiable view of the specified collection, or an empty list if {@code null}
-     *
      * @see Collections#unmodifiableCollection(Collection)
      * @see #isUnmodifiable(Collection)
      * @see Immutable
@@ -11051,25 +11735,17 @@ sealed class CommonUtil permits N {
      *   <li>Wrapping the list in an unmodifiable wrapper otherwise</li>
      * </ul>
      *
-     * <p><b>Examples:</b>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * // Returns the list unchanged (already unmodifiable)
-     * List<String> immutable = List.of("a", "b", "c");
-     * List<String> result = N.unmodifiableList(immutable);  // same instance
-     *
-     * // Returns an unmodifiable wrapper
-     * List<String> mutableList = new ArrayList<>(Arrays.asList("a", "b", "c"));
-     * List<String> unmodifiable = N.unmodifiableList(mutableList);
-     * // unmodifiable.add("d");  // throws UnsupportedOperationException
-     *
-     * // Returns empty list for null input
-     * N.unmodifiableList(null);  // returns empty list
+     * List<String> list = new ArrayList<>(Arrays.asList("a", "b", "c"));
+     * List<String> unmodifiable = N.unmodifiableList(list);
+     * unmodifiable.add("d");    // throws UnsupportedOperationException
+     * N.unmodifiableList(null); // returns empty list
      * }</pre>
      *
      * @param <T> the type of elements in the list
      * @param list the {@code List} to wrap, may be {@code null}
      * @return an unmodifiable view of the specified list, or an empty list if {@code null}
-     *
      * @see Collections#unmodifiableList(List)
      * @see #isUnmodifiable(Collection)
      * @see Immutable
@@ -11099,25 +11775,17 @@ sealed class CommonUtil permits N {
      *   <li>Wrapping the set in an unmodifiable wrapper otherwise</li>
      * </ul>
      *
-     * <p><b>Examples:</b>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * // Returns the set unchanged (already unmodifiable)
-     * Set<String> immutable = Set.of("a", "b", "c");
-     * Set<String> result = N.unmodifiableSet(immutable);  // same instance
-     *
-     * // Returns an unmodifiable wrapper
-     * Set<String> mutableSet = new HashSet<>(Arrays.asList("a", "b", "c"));
-     * Set<String> unmodifiable = N.unmodifiableSet(mutableSet);
-     * // unmodifiable.add("d");  // throws UnsupportedOperationException
-     *
-     * // Returns empty set for null input
-     * N.unmodifiableSet(null);  // returns empty set
+     * Set<String> set = new HashSet<>(Arrays.asList("a", "b", "c"));
+     * Set<String> unmodifiable = N.unmodifiableSet(set);
+     * unmodifiable.add("d");   // throws UnsupportedOperationException
+     * N.unmodifiableSet(null); // returns empty set
      * }</pre>
      *
      * @param <T> the type of elements in the set
      * @param set the {@code Set} to wrap, may be {@code null}
      * @return an unmodifiable view of the specified set, or an empty set if {@code null}
-     *
      * @see Collections#unmodifiableSet(Set)
      * @see #isUnmodifiable(Collection)
      * @see Immutable
@@ -11147,25 +11815,17 @@ sealed class CommonUtil permits N {
      *   <li>Wrapping the set in an unmodifiable wrapper otherwise</li>
      * </ul>
      *
-     * <p><b>Examples:</b>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * // Returns the set unchanged (already unmodifiable)
-     * SortedSet<String> immutable = Collections.unmodifiableSortedSet(new TreeSet<>(Arrays.asList("a", "b", "c")));
-     * SortedSet<String> result = N.unmodifiableSortedSet(immutable);  // same instance
-     *
-     * // Returns an unmodifiable wrapper
-     * SortedSet<String> mutableSet = new TreeSet<>(Arrays.asList("a", "b", "c"));
-     * SortedSet<String> unmodifiable = N.unmodifiableSortedSet(mutableSet);
-     * // unmodifiable.add("d");  // throws UnsupportedOperationException
-     *
-     * // Returns empty sorted set for null input
-     * N.unmodifiableSortedSet(null);  // returns empty sorted set
+     * SortedSet<String> set = new TreeSet<>(Arrays.asList("a", "b", "c"));
+     * SortedSet<String> unmodifiable = N.unmodifiableSortedSet(set);
+     * unmodifiable.add("d");         // throws UnsupportedOperationException
+     * N.unmodifiableSortedSet(null); // returns empty sorted set
      * }</pre>
      *
      * @param <T> the type of elements in the set
      * @param set the {@code SortedSet} to wrap, may be {@code null}
      * @return an unmodifiable view of the specified sorted set, or an empty sorted set if {@code null}
-     *
      * @see Collections#unmodifiableSortedSet(SortedSet)
      * @see #isUnmodifiable(Collection)
      * @see Immutable
@@ -11195,25 +11855,17 @@ sealed class CommonUtil permits N {
      *   <li>Wrapping the set in an unmodifiable wrapper otherwise</li>
      * </ul>
      *
-     * <p><b>Examples:</b>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * // Returns the set unchanged (already unmodifiable)
-     * NavigableSet<String> immutable = Collections.unmodifiableNavigableSet(new TreeSet<>(Arrays.asList("a", "b", "c")));
-     * NavigableSet<String> result = N.unmodifiableNavigableSet(immutable);  // same instance
-     *
-     * // Returns an unmodifiable wrapper
-     * NavigableSet<String> mutableSet = new TreeSet<>(Arrays.asList("a", "b", "c"));
-     * NavigableSet<String> unmodifiable = N.unmodifiableNavigableSet(mutableSet);
-     * // unmodifiable.add("d");  // throws UnsupportedOperationException
-     *
-     * // Returns empty navigable set for null input
-     * N.unmodifiableNavigableSet(null);  // returns empty navigable set
+     * NavigableSet<String> set = new TreeSet<>(Arrays.asList("a", "b", "c"));
+     * NavigableSet<String> unmodifiable = N.unmodifiableNavigableSet(set);
+     * unmodifiable.add("d");            // throws UnsupportedOperationException
+     * N.unmodifiableNavigableSet(null); // returns empty navigable set
      * }</pre>
      *
      * @param <T> the type of elements in the set
      * @param set the {@code NavigableSet} to wrap, may be {@code null}
      * @return an unmodifiable view of the specified navigable set, or an empty navigable set if {@code null}
-     *
      * @see Collections#unmodifiableNavigableSet(NavigableSet)
      * @see #isUnmodifiable(Collection)
      * @see Immutable
@@ -11243,19 +11895,12 @@ sealed class CommonUtil permits N {
      *   <li>Wrapping the map in an unmodifiable wrapper otherwise</li>
      * </ul>
      *
-     * <p><b>Examples:</b>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * // Returns the map unchanged (already unmodifiable)
-     * Map<String, Integer> immutable = Collections.unmodifiableMap(Map.of("a", 1, "b", 2));
-     * Map<String, Integer> result = N.unmodifiableMap(immutable);  // same instance
-     *
-     * // Returns an unmodifiable wrapper
-     * Map<String, Integer> mutableMap = new HashMap<>();
-     * mutableMap.put("a", 1);
-     * Map<String, Integer> unmodifiable = N.unmodifiableMap(mutableMap);
-     * // unmodifiable.put("c", 3);  // throws UnsupportedOperationException
-     *
-     * // Returns empty map for null input
+     * Map<String, Integer> map = new HashMap<>();
+     * map.put("a", 1);
+     * Map<String, Integer> unmodifiable = N.unmodifiableMap(map);
+     * unmodifiable.put("b", 2); // throws UnsupportedOperationException
      * N.unmodifiableMap(null);  // returns empty map
      * }</pre>
      *
@@ -11263,7 +11908,6 @@ sealed class CommonUtil permits N {
      * @param <V> the type of map values
      * @param m the {@code Map} to wrap, may be {@code null}
      * @return an unmodifiable view of the specified map, or an empty map if {@code null}
-     *
      * @see Collections#unmodifiableMap(Map)
      * @see #isUnmodifiable(Map)
      * @see Immutable
@@ -11293,27 +11937,19 @@ sealed class CommonUtil permits N {
      *   <li>Wrapping the map in an unmodifiable wrapper otherwise</li>
      * </ul>
      *
-     * <p><b>Examples:</b>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * // Returns the map unchanged (already unmodifiable)
-     * SortedMap<String, Integer> immutable = Collections.unmodifiableSortedMap(new TreeMap<>(Map.of("a", 1, "b", 2)));
-     * SortedMap<String, Integer> result = N.unmodifiableSortedMap(immutable);  // same instance
-     *
-     * // Returns an unmodifiable wrapper
-     * SortedMap<String, Integer> mutableMap = new TreeMap<>();
-     * mutableMap.put("a", 1);
-     * SortedMap<String, Integer> unmodifiable = N.unmodifiableSortedMap(mutableMap);
-     * // unmodifiable.put("c", 3);  // throws UnsupportedOperationException
-     *
-     * // Returns empty sorted map for null input
-     * N.unmodifiableSortedMap(null);  // returns empty sorted map
+     * SortedMap<String, Integer> map = new TreeMap<>();
+     * map.put("a", 1);
+     * SortedMap<String, Integer> unmodifiable = N.unmodifiableSortedMap(map);
+     * unmodifiable.put("b", 2);      // throws UnsupportedOperationException
+     * N.unmodifiableSortedMap(null); // returns empty sorted map
      * }</pre>
      *
      * @param <K> the type of map keys
      * @param <V> the type of map values
      * @param m the {@code SortedMap} to wrap, may be {@code null}
      * @return an unmodifiable view of the specified sorted map, or an empty sorted map if {@code null}
-     *
      * @see Collections#unmodifiableSortedMap(SortedMap)
      * @see #isUnmodifiable(Map)
      * @see Immutable
@@ -11343,27 +11979,19 @@ sealed class CommonUtil permits N {
      *   <li>Wrapping the map in an unmodifiable wrapper otherwise</li>
      * </ul>
      *
-     * <p><b>Examples:</b>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * // Returns the map unchanged (already unmodifiable)
-     * NavigableMap<String, Integer> immutable = Collections.unmodifiableNavigableMap(new TreeMap<>(Map.of("a", 1, "b", 2)));
-     * NavigableMap<String, Integer> result = N.unmodifiableNavigableMap(immutable);  // same instance
-     *
-     * // Returns an unmodifiable wrapper
-     * NavigableMap<String, Integer> mutableMap = new TreeMap<>();
-     * mutableMap.put("a", 1);
-     * NavigableMap<String, Integer> unmodifiable = N.unmodifiableNavigableMap(mutableMap);
-     * // unmodifiable.put("c", 3);  // throws UnsupportedOperationException
-     *
-     * // Returns empty navigable map for null input
-     * N.unmodifiableNavigableMap(null);  // returns empty navigable map
+     * NavigableMap<String, Integer> map = new TreeMap<>();
+     * map.put("a", 1);
+     * NavigableMap<String, Integer> unmodifiable = N.unmodifiableNavigableMap(map);
+     * unmodifiable.put("b", 2);         // throws UnsupportedOperationException
+     * N.unmodifiableNavigableMap(null); // returns empty navigable map
      * }</pre>
      *
      * @param <K> the type of map keys
      * @param <V> the type of map values
      * @param m the {@code NavigableMap} to wrap, may be {@code null}
      * @return an unmodifiable view of the specified navigable map, or an empty navigable map if {@code null}
-     *
      * @see Collections#unmodifiableNavigableMap(NavigableMap)
      * @see #isUnmodifiable(Map)
      * @see Immutable
@@ -11412,11 +12040,8 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * MyInterface proxy = N.newProxyInstance(MyInterface.class, (proxy, method, args) -> {
-     *     System.out.println("Method called: " + method.getName());
-     *     return null;
-     * });
-     * proxy.someMethod();   // prints "Method called: someMethod"
+     * Runnable proxy = N.newProxyInstance(Runnable.class, (p, method, args) -> null); // returns proxy instance
+     * proxy.run();                                                                    // invokes the proxy handler
      * }</pre>
      *
      * @param <T> the type of the interface for the proxy class to implement.
@@ -11434,6 +12059,12 @@ sealed class CommonUtil permits N {
      *
      * This method is a utility for creating dynamic proxies. A dynamic proxy class is a class that implements a list of interfaces specified at runtime such that a method invocation through one of the interfaces on an instance of the class will be encoded and dispatched to another object through a uniform interface.
      * Thus, a dynamic proxy class can be used to create an object that can implement an arbitrary set of interfaces specified at runtime.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Runnable proxy = N.newProxyInstance(new Class<?>[] {Runnable.class}, (p, method, args) -> null); // returns proxy instance
+     * proxy.run();                                                                                     // invokes the proxy handler
+     * }</pre>
      *
      * @param <T> the type of the interface for the proxy class to implement.
      * @param interfaceClasses the array of Class objects of the interfaces for the proxy class to implement; must not be {@code null}
@@ -11460,14 +12091,9 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * // Create a new instance of a simple class
-     * MyClass obj = N.newInstance(MyClass.class);
-     *
-     * // Create a new instance of a collection type
-     * List<String> list = N.newInstance(ArrayList.class);
-     *
-     * // Create a new instance of a map type
-     * Map<String, Integer> map = N.newInstance(HashMap.class);
+     * ArrayList<String> list = N.newInstance(ArrayList.class);       // returns empty ArrayList
+     * HashMap<String, Integer> map = N.newInstance(HashMap.class);   // returns empty HashMap
+     * N.newInstance(Runnable.class);                                 // throws IllegalArgumentException
      * }</pre>
      *
      * @param <T> the type of the object to be created
@@ -11563,6 +12189,12 @@ sealed class CommonUtil permits N {
     /**
      * Creates a new collection of the specified type with the given initial size.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.newCollection(ArrayList.class, 10);     // returns empty ArrayList (initial capacity 10)
+     * N.newCollection(LinkedHashSet.class, 16); // returns empty LinkedHashSet
+     * }</pre>
+     *
      * @param <T> the type of elements in the collection
      * @param targetType the class of the collection to be created
      * @param size the initial size of the collection
@@ -11599,6 +12231,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Creates a new map of the specified type with the given initial size.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.newMap(HashMap.class, 8);       // returns empty HashMap
+     * N.newMap(LinkedHashMap.class, 0); // returns empty LinkedHashMap
+     * }</pre>
      *
      * @param <K> the type of keys maintained by the map
      * @param <V> the type of mapped values
@@ -11732,6 +12370,12 @@ sealed class CommonUtil permits N {
     /**
      * Creates a new instance of a LinkedList.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.newLinkedList();        // returns empty LinkedList
+     * N.newLinkedList().size(); // returns 0
+     * }</pre>
+     *
      * @param <T> the type of elements in the list
      * @return a new instance of a LinkedList
      */
@@ -11741,6 +12385,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Creates a new instance of a LinkedList with the elements from the specified collection.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.newLinkedList(Arrays.asList("a", "b")); // returns LinkedList ["a", "b"]
+     * N.newLinkedList(null);                    // returns empty LinkedList
+     * }</pre>
      *
      * @param <T> the type of elements in the list
      * @param c the collection whose elements are to be placed into this list
@@ -11808,6 +12458,12 @@ sealed class CommonUtil permits N {
     /**
      * Creates a new instance of a LinkedHashSet.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.newLinkedHashSet();        // returns empty LinkedHashSet
+     * N.newLinkedHashSet().size(); // returns 0
+     * }</pre>
+     *
      * @param <T> the type of elements in the set
      * @return a new instance of a LinkedHashSet
      */
@@ -11817,6 +12473,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Creates a new instance of a LinkedHashSet with the specified initial capacity.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.newLinkedHashSet(8); // returns empty LinkedHashSet
+     * N.newLinkedHashSet(0); // returns empty LinkedHashSet
+     * }</pre>
      *
      * @param <T> the type of elements in the set
      * @param initialCapacity the initial capacity of the set
@@ -11830,6 +12492,12 @@ sealed class CommonUtil permits N {
     /**
      * Creates a new instance of a LinkedHashSet with the elements from the specified collection.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.newLinkedHashSet(Arrays.asList("a", "b")); // returns LinkedHashSet ["a", "b"]
+     * N.newLinkedHashSet(null);                    // returns empty LinkedHashSet
+     * }</pre>
+     *
      * @param <T> the type of elements in the set
      * @param c the collection whose elements are to be placed into this set
      * @return a new instance of a LinkedHashSet containing the elements from the specified collection
@@ -11842,6 +12510,14 @@ sealed class CommonUtil permits N {
     /**
      * Creates a new instance of a TreeSet.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * TreeSet<Integer> set = N.newTreeSet();
+     * set.add(3);    // set is [3]
+     * set.add(1);    // set is [1, 3] (kept sorted)
+     * set.first();   // returns 1 (smallest, natural ordering)
+     * }</pre>
+     *
      * @param <T> the type of elements in the set
      * @return a new instance of a TreeSet
      */
@@ -11851,6 +12527,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Creates a new instance of a TreeSet with the specified comparator.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.newTreeSet(Comparator.naturalOrder()); // returns empty TreeSet
+     * N.newTreeSet(null);                      // returns TreeSet using natural ordering
+     * }</pre>
      *
      * @param <T> the type of elements in the set
      * @param comparator the comparator that will be used to order this set.
@@ -11863,6 +12545,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Creates a new instance of a TreeSet with the elements from the specified collection.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.newTreeSet(Arrays.asList(3, 1, 2));    // returns TreeSet [1, 2, 3] (sorted)
+     * N.newTreeSet(new ArrayList<Integer>());  // returns empty TreeSet
+     * }</pre>
      *
      * @param <T> the type of elements in the set
      * @param c the collection whose elements are to be placed into this set
@@ -11896,6 +12584,12 @@ sealed class CommonUtil permits N {
     /**
      * Creates a new instance of a concurrent hash set with the specified initial capacity.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.newConcurrentHashSet(16); // returns empty concurrent set
+     * N.newConcurrentHashSet(0);  // returns empty concurrent set
+     * }</pre>
+     *
      * @param <T> the type of elements in the set
      * @param initialCapacity the initial capacity of the set
      * @return a new instance of a concurrent hash set
@@ -11908,6 +12602,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Creates a new instance of a concurrent hash set with the elements from the specified collection.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.newConcurrentHashSet(Arrays.asList("a", "b")); // returns concurrent set ["a", "b"]
+     * N.newConcurrentHashSet(null);                    // returns empty concurrent set
+     * }</pre>
      *
      * @param <T> the type of elements in the set
      * @param c the collection whose elements are to be placed into this set
@@ -11928,6 +12628,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Returns a set backed by the specified map.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.newSetFromMap(new ConcurrentHashMap<>()); // returns set backed by the map
+     * N.newSetFromMap(new HashMap<>());           // returns set backed by the map
+     * }</pre>
      *
      * @param <E> the type of elements in the set
      * @param map the backing map
@@ -11961,6 +12667,12 @@ sealed class CommonUtil permits N {
     /**
      * Creates a new instance of a Multiset with the specified initial capacity.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.newMultiset(16); // returns empty Multiset
+     * N.newMultiset(0);  // returns empty Multiset
+     * }</pre>
+     *
      * @param <T> the type of elements in the multiset
      * @param initialCapacity the initial capacity of the multiset
      * @return a new instance of a Multiset with the specified initial capacity
@@ -11971,6 +12683,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Creates a new instance of a Multiset with the specified backed Map type for storing element/occurrence pairs.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.newMultiset(HashMap.class);       // returns empty Multiset
+     * N.newMultiset(LinkedHashMap.class); // returns empty Multiset
+     * }</pre>
      *
      * @param <T> the type of elements in the multiset
      * @param valueMapType the class of the map to be used to store element/occurrence pairs
@@ -11984,6 +12702,12 @@ sealed class CommonUtil permits N {
     /**
      * Creates a new instance of a Multiset with the specified {@code Supplier} which provides the map to store element/occurrence pairs.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.newMultiset(HashMap::new);       // returns empty Multiset
+     * N.newMultiset(LinkedHashMap::new); // returns empty Multiset
+     * }</pre>
+     *
      * @param <T> the type of elements in the multiset
      * @param mapSupplier the supplier that provides the map to be used to store element/occurrence pairs
      * @return a new instance of a Multiset backed by the map provided by the specified supplier
@@ -11994,6 +12718,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Creates a new instance of a Multiset with the elements from the specified collection.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.newMultiset(Arrays.asList("a", "b", "a")); // returns Multiset with "a" count 2
+     * N.newMultiset(Collections.emptyList());      // returns empty Multiset
+     * }</pre>
      *
      * @param <T> the type of elements in the multiset
      * @param c the collection whose elements are to be placed into this multiset
@@ -12006,6 +12736,12 @@ sealed class CommonUtil permits N {
     /**
      * Creates a new instance of an ArrayDeque.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.newArrayDeque();        // returns empty ArrayDeque
+     * N.newArrayDeque().size(); // returns 0
+     * }</pre>
+     *
      * @param <T> the type of elements in the deque
      * @return a new instance of an ArrayDeque
      */
@@ -12015,6 +12751,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Creates a new instance of an ArrayDeque with the specified initial capacity.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.newArrayDeque(8); // returns empty ArrayDeque
+     * N.newArrayDeque(0); // returns empty ArrayDeque
+     * }</pre>
      *
      * @param <T> the type of elements in the deque
      * @param numElements the initial capacity of the deque
@@ -12026,6 +12768,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Creates a new instance of an ArrayDeque with the elements from the specified collection.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.newArrayDeque(Arrays.asList("a", "b")); // returns ArrayDeque ["a", "b"]
+     * N.newArrayDeque(Collections.emptyList()); // returns empty ArrayDeque
+     * }</pre>
      *
      * @param <E> the type of elements in the deque
      * @param c the collection whose elements are to be placed into this deque
@@ -12043,7 +12791,7 @@ sealed class CommonUtil permits N {
      * Map.Entry<String, Integer> entry = N.newEntry("key", 1);
      * entry.getKey();      // returns "key"
      * entry.getValue();    // returns 1
-     * entry.setValue(2);   // modifies the value to 2
+     * entry.setValue(2);   // returns 1; entry value is 2
      * }</pre>
      *
      * @param <K> the type of keys maintained by this entry
@@ -12137,6 +12885,12 @@ sealed class CommonUtil permits N {
     /**
      * Creates a new instance of a HashMap with the elements from the specified collection.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.newHashMap(Arrays.asList("a", "bb"), String::length); // returns {1="a", 2="bb"}
+     * N.newHashMap(Collections.emptyList(), String::length);  // returns empty HashMap
+     * }</pre>
+     *
      * @param <K> the type of keys maintained by this map
      * @param <V> the type of mapped values
      * @param c the collection whose elements are to be placed into this map
@@ -12166,6 +12920,12 @@ sealed class CommonUtil permits N {
     /**
      * Creates a new instance of a LinkedHashMap.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.newLinkedHashMap();        // returns empty LinkedHashMap
+     * N.newLinkedHashMap().size(); // returns 0
+     * }</pre>
+     *
      * @param <K> the type of keys maintained by this map
      * @param <V> the type of mapped values
      * @return a new instance of a LinkedHashMap
@@ -12176,6 +12936,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Creates a new instance of a LinkedHashMap with the specified initial capacity.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.newLinkedHashMap(8); // returns empty LinkedHashMap
+     * N.newLinkedHashMap(0); // returns empty LinkedHashMap
+     * }</pre>
      *
      * @param <K> the type of keys maintained by this map
      * @param <V> the type of mapped values
@@ -12189,6 +12955,12 @@ sealed class CommonUtil permits N {
     /**
      * Creates a new instance of a LinkedHashMap with the entries from the specified map.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.newLinkedHashMap(N.asMap("a", 1)); // returns LinkedHashMap {"a"=1}
+     * N.newLinkedHashMap(null);            // returns empty LinkedHashMap
+     * }</pre>
+     *
      * @param <K> the type of keys maintained by this map
      * @param <V> the type of mapped values
      * @param m the map whose elements are to be placed into this map
@@ -12200,6 +12972,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Creates a new instance of a LinkedHashMap with the elements from the specified collection.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.newLinkedHashMap(Arrays.asList("a", "bb"), String::length); // returns {1="a", 2="bb"}
+     * N.newLinkedHashMap(Collections.emptyList(), String::length);  // returns empty LinkedHashMap
+     * }</pre>
      *
      * @param <K> the type of keys maintained by this map
      * @param <V> the type of mapped values
@@ -12228,6 +13006,12 @@ sealed class CommonUtil permits N {
     /**
      * Creates a new instance of a TreeMap.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * TreeMap<String, Integer> map = N.newTreeMap();
+     * map.put("a", 1); // map is sorted by natural key order
+     * }</pre>
+     *
      * @param <K> the type of keys maintained by this map, which must be comparable
      * @param <V> the type of mapped values
      * @return a new instance of a TreeMap
@@ -12238,6 +13022,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Creates a new instance of a TreeMap with the specified comparator.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.newTreeMap(Comparator.naturalOrder()); // returns empty TreeMap
+     * N.newTreeMap(null);                      // returns TreeMap using natural ordering
+     * }</pre>
      *
      * @param <C> the type of the comparator
      * @param <K> the type of keys maintained by this map
@@ -12252,6 +13042,12 @@ sealed class CommonUtil permits N {
     /**
      * Creates a new instance of a TreeMap with the entries from the specified map.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.newTreeMap(N.asMap("b", 2, "a", 1));         // returns TreeMap {a=1, b=2} (keys sorted)
+     * N.newTreeMap(new HashMap<String, Integer>());  // returns empty TreeMap
+     * }</pre>
+     *
      * @param <K> the type of keys maintained by this map, which must be comparable
      * @param <V> the type of mapped values
      * @param m the map whose elements are to be placed into this map
@@ -12264,6 +13060,12 @@ sealed class CommonUtil permits N {
     /**
      * Creates a new instance of an IdentityHashMap.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.newIdentityHashMap();        // returns empty IdentityHashMap
+     * N.newIdentityHashMap().size(); // returns 0
+     * }</pre>
+     *
      * @param <K> the type of keys maintained by this map
      * @param <V> the type of mapped values
      * @return a new instance of an IdentityHashMap
@@ -12274,6 +13076,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Creates a new instance of an IdentityHashMap with the specified initial capacity.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.newIdentityHashMap(8); // returns empty IdentityHashMap
+     * N.newIdentityHashMap(0); // returns empty IdentityHashMap
+     * }</pre>
      *
      * @param <K> the type of keys maintained by this map
      * @param <V> the type of mapped values
@@ -12286,6 +13094,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Creates a new instance of an IdentityHashMap with the entries from the specified map.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.newIdentityHashMap(N.asMap("a", 1)); // returns IdentityHashMap with one entry
+     * N.newIdentityHashMap(null);            // returns empty IdentityHashMap
+     * }</pre>
      *
      * @param <K> the type of keys maintained by this map
      * @param <V> the type of mapped values
@@ -12318,6 +13132,12 @@ sealed class CommonUtil permits N {
     /**
      * Creates a new instance of a ConcurrentHashMap with the specified initial capacity.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.newConcurrentHashMap(16); // returns empty ConcurrentHashMap
+     * N.newConcurrentHashMap(0);  // returns empty ConcurrentHashMap
+     * }</pre>
+     *
      * @param <K> the type of keys maintained by this map
      * @param <V> the type of mapped values
      * @param initialCapacity the initial capacity of the map
@@ -12329,6 +13149,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Creates a new instance of a ConcurrentHashMap with the entries from the specified map.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.newConcurrentHashMap(N.asMap("a", 1)); // returns ConcurrentHashMap {"a"=1}
+     * N.newConcurrentHashMap(null);            // returns empty ConcurrentHashMap
+     * }</pre>
      *
      * @param <K> the type of keys maintained by this map
      * @param <V> the type of mapped values
@@ -12348,7 +13174,7 @@ sealed class CommonUtil permits N {
      * BiMap<String, Integer> biMap = N.newBiMap();
      * biMap.put("one", 1);
      * biMap.put("two", 2);
-     * biMap.get("one");          // returns 1
+     * biMap.get("one");         // returns 1
      * biMap.inverse().get(1);   // returns "one"
      * }</pre>
      *
@@ -12363,6 +13189,12 @@ sealed class CommonUtil permits N {
     /**
      * Creates a new instance of a BiMap with the specified initial capacity.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.newBiMap(16); // returns empty BiMap
+     * N.newBiMap(0);  // returns empty BiMap
+     * }</pre>
+     *
      * @param <K> the type of keys maintained by this map
      * @param <V> the type of mapped values
      * @param initialCapacity the initial capacity of the map
@@ -12374,6 +13206,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Creates a new instance of a BiMap with the specified initial capacity and load factor.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.newBiMap(8, 0.75f); // returns empty BiMap
+     * N.newBiMap(0, 0.75f); // returns empty BiMap
+     * }</pre>
      *
      * @param <K> the type of keys maintained by this map
      * @param <V> the type of mapped values
@@ -12387,6 +13225,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Creates a new instance of a BiMap with the specified key map type which is used to create map to store <i>key/value</i> pairs and value map type which is used to create map to store <i>value/key</i> pairs.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.newBiMap(LinkedHashMap.class, LinkedHashMap.class); // returns empty BiMap
+     * N.newBiMap(HashMap.class, HashMap.class);             // returns empty BiMap
+     * }</pre>
      *
      * @param <K> the type of keys maintained by this map
      * @param <V> the type of mapped values
@@ -12402,6 +13246,12 @@ sealed class CommonUtil permits N {
     /**
      * Creates a new instance of a BiMap with the specified key map supplier which provides the map to store <i>key/value</i> pairs and value map supplier which provides the map to store <i>value/key</i> pairs.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.newBiMap(LinkedHashMap::new, LinkedHashMap::new); // returns empty BiMap
+     * N.newBiMap(HashMap::new, HashMap::new);             // returns empty BiMap
+     * }</pre>
+     *
      * @param <K> the type of keys maintained by this map
      * @param <V> the type of mapped values
      * @param keyMapSupplier the supplier that provides the map to store <i>key/value</i> pairs
@@ -12414,6 +13264,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Creates a new instance of a Multimap with the specified map which provides the map to store <i>key/value</i> pairs and value supplier which provides the collection to store <i>values</i>.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.newMultimap(HashMap::new, ArrayList::new);           // returns empty Multimap
+     * N.newMultimap(LinkedHashMap::new, LinkedHashSet::new); // returns empty Multimap
+     * }</pre>
      *
      * @param <K> the type of keys maintained by this map
      * @param <E> the type of elements in the collection
@@ -12436,7 +13292,7 @@ sealed class CommonUtil permits N {
      * ListMultimap<String, Integer> multimap = N.newListMultimap();
      * multimap.put("key", 1);
      * multimap.put("key", 2);
-     * multimap.put("key", 1);   // duplicates allowed
+     * multimap.put("key", 1);   // duplicate value is added
      * multimap.get("key");      // returns [1, 2, 1]
      * }</pre>
      *
@@ -12451,6 +13307,12 @@ sealed class CommonUtil permits N {
     /**
      * Creates a new instance of a ListMultimap with the specified initial capacity.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.newListMultimap(16); // returns empty ListMultimap
+     * N.newListMultimap(0);  // returns empty ListMultimap
+     * }</pre>
+     *
      * @param <K> the type of keys maintained by this map
      * @param <E> the type of elements in the collection
      * @param initialCapacity the initial capacity of the ListMultimap
@@ -12462,6 +13324,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Creates a new instance of a ListMultimap with the specified map type which is used to create the backed map for storing entries.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.newListMultimap(LinkedHashMap.class); // returns empty ListMultimap
+     * N.newListMultimap(HashMap.class);       // returns empty ListMultimap
+     * }</pre>
      *
      * @param <K> the type of keys maintained by this map
      * @param <E> the type of elements in the collection
@@ -12475,6 +13343,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Creates a new instance of a ListMultimap with the specified map type which is used to create the backed map for storing entries and value type which is used to create the backed list for storing values.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.newListMultimap(LinkedHashMap.class, ArrayList.class); // returns empty ListMultimap
+     * N.newListMultimap(HashMap.class, LinkedList.class);      // returns empty ListMultimap
+     * }</pre>
      *
      * @param <K> the type of keys maintained by this map
      * @param <E> the type of elements in the collection
@@ -12490,6 +13364,12 @@ sealed class CommonUtil permits N {
     /**
      * Creates a new instance of a ListMultimap with the specified map and value suppliers.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.newListMultimap(LinkedHashMap::new, ArrayList::new); // returns empty ListMultimap
+     * N.newListMultimap(HashMap::new, LinkedList::new);      // returns empty ListMultimap
+     * }</pre>
+     *
      * @param <K> the type of keys maintained by this map
      * @param <E> the type of elements in the collection
      * @param mapSupplier the supplier that provides the map to store entries
@@ -12503,6 +13383,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Creates a new instance of a ListMultimap with the entries from the specified map.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.newListMultimap(N.asMap("a", 1, "b", 2)); // returns ListMultimap with two entries
+     * N.newListMultimap(null);                    // returns empty ListMultimap
+     * }</pre>
      *
      * @param <K> the type of keys maintained by this map
      * @param <E> the type of elements in the collection
@@ -12520,6 +13406,12 @@ sealed class CommonUtil permits N {
     /**
      * Creates a new instance of a ListMultimap with the keys extracted from the specified collection by the specified {@code Function} and values from the specified collection.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.newListMultimap(Arrays.asList("a", "bb"), String::length); // returns ListMultimap grouped by length
+     * N.newListMultimap(Collections.emptyList(), String::length);  // returns empty ListMultimap
+     * }</pre>
+     *
      * @param <T> the type of elements in the collection
      * @param <K> the type of keys maintained by this map
      * @param c the collection whose elements are to be placed into this ListMultimap
@@ -12532,6 +13424,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Creates a new instance of a ListMultimap with the keys and values extracted from the specified collection.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.newListMultimap(Arrays.asList("a", "bb"), String::length, String::toUpperCase); // returns ListMultimap grouped by length
+     * N.newListMultimap(Collections.emptyList(), String::length, String::toUpperCase);  // returns empty ListMultimap
+     * }</pre>
      *
      * @param <T> the type of elements in the collection
      * @param <K> the type of keys maintained by this map
@@ -12572,6 +13470,12 @@ sealed class CommonUtil permits N {
     /**
      * Creates a new instance of a ListMultimap backed by a LinkedHashMap with the specified initial capacity.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.newLinkedListMultimap(16); // returns empty ListMultimap (backed by LinkedHashMap)
+     * N.newLinkedListMultimap(0);  // returns empty ListMultimap (backed by LinkedHashMap)
+     * }</pre>
+     *
      * @param <K> the type of keys maintained by this map
      * @param <E> the type of elements in the collection
      * @param initialCapacity the initial capacity of the ListMultimap
@@ -12583,6 +13487,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Creates a new instance of a ListMultimap backed by a LinkedHashMap with the entries from the specified map.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.newLinkedListMultimap(N.asMap("a", 1, "b", 2)); // returns ListMultimap with two entries
+     * N.newLinkedListMultimap(null);                    // returns empty ListMultimap
+     * }</pre>
      *
      * @param <K> the type of keys maintained by this map
      * @param <E> the type of elements in the collection
@@ -12601,6 +13511,14 @@ sealed class CommonUtil permits N {
      * Creates a new instance of a ListMultimap backed by a SortedMap.
      * The keys in the map will be sorted according to their natural ordering.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * ListMultimap<String, Integer> m = N.newSortedListMultimap();
+     * m.put("banana", 1);   // m has key "banana"
+     * m.put("apple", 2);    // m has keys [apple, banana]
+     * m.keySet();           // returns [apple, banana] (sorted)
+     * }</pre>
+     *
      * @param <K> the type of keys maintained by this map, which must be comparable
      * @param <E> the type of elements in the collection
      * @return a new instance of a ListMultimap backed by a SortedMap
@@ -12612,6 +13530,12 @@ sealed class CommonUtil permits N {
     /**
      * Creates a new instance of a ListMultimap backed by a SortedMap with the entries from the specified map.
      * The keys in the map will be sorted according to their natural ordering.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Map<String, Integer> existingMap = N.asMap("b", 2, "a", 1);
+     * N.newSortedListMultimap(existingMap); // returns ListMultimap with sorted keys
+     * }</pre>
      *
      * @param <K> the type of keys maintained by this map, which must be comparable
      * @param <E> the type of elements in the collection
@@ -12635,7 +13559,7 @@ sealed class CommonUtil permits N {
      * SetMultimap<String, Integer> multimap = N.newSetMultimap();
      * multimap.put("key", 1);
      * multimap.put("key", 2);
-     * multimap.put("key", 1);   // duplicate ignored
+     * multimap.put("key", 1);   // duplicate is ignored
      * multimap.get("key");      // returns Set containing [1, 2]
      * }</pre>
      *
@@ -12670,6 +13594,12 @@ sealed class CommonUtil permits N {
     /**
      * Creates a new instance of a SetMultimap with the specified map type which is used to create the backed map for storing entries.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.newSetMultimap(LinkedHashMap.class); // returns empty SetMultimap (backed by LinkedHashMap)
+     * N.newSetMultimap(HashMap.class);       // returns empty SetMultimap
+     * }</pre>
+     *
      * @param <K> the type of keys maintained by this map
      * @param <E> the type of elements in the collection
      * @param mapType the class of the map to be used to store entries
@@ -12682,6 +13612,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Creates a new instance of a SetMultimap with the specified map type which is used to create the backed map for storing entries and value type which is used to create the backed Set for storing values.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.newSetMultimap(LinkedHashMap.class, LinkedHashSet.class); // returns empty SetMultimap
+     * N.newSetMultimap(HashMap.class, HashSet.class);             // returns empty SetMultimap
+     * }</pre>
      *
      * @param <K> the type of keys maintained by this map
      * @param <E> the type of elements in the collection
@@ -12697,6 +13633,12 @@ sealed class CommonUtil permits N {
     /**
      * Creates a new instance of a SetMultimap with the specified map and value suppliers.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.newSetMultimap(LinkedHashMap::new, LinkedHashSet::new); // returns empty SetMultimap
+     * N.newSetMultimap(HashMap::new, HashSet::new);             // returns empty SetMultimap
+     * }</pre>
+     *
      * @param <K> the type of keys maintained by this map
      * @param <E> the type of elements in the collection
      * @param mapSupplier the supplier that provides the map to store entries
@@ -12710,6 +13652,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Creates a new instance of a SetMultimap with the entries from the specified map.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.newSetMultimap(N.asMap("a", 1, "b", 2)); // returns SetMultimap with two entries
+     * N.newSetMultimap(null);                    // returns empty SetMultimap
+     * }</pre>
      *
      * @param <K> the type of keys maintained by this map
      * @param <E> the type of elements in the collection
@@ -12727,6 +13675,12 @@ sealed class CommonUtil permits N {
     /**
      * Creates a new instance of a SetMultimap with the keys extracted from the specified collection by the specified {@code Function} and values from the specified collection.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.newSetMultimap(Arrays.asList("a", "bb"), String::length); // returns SetMultimap grouped by length
+     * N.newSetMultimap(Collections.emptyList(), String::length);  // returns empty SetMultimap
+     * }</pre>
+     *
      * @param <T> the type of elements in the collection
      * @param <K> the type of keys maintained by this map
      * @param c the collection whose elements are to be placed into this SetMultimap
@@ -12739,6 +13693,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Creates a new instance of a SetMultimap with the keys and values extracted from the specified collection.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.newSetMultimap(Arrays.asList("a", "bb"), String::length, String::toUpperCase); // returns SetMultimap grouped by length
+     * N.newSetMultimap(Collections.emptyList(), String::length, String::toUpperCase);  // returns empty SetMultimap
+     * }</pre>
      *
      * @param <T> the type of elements in the collection
      * @param <K> the type of keys maintained by this map
@@ -12756,6 +13716,12 @@ sealed class CommonUtil permits N {
     /**
      * Creates a new instance of a SetMultimap backed by a LinkedHashMap.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.newLinkedSetMultimap();        // returns empty SetMultimap
+     * N.newLinkedSetMultimap().size(); // returns 0
+     * }</pre>
+     *
      * @param <K> the type of keys maintained by this map
      * @param <E> the type of elements in the collection
      * @return a new instance of a SetMultimap backed by a LinkedHashMap
@@ -12766,6 +13732,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Creates a new instance of a SetMultimap backed by a LinkedHashMap with the specified initial capacity.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.newLinkedSetMultimap(8); // returns empty SetMultimap
+     * N.newLinkedSetMultimap(0); // returns empty SetMultimap
+     * }</pre>
      *
      * @param <K> the type of keys maintained by this map
      * @param <E> the type of elements in the collection
@@ -12778,6 +13750,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Creates a new instance of a SetMultimap backed by a LinkedHashMap with the entries from the specified map.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.newLinkedSetMultimap(N.asMap("a", 1, "b", 2)); // returns SetMultimap with two entries
+     * N.newLinkedSetMultimap(null);                    // returns empty SetMultimap
+     * }</pre>
      *
      * @param <K> the type of keys maintained by this map
      * @param <E> the type of elements in the collection
@@ -12796,6 +13774,14 @@ sealed class CommonUtil permits N {
      * Creates a new instance of a SetMultimap backed by a SortedMap.
      * The keys in the map will be sorted according to their natural ordering.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * SetMultimap<String, Integer> m = N.newSortedSetMultimap();
+     * m.put("banana", 1);   // m has key "banana"
+     * m.put("apple", 2);    // m has keys [apple, banana]
+     * m.keySet();           // returns [apple, banana] (sorted)
+     * }</pre>
+     *
      * @param <K> the type of keys maintained by this map, which must be comparable
      * @param <E> the type of elements in the collection
      * @return a new instance of a SetMultimap backed by a SortedMap
@@ -12807,6 +13793,12 @@ sealed class CommonUtil permits N {
     /**
      * Creates a new instance of a SetMultimap backed by a SortedMap with the entries from the specified map.
      * The keys in the map will be sorted according to their natural ordering.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Map<String, Integer> existingMap = N.asMap("b", 2, "a", 1);
+     * N.newSortedSetMultimap(existingMap); // returns SetMultimap with sorted keys
+     * }</pre>
      *
      * @param <K> the type of keys maintained by this map, which must be comparable
      * @param <E> the type of elements in the collection
@@ -12838,7 +13830,7 @@ sealed class CommonUtil permits N {
      * // ds.size() returns 0
      * }</pre>
      *
-     * @return a new empty Dataset.
+     * @return  a new empty Dataset.
      * @see Dataset#empty()
      */
     public static Dataset newEmptyDataset() {
@@ -12865,6 +13857,12 @@ sealed class CommonUtil permits N {
      * The Dataset is a data structure that stores data in a tabular format, similar to a table in a database.
      * This method creates a Dataset with no rows, but with the specified column names.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.newEmptyDataset(Arrays.asList("id", "name")); // returns empty Dataset with columns id and name
+     * N.newEmptyDataset(Collections.emptyList());     // returns empty Dataset with no columns
+     * }</pre>
+     *
      * @param columnNames a collection of strings representing the names of the columns in the Dataset.
      * @return a new empty Dataset with the specified column names.
      * @see Dataset#empty()
@@ -12878,6 +13876,12 @@ sealed class CommonUtil permits N {
      *
      * The Dataset is a data structure that stores data in a tabular format, similar to a table in a database.
      * This method creates a Dataset with no rows, but with the specified column names and properties.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.newEmptyDataset(Arrays.asList("id", "name")); // returns empty Dataset with columns id and name
+     * N.newEmptyDataset(Collections.emptyList());     // returns empty Dataset with no columns
+     * }</pre>
      *
      * @param columnNames a collection of strings representing the names of the columns in the Dataset.
      * @param properties a map representing the properties of the Dataset. The keys are property names and the values are the corresponding property values.
@@ -12937,6 +13941,13 @@ sealed class CommonUtil permits N {
      * The <i>rows</i> parameter is a collection where each item represents a row in the Dataset.
      * The <i>properties</i> parameter is a map where each entry represents a property of the Dataset.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<List<Object>> rows = Arrays.asList(Arrays.asList(1, "Alice"));
+     * N.newDataset(Arrays.asList("id", "name"), rows);                    // returns Dataset with 1 row
+     * N.newDataset(Arrays.asList("id", "name"), Collections.emptyList()); // returns empty Dataset with columns id and name
+     * }</pre>
+     *
      * @param rows a collection of objects representing the data in the Dataset. Each object is a row which can be: Map/Bean.
      * @param properties a map of properties for the Dataset. Each key is a property name and each value is the property value.
      * @return a new Dataset with the specified rows and properties.
@@ -12978,6 +13989,13 @@ sealed class CommonUtil permits N {
      * The <i>rows</i> parameter is a collection where each item represents a row in the Dataset.
      * The order of elements in each row should correspond to the order of column names.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<List<Object>> rows = Arrays.asList(Arrays.asList(1, "Alice"));
+     * N.newDataset(Arrays.asList("id", "name"), rows, N.asMap("source", (Object) "test")); // returns Dataset with properties
+     * N.newDataset(Arrays.asList("id", "name"), Collections.emptyList(), null);            // returns empty Dataset with columns id and name
+     * }</pre>
+     *
      * @param columnNames a collection of strings representing the names of the columns in the Dataset.
      * @param rows a collection of objects representing the data in the Dataset. Each object is a row which can be: Map/Bean/Array/List.
      * @return a new Dataset with the specified column names and rows.
@@ -12999,6 +14017,13 @@ sealed class CommonUtil permits N {
      * The <i>rows</i> parameter is a collection where each item represents a row in the Dataset.
      * The order of elements in each row should correspond to the order of column names.
      * The <i>properties</i> parameter is a map where each entry represents a property of the Dataset.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Object[][] rows = {{1, "Alice"}};
+     * N.newDataset(Arrays.asList("id", "name"), rows);            // returns Dataset with 1 row
+     * N.newDataset(Arrays.asList("id", "name"), new Object[0][]); // returns empty Dataset with columns id and name
+     * }</pre>
      *
      * @param columnNames a collection of strings representing the names of the columns in the Dataset.
      * @param rows a collection of objects representing the data in the Dataset. Each object is a row which can be: Map/Bean/Array/List.
@@ -13121,6 +14146,12 @@ sealed class CommonUtil permits N {
      * The <i>rows</i> parameter is a two-dimensional array where each subarray represents a row in the Dataset.
      * The order of elements in each row should correspond to the order of column names.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.newDataset(Arrays.asList("id", "name")); // returns empty Dataset with columns id and name
+     * N.newDataset(Collections.emptyList());     // returns empty Dataset with no columns
+     * }</pre>
+     *
      * @param columnNames a collection of strings representing the names of the columns in the Dataset.
      * @param rows a two-dimensional array of objects representing the data in the Dataset. Each subarray is a row.
      * @return a new Dataset with the specified column names and rows.
@@ -13167,7 +14198,7 @@ sealed class CommonUtil permits N {
      * // Row 0: Name=Alice, Score=95
      * // Row 1: Name=Bob, Score=87
      *
-     * // Null map creates empty dataset
+     * // null maps are considered unmodifiable creates empty dataset
      * Dataset empty = N.newDataset("key", "value", null);
      * }</pre>
      *
@@ -13212,13 +14243,13 @@ sealed class CommonUtil permits N {
      * Map<String, List<Object>> data = N.asMap(
      *     "Name", N.asList("Alice", "Bob", "Charlie"),
      *     "Age", N.asList(25, 30, 35),
-     *     "City", N.asList("NYC", "LA")  // shorter column
+     *     "City", N.asList("NYC", "LA")
      * );
      * Dataset ds = N.newDataset(data);
      * // ds has 3 rows (max collection size) and 3 columns
      * // City column has null for row 2
      *
-     * // Empty map creates empty dataset
+     * // empty map creates an empty dataset
      * Dataset empty = N.newDataset(N.newLinkedHashMap());
      * }</pre>
      *
@@ -13272,9 +14303,9 @@ sealed class CommonUtil permits N {
      * Dataset ds = N.newDataset("Name", names);
      * // ds has 1 column "Name" with 3 rows: Alice, Bob, Charlie
      *
-     * // Empty collection creates dataset with column but no rows
+     * // empty column creates a dataset with column "Value" and 0 rows
      * Dataset empty = N.newDataset("Value", N.emptyList());
-     * // empty has column "Value" but 0 rows
+     * // empty dataset has column "Value" and 0 rows
      * }</pre>
      *
      * @param columnName the name of the column in the Dataset. Cannot be {@code null} or empty.
@@ -13323,6 +14354,14 @@ sealed class CommonUtil permits N {
     /**
      * Merges three given Datasets into a new single Dataset.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Dataset ds1 = N.newDataset(Arrays.asList("id"), Arrays.asList(Arrays.asList(1)));
+     * Dataset ds2 = N.newDataset(Arrays.asList("id"), Arrays.asList(Arrays.asList(2)));
+     * Dataset ds3 = N.newDataset(Arrays.asList("id"), Arrays.asList(Arrays.asList(3)));
+     * N.merge(ds1, ds2, ds3); // returns Dataset with 3 rows
+     * }</pre>
+     *
      * @param a the first Dataset to be merged.
      * @param b the second Dataset to be merged.
      * @param c the third Dataset to be merged.
@@ -13340,6 +14379,12 @@ sealed class CommonUtil permits N {
     /**
      * Merges a collection of Datasets into a new single Dataset.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.merge(Arrays.asList(N.newDataset("id", Arrays.asList(1)), N.newDataset("id", Arrays.asList(2)))); // returns merged Dataset
+     * N.merge(Collections.emptyList());                                                                   // throws IllegalArgumentException
+     * }</pre>
+     *
      * @param dss the collection of Datasets to be merged.
      * @return a new Dataset which is the result of merging all the Datasets in the provided collection.
      * @throws IllegalArgumentException if the provided collection is {@code null} or empty.
@@ -13350,6 +14395,15 @@ sealed class CommonUtil permits N {
 
     /**
      * Merges a collection of Datasets into a new single Dataset.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Dataset ds1 = N.newDataset(Arrays.asList("id"), Arrays.asList(Arrays.asList(1)));
+     * Dataset ds2 = N.newDataset(Arrays.asList("id"), Arrays.asList(Arrays.asList(2)));
+     *
+     * N.merge(Arrays.asList(ds1, ds2), true);   // returns Dataset with 2 rows
+     * N.merge(Collections.emptyList(), false);  // throws IllegalArgumentException
+     * }</pre>
      *
      * @param dss the collection of Datasets to be merged.
      * @param requiresSameColumns a boolean flag that indicates whether the Datasets in the collection should have the same columns.
@@ -13436,7 +14490,7 @@ sealed class CommonUtil permits N {
      * <pre>{@code
      * String[] words = {"apple", "banana", "cherry", "date", "elderberry"};
      * ImmutableList<String> slice = N.slice(words, 1, 4);
-     * // Returns ["banana", "cherry", "date"]
+     * // returns ["banana", "cherry", "date"]
      * }</pre>
      *
      * @param <T> the type of elements in the array
@@ -13470,7 +14524,7 @@ sealed class CommonUtil permits N {
      * <pre>{@code
      * List<String> words = Arrays.asList("apple", "banana", "cherry", "date", "elderberry");
      * ImmutableList<String> slice = N.slice(words, 1, 4);
-     * // Returns ["banana", "cherry", "date"]
+     * // returns ["banana", "cherry", "date"]
      * }</pre>
      *
      * @param <T> the type of elements in the list
@@ -13506,7 +14560,7 @@ sealed class CommonUtil permits N {
      * <pre>{@code
      * List<String> list = Arrays.asList("a", "b", "c", "d", "e");
      * ImmutableCollection<String> slice = N.slice(list, 1, 4);
-     * // Returns ["b", "c", "d"]
+     * // returns ["b", "c", "d"]
      * }</pre>
      *
      * @param <T> the type of elements in the collection
@@ -13540,7 +14594,7 @@ sealed class CommonUtil permits N {
      * <pre>{@code
      * com.landawn.abacus.util.stream.Stream<Integer> stream = com.landawn.abacus.util.stream.Stream.of(1, 2, 3, 4, 5, 6, 7, 8, 9, 10);
      * ObjIterator<Integer> slice = N.slice(stream.iterator(), 2, 7);
-     * // Returns [3, 4, 5, 6, 7]
+     * // returns [3, 4, 5, 6, 7]
      * }</pre>
      *
      * @param <T> the type of elements in the iterator
@@ -13575,7 +14629,7 @@ sealed class CommonUtil permits N {
      *
      * // Handles null input safely
      * Object[] empty = N.toArray(null);
-     * // empty is an empty array []
+     * // returns empty is an empty array []
      * }</pre>
      *
      * @param c the collection to be converted to an array. Can be {@code null}.
@@ -13591,6 +14645,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Converts the specified range in the specified collection into an array.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.toArray(Arrays.asList("a", "b", "c"), 1, 3); // returns ["b", "c"]
+     * N.toArray(Arrays.asList("a", "b"), 0, 0);      // returns empty array
+     * }</pre>
      *
      * @param c the collection to be converted into an array.
      * @param fromIndex the starting (inclusive) index of the range to be converted.
@@ -13631,12 +14691,18 @@ sealed class CommonUtil permits N {
      * Converts a collection into an array. If the provided array is large enough to hold the elements of the collection,
      * it is filled with the collection's elements, otherwise, a new array of the same runtime type is allocated for this purpose.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.toArray(Arrays.asList("a", "b"), new String[0]); // returns ["a", "b"]
+     * N.toArray(Collections.emptyList(), new String[1]); // returns array with first element null
+     * }</pre>
+     *
      * @param <A> the type of the array.
      * @param <T> the type of the elements in the collection. It must extend or be the same as the type of the array.
      * @param c the collection to be converted into an array.
      * @param a the array into which the elements of the collection are to be stored, if it is big enough; otherwise, a new array of the same runtime type is allocated for this purpose.
      * @return the array containing the elements of the collection. If the provided array was large enough to hold the collection's elements, it is the same as the provided array.
-     * @throws IllegalArgumentException if the specified {@code Array} is {@code null}.
+     * @throws IllegalArgumentException if the specified {@code array} is {@code null}.
      */
     public static <A, T extends A> A[] toArray(final Collection<? extends T> c, @NotNull final A[] a) throws IllegalArgumentException {
         checkArgNotNull(a);
@@ -13657,6 +14723,12 @@ sealed class CommonUtil permits N {
      * Converts the specified range in the specified collection into an array. If the provided array is large enough to hold the elements of the collection,
      * it is filled with the collection's elements, otherwise, a new array of the same runtime type is allocated for this purpose.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.toArray(Arrays.asList("a", "b", "c"), 1, 3, new String[0]); // returns ["b", "c"]
+     * N.toArray(Arrays.asList("a", "b"), 0, 0, new String[1]);      // returns array with first element null
+     * }</pre>
+     *
      * @param <A> the type of the array.
      * @param <T> the type of the elements in the collection. It must extend or be the same as the type of the array.
      * @param c the collection to be converted into an array.
@@ -13664,7 +14736,7 @@ sealed class CommonUtil permits N {
      * @param toIndex the ending (exclusive) index of the range to be converted.
      * @param a the array into which the elements of the collection are to be stored, if it is big enough; otherwise, a new array of the same runtime type is allocated for this purpose.
      * @return the array containing the elements of the specified portion of the collection. If the provided array was large enough to hold the collection's elements, it is the same as the provided array.
-     * @throws IllegalArgumentException if the specified {@code Array} is {@code null}.
+     * @throws IllegalArgumentException if the specified {@code array} is {@code null}.
      */
     public static <A, T extends A> A[] toArray(final Collection<? extends T> c, final int fromIndex, final int toIndex, @NotNull final A[] a)
             throws IllegalArgumentException {
@@ -13710,6 +14782,12 @@ sealed class CommonUtil permits N {
      * Converts a collection into an array using a provided array supplier function.
      * The array supplier function is responsible for creating a new array of the appropriate type and size.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.toArray(Arrays.asList("a", "b"), String[]::new); // returns ["a", "b"]
+     * N.toArray(Collections.emptyList(), String[]::new); // returns empty String[]
+     * }</pre>
+     *
      * @param <A> the type of the array.
      * @param <T> the type of the elements in the collection. It must extend or be the same as the type of the array.
      * @param c the collection to be converted into an array.
@@ -13727,6 +14805,12 @@ sealed class CommonUtil permits N {
     /**
      * Converts the specified range in the specified collection into an array using a provided array supplier function.
      * The array supplier function is responsible for creating a new array of the appropriate type and size.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.toArray(Arrays.asList("a", "b", "c"), 1, 3, String[]::new); // returns ["b", "c"]
+     * N.toArray(Arrays.asList("a", "b"), 0, 0, String[]::new);      // returns empty String[]
+     * }</pre>
      *
      * @param <A> the type of the array.
      * @param <T> the type of the elements in the collection. It must extend or be the same as the type of the array.
@@ -13769,6 +14853,12 @@ sealed class CommonUtil permits N {
     /**
      * Converts a collection into an array of a specified type.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.toArray(Arrays.asList("a", "b"), String[].class); // returns ["a", "b"]
+     * N.toArray(Collections.emptyList(), String[].class); // returns empty String[]
+     * }</pre>
+     *
      * @param <A> the type of the array.
      * @param <T> the type of the elements in the collection. It must extend or be the same as the type of the array.
      * @param c the collection to be converted into an array.
@@ -13788,6 +14878,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Converts the specified range in the specified collection into an array of a specified type.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.toArray(Arrays.asList("a", "b", "c"), 1, 3, String[].class); // returns ["b", "c"]
+     * N.toArray(Arrays.asList("a", "b"), 0, 0, String[].class);      // returns empty String[]
+     * }</pre>
      *
      * @param <A> the type of the array.
      * @param <T> the type of the elements in the collection. It must extend or be the same as the type of the array.
@@ -13840,7 +14936,7 @@ sealed class CommonUtil permits N {
      * boolean[] array = N.toBooleanArray(list);
      * // array is [true, false, true]
      *
-     * // Null elements become false
+     * // null elements become false
      * List<Boolean> listWithNull = N.asList(true, null, false);
      * boolean[] arrayWithNull = N.toBooleanArray(listWithNull);
      * // arrayWithNull is [true, false, false]
@@ -13857,6 +14953,14 @@ sealed class CommonUtil permits N {
     /**
      * Converts the specified range of the specified Boolean collection to a boolean array.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<Boolean> c = N.asList(true, false, true, false);
+     * N.toBooleanArray(c, 1, 3);   // returns [false, true]
+     * N.toBooleanArray(c, 1, 1);   // returns [] (empty range)
+     * N.toBooleanArray(c, 0, 5);   // throws IndexOutOfBoundsException
+     * }</pre>
+     *
      * @param c the collection of Boolean objects to be converted
      * @param fromIndex the starting (inclusive) index of the range to be converted
      * @param toIndex the ending (exclusive) index of the range to be converted
@@ -13870,6 +14974,12 @@ sealed class CommonUtil permits N {
     /**
      * Converts a collection of Boolean objects to a boolean array.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.toBooleanArray(Arrays.asList(true, null, false), true); // returns primitive array using default for null
+     * N.toBooleanArray(Collections.emptyList(), true);          // returns empty primitive array
+     * }</pre>
+     *
      * @param c the collection of Boolean objects to be converted
      * @param defaultForNull the default boolean value to use if a Boolean object in the collection is null
      * @return a boolean array containing the primitive boolean values from the collection
@@ -13880,6 +14990,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Converts the specified range of the specified Boolean collection to a boolean array.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.toBooleanArray(Arrays.asList(true, null, false), 1, 3, true); // returns primitive array for selected range
+     * N.toBooleanArray(Arrays.asList(true, null, false), 0, 0, true); // returns empty primitive array
+     * }</pre>
      *
      * @param c the collection of Boolean objects to be converted
      * @param fromIndex the starting (inclusive) index of the range to be converted
@@ -13944,9 +15060,9 @@ sealed class CommonUtil permits N {
      * boolean[] bools = N.toBooleanArray(bytes);
      * // bools is [true, false, false, true, false]
      *
-     * // Null or empty returns empty array
+     * // null or empty returns empty array
      * boolean[] empty = N.toBooleanArray((byte[]) null);
-     * // empty is an empty boolean array
+     * // returns empty is an empty boolean array
      * }</pre>
      *
      * @param a the byte array to be converted. Can be {@code null}.
@@ -13971,6 +15087,12 @@ sealed class CommonUtil permits N {
     /**
      * Converts an integer array to a boolean array.
      * Each integer with positive value({@code > 0}) is converted to a boolean value {@code true}, {@code 0} and negative value to {@code false}.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.toBooleanArray(new int[] {1, 2}); // returns converted primitive array
+     * N.toBooleanArray((int[]) null);     // returns empty primitive array
+     * }</pre>
      *
      * @param a the integer array to be converted
      * @return a boolean array with the same length as the input array, or an empty boolean array if the input array is {@code null} or empty
@@ -14000,7 +15122,7 @@ sealed class CommonUtil permits N {
      * char[] array = N.toCharArray(list);
      * // array is ['a', 'b', 'c']
      *
-     * // Null elements become '\0'
+     * // null elements become '\0'
      * List<Character> listWithNull = N.asList('x', null, 'z');
      * char[] arrayWithNull = N.toCharArray(listWithNull);
      * // arrayWithNull is ['x', '\0', 'z']
@@ -14017,6 +15139,14 @@ sealed class CommonUtil permits N {
     /**
      * Converts the specified range of the specified character collection to a char array.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<Character> c = N.asList('a', 'b', 'c', 'd');
+     * N.toCharArray(c, 1, 3);   // returns ['b', 'c']
+     * N.toCharArray(c, 2, 2);   // returns [] (empty range)
+     * N.toCharArray(c, 0, 5);   // throws IndexOutOfBoundsException
+     * }</pre>
+     *
      * @param c the collection of Character objects to be converted
      * @param fromIndex the starting (inclusive) index of the range to be converted
      * @param toIndex the ending (exclusive) index of the range to be converted
@@ -14030,6 +15160,12 @@ sealed class CommonUtil permits N {
     /**
      * Converts a collection of Character objects to a char array.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.toCharArray(Arrays.asList('a', null, 'c'), 'x'); // returns primitive array using default for null
+     * N.toCharArray(Collections.emptyList(), 'x');       // returns empty primitive array
+     * }</pre>
+     *
      * @param c the collection of Character objects to be converted
      * @param defaultForNull the default char value to use if a Character object in the collection is null
      * @return a char array containing the primitive char values from the collection
@@ -14040,6 +15176,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Converts the specified range of the specified character collection to a char array.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.toCharArray(Arrays.asList('a', null, 'c'), 1, 3, 'x'); // returns primitive array for selected range
+     * N.toCharArray(Arrays.asList('a', null, 'c'), 0, 0, 'x'); // returns empty primitive array
+     * }</pre>
      *
      * @param c the collection of Character objects to be converted
      * @param fromIndex the starting (inclusive) index of the range to be converted
@@ -14109,7 +15251,7 @@ sealed class CommonUtil permits N {
      * byte[] fromInts = N.toByteArray(ints);
      * // fromInts is [100, -56, 50] (200 overflows to -56)
      *
-     * // Null elements become 0
+     * // null elements become 0
      * List<Byte> withNull = N.asList((byte) 1, null, (byte) 3);
      * byte[] arrayWithNull = N.toByteArray(withNull);
      * // arrayWithNull is [1, 0, 3]
@@ -14126,6 +15268,12 @@ sealed class CommonUtil permits N {
     /**
      * Converts the specified range of the specified Number collection to a byte array.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.toByteArray(Arrays.asList((byte) 1, null, (byte) 3)); // returns primitive array
+     * N.toByteArray(Collections.emptyList());                 // returns empty primitive array
+     * }</pre>
+     *
      * @param c the collection of Number objects to be converted
      * @param fromIndex the starting (inclusive) index of the range to be converted
      * @param toIndex the ending (exclusive) index of the range to be converted
@@ -14139,6 +15287,12 @@ sealed class CommonUtil permits N {
     /**
      * Converts a collection of Number objects to a byte array.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.toByteArray(Arrays.asList((byte) 1, null, (byte) 3), (byte) 9); // returns primitive array using default for null
+     * N.toByteArray(Collections.emptyList(), (byte) 9);                 // returns empty primitive array
+     * }</pre>
+     *
      * @param c the collection of Number objects to be converted
      * @param defaultForNull the default byte value to use if a Number object in the collection is null
      * @return a byte array containing the primitive byte values from the collection
@@ -14149,6 +15303,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Converts the specified range of the specified Number collection to a byte array.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.toByteArray(Arrays.asList((byte) 1, null, (byte) 3), 1, 3, (byte) 9); // returns primitive array for selected range
+     * N.toByteArray(Arrays.asList((byte) 1, null, (byte) 3), 0, 0, (byte) 9); // returns empty primitive array
+     * }</pre>
      *
      * @param c the collection of Number objects to be converted
      * @param fromIndex the starting (inclusive) index of the range to be converted
@@ -14213,9 +15373,9 @@ sealed class CommonUtil permits N {
      * byte[] bytes = N.toByteArray(bools);
      * // bytes is [1, 0, 1, 1]
      *
-     * // Null or empty returns empty array
+     * // null or empty returns empty array
      * byte[] empty = N.toByteArray((boolean[]) null);
-     * // empty is an empty byte array
+     * // returns empty is an empty byte array
      * }</pre>
      *
      * @param a the boolean array to be converted. Can be {@code null}.
@@ -14252,7 +15412,7 @@ sealed class CommonUtil permits N {
      * short[] fromInts = N.toShortArray(ints);
      * // fromInts is [1000, -15536, 500] (50000 overflows)
      *
-     * // Null elements become 0
+     * // null elements become 0
      * List<Short> withNull = N.asList((short) 10, null, (short) 30);
      * short[] arrayWithNull = N.toShortArray(withNull);
      * // arrayWithNull is [10, 0, 30]
@@ -14269,6 +15429,12 @@ sealed class CommonUtil permits N {
     /**
      * Converts the specified range of the specified Number collection to a short array.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.toShortArray(Arrays.asList((short) 1, null, (short) 3)); // returns primitive array
+     * N.toShortArray(Collections.emptyList());                   // returns empty primitive array
+     * }</pre>
+     *
      * @param c the collection of Number objects to be converted
      * @param fromIndex the starting (inclusive) index of the range to be converted
      * @param toIndex the ending (exclusive) index of the range to be converted
@@ -14282,6 +15448,12 @@ sealed class CommonUtil permits N {
     /**
      * Converts a collection of Number objects to a short array.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.toShortArray(Arrays.asList((short) 1, null, (short) 3), (short) 9); // returns primitive array using default for null
+     * N.toShortArray(Collections.emptyList(), (short) 9);                   // returns empty primitive array
+     * }</pre>
+     *
      * @param c the collection of Number objects to be converted
      * @param defaultForNull the default short value to use if a Number object in the collection is null
      * @return a short array containing the primitive short values from the collection
@@ -14292,6 +15464,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Converts the specified range of the specified Number collection to a short array.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.toShortArray(Arrays.asList((short) 1, null, (short) 3), 1, 3, (short) 9); // returns primitive array for selected range
+     * N.toShortArray(Arrays.asList((short) 1, null, (short) 3), 0, 0, (short) 9); // returns empty primitive array
+     * }</pre>
      *
      * @param c the collection of Number objects to be converted
      * @param fromIndex the starting (inclusive) index of the range to be converted
@@ -14361,7 +15539,7 @@ sealed class CommonUtil permits N {
      * int[] fromDoubles = N.toIntArray(doubles);
      * // fromDoubles is [1, 2, 3]
      *
-     * // Null elements become 0
+     * // null elements become 0
      * List<Integer> withNull = N.asList(1, null, 3);
      * int[] arrayWithNull = N.toIntArray(withNull);
      * // arrayWithNull is [1, 0, 3]
@@ -14378,6 +15556,12 @@ sealed class CommonUtil permits N {
     /**
      * Converts the specified range of the specified Number collection to an int array.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.toIntArray(Arrays.asList(1, null, 3)); // returns primitive array
+     * N.toIntArray(Collections.emptyList());   // returns empty primitive array
+     * }</pre>
+     *
      * @param c the collection of Number objects to be converted
      * @param fromIndex the starting (inclusive) index of the range to be converted
      * @param toIndex the ending (exclusive) index of the range to be converted
@@ -14391,6 +15575,12 @@ sealed class CommonUtil permits N {
     /**
      * Converts a collection of Number objects to an int array.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.toIntArray(Arrays.asList(1, null, 3), 9); // returns primitive array using default for null
+     * N.toIntArray(Collections.emptyList(), 9);   // returns empty primitive array
+     * }</pre>
+     *
      * @param c the collection of Number objects to be converted
      * @param defaultForNull the default int value to use if a Number object in the collection is null
      * @return an int array containing the primitive int values from the collection
@@ -14401,6 +15591,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Converts the specified range of the specified Number collection to an int array.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.toIntArray(Arrays.asList(1, null, 3), 1, 3, 9); // returns primitive array for selected range
+     * N.toIntArray(Arrays.asList(1, null, 3), 0, 0, 9); // returns empty primitive array
+     * }</pre>
      *
      * @param c the collection of Number objects to be converted
      * @param fromIndex the starting (inclusive) index of the range to be converted
@@ -14459,6 +15655,12 @@ sealed class CommonUtil permits N {
      * Converts a char array to an int array.
      * Each char value is converted to its corresponding int value.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.toIntArray(new char[] {'a', 'b'}); // returns converted primitive array
+     * N.toIntArray((char[]) null);         // returns empty primitive array
+     * }</pre>
+     *
      * @param a the char array to be converted
      * @return an int array with the same length as the input array, or an empty int array if the input array is {@code null} or empty
      */
@@ -14491,7 +15693,7 @@ sealed class CommonUtil permits N {
      * int trueCount = IntStream.of(N.toIntArray(bools)).sum();
      * // trueCount is 3
      *
-     * // Null or empty returns empty array
+     * // null or empty returns empty array
      * int[] empty = N.toIntArray((boolean[]) null);
      * }</pre>
      *
@@ -14529,7 +15731,7 @@ sealed class CommonUtil permits N {
      * long[] fromInts = N.toLongArray(ints);
      * // fromInts is [1L, 2L, 3L]
      *
-     * // Null elements become 0
+     * // null elements become 0
      * List<Long> withNull = N.asList(10L, null, 30L);
      * long[] arrayWithNull = N.toLongArray(withNull);
      * // arrayWithNull is [10, 0, 30]
@@ -14546,6 +15748,12 @@ sealed class CommonUtil permits N {
     /**
      * Converts the specified range of the specified Number collection to a long array.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.toLongArray(Arrays.asList(1L, null, 3L)); // returns primitive array
+     * N.toLongArray(Collections.emptyList());     // returns empty primitive array
+     * }</pre>
+     *
      * @param c the collection of Number objects to be converted
      * @param fromIndex the starting (inclusive) index of the range to be converted
      * @param toIndex the ending (exclusive) index of the range to be converted
@@ -14559,6 +15767,12 @@ sealed class CommonUtil permits N {
     /**
      * Converts a collection of Number objects to a long array.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.toLongArray(Arrays.asList(1L, null, 3L), 9L); // returns primitive array using default for null
+     * N.toLongArray(Collections.emptyList(), 9L);     // returns empty primitive array
+     * }</pre>
+     *
      * @param c the collection of Number objects to be converted
      * @param defaultForNull the default long value to use if a Number object in the collection is null
      * @return a long array containing the primitive long values from the collection
@@ -14569,6 +15783,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Converts the specified range of the specified Number collection to a long array.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.toLongArray(Arrays.asList(1L, null, 3L), 1, 3, 9L); // returns primitive array for selected range
+     * N.toLongArray(Arrays.asList(1L, null, 3L), 0, 0, 9L); // returns empty primitive array
+     * }</pre>
      *
      * @param c the collection of Number objects to be converted
      * @param fromIndex the starting (inclusive) index of the range to be converted
@@ -14638,7 +15858,7 @@ sealed class CommonUtil permits N {
      * float[] fromInts = N.toFloatArray(ints);
      * // fromInts is [1.0f, 2.0f, 3.0f]
      *
-     * // Null elements become 0
+     * // null elements become 0
      * List<Float> withNull = N.asList(1.1f, null, 3.3f);
      * float[] arrayWithNull = N.toFloatArray(withNull);
      * // arrayWithNull is [1.1, 0.0, 3.3]
@@ -14655,6 +15875,12 @@ sealed class CommonUtil permits N {
     /**
      * Converts the specified range of the specified Number collection to a float array.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.toFloatArray(Arrays.asList(1.0f, null, 3.0f)); // returns primitive array
+     * N.toFloatArray(Collections.emptyList());         // returns empty primitive array
+     * }</pre>
+     *
      * @param c the collection of Number objects to be converted
      * @param fromIndex the starting (inclusive) index of the range to be converted
      * @param toIndex the ending (exclusive) index of the range to be converted
@@ -14668,6 +15894,12 @@ sealed class CommonUtil permits N {
     /**
      * Converts a collection of Number objects to a float array.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.toFloatArray(Arrays.asList(1.0f, null, 3.0f), 9.0f); // returns primitive array using default for null
+     * N.toFloatArray(Collections.emptyList(), 9.0f);         // returns empty primitive array
+     * }</pre>
+     *
      * @param c the collection of Number objects to be converted
      * @param defaultForNull the default float value to use if a Number object in the collection is null
      * @return a float array containing the primitive float values from the collection
@@ -14678,6 +15910,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Converts the specified range of the specified Number collection to a float array.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.toFloatArray(Arrays.asList(1.0f, null, 3.0f), 1, 3, 9.0f); // returns primitive array for selected range
+     * N.toFloatArray(Arrays.asList(1.0f, null, 3.0f), 0, 0, 9.0f); // returns empty primitive array
+     * }</pre>
      *
      * @param c the collection of Number objects to be converted
      * @param fromIndex the starting (inclusive) index of the range to be converted
@@ -14747,7 +15985,7 @@ sealed class CommonUtil permits N {
      * double[] fromInts = N.toDoubleArray(ints);
      * // fromInts is [1.0, 2.0, 3.0]
      *
-     * // Null elements become 0
+     * // null elements become 0
      * List<Double> withNull = N.asList(1.1, null, 3.3);
      * double[] arrayWithNull = N.toDoubleArray(withNull);
      * // arrayWithNull is [1.1, 0.0, 3.3]
@@ -14764,6 +16002,12 @@ sealed class CommonUtil permits N {
     /**
      * Converts the specified range of the specified Number collection to a double array.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.toDoubleArray(Arrays.asList(1.0d, null, 3.0d)); // returns primitive array
+     * N.toDoubleArray(Collections.emptyList());         // returns empty primitive array
+     * }</pre>
+     *
      * @param c the collection of Number objects to be converted
      * @param fromIndex the starting (inclusive) index of the range to be converted
      * @param toIndex the ending (exclusive) index of the range to be converted
@@ -14777,6 +16021,12 @@ sealed class CommonUtil permits N {
     /**
      * Converts a collection of Number objects to a double array.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.toDoubleArray(Arrays.asList(1.0d, null, 3.0d), 9.0d); // returns primitive array using default for null
+     * N.toDoubleArray(Collections.emptyList(), 9.0d);         // returns empty primitive array
+     * }</pre>
+     *
      * @param c the collection of Number objects to be converted
      * @param defaultForNull the default double value to use if a Number object in the collection is null
      * @return a double array containing the primitive double values from the collection
@@ -14787,6 +16037,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Converts the specified range of the specified Number collection to a double array.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.toDoubleArray(Arrays.asList(1.0d, null, 3.0d), 1, 3, 9.0d); // returns primitive array for selected range
+     * N.toDoubleArray(Arrays.asList(1.0d, null, 3.0d), 0, 0, 9.0d); // returns empty primitive array
+     * }</pre>
      *
      * @param c the collection of Number objects to be converted
      * @param fromIndex the starting (inclusive) index of the range to be converted
@@ -14852,12 +16108,12 @@ sealed class CommonUtil permits N {
      * <pre>{@code
      * boolean[] array = {true, false, true};
      * List<Boolean> list = N.toList(array);
-     * list.add(false);  // list is now [true, false, true, false]
+     * list.add(false);  // returns true; list is now [true, false, true, false]
      * // array is still [true, false, true] - not affected
      *
-     * // Null or empty input returns empty list
+     * // null or empty input returns empty list
      * List<Boolean> empty = N.toList((boolean[]) null);
-     * // empty is an empty ArrayList
+     * // returns empty is an empty ArrayList
      * }</pre>
      *
      * @param a the boolean array to be converted. Can be {@code null}.
@@ -14870,6 +16126,14 @@ sealed class CommonUtil permits N {
 
     /**
      * Converts the specified range of the array to a modifiable List, which is NOT backed with the input array.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * boolean[] a = {true, false, true, false};
+     * N.toList(a, 1, 3);   // returns [false, true]
+     * N.toList(a, 1, 1);   // returns [] (empty range)
+     * N.toList(a, 0, 5);   // throws IndexOutOfBoundsException
+     * }</pre>
      *
      * @param a the boolean array to be converted
      * @param fromIndex the starting (inclusive) index of the range to be converted
@@ -14896,6 +16160,12 @@ sealed class CommonUtil permits N {
     /**
      * Converts a char array to a modifiable List, which is NOT backed with the input array.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.toList(new char[] {'a', 'b'}); // returns List with two elements
+     * N.toList((char[]) null);         // returns empty List
+     * }</pre>
+     *
      * @param a the char array to be converted
      * @return a modifiable List of Character objects containing the values from the char array
      */
@@ -14905,6 +16175,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Converts the specified range of the array to a modifiable List, which is NOT backed with the input array.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.toList(new char[] {'a', 'b'}); // returns List with two elements
+     * N.toList((char[]) null);         // returns empty List
+     * }</pre>
      *
      * @param a the char array to be converted
      * @param fromIndex the starting (inclusive) index of the range to be converted
@@ -14931,6 +16207,12 @@ sealed class CommonUtil permits N {
     /**
      * Converts a byte array to a modifiable List, which is NOT backed with the input array.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.toList(new byte[] {1, 2}); // returns List with two elements
+     * N.toList((byte[]) null);     // returns empty List
+     * }</pre>
+     *
      * @param a the byte array to be converted
      * @return a modifiable List of Byte objects containing the values from the byte array
      */
@@ -14940,6 +16222,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Converts the specified range of the byte array to a modifiable List, which is NOT backed with the input array.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.toList(new byte[] {1, 2}); // returns List with two elements
+     * N.toList((byte[]) null);     // returns empty List
+     * }</pre>
      *
      * @param a the byte array to be converted
      * @param fromIndex the starting (inclusive) index of the range to be converted
@@ -14966,6 +16254,12 @@ sealed class CommonUtil permits N {
     /**
      * Converts a short array to a modifiable List, which is NOT backed with the input array.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.toList(new short[] {1, 2}); // returns List with two elements
+     * N.toList((short[]) null);     // returns empty List
+     * }</pre>
+     *
      * @param a the short array to be converted
      * @return a modifiable List of Short objects containing the values from the short array
      */
@@ -14975,6 +16269,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Converts the specified range of the short array to a modifiable List, which is NOT backed with the input array.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.toList(new short[] {1, 2}); // returns List with two elements
+     * N.toList((short[]) null);     // returns empty List
+     * }</pre>
      *
      * @param a the short array to be converted
      * @param fromIndex the starting (inclusive) index of the range to be converted
@@ -15001,6 +16301,12 @@ sealed class CommonUtil permits N {
     /**
      * Converts an int array to a modifiable List, which is NOT backed with the input array.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.toList(new int[] {1, 2}); // returns List with two elements
+     * N.toList((int[]) null);     // returns empty List
+     * }</pre>
+     *
      * @param a the int array to be converted
      * @return a modifiable List of Integer objects containing the values from the int array
      */
@@ -15010,6 +16316,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Converts the specified range of the int array to a modifiable List, which is NOT backed with the input array.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.toList(new int[] {1, 2}); // returns List with two elements
+     * N.toList((int[]) null);     // returns empty List
+     * }</pre>
      *
      * @param a the int array to be converted
      * @param fromIndex the starting (inclusive) index of the range to be converted
@@ -15036,6 +16348,12 @@ sealed class CommonUtil permits N {
     /**
      * Converts a long array to a modifiable List, which is NOT backed with the input array.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.toList(new long[] {1L, 2L}); // returns List with two elements
+     * N.toList((long[]) null);       // returns empty List
+     * }</pre>
+     *
      * @param a the long array to be converted
      * @return a modifiable List of Long objects containing the values from the long array
      */
@@ -15045,6 +16363,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Converts the specified range of the long array to a modifiable List, which is NOT backed with the input array.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.toList(new long[] {1L, 2L}); // returns List with two elements
+     * N.toList((long[]) null);       // returns empty List
+     * }</pre>
      *
      * @param a the long array to be converted
      * @param fromIndex the starting (inclusive) index of the range to be converted
@@ -15071,6 +16395,12 @@ sealed class CommonUtil permits N {
     /**
      * Converts a float array to a modifiable List, which is NOT backed with the input array.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.toList(new float[] {1.0f, 2.0f}); // returns List with two elements
+     * N.toList((float[]) null);           // returns empty List
+     * }</pre>
+     *
      * @param a the float array to be converted
      * @return a modifiable List of Float objects containing the values from the float array
      */
@@ -15080,6 +16410,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Converts the specified range of the float array to a modifiable List, which is NOT backed with the input array.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.toList(new float[] {1.0f, 2.0f}); // returns List with two elements
+     * N.toList((float[]) null);           // returns empty List
+     * }</pre>
      *
      * @param a the float array to be converted
      * @param fromIndex the starting (inclusive) index of the range to be converted
@@ -15106,6 +16442,12 @@ sealed class CommonUtil permits N {
     /**
      * Converts a double array to a modifiable List, which is NOT backed with the input array.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.toList(new double[] {1.0d, 2.0d}); // returns List with two elements
+     * N.toList((double[]) null);           // returns empty List
+     * }</pre>
+     *
      * @param a the double array to be converted
      * @return a modifiable List of Double objects containing the values from the double array
      */
@@ -15115,6 +16457,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Converts the specified range of the double array to a modifiable List, which is NOT backed with the input array.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.toList(new double[] {1.0d, 2.0d}); // returns List with two elements
+     * N.toList((double[]) null);           // returns empty List
+     * }</pre>
      *
      * @param a the double array to be converted
      * @param fromIndex the starting (inclusive) index of the range to be converted
@@ -15141,6 +16489,12 @@ sealed class CommonUtil permits N {
     /**
      * Converts an array of objects to a modifiable List, which is NOT backed with the input array.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.toList("a", "b");        // returns List with two elements
+     * N.toList((String[]) null); // returns empty List
+     * }</pre>
+     *
      * @param <T> the type of elements in the array
      * @param a the array to be converted
      * @return a modifiable List of objects containing the values from the array
@@ -15159,6 +16513,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Converts the specified range of the array to a modifiable List, which is NOT backed with the input array.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.toList(new String[] {"a", "b"}); // returns List with two elements
+     * N.toList((T[]) null);              // returns empty List
+     * }</pre>
      *
      * @param <T> the type of elements in the array
      * @param a the array to be converted
@@ -15199,9 +16559,9 @@ sealed class CommonUtil permits N {
      * // list is ["a", "b", "c"]
      * // iter is now exhausted and cannot be reused
      *
-     * // Null iterator returns empty list
+     * // null iterator returns empty list
      * List<String> empty = N.toList((Iterator<String>) null);
-     * // empty is an empty ArrayList
+     * // returns empty is an empty ArrayList
      * }</pre>
      *
      * @param <T> the type of elements in the iterator
@@ -15231,6 +16591,12 @@ sealed class CommonUtil permits N {
      * modifiable list that is not backed by the original array, meaning modifications to the returned
      * list will not affect the original array and vice versa.</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.toLinkedList("a", "b");        // returns LinkedList ["a", "b"]
+     * N.toLinkedList((String[]) null); // returns empty LinkedList
+     * }</pre>
+     *
      * @param <T> the type of elements in the list
      * @param a the array of elements to be placed in the List
      * @return a List containing the specified elements
@@ -15258,11 +16624,11 @@ sealed class CommonUtil permits N {
      * boolean[] array = {true, false, true, false};
      * Set<Boolean> set = N.toSet(array);
      * // set contains only [true, false] - duplicates removed
-     * set.add(true);  // no effect, already present
+     * set.add(true);  // returns false; set is unchanged
      *
-     * // Null or empty input returns empty Set
+     * // null or empty input returns empty Set
      * Set<Boolean> empty = N.toSet((boolean[]) null);
-     * // empty is an empty HashSet
+     * // returns empty is an empty HashSet
      * }</pre>
      *
      * @param a the boolean array to be converted. Can be {@code null}.
@@ -15275,6 +16641,14 @@ sealed class CommonUtil permits N {
 
     /**
      * Converts the specified range of the boolean array to a modifiable Set, which is NOT backed with the input array.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * boolean[] a = {true, false, true, false};
+     * N.toSet(a, 0, 4);   // returns [true, false] (duplicates removed)
+     * N.toSet(a, 1, 1);   // returns [] (empty range)
+     * N.toSet(a, 0, 5);   // throws IndexOutOfBoundsException
+     * }</pre>
      *
      * @param a the boolean array to be converted
      * @param fromIndex the starting (inclusive) index of the range to be converted
@@ -15301,6 +16675,12 @@ sealed class CommonUtil permits N {
     /**
      * Converts a char array to a modifiable Set, which is NOT backed with the input array.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.toSet(new char[] {'a', 'b'}); // returns Set with two elements
+     * N.toSet((char[]) null);         // returns empty Set
+     * }</pre>
+     *
      * @param a the char array to be converted
      * @return a modifiable Set of Character objects containing the values from the char array
      */
@@ -15310,6 +16690,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Converts the specified range of the char array to a modifiable Set, which is NOT backed with the input array.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.toSet(new char[] {'a', 'b'}); // returns Set with two elements
+     * N.toSet((char[]) null);         // returns empty Set
+     * }</pre>
      *
      * @param a the char array to be converted
      * @param fromIndex the starting (inclusive) index of the range to be converted
@@ -15336,6 +16722,12 @@ sealed class CommonUtil permits N {
     /**
      * Converts a byte array to a modifiable Set, which is NOT backed with the input array.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.toSet(new byte[] {1, 2}); // returns Set with two elements
+     * N.toSet((byte[]) null);     // returns empty Set
+     * }</pre>
+     *
      * @param a the byte array to be converted
      * @return a modifiable Set of Byte objects containing the values from the byte array
      */
@@ -15345,6 +16737,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Converts the specified range of the byte array to a modifiable Set, which is NOT backed with the input array.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.toSet(new byte[] {1, 2}); // returns Set with two elements
+     * N.toSet((byte[]) null);     // returns empty Set
+     * }</pre>
      *
      * @param a the byte array to be converted
      * @param fromIndex the starting (inclusive) index of the range to be converted
@@ -15371,6 +16769,12 @@ sealed class CommonUtil permits N {
     /**
      * Converts a short array to a modifiable Set, which is NOT backed with the input array.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.toSet(new short[] {1, 2}); // returns Set with two elements
+     * N.toSet((short[]) null);     // returns empty Set
+     * }</pre>
+     *
      * @param a the short array to be converted
      * @return a modifiable Set of Short objects containing the values from the short array
      */
@@ -15380,6 +16784,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Converts the specified range of the short array to a modifiable Set, which is NOT backed with the input array.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.toSet(new short[] {1, 2}); // returns Set with two elements
+     * N.toSet((short[]) null);     // returns empty Set
+     * }</pre>
      *
      * @param a the short array to be converted
      * @param fromIndex the starting (inclusive) index of the range to be converted
@@ -15406,6 +16816,12 @@ sealed class CommonUtil permits N {
     /**
      * Converts an int array to a modifiable Set, which is NOT backed with the input array.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.toSet(new int[] {1, 2}); // returns Set with two elements
+     * N.toSet((int[]) null);     // returns empty Set
+     * }</pre>
+     *
      * @param a the int array to be converted
      * @return a modifiable Set of Integer objects containing the values from the int array
      */
@@ -15415,6 +16831,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Converts the specified range of the int array to a modifiable Set, which is NOT backed with the input array.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.toSet(new int[] {1, 2}); // returns Set with two elements
+     * N.toSet((int[]) null);     // returns empty Set
+     * }</pre>
      *
      * @param a the int array to be converted
      * @param fromIndex the starting (inclusive) index of the range to be converted
@@ -15441,6 +16863,12 @@ sealed class CommonUtil permits N {
     /**
      * Converts a long array to a modifiable Set, which is NOT backed with the input array.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.toSet(new long[] {1L, 2L}); // returns Set with two elements
+     * N.toSet((long[]) null);       // returns empty Set
+     * }</pre>
+     *
      * @param a the long array to be converted
      * @return a modifiable Set of Long objects containing the values from the long array
      */
@@ -15450,6 +16878,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Converts the specified range of the long array to a modifiable Set, which is NOT backed with the input array.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.toSet(new long[] {1L, 2L}); // returns Set with two elements
+     * N.toSet((long[]) null);       // returns empty Set
+     * }</pre>
      *
      * @param a the long array to be converted
      * @param fromIndex the starting (inclusive) index of the range to be converted
@@ -15476,6 +16910,12 @@ sealed class CommonUtil permits N {
     /**
      * Converts a float array to a modifiable Set, which is NOT backed with the input array.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.toSet(new float[] {1.0f, 2.0f}); // returns Set with two elements
+     * N.toSet((float[]) null);           // returns empty Set
+     * }</pre>
+     *
      * @param a the float array to be converted
      * @return a modifiable Set of Float objects containing the values from the float array
      */
@@ -15485,6 +16925,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Converts the specified range of the float array to a modifiable Set, which is NOT backed with the input array.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.toSet(new float[] {1.0f, 2.0f}); // returns Set with two elements
+     * N.toSet((float[]) null);           // returns empty Set
+     * }</pre>
      *
      * @param a the float array to be converted
      * @param fromIndex the starting (inclusive) index of the range to be converted
@@ -15511,6 +16957,12 @@ sealed class CommonUtil permits N {
     /**
      * Converts a double array to a modifiable Set, which is NOT backed with the input array.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.toSet(new double[] {1.0d, 2.0d}); // returns Set with two elements
+     * N.toSet((double[]) null);           // returns empty Set
+     * }</pre>
+     *
      * @param a the double array to be converted
      * @return a modifiable Set of Double objects containing the values from the double array
      */
@@ -15520,6 +16972,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Converts the specified range of the double array to a modifiable Set, which is NOT backed with the input array.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.toSet(new double[] {1.0d, 2.0d}); // returns Set with two elements
+     * N.toSet((double[]) null);           // returns empty Set
+     * }</pre>
      *
      * @param a the double array to be converted
      * @param fromIndex the starting (inclusive) index of the range to be converted
@@ -15546,6 +17004,12 @@ sealed class CommonUtil permits N {
     /**
      * Converts an array of objects to a modifiable Set, which is NOT backed with the input array.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.toSet("a", "b");        // returns Set with two elements
+     * N.toSet((String[]) null); // returns empty Set
+     * }</pre>
+     *
      * @param <T> the type of elements in the array
      * @param a the array to be converted
      * @return a modifiable Set of objects containing the values from the array
@@ -15564,6 +17028,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Converts the specified range of the array to a modifiable Set, which is NOT backed with the input array.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.toSet(new String[] {"a", "b"}); // returns Set with two elements
+     * N.toSet((T[]) null);              // returns empty Set
+     * }</pre>
      *
      * @param <T> the type of elements in the array
      * @param a the array to be converted
@@ -15603,9 +17073,9 @@ sealed class CommonUtil permits N {
      * // set is ["a", "b", "c"] - duplicates removed
      * // iter is now exhausted and cannot be reused
      *
-     * // Null iterator returns empty set
+     * // null iterator returns empty set
      * Set<String> empty = N.toSet((Iterator<String>) null);
-     * // empty is an empty HashSet
+     * // returns empty is an empty HashSet
      * }</pre>
      *
      * @param <T> the type of elements in the iterator
@@ -15630,6 +17100,12 @@ sealed class CommonUtil permits N {
      * Returns a modifiable {@code LinkedHashSet} with specified elements. And it's not backed by the specified array.
      * If the specified array is {@code null} or empty, an empty {@code LinkedHashSet} is returned.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.toLinkedHashSet("a", "b");        // returns LinkedHashSet ["a", "b"]
+     * N.toLinkedHashSet((String[]) null); // returns empty LinkedHashSet
+     * }</pre>
+     *
      * @param <T> the type of elements in the set
      * @param a the array of elements to be placed in the set
      * @return a Set containing the specified elements
@@ -15647,6 +17123,12 @@ sealed class CommonUtil permits N {
     /**
      * Returns a modifiable {@code SortedSet} with specified elements. And it's not backed by the specified array.
      * If the specified array is {@code null} or empty, an empty {@code SortedSet} is returned.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.toSortedSet("a", "b");        // returns SortedSet ["a", "b"]
+     * N.toSortedSet((String[]) null); // returns empty SortedSet
+     * }</pre>
      *
      * @param <T> the type of elements in the set
      * @param a the array of elements to be placed in the set
@@ -15666,6 +17148,12 @@ sealed class CommonUtil permits N {
      * Returns a modifiable {@code NavigableSet} with specified elements. And it's not backed by the specified array.
      * If the specified array is {@code null} or empty, an empty {@code NavigableSet} is returned.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.toNavigableSet("a", "b");        // returns NavigableSet ["a", "b"]
+     * N.toNavigableSet((String[]) null); // returns empty NavigableSet
+     * }</pre>
+     *
      * @param <T> the type of elements in the set
      * @param a the array of elements to be placed in the set
      * @return a Set containing the specified elements
@@ -15683,6 +17171,12 @@ sealed class CommonUtil permits N {
      * Returns a modifiable {@code Queue} with specified elements. And it's not backed by the specified array.
      * If the specified array is {@code null} or empty, an empty {@code Queue} is returned.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.toQueue("a", "b");        // returns Queue ["a", "b"]
+     * N.toQueue((String[]) null); // returns empty Queue
+     * }</pre>
+     *
      * @param <T> the type of elements in the queue
      * @param a the array of elements to be placed in the queue
      * @return a queue containing the specified elements
@@ -15695,6 +17189,12 @@ sealed class CommonUtil permits N {
     /**
      * Returns a modifiable {@code ArrayBlockingQueue} with specified elements. And it's not backed by the specified array.
      * If the specified array is {@code null} or empty, an empty {@code ArrayBlockingQueue} is returned.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.toArrayBlockingQueue("a", "b");        // returns ArrayBlockingQueue ["a", "b"]
+     * N.toArrayBlockingQueue((String[]) null); // returns empty ArrayBlockingQueue
+     * }</pre>
      *
      * @param <T> the type of elements in the queue
      * @param a the array of elements to be placed in the queue
@@ -15717,6 +17217,12 @@ sealed class CommonUtil permits N {
      * Returns a modifiable {@code LinkedBlockingQueue} with specified elements. And it's not backed by the specified array.
      * If the specified array is {@code null} or empty, an empty {@code LinkedBlockingQueue} is returned.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.toLinkedBlockingQueue("a", "b");        // returns LinkedBlockingQueue ["a", "b"]
+     * N.toLinkedBlockingQueue((String[]) null); // returns empty LinkedBlockingQueue
+     * }</pre>
+     *
      * @param <T> the type of elements in the queue
      * @param a the array of elements to be placed in the queue
      * @return a queue containing the specified elements
@@ -15738,6 +17244,12 @@ sealed class CommonUtil permits N {
      * Returns a modifiable {@code ConcurrentLinkedQueue} with specified elements. And it's not backed by the specified array.
      * If the specified array is {@code null} or empty, an empty {@code ConcurrentLinkedQueue} is returned.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.toConcurrentLinkedQueue("a", "b");        // returns ConcurrentLinkedQueue ["a", "b"]
+     * N.toConcurrentLinkedQueue((String[]) null); // returns empty ConcurrentLinkedQueue
+     * }</pre>
+     *
      * @param <T> the type of elements in the queue
      * @param a the array of elements to be placed in the queue
      * @return a queue containing the specified elements
@@ -15755,6 +17267,16 @@ sealed class CommonUtil permits N {
      * Returns a modifiable {@code DelayQueue} with specified elements. And it's not backed by the specified array.
      * If the specified array is {@code null} or empty, an empty {@code DelayQueue} is returned.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Delayed task = new Delayed() {
+     *     public long getDelay(TimeUnit unit) { return 0; }
+     *     public int compareTo(Delayed other) { return 0; }
+     * };
+     * N.toDelayQueue(task); // returns DelayQueue containing task
+     * N.toDelayQueue();     // returns empty DelayQueue
+     * }</pre>
+     *
      * @param <T> the type of elements in the queue
      * @param a the array of elements to be placed in the queue
      * @return a queue containing the specified elements
@@ -15771,6 +17293,12 @@ sealed class CommonUtil permits N {
     /**
      * Returns a modifiable {@code PriorityQueue} with specified elements. And it's not backed by the specified array.
      * If the specified array is {@code null} or empty, an empty {@code PriorityQueue} is returned.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.toPriorityQueue("b", "a");        // returns PriorityQueue ["a", "b"]
+     * N.toPriorityQueue((String[]) null); // returns empty PriorityQueue
+     * }</pre>
      *
      * @param <T> the type of elements in the queue
      * @param a the array of elements to be placed in the queue
@@ -15793,6 +17321,12 @@ sealed class CommonUtil permits N {
      * Returns a modifiable {@code Deque} with specified elements. And it's not backed by the specified array.
      * If the specified array is {@code null} or empty, an empty {@code Deque} is returned.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.toDeque("a", "b");        // returns Deque ["a", "b"]
+     * N.toDeque((String[]) null); // returns empty Deque
+     * }</pre>
+     *
      * @param <T> the type of elements in the deque
      * @param a the array of elements to be placed in the deque
      * @return a deque containing the specified elements
@@ -15805,6 +17339,12 @@ sealed class CommonUtil permits N {
     /**
      * Returns a modifiable {@code ArrayDeque} with specified elements. And it's not backed by the specified array.
      * If the specified array is {@code null} or empty, an empty {@code ArrayDeque} is returned.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.toArrayDeque("a", "b");        // returns ArrayDeque ["a", "b"]
+     * N.toArrayDeque((String[]) null); // returns empty ArrayDeque
+     * }</pre>
      *
      * @param <T> the type of elements in the deque
      * @param a the array of elements to be placed in the deque
@@ -15827,6 +17367,12 @@ sealed class CommonUtil permits N {
      * Returns a modifiable {@code LinkedBlockingDeque} with specified elements. And it's not backed by the specified array.
      * If the specified array is {@code null} or empty, an empty {@code LinkedBlockingDeque} is returned.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.toLinkedBlockingDeque("a", "b");        // returns LinkedBlockingDeque ["a", "b"]
+     * N.toLinkedBlockingDeque((String[]) null); // returns empty LinkedBlockingDeque
+     * }</pre>
+     *
      * @param <T> the type of elements in the deque
      * @param a the array of elements to be placed in the deque
      * @return a deque containing the specified elements
@@ -15848,6 +17394,12 @@ sealed class CommonUtil permits N {
      * Returns a modifiable {@code ConcurrentLinkedDeque} with specified elements. And it's not backed by the specified array.
      * If the specified array is {@code null} or empty, an empty {@code ConcurrentLinkedDeque} is returned.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.toConcurrentLinkedDeque("a", "b");        // returns ConcurrentLinkedDeque ["a", "b"]
+     * N.toConcurrentLinkedDeque((String[]) null); // returns empty ConcurrentLinkedDeque
+     * }</pre>
+     *
      * @param <T> the type of elements in the deque
      * @param a the array of elements to be placed in the deque
      * @return a deque containing the specified elements
@@ -15864,6 +17416,12 @@ sealed class CommonUtil permits N {
     /**
      * Returns a modifiable {@code Multiset} with the specified elements.
      * If the specified array is {@code null} or empty, an empty modifiable {@code Multiset} is returned.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.toMultiset("a", "b", "a");     // returns Multiset with "a" count 2
+     * N.toMultiset((String[]) null);   // returns empty Multiset
+     * }</pre>
      *
      * @param <T> the type of elements in the multiset
      * @param a the array of elements to be placed in the multiset
@@ -15909,6 +17467,12 @@ sealed class CommonUtil permits N {
     /**
      * Converts the specified range of the boolean array to a specified type of Collection.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.toCollection(new boolean[] {true, false}, ArrayList::new);     // returns ArrayList with elements
+     * N.toCollection(new boolean[] {true, false}, LinkedHashSet::new); // returns LinkedHashSet with elements
+     * }</pre>
+     *
      * @param <C> the type of Collection to be returned
      * @param a the boolean array to be converted
      * @param fromIndex the starting (inclusive) index of the range to be converted
@@ -15939,6 +17503,12 @@ sealed class CommonUtil permits N {
     /**
      * Converts a char array to a specified type of Collection.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.toCollection(new char[] {'a', 'b'}, ArrayList::new);     // returns ArrayList with elements
+     * N.toCollection(new char[] {'a', 'b'}, LinkedHashSet::new); // returns LinkedHashSet with elements
+     * }</pre>
+     *
      * @param <C> the type of Collection to be returned
      * @param a the char array to be converted
      * @param supplier a function that provides a new instance of the desired Collection type
@@ -15952,6 +17522,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Converts the specified range of the char array to a specified type of Collection.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.toCollection(new char[] {'a', 'b'}, ArrayList::new);     // returns ArrayList with elements
+     * N.toCollection(new char[] {'a', 'b'}, LinkedHashSet::new); // returns LinkedHashSet with elements
+     * }</pre>
      *
      * @param <C> the type of Collection to be returned
      * @param a the char array to be converted
@@ -15983,6 +17559,12 @@ sealed class CommonUtil permits N {
     /**
      * Converts a byte array to a specified type of Collection.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.toCollection(new byte[] {1, 2}, ArrayList::new);     // returns ArrayList with elements
+     * N.toCollection(new byte[] {1, 2}, LinkedHashSet::new); // returns LinkedHashSet with elements
+     * }</pre>
+     *
      * @param <C> the type of Collection to be returned
      * @param a the byte array to be converted
      * @param supplier a function that provides a new instance of the desired Collection type
@@ -15996,6 +17578,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Converts the specified range of the byte array to a specified type of Collection.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.toCollection(new byte[] {1, 2}, ArrayList::new);     // returns ArrayList with elements
+     * N.toCollection(new byte[] {1, 2}, LinkedHashSet::new); // returns LinkedHashSet with elements
+     * }</pre>
      *
      * @param <C> the type of Collection to be returned
      * @param a the byte array to be converted
@@ -16027,6 +17615,12 @@ sealed class CommonUtil permits N {
     /**
      * Converts a short array to a specified type of Collection.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.toCollection(new short[] {1, 2}, ArrayList::new);     // returns ArrayList with elements
+     * N.toCollection(new short[] {1, 2}, LinkedHashSet::new); // returns LinkedHashSet with elements
+     * }</pre>
+     *
      * @param <C> the type of Collection to be returned
      * @param a the short array to be converted
      * @param supplier a function that provides a new instance of the desired Collection type
@@ -16040,6 +17634,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Converts the specified range of the short array to a specified type of Collection.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.toCollection(new short[] {1, 2}, ArrayList::new);     // returns ArrayList with elements
+     * N.toCollection(new short[] {1, 2}, LinkedHashSet::new); // returns LinkedHashSet with elements
+     * }</pre>
      *
      * @param <C> the type of Collection to be returned
      * @param a the short array to be converted
@@ -16071,6 +17671,12 @@ sealed class CommonUtil permits N {
     /**
      * Converts an int array to a specified type of Collection.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.toCollection(new int[] {1, 2}, ArrayList::new);     // returns ArrayList with elements
+     * N.toCollection(new int[] {1, 2}, LinkedHashSet::new); // returns LinkedHashSet with elements
+     * }</pre>
+     *
      * @param <C> the type of Collection to be returned
      * @param a the int array to be converted
      * @param supplier a function that provides a new instance of the desired Collection type
@@ -16084,6 +17690,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Converts the specified range of the int array to a specified type of Collection.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.toCollection(new int[] {1, 2}, ArrayList::new);     // returns ArrayList with elements
+     * N.toCollection(new int[] {1, 2}, LinkedHashSet::new); // returns LinkedHashSet with elements
+     * }</pre>
      *
      * @param <C> the type of Collection to be returned
      * @param a the int array to be converted
@@ -16115,6 +17727,12 @@ sealed class CommonUtil permits N {
     /**
      * Converts a long array to a specified type of Collection.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.toCollection(new long[] {1L, 2L}, ArrayList::new);     // returns ArrayList with elements
+     * N.toCollection(new long[] {1L, 2L}, LinkedHashSet::new); // returns LinkedHashSet with elements
+     * }</pre>
+     *
      * @param <C> the type of Collection to be returned
      * @param a the long array to be converted
      * @param supplier a function that provides a new instance of the desired Collection type
@@ -16128,6 +17746,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Converts the specified range of the long array to a specified type of Collection.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.toCollection(new long[] {1L, 2L}, ArrayList::new);     // returns ArrayList with elements
+     * N.toCollection(new long[] {1L, 2L}, LinkedHashSet::new); // returns LinkedHashSet with elements
+     * }</pre>
      *
      * @param <C> the type of Collection to be returned
      * @param a the long array to be converted
@@ -16159,6 +17783,12 @@ sealed class CommonUtil permits N {
     /**
      * Converts a float array to a specified type of Collection.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.toCollection(new float[] {1.0f, 2.0f}, ArrayList::new);     // returns ArrayList with elements
+     * N.toCollection(new float[] {1.0f, 2.0f}, LinkedHashSet::new); // returns LinkedHashSet with elements
+     * }</pre>
+     *
      * @param <C> the type of Collection to be returned
      * @param a the float array to be converted
      * @param supplier a function that provides a new instance of the desired Collection type
@@ -16172,6 +17802,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Converts the specified range of the float array to a specified type of Collection.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.toCollection(new float[] {1.0f, 2.0f}, ArrayList::new);     // returns ArrayList with elements
+     * N.toCollection(new float[] {1.0f, 2.0f}, LinkedHashSet::new); // returns LinkedHashSet with elements
+     * }</pre>
      *
      * @param <C> the type of Collection to be returned
      * @param a the float array to be converted
@@ -16203,6 +17839,12 @@ sealed class CommonUtil permits N {
     /**
      * Converts a double array to a specified type of Collection.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.toCollection(new double[] {1.0d, 2.0d}, ArrayList::new);     // returns ArrayList with elements
+     * N.toCollection(new double[] {1.0d, 2.0d}, LinkedHashSet::new); // returns LinkedHashSet with elements
+     * }</pre>
+     *
      * @param <C> the type of Collection to be returned
      * @param a the double array to be converted
      * @param supplier a function that provides a new instance of the desired Collection type
@@ -16216,6 +17858,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Converts the specified range of the double array to a specified type of Collection.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.toCollection(new double[] {1.0d, 2.0d}, ArrayList::new);     // returns ArrayList with elements
+     * N.toCollection(new double[] {1.0d, 2.0d}, LinkedHashSet::new); // returns LinkedHashSet with elements
+     * }</pre>
      *
      * @param <C> the type of Collection to be returned
      * @param a the double array to be converted
@@ -16247,6 +17895,12 @@ sealed class CommonUtil permits N {
     /**
      * Converts an array of objects to a specified type of Collection.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.toCollection(new String[] {"a", "b"}, ArrayList::new);     // returns ArrayList with elements
+     * N.toCollection(new String[] {"a", "b"}, LinkedHashSet::new); // returns LinkedHashSet with elements
+     * }</pre>
+     *
      * @param <T> the type of elements in the array and the Collection
      * @param <C> the type of Collection to be returned
      * @param a the array to be converted
@@ -16265,6 +17919,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Converts the specified range of the array to a specified type of Collection.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.toCollection(new String[] {"a", "b"}, ArrayList::new);     // returns ArrayList with elements
+     * N.toCollection(new String[] {"a", "b"}, LinkedHashSet::new); // returns LinkedHashSet with elements
+     * }</pre>
      *
      * @param <T> the type of elements in the array and the Collection
      * @param <C> the type of Collection to be returned
@@ -16301,6 +17961,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Converts an Iterable to a specified type of Collection.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.toCollection(Arrays.asList("a", "b"), ArrayList::new);     // returns ArrayList with elements
+     * N.toCollection(Arrays.asList("a", "b"), LinkedHashSet::new); // returns LinkedHashSet with elements
+     * }</pre>
      *
      * @param <T> the type of elements in the Iterable and the Collection
      * @param <C> the type of Collection to be returned
@@ -16342,15 +18008,11 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Iterator<String> iter = N.toList("a", "b", "c").iterator();
+     * Iterator<String> iter = Arrays.asList("a", "b", "c").iterator();
+     * N.toCollection(iter, ArrayList::new); // returns ArrayList ["a", "b", "c"]
      *
-     * // Convert to ArrayList
-     * List<String> list = N.toCollection(iter, ArrayList::new);
-     *
-     * // Convert to LinkedHashSet (maintains insertion order)
-     * Iterator<String> iter2 = N.toList("a", "b", "a").iterator();
-     * Set<String> set = N.toCollection(iter2, LinkedHashSet::new);
-     * // Result: ["a", "b"]
+     * Iterator<String> iter2 = Arrays.asList("a", "b", "a").iterator();
+     * N.toCollection(iter2, LinkedHashSet::new); // returns LinkedHashSet ["a", "b"]
      * }</pre>
      *
      * @param <T> the type of elements in the Iterator and the Collection
@@ -16384,13 +18046,8 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * List<String> names = N.toList("Alice", "Bob", "Charlie");
-     * Map<Integer, String> lengthToName = N.toMap(names, String::length);
-     * // Result: {5=Alice, 3=Bob, 7=Charlie}
-     *
-     * List<User> users = N.toList(new User(1, "Alice"), new User(2, "Bob"));
-     * Map<Integer, User> idToUser = N.toMap(users, User::getId);
-     * // Result: {1=User(1, Alice), 2=User(2, Bob)}
+     * N.toMap(Arrays.asList("a", "bb"), String::length); // returns HashMap {1="a", 2="bb"}
+     * N.toMap(Collections.emptyList(), String::length);  // returns empty HashMap
      * }</pre>
      *
      * @param <T> the type of elements in the Iterable
@@ -16421,13 +18078,8 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * List<User> users = N.toList(new User(1, "Alice"), new User(2, "Bob"));
-     * Map<Integer, String> idToName = N.toMap(users, User::getId, User::getName);
-     * // Result: {1="Alice", 2="Bob"}
-     *
-     * List<String> words = N.toList("apple", "banana", "cherry");
-     * Map<String, Integer> wordToLength = N.toMap(words, s -> s, String::length);
-     * // Result: {"apple"=5, "banana"=6, "cherry"=6}
+     * N.toMap(Arrays.asList("a", "bb"), String::length, String::toUpperCase); // returns HashMap {1="A", 2="BB"}
+     * N.toMap(Collections.emptyList(), String::length, String::toUpperCase);  // returns empty HashMap
      * }</pre>
      *
      * @param <T> the type of elements in the Iterable
@@ -16464,12 +18116,8 @@ sealed class CommonUtil permits N {
      * List<User> users = N.toList(new User(1, "Alice"), new User(2, "Bob"));
      *
      * // Using LinkedHashMap to maintain insertion order
-     * LinkedHashMap<Integer, String> orderedMap = N.toMap(users, User::getId, User::getName,
-     *         size -> new LinkedHashMap<>(size));
-     *
-     * // Using TreeMap for sorted keys
-     * TreeMap<Integer, String> sortedMap = N.toMap(users, User::getId, User::getName,
-     *         size -> new TreeMap<>());
+     * N.toMap(Arrays.asList("a", "bb"), String::length, String::toUpperCase, LinkedHashMap::new); // returns LinkedHashMap {1="A", 2="BB"}
+     * N.toMap(Collections.emptyList(), String::length, String::toUpperCase, TreeMap::new);        // returns empty TreeMap
      * }</pre>
      *
      * @param <T> the type of elements in the Iterable
@@ -16506,21 +18154,8 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * // Summing values for duplicate keys
-     * List<Transaction> transactions = N.toList(
-     *     new Transaction("A", 100), new Transaction("B", 200), new Transaction("A", 50));
-     * Map<String, Integer> totalByAccount = N.toMap(transactions,
-     *     Transaction::getAccount,
-     *     Transaction::getAmount,
-     *     Integer::sum,
-     *     size -> new HashMap<>(size));
-     * // Result: {"A"=150, "B"=200}
-     *
-     * // Concatenating strings for duplicate keys
-     * List<Pair<String, String>> pairs = N.toList(Pair.of("k1", "a"), Pair.of("k1", "b"));
-     * Map<String, String> merged = N.toMap(pairs, Pair::getLeft, Pair::getRight,
-     *     (v1, v2) -> v1 + "," + v2, size -> new LinkedHashMap<>(size));
-     * // Result: {"k1"="a,b"}
+     * N.toMap(Arrays.asList("a", "bb", "cc"), String::length, String::toUpperCase, (left, right) -> left + right, LinkedHashMap::new); // returns Map with merged duplicate keys
+     * N.toMap(Collections.emptyList(), String::length, String::toUpperCase, (left, right) -> left + right, LinkedHashMap::new);        // returns empty Map
      * }</pre>
      *
      * @param <T> the type of elements in the Iterable
@@ -16570,9 +18205,8 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Iterator<String> iter = N.toList("Alice", "Bob", "Charlie").iterator();
-     * Map<Integer, String> lengthToName = N.toMap(iter, String::length);
-     * // Result: {5="Alice", 3="Bob", 7="Charlie"} (later values overwrite earlier for same key)
+     * Iterator<String> iter = Arrays.asList("a", "bb").iterator();
+     * N.toMap(iter, String::length); // returns HashMap {1="a", 2="bb"}
      * }</pre>
      *
      * @param <T> the type of elements in the Iterator
@@ -16604,14 +18238,10 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * List<String> words = N.toList("apple", "banana", "cherry");
-     * Iterator<String> iter = words.iterator();
-     * Map<Integer, String> lengthToWord = N.toMap(iter, String::length, s -> s.toUpperCase());
-     * // Result: {5="APPLE", 6="CHERRY"} (for key 6, "CHERRY" overwrites the earlier "BANANA")
+     * Iterator<String> iter = Arrays.asList("apple", "banana", "cherry").iterator();
+     * Map<Integer, String> lengthToWord = N.toMap(iter, String::length, s -> s.toUpperCase()); // returns HashMap {5="APPLE", 6="CHERRY"}
      *
-     * // Null iterator returns empty map
-     * Map<Integer, String> empty = N.toMap(null, String::length, String::toUpperCase);
-     * // empty is an empty HashMap
+     * Map<Integer, String> empty = N.toMap(null, String::length, String::toUpperCase); // returns empty HashMap
      * }</pre>
      *
      * @param <T> the type of elements in the Iterator
@@ -16650,15 +18280,11 @@ sealed class CommonUtil permits N {
      * Iterator<String> iter = words.iterator();
      *
      * // Using LinkedHashMap to maintain insertion order
-     * LinkedHashMap<Integer, String> orderedMap = N.toMap(iter,
-     *     String::length, String::toUpperCase, LinkedHashMap::new);
-     * // orderedMap maintains insertion order of keys
+     * Iterator<String> iter = Arrays.asList("a", "bb").iterator();
+     * N.toMap(iter, String::length, String::toUpperCase, LinkedHashMap::new); // returns LinkedHashMap {1="A", 2="BB"}
      *
-     * // Using TreeMap for sorted keys
-     * Iterator<String> iter2 = words.iterator();
-     * TreeMap<Integer, String> sortedMap = N.toMap(iter2,
-     *     String::length, String::toUpperCase, TreeMap::new);
-     * // sortedMap has keys in natural order
+     * Iterator<String> iter2 = Arrays.asList("a", "bb").iterator();
+     * N.toMap(iter2, String::length, String::toUpperCase, TreeMap::new);      // returns TreeMap {1="A", 2="BB"}
      * }</pre>
      *
      * @param <T> the type of elements in the Iterator
@@ -16691,6 +18317,15 @@ sealed class CommonUtil permits N {
 
     /**
      * Converts an Iterator to a Map using key and value extractor functions, with a custom Map supplier.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<String> words = Arrays.asList("apple", "ant", "bee");
+     * N.toMap(words.iterator(), s -> s.charAt(0), s -> s, (v1, v2) -> v1 + "," + v2, LinkedHashMap::new);
+     * // returns {a=apple,ant, b=bee}
+     * N.toMap(Collections.<String>emptyIterator(), s -> s.charAt(0), s -> s, (v1, v2) -> v1, HashMap::new);
+     * // returns {} (empty map)
+     * }</pre>
      *
      * @param <T> the type of elements in the Iterator
      * @param <K> the type of keys in the resulting Map
@@ -16738,6 +18373,12 @@ sealed class CommonUtil permits N {
      *
      * <p>Unlike {@link Map#of(Object, Object)}, this method supports {@code null} keys and values.</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.toMap("a", 1);  // returns HashMap {"a"=1}
+     * N.toMap(null, 1); // returns HashMap allowing null key
+     * }</pre>
+     *
      * @param <K> the type of keys in the Map
      * @param <V> the type of values in the Map
      * @param k1 the key to be placed in the Map. Can be {@code null}.
@@ -16757,6 +18398,12 @@ sealed class CommonUtil permits N {
      * <p>Unlike {@link Map#of(Object, Object, Object, Object)}, this method supports {@code null} keys and values.</p>
      *
      * <p>If duplicate keys are provided, the later value overwrites the earlier value.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.toMap("a", 1, "b", 2); // returns HashMap {"a"=1, "b"=2}
+     * N.toMap("a", 1, "a", 2); // returns HashMap {"a"=2}
+     * }</pre>
      *
      * @param <K> the type of keys in the Map
      * @param <V> the type of values in the Map
@@ -16780,6 +18427,12 @@ sealed class CommonUtil permits N {
      * <p>Unlike {@link Map#of(Object, Object, Object, Object, Object, Object)}, this method supports {@code null} keys and values.</p>
      *
      * <p>If duplicate keys are provided, the later value overwrites the earlier value.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.toMap("a", 1, "b", 2, "c", 3); // returns HashMap {"a"=1, "b"=2, "c"=3}
+     * N.toMap("a", 1, "a", 2, "b", 3); // returns HashMap {"a"=2, "b"=3}
+     * }</pre>
      *
      * @param <K> the type of keys in the Map
      * @param <V> the type of values in the Map
@@ -16809,6 +18462,12 @@ sealed class CommonUtil permits N {
      * <p>Unlike {@link Map#ofEntries(Map.Entry...)}, this method supports {@code null} keys and values.</p>
      *
      * <p>If duplicate keys are provided, the later value overwrites the earlier value.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.toMap("a", 1, "b", 2, "c", 3); // returns HashMap {"a"=1, "b"=2, "c"=3}
+     * N.toMap("a", 1, "b");            // throws IllegalArgumentException
+     * }</pre>
      *
      * @param <K> the type of keys in the Map
      * @param <V> the type of values in the Map
@@ -16843,6 +18502,12 @@ sealed class CommonUtil permits N {
      *
      * <p>The returned map preserves insertion order when iterating over entries.</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.toLinkedHashMap("a", 1);  // returns LinkedHashMap {"a"=1}
+     * N.toLinkedHashMap(null, 1); // returns LinkedHashMap allowing null key
+     * }</pre>
+     *
      * @param <K> the type of keys in the Map
      * @param <V> the type of values in the Map
      * @param k1 the key to be placed in the Map. Can be {@code null}.
@@ -16864,6 +18529,12 @@ sealed class CommonUtil permits N {
      * <p>If duplicate keys are provided, the later value overwrites the earlier value.</p>
      *
      * <p>The returned map preserves insertion order when iterating over entries.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.toLinkedHashMap("a", 1, "b", 2); // returns LinkedHashMap {"a"=1, "b"=2}
+     * N.toLinkedHashMap("a", 1, "a", 2); // returns LinkedHashMap {"a"=2}
+     * }</pre>
      *
      * @param <K> the type of keys in the Map
      * @param <V> the type of values in the Map
@@ -16889,6 +18560,12 @@ sealed class CommonUtil permits N {
      * <p>If duplicate keys are provided, the later value overwrites the earlier value.</p>
      *
      * <p>The returned map preserves insertion order when iterating over entries.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.toLinkedHashMap("a", 1, "b", 2, "c", 3); // returns LinkedHashMap {"a"=1, "b"=2, "c"=3}
+     * N.toLinkedHashMap("a", 1, "a", 2, "b", 3); // returns LinkedHashMap {"a"=2, "b"=3}
+     * }</pre>
      *
      * @param <K> the type of keys in the Map
      * @param <V> the type of values in the Map
@@ -16920,6 +18597,12 @@ sealed class CommonUtil permits N {
      * <p>If duplicate keys are provided, the later value overwrites the earlier value.</p>
      *
      * <p>The returned map preserves insertion order when iterating over entries.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.toLinkedHashMap("a", 1, "b", 2, "c", 3); // returns LinkedHashMap {"a"=1, "b"=2, "c"=3}
+     * N.toLinkedHashMap("a", 1, "b");            // throws IllegalArgumentException
+     * }</pre>
      *
      * @param <K> the type of keys in the Map
      * @param <V> the type of values in the Map
@@ -16955,18 +18638,16 @@ sealed class CommonUtil permits N {
      *
      * <p>This is a convenient factory method for creating a single-entry map.</p>
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Map<String, Integer> map = N.asMap("age", 25);
-     *
-     * // Both key and value can be null
-     * Map<String, String> mapWithNull = N.asMap("key", null);
-     * }</pre>
-     *
      * <p><b>Immutability warning:</b> The returned map is fully immutable — any attempt to call
      * {@link Map#put(Object, Object)}, {@link Map#remove(Object)}, or {@link Map#clear()} will throw
      * {@code UnsupportedOperationException}. Use {@code new LinkedHashMap<>(N.asMap(k1, v1))} to obtain
      * a mutable copy.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.asMap("k1", 1); // returns ImmutableMap with 1 entry
+     * N.asMap(null, 1); // returns ImmutableMap allowing null key
+     * }</pre>
      *
      * @param <K> the type of keys in the Map
      * @param <V> the type of values in the Map
@@ -16987,6 +18668,12 @@ sealed class CommonUtil permits N {
      * <p><b>Immutability warning:</b> The returned map is fully immutable — any attempt to mutate it
      * will throw {@code UnsupportedOperationException}. Use {@code new LinkedHashMap<>(N.asMap(...))}
      * to obtain a mutable copy.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.asMap("k1", 1, "k2", 2); // returns ImmutableMap with 2 entries
+     * N.asMap(null, 1, "k2", 2); // returns ImmutableMap allowing null key
+     * }</pre>
      *
      * @param <K> the type of keys in the Map
      * @param <V> the type of values in the Map
@@ -17009,6 +18696,12 @@ sealed class CommonUtil permits N {
      * <p><b>Immutability warning:</b> The returned map is fully immutable — any attempt to mutate it
      * will throw {@code UnsupportedOperationException}. Use {@code new LinkedHashMap<>(N.asMap(...))}
      * to obtain a mutable copy.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.asMap("k1", 1, "k2", 2, "k3", 3); // returns ImmutableMap with 3 entries
+     * N.asMap(null, 1, "k2", 2, "k3", 3); // returns ImmutableMap allowing null key
+     * }</pre>
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -17033,6 +18726,12 @@ sealed class CommonUtil permits N {
      * <p><b>Immutability warning:</b> The returned map is fully immutable — any attempt to mutate it
      * will throw {@code UnsupportedOperationException}. Use {@code new LinkedHashMap<>(N.asMap(...))}
      * to obtain a mutable copy.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.asMap("k1", 1, "k2", 2, "k3", 3, "k4", 4); // returns ImmutableMap with 4 entries
+     * N.asMap(null, 1, "k2", 2, "k3", 3, "k4", 4); // returns ImmutableMap allowing null key
+     * }</pre>
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -17059,6 +18758,12 @@ sealed class CommonUtil permits N {
      * <p><b>Immutability warning:</b> The returned map is fully immutable — any attempt to mutate it
      * will throw {@code UnsupportedOperationException}. Use {@code new LinkedHashMap<>(N.asMap(...))}
      * to obtain a mutable copy.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.asMap("k1", 1, "k2", 2, "k3", 3, "k4", 4, "k5", 5); // returns ImmutableMap with 5 entries
+     * N.asMap(null, 1, "k2", 2, "k3", 3, "k4", 4, "k5", 5); // returns ImmutableMap allowing null key
+     * }</pre>
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -17088,6 +18793,12 @@ sealed class CommonUtil permits N {
      * <p><b>Immutability warning:</b> The returned map is fully immutable — any attempt to mutate it
      * will throw {@code UnsupportedOperationException}. Use {@code new LinkedHashMap<>(N.asMap(...))}
      * to obtain a mutable copy.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.asMap("k1", 1, "k2", 2, "k3", 3, "k4", 4, "k5", 5, "k6", 6); // returns ImmutableMap with 6 entries
+     * N.asMap(null, 1, "k2", 2, "k3", 3, "k4", 4, "k5", 5, "k6", 6); // returns ImmutableMap allowing null key
+     * }</pre>
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -17119,6 +18830,12 @@ sealed class CommonUtil permits N {
      * <p><b>Immutability warning:</b> The returned map is fully immutable — any attempt to mutate it
      * will throw {@code UnsupportedOperationException}. Use {@code new LinkedHashMap<>(N.asMap(...))}
      * to obtain a mutable copy.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.asMap("k1", 1, "k2", 2, "k3", 3, "k4", 4, "k5", 5, "k6", 6, "k7", 7); // returns ImmutableMap with 7 entries
+     * N.asMap(null, 1, "k2", 2, "k3", 3, "k4", 4, "k5", 5, "k6", 6, "k7", 7); // returns ImmutableMap allowing null key
+     * }</pre>
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -17152,6 +18869,12 @@ sealed class CommonUtil permits N {
      * <p><b>Immutability warning:</b> The returned map is fully immutable — any attempt to mutate it
      * will throw {@code UnsupportedOperationException}. Use {@code new LinkedHashMap<>(N.asMap(...))}
      * to obtain a mutable copy.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.asMap("k1", 1, "k2", 2, "k3", 3, "k4", 4, "k5", 5, "k6", 6, "k7", 7, "k8", 8); // returns ImmutableMap with 8 entries
+     * N.asMap(null, 1, "k2", 2, "k3", 3, "k4", 4, "k5", 5, "k6", 6, "k7", 7, "k8", 8); // returns ImmutableMap allowing null key
+     * }</pre>
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -17187,6 +18910,12 @@ sealed class CommonUtil permits N {
      * <p><b>Immutability warning:</b> The returned map is fully immutable — any attempt to mutate it
      * will throw {@code UnsupportedOperationException}. Use {@code new LinkedHashMap<>(N.asMap(...))}
      * to obtain a mutable copy.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.asMap("k1", 1, "k2", 2, "k3", 3, "k4", 4, "k5", 5, "k6", 6, "k7", 7, "k8", 8, "k9", 9); // returns ImmutableMap with 9 entries
+     * N.asMap(null, 1, "k2", 2, "k3", 3, "k4", 4, "k5", 5, "k6", 6, "k7", 7, "k8", 8, "k9", 9); // returns ImmutableMap allowing null key
+     * }</pre>
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -17602,6 +19331,12 @@ sealed class CommonUtil permits N {
      * {@link List#remove(Object)} on the result will throw {@code UnsupportedOperationException}.
      * Use {@link #toList(Object[])} to obtain a mutable list.</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.asList("a");           // returns ["a"]
+     * N.asList((String) null); // returns list containing null
+     * }</pre>
+     *
      * @param <T> the type of the element
      * @param e the element to be placed in the List. Can be {@code null}.
      * @return an unmodifiable {@code ImmutableList} containing the specified element
@@ -17621,6 +19356,12 @@ sealed class CommonUtil permits N {
      * {@link java.util.Arrays#asList(Object[])}, which returns a fixed-size but <em>mutable</em> list,
      * any attempt to mutate the result will throw {@code UnsupportedOperationException}.
      * Use {@link #toList(Object[])} to obtain a mutable list.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.asList("a", "b");  // returns ["a", "b"]
+     * N.asList("a", null); // returns list containing null
+     * }</pre>
      *
      * @param <T> the type of elements in the list
      * @param e1 the first element to be placed in the List. Can be {@code null}.
@@ -17643,6 +19384,12 @@ sealed class CommonUtil permits N {
      * any attempt to mutate the result will throw {@code UnsupportedOperationException}.
      * Use {@link #toList(Object[])} to obtain a mutable list.</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.asList("a", "b", "c");  // returns ["a", "b", "c"]
+     * N.asList("a", "b", null); // returns list containing null
+     * }</pre>
+     *
      * @param <T> the type of elements in the list
      * @param e1 the first element to be placed in the List. Can be {@code null}.
      * @param e2 the second element to be placed in the List. Can be {@code null}.
@@ -17664,6 +19411,12 @@ sealed class CommonUtil permits N {
      * {@link java.util.Arrays#asList(Object[])}, which returns a fixed-size but <em>mutable</em> list,
      * any attempt to mutate the result will throw {@code UnsupportedOperationException}.
      * Use {@link #toList(Object[])} to obtain a mutable list.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.asList("a", "b", "c", "d");  // returns ["a", "b", "c", "d"]
+     * N.asList("a", "b", "c", null); // returns list containing null
+     * }</pre>
      *
      * @param <T> the type of elements in the list
      * @param e1 the first element to be placed in the List. Can be {@code null}.
@@ -17688,6 +19441,12 @@ sealed class CommonUtil permits N {
      * any attempt to mutate the result will throw {@code UnsupportedOperationException}.
      * Use {@link #toList(Object[])} to obtain a mutable list.</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.asList("a", "b", "c", "d", "e");  // returns ["a", "b", "c", "d", "e"]
+     * N.asList("a", "b", "c", "d", null); // returns list containing null
+     * }</pre>
+     *
      * @param <T> the type of elements in the list
      * @param e1 the first element to be placed in the List. Can be {@code null}.
      * @param e2 the second element to be placed in the List. Can be {@code null}.
@@ -17711,6 +19470,12 @@ sealed class CommonUtil permits N {
      * {@link java.util.Arrays#asList(Object[])}, which returns a fixed-size but <em>mutable</em> list,
      * any attempt to mutate the result will throw {@code UnsupportedOperationException}.
      * Use {@link #toList(Object[])} to obtain a mutable list.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.asList("a", "b", "c", "d", "e", "f");  // returns ["a", "b", "c", "d", "e", "f"]
+     * N.asList("a", "b", "c", "d", "e", null); // returns list containing null
+     * }</pre>
      *
      * @param <T> the type of elements in the list
      * @param e1 the first element to be placed in the List. Can be {@code null}.
@@ -17737,6 +19502,12 @@ sealed class CommonUtil permits N {
      * any attempt to mutate the result will throw {@code UnsupportedOperationException}.
      * Use {@link #toList(Object[])} to obtain a mutable list.</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.asList("a", "b", "c", "d", "e", "f", "g");  // returns ["a", "b", "c", "d", "e", "f", "g"]
+     * N.asList("a", "b", "c", "d", "e", "f", null); // returns list containing null
+     * }</pre>
+     *
      * @param <T> the type of elements in the list
      * @param e1 the first element to be placed in the List. Can be {@code null}.
      * @param e2 the second element to be placed in the List. Can be {@code null}.
@@ -17762,6 +19533,12 @@ sealed class CommonUtil permits N {
      * {@link java.util.Arrays#asList(Object[])}, which returns a fixed-size but <em>mutable</em> list,
      * any attempt to mutate the result will throw {@code UnsupportedOperationException}.
      * Use {@link #toList(Object[])} to obtain a mutable list.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.asList("a", "b", "c", "d", "e", "f", "g", "h");  // returns ["a", "b", "c", "d", "e", "f", "g", "h"]
+     * N.asList("a", "b", "c", "d", "e", "f", "g", null); // returns list containing null
+     * }</pre>
      *
      * @param <T> the type of elements in the list
      * @param e1 the first element to be placed in the List. Can be {@code null}.
@@ -17790,6 +19567,12 @@ sealed class CommonUtil permits N {
      * any attempt to mutate the result will throw {@code UnsupportedOperationException}.
      * Use {@link #toList(Object[])} to obtain a mutable list.</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.asList("a", "b", "c", "d", "e", "f", "g", "h", "i");  // returns ["a", "b", "c", "d", "e", "f", "g", "h", "i"]
+     * N.asList("a", "b", "c", "d", "e", "f", "g", "h", null); // returns list containing null
+     * }</pre>
+     *
      * @param <T> the type of elements in the list
      * @param e1 the first element to be placed in the List. Can be {@code null}.
      * @param e2 the second element to be placed in the List. Can be {@code null}.
@@ -17817,6 +19600,12 @@ sealed class CommonUtil permits N {
      * {@link java.util.Arrays#asList(Object[])}, which returns a fixed-size but <em>mutable</em> list,
      * any attempt to mutate the result will throw {@code UnsupportedOperationException}.
      * Use {@link #toList(Object[])} to obtain a mutable list.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.asList("a", "b");  // returns ["a", "b"]
+     * N.asList("a", null); // returns list containing null
+     * }</pre>
      *
      * @param <T> the type of elements in the array
      * @param a the array to be converted
@@ -18032,6 +19821,12 @@ sealed class CommonUtil permits N {
      * will throw {@code UnsupportedOperationException}. Use {@link #toSet(Object[])} to obtain a
      * mutable set.</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.asSet("a");           // returns ImmutableSet containing "a"
+     * N.asSet((String) null); // returns ImmutableSet containing null
+     * }</pre>
+     *
      * @param <T> the type of elements in the set
      * @param e the element to be placed in the Set. Can be {@code null}.
      * @return an unmodifiable {@code ImmutableSet} containing the specified element
@@ -18050,6 +19845,12 @@ sealed class CommonUtil permits N {
      * <p><b>Immutability warning:</b> The returned set is fully immutable — any attempt to call
      * {@link Set#add(Object)} or {@link Set#remove(Object)} will throw {@code UnsupportedOperationException}.
      * Use {@link #toSet(Object[])} to obtain a mutable set.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.asSet("a", "b");  // returns ImmutableSet containing "a", "b"
+     * N.asSet("a", null); // returns ImmutableSet containing null
+     * }</pre>
      *
      * @param <T> the type of elements in the set
      * @param e1 the first element to be placed in the Set. Can be {@code null}.
@@ -18071,6 +19872,12 @@ sealed class CommonUtil permits N {
      * {@link Set#add(Object)} or {@link Set#remove(Object)} will throw {@code UnsupportedOperationException}.
      * Use {@link #toSet(Object[])} to obtain a mutable set.</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.asSet("a", "b", "c");  // returns ImmutableSet containing "a", "b", "c"
+     * N.asSet("a", "b", null); // returns ImmutableSet containing null
+     * }</pre>
+     *
      * @param <T> the type of elements in the set
      * @param e1 the first element to be placed in the Set. Can be {@code null}.
      * @param e2 the second element to be placed in the Set. Can be {@code null}.
@@ -18091,6 +19898,12 @@ sealed class CommonUtil permits N {
      * <p><b>Immutability warning:</b> The returned set is fully immutable — any attempt to call
      * {@link Set#add(Object)} or {@link Set#remove(Object)} will throw {@code UnsupportedOperationException}.
      * Use {@link #toSet(Object[])} to obtain a mutable set.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.asSet("a", "b", "c", "d");  // returns ImmutableSet containing "a", "b", "c", "d"
+     * N.asSet("a", "b", "c", null); // returns ImmutableSet containing null
+     * }</pre>
      *
      * @param <T> the type of elements in the set
      * @param e1 the first element to be placed in the Set. Can be {@code null}.
@@ -18114,6 +19927,12 @@ sealed class CommonUtil permits N {
      * {@link Set#add(Object)} or {@link Set#remove(Object)} will throw {@code UnsupportedOperationException}.
      * Use {@link #toSet(Object[])} to obtain a mutable set.</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.asSet("a", "b", "c", "d", "e");  // returns ImmutableSet containing "a", "b", "c", "d", "e"
+     * N.asSet("a", "b", "c", "d", null); // returns ImmutableSet containing null
+     * }</pre>
+     *
      * @param <T> the type of elements in the set
      * @param e1 the first element to be placed in the Set. Can be {@code null}.
      * @param e2 the second element to be placed in the Set. Can be {@code null}.
@@ -18136,6 +19955,12 @@ sealed class CommonUtil permits N {
      * <p><b>Immutability warning:</b> The returned set is fully immutable — any attempt to call
      * {@link Set#add(Object)} or {@link Set#remove(Object)} will throw {@code UnsupportedOperationException}.
      * Use {@link #toSet(Object[])} to obtain a mutable set.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.asSet("a", "b", "c", "d", "e", "f");  // returns ImmutableSet containing "a", "b", "c", "d", "e", "f"
+     * N.asSet("a", "b", "c", "d", "e", null); // returns ImmutableSet containing null
+     * }</pre>
      *
      * @param <T> the type of elements in the set
      * @param e1 the first element to be placed in the Set. Can be {@code null}.
@@ -18161,6 +19986,12 @@ sealed class CommonUtil permits N {
      * {@link Set#add(Object)} or {@link Set#remove(Object)} will throw {@code UnsupportedOperationException}.
      * Use {@link #toSet(Object[])} to obtain a mutable set.</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.asSet("a", "b", "c", "d", "e", "f", "g");  // returns ImmutableSet containing "a", "b", "c", "d", "e", "f", "g"
+     * N.asSet("a", "b", "c", "d", "e", "f", null); // returns ImmutableSet containing null
+     * }</pre>
+     *
      * @param <T> the type of elements in the set
      * @param e1 the first element to be placed in the Set. Can be {@code null}.
      * @param e2 the second element to be placed in the Set. Can be {@code null}.
@@ -18185,6 +20016,12 @@ sealed class CommonUtil permits N {
      * <p><b>Immutability warning:</b> The returned set is fully immutable — any attempt to call
      * {@link Set#add(Object)} or {@link Set#remove(Object)} will throw {@code UnsupportedOperationException}.
      * Use {@link #toSet(Object[])} to obtain a mutable set.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.asSet("a", "b", "c", "d", "e", "f", "g", "h");  // returns ImmutableSet containing "a", "b", "c", "d", "e", "f", "g", "h"
+     * N.asSet("a", "b", "c", "d", "e", "f", "g", null); // returns ImmutableSet containing null
+     * }</pre>
      *
      * @param <T> the type of elements in the set
      * @param e1 the first element to be placed in the Set. Can be {@code null}.
@@ -18212,6 +20049,12 @@ sealed class CommonUtil permits N {
      * {@link Set#add(Object)} or {@link Set#remove(Object)} will throw {@code UnsupportedOperationException}.
      * Use {@link #toSet(Object[])} to obtain a mutable set.</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.asSet("a", "b", "c", "d", "e", "f", "g", "h", "i");  // returns ImmutableSet containing "a", "b", "c", "d", "e", "f", "g", "h", "i"
+     * N.asSet("a", "b", "c", "d", "e", "f", "g", "h", null); // returns ImmutableSet containing null
+     * }</pre>
+     *
      * @param <T> the type of elements in the set
      * @param e1 the first element to be placed in the Set. Can be {@code null}.
      * @param e2 the second element to be placed in the Set. Can be {@code null}.
@@ -18238,6 +20081,12 @@ sealed class CommonUtil permits N {
      * <p><b>Immutability warning:</b> The returned set is fully immutable — any attempt to call
      * {@link Set#add(Object)} or {@link Set#remove(Object)} will throw {@code UnsupportedOperationException}.
      * Use {@link #toSet(Object[])} to obtain a mutable set.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.asSet("a", "b");  // returns ImmutableSet containing "a", "b"
+     * N.asSet("a", null); // returns ImmutableSet containing null
+     * }</pre>
      *
      * @param <T> the type of elements in the array
      * @param a the array to be converted
@@ -18445,6 +20294,13 @@ sealed class CommonUtil permits N {
     /**
      * Returns an immutable list containing only the specified element.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.asSingletonList("hello"); // returns ["hello"]
+     * N.asSingletonList(42);      // returns [42]
+     * N.asSingletonList(null);    // returns [null]
+     * }</pre>
+     *
      * @param <T> the type of the element
      * @param e the element to be wrapped in a singleton list
      * @return an immutable list containing the specified element
@@ -18458,6 +20314,12 @@ sealed class CommonUtil permits N {
     /**
      * Returns an immutable set containing only the specified element.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.asSingletonSet("hello"); // returns ["hello"]
+     * N.asSingletonSet(42);      // returns [42]
+     * }</pre>
+     *
      * @param <T> the type of the element
      * @param e the element to be wrapped in a singleton set
      * @return an immutable set containing the specified element
@@ -18470,6 +20332,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Returns an immutable map containing only the specified key-value pair.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.asSingletonMap("key", "value"); // returns {"key": "value"}
+     * N.asSingletonMap(1, 100);         // returns {1: 100}
+     * }</pre>
      *
      * @param <K> the type of keys maintained by the map
      * @param <V> the type of mapped values
@@ -18503,7 +20371,7 @@ sealed class CommonUtil permits N {
      * void processArray(String[] arr) { }
      * processArray(N.asArray("x", "y", "z"));
      *
-     * // Returns null for null input
+     * // returns null for null input
      * String[] nullArray = N.asArray((String[]) null);
      * // nullArray is null
      * }</pre>
@@ -18524,6 +20392,12 @@ sealed class CommonUtil permits N {
     /**
      * Returns an immutable empty {@code List}.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.emptyList();           // returns empty
+     * N.emptyList().isEmpty(); // returns true
+     * }</pre>
+     *
      * @param <T> the type of elements in the list
      * @return an immutable empty list
      * @see Collections#emptyList()
@@ -18535,6 +20409,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Returns an immutable empty {@code Set}.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.emptySet();           // returns empty
+     * N.emptySet().isEmpty(); // returns true
+     * }</pre>
      *
      * @param <T> the type of elements in the set
      * @return an immutable empty set
@@ -18548,8 +20428,14 @@ sealed class CommonUtil permits N {
     /**
      * Returns an immutable empty {@code SortedSet}.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.emptySortedSet();           // returns empty
+     * N.emptySortedSet().isEmpty(); // returns true
+     * }</pre>
+     *
      * @param <T> the type of elements in the set
-     * @return an immutable empty set
+     * @return an immutable empty sorted set
      * @see Collections#emptySortedSet()
      */
     @com.landawn.abacus.annotation.Immutable
@@ -18560,8 +20446,14 @@ sealed class CommonUtil permits N {
     /**
      * Returns an immutable empty {@code NavigableSet}.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.emptyNavigableSet();           // returns empty
+     * N.emptyNavigableSet().isEmpty(); // returns true
+     * }</pre>
+     *
      * @param <T> the type of elements in the set
-     * @return an immutable empty set
+     * @return an immutable empty navigable set
      * @see Collections#emptyNavigableSet()
      */
     @com.landawn.abacus.annotation.Immutable
@@ -18571,6 +20463,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Returns an immutable empty {@code Map}.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.emptyMap();           // returns empty
+     * N.emptyMap().isEmpty(); // returns true
+     * }</pre>
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -18585,6 +20483,12 @@ sealed class CommonUtil permits N {
     /**
      * Returns an immutable empty {@code SortedMap}.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.emptySortedMap();           // returns empty
+     * N.emptySortedMap().isEmpty(); // returns true
+     * }</pre>
+     *
      * @param <K> the key type
      * @param <V> the value type
      * @return an immutable empty sorted map
@@ -18597,6 +20501,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Returns an immutable empty {@code NavigableMap}.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.emptyNavigableMap();           // returns empty
+     * N.emptyNavigableMap().isEmpty(); // returns true
+     * }</pre>
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -18611,6 +20521,12 @@ sealed class CommonUtil permits N {
     /**
      * Returns an immutable empty iterator.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.emptyIterator();           // returns empty
+     * N.emptyIterator().hasNext(); // returns false
+     * }</pre>
+     *
      * @param <T> the type of elements returned by this iterator
      * @return an immutable empty iterator
      * @see Collections#emptyIterator()
@@ -18621,6 +20537,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Returns an immutable empty {@code ListIterator}.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.emptyListIterator();           // returns empty
+     * N.emptyListIterator().hasNext(); // returns false
+     * }</pre>
      *
      * @param <T> the type of elements returned by this list iterator
      * @return an immutable empty list iterator
@@ -18636,6 +20558,12 @@ sealed class CommonUtil permits N {
     /**
      * Returns an immutable empty {@code InputStream}.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.emptyInputStream();        // returns empty
+     * N.emptyInputStream().read(); // returns -1
+     * }</pre>
+     *
      * @return an immutable empty input stream
      * @see ByteArrayInputStream
      */
@@ -18646,6 +20574,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Returns an immutable empty {@code Dataset}.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.emptyDataset();           // returns empty
+     * N.emptyDataset().isEmpty(); // returns true
+     * }</pre>
      *
      * @return an immutable empty Dataset
      * @see Dataset#empty()
@@ -18660,6 +20594,13 @@ sealed class CommonUtil permits N {
     /**
      * Compares two boolean values.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.compare(true, false); // returns positive value
+     * N.compare(false, true); // returns negative value
+     * N.compare(true, true);  // returns 0
+     * }</pre>
+     *
      * @param a the first boolean value
      * @param b the second boolean value
      * @return 0 if both values are equal, 1 if the first value is {@code true} and the second is {@code false}, -1 if the first value is {@code false} and the second is {@code true}
@@ -18670,6 +20611,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Compares two char values.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.compare('a', 'b'); // returns negative value
+     * N.compare('a', 'a'); // returns 0
+     * }</pre>
      *
      * @param a the first char value
      * @param b the second char value
@@ -18682,6 +20629,12 @@ sealed class CommonUtil permits N {
     /**
      * Compares two byte values.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.compare((byte) 1, (byte) 2); // returns negative value
+     * N.compare((byte) 1, (byte) 1); // returns 0
+     * }</pre>
+     *
      * @param a the first byte value
      * @param b the second byte value
      * @return 0 if both values are equal; a value greater than {@code 0} if the first value is greater than the second; a value less than {@code 0} if the first value is less than the second
@@ -18692,6 +20645,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Compares two unsigned byte values.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.compareUnsigned((byte) 1, (byte) 1); // returns 0
+     * N.compareUnsigned((byte) 1, (byte) 2); // returns negative value
+     * }</pre>
      *
      * @param a the first byte value
      * @param b the second byte value
@@ -18705,6 +20664,12 @@ sealed class CommonUtil permits N {
     /**
      * Compares two short values.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.compare((short) 1, (short) 2); // returns negative value
+     * N.compare((short) 1, (short) 1); // returns 0
+     * }</pre>
+     *
      * @param a the first short value
      * @param b the second short value
      * @return 0 if both values are equal; a value greater than {@code 0} if the first value is greater than the second; a value less than {@code 0} if the first value is less than the second
@@ -18715,6 +20680,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Compares two unsigned short values.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.compareUnsigned((short) 1, (short) 1); // returns 0
+     * N.compareUnsigned((short) 1, (short) 2); // returns negative value
+     * }</pre>
      *
      * @param a the first short value
      * @param b the second short value
@@ -18728,6 +20699,12 @@ sealed class CommonUtil permits N {
     /**
      * Compares two int values.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.compare(1, 2); // returns negative value
+     * N.compare(1, 1); // returns 0
+     * }</pre>
+     *
      * @param a the first int value
      * @param b the second int value
      * @return 0 if both values are equal; a value greater than {@code 0} if the first value is greater than the second; a value less than {@code 0} if the first value is less than the second
@@ -18738,6 +20715,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Compares two unsigned int values.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.compareUnsigned(1, 1); // returns 0
+     * N.compareUnsigned(1, 2); // returns negative value
+     * }</pre>
      *
      * @param a the first int value
      * @param b the second int value
@@ -18751,6 +20734,12 @@ sealed class CommonUtil permits N {
     /**
      * Compares two long values.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.compare(1L, 2L); // returns negative value
+     * N.compare(1L, 1L); // returns 0
+     * }</pre>
+     *
      * @param a the first long value
      * @param b the second long value
      * @return 0 if both values are equal; a value greater than {@code 0} if the first value is greater than the second; a value less than {@code 0} if the first value is less than the second
@@ -18761,6 +20750,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Compares two unsigned long values.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.compareUnsigned(1L, 1L); // returns 0
+     * N.compareUnsigned(1L, 2L); // returns negative value
+     * }</pre>
      *
      * @param a the first long value
      * @param b the second long value
@@ -18774,6 +20769,12 @@ sealed class CommonUtil permits N {
     /**
      * Compares two float values.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.compare(1.0f, 2.0f); // returns negative value
+     * N.compare(1.0f, 1.0f); // returns 0
+     * }</pre>
+     *
      * @param a the first float value
      * @param b the second float value
      * @return 0 if both values are equal; a value greater than {@code 0} if the first value is greater than the second; a value less than {@code 0} if the first value is less than the second
@@ -18784,6 +20785,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Compares two double values.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.compare(1.0d, 2.0d); // returns negative value
+     * N.compare(1.0d, 1.0d); // returns 0
+     * }</pre>
      *
      * @param a the first double value
      * @param b the second double value
@@ -18796,6 +20803,14 @@ sealed class CommonUtil permits N {
     /**
      * Compares two {@code Comparable} object values. ({@code null} is considered as the smallest value in natural order).
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.compare("a", "b");    // returns a negative value
+     * N.compare("b", "a");    // returns a positive value
+     * N.compare("a", "a");    // returns 0
+     * N.compare(null, "a");   // returns a negative value (null is smallest)
+     * }</pre>
+     *
      * @param <T> the type of the comparable objects
      * @param a the first object value
      * @param b the second object value
@@ -18807,6 +20822,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Compares two {@code Comparable} object values using the specified {@code Comparator}.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.compare("a", "b", Comparator.naturalOrder()); // returns negative value
+     * N.compare("a", "a", Comparator.naturalOrder()); // returns 0
+     * }</pre>
      *
      * @param <T> the type of objects being compared
      * @param a the first object value
@@ -18826,6 +20847,12 @@ sealed class CommonUtil permits N {
      * Compares two pairs of values (a1, b1) and (a2, b2) until they are not equal. ({@code null} is considered as the smallest value in natural order).
      * Returns 0 if all pairs of values are equal.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.compare(1, 1, 2, 3); // returns negative value
+     * N.compare(1, 1, 2, 2); // returns 0
+     * }</pre>
+     *
      * @param <T1> the type of the first pair of values, which must be comparable
      * @param <T2> the type of the second pair of values, which must be comparable
      * @param a1 the first value of the first pair
@@ -18843,6 +20870,12 @@ sealed class CommonUtil permits N {
     /**
      * Compares three pairs of values (a1, b1), (a2, b2), and (a3, b3) until they are not equal. ({@code null} is considered as the smallest value in natural order).
      * Returns 0 if all pairs of values are equal.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.compare(1, 1, 2, 2, 3, 4); // returns negative value
+     * N.compare(1, 1, 2, 2, 3, 3); // returns 0
+     * }</pre>
      *
      * @param <T1> the type of the first pair of values, which must be comparable
      * @param <T2> the type of the second pair of values, which must be comparable
@@ -18870,6 +20903,12 @@ sealed class CommonUtil permits N {
     /**
      * Compares four pairs of values (a1, b1), (a2, b2), (a3, b3), and (a4, b4) until they are not equal. ({@code null} is considered as the smallest value in natural order).
      * Returns 0 if all pairs of values are equal.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.compare(1, 1, 2, 2, 3, 3, 4, 5); // returns negative value
+     * N.compare(1, 1, 2, 2, 3, 3, 4, 4); // returns 0
+     * }</pre>
      *
      * @param <T1> the type of the first pair of values, which must be comparable
      * @param <T2> the type of the second pair of values, which must be comparable
@@ -18903,6 +20942,12 @@ sealed class CommonUtil permits N {
     /**
      * Compares five pairs of values (a1, b1), (a2, b2), (a3, b3), (a4, b4), and (a5, b5) until they are not equal. ({@code null} is considered as the smallest value in natural order).
      * Returns 0 if all pairs of values are equal.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.compare(1, 1, 2, 2, 3, 3, 4, 4, 5, 6); // returns negative value
+     * N.compare(1, 1, 2, 2, 3, 3, 4, 4, 5, 5); // returns 0
+     * }</pre>
      *
      * @param <T1> the type of the first pair of values, which must be comparable
      * @param <T2> the type of the second pair of values, which must be comparable
@@ -18939,6 +20984,12 @@ sealed class CommonUtil permits N {
     /**
      * Compares six pairs of values (a1, b1), (a2, b2), (a3, b3), (a4, b4), (a5, b5), and (a6, b6) until they are not equal. ({@code null} is considered as the smallest value in natural order).
      * Returns 0 if all pairs of values are equal.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.compare(1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 7); // returns negative value
+     * N.compare(1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6); // returns 0
+     * }</pre>
      *
      * @param <T1> the type of the first pair of values, which must be comparable
      * @param <T2> the type of the second pair of values, which must be comparable
@@ -18980,6 +21031,12 @@ sealed class CommonUtil permits N {
     /**
      * Compares seven pairs of values (a1, b1), (a2, b2), (a3, b3), (a4, b4), (a5, b5), (a6, b6), and (a7, b7) until they are not equal. ({@code null} is considered as the smallest value in natural order).
      * Returns 0 if all pairs of values are equal.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.compare(1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 8); // returns negative value
+     * N.compare(1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7); // returns 0
+     * }</pre>
      *
      * @param <T1> the type of the first pair of values, which must be comparable
      * @param <T2> the type of the second pair of values, which must be comparable
@@ -19034,6 +21091,12 @@ sealed class CommonUtil permits N {
      * the shorter array is considered less than the longer array. Null or empty arrays are
      * considered less than non-empty arrays.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.compare(new boolean[] {true, false}, new boolean[] {true, false}); // returns 0
+     * N.compare(new boolean[] {true, false}, new boolean[] {true, true});  // returns negative value
+     * }</pre>
+     *
      * @param a the first array to compare, may be {@code null}
      * @param b the second array to compare, may be {@code null}
      * @return a negative integer, zero, or a positive integer as the first array is less than, equal to, or greater than the second
@@ -19065,10 +21128,8 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * boolean[] a = {false, true, false};
-     * boolean[] b = {false, true, true};
-     * compare(a, 0, b, 0, 3);   // returns negative value (false < true at index 2)
-     * compare(a, 0, b, 0, 2);   // returns 0
+     * N.compare(new boolean[] {true, false}, 0, new boolean[] {true, false}, 0, 2); // returns 0
+     * N.compare(new boolean[] {true, false}, 0, new boolean[] {true, true}, 0, 2);  // returns negative value
      * }</pre>
      *
      * @param a the first array to compare
@@ -19106,6 +21167,12 @@ sealed class CommonUtil permits N {
     /**
      * Compares two arrays lexicographically.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.compare(new char[] {'a', 'b'}, new char[] {'a', 'b'}); // returns 0
+     * N.compare(new char[] {'a', 'b'}, new char[] {'a', 'c'}); // returns negative value
+     * }</pre>
+     *
      * @param a the first array to compare
      * @param b the second array to compare
      * @return a negative integer, zero, or a positive integer as the first array is less than, equal to, or greater than the second
@@ -19137,10 +21204,8 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * char[] a = {'a', 'b', 'c'};
-     * char[] b = {'a', 'b', 'd'};
-     * compare(a, 0, b, 0, 3);   // returns negative value ('c' < 'd')
-     * compare(a, 0, b, 0, 2);   // returns 0
+     * N.compare(new char[] {'a', 'b'}, 0, new char[] {'a', 'b'}, 0, 2); // returns 0
+     * N.compare(new char[] {'a', 'b'}, 0, new char[] {'a', 'c'}, 0, 2); // returns negative value
      * }</pre>
      *
      * @param a the first array to compare
@@ -19178,6 +21243,12 @@ sealed class CommonUtil permits N {
     /**
      * Compares two arrays lexicographically.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.compare(new byte[] {1, 2}, new byte[] {1, 2}); // returns 0
+     * N.compare(new byte[] {1, 2}, new byte[] {1, 3}); // returns negative value
+     * }</pre>
+     *
      * @param a the first array to compare
      * @param b the second array to compare
      * @return a negative integer, zero, or a positive integer as the first array is less than, equal to, or greater than the second
@@ -19209,10 +21280,8 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * byte[] a = {1, 2, 3};
-     * byte[] b = {1, 2, 4};
-     * compare(a, 0, b, 0, 3);   // returns negative value (3 < 4)
-     * compare(a, 0, b, 0, 2);   // returns 0
+     * N.compare(new byte[] {1, 2}, 0, new byte[] {1, 2}, 0, 2); // returns 0
+     * N.compare(new byte[] {1, 2}, 0, new byte[] {1, 3}, 0, 2); // returns negative value
      * }</pre>
      *
      * @param a the first array to compare
@@ -19250,6 +21319,12 @@ sealed class CommonUtil permits N {
     /**
      * Compares two arrays lexicographically, treating the values as unsigned.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.compareUnsigned(new byte[] {1, 2}, new byte[] {1, 2}); // returns 0
+     * N.compareUnsigned(new byte[] {1, 2}, new byte[] {1, 3}); // returns negative value
+     * }</pre>
+     *
      * @param a the first array to compare
      * @param b the second array to compare
      * @return a negative integer, zero, or a positive integer as the first array is less than, equal to, or greater than the second
@@ -19268,6 +21343,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Compares two subarrays lexicographically, treating the values as unsigned.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.compareUnsigned(new byte[] {1, 2}, 0, new byte[] {1, 2}, 0, 2); // returns 0
+     * N.compareUnsigned(new byte[] {1, 2}, 0, new byte[] {1, 3}, 0, 2); // returns negative value
+     * }</pre>
      *
      * @param a the first array to compare
      * @param fromIndexA the starting index (inclusive) of the first subarray
@@ -19295,6 +21376,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Compares two arrays lexicographically.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.compare(new short[] {1, 2}, new short[] {1, 2}); // returns 0
+     * N.compare(new short[] {1, 2}, new short[] {1, 3}); // returns negative value
+     * }</pre>
      *
      * @param a the first array to compare
      * @param b the second array to compare
@@ -19327,10 +21414,8 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * short[] a = {1, 2, 3};
-     * short[] b = {1, 2, 4};
-     * compare(a, 0, b, 0, 3);   // returns negative value (3 < 4)
-     * compare(a, 0, b, 0, 2);   // returns 0
+     * N.compare(new short[] {1, 2}, 0, new short[] {1, 2}, 0, 2); // returns 0
+     * N.compare(new short[] {1, 2}, 0, new short[] {1, 3}, 0, 2); // returns negative value
      * }</pre>
      *
      * @param a the first array to compare
@@ -19368,6 +21453,12 @@ sealed class CommonUtil permits N {
     /**
      * Compares two arrays lexicographically, treating the values as unsigned.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.compareUnsigned(new short[] {1, 2}, new short[] {1, 2}); // returns 0
+     * N.compareUnsigned(new short[] {1, 2}, new short[] {1, 3}); // returns negative value
+     * }</pre>
+     *
      * @param a the first array to compare
      * @param b the second array to compare
      * @return a negative integer, zero, or a positive integer as the first array is less than, equal to, or greater than the second
@@ -19386,6 +21477,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Compares two subarrays lexicographically, treating the values as unsigned.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.compareUnsigned(new short[] {1, 2}, 0, new short[] {1, 2}, 0, 2); // returns 0
+     * N.compareUnsigned(new short[] {1, 2}, 0, new short[] {1, 3}, 0, 2); // returns negative value
+     * }</pre>
      *
      * @param a the first array to compare
      * @param fromIndexA the starting index (inclusive) of the first subarray
@@ -19413,6 +21510,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Compares two arrays lexicographically.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.compare(new int[] {1, 2}, new int[] {1, 2}); // returns 0
+     * N.compare(new int[] {1, 2}, new int[] {1, 3}); // returns negative value
+     * }</pre>
      *
      * @param a the first array to compare
      * @param b the second array to compare
@@ -19445,10 +21548,8 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * int[] a = {1, 2, 3};
-     * int[] b = {1, 2, 4};
-     * compare(a, 0, b, 0, 3);   // returns negative value (3 < 4)
-     * compare(a, 0, b, 0, 2);   // returns 0
+     * N.compare(new int[] {1, 2}, 0, new int[] {1, 2}, 0, 2); // returns 0
+     * N.compare(new int[] {1, 2}, 0, new int[] {1, 3}, 0, 2); // returns negative value
      * }</pre>
      *
      * @param a the first array to compare
@@ -19486,6 +21587,12 @@ sealed class CommonUtil permits N {
     /**
      * Compares two arrays lexicographically, treating the values as unsigned.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.compareUnsigned(new int[] {1, 2}, new int[] {1, 2}); // returns 0
+     * N.compareUnsigned(new int[] {1, 2}, new int[] {1, 3}); // returns negative value
+     * }</pre>
+     *
      * @param a the first array to compare
      * @param b the second array to compare
      * @return a negative integer, zero, or a positive integer as the first array is less than, equal to, or greater than the second
@@ -19504,6 +21611,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Compares two subarrays lexicographically, treating the values as unsigned.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.compareUnsigned(new int[] {1, 2}, 0, new int[] {1, 2}, 0, 2); // returns 0
+     * N.compareUnsigned(new int[] {1, 2}, 0, new int[] {1, 3}, 0, 2); // returns negative value
+     * }</pre>
      *
      * @param a the first array to compare
      * @param fromIndexA the starting index (inclusive) of the first subarray
@@ -19531,6 +21644,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Compares two arrays lexicographically.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.compare(new long[] {1L, 2L}, new long[] {1L, 2L}); // returns 0
+     * N.compare(new long[] {1L, 2L}, new long[] {1L, 3L}); // returns negative value
+     * }</pre>
      *
      * @param a the first array to compare
      * @param b the second array to compare
@@ -19563,10 +21682,8 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * long[] a = {1L, 2L, 3L};
-     * long[] b = {1L, 2L, 4L};
-     * compare(a, 0, b, 0, 3);   // returns negative value (3L < 4L)
-     * compare(a, 0, b, 0, 2);   // returns 0
+     * N.compare(new long[] {1L, 2L}, 0, new long[] {1L, 2L}, 0, 2); // returns 0
+     * N.compare(new long[] {1L, 2L}, 0, new long[] {1L, 3L}, 0, 2); // returns negative value
      * }</pre>
      *
      * @param a the first array to compare
@@ -19604,6 +21721,12 @@ sealed class CommonUtil permits N {
     /**
      * Compares two arrays lexicographically, treating the values as unsigned.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.compareUnsigned(new long[] {1L, 2L}, new long[] {1L, 2L}); // returns 0
+     * N.compareUnsigned(new long[] {1L, 2L}, new long[] {1L, 3L}); // returns negative value
+     * }</pre>
+     *
      * @param a the first array to compare
      * @param b the second array to compare
      * @return a negative integer, zero, or a positive integer as the first array is less than, equal to, or greater than the second
@@ -19622,6 +21745,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Compares two subarrays lexicographically, treating the values as unsigned.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.compareUnsigned(new long[] {1L, 2L}, 0, new long[] {1L, 2L}, 0, 2); // returns 0
+     * N.compareUnsigned(new long[] {1L, 2L}, 0, new long[] {1L, 3L}, 0, 2); // returns negative value
+     * }</pre>
      *
      * @param a the first array to compare
      * @param fromIndexA the starting index (inclusive) of the first subarray
@@ -19649,6 +21778,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Compares two arrays lexicographically.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.compare(new float[] {1.0f, 2.0f}, new float[] {1.0f, 2.0f}); // returns 0
+     * N.compare(new float[] {1.0f, 2.0f}, new float[] {1.0f, 3.0f}); // returns negative value
+     * }</pre>
      *
      * @param a the first array to compare
      * @param b the second array to compare
@@ -19683,10 +21818,8 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * float[] a = {1.0f, 2.0f, 3.0f};
-     * float[] b = {1.0f, 2.0f, 4.0f};
-     * compare(a, 0, b, 0, 3);   // returns negative value (3.0f < 4.0f)
-     * compare(a, 0, b, 0, 2);   // returns 0
+     * N.compare(new float[] {1.0f, 2.0f}, 0, new float[] {1.0f, 2.0f}, 0, 2); // returns 0
+     * N.compare(new float[] {1.0f, 2.0f}, 0, new float[] {1.0f, 3.0f}, 0, 2); // returns negative value
      * }</pre>
      *
      * @param a the first array to compare
@@ -19726,6 +21859,12 @@ sealed class CommonUtil permits N {
     /**
      * Compares two arrays lexicographically.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.compare(new double[] {1.0d, 2.0d}, new double[] {1.0d, 2.0d}); // returns 0
+     * N.compare(new double[] {1.0d, 2.0d}, new double[] {1.0d, 3.0d}); // returns negative value
+     * }</pre>
+     *
      * @param a the first array to compare
      * @param b the second array to compare
      * @return a negative integer, zero, or a positive integer as the first array is less than, equal to, or greater than the second
@@ -19759,10 +21898,8 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * double[] a = {1.0, 2.0, 3.0};
-     * double[] b = {1.0, 2.0, 4.0};
-     * compare(a, 0, b, 0, 3);   // returns negative value (3.0 < 4.0)
-     * compare(a, 0, b, 0, 2);   // returns 0
+     * N.compare(new double[] {1.0d, 2.0d}, 0, new double[] {1.0d, 2.0d}, 0, 2); // returns 0
+     * N.compare(new double[] {1.0d, 2.0d}, 0, new double[] {1.0d, 3.0d}, 0, 2); // returns negative value
      * }</pre>
      *
      * @param a the first array to compare
@@ -19807,11 +21944,8 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * String[] a = {"a", "b", "c"};
-     * String[] b = {"a", "b", "d"};
-     * N.compare(a, b);      // returns negative value (c < d)
-     * N.compare(a, a);      // returns 0
-     * N.compare(null, b);   // returns -1
+     * N.compare(new String[] {"a", "b"}, new String[] {"a", "b"}); // returns 0
+     * N.compare(new String[] {"a", "b"}, new String[] {"a", "c"}); // returns negative value
      * }</pre>
      *
      * @param <T> the type of the comparable array elements
@@ -19830,10 +21964,8 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * String[] a = {"a", "b", "c", "d"};
-     * String[] b = {"a", "b", "x", "y"};
-     * N.compare(a, 0, b, 0, 2);   // returns 0 (first 2 elements are same)
-     * N.compare(a, 2, b, 2, 2);   // returns negative value (c < x)
+     * N.compare(new String[] {"a", "b"}, 0, new String[] {"a", "b"}, 0, 2); // returns 0
+     * N.compare(new String[] {"a", "b"}, 0, new String[] {"a", "c"}, 0, 2); // returns negative value
      * }</pre>
      *
      * @param <T> the type of the comparable array elements
@@ -19860,10 +21992,8 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * String[] a = {"apple", "banana"};
-     * String[] b = {"APPLE", "BANANA"};
-     * N.compare(a, b, String.CASE_INSENSITIVE_ORDER);   // returns 0
-     * N.compare(a, b, null);                            // uses natural ordering
+     * N.compare(new String[] {"a", "b"}, new String[] {"a", "b"}, Comparator.naturalOrder()); // returns 0
+     * N.compare(new String[] {"a", "b"}, new String[] {"a", "c"}, Comparator.naturalOrder()); // returns negative value
      * }</pre>
      *
      * @param <T> the type of elements in the arrays
@@ -19897,10 +22027,8 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * String[] a = {"apple", "BANANA", "cherry"};
-     * String[] b = {"APPLE", "banana", "CHERRY"};
-     * N.compare(a, 0, b, 0, 3, String.CASE_INSENSITIVE_ORDER);   // returns 0
-     * N.compare(a, 0, b, 0, 1, null);                            // uses natural ordering for first element
+     * N.compare(new String[] {"a", "b"}, new String[] {"a", "b"}, Comparator.naturalOrder()); // returns 0
+     * N.compare(new String[] {"a", "b"}, new String[] {"a", "c"}, Comparator.naturalOrder()); // returns negative value
      * }</pre>
      *
      * @param <T> the type of the array elements
@@ -19939,6 +22067,12 @@ sealed class CommonUtil permits N {
     /**
      * Compares two collections lexicographically over the specified range. ({@code null} is considered as the smallest value in natural order).
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.compare(Arrays.asList(1, 2, 3), 0, Arrays.asList(1, 2, 4), 0, 3); // returns negative value
+     * N.compare(Arrays.asList(1, 2), 0, Arrays.asList(1, 2), 0, 2);       // returns 0
+     * }</pre>
+     *
      * @param <T> the type of the collection elements
      * @param a the first collection to compare
      * @param fromIndexA the starting index in the first collection
@@ -19958,6 +22092,14 @@ sealed class CommonUtil permits N {
     /**
      * Compares two iterables lexicographically. ({@code null} is considered as the smallest value in natural order).
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.compare(Arrays.asList(1, 2, 3), Arrays.asList(1, 2, 4)); // returns a negative value
+     * N.compare(Arrays.asList(1, 2), Arrays.asList(1, 2));       // returns 0
+     * N.compare(Arrays.asList(1, 2, 3), Arrays.asList(1, 2));    // returns a positive value (longer)
+     * N.compare(Arrays.asList(1), Arrays.asList(2));             // returns a negative value
+     * }</pre>
+     *
      * @param <T> the type of elements in the iterables, which must be comparable
      * @param a the first iterable to compare
      * @param b the second iterable to compare
@@ -19972,6 +22114,12 @@ sealed class CommonUtil permits N {
     /**
      * Compares two iterators lexicographically. ({@code null} is considered as the smallest value in natural order).
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.compare(Arrays.asList(1, 2).iterator(), Arrays.asList(1, 3).iterator()); // returns negative value
+     * N.compare(Arrays.asList(1, 2).iterator(), Arrays.asList(1, 2).iterator()); // returns 0
+     * }</pre>
+     *
      * @param <T> the type of elements in the iterators, which must be comparable
      * @param a the first iterator to compare
      * @param b the second iterator to compare
@@ -19985,6 +22133,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Compares two collections lexicographically over the specified range using the specified comparator.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.compare(Arrays.asList(1, 2, 3), 0, Arrays.asList(1, 2, 4), 0, 3, Comparator.naturalOrder()); // returns a negative value
+     * N.compare(Arrays.asList(1, 2), 0, Arrays.asList(1, 2), 0, 2, Comparator.naturalOrder());       // returns 0
+     * }</pre>
      *
      * @param <T> the type of elements in the collections
      * @param a the first collection to compare
@@ -20033,6 +22187,12 @@ sealed class CommonUtil permits N {
     /**
      * Compares two iterables using the specified comparator.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.compare(Arrays.asList(1, 2), Arrays.asList(1, 3), Comparator.naturalOrder()); // returns a negative value
+     * N.compare(Arrays.asList(1, 2), Arrays.asList(1, 2), Comparator.naturalOrder()); // returns 0
+     * }</pre>
+     *
      * @param <T> the type of elements in the iterables
      * @param a the first iterable to compare
      * @param b the second iterable to compare
@@ -20053,6 +22213,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Compares two iterators using the specified comparator.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.compare(Arrays.asList(1, 2).iterator(), Arrays.asList(1, 3).iterator(), Comparator.naturalOrder()); // returns a negative value
+     * N.compare(Arrays.asList(1, 2).iterator(), Arrays.asList(1, 2).iterator(), Comparator.naturalOrder()); // returns 0
+     * }</pre>
      *
      * @param <T> the type of elements in the iterators
      * @param a the first iterator to compare
@@ -20079,6 +22245,12 @@ sealed class CommonUtil permits N {
     /**
      * Compares two strings lexicographically, ignoring case differences.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.compareIgnoreCase("hello", "HELLO"); // returns 0
+     * N.compareIgnoreCase("abc", "XYZ");     // returns negative
+     * }</pre>
+     *
      * @param a the first string to compare
      * @param b the second string to compare
      * @return a negative integer, zero, or a positive integer as the first string is less than, equal to, or greater than the second string, ignoring case considerations
@@ -20090,6 +22262,12 @@ sealed class CommonUtil permits N {
     /**
      * Compares two arrays of strings lexicographically, ignoring case differences.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.compareIgnoreCase(new String[]{"a", "B"}, new String[]{"A", "b"}); // returns 0
+     * N.compareIgnoreCase(new String[]{"abc"}, new String[]{"XYZ"});       // returns a negative value
+     * }</pre>
+     *
      * @param a the first array of strings to compare
      * @param b the second array of strings to compare
      * @return a negative integer, zero, or a positive integer as the first array is less than, equal to, or greater than the second array, ignoring case considerations
@@ -20100,6 +22278,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Compares two beans based on the specified properties.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.compareByProps(bean1, bean2, Arrays.asList("name", "age")); // returns comparison result
+     * N.compareByProps(bean1, bean2, Collections.emptyList());      // returns 0
+     * }</pre>
      *
      * @param bean1 the first bean to compare, must not be null
      * @param bean2 the second bean to compare, must not be null
@@ -20129,6 +22313,12 @@ sealed class CommonUtil permits N {
     /**
      * Compares two comparable objects to determine if the first is less than the second. ({@code null} is considered as the smallest value in natural order).
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.lessThan(1, 2); // returns true
+     * N.lessThan(3, 3); // returns false
+     * }</pre>
+     *
      * @param <T> the type of the objects being compared, which must be comparable
      * @param a the first object to compare, may be {@code null}
      * @param b the second object to compare, may be {@code null}
@@ -20140,6 +22330,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Compares two objects using the specified comparator to determine if the first is less than the second.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.lessThan(1, 2, Comparator.naturalOrder()); // returns true
+     * N.lessThan(3, 3, Comparator.naturalOrder()); // returns false
+     * }</pre>
      *
      * @param <T> the type of the objects being compared
      * @param a the first object to compare, may be {@code null}
@@ -20156,6 +22352,13 @@ sealed class CommonUtil permits N {
     /**
      * Compares two comparable objects to determine if the first is less than or equal to the second. ({@code null} is considered as the smallest value in natural order).
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.lessThanOrEqual(1, 2);   // returns true
+     * N.lessThanOrEqual(3, 3);   // returns true
+     * N.lessThanOrEqual(5, 2);   // returns false
+     * }</pre>
+     *
      * @param <T> the type of the objects being compared, which must be comparable
      * @param a the first object to compare, may be {@code null}
      * @param b the second object to compare, may be {@code null}
@@ -20168,6 +22371,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Compares two objects using the specified comparator to determine if the first is less than or equal to the second.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.lessThanOrEqual(1, 2, Comparator.naturalOrder()); // returns true
+     * N.lessThanOrEqual(3, 3, Comparator.naturalOrder()); // returns true
+     * }</pre>
      *
      * @param <T> the type of the objects being compared
      * @param a the first object to compare, may be {@code null}
@@ -20185,6 +22394,13 @@ sealed class CommonUtil permits N {
     /**
      * Alias for {@link #lessThanOrEqual(Comparable, Comparable)}.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.le(1, 2);   // returns true
+     * N.le(3, 3);   // returns true
+     * N.le(5, 2);   // returns false
+     * }</pre>
+     *
      * @param <T> the type of the objects being compared, which must be comparable
      * @param a the first object to compare, may be {@code null}
      * @param b the second object to compare, may be {@code null}
@@ -20197,6 +22413,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Alias for {@link #lessThanOrEqual(Object, Object, Comparator)}.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.le(1, 2, Comparator.naturalOrder()); // returns true
+     * N.le(3, 3, Comparator.naturalOrder()); // returns true
+     * }</pre>
      *
      * @param <T> the type of the objects being compared
      * @param a the first object to compare, may be {@code null}
@@ -20212,6 +22434,13 @@ sealed class CommonUtil permits N {
     /**
      * Compares two comparable objects to determine if the first is greater than the second. ({@code null} is considered as the smallest value in natural order).
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.greaterThan(2, 1);   // returns true
+     * N.greaterThan(3, 3);   // returns false
+     * N.greaterThan(1, 2);   // returns false
+     * }</pre>
+     *
      * @param <T> the type of the objects being compared, which must be comparable
      * @param a the first object to compare, may be {@code null}
      * @param b the second object to compare, may be {@code null}
@@ -20223,6 +22452,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Compares two objects using the specified comparator to determine if the first is greater than the second.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.greaterThan(1, 2, Comparator.naturalOrder()); // returns false
+     * N.greaterThan(3, 3, Comparator.naturalOrder()); // returns false
+     * }</pre>
      *
      * @param <T> the type of the objects being compared
      * @param a the first object to compare, may be {@code null}
@@ -20239,6 +22474,13 @@ sealed class CommonUtil permits N {
     /**
      * Compares two comparable objects to determine if the first is greater than or equal to the second. ({@code null} is considered as the smallest value in natural order).
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.greaterThanOrEqual(2, 1);   // returns true
+     * N.greaterThanOrEqual(3, 3);   // returns true
+     * N.greaterThanOrEqual(1, 2);   // returns false
+     * }</pre>
+     *
      * @param <T> the type of the objects being compared, which must be comparable
      * @param a the first object to compare, may be {@code null}
      * @param b the second object to compare, may be {@code null}
@@ -20251,6 +22493,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Compares two objects using the specified comparator to determine if the first is greater than or equal to the second.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.greaterThanOrEqual(1, 2, Comparator.naturalOrder()); // returns false
+     * N.greaterThanOrEqual(3, 3, Comparator.naturalOrder()); // returns true
+     * }</pre>
      *
      * @param <T> the type of the objects being compared
      * @param a the first object to compare, may be {@code null}
@@ -20268,6 +22516,13 @@ sealed class CommonUtil permits N {
     /**
      * Alias for {@link #greaterThanOrEqual(Comparable, Comparable)}.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.ge(2, 1);   // returns true
+     * N.ge(3, 3);   // returns true
+     * N.ge(1, 2);   // returns false
+     * }</pre>
+     *
      * @param <T> the type of the objects being compared, which must be comparable
      * @param a the first object to compare, may be {@code null}
      * @param b the second object to compare, may be {@code null}
@@ -20280,6 +22535,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Alias for {@link #greaterThanOrEqual(Object, Object, Comparator)}.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.ge(1, 2, Comparator.naturalOrder()); // returns false
+     * N.ge(3, 3, Comparator.naturalOrder()); // returns true
+     * }</pre>
      *
      * @param <T> the type of the objects being compared
      * @param a the first object to compare, may be {@code null}
@@ -20294,6 +22555,13 @@ sealed class CommonUtil permits N {
 
     /**
      * Checks if the given value is greater than the minimum value and less than the maximum value. ({@code null} is considered as the smallest value in natural order).
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.gtAndLt(5, 1, 10);    // returns true
+     * N.gtAndLt(1, 1, 10);    // returns false (not strictly greater than min)
+     * N.gtAndLt(10, 1, 10);   // returns false (not strictly less than max)
+     * }</pre>
      *
      * @param <T> the type of the objects being compared, which must be comparable
      * @param value the value to check, may be {@code null}
@@ -20311,6 +22579,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Checks if the given value is greater than the minimum value and less than the maximum value using the specified comparator.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.gtAndLt(5, 1, 10, Comparator.naturalOrder()); // returns true
+     * N.gtAndLt(0, 1, 10, Comparator.naturalOrder()); // returns false
+     * }</pre>
      *
      * @param <T> the type of the objects being compared
      * @param value the value to check, must not be null
@@ -20332,6 +22606,13 @@ sealed class CommonUtil permits N {
     /**
      * Checks if the given value is greater than or equal to the minimum value and less than the maximum value. ({@code null} is considered as the smallest value in natural order).
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.geAndLt(1, 1, 10);    // returns true (equal to min is allowed)
+     * N.geAndLt(10, 1, 10);   // returns false (not less than max)
+     * N.geAndLt(0, 1, 10);    // returns false (below min)
+     * }</pre>
+     *
      * @param <T> the type of the objects being compared, which must be comparable
      * @param value the value to check, may be {@code null}
      * @param min the minimum value, may be {@code null}
@@ -20348,6 +22629,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Checks if the given value is greater than or equal to the minimum value and less than the maximum value using the specified comparator.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.geAndLt(5, 1, 10, Comparator.naturalOrder()); // returns true
+     * N.geAndLt(0, 1, 10, Comparator.naturalOrder()); // returns false
+     * }</pre>
      *
      * @param <T> the type of the objects being compared
      * @param value the value to check, must not be null
@@ -20369,6 +22656,13 @@ sealed class CommonUtil permits N {
     /**
      * Checks if the given value is greater than or equal to the minimum value and less than or equal to the maximum value. ({@code null} is considered as the smallest value in natural order).
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.geAndLe(1, 1, 10);    // returns true (equal to min is allowed)
+     * N.geAndLe(10, 1, 10);   // returns true (equal to max is allowed)
+     * N.geAndLe(11, 1, 10);   // returns false (above max)
+     * }</pre>
+     *
      * @param <T> the type of the objects being compared, which must be comparable
      * @param value the value to check, may be {@code null}
      * @param min the minimum value, may be {@code null}
@@ -20385,6 +22679,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Checks if the given value is greater than or equal to the minimum value and less than or equal to the maximum value using the specified comparator.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.geAndLe(5, 1, 10, Comparator.naturalOrder()); // returns true
+     * N.geAndLe(0, 1, 10, Comparator.naturalOrder()); // returns false
+     * }</pre>
      *
      * @param <T> the type of the objects being compared
      * @param value the value to check, must not be null
@@ -20406,6 +22706,13 @@ sealed class CommonUtil permits N {
     /**
      * Checks if the given value is greater than the minimum value and less than or equal to the maximum value. ({@code null} is considered as the smallest value in natural order).
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.gtAndLe(1, 1, 10);    // returns false (not strictly greater than min)
+     * N.gtAndLe(10, 1, 10);   // returns true (equal to max is allowed)
+     * N.gtAndLe(5, 1, 10);    // returns true
+     * }</pre>
+     *
      * @param <T> the type of the objects being compared, which must be comparable
      * @param value the value to check, may be {@code null}
      * @param min the minimum value, may be {@code null}
@@ -20422,6 +22729,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Checks if the given value is greater than the minimum value and less than or equal to the maximum value using the specified comparator.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.gtAndLe(5, 1, 10, Comparator.naturalOrder()); // returns true
+     * N.gtAndLe(0, 1, 10, Comparator.naturalOrder()); // returns false
+     * }</pre>
      *
      * @param <T> the type of the objects being compared
      * @param value the value to check, must not be null
@@ -20446,6 +22759,12 @@ sealed class CommonUtil permits N {
      * {@code null} is considered as the smallest value in natural order.
      * <p><b>Implementation Note:</b> it is equivalent to {@link #geAndLe(Comparable, Comparable, Comparable)}.</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.isBetween(5, 1, 10); // returns true
+     * N.isBetween(0, 1, 10); // returns false
+     * }</pre>
+     *
      * @param <T> the type of the objects being compared
      * @param value the value to check, may be {@code null}
      * @param min the minimum value, may be {@code null}
@@ -20462,6 +22781,12 @@ sealed class CommonUtil permits N {
      * Checks if the given value is between the specified minimum and maximum values, inclusive.
      * It means {@code min <= value <= max}.
      * <p><b>Implementation Note:</b> it is equivalent to {@link #geAndLe(Object, Object, Object, Comparator)}.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.isBetween(5, 1, 10, Comparator.naturalOrder()); // returns true
+     * N.isBetween(0, 1, 10, Comparator.naturalOrder()); // returns false
+     * }</pre>
      *
      * @param <T> the type of the objects being compared
      * @param value the value to check, must not be null
@@ -20582,6 +22907,13 @@ sealed class CommonUtil permits N {
     /**
      * Returns the only element in the given Iterator.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.getOnlyElement(Arrays.asList("a").iterator());     // returns Nullable.of("a")
+     * N.getOnlyElement(Collections.emptyIterator());       // returns Nullable.empty()
+     * N.getOnlyElement(Arrays.asList("a","b").iterator()); // throws TooManyElementsException
+     * }</pre>
+     *
      * @param <T> the type of elements in the Iterator
      * @param iter the Iterator to get the element from
      * @return a {@code Nullable} containing the only element in the Iterator if it exists, otherwise an empty Nullable
@@ -20634,6 +22966,12 @@ sealed class CommonUtil permits N {
      * Returns the first element in the given Iterator wrapped in a {@code Nullable}.
      * If the Iterator is empty, an empty {@code Nullable} is returned.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.firstElement(Arrays.asList("a","b","c").iterator()); // returns Nullable.of("a")
+     * N.firstElement(Collections.emptyIterator());           // returns Nullable.empty()
+     * }</pre>
+     *
      * @param <T> the type of elements in the Iterator
      * @param iter the Iterator to get the first element from
      * @return a {@code Nullable} containing the first element in the Iterator if it exists, otherwise an empty Nullable
@@ -20682,6 +23020,12 @@ sealed class CommonUtil permits N {
     /**
      * Returns the last element in the given Iterator wrapped in a {@code Nullable}.
      * If the Iterator is empty, an empty {@code Nullable} is returned.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.lastElement(Arrays.asList("a","b","c").iterator()); // returns Nullable.of("c")
+     * N.lastElement(Collections.emptyIterator());           // returns Nullable.empty()
+     * }</pre>
      *
      * @param <T> the type of elements in the Iterator
      * @param iter the Iterator to get the last element from
@@ -20733,6 +23077,15 @@ sealed class CommonUtil permits N {
      * Returns a list containing the first <i>n</i> elements from the given Iterable.
      * If the Iterable has less than <i>n</i> elements, it returns a list with all the elements in the Iterable.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.firstElements(Arrays.asList("a", "b", "c"), 2); // returns ["a", "b"]
+     * N.firstElements(Arrays.asList("a"), 5);           // returns ["a"]
+     * N.firstElements(Collections.emptyList(), 3);      // returns []
+     * N.firstElements(Arrays.asList("a", "b"), 0);      // returns []
+     * N.firstElements(Arrays.asList("a", "b"), -1);     // throws IllegalArgumentException
+     * }</pre>
+     *
      * @param <T> the type of elements in the Iterable
      * @param c the Iterable to get the elements from
      * @param n the number of elements to retrieve from the Iterable
@@ -20772,6 +23125,17 @@ sealed class CommonUtil permits N {
     /**
      * Returns a list containing the first <i>n</i> elements from the given Iterator.
      * If the Iterator has less than <i>n</i> elements, it returns a list with all the elements in the Iterator.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Iterator<String> iter = Arrays.asList("a", "b", "c").iterator();
+     *
+     * N.firstElements(iter, 2);                                       // returns ["a", "b"]
+     * N.firstElements(Arrays.asList("a").iterator(), 5);              // returns ["a"]
+     * N.firstElements(Collections.<String>emptyList().iterator(), 3); // returns []
+     * N.firstElements(Arrays.asList("a", "b").iterator(), 0);         // returns []
+     * N.firstElements(Arrays.asList("a", "b").iterator(), -1);        // throws IllegalArgumentException
+     * }</pre>
      *
      * @param <T> the type of elements in the Iterator
      * @param iter the Iterator to get the elements from
@@ -20833,6 +23197,15 @@ sealed class CommonUtil permits N {
      * Returns a list containing the last <i>n</i> elements from the given Iterable.
      * If the Iterable has less than <i>n</i> elements, it returns a list with all the elements in the Iterable.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.lastElements(Arrays.asList("a", "b", "c"), 2); // returns ["b", "c"]
+     * N.lastElements(Arrays.asList("a"), 5);           // returns ["a"]
+     * N.lastElements(Collections.emptyList(), 3);      // returns []
+     * N.lastElements(Arrays.asList("a", "b"), 0);      // returns []
+     * N.lastElements(Arrays.asList("a", "b"), -1);     // throws IllegalArgumentException
+     * }</pre>
+     *
      * @param <T> the type of elements in the Iterable
      * @param c the Iterable to get the elements from
      * @param n the number of elements to retrieve from the end of the Iterable
@@ -20871,6 +23244,17 @@ sealed class CommonUtil permits N {
     /**
      * Returns a list containing the last <i>n</i> elements from the given Iterator.
      * If the Iterator has less than <i>n</i> elements, it returns a list with all the elements in the Iterator.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Iterator<String> iter = Arrays.asList("a", "b", "c").iterator();
+     *
+     * N.lastElements(iter, 2);                                       // returns ["b", "c"]
+     * N.lastElements(Arrays.asList("a").iterator(), 5);              // returns ["a"]
+     * N.lastElements(Collections.<String>emptyList().iterator(), 3); // returns []
+     * N.lastElements(Arrays.asList("a", "b").iterator(), 0);         // returns []
+     * N.lastElements(Arrays.asList("a", "b").iterator(), -1);        // throws IllegalArgumentException
+     * }</pre>
      *
      * @param <T> the type of elements in the Iterator
      * @param iter the Iterator to get the elements from
@@ -21040,6 +23424,13 @@ sealed class CommonUtil permits N {
 
     /**
      * Returns the first non-null element from the specified array, or the default value if no non-null element is found.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.firstNonNullOrDefault(new String[]{null,"hello","world"}, "default"); // returns "hello"
+     * N.firstNonNullOrDefault(new String[]{null,null}, "default");            // returns "default"
+     * N.firstNonNullOrDefault(new String[0], "default");                      // returns "default"
+     * }</pre>
      *
      * @param <T> the type of elements in the array
      * @param a the array to search through
@@ -21287,6 +23678,13 @@ sealed class CommonUtil permits N {
     /**
      * Returns the last non-null element from the specified array, or the default value if no non-null element is found.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.lastNonNullOrDefault(new String[]{null,"hello","world"}, "default"); // returns "world"
+     * N.lastNonNullOrDefault(new String[]{null,null}, "default");            // returns "default"
+     * N.lastNonNullOrDefault(new String[0], "default");                      // returns "default"
+     * }</pre>
+     *
      * @param <T> the type of elements in the array
      * @param a the array to search through
      * @param defaultValue the value to return if no non-null element is found or if the array is empty/null; must not be null
@@ -21386,6 +23784,15 @@ sealed class CommonUtil permits N {
      * Returns the first non-empty array from the given arrays.
      * If all arrays are empty or {@code null}, it returns an empty Optional.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * String[] arr1 = {"a", "b"};
+     * String[] arr2 = {"c", "d"};
+     * N.firstNonEmpty(new String[0], arr1, arr2);   // returns Optional.of(arr1)
+     * N.firstNonEmpty(null, new String[0], arr2);   // returns Optional.of(arr2)
+     * N.firstNonEmpty((String[]) null, null, null); // returns Optional.empty()
+     * }</pre>
+     *
      * @param <T> the type of elements in the arrays
      * @param a the first array to check
      * @param b the second array to check
@@ -21422,6 +23829,15 @@ sealed class CommonUtil permits N {
     /**
      * Returns the first non-empty collection from the given collections.
      * If all collections are empty or {@code null}, it returns an empty Optional.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<String> list1 = Arrays.asList("a", "b");
+     * List<String> list2 = Arrays.asList("c", "d");
+     * N.firstNonEmpty(Collections.emptyList(), list1, list2); // returns Optional.of(list1)
+     * N.firstNonEmpty(null, null, list2);                     // returns Optional.of(list2)
+     * N.firstNonEmpty((List<String>) null, null, null);       // returns Optional.empty()
+     * }</pre>
      *
      * @param <T> the type of the collections
      * @param a the first collection to check
@@ -21460,6 +23876,15 @@ sealed class CommonUtil permits N {
      * Returns the first non-empty map from the given maps.
      * If all maps are empty or {@code null}, it returns an empty Optional.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Map<String, Integer> map1 = N.asMap("a", 1);
+     * Map<String, Integer> map2 = N.asMap("b", 2);
+     * N.firstNonEmpty(Collections.emptyMap(), map1, map2);       // returns Optional.of(map1)
+     * N.firstNonEmpty(null, null, map2);                         // returns Optional.of(map2)
+     * N.firstNonEmpty((Map<String, Integer>) null, null, null);  // returns Optional.empty()
+     * }</pre>
+     *
      * @param <T> the type of the maps
      * @param a the first map to check
      * @param b the second map to check
@@ -21496,6 +23921,13 @@ sealed class CommonUtil permits N {
      * Returns the first non-empty CharSequence from the given CharSequences.
      * If all CharSequences are empty or {@code null}, it returns an empty Optional.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.firstNonEmpty("", "hello", "world"); // returns Optional.of("hello")
+     * N.firstNonEmpty("", "", "x");          // returns Optional.of("x")
+     * N.firstNonEmpty(null, "", null);       // returns Optional.empty()
+     * }</pre>
+     *
      * @param <T> the type of the CharSequences
      * @param a the first CharSequence to check
      * @param b the second CharSequence to check
@@ -21510,6 +23942,12 @@ sealed class CommonUtil permits N {
     /**
      * Returns the first non-empty CharSequence from the given CharSequences.
      * If all CharSequences are empty or {@code null}, it returns an empty Optional.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.firstNonEmpty("", "hello", "world"); // returns Optional.of("hello")
+     * N.firstNonEmpty(null, "", null);       // returns Optional.empty()
+     * }</pre>
      *
      * @param <T> the type of the CharSequences
      * @param a the array of CharSequences to check
@@ -21535,6 +23973,12 @@ sealed class CommonUtil permits N {
      * Returns an Optional containing the first non-empty CharSequence from the given Iterable of CharSequences.
      * If all CharSequences are empty or the Iterable is empty, returns an empty Optional.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.firstNonEmpty(Arrays.asList("","hello")); // returns Optional.of("hello")
+     * N.firstNonEmpty(Arrays.asList("","  "));    // returns Optional.empty()
+     * }</pre>
+     *
      * @param <T> the type of the CharSequence
      * @param css the Iterable of CharSequences to check, may be {@code null} or empty
      * @return an Optional containing the first non-empty CharSequence, or an empty Optional if all are empty or the Iterable is empty
@@ -21556,6 +24000,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Returns the first non-empty element from the specified array, or the default value if no non-empty element is found.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.firstNonEmptyOrDefault(new String[]{"","hello"}, "default"); // returns "hello"
+     * N.firstNonEmptyOrDefault(new String[]{"",""}, "default");      // returns "default"
+     * }</pre>
      *
      * @param <T> the type of CharSequence elements
      * @param css the array of CharSequence elements to search through
@@ -21581,6 +24031,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Returns the first non-empty element from the specified iterable, or the default value if no non-empty element is found.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.firstNonEmptyOrDefault(Arrays.asList("", "hello"), "default"); // returns "hello"
+     * N.firstNonEmptyOrDefault(Arrays.asList("", ""), "default");      // returns "default"
+     * }</pre>
      *
      * @param <T> the type of CharSequence elements
      * @param css the iterable of CharSequence elements to search through
@@ -21629,6 +24085,13 @@ sealed class CommonUtil permits N {
      * Returns the first non-blank CharSequence from the given CharSequences.
      * If all CharSequences are blank or {@code null}, it returns an empty Optional.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.firstNonBlank("  ", "hello", "world"); // returns Optional.of("hello")
+     * N.firstNonBlank("", "  ", "x");          // returns Optional.of("x")
+     * N.firstNonBlank(null, "  ", null);       // returns Optional.empty()
+     * }</pre>
+     *
      * @param <T> the type of the CharSequences
      * @param a the first CharSequence to check
      * @param b the second CharSequence to check
@@ -21643,6 +24106,12 @@ sealed class CommonUtil permits N {
     /**
      * Returns the first non-blank CharSequence from the given CharSequences.
      * If all CharSequences are blank or {@code null}, it returns an empty Optional.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.firstNonBlank("", "hello", "world"); // returns Optional.of("hello")
+     * N.firstNonBlank(null, "", null);       // returns Optional.empty()
+     * }</pre>
      *
      * @param <T> the type of the CharSequences
      * @param a the array of CharSequences to check
@@ -21667,6 +24136,12 @@ sealed class CommonUtil permits N {
     /**
      * Returns an Optional containing the first non-blank CharSequence from the given Iterable of CharSequences.
      * If all CharSequences are blank or the Iterable is empty, returns an empty Optional.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.firstNonBlank(Arrays.asList("","hello")); // returns Optional.of("hello")
+     * N.firstNonBlank(Arrays.asList("","  "));    // returns Optional.empty()
+     * }</pre>
      *
      * @param <T> the type of the CharSequence
      * @param css the Iterable of CharSequences to check, may be {@code null} or empty
@@ -21693,6 +24168,12 @@ sealed class CommonUtil permits N {
      * A CharSequence is considered blank if it is null, empty, or contains only whitespace characters.
      * </p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.firstNonBlankOrDefault(new String[]{"","hello"}, "default"); // returns "hello"
+     * N.firstNonBlankOrDefault(new String[]{"",""}, "default");      // returns "default"
+     * }</pre>
+     *
      * @param <T> the type of CharSequence elements
      * @param css the array of CharSequence elements to search through
      * @param defaultValue the value to return if no non-blank element is found or if the array is empty/null; must not be blank
@@ -21717,6 +24198,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Returns the first non-blank element from the specified iterable, or the default value if no non-blank element is found.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.firstNonBlankOrDefault(Arrays.asList("  ", "hello"), "default"); // returns "hello"
+     * N.firstNonBlankOrDefault(Arrays.asList("  ", ""), "default");      // returns "default"
+     * }</pre>
      *
      * @param <T> the type of CharSequence elements
      * @param css the iterable of CharSequence elements to search through
@@ -21836,6 +24323,13 @@ sealed class CommonUtil permits N {
     /**
      * Returns the first element of the given iterator if it is not empty, otherwise returns {@code null}.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.firstOrNullIfEmpty(Arrays.asList("a", "b", "c").iterator()); // returns "a"
+     * N.firstOrNullIfEmpty(Collections.<String>emptyIterator());     // returns null
+     * N.firstOrNullIfEmpty((Iterator<String>) null);                 // returns null
+     * }</pre>
+     *
      * @param <T> the type of the elements in the iterator
      * @param iter the iterator to check, may be {@code null} or empty
      * @return the first element of the iterator if it is not empty, otherwise {@code null}
@@ -21896,6 +24390,13 @@ sealed class CommonUtil permits N {
     /**
      * Returns the first element of the given iterator if it is not empty, otherwise returns the specified default value.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.firstOrDefaultIfEmpty(Arrays.asList("a", "b", "c").iterator(), "default"); // returns "a"
+     * N.firstOrDefaultIfEmpty(Collections.<String>emptyIterator(), "default");     // returns "default"
+     * N.firstOrDefaultIfEmpty((Iterator<String>) null, "default");                 // returns "default"
+     * }</pre>
+     *
      * @param <T> the type of the elements in the iterator
      * @param iter the iterator to check
      * @param defaultValueForEmpty the default value to return if the iterator is empty
@@ -21951,6 +24452,13 @@ sealed class CommonUtil permits N {
     /**
      * Returns the last element of the given iterator if it is not empty, otherwise returns {@code null}.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.lastOrNullIfEmpty(Arrays.asList("a", "b", "c").iterator()); // returns "c"
+     * N.lastOrNullIfEmpty(Collections.<String>emptyIterator());     // returns null
+     * N.lastOrNullIfEmpty((Iterator<String>) null);                 // returns null
+     * }</pre>
+     *
      * @param <T> the type of the elements in the iterator
      * @param iter the iterator to check, may be {@code null} or empty
      * @return the last element of the iterator if it is not empty, otherwise {@code null}
@@ -21961,6 +24469,13 @@ sealed class CommonUtil permits N {
 
     /**
      * Returns the last element of the given array if it is not empty, otherwise returns the specified default value.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.lastOrDefaultIfEmpty(new String[]{"a", "b", "c"}, "default"); // returns "c"
+     * N.lastOrDefaultIfEmpty(new String[0], "default");               // returns "default"
+     * N.lastOrDefaultIfEmpty((String[]) null, "default");             // returns "default"
+     * }</pre>
      *
      * @param <T> the type of the elements in the array
      * @param a the array to check
@@ -22010,6 +24525,13 @@ sealed class CommonUtil permits N {
 
     /**
      * Returns the last element of the given iterator if it is not empty, otherwise returns the specified default value.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.lastOrDefaultIfEmpty(Arrays.asList("a", "b", "c").iterator(), "default"); // returns "c"
+     * N.lastOrDefaultIfEmpty(Collections.<String>emptyIterator(), "default");     // returns "default"
+     * N.lastOrDefaultIfEmpty((Iterator<String>) null, "default");                 // returns "default"
+     * }</pre>
      *
      * @param <T> the type of the elements in the iterator
      * @param iter the iterator to check
@@ -22091,6 +24613,12 @@ sealed class CommonUtil permits N {
     /**
      * Returns the first element in the given iterator that matches the specified predicate.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.findFirst(Arrays.asList("a", "bb", "ccc").iterator(), s -> s.length() > 1); // returns Nullable.of("bb")
+     * N.findFirst(Arrays.asList("a", "b").iterator(), s -> s.length() > 5);         // returns Nullable.empty()
+     * }</pre>
+     *
      * @param <T> the type of the elements in the iterator
      * @param iter the iterator to search
      * @param predicate the predicate to apply to elements of the iterator
@@ -22145,6 +24673,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Returns the last element in the given iterable that matches the specified predicate.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.findLast(Arrays.asList("a", "bb", "ccc"), s -> s.length() > 1); // returns Nullable.of("ccc")
+     * N.findLast(Arrays.asList("a", "b"), s -> s.length() > 5);         // returns Nullable.empty()
+     * }</pre>
      *
      * @param <T> the type of the elements in the iterable
      * @param c the iterable to search
@@ -22255,6 +24789,12 @@ sealed class CommonUtil permits N {
     /**
      * Returns the first {@code non-null} element in the given iterable that matches the specified predicate.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.findFirstNonNull(Arrays.asList(null, "hello", "world"), s -> s.length() > 3); // returns Optional.of("hello")
+     * N.findFirstNonNull(Arrays.asList(null, null), s -> true);                       // returns Optional.empty()
+     * }</pre>
+     *
      * @param <T> the type of the elements in the iterable
      * @param c the iterable to search
      * @param predicate the predicate to apply to elements of the iterable
@@ -22276,6 +24816,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Returns the first {@code non-null} element in the given iterator that matches the specified predicate.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.findFirstNonNull(Arrays.asList(null, "hello", "world").iterator(), s -> s.length() > 3); // returns Optional.of("hello")
+     * N.findFirstNonNull(Arrays.<String>asList(null, null).iterator(), s -> true);               // returns Optional.empty()
+     * }</pre>
      *
      * @param <T> the type of the elements in the iterator
      * @param iter the iterator to search
@@ -22303,6 +24849,12 @@ sealed class CommonUtil permits N {
     /**
      * Returns the last {@code non-null} element in the given array that matches the specified predicate.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.findLastNonNull(new String[] {null, "hello", "world"}, s -> s.length() > 3); // returns Optional.of("world")
+     * N.findLastNonNull(new String[] {null, null}, s -> s != null);                  // returns Optional.empty()
+     * }</pre>
+     *
      * @param <T> the type of the elements in the array
      * @param a the array to search
      * @param predicate the predicate to apply to elements of the array
@@ -22325,6 +24877,12 @@ sealed class CommonUtil permits N {
     /**
      * Returns the last {@code non-null} element in the given iterable that matches the specified predicate.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.findLastNonNull(Arrays.asList(null, "hello", "world"), s -> s.length() > 3); // returns Optional.of("world")
+     * N.findLastNonNull(Arrays.asList(null, null), s -> true);                       // returns Optional.empty()
+     * }</pre>
+     *
      * @param <T> the type of the elements in the iterable
      * @param c the iterable to search
      * @param predicate the predicate to apply to elements of the iterable
@@ -22342,6 +24900,13 @@ sealed class CommonUtil permits N {
      *   <li>They are both empty or null</li>
      *   <li>They contain exactly the same elements with the same frequencies in any order</li>
      * </ul>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.containsSameElements(new boolean[] {true, false}, new boolean[] {false, true}); // returns true
+     * N.containsSameElements(new boolean[] {true}, new boolean[] {false});              // returns false
+     * N.containsSameElements(new boolean[0], new boolean[0]);                           // returns true
+     * }</pre>
      *
      * @param a the first boolean array to compare, may be {@code null}
      * @param b the second boolean array to compare, may be {@code null}
@@ -22383,6 +24948,13 @@ sealed class CommonUtil permits N {
      *   <li>They contain exactly the same elements with the same frequencies in any order</li>
      * </ul>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.containsSameElements(new char[] {'a', 'b'}, new char[] {'b', 'a'}); // returns true
+     * N.containsSameElements(new char[] {'a'}, new char[] {'b'});           // returns false
+     * N.containsSameElements(new char[0], new char[0]);                     // returns true
+     * }</pre>
+     *
      * @param a the first char array to compare, may be {@code null}
      * @param b the second char array to compare, may be {@code null}
      * @return {@code true} if both arrays contain the same elements with the same frequencies, {@code false} otherwise
@@ -22423,6 +24995,13 @@ sealed class CommonUtil permits N {
      *   <li>They contain exactly the same elements with the same frequencies in any order</li>
      * </ul>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.containsSameElements(new byte[] {1, 2}, new byte[] {2, 1}); // returns true
+     * N.containsSameElements(new byte[] {1}, new byte[] {2});       // returns false
+     * N.containsSameElements(new byte[0], new byte[0]);             // returns true
+     * }</pre>
+     *
      * @param a the first byte array to compare, may be {@code null}
      * @param b the second byte array to compare, may be {@code null}
      * @return {@code true} if both arrays contain the same elements with the same frequencies, {@code false} otherwise
@@ -22462,6 +25041,13 @@ sealed class CommonUtil permits N {
      *   <li>They are both empty or null</li>
      *   <li>They contain exactly the same elements with the same frequencies in any order</li>
      * </ul>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.containsSameElements(new short[] {1, 2}, new short[] {2, 1}); // returns true
+     * N.containsSameElements(new short[] {1}, new short[] {2});       // returns false
+     * N.containsSameElements(new short[0], new short[0]);             // returns true
+     * }</pre>
      *
      * @param a the first short array to compare, may be {@code null}
      * @param b the second short array to compare, may be {@code null}
@@ -22510,13 +25096,12 @@ sealed class CommonUtil permits N {
      * int[] c = {1, 2, 3};
      * int[] d = {1, 2, 2, 2};
      *
-     * containsSameElements(a, b);                     // returns true (same elements, different order)
-     * containsSameElements(a, c);                     // returns false (different lengths)
-     * containsSameElements(a, d);                     // returns false (different frequencies of element 2)
-     * containsSameElements(null, null);               // returns true
-     * containsSameElements(new int[0], new int[0]);   // returns true
+     * N.containsSameElements(a, b);                     // returns true (same elements, different order)
+     * N.containsSameElements(a, c);                     // returns false (different lengths)
+     * N.containsSameElements(a, d);                     // returns false (different frequencies of element 2)
+     * N.containsSameElements(null, null);               // returns true
+     * N.containsSameElements(new int[0], new int[0]);   // returns true
      * }</pre>
-     *
      *
      * @param a the first int array to compare, may be {@code null}
      * @param b the second int array to compare, may be {@code null}
@@ -22556,6 +25141,13 @@ sealed class CommonUtil permits N {
      *   <li>They are both empty or null</li>
      *   <li>They contain exactly the same elements with the same frequencies in any order</li>
      * </ul>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.containsSameElements(new long[] {1L, 2L}, new long[] {2L, 1L}); // returns true
+     * N.containsSameElements(new long[] {1L}, new long[] {2L});         // returns false
+     * N.containsSameElements(new long[0], new long[0]);                 // returns true
+     * }</pre>
      *
      * @param a the first long array to compare, may be {@code null}
      * @param b the second long array to compare, may be {@code null}
@@ -22597,6 +25189,13 @@ sealed class CommonUtil permits N {
      *   <li>They contain exactly the same elements with the same frequencies in any order</li>
      * </ul>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.containsSameElements(new float[] {1.0f, 2.0f}, new float[] {2.0f, 1.0f}); // returns true
+     * N.containsSameElements(new float[] {1.0f}, new float[] {2.0f});             // returns false
+     * N.containsSameElements(new float[0], new float[0]);                         // returns true
+     * }</pre>
+     *
      * @param a the first float array to compare, may be {@code null}
      * @param b the second float array to compare, may be {@code null}
      * @return {@code true} if both arrays contain the same elements with the same frequencies, {@code false} otherwise
@@ -22637,6 +25236,13 @@ sealed class CommonUtil permits N {
      *   <li>They contain exactly the same elements with the same frequencies in any order</li>
      * </ul>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.containsSameElements(new double[] {1.0d, 2.0d}, new double[] {2.0d, 1.0d}); // returns true
+     * N.containsSameElements(new double[] {1.0d}, new double[] {2.0d});             // returns false
+     * N.containsSameElements(new double[0], new double[0]);                         // returns true
+     * }</pre>
+     *
      * @param a the first double array to compare, may be {@code null}
      * @param b the second double array to compare, may be {@code null}
      * @return {@code true} if both arrays contain the same elements with the same frequencies, {@code false} otherwise
@@ -22676,6 +25282,13 @@ sealed class CommonUtil permits N {
      *   <li>They are both empty or null</li>
      *   <li>They contain exactly the same elements with the same frequencies in any order</li>
      * </ul>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.containsSameElements(new String[] {"a", "b"}, new String[] {"b", "a"}); // returns true
+     * N.containsSameElements(new String[] {"a"}, new String[] {"b"});           // returns false
+     * N.containsSameElements(new String[0], new String[0]);                     // returns true
+     * }</pre>
      *
      * @param a the first object array to compare, may be {@code null}
      * @param b the second object array to compare, may be {@code null}
@@ -22768,11 +25381,8 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * boolean[] a = {true, false, true};
-     * boolean[] b = {true, false, false};
-     * N.mismatch(a, b);         // returns 2
-     * N.mismatch(a, a);         // returns -1
-     * N.mismatch(null, null);   // returns -1
+     * N.mismatch(new boolean[] {true, false}, new boolean[] {true, false}); // returns -1
+     * N.mismatch(new boolean[] {true, false}, new boolean[] {true, true});  // returns 1
      * }</pre>
      *
      * @param a the first boolean array, may be {@code null}
@@ -22813,10 +25423,8 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * boolean[] a = {true, false, true, false};
-     * boolean[] b = {true, true, true, true};
-     * N.mismatch(a, 0, b, 0, 4);   // returns 1 (relative index)
-     * N.mismatch(a, 2, b, 2, 1);   // returns -1 (identical in range)
+     * N.mismatch(new boolean[] {true, false}, 0, new boolean[] {true, true}, 0, 2);  // returns 1
+     * N.mismatch(new boolean[] {true, false}, 0, new boolean[] {true, true}, 0, -1); // throws IllegalArgumentException
      * }</pre>
      *
      * @param a the first boolean array
@@ -22856,6 +25464,12 @@ sealed class CommonUtil permits N {
      * Finds and returns the index of the first mismatch between two arrays.
      * If the arrays are identical or both are {@code null} or empty, returns -1.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.mismatch(new char[] {'a', 'b'}, new char[] {'a', 'b'}); // returns -1
+     * N.mismatch(new char[] {'a', 'b'}, new char[] {'a', 'c'}); // returns 1
+     * }</pre>
+     *
      * @param a the first char array
      * @param b the second char array
      * @return the index of the first mismatch, or -1 if the arrays are identical or both are {@code null} or empty.
@@ -22890,6 +25504,12 @@ sealed class CommonUtil permits N {
     /**
      * Finds and returns the index of the first mismatch between two char arrays starting from specified indices.
      * If the arrays are identical in the specified range, returns -1.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.mismatch(new char[] {'a', 'b'}, 0, new char[] {'a', 'c'}, 0, 2);  // returns 1
+     * N.mismatch(new char[] {'a', 'b'}, 0, new char[] {'a', 'c'}, 0, -1); // throws IllegalArgumentException
+     * }</pre>
      *
      * @param a the first char array
      * @param fromIndexA the starting index in the first array
@@ -22928,6 +25548,12 @@ sealed class CommonUtil permits N {
      * Finds and returns the index of the first mismatch between two arrays.
      * If the arrays are identical or both are {@code null} or empty, returns -1.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.mismatch(new byte[] {1, 2}, new byte[] {1, 2}); // returns -1
+     * N.mismatch(new byte[] {1, 2}, new byte[] {1, 3}); // returns 1
+     * }</pre>
+     *
      * @param a the first byte array
      * @param b the second byte array
      * @return the index of the first mismatch, or -1 if the arrays are identical or both are {@code null} or empty.
@@ -22962,6 +25588,12 @@ sealed class CommonUtil permits N {
     /**
      * Finds and returns the index of the first mismatch between two byte arrays starting from specified indices.
      * If the arrays are identical in the specified range, returns -1.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.mismatch(new byte[] {1, 2}, 0, new byte[] {1, 3}, 0, 2);  // returns 1
+     * N.mismatch(new byte[] {1, 2}, 0, new byte[] {1, 3}, 0, -1); // throws IllegalArgumentException
+     * }</pre>
      *
      * @param a the first byte array
      * @param fromIndexA the starting index in the first array
@@ -23000,6 +25632,12 @@ sealed class CommonUtil permits N {
      * Finds and returns the index of the first mismatch between two arrays.
      * If the arrays are identical or both are {@code null} or empty, returns -1.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.mismatch(new short[] {1, 2}, new short[] {1, 2}); // returns -1
+     * N.mismatch(new short[] {1, 2}, new short[] {1, 3}); // returns 1
+     * }</pre>
+     *
      * @param a the first short array
      * @param b the second short array
      * @return the index of the first mismatch, or -1 if the arrays are identical or both are {@code null} or empty.
@@ -23034,6 +25672,12 @@ sealed class CommonUtil permits N {
     /**
      * Finds and returns the index of the first mismatch between two short arrays starting from specified indices.
      * If the arrays are identical in the specified range, returns -1.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.mismatch(new short[] {1, 2}, 0, new short[] {1, 3}, 0, 2);  // returns 1
+     * N.mismatch(new short[] {1, 2}, 0, new short[] {1, 3}, 0, -1); // throws IllegalArgumentException
+     * }</pre>
      *
      * @param a the first short array
      * @param fromIndexA the starting index in the first array
@@ -23072,6 +25716,12 @@ sealed class CommonUtil permits N {
      * Finds and returns the index of the first mismatch between two arrays.
      * If the arrays are identical or both are {@code null} or empty, returns -1.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.mismatch(new int[] {1, 2}, new int[] {1, 2}); // returns -1
+     * N.mismatch(new int[] {1, 2}, new int[] {1, 3}); // returns 1
+     * }</pre>
+     *
      * @param a the first int array
      * @param b the second int array
      * @return the index of the first mismatch, or -1 if the arrays are identical or both are {@code null} or empty.
@@ -23106,6 +25756,12 @@ sealed class CommonUtil permits N {
     /**
      * Finds and returns the index of the first mismatch between two int arrays starting from specified indices.
      * If the arrays are identical in the specified range, returns -1.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.mismatch(new int[] {1, 2}, 0, new int[] {1, 3}, 0, 2);  // returns 1
+     * N.mismatch(new int[] {1, 2}, 0, new int[] {1, 3}, 0, -1); // throws IllegalArgumentException
+     * }</pre>
      *
      * @param a the first int array
      * @param fromIndexA the starting index in the first array
@@ -23144,6 +25800,12 @@ sealed class CommonUtil permits N {
      * Finds and returns the index of the first mismatch between two arrays.
      * If the arrays are identical or both are {@code null} or empty, returns -1.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.mismatch(new long[] {1L, 2L}, new long[] {1L, 2L}); // returns -1
+     * N.mismatch(new long[] {1L, 2L}, new long[] {1L, 3L}); // returns 1
+     * }</pre>
+     *
      * @param a the first long array
      * @param b the second long array
      * @return the index of the first mismatch, or -1 if the arrays are identical or both are {@code null} or empty.
@@ -23178,6 +25840,12 @@ sealed class CommonUtil permits N {
     /**
      * Finds and returns the index of the first mismatch between two long arrays starting from specified indices.
      * If the arrays are identical in the specified range, returns -1.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.mismatch(new long[] {1L, 2L}, 0, new long[] {1L, 3L}, 0, 2);  // returns 1
+     * N.mismatch(new long[] {1L, 2L}, 0, new long[] {1L, 3L}, 0, -1); // throws IllegalArgumentException
+     * }</pre>
      *
      * @param a the first long array
      * @param fromIndexA the starting index in the first array
@@ -23216,6 +25884,12 @@ sealed class CommonUtil permits N {
      * Finds and returns the index of the first mismatch between two arrays.
      * If the arrays are identical or both are {@code null} or empty, returns -1.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.mismatch(new float[] {1.0f, 2.0f}, new float[] {1.0f, 2.0f}); // returns -1
+     * N.mismatch(new float[] {1.0f, 2.0f}, new float[] {1.0f, 3.0f}); // returns 1
+     * }</pre>
+     *
      * @param a the first float array
      * @param b the second float array
      * @return the index of the first mismatch, or -1 if the arrays are identical or both are {@code null} or empty.
@@ -23250,6 +25924,12 @@ sealed class CommonUtil permits N {
     /**
      * Finds and returns the index of the first mismatch between two float arrays starting from specified indices.
      * If the arrays are identical in the specified range, returns -1.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.mismatch(new float[] {1.0f, 2.0f}, 0, new float[] {1.0f, 3.0f}, 0, 2);  // returns 1
+     * N.mismatch(new float[] {1.0f, 2.0f}, 0, new float[] {1.0f, 3.0f}, 0, -1); // throws IllegalArgumentException
+     * }</pre>
      *
      * @param a the first float array
      * @param fromIndexA the starting index in the first array
@@ -23288,6 +25968,12 @@ sealed class CommonUtil permits N {
      * Finds and returns the index of the first mismatch between two arrays.
      * If the arrays are identical or both are {@code null} or empty, returns -1.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.mismatch(new double[] {1.0d, 2.0d}, new double[] {1.0d, 2.0d}); // returns -1
+     * N.mismatch(new double[] {1.0d, 2.0d}, new double[] {1.0d, 3.0d}); // returns 1
+     * }</pre>
+     *
      * @param a the first double array
      * @param b the second double array
      * @return the index of the first mismatch, or -1 if the arrays are identical or both are {@code null} or empty.
@@ -23322,6 +26008,12 @@ sealed class CommonUtil permits N {
     /**
      * Finds and returns the index of the first mismatch between two double arrays starting from specified indices.
      * If the arrays are identical in the specified range, returns -1.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.mismatch(new double[] {1.0d, 2.0d}, 0, new double[] {1.0d, 3.0d}, 0, 2);  // returns 1
+     * N.mismatch(new double[] {1.0d, 2.0d}, 0, new double[] {1.0d, 3.0d}, 0, -1); // throws IllegalArgumentException
+     * }</pre>
      *
      * @param a the first double array
      * @param fromIndexA the starting index in the first array
@@ -23360,6 +26052,12 @@ sealed class CommonUtil permits N {
      * Finds and returns the index of the first mismatch between two arrays.
      * If the arrays are identical or both are {@code null} or empty, returns -1.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.mismatch(new String[] {"a", "b"}, new String[] {"a", "b"}); // returns -1
+     * N.mismatch(new String[] {"a", "b"}, new String[] {"a", "c"}); // returns 1
+     * }</pre>
+     *
      * @param <T> the type of elements in the arrays, which must be Comparable
      * @param a the first array
      * @param b the second array
@@ -23374,6 +26072,12 @@ sealed class CommonUtil permits N {
     /**
      * Finds and returns the index of the first mismatch between two arrays starting from specified indices.
      * If the arrays are identical in the specified range, returns -1.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.mismatch(new String[] {"a", "b"}, 0, new String[] {"a", "c"}, 0, 2);  // returns 1
+     * N.mismatch(new String[] {"a", "b"}, 0, new String[] {"a", "c"}, 0, -1); // throws IllegalArgumentException
+     * }</pre>
      *
      * @param <T> the type of the comparable array elements
      * @param a the first array
@@ -23395,6 +26099,12 @@ sealed class CommonUtil permits N {
     /**
      * Finds and returns the index of the first mismatch between two arrays.
      * If the arrays are identical or both are {@code null} or empty, returns -1.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.mismatch(new String[] {"a", "b"}, new String[] {"a", "b"}, Comparator.naturalOrder()); // returns -1
+     * N.mismatch(new String[] {"a", "b"}, new String[] {"a", "c"}, Comparator.naturalOrder()); // returns 1
+     * }</pre>
      *
      * @param <T> the type of elements in the arrays, which must be Comparable
      * @param a the first array
@@ -23429,6 +26139,12 @@ sealed class CommonUtil permits N {
     /**
      * Finds and returns the index of the first mismatch between two arrays starting from specified indices.
      * If the arrays are identical in the specified range, returns -1.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.mismatch(new String[] {"a", "b"}, new String[] {"a", "b"}, Comparator.naturalOrder()); // returns -1
+     * N.mismatch(new String[] {"a", "b"}, new String[] {"a", "c"}, Comparator.naturalOrder()); // returns 1
+     * }</pre>
      *
      * @param <T> the type of the array elements
      * @param a the first array
@@ -23467,6 +26183,12 @@ sealed class CommonUtil permits N {
      * Finds and returns the index of the first mismatch between two collections starting from specified indices.
      * If the collections are identical in the specified range, returns -1.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.mismatch(Arrays.asList("a", "b"), 0, Arrays.asList("a", "c"), 0, 2);  // returns 1
+     * N.mismatch(Arrays.asList("a", "b"), 0, Arrays.asList("a", "c"), 0, -1); // throws IllegalArgumentException
+     * }</pre>
+     *
      * @param <T> the type of elements in the collections
      * @param a the first collection
      * @param fromIndexA the starting index in the first collection
@@ -23488,6 +26210,14 @@ sealed class CommonUtil permits N {
      * Finds and returns the index of the first mismatch between two iterables.
      * If the iterables are identical or both are {@code null} or empty, returns -1.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.mismatch(Arrays.asList("a", "b", "c"), Arrays.asList("a", "b", "c")); // returns -1
+     * N.mismatch(Arrays.asList("a", "b", "c"), Arrays.asList("a", "x", "c")); // returns 1
+     * N.mismatch(Arrays.asList("a"), Arrays.asList("a", "b"));                // returns 1 (shorter is a prefix)
+     * N.mismatch(Arrays.asList("a", "b"), Arrays.asList("a", "b", "c"));      // returns 2
+     * }</pre>
+     *
      * @param <T> the type of elements in the iterables
      * @param a the first iterable
      * @param b the second iterable
@@ -23503,6 +26233,12 @@ sealed class CommonUtil permits N {
      * Finds and returns the index of the first mismatch between two iterators.
      * If the iterators are identical or both are {@code null} or empty, returns -1.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.mismatch(Arrays.asList("a", "b").iterator(), Arrays.asList("a", "b").iterator()); // returns -1
+     * N.mismatch(Arrays.asList("a", "b").iterator(), Arrays.asList("a", "c").iterator()); // returns 1
+     * }</pre>
+     *
      * @param <T> the type of elements in the iterators
      * @param a the first iterator
      * @param b the second iterator
@@ -23517,6 +26253,12 @@ sealed class CommonUtil permits N {
     /**
      * Finds and returns the index of the first mismatch between two collections starting from specified indices.
      * If the collections are identical in the specified range, returns -1.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.mismatch(Arrays.asList("a", "b"), 0, Arrays.asList("a", "b"), 0, 2, Comparator.naturalOrder()); // returns -1
+     * N.mismatch(Arrays.asList("a", "b"), 0, Arrays.asList("a", "c"), 0, 2, Comparator.naturalOrder()); // returns 1
+     * }</pre>
      *
      * @param <T> the type of elements in the collections
      * @param a the first collection
@@ -23565,6 +26307,12 @@ sealed class CommonUtil permits N {
      * Finds and returns the index of the first mismatch between two iterables using the specified comparator.
      * If the iterables are identical or both are {@code null} or empty, returns -1.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.mismatch(Arrays.asList("a", "b"), Arrays.asList("a", "b"), Comparator.naturalOrder()); // returns -1
+     * N.mismatch(Arrays.asList("a", "b"), Arrays.asList("a", "c"), Comparator.naturalOrder()); // returns 1
+     * }</pre>
+     *
      * @param <T> the type of elements in the iterables
      * @param a the first iterable
      * @param b the second iterable
@@ -23589,6 +26337,12 @@ sealed class CommonUtil permits N {
     /**
      * Finds and returns the index of the first mismatch between two iterators using the specified comparator.
      * If the iterators are identical or both are {@code null} or empty, returns -1.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.mismatch(Arrays.asList("a", "b").iterator(), Arrays.asList("a", "b").iterator(), Comparator.naturalOrder()); // returns -1
+     * N.mismatch(Arrays.asList("a", "b").iterator(), Arrays.asList("a", "c").iterator(), Comparator.naturalOrder()); // returns 1
+     * }</pre>
      *
      * @param <T> the type of elements in the iterators
      * @param a the first iterator
@@ -23636,6 +26390,12 @@ sealed class CommonUtil permits N {
      * For example, the array {@code [true, false]} becomes {@code [false, true]}.
      * If the array is {@code null} or empty, this method does nothing.</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * boolean[] values = new boolean[] {true, false};
+     * N.reverse(values); // values are reversed
+     * }</pre>
+     *
      * @param a the boolean array to be reversed. May be {@code null}.
      * @see #reverse(boolean[], int, int)
      */
@@ -23656,6 +26416,13 @@ sealed class CommonUtil permits N {
      *
      * <p>For example, reversing the range [1, 4) in the array {@code [true, false, false, true, true]}
      * results in {@code [true, true, false, false, true]}.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * boolean[] values = new boolean[] {true, false};
+     * N.reverse(values, 0, values.length);  // values are reversed
+     * N.reverse(values, -1, values.length); // throws IndexOutOfBoundsException
+     * }</pre>
      *
      * @param a the boolean array containing the range to be reversed
      * @param fromIndex the starting index of the range (inclusive). Must be non-negative.
@@ -23686,6 +26453,12 @@ sealed class CommonUtil permits N {
      * For example, the array {@code ['a', 'b', 'c']} becomes {@code ['c', 'b', 'a']}.
      * If the array is {@code null} or empty, this method does nothing.</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * char[] values = new char[] {'a', 'b'};
+     * N.reverse(values); // values are reversed
+     * }</pre>
+     *
      * @param a the char array to be reversed. May be {@code null}.
      * @see #reverse(char[], int, int)
      */
@@ -23706,6 +26479,13 @@ sealed class CommonUtil permits N {
      *
      * <p>For example, reversing the range [1, 4) in the array {@code ['a', 'b', 'c', 'd', 'e']}
      * results in {@code ['a', 'd', 'c', 'b', 'e']}.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * char[] values = new char[] {'a', 'b'};
+     * N.reverse(values, 0, values.length);  // values are reversed
+     * N.reverse(values, -1, values.length); // throws IndexOutOfBoundsException
+     * }</pre>
      *
      * @param a the char array containing the range to be reversed
      * @param fromIndex the starting index of the range (inclusive). Must be non-negative.
@@ -23736,6 +26516,12 @@ sealed class CommonUtil permits N {
      * For example, the array {@code [1, 2, 3]} becomes {@code [3, 2, 1]}.
      * If the array is {@code null} or empty, this method does nothing.</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * byte[] values = new byte[] {1, 2};
+     * N.reverse(values); // values are reversed
+     * }</pre>
+     *
      * @param a the byte array to be reversed. May be {@code null}.
      * @see #reverse(byte[], int, int)
      */
@@ -23756,6 +26542,13 @@ sealed class CommonUtil permits N {
      *
      * <p>For example, reversing the range [1, 4) in the array {@code [1, 2, 3, 4, 5]}
      * results in {@code [1, 4, 3, 2, 5]}.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * byte[] values = new byte[] {1, 2};
+     * N.reverse(values, 0, values.length);  // values are reversed
+     * N.reverse(values, -1, values.length); // throws IndexOutOfBoundsException
+     * }</pre>
      *
      * @param a the byte array containing the range to be reversed
      * @param fromIndex the starting index of the range (inclusive). Must be non-negative.
@@ -23786,6 +26579,12 @@ sealed class CommonUtil permits N {
      * For example, the array {@code [1, 2, 3]} becomes {@code [3, 2, 1]}.
      * If the array is {@code null} or empty, this method does nothing.</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * short[] values = new short[] {1, 2};
+     * N.reverse(values); // values are reversed
+     * }</pre>
+     *
      * @param a the short array to be reversed. May be {@code null}.
      * @see #reverse(short[], int, int)
      */
@@ -23806,6 +26605,13 @@ sealed class CommonUtil permits N {
      *
      * <p>For example, reversing the range [1, 4) in the array {@code [1, 2, 3, 4, 5]}
      * results in {@code [1, 4, 3, 2, 5]}.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * short[] values = new short[] {1, 2};
+     * N.reverse(values, 0, values.length);  // values are reversed
+     * N.reverse(values, -1, values.length); // throws IndexOutOfBoundsException
+     * }</pre>
      *
      * @param a the short array containing the range to be reversed
      * @param fromIndex the starting index of the range (inclusive). Must be non-negative.
@@ -23836,6 +26642,12 @@ sealed class CommonUtil permits N {
      * For example, the array {@code [1, 2, 3]} becomes {@code [3, 2, 1]}.
      * If the array is {@code null} or empty, this method does nothing.</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * int[] values = new int[] {1, 2};
+     * N.reverse(values); // values are reversed
+     * }</pre>
+     *
      * @param a the int array to be reversed. May be {@code null}.
      * @see #reverse(int[], int, int)
      */
@@ -23856,6 +26668,13 @@ sealed class CommonUtil permits N {
      *
      * <p>For example, reversing the range [1, 4) in the array {@code [1, 2, 3, 4, 5]}
      * results in {@code [1, 4, 3, 2, 5]}.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * int[] values = new int[] {1, 2};
+     * N.reverse(values, 0, values.length);  // values are reversed
+     * N.reverse(values, -1, values.length); // throws IndexOutOfBoundsException
+     * }</pre>
      *
      * @param a the int array containing the range to be reversed
      * @param fromIndex the starting index of the range (inclusive). Must be non-negative.
@@ -23886,6 +26705,12 @@ sealed class CommonUtil permits N {
      * For example, the array {@code [1L, 2L, 3L]} becomes {@code [3L, 2L, 1L]}.
      * If the array is {@code null} or empty, this method does nothing.</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * long[] values = new long[] {1L, 2L};
+     * N.reverse(values); // values are reversed
+     * }</pre>
+     *
      * @param a the long array to be reversed. May be {@code null}.
      * @see #reverse(long[], int, int)
      */
@@ -23906,6 +26731,13 @@ sealed class CommonUtil permits N {
      *
      * <p>For example, reversing the range [1, 4) in the array {@code [1L, 2L, 3L, 4L, 5L]}
      * results in {@code [1L, 4L, 3L, 2L, 5L]}.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * long[] values = new long[] {1L, 2L};
+     * N.reverse(values, 0, values.length);  // values are reversed
+     * N.reverse(values, -1, values.length); // throws IndexOutOfBoundsException
+     * }</pre>
      *
      * @param a the long array containing the range to be reversed
      * @param fromIndex the starting index of the range (inclusive). Must be non-negative.
@@ -23936,6 +26768,12 @@ sealed class CommonUtil permits N {
      * For example, the array {@code [1.0f, 2.0f, 3.0f]} becomes {@code [3.0f, 2.0f, 1.0f]}.
      * If the array is {@code null} or empty, this method does nothing.</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * float[] values = new float[] {1.0f, 2.0f};
+     * N.reverse(values); // values are reversed
+     * }</pre>
+     *
      * @param a the float array to be reversed. May be {@code null}.
      * @see #reverse(float[], int, int)
      */
@@ -23956,6 +26794,13 @@ sealed class CommonUtil permits N {
      *
      * <p>For example, reversing the range [1, 4) in the array {@code [1.0f, 2.0f, 3.0f, 4.0f, 5.0f]}
      * results in {@code [1.0f, 4.0f, 3.0f, 2.0f, 5.0f]}.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * float[] values = new float[] {1.0f, 2.0f};
+     * N.reverse(values, 0, values.length);  // values are reversed
+     * N.reverse(values, -1, values.length); // throws IndexOutOfBoundsException
+     * }</pre>
      *
      * @param a the float array containing the range to be reversed
      * @param fromIndex the starting index of the range (inclusive). Must be non-negative.
@@ -23986,6 +26831,12 @@ sealed class CommonUtil permits N {
      * For example, the array {@code [1.0, 2.0, 3.0]} becomes {@code [3.0, 2.0, 1.0]}.
      * If the array is {@code null} or empty, this method does nothing.</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * double[] values = new double[] {1.0d, 2.0d};
+     * N.reverse(values); // values are reversed
+     * }</pre>
+     *
      * @param a the double array to be reversed. May be {@code null}.
      * @see #reverse(double[], int, int)
      */
@@ -24006,6 +26857,13 @@ sealed class CommonUtil permits N {
      *
      * <p>For example, reversing the range [1, 4) in the array {@code [1.0, 2.0, 3.0, 4.0, 5.0]}
      * results in {@code [1.0, 4.0, 3.0, 2.0, 5.0]}.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * double[] values = new double[] {1.0d, 2.0d};
+     * N.reverse(values, 0, values.length);  // values are reversed
+     * N.reverse(values, -1, values.length); // throws IndexOutOfBoundsException
+     * }</pre>
      *
      * @param a the double array containing the range to be reversed
      * @param fromIndex the starting index of the range (inclusive). Must be non-negative.
@@ -24036,6 +26894,12 @@ sealed class CommonUtil permits N {
      * For example, the array {@code ["a", "b", "c"]} becomes {@code ["c", "b", "a"]}.
      * If the array is {@code null} or empty, this method does nothing.</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Object[] values = new String[] {"a", "b"};
+     * N.reverse(values); // values are reversed
+     * }</pre>
+     *
      * @param a the object array to be reversed. May be {@code null}.
      * @see #reverse(Object[], int, int)
      */
@@ -24056,6 +26920,13 @@ sealed class CommonUtil permits N {
      *
      * <p>For example, reversing the range [1, 4) in the array {@code ["a", "b", "c", "d", "e"]}
      * results in {@code ["a", "d", "c", "b", "e"]}.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Object[] values = new String[] {"a", "b"};
+     * N.reverse(values, 0, values.length);  // values are reversed
+     * N.reverse(values, -1, values.length); // throws IndexOutOfBoundsException
+     * }</pre>
      *
      * @param a the object array containing the range to be reversed
      * @param fromIndex the starting index of the range (inclusive). Must be non-negative.
@@ -24090,6 +26961,12 @@ sealed class CommonUtil permits N {
      *
      * <p>If the list is {@code null} or empty, this method does nothing.</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<String> values = new ArrayList<>(Arrays.asList("a", "b"));
+     * N.reverse(values); // values is now [b, a]
+     * }</pre>
+     *
      * @param list the list to be reversed. May be {@code null}.
      * @see #reverse(List, int, int)
      * @see #reverse(Collection)
@@ -24116,6 +26993,13 @@ sealed class CommonUtil permits N {
      *
      * <p>For example, reversing the range [1, 4) in the list {@code ["a", "b", "c", "d", "e"]}
      * results in {@code ["a", "d", "c", "b", "e"]}.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<String> values = new ArrayList<>(Arrays.asList("a", "b"));
+     * N.reverse(values, 0, values.size());  // values is now [b, a]
+     * N.reverse(values, -1, values.size()); // throws IndexOutOfBoundsException
+     * }</pre>
      *
      * @param list the list containing the range to be reversed
      * @param fromIndex the starting index of the range (inclusive). Must be non-negative.
@@ -24166,6 +27050,12 @@ sealed class CommonUtil permits N {
      * <p><b>Note:</b> This method is marked as {@link Beta} and may be replaced by
      * {@code SequencedCollection} functionality in JDK 21 or later.</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Collection<String> values = new ArrayList<>(Arrays.asList("a", "b"));
+     * N.reverse(values); // values is now [b, a]
+     * }</pre>
+     *
      * @param c the collection to be reversed. Should have a well-defined encounter order.
      * @see #reverse(List)
      * @see #reverseToList(Collection)
@@ -24202,6 +27092,12 @@ sealed class CommonUtil permits N {
      * <p><b>Note:</b> This method is marked as {@link Beta} and may be replaced by
      * {@code SequencedCollection} functionality in JDK 21 or later.</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.reverseToList(Arrays.asList(1,2,3));    // returns [3,2,1]
+     * N.reverseToList(Collections.emptyList()); // returns []
+     * }</pre>
+     *
      * @param <T> the type of elements in the collection
      * @param c the collection whose elements will be added to the returned list in reverse order. May be {@code null}.
      * @return a new list containing the elements from the collection in reversed order
@@ -24232,6 +27128,12 @@ sealed class CommonUtil permits N {
      * If the array is {@code null}, empty, or the effective rotation distance is 0,
      * this method does nothing.</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * boolean[] values = new boolean[] {true, false};
+     * N.rotate(values, 1); // values are rotated right by 1
+     * }</pre>
+     *
      * @param a the boolean array to be rotated. May be {@code null}.
      * @param distance the distance to rotate. Positive values rotate right, negative values rotate left.
      * @see #rotate(boolean[], int, int, int)
@@ -24249,6 +27151,12 @@ sealed class CommonUtil permits N {
      *
      * <p>The rotation is performed in-place using a cyclic algorithm that minimizes
      * the number of element moves. The effective distance is calculated as {@code distance % (toIndex - fromIndex)}.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * boolean[] values = new boolean[] {true, false};
+     * N.rotate(values, 0, values.length, 1); // values are rotated right by 1
+     * }</pre>
      *
      * @param a the boolean array containing the range to be rotated
      * @param fromIndex the starting index of the range (inclusive). Must be non-negative.
@@ -24300,6 +27208,12 @@ sealed class CommonUtil permits N {
      * If the array is {@code null}, empty, or the effective rotation distance is 0,
      * this method does nothing.</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * char[] values = new char[] {'a', 'b'};
+     * N.rotate(values, 1); // values are rotated right by 1
+     * }</pre>
+     *
      * @param a the char array to be rotated. May be {@code null}.
      * @param distance the distance to rotate. Positive values rotate right, negative values rotate left.
      * @see #rotate(char[], int, int, int)
@@ -24317,6 +27231,12 @@ sealed class CommonUtil permits N {
      *
      * <p>The rotation is performed in-place using a cyclic algorithm that minimizes
      * the number of element moves. The effective distance is calculated as {@code distance % (toIndex - fromIndex)}.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * char[] values = new char[] {'a', 'b'};
+     * N.rotate(values, 0, values.length, 1); // values are rotated right by 1
+     * }</pre>
      *
      * @param a the char array containing the range to be rotated
      * @param fromIndex the starting index of the range (inclusive). Must be non-negative.
@@ -24368,6 +27288,12 @@ sealed class CommonUtil permits N {
      * If the array is {@code null}, empty, or the effective rotation distance is 0,
      * this method does nothing.</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * byte[] values = new byte[] {1, 2};
+     * N.rotate(values, 1); // values are rotated right by 1
+     * }</pre>
+     *
      * @param a the byte array to be rotated. May be {@code null}.
      * @param distance the distance to rotate. Positive values rotate right, negative values rotate left.
      * @see #rotate(byte[], int, int, int)
@@ -24385,6 +27311,12 @@ sealed class CommonUtil permits N {
      *
      * <p>The rotation is performed in-place using a cyclic algorithm that minimizes
      * the number of element moves. The effective distance is calculated as {@code distance % (toIndex - fromIndex)}.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * byte[] values = new byte[] {1, 2};
+     * N.rotate(values, 0, values.length, 1); // values are rotated right by 1
+     * }</pre>
      *
      * @param a the byte array containing the range to be rotated
      * @param fromIndex the starting index of the range (inclusive). Must be non-negative.
@@ -24436,6 +27368,12 @@ sealed class CommonUtil permits N {
      * If the array is {@code null}, empty, or the effective rotation distance is 0,
      * this method does nothing.</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * short[] values = new short[] {1, 2};
+     * N.rotate(values, 1); // values are rotated right by 1
+     * }</pre>
+     *
      * @param a the short array to be rotated. May be {@code null}.
      * @param distance the distance to rotate. Positive values rotate right, negative values rotate left.
      * @see #rotate(short[], int, int, int)
@@ -24453,6 +27391,12 @@ sealed class CommonUtil permits N {
      *
      * <p>The rotation is performed in-place using a cyclic algorithm that minimizes
      * the number of element moves. The effective distance is calculated as {@code distance % (toIndex - fromIndex)}.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * short[] values = new short[] {1, 2};
+     * N.rotate(values, 0, values.length, 1); // values are rotated right by 1
+     * }</pre>
      *
      * @param a the short array containing the range to be rotated
      * @param fromIndex the starting index of the range (inclusive). Must be non-negative.
@@ -24501,17 +27445,8 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * // Rotate an int array to the right by 2 positions
-     * int[] a = {1, 2, 3, 4, 5};
-     * rotate(a, 2);   // a => [4, 5, 1, 2, 3]
-     *
-     * //  Rotate an int array to the left by 1 position (negative distance)
-     * int[] a = {1, 2, 3, 4, 5};
-     * rotate(a, -1);   // a => [2, 3, 4, 5, 1]
-     *
-     * // Rotate by a distance larger than the array size
-     * int[] a = {1, 2, 3, 4, 5};
-     * rotate(a, 7);   // a => [4, 5, 1, 2, 3], same as rotate(2) due to modulo operation
+     * int[] values = new int[] {1, 2};
+     * N.rotate(values, 1); // values are rotated right by 1
      * }</pre>
      *
      * <p>The rotation is performed in-place, modifying the original array.
@@ -24535,6 +27470,12 @@ sealed class CommonUtil permits N {
      *
      * <p>The rotation is performed in-place using a cyclic algorithm that minimizes
      * the number of element moves. The effective distance is calculated as {@code distance % (toIndex - fromIndex)}.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * int[] values = new int[] {1, 2};
+     * N.rotate(values, 0, values.length, 1); // values are rotated right by 1
+     * }</pre>
      *
      * @param a the int array containing the range to be rotated
      * @param fromIndex the starting index of the range (inclusive). Must be non-negative.
@@ -24586,6 +27527,12 @@ sealed class CommonUtil permits N {
      * If the array is {@code null}, empty, or the effective rotation distance is 0,
      * this method does nothing.</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * long[] values = new long[] {1L, 2L};
+     * N.rotate(values, 1); // values are rotated right by 1
+     * }</pre>
+     *
      * @param a the long array to be rotated. May be {@code null}.
      * @param distance the distance to rotate. Positive values rotate right, negative values rotate left.
      * @see #rotate(long[], int, int, int)
@@ -24603,6 +27550,12 @@ sealed class CommonUtil permits N {
      *
      * <p>The rotation is performed in-place using a cyclic algorithm that minimizes
      * the number of element moves. The effective distance is calculated as {@code distance % (toIndex - fromIndex)}.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * long[] values = new long[] {1L, 2L};
+     * N.rotate(values, 0, values.length, 1); // values are rotated right by 1
+     * }</pre>
      *
      * @param a the long array containing the range to be rotated
      * @param fromIndex the starting index of the range (inclusive). Must be non-negative.
@@ -24654,6 +27607,12 @@ sealed class CommonUtil permits N {
      * If the array is {@code null}, empty, or the effective rotation distance is 0,
      * this method does nothing.</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * float[] values = new float[] {1.0f, 2.0f};
+     * N.rotate(values, 1); // values are rotated right by 1
+     * }</pre>
+     *
      * @param a the float array to be rotated. May be {@code null}.
      * @param distance the distance to rotate. Positive values rotate right, negative values rotate left.
      * @see #rotate(float[], int, int, int)
@@ -24671,6 +27630,12 @@ sealed class CommonUtil permits N {
      *
      * <p>The rotation is performed in-place using a cyclic algorithm that minimizes
      * the number of element moves. The effective distance is calculated as {@code distance % (toIndex - fromIndex)}.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * float[] values = new float[] {1.0f, 2.0f};
+     * N.rotate(values, 0, values.length, 1); // values are rotated right by 1
+     * }</pre>
      *
      * @param a the float array containing the range to be rotated
      * @param fromIndex the starting index of the range (inclusive). Must be non-negative.
@@ -24722,6 +27687,12 @@ sealed class CommonUtil permits N {
      * If the array is {@code null}, empty, or the effective rotation distance is 0,
      * this method does nothing.</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * double[] values = new double[] {1.0d, 2.0d};
+     * N.rotate(values, 1); // values are rotated right by 1
+     * }</pre>
+     *
      * @param a the double array to be rotated. May be {@code null}.
      * @param distance the distance to rotate. Positive values rotate right, negative values rotate left.
      * @see #rotate(double[], int, int, int)
@@ -24739,6 +27710,12 @@ sealed class CommonUtil permits N {
      *
      * <p>The rotation is performed in-place using a cyclic algorithm that minimizes
      * the number of element moves. The effective distance is calculated as {@code distance % (toIndex - fromIndex)}.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * double[] values = new double[] {1.0d, 2.0d};
+     * N.rotate(values, 0, values.length, 1); // values are rotated right by 1
+     * }</pre>
      *
      * @param a the double array containing the range to be rotated
      * @param fromIndex the starting index of the range (inclusive). Must be non-negative.
@@ -24790,6 +27767,12 @@ sealed class CommonUtil permits N {
      * If the array is {@code null}, empty, or the effective rotation distance is 0,
      * this method does nothing.</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Object[] values = new String[] {"a", "b"};
+     * N.rotate(values, 1); // values are rotated right by 1
+     * }</pre>
+     *
      * @param a the object array to be rotated. May be {@code null}.
      * @param distance the distance to rotate. Positive values rotate right, negative values rotate left.
      * @see #rotate(Object[], int, int, int)
@@ -24807,6 +27790,12 @@ sealed class CommonUtil permits N {
      *
      * <p>The rotation is performed in-place using a cyclic algorithm that minimizes
      * the number of element moves. The effective distance is calculated as {@code distance % (toIndex - fromIndex)}.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Object[] values = new String[] {"a", "b"};
+     * N.rotate(values, 0, values.length, 1); // values are rotated right by 1
+     * }</pre>
      *
      * @param a the object array containing the range to be rotated
      * @param fromIndex the starting index of the range (inclusive). Must be non-negative.
@@ -24858,6 +27847,12 @@ sealed class CommonUtil permits N {
      * If the list is {@code null}, has size 1 or less, or the effective rotation distance is 0,
      * this method does nothing.</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<String> values = new ArrayList<>(Arrays.asList("a", "b", "c"));
+     * N.rotate(values, 1); // values are rotated right by 1
+     * }</pre>
+     *
      * @param list the list to be rotated. May be {@code null}.
      * @param distance the distance to rotate. Positive values rotate right, negative values rotate left.
      * @see Collections#rotate(List, int)
@@ -24883,6 +27878,12 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Note:</b> This method is marked as {@link Beta} and its behavior may change
      * in future versions.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Collection<String> values = new ArrayList<>(Arrays.asList("a", "b", "c"));
+     * N.rotate(values, 1); // values are rotated right by 1 to [c, a, b]
+     * }</pre>
      *
      * @param c the collection to be rotated. Should have a well-defined encounter order.
      * @param distance the distance to rotate. Positive values rotate right, negative values rotate left.
@@ -24914,6 +27915,12 @@ sealed class CommonUtil permits N {
      *
      * <p>If the array is {@code null} or empty, this method does nothing.</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * boolean[] values = new boolean[] {true, false};
+     * N.shuffle(values, new Random(1)); // values are shuffled with the supplied Random
+     * }</pre>
+     *
      * @param a the boolean array to be shuffled. May be {@code null}.
      * @see #shuffle(boolean[], Random)
      * @see #shuffle(boolean[], int, int)
@@ -24930,6 +27937,12 @@ sealed class CommonUtil permits N {
      * this range remain in their original positions.</p>
      *
      * <p>The shuffle is performed in-place using the Fisher-Yates algorithm.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * boolean[] values = new boolean[] {true, false};
+     * N.shuffle(values, new Random(1)); // values are shuffled with the supplied Random
+     * }</pre>
      *
      * @param a the boolean array containing the range to be shuffled
      * @param fromIndex the starting index of the range (inclusive). Must be non-negative.
@@ -24950,6 +27963,12 @@ sealed class CommonUtil permits N {
      *
      * <p>If the array is {@code null} or empty, this method does nothing.</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * boolean[] values = new boolean[] {true, false};
+     * N.shuffle(values, new Random(1)); // values are shuffled with the supplied Random
+     * }</pre>
+     *
      * @param a the boolean array to be shuffled. May be {@code null}.
      * @param rnd the random number generator to use for shuffling
      * @see #shuffle(boolean[])
@@ -24968,6 +27987,12 @@ sealed class CommonUtil permits N {
      *
      * <p>If the array is {@code null}, empty, or the range contains 1 or fewer elements,
      * this method does nothing.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * boolean[] values = new boolean[] {true, false};
+     * N.shuffle(values, 0, values.length, new Random(1)); // values are shuffled with the supplied Random
+     * }</pre>
      *
      * @param a the boolean array containing the range to be shuffled
      * @param fromIndex the starting index of the range (inclusive). Must be non-negative.
@@ -24993,6 +28018,12 @@ sealed class CommonUtil permits N {
      * The shuffling is performed in-place, meaning the original array is modified.
      * This method uses the default random number generator.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * char[] values = new char[] {'a', 'b'};
+     * N.shuffle(values, new Random(1)); // values are shuffled with the supplied Random
+     * }</pre>
+     *
      * @param a the char array to be shuffled. If {@code null} or empty, no operation is performed.
      * @see #shuffle(char[], Random)
      */
@@ -25005,6 +28036,12 @@ sealed class CommonUtil permits N {
      * The shuffling is performed in-place, meaning the original array is modified.
      * Only elements from {@code fromIndex} (inclusive) to {@code toIndex} (exclusive) are shuffled.
      * This method uses the default random number generator.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * char[] values = new char[] {'a', 'b'};
+     * N.shuffle(values, new Random(1)); // values are shuffled with the supplied Random
+     * }</pre>
      *
      * @param a the char array to be shuffled
      * @param fromIndex the starting index (inclusive) of the range to shuffle
@@ -25021,6 +28058,12 @@ sealed class CommonUtil permits N {
      * with the specified random number generator.
      * The shuffling is performed in-place, meaning the original array is modified.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * char[] values = new char[] {'a', 'b'};
+     * N.shuffle(values, new Random(1)); // values are shuffled with the supplied Random
+     * }</pre>
+     *
      * @param a the char array to be shuffled. If {@code null} or empty, no operation is performed.
      * @param rnd the random number generator to use for shuffling
      * @see Random
@@ -25034,6 +28077,12 @@ sealed class CommonUtil permits N {
      * with the specified random number generator.
      * The shuffling is performed in-place, meaning the original array is modified.
      * Only elements from {@code fromIndex} (inclusive) to {@code toIndex} (exclusive) are shuffled.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * char[] values = new char[] {'a', 'b'};
+     * N.shuffle(values, 0, values.length, new Random(1)); // values are shuffled with the supplied Random
+     * }</pre>
      *
      * @param a the char array to be shuffled
      * @param fromIndex the starting index (inclusive) of the range to shuffle
@@ -25058,6 +28107,12 @@ sealed class CommonUtil permits N {
      * The shuffling is performed in-place, meaning the original array is modified.
      * This method uses the default random number generator.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * byte[] values = new byte[] {1, 2};
+     * N.shuffle(values, new Random(1)); // values are shuffled with the supplied Random
+     * }</pre>
+     *
      * @param a the byte array to be shuffled. If {@code null} or empty, no operation is performed.
      * @see #shuffle(byte[], Random)
      */
@@ -25070,6 +28125,12 @@ sealed class CommonUtil permits N {
      * The shuffling is performed in-place, meaning the original array is modified.
      * Only elements from {@code fromIndex} (inclusive) to {@code toIndex} (exclusive) are shuffled.
      * This method uses the default random number generator.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * byte[] values = new byte[] {1, 2};
+     * N.shuffle(values, new Random(1)); // values are shuffled with the supplied Random
+     * }</pre>
      *
      * @param a the byte array to be shuffled
      * @param fromIndex the starting index (inclusive) of the range to shuffle
@@ -25086,6 +28147,12 @@ sealed class CommonUtil permits N {
      * with the specified random number generator.
      * The shuffling is performed in-place, meaning the original array is modified.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * byte[] values = new byte[] {1, 2};
+     * N.shuffle(values, new Random(1)); // values are shuffled with the supplied Random
+     * }</pre>
+     *
      * @param a the byte array to be shuffled. If {@code null} or empty, no operation is performed.
      * @param rnd the random number generator to use for shuffling
      * @see Random
@@ -25099,6 +28166,12 @@ sealed class CommonUtil permits N {
      * with the specified random number generator.
      * The shuffling is performed in-place, meaning the original array is modified.
      * Only elements from {@code fromIndex} (inclusive) to {@code toIndex} (exclusive) are shuffled.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * byte[] values = new byte[] {1, 2};
+     * N.shuffle(values, 0, values.length, new Random(1)); // values are shuffled with the supplied Random
+     * }</pre>
      *
      * @param a the byte array to be shuffled
      * @param fromIndex the starting index (inclusive) of the range to shuffle
@@ -25123,6 +28196,12 @@ sealed class CommonUtil permits N {
      * The shuffling is performed in-place, meaning the original array is modified.
      * This method uses the default random number generator.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * short[] values = new short[] {1, 2};
+     * N.shuffle(values, new Random(1)); // values are shuffled with the supplied Random
+     * }</pre>
+     *
      * @param a the short array to be shuffled. If {@code null} or empty, no operation is performed.
      * @see #shuffle(short[], Random)
      */
@@ -25135,6 +28214,12 @@ sealed class CommonUtil permits N {
      * The shuffling is performed in-place, meaning the original array is modified.
      * Only elements from {@code fromIndex} (inclusive) to {@code toIndex} (exclusive) are shuffled.
      * This method uses the default random number generator.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * short[] values = new short[] {1, 2};
+     * N.shuffle(values, new Random(1)); // values are shuffled with the supplied Random
+     * }</pre>
      *
      * @param a the short array to be shuffled
      * @param fromIndex the starting index (inclusive) of the range to shuffle
@@ -25151,6 +28236,12 @@ sealed class CommonUtil permits N {
      * with the specified random number generator.
      * The shuffling is performed in-place, meaning the original array is modified.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * short[] values = new short[] {1, 2};
+     * N.shuffle(values, new Random(1)); // values are shuffled with the supplied Random
+     * }</pre>
+     *
      * @param a the short array to be shuffled. If {@code null} or empty, no operation is performed.
      * @param rnd the random number generator to use for shuffling
      * @see Random
@@ -25164,6 +28255,12 @@ sealed class CommonUtil permits N {
      * with the specified random number generator.
      * The shuffling is performed in-place, meaning the original array is modified.
      * Only elements from {@code fromIndex} (inclusive) to {@code toIndex} (exclusive) are shuffled.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * short[] values = new short[] {1, 2};
+     * N.shuffle(values, 0, values.length, new Random(1)); // values are shuffled with the supplied Random
+     * }</pre>
      *
      * @param a the short array to be shuffled
      * @param fromIndex the starting index (inclusive) of the range to shuffle
@@ -25188,6 +28285,12 @@ sealed class CommonUtil permits N {
      * The shuffling is performed in-place, meaning the original array is modified.
      * This method uses the default random number generator.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * int[] values = new int[] {1, 2};
+     * N.shuffle(values, new Random(1)); // values are shuffled with the supplied Random
+     * }</pre>
+     *
      * @param a the int array to be shuffled. If {@code null} or empty, no operation is performed.
      * @see #shuffle(int[], Random)
      */
@@ -25200,6 +28303,12 @@ sealed class CommonUtil permits N {
      * The shuffling is performed in-place, meaning the original array is modified.
      * Only elements from {@code fromIndex} (inclusive) to {@code toIndex} (exclusive) are shuffled.
      * This method uses the default random number generator.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * int[] values = new int[] {1, 2};
+     * N.shuffle(values, new Random(1)); // values are shuffled with the supplied Random
+     * }</pre>
      *
      * @param a the int array to be shuffled
      * @param fromIndex the starting index (inclusive) of the range to shuffle
@@ -25216,6 +28325,12 @@ sealed class CommonUtil permits N {
      * with the specified random number generator.
      * The shuffling is performed in-place, meaning the original array is modified.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * int[] values = new int[] {1, 2};
+     * N.shuffle(values, new Random(1)); // values are shuffled with the supplied Random
+     * }</pre>
+     *
      * @param a the int array to be shuffled. If {@code null} or empty, no operation is performed.
      * @param rnd the random number generator to use for shuffling
      * @see Random
@@ -25229,6 +28344,12 @@ sealed class CommonUtil permits N {
      * with the specified random number generator.
      * The shuffling is performed in-place, meaning the original array is modified.
      * Only elements from {@code fromIndex} (inclusive) to {@code toIndex} (exclusive) are shuffled.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * int[] values = new int[] {1, 2};
+     * N.shuffle(values, 0, values.length, new Random(1)); // values are shuffled with the supplied Random
+     * }</pre>
      *
      * @param a the int array to be shuffled
      * @param fromIndex the starting index (inclusive) of the range to shuffle
@@ -25253,6 +28374,12 @@ sealed class CommonUtil permits N {
      * The shuffling is performed in-place, meaning the original array is modified.
      * This method uses the default random number generator.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * long[] values = new long[] {1L, 2L};
+     * N.shuffle(values, new Random(1)); // values are shuffled with the supplied Random
+     * }</pre>
+     *
      * @param a the long array to be shuffled. If {@code null} or empty, no operation is performed.
      * @see #shuffle(long[], Random)
      */
@@ -25265,6 +28392,12 @@ sealed class CommonUtil permits N {
      * The shuffling is performed in-place, meaning the original array is modified.
      * Only elements from {@code fromIndex} (inclusive) to {@code toIndex} (exclusive) are shuffled.
      * This method uses the default random number generator.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * long[] values = new long[] {1L, 2L};
+     * N.shuffle(values, new Random(1)); // values are shuffled with the supplied Random
+     * }</pre>
      *
      * @param a the long array to be shuffled
      * @param fromIndex the starting index (inclusive) of the range to shuffle
@@ -25281,6 +28414,12 @@ sealed class CommonUtil permits N {
      * with the specified random number generator.
      * The shuffling is performed in-place, meaning the original array is modified.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * long[] values = new long[] {1L, 2L};
+     * N.shuffle(values, new Random(1)); // values are shuffled with the supplied Random
+     * }</pre>
+     *
      * @param a the long array to be shuffled. If {@code null} or empty, no operation is performed.
      * @param rnd the random number generator to use for shuffling
      * @see Random
@@ -25294,6 +28433,12 @@ sealed class CommonUtil permits N {
      * with the specified random number generator.
      * The shuffling is performed in-place, meaning the original array is modified.
      * Only elements from {@code fromIndex} (inclusive) to {@code toIndex} (exclusive) are shuffled.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * long[] values = new long[] {1L, 2L};
+     * N.shuffle(values, 0, values.length, new Random(1)); // values are shuffled with the supplied Random
+     * }</pre>
      *
      * @param a the long array to be shuffled
      * @param fromIndex the starting index (inclusive) of the range to shuffle
@@ -25318,6 +28463,12 @@ sealed class CommonUtil permits N {
      * The shuffling is performed in-place, meaning the original array is modified.
      * This method uses the default random number generator.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * float[] values = new float[] {1.0f, 2.0f};
+     * N.shuffle(values, new Random(1)); // values are shuffled with the supplied Random
+     * }</pre>
+     *
      * @param a the float array to be shuffled. If {@code null} or empty, no operation is performed.
      * @see #shuffle(float[], Random)
      */
@@ -25330,6 +28481,12 @@ sealed class CommonUtil permits N {
      * The shuffling is performed in-place, meaning the original array is modified.
      * Only elements from {@code fromIndex} (inclusive) to {@code toIndex} (exclusive) are shuffled.
      * This method uses the default random number generator.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * float[] values = new float[] {1.0f, 2.0f};
+     * N.shuffle(values, new Random(1)); // values are shuffled with the supplied Random
+     * }</pre>
      *
      * @param a the float array to be shuffled
      * @param fromIndex the starting index (inclusive) of the range to shuffle
@@ -25346,6 +28503,12 @@ sealed class CommonUtil permits N {
      * with the specified random number generator.
      * The shuffling is performed in-place, meaning the original array is modified.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * float[] values = new float[] {1.0f, 2.0f};
+     * N.shuffle(values, new Random(1)); // values are shuffled with the supplied Random
+     * }</pre>
+     *
      * @param a the float array to be shuffled. If {@code null} or empty, no operation is performed.
      * @param rnd the random number generator to use for shuffling
      * @see Random
@@ -25359,6 +28522,12 @@ sealed class CommonUtil permits N {
      * with the specified random number generator.
      * The shuffling is performed in-place, meaning the original array is modified.
      * Only elements from {@code fromIndex} (inclusive) to {@code toIndex} (exclusive) are shuffled.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * float[] values = new float[] {1.0f, 2.0f};
+     * N.shuffle(values, 0, values.length, new Random(1)); // values are shuffled with the supplied Random
+     * }</pre>
      *
      * @param a the float array to be shuffled
      * @param fromIndex the starting index (inclusive) of the range to shuffle
@@ -25383,6 +28552,12 @@ sealed class CommonUtil permits N {
      * The shuffling is performed in-place, meaning the original array is modified.
      * This method uses the default random number generator.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * double[] values = new double[] {1.0d, 2.0d};
+     * N.shuffle(values, new Random(1)); // values are shuffled with the supplied Random
+     * }</pre>
+     *
      * @param a the double array to be shuffled. If {@code null} or empty, no operation is performed.
      * @see #shuffle(double[], Random)
      */
@@ -25395,6 +28570,12 @@ sealed class CommonUtil permits N {
      * The shuffling is performed in-place, meaning the original array is modified.
      * Only elements from {@code fromIndex} (inclusive) to {@code toIndex} (exclusive) are shuffled.
      * This method uses the default random number generator.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * double[] values = new double[] {1.0d, 2.0d};
+     * N.shuffle(values, new Random(1)); // values are shuffled with the supplied Random
+     * }</pre>
      *
      * @param a the double array to be shuffled
      * @param fromIndex the starting index (inclusive) of the range to shuffle
@@ -25411,6 +28592,12 @@ sealed class CommonUtil permits N {
      * with the specified random number generator.
      * The shuffling is performed in-place, meaning the original array is modified.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * double[] values = new double[] {1.0d, 2.0d};
+     * N.shuffle(values, new Random(1)); // values are shuffled with the supplied Random
+     * }</pre>
+     *
      * @param a the double array to be shuffled. If {@code null} or empty, no operation is performed.
      * @param rnd the random number generator to use for shuffling
      * @see Random
@@ -25424,6 +28611,12 @@ sealed class CommonUtil permits N {
      * with the specified random number generator.
      * The shuffling is performed in-place, meaning the original array is modified.
      * Only elements from {@code fromIndex} (inclusive) to {@code toIndex} (exclusive) are shuffled.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * double[] values = new double[] {1.0d, 2.0d};
+     * N.shuffle(values, 0, values.length, new Random(1)); // values are shuffled with the supplied Random
+     * }</pre>
      *
      * @param a the double array to be shuffled
      * @param fromIndex the starting index (inclusive) of the range to shuffle
@@ -25448,6 +28641,12 @@ sealed class CommonUtil permits N {
      * The shuffling is performed in-place, meaning the original array is modified.
      * This method uses the default random number generator.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Object[] values = new String[] {"a", "b"};
+     * N.shuffle(values, new Random(1)); // values are shuffled with the supplied Random
+     * }</pre>
+     *
      * @param a the object array to be shuffled. If {@code null} or empty, no operation is performed.
      * @see #shuffle(Object[], Random)
      */
@@ -25460,6 +28659,12 @@ sealed class CommonUtil permits N {
      * The shuffling is performed in-place, meaning the original array is modified.
      * Only elements from {@code fromIndex} (inclusive) to {@code toIndex} (exclusive) are shuffled.
      * This method uses the default random number generator.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Object[] values = new String[] {"a", "b"};
+     * N.shuffle(values, new Random(1)); // values are shuffled with the supplied Random
+     * }</pre>
      *
      * @param a the object array to be shuffled
      * @param fromIndex the starting index (inclusive) of the range to shuffle
@@ -25476,6 +28681,12 @@ sealed class CommonUtil permits N {
      * with the specified random number generator.
      * The shuffling is performed in-place, meaning the original array is modified.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Object[] values = new String[] {"a", "b"};
+     * N.shuffle(values, new Random(1)); // values are shuffled with the supplied Random
+     * }</pre>
+     *
      * @param a the object array to be shuffled. If {@code null} or empty, no operation is performed.
      * @param rnd the random number generator to use for shuffling
      * @see Random
@@ -25489,6 +28700,12 @@ sealed class CommonUtil permits N {
      * with the specified random number generator.
      * The shuffling is performed in-place, meaning the original array is modified.
      * Only elements from {@code fromIndex} (inclusive) to {@code toIndex} (exclusive) are shuffled.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Object[] values = new String[] {"a", "b"};
+     * N.shuffle(values, 0, values.length, new Random(1)); // values are shuffled with the supplied Random
+     * }</pre>
      *
      * @param a the object array to be shuffled
      * @param fromIndex the starting index (inclusive) of the range to shuffle
@@ -25517,6 +28734,12 @@ sealed class CommonUtil permits N {
      * and may have degraded performance for lists that do not support constant-time
      * positional access.</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<String> values = new ArrayList<>(Arrays.asList("a", "b", "c"));
+     * N.shuffle(values, new Random(1)); // values are shuffled with the supplied Random
+     * }</pre>
+     *
      * @param list the list to be shuffled. If {@code null}, empty, or contains only one element, no operation is performed.
      * @see java.util.Collections#shuffle(List)
      * @see #shuffle(List, Random)
@@ -25533,6 +28756,12 @@ sealed class CommonUtil permits N {
      * <p>This method runs in linear time for lists that implement {@link RandomAccess},
      * and may have degraded performance for lists that do not support constant-time
      * positional access.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<String> values = new ArrayList<>(Arrays.asList("a", "b", "c"));
+     * N.shuffle(values, new Random(1)); // values are shuffled with the supplied Random
+     * }</pre>
      *
      * @param list the list to be shuffled. If {@code null}, empty, or contains only one element, no operation is performed.
      * @param rnd the random number generator to use for shuffling
@@ -25557,6 +28786,12 @@ sealed class CommonUtil permits N {
      * the collection is cleared and repopulated with the shuffled elements.</p>
      *
      * <p><b>Note:</b> This method is marked as {@code @Beta} and may be subject to change in future versions.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Collection<String> values = new ArrayList<>(Arrays.asList("a", "b"));
+     * N.shuffle(values); // values are shuffled
+     * }</pre>
      *
      * @param c the collection to be shuffled. It should be a collection that has a well-defined encounter order
      *          (e.g., {@link List}, {@link java.util.LinkedHashSet}). If {@code null} or contains fewer than 2 elements,
@@ -25593,6 +28828,12 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Note:</b> This method is marked as {@code @Beta} and may be subject to change in future versions.</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Collection<String> values = new ArrayList<>(Arrays.asList("a", "b"));
+     * N.shuffle(values, new Random(1)); // values are shuffled with the supplied Random
+     * }</pre>
+     *
      * @param c the collection to be shuffled. It should be a collection that has a well-defined encounter order
      *          (e.g., {@link List}, {@link java.util.LinkedHashSet}). If {@code null} or contains fewer than 2 elements,
      *          no operation is performed.
@@ -25622,6 +28863,12 @@ sealed class CommonUtil permits N {
     /**
      * Swaps the elements at the specified positions in the specified boolean array.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * boolean[] values = new boolean[] {true, false};
+     * N.swap(values, 0, 1); // values[0] and values[1] are swapped
+     * }</pre>
+     *
      * @param a the boolean array in which to swap elements
      * @param i the index of one element to be swapped
      * @param j the index of the other element to be swapped
@@ -25634,6 +28881,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Swaps the elements at the specified positions in the specified char array.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * char[] values = new char[] {'a', 'b'};
+     * N.swap(values, 0, 1); // values[0] and values[1] are swapped
+     * }</pre>
      *
      * @param a the char array in which to swap elements
      * @param i the index of one element to be swapped
@@ -25648,6 +28901,12 @@ sealed class CommonUtil permits N {
     /**
      * Swaps the elements at the specified positions in the specified byte array.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * byte[] values = new byte[] {1, 2};
+     * N.swap(values, 0, 1); // values[0] and values[1] are swapped
+     * }</pre>
+     *
      * @param a the byte array in which to swap elements
      * @param i the index of one element to be swapped
      * @param j the index of the other element to be swapped
@@ -25660,6 +28919,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Swaps the elements at the specified positions in the specified short array.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * short[] values = new short[] {1, 2};
+     * N.swap(values, 0, 1); // values[0] and values[1] are swapped
+     * }</pre>
      *
      * @param a the short array in which to swap elements
      * @param i the index of one element to be swapped
@@ -25674,6 +28939,12 @@ sealed class CommonUtil permits N {
     /**
      * Swaps the elements at the specified positions in the specified int array.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * int[] values = new int[] {1, 2};
+     * N.swap(values, 0, 1); // values[0] and values[1] are swapped
+     * }</pre>
+     *
      * @param a the int array in which to swap elements
      * @param i the index of one element to be swapped
      * @param j the index of the other element to be swapped
@@ -25686,6 +28957,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Swaps the elements at the specified positions in the specified long array.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * long[] values = new long[] {1L, 2L};
+     * N.swap(values, 0, 1); // values[0] and values[1] are swapped
+     * }</pre>
      *
      * @param a the long array in which to swap elements
      * @param i the index of one element to be swapped
@@ -25700,6 +28977,12 @@ sealed class CommonUtil permits N {
     /**
      * Swaps the elements at the specified positions in the specified float array.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * float[] values = new float[] {1.0f, 2.0f};
+     * N.swap(values, 0, 1); // values[0] and values[1] are swapped
+     * }</pre>
+     *
      * @param a the float array in which to swap elements
      * @param i the index of one element to be swapped
      * @param j the index of the other element to be swapped
@@ -25712,6 +28995,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Swaps the elements at the specified positions in the specified double array.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * double[] values = new double[] {1.0d, 2.0d};
+     * N.swap(values, 0, 1); // values[0] and values[1] are swapped
+     * }</pre>
      *
      * @param a the double array in which to swap elements
      * @param i the index of one element to be swapped
@@ -25726,6 +29015,12 @@ sealed class CommonUtil permits N {
     /**
      * Swaps the elements at the specified positions in the specified Object array.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Object[] values = new String[] {"a", "b"};
+     * N.swap(values, 0, 1); // values[0] and values[1] are swapped
+     * }</pre>
+     *
      * @param a the Object array in which to swap elements
      * @param i the index of one element to be swapped
      * @param j the index of the other element to be swapped
@@ -25739,6 +29034,12 @@ sealed class CommonUtil permits N {
     /**
      * Swaps the elements at the specified positions in the specified list.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<String> values = new ArrayList<>(Arrays.asList("a", "b"));
+     * N.swap(values, 0, 1); // values[0] and values[1] are swapped
+     * }</pre>
+     *
      * @param list the list in which to swap elements
      * @param i the index of one element to be swapped
      * @param j the index of the other element to be swapped
@@ -25751,6 +29052,12 @@ sealed class CommonUtil permits N {
     /**
      * Swaps the left and right elements in the specified pair.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Pair<Integer, Integer> p = Pair.of(1, 2);
+     * N.swap(p); // p is now (2, 1)
+     * }</pre>
+     *
      * @param <T> the type of the elements in the pair
      * @param pair the pair whose elements are to be swapped
      */
@@ -25760,6 +29067,13 @@ sealed class CommonUtil permits N {
 
     /**
      * Swaps the left and right elements in the specified pair if the specified predicate is {@code true}.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Pair<Integer, Integer> p = Pair.of(3, 1);
+     * N.swapIf(p, x -> x.left() > x.right()); // returns true; p becomes (1, 3)
+     * N.swapIf(p, x -> false);                // returns false; p is unchanged
+     * }</pre>
      *
      * @param <T> the type of the elements in the pair
      * @param pair the pair whose elements are to be swapped
@@ -25778,6 +29092,12 @@ sealed class CommonUtil permits N {
     /**
      * Swaps the left and right elements in the specified triple.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Triple<Integer, String, Integer> t = Triple.of(1, "m", 2);
+     * N.swap(t); // t is now (2, "m", 1)
+     * }</pre>
+     *
      * @param <T> the type of the left and right elements in the triple
      * @param <M> the type of the middle element in the triple
      * @param triple the triple whose elements are to be swapped
@@ -25790,6 +29110,13 @@ sealed class CommonUtil permits N {
 
     /**
      * Swaps the left and right elements in the specified triple if the specified predicate is {@code true}.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Triple<Integer, String, Integer> t = Triple.of(3, "mid", 1);
+     * N.swapIf(t, x -> x.left() > x.right()); // returns true; t becomes (1, mid, 3)
+     * N.swapIf(t, x -> false);                // returns false; t is unchanged
+     * }</pre>
      *
      * @param <T> the type of the left and right elements in the triple
      * @param <M> the type of the middle element in the triple
@@ -25811,6 +29138,12 @@ sealed class CommonUtil permits N {
     /**
      * Fills the specified boolean array with the specified value.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * boolean[] values = new boolean[] {true, false};
+     * N.fill(values, true); // values are filled with true
+     * }</pre>
+     *
      * @param a the boolean array to be filled
      * @param val the boolean value to fill the array with
      * @see Arrays#fill(boolean[], boolean)
@@ -25825,6 +29158,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Fills the specified boolean array with the specified value from the specified fromIndex (inclusive) to the specified toIndex (exclusive).
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * boolean[] values = new boolean[] {true, false};
+     * N.fill(values, 0, values.length, true); // values are filled with true
+     * }</pre>
      *
      * @param a the boolean array to be filled
      * @param fromIndex the index to start filling (inclusive)
@@ -25846,6 +29185,12 @@ sealed class CommonUtil permits N {
     /**
      * Fills the specified char array with the specified value.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * char[] values = new char[] {'a', 'b'};
+     * N.fill(values, 'z'); // values are filled with 'z'
+     * }</pre>
+     *
      * @param a the char array to be filled
      * @param val the char value to fill the array with
      * @see Arrays#fill(char[], char)
@@ -25860,6 +29205,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Fills the specified char array with the specified value from the specified fromIndex (inclusive) to the specified toIndex (exclusive).
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * char[] values = new char[] {'a', 'b'};
+     * N.fill(values, 0, values.length, 'z'); // values are filled with 'z'
+     * }</pre>
      *
      * @param a the char array to be filled
      * @param fromIndex the index to start filling (inclusive)
@@ -25881,6 +29232,12 @@ sealed class CommonUtil permits N {
     /**
      * Fills the specified byte array with the specified value.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * byte[] values = new byte[] {1, 2};
+     * N.fill(values, (byte) 9); // values are filled with (byte) 9
+     * }</pre>
+     *
      * @param a the byte array to be filled
      * @param val the byte value to fill the array with
      * @see Arrays#fill(byte[], byte)
@@ -25895,6 +29252,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Fills the specified byte array with the specified value from the specified fromIndex (inclusive) to the specified toIndex (exclusive).
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * byte[] values = new byte[] {1, 2};
+     * N.fill(values, 0, values.length, (byte) 9); // values are filled with (byte) 9
+     * }</pre>
      *
      * @param a the byte array to be filled
      * @param fromIndex the index to start filling (inclusive)
@@ -25916,6 +29279,12 @@ sealed class CommonUtil permits N {
     /**
      * Fills the specified short array with the specified value.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * short[] values = new short[] {1, 2};
+     * N.fill(values, (short) 9); // values are filled with (short) 9
+     * }</pre>
+     *
      * @param a the short array to be filled
      * @param val the short value to fill the array with
      * @see Arrays#fill(short[], short)
@@ -25930,6 +29299,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Fills the specified short array with the specified value from the specified fromIndex (inclusive) to the specified toIndex (exclusive).
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * short[] values = new short[] {1, 2};
+     * N.fill(values, 0, values.length, (short) 9); // values are filled with (short) 9
+     * }</pre>
      *
      * @param a the short array to be filled
      * @param fromIndex the index to start filling (inclusive)
@@ -25951,6 +29326,12 @@ sealed class CommonUtil permits N {
     /**
      * Fills the specified int array with the specified value.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * int[] values = new int[] {1, 2};
+     * N.fill(values, 9); // values are filled with 9
+     * }</pre>
+     *
      * @param a the int array to be filled
      * @param val the int value to fill the array with
      * @see Arrays#fill(int[], int)
@@ -25965,6 +29346,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Fills the specified int array with the specified value from the specified fromIndex (inclusive) to the specified toIndex (exclusive).
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * int[] values = new int[] {1, 2};
+     * N.fill(values, 0, values.length, 9); // values are filled with 9
+     * }</pre>
      *
      * @param a the int array to be filled
      * @param fromIndex the index to start filling (inclusive)
@@ -25986,6 +29373,12 @@ sealed class CommonUtil permits N {
     /**
      * Fills the specified long array with the specified value.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * long[] values = new long[] {1L, 2L};
+     * N.fill(values, 9L); // values are filled with 9L
+     * }</pre>
+     *
      * @param a the long array to be filled
      * @param val the long value to fill the array with
      * @see Arrays#fill(long[], long)
@@ -26000,6 +29393,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Fills the specified long array with the specified value from the specified fromIndex (inclusive) to the specified toIndex (exclusive).
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * long[] values = new long[] {1L, 2L};
+     * N.fill(values, 0, values.length, 9L); // values are filled with 9L
+     * }</pre>
      *
      * @param a the long array to be filled
      * @param fromIndex the index to start filling (inclusive)
@@ -26021,6 +29420,12 @@ sealed class CommonUtil permits N {
     /**
      * Fills the specified float array with the specified value.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * float[] values = new float[] {1.0f, 2.0f};
+     * N.fill(values, 9.0f); // values are filled with 9.0f
+     * }</pre>
+     *
      * @param a the float array to be filled
      * @param val the float value to fill the array with
      * @see Arrays#fill(float[], float)
@@ -26035,6 +29440,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Fills the specified float array with the specified value from the specified fromIndex (inclusive) to the specified toIndex (exclusive).
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * float[] values = new float[] {1.0f, 2.0f};
+     * N.fill(values, 0, values.length, 9.0f); // values are filled with 9.0f
+     * }</pre>
      *
      * @param a the float array to be filled
      * @param fromIndex the index to start filling (inclusive)
@@ -26056,6 +29467,12 @@ sealed class CommonUtil permits N {
     /**
      * Fills the specified double array with the specified value.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * double[] values = new double[] {1.0d, 2.0d};
+     * N.fill(values, 9.0d); // values are filled with 9.0d
+     * }</pre>
+     *
      * @param a the double array to be filled
      * @param val the double value to fill the array with
      * @see Arrays#fill(double[], double)
@@ -26070,6 +29487,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Fills the specified double array with the specified value from the specified fromIndex (inclusive) to the specified toIndex (exclusive).
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * double[] values = new double[] {1.0d, 2.0d};
+     * N.fill(values, 0, values.length, 9.0d); // values are filled with 9.0d
+     * }</pre>
      *
      * @param a the double array to be filled
      * @param fromIndex the index to start filling (inclusive)
@@ -26090,6 +29513,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Fills the specified Object array with the specified value.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * String[] values = new String[] {"a", "b"};
+     * N.fill(values, "z"); // values are filled with "z"
+     * }</pre>
      *
      * @param <T> the type of the array elements
      * @param a the Object array to be filled
@@ -26112,6 +29541,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Fills the specified Object array with the specified value from the specified fromIndex (inclusive) to the specified toIndex (exclusive).
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * String[] values = new String[] {"a", "b"};
+     * N.fill(values, 0, values.length, "z"); // values are filled with "z"
+     * }</pre>
      *
      * @param <T> the type of the array elements
      * @param a the Object array to be filled
@@ -26138,6 +29573,12 @@ sealed class CommonUtil permits N {
     /**
      * Fills the specified list with the specified value.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<String> values = new ArrayList<>(Arrays.asList("a", "b"));
+     * N.fill(values, "z"); // values is now [z, z]
+     * }</pre>
+     *
      * @param <T> the type of elements in the list
      * @param list the list to be filled
      * @param val the value to fill the list with
@@ -26159,6 +29600,12 @@ sealed class CommonUtil permits N {
     /**
      * Fills the specified list with the specified value from the specified start index to the specified end index.
      * The list will be extended automatically if the size of the list is less than the specified toIndex.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<String> values = new ArrayList<>(Arrays.asList("a", "b"));
+     * N.fill(values, 0, values.size(), "z"); // values is now [z, z]
+     * }</pre>
      *
      * @param <T> the type of elements in the list
      * @param list the list to be filled
@@ -26255,6 +29702,13 @@ sealed class CommonUtil permits N {
     /**
      * Prepends the provided object to the beginning of the list until the list has at least the specified minimum size.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.padLeft(list, 5, "x");  // pads to size 5
+     * N.padLeft(list, 2, "x");  // no padding
+     * N.padLeft(list, 3, null); // pads with null
+     * }</pre>
+     *
      * @param <T> the type of the elements in the list
      * @param list the list to be padded
      * @param minSize the minimum size the list should have after this operation
@@ -26290,6 +29744,13 @@ sealed class CommonUtil permits N {
 
     /**
      * Appends the provided object to the end of the collection until the collection has at least the specified minimum size.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.padRight(list, 5, "x");  // pads to size 5
+     * N.padRight(list, 2, "x");  // no padding
+     * N.padRight(list, 3, null); // pads with null
+     * }</pre>
      *
      * @param <T> the type of elements in the collection
      * @param c the collection to be padded
@@ -26327,6 +29788,13 @@ sealed class CommonUtil permits N {
     /**
      * Repeats the provided value a specified number of times.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.repeat("x", 3);  // returns ["x","x","x"]
+     * N.repeat("x", 0);  // returns []
+     * N.repeat("x", -1); // throws IllegalArgumentException
+     * }</pre>
+     *
      * @param <T> the type of the value to be repeated
      * @param value the value to be repeated
      * @param n the number of times to repeat the value
@@ -26349,7 +29817,7 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * List<Integer> result = repeatElements(asList(1, 2, 3), 2);
+     * List<Integer> result = N.repeatElements(N.asList(1, 2, 3), 2);
      * // result => [1, 1, 2, 2, 3, 3]
      * }</pre>
      *
@@ -26383,7 +29851,7 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * List<Integer> result = repeatElementsToSize(asList(1, 2, 3), 5);
+     * List<Integer> result = N.repeatElementsToSize(N.asList(1, 2, 3), 5);
      * // result => [1, 1, 2, 2, 3]
      * }</pre>
      *
@@ -26425,7 +29893,7 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * List<Integer> result = cycle(asList(1, 2, 3), 2);
+     * List<Integer> result = N.cycle(N.asList(1, 2, 3), 2);
      * // result => [1, 2, 3, 1, 2, 3]
      * }</pre>
      *
@@ -26457,7 +29925,7 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * List<Integer> result = cycleToSize(asList(1, 2, 3), 5);
+     * List<Integer> result = N.cycleToSize(N.asList(1, 2, 3), 5);
      * // result => [1, 2, 3, 1, 2]
      * }</pre>
      *
@@ -26500,6 +29968,13 @@ sealed class CommonUtil permits N {
     /**
      * Copies elements from the source boolean array to the destination boolean array.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.copy(src, 0, dest, 0, 3);   // copies 3 elements
+     * N.copy(src, 1, dest, 0, 2);   // copies from offset
+     * N.copy(src, 0, dest, 0, 999); // throws IndexOutOfBoundsException
+     * }</pre>
+     *
      * @param src the source array from which elements are to be copied
      * @param srcPos starting position in the source array
      * @param dest the destination array to which elements are to be copied
@@ -26536,6 +30011,13 @@ sealed class CommonUtil permits N {
 
     /**
      * Copies elements from the source char array to the destination char array.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.copy(src, 0, dest, 0, 3);   // copies 3 elements
+     * N.copy(src, 1, dest, 0, 2);   // copies from offset
+     * N.copy(src, 0, dest, 0, 999); // throws IndexOutOfBoundsException
+     * }</pre>
      *
      * @param src the source array from which elements are to be copied
      * @param srcPos starting position in the source array
@@ -26574,6 +30056,13 @@ sealed class CommonUtil permits N {
     /**
      * Copies elements from the source byte array to the destination byte array.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.copy(src, 0, dest, 0, 3);   // copies 3 elements
+     * N.copy(src, 1, dest, 0, 2);   // copies from offset
+     * N.copy(src, 0, dest, 0, 999); // throws IndexOutOfBoundsException
+     * }</pre>
+     *
      * @param src the source array from which elements are to be copied
      * @param srcPos starting position in the source array
      * @param dest the destination array to which elements are to be copied
@@ -26610,6 +30099,13 @@ sealed class CommonUtil permits N {
 
     /**
      * Copies elements from the source short array to the destination short array.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.copy(src, 0, dest, 0, 3);   // copies 3 elements
+     * N.copy(src, 1, dest, 0, 2);   // copies from offset
+     * N.copy(src, 0, dest, 0, 999); // throws IndexOutOfBoundsException
+     * }</pre>
      *
      * @param src the source array from which elements are to be copied
      * @param srcPos starting position in the source array
@@ -26648,6 +30144,13 @@ sealed class CommonUtil permits N {
     /**
      * Copies elements from the source int array to the destination int array.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.copy(src, 0, dest, 0, 3);   // copies 3 elements
+     * N.copy(src, 1, dest, 0, 2);   // copies from offset
+     * N.copy(src, 0, dest, 0, 999); // throws IndexOutOfBoundsException
+     * }</pre>
+     *
      * @param src the source array from which elements are to be copied
      * @param srcPos starting position in the source array
      * @param dest the destination array to which elements are to be copied
@@ -26684,6 +30187,13 @@ sealed class CommonUtil permits N {
 
     /**
      * Copies elements from the source long array to the destination long array.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.copy(src, 0, dest, 0, 3);   // copies 3 elements
+     * N.copy(src, 1, dest, 0, 2);   // copies from offset
+     * N.copy(src, 0, dest, 0, 999); // throws IndexOutOfBoundsException
+     * }</pre>
      *
      * @param src the source array from which elements are to be copied
      * @param srcPos starting position in the source array
@@ -26722,6 +30232,13 @@ sealed class CommonUtil permits N {
     /**
      * Copies elements from the source float array to the destination float array.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.copy(src, 0, dest, 0, 3);   // copies 3 elements
+     * N.copy(src, 1, dest, 0, 2);   // copies from offset
+     * N.copy(src, 0, dest, 0, 999); // throws IndexOutOfBoundsException
+     * }</pre>
+     *
      * @param src the source array from which elements are to be copied
      * @param srcPos starting position in the source array
      * @param dest the destination array to which elements are to be copied
@@ -26758,6 +30275,13 @@ sealed class CommonUtil permits N {
 
     /**
      * Copies elements from the source double array to the destination double array.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.copy(src, 0, dest, 0, 3);   // copies 3 elements
+     * N.copy(src, 1, dest, 0, 2);   // copies from offset
+     * N.copy(src, 0, dest, 0, 999); // throws IndexOutOfBoundsException
+     * }</pre>
      *
      * @param src the source array from which elements are to be copied
      * @param srcPos starting position in the source array
@@ -26796,6 +30320,13 @@ sealed class CommonUtil permits N {
     /**
      * Copies elements from the source array to the destination array.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.copy(src, 0, dest, 0, 3);   // copies 3 elements
+     * N.copy(src, 1, dest, 0, 2);   // copies from offset
+     * N.copy(src, 0, dest, 0, 999); // throws IndexOutOfBoundsException
+     * }</pre>
+     *
      * @param src the source array from which elements are to be copied
      * @param srcPos starting position in the source array
      * @param dest the destination array to which elements are to be copied
@@ -26833,6 +30364,13 @@ sealed class CommonUtil permits N {
     /**
      * Copies elements from the source array to the destination array.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.copy(src, 0, dest, 0, 3);   // copies 3 elements
+     * N.copy(src, 1, dest, 0, 2);   // copies from offset
+     * N.copy(src, 0, dest, 0, 999); // throws IndexOutOfBoundsException
+     * }</pre>
+     *
      * @param src the source array from which elements are to be copied
      * @param srcPos starting position in the source array
      * @param dest the destination array to which elements are to be copied
@@ -26852,6 +30390,14 @@ sealed class CommonUtil permits N {
     /**
      * Returns a new boolean array containing a copy of the original array,
      * truncated or padded with {@code false} (if necessary) so the copy has the specified length.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.copyOf(new boolean[] {true, false}, 4); // returns [true, false, false, false]
+     * N.copyOf(new boolean[] {true, false}, 1); // returns [true]
+     * N.copyOf(new boolean[] {true}, 0);        // returns []
+     * N.copyOf(new boolean[0], 2);              // returns [false, false]
+     * }</pre>
      *
      * @param original the array to be copied
      * @param newLength the length of the copy to be returned
@@ -26879,6 +30425,14 @@ sealed class CommonUtil permits N {
      * Returns a new char array containing a copy of the original array,
      * truncated or padded with default value (if necessary) so the copy has the specified length.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.copyOf(new char[] {'a', 'b'}, 3); // returns ['a', 'b', '\0']
+     * N.copyOf(new char[] {'a', 'b'}, 1); // returns ['a']
+     * N.copyOf(new char[] {'a'}, 0);      // returns []
+     * N.copyOf(new char[0], 2);           // returns ['\0', '\0']
+     * }</pre>
+     *
      * @param original the array to be copied
      * @param newLength the length of the copy to be returned
      * @return a new char array containing a copy of the original array
@@ -26904,6 +30458,14 @@ sealed class CommonUtil permits N {
     /**
      * Returns a new byte array containing a copy of the original array,
      * truncated or padded with default value (if necessary) so the copy has the specified length.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.copyOf(new byte[] {1, 2, 3}, 5); // returns [1, 2, 3, 0, 0]
+     * N.copyOf(new byte[] {1, 2, 3}, 2); // returns [1, 2]
+     * N.copyOf(new byte[] {1, 2, 3}, 0); // returns []
+     * N.copyOf(new byte[0], 3);          // returns [0, 0, 0]
+     * }</pre>
      *
      * @param original the array to be copied
      * @param newLength the length of the copy to be returned
@@ -26931,6 +30493,14 @@ sealed class CommonUtil permits N {
      * Returns a new short array containing a copy of the original array,
      * truncated or padded with default value (if necessary) so the copy has the specified length.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.copyOf(new short[] {1, 2, 3}, 5); // returns [1, 2, 3, 0, 0]
+     * N.copyOf(new short[] {1, 2, 3}, 2); // returns [1, 2]
+     * N.copyOf(new short[] {1, 2, 3}, 0); // returns []
+     * N.copyOf(new short[0], 3);          // returns [0, 0, 0]
+     * }</pre>
+     *
      * @param original the array to be copied
      * @param newLength the length of the copy to be returned
      * @return a new short array containing a copy of the original array
@@ -26956,6 +30526,14 @@ sealed class CommonUtil permits N {
     /**
      * Returns a new int array containing a copy of the original array,
      * truncated or padded with default value (if necessary) so the copy has the specified length.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.copyOf(new int[] {1, 2, 3}, 5); // returns [1, 2, 3, 0, 0]
+     * N.copyOf(new int[] {1, 2, 3}, 2); // returns [1, 2]
+     * N.copyOf(new int[] {1, 2, 3}, 0); // returns []
+     * N.copyOf(new int[0], 3);          // returns [0, 0, 0]
+     * }</pre>
      *
      * @param original the array to be copied
      * @param newLength the length of the copy to be returned
@@ -26983,6 +30561,14 @@ sealed class CommonUtil permits N {
      * Returns a new long array containing a copy of the original array,
      * truncated or padded with default value (if necessary) so the copy has the specified length.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.copyOf(new long[] {1L, 2L, 3L}, 5); // returns [1, 2, 3, 0, 0]
+     * N.copyOf(new long[] {1L, 2L, 3L}, 2); // returns [1, 2]
+     * N.copyOf(new long[] {1L, 2L, 3L}, 0); // returns []
+     * N.copyOf(new long[0], 3);             // returns [0, 0, 0]
+     * }</pre>
+     *
      * @param original the array to be copied
      * @param newLength the length of the copy to be returned
      * @return a new long array containing a copy of the original array
@@ -27008,6 +30594,14 @@ sealed class CommonUtil permits N {
     /**
      * Returns a new float array containing a copy of the original array,
      * truncated or padded with default value (if necessary) so the copy has the specified length.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.copyOf(new float[] {1.0f, 2.0f}, 4); // returns [1.0, 2.0, 0.0, 0.0]
+     * N.copyOf(new float[] {1.0f, 2.0f}, 1); // returns [1.0]
+     * N.copyOf(new float[] {1.0f}, 0);       // returns []
+     * N.copyOf(new float[0], 2);             // returns [0.0, 0.0]
+     * }</pre>
      *
      * @param original the array to be copied
      * @param newLength the length of the copy to be returned
@@ -27035,6 +30629,14 @@ sealed class CommonUtil permits N {
      * Returns a new double array containing a copy of the original array,
      * truncated or padded with default value (if necessary) so the copy has the specified length.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.copyOf(new double[] {1.0, 2.0}, 4); // returns [1.0, 2.0, 0.0, 0.0]
+     * N.copyOf(new double[] {1.0, 2.0}, 1); // returns [1.0]
+     * N.copyOf(new double[] {1.0}, 0);      // returns []
+     * N.copyOf(new double[0], 2);           // returns [0.0, 0.0]
+     * }</pre>
+     *
      * @param original the array to be copied
      * @param newLength the length of the copy to be returned
      * @return a new double array containing a copy of the original array
@@ -27061,6 +30663,14 @@ sealed class CommonUtil permits N {
      * Returns a new array, with the same runtime component type as the original, containing a copy of the original array,
      * truncated or padded with {@code null} (if necessary) so the copy has the specified length.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.copyOf(new String[] {"a", "b"}, 4); // returns ["a", "b", null, null]
+     * N.copyOf(new String[] {"a", "b"}, 1); // returns ["a"]
+     * N.copyOf(new String[] {"a"}, 0);      // returns []
+     * N.copyOf(new String[0], 2);           // returns [null, null]
+     * }</pre>
+     *
      * @param <T> the type of the elements in the array
      * @param original the array to be copied
      * @param newLength the length of the copy to be returned
@@ -27080,6 +30690,14 @@ sealed class CommonUtil permits N {
 
     /**
      * Returns a new array containing a copy of the original array, truncated or padded with {@code null} (if necessary) so the copy has the specified length.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.copyOf(new String[] {"a", "b"}, 3, Object[].class); // returns ["a", "b", null]
+     * N.copyOf(new String[] {"a", "b"}, 1, Object[].class); // returns ["a"]
+     * N.copyOf(new String[] {"a"}, 0, Object[].class);      // returns []
+     * N.copyOf(null, 2, String[].class);                    // returns [null, null]
+     * }</pre>
      *
      * @param <T> the type of the elements in the array
      * @param original the array to be copied
@@ -27105,6 +30723,12 @@ sealed class CommonUtil permits N {
     /**
      * Returns a new boolean array containing a copy of the specified range of the original array.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * boolean[] values = new boolean[] {true, false};
+     * N.copyOfRange(values, 0, values.length); // returns a copy of the selected range
+     * }</pre>
+     *
      * @param original the array from which a range is to be copied
      * @param fromIndex the initial index of the range to be copied, inclusive
      * @param toIndex the final index of the range to be copied, exclusive
@@ -27128,6 +30752,13 @@ sealed class CommonUtil permits N {
     /**
      * Returns a new boolean array containing a copy of the specified range of the original array, with elements selected at intervals defined by the step parameter.
      * If step is negative, the elements will be copied in reverse order.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * boolean[] values = new boolean[] {true, false};
+     * N.copyOfRange(values, 0, values.length, 1); // returns a copy of the selected range
+     * N.copyOfRange(values, 0, values.length, 0); // throws IllegalArgumentException
+     * }</pre>
      *
      * @param original the array from which a range is to be copied
      * @param fromIndex the initial index of the range to be copied, inclusive
@@ -27167,6 +30798,12 @@ sealed class CommonUtil permits N {
     /**
      * Returns a new char array containing a copy of the specified range of the original array.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * char[] values = new char[] {'a', 'b'};
+     * N.copyOfRange(values, 0, values.length); // returns a copy of the selected range
+     * }</pre>
+     *
      * @param original the array from which a range is to be copied
      * @param fromIndex the initial index of the range to be copied, inclusive
      * @param toIndex the final index of the range to be copied, exclusive
@@ -27190,6 +30827,13 @@ sealed class CommonUtil permits N {
     /**
      * Returns a new char array containing a copy of the specified range of the original array, with elements selected at intervals defined by the step parameter.
      * If step is negative, the elements will be copied in reverse order.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * char[] values = new char[] {'a', 'b'};
+     * N.copyOfRange(values, 0, values.length, 1); // returns a copy of the selected range
+     * N.copyOfRange(values, 0, values.length, 0); // throws IllegalArgumentException
+     * }</pre>
      *
      * @param original the array from which a range is to be copied
      * @param fromIndex the initial index of the range to be copied, inclusive
@@ -27229,6 +30873,12 @@ sealed class CommonUtil permits N {
     /**
      * Returns a new byte array containing a copy of the specified range of the original array.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * byte[] values = new byte[] {1, 2};
+     * N.copyOfRange(values, 0, values.length); // returns a copy of the selected range
+     * }</pre>
+     *
      * @param original the array from which a range is to be copied
      * @param fromIndex the initial index of the range to be copied, inclusive
      * @param toIndex the final index of the range to be copied, exclusive
@@ -27252,6 +30902,13 @@ sealed class CommonUtil permits N {
     /**
      * Returns a new byte array containing a copy of the specified range of the original array, with elements selected at intervals defined by the step parameter.
      * If step is negative, the elements will be copied in reverse order.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * byte[] values = new byte[] {1, 2};
+     * N.copyOfRange(values, 0, values.length, 1); // returns a copy of the selected range
+     * N.copyOfRange(values, 0, values.length, 0); // throws IllegalArgumentException
+     * }</pre>
      *
      * @param original the array from which a range is to be copied
      * @param fromIndex the initial index of the range to be copied, inclusive
@@ -27291,6 +30948,12 @@ sealed class CommonUtil permits N {
     /**
      * Returns a new short array containing a copy of the specified range of the original array.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * short[] values = new short[] {1, 2};
+     * N.copyOfRange(values, 0, values.length); // returns a copy of the selected range
+     * }</pre>
+     *
      * @param original the array from which a range is to be copied
      * @param fromIndex the initial index of the range to be copied, inclusive
      * @param toIndex the final index of the range to be copied, exclusive
@@ -27314,6 +30977,13 @@ sealed class CommonUtil permits N {
     /**
      * Returns a new short array containing a copy of the specified range of the original array, with elements selected at intervals defined by the step parameter.
      * If step is negative, the elements will be copied in reverse order.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * short[] values = new short[] {1, 2};
+     * N.copyOfRange(values, 0, values.length, 1); // returns a copy of the selected range
+     * N.copyOfRange(values, 0, values.length, 0); // throws IllegalArgumentException
+     * }</pre>
      *
      * @param original the array from which a range is to be copied
      * @param fromIndex the initial index of the range to be copied, inclusive
@@ -27353,6 +31023,12 @@ sealed class CommonUtil permits N {
     /**
      * Returns a new int array containing a copy of the specified range of the original array.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * int[] values = new int[] {1, 2};
+     * N.copyOfRange(values, 0, values.length); // returns a copy of the selected range
+     * }</pre>
+     *
      * @param original the array from which a range is to be copied
      * @param fromIndex the initial index of the range to be copied, inclusive
      * @param toIndex the final index of the range to be copied, exclusive
@@ -27381,14 +31057,9 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * int[] a = { 0, 1, 2, 3, 4, 5 };
-     * copyOfRange(a, 1, 5, 1);     // [1, 2, 3, 4]
-     * copyOfRange(a, 1, 5, 2);     // [1, 3]
-     *
-     * copyOfRange(a, 5, 1, -1);    // [5, 4, 3, 2]
-     * copyOfRange(a, 5, 1, -2);    // [5, 3]
-     * copyOfRange(a, 5, -1, -1);   // [5, 4, 3, 2, 1, 0]
-     * copyOfRange(a, 6, -1, -1);   // [5, 4, 3, 2, 1, 0]
+     * int[] values = new int[] {1, 2};
+     * N.copyOfRange(values, 0, values.length, 1); // returns a copy of the selected range
+     * N.copyOfRange(values, 0, values.length, 0); // throws IllegalArgumentException
      * }</pre>
      *
      * @param original the array from which a range is to be copied
@@ -27428,6 +31099,12 @@ sealed class CommonUtil permits N {
     /**
      * Returns a new long array containing a copy of the specified range of the original array.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * long[] values = new long[] {1L, 2L};
+     * N.copyOfRange(values, 0, values.length); // returns a copy of the selected range
+     * }</pre>
+     *
      * @param original the array from which a range is to be copied
      * @param fromIndex the initial index of the range to be copied, inclusive
      * @param toIndex the final index of the range to be copied, exclusive
@@ -27451,6 +31128,13 @@ sealed class CommonUtil permits N {
     /**
      * Returns a new long array containing a copy of the specified range of the original array, with elements selected at intervals defined by the step parameter.
      * If step is negative, the elements will be copied in reverse order.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * long[] values = new long[] {1L, 2L};
+     * N.copyOfRange(values, 0, values.length, 1); // returns a copy of the selected range
+     * N.copyOfRange(values, 0, values.length, 0); // throws IllegalArgumentException
+     * }</pre>
      *
      * @param original the array from which a range is to be copied
      * @param fromIndex the initial index of the range to be copied, inclusive
@@ -27490,6 +31174,12 @@ sealed class CommonUtil permits N {
     /**
      * Returns a new float array containing a copy of the specified range of the original array.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * float[] values = new float[] {1.0f, 2.0f};
+     * N.copyOfRange(values, 0, values.length); // returns a copy of the selected range
+     * }</pre>
+     *
      * @param original the array from which a range is to be copied
      * @param fromIndex the initial index of the range to be copied, inclusive
      * @param toIndex the final index of the range to be copied, exclusive
@@ -27513,6 +31203,13 @@ sealed class CommonUtil permits N {
     /**
      * Returns a new float array containing a copy of the specified range of the original array, with elements selected at intervals defined by the step parameter.
      * If step is negative, the elements will be copied in reverse order.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * float[] values = new float[] {1.0f, 2.0f};
+     * N.copyOfRange(values, 0, values.length, 1); // returns a copy of the selected range
+     * N.copyOfRange(values, 0, values.length, 0); // throws IllegalArgumentException
+     * }</pre>
      *
      * @param original the array from which a range is to be copied
      * @param fromIndex the initial index of the range to be copied, inclusive
@@ -27552,6 +31249,12 @@ sealed class CommonUtil permits N {
     /**
      * Returns a new double array containing a copy of the specified range of the original array.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * double[] values = new double[] {1.0d, 2.0d};
+     * N.copyOfRange(values, 0, values.length); // returns a copy of the selected range
+     * }</pre>
+     *
      * @param original the array from which a range is to be copied
      * @param fromIndex the initial index of the range to be copied, inclusive
      * @param toIndex the final index of the range to be copied, exclusive
@@ -27575,6 +31278,13 @@ sealed class CommonUtil permits N {
     /**
      * Returns a new double array containing a copy of the specified range of the original array, with elements selected at intervals defined by the step parameter.
      * If step is negative, the elements will be copied in reverse order.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * double[] values = new double[] {1.0d, 2.0d};
+     * N.copyOfRange(values, 0, values.length, 1); // returns a copy of the selected range
+     * N.copyOfRange(values, 0, values.length, 0); // throws IllegalArgumentException
+     * }</pre>
      *
      * @param original the array from which a range is to be copied
      * @param fromIndex the initial index of the range to be copied, inclusive
@@ -27614,6 +31324,12 @@ sealed class CommonUtil permits N {
     /**
      * Returns a new array, with the same runtime component type as the original, containing a copy of the specified range of the original array.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * String[] values = new String[] {"a", "b"};
+     * N.copyOfRange(values, 0, values.length); // returns a copy of the selected range
+     * }</pre>
+     *
      * @param <T> the type of the elements in the array
      * @param original the array from which a range is to be copied
      * @param fromIndex the initial index of the range to be copied, inclusive
@@ -27636,6 +31352,13 @@ sealed class CommonUtil permits N {
      * Returns a new array, with the same runtime component type as the original, containing a copy of the specified range of the original array, with elements selected at intervals defined by the step parameter.
      * If step is negative, the elements will be copied in reverse order.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * String[] values = new String[] {"a", "b"};
+     * N.copyOfRange(values, 0, values.length, 1); // returns a copy of the selected range
+     * N.copyOfRange(values, 0, values.length, 0); // throws IllegalArgumentException
+     * }</pre>
+     *
      * @param <T> the type of the elements in the array
      * @param original the array from which a range is to be copied
      * @param fromIndex the initial index of the range to be copied, inclusive
@@ -27652,6 +31375,13 @@ sealed class CommonUtil permits N {
 
     /**
      * Returns a new array containing a copy of the specified range of the original array.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Object[] values = new String[] {"a", "b"};
+     * N.copyOfRange(values, 0, values.length, 1); // returns a copy of the selected range
+     * N.copyOfRange(values, 0, values.length, 0); // throws IllegalArgumentException
+     * }</pre>
      *
      * @param <T> the type of the elements in the new array
      * @param original the array from which a range is to be copied
@@ -27674,6 +31404,13 @@ sealed class CommonUtil permits N {
     /**
      * Returns a new array containing a copy of the specified range of the original array, with elements selected at intervals defined by the step parameter.
      * If step is negative, the elements will be copied in reverse order.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Object[] values = new String[] {"a", "b"};
+     * N.copyOfRange(values, 0, values.length, 1); // returns a copy of the selected range
+     * N.copyOfRange(values, 0, values.length, 0); // throws IllegalArgumentException
+     * }</pre>
      *
      * @param <T> the type of the elements in the new array
      * @param original the array from which a range is to be copied
@@ -27716,6 +31453,12 @@ sealed class CommonUtil permits N {
     /**
      * Returns a new list containing a copy of the specified range of the original list.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * String[] values = new String[] {"a", "b"};
+     * N.copyOfRange(values, 0, values.length); // returns a copy of the selected range
+     * }</pre>
+     *
      * @param <T> the type of elements in the list
      * @param c the list from which a range is to be copied
      * @param fromIndex the initial index of the range to be copied, inclusive
@@ -27734,6 +31477,13 @@ sealed class CommonUtil permits N {
     /**
      * Returns a new list containing a copy of the specified range of the original list, with elements selected at intervals defined by the step parameter.
      * If step is negative, the elements will be copied in reverse order.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * String[] values = new String[] {"a", "b"};
+     * N.copyOfRange(values, 0, values.length, 1); // returns a copy of the selected range
+     * N.copyOfRange(values, 0, values.length, 0); // throws IllegalArgumentException
+     * }</pre>
      *
      * @param <T> the type of elements in the list
      * @param c the list from which a range is to be copied
@@ -27784,6 +31534,12 @@ sealed class CommonUtil permits N {
      * The substring begins at the specified <i>fromIndex</i> and extends to the character at index <i>toIndex - 1</i>.
      * Thus, the length of the substring is <i>toIndex - fromIndex</i>.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * String[] values = new String[] {"a", "b"};
+     * N.copyOfRange(values, 0, values.length); // returns a copy of the selected range
+     * }</pre>
+     *
      * @param str the original string from which a range is to be copied
      * @param fromIndex the beginning index, inclusive
      * @param toIndex the ending index, exclusive
@@ -27809,6 +31565,13 @@ sealed class CommonUtil permits N {
     /**
      * Returns a new string that is a substring of the specified string, with characters selected at intervals defined by the step parameter.
      * If step is negative, the characters will be copied in reverse order.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * String[] values = new String[] {"a", "b"};
+     * N.copyOfRange(values, 0, values.length, 1); // returns a copy of the selected range
+     * N.copyOfRange(values, 0, values.length, 0); // throws IllegalArgumentException
+     * }</pre>
      *
      * @param str the original string from which a range is to be copied
      * @param fromIndex the beginning index, inclusive
@@ -27843,6 +31606,12 @@ sealed class CommonUtil permits N {
     /**
      * Returns a new array that is a clone of the specified array, or {@code null} if the original array is {@code null}.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * boolean[] a = {true, false, true};
+     * N.clone(a);   // returns a copy: [true, false, true]
+     * }</pre>
+     *
      * @param original the array to be cloned
      * @return a clone of the original array, or {@code null} if the original array is null
      */
@@ -27857,6 +31626,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Returns a new array that is a clone of the specified array, or {@code null} if the original array is {@code null}.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * char[] a = {'a', 'b', 'c'};
+     * N.clone(a);   // returns a copy: ['a', 'b', 'c']
+     * }</pre>
      *
      * @param original the array to be cloned
      * @return a clone of the original array, or {@code null} if the original array is null
@@ -27873,6 +31648,12 @@ sealed class CommonUtil permits N {
     /**
      * Returns a new array that is a clone of the specified array, or {@code null} if the original array is {@code null}.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * byte[] a = {1, 2, 3};
+     * N.clone(a);   // returns a copy: [1, 2, 3]
+     * }</pre>
+     *
      * @param original the array to be cloned
      * @return a clone of the original array, or {@code null} if the original array is null
      */
@@ -27887,6 +31668,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Returns a new array that is a clone of the specified array, or {@code null} if the original array is {@code null}.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * short[] a = {1, 2, 3};
+     * N.clone(a);   // returns a copy: [1, 2, 3]
+     * }</pre>
      *
      * @param original the array to be cloned
      * @return a clone of the original array, or {@code null} if the original array is null
@@ -27903,6 +31690,12 @@ sealed class CommonUtil permits N {
     /**
      * Returns a new array that is a clone of the specified array, or {@code null} if the original array is {@code null}.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * int[] a = {1, 2, 3};
+     * N.clone(a);   // returns a copy: [1, 2, 3]
+     * }</pre>
+     *
      * @param original the array to be cloned
      * @return a clone of the original array, or {@code null} if the original array is null
      */
@@ -27917,6 +31710,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Returns a new array that is a clone of the specified array, or {@code null} if the original array is {@code null}.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * long[] a = {1L, 2L, 3L};
+     * N.clone(a);   // returns a copy: [1L, 2L, 3L]
+     * }</pre>
      *
      * @param original the array to be cloned
      * @return a clone of the original array, or {@code null} if the original array is null
@@ -27933,6 +31732,12 @@ sealed class CommonUtil permits N {
     /**
      * Returns a new array that is a clone of the specified array, or {@code null} if the original array is {@code null}.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * float[] a = {1.0f, 2.0f, 3.0f};
+     * N.clone(a);   // returns a copy: [1.0, 2.0, 3.0]
+     * }</pre>
+     *
      * @param original the array to be cloned
      * @return a clone of the original array, or {@code null} if the original array is null
      */
@@ -27947,6 +31752,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Returns a new array that is a clone of the specified array, or {@code null} if the original array is {@code null}.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * double[] a = {1.0, 2.0, 3.0};
+     * N.clone(a);   // returns a copy: [1.0, 2.0, 3.0]
+     * }</pre>
      *
      * @param original the array to be cloned
      * @return a clone of the original array, or {@code null} if the original array is null
@@ -27963,6 +31774,12 @@ sealed class CommonUtil permits N {
     /**
      * Returns a new array that is a clone of the specified array, or {@code null} if the original array is {@code null}.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * String[] a = {"a", "b", "c"};
+     * N.clone(a);   // returns a copy: [a, b, c]
+     * }</pre>
+     *
      * @param <T> the type of the array elements
      * @param original the array to be cloned
      * @return a clone of the original array, or {@code null} if the original array is null
@@ -27978,6 +31795,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Clone the original array and its sub arrays. {@code null} is returned if the input array is {@code null}.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * boolean[][] a = {{true, false}, {true, false}};
+     * N.clone(a);   // returns a deep copy of the 2D array
+     * }</pre>
      *
      * @param original the two-dimensional array to be cloned
      * @return a clone of the original two-dimensional array, or {@code null} if the original array is null
@@ -28001,6 +31824,12 @@ sealed class CommonUtil permits N {
     /**
      * Clone the original array and its sub arrays. {@code null} is returned if the input array is {@code null}.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * char[][] a = {{'a', 'b'}, {'a', 'b'}};
+     * N.clone(a);   // returns a deep copy of the 2D array
+     * }</pre>
+     *
      * @param original the two-dimensional array to be cloned
      * @return a clone of the original two-dimensional array, or {@code null} if the original array is null
      * @see #clone(char[])
@@ -28022,6 +31851,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Clone the original array and its sub arrays. {@code null} is returned if the input array is {@code null}.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * byte[][] a = {{1, 2}, {1, 2}};
+     * N.clone(a);   // returns a deep copy of the 2D array
+     * }</pre>
      *
      * @param original the two-dimensional array to be cloned
      * @return a clone of the original two-dimensional array, or {@code null} if the original array is null
@@ -28045,6 +31880,12 @@ sealed class CommonUtil permits N {
     /**
      * Clone the original array and its sub arrays. {@code null} is returned if the input array is {@code null}.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * short[][] a = {{1, 2}, {1, 2}};
+     * N.clone(a);   // returns a deep copy of the 2D array
+     * }</pre>
+     *
      * @param original the two-dimensional array to be cloned
      * @return a clone of the original two-dimensional array, or {@code null} if the original array is null
      * @see #clone(short[])
@@ -28066,6 +31907,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Clone the original array and its sub arrays. {@code null} is returned if the input array is {@code null}.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * int[][] a = {{1, 2}, {1, 2}};
+     * N.clone(a);   // returns a deep copy of the 2D array
+     * }</pre>
      *
      * @param original the two-dimensional array to be cloned
      * @return a clone of the original two-dimensional array, or {@code null} if the original array is null
@@ -28089,6 +31936,12 @@ sealed class CommonUtil permits N {
     /**
      * Clone the original array and its sub arrays. {@code null} is returned if the input array is {@code null}.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * long[][] a = {{1L, 2L}, {1L, 2L}};
+     * N.clone(a);   // returns a deep copy of the 2D array
+     * }</pre>
+     *
      * @param original the two-dimensional array to be cloned
      * @return a clone of the original two-dimensional array, or {@code null} if the original array is null
      * @see #clone(long[])
@@ -28110,6 +31963,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Clone the original array and its sub arrays. {@code null} is returned if the input array is {@code null}.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * float[][] a = {{1.0f, 2.0f}, {1.0f, 2.0f}};
+     * N.clone(a);   // returns a deep copy of the 2D array
+     * }</pre>
      *
      * @param original the two-dimensional array to be cloned
      * @return a clone of the original two-dimensional array, or {@code null} if the original array is null
@@ -28133,6 +31992,12 @@ sealed class CommonUtil permits N {
     /**
      * Clone the original array and its sub arrays. {@code null} is returned if the input array is {@code null}.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * double[][] a = {{1.0, 2.0}, {1.0, 2.0}};
+     * N.clone(a);   // returns a deep copy of the 2D array
+     * }</pre>
+     *
      * @param original the two-dimensional array to be cloned
      * @return a clone of the original two-dimensional array, or {@code null} if the original array is null
      * @see #clone(double[])
@@ -28154,6 +32019,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Clone the original array and its sub arrays. {@code null} is returned if the input array is {@code null}.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * String[][] a = {{"a", "b"}, {"a", "b"}};
+     * N.clone(a);   // returns a deep copy of the 2D array
+     * }</pre>
      *
      * @param <T> the type of the array elements
      * @param original the two-dimensional array to be cloned
@@ -28178,6 +32049,12 @@ sealed class CommonUtil permits N {
     /**
      * Clone the original array and its sub arrays. {@code null} is returned if the input array is {@code null}.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * boolean[][][] a = {{{true, false}, {true, false}}, {{true, false}, {true, false}}};
+     * N.clone(a);   // returns a deep copy of the 3D array
+     * }</pre>
+     *
      * @param original the three-dimensional array to be cloned
      * @return a clone of the original three-dimensional array, or {@code null} if the original array is null
      * @see #clone(boolean[])
@@ -28200,6 +32077,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Clone the original array and its sub arrays. {@code null} is returned if the input array is {@code null}.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * char[][][] a = {{{'a', 'b'}, {'a', 'b'}}, {{'a', 'b'}, {'a', 'b'}}};
+     * N.clone(a);   // returns a deep copy of the 3D array
+     * }</pre>
      *
      * @param original the three-dimensional array to be cloned
      * @return a clone of the original three-dimensional array, or {@code null} if the original array is null
@@ -28224,6 +32107,12 @@ sealed class CommonUtil permits N {
     /**
      * Clone the original array and its sub arrays. {@code null} is returned if the input array is {@code null}.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * byte[][][] a = {{{1, 2}, {1, 2}}, {{1, 2}, {1, 2}}};
+     * N.clone(a);   // returns a deep copy of the 3D array
+     * }</pre>
+     *
      * @param original the three-dimensional array to be cloned
      * @return a clone of the original three-dimensional array, or {@code null} if the original array is null
      * @see #clone(byte[])
@@ -28246,6 +32135,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Clone the original array and its sub arrays. {@code null} is returned if the input array is {@code null}.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * short[][][] a = {{{1, 2}, {1, 2}}, {{1, 2}, {1, 2}}};
+     * N.clone(a);   // returns a deep copy of the 3D array
+     * }</pre>
      *
      * @param original the three-dimensional array to be cloned
      * @return a clone of the original three-dimensional array, or {@code null} if the original array is null
@@ -28270,6 +32165,12 @@ sealed class CommonUtil permits N {
     /**
      * Clone the original array and its sub arrays. {@code null} is returned if the input array is {@code null}.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * int[][][] a = {{{1, 2}, {1, 2}}, {{1, 2}, {1, 2}}};
+     * N.clone(a);   // returns a deep copy of the 3D array
+     * }</pre>
+     *
      * @param original the three-dimensional array to be cloned
      * @return a clone of the original three-dimensional array, or {@code null} if the original array is null
      * @see #clone(int[])
@@ -28292,6 +32193,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Clone the original array and its sub arrays. {@code null} is returned if the input array is {@code null}.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * long[][][] a = {{{1L, 2L}, {1L, 2L}}, {{1L, 2L}, {1L, 2L}}};
+     * N.clone(a);   // returns a deep copy of the 3D array
+     * }</pre>
      *
      * @param original the three-dimensional array to be cloned
      * @return a clone of the original three-dimensional array, or {@code null} if the original array is null
@@ -28316,6 +32223,12 @@ sealed class CommonUtil permits N {
     /**
      * Clone the original array and its sub arrays. {@code null} is returned if the input array is {@code null}.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * float[][][] a = {{{1.0f, 2.0f}, {1.0f, 2.0f}}, {{1.0f, 2.0f}, {1.0f, 2.0f}}};
+     * N.clone(a);   // returns a deep copy of the 3D array
+     * }</pre>
+     *
      * @param original the three-dimensional array to be cloned
      * @return a clone of the original three-dimensional array, or {@code null} if the original array is null
      * @see #clone(float[])
@@ -28339,6 +32252,12 @@ sealed class CommonUtil permits N {
     /**
      * Clone the original array and its sub arrays. {@code null} is returned if the input array is {@code null}.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * double[][][] a = {{{1.0, 2.0}, {1.0, 2.0}}, {{1.0, 2.0}, {1.0, 2.0}}};
+     * N.clone(a);   // returns a deep copy of the 3D array
+     * }</pre>
+     *
      * @param original the three-dimensional array to be cloned
      * @return a clone of the original three-dimensional array, or {@code null} if the original array is null
      * @see #clone(double[])
@@ -28361,6 +32280,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Clone the original array and its sub arrays. {@code null} is returned if the input array is {@code null}.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * String[][][] a = {{{"a", "b"}, {"a", "b"}}, {{"a", "b"}, {"a", "b"}}};
+     * N.clone(a);   // returns a deep copy of the 3D array
+     * }</pre>
      *
      * @param <T> the type of the array elements
      * @param original the three-dimensional array to be cloned
@@ -28390,6 +32315,14 @@ sealed class CommonUtil permits N {
     /**
      * Checks if the specified boolean array is sorted in ascending order.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * boolean[] a = {false, false, true, true, true};
+     * N.isSorted(a);   // returns true
+     * boolean[] b = {true, true, true, false, false};
+     * N.isSorted(b);   // returns false
+     * }</pre>
+     *
      * @param a the boolean array to be checked
      * @return {@code true} if the array is sorted in ascending order, {@code false} otherwise
      */
@@ -28413,6 +32346,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Checks if the specified range of the boolean array is sorted in ascending order.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * boolean[] a = {false, false, true, true, true};
+     * N.isSorted(a, 0, 3);   // returns true
+     * }</pre>
      *
      * @param a the boolean array to be checked
      * @param fromIndex the starting index (inclusive) of the range to be checked
@@ -28443,6 +32382,14 @@ sealed class CommonUtil permits N {
     /**
      * Checks if the specified char array is sorted in ascending order.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * char[] a = {'a', 'b', 'c', 'd', 'e'};
+     * N.isSorted(a);   // returns true
+     * char[] b = {'e', 'd', 'c', 'b', 'a'};
+     * N.isSorted(b);   // returns false
+     * }</pre>
+     *
      * @param a the char array to be checked
      * @return {@code true} if the array is sorted in ascending order, {@code false} otherwise
      */
@@ -28466,6 +32413,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Checks if the specified range of the char array is sorted in ascending order.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * char[] a = {'a', 'b', 'c', 'd', 'e'};
+     * N.isSorted(a, 0, 3);   // returns true
+     * }</pre>
      *
      * @param a the char array to be checked
      * @param fromIndex the starting index (inclusive) of the range to be checked
@@ -28494,6 +32447,14 @@ sealed class CommonUtil permits N {
     /**
      * Checks if the specified byte array is sorted in ascending order.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * byte[] a = {1, 2, 3, 4, 5};
+     * N.isSorted(a);   // returns true
+     * byte[] b = {5, 4, 3, 2, 1};
+     * N.isSorted(b);   // returns false
+     * }</pre>
+     *
      * @param a the byte array to be checked
      * @return {@code true} if the array is sorted in ascending order, {@code false} otherwise
      */
@@ -28517,6 +32478,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Checks if the specified range of the byte array is sorted in ascending order.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * byte[] a = {1, 2, 3, 4, 5};
+     * N.isSorted(a, 0, 3);   // returns true
+     * }</pre>
      *
      * @param a the byte array to be checked
      * @param fromIndex the starting index (inclusive) of the range to be checked
@@ -28545,6 +32512,14 @@ sealed class CommonUtil permits N {
     /**
      * Checks if the specified short array is sorted in ascending order.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * short[] a = {1, 2, 3, 4, 5};
+     * N.isSorted(a);   // returns true
+     * short[] b = {5, 4, 3, 2, 1};
+     * N.isSorted(b);   // returns false
+     * }</pre>
+     *
      * @param a the short array to be checked
      * @return {@code true} if the array is sorted in ascending order, {@code false} otherwise
      */
@@ -28568,6 +32543,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Checks if the specified range of the short array is sorted in ascending order.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * short[] a = {1, 2, 3, 4, 5};
+     * N.isSorted(a, 0, 3);   // returns true
+     * }</pre>
      *
      * @param a the short array to be checked
      * @param fromIndex the starting index (inclusive) of the range to be checked
@@ -28599,13 +32580,13 @@ sealed class CommonUtil permits N {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * int[] sorted = {1, 2, 3, 4, 5};
-     * boolean result1 = isSorted(sorted);   // Returns true
+     * boolean result1 = N.isSorted(sorted);   // returns true
      *
      * int[] unsorted = {1, 3, 2, 4, 5};
-     * boolean result2 = isSorted(unsorted);   // Returns false
+     * boolean result2 = N.isSorted(unsorted);   // returns false
      *
      * int[] empty = {};
-     * boolean result3 = isSorted(empty);   // Returns true
+     * boolean result3 = N.isSorted(empty);   // returns true
      * }</pre>
      *
      * @param a the integer array to be checked
@@ -28631,6 +32612,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Checks if the specified range of the integer array is sorted in ascending order.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * int[] a = {1, 2, 3, 4, 5};
+     * N.isSorted(a, 0, 3);   // returns true
+     * }</pre>
      *
      * @param a the int array to be checked
      * @param fromIndex the starting index (inclusive) of the range to be checked
@@ -28659,6 +32646,14 @@ sealed class CommonUtil permits N {
     /**
      * Checks if the specified long array is sorted in ascending order.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * long[] a = {1L, 2L, 3L, 4L, 5L};
+     * N.isSorted(a);   // returns true
+     * long[] b = {5L, 4L, 3L, 2L, 1L};
+     * N.isSorted(b);   // returns false
+     * }</pre>
+     *
      * @param a the long array to be checked
      * @return {@code true} if the array is sorted in ascending order, {@code false} otherwise
      */
@@ -28682,6 +32677,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Checks if the specified range of the long array is sorted in ascending order.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * long[] a = {1L, 2L, 3L, 4L, 5L};
+     * N.isSorted(a, 0, 3);   // returns true
+     * }</pre>
      *
      * @param a the long array to be checked
      * @param fromIndex the starting index (inclusive) of the range to be checked
@@ -28710,6 +32711,14 @@ sealed class CommonUtil permits N {
     /**
      * Checks if the specified float array is sorted in ascending order.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * float[] a = {1.0f, 2.0f, 3.0f, 4.0f, 5.0f};
+     * N.isSorted(a);   // returns true
+     * float[] b = {5.0f, 4.0f, 3.0f, 2.0f, 1.0f};
+     * N.isSorted(b);   // returns false
+     * }</pre>
+     *
      * @param a the float array to be checked
      * @return {@code true} if the array is sorted in ascending order, {@code false} otherwise
      */
@@ -28733,6 +32742,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Checks if the specified range of the float array is sorted in ascending order.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * float[] a = {1.0f, 2.0f, 3.0f, 4.0f, 5.0f};
+     * N.isSorted(a, 0, 3);   // returns true
+     * }</pre>
      *
      * @param a the float array to be checked
      * @param fromIndex the starting index (inclusive) of the range to be checked
@@ -28761,6 +32776,14 @@ sealed class CommonUtil permits N {
     /**
      * Checks if the specified double array is sorted in ascending order.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * double[] a = {1.0, 2.0, 3.0, 4.0, 5.0};
+     * N.isSorted(a);   // returns true
+     * double[] b = {5.0, 4.0, 3.0, 2.0, 1.0};
+     * N.isSorted(b);   // returns false
+     * }</pre>
+     *
      * @param a the double array to be checked
      * @return {@code true} if the array is sorted in ascending order, {@code false} otherwise
      */
@@ -28784,6 +32807,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Checks if the specified range of the double array is sorted in ascending order.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * double[] a = {1.0, 2.0, 3.0, 4.0, 5.0};
+     * N.isSorted(a, 0, 3);   // returns true
+     * }</pre>
      *
      * @param a the double array to be checked
      * @param fromIndex the starting index (inclusive) of the range to be checked
@@ -28811,6 +32840,14 @@ sealed class CommonUtil permits N {
 
     /**
      * Checks if the specified array is sorted in ascending order (where {@code null} is smallest).
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Integer[] a = {1, 2, 3, 4, 5};
+     * N.isSorted(a);   // returns true
+     * Integer[] b = {5, 4, 3, 2, 1};
+     * N.isSorted(b);   // returns false
+     * }</pre>
      *
      * @param <T> the type of elements in the array, which must be Comparable
      * @param a the array to be checked
@@ -28840,6 +32877,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Checks if the specified range of the array is sorted in ascending order (where {@code null} is smallest).
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Integer[] a = {1, 2, 3, 4, 5};
+     * N.isSorted(a, 0, 3);   // returns true
+     * }</pre>
      *
      * @param <T> the type of elements in the array, which must be Comparable
      * @param a the array to be checked
@@ -28876,13 +32919,13 @@ sealed class CommonUtil permits N {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String[] array = {"apple", "banana", "cherry", "date"};
-     * boolean result1 = isSorted(array, Comparator.naturalOrder());   // Returns true
+     * boolean result1 = N.isSorted(array, Comparator.naturalOrder());   // returns true
      *
      * String[] array2 = {"apple", "cherry", "banana"};
-     * boolean result2 = isSorted(array2, Comparator.naturalOrder());   // Returns false
+     * boolean result2 = N.isSorted(array2, Comparator.naturalOrder());   // returns false
      *
      * String[] byLength = {"a", "bb", "ccc", "dddd"};
-     * boolean result3 = isSorted(byLength, Comparator.comparing(String::length));   // Returns true
+     * boolean result3 = N.isSorted(byLength, Comparator.comparing(String::length));   // returns true
      * }</pre>
      *
      * @param <T> the type of elements in the array
@@ -28916,6 +32959,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Checks if the specified range of the array is sorted according to the order induced by the specified comparator.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Integer[] a = {1, 2, 3, 4, 5};
+     * N.isSorted(a, 0, 3);   // returns true
+     * }</pre>
      *
      * @param <T> the type of elements in the array
      * @param a the array to be checked
@@ -28952,6 +33001,12 @@ sealed class CommonUtil permits N {
     /**
      * Checks if the collection is sorted in ascending order (where {@code null} is smallest).
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.isSorted(Arrays.asList(1, 2, 3, 4, 5));   // returns true
+     * N.isSorted(Arrays.asList(5, 4, 3, 2, 1));   // returns false
+     * }</pre>
+     *
      * @param <T> the type of elements in the collection
      * @param c the collection to be checked
      * @return {@code true} if the collection is sorted in natural order, {@code false} otherwise
@@ -28984,6 +33039,11 @@ sealed class CommonUtil permits N {
 
     /**
      * Checks if the specified range of the collection is sorted in ascending order (where {@code null} is smallest).
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.isSorted(Arrays.asList(1, 2, 3, 4, 5), 0, 3);   // returns true
+     * }</pre>
      *
      * @param <T> the type of elements in the collection
      * @param c the collection to be checked
@@ -29033,6 +33093,11 @@ sealed class CommonUtil permits N {
     /**
      * Checks if the collection is sorted according to the order induced by the specified comparator.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.isSorted(Arrays.asList(1, 2, 3, 4, 5), Comparator.naturalOrder());   // returns true
+     * }</pre>
+     *
      * @param <T> the type of elements in the collection
      * @param c the collection to be checked
      * @param cmp the comparator to determine the order of the collection
@@ -29068,6 +33133,11 @@ sealed class CommonUtil permits N {
 
     /**
      * Checks if the specified range of the collection is sorted according to the order induced by the specified comparator.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.isSorted(Arrays.asList(1, 2, 3, 4, 5), 0, 3);   // returns true
+     * }</pre>
      *
      * @param <T> the type of elements in the collection
      * @param c the collection to be checked
@@ -29125,8 +33195,7 @@ sealed class CommonUtil permits N {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * boolean[] array = {true, false, true, false, false};
-     * sort(array);
-     * // Result: array = {false, false, false, true, true}
+     * N.sort(array); // array is [false, false, false, true, true]
      * }</pre>
      *
      * @param a the array to be sorted
@@ -29141,6 +33210,13 @@ sealed class CommonUtil permits N {
 
     /**
      * Sorts the specified range of the array into ascending order. {@code false} is considered less than {@code true}.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * boolean[] a = {true, true, false, false};
+     * N.sort(a, 1, 3);   // a is now [true, false, true, false] (only index 1..2 sorted)
+     * N.sort(a, -1, 1);  // throws IndexOutOfBoundsException
+     * }</pre>
      *
      * @param a the array to be sorted
      * @param fromIndex the index of the first element (inclusive) to be sorted
@@ -29175,8 +33251,7 @@ sealed class CommonUtil permits N {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * char[] array = {'d', 'a', 'c', 'b'};
-     * sort(array);
-     * // Result: array = {'a', 'b', 'c', 'd'}
+     * N.sort(array); // array is ['a', 'b', 'c', 'd']
      * }</pre>
      *
      * @param a the array to be sorted
@@ -29191,6 +33266,13 @@ sealed class CommonUtil permits N {
 
     /**
      * Sorts the specified range of the array into ascending order.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * char[] a = {'d', 'a', 'c', 'b'};
+     * N.sort(a, 1, 4);   // a is now ['d', 'a', 'b', 'c'] (only index 1..3 sorted)
+     * N.sort(a, 0, 5);   // throws IndexOutOfBoundsException
+     * }</pre>
      *
      * @param a the array to be sorted
      * @param fromIndex the index of the first element (inclusive) to be sorted
@@ -29213,6 +33295,12 @@ sealed class CommonUtil permits N {
      * <p><b>Implementation Note:</b> This method uses a dual-pivot Quicksort via {@link Arrays#sort(byte[])},
      * which offers O(n log n) performance on most data sets.</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * byte[] a = {3, 1, 2};
+     * N.sort(a);   // a is now [1, 2, 3]
+     * }</pre>
+     *
      * @param a the array to be sorted
      */
     public static void sort(final byte[] a) {
@@ -29225,6 +33313,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Sorts the specified range of the array into ascending order.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * byte[] a = {5, 4, 3, 2, 1};
+     * N.sort(a, 1, 4);   // a is now [5, 2, 3, 4, 1] (only index 1..3 sorted)
+     * }</pre>
      *
      * @param a the array to be sorted
      * @param fromIndex the index of the first element (inclusive) to be sorted
@@ -29250,8 +33344,7 @@ sealed class CommonUtil permits N {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * short[] array = {30, 10, 50, 20, 40};
-     * sort(array);
-     * // Result: array = {10, 20, 30, 40, 50}
+     * N.sort(array); // array is [10, 20, 30, 40, 50]
      * }</pre>
      *
      * @param a the array to be sorted
@@ -29266,6 +33359,13 @@ sealed class CommonUtil permits N {
 
     /**
      * Sorts the specified range of the array into ascending order.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * short[] a = {30, 10, 50, 20, 40};
+     * N.sort(a, 1, 4);   // a is now [30, 10, 20, 50, 40] (only index 1..3 sorted)
+     * N.sort(a, 0, 6);   // throws IndexOutOfBoundsException
+     * }</pre>
      *
      * @param a the array to be sorted
      * @param fromIndex the index of the first element (inclusive) to be sorted
@@ -29288,6 +33388,12 @@ sealed class CommonUtil permits N {
      * <p><b>Implementation Note:</b> This method uses a dual-pivot Quicksort via {@link Arrays#sort(int[])},
      * which offers O(n log n) performance on most data sets.</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * int[] a = {3, 1, 2};
+     * N.sort(a);   // a is now [1, 2, 3]
+     * }</pre>
+     *
      * @param a the array to be sorted
      */
     public static void sort(final int[] a) {
@@ -29300,6 +33406,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Sorts the specified range of the array into ascending order.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * int[] a = {5, 4, 3, 2, 1};
+     * N.sort(a, 1, 4);   // a is now [5, 2, 3, 4, 1] (only index 1..3 sorted)
+     * }</pre>
      *
      * @param a the array to be sorted
      * @param fromIndex the index of the first element (inclusive) to be sorted
@@ -29325,8 +33437,7 @@ sealed class CommonUtil permits N {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * long[] array = {300L, 100L, 500L, 200L, 400L};
-     * sort(array);
-     * // Result: array = {100L, 200L, 300L, 400L, 500L}
+     * N.sort(array); // array is [100L, 200L, 300L, 400L, 500L]
      * }</pre>
      *
      * @param a the array to be sorted
@@ -29341,6 +33452,13 @@ sealed class CommonUtil permits N {
 
     /**
      * Sorts the specified range of the array into ascending order.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * long[] a = {30L, 10L, 50L, 20L, 40L};
+     * N.sort(a, 1, 4);   // a is now [30, 10, 20, 50, 40] (only index 1..3 sorted)
+     * N.sort(a, 0, 6);   // throws IndexOutOfBoundsException
+     * }</pre>
      *
      * @param a the array to be sorted
      * @param fromIndex the index of the first element (inclusive) to be sorted
@@ -29366,8 +33484,7 @@ sealed class CommonUtil permits N {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * float[] array = {3.5f, 1.2f, 5.8f, 2.1f, 4.3f};
-     * sort(array);
-     * // Result: array = {1.2f, 2.1f, 3.5f, 4.3f, 5.8f}
+     * N.sort(array); // array is [1.2f, 2.1f, 3.5f, 4.3f, 5.8f]
      * }</pre>
      *
      * @param a the array to be sorted
@@ -29382,6 +33499,13 @@ sealed class CommonUtil permits N {
 
     /**
      * Sorts the specified range of the array into ascending order.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * float[] a = {3.5f, 1.2f, 5.8f, 2.1f};
+     * N.sort(a, 1, 4);   // a is now [3.5, 1.2, 2.1, 5.8] (only index 1..3 sorted)
+     * N.sort(a, 0, 5);   // throws IndexOutOfBoundsException
+     * }</pre>
      *
      * @param a the array to be sorted
      * @param fromIndex the index of the first element (inclusive) to be sorted
@@ -29404,6 +33528,12 @@ sealed class CommonUtil permits N {
      * <p><b>Implementation Note:</b> This method uses a dual-pivot Quicksort via {@link Arrays#sort(double[])},
      * which offers O(n log n) performance on most data sets.</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * double[] a = {3.0, 1.0, 2.0};
+     * N.sort(a);   // a is now [1.0, 2.0, 3.0]
+     * }</pre>
+     *
      * @param a the array to be sorted
      */
     public static void sort(final double[] a) {
@@ -29416,6 +33546,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Sorts the specified range of the array into ascending order.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * double[] a = {5.0, 4.0, 3.0, 2.0, 1.0};
+     * N.sort(a, 1, 4);   // a is now [5.0, 2.0, 3.0, 4.0, 1.0] (only index 1..3 sorted)
+     * }</pre>
      *
      * @param a the array to be sorted
      * @param fromIndex the index of the first element (inclusive) to be sorted
@@ -29434,6 +33570,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Sorts the specified array according to the natural ordering (where {@code null} is smallest).
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Integer[] a = {3, 1, 2};
+     * N.sort(a);   // a is now [1, 2, 3]
+     * }</pre>
      *
      * @param a the array to be sorted
      * @throws ClassCastException if the array contains elements that are not mutually comparable
@@ -29456,6 +33598,12 @@ sealed class CommonUtil permits N {
     /**
      * Sorts the specified range of the specified array according to the natural ordering (where {@code null} is smallest).
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Integer[] a = {5, 4, 3, 2, 1};
+     * N.sort(a, 1, 4);   // a is now [5, 2, 3, 4, 1] (only index 1..3 sorted)
+     * }</pre>
+     *
      * @param a the array to be sorted
      * @param fromIndex the index of the first element (inclusive) to be sorted
      * @param toIndex the index of the last element (exclusive) to be sorted
@@ -29474,6 +33622,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Sorts the specified array according to the order induced by the specified comparator.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Integer[] a = {3, 1, 2};
+     * N.sort(a, Comparator.reverseOrder());   // a is now [3, 2, 1]
+     * }</pre>
      *
      * @param <T> the type of the objects being compared
      * @param a the array to be sorted
@@ -29496,6 +33650,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Sorts the specified range of the specified array according to the order induced by the specified comparator.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Integer[] a = {3, 1, 2};
+     * N.sort(a, Comparator.reverseOrder());   // a is now [3, 2, 1]
+     * }</pre>
      *
      * @param <T> the type of the objects being compared
      * @param a the array to be sorted
@@ -29524,6 +33684,12 @@ sealed class CommonUtil permits N {
     /**
      * Sorts the specified list according to the natural ordering (where {@code null} is smallest).
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<Integer> list = new ArrayList<>(Arrays.asList(3, 1, 2));
+     * N.sort(list);   // list is now [1, 2, 3]
+     * }</pre>
+     *
      * @param <T> the type of the elements in the list
      * @param list the list to be sorted
      * @see Arrays#sort(Object[])
@@ -29544,6 +33710,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Sorts the specified range of the specified list according to the natural ordering (where {@code null} is smallest).
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<Integer> list = new ArrayList<>(Arrays.asList(5, 4, 3, 2, 1));
+     * N.sort(list, 1, 4);   // list is now [5, 2, 3, 4, 1] (only index 1..3 sorted)
+     * }</pre>
      *
      * @param <T> the type of the elements in the list
      * @param list the list to be sorted
@@ -29569,6 +33741,12 @@ sealed class CommonUtil permits N {
     /**
      * Sorts the specified list according to the order induced by the specified comparator.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<Integer> list = new ArrayList<>(Arrays.asList(3, 1, 2));
+     * N.sort(list, Comparator.reverseOrder());   // list is now [3, 2, 1]
+     * }</pre>
+     *
      * @param <T> the type of the elements in the list
      * @param list the list to be sorted
      * @param cmp the comparator to determine the order of the list. A {@code null} value indicates that the elements' natural ordering should be used
@@ -29590,6 +33768,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Sorts the specified range of the list according to the order induced by the specified comparator.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<Integer> list = new ArrayList<>(Arrays.asList(3, 1, 2));
+     * N.sort(list, Comparator.reverseOrder());   // list is now [3, 2, 1]
+     * }</pre>
      *
      * @param <T> the type of the elements in the list
      * @param list the list to be sorted
@@ -29643,11 +33827,9 @@ sealed class CommonUtil permits N {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Person[] people = {new Person("Bob", 30), new Person("Alice", 25), new Person("Charlie", 35)};
-     * sortBy(people, Person::getName);
-     * // Result: sorted by name - Alice, Bob, Charlie
+     * N.sortBy(people, Person::getName); // people are sorted by name: Alice, Bob, Charlie
      *
-     * sortBy(people, Person::getAge);
-     * // Result: sorted by age - 25, 30, 35
+     * N.sortBy(people, Person::getAge); // people are sorted by age: 25, 30, 35
      * }</pre>
      *
      * @param <T> the type of elements in the array
@@ -29665,6 +33847,15 @@ sealed class CommonUtil permits N {
     /**
      * Sorts the specified list based on the keys extracted by the provided {@code Function}.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<String> list = new ArrayList<>(Arrays.asList("ccc", "a", "bb"));
+     * N.sortBy(list, String::length);   // list is now [a, bb, ccc] (sorted by length)
+     *
+     * List<String> names = new ArrayList<>(Arrays.asList("Bob", "Alice"));
+     * N.sortBy(names, s -> s);          // names is now [Alice, Bob]
+     * }</pre>
+     *
      * @param <T> the type of elements in the list
      * @param <U> the type of the key values, which must be comparable
      * @param list the List to be sorted
@@ -29680,6 +33871,12 @@ sealed class CommonUtil permits N {
     /**
      * Sorts the specified array into ascending numerical order based on the keys extracted by the provided {@code ToIntFunction}.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * String[] a = {"ccc", "a", "bb"};
+     * N.sortByInt(a, String::length);   // a is now [a, bb, ccc] (sorted by length)
+     * }</pre>
+     *
      * @param <T> the type of elements in the array
      * @param a the array to be sorted
      * @param keyExtractor the function to extract the key values from the array elements
@@ -29690,6 +33887,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Sorts the specified list into ascending numerical order based on the keys extracted by the provided {@code ToIntFunction}.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<String> list = new ArrayList<>(Arrays.asList("ccc", "a", "bb"));
+     * N.sortByInt(list, String::length);   // list is now [a, bb, ccc] (sorted by length)
+     * }</pre>
      *
      * @param <T> the type of elements in the list
      * @param list the list to be sorted
@@ -29702,6 +33905,12 @@ sealed class CommonUtil permits N {
     /**
      * Sorts the specified array into ascending numerical order based on the keys extracted by the provided {@code ToLongFunction}.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.sortByLong(arr, String::length);           // sorts by length
+     * N.sortByLong(new String[0], String::length); // empty array, no change
+     * }</pre>
+     *
      * @param <T> the type of elements in the array
      * @param a the array to be sorted
      * @param keyExtractor the function to extract the key values from the array elements
@@ -29712,6 +33921,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Sorts the specified list into ascending numerical order based on the keys extracted by the provided {@code ToLongFunction}.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.sortByLong(arr, String::length);           // sorts by length
+     * N.sortByLong(new String[0], String::length); // empty array, no change
+     * }</pre>
      *
      * @param <T> the type of elements in the list
      * @param list the list to be sorted
@@ -29724,6 +33939,12 @@ sealed class CommonUtil permits N {
     /**
      * Sorts the specified array into ascending numerical order based on the keys extracted by the provided {@code ToFloatFunction}.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.sortByFloat(arr, String::length);           // sorts by length
+     * N.sortByFloat(new String[0], String::length); // empty array, no change
+     * }</pre>
+     *
      * @param <T> the type of elements in the array
      * @param a the array to be sorted
      * @param keyExtractor the function to extract the key values from the array elements
@@ -29734,6 +33955,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Sorts the specified list into ascending numerical order based on the keys extracted by the provided {@code ToFloatFunction}.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.sortByFloat(arr, String::length);           // sorts by length
+     * N.sortByFloat(new String[0], String::length); // empty array, no change
+     * }</pre>
      *
      * @param <T> the type of elements in the list
      * @param list the list to be sorted
@@ -29746,6 +33973,12 @@ sealed class CommonUtil permits N {
     /**
      * Sorts the specified array into ascending numerical order based on the keys extracted by the provided {@code ToDoubleFunction}.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.sortByDouble(arr, String::length);           // sorts by length
+     * N.sortByDouble(new String[0], String::length); // empty array, no change
+     * }</pre>
+     *
      * @param <T> the type of elements in the array
      * @param a the array to be sorted
      * @param keyExtractor the function to extract the key values from the array elements
@@ -29756,6 +33989,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Sorts the specified list into ascending numerical order based on the keys extracted by the provided {@code ToDoubleFunction}.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.sortByDouble(arr, String::length);           // sorts by length
+     * N.sortByDouble(new String[0], String::length); // empty array, no change
+     * }</pre>
      *
      * @param <T> the type of elements in the list
      * @param list the list to be sorted
@@ -29785,14 +34024,8 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * char[] largeArray = new char[10000];
-     * // ... populate array ...
-     * parallelSort(largeArray);   // Uses multiple threads for better performance
-     * // Result: array sorted in ascending order using parallel processing
-     *
-     * char[] smallArray = {'z', 'a', 'm', 'b'};
-     * parallelSort(smallArray);   // Uses single-threaded sort (array too small)
-     * // Result: smallArray = {'a', 'b', 'm', 'z'}
+     * char[] values = new char[] {'a', 'b'};
+     * N.parallelSort(values); // values are sorted in ascending order
      * }</pre>
      *
      * @param a the array to be sorted - if {@code null} or empty, the method returns immediately without effect
@@ -29825,15 +34058,8 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * char[] array = {'z', 'y', 'x', 'w', 'v', 'u', 't', 's'};
-     *
-     * // Sort a range from index 2 to 6 (exclusive)
-     * parallelSort(array, 2, 6);
-     * // Result: array = {'z', 'y', 'u', 'v', 'w', 'x', 't', 's'}
-     * //                              ^^^^^^^^^^^^^^^^ sorted range
-     *
-     * // Sort the entire array except first and last element
-     * parallelSort(array, 1, array.length - 1);
+     * char[] values = new char[] {'a', 'c'};
+     * N.parallelSort(values, 0, values.length); // values are sorted in ascending order
      * }</pre>
      *
      * @param a the array to be sorted - may be {@code null} (in which case the method returns immediately)
@@ -29873,9 +34099,8 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * byte[] largeArray = new byte[10000];
-     * // ... populate array ...
-     * parallelSort(largeArray);   // Uses multiple threads for better performance
+     * byte[] values = new byte[] {1, 2};
+     * N.parallelSort(values); // values are sorted in ascending order
      * }</pre>
      *
      * @param a the array to be sorted - if {@code null} or empty, the method returns immediately without effect
@@ -29908,11 +34133,8 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * byte[] array = {30, 10, 50, 20, 40, 15, 25, 35};
-     *
-     * // Sort a range from index 2 to 6 (exclusive)
-     * parallelSort(array, 2, 6);
-     * // Result: array = {30, 10, 15, 20, 40, 50, 25, 35}
+     * byte[] values = new byte[] {1, 3};
+     * N.parallelSort(values, 0, values.length); // values are sorted in ascending order
      * }</pre>
      *
      * @param a the array to be sorted - may be {@code null} (in which case the method returns immediately)
@@ -29950,6 +34172,12 @@ sealed class CommonUtil permits N {
      * or when only one CPU core is available, this method falls back to single-threaded sorting.
      * Otherwise, it uses {@link Arrays#parallelSort(short[])} for parallel execution.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * short[] values = new short[] {1, 2};
+     * N.parallelSort(values); // values are sorted in ascending order
+     * }</pre>
+     *
      * @param a the array to be sorted - if {@code null} or empty, the method returns immediately without effect
      * @see Arrays#parallelSort(short[])
      * @see Arrays#parallelSort(short[], int, int)
@@ -29977,6 +34205,12 @@ sealed class CommonUtil permits N {
      * <p><b>Implementation Note:</b> For ranges smaller than {@code DOUBLE_PIPE_SORT_PRIMITIVE_THRESHOLD} (3000 elements),
      * or when only one CPU core is available, this method uses {@link Arrays#sort(short[], int, int)} for single-threaded sorting.
      * Otherwise, it uses {@link Arrays#parallelSort(short[], int, int)} for parallel execution.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * short[] values = new short[] {1, 3};
+     * N.parallelSort(values, 0, values.length); // values are sorted in ascending order
+     * }</pre>
      *
      * @param a the array to be sorted - may be {@code null} (in which case the method returns immediately)
      * @param fromIndex the index of the first element (inclusive) to be sorted - must be non-negative and not greater than {@code toIndex}
@@ -30009,10 +34243,8 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * int[] largeArray = new int[10000];
-     * // ... populate array ...
-     * parallelSort(largeArray);   // Uses multiple threads for better performance
-     * // Result: array sorted in ascending order using parallel processing
+     * int[] values = new int[] {1, 2};
+     * N.parallelSort(values); // values are sorted in ascending order
      * }</pre>
      *
      * @param a the array to be sorted - if {@code null} or empty, the method returns immediately without effect
@@ -30037,6 +34269,12 @@ sealed class CommonUtil permits N {
      * <p><b>Implementation Note:</b> For ranges smaller than {@code DOUBLE_PIPE_SORT_PRIMITIVE_THRESHOLD} (3000 elements),
      * or when only one CPU core is available, this method uses {@link Arrays#sort(int[], int, int)} for single-threaded sorting.
      * Otherwise, it uses {@link Arrays#parallelSort(int[], int, int)} for parallel execution.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * int[] values = new int[] {1, 3};
+     * N.parallelSort(values, 0, values.length); // values are sorted in ascending order
+     * }</pre>
      *
      * @param a the array to be sorted - may be {@code null} (in which case the method returns immediately)
      * @param fromIndex the index of the first element (inclusive) to be sorted - must be non-negative and not greater than {@code toIndex}
@@ -30073,6 +34311,12 @@ sealed class CommonUtil permits N {
      * or when only one CPU core is available, this method falls back to single-threaded sorting.
      * Otherwise, it uses {@link Arrays#parallelSort(long[])} for parallel execution.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * long[] values = new long[] {1L, 2L};
+     * N.parallelSort(values); // values are sorted in ascending order
+     * }</pre>
+     *
      * @param a the array to be sorted - if {@code null} or empty, the method returns immediately without effect
      * @see Arrays#parallelSort(long[])
      * @see Arrays#parallelSort(long[], int, int)
@@ -30100,6 +34344,12 @@ sealed class CommonUtil permits N {
      * <p><b>Implementation Note:</b> For ranges smaller than {@code DOUBLE_PIPE_SORT_PRIMITIVE_THRESHOLD} (3000 elements),
      * or when only one CPU core is available, this method uses {@link Arrays#sort(long[], int, int)} for single-threaded sorting.
      * Otherwise, it uses {@link Arrays#parallelSort(long[], int, int)} for parallel execution.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * long[] values = new long[] {1L, 3L};
+     * N.parallelSort(values, 0, values.length); // values are sorted in ascending order
+     * }</pre>
      *
      * @param a the array to be sorted - may be {@code null} (in which case the method returns immediately)
      * @param fromIndex the index of the first element (inclusive) to be sorted - must be non-negative and not greater than {@code toIndex}
@@ -30136,6 +34386,12 @@ sealed class CommonUtil permits N {
      * or when only one CPU core is available, this method falls back to single-threaded sorting.
      * Otherwise, it uses {@link Arrays#parallelSort(float[])} for parallel execution.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * float[] values = new float[] {1.0f, 2.0f};
+     * N.parallelSort(values); // values are sorted in ascending order
+     * }</pre>
+     *
      * @param a the array to be sorted - if {@code null} or empty, the method returns immediately without effect
      * @see Arrays#parallelSort(float[])
      * @see Arrays#parallelSort(float[], int, int)
@@ -30163,6 +34419,12 @@ sealed class CommonUtil permits N {
      * <p><b>Implementation Note:</b> For ranges smaller than {@code DOUBLE_PIPE_SORT_PRIMITIVE_THRESHOLD} (3000 elements),
      * or when only one CPU core is available, this method uses {@link Arrays#sort(float[], int, int)} for single-threaded sorting.
      * Otherwise, it uses {@link Arrays#parallelSort(float[], int, int)} for parallel execution.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * float[] values = new float[] {1.0f, 3.0f};
+     * N.parallelSort(values, 0, values.length); // values are sorted in ascending order
+     * }</pre>
      *
      * @param a the array to be sorted - may be {@code null} (in which case the method returns immediately)
      * @param fromIndex the index of the first element (inclusive) to be sorted - must be non-negative and not greater than {@code toIndex}
@@ -30199,6 +34461,12 @@ sealed class CommonUtil permits N {
      * or when only one CPU core is available, this method falls back to single-threaded sorting.
      * Otherwise, it uses {@link Arrays#parallelSort(double[])} for parallel execution.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * double[] values = new double[] {1.0d, 2.0d};
+     * N.parallelSort(values); // values are sorted in ascending order
+     * }</pre>
+     *
      * @param a the array to be sorted - if {@code null} or empty, the method returns immediately without effect
      * @see Arrays#parallelSort(double[])
      * @see Arrays#parallelSort(double[], int, int)
@@ -30227,6 +34495,12 @@ sealed class CommonUtil permits N {
      * or when only one CPU core is available, this method uses {@link Arrays#sort(double[], int, int)} for single-threaded sorting.
      * Otherwise, it uses {@link Arrays#parallelSort(double[], int, int)} for parallel execution.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * double[] values = new double[] {1.0d, 3.0d};
+     * N.parallelSort(values, 0, values.length); // values are sorted in ascending order
+     * }</pre>
+     *
      * @param a the array to be sorted - may be {@code null} (in which case the method returns immediately)
      * @param fromIndex the index of the first element (inclusive) to be sorted - must be non-negative and not greater than {@code toIndex}
      * @param toIndex the index of the last element (exclusive) to be sorted - must be non-negative and not greater than {@code a.length}
@@ -30252,6 +34526,12 @@ sealed class CommonUtil permits N {
     /**
      * Sorts the specified array according to the natural ordering (where {@code null} is minimum) using multiple threads.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * String[] values = new String[] {"a", "b"};
+     * N.parallelSort(values); // values are sorted in ascending order
+     * }</pre>
+     *
      * @param <T> the type of the elements in the array
      * @param a the array to be sorted
      * @see Arrays#parallelSort(Comparable[])
@@ -30272,6 +34552,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Sorts the specified range of the specified array according to the natural ordering (where {@code null} is minimum) using multiple threads.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * String[] values = new String[] {"a", "c"};
+     * N.parallelSort(values, 0, values.length); // values are sorted in ascending order
+     * }</pre>
      *
      * @param <T> the type of the comparable array elements
      * @param a the array to be sorted
@@ -30299,6 +34585,12 @@ sealed class CommonUtil permits N {
     /**
      * Sorts the specified array according to the order induced by the specified comparator using multiple threads.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * String[] values = new String[] {"a", "c"};
+     * N.parallelSort(values, 0, values.length); // values are sorted in ascending order
+     * }</pre>
+     *
      * @param <T> the type of the objects being compared
      * @param a the array to be sorted
      * @param cmp the comparator to determine the order of the array. A {@code null} value indicates that the elements' natural ordering should be used.
@@ -30320,6 +34612,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Sorts the specified range of the specified array according to the order induced by the specified comparator using multiple threads.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * String[] values = new String[] {"a", "c"};
+     * N.parallelSort(values, 0, values.length); // values are sorted in ascending order
+     * }</pre>
      *
      * @param <T> the type of the objects being compared
      * @param a the array to be sorted
@@ -30352,6 +34650,12 @@ sealed class CommonUtil permits N {
     /**
      * Sorts the specified list according to the natural ordering (where {@code null} is minimum) using multiple threads.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<String> values = new ArrayList<>(Arrays.asList("a", "b"));
+     * N.parallelSort(values); // values are sorted in ascending order
+     * }</pre>
+     *
      * @param <T> the type of the elements in the list
      * @param list the list to be sorted
      * @see Arrays#parallelSort(Comparable[])
@@ -30373,6 +34677,12 @@ sealed class CommonUtil permits N {
     /**
      * Sorts the specified range of the specified list according to the natural ordering (where {@code null} is minimum) using multiple threads.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<String> values = new ArrayList<>(Arrays.asList("a", "c"));
+     * N.parallelSort(values, 0, values.size()); // values are sorted in ascending order
+     * }</pre>
+     *
      * @param <T> the type of the elements in the list
      * @param list the list to be sorted
      * @param fromIndex the index of the first element (inclusive) to be sorted
@@ -30392,6 +34702,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Sorts the specified list according to the order induced by the specified comparator using multiple threads.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<String> values = new ArrayList<>(Arrays.asList("a", "c"));
+     * N.parallelSort(values, 0, values.size()); // values are sorted in ascending order
+     * }</pre>
      *
      * @param <T> the type of the elements in the list
      * @param list the list to be sorted
@@ -30414,6 +34730,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Sorts the specified range of the list according to the order induced by the specified comparator using multiple threads.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<String> values = new ArrayList<>(Arrays.asList("a", "c"));
+     * N.parallelSort(values, 0, values.size()); // values are sorted in ascending order
+     * }</pre>
      *
      * @param <T> the type of the elements in the list
      * @param list the list to be sorted
@@ -30488,12 +34810,10 @@ sealed class CommonUtil permits N {
      * };
      *
      * // Sort by name (alphabetically)
-     * parallelSortBy(people, Person::getName);
-     * // Result: [Alice, Bob, Charlie]
+     * N.parallelSortBy(people, Person::getName); // values are sorted by name: Alice, Bob, Charlie
      *
      * // Sort by age (numerically)
-     * parallelSortBy(people, p -> p.getAge());
-     * // Result: [Bob(25), Alice(30), Charlie(35)]
+     * N.parallelSortBy(people, p -> p.getAge()); // values are sorted by age: Bob(25), Alice(30), Charlie(35)
      * }</pre>
      *
      * @param <T> the type of the elements in the array
@@ -30535,12 +34855,10 @@ sealed class CommonUtil permits N {
      * );
      *
      * // Sort by name (alphabetically)
-     * parallelSortBy(employees, Employee::getName);
-     * // Result: [Alice, Bob, Charlie]
+     * N.parallelSortBy(employees, Employee::getName); // values are sorted by name: Alice, Bob, Charlie
      *
      * // Sort by salary (numerically)
-     * parallelSortBy(employees, e -> e.getSalary());
-     * // Result: [Bob(60000), Alice(75000), Charlie(85000)]
+     * N.parallelSortBy(employees, e -> e.getSalary()); // values are sorted by salary: Bob(60000), Alice(75000), Charlie(85000)
      * }</pre>
      *
      * @param <T> the type of the elements in the list
@@ -30559,6 +34877,12 @@ sealed class CommonUtil permits N {
     /**
      * Sorts the specified array based on the int values extracted by the provided {@code ToIntFunction} using multiple threads.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.parallelSortByInt(arr, String::length);           // sorts by length
+     * N.parallelSortByInt(new String[0], String::length); // empty array, no change
+     * }</pre>
+     *
      * @param <T> the type of the elements in the array
      * @param a the array to be sorted
      * @param keyExtractor the function used to extract the int key for comparison
@@ -30569,6 +34893,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Sorts the specified list based on the int values extracted by the provided {@code ToIntFunction} using multiple threads.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.parallelSortByInt(arr, String::length);           // sorts by length
+     * N.parallelSortByInt(new String[0], String::length); // empty array, no change
+     * }</pre>
      *
      * @param <T> the type of the elements in the list
      * @param list the list to be sorted
@@ -30581,6 +34911,12 @@ sealed class CommonUtil permits N {
     /**
      * Sorts the specified array based on the long values extracted by the provided {@code ToLongFunction} using multiple threads.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.parallelSortByLong(arr, String::length);           // sorts by length
+     * N.parallelSortByLong(new String[0], String::length); // empty array, no change
+     * }</pre>
+     *
      * @param <T> the type of the elements in the array
      * @param a the array to be sorted
      * @param keyExtractor the function used to extract the long key for comparison
@@ -30591,6 +34927,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Sorts the specified list based on the long values extracted by the provided {@code ToLongFunction} using multiple threads.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.parallelSortByLong(arr, String::length);           // sorts by length
+     * N.parallelSortByLong(new String[0], String::length); // empty array, no change
+     * }</pre>
      *
      * @param <T> the type of the elements in the list
      * @param list the list to be sorted
@@ -30603,6 +34945,12 @@ sealed class CommonUtil permits N {
     /**
      * Sorts the specified array based on the float values extracted by the provided {@code ToFloatFunction} using multiple threads.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.parallelSortByFloat(arr, String::length);           // sorts by length
+     * N.parallelSortByFloat(new String[0], String::length); // empty array, no change
+     * }</pre>
+     *
      * @param <T> the type of the elements in the array
      * @param a the array to be sorted
      * @param keyExtractor the function used to extract the float key for comparison
@@ -30613,6 +34961,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Sorts the specified list based on the float values extracted by the provided {@code ToFloatFunction} using multiple threads.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.parallelSortByFloat(arr, String::length);           // sorts by length
+     * N.parallelSortByFloat(new String[0], String::length); // empty array, no change
+     * }</pre>
      *
      * @param <T> the type of the elements in the list
      * @param list the list to be sorted
@@ -30625,6 +34979,12 @@ sealed class CommonUtil permits N {
     /**
      * Sorts the specified array based on the double values extracted by the provided {@code ToDoubleFunction} using multiple threads.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.parallelSortByDouble(arr, String::length);           // sorts by length
+     * N.parallelSortByDouble(new String[0], String::length); // empty array, no change
+     * }</pre>
+     *
      * @param <T> the type of the elements in the array
      * @param a the array to be sorted
      * @param keyExtractor the function used to extract the double key for comparison
@@ -30636,6 +34996,12 @@ sealed class CommonUtil permits N {
     /**
      * Sorts the specified list based on the double values extracted by the provided {@code ToDoubleFunction} using multiple threads.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.parallelSortByDouble(arr, String::length);           // sorts by length
+     * N.parallelSortByDouble(new String[0], String::length); // empty array, no change
+     * }</pre>
+     *
      * @param <T> the type of the elements in the list
      * @param list the list to be sorted
      * @param keyExtractor the function used to extract the double key for comparison
@@ -30646,6 +35012,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Sorts the specified array of booleans in reverse order.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * boolean[] a = {true, false, true};
+     * N.reverseSort(a);   // a is now [true, true, false]
+     * }</pre>
      *
      * @param a the array to be sorted
      */
@@ -30659,6 +35031,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Sorts the specified range of the array of booleans in reverse order.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * boolean[] a = {false, false, false, true, true};
+     * N.reverseSort(a, 1, 4);   // a is now [false, true, false, false, true] (only index 1..3 reverse-sorted)
+     * }</pre>
      *
      * @param a the array to be sorted
      * @param fromIndex the index of the first element (inclusive) to be sorted
@@ -30687,6 +35065,12 @@ sealed class CommonUtil permits N {
     /**
      * Sorts the specified array of characters in reverse order.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * char[] a = {'c', 'a', 'b'};
+     * N.reverseSort(a);   // a is now ['c', 'b', 'a']
+     * }</pre>
+     *
      * @param a the array to be sorted
      */
     public static void reverseSort(final char[] a) {
@@ -30696,6 +35080,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Sorts the specified range of the array of characters in reverse order.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * char[] a = {'a', 'b', 'c', 'd', 'e'};
+     * N.reverseSort(a, 1, 4);   // a is now ['a', 'd', 'c', 'b', 'e'] (only index 1..3 reverse-sorted)
+     * }</pre>
      *
      * @param a the array to be sorted
      * @param fromIndex the index of the first element (inclusive) to be sorted
@@ -30716,6 +35106,12 @@ sealed class CommonUtil permits N {
     /**
      * Sorts the specified array of bytes in reverse order.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * byte[] a = {3, 1, 2};
+     * N.reverseSort(a);   // a is now [3, 2, 1]
+     * }</pre>
+     *
      * @param a the array to be sorted
      */
     public static void reverseSort(final byte[] a) {
@@ -30725,6 +35121,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Sorts the specified range of the array of bytes in reverse order.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * byte[] a = {1, 2, 3, 4, 5};
+     * N.reverseSort(a, 1, 4);   // a is now [1, 4, 3, 2, 5] (only index 1..3 reverse-sorted)
+     * }</pre>
      *
      * @param a the array to be sorted
      * @param fromIndex the index of the first element (inclusive) to be sorted
@@ -30745,6 +35147,12 @@ sealed class CommonUtil permits N {
     /**
      * Sorts the specified array of shorts in reverse order.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * short[] a = {3, 1, 2};
+     * N.reverseSort(a);   // a is now [3, 2, 1]
+     * }</pre>
+     *
      * @param a the array to be sorted
      */
     public static void reverseSort(final short[] a) {
@@ -30754,6 +35162,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Sorts the specified range of the array of shorts in reverse order.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * short[] a = {1, 2, 3, 4, 5};
+     * N.reverseSort(a, 1, 4);   // a is now [1, 4, 3, 2, 5] (only index 1..3 reverse-sorted)
+     * }</pre>
      *
      * @param a the array to be sorted
      * @param fromIndex the index of the first element (inclusive) to be sorted
@@ -30779,8 +35193,7 @@ sealed class CommonUtil permits N {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * int[] array = {30, 10, 50, 20, 40};
-     * reverseSort(array);
-     * // Result: array = {50, 40, 30, 20, 10}
+     * N.reverseSort(array); // array is [50, 40, 30, 20, 10]
      * }</pre>
      *
      * @param a the array to be sorted
@@ -30792,6 +35205,13 @@ sealed class CommonUtil permits N {
 
     /**
      * Sorts the specified range of the array of ints in reverse order.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * int[] a = {1, 2, 3, 4, 5};
+     * N.reverseSort(a, 1, 4);   // a is now [1, 4, 3, 2, 5] (only index 1..3 reverse-sorted)
+     * N.reverseSort(a, 0, 6);   // throws IndexOutOfBoundsException
+     * }</pre>
      *
      * @param a the array to be sorted
      * @param fromIndex the index of the first element (inclusive) to be sorted
@@ -30812,6 +35232,12 @@ sealed class CommonUtil permits N {
     /**
      * Sorts the specified array of longs in reverse order.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * long[] a = {3L, 1L, 2L};
+     * N.reverseSort(a);   // a is now [3L, 2L, 1L]
+     * }</pre>
+     *
      * @param a the array to be sorted
      */
     public static void reverseSort(final long[] a) {
@@ -30821,6 +35247,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Sorts the specified range of the array of longs in reverse order.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * long[] a = {1L, 2L, 3L, 4L, 5L};
+     * N.reverseSort(a, 1, 4);   // a is now [1L, 4L, 3L, 2L, 5L] (only index 1..3 reverse-sorted)
+     * }</pre>
      *
      * @param a the array to be sorted
      * @param fromIndex the index of the first element (inclusive) to be sorted
@@ -30841,6 +35273,12 @@ sealed class CommonUtil permits N {
     /**
      * Sorts the specified array of floats in reverse order.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * float[] a = {3.0f, 1.0f, 2.0f};
+     * N.reverseSort(a);   // a is now [3.0, 2.0, 1.0]
+     * }</pre>
+     *
      * @param a the array to be sorted
      */
     public static void reverseSort(final float[] a) {
@@ -30850,6 +35288,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Sorts the specified range of the array of floats in reverse order.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * float[] a = {1.0f, 2.0f, 3.0f, 4.0f, 5.0f};
+     * N.reverseSort(a, 1, 4);   // a is now [1.0, 4.0, 3.0, 2.0, 5.0] (only index 1..3 reverse-sorted)
+     * }</pre>
      *
      * @param a the array to be sorted
      * @param fromIndex the index of the first element (inclusive) to be sorted
@@ -30870,6 +35314,12 @@ sealed class CommonUtil permits N {
     /**
      * Sorts the specified array of doubles in reverse order.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * double[] a = {3.0, 1.0, 2.0};
+     * N.reverseSort(a);   // a is now [3.0, 2.0, 1.0]
+     * }</pre>
+     *
      * @param a the array to be sorted
      */
     public static void reverseSort(final double[] a) {
@@ -30879,6 +35329,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Sorts the specified range of the array of doubles in reverse order.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * double[] a = {1.0, 2.0, 3.0, 4.0, 5.0};
+     * N.reverseSort(a, 1, 4);   // a is now [1.0, 4.0, 3.0, 2.0, 5.0] (only index 1..3 reverse-sorted)
+     * }</pre>
      *
      * @param a the array to be sorted
      * @param fromIndex the index of the first element (inclusive) to be sorted
@@ -30899,19 +35355,17 @@ sealed class CommonUtil permits N {
     /**
      * Sorts the specified array of objects in reverse (descending) order.
      * <p>This method sorts the array in place in descending order, where the largest elements come first.
-     * {@code null} values are treated as maximum and will appear at the end of the sorted array.
+     * {@code null} values are ordered after non-null values and appear at the end of the sorted array.
      *
      * <p>The elements must implement {@link Comparable}, or a {@link ClassCastException} will be thrown.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Integer[] numbers = {30, 10, 50, 20, 40};
-     * reverseSort(numbers);
-     * // Result: numbers = {50, 40, 30, 20, 10}
+     * N.reverseSort(numbers); // numbers is [50, 40, 30, 20, 10]
      *
      * String[] words = {"apple", "cherry", "banana", null};
-     * reverseSort(words);
-     * // Result: words = {"cherry", "banana", "apple", null}  // null is maximum
+     * N.reverseSort(words); // words is ["cherry", "banana", "apple", null]
      * }</pre>
      *
      * @param a the array to be sorted - if {@code null} or empty, the method returns immediately without effect
@@ -30925,6 +35379,13 @@ sealed class CommonUtil permits N {
 
     /**
      * Sorts the specified range of the array of objects in reverse order (where {@code null} is maximum).
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Integer[] a = {1, 2, 3, 4, 5};
+     * N.reverseSort(a, 1, 4);   // a is now [1, 4, 3, 2, 5] (only index 1..3 reverse-sorted)
+     * N.reverseSort(a, 0, 6);   // throws IndexOutOfBoundsException
+     * }</pre>
      *
      * @param a the array to be sorted
      * @param fromIndex the index of the first element (inclusive) to be sorted
@@ -30944,6 +35405,12 @@ sealed class CommonUtil permits N {
     /**
      * Sorts the specified list in reverse order (where {@code null} is maximum).
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<Integer> list = new ArrayList<>(Arrays.asList(3, 1, 2));
+     * N.reverseSort(list);   // list is now [3, 2, 1]
+     * }</pre>
+     *
      * @param <T> the type of elements in the list
      * @param list the list to be sorted
      */
@@ -30953,6 +35420,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Sorts the specified range of the list in reverse order (where {@code null} is maximum).
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<Integer> list = new ArrayList<>(Arrays.asList(1, 2, 3, 4, 5));
+     * N.reverseSort(list, 1, 4);   // list is now [1, 4, 3, 2, 5] (only index 1..3 reverse-sorted)
+     * }</pre>
      *
      * @param <T> the type of elements in the list
      * @param list the list to be sorted
@@ -30996,12 +35469,10 @@ sealed class CommonUtil permits N {
      * };
      *
      * // Sort by GPA in descending order (highest first)
-     * reverseSortBy(students, Student::getGpa);
-     * // Result: [Bob(3.9), Charlie(3.7), Alice(3.5)]
+     * N.reverseSortBy(students, Student::getGpa); // students are sorted by GPA: Bob(3.9), Charlie(3.7), Alice(3.5)
      *
      * // Sort by name in reverse alphabetical order
-     * reverseSortBy(students, Student::getName);
-     * // Result: [Charlie, Bob, Alice]
+     * N.reverseSortBy(students, Student::getName); // students are sorted by name: Charlie, Bob, Alice
      * }</pre>
      *
      * @param <T> the type of elements in the array
@@ -31019,6 +35490,12 @@ sealed class CommonUtil permits N {
     /**
      * Sorts the specified list based on the keys extracted by the provided {@code Function} in reverse order.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<String> list = Arrays.asList("ccc", "a", "bb");
+     * N.reverseSortBy(list, String::length); // list is ["ccc", "bb", "a"]
+     * }</pre>
+     *
      * @param <T> the type of elements in the list
      * @param <U> the type of keys extracted from the elements, which must be comparable
      * @param list the list to be sorted
@@ -31031,6 +35508,12 @@ sealed class CommonUtil permits N {
     /**
      * Sorts the specified array based on the int values extracted by the provided {@code ToIntFunction} in reverse order.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.reverseSortByInt(arr, String::length);           // sorts by length
+     * N.reverseSortByInt(new String[0], String::length); // empty array, no change
+     * }</pre>
+     *
      * @param <T> the type of elements in the array
      * @param a the array to be sorted
      * @param keyExtractor the function to extract the int key from the elements
@@ -31041,6 +35524,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Sorts the specified list based on the int values extracted by the provided {@code ToIntFunction} in reverse order.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.reverseSortByInt(arr, String::length);           // sorts by length
+     * N.reverseSortByInt(new String[0], String::length); // empty array, no change
+     * }</pre>
      *
      * @param <T> the type of elements in the list
      * @param list the list to be sorted
@@ -31053,6 +35542,12 @@ sealed class CommonUtil permits N {
     /**
      * Sorts the specified array based on the long values extracted by the provided {@code ToLongFunction} in reverse order.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.reverseSortByLong(arr, String::length);           // sorts by length
+     * N.reverseSortByLong(new String[0], String::length); // empty array, no change
+     * }</pre>
+     *
      * @param <T> the type of elements in the array
      * @param a the array to be sorted
      * @param keyExtractor the function to extract the long key from the elements
@@ -31063,6 +35558,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Sorts the specified list based on the long values extracted by the provided {@code ToLongFunction} in reverse order.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.reverseSortByLong(arr, String::length);           // sorts by length
+     * N.reverseSortByLong(new String[0], String::length); // empty array, no change
+     * }</pre>
      *
      * @param <T> the type of elements in the list
      * @param list the list to be sorted
@@ -31075,6 +35576,12 @@ sealed class CommonUtil permits N {
     /**
      * Sorts the specified array based on the float values extracted by the provided {@code ToFloatFunction} in reverse order.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.reverseSortByFloat(arr, String::length);           // sorts by length
+     * N.reverseSortByFloat(new String[0], String::length); // empty array, no change
+     * }</pre>
+     *
      * @param <T> the type of elements in the array
      * @param a the array to be sorted
      * @param keyExtractor the function to extract the float key from the elements
@@ -31085,6 +35592,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Sorts the specified list based on the float values extracted by the provided {@code ToFloatFunction} in reverse order.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.reverseSortByFloat(arr, String::length);           // sorts by length
+     * N.reverseSortByFloat(new String[0], String::length); // empty array, no change
+     * }</pre>
      *
      * @param <T> the type of elements in the list
      * @param list the list to be sorted
@@ -31097,6 +35610,12 @@ sealed class CommonUtil permits N {
     /**
      * Sorts the specified array based on the double values extracted by the provided {@code ToDoubleFunction} in reverse order.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.reverseSortByDouble(arr, String::length);           // sorts by length
+     * N.reverseSortByDouble(new String[0], String::length); // empty array, no change
+     * }</pre>
+     *
      * @param <T> the type of elements in the array
      * @param a the array to be sorted
      * @param keyExtractor the function to extract the double key from the elements
@@ -31107,6 +35626,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Sorts the specified list based on the double values extracted by the provided {@code ToDoubleFunction} in reverse order.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.reverseSortByDouble(arr, String::length);           // sorts by length
+     * N.reverseSortByDouble(new String[0], String::length); // empty array, no change
+     * }</pre>
      *
      * @param <T> the type of elements in the list
      * @param list the list to be sorted
@@ -31161,8 +35686,8 @@ sealed class CommonUtil permits N {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * char[] sortedArray = {'a', 'b', 'c', 'd', 'e'};
-     * int index1 = binarySearch(sortedArray, 'c');   // Returns 2
-     * int index2 = binarySearch(sortedArray, 'f');   // Returns negative insertion point
+     * int index1 = N.binarySearch(sortedArray, 'c');   // returns 2
+     * int index2 = N.binarySearch(sortedArray, 'f');   // returns negative insertion point
      * }</pre>
      *
      * @param a the array to be searched. It must be sorted in ascending order
@@ -31184,6 +35709,12 @@ sealed class CommonUtil permits N {
      * The range must be sorted (as by the {@link #sort(char[], int, int)} method) before making this call.
      * If it is not sorted, the results are undefined.
      * If the range contains multiple elements with the specified value, there is no guarantee which one will be found.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * char[] a = {'a', 'c', 'e', 'g', 'i'};
+     * N.binarySearch(a, 0, 5, 'e');   // returns 2
+     * }</pre>
      *
      * @param a the array to be searched. It must be sorted in ascending order.
      * @param fromIndex the index of the first element (inclusive) to be searched.
@@ -31210,6 +35741,12 @@ sealed class CommonUtil permits N {
      * If it is not sorted, the results are undefined.
      * If the array contains multiple elements with the specified value, there is no guarantee which one will be found.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * byte[] a = {1, 3, 5, 7, 9};
+     * N.binarySearch(a, 5);   // returns 2
+     * }</pre>
+     *
      * @param a the array to be searched. It must be sorted in ascending order
      * @param valueToFind the value to be searched for
      * @return the index of the value to be searched, if it is contained in the array within the specified range;
@@ -31229,6 +35766,12 @@ sealed class CommonUtil permits N {
      * The range must be sorted (as by the {@link #sort(byte[], int, int)} method) before making this call.
      * If it is not sorted, the results are undefined.
      * If the range contains multiple elements with the specified value, there is no guarantee which one will be found.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * byte[] a = {1, 3, 5, 7, 9};
+     * N.binarySearch(a, 0, 5, 5);   // returns 2
+     * }</pre>
      *
      * @param a the array to be searched. It must be sorted in ascending order.
      * @param fromIndex the index of the first element (inclusive) to be searched.
@@ -31255,6 +35798,12 @@ sealed class CommonUtil permits N {
      * If it is not sorted, the results are undefined.
      * If the array contains multiple elements with the specified value, there is no guarantee which one will be found.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * short[] a = {1, 3, 5, 7, 9};
+     * N.binarySearch(a, 5);   // returns 2
+     * }</pre>
+     *
      * @param a the array to be searched. It must be sorted in ascending order
      * @param valueToFind the value to be searched for
      * @return the index of the value to be searched, if it is contained in the array within the specified range;
@@ -31274,6 +35823,12 @@ sealed class CommonUtil permits N {
      * The range must be sorted (as by the {@link #sort(short[], int, int)} method) before making this call.
      * If it is not sorted, the results are undefined.
      * If the range contains multiple elements with the specified value, there is no guarantee which one will be found.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * short[] a = {1, 3, 5, 7, 9};
+     * N.binarySearch(a, 0, 5, 5);   // returns 2
+     * }</pre>
      *
      * @param a the array to be searched. It must be sorted in ascending order.
      * @param fromIndex the index of the first element (inclusive) to be searched.
@@ -31300,6 +35855,12 @@ sealed class CommonUtil permits N {
      * If it is not sorted, the results are undefined.
      * If the array contains multiple elements with the specified value, there is no guarantee which one will be found.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * int[] a = {1, 3, 5, 7, 9};
+     * N.binarySearch(a, 5);   // returns 2
+     * }</pre>
+     *
      * @param a the array to be searched. It must be sorted in ascending order
      * @param valueToFind the value to be searched for
      * @return the index of the value to be searched, if it is contained in the array within the specified range;
@@ -31319,6 +35880,12 @@ sealed class CommonUtil permits N {
      * The range must be sorted (as by the {@link #sort(int[], int, int)} method) before making this call.
      * If it is not sorted, the results are undefined.
      * If the range contains multiple elements with the specified value, there is no guarantee which one will be found.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * int[] a = {1, 3, 5, 7, 9};
+     * N.binarySearch(a, 0, 5, 5);   // returns 2
+     * }</pre>
      *
      * @param a the array to be searched. It must be sorted in ascending order.
      * @param fromIndex the index of the first element (inclusive) to be searched.
@@ -31345,6 +35912,12 @@ sealed class CommonUtil permits N {
      * If it is not sorted, the results are undefined.
      * If the array contains multiple elements with the specified value, there is no guarantee which one will be found.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * long[] a = {1L, 3L, 5L, 7L, 9L};
+     * N.binarySearch(a, 5L);   // returns 2
+     * }</pre>
+     *
      * @param a the array to be searched. It must be sorted in ascending order
      * @param valueToFind the value to be searched for
      * @return the index of the value to be searched, if it is contained in the array within the specified range;
@@ -31364,6 +35937,12 @@ sealed class CommonUtil permits N {
      * The range must be sorted (as by the {@link #sort(long[], int, int)} method) before making this call.
      * If it is not sorted, the results are undefined.
      * If the range contains multiple elements with the specified value, there is no guarantee which one will be found.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * long[] a = {1L, 3L, 5L, 7L, 9L};
+     * N.binarySearch(a, 0, 5, 5L);   // returns 2
+     * }</pre>
      *
      * @param a the array to be searched. It must be sorted in ascending order.
      * @param fromIndex the index of the first element (inclusive) to be searched.
@@ -31390,6 +35969,12 @@ sealed class CommonUtil permits N {
      * If it is not sorted, the results are undefined.
      * If the array contains multiple elements with the specified value, there is no guarantee which one will be found.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * float[] a = {1.0f, 3.0f, 5.0f, 7.0f, 9.0f};
+     * N.binarySearch(a, 5.0f);   // returns 2
+     * }</pre>
+     *
      * @param a the array to be searched. It must be sorted in ascending order
      * @param valueToFind the value to be searched for
      * @return the index of the value to be searched, if it is contained in the array within the specified range;
@@ -31409,6 +35994,12 @@ sealed class CommonUtil permits N {
      * The range must be sorted (as by the {@link #sort(float[], int, int)} method) before making this call.
      * If it is not sorted, the results are undefined.
      * If the range contains multiple elements with the specified value, there is no guarantee which one will be found.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * float[] a = {1.0f, 3.0f, 5.0f, 7.0f, 9.0f};
+     * N.binarySearch(a, 0, 5, 5.0f);   // returns 2
+     * }</pre>
      *
      * @param a the array to be searched. It must be sorted in ascending order.
      * @param fromIndex the index of the first element (inclusive) to be searched.
@@ -31435,6 +36026,12 @@ sealed class CommonUtil permits N {
      * If it is not sorted, the results are undefined.
      * If the array contains multiple elements with the specified value, there is no guarantee which one will be found.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * double[] a = {1.0, 3.0, 5.0, 7.0, 9.0};
+     * N.binarySearch(a, 5.0);   // returns 2
+     * }</pre>
+     *
      * @param a the array to be searched. It must be sorted in ascending order
      * @param valueToFind the value to be searched for
      * @return the index of the value to be searched, if it is contained in the array within the specified range;
@@ -31454,6 +36051,12 @@ sealed class CommonUtil permits N {
      * The range must be sorted (as by the {@link #sort(double[], int, int)} method) before making this call.
      * If it is not sorted, the results are undefined.
      * If the range contains multiple elements with the specified value, there is no guarantee which one will be found.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * double[] a = {1.0, 3.0, 5.0, 7.0, 9.0};
+     * N.binarySearch(a, 0, 5, 5.0);   // returns 2
+     * }</pre>
      *
      * @param a the array to be searched. It must be sorted in ascending order.
      * @param fromIndex the index of the first element (inclusive) to be searched.
@@ -31480,6 +36083,12 @@ sealed class CommonUtil permits N {
      * If it is not sorted, the results are undefined.
      * If the array contains multiple elements with the specified value, there is no guarantee which one will be found.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Integer[] a = {1, 3, 5, 7, 9};
+     * N.binarySearch(a, 5);   // returns 2
+     * }</pre>
+     *
      * @param a the array to be searched. It must be sorted in ascending order
      * @param valueToFind the value to be searched for
      * @return the index of the value to be searched, if it is contained in the array within the specified range;
@@ -31499,6 +36108,12 @@ sealed class CommonUtil permits N {
      * The range must be sorted (as by the {@link #sort(Object[], int, int)} method) before making this call.
      * If it is not sorted, the results are undefined.
      * If the range contains multiple elements with the specified value, there is no guarantee which one will be found.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Integer[] a = {1, 3, 5, 7, 9};
+     * N.binarySearch(a, 0, 5, 5);   // returns 2
+     * }</pre>
      *
      * @param a the array to be searched. It must be sorted in ascending order.
      * @param fromIndex the index of the first element (inclusive) to be searched.
@@ -31525,6 +36140,12 @@ sealed class CommonUtil permits N {
      * If it is not sorted, the results are undefined.
      * If the array contains multiple elements with the specified value, there is no guarantee which one will be found.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Integer[] a = {1, 3, 5, 7, 9};
+     * N.binarySearch(a, 5, Comparator.naturalOrder());   // returns 2
+     * }</pre>
+     *
      * @param <T> the type of the elements in the array
      * @param a the array to be searched. It must be sorted in ascending order
      * @param valueToFind the value to be searched for
@@ -31546,6 +36167,12 @@ sealed class CommonUtil permits N {
      * The range must be sorted (as by the {@link #sort(Object[], int, int, Comparator)} method) before making this call.
      * If it is not sorted, the results are undefined.
      * If the range contains multiple elements with the specified value, there is no guarantee which one will be found.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Integer[] a = {1, 3, 5, 7, 9};
+     * N.binarySearch(a, 0, 5, 5, Comparator.naturalOrder());   // returns 2
+     * }</pre>
      *
      * @param <T> the type of the elements in the array
      * @param a the array to be searched. It must be sorted in ascending order.
@@ -31574,6 +36201,14 @@ sealed class CommonUtil permits N {
      * If it is not sorted, the results are undefined.
      * If the list contains multiple elements with the specified value, there is no guarantee which one will be found.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<Integer> list = Arrays.asList(10, 20, 30, 40, 50);
+     * N.binarySearch(list, 30);                            // returns 2
+     * N.binarySearch(list, 35);                            // returns a negative value (-(insertion point) - 1)
+     * N.binarySearch(Collections.<Integer>emptyList(), 5); // returns -1
+     * }</pre>
+     *
      * @param <T> the type of the elements in the list
      * @param list the list to be searched. It must be sorted in ascending order
      * @param valueToFind the value to be searched for
@@ -31594,6 +36229,12 @@ sealed class CommonUtil permits N {
      * The range must be sorted (as by the {@link #sort(List, int, int)} method) before making this call.
      * If it is not sorted, the results are undefined.
      * If the range contains multiple elements with the specified value, there is no guarantee which one will be found.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.binarySearch(list, 0, list.size(), 5);  // returns index of 5
+     * N.binarySearch(list, 0, list.size(), 99); // returns -(insertionPoint)-1
+     * }</pre>
      *
      * @param <T> the type of the elements in the list
      * @param list the list to be searched. It must be sorted in ascending order.
@@ -31622,6 +36263,11 @@ sealed class CommonUtil permits N {
      * If it is not sorted, the results are undefined.
      * If the list contains multiple elements with the specified value, there is no guarantee which one will be found.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.binarySearch(Arrays.asList(1, 3, 5, 7, 9), 5, Comparator.naturalOrder());   // returns 2
+     * }</pre>
+     *
      * @param <T> the type of the elements in the list
      * @param list the list to be searched. It must be sorted in ascending order
      * @param valueToFind the value to be searched for
@@ -31643,6 +36289,11 @@ sealed class CommonUtil permits N {
      * The range must be sorted (as by the {@link #sort(List, int, int, Comparator)} method) before making this call.
      * If it is not sorted, the results are undefined.
      * If the range contains multiple elements with the specified value, there is no guarantee which one will be found.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.binarySearch(Arrays.asList(1, 3, 5, 7, 9), 0, 5, 5, Comparator.naturalOrder());   // returns 2
+     * }</pre>
      *
      * @param <T> the type of the elements in the list
      * @param list the list to be searched. It must be sorted in ascending order.
@@ -31686,8 +36337,8 @@ sealed class CommonUtil permits N {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * boolean[] array = {false, true, false, true, false};
-     * int index1 = indexOf(array, true);    // Returns 1
-     * int index2 = indexOf(array, false);   // Returns 0
+     * int index1 = N.indexOf(array, true);    // returns 1
+     * int index2 = N.indexOf(array, false);   // returns 0
      * }</pre>
      *
      * @param a the array to be searched
@@ -31703,6 +36354,14 @@ sealed class CommonUtil permits N {
      * Returns the index of the first occurrence of the specified value in the array, starting the search at the specified index.
      * <p>A negative {@code fromIndex} is treated as zero. A {@code fromIndex} larger than the array
      * length will return {@code -1}.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * boolean[] a = {false, true, false, true, false};
+     * N.indexOf(a, true, 2);    // returns 3
+     * N.indexOf(a, true, 4);    // returns -1 (no true at/after index 4)
+     * N.indexOf(a, true, 10);   // returns -1 (fromIndex past end)
+     * }</pre>
      *
      * @param a the array to be searched
      * @param valueToFind the value to be searched for
@@ -31729,6 +36388,13 @@ sealed class CommonUtil permits N {
     /**
      * Returns the index of the first occurrence of the specified value in the array.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * char[] a = {'a', 'b', 'c', 'b'};
+     * N.indexOf(a, 'b');   // returns 1
+     * N.indexOf(a, 'z');   // returns -1 (not found)
+     * }</pre>
+     *
      * @param a the array to be searched
      * @param valueToFind the value to be searched for
      * @return the index of the first occurrence of the specified value in the array,
@@ -31740,6 +36406,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Returns the index of the first occurrence of the specified value in the array, starting the search at the specified index.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * char[] a = {'a', 'b', 'c', 'b'};
+     * N.indexOf(a, 'b', 2);   // returns 3
+     * }</pre>
      *
      * @param a the array to be searched
      * @param valueToFind the value to be searched for
@@ -31766,6 +36438,13 @@ sealed class CommonUtil permits N {
     /**
      * Returns the index of the first occurrence of the specified value in the array.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * byte[] a = {1, 2, 3, 2};
+     * N.indexOf(a, 2);   // returns 1
+     * N.indexOf(a, 9);   // returns -1 (not found)
+     * }</pre>
+     *
      * @param a the array to be searched
      * @param valueToFind the value to be searched for
      * @return the index of the first occurrence of the specified value in the array,
@@ -31777,6 +36456,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Returns the index of the first occurrence of the specified value in the array, starting the search at the specified index.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * byte[] a = {1, 2, 3, 2};
+     * N.indexOf(a, 2, 2);   // returns 3
+     * }</pre>
      *
      * @param a the array to be searched
      * @param valueToFind the value to be searched for
@@ -31803,6 +36488,13 @@ sealed class CommonUtil permits N {
     /**
      * Returns the index of the first occurrence of the specified value in the array.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * short[] a = {1, 2, 3, 2};
+     * N.indexOf(a, 2);   // returns 1
+     * N.indexOf(a, 9);   // returns -1 (not found)
+     * }</pre>
+     *
      * @param a the array to be searched
      * @param valueToFind the value to be searched for
      * @return the index of the first occurrence of the specified value in the array,
@@ -31814,6 +36506,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Returns the index of the first occurrence of the specified value in the array, starting the search at the specified index.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * short[] a = {1, 2, 3, 2};
+     * N.indexOf(a, 2, 2);   // returns 3
+     * }</pre>
      *
      * @param a the array to be searched
      * @param valueToFind the value to be searched for
@@ -31840,6 +36538,13 @@ sealed class CommonUtil permits N {
     /**
      * Returns the index of the first occurrence of the specified value in the array.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * int[] a = {1, 2, 3, 2};
+     * N.indexOf(a, 2);   // returns 1
+     * N.indexOf(a, 9);   // returns -1 (not found)
+     * }</pre>
+     *
      * @param a the array to be searched
      * @param valueToFind the value to be searched for
      * @return the index of the first occurrence of the specified value in the array,
@@ -31851,6 +36556,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Returns the index of the first occurrence of the specified value in the array, starting the search at the specified index.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * int[] a = {1, 2, 3, 2};
+     * N.indexOf(a, 2, 2);   // returns 3
+     * }</pre>
      *
      * @param a the array to be searched
      * @param valueToFind the value to be searched for
@@ -31877,6 +36588,13 @@ sealed class CommonUtil permits N {
     /**
      * Returns the index of the first occurrence of the specified value in the array.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * long[] a = {1L, 2L, 3L, 2L};
+     * N.indexOf(a, 2L);   // returns 1
+     * N.indexOf(a, 9L);   // returns -1 (not found)
+     * }</pre>
+     *
      * @param a the array to be searched
      * @param valueToFind the value to be searched for
      * @return the index of the first occurrence of the specified value in the array,
@@ -31888,6 +36606,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Returns the index of the first occurrence of the specified value in the array, starting the search at the specified index.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * long[] a = {1L, 2L, 3L, 2L};
+     * N.indexOf(a, 2L, 2);   // returns 3
+     * }</pre>
      *
      * @param a the array to be searched
      * @param valueToFind the value to be searched for
@@ -31914,6 +36638,13 @@ sealed class CommonUtil permits N {
     /**
      * Returns the index of the first occurrence of the specified value in the array.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * float[] a = {1.0f, 2.0f, 3.0f, 2.0f};
+     * N.indexOf(a, 2.0f);   // returns 1
+     * N.indexOf(a, 9.0f);   // returns -1 (not found)
+     * }</pre>
+     *
      * @param a the array to be searched
      * @param valueToFind the value to be searched for
      * @return the index of the first occurrence of the specified value in the array,
@@ -31925,6 +36656,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Returns the index of the first occurrence of the specified value in the array, starting the search at the specified index.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * float[] a = {1.0f, 2.0f, 3.0f, 2.0f};
+     * N.indexOf(a, 2.0f, 2);   // returns 3
+     * }</pre>
      *
      * @param a the array to be searched
      * @param valueToFind the value to be searched for
@@ -31951,6 +36688,13 @@ sealed class CommonUtil permits N {
     /**
      * Returns the index of the first occurrence of the specified value in the array.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * double[] a = {1.0, 2.0, 3.0, 2.0};
+     * N.indexOf(a, 2.0);   // returns 1
+     * N.indexOf(a, 9.0);   // returns -1 (not found)
+     * }</pre>
+     *
      * @param a the array to be searched
      * @param valueToFind the value to be searched for
      * @return the index of the first occurrence of the specified value in the array,
@@ -31962,6 +36706,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Returns the index of the first occurrence of the specified value in the array, starting the search at the specified index.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * double[] a = {1.0, 2.0, 3.0, 2.0};
+     * N.indexOf(a, 2.0, 2);   // returns 3
+     * }</pre>
      *
      * @param a the array to be searched
      * @param valueToFind the value to be searched for
@@ -31992,6 +36742,12 @@ sealed class CommonUtil permits N {
      *
      * <p>This method returns {@link #INDEX_NOT_FOUND} ({@code -1}) for a {@code null} input array.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.indexOf(new double[]{1.0,2.0,3.0}, 2.0, 0.01); // returns 1
+     * N.indexOf(new double[]{1.0,2.0}, 3.0, 0.01);     // returns -1
+     * }</pre>
+     *
      * @param a the array to search through for the object, may be {@code null}
      * @param valueToFind the value to search for
      * @param tolerance tolerance of the search
@@ -32011,6 +36767,12 @@ sealed class CommonUtil permits N {
      *
      * <p>A negative fromIndex is treated as zero. A fromIndex larger than the array
      * length will return {@link #INDEX_NOT_FOUND} ({@code -1}).
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.indexOf(new double[]{1.0,2.0,3.0}, 2.0, 0.01, 0); // returns 1
+     * N.indexOf(new double[]{1.0,2.0}, 3.0, 0.01, 0);     // returns -1
+     * }</pre>
      *
      * @param a the array to search through for the object, may be {@code null}
      * @param valueToFind the value to search for
@@ -32041,9 +36803,9 @@ sealed class CommonUtil permits N {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String[] array = {"apple", "banana", "cherry", "banana"};
-     * int index1 = indexOf(array, "banana");   // Returns 1
-     * int index2 = indexOf(array, "grape");    // Returns -1 (not found)
-     * int index3 = indexOf(array, null);       // Returns -1 (or index if array contains null)
+     * int index1 = N.indexOf(array, "banana");   // returns 1
+     * int index2 = N.indexOf(array, "grape");    // returns -1 (not found)
+     * int index3 = N.indexOf(array, null);       // returns -1 (or index if array contains null)
      * }</pre>
      *
      * @param a the array to be searched
@@ -32057,6 +36819,14 @@ sealed class CommonUtil permits N {
 
     /**
      * Returns the index of the first occurrence of the specified value in the array, starting the search at the specified index.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * String[] a = {"a", "b", "c", "b"};
+     * N.indexOf(a, "b", 2);    // returns 3
+     * N.indexOf(a, "z", 0);    // returns -1 (not found)
+     * N.indexOf(a, "a", 10);   // returns -1 (fromIndex past end)
+     * }</pre>
      *
      * @param a the array to be searched
      * @param valueToFind the value to be searched for
@@ -32083,6 +36853,12 @@ sealed class CommonUtil permits N {
     /**
      * Returns the index of the first occurrence of the specified value in the specified collection.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.indexOf(Arrays.asList(1, 2, 3, 2), 2);   // returns 1
+     * N.indexOf(Arrays.asList(1, 2, 3, 2), 9);   // returns -1 (not found)
+     * }</pre>
+     *
      * @param c the collection to be searched
      * @param valueToFind the value to be searched for
      * @return the index of the first occurrence of the specified value in the collection,
@@ -32094,6 +36870,11 @@ sealed class CommonUtil permits N {
 
     /**
      * Returns the index of the first occurrence of the specified value in the specified collection, starting the search at the specified index.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.indexOf(Arrays.asList(1, 2, 3, 2), 2, 2);   // returns 3
+     * }</pre>
      *
      * @param c the collection to be searched
      * @param valueToFind the value to be searched for
@@ -32141,6 +36922,12 @@ sealed class CommonUtil permits N {
     /**
      * Returns the index of the first occurrence of the specified value in the given iterator.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.indexOf(Arrays.asList(1, 2, 3, 2).iterator(), 2);   // returns 1
+     * N.indexOf(Arrays.asList(1, 2, 3, 2).iterator(), 9);   // returns -1 (not found)
+     * }</pre>
+     *
      * @param iter the iterator to be searched.
      * @param valueToFind the value to find in the iterator.
      * @return the index of the first occurrence of the specified value in the iterator, or -1 if the value is not found.
@@ -32153,6 +36940,11 @@ sealed class CommonUtil permits N {
 
     /**
      * Returns the index of the first occurrence of the specified value in the given iterator, starting the search from the specified index.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.indexOf(Arrays.asList(1, 2, 3, 2).iterator(), 2, 2);   // returns 3
+     * }</pre>
      *
      * @param iter the iterator to be searched.
      * @param valueToFind the value to find in the iterator.
@@ -32171,6 +36963,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Returns the starting position of the first occurrence of the specified sublist within the source list.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.indexOfSubList(Arrays.asList(1,2,3,4), Arrays.asList(2,3)); // returns 1
+     * N.indexOfSubList(Arrays.asList(1,2,3), Arrays.asList(4));     // returns -1
+     * }</pre>
      *
      * @param sourceList the list to search within
      * @param subListToFind the sublist to search for
@@ -32196,6 +36994,12 @@ sealed class CommonUtil permits N {
     /**
      * Returns the starting position of the first occurrence of the specified sublist within the source list, starting the search at the specified index.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.indexOfSubList(Arrays.asList(1,2,3,4), Arrays.asList(2,3)); // returns 1
+     * N.indexOfSubList(Arrays.asList(1,2,3), Arrays.asList(4));     // returns -1
+     * }</pre>
+     *
      * @param sourceList the list to search within
      * @param subListToFind the sublist to search for
      * @param fromIndex the index to start the search from
@@ -32210,6 +37014,12 @@ sealed class CommonUtil permits N {
     /**
      * Returns the index of the first occurrence of the specified string in the array, ignoring case considerations.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.indexOfIgnoreCase(new String[]{"Hello","World"}, "hello"); // returns 0
+     * N.indexOfIgnoreCase(new String[]{"Hello"}, "xyz");           // returns -1
+     * }</pre>
+     *
      * @param a the array to search within
      * @param valueToFind the string to search for
      * @return the index of the first occurrence of the specified string, or -1 if there is no such occurrence
@@ -32220,6 +37030,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Returns the index of the first occurrence of the specified string in the array, ignoring case considerations, starting the search at the specified index.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.indexOfIgnoreCase(new String[]{"Hello","World"}, "hello"); // returns 0
+     * N.indexOfIgnoreCase(new String[]{"Hello"}, "xyz");           // returns -1
+     * }</pre>
      *
      * @param a the array to search within
      * @param valueToFind the string to search for
@@ -32245,6 +37061,13 @@ sealed class CommonUtil permits N {
     /**
      * Returns the index of the last occurrence of the specified value in the array.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * boolean[] a = {false, true, false, true};
+     * N.lastIndexOf(a, true);    // returns 3
+     * N.lastIndexOf(a, false);   // returns 2
+     * }</pre>
+     *
      * @param a the array to search within
      * @param valueToFind the value to search for
      * @return the index of the last occurrence of the specified value, or -1 if there is no such occurrence
@@ -32261,6 +37084,12 @@ sealed class CommonUtil permits N {
      * Returns the index of the last occurrence of the specified value in the array, starting the search backwards from the specified index.
      * <p>A negative {@code startIndexFromBack} will return {@code -1}.
      * A {@code startIndexFromBack} larger than the array length will search from the end of the array.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * boolean[] a = {false, true, false, true};
+     * N.lastIndexOf(a, true, 2);   // returns 1 (searching backward from index 2)
+     * }</pre>
      *
      * @param a the array to search within
      * @param valueToFind the value to search for
@@ -32286,6 +37115,13 @@ sealed class CommonUtil permits N {
     /**
      * Returns the index of the last occurrence of the specified value in the array.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * char[] a = {'a', 'b', 'c', 'b'};
+     * N.lastIndexOf(a, 'b');   // returns 3
+     * N.lastIndexOf(a, 'z');   // returns -1 (not found)
+     * }</pre>
+     *
      * @param a the array to search within
      * @param valueToFind the value to search for
      * @return the index of the last occurrence of the specified value, or -1 if there is no such occurrence
@@ -32300,6 +37136,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Returns the index of the last occurrence of the specified value in the array, starting the search backwards from the specified index.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * char[] a = {'a', 'b', 'c', 'b'};
+     * N.lastIndexOf(a, 'b', 2);   // returns 1 (searching backward from index 2)
+     * }</pre>
      *
      * @param a the array to search within
      * @param valueToFind the value to search for
@@ -32325,6 +37167,13 @@ sealed class CommonUtil permits N {
     /**
      * Returns the index of the last occurrence of the specified value in the array.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * byte[] a = {1, 2, 3, 2};
+     * N.lastIndexOf(a, 2);   // returns 3
+     * N.lastIndexOf(a, 9);   // returns -1 (not found)
+     * }</pre>
+     *
      * @param a the array to search within
      * @param valueToFind the value to search for
      * @return the index of the last occurrence of the specified value, or -1 if there is no such occurrence
@@ -32340,6 +37189,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Returns the index of the last occurrence of the specified value in the array, starting the search backwards from the specified index.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * byte[] a = {1, 2, 3, 2};
+     * N.lastIndexOf(a, 2, 2);   // returns 1 (searching backward from index 2)
+     * }</pre>
      *
      * @param a the array to search within
      * @param valueToFind the value to search for
@@ -32365,6 +37220,13 @@ sealed class CommonUtil permits N {
     /**
      * Returns the index of the last occurrence of the specified value in the array.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * short[] a = {1, 2, 3, 2};
+     * N.lastIndexOf(a, 2);   // returns 3
+     * N.lastIndexOf(a, 9);   // returns -1 (not found)
+     * }</pre>
+     *
      * @param a the array to search within
      * @param valueToFind the value to search for
      * @return the index of the last occurrence of the specified value, or -1 if there is no such occurrence
@@ -32379,6 +37241,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Returns the index of the last occurrence of the specified value in the array, starting the search backwards from the specified index.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * short[] a = {1, 2, 3, 2};
+     * N.lastIndexOf(a, 2, 2);   // returns 1 (searching backward from index 2)
+     * }</pre>
      *
      * @param a the array to search within
      * @param valueToFind the value to search for
@@ -32404,6 +37272,13 @@ sealed class CommonUtil permits N {
     /**
      * Returns the index of the last occurrence of the specified value in the array.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * int[] a = {1, 2, 3, 2};
+     * N.lastIndexOf(a, 2);   // returns 3
+     * N.lastIndexOf(a, 9);   // returns -1 (not found)
+     * }</pre>
+     *
      * @param a the array to search within
      * @param valueToFind the value to search for
      * @return the index of the last occurrence of the specified value, or -1 if there is no such occurrence
@@ -32418,6 +37293,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Returns the index of the last occurrence of the specified value in the array, starting the search backwards from the specified index.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * int[] a = {1, 2, 3, 2};
+     * N.lastIndexOf(a, 2, 2);   // returns 1 (searching backward from index 2)
+     * }</pre>
      *
      * @param a the array to search within
      * @param valueToFind the value to search for
@@ -32443,6 +37324,13 @@ sealed class CommonUtil permits N {
     /**
      * Returns the index of the last occurrence of the specified value in the array.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * long[] a = {1L, 2L, 3L, 2L};
+     * N.lastIndexOf(a, 2L);   // returns 3
+     * N.lastIndexOf(a, 9L);   // returns -1 (not found)
+     * }</pre>
+     *
      * @param a the array to search within
      * @param valueToFind the value to search for
      * @return the index of the last occurrence of the specified value, or -1 if there is no such occurrence
@@ -32457,6 +37345,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Returns the index of the last occurrence of the specified value in the array, starting the search backwards from the specified index.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * long[] a = {1L, 2L, 3L, 2L};
+     * N.lastIndexOf(a, 2L, 2);   // returns 1 (searching backward from index 2)
+     * }</pre>
      *
      * @param a the array to search within
      * @param valueToFind the value to search for
@@ -32482,6 +37376,13 @@ sealed class CommonUtil permits N {
     /**
      * Returns the index of the last occurrence of the specified value in the array.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * float[] a = {1.0f, 2.0f, 3.0f, 2.0f};
+     * N.lastIndexOf(a, 2.0f);   // returns 3
+     * N.lastIndexOf(a, 9.0f);   // returns -1 (not found)
+     * }</pre>
+     *
      * @param a the array to search within
      * @param valueToFind the value to search for
      * @return the index of the last occurrence of the specified value, or -1 if there is no such occurrence
@@ -32496,6 +37397,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Returns the index of the last occurrence of the specified value in the array, starting the search backwards from the specified index.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * float[] a = {1.0f, 2.0f, 3.0f, 2.0f};
+     * N.lastIndexOf(a, 2.0f, 2);   // returns 1 (searching backward from index 2)
+     * }</pre>
      *
      * @param a the array to search within
      * @param valueToFind the value to search for
@@ -32521,6 +37428,13 @@ sealed class CommonUtil permits N {
     /**
      * Returns the index of the last occurrence of the specified value in the array.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * double[] a = {1.0, 2.0, 3.0, 2.0};
+     * N.lastIndexOf(a, 2.0);   // returns 3
+     * N.lastIndexOf(a, 9.0);   // returns -1 (not found)
+     * }</pre>
+     *
      * @param a the array to search within
      * @param valueToFind the value to search for
      * @return the index of the last occurrence of the specified value, or -1 if there is no such occurrence
@@ -32535,6 +37449,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Returns the index of the last occurrence of the specified value in the array, starting the search backwards from the specified index.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * double[] a = {1.0, 2.0, 3.0, 2.0};
+     * N.lastIndexOf(a, 2.0, 2);   // returns 1 (searching backward from index 2)
+     * }</pre>
      *
      * @param a the array to search within
      * @param valueToFind the value to search for
@@ -32564,6 +37484,12 @@ sealed class CommonUtil permits N {
      *
      * <p>This method returns {@link #INDEX_NOT_FOUND} ({@code -1}) for a {@code null} input array.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.lastIndexOf(new double[]{1.0,2.0,1.0}, 1.0, 0.01); // returns 2
+     * N.lastIndexOf(new double[]{1.0,2.0}, 3.0, 0.01);     // returns -1
+     * }</pre>
+     *
      * @param a the array to search through for the object, may be {@code null}
      * @param valueToFind the value to search for
      * @param tolerance tolerance of the search
@@ -32587,6 +37513,12 @@ sealed class CommonUtil permits N {
      *
      * <p>A negative fromIndex will return {@link #INDEX_NOT_FOUND} ({@code -1}). A fromIndex larger than the
      * array length will search from the end of the array.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.lastIndexOf(new double[]{1.0,2.0,1.0}, 1.0, 0.01); // returns 2
+     * N.lastIndexOf(new double[]{1.0,2.0}, 3.0, 0.01);     // returns -1
+     * }</pre>
      *
      * @param a the array to traverse for looking for the object, may be {@code null}
      * @param valueToFind the value to search for
@@ -32617,9 +37549,9 @@ sealed class CommonUtil permits N {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String[] array = {"apple", "banana", "cherry", "banana", "date"};
-     * int index1 = lastIndexOf(array, "banana");   // Returns 3
-     * int index2 = lastIndexOf(array, "apple");    // Returns 0
-     * int index3 = lastIndexOf(array, "grape");    // Returns -1 (not found)
+     * int index1 = N.lastIndexOf(array, "banana");   // returns 3
+     * int index2 = N.lastIndexOf(array, "apple");    // returns 0
+     * int index3 = N.lastIndexOf(array, "grape");    // returns -1 (not found)
      * }</pre>
      *
      * @param a the array to search within
@@ -32636,6 +37568,14 @@ sealed class CommonUtil permits N {
 
     /**
      * Returns the index of the last occurrence of the specified value in the array, starting the search backwards from the specified index.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * String[] a = {"a", "b", "c", "b", "a"};
+     * N.lastIndexOf(a, "b", 2);    // returns 1 (searching backward from index 2)
+     * N.lastIndexOf(a, "b", 4);    // returns 3
+     * N.lastIndexOf(a, "z", 4);    // returns -1 (not found)
+     * }</pre>
      *
      * @param a the array to search within
      * @param valueToFind the value to search for
@@ -32661,6 +37601,12 @@ sealed class CommonUtil permits N {
     /**
      * Returns the index of the last occurrence of the specified value in the specified collection.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.lastIndexOf(Arrays.asList(1, 2, 3, 2), 2);   // returns 3
+     * N.lastIndexOf(Arrays.asList(1, 2, 3, 2), 9);   // returns -1 (not found)
+     * }</pre>
+     *
      * @param c the collection to search within
      * @param valueToFind the value to search for
      * @return the index of the last occurrence of the specified value, or -1 if there is no such occurrence
@@ -32675,6 +37621,11 @@ sealed class CommonUtil permits N {
 
     /**
      * Returns the index of the last occurrence of the specified value in the specified collection, starting the search backwards from the specified index.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.lastIndexOf(Arrays.asList(1, 2, 3, 2), 2, 2);   // returns 1 (searching backward from index 2)
+     * }</pre>
      *
      * @param c the collection to search within
      * @param valueToFind the value to search for
@@ -32722,6 +37673,12 @@ sealed class CommonUtil permits N {
     /**
      * Returns the index of the last occurrence of the specified sublist in the source list.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.lastIndexOfSubList(Arrays.asList(1,2,1,2), Arrays.asList(1,2)); // returns 2
+     * N.lastIndexOfSubList(Arrays.asList(1,2,3), Arrays.asList(4));     // returns -1
+     * }</pre>
+     *
      * @param sourceList the list to search within
      * @param subListToFind the sublist to search for
      * @return the index of the last occurrence of the specified sublist, or -1 if there is no such occurrence
@@ -32745,6 +37702,12 @@ sealed class CommonUtil permits N {
     /**
      * Returns the index of the last occurrence of the specified sublist in the source list, starting the search backwards from the specified index.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.lastIndexOfSubList(Arrays.asList(1,2,1,2), Arrays.asList(1,2)); // returns 2
+     * N.lastIndexOfSubList(Arrays.asList(1,2,3), Arrays.asList(4));     // returns -1
+     * }</pre>
+     *
      * @param sourceList the list to search within
      * @param subListToFind the sublist to search for
      * @param startIndexFromBack the index to start the search from.
@@ -32757,6 +37720,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Returns the index of the last occurrence of the specified string in the array, ignoring case considerations.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.lastIndexOfIgnoreCase(new String[]{"Hello","hello","World"}, "hello"); // returns 1
+     * N.lastIndexOfIgnoreCase(new String[]{"Hello"}, "xyz");                   // returns -1
+     * }</pre>
      *
      * @param a the array to search within
      * @param valueToFind the string to search for
@@ -32772,6 +37741,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Returns the index of the last occurrence of the specified string in the array, ignoring case considerations, starting the search backwards from the specified index.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.lastIndexOfIgnoreCase(new String[]{"Hello","hello","World"}, "hello"); // returns 1
+     * N.lastIndexOfIgnoreCase(new String[]{"Hello"}, "xyz");                   // returns -1
+     * }</pre>
      *
      * @param a the array to search within
      * @param valueToFind the string to search for
@@ -32800,9 +37775,9 @@ sealed class CommonUtil permits N {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String[] array = {"apple", "banana", "cherry", "date"};
-     * OptionalInt index1 = findFirstIndex(array, s -> s.startsWith("b"));   // Returns OptionalInt[1]
-     * OptionalInt index2 = findFirstIndex(array, s -> s.length() > 5);      // Returns OptionalInt[1] ("banana")
-     * OptionalInt index3 = findFirstIndex(array, s -> s.startsWith("z"));   // Returns OptionalInt.empty()
+     * OptionalInt index1 = findFirstIndex(array, s -> s.startsWith("b"));   // returns OptionalInt[1]
+     * OptionalInt index2 = findFirstIndex(array, s -> s.length() > 5);      // returns OptionalInt[1] ("banana")
+     * OptionalInt index3 = findFirstIndex(array, s -> s.startsWith("z"));   // returns OptionalInt.empty()
      * }</pre>
      *
      * @param <T> the type of elements in the array
@@ -32827,6 +37802,12 @@ sealed class CommonUtil permits N {
     /**
      * Finds the index of the first element in the array that matches the given predicate.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.findFirstIndex(arr, 5, (s, n) -> s.length() == n);  // returns OptionalInt
+     * N.findFirstIndex(arr, 99, (s, n) -> s.length() == n); // returns OptionalInt.empty()
+     * }</pre>
+     *
      * @param <T> the type of elements in the array
      * @param <U> the type of the second argument to the predicate
      * @param a the array to search within
@@ -32850,6 +37831,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Finds the index of the first element in the collection that matches the given predicate.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.findFirstIndex(Arrays.asList("a", "bb", "ccc"), s -> s.length() > 1); // returns OptionalInt.of(1)
+     * N.findFirstIndex(Arrays.asList("a"), s -> s.length() > 5);              // returns OptionalInt.empty()
+     * }</pre>
      *
      * @param <T> the type of elements in the collection
      * @param c the collection to search within
@@ -32876,6 +37863,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Finds the index of the first element in the collection that matches the given predicate.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.findFirstIndex(arr, 5, (s, n) -> s.length() == n);  // returns OptionalInt
+     * N.findFirstIndex(arr, 99, (s, n) -> s.length() == n); // returns OptionalInt.empty()
+     * }</pre>
      *
      * @param <T> the type of elements in the collection
      * @param <U> the type of the second argument to the predicate
@@ -32905,6 +37898,12 @@ sealed class CommonUtil permits N {
     /**
      * Finds the index of the last element in the array that matches the given predicate.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.findLastIndex(new String[]{"a","bb","ccc"}, s -> s.length() > 1); // returns OptionalInt
+     * N.findLastIndex(new String[]{"a"}, s -> s.length() > 5);            // returns OptionalInt.empty()
+     * }</pre>
+     *
      * @param <T> the type of elements in the array
      * @param a the array to search within
      * @param predicate the predicate to apply to elements of the array
@@ -32926,6 +37925,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Finds the index of the last element in the array that matches the given predicate.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.findLastIndex(arr, 5, (s, n) -> s.length() == n);  // returns OptionalInt
+     * N.findLastIndex(arr, 99, (s, n) -> s.length() == n); // returns OptionalInt.empty()
+     * }</pre>
      *
      * @param <T> the type of elements in the array
      * @param <U> the type of the second argument to the predicate
@@ -32950,6 +37955,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Finds the index of the last element in the collection that matches the given predicate.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.findLastIndex(Arrays.asList("a", "bb", "ccc"), s -> s.length() > 1); // returns OptionalInt.of(2)
+     * N.findLastIndex(Arrays.asList("a"), s -> s.length() > 5);              // returns OptionalInt.empty()
+     * }</pre>
      *
      * @param <T> the type of elements in the collection
      * @param c the collection to search within
@@ -33001,6 +38012,12 @@ sealed class CommonUtil permits N {
     /**
      * Finds the index of the last element in the collection that matches the given predicate.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.findLastIndex(arr, 5, (s, n) -> s.length() == n);  // returns OptionalInt
+     * N.findLastIndex(arr, 99, (s, n) -> s.length() == n); // returns OptionalInt.empty()
+     * }</pre>
+     *
      * @param <T> the type of elements in the collection
      * @param <U> the type of the second argument to the predicate
      * @param c the collection to search within
@@ -33032,16 +38049,16 @@ sealed class CommonUtil permits N {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Integer[] array1 = {3, 1, 4, 1, 5};
-     * int[] minIndices1 = indicesOfMin(array1);   // Returns [1, 3] (both 1's)
+     * int[] minIndices1 = N.indicesOfMin(array1);   // returns [1, 3] (both 1's)
      *
      * String[] array2 = {"cat", "dog", "ant", "ant"};
-     * int[] minIndices2 = indicesOfMin(array2);   // Returns [2, 3] (both "ant"s)
+     * int[] minIndices2 = N.indicesOfMin(array2);   // returns [2, 3] (both "ant"s)
      *
      * Integer[] array3 = {5, 5, 5};
-     * int[] minIndices3 = indicesOfMin(array3);   // Returns [0, 1, 2] (all equal)
+     * int[] minIndices3 = N.indicesOfMin(array3);   // returns [0, 1, 2] (all equal)
      *
      * Integer[] emptyArray = {};
-     * int[] minIndices4 = indicesOfMin(emptyArray);   // Returns empty array []
+     * int[] minIndices4 = N.indicesOfMin(emptyArray);   // returns empty array []
      * }</pre>
      *
      * @param <T> the type of elements in the array - must implement {@link Comparable}
@@ -33062,6 +38079,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Returns the indices of all minimum elements in the specified array using the provided comparator.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.indicesOfMin(new Integer[]{3, 1, 4, 1, 5}, Comparator.naturalOrder()); // returns [1, 3]
+     * N.indicesOfMin(new Integer[0], Comparator.naturalOrder());               // returns []
+     * }</pre>
      *
      * @param <T> the type of elements in the array
      * @param a the array to search within
@@ -33099,6 +38122,12 @@ sealed class CommonUtil permits N {
     /**
      * Returns the indices of all minimum elements in the specified collection.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.indicesOfMin(Arrays.asList(3, 1, 4, 1, 5)); // returns [1, 3]
+     * N.indicesOfMin(Collections.emptyList());      // returns []
+     * }</pre>
+     *
      * @param <T> the type of elements in the collection
      * @param c the collection to search within
      * @return an array of indices of all minimum elements. An empty array if the input collection is empty.
@@ -33132,13 +38161,13 @@ sealed class CommonUtil permits N {
      *
      * // Find all youngest people (minimum age)
      * Comparator<Person> byAge = Comparator.comparingInt(p -> p.age);
-     * int[] minIndices = indicesOfMin(people, byAge);
-     * // Returns [1, 2] (Bob and Charlie, both age 25)
+     * int[] minIndices = N.indicesOfMin(people, byAge);
+     * // returns [1, 2] (Bob and Charlie, both age 25)
      *
      * // Find alphabetically first names
      * Comparator<Person> byName = Comparator.comparing(p -> p.name);
-     * int[] firstNames = indicesOfMin(people, byName);
-     * // Returns [0] (Alice is alphabetically first)
+     * int[] firstNames = N.indicesOfMin(people, byName);
+     * // returns [0] (Alice is alphabetically first)
      * }</pre>
      *
      * @param <T> the type of elements in the collection
@@ -33195,13 +38224,13 @@ sealed class CommonUtil permits N {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Integer[] array1 = {3, 5, 4, 5, 2};
-     * int[] maxIndices1 = indicesOfMax(array1);   // Returns [1, 3] (both 5's)
+     * int[] maxIndices1 = N.indicesOfMax(array1);   // returns [1, 3] (both 5's)
      *
      * String[] array2 = {"cat", "dog", "dog", "ant"};
-     * int[] maxIndices2 = indicesOfMax(array2);   // Returns [1, 2] (both "dog"s)
+     * int[] maxIndices2 = N.indicesOfMax(array2);   // returns [1, 2] (both "dog"s)
      *
      * Integer[] array3 = {5, 5, 5};
-     * int[] maxIndices3 = indicesOfMax(array3);   // Returns [0, 1, 2] (all equal)
+     * int[] maxIndices3 = N.indicesOfMax(array3);   // returns [0, 1, 2] (all equal)
      * }</pre>
      *
      * @param <T> the type of elements in the array
@@ -33237,13 +38266,13 @@ sealed class CommonUtil permits N {
      *
      * // Find all most expensive products (maximum price)
      * Comparator<Product> byPrice = Comparator.comparingDouble(p -> p.price);
-     * int[] maxIndices = indicesOfMax(products, byPrice);
-     * // Returns [2, 3] (Cherry and Date, both $2.00)
+     * int[] maxIndices = N.indicesOfMax(products, byPrice);
+     * // returns [2, 3] (Cherry and Date, both $2.00)
      *
      * // Find products with longest names (maximum length)
      * Comparator<Product> byNameLength = Comparator.comparingInt(p -> p.name.length());
-     * int[] longestNames = indicesOfMax(products, byNameLength);
-     * // Returns [1, 2] (Banana and Cherry, both 6 characters)
+     * int[] longestNames = N.indicesOfMax(products, byNameLength);
+     * // returns [1, 2] (Banana and Cherry, both 6 characters)
      * }</pre>
      *
      * @param <T> the type of elements in the array
@@ -33288,6 +38317,12 @@ sealed class CommonUtil permits N {
     /**
      * Returns the indices of all maximum elements in the specified collection.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.indicesOfMax(Arrays.asList(3, 1, 4, 1, 5)); // returns [4]
+     * N.indicesOfMax(Collections.emptyList());      // returns []
+     * }</pre>
+     *
      * @param <T> the type of elements in the collection
      * @param c the collection to search within
      * @return an array of indices of all maximum elements. An empty array if the input collection is empty.
@@ -33321,13 +38356,13 @@ sealed class CommonUtil permits N {
      *
      * // Find all players with highest score (maximum points)
      * Comparator<Score> byPoints = Comparator.comparingInt(s -> s.points);
-     * int[] topScorers = indicesOfMax(scores, byPoints);
-     * // Returns [1, 2] (Bob and Charlie, both 150 points)
+     * int[] topScorers = N.indicesOfMax(scores, byPoints);
+     * // returns [1, 2] (Bob and Charlie, both 150 points)
      *
      * // Find alphabetically last player names
      * Comparator<Score> byName = Comparator.comparing(s -> s.player);
-     * int[] lastNames = indicesOfMax(scores, byName);
-     * // Returns [3] (David is alphabetically last)
+     * int[] lastNames = N.indicesOfMax(scores, byName);
+     * // returns [3] (David is alphabetically last)
      * }</pre>
      *
      * @param <T> the type of elements in the collection
@@ -33386,15 +38421,15 @@ sealed class CommonUtil permits N {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String[] words = {"apple", "banana", "apple", "cherry", "apple", "date"};
-     * int[] indices1 = indicesOfAll(words, "apple");
-     * // Returns [0, 2, 4] (all positions where "apple" appears)
+     * int[] indices1 = N.indicesOfAll(words, "apple");
+     * // returns [0, 2, 4] (all positions where "apple" appears)
      *
-     * int[] indices2 = indicesOfAll(words, "grape");
-     * // Returns [] (empty array - value not found)
+     * int[] indices2 = N.indicesOfAll(words, "grape");
+     * // returns [] (empty array - value not found)
      *
      * String[] withNull = {"a", null, "b", null, "c"};
-     * int[] indices3 = indicesOfAll(withNull, null);
-     * // Returns [1, 3] (all positions where null appears)
+     * int[] indices3 = N.indicesOfAll(withNull, null);
+     * // returns [1, 3] (all positions where null appears)
      * }</pre>
      *
      * @param a the array to search within - may be {@code null} or empty
@@ -33426,20 +38461,20 @@ sealed class CommonUtil permits N {
      * String[] words = {"apple", "banana", "apple", "cherry", "apple", "date", "apple"};
      *
      * // Find all "apple" occurrences from the beginning
-     * int[] indices1 = indicesOfAll(words, "apple", 0);
-     * // Returns [0, 2, 4, 6] (all positions where "apple" appears)
+     * int[] indices1 = N.indicesOfAll(words, "apple", 0);
+     * // returns [0, 2, 4, 6] (all positions where "apple" appears)
      *
      * // Find "apple" occurrences starting from index 3
-     * int[] indices2 = indicesOfAll(words, "apple", 3);
-     * // Returns [4, 6] (only "apple"s at or after index 3)
+     * int[] indices2 = N.indicesOfAll(words, "apple", 3);
+     * // returns [4, 6] (only "apple"s at or after index 3)
      *
      * // Search with negative fromIndex (treated as 0)
-     * int[] indices3 = indicesOfAll(words, "banana", -1);
-     * // Returns [1]
+     * int[] indices3 = N.indicesOfAll(words, "banana", -1);
+     * // returns [1]
      *
      * // Search from index beyond array length
-     * int[] indices4 = indicesOfAll(words, "apple", 100);
-     * // Returns [] (empty array)
+     * int[] indices4 = N.indicesOfAll(words, "apple", 100);
+     * // returns [] (empty array)
      * }</pre>
      *
      * @param a the array to search within - may be {@code null} or empty
@@ -33473,6 +38508,12 @@ sealed class CommonUtil permits N {
     /**
      * Returns the indices of all occurrences of the specified value in the specified collection.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.indicesOfAll(Arrays.asList(1, 2, 1, 3), 1); // returns [0, 2]
+     * N.indicesOfAll(Arrays.asList(1, 2, 3), 5);    // returns []
+     * }</pre>
+     *
      * @param c the collection to search within
      * @param valueToFind the value to find in the collection
      * @return an array of indices of all occurrences of the specified value
@@ -33483,6 +38524,12 @@ sealed class CommonUtil permits N {
 
     /**
      * Returns the indices of all occurrences of the specified value in the specified collection, starting the search from the specified index.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.indicesOfAll(Arrays.asList(1, 2, 1, 3), 1); // returns [0, 2]
+     * N.indicesOfAll(Arrays.asList(1, 2, 3), 5);    // returns []
+     * }</pre>
      *
      * @param c the collection to search within
      * @param valueToFind the value to find in the collection
@@ -33533,9 +38580,9 @@ sealed class CommonUtil permits N {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String[] array = {"apple", "banana", "cherry", "date", "apricot"};
-     * int[] indices1 = indicesOfAll(array, s -> s.startsWith("a"));   // Returns [0, 4] ("apple", "apricot")
-     * int[] indices2 = indicesOfAll(array, s -> s.length() > 5);      // Returns [1, 2] ("banana", "cherry")
-     * int[] indices3 = indicesOfAll(array, s -> s.contains("z"));     // Returns [] (empty)
+     * int[] indices1 = indicesOfAll(array, s -> s.startsWith("a"));   // returns [0, 4] ("apple", "apricot")
+     * int[] indices2 = indicesOfAll(array, s -> s.length() > 5);      // returns [1, 2, 4] ("banana", "cherry", "apricot")
+     * int[] indices3 = indicesOfAll(array, s -> s.contains("z"));     // returns [] (empty)
      * }</pre>
      *
      * @param <T> the type of elements in the array
@@ -33549,6 +38596,14 @@ sealed class CommonUtil permits N {
 
     /**
      * Returns the indices of all elements in the specified array that match the given predicate, starting the search from the specified index.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * String[] a = {"apple", "banana", "avocado", "cherry", "apricot"};
+     * N.indicesOfAll(a, s -> s.startsWith("a"), 1);   // returns [2, 4] (from index 1: avocado, apricot)
+     * N.indicesOfAll(a, s -> s.startsWith("z"), 0);   // returns [] (none match)
+     * N.indicesOfAll(a, s -> true, 10);               // returns [] (fromIndex past end)
+     * }</pre>
      *
      * @param <T> the type of elements in the array
      * @param a the array to search within
@@ -33577,6 +38632,12 @@ sealed class CommonUtil permits N {
     /**
      * Returns the indices of all elements in the specified collection that match the given predicate.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.indicesOfAll(Arrays.asList("a", "bb", "cc"), s -> s.length() > 1); // returns [1, 2]
+     * N.indicesOfAll(new String[]{"a","b"}, s -> s.length() > 5);          // returns []
+     * }</pre>
+     *
      * @param <T> the type of elements in the collection
      * @param c the collection to search within
      * @param predicate the predicate to apply to elements of the collection
@@ -33603,19 +38664,19 @@ sealed class CommonUtil permits N {
      * List<String> list = Arrays.asList("apple", "banana", "apple", "cherry", "apple");
      *
      * // Find all "apple" occurrences from index 1
-     * int[] indices1 = indicesOfAll(list, s -> "apple".equals(s), 1);   // Returns [2, 4]
+     * int[] indices1 = indicesOfAll(list, s -> "apple".equals(s), 1);   // returns [2, 4]
      *
      * // Find all strings longer than 5 characters from start
-     * int[] indices2 = indicesOfAll(list, s -> s.length() > 5, 0);   // Returns [1, 3]
+     * int[] indices2 = indicesOfAll(list, s -> s.length() > 5, 0);   // returns [1, 3]
      *
      * // Search from index beyond collection size
-     * int[] indices3 = indicesOfAll(list, s -> true, 10);   // Returns []
+     * int[] indices3 = indicesOfAll(list, s -> true, 10);   // returns []
      *
      * // Search with negative fromIndex (treated as 0)
-     * int[] indices4 = indicesOfAll(list, s -> "apple".equals(s), -1);   // Returns [0, 2, 4]
+     * int[] indices4 = indicesOfAll(list, s -> "apple".equals(s), -1);   // returns [0, 2, 4]
      *
      * Set<Integer> set = new HashSet<>(Arrays.asList(1, 2, 3, 4, 5));
-     * int[] indices5 = indicesOfAll(set, n -> n % 2 == 0, 0);   // Returns even number indices
+     * int[] indices5 = indicesOfAll(set, n -> n % 2 == 0, 0);   // returns even number indices
      * }</pre>
      *
      * @param <T> the type of elements in the collection

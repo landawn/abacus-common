@@ -41,6 +41,7 @@ public interface LongPredicate extends Throwables.LongPredicate<RuntimeException
      * alwaysPass.test(42L);   // returns true
      * alwaysPass.test(-1L);   // returns true
      * }</pre>
+     *
      */
     LongPredicate ALWAYS_TRUE = value -> true;
     /**
@@ -52,6 +53,7 @@ public interface LongPredicate extends Throwables.LongPredicate<RuntimeException
      * alwaysFail.test(42L);   // returns false
      * alwaysFail.test(-1L);   // returns false
      * }</pre>
+     *
      */
     LongPredicate ALWAYS_FALSE = value -> false;
     /**
@@ -100,7 +102,7 @@ public interface LongPredicate extends Throwables.LongPredicate<RuntimeException
      * boolean result = isEven.test(4L);   // Returns true
      * }</pre>
      *
-     * @param value the input argument
+     * @param value the {@code long} input argument
      * @return {@code true} if the input argument matches the predicate, {@code false} otherwise
      */
     @Override
@@ -111,6 +113,13 @@ public interface LongPredicate extends Throwables.LongPredicate<RuntimeException
      *
      * <p>The returned predicate will return {@code true} when this predicate returns {@code false},
      * and {@code false} when this predicate returns {@code true}.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * LongPredicate isEven = value -> value % 2 == 0;
+     * LongPredicate isOdd = isEven.negate();
+     * boolean result = isOdd.test(3L);   // Returns true
+     * }</pre>
      *
      * @return a predicate that represents the logical negation of this predicate
      */
@@ -127,6 +136,14 @@ public interface LongPredicate extends Throwables.LongPredicate<RuntimeException
      * then the {@code other} predicate is not evaluated.
      *
      * <p>If evaluation of either operation throws an exception, it is relayed to the caller of the composed operation.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * LongPredicate isPositive = value -> value > 0;
+     * LongPredicate isEven = value -> value % 2 == 0;
+     * LongPredicate positiveAndEven = isPositive.and(isEven);
+     * boolean result = positiveAndEven.test(4L);   // Returns true
+     * }</pre>
      *
      * @param other a predicate that will be logically-ANDed with this predicate. Must not be {@code null}.
      * @return a composed predicate that represents the short-circuiting logical
@@ -148,6 +165,14 @@ public interface LongPredicate extends Throwables.LongPredicate<RuntimeException
      *
      * <p>If evaluation of either operation throws an exception, it is relayed to the caller of the composed operation.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * LongPredicate isNegative = value -> value < 0;
+     * LongPredicate isZero = value -> value == 0;
+     * LongPredicate nonPositive = isNegative.or(isZero);
+     * boolean result = nonPositive.test(0L);   // Returns true
+     * }</pre>
+     *
      * @param other a predicate that will be logically-ORed with this predicate. Must not be {@code null}.
      * @return a composed predicate that represents the short-circuiting logical
      *         OR of this predicate and the {@code other} predicate
@@ -164,6 +189,12 @@ public interface LongPredicate extends Throwables.LongPredicate<RuntimeException
      *
      * <p>This is a utility method that simply returns the input predicate,
      * useful for method chaining or type conversion contexts.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * LongPredicate isPositive = LongPredicate.of(value -> value > 0);
+     * boolean result = isPositive.test(5L);   // Returns true
+     * }</pre>
      *
      * @param predicate the predicate to return
      * @return the specified predicate

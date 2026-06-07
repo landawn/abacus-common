@@ -130,6 +130,7 @@ public final class BufferedXmlWriter extends CharacterWriter {
      * writer.write("<element>content</element>");
      * String xml = writer.toString();
      * }</pre>
+     *
      */
     BufferedXmlWriter() {
         super(REPLACEMENT_CHARS);

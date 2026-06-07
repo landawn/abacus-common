@@ -27,7 +27,7 @@ package com.landawn.abacus.type;
  * Type<Boolean> type = TypeFactory.getType(boolean.class);
  *
  * // Convert string to boolean
- * Boolean value = type.valueOf("true");   // Returns true
+ * Boolean value = type.valueOf("true");     // Returns true
  * Boolean value2 = type.valueOf("false");   // Returns false
  *
  * // Get default value
@@ -40,6 +40,7 @@ package com.landawn.abacus.type;
  *     }
  * }
  * }</pre>
+ *
  */
 public final class PrimitiveBooleanType extends AbstractBooleanType {
 

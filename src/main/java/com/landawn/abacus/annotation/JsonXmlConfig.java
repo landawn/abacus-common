@@ -75,8 +75,8 @@ public @interface JsonXmlConfig {
      * <pre>{@code
      * @JsonXmlConfig(ignoredFields = {"password", "internal.*"})
      * public class User {
-     *     private String password;  // Will be ignored
-     *     private String internalToken;  // Will be ignored (matches "internal.*")
+     *     private String password;       // password is ignored
+     *     private String internalToken;  // internalToken is ignored (matches "internal.*")
      * }
      * }</pre>
      *

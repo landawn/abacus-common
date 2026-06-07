@@ -141,6 +141,7 @@ public final class BufferedCsvWriter extends CharacterWriter {
      * writer.write("\"quoted value\",normal value\n");
      * String csv = writer.toString();
      * }</pre>
+     *
      */
     BufferedCsvWriter() {
         super(CsvUtil.isBackSlashEscapeCharForWrite() ? REPLACEMENT_CHARS_BACK_SLASH : REPLACEMENT_CHARS);

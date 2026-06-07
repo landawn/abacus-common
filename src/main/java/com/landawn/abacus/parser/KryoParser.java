@@ -88,6 +88,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 import javax.xml.datatype.XMLGregorianCalendar;
 
 import com.esotericsoftware.kryo.Kryo;
+import com.esotericsoftware.kryo.Registration;
 import com.esotericsoftware.kryo.Serializer;
 import com.esotericsoftware.kryo.io.Input;
 import com.esotericsoftware.kryo.io.Output;
@@ -98,6 +99,7 @@ import com.landawn.abacus.util.BooleanList;
 import com.landawn.abacus.util.ByteArrayOutputStream;
 import com.landawn.abacus.util.ByteList;
 import com.landawn.abacus.util.CharList;
+import com.landawn.abacus.util.ClassUtil;
 import com.landawn.abacus.util.Dataset;
 import com.landawn.abacus.util.DoubleList;
 import com.landawn.abacus.util.Duration;
@@ -191,7 +193,7 @@ import com.landawn.abacus.util.u.OptionalShort;
  *
  * // Register custom types for better performance
  * parser.register(MyCustomType.class);
- * parser.register(MyCustomType.class, 100);   // with ID
+ * parser.register(MyCustomType.class, 100);   // uses ID 100
  *
  * // Deep copy
  * MyObject copy = parser.deepCopy(obj);
@@ -393,7 +395,7 @@ public final class KryoParser extends AbstractParser<KryoSerConfig, KryoDeserCon
      * or both the class information and the object.
      *
      * <p>Both the class and the object are written (via {@code writeClassAndObject}) when {@code obj} is
-     * {@code null} or when {@code config.isWriteClass()} returns {@code true}; otherwise only the object is
+     * {@code null} or when {@code config} is not {@code null} and {@code config.isWriteClass()} returns {@code true}; otherwise only the object is
      * written (via {@code writeObject}).</p>
      *
      * <p><b>Note:</b> This is a protected method intended for internal use and subclass extension.
@@ -438,7 +440,7 @@ public final class KryoParser extends AbstractParser<KryoSerConfig, KryoDeserCon
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * String base64Data = "rO0ABXNyABF...";  // Base64 encoded
+     * String base64Data = "rO0ABXNyABF...";  // value is Base64 encoded
      * MyObject obj = parser.deserialize(base64Data, null, MyObject.class);
      * }</pre>
      *
@@ -447,6 +449,7 @@ public final class KryoParser extends AbstractParser<KryoSerConfig, KryoDeserCon
      * @param config the deserialization configuration to use (may be {@code null} for default behavior)
      * @param targetType the type of the object to create (must not be {@code null})
      * @return the deserialized object instance
+     * @throws IllegalArgumentException if {@code source} is {@code null}
      */
     @Override
     public <T> T deserialize(String source, KryoDeserConfig config, Type<? extends T> targetType) {
@@ -461,7 +464,7 @@ public final class KryoParser extends AbstractParser<KryoSerConfig, KryoDeserCon
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * String base64Data = "rO0ABXNyABF...";  // Base64 encoded
+     * String base64Data = "rO0ABXNyABF...";  // value is Base64 encoded
      * MyObject obj = parser.deserialize(base64Data, null, MyObject.class);
      * }</pre>
      *
@@ -662,7 +665,7 @@ public final class KryoParser extends AbstractParser<KryoSerConfig, KryoDeserCon
         final Input input = createInput();
 
         try {
-            input.setInputStream(source);
+            input.setBuffer(IOUtil.readAllBytes(source));
 
             return read(input, config, targetClass);
         } finally {
@@ -695,10 +698,52 @@ public final class KryoParser extends AbstractParser<KryoSerConfig, KryoDeserCon
         final Kryo kryo = createKryo();
 
         try {
-            return (T) ((targetClass == null) ? kryo.readClassAndObject(source) : kryo.readObject(source, targetClass));
+            if (targetClass == null) {
+                return (T) kryo.readClassAndObject(source);
+            }
+
+            final int position = source.position();
+
+            if (source.getInputStream() == null) {
+                RuntimeException classAndObjectException = null;
+
+                try {
+                    final Registration registration = kryo.readClass(source);
+
+                    source.setPosition(position);
+
+                    if (registration == null || isAssignableToTarget(targetClass, registration.getType())) {
+                        final Object value = kryo.readClassAndObject(source);
+
+                        if ((value == null || isAssignableToTarget(targetClass, value.getClass())) && source.position() == source.limit()) {
+                            return (T) value;
+                        }
+                    }
+                } catch (final RuntimeException e) {
+                    classAndObjectException = e;
+                }
+
+                source.setPosition(position);
+
+                try {
+                    return kryo.readObject(source, targetClass);
+                } catch (final RuntimeException e2) {
+                    if (classAndObjectException != null) {
+                        e2.addSuppressed(classAndObjectException);
+                    }
+
+                    throw e2;
+                }
+            }
+
+            return kryo.readObject(source, targetClass);
         } finally {
             recycle(kryo);
         }
+    }
+
+    private static boolean isAssignableToTarget(final Class<?> targetClass, final Class<?> cls) {
+        return targetClass.isAssignableFrom(cls) || ClassUtil.wrap(targetClass).isAssignableFrom(ClassUtil.wrap(cls));
     }
 
     /**
@@ -709,7 +754,7 @@ public final class KryoParser extends AbstractParser<KryoSerConfig, KryoDeserCon
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * KryoSerConfig config = KryoSerConfig.create();
-     * config = parser.check(config);   // Validates and returns config
+     * config = parser.check(config);   // returns config
      * }</pre>
      *
      * @param config the configuration to check (may be {@code null})
@@ -734,7 +779,7 @@ public final class KryoParser extends AbstractParser<KryoSerConfig, KryoDeserCon
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * KryoDeserConfig config = KryoDeserConfig.create();
-     * config = parser.check(config);   // Validates and returns config
+     * config = parser.check(config);   // returns config
      * }</pre>
      *
      * @param config the configuration to check (may be {@code null})
@@ -1202,13 +1247,13 @@ public final class KryoParser extends AbstractParser<KryoSerConfig, KryoDeserCon
             }
 
             if (N.notEmpty(ParserFactory._kryoClassIdMap)) {
-                for (Map.Entry<Class<?>, Integer> entry : ParserFactory._kryoClassIdMap.entrySet()) {
+                for (final Map.Entry<Class<?>, Integer> entry : ParserFactory._kryoClassIdMap.entrySet()) {
                     kryo.register(entry.getKey(), entry.getValue());
                 }
             }
 
             if (N.notEmpty(ParserFactory._kryoClassSerializerMap)) {
-                for (Map.Entry<Class<?>, Serializer<?>> entry : ParserFactory._kryoClassSerializerMap.entrySet()) {
+                for (final Map.Entry<Class<?>, Serializer<?>> entry : ParserFactory._kryoClassSerializerMap.entrySet()) {
                     kryo.register(entry.getKey(), entry.getValue());
                 }
             }
@@ -1226,13 +1271,13 @@ public final class KryoParser extends AbstractParser<KryoSerConfig, KryoDeserCon
             }
 
             if (N.notEmpty(kryoClassIdMap)) {
-                for (Map.Entry<Class<?>, Integer> entry : kryoClassIdMap.entrySet()) { //NOSONAR
+                for (final Map.Entry<Class<?>, Integer> entry : kryoClassIdMap.entrySet()) { //NOSONAR
                     kryo.register(entry.getKey(), entry.getValue());
                 }
             }
 
             if (N.notEmpty(kryoClassSerializerMap)) {
-                for (Map.Entry<Class<?>, Serializer<?>> entry : kryoClassSerializerMap.entrySet()) { //NOSONAR
+                for (final Map.Entry<Class<?>, Serializer<?>> entry : kryoClassSerializerMap.entrySet()) { //NOSONAR
                     kryo.register(entry.getKey(), entry.getValue());
                 }
             }

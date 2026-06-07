@@ -107,6 +107,25 @@ public class LocalDateTimeTypeTest extends TestBase {
     }
 
     @Test
+    public void testValueOf_ParsesLocalDateTimeToString() {
+        // Every form produced by LocalDateTime.toString() must round-trip through valueOf.
+        LocalDateTime[] values = { //
+                LocalDateTime.of(2021, 1, 1, 10, 30), // seconds omitted, "...T10:30"
+                LocalDateTime.of(2021, 1, 1, 10, 30, 45), // seconds, "...T10:30:45"
+                LocalDateTime.of(2021, 1, 1, 10, 30, 45, 123000000), // millis
+                LocalDateTime.of(2021, 1, 1, 10, 30, 45, 123456789), // nanos
+                LocalDateTime.of(2021, 1, 1, 0, 0), // midnight, seconds omitted
+                LocalDateTime.now() };
+
+        for (LocalDateTime value : values) {
+            String text = value.toString();
+            LocalDateTime result = localDateTimeType.valueOf(text);
+            assertNotNull(result, () -> "Failed to parse: " + text);
+            assertEquals(value, result, () -> "Mismatch for: " + text);
+        }
+    }
+
+    @Test
     public void testValueOf_CharArray_Null() {
         assertNull(localDateTimeType.valueOf(null, 0, 0));
     }

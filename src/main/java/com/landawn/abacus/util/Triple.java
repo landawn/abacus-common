@@ -32,9 +32,9 @@ import com.landawn.abacus.util.u.Optional;
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * Triple<String, Integer, Boolean> triple = Triple.of("Hello", 42, true);
- * String left = triple.left();   // "Hello"
- * Integer middle = triple.middle();   // 42
- * Boolean right = triple.right();   // true
+ * String left = triple.left();        // returns "Hello"
+ * Integer middle = triple.middle();   // returns 42
+ * Boolean right = triple.right();     // returns true
  * }</pre>
  *
  * <h2>{@code Triple} vs {@link Tuple3}</h2>
@@ -111,6 +111,15 @@ public final class Triple<L, M, R> implements Mutable {
      * Constructs an empty Triple with all elements set to {@code null}.
      * This constructor is typically used when the values will be set later
      * using the setter methods.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Triple<String, Integer, Boolean> triple = new Triple<>();
+     * triple.setLeft("Hello");
+     * triple.setMiddle(42);
+     * triple.setRight(true);
+     * }</pre>
+     *
      */
     public Triple() {
     }
@@ -159,7 +168,7 @@ public final class Triple<L, M, R> implements Mutable {
      * Returns a type-safe empty array of Triple instances.
      *
      * <p>This method provides a reusable empty array, avoiding the need to create
-     * a new empty array each time. The returned array is immutable and shared across
+     * a new empty array each time. The returned array is shared across
      * all calls to this method.</p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -946,6 +955,13 @@ public final class Triple<L, M, R> implements Mutable {
      * Two Triple objects with equal elements (as determined by their equals methods)
      * will have the same hash code.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Triple<String, Integer, Boolean> t1 = Triple.of("text", 42, true);
+     * Triple<String, Integer, Boolean> t2 = Triple.of("text", 42, true);
+     * // t1.hashCode() == t2.hashCode()
+     * }</pre>
+     *
      * @return a hash code value for this Triple.
      */
     @Override
@@ -1001,10 +1017,10 @@ public final class Triple<L, M, R> implements Mutable {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Triple<String, Integer, Boolean> triple = Triple.of("text", 42, true);
-     * System.out.println(triple);   // prints: (text, 42, true)
+     * System.out.println(triple);   // prints (text, 42, true)
      *
      * Triple<String, Integer, Boolean> nullTriple = Triple.of(null, null, null);
-     * System.out.println(nullTriple);   // prints: (null, null, null)
+     * System.out.println(nullTriple);   // prints (null, null, null)
      * }</pre>
      *
      * @return a string representation of this Triple.

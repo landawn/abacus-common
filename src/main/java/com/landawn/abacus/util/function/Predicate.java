@@ -96,7 +96,7 @@ public interface Predicate<T> extends Throwables.Predicate<T, RuntimeException>,
      * boolean result = isNotEmptyAndStartsWithA.test("Apple");   // Returns true
      * }</pre>
      *
-     * @param other a predicate that will be logically-ANDed with this predicate
+     * @param other a predicate that will be logically-ANDed with this predicate. Must not be {@code null}.
      * @return a composed {@code Predicate} that represents the short-circuiting logical
      *         AND of this predicate and the {@code other} predicate
      * @throws NullPointerException if {@code other} is null
@@ -127,7 +127,7 @@ public interface Predicate<T> extends Throwables.Predicate<T, RuntimeException>,
      * boolean result2 = isEvenOrNegative.test(-3);   // Returns true (negative)
      * }</pre>
      *
-     * @param other a predicate that will be logically-ORed with this predicate
+     * @param other a predicate that will be logically-ORed with this predicate. Must not be {@code null}.
      * @return a composed {@code Predicate} that represents the short-circuiting logical
      *         OR of this predicate and the {@code other} predicate
      * @throws NullPointerException if {@code other} is null

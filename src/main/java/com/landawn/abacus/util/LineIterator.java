@@ -110,6 +110,7 @@ public final class LineIterator extends ObjIterator<String> implements AutoClose
      *     }
      * }
      * }</pre>
+     *
      * <p>
      * If an exception occurs during the creation of the iterator, the underlying stream
      * is automatically closed.
@@ -138,6 +139,7 @@ public final class LineIterator extends ObjIterator<String> implements AutoClose
      *     it.forEachRemaining(line -> processLine(line));
      * }
      * }</pre>
+     *
      * <p>
      * If an exception occurs during the creation of the iterator, the underlying stream
      * is automatically closed to prevent resource leaks.
@@ -365,6 +367,7 @@ public final class LineIterator extends ObjIterator<String> implements AutoClose
      *     it.close();   // Important to close to release resources
      * }
      * }</pre>
+     *
      */
     @Override
     public synchronized void close() {

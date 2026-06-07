@@ -19,7 +19,7 @@ import com.landawn.abacus.util.Throwables;
 
 /**
  * Represents a function that accepts three byte-valued arguments and produces a result.
- * This is the three-arity specialization of {@link java.util.function.Function} for byte values.
+ * This is the three-arity specialization of {@link ByteFunction} for byte values.
  *
  * <p>This is a functional interface whose functional method is {@link #apply(byte, byte, byte)}.
  *

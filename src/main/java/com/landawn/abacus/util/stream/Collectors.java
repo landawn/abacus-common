@@ -1232,7 +1232,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * List<Integer> evens = Stream.of(1, 2, 3, 4, 5, 6)
      *     .collect(Collectors.toCollection(ArrayList::new,
      *         (list, n) -> { if (n % 2 == 0) list.add(n); }));
-     * // Result: [2, 4, 6]
+     * // returns [2, 4, 6]
      * }</pre>
      *
      * @param <T> the type of input elements
@@ -1279,7 +1279,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      *         (list, elem) -> list.addFirst(elem),
      *         (list1, list2) -> { list1.addAll(0, list2); return list1; }
      *     ));
-     * // Result: ["c", "b", "a"]
+     * // returns ["c", "b", "a"]
      * }</pre>
      *
      * @param <T> the type of input elements
@@ -1307,6 +1307,50 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * <p>This collector provides full control over how elements are accumulated into the
      * collection and how partial collections are combined in parallel processing, while also
      * allowing you to specify characteristics like CONCURRENT or UNORDERED.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * // Collect to LinkedHashSet with IDENTITY_FINISH characteristic
+     * Set<String> set = Stream.of("a", "b", "c")
+     *     .collect(Collectors.toCollection(
+     *         LinkedHashSet::new,
+     *         Set::add,
+     *         (s1, s2) -> { s1.addAll(s2); return s1; },
+     *         Collector.Characteristics.IDENTITY_FINISH
+     *     ));
+     * // returns [a, b, c]
+     *
+     * // Collect to synchronized List with UNORDERED characteristic
+     * List<Integer> syncList = Stream.of(3, 1, 2)
+     *     .collect(Collectors.toCollection(
+     *         CopyOnWriteArrayList::new,
+     *         List::add,
+     *         (l1, l2) -> { l1.addAll(l2); return l1; },
+     *         Collector.Characteristics.UNORDERED,
+     *         Collector.Characteristics.IDENTITY_FINISH
+     *     ));
+     * // returns [3, 1, 2] (order not guaranteed with UNORDERED)
+     *
+     * // Empty stream returns empty collection from supplier
+     * Set<String> empty = Stream.<String>empty()
+     *     .collect(Collectors.toCollection(
+     *         LinkedHashSet::new,
+     *         Set::add,
+     *         (s1, s2) -> { s1.addAll(s2); return s1; },
+     *         Collector.Characteristics.IDENTITY_FINISH
+     *     ));
+     * // returns [] (empty LinkedHashSet)
+     *
+     * // Null elements are accepted if the collection supports them
+     * List<String> withNull = Stream.of("a", null, "b")
+     *     .collect(Collectors.toCollection(
+     *         ArrayList::new,
+     *         List::add,
+     *         (l1, l2) -> { l1.addAll(l2); return l1; },
+     *         Collector.Characteristics.IDENTITY_FINISH
+     *     ));
+     * // returns [a, null, b]
+     * }</pre>
      *
      * @param <T> the type of input elements
      * @param <C> the type of the resulting collection
@@ -1342,8 +1386,15 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * <pre>{@code
      * // Collect stream elements to a list
      * List<String> list = Stream.of("apple", "banana", "orange")
-     *     .collect(Collectors.toList());
-     * // Result: ["apple", "banana", "orange"]
+     *     .collect(Collectors.toList());                  // returns ["apple", "banana", "orange"]
+     *
+     * // Collect empty stream returns empty list
+     * List<String> empty = Stream.<String>empty()
+     *     .collect(Collectors.toList());                  // returns []
+     *
+     * // Null elements are allowed
+     * List<String> withNull = Stream.of("a", null, "c")
+     *     .collect(Collectors.toList());                  // returns ["a", null, "c"]
      * }</pre>
      *
      * @param <T> the type of input elements
@@ -1380,8 +1431,11 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * <pre>{@code
      * // Collect to a LinkedList for efficient head/tail operations
      * LinkedList<Integer> linkedList = Stream.of(1, 2, 3, 4, 5)
-     *     .collect(Collectors.toLinkedList());
-     * // Can now efficiently use: linkedList.addFirst(0), linkedList.removeLast(), etc.
+     *     .collect(Collectors.toLinkedList());           // returns [1, 2, 3, 4, 5]
+     *
+     * // Collect empty stream returns empty LinkedList
+     * LinkedList<Integer> empty = Stream.<Integer>empty()
+     *     .collect(Collectors.toLinkedList());           // returns []
      * }</pre>
      *
      * @param <T> the type of input elements
@@ -1416,8 +1470,13 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * <pre>{@code
      * // Create an immutable list from stream elements
      * ImmutableList<String> immutable = Stream.of("a", "b", "c")
-     *     .collect(Collectors.toImmutableList());
-     * // immutable.add("d");   // This would throw UnsupportedOperationException
+     *     .collect(Collectors.toImmutableList());       // returns ["a", "b", "c"]
+     *
+     * // Collect empty stream returns empty ImmutableList
+     * ImmutableList<String> empty = Stream.<String>empty()
+     *     .collect(Collectors.toImmutableList());       // returns []
+     *
+     * // immutable.add("d");                            // throws UnsupportedOperationException
      * }</pre>
      *
      * @param <T> the type of input elements
@@ -1455,8 +1514,13 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * <pre>{@code
      * // Create an unmodifiable list
      * List<Integer> unmodifiable = Stream.of(1, 2, 3)
-     *     .collect(Collectors.toUnmodifiableList());
-     * // unmodifiable.add(4);   // This would throw UnsupportedOperationException
+     *     .collect(Collectors.toUnmodifiableList());  // returns [1, 2, 3]
+     *
+     * // Collect empty stream returns empty unmodifiable list
+     * List<Integer> empty = Stream.<Integer>empty()
+     *     .collect(Collectors.toUnmodifiableList());    // returns []
+     *
+     * // Stream.of("a", null).collect(Collectors.toUnmodifiableList()); // throws NullPointerException
      * }</pre>
      *
      * @param <T> the type of input elements
@@ -1487,10 +1551,17 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * // Collect unique elements to a set
+     * // Collect unique elements to a set (duplicates are removed)
      * Set<Integer> uniqueNumbers = Stream.of(1, 2, 2, 3, 3, 3)
-     *     .collect(Collectors.toSet());
-     * // Result: [1, 2, 3] (order not guaranteed)
+     *     .collect(Collectors.toSet());                 // returns [1, 2, 3] (order not guaranteed)
+     *
+     * // Collect empty stream returns empty set
+     * Set<Integer> empty = Stream.<Integer>empty()
+     *     .collect(Collectors.toSet());                  // returns []
+     *
+     * // Single element
+     * Set<Integer> single = Stream.of(1)
+     *     .collect(Collectors.toSet());                 // returns [1]
      * }</pre>
      *
      * @param <T> the type of input elements
@@ -1520,10 +1591,13 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * // Collect unique elements preserving order
+     * // Collect unique elements preserving insertion order
      * Set<String> orderedSet = Stream.of("c", "a", "b", "a", "c")
-     *     .collect(Collectors.toLinkedHashSet());
-     * // Result: ["c", "a", "b"] in that order
+     *     .collect(Collectors.toLinkedHashSet());      // returns ["c", "a", "b"] in encounter order
+     *
+     * // Collect empty stream returns empty LinkedHashSet
+     * Set<String> empty = Stream.<String>empty()
+     *     .collect(Collectors.toLinkedHashSet());      // returns []
      * }</pre>
      *
      * @param <T> the type of input elements
@@ -1551,11 +1625,15 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * // Create an immutable set from stream elements
+     * // Create an immutable set from stream elements (duplicates removed)
      * ImmutableSet<String> immutable = Stream.of("a", "b", "b", "c")
-     *     .collect(Collectors.toImmutableSet());
-     * // Result contains: ["a", "b", "c"]
-     * // immutable.add("d");   // This would throw UnsupportedOperationException
+     *     .collect(Collectors.toImmutableSet());       // returns ImmutableSet containing ["a", "b", "c"]
+     *
+     * // Collect empty stream returns empty ImmutableSet
+     * ImmutableSet<String> empty = Stream.<String>empty()
+     *     .collect(Collectors.toImmutableSet());       // returns empty ImmutableSet
+     *
+     * // immutable.add("d");                            // throws UnsupportedOperationException
      * }</pre>
      *
      * @param <T> the type of input elements
@@ -1588,11 +1666,15 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * // Create an unmodifiable set
+     * // Create an unmodifiable set (duplicates removed)
      * Set<Integer> unmodifiable = Stream.of(1, 2, 2, 3)
-     *     .collect(Collectors.toUnmodifiableSet());
-     * // Result contains: [1, 2, 3]
-     * // unmodifiable.add(4);   // This would throw UnsupportedOperationException
+     *     .collect(Collectors.toUnmodifiableSet());    // returns set containing [1, 2, 3]
+     *
+     * // Collect empty stream returns empty unmodifiable set
+     * Set<Integer> empty = Stream.<Integer>empty()
+     *     .collect(Collectors.toUnmodifiableSet());    // returns []
+     *
+     * // Stream.of(1, null, 3).collect(Collectors.toUnmodifiableSet()); // throws NullPointerException
      * }</pre>
      *
      * @param <T> the type of input elements
@@ -1623,8 +1705,11 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * <pre>{@code
      * // Collect elements into a queue for FIFO processing
      * Queue<String> taskQueue = Stream.of("task1", "task2", "task3")
-     *     .collect(Collectors.toQueue());
-     * // Process: taskQueue.poll() returns "task1", then "task2", then "task3"
+     *     .collect(Collectors.toQueue());               // returns queue with 3 elements
+     *
+     * // Collect empty stream returns empty queue
+     * Queue<String> empty = Stream.<String>empty()
+     *     .collect(Collectors.toQueue());               // returns empty queue
      * }</pre>
      *
      * @param <T> the type of input elements
@@ -1656,8 +1741,11 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * <pre>{@code
      * // Collect elements into a deque for flexible processing
      * Deque<Integer> deque = Stream.of(1, 2, 3, 4)
-     *     .collect(Collectors.toDeque());
-     * // Can use: deque.addFirst(), deque.removeLast(), etc.
+     *     .collect(Collectors.toDeque());                // returns deque with [1, 2, 3, 4]
+     *
+     * // Collect empty stream returns empty deque
+     * Deque<Integer> empty = Stream.<Integer>empty()
+     *     .collect(Collectors.toDeque());                // returns empty deque
      * }</pre>
      *
      * @param <T> the type of input elements
@@ -1682,11 +1770,15 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * // Collect at most 5 elements from a potentially large stream
-     * List<Integer> topFive = Stream.iterate(1, n -> n + 1)
-     *     .limit(1000)
-     *     .collect(Collectors.toList(5));
-     * // Result: [1, 2, 3, 4, 5]
+     * // Collect at most 3 elements from a large stream
+     * List<Integer> limited = Stream.of(1, 2, 3, 4, 5)
+     *     .collect(Collectors.toList(3));                // returns [1, 2, 3]
+     *
+     * // Fewer elements than limit - all are collected
+     * List<Integer> fewer = Stream.of(1, 2)
+     *     .collect(Collectors.toList(5));                // returns [1, 2]
+     *
+     * // Stream.of(1, 2, 3).collect(Collectors.toList(-1)); // throws IllegalArgumentException
      * }</pre>
      *
      * @param <T> the type of input elements
@@ -1715,8 +1807,9 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * <pre>{@code
      * // Collect at most 3 unique elements
      * Set<Integer> limitedSet = Stream.of(1, 2, 2, 3, 4, 5)
-     *     .collect(Collectors.toSet(3));
-     * // Result might be: [1, 2, 3] (order not guaranteed)
+     *     .collect(Collectors.toSet(3));                  // returns set with at most 3 elements
+     *
+     * // Stream.of(1, 2, 3).collect(Collectors.toSet(-1)); // throws IllegalArgumentException
      * }</pre>
      *
      * @param <T> the type of input elements
@@ -1744,9 +1837,11 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * <pre>{@code
      * // Count frequency of elements
      * Multiset<String> wordCounts = Stream.of("apple", "banana", "apple", "apple", "banana")
-     *     .collect(Collectors.toMultiset());
-     * // wordCounts.count("apple") returns 3
-     * // wordCounts.count("banana") returns 2
+     *     .collect(Collectors.toMultiset());             // returns a Multiset; countOf("apple") is 3
+     *
+     * // Collect empty stream returns empty Multiset
+     * Multiset<String> empty = Stream.<String>empty()
+     *     .collect(Collectors.toMultiset());             // returns empty Multiset
      * }</pre>
      *
      * @param <T> the type of input elements
@@ -1773,8 +1868,11 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * <pre>{@code
      * // Use a custom Multiset implementation
      * Multiset<Integer> counts = Stream.of(1, 2, 2, 3, 3, 3)
-     *     .collect(Collectors.toMultiset(HashMultiset::new));
-     * // counts.count(3) returns 3
+     *     .collect(Collectors.toMultiset(Multiset::new)); // returns a Multiset; countOf(3) is 3
+     *
+     * // Collect empty stream with custom supplier
+     * Multiset<Integer> empty = Stream.<Integer>empty()
+     *     .collect(Collectors.toMultiset(Multiset::new)); // returns empty Multiset
      * }</pre>
      *
      * @param <T> the type of input elements
@@ -1804,8 +1902,11 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * <pre>{@code
      * // Collect stream elements to an Object array
      * Object[] array = Stream.of("a", "b", "c")
-     *     .collect(Collectors.toArray());
-     * // Result: ["a", "b", "c"] as Object[]
+     *     .collect(Collectors.toArray());                // returns Object[]{"a", "b", "c"}
+     *
+     * // Collect empty stream returns empty array
+     * Object[] empty = Stream.<String>empty()
+     *     .collect(Collectors.toArray());                // returns Object[]{}
      * }</pre>
      *
      * @param <T> the type of input elements
@@ -1830,10 +1931,13 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * // Collect to a String array
+     * // Collect to a typed array
      * String[] strings = Stream.of("a", "b", "c")
-     *     .collect(Collectors.toArray(() -> new String[0]));
-     * // Result: ["a", "b", "c"] as String[]
+     *     .collect(Collectors.toArray(() -> new String[0])); // returns {"a", "b", "c"}
+     *
+     * // Collect empty stream returns empty typed array
+     * String[] empty = Stream.<String>empty()
+     *     .collect(Collectors.toArray(() -> new String[0])); // returns String[]{}
      * }</pre>
      *
      * @param <T> the type of input elements
@@ -1875,8 +1979,11 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * <pre>{@code
      * // Collect to an Integer array with exact sizing
      * Integer[] numbers = Stream.of(1, 2, 3, 4, 5)
-     *     .collect(Collectors.toArray(Integer[]::new));
-     * // Result: [1, 2, 3, 4, 5] as Integer[]
+     *     .collect(Collectors.toArray(Integer[]::new));   // returns {1, 2, 3, 4, 5}
+     *
+     * // Collect empty stream returns empty typed array
+     * Integer[] empty = Stream.<Integer>empty()
+     *     .collect(Collectors.toArray(Integer[]::new));   // returns Integer[]{}
      * }</pre>
      *
      * @param <T> the type of input elements
@@ -1909,8 +2016,11 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * <pre>{@code
      * // Collect boolean values efficiently
      * BooleanList flags = Stream.of(true, false, true, true, false)
-     *     .collect(Collectors.toBooleanList());
-     * // Result: [true, false, true, true, false] in BooleanList
+     *     .collect(Collectors.toBooleanList());        // returns BooleanList[true, false, true, true, false]
+     *
+     * // Collect empty stream returns empty BooleanList
+     * BooleanList empty = Stream.<Boolean>empty()
+     *     .collect(Collectors.toBooleanList());         // returns empty BooleanList
      * }</pre>
      *
      * @return a {@code Collector} which collects {@code Boolean} elements into a {@code BooleanList}
@@ -1938,8 +2048,11 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * <pre>{@code
      * // Convert Boolean stream to primitive array
      * boolean[] array = Stream.of(true, false, true)
-     *     .collect(Collectors.toBooleanArray());
-     * // Result: [true, false, true] as boolean[]
+     *     .collect(Collectors.toBooleanArray());        // returns boolean[]{true, false, true}
+     *
+     * // Collect empty stream returns empty array
+     * boolean[] empty = Stream.<Boolean>empty()
+     *     .collect(Collectors.toBooleanArray());         // returns boolean[]{}
      * }</pre>
      *
      * @return a {@code Collector} which collects {@code Boolean} elements into a {@code boolean[]}
@@ -1968,8 +2081,11 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * <pre>{@code
      * // Collect characters efficiently
      * CharList chars = Stream.of('a', 'b', 'c', 'd')
-     *     .collect(Collectors.toCharList());
-     * // Result: ['a', 'b', 'c', 'd'] in CharList
+     *     .collect(Collectors.toCharList());             // returns CharList['a', 'b', 'c', 'd']
+     *
+     * // Collect empty stream returns empty CharList
+     * CharList empty = Stream.<Character>empty()
+     *     .collect(Collectors.toCharList());            // returns empty CharList
      * }</pre>
      *
      * @return a {@code Collector} which collects {@code Character} elements into a {@code CharList}
@@ -1997,8 +2113,11 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * <pre>{@code
      * // Convert Character stream to primitive array
      * char[] array = Stream.of('H', 'e', 'l', 'l', 'o')
-     *     .collect(Collectors.toCharArray());
-     * // Result: ['H', 'e', 'l', 'l', 'o'] as char[]
+     *     .collect(Collectors.toCharArray());            // returns char[]{'H','e','l','l','o'}
+     *
+     * // Collect empty stream returns empty array
+     * char[] empty = Stream.<Character>empty()
+     *     .collect(Collectors.toCharArray());            // returns char[]{}
      * }</pre>
      *
      * @return a {@code Collector} which collects {@code Character} elements into a {@code char[]}
@@ -2027,8 +2146,11 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * <pre>{@code
      * // Collect bytes efficiently
      * ByteList bytes = Stream.of((byte)1, (byte)2, (byte)3)
-     *     .collect(Collectors.toByteList());
-     * // Result: [1, 2, 3] in ByteList
+     *     .collect(Collectors.toByteList());             // returns ByteList[1, 2, 3]
+     *
+     * // Collect empty stream returns empty ByteList
+     * ByteList empty = Stream.<Byte>empty()
+     *     .collect(Collectors.toByteList());             // returns empty ByteList
      * }</pre>
      *
      * @return a {@code Collector} which collects {@code Byte} elements into a {@code ByteList}
@@ -2056,8 +2178,11 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * <pre>{@code
      * // Convert Byte stream to primitive array
      * byte[] array = Stream.of((byte)10, (byte)20, (byte)30)
-     *     .collect(Collectors.toByteArray());
-     * // Result: [10, 20, 30] as byte[]
+     *     .collect(Collectors.toByteArray());             // returns byte[]{10, 20, 30}
+     *
+     * // Collect empty stream returns empty array
+     * byte[] empty = Stream.<Byte>empty()
+     *     .collect(Collectors.toByteArray());             // returns byte[]{}
      * }</pre>
      *
      * @return a {@code Collector} which collects {@code Byte} elements into a {@code byte[]}
@@ -2086,8 +2211,11 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * <pre>{@code
      * // Collect shorts efficiently
      * ShortList shorts = Stream.of((short)100, (short)200, (short)300)
-     *     .collect(Collectors.toShortList());
-     * // Result: [100, 200, 300] in ShortList
+     *     .collect(Collectors.toShortList());            // returns ShortList[100, 200, 300]
+     *
+     * // Collect empty stream returns empty ShortList
+     * ShortList empty = Stream.<Short>empty()
+     *     .collect(Collectors.toShortList());            // returns empty ShortList
      * }</pre>
      *
      * @return a {@code Collector} which collects {@code Short} elements into a {@code ShortList}
@@ -2115,8 +2243,11 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * <pre>{@code
      * // Convert Short stream to primitive array
      * short[] array = Stream.of((short)1, (short)2, (short)3)
-     *     .collect(Collectors.toShortArray());
-     * // Result: [1, 2, 3] as short[]
+     *     .collect(Collectors.toShortArray());           // returns short[]{1, 2, 3}
+     *
+     * // Collect empty stream returns empty array
+     * short[] empty = Stream.<Short>empty()
+     *     .collect(Collectors.toShortArray());            // returns short[]{}
      * }</pre>
      *
      * @return a {@code Collector} which collects {@code Short} elements into a {@code short[]}
@@ -2143,10 +2274,13 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * // Collect integers efficiently
+     * // Collect integers efficiently (avoids boxing)
      * IntList ints = Stream.of(1, 2, 3, 4, 5)
-     *     .collect(Collectors.toIntList());
-     * // Result: [1, 2, 3, 4, 5] in IntList
+     *     .collect(Collectors.toIntList());              // returns IntList[1, 2, 3, 4, 5]
+     *
+     * // Collect empty stream returns empty IntList
+     * IntList empty = Stream.<Integer>empty()
+     *     .collect(Collectors.toIntList());              // returns empty IntList
      * }</pre>
      *
      * @return a {@code Collector} which collects {@code Integer} elements into an {@code IntList}
@@ -2174,8 +2308,11 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * <pre>{@code
      * // Convert Integer stream to primitive array
      * int[] array = Stream.of(10, 20, 30, 40, 50)
-     *     .collect(Collectors.toIntArray());
-     * // Result: [10, 20, 30, 40, 50] as int[]
+     *     .collect(Collectors.toIntArray());              // returns int[]{10, 20, 30, 40, 50}
+     *
+     * // Collect empty stream returns empty array
+     * int[] empty = Stream.<Integer>empty()
+     *     .collect(Collectors.toIntArray());              // returns int[]{}
      * }</pre>
      *
      * @return a {@code Collector} which collects {@code Integer} elements into an {@code int[]}
@@ -2202,10 +2339,13 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * // Collect longs efficiently
+     * // Collect longs efficiently (avoids boxing)
      * LongList longs = Stream.of(1000L, 2000L, 3000L)
-     *     .collect(Collectors.toLongList());
-     * // Result: [1000, 2000, 3000] in LongList
+     *     .collect(Collectors.toLongList());              // returns LongList[1000, 2000, 3000]
+     *
+     * // Collect empty stream returns empty LongList
+     * LongList empty = Stream.<Long>empty()
+     *     .collect(Collectors.toLongList());              // returns empty LongList
      * }</pre>
      *
      * @return a {@code Collector} which collects {@code Long} elements into a {@code LongList}
@@ -2233,8 +2373,11 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * <pre>{@code
      * // Convert Long stream to primitive array
      * long[] array = Stream.of(100L, 200L, 300L)
-     *     .collect(Collectors.toLongArray());
-     * // Result: [100, 200, 300] as long[]
+     *     .collect(Collectors.toLongArray());              // returns long[]{100, 200, 300}
+     *
+     * // Collect empty stream returns empty array
+     * long[] empty = Stream.<Long>empty()
+     *     .collect(Collectors.toLongArray());               // returns long[]{}
      * }</pre>
      *
      * @return a {@code Collector} which collects {@code Long} elements into a {@code long[]}
@@ -2261,10 +2404,13 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * // Collect floats efficiently
+     * // Collect floats efficiently (avoids boxing)
      * FloatList floats = Stream.of(1.5f, 2.5f, 3.5f)
-     *     .collect(Collectors.toFloatList());
-     * // Result: [1.5, 2.5, 3.5] in FloatList
+     *     .collect(Collectors.toFloatList());            // returns FloatList[1.5, 2.5, 3.5]
+     *
+     * // Collect empty stream returns empty FloatList
+     * FloatList empty = Stream.<Float>empty()
+     *     .collect(Collectors.toFloatList());            // returns empty FloatList
      * }</pre>
      *
      * @return a {@code Collector} which collects {@code Float} elements into a {@code FloatList}
@@ -2293,7 +2439,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * // Convert Float stream to primitive array
      * float[] array = Stream.of(1.0f, 2.0f, 3.0f)
      *     .collect(Collectors.toFloatArray());
-     * // Result: [1.0, 2.0, 3.0] as float[]
+     * // returns [1.0, 2.0, 3.0] as float[]
      * }</pre>
      *
      * @return a {@code Collector} which collects {@code Float} elements into a {@code float[]}
@@ -2323,7 +2469,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * // Collect doubles efficiently
      * DoubleList doubles = Stream.of(1.5, 2.5, 3.5)
      *     .collect(Collectors.toDoubleList());
-     * // Result: [1.5, 2.5, 3.5] in DoubleList
+     * // returns [1.5, 2.5, 3.5] in DoubleList
      * }</pre>
      *
      * @return a {@code Collector} which collects {@code Double} elements into a {@code DoubleList}
@@ -2352,7 +2498,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * // Convert Double stream to primitive array
      * double[] array = Stream.of(1.1, 2.2, 3.3)
      *     .collect(Collectors.toDoubleArray());
-     * // Result: [1.1, 2.2, 3.3] as double[]
+     * // returns [1.1, 2.2, 3.3] as double[]
      * }</pre>
      *
      * @return a {@code Collector} which collects {@code Double} elements into a {@code double[]}
@@ -2404,11 +2550,18 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * // Find the only element matching a condition
-     * Optional<String> result = list.stream()
-     *     .filter(s -> s.startsWith("unique"))
+     * // Stream with exactly one element returns it
+     * Optional<Integer> single = Stream.of(42)
      *     .collect(Collectors.onlyOne());
+     * // returns Optional[42]
+     *
+     * // Empty stream returns Optional.empty()
+     * Optional<Integer> empty = Stream.<Integer>empty()
+     *     .collect(Collectors.onlyOne());
+     * // returns Optional.empty
+     *
      * // Throws TooManyElementsException if multiple matches found
+     * Stream.of(1, 2, 3).collect(Collectors.onlyOne()); // throws TooManyElementsException
      * }</pre>
      *
      * @param <T> the type of input elements
@@ -2442,7 +2595,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * // Find the only even number in a specific range
      * Optional<Integer> onlyEven = Stream.of(1, 3, 4, 5, 7)
      *     .collect(Collectors.onlyOne(n -> n % 2 == 0));
-     * // Result: Optional[4]
+     * // returns Optional[4]
      * }</pre>
      *
      * @param <T> the type of input elements
@@ -2495,7 +2648,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * // Get the first element as a collector
      * Optional<String> first = Stream.of("a", "b", "c")
      *     .collect(Collectors.first());
-     * // Result: Optional["a"]
+     * // returns Optional["a"]
      * }</pre>
      *
      * @param <T> the type of input elements
@@ -2529,7 +2682,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * // Get the last element as a collector
      * Optional<String> last = Stream.of("a", "b", "c")
      *     .collect(Collectors.last());
-     * // Result: Optional["c"]
+     * // returns Optional["c"]
      * }</pre>
      *
      * @param <T> the type of input elements
@@ -2563,7 +2716,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * // Get the first 3 elements
      * List<Integer> firstThree = Stream.of(1, 2, 3, 4, 5)
      *     .collect(Collectors.first(3));
-     * // Result: [1, 2, 3]
+     * // returns [1, 2, 3]
      * }</pre>
      *
      * @param <T> the type of input elements
@@ -2611,7 +2764,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * // Get the last 3 elements
      * List<Integer> lastThree = Stream.of(1, 2, 3, 4, 5)
      *     .collect(Collectors.last(3));
-     * // Result: [3, 4, 5]
+     * // returns [3, 4, 5]
      * }</pre>
      *
      * @param <T> the type of input elements
@@ -2666,7 +2819,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * // Concatenate characters into a string
      * String result = Stream.of("H", "e", "l", "l", "o")
      *     .collect(Collectors.joining());
-     * // Result: "Hello"
+     * // returns "Hello"
      * }</pre>
      *
      * @return a {@code Collector} which concatenates input elements into a {@code String}
@@ -2691,7 +2844,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * // Create comma-separated values
      * String csv = Stream.of("apple", "banana", "orange")
      *     .collect(Collectors.joining(", "));
-     * // Result: "apple, banana, orange"
+     * // returns "apple, banana, orange"
      * }</pre>
      *
      * @param delimiter the delimiter to be used between each element
@@ -2719,7 +2872,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * // Create a formatted list
      * String list = Stream.of("apple", "banana", "orange")
      *     .collect(Collectors.joining(", ", "[", "]"));
-     * // Result: "[apple, banana, orange]"
+     * // returns "[apple, banana, orange]"
      * }</pre>
      *
      * @param delimiter the delimiter to be used between each element
@@ -2756,7 +2909,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * // Collect only even numbers to a list
      * List<Integer> evens = Stream.of(1, 2, 3, 4, 5, 6)
      *     .collect(Collectors.filtering(n -> n % 2 == 0, Collectors.toList()));
-     * // Result: [2, 4, 6]
+     * // returns [2, 4, 6]
      * }</pre>
      *
      * @param <T> the type of the input elements
@@ -2796,7 +2949,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * // Filter and collect positive numbers
      * List<Integer> positives = Stream.of(-1, 2, -3, 4, -5, 6)
      *     .collect(Collectors.filteringToList(n -> n > 0));
-     * // Result: [2, 4, 6]
+     * // returns [2, 4, 6]
      * }</pre>
      *
      * @param <T> the type of the input elements
@@ -2828,7 +2981,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * // Collect string lengths to a list
      * List<Integer> lengths = Stream.of("apple", "banana", "orange")
      *     .collect(Collectors.mapping(String::length, Collectors.toList()));
-     * // Result: [5, 6, 6]
+     * // returns [5, 6, 6]
      * }</pre>
      *
      * @param <T> the type of the input elements
@@ -2864,7 +3017,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * // Extract and collect first characters
      * List<Character> firstChars = Stream.of("apple", "banana", "cherry")
      *     .collect(Collectors.mappingToList(s -> s.charAt(0)));
-     * // Result: ['a', 'b', 'c']
+     * // returns ['a', 'b', 'c']
      * }</pre>
      *
      * @param <T> the type of the input elements
@@ -2894,7 +3047,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * // Flatten nested lists during collection
      * List<Integer> flattened = Stream.of(Arrays.asList(1, 2), Arrays.asList(3, 4))
      *     .collect(Collectors.flatMapping(list -> list.stream(), Collectors.toList()));
-     * // Result: [1, 2, 3, 4]
+     * // returns [1, 2, 3, 4]
      * }</pre>
      *
      * @param <T> the type of the input elements
@@ -2939,7 +3092,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * List<Character> chars = Stream.of("abc", "def")
      *     .collect(Collectors.flatMappingToList(
      *         s -> s.chars().mapToObj(c -> (char)c)));
-     * // Result: ['a', 'b', 'c', 'd', 'e', 'f']
+     * // returns ['a', 'b', 'c', 'd', 'e', 'f']
      * }</pre>
      *
      * @param <T> the type of the input elements
@@ -2973,7 +3126,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * map.put("b", Arrays.asList(3, 4));
      * List<Integer> values = map.entrySet().stream()
      *     .collect(Collectors.flatmapping(Map.Entry::getValue, Collectors.toList()));
-     * // Result: [1, 2, 3, 4]
+     * // returns [1, 2, 3, 4]
      * }</pre>
      *
      * @param <T> the type of the input elements
@@ -3052,7 +3205,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      *     .collect(Collectors.collectingAndThen(
      *         Collectors.toList(),
      *         List::size));
-     * // Result: 3
+     * // returns 3
      * }</pre>
      *
      * @param <T> the type of the input elements
@@ -3100,16 +3253,16 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * // Returns Optional.empty() for empty stream
+     * // returns Optional.empty() for empty stream
      * Optional<List<String>> result = Stream.<String>empty()
      *     .collect(Collectors.collectingOrEmpty(Collectors.toList()));
-     * // Result: Optional.empty()
+     * // returns Optional.empty()
      *
-     * // Returns Optional.empty() when no elements reach the collector
+     * // returns Optional.empty() when no elements reach the collector
      * Optional<List<String>> filtered = Stream.of("a", "b", "c")
      *     .filter(s -> s.length() > 5)
      *     .collect(Collectors.collectingOrEmpty(Collectors.toList()));
-     * // Result: Optional.empty() (no elements were accumulated)
+     * // returns Optional.empty() (no elements were accumulated)
      * }</pre>
      *
      * @param <T> the type of the input elements
@@ -3170,7 +3323,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      *     .collect(Collectors.collectingOrDefaultIfEmpty(
      *         Collectors.toList(),
      *         Arrays.asList("default")));
-     * // Result: ["default"]
+     * // returns ["default"]
      * }</pre>
      *
      * @param <T> the type of the input elements
@@ -3262,11 +3415,11 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * // Throws if no elements match
+     * // Collecting empty stream throws NoSuchElementException
      * List<String> result = Stream.of("a", "b", "c")
      *     .filter(s -> s.length() > 5)
      *     .collect(Collectors.collectingOrElseThrowIfEmpty(Collectors.toList()));
-     * // Throws NoSuchElementException
+     * // throws NoSuchElementException
      * }</pre>
      *
      * @param <T> the type of the input elements
@@ -3294,7 +3447,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * // Throws custom exception if no valid data found
+     * // throws custom exception if no valid data found
      * List<Data> result = dataStream
      *     .filter(Data::isValid)
      *     .collect(Collectors.collectingOrElseThrowIfEmpty(
@@ -3423,7 +3576,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * // Count unique departments
      * Integer uniqueDepartments = employees.stream()
      *     .collect(Collectors.distinctByToCounting(Employee::getDepartment));
-     * // Result: number of distinct departments
+     * // returns number of distinct departments
      * }</pre>
      *
      * @param <T> the type of the input elements
@@ -3517,7 +3670,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * // Find minimum value
      * Optional<Integer> min = Stream.of(3, 1, 4, 1, 5)
      *     .collect(Collectors.min());
-     * // Result: Optional[1]
+     * // returns Optional[1]
      * }</pre>
      *
      * @param <T> the type of the input elements, must be {@code Comparable}
@@ -3542,7 +3695,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * // Find shortest string
      * Optional<String> shortest = Stream.of("apple", "pie", "banana")
      *     .collect(Collectors.min(Comparator.comparing(String::length)));
-     * // Result: Optional["pie"]
+     * // returns Optional["pie"]
      * }</pre>
      *
      * @param <T> the type of the input elements
@@ -3572,7 +3725,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * // Find minimum with default
      * Integer min = Stream.<Integer>empty()
      *     .collect(Collectors.minOrElse(Integer.MAX_VALUE));
-     * // Result: Integer.MAX_VALUE (the default)
+     * // returns Integer.MAX_VALUE (the default)
      * }</pre>
      *
      * @param <T> the type of the input elements, must be {@code Comparable}
@@ -3599,7 +3752,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      *     .collect(Collectors.minOrElse(
      *         Comparator.comparing(String::length),
      *         "NO_DATA"));
-     * // Result: "NO_DATA" if stream is empty
+     * // returns "NO_DATA" if stream is empty
      * }</pre>
      *
      * @param <T> the type of the input elements
@@ -3628,12 +3781,12 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * // Get minimum or default value
      * Integer min = Stream.of(5, 3, 8, 2)
      *     .collect(Collectors.minOrElseGet(() -> 0));
-     * // Result: 2
+     * // returns 2
      *
      * // Empty stream returns default
      * Integer defaultMin = Stream.<Integer>empty()
      *     .collect(Collectors.minOrElseGet(() -> -1));
-     * // Result: -1
+     * // returns -1
      * }</pre>
      *
      * @param <T> the type of input elements
@@ -3659,7 +3812,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      *     .collect(Collectors.minOrElseGet(
      *         Comparator.comparingInt(String::length),
      *         () -> "none"));
-     * // Result: "pi"
+     * // returns "pi"
      * }</pre>
      *
      * @param <T> the type of input elements
@@ -3692,7 +3845,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * // Find minimum element
      * Integer min = Stream.of(5, 3, 8, 2)
      *     .collect(Collectors.minOrElseThrow());
-     * // Result: 2
+     * // returns 2
      *
      * // Empty stream throws exception
      * Stream.<Integer>empty()
@@ -3720,7 +3873,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * String shortest = Stream.of("apple", "pi", "banana")
      *     .collect(Collectors.minOrElseThrow(
      *         Comparator.comparingInt(String::length)));
-     * // Result: "pi"
+     * // returns "pi"
      * }</pre>
      *
      * @param <T> the type of input elements
@@ -3886,7 +4039,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * // Find maximum element
      * Optional<Integer> max = Stream.of(5, 3, 8, 2)
      *     .collect(Collectors.max());
-     * // Result: Optional[8]
+     * // returns Optional[8]
      * }</pre>
      *
      * @param <T> the type of input elements
@@ -3909,7 +4062,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * // Find longest string
      * Optional<String> longest = Stream.of("apple", "pi", "banana")
      *     .collect(Collectors.max(Comparator.comparingInt(String::length)));
-     * // Result: Optional["banana"]
+     * // returns Optional["banana"]
      * }</pre>
      *
      * @param <T> the type of input elements
@@ -3937,12 +4090,12 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * // Find maximum with default value
      * Integer max = Stream.of(5, 3, 8, 2)
      *     .collect(Collectors.maxOrElse(0));
-     * // Result: 8
+     * // returns 8
      *
      * // Empty stream returns default
      * Integer defaultMax = Stream.<Integer>empty()
      *     .collect(Collectors.maxOrElse(0));
-     * // Result: 0
+     * // returns 0
      * }</pre>
      *
      * @param <T> the type of input elements
@@ -3967,7 +4120,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      *     .collect(Collectors.maxOrElse(
      *         Comparator.comparingInt(String::length),
      *         "empty"));
-     * // Result: "banana"
+     * // returns "banana"
      * }</pre>
      *
      * @param <T> the type of input elements
@@ -3992,7 +4145,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * // Find maximum or compute default
      * Integer max = Stream.of(5, 3, 8, 2)
      *     .collect(Collectors.maxOrElseGet(() -> computeDefault()));
-     * // Result: 8
+     * // returns 8
      * }</pre>
      *
      * @param <T> the type of input elements
@@ -4047,7 +4200,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * // Find maximum element
      * Integer max = Stream.of(5, 3, 8, 2)
      *     .collect(Collectors.maxOrElseThrow());
-     * // Result: 8
+     * // returns 8
      *
      * // Empty stream throws exception
      * Stream.<Integer>empty()
@@ -4075,7 +4228,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * String longest = Stream.of("apple", "pi", "banana")
      *     .collect(Collectors.maxOrElseThrow(
      *         Comparator.comparingInt(String::length)));
-     * // Result: "banana"
+     * // returns "banana"
      * }</pre>
      *
      * @param <T> the type of input elements
@@ -4234,12 +4387,12 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * // Find all minimum integers
      * List<Integer> mins = Stream.of(3, 1, 4, 1, 5, 1)
      *     .collect(Collectors.minAll());
-     * // Result: [1, 1, 1]
+     * // returns [1, 1, 1]
      *
      * // Find all lexicographically smallest strings
      * List<String> smallest = Stream.of("apple", "pie", "cat", "dog")
      *     .collect(Collectors.minAll());
-     * // Result: ["apple"] ("apple" is smallest in natural/lexicographic ordering)
+     * // returns ["apple"] ("apple" is smallest in natural/lexicographic ordering)
      * }</pre>
      *
      * @param <T> the type of the input elements
@@ -4270,7 +4423,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * // Find all strings with minimum length (case-insensitive)
      * List<String> shortest = Stream.of("Apple", "pie", "CAT", "dog")
      *     .collect(Collectors.minAll(Comparator.comparingInt(String::length)));
-     * // Result: ["pie", "CAT", "dog"]
+     * // returns ["pie", "CAT", "dog"]
      * }</pre>
      *
      * @param <T> the type of the input elements
@@ -4297,7 +4450,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * // Find at most 5 minimum values
      * List<Integer> mins = Stream.of(1, 3, 1, 5, 1, 2, 1)
      *     .collect(Collectors.minAll(Comparator.naturalOrder(), 5));
-     * // Result: [1, 1, 1, 1] (all minimal values, limited by actual count)
+     * // returns [1, 1, 1, 1] (all minimal values, limited by actual count)
      * }</pre>
      *
      * @param <T> the type of the input elements
@@ -4323,12 +4476,12 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * // Count how many minimum values exist
      * Long minCount = Stream.of(3, 1, 4, 1, 5, 1)
      *     .collect(Collectors.minAll(Collectors.counting()));
-     * // Result: 3
+     * // returns 3
      *
      * // Join all minimum strings
      * String joined = Stream.of("apple", "pie", "cat", "dog")
      *     .collect(Collectors.minAll(Collectors.joining(", ")));
-     * // Result: "apple"
+     * // returns "apple"
      * }</pre>
      *
      * @param <T> the type of the input elements
@@ -4399,7 +4552,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * // Find minimum value and count of occurrences
      * Optional<Pair<Integer, Long>> result = Stream.of(1, 3, 1, 5, 1)
      *     .collect(Collectors.minAllWith(Collectors.counting()));
-     * // Result: Optional[Pair(1, 3)]
+     * // returns Optional[Pair(1, 3)]
      * }</pre>
      *
      * @param <T> the type of the input elements
@@ -4429,7 +4582,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      *     .collect(Collectors.minAllWith(
      *         Comparator.comparingInt(String::length),
      *         Collectors.joining(",")));
-     * // Result: Optional[Pair("a", "a,a")]
+     * // returns Optional[Pair("a", "a,a")]
      * }</pre>
      *
      * @param <T> the type of the input elements
@@ -4461,7 +4614,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      *         Collectors.counting(),
      *         opt -> opt.map(p -> "Min: " + p.left() + ", Count: " + p.right())
      *                   .orElse("No elements")));
-     * // Result: "Min: 1, Count: 3"
+     * // returns "Min: 1, Count: 3"
      * }</pre>
      *
      * @param <T> the type of the input elements
@@ -4491,12 +4644,12 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * // Find all maximum integers
      * List<Integer> maxs = Stream.of(3, 5, 4, 5, 1, 5)
      *     .collect(Collectors.maxAll());
-     * // Result: [5, 5, 5]
+     * // returns [5, 5, 5]
      *
      * // Find all lexicographically largest strings
      * List<String> largest = Stream.of("apple", "pie", "banana", "cherry")
      *     .collect(Collectors.maxAll());
-     * // Result: ["pie"]
+     * // returns ["pie"]
      * }</pre>
      *
      * @param <T> the type of the input elements
@@ -4527,7 +4680,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * // Find all strings with maximum length
      * List<String> longest = Stream.of("Apple", "pie", "banana", "cherry")
      *     .collect(Collectors.maxAll(Comparator.comparingInt(String::length)));
-     * // Result: ["banana", "cherry"]
+     * // returns ["banana", "cherry"]
      * }</pre>
      *
      * @param <T> the type of the input elements
@@ -4554,7 +4707,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * // Find at most 3 maximum values
      * List<Integer> maxs = Stream.of(5, 3, 5, 1, 5, 2)
      *     .collect(Collectors.maxAll(Comparator.naturalOrder(), 3));
-     * // Result: [5, 5, 5]
+     * // returns [5, 5, 5]
      * }</pre>
      *
      * @param <T> the type of the input elements
@@ -4634,12 +4787,12 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * // Count how many maximum values exist
      * Long maxCount = Stream.of(3, 5, 4, 5, 1, 5)
      *     .collect(Collectors.maxAll(Collectors.counting()));
-     * // Result: 3
+     * // returns 3
      *
      * // Join all maximum strings with a delimiter
      * String joined = Stream.of("apple", "pie", "banana", "cherry")
      *     .collect(Collectors.maxAll(Collectors.joining(" & ")));
-     * // Result: "pie"
+     * // returns "pie"
      * }</pre>
      *
      * @param <T> the type of the input elements
@@ -4789,7 +4942,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * // Find maximum value and sum of all maximums
      * Optional<Pair<Integer, Integer>> result = Stream.of(5, 3, 5, 1, 5)
      *     .collect(Collectors.maxAllWith(Collectors.summingInt(i -> i)));
-     * // Result: Optional[Pair(5, 15)]
+     * // returns Optional[Pair(5, 15)]
      * }</pre>
      *
      * @param <T> the type of the input elements
@@ -4819,7 +4972,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      *     .collect(Collectors.maxAllWith(
      *         Comparator.comparingInt(String::length),
      *         Collectors.joining("-")));
-     * // Result: Optional[Pair("abc", "abc-def")]
+     * // returns Optional[Pair("abc", "abc-def")]
      * }</pre>
      *
      * @param <T> the type of the input elements
@@ -4850,7 +5003,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      *         Comparator.naturalOrder(),
      *         Collectors.toList(),
      *         opt -> opt.isPresent() && opt.get().right().size() > 1));
-     * // Result: true (multiple elements with max value 5)
+     * // returns true (multiple elements with max value 5)
      * }</pre>
      *
      * @param <T> the type of the input elements
@@ -4967,7 +5120,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * // Find min and max from a stream of integers
      * Optional<Pair<Integer, Integer>> result = Stream.of(5, 2, 8, 1, 9)
      *     .collect(Collectors.minMax());
-     * // Result: Optional[Pair(1, 9)]
+     * // returns Optional[Pair(1, 9)]
      * }</pre>
      *
      * @param <T> the type of input elements, must be Comparable
@@ -4995,7 +5148,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * // Find shortest and longest strings
      * Optional<Pair<String, String>> result = Stream.of("a", "abc", "ab", "abcd")
      *     .collect(Collectors.minMax(Comparator.comparing(String::length)));
-     * // Result: Optional[Pair(a, abcd)]
+     * // returns Optional[Pair(a, abcd)]
      * }</pre>
      *
      * @param <T> the type of input elements
@@ -5030,7 +5183,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * // Calculate the range (difference between max and min)
      * Optional<Integer> range = Stream.of(5, 2, 8, 1, 9)
      *     .collect(Collectors.minMax(Integer::compare, (min, max) -> max - min));
-     * // Result: Optional[8]
+     * // returns Optional[8]
      * }</pre>
      *
      * @param <T> the type of the input elements
@@ -5118,7 +5271,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * // Find min and max with default values
      * Pair<Integer, Integer> result = Stream.<Integer>empty()
      *     .collect(Collectors.minMaxOrElseGet(() -> Pair.of(0, 100)));
-     * // Result: Pair(0, 100)
+     * // returns Pair(0, 100)
      * }</pre>
      *
      * @param <T> the type of input elements, must be Comparable
@@ -5145,7 +5298,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      *     .collect(Collectors.minMaxOrElseGet(
      *         Comparator.comparing(String::length),
      *         () -> Pair.of("", "default")));
-     * // Result: Pair(, default)
+     * // returns Pair(, default)
      * }</pre>
      *
      * @param <T> the type of input elements
@@ -5178,7 +5331,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * // This will throw NoSuchElementException if stream is empty
      * Pair<Integer, Integer> result = Stream.of(5, 2, 8, 1, 9)
      *     .collect(Collectors.minMaxOrElseThrow());
-     * // Result: Pair(1, 9)
+     * // returns Pair(1, 9)
      * }</pre>
      *
      * @param <T> the type of input elements, must be Comparable
@@ -5202,7 +5355,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * Pair<String, String> result = Stream.of("a", "abc", "ab")
      *     .collect(Collectors.minMaxOrElseThrow(
      *         Comparator.comparing(String::length)));
-     * // Result: Pair(a, abc)
+     * // returns Pair(a, abc)
      * }</pre>
      *
      * @param <T> the type of input elements
@@ -5232,7 +5385,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * // Sum the lengths of all strings
      * Integer totalLength = Stream.of("hello", "world", "!")
      *     .collect(Collectors.summingInt(String::length));
-     * // Result: 11
+     * // returns 11
      * }</pre>
      *
      * @param <T> the type of input elements
@@ -5258,7 +5411,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * // Sum large numbers safely
      * Long total = Stream.of(1_000_000, 2_000_000, 3_000_000)
      *     .collect(Collectors.summingIntToLong(i -> i));
-     * // Result: 6000000L
+     * // returns 6000000L
      * }</pre>
      *
      * @param <T> the type of input elements
@@ -5334,7 +5487,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * // Sum very large numbers
      * BigInteger total = Stream.of("1000000000000000000", "2000000000000000000")
      *     .collect(Collectors.summingBigInteger(BigInteger::new));
-     * // Result: 3000000000000000000
+     * // returns 3000000000000000000
      * }</pre>
      *
      * @param <T> the type of input elements
@@ -5389,7 +5542,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * // Calculate average length of strings
      * Double avgLength = Stream.of("hello", "world", "!")
      *     .collect(Collectors.averagingInt(String::length));
-     * // Result: 3.6666666666666665 (average of 5, 5, and 1)
+     * // returns 3.6666666666666665 (average of 5, 5, and 1)
      *
      * // Calculate average age of people
      * List<Person> people = Arrays.asList(
@@ -5399,12 +5552,12 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * );
      * Double avgAge = people.stream()
      *     .collect(Collectors.averagingInt(Person::getAge));
-     * // Result: 30.0
+     * // returns 30.0
      *
      * // Empty stream returns 0.0
      * Double emptyAvg = Stream.<String>empty()
      *     .collect(Collectors.averagingInt(String::length));
-     * // Result: 0.0
+     * // returns 0.0
      * }</pre>
      *
      * @param <T> the type of input elements
@@ -5437,20 +5590,20 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * // Calculate average length of strings with Optional result
      * OptionalDouble avgLength = Stream.of("hello", "world", "!")
      *     .collect(Collectors.averagingIntOrEmpty(String::length));
-     * // Result: OptionalDouble[3.6666666666666665]
+     * // returns OptionalDouble[3.6666666666666665]
      * avgLength.ifPresent(avg -> System.out.println("Average: " + avg));
      *
      * // Empty stream returns empty Optional
      * OptionalDouble emptyAvg = Stream.<String>empty()
      *     .collect(Collectors.averagingIntOrEmpty(String::length));
-     * // Result: OptionalDouble.empty
+     * // returns OptionalDouble.empty
      * System.out.println(emptyAvg.isPresent()); // false
      *
      * // Safe handling with orElse
      * double result = Stream.of("a", "bb")
      *     .collect(Collectors.averagingIntOrEmpty(String::length))
      *     .orElse(0.0);
-     * // Result: 1.5
+     * // returns 1.5
      * }</pre>
      *
      * @param <T> the type of input elements
@@ -5493,7 +5646,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * );
      * Double avgAge = people.stream()
      *     .collect(Collectors.averagingIntOrElseThrow(Person::getAge));
-     * // Result: 27.5
+     * // returns 27.5
      *
      * // Empty stream throws exception
      * try {
@@ -5556,7 +5709,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * // Empty stream returns 0.0
      * Double emptyAvg = Stream.<File>empty()
      *     .collect(Collectors.averagingLong(File::length));
-     * // Result: 0.0
+     * // returns 0.0
      * }</pre>
      *
      * @param <T> the type of input elements
@@ -5696,18 +5849,18 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * );
      * Double avgPrice = products.stream()
      *     .collect(Collectors.averagingDouble(Product::getPrice));
-     * // Result: 369.99
+     * // returns 369.99
      *
      * // Calculate average score
      * List<Double> scores = Arrays.asList(85.5, 90.0, 78.3, 92.7);
      * Double avgScore = scores.stream()
      *     .collect(Collectors.averagingDouble(d -> d));
-     * // Result: 86.625
+     * // returns 86.625
      *
      * // Empty stream returns 0.0
      * Double emptyAvg = Stream.<Product>empty()
      *     .collect(Collectors.averagingDouble(Product::getPrice));
-     * // Result: 0.0
+     * // returns 0.0
      * }</pre>
      *
      * @param <T> the type of input elements
@@ -5794,7 +5947,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * );
      * Double avgScore = students.stream()
      *     .collect(Collectors.averagingDoubleOrElseThrow(Student::getScore));
-     * // Result: 85.26666666666667
+     * // returns 85.26666666666667
      *
      * // Empty stream throws exception
      * try {
@@ -5842,7 +5995,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * BigDecimal avg = Stream.of("1000000000000000000", "2000000000000000000", "3000000000000000000")
      *     .map(BigInteger::new)
      *     .collect(Collectors.averagingBigInteger(n -> n));
-     * // Result: 2000000000000000000
+     * // returns 2000000000000000000
      *
      * // Average account balances with precise arithmetic
      * List<Account> accounts = getAccounts();
@@ -5852,7 +6005,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * // Empty stream returns BigDecimal.ZERO
      * BigDecimal emptyAvg = Stream.<BigInteger>empty()
      *     .collect(Collectors.averagingBigInteger(n -> n));
-     * // Result: BigDecimal.ZERO
+     * // returns BigDecimal.ZERO
      * }</pre>
      *
      * @param <T> the type of input elements
@@ -5992,7 +6145,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * );
      * BigDecimal avgAmount = transactions.stream()
      *     .collect(Collectors.averagingBigDecimal(Transaction::getAmount));
-     * // Result: 175.50 (precise)
+     * // returns 175.50 (precise)
      *
      * // Average prices with full precision
      * List<BigDecimal> prices = Arrays.asList(
@@ -6002,12 +6155,12 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * );
      * BigDecimal avgPrice = prices.stream()
      *     .collect(Collectors.averagingBigDecimal(p -> p));
-     * // Result: 29.99 (exact)
+     * // returns 29.99 (exact)
      *
      * // Empty stream returns BigDecimal.ZERO
      * BigDecimal emptyAvg = Stream.<BigDecimal>empty()
      *     .collect(Collectors.averagingBigDecimal(d -> d));
-     * // Result: BigDecimal.ZERO
+     * // returns BigDecimal.ZERO
      * }</pre>
      *
      * @param <T> the type of input elements
@@ -6150,7 +6303,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * System.out.println("Count: " + stats.getCount());       // 4
      * System.out.println("Min: " + stats.getMin());           // 'a'
      * System.out.println("Max: " + stats.getMax());           // 'd'
-     * System.out.println("Average: " + stats.getAverage());   // average of char values
+     * System.out.println("Average: " + stats.getAverage());   // prints the average of char values
      *
      * // Analyze character codes
      * String text = "Hello";
@@ -6430,10 +6583,10 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * DoubleSummaryStatistics stats = products.stream()
      *     .collect(Collectors.summarizingDouble(Product::getPrice));
      * System.out.println("Count: " + stats.getCount());        // 3
-     * System.out.println("Total: $" + stats.getSum());         // $1109.97
-     * System.out.println("Min: $" + stats.getMin());           // $29.99
-     * System.out.println("Max: $" + stats.getMax());           // $999.99
-     * System.out.println("Average: $" + stats.getAverage());   // $369.99
+     * System.out.println("Total: $" + stats.getSum());         // prints $1109.97
+     * System.out.println("Min: $" + stats.getMin());           // prints $29.99
+     * System.out.println("Max: $" + stats.getMax());           // prints $999.99
+     * System.out.println("Average: $" + stats.getAverage());   // prints $369.99
      *
      * // Analyze test scores
      * List<Student> students = getStudents();
@@ -6531,10 +6684,10 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * BigDecimalSummaryStatistics stats = transactions.stream()
      *     .collect(Collectors.summarizingBigDecimal(Transaction::getAmount));
      * System.out.println("Count: " + stats.getCount());        // 4
-     * System.out.println("Total: $" + stats.getSum());         // $616.49
-     * System.out.println("Min: $" + stats.getMin());           // $89.99
-     * System.out.println("Max: $" + stats.getMax());           // $250.75
-     * System.out.println("Average: $" + stats.getAverage());   // $154.1225
+     * System.out.println("Total: $" + stats.getSum());         // prints $616.49
+     * System.out.println("Min: $" + stats.getMin());           // prints $89.99
+     * System.out.println("Max: $" + stats.getMax());           // prints $250.75
+     * System.out.println("Average: $" + stats.getAverage());   // prints $154.1225
      *
      * // Analyze invoice amounts
      * List<Invoice> invoices = getInvoices();
@@ -6582,22 +6735,22 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * // Calculate product of all numbers
      * Integer product = Stream.of(1, 2, 3, 4)
      *     .collect(Collectors.reducing(1, (a, b) -> a * b));
-     * // Result: 24
+     * // returns 24
      *
      * // Concatenate strings with a seed value
      * String result = Stream.of("a", "b", "c")
      *     .collect(Collectors.reducing("start:", (s1, s2) -> s1 + s2));
-     * // Result: "start:abc"
+     * // returns "start:abc"
      *
      * // Find maximum with default value
      * Integer max = Stream.of(5, 3, 8, 1)
      *     .collect(Collectors.reducing(Integer.MIN_VALUE, Integer::max));
-     * // Result: 8
+     * // returns 8
      *
      * // Empty stream returns identity
      * Integer emptyProduct = Stream.<Integer>empty()
      *     .collect(Collectors.reducing(1, (a, b) -> a * b));
-     * // Result: 1
+     * // returns 1
      * }</pre>
      *
      * @param <T> the type of input elements and the result
@@ -6643,22 +6796,22 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * Optional<String> longest = Stream.of("a", "abc", "ab")
      *     .collect(Collectors.reducing((s1, s2) ->
      *         s1.length() >= s2.length() ? s1 : s2));
-     * // Result: Optional["abc"]
+     * // returns Optional["abc"]
      *
      * // Find maximum number
      * Optional<Integer> max = Stream.of(5, 3, 8, 1, 9)
      *     .collect(Collectors.reducing(Integer::max));
-     * // Result: Optional[9]
+     * // returns Optional[9]
      *
      * // Concatenate all strings
      * Optional<String> concatenated = Stream.of("Hello", " ", "World")
      *     .collect(Collectors.reducing(String::concat));
-     * // Result: Optional["Hello World"]
+     * // returns Optional["Hello World"]
      *
      * // Empty stream returns empty Optional
      * Optional<Integer> empty = Stream.<Integer>empty()
      *     .collect(Collectors.reducing(Integer::max));
-     * // Result: Optional.empty
+     * // returns Optional.empty
      * }</pre>
      *
      * @param <T> the type of input elements
@@ -6697,7 +6850,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * // Find maximum with default
      * Integer max = Stream.<Integer>empty()
      *     .collect(Collectors.reducingOrElseGet(Integer::max, () -> 0));
-     * // Result: 0
+     * // returns 0
      * }</pre>
      *
      * @param <T> the type of input elements
@@ -6732,7 +6885,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * // Find minimum (throws if empty)
      * Integer min = Stream.of(5, 2, 8, 1)
      *     .collect(Collectors.reducingOrElseThrow(Integer::min));
-     * // Result: 1
+     * // returns 1
      * }</pre>
      *
      * @param <T> the type of input elements
@@ -6763,7 +6916,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      *         Integer::max,
      *         () -> new IllegalStateException("No elements")
      *     ));
-     * // Result: 5
+     * // returns 5
      * }</pre>
      *
      * @param <T> the type of input elements
@@ -6807,7 +6960,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * // Sum the lengths of strings
      * Integer totalLength = Stream.of("hello", "world", "java")
      *     .collect(Collectors.reducing(0, String::length, Integer::sum));
-     * // Result: 14
+     * // returns 14
      * }</pre>
      *
      * @param <T> the type of input elements
@@ -6851,7 +7004,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      *         s -> s,
      *         (s1, s2) -> s1.length() >= s2.length() ? s1 : s2
      *     ));
-     * // Result: Optional[banana]
+     * // returns Optional[banana]
      * }</pre>
      *
      * @param <T> the type of input elements
@@ -6937,7 +7090,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      *         (a, b) -> a * b,
      *         () -> 1
      *     ));
-     * // Result: 1
+     * // returns 1
      * }</pre>
      *
      * @param <T> the type of input elements
@@ -6979,7 +7132,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      *         Integer::min,
      *         () -> new NoSuchElementException("No strings found")
      *     ));
-     * // Result: 3
+     * // returns 3
      * }</pre>
      *
      * @param <T> the type of input elements
@@ -7027,7 +7180,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      *         s -> s,
      *         String::concat
      *     ));
-     * // Result: "Hello World"
+     * // returns "Hello World"
      * }</pre>
      *
      * @param <T> the type of input elements
@@ -7058,7 +7211,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * // Find common prefix
      * String prefix = Stream.of("prefix_test", "prefix_example", "prefix_demo")
      *     .collect(Collectors.commonPrefix());
-     * // Result: "prefix_"
+     * // returns "prefix_"
      * }</pre>
      *
      * @return a {@code Collector} which computes the common prefix of input sequences
@@ -7112,7 +7265,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * // Find common suffix
      * String suffix = Stream.of("test_suffix", "example_suffix", "demo_suffix")
      *     .collect(Collectors.commonSuffix());
-     * // Result: "_suffix"
+     * // returns "_suffix"
      * }</pre>
      *
      * @return a {@code Collector} which computes the common suffix of input sequences
@@ -7173,7 +7326,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * Map<Integer, List<String>> groupedByLength =
      *     Stream.of("apple", "pie", "banana", "cat")
      *         .collect(Collectors.groupingBy(String::length));
-     * // Result: {5=[apple], 3=[pie, cat], 6=[banana]}
+     * // returns {5=[apple], 3=[pie, cat], 6=[banana]}
      * }</pre>
      *
      * @param <T> the type of input elements
@@ -7207,7 +7360,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      *             s -> s.charAt(0),
      *             TreeMap::new
      *         ));
-     * // Result: {a=[apple, apricot], b=[banana], c=[cherry]}
+     * // returns {a=[apple, apricot], b=[banana], c=[cherry]}
      * }</pre>
      *
      * @param <T> the type of input elements
@@ -7245,7 +7398,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      *             String::length,
      *             Collectors.counting()
      *         ));
-     * // Result: {3=3, 5=1, 6=1}
+     * // returns {3=3, 5=1, 6=1}
      * }</pre>
      *
      * @param <T> the type of input elements
@@ -7466,7 +7619,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * Map<Boolean, List<Integer>> evenOddPartition =
      *     Stream.of(1, 2, 3, 4, 5, 6)
      *         .collect(Collectors.partitioningBy(n -> n % 2 == 0));
-     * // Result: {false=[1, 3, 5], true=[2, 4, 6]}
+     * // returns {false=[1, 3, 5], true=[2, 4, 6]}
      * }</pre>
      *
      * @param <T> the type of input elements
@@ -7500,7 +7653,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      *             s -> s.length() > 1,
      *             Collectors.counting()
      *         ));
-     * // Result: {false=2, true=3}
+     * // returns {false=2, true=3}
      * }</pre>
      *
      * @param <T> the type of input elements
@@ -7558,7 +7711,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * Map<Character, Long> letterCounts =
      *     Stream.of("apple", "apricot", "banana", "cherry", "apple")
      *         .collect(Collectors.countingBy(s -> s.charAt(0)));
-     * // Result: {a=3, b=1, c=1}
+     * // returns {a=3, b=1, c=1}
      * }</pre>
      *
      * @param <T> the type of input elements
@@ -7590,7 +7743,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      *             String::length,
      *             TreeMap::new
      *         ));
-     * // Result: {1=2, 2=2, 3=1}
+     * // returns {1=2, 2=2, 3=1}
      * }</pre>
      *
      * @param <T> the type of input elements
@@ -7623,7 +7776,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * Map<Integer, Integer> wordLengthCounts =
      *     Stream.of("hello", "world", "java", "code")
      *         .collect(Collectors.countingToIntBy(String::length));
-     * // Result: {4=2, 5=2}
+     * // returns {4=2, 5=2}
      * }</pre>
      *
      * @param <T> the type of input elements
@@ -7870,7 +8023,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      *         Function.identity(),
      *         String::length,
      *         Integer::sum));
-     * // Result: {apple=10, banana=6}
+     * // returns {apple=10, banana=6}
      * }</pre>
      *
      * @param <T> the type of input elements
@@ -7917,7 +8070,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      *         Function.identity(),
      *         String::length,
      *         TreeMap::new));
-     * // Result: {apple=5, banana=6, cherry=6} (sorted by key)
+     * // returns {apple=5, banana=6, cherry=6} (sorted by key)
      * }</pre>
      *
      * @param <T> the type of input elements
@@ -7969,7 +8122,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      *         s -> s.split(":")[1],
      *         (v1, v2) -> v1 + "," + v2,
      *         LinkedHashMap::new));
-     * // Result: {a=1,3, b=2} (maintains insertion order)
+     * // returns {a=1,3, b=2} (maintains insertion order)
      * }</pre>
      *
      * @param <T> the type of input elements
@@ -8080,7 +8233,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      *     .collect(Collectors.toImmutableMap(
      *         Function.identity(),
      *         String::length));
-     * // Result: {apple=5, banana=6, cherry=6}
+     * // returns {apple=5, banana=6, cherry=6}
      * }</pre>
      *
      * @param <T> the type of input elements
@@ -8116,7 +8269,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      *         s -> s.split(":")[0],
      *         s -> s.split(":")[1],
      *         (v1, v2) -> v1 + "," + v2));
-     * // Result: {a=1,3, b=2}
+     * // returns {a=1,3, b=2}
      * }</pre>
      *
      * @param <T> the type of input elements
@@ -8482,7 +8635,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      *     .collect(Collectors.toBiMap(
      *         Function.identity(),
      *         String::length,
-     *         HashBiMap::create));
+     *         BiMap::new));
      * }</pre>
      *
      * @param <T> the type of input elements
@@ -8519,7 +8672,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      *         s -> s.split(":")[0],
      *         s -> s.split(":")[1],
      *         (v1, v2) -> v1 + v2));
-     * // Result: {a=13, b=2}
+     * // returns {a=13, b=2}
      * }</pre>
      *
      * @param <T> the type of input elements
@@ -8555,7 +8708,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      *         Item::getName,
      *         Item::getId,
      *         (id1, id2) -> Math.max(id1, id2),
-     *         HashBiMap::create));
+     *         BiMap::new));
      * }</pre>
      *
      * @param <T> the type of input elements
@@ -8571,8 +8724,6 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      */
     public static <T, K, V> Collector<T, ?, BiMap<K, V>> toBiMap(final Function<? super T, ? extends K> keyMapper,
             final Function<? super T, ? extends V> valueMapper, final BinaryOperator<V> mergeFunction, final Supplier<BiMap<K, V>> mapFactory) {
-        // return toMap(keyMapper, valueMapper, mergeFunction, mapFactory);
-
         final BiConsumer<BiMap<K, V>, T> accumulator = (map, element) -> merge(map, keyMapper.apply(element), valueMapper.apply(element), mergeFunction);
 
         final BinaryOperator<BiMap<K, V>> combiner = biMapMerger(mergeFunction);
@@ -8648,9 +8799,9 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Create a specific type of multimap from entries
-     * SetMultimap<String, Integer> result = entries.stream()
-     *     .collect(Collectors.toMultimap(HashMultimap::create));
-     * // Values for same key are stored in a set
+     * ListMultimap<String, Integer> result = entries.stream()
+     *     .collect(Collectors.toMultimap(N::newListMultimap));
+     * // Values for same key are stored in a list
      * }</pre>
      *
      * @param <K> the type of map keys
@@ -8682,7 +8833,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * // Group strings by their first character
      * ListMultimap<Character, String> result = Stream.of("apple", "apricot", "banana")
      *     .collect(Collectors.toMultimap(s -> s.charAt(0)));
-     * // Result: {a=[apple, apricot], b=[banana]}
+     * // returns {a=[apple, apricot], b=[banana]}
      * }</pre>
      *
      * @param <T> the type of input elements
@@ -8706,12 +8857,12 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * // Group strings by length into a SetMultimap
-     * SetMultimap<Integer, String> result = Stream.of("apple", "banana", "cherry", "apple")
+     * // Group strings by length into a ListMultimap
+     * ListMultimap<Integer, String> result = Stream.of("apple", "banana", "cherry", "apple")
      *     .collect(Collectors.toMultimap(
      *         String::length,
-     *         HashMultimap::create));
-     * // Result: {5=[apple], 6=[banana, cherry]} (duplicates removed by Set)
+     *         N::newListMultimap));
+     * // returns {5=[apple, apple], 6=[banana, cherry]}
      * }</pre>
      *
      * @param <T> the type of input elements
@@ -8849,7 +9000,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      *     .collect(Collectors.flatMappingValueToMultimap(
      *         Item::getCategory,
      *         item -> item.getTags().stream(),
-     *         HashMultimap::create));
+     *         N::newListMultimap));
      * // Tags are deduplicated within each category
      * }</pre>
      *
@@ -9245,7 +9396,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      *         Collectors.counting(),
      *         (sum, count) -> Pair.of(sum, count)
      *     ));
-     * // Result: Pair(15, 5)
+     * // returns Pair(15, 5)
      * }</pre>
      *
      * @param <T> the type of input elements
@@ -10531,7 +10682,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
          *         Collectors.averagingDouble(i -> i),
          *         (count, avg) -> String.format("Count: %d, Average: %.2f", count, avg)
          *     ));
-         * // Result: "Count: 5, Average: 3.00"
+         * // returns "Count: 5, Average: 3.00"
          * }</pre>
          *
          * @param <T> the type of input elements

@@ -67,8 +67,15 @@ public class SetMultimapType<K, E> extends MultimapType<K, E, Set<E>, SetMultima
      * // Returns: null
      * }</pre>
      *
+     * <p>The returned string is a serializable representation designed to be parsed back into an equivalent value
+     * via {@link #valueOf(String)}; {@code stringOf} and {@code valueOf} are inverse operations that round-trip. This
+     * is the key distinction from {@link Object#toString()}, whose result is not guaranteed to be convertible back
+     * into the original value.</p>
+     *
      * @param x the SetMultimap to convert to string
      * @return the JSON string representation of the multimap, or {@code null} if the input is null
+     * @see #valueOf(String)
+     * @see #valueOf(Object)
      */
     @Override
     public String stringOf(final SetMultimap<K, E> x) {
@@ -96,9 +103,15 @@ public class SetMultimapType<K, E> extends MultimapType<K, E, Set<E>, SetMultima
      * // Returns: empty SetMultimap
      * }</pre>
      *
+     * <p>This method is the inverse of {@code stringOf} and round-trips with it: it parses the string produced by
+     * {@code stringOf} back into a value of this type. Strings produced by {@link Object#toString()} are not
+     * guaranteed to be parseable in this way.</p>
+     *
      * @param str the JSON string to parse
      * @return the parsed SetMultimap, or {@code null} if the input string is {@code null}, empty, or blank
      * @throws IllegalArgumentException if the string cannot be parsed as a valid map structure
+     * @see #valueOf(Object)
+     * @see #stringOf(SetMultimap)
      */
     @SuppressWarnings("unchecked")
     @Override

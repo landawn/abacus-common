@@ -242,4 +242,16 @@ public class DoublePredicateTest extends TestBase {
         DoublePredicate instance = a -> false;
         org.junit.jupiter.api.Assertions.assertThrows(NullPointerException.class, () -> instance.and((java.util.function.DoublePredicate) null));
     }
+
+    @Test
+    public void testNaNDoesNotSatisfyRelationalPredicates() {
+        assertFalse(DoublePredicate.IS_POSITIVE.test(Double.NaN));
+        assertFalse(DoublePredicate.NOT_POSITIVE.test(Double.NaN));
+        assertFalse(DoublePredicate.IS_NEGATIVE.test(Double.NaN));
+        assertFalse(DoublePredicate.NOT_NEGATIVE.test(Double.NaN));
+        assertFalse(DoublePredicate.greaterThan(0d).test(Double.NaN));
+        assertFalse(DoublePredicate.greaterThanOrEqual(0d).test(Double.NaN));
+        assertFalse(DoublePredicate.lessThan(0d).test(Double.NaN));
+        assertFalse(DoublePredicate.lessThanOrEqual(0d).test(Double.NaN));
+    }
 }

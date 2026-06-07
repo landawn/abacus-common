@@ -59,7 +59,7 @@ public interface DoubleObjPredicate<T> extends Throwables.DoubleObjPredicate<T, 
      * @return a predicate that represents the logical negation of this predicate
      */
     default DoubleObjPredicate<T> negate() {
-        return (i, t) -> !test(i, t);
+        return (t, u) -> !test(t, u);
     }
 
     /**
@@ -75,7 +75,7 @@ public interface DoubleObjPredicate<T> extends Throwables.DoubleObjPredicate<T, 
      */
     default DoubleObjPredicate<T> and(final DoubleObjPredicate<T> other) {
         Objects.requireNonNull(other);
-        return (i, t) -> test(i, t) && other.test(i, t);
+        return (t, u) -> test(t, u) && other.test(t, u);
     }
 
     /**
@@ -91,6 +91,6 @@ public interface DoubleObjPredicate<T> extends Throwables.DoubleObjPredicate<T, 
      */
     default DoubleObjPredicate<T> or(final DoubleObjPredicate<T> other) {
         Objects.requireNonNull(other);
-        return (i, t) -> test(i, t) || other.test(i, t);
+        return (t, u) -> test(t, u) || other.test(t, u);
     }
 }

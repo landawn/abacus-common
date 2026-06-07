@@ -135,6 +135,26 @@ public class InstantTypeTest extends TestBase {
     }
 
     @Test
+    public void testValueOf_ParsesInstantToString() {
+        // Every form produced by Instant.toString() must round-trip through valueOf.
+        Instant[] values = { //
+                Instant.ofEpochSecond(1703502645L), // second precision, "...:45Z"
+                Instant.ofEpochSecond(1703502645L, 123000000), // millis, "...45.123Z"
+                Instant.ofEpochSecond(1703502645L, 123456000), // micros
+                Instant.ofEpochSecond(1703502645L, 123456789), // nanos
+                Instant.ofEpochSecond(1703502600L), // whole-minute instant
+                Instant.EPOCH, //
+                Instant.now() };
+
+        for (Instant value : values) {
+            String text = value.toString();
+            Instant result = instantType.valueOf(text);
+            assertNotNull(result, () -> "Failed to parse: " + text);
+            assertEquals(value, result, () -> "Mismatch for: " + text);
+        }
+    }
+
+    @Test
     public void testValueOf_CharArray_Null() {
         assertNull(instantType.valueOf(null, 0, 0));
     }
@@ -253,60 +273,60 @@ public class InstantTypeTest extends TestBase {
     }
 
     @Test
-    public void testWriteCharacter_Null() throws IOException {
-        instantType.writeCharacter(characterWriter, null, null);
+    public void testSerializeTo_Null() throws IOException {
+        instantType.serializeTo(characterWriter, null, null);
         verify(characterWriter).write(any(char[].class));
     }
 
     @Test
-    public void testWriteCharacter_NoConfig() throws IOException {
+    public void testSerializeTo_NoConfig() throws IOException {
         Instant instant = Instant.parse("2023-12-25T10:30:45.123Z");
 
-        instantType.writeCharacter(characterWriter, instant, null);
+        instantType.serializeTo(characterWriter, instant, null);
         verify(characterWriter).write(anyString());
     }
 
     @Test
-    public void testWriteCharacter_LongFormat() throws IOException {
+    public void testSerializeTo_LongFormat() throws IOException {
         Instant instant = Instant.parse("2023-12-25T10:30:45.123Z");
         JsonXmlSerConfig<?> config = mock(JsonXmlSerConfig.class);
         when(config.getDateTimeFormat()).thenReturn(DateTimeFormat.LONG);
         when(config.getStringQuotation()).thenReturn((char) 0);
 
-        instantType.writeCharacter(characterWriter, instant, config);
+        instantType.serializeTo(characterWriter, instant, config);
         verify(characterWriter).write(instant.toEpochMilli());
     }
 
     @Test
-    public void testWriteCharacter_ISO8601DateTime() throws IOException {
+    public void testSerializeTo_ISO8601DateTime() throws IOException {
         Instant instant = Instant.parse("2023-12-25T10:30:45.123Z");
         JsonXmlSerConfig<?> config = mock(JsonXmlSerConfig.class);
         when(config.getDateTimeFormat()).thenReturn(DateTimeFormat.ISO_8601_DATE_TIME);
         when(config.getStringQuotation()).thenReturn((char) 0);
 
-        instantType.writeCharacter(characterWriter, instant, config);
+        instantType.serializeTo(characterWriter, instant, config);
         verify(characterWriter).write(anyString());
     }
 
     @Test
-    public void testWriteCharacter_ISO8601Timestamp() throws IOException {
+    public void testSerializeTo_ISO8601Timestamp() throws IOException {
         Instant instant = Instant.parse("2023-12-25T10:30:45.123Z");
         JsonXmlSerConfig<?> config = mock(JsonXmlSerConfig.class);
         when(config.getDateTimeFormat()).thenReturn(DateTimeFormat.ISO_8601_TIMESTAMP);
         when(config.getStringQuotation()).thenReturn((char) 0);
 
-        instantType.writeCharacter(characterWriter, instant, config);
+        instantType.serializeTo(characterWriter, instant, config);
         verify(characterWriter).write(anyString());
     }
 
     @Test
-    public void testWriteCharacter_WithQuotes() throws IOException {
+    public void testSerializeTo_WithQuotes() throws IOException {
         Instant instant = Instant.parse("2023-12-25T10:30:45.123Z");
         JsonXmlSerConfig<?> config = mock(JsonXmlSerConfig.class);
         when(config.getDateTimeFormat()).thenReturn(DateTimeFormat.ISO_8601_TIMESTAMP);
         when(config.getStringQuotation()).thenReturn('"');
 
-        instantType.writeCharacter(characterWriter, instant, config);
+        instantType.serializeTo(characterWriter, instant, config);
         verify(characterWriter, times(2)).write('"');
         verify(characterWriter).write(anyString());
     }

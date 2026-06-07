@@ -85,9 +85,16 @@ public class ByteBufferType extends AbstractType<ByteBuffer> {
      * The encoded bytes are taken from position {@code 0} to the buffer's current
      * {@link java.nio.ByteBuffer#position() position}; the position is restored after reading.
      *
+     * <p>The returned string is a serializable representation designed to be parsed back into an equivalent value
+     * via {@link #valueOf(String)}; {@code stringOf} and {@code valueOf} are inverse operations that round-trip. This
+     * is the key distinction from {@link Object#toString()}, whose result is not guaranteed to be convertible back
+     * into the original value.</p>
+     *
      * @param x the {@code ByteBuffer} to encode; may be {@code null}
      * @return the Base64-encoded string of the buffer's written content,
      *         or {@code null} if {@code x} is {@code null}
+     * @see #valueOf(String)
+     * @see #valueOf(Object)
      */
     @Override
     public String stringOf(final ByteBuffer x) {
@@ -100,11 +107,17 @@ public class ByteBufferType extends AbstractType<ByteBuffer> {
      * (i.e. positioned at the end of the written data, consistent with the convention used by
      * {@link #byteArrayOf(ByteBuffer)} and {@link #valueOf(byte[])}).
      *
+     * <p>This method is the inverse of {@code stringOf} and round-trips with it: it parses the string produced by
+     * {@code stringOf} back into a value of this type. Strings produced by {@link Object#toString()} are not
+     * guaranteed to be parseable in this way.</p>
+     *
      * @param str the Base64-encoded string to decode; may be {@code null} or empty
      * @return a {@code ByteBuffer} wrapping the decoded bytes with position at {@code bytes.length},
      *         or {@code null} if {@code str} is {@code null},
      *         or an empty buffer if {@code str} is empty
      * @throws IllegalArgumentException if {@code str} contains characters outside the Base64 alphabet
+     * @see #valueOf(Object)
+     * @see #stringOf(ByteBuffer)
      */
     @Override
     public ByteBuffer valueOf(final String str) {
@@ -122,6 +135,13 @@ public class ByteBufferType extends AbstractType<ByteBuffer> {
      * Copies bytes from index {@code 0} up to (but not including) the buffer's current
      * {@link java.nio.ByteBuffer#position() position}, then restores the position to its
      * original value before returning.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * ByteBuffer buf = ByteBuffer.allocate(10);
+     * buf.put((byte) 10).put((byte) 20);              // position is now 2
+     * byte[] bytes = ByteBufferType.byteArrayOf(buf); // returns [10, 20]; buf.position() still 2
+     * }</pre>
      *
      * @param x the {@code ByteBuffer} to extract bytes from; must not be {@code null}
      * @return a new byte array containing the buffer's written bytes (indices {@code 0..position-1})
@@ -142,6 +162,14 @@ public class ByteBufferType extends AbstractType<ByteBuffer> {
      * The resulting buffer has capacity equal to {@code bytes.length} and limit equal to
      * {@code bytes.length}, with position at {@code bytes.length} — ready for reading
      * via {@link #byteArrayOf(ByteBuffer)}.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * ByteBuffer buf = ByteBufferType.valueOf(new byte[] { 1, 2, 3 });
+     * buf.position();   // returns 3
+     * buf.limit();      // returns 3
+     * buf.capacity();   // returns 3
+     * }</pre>
      *
      * @param bytes the byte array to wrap; must not be {@code null}
      * @return a {@code ByteBuffer} wrapping {@code bytes} with position at {@code bytes.length}

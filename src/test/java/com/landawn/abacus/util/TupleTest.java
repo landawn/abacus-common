@@ -1156,7 +1156,7 @@ public class TupleTest extends TestBase {
 
     @Test
     public void testTupleJson_Serialization() {
-        // Triggers appendTo and writeCharacter on TupleNType classes
+        // Triggers appendTo and serializeTo on TupleNType classes
         Tuple2<String, Integer> t2 = Tuple.of("hello", 42);
         String json2 = N.toJson(t2);
         Assertions.assertNotNull(json2);

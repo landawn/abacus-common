@@ -48,6 +48,7 @@ import org.slf4j.spi.LocationAwareLogger;
  * Exception exception = new Exception("Processing error");
  * logger.error("Operation failed", exception);
  * }</pre>
+ *
  */
 class SLF4JLogger extends AbstractLogger {
 

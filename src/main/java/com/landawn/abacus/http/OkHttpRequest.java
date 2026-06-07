@@ -54,6 +54,7 @@ import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
 import okhttp3.ResponseBody;
+import okio.BufferedSource;
 
 /**
  * A fluent HTTP request builder and executor based on OkHttp.
@@ -123,6 +124,14 @@ public final class OkHttpRequest {
     /**
      * Creates a new OkHttpRequest instance with the specified URL and HTTP client.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * OkHttpClient client = new OkHttpClient();
+     * OkHttpRequest req = OkHttpRequest.create("http://localhost:18080/users", client)
+     *         .header("Accept", "application/json");
+     * // req.get();   // returns the response when executed (network)
+     * }</pre>
+     *
      * @param url the URL string for the request
      * @param httpClient the OkHttpClient to use for executing the request
      * @return a new OkHttpRequest instance
@@ -134,6 +143,15 @@ public final class OkHttpRequest {
     /**
      * Creates a new OkHttpRequest instance with the specified URL and HTTP client.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * OkHttpClient client = new OkHttpClient();
+     * URL url = new URL("http://localhost:18080/users");
+     * OkHttpRequest req = OkHttpRequest.create(url, client)
+     *         .header("Accept", "application/json");
+     * // req.get();   // returns the response when executed (network)
+     * }</pre>
+     *
      * @param url the URL object for the request
      * @param httpClient the OkHttpClient to use for executing the request
      * @return a new OkHttpRequest instance
@@ -144,6 +162,15 @@ public final class OkHttpRequest {
 
     /**
      * Creates a new OkHttpRequest instance with the specified HttpUrl and HTTP client.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * OkHttpClient client = new OkHttpClient();
+     * HttpUrl url = HttpUrl.get("http://localhost:18080/users");
+     * OkHttpRequest req = OkHttpRequest.create(url, client)
+     *         .header("Accept", "application/json");
+     * // req.get();   // returns the response when executed (network)
+     * }</pre>
      *
      * @param url the HttpUrl object for the request
      * @param httpClient the OkHttpClient to use for executing the request
@@ -175,6 +202,14 @@ public final class OkHttpRequest {
     /**
      * Creates a new OkHttpRequest instance with the specified URL using the default HTTP client.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * URL url = new URL("http://localhost:18080/users");
+     * OkHttpRequest req = OkHttpRequest.url(url)
+     *         .header("Accept", "application/json");
+     * // req.get();   // returns the response when executed (network)
+     * }</pre>
+     *
      * @param url the URL object for the request
      * @return a new OkHttpRequest instance
      * @throws IllegalArgumentException if the scheme of {@code url} is not {@code http} or {@code https}.
@@ -185,6 +220,14 @@ public final class OkHttpRequest {
 
     /**
      * Creates a new OkHttpRequest instance with the specified HttpUrl using the default HTTP client.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * HttpUrl url = HttpUrl.get("http://localhost:18080/users");
+     * OkHttpRequest req = OkHttpRequest.url(url)
+     *         .header("Accept", "application/json");
+     * // req.get();   // returns the response when executed (network)
+     * }</pre>
      *
      * @param url the HttpUrl object for the request
      * @return a new OkHttpRequest instance
@@ -197,21 +240,40 @@ public final class OkHttpRequest {
      * Creates a new OkHttpRequest instance with the specified URL and timeout settings.
      * A new HTTP client is created with the specified timeouts and will be closed after execution.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * // Connect timeout of 3s, read timeout of 10s
+     * OkHttpRequest req = OkHttpRequest.url("http://localhost:18080/users", 3000, 10000)
+     *         .header("Accept", "application/json");
+     * // req.get();   // returns the response when executed (network)
+     * }</pre>
+     *
      * @param url the URL string for the request
      * @param connectTimeoutInMillis the connection timeout in milliseconds
      * @param readTimeoutInMillis the read timeout in milliseconds
      * @return a new OkHttpRequest instance
      */
     public static OkHttpRequest url(final String url, final long connectTimeoutInMillis, final long readTimeoutInMillis) {
-        return create(url,
-                new OkHttpClient.Builder().connectTimeout(connectTimeoutInMillis, TimeUnit.MILLISECONDS)
-                        .readTimeout(readTimeoutInMillis, TimeUnit.MILLISECONDS)
-                        .build()).closeHttpClientAfterExecution(true);
+        return create(url, newClient(connectTimeoutInMillis, readTimeoutInMillis)).closeHttpClientAfterExecution(true);
+    }
+
+    private static OkHttpClient newClient(final long connectTimeoutInMillis, final long readTimeoutInMillis) {
+        return new OkHttpClient.Builder().connectTimeout(connectTimeoutInMillis, TimeUnit.MILLISECONDS)
+                .readTimeout(readTimeoutInMillis, TimeUnit.MILLISECONDS)
+                .build();
     }
 
     /**
      * Creates a new OkHttpRequest instance with the specified URL and timeout settings.
      * A new HTTP client is created with the specified timeouts and will be closed after execution.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * URL url = new URL("http://localhost:18080/users");
+     * OkHttpRequest req = OkHttpRequest.url(url, 3000, 10000)
+     *         .header("Accept", "application/json");
+     * // req.get();   // returns the response when executed (network)
+     * }</pre>
      *
      * @param url the URL object for the request
      * @param connectTimeoutInMillis the connection timeout in milliseconds
@@ -219,15 +281,20 @@ public final class OkHttpRequest {
      * @return a new OkHttpRequest instance
      */
     public static OkHttpRequest url(final URL url, final long connectTimeoutInMillis, final long readTimeoutInMillis) {
-        return create(url,
-                new OkHttpClient.Builder().connectTimeout(connectTimeoutInMillis, TimeUnit.MILLISECONDS)
-                        .readTimeout(readTimeoutInMillis, TimeUnit.MILLISECONDS)
-                        .build()).closeHttpClientAfterExecution(true);
+        return create(url, newClient(connectTimeoutInMillis, readTimeoutInMillis)).closeHttpClientAfterExecution(true);
     }
 
     /**
      * Creates a new OkHttpRequest instance with the specified HttpUrl and timeout settings.
      * A new HTTP client is created with the specified timeouts and will be closed after execution.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * HttpUrl url = HttpUrl.get("http://localhost:18080/users");
+     * OkHttpRequest req = OkHttpRequest.url(url, 3000, 10000)
+     *         .header("Accept", "application/json");
+     * // req.get();   // returns the response when executed (network)
+     * }</pre>
      *
      * @param url the HttpUrl object for the request
      * @param connectTimeoutInMillis the connection timeout in milliseconds
@@ -235,16 +302,21 @@ public final class OkHttpRequest {
      * @return a new OkHttpRequest instance
      */
     public static OkHttpRequest url(final HttpUrl url, final long connectTimeoutInMillis, final long readTimeoutInMillis) {
-        return create(url,
-                new OkHttpClient.Builder().connectTimeout(connectTimeoutInMillis, TimeUnit.MILLISECONDS)
-                        .readTimeout(readTimeoutInMillis, TimeUnit.MILLISECONDS)
-                        .build()).closeHttpClientAfterExecution(true);
+        return create(url, newClient(connectTimeoutInMillis, readTimeoutInMillis)).closeHttpClientAfterExecution(true);
     }
 
     OkHttpRequest closeHttpClientAfterExecution(final boolean shouldClose) {
         closeHttpClientAfterExecution = shouldClose;
 
         return this;
+    }
+
+    private OkHttpClient.Builder clientBuilder() {
+        if (httpClientBuilder == null) {
+            httpClientBuilder = httpClient.newBuilder();
+        }
+
+        return httpClientBuilder;
     }
 
     /**
@@ -263,11 +335,7 @@ public final class OkHttpRequest {
      * @return This OkHttpRequest instance for method chaining
      */
     public OkHttpRequest connectTimeout(final long connectTimeout) {
-        if (httpClientBuilder == null) {
-            httpClientBuilder = httpClient.newBuilder();
-        }
-
-        httpClientBuilder.connectTimeout(connectTimeout, TimeUnit.MILLISECONDS);
+        clientBuilder().connectTimeout(connectTimeout, TimeUnit.MILLISECONDS);
 
         return this;
     }
@@ -286,11 +354,7 @@ public final class OkHttpRequest {
      * @return This OkHttpRequest instance for method chaining
      */
     public OkHttpRequest connectTimeout(final Duration connectTimeout) {
-        if (httpClientBuilder == null) {
-            httpClientBuilder = httpClient.newBuilder();
-        }
-
-        httpClientBuilder.connectTimeout(connectTimeout);
+        clientBuilder().connectTimeout(connectTimeout);
 
         return this;
     }
@@ -311,11 +375,7 @@ public final class OkHttpRequest {
      * @return This OkHttpRequest instance for method chaining
      */
     public OkHttpRequest readTimeout(final long readTimeout) {
-        if (httpClientBuilder == null) {
-            httpClientBuilder = httpClient.newBuilder();
-        }
-
-        httpClientBuilder.readTimeout(readTimeout, TimeUnit.MILLISECONDS);
+        clientBuilder().readTimeout(readTimeout, TimeUnit.MILLISECONDS);
 
         return this;
     }
@@ -334,11 +394,7 @@ public final class OkHttpRequest {
      * @return This OkHttpRequest instance for method chaining
      */
     public OkHttpRequest readTimeout(final Duration readTimeout) {
-        if (httpClientBuilder == null) {
-            httpClientBuilder = httpClient.newBuilder();
-        }
-
-        httpClientBuilder.readTimeout(readTimeout);
+        clientBuilder().readTimeout(readTimeout);
 
         return this;
     }
@@ -470,6 +526,13 @@ public final class OkHttpRequest {
      * Sets HTTP headers specified by {@code name1/value1}, {@code name2/value2}.
      * If this request already has any headers with that name, they are all replaced.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * OkHttpRequest req = OkHttpRequest.url("http://localhost:18080/data")
+     *         .headers("Accept", "application/json", "User-Agent", "MyApp/1.0");
+     * // req.get();   // returns the response when executed (network)
+     * }</pre>
+     *
      * @param name1 the first header name
      * @param value1 the first header value
      * @param name2 the second header name
@@ -488,6 +551,15 @@ public final class OkHttpRequest {
     /**
      * Sets HTTP headers specified by {@code name1/value1}, {@code name2/value2}, {@code name3/value3}.
      * If this request already has any headers with that name, they are all replaced.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * OkHttpRequest req = OkHttpRequest.url("http://localhost:18080/data")
+     *         .headers("Accept", "application/json",
+     *                  "User-Agent", "MyApp/1.0",
+     *                  "Authorization", "Bearer token123");
+     * // req.get();   // returns the response when executed (network)
+     * }</pre>
      *
      * @param name1 the first header name
      * @param value1 the first header value
@@ -541,6 +613,18 @@ public final class OkHttpRequest {
      * Removes all headers on this request and adds the specified headers.
      * This method replaces all existing headers with the provided Headers instance.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Headers headers = new Headers.Builder()
+     *         .add("Accept", "application/json")
+     *         .add("Authorization", "Bearer token123")
+     *         .build();
+     *
+     * OkHttpRequest req = OkHttpRequest.url("http://localhost:18080/data")
+     *         .headers(headers);
+     * // req.get();   // returns the response when executed (network)
+     * }</pre>
+     *
      * @param headers the Headers object containing all headers to set
      * @return this OkHttpRequest instance for method chaining
      * @see Request.Builder#headers(Headers)
@@ -554,6 +638,16 @@ public final class OkHttpRequest {
     /**
      * Removes all headers on this request and adds the specified headers.
      * This method replaces all existing headers with the provided HttpHeaders instance.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * HttpHeaders headers = HttpHeaders.of("Accept", "application/json",
+     *                                      "Authorization", "Bearer token123");
+     *
+     * OkHttpRequest req = OkHttpRequest.url("http://localhost:18080/data")
+     *         .headers(headers);
+     * // req.get();   // returns the response when executed (network)
+     * }</pre>
      *
      * @param headers the HttpHeaders object containing all headers to set
      * @return this OkHttpRequest instance for method chaining
@@ -581,6 +675,14 @@ public final class OkHttpRequest {
      * <p>Note that for some headers including {@code Content-Length} and {@code Content-Encoding},
      * OkHttp may replace {@code value} with a header derived from the request body.</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * OkHttpRequest req = OkHttpRequest.url("http://localhost:18080/data")
+     *         .addHeader("Cookie", "session=abc")
+     *         .addHeader("Cookie", "theme=dark");   // both values are kept
+     * // req.get();   // returns the response when executed (network)
+     * }</pre>
+     *
      * @param name the header name
      * @param value the header value
      * @return this OkHttpRequest instance for method chaining
@@ -599,6 +701,14 @@ public final class OkHttpRequest {
 
     /**
      * Removes all headers with the specified name from this request.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * OkHttpRequest req = OkHttpRequest.url("http://localhost:18080/data")
+     *         .header("X-Debug", "true")
+     *         .removeHeader("X-Debug");   // header no longer present
+     * // req.get();   // returns the response when executed (network)
+     * }</pre>
      *
      * @param name the name of the headers to remove
      * @return this OkHttpRequest instance for method chaining
@@ -816,6 +926,17 @@ public final class OkHttpRequest {
     /**
      * Sets the request body as form data from a map.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Map<String, String> formData = new HashMap<>();
+     * formData.put("username", "john_doe");
+     * formData.put("password", "secret123");
+     *
+     * OkHttpRequest req = OkHttpRequest.url("http://localhost:18080/login")
+     *         .body(formData);   // deprecated; prefer formBody(Map)
+     * // req.post();   // returns the response when executed (network)
+     * }</pre>
+     *
      * @param formBodyByMap a map containing form field names and values
      * @return this OkHttpRequest instance for method chaining
      * @see FormBody.Builder
@@ -831,6 +952,17 @@ public final class OkHttpRequest {
 
     /**
      * Sets the request body as form data from a bean object.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * LoginRequest login = new LoginRequest();
+     * login.setUsername("john_doe");
+     * login.setPassword("secret123");
+     *
+     * OkHttpRequest req = OkHttpRequest.url("http://localhost:18080/login")
+     *         .body(login);   // deprecated; prefer formBody(Object)
+     * // req.post();   // returns the response when executed (network)
+     * }</pre>
      *
      * @param formBodyByBean a bean object whose properties will be used as form fields
      * @return this OkHttpRequest instance for method chaining
@@ -849,6 +981,15 @@ public final class OkHttpRequest {
      * Sets the request body with a custom RequestBody instance.
      * This allows full control over the request body content and media type.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * RequestBody body = RequestBody.create("{\"k\":1}", MediaType.get("application/json"));
+     *
+     * OkHttpRequest req = OkHttpRequest.url("http://localhost:18080/data")
+     *         .body(body);
+     * // req.post();   // returns the response when executed (network)
+     * }</pre>
+     *
      * @param body the RequestBody to use
      * @return this OkHttpRequest instance for method chaining
      * @see RequestBody
@@ -860,6 +1001,13 @@ public final class OkHttpRequest {
 
     /**
      * Sets the request body with the specified content and media type.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * OkHttpRequest req = OkHttpRequest.url("http://localhost:18080/data")
+     *         .body("{\"k\":1}", MediaType.get("application/json"));
+     * // req.post();   // returns the response when executed (network)
+     * }</pre>
      *
      * @param content the string content of the request body
      * @param contentType the media type of the content, or {@code null} to use default
@@ -875,6 +1023,15 @@ public final class OkHttpRequest {
     /**
      * Sets the request body with the specified byte array content and media type.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * byte[] content = "{\"k\":1}".getBytes(StandardCharsets.UTF_8);
+     *
+     * OkHttpRequest req = OkHttpRequest.url("http://localhost:18080/data")
+     *         .body(content, MediaType.get("application/json"));
+     * // req.post();   // returns the response when executed (network)
+     * }</pre>
+     *
      * @param content the byte array content of the request body
      * @param contentType the media type of the content, or {@code null} to use default
      * @return this OkHttpRequest instance for method chaining
@@ -888,6 +1045,16 @@ public final class OkHttpRequest {
 
     /**
      * Sets the request body with the specified byte array content, offset, length, and media type.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * byte[] content = "xx{\"k\":1}yy".getBytes(StandardCharsets.UTF_8);
+     *
+     * // Send only the 7 bytes starting at offset 2, i.e. {"k":1}
+     * OkHttpRequest req = OkHttpRequest.url("http://localhost:18080/data")
+     *         .body(content, 2, 7, MediaType.get("application/json"));
+     * // req.post();   // returns the response when executed (network)
+     * }</pre>
      *
      * @param content the byte array content of the request body
      * @param offset the offset in the byte array to start reading from
@@ -904,6 +1071,15 @@ public final class OkHttpRequest {
 
     /**
      * Sets the request body with the content from the specified file and media type.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * File file = new File("payload.json");
+     *
+     * OkHttpRequest req = OkHttpRequest.url("http://localhost:18080/upload")
+     *         .body(file, MediaType.get("application/json"));
+     * // req.post();   // returns the response when executed (network)
+     * }</pre>
      *
      * @param content the file containing the request body content
      * @param contentType the media type of the content, or {@code null} to use default
@@ -1147,8 +1323,6 @@ public final class OkHttpRequest {
      */
     @Beta
     public Response execute(final HttpMethod httpMethod) throws IOException {
-        // final Request request = createRequest(httpMethod);
-
         return execute(httpMethod, Response.class);
     }
 
@@ -1167,12 +1341,13 @@ public final class OkHttpRequest {
      * @param resultClass The class of the expected response object. Must not be {@code null}.
      *                    Use {@link Response Response.class} to receive the raw OkHttp response.
      * @return The deserialized response body
-     * @throws IllegalArgumentException if {@code resultClass} is {@code null} or is the abacus
+     * @throws IllegalArgumentException if {@code httpMethod} or {@code resultClass} is {@code null}, or {@code resultClass} is the abacus
      *                                  {@link HttpResponse} type (use OkHttp's {@code Response} class directly instead)
      * @throws IOException if the request could not be executed or the response indicates a non-2xx status
      */
     @Beta
     public <T> T execute(final HttpMethod httpMethod, final Class<T> resultClass) throws IllegalArgumentException, IOException {
+        N.checkArgNotNull(httpMethod, "httpMethod");
         N.checkArgNotNull(resultClass, cs.resultClass);
         N.checkArgument(!HttpResponse.class.equals(resultClass), "Return type cannot be HttpResponse");
 
@@ -1187,16 +1362,16 @@ public final class OkHttpRequest {
             resp = execute(request, returningResponse);
 
             if (returningResponse) {
-                // Skip the finally cleanup: the caller owns the Response *and* the underlying
-                // per-request client. The client stays alive until the next call to a method on
-                // this OkHttpRequest (which calls doAfterExecution from its own finally) or until
-                // the OkHttpRequest is garbage-collected.
-                return (T) resp;
+                return (T) attachCleanup(resp);
+            }
+
+            if (!resp.isSuccessful()) {
+                throw new IOException(resp.code() + ": " + resp.message());
             }
 
             if (resultClass.equals(Void.class)) {
                 return null;
-            } else if (resp.isSuccessful()) {
+            } else {
                 final String contentType = request.header(HttpHeaders.Names.CONTENT_TYPE);
                 final String contentEncoding = request.header(HttpHeaders.Names.CONTENT_ENCODING);
                 final ContentFormat requestContentFormat = HttpUtil.getContentFormat(contentType, contentEncoding);
@@ -1235,8 +1410,6 @@ public final class OkHttpRequest {
                 } finally {
                     IOUtil.closeQuietly(is);
                 }
-            } else {
-                throw new IOException(resp.code() + ": " + resp.message());
             }
         } finally {
             try {
@@ -1244,12 +1417,55 @@ public final class OkHttpRequest {
                     IOUtil.close(resp);
                 }
             } finally {
-                if (!returningResponse) {
-                    // Defer client shutdown: ownership transferred to the caller via the Response.
+                if (!returningResponse || resp == null) {
                     doAfterExecution();
                 }
             }
         }
+    }
+
+    private Response attachCleanup(final Response response) {
+        final ResponseBody body = response.body();
+
+        if (body == null) {
+            doAfterExecution();
+            return response;
+        }
+
+        return response.newBuilder().body(new ResponseBody() {
+            private volatile boolean closed = false;
+
+            @Override
+            public MediaType contentType() {
+                return body.contentType();
+            }
+
+            @Override
+            public long contentLength() {
+                return body.contentLength();
+            }
+
+            @Override
+            public BufferedSource source() {
+                return body.source();
+            }
+
+            @Override
+            public void close() {
+                try {
+                    body.close();
+                } finally {
+                    closeOnce();
+                }
+            }
+
+            private void closeOnce() {
+                if (!closed) {
+                    closed = true;
+                    doAfterExecution();
+                }
+            }
+        }).build();
     }
 
     private Response execute(final Request request, final boolean deferShutdown) throws IOException {
@@ -1300,6 +1516,8 @@ public final class OkHttpRequest {
     }
 
     private Request createRequest(final HttpMethod httpMethod) {
+        final RequestBody requestBody = body == null && requiresRequestBody(httpMethod) ? RequestBody.create(N.EMPTY_BYTE_ARRAY, null) : body;
+
         if (query == null || (query instanceof String && Strings.isEmpty((String) query))) {
             if (httpUrl == null) {
                 requestBuilder.url(HttpUrl.get(url));
@@ -1314,7 +1532,11 @@ public final class OkHttpRequest {
             }
         }
 
-        return requestBuilder.method(httpMethod.name(), body).build();
+        return requestBuilder.method(httpMethod.name(), requestBody).build();
+    }
+
+    private static boolean requiresRequestBody(final HttpMethod httpMethod) {
+        return httpMethod == HttpMethod.POST || httpMethod == HttpMethod.PUT || httpMethod == HttpMethod.PATCH;
     }
 
     /**
@@ -1341,6 +1563,14 @@ public final class OkHttpRequest {
     /**
      * Executes a GET request asynchronously using the specified executor.
      * The request is executed on the provided executor and returns immediately with a ContinuableFuture.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Executor executor = Executors.newFixedThreadPool(2);
+     * ContinuableFuture<Response> future = OkHttpRequest.url("http://localhost:18080/users")
+     *         .asyncGet(executor);
+     * // Response response = future.get();   // blocks for the result when executed (network)
+     * }</pre>
      *
      * @param executor the executor to use for the asynchronous operation
      * @return a ContinuableFuture that will complete with the HTTP response when the request finishes
@@ -1374,6 +1604,14 @@ public final class OkHttpRequest {
     /**
      * Executes a GET request asynchronously using the specified executor and deserializes the response to the specified type.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Executor executor = Executors.newFixedThreadPool(2);
+     * ContinuableFuture<String> future = OkHttpRequest.url("http://localhost:18080/users")
+     *         .asyncGet(String.class, executor);
+     * // String body = future.get();   // blocks for the result when executed (network)
+     * }</pre>
+     *
      * @param <T> The type of the response object
      * @param resultClass The class of the expected response object
      * @param executor The executor to use for the asynchronous operation
@@ -1386,6 +1624,14 @@ public final class OkHttpRequest {
     /**
      * Executes a POST request asynchronously using the default executor.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * ContinuableFuture<Response> future = OkHttpRequest.url("http://localhost:18080/users")
+     *         .jsonBody("{\"name\":\"John\"}")
+     *         .asyncPost();
+     * // Response response = future.get();   // blocks for the result when executed (network)
+     * }</pre>
+     *
      * @return a ContinuableFuture that will complete with the HTTP response
      */
     public ContinuableFuture<Response> asyncPost() {
@@ -1394,6 +1640,15 @@ public final class OkHttpRequest {
 
     /**
      * Executes a POST request asynchronously using the specified executor.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Executor executor = Executors.newFixedThreadPool(2);
+     * ContinuableFuture<Response> future = OkHttpRequest.url("http://localhost:18080/users")
+     *         .jsonBody("{\"name\":\"John\"}")
+     *         .asyncPost(executor);
+     * // Response response = future.get();   // blocks for the result when executed (network)
+     * }</pre>
      *
      * @param executor The executor to use for the asynchronous operation
      * @return A ContinuableFuture that will complete with the HTTP response
@@ -1406,6 +1661,14 @@ public final class OkHttpRequest {
      * Executes a POST request asynchronously and deserializes the response to the specified type.
      * Uses the default executor.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * ContinuableFuture<User> future = OkHttpRequest.url("http://localhost:18080/users")
+     *         .jsonBody("{\"name\":\"John\"}")
+     *         .asyncPost(User.class);
+     * // User user = future.get();   // blocks for the result when executed (network)
+     * }</pre>
+     *
      * @param <T> The type of the response object
      * @param resultClass The class of the expected response object
      * @return A ContinuableFuture that will complete with the deserialized response body
@@ -1416,6 +1679,15 @@ public final class OkHttpRequest {
 
     /**
      * Executes a POST request asynchronously using the specified executor and deserializes the response to the specified type.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Executor executor = Executors.newFixedThreadPool(2);
+     * ContinuableFuture<User> future = OkHttpRequest.url("http://localhost:18080/users")
+     *         .jsonBody("{\"name\":\"John\"}")
+     *         .asyncPost(User.class, executor);
+     * // User user = future.get();   // blocks for the result when executed (network)
+     * }</pre>
      *
      * @param <T> The type of the response object
      * @param resultClass The class of the expected response object
@@ -1429,6 +1701,14 @@ public final class OkHttpRequest {
     /**
      * Executes a PUT request asynchronously using the default executor.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * ContinuableFuture<Response> future = OkHttpRequest.url("http://localhost:18080/users/123")
+     *         .jsonBody("{\"name\":\"John\"}")
+     *         .asyncPut();
+     * // Response response = future.get();   // blocks for the result when executed (network)
+     * }</pre>
+     *
      * @return a ContinuableFuture that will complete with the HTTP response
      */
     public ContinuableFuture<Response> asyncPut() {
@@ -1437,6 +1717,15 @@ public final class OkHttpRequest {
 
     /**
      * Executes a PUT request asynchronously using the specified executor.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Executor executor = Executors.newFixedThreadPool(2);
+     * ContinuableFuture<Response> future = OkHttpRequest.url("http://localhost:18080/users/123")
+     *         .jsonBody("{\"name\":\"John\"}")
+     *         .asyncPut(executor);
+     * // Response response = future.get();   // blocks for the result when executed (network)
+     * }</pre>
      *
      * @param executor The executor to use for the asynchronous operation
      * @return A ContinuableFuture that will complete with the HTTP response
@@ -1449,6 +1738,14 @@ public final class OkHttpRequest {
      * Executes a PUT request asynchronously and deserializes the response to the specified type.
      * Uses the default executor.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * ContinuableFuture<User> future = OkHttpRequest.url("http://localhost:18080/users/123")
+     *         .jsonBody("{\"name\":\"John\"}")
+     *         .asyncPut(User.class);
+     * // User user = future.get();   // blocks for the result when executed (network)
+     * }</pre>
+     *
      * @param <T> The type of the response object
      * @param resultClass The class of the expected response object
      * @return A ContinuableFuture that will complete with the deserialized response body
@@ -1459,6 +1756,15 @@ public final class OkHttpRequest {
 
     /**
      * Executes a PUT request asynchronously using the specified executor and deserializes the response to the specified type.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Executor executor = Executors.newFixedThreadPool(2);
+     * ContinuableFuture<User> future = OkHttpRequest.url("http://localhost:18080/users/123")
+     *         .jsonBody("{\"name\":\"John\"}")
+     *         .asyncPut(User.class, executor);
+     * // User user = future.get();   // blocks for the result when executed (network)
+     * }</pre>
      *
      * @param <T> The type of the response object
      * @param resultClass The class of the expected response object
@@ -1472,6 +1778,14 @@ public final class OkHttpRequest {
     /**
      * Executes a PATCH request asynchronously using the default executor.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * ContinuableFuture<Response> future = OkHttpRequest.url("http://localhost:18080/users/123")
+     *         .jsonBody("{\"status\":\"active\"}")
+     *         .asyncPatch();
+     * // Response response = future.get();   // blocks for the result when executed (network)
+     * }</pre>
+     *
      * @return a ContinuableFuture that will complete with the HTTP response
      */
     public ContinuableFuture<Response> asyncPatch() {
@@ -1480,6 +1794,15 @@ public final class OkHttpRequest {
 
     /**
      * Executes a PATCH request asynchronously using the specified executor.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Executor executor = Executors.newFixedThreadPool(2);
+     * ContinuableFuture<Response> future = OkHttpRequest.url("http://localhost:18080/users/123")
+     *         .jsonBody("{\"status\":\"active\"}")
+     *         .asyncPatch(executor);
+     * // Response response = future.get();   // blocks for the result when executed (network)
+     * }</pre>
      *
      * @param executor The executor to use for the asynchronous operation
      * @return A ContinuableFuture that will complete with the HTTP response
@@ -1492,6 +1815,14 @@ public final class OkHttpRequest {
      * Executes a PATCH request asynchronously and deserializes the response to the specified type.
      * Uses the default executor.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * ContinuableFuture<User> future = OkHttpRequest.url("http://localhost:18080/users/123")
+     *         .jsonBody("{\"status\":\"active\"}")
+     *         .asyncPatch(User.class);
+     * // User user = future.get();   // blocks for the result when executed (network)
+     * }</pre>
+     *
      * @param <T> The type of the response object
      * @param resultClass The class of the expected response object
      * @return A ContinuableFuture that will complete with the deserialized response body
@@ -1502,6 +1833,15 @@ public final class OkHttpRequest {
 
     /**
      * Executes a PATCH request asynchronously using the specified executor and deserializes the response to the specified type.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Executor executor = Executors.newFixedThreadPool(2);
+     * ContinuableFuture<User> future = OkHttpRequest.url("http://localhost:18080/users/123")
+     *         .jsonBody("{\"status\":\"active\"}")
+     *         .asyncPatch(User.class, executor);
+     * // User user = future.get();   // blocks for the result when executed (network)
+     * }</pre>
      *
      * @param <T> The type of the response object
      * @param resultClass The class of the expected response object
@@ -1515,6 +1855,13 @@ public final class OkHttpRequest {
     /**
      * Executes a DELETE request asynchronously using the default executor.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * ContinuableFuture<Response> future = OkHttpRequest.url("http://localhost:18080/users/123")
+     *         .asyncDelete();
+     * // Response response = future.get();   // blocks for the result when executed (network)
+     * }</pre>
+     *
      * @return a ContinuableFuture that will complete with the HTTP response
      */
     public ContinuableFuture<Response> asyncDelete() {
@@ -1523,6 +1870,14 @@ public final class OkHttpRequest {
 
     /**
      * Executes a DELETE request asynchronously using the specified executor.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Executor executor = Executors.newFixedThreadPool(2);
+     * ContinuableFuture<Response> future = OkHttpRequest.url("http://localhost:18080/users/123")
+     *         .asyncDelete(executor);
+     * // Response response = future.get();   // blocks for the result when executed (network)
+     * }</pre>
      *
      * @param executor The executor to use for the asynchronous operation
      * @return A ContinuableFuture that will complete with the HTTP response
@@ -1535,6 +1890,13 @@ public final class OkHttpRequest {
      * Executes a DELETE request asynchronously and deserializes the response to the specified type.
      * Uses the default executor.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * ContinuableFuture<DeleteResponse> future = OkHttpRequest.url("http://localhost:18080/users/123")
+     *         .asyncDelete(DeleteResponse.class);
+     * // DeleteResponse result = future.get();   // blocks for the result when executed (network)
+     * }</pre>
+     *
      * @param <T> The type of the response object
      * @param resultClass The class of the expected response object
      * @return A ContinuableFuture that will complete with the deserialized response body
@@ -1545,6 +1907,14 @@ public final class OkHttpRequest {
 
     /**
      * Executes a DELETE request asynchronously using the specified executor and deserializes the response to the specified type.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Executor executor = Executors.newFixedThreadPool(2);
+     * ContinuableFuture<DeleteResponse> future = OkHttpRequest.url("http://localhost:18080/users/123")
+     *         .asyncDelete(DeleteResponse.class, executor);
+     * // DeleteResponse result = future.get();   // blocks for the result when executed (network)
+     * }</pre>
      *
      * @param <T> The type of the response object
      * @param resultClass The class of the expected response object
@@ -1558,6 +1928,13 @@ public final class OkHttpRequest {
     /**
      * Executes a HEAD request asynchronously using the default executor.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * ContinuableFuture<Response> future = OkHttpRequest.url("http://localhost:18080/large-file")
+     *         .asyncHead();
+     * // Response response = future.get();   // blocks for the headers when executed (network)
+     * }</pre>
+     *
      * @return a ContinuableFuture that will complete with the HTTP response
      */
     public ContinuableFuture<Response> asyncHead() {
@@ -1566,6 +1943,14 @@ public final class OkHttpRequest {
 
     /**
      * Executes a HEAD request asynchronously using the specified executor.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Executor executor = Executors.newFixedThreadPool(2);
+     * ContinuableFuture<Response> future = OkHttpRequest.url("http://localhost:18080/large-file")
+     *         .asyncHead(executor);
+     * // Response response = future.get();   // blocks for the headers when executed (network)
+     * }</pre>
      *
      * @param executor The executor to use for the asynchronous operation
      * @return A ContinuableFuture that will complete with the HTTP response
@@ -1577,6 +1962,13 @@ public final class OkHttpRequest {
     /**
      * Executes an HTTP request asynchronously with the specified method using the default executor.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * ContinuableFuture<Response> future = OkHttpRequest.url("http://localhost:18080/resource")
+     *         .asyncExecute(HttpMethod.GET);
+     * // Response response = future.get();   // blocks for the result when executed (network)
+     * }</pre>
+     *
      * @param httpMethod The HTTP method to use (GET, POST, PUT, PATCH, DELETE, HEAD)
      * @return A ContinuableFuture that will complete with the HTTP response
      */
@@ -1587,6 +1979,14 @@ public final class OkHttpRequest {
 
     /**
      * Executes an HTTP request asynchronously with the specified method using the specified executor.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Executor executor = Executors.newFixedThreadPool(2);
+     * ContinuableFuture<Response> future = OkHttpRequest.url("http://localhost:18080/resource")
+     *         .asyncExecute(HttpMethod.GET, executor);
+     * // Response response = future.get();   // blocks for the result when executed (network)
+     * }</pre>
      *
      * @param httpMethod The HTTP method to use (GET, POST, PUT, PATCH, DELETE, HEAD)
      * @param executor The executor to use for the asynchronous operation
@@ -1601,6 +2001,13 @@ public final class OkHttpRequest {
      * Executes an HTTP request asynchronously with the specified method and deserializes the response to the specified type.
      * Uses the default executor.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * ContinuableFuture<User> future = OkHttpRequest.url("http://localhost:18080/users/123")
+     *         .asyncExecute(HttpMethod.GET, User.class);
+     * // User user = future.get();   // blocks for the result when executed (network)
+     * }</pre>
+     *
      * @param <T> The type of the response object
      * @param httpMethod The HTTP method to use (GET, POST, PUT, PATCH, DELETE, HEAD)
      * @param resultClass The class of the expected response object
@@ -1613,6 +2020,14 @@ public final class OkHttpRequest {
 
     /**
      * Executes an HTTP request asynchronously with the specified method using the specified executor and deserializes the response to the specified type.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Executor executor = Executors.newFixedThreadPool(2);
+     * ContinuableFuture<User> future = OkHttpRequest.url("http://localhost:18080/users/123")
+     *         .asyncExecute(HttpMethod.GET, User.class, executor);
+     * // User user = future.get();   // blocks for the result when executed (network)
+     * }</pre>
      *
      * @param <T> The type of the response object
      * @param httpMethod The HTTP method to use (GET, POST, PUT, PATCH, DELETE, HEAD)

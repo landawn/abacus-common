@@ -68,7 +68,7 @@ public class JSONType<T> extends AbstractType<T> {
     /**
      * Returns the declaring name of this JSONType.
      * The declaring name wraps the underlying type's declaring name with the {@code JSON<>} notation,
-     * for example {@code "JSON<java.util.Map>"} or {@code "JSON<com.example.MyBean>"}.
+     * for example {@code "JSON<Map>"} or {@code "JSON<MyBean>"}.
      *
      * @return the declaring name in the format {@code "JSON<TypeDeclaringName>"}
      */
@@ -91,8 +91,15 @@ public class JSONType<T> extends AbstractType<T> {
      * Converts an object to its JSON string representation.
      * Uses the default JSON parser and serialization configuration.
      *
+     * <p>The returned string is a serializable representation designed to be parsed back into an equivalent value
+     * via {@link #valueOf(String)}; {@code stringOf} and {@code valueOf} are inverse operations that round-trip. This
+     * is the key distinction from {@link Object#toString()}, whose result is not guaranteed to be convertible back
+     * into the original value.</p>
+     *
      * @param x the object to serialize; may be {@code null}
      * @return the JSON string representation of the object, or {@code null} if the input is {@code null}
+     * @see #valueOf(String)
+     * @see #valueOf(Object)
      */
     @Override
     public String stringOf(final T x) {
@@ -102,8 +109,14 @@ public class JSONType<T> extends AbstractType<T> {
     /**
      * Deserializes a JSON string into an object of type {@code T}.
      *
+     * <p>This method is the inverse of {@code stringOf} and round-trips with it: it parses the string produced by
+     * {@code stringOf} back into a value of this type. Strings produced by {@link Object#toString()} are not
+     * guaranteed to be parseable in this way.</p>
+     *
      * @param str the JSON string to parse; may be {@code null} or empty
      * @return the deserialized object of type {@code T}, or {@code null} if {@code str} is {@code null} or empty
+     * @see #valueOf(Object)
+     * @see #stringOf(Object)
      */
     @Override
     public T valueOf(final String str) {

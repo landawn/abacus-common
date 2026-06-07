@@ -99,6 +99,7 @@ public class JsonHttpMessageConverter extends AbstractJsonHttpMessageConverter {
      * RestTemplate restTemplate = new RestTemplate();
      * restTemplate.getMessageConverters().add(0, new JsonHttpMessageConverter());
      * }</pre>
+     *
      */
     public JsonHttpMessageConverter() {
         this(new JsonSerConfig(), new JsonDeserConfig());
@@ -233,7 +234,7 @@ public class JsonHttpMessageConverter extends AbstractJsonHttpMessageConverter {
      * @GetMapping("/users/{id}")
      * public User getUser(@PathVariable Long id) {
      *     User user = userService.findById(id);
-     *     return user;  // Automatically serialized to JSON by this method
+     *     return user;  // user is automatically serialized to JSON by this method
      * }
      * }</pre>
      *

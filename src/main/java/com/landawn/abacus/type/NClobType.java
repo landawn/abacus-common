@@ -50,7 +50,7 @@ public class NClobType extends AbstractType<NClob> {
      *
      * @param clazz the specific {@link NClob} class or subclass to handle; must not be {@code null}
      */
-    NClobType(Class<? extends NClob> clazz) {
+    NClobType(final Class<? extends NClob> clazz) {
         super(NCLOB);
         this.clazz = (Class<NClob>) clazz;
     }

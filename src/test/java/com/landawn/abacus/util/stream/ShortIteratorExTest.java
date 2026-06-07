@@ -33,7 +33,7 @@ public class ShortIteratorExTest extends TestBase {
         Assertions.assertThrows(NoSuchElementException.class, () -> iter.nextShort());
         Assertions.assertEquals(0, iter.count());
         Assertions.assertArrayEquals(new short[0], iter.toArray());
-        iter.close();
+        iter.closeResource();
     }
 
     // ---- of(short[] a, int fromIndex, int toIndex) ----
@@ -300,7 +300,7 @@ public class ShortIteratorExTest extends TestBase {
 
         Assertions.assertEquals(1, iter.count());
 
-        iter.close();
+        iter.closeResource();
     }
 
     @Test
@@ -354,12 +354,12 @@ public class ShortIteratorExTest extends TestBase {
         Assertions.assertFalse(iter.hasNext());
     }
 
-    // ---- close() ----
+    // ---- closeResource() ----
 
     @Test
-    public void testClose() {
+    public void testCloseResource() {
         ShortIteratorEx iter = ShortIteratorEx.of((short) 1, (short) 2, (short) 3);
-        iter.close();
+        iter.closeResource();
         assertNotNull(iter);
     }
 

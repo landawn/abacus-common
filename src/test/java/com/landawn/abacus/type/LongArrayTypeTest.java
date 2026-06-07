@@ -159,32 +159,32 @@ public class LongArrayTypeTest extends TestBase {
     }
 
     @Test
-    public void testWriteCharacter_Null() throws IOException {
-        longArrayType.writeCharacter(characterWriter, null, null);
+    public void testSerializeTo_Null() throws IOException {
+        longArrayType.serializeTo(characterWriter, null, null);
         verify(characterWriter).write(any(char[].class));
     }
 
     @Test
-    public void testWriteCharacter_EmptyArray() throws IOException {
+    public void testSerializeTo_EmptyArray() throws IOException {
         Long[] arr = new Long[0];
-        longArrayType.writeCharacter(characterWriter, arr, null);
+        longArrayType.serializeTo(characterWriter, arr, null);
         verify(characterWriter).write('[');
         verify(characterWriter).write(']');
     }
 
     @Test
-    public void testWriteCharacter_SingleElement() throws IOException {
+    public void testSerializeTo_SingleElement() throws IOException {
         Long[] arr = { 42L };
-        longArrayType.writeCharacter(characterWriter, arr, null);
+        longArrayType.serializeTo(characterWriter, arr, null);
         verify(characterWriter).write('[');
         verify(characterWriter).write(42L);
         verify(characterWriter).write(']');
     }
 
     @Test
-    public void testWriteCharacter_MultipleElements() throws IOException {
+    public void testSerializeTo_MultipleElements() throws IOException {
         Long[] arr = { 1L, 2L, 3L };
-        longArrayType.writeCharacter(characterWriter, arr, null);
+        longArrayType.serializeTo(characterWriter, arr, null);
         verify(characterWriter).write('[');
         verify(characterWriter).write(1L);
         verify(characterWriter, times(2)).write(", ");
@@ -194,9 +194,9 @@ public class LongArrayTypeTest extends TestBase {
     }
 
     @Test
-    public void testWriteCharacter_WithNullElements() throws IOException {
+    public void testSerializeTo_WithNullElements() throws IOException {
         Long[] arr = { 1L, null, 3L };
-        longArrayType.writeCharacter(characterWriter, arr, null);
+        longArrayType.serializeTo(characterWriter, arr, null);
         verify(characterWriter).write('[');
         verify(characterWriter).write(1L);
         verify(characterWriter, times(2)).write(", ");
@@ -206,11 +206,11 @@ public class LongArrayTypeTest extends TestBase {
     }
 
     @Test
-    public void testWriteCharacter_WithConfig() throws IOException {
+    public void testSerializeTo_WithConfig() throws IOException {
         Long[] arr = { 1L, 2L, 3L };
         JsonXmlSerConfig<?> config = mock(JsonXmlSerConfig.class);
 
-        longArrayType.writeCharacter(characterWriter, arr, config);
+        longArrayType.serializeTo(characterWriter, arr, config);
         verify(characterWriter).write('[');
         verify(characterWriter).write(1L);
         verify(characterWriter, times(2)).write(", ");

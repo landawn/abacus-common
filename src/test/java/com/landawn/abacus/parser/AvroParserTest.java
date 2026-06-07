@@ -43,6 +43,7 @@ public class AvroParserTest extends TestBase {
     private AvroParser parser;
     private Schema testSchema;
     private Schema arraySchema;
+    private Schema nullableSchema;
 
     @TempDir
     File tempDir;
@@ -55,6 +56,9 @@ public class AvroParserTest extends TestBase {
                 + "{\"name\":\"age\",\"type\":\"int\"}" + "]}");
 
         arraySchema = new Schema.Parser().parse("{\"type\":\"array\",\"items\":\"string\"}");
+        nullableSchema = new Schema.Parser()
+                .parse("{\"type\":\"record\",\"name\":\"NullableRecord\",\"fields\":[" + "{\"name\":\"name\",\"type\":[\"null\",\"string\"],\"default\":null},"
+                        + "{\"name\":\"age\",\"type\":[\"null\",\"int\"],\"default\":null}" + "]}");
     }
 
     public static class TestBean {
@@ -639,6 +643,27 @@ public class AvroParserTest extends TestBase {
     }
 
     @Test
+    public void testDeserializeToMapPreservesNullFields() {
+        GenericRecord record = new GenericData.Record(nullableSchema);
+        record.put("name", null);
+        record.put("age", 12);
+
+        AvroSerConfig serConfig = AvroSerConfig.create().setSchema(nullableSchema);
+        ByteArrayOutputStream os = new ByteArrayOutputStream();
+        parser.serialize(record, serConfig, os);
+
+        AvroDeserConfig deserConfig = AvroDeserConfig.create().setSchema(nullableSchema);
+        ByteArrayInputStream is = new ByteArrayInputStream(os.toByteArray());
+        @SuppressWarnings("unchecked")
+        Map<String, Object> result = parser.deserialize(is, deserConfig, HashMap.class);
+
+        assertNotNull(result);
+        assertTrue(result.containsKey("name"));
+        assertEquals(null, result.get("name"));
+        assertEquals(12, result.get("age"));
+    }
+
+    @Test
     public void testDeserializeFromFile() throws IOException {
         GenericRecord record = new GenericData.Record(testSchema);
         record.put("name", "FileUser");
@@ -864,6 +889,24 @@ public class AvroParserTest extends TestBase {
 
         assertNotNull(result);
         assertEquals(Arrays.asList("ListUser", 29), result);
+    }
+
+    @Test
+    public void testFromGenericRecord_CollectionTargetPreservesNullFieldPosition() throws Exception {
+        GenericRecord record = new GenericData.Record(nullableSchema);
+        record.put("name", null);
+        record.put("age", 12);
+
+        Method method = AvroParser.class.getDeclaredMethod("fromGenericRecord", GenericRecord.class, Class.class);
+        method.setAccessible(true);
+
+        @SuppressWarnings("unchecked")
+        List<Object> result = (List<Object>) method.invoke(parser, record, ArrayList.class);
+
+        assertNotNull(result);
+        assertEquals(2, result.size());
+        assertEquals(null, result.get(0));
+        assertEquals(12, result.get(1));
     }
 
     // TODO: Remaining AvroParser gaps are concentrated in schema-specific private conversion branches that need dedicated fixture schemas/records beyond the current lightweight unit setup.

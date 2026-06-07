@@ -16,15 +16,16 @@ package com.landawn.abacus.util.function;
 import com.landawn.abacus.util.Throwables;
 
 /**
- * Represents a function that accepts a long-valued argument and produces a double-valued result.
- * This is the long-to-double primitive specialization for {@code Function}.
+ * Represents a function that accepts a {@code long}-valued argument and produces a
+ * {@code double}-valued result. This is the {@code long}-to-{@code double} primitive
+ * specialization for {@link java.util.function.Function}.
+ *
+ * <p>This interface extends both {@link Throwables.LongToDoubleFunction} with
+ * {@link RuntimeException} and {@link java.util.function.LongToDoubleFunction},
+ * providing compatibility with the Java standard library while supporting the
+ * abacus-common framework's exception handling capabilities.
  *
  * <p>This is a functional interface whose functional method is {@link #applyAsDouble(long)}.
- *
- * <p>The interface extends both {@code Throwables.LongToDoubleFunction} with {@code RuntimeException}
- * and {@code java.util.function.LongToDoubleFunction}, providing compatibility with the Java standard library
- * while adding a predefined default conversion function.
- *
  *
  * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
  *
@@ -46,6 +47,7 @@ public interface LongToDoubleFunction extends Throwables.LongToDoubleFunction<Ru
      * LongToDoubleFunction converter = LongToDoubleFunction.DEFAULT;
      * double result = converter.applyAsDouble(42L);   // returns 42.0
      * }</pre>
+     *
      */
     LongToDoubleFunction DEFAULT = value -> value;
 

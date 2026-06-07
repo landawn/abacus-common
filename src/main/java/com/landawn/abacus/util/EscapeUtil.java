@@ -235,11 +235,8 @@ public final class EscapeUtil {
      * <pre>{@code EscapeUtil.escapeJava("foo"); }</pre>
      */
     private EscapeUtil() {
-        // Utility class - prevent instantiation
-    }
 
-    // Java and JavaScript
-    //--------------------------------------------------------------------------
+    }
 
     /**
      * Escapes characters in a string using Java String literal rules, converting special characters
@@ -696,6 +693,24 @@ public final class EscapeUtil {
          * and the only IOExceptions thrown must be from interacting with the Writer so that
          * the top level API may reliably ignore StringWriter IOExceptions.
          *
+         * <p>A return value of {@code 0} means the codepoint at {@code index} was not handled by this
+         * translator (nothing is written); the caller then copies that single character through
+         * unchanged and advances by one.</p>
+         *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * java.io.StringWriter out = new java.io.StringWriter();
+         *
+         * // A character that this translator handles: ESCAPE_JAVA escapes a double quote
+         * int consumed = EscapeUtil.ESCAPE_JAVA.translate("\"abc", 0, out); // returns 1 (one codepoint consumed)
+         * out.toString();                                                   // returns "\\\"" (a backslash followed by a quote)
+         *
+         * // A character it does not handle: nothing is consumed or written
+         * java.io.StringWriter out2 = new java.io.StringWriter();
+         * int consumed2 = EscapeUtil.ESCAPE_JAVA.translate("abc", 0, out2); // returns 0 (not handled here)
+         * out2.toString();                                                  // returns "" (empty; caller passes the char through)
+         * }</pre>
+         *
          * @param input CharSequence that is being translated
          * @param index int representing the current point of translation
          * @param out Writer to translate the text to
@@ -710,6 +725,14 @@ public final class EscapeUtil {
          *
          * <p>This method internally uses a {@link StringWriter} to collect the translated output,
          * which eliminates the need for callers to manage Writer instances.</p>
+         *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * EscapeUtil.ESCAPE_JAVA.translate("Hello\nWorld")      = "Hello\\nWorld"
+         * EscapeUtil.UNESCAPE_HTML4.translate("&lt;p&gt;")      = "<p>"
+         * EscapeUtil.ESCAPE_CSV.translate("hello,world")        = "\"hello,world\""
+         * EscapeUtil.ESCAPE_JAVA.translate(null)                = null
+         * }</pre>
          *
          * @param input CharSequence to be translated, may be null
          * @return the translated String, or {@code null} if the input is {@code null}
@@ -737,6 +760,13 @@ public final class EscapeUtil {
          *
          * <p>If {@code input} is {@code null}, this method returns immediately without writing
          * anything. If {@code out} is {@code null}, an {@link IllegalArgumentException} is thrown.</p>
+         *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * java.io.StringWriter sw = new java.io.StringWriter();
+         * EscapeUtil.ESCAPE_JAVA.translate("Hello\nWorld", sw);
+         * sw.toString()         = "Hello\\nWorld"
+         * }</pre>
          *
          * @param input the CharSequence to be translated; may be {@code null}, in which case nothing is written
          * @param out the Writer to translate the text to; must not be {@code null}
@@ -780,6 +810,17 @@ public final class EscapeUtil {
          * Helper method to create a merger of this translator with another set of
          * translators. Useful in customizing the standard functionality.
          *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * // Chain translators: first HTML escape, then fall back to Java escape
+         * CharSequenceTranslator combined = EscapeUtil.ESCAPE_HTML4.with(EscapeUtil.ESCAPE_JAVA);
+         * combined.translate("<tag>\n")         = "&lt;tag&gt;\\n"
+         *
+         * // Multiple translators can be chained in one call
+         * CharSequenceTranslator triple = EscapeUtil.ESCAPE_HTML4
+         *         .with(EscapeUtil.ESCAPE_JAVA, EscapeUtil.ESCAPE_ECMASCRIPT);
+         * }</pre>
+         *
          * @param translators CharSequenceTranslator array of translators to merge with this one
          * @return CharSequenceTranslator merging this translator with the others
          */
@@ -793,6 +834,13 @@ public final class EscapeUtil {
         /**
          * <p>Returns an upper case hexadecimal {@code String} for the given
          * character.</p>
+         *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * CharSequenceTranslator.hex(0)       = "0"
+         * CharSequenceTranslator.hex(15)      = "F"
+         * CharSequenceTranslator.hex(255)     = "FF"
+         * }</pre>
          *
          * @param codepoint The codepoint to convert.
          * @return An upper case hexadecimal {@code String}

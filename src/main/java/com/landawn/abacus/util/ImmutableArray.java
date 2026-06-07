@@ -35,8 +35,8 @@ import com.landawn.abacus.util.stream.Stream;
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * ImmutableArray<String> array = ImmutableArray.of("apple", "banana", "cherry");
- * String first = array.get(0);   // "apple"
- * boolean hasApple = array.contains("apple");   // true
+ * String first = array.get(0);                  // returns "apple"
+ * boolean hasApple = array.contains("apple");   // returns true
  *
  * // Iterate over elements
  * for (String fruit : array) {
@@ -112,6 +112,11 @@ public final class ImmutableArray<T> implements Iterable<T>, Immutable {
     /**
      * Creates an ImmutableArray containing four elements.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * ImmutableArray<String> quad = ImmutableArray.of("North", "South", "East", "West");
+     * }</pre>
+     *
      * @param <T> the type of the elements
      * @param e1 the first element
      * @param e2 the second element
@@ -125,6 +130,11 @@ public final class ImmutableArray<T> implements Iterable<T>, Immutable {
 
     /**
      * Creates an ImmutableArray containing five elements.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * ImmutableArray<Integer> primes = ImmutableArray.of(2, 3, 5, 7, 11);
+     * }</pre>
      *
      * @param <T> the type of the elements
      * @param e1 the first element
@@ -140,6 +150,11 @@ public final class ImmutableArray<T> implements Iterable<T>, Immutable {
 
     /**
      * Creates an ImmutableArray containing six elements.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * ImmutableArray<String> days = ImmutableArray.of("Mon", "Tue", "Wed", "Thu", "Fri", "Sat");
+     * }</pre>
      *
      * @param <T> the type of the elements
      * @param e1 the first element
@@ -157,6 +172,11 @@ public final class ImmutableArray<T> implements Iterable<T>, Immutable {
     /**
      * Creates an ImmutableArray containing seven elements.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * ImmutableArray<String> week = ImmutableArray.of("Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun");
+     * }</pre>
+     *
      * @param <T> the type of the elements
      * @param e1 the first element
      * @param e2 the second element
@@ -173,6 +193,11 @@ public final class ImmutableArray<T> implements Iterable<T>, Immutable {
 
     /**
      * Creates an ImmutableArray containing eight elements.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * ImmutableArray<Integer> fib = ImmutableArray.of(1, 1, 2, 3, 5, 8, 13, 21);
+     * }</pre>
      *
      * @param <T> the type of the elements
      * @param e1 the first element
@@ -192,6 +217,11 @@ public final class ImmutableArray<T> implements Iterable<T>, Immutable {
     /**
      * Creates an ImmutableArray containing nine elements.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * ImmutableArray<Integer> digits = ImmutableArray.of(1, 2, 3, 4, 5, 6, 7, 8, 9);
+     * }</pre>
+     *
      * @param <T> the type of the elements
      * @param e1 the first element
      * @param e2 the second element
@@ -210,6 +240,11 @@ public final class ImmutableArray<T> implements Iterable<T>, Immutable {
 
     /**
      * Creates an ImmutableArray containing ten elements.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * ImmutableArray<Integer> numbers = ImmutableArray.of(1, 2, 3, 4, 5, 6, 7, 8, 9, 10);
+     * }</pre>
      *
      * @param <T> the type of the elements
      * @param e1 the first element
@@ -454,7 +489,7 @@ public final class ImmutableArray<T> implements Iterable<T>, Immutable {
      * ImmutableArray<String> array = ImmutableArray.of("apple", "banana", "cherry");
      * List<String> filtered = array.stream()
      *     .filter(s -> s.startsWith("a"))
-     *     .collect(Collectors.toList());   // ["apple"]
+     *     .collect(Collectors.toList());   // returns ["apple"]
      * }</pre>
      *
      * @return a Stream over the elements in this array

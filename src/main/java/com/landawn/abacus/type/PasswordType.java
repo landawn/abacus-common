@@ -50,6 +50,7 @@ import com.landawn.abacus.util.Password;
  *     String hashedPassword = passwordType.get(rs, 1);   // Returns the hashed value
  * }
  * }</pre>
+ *
  */
 @SuppressWarnings("java:S2160")
 public class PasswordType extends AbstractStringType {

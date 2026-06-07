@@ -78,7 +78,7 @@ public interface LongObjPredicate<T> extends Throwables.LongObjPredicate<T, Runt
      * @return a predicate that represents the logical negation of this predicate
      */
     default LongObjPredicate<T> negate() {
-        return (i, t) -> !test(i, t);
+        return (t, u) -> !test(t, u);
     }
 
     /**
@@ -107,7 +107,7 @@ public interface LongObjPredicate<T> extends Throwables.LongObjPredicate<T, Runt
      */
     default LongObjPredicate<T> and(final LongObjPredicate<T> other) {
         Objects.requireNonNull(other);
-        return (i, t) -> test(i, t) && other.test(i, t);
+        return (t, u) -> test(t, u) && other.test(t, u);
     }
 
     /**
@@ -137,6 +137,6 @@ public interface LongObjPredicate<T> extends Throwables.LongObjPredicate<T, Runt
      */
     default LongObjPredicate<T> or(final LongObjPredicate<T> other) {
         Objects.requireNonNull(other);
-        return (i, t) -> test(i, t) || other.test(i, t);
+        return (t, u) -> test(t, u) || other.test(t, u);
     }
 }

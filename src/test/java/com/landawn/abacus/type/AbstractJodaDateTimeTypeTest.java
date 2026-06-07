@@ -81,67 +81,67 @@ public class AbstractJodaDateTimeTypeTest extends TestBase {
     }
 
     @Test
-    public void testWriteCharacterWithNullValue() throws IOException {
-        jodaDateTimeType.writeCharacter(writer, null, null);
+    public void testSerializeToWithNullValue() throws IOException {
+        jodaDateTimeType.serializeTo(writer, null, null);
         verify(writer).write(any(char[].class));
     }
 
     @Test
-    public void testWriteCharacterWithLongFormat() throws IOException {
+    public void testSerializeToWithLongFormat() throws IOException {
         DateTime dateTime = new DateTime(1234567890123L);
         when(config.getDateTimeFormat()).thenReturn(DateTimeFormat.LONG);
         when(config.getStringQuotation()).thenReturn((char) 0);
 
-        jodaDateTimeType.writeCharacter(writer, dateTime, config);
+        jodaDateTimeType.serializeTo(writer, dateTime, config);
         verify(writer).write(1234567890123L);
     }
 
     @Test
-    public void testWriteCharacterWithISO8601DateTime() throws IOException {
+    public void testSerializeToWithISO8601DateTime() throws IOException {
         DateTime dateTime = new DateTime(2023, 6, 15, 10, 30, 45, 123);
         when(config.getDateTimeFormat()).thenReturn(DateTimeFormat.ISO_8601_DATE_TIME);
         when(config.getStringQuotation()).thenReturn((char) 0);
 
-        jodaDateTimeType.writeCharacter(writer, dateTime, config);
+        jodaDateTimeType.serializeTo(writer, dateTime, config);
         verify(writer, atLeastOnce()).append(anyString());
     }
 
     @Test
-    public void testWriteCharacterWithISO8601Timestamp() throws IOException {
+    public void testSerializeToWithISO8601Timestamp() throws IOException {
         DateTime dateTime = new DateTime(2023, 6, 15, 10, 30, 45, 123);
         when(config.getDateTimeFormat()).thenReturn(DateTimeFormat.ISO_8601_TIMESTAMP);
         when(config.getStringQuotation()).thenReturn((char) 0);
 
-        jodaDateTimeType.writeCharacter(writer, dateTime, config);
+        jodaDateTimeType.serializeTo(writer, dateTime, config);
         verify(writer, atLeastOnce()).append(anyString());
     }
 
     @Test
-    public void testWriteCharacterWithQuotation() throws IOException {
+    public void testSerializeToWithQuotation() throws IOException {
         DateTime dateTime = new DateTime(2023, 6, 15, 10, 30, 45, 123);
         when(config.getDateTimeFormat()).thenReturn(DateTimeFormat.ISO_8601_TIMESTAMP);
         when(config.getStringQuotation()).thenReturn('"');
 
-        jodaDateTimeType.writeCharacter(writer, dateTime, config);
+        jodaDateTimeType.serializeTo(writer, dateTime, config);
         verify(writer, times(2)).write('"');
     }
 
     @Test
-    public void testWriteCharacterWithNullConfig() throws IOException {
+    public void testSerializeToWithNullConfig() throws IOException {
         DateTime dateTime = new DateTime(2023, 6, 15, 10, 30, 45, 123);
 
-        jodaDateTimeType.writeCharacter(writer, dateTime, null);
+        jodaDateTimeType.serializeTo(writer, dateTime, null);
         verify(writer, atLeastOnce()).append(anyString());
     }
 
     @Test
-    public void testWriteCharacterWithUnsupportedFormat() throws IOException {
+    public void testSerializeToWithUnsupportedFormat() throws IOException {
         DateTime dateTime = new DateTime(2023, 6, 15, 10, 30, 45, 123);
         DateTimeFormat unsupportedFormat = mock(DateTimeFormat.class);
         when(config.getDateTimeFormat()).thenReturn(unsupportedFormat);
         when(config.getStringQuotation()).thenReturn((char) 0);
 
-        jodaDateTimeType.writeCharacter(writer, dateTime, config);
+        jodaDateTimeType.serializeTo(writer, dateTime, config);
         assertNotNull(unsupportedFormat);
     }
 }

@@ -92,10 +92,10 @@ public @interface Entity {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * @Entity(name = "app_users")  // Maps to 'app_users' table
+     * @Entity(name = "app_users")  // maps to 'app_users' table
      * public class User { }
      *
-     * @Entity  // Maps to 'Customer' table (class name)
+     * @Entity  // maps to 'Customer' table (class name)
      * public class Customer { }
      * }</pre>
      *

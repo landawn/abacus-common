@@ -63,8 +63,8 @@ import com.landawn.abacus.logging.LoggerFactory;
  * // Execute with retry
  * ContinuableFuture<String> retryFuture = executor.executeWithRetry(
  *     () -> performNetworkCall(),
- *     3, // retry 3 times
- *     1000, // wait 1 second between retries
+ *     3,
+ *     1000,
  *     (result, exception) -> exception != null // retry on any exception
  * );
  * }</pre>
@@ -110,6 +110,7 @@ public class AsyncExecutor {
      * AsyncExecutor executor = new AsyncExecutor();
      * executor.execute(() -> System.out.println("Hello from async task"));
      * }</pre>
+     *
      */
     public AsyncExecutor() {
         this(DEFAULT_CORE_POOL_SIZE, DEFAULT_MAX_THREAD_POOL_SIZE, 180L, TimeUnit.SECONDS);
@@ -215,7 +216,7 @@ public class AsyncExecutor {
      * <pre>{@code
      * ContinuableFuture<Void> future = executor.execute(
      *     () -> processData(),
-     *     () -> releaseResources() // Always executed
+     *     () -> releaseResources() // invokes cleanup after command
      * );
      * }</pre>
      *
@@ -310,7 +311,7 @@ public class AsyncExecutor {
      * <pre>{@code
      * ContinuableFuture<Integer> future = executor.execute(
      *     () -> computeValue(),
-     *     () -> logCompletion() // Always executed
+     *     () -> logCompletion() // invokes completion logging
      * );
      * }</pre>
      *
@@ -382,9 +383,9 @@ public class AsyncExecutor {
      * <pre>{@code
      * ContinuableFuture<Void> future = executor.executeWithRetry(
      *     () -> sendEmail(),
-     *     3, // retry up to 3 times
-     *     1000, // wait 1 second between retries
-     *     e -> e instanceof IOException // retry only on IOException
+     *     3,
+     *     1000,
+     *     e -> e instanceof IOException
      * );
      * }</pre>
      *
@@ -427,8 +428,8 @@ public class AsyncExecutor {
      * <pre>{@code
      * ContinuableFuture<String> future = executor.executeWithRetry(
      *     () -> fetchDataFromAPI(),
-     *     5, // retry up to 5 times
-     *     2000, // wait 2 seconds between retries
+     *     5,
+     *     2000,
      *     (result, exception) -> exception != null || result == null // retry on exception or null result
      * );
      * }</pre>
@@ -549,8 +550,9 @@ public class AsyncExecutor {
      * <pre>{@code
      * AsyncExecutor executor = new AsyncExecutor();
      * // Use executor...
-     * executor.shutdown();   // Gracefully shutdown
+     * executor.shutdown();   // Gracefully shuts down
      * }</pre>
+     *
      */
     public synchronized void shutdown() {
         shutdown(0, TimeUnit.SECONDS);
@@ -575,7 +577,7 @@ public class AsyncExecutor {
      * <pre>{@code
      * AsyncExecutor executor = new AsyncExecutor();
      * // Use executor...
-     * executor.shutdown(30, TimeUnit.SECONDS);   // Wait up to 30 seconds for tasks to complete
+     * executor.shutdown(30, TimeUnit.SECONDS);   // Waits up to 30 seconds for tasks to complete
      * }</pre>
      *
      * @param terminationTimeout the maximum time to wait for executor termination; if 0 or negative,

@@ -3,6 +3,7 @@ package com.landawn.abacus.parser;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -19,6 +20,7 @@ import java.nio.file.Path;
 import java.util.ArrayDeque;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
@@ -34,6 +36,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 
 import com.landawn.abacus.TestBase;
+import com.landawn.abacus.annotation.JsonXmlField;
 import com.landawn.abacus.type.Type;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Strings;
@@ -72,6 +75,50 @@ public class AbacusXmlParserImplTest extends TestBase {
 
         public void setAge(final int age) {
             this.age = age;
+        }
+    }
+
+    public static class RawXmlBean {
+        private String name;
+
+        @JsonXmlField(isJsonRawValue = true)
+        private String payload;
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(final String name) {
+            this.name = name;
+        }
+
+        public String getPayload() {
+            return payload;
+        }
+
+        public void setPayload(final String payload) {
+            this.payload = payload;
+        }
+    }
+
+    public static class CircularRefBean {
+        private String name;
+        private CircularRefBean reference;
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(final String name) {
+            this.name = name;
+        }
+
+        public CircularRefBean getReference() {
+            return reference;
+        }
+
+        public void setReference(final CircularRefBean reference) {
+            this.reference = reference;
         }
     }
 
@@ -123,6 +170,23 @@ public class AbacusXmlParserImplTest extends TestBase {
     }
 
     @Test
+    public void testSerializeJsonRawValueWritesPayloadVerbatim() {
+        if (ParserFactory.isAbacusXmlParserAvailable()) {
+            final RawXmlBean bean = new RawXmlBean();
+            bean.setName("doc");
+            bean.setPayload("{\"k\":\"v\"}");
+
+            String xml = staxParser.serialize(bean);
+            assertTrue(xml.contains("{\"k\":\"v\"}"), xml);
+            assertTrue(!xml.contains("\\\"k\\\""), xml);
+
+            xml = domParser.serialize(bean);
+            assertTrue(xml.contains("{\"k\":\"v\"}"), xml);
+            assertTrue(!xml.contains("\\\"k\\\""), xml);
+        }
+    }
+
+    @Test
     public void testSerializeToString() {
         Person person = new Person();
         person.setName("John");
@@ -152,6 +216,25 @@ public class AbacusXmlParserImplTest extends TestBase {
     public void testSerializeNull() {
         String xml = staxParser.serialize(null);
         assertEquals("", xml);
+    }
+
+    @Test
+    public void testSerializePrimitiveArray() {
+        if (ParserFactory.isAbacusXmlParserAvailable()) {
+            final int[] values = { 1, 2, 3 };
+
+            String xml = staxParser.serialize(values);
+            assertNotNull(xml);
+            assertTrue(xml.contains("1"));
+            assertTrue(xml.contains("2"));
+            assertTrue(xml.contains("3"));
+
+            xml = domParser.serialize(values);
+            assertNotNull(xml);
+            assertTrue(xml.contains("1"));
+            assertTrue(xml.contains("2"));
+            assertTrue(xml.contains("3"));
+        }
     }
 
     @Test
@@ -198,6 +281,24 @@ public class AbacusXmlParserImplTest extends TestBase {
         String xml = staxParser.serialize(person, config);
         assertNotNull(xml);
         assertTrue(xml.contains("Pretty"));
+    }
+
+    @Test
+    public void testSerializeUsesDefaultConfigForCircularReference() {
+        if (!ParserFactory.isAbacusXmlParserAvailable()) {
+            return;
+        }
+
+        XmlSerConfig config = new XmlSerConfig().setSupportCircularReference(true);
+        XmlParser parser = new AbacusXmlParserImpl(XmlParserType.StAX, config, null);
+        CircularRefBean bean = new CircularRefBean();
+        bean.setName("cycle");
+        bean.setReference(bean);
+
+        String xml = parser.serialize(bean);
+
+        assertNotNull(xml);
+        assertTrue(xml.contains("cycle"));
     }
 
     @Test
@@ -867,6 +968,181 @@ public class AbacusXmlParserImplTest extends TestBase {
         assertNotNull(restored);
         assertEquals(original.getName(), restored.getName());
         assertEquals(original.getAge(), restored.getAge());
+    }
+
+    // ==================================================================================
+    // Regression tests: ignored-property / ignored-key handling in the SAX parser.
+    //
+    // Before the fix, when deserializing with XmlDeserConfig.setIgnoredPropNames(...):
+    //   (1) a nested bean with two or more ignored properties serialized with
+    //       tagByPropertyName=false left a stale entry on the internal property-name
+    //       stack, so the enclosing bean's following properties were bound under the
+    //       wrong name (the nested bean was dropped, sibling properties got garbage);
+    //   (2) an ignored map key left the internal "ignore" counter stuck at 1, which
+    //       silently swallowed every entry that followed the first ignored key.
+    // In both cases the SAX result diverged from the (correct) StAX/DOM result.
+    // ==================================================================================
+
+    public static class IgnInner {
+        private String keep;
+        private String drop1;
+        private String drop2;
+        private String after;
+
+        public String getKeep() {
+            return keep;
+        }
+
+        public void setKeep(final String keep) {
+            this.keep = keep;
+        }
+
+        public String getDrop1() {
+            return drop1;
+        }
+
+        public void setDrop1(final String drop1) {
+            this.drop1 = drop1;
+        }
+
+        public String getDrop2() {
+            return drop2;
+        }
+
+        public void setDrop2(final String drop2) {
+            this.drop2 = drop2;
+        }
+
+        public String getAfter() {
+            return after;
+        }
+
+        public void setAfter(final String after) {
+            this.after = after;
+        }
+    }
+
+    public static class IgnOuter {
+        private String name;
+        private IgnInner inner;
+        private String tail;
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(final String name) {
+            this.name = name;
+        }
+
+        public IgnInner getInner() {
+            return inner;
+        }
+
+        public void setInner(final IgnInner inner) {
+            this.inner = inner;
+        }
+
+        public String getTail() {
+            return tail;
+        }
+
+        public void setTail(final String tail) {
+            this.tail = tail;
+        }
+    }
+
+    @Test
+    public void bugFix_sax_nestedBean_twoIgnoredProps_tagByValue() {
+        if (!ParserFactory.isAbacusXmlParserAvailable()) {
+            return;
+        }
+
+        final IgnInner inner = new IgnInner();
+        inner.setKeep("K");
+        inner.setDrop1("D1");
+        inner.setDrop2("D2");
+        inner.setAfter("A");
+        final IgnOuter outer = new IgnOuter();
+        outer.setName("OUTER");
+        outer.setInner(inner);
+        outer.setTail("TAIL");
+
+        // tagByPropertyName=false -> <property name="...">value</property> form.
+        final String xml = staxParser.serialize(outer, new XmlSerConfig().setTagByPropertyName(false));
+
+        final XmlDeserConfig xdc = new XmlDeserConfig().setIgnoredPropNames(IgnInner.class, Set.of("drop1", "drop2"));
+
+        final XmlParser saxParser = new AbacusXmlParserImpl(XmlParserType.SAX);
+        final IgnOuter fromSax = saxParser.deserialize(xml, xdc, IgnOuter.class);
+
+        // The nested bean must still be bound, with the two ignored props left null and the rest intact.
+        assertNotNull(fromSax.getInner());
+        assertEquals("OUTER", fromSax.getName());
+        assertEquals("TAIL", fromSax.getTail());
+        assertEquals("K", fromSax.getInner().getKeep());
+        assertEquals("A", fromSax.getInner().getAfter());
+        assertNull(fromSax.getInner().getDrop1());
+        assertNull(fromSax.getInner().getDrop2());
+
+        // And SAX must agree with the reference StAX/DOM parsers.
+        final IgnOuter fromStax = staxParser.deserialize(xml, xdc, IgnOuter.class);
+        final IgnOuter fromDom = domParser.deserialize(xml, xdc, IgnOuter.class);
+        assertEquals(fromStax.getName(), fromSax.getName());
+        assertEquals(fromStax.getTail(), fromSax.getTail());
+        assertEquals(fromStax.getInner().getKeep(), fromSax.getInner().getKeep());
+        assertEquals(fromStax.getInner().getAfter(), fromSax.getInner().getAfter());
+        assertEquals(fromDom.getInner().getKeep(), fromSax.getInner().getKeep());
+    }
+
+    @Test
+    public void bugFix_sax_flatMap_ignoredKeys_keepsLaterEntries() {
+        if (!ParserFactory.isAbacusXmlParserAvailable()) {
+            return;
+        }
+
+        final Map<String, Object> map = new LinkedHashMap<>();
+        map.put("a", "1");
+        map.put("drop1", "X");
+        map.put("drop2", "Y");
+        map.put("b", "2");
+
+        final String xml = staxParser.serialize(map);
+        final XmlDeserConfig xdc = new XmlDeserConfig().setIgnoredPropNames(Map.class, Set.of("drop1", "drop2"));
+
+        final XmlParser saxParser = new AbacusXmlParserImpl(XmlParserType.SAX);
+        final Map<String, Object> fromSax = saxParser.deserialize(xml, xdc, Map.class);
+
+        // The entry after the ignored keys must survive (previously "b" was swallowed).
+        assertEquals(N.asMap("a", "1", "b", "2"), fromSax);
+        assertEquals(staxParser.deserialize(xml, xdc, Map.class), fromSax);
+        assertEquals(domParser.deserialize(xml, xdc, Map.class), fromSax);
+    }
+
+    @Test
+    public void bugFix_sax_nestedMap_ignoredKeys_keepsLaterEntries() {
+        if (!ParserFactory.isAbacusXmlParserAvailable()) {
+            return;
+        }
+
+        final Map<String, Object> innerMap = new LinkedHashMap<>();
+        innerMap.put("a", "1");
+        innerMap.put("drop1", "X");
+        innerMap.put("drop2", "Y");
+        innerMap.put("b", "2");
+        final Map<String, Object> outerMap = new LinkedHashMap<>();
+        outerMap.put("inner", innerMap);
+        outerMap.put("tail", "TAIL");
+
+        final String xml = staxParser.serialize(outerMap);
+        final XmlDeserConfig xdc = new XmlDeserConfig().setIgnoredPropNames(Map.class, Set.of("drop1", "drop2"));
+
+        final XmlParser saxParser = new AbacusXmlParserImpl(XmlParserType.SAX);
+        final Map<String, Object> fromSax = saxParser.deserialize(xml, xdc, Map.class);
+
+        assertEquals(N.asMap("inner", N.asMap("a", "1", "b", "2"), "tail", "TAIL"), fromSax);
+        assertEquals(staxParser.deserialize(xml, xdc, Map.class), fromSax);
+        assertEquals(domParser.deserialize(xml, xdc, Map.class), fromSax);
     }
 
 }

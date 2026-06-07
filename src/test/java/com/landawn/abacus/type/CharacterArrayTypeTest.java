@@ -1,5 +1,6 @@
 package com.landawn.abacus.type;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -177,36 +178,36 @@ public class CharacterArrayTypeTest extends TestBase {
     }
 
     @Test
-    public void test_writeCharacter() throws IOException {
+    public void test_serializeTo() throws IOException {
         CharacterWriter writer = mock(BufferedJsonWriter.class);
         JsonXmlSerConfig<?> config = mock(JsonXmlSerConfig.class);
 
         Character[] arr = new Character[] { 'A', 'B' };
-        type.writeCharacter(writer, arr, config);
+        type.serializeTo(writer, arr, config);
         verify(writer, atLeastOnce()).write(any(String.class));
 
         reset(writer);
-        type.writeCharacter(writer, null, config);
+        type.serializeTo(writer, null, config);
         verify(writer).write(NULL_CHAR_ARRAY);
     }
 
     @Test
-    public void testWriteCharacter_Empty() throws IOException {
+    public void testSerializeTo_Empty() throws IOException {
         CharacterWriter mockWriter = createCharacterWriter();
         Character[] array = new Character[0];
-        type.writeCharacter(mockWriter, array, null);
+        type.serializeTo(mockWriter, array, null);
         verify(mockWriter).write('[');
         verify(mockWriter).write(']');
     }
 
     @Test
-    public void testWriteCharacter_NoQuotation() throws IOException {
+    public void testSerializeTo_NoQuotation() throws IOException {
         CharacterWriter mockWriter = createCharacterWriter();
         Character[] array = new Character[] { 'a', null, 'b' };
         JsonXmlSerConfig<?> config = mock(JsonXmlSerConfig.class);
         when(config.getCharQuotation()).thenReturn((char) 0);
 
-        type.writeCharacter(mockWriter, array, config);
+        type.serializeTo(mockWriter, array, config);
 
         verify(mockWriter).write('[');
         verify(mockWriter).writeCharacter('a');
@@ -217,13 +218,13 @@ public class CharacterArrayTypeTest extends TestBase {
     }
 
     @Test
-    public void testWriteCharacter_WithSingleQuote() throws IOException {
+    public void testSerializeTo_WithSingleQuote() throws IOException {
         CharacterWriter mockWriter = createCharacterWriter();
         Character[] array = new Character[] { 'x' };
         JsonXmlSerConfig<?> config = mock(JsonXmlSerConfig.class);
         when(config.getCharQuotation()).thenReturn('\'');
 
-        type.writeCharacter(mockWriter, array, config);
+        type.serializeTo(mockWriter, array, config);
 
         verify(mockWriter).write('[');
         verify(mockWriter, times(2)).write('\'');
@@ -232,13 +233,13 @@ public class CharacterArrayTypeTest extends TestBase {
     }
 
     @Test
-    public void testWriteCharacter_EscapeSingleQuote() throws IOException {
+    public void testSerializeTo_EscapeSingleQuote() throws IOException {
         CharacterWriter mockWriter = createCharacterWriter();
         Character[] array = new Character[] { '\'' };
         JsonXmlSerConfig<?> config = mock(JsonXmlSerConfig.class);
         when(config.getCharQuotation()).thenReturn('\'');
 
-        type.writeCharacter(mockWriter, array, config);
+        type.serializeTo(mockWriter, array, config);
 
         verify(mockWriter).write('[');
         verify(mockWriter, times(2)).write('\'');
@@ -270,6 +271,27 @@ public class CharacterArrayTypeTest extends TestBase {
     @Test
     public void test_clazz() {
         assertEquals(Character[].class, type.javaType());
+    }
+
+    @Test
+    public void testValueOfQuotedCommaElement() {
+        Character[] chars = new Character[] { ',' };
+
+        String str = type.stringOf(chars);
+
+        Character[] chs = type.valueOf(str);
+
+        assertArrayEquals(chars, chs);
+    }
+
+    @Test
+    public void testValueOfLegacyAppendToSpecialCharacters() throws IOException {
+        final Character[] chars = new Character[] { '\r', '\t', '"', '\'', ' ', ',', ' ', ',' };
+        final StringBuilder sb = new StringBuilder();
+
+        type.appendTo(sb, chars);
+
+        assertArrayEquals(chars, type.valueOf(sb.toString()));
     }
 
 }

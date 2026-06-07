@@ -190,8 +190,15 @@ public class SheetType<R, C, E> extends AbstractType<Sheet<R, C, E>> {
      * // Returns null
      * }</pre>
      *
+     * <p>The returned string is a serializable representation designed to be parsed back into an equivalent value
+     * via {@link #valueOf(String)}; {@code stringOf} and {@code valueOf} are inverse operations that round-trip. This
+     * is the key distinction from {@link Object#toString()}, whose result is not guaranteed to be convertible back
+     * into the original value.</p>
+     *
      * @param x the Sheet to convert to string
      * @return the JSON string representation of the sheet, or {@code null} if the input is null
+     * @see #valueOf(String)
+     * @see #valueOf(Object)
      */
     @SuppressWarnings("rawtypes")
     @Override
@@ -214,9 +221,14 @@ public class SheetType<R, C, E> extends AbstractType<Sheet<R, C, E>> {
      * // nullSheet is null
      * }</pre>
      *
+     * <p>This method is the inverse of {@code stringOf} and round-trips with it: it parses the string produced by
+     * {@code stringOf} back into a value of this type. Strings produced by {@link Object#toString()} are not
+     * guaranteed to be parseable in this way.</p>
+     *
      * @param str the JSON string to parse
      * @return the parsed Sheet object, or {@code null} if the input string is {@code null} or empty
-     * @throws IllegalArgumentException if the string cannot be parsed as a valid Sheet structure
+     * @see #valueOf(Object)
+     * @see #stringOf(Sheet)
      */
     @SuppressWarnings("rawtypes")
     @Override

@@ -83,6 +83,14 @@ public final class ObjectPool<K, V> extends AbstractMap<K, V> {
      * for the underlying {@link ConcurrentHashMap}, helping to avoid rehashing
      * when the approximate number of entries is known in advance.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * ObjectPool<String, Integer> pool = new ObjectPool<>(128);
+     * boolean empty = pool.isEmpty();   // returns true
+     * pool.put("a", 1);
+     * int size = pool.size();           // returns 1
+     * }</pre>
+     *
      * @param capacity the initial capacity hint; used to size the underlying hash table
      * @throws IllegalArgumentException if {@code capacity} is negative
      */
@@ -98,6 +106,12 @@ public final class ObjectPool<K, V> extends AbstractMap<K, V> {
      * Unlike {@link ConcurrentHashMap#get(Object)}, this method returns
      * {@code null} for a {@code null} key instead of throwing
      * {@link NullPointerException}.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<?> type = typeCache.get("int");
+     * Object result = pool.get(null);   // returns null instead of throwing
+     * }</pre>
      *
      * @param key the key whose associated value is to be returned
      * @return the value to which the specified key is mapped,
@@ -116,6 +130,12 @@ public final class ObjectPool<K, V> extends AbstractMap<K, V> {
     /**
      * Associates the specified value with the specified key in this map.
      * If the map previously contained a mapping for the key, the old value is replaced.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * typeCache.put("int", IntType.INSTANCE);
+     * Type<?> oldValue = typeCache.put("int", LongType.INSTANCE);  // returns the old value (IntType.INSTANCE)
+     * }</pre>
      *
      * @param key   key with which the specified value is to be associated
      * @param value value to be associated with the specified key
@@ -150,6 +170,12 @@ public final class ObjectPool<K, V> extends AbstractMap<K, V> {
      * {@code null} for a {@code null} key instead of throwing
      * {@link NullPointerException}.</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<?> removed = typeCache.remove("int");
+     * pool.remove(null);   // returns null instead of throwing
+     * }</pre>
+     *
      * @param key key whose mapping is to be removed from the map
      * @return the previous value associated with {@code key},
      *         or {@code null} if the key is {@code null} or no mapping existed
@@ -171,6 +197,14 @@ public final class ObjectPool<K, V> extends AbstractMap<K, V> {
      * returns {@code false} for a {@code null} key instead of throwing
      * {@link NullPointerException}.</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * if (typeCache.containsKey("int")) {
+     *     Type<?> type = typeCache.get("int");
+     * }
+     * pool.containsKey(null);   // returns false instead of throwing
+     * }</pre>
+     *
      * @param key key whose presence in this map is to be tested
      * @return {@code true} if this map contains a mapping for the specified key;
      *         {@code false} if the key is {@code null} or not present
@@ -190,6 +224,14 @@ public final class ObjectPool<K, V> extends AbstractMap<K, V> {
      * <p>Unlike {@link ConcurrentHashMap#containsValue(Object)}, this method
      * returns {@code false} for a {@code null} value instead of throwing
      * {@link NullPointerException}.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * if (typeCache.containsValue(IntType.INSTANCE)) {
+     *     // IntType has been cached
+     * }
+     * pool.containsValue(null);   // returns false instead of throwing
+     * }</pre>
      *
      * @param value value whose presence in this map is to be tested
      * @return {@code true} if this map maps one or more keys to the specified value;

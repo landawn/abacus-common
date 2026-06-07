@@ -117,6 +117,12 @@ public class HttpResponse {
     /**
      * Gets the URL of the original request that generated this response.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * HttpResponse response = client.get(HttpResponse.class);
+     * String url = response.requestUrl();  // e.g. "http://localhost:18080/users"
+     * }</pre>
+     *
      * @return The request URL as a string
      */
     public String requestUrl() {
@@ -126,6 +132,13 @@ public class HttpResponse {
     /**
      * Gets the timestamp when the request was sent, in milliseconds since epoch.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * HttpResponse response = client.get(HttpResponse.class);
+     * long sentAt = response.requestSentAtMillis();
+     * long elapsed = response.responseReceivedAtMillis() - sentAt;  // round-trip time in ms
+     * }</pre>
+     *
      * @return The request sent timestamp in milliseconds
      */
     public long requestSentAtMillis() {
@@ -134,6 +147,13 @@ public class HttpResponse {
 
     /**
      * Gets the timestamp when the response was received, in milliseconds since epoch.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * HttpResponse response = client.get(HttpResponse.class);
+     * long receivedAt = response.responseReceivedAtMillis();
+     * long elapsed = receivedAt - response.requestSentAtMillis();  // round-trip time in ms
+     * }</pre>
      *
      * @return The response received timestamp in milliseconds
      */
@@ -169,6 +189,12 @@ public class HttpResponse {
     /**
      * Gets the status message associated with the status code.
      * For example, "OK" for status code 200, "Not Found" for 404.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * HttpResponse response = client.get(HttpResponse.class);
+     * String message = response.message();  // e.g. "OK" for status 200, "Not Found" for 404
+     * }</pre>
      *
      * @return The status message
      */
@@ -291,7 +317,7 @@ public class HttpResponse {
      * Type<Map<String, Object>> mapType = Type.of("Map<String, Object>");
      * Map<String, Object> data = response.body(mapType);
      *
-     * // Alternative: using Type.of()
+     * // Alternative: pass the Type inline instead of via a local variable
      * List<User> users2 = response.body(Type.of("List<User>"));
      * }</pre>
      *
@@ -343,7 +369,7 @@ public class HttpResponse {
 
         final Map<String, List<String>> copiedHeaders = new LinkedHashMap<>(headers.size());
 
-        for (Map.Entry<String, List<String>> entry : headers.entrySet()) {
+        for (final Map.Entry<String, List<String>> entry : headers.entrySet()) {
             final List<String> values = entry.getValue();
             copiedHeaders.put(entry.getKey(), values == null ? null : Collections.unmodifiableList(new ArrayList<>(values)));
         }
@@ -402,7 +428,7 @@ public class HttpResponse {
      *
      * <p><b>Example output:</b></p>
      * <pre>{@code
-     * HttpResponse{statusCode=200, message=OK, url=http://localhost:18080/users, elapsedTime=123}
+     * "HttpResponse{statusCode=200, message=OK, url=http://localhost:18080/users, elapsedTime=123}"
      * }</pre>
      *
      * @return a string representation of this object

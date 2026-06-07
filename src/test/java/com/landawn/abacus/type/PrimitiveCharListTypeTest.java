@@ -90,23 +90,23 @@ public class PrimitiveCharListTypeTest extends TestBase {
     }
 
     @Test
-    public void testWriteCharacterEmptyList() throws IOException {
+    public void testSerializeToEmptyList() throws IOException {
         CharacterWriter writer = createCharacterWriter();
         CharList list = CharList.of(new char[0]);
         JsonXmlSerConfig<?> config = mock(JsonXmlSerConfig.class);
 
-        type.writeCharacter(writer, list, config);
+        type.serializeTo(writer, list, config);
         verify(writer).write('[');
         verify(writer).write(']');
     }
 
     @Test
-    public void testWriteCharacterNonEmptyList() throws IOException {
+    public void testSerializeToNonEmptyList() throws IOException {
         CharacterWriter writer = createCharacterWriter();
         CharList list = CharList.of(new char[] { 'a', 'b' });
         JsonXmlSerConfig<?> config = mock(JsonXmlSerConfig.class);
 
-        type.writeCharacter(writer, list, config);
+        type.serializeTo(writer, list, config);
         verify(writer).write('[');
         verify(writer).writeCharacter('a');
         verify(writer).write(", ");
@@ -115,13 +115,13 @@ public class PrimitiveCharListTypeTest extends TestBase {
     }
 
     @Test
-    public void testWriteCharacterWithQuotation() throws IOException {
+    public void testSerializeToWithQuotation() throws IOException {
         CharacterWriter writer = createCharacterWriter();
         CharList list = CharList.of(new char[] { 'a' });
         JsonXmlSerConfig<?> config = mock(JsonXmlSerConfig.class);
         when(config.getCharQuotation()).thenReturn('\'');
 
-        type.writeCharacter(writer, list, config);
+        type.serializeTo(writer, list, config);
         verify(writer).write('[');
         verify(writer, times(2)).write('\'');
         verify(writer).writeCharacter('a');

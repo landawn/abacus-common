@@ -69,8 +69,9 @@ public final class MutableBoolean implements Mutable, Serializable, Comparable<M
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * MutableBoolean flag = new MutableBoolean();   // value is false
+     * MutableBoolean flag = new MutableBoolean();
      * }</pre>
+     *
      */
     MutableBoolean() {
     }
@@ -80,7 +81,7 @@ public final class MutableBoolean implements Mutable, Serializable, Comparable<M
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * MutableBoolean flag = new MutableBoolean(true);   // value is true
+     * MutableBoolean flag = new MutableBoolean(true);
      * }</pre>
      *
      * @param value the initial value to store
@@ -124,6 +125,18 @@ public final class MutableBoolean implements Mutable, Serializable, Comparable<M
 
     /**
      * Gets the value as a boolean primitive.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * MutableBoolean flag = MutableBoolean.of(true);
+     * boolean val = flag.getValue();   // returns true, value is unchanged
+     *
+     * flag.setFalse();
+     * val = flag.getValue();           // returns false, value is unchanged
+     *
+     * MutableBoolean def = new MutableBoolean();
+     * val = def.getValue();            // returns false (the default value)
+     * }</pre>
      *
      * @return the current boolean value
      * @deprecated replaced by {@link #value()}.
@@ -255,6 +268,7 @@ public final class MutableBoolean implements Mutable, Serializable, Comparable<M
      * MutableBoolean flag = MutableBoolean.of(true);
      * flag.setFalse();   // value is now false
      * }</pre>
+     *
      */
     public void setFalse() {
         value = false;
@@ -268,6 +282,7 @@ public final class MutableBoolean implements Mutable, Serializable, Comparable<M
      * MutableBoolean flag = MutableBoolean.of(false);
      * flag.setTrue();   // value is now true
      * }</pre>
+     *
      */
     public void setTrue() {
         value = true;
@@ -318,6 +333,7 @@ public final class MutableBoolean implements Mutable, Serializable, Comparable<M
      * flag.negate();   // value is now false
      * flag.negate();   // value is now true again
      * }</pre>
+     *
      */
     public void negate() {
         value = !value;
@@ -360,7 +376,7 @@ public final class MutableBoolean implements Mutable, Serializable, Comparable<M
      * }</pre>
      *
      * @param obj the object to compare with, {@code null} returns false
-     * @return {@code true} if the objects are the same; {@code false} otherwise
+     * @return {@code true} if the objects represent the same boolean value; {@code false} otherwise
      */
     @Override
     public boolean equals(final Object obj) {

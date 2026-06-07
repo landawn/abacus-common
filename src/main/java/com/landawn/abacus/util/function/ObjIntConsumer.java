@@ -82,16 +82,16 @@ public interface ObjIntConsumer<T> extends Throwables.ObjIntConsumer<T, RuntimeE
      * combined.accept(builder, 5);   // builder contains "[5]\n"
      * }</pre>
      *
-     * @param after the operation to perform after this operation
+     * @param after the operation to perform after this operation. Must not be {@code null}.
      * @return a composed {@code ObjIntConsumer} that performs in sequence this
      *         operation followed by the {@code after} operation
      * @throws NullPointerException if {@code after} is null
      */
     default ObjIntConsumer<T> andThen(final ObjIntConsumer<? super T> after) {
         Objects.requireNonNull(after);
-        return (t, u) -> {
-            accept(t, u);
-            after.accept(t, u);
+        return (t, i) -> {
+            accept(t, i);
+            after.accept(t, i);
         };
     }
 }

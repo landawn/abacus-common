@@ -2,6 +2,7 @@ package com.landawn.abacus.http;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
@@ -10,6 +11,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.net.URL;
 import java.nio.file.Files;
 import java.time.Duration;
@@ -1309,6 +1311,36 @@ public class OkHttpRequestTest extends TestBase {
     }
 
     @Test
+    public void testExecute_voidResultClassStillThrowsOnHttpError() throws Exception {
+        server.enqueue(new MockResponse().setBody("server error").setResponseCode(500));
+
+        assertThrows(IOException.class, () -> OkHttpRequest.url(baseUrl).execute(HttpMethod.GET, Void.class));
+    }
+
+    @Test
+    public void testEntityEnclosingMethodsWithoutBodySendEmptyBody() throws Exception {
+        server.enqueue(new MockResponse().setResponseCode(200));
+        server.enqueue(new MockResponse().setResponseCode(200));
+        server.enqueue(new MockResponse().setResponseCode(200));
+
+        IOUtil.close(OkHttpRequest.url(baseUrl).post());
+        IOUtil.close(OkHttpRequest.url(baseUrl).put());
+        IOUtil.close(OkHttpRequest.url(baseUrl).patch());
+
+        RecordedRequest post = server.takeRequest();
+        assertEquals("POST", post.getMethod());
+        assertEquals("", post.getBody().readUtf8());
+
+        RecordedRequest put = server.takeRequest();
+        assertEquals("PUT", put.getMethod());
+        assertEquals("", put.getBody().readUtf8());
+
+        RecordedRequest patch = server.takeRequest();
+        assertEquals("PATCH", patch.getMethod());
+        assertEquals("", patch.getBody().readUtf8());
+    }
+
+    @Test
     public void testExecute_httpResponseClassIsRejected() {
         // HttpResponse (the abacus wrapper) is not allowed as a result type;
         // callers must use OkHttp's Response class directly.
@@ -1334,6 +1366,43 @@ public class OkHttpRequestTest extends TestBase {
         server.enqueue(new MockResponse().setBody("timeout-client body").setResponseCode(200));
         final String result = OkHttpRequest.url(baseUrl).connectTimeout(5_000L).readTimeout(10_000L).get(String.class);
         assertEquals("timeout-client body", result);
+    }
+
+    @Test
+    public void testExecuteResponseClassClosesTimeoutClientWhenResponseCloses() throws Exception {
+        server.enqueue(new MockResponse().setBody("raw body").setResponseCode(200));
+
+        final OkHttpRequest request = OkHttpRequest.url(baseUrl, 5_000L, 10_000L);
+        final OkHttpClient client = (OkHttpClient) getField(request, "httpClient");
+        final Response response = request.execute(HttpMethod.GET, Response.class);
+
+        assertFalse(client.dispatcher().executorService().isShutdown());
+
+        IOUtil.close(response);
+
+        assertTrue(client.dispatcher().executorService().isShutdown());
+    }
+
+    @Test
+    public void testExecuteResponseClassClosesBuilderClientWhenResponseCloses() throws Exception {
+        server.enqueue(new MockResponse().setBody("raw body").setResponseCode(200));
+
+        final OkHttpRequest request = OkHttpRequest.url(baseUrl).connectTimeout(5_000L).readTimeout(10_000L);
+        final Response response = request.execute(HttpMethod.GET, Response.class);
+        final OkHttpClient client = (OkHttpClient) getField(request, "pendingPerRequestClient");
+
+        assertNotNull(client);
+
+        IOUtil.close(response);
+
+        assertTrue(client.dispatcher().executorService().isShutdown());
+        assertNull(getField(request, "pendingPerRequestClient"));
+    }
+
+    private static Object getField(final Object target, final String name) throws Exception {
+        final Field field = target.getClass().getDeclaredField(name);
+        field.setAccessible(true);
+        return field.get(target);
     }
 
 }

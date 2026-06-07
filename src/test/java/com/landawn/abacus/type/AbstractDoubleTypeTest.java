@@ -194,50 +194,50 @@ public class AbstractDoubleTypeTest extends TestBase {
     }
 
     @Test
-    public void testWriteCharacter_Null_NoConfig() throws IOException {
+    public void testSerializeTo_Null_NoConfig() throws IOException {
         assertDoesNotThrow(() -> {
-            type.writeCharacter(writer, null, null);
+            type.serializeTo(writer, null, null);
         });
     }
 
     @Test
-    public void testWriteCharacter_DoubleValue_NoConfig() throws IOException {
+    public void testSerializeTo_DoubleValue_NoConfig() throws IOException {
         assertDoesNotThrow(() -> {
-            type.writeCharacter(writer, 42.5, null);
+            type.serializeTo(writer, 42.5, null);
         });
     }
 
     @Test
-    public void testWriteCharacter_Null_WithWriteNullNumberAsZero() throws IOException {
+    public void testSerializeTo_Null_WithWriteNullNumberAsZero() throws IOException {
         assertDoesNotThrow(() -> {
             when(config.isWriteNullNumberAsZero()).thenReturn(true);
-            type.writeCharacter(writer, null, config);
+            type.serializeTo(writer, null, config);
         });
     }
 
     @Test
-    public void testWriteCharacter_Null_WithoutWriteNullNumberAsZero() throws IOException {
+    public void testSerializeTo_Null_WithoutWriteNullNumberAsZero() throws IOException {
         assertDoesNotThrow(() -> {
             when(config.isWriteNullNumberAsZero()).thenReturn(false);
-            type.writeCharacter(writer, null, config);
+            type.serializeTo(writer, null, config);
         });
     }
 
     @Test
-    public void testWriteCharacter_NumberValue() throws IOException {
+    public void testSerializeTo_NumberValue() throws IOException {
         assertDoesNotThrow(() -> {
-            type.writeCharacter(writer, 100d, config);
+            type.serializeTo(writer, 100d, config);
 
-            type.writeCharacter(writer, 3.14d, config);
+            type.serializeTo(writer, 3.14d, config);
         });
     }
 
     @Test
-    public void testWriteCharacter_SpecialValues() throws IOException {
+    public void testSerializeTo_SpecialValues() throws IOException {
         assertDoesNotThrow(() -> {
-            type.writeCharacter(writer, Double.NaN, config);
+            type.serializeTo(writer, Double.NaN, config);
 
-            type.writeCharacter(writer, Double.POSITIVE_INFINITY, config);
+            type.serializeTo(writer, Double.POSITIVE_INFINITY, config);
         });
     }
 }

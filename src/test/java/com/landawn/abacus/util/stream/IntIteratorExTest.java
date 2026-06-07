@@ -33,7 +33,7 @@ public class IntIteratorExTest extends TestBase {
         Assertions.assertThrows(NoSuchElementException.class, () -> iter.nextInt());
         Assertions.assertEquals(0, iter.count());
         Assertions.assertArrayEquals(new int[0], iter.toArray());
-        iter.close();
+        iter.closeResource();
     }
 
     // ---- of(int[] a, int fromIndex, int toIndex) ----
@@ -300,7 +300,7 @@ public class IntIteratorExTest extends TestBase {
 
         Assertions.assertEquals(1, iter.count());
 
-        iter.close();
+        iter.closeResource();
     }
 
     @Test
@@ -354,12 +354,12 @@ public class IntIteratorExTest extends TestBase {
         Assertions.assertFalse(iter.hasNext());
     }
 
-    // ---- close() ----
+    // ---- closeResource() ----
 
     @Test
-    public void testClose() {
+    public void testCloseResource() {
         IntIteratorEx iter = IntIteratorEx.of(1, 2, 3);
-        iter.close();
+        iter.closeResource();
         assertNotNull(iter);
     }
 

@@ -79,8 +79,15 @@ public class LocalTimeType extends AbstractTemporalType<LocalTime> {
      * String str = type.stringOf(time);   // "10:30:45"
      * }</pre>
      *
+     * <p>The returned string is a serializable representation designed to be parsed back into an equivalent value
+     * via {@link #valueOf(String)}; {@code stringOf} and {@code valueOf} are inverse operations that round-trip. This
+     * is the key distinction from {@link Object#toString()}, whose result is not guaranteed to be convertible back
+     * into the original value.</p>
+     *
      * @param x the LocalTime object to convert; may be {@code null}
      * @return the ISO-8601 time string, or {@code null} if the input is {@code null}
+     * @see #valueOf(String)
+     * @see #valueOf(Object)
      */
     @Override
     public String stringOf(final LocalTime x) {
@@ -118,8 +125,12 @@ public class LocalTimeType extends AbstractTemporalType<LocalTime> {
      *   <li>{@code null}, empty, or blank string returns {@code null}</li>
      *   <li>{@code "SYS_TIME"} returns the current {@code LocalTime}</li>
      *   <li>Numeric strings are treated as milliseconds since the epoch</li>
-     *   <li>ISO-8601 formatted strings are parsed directly</li>
+     *   <li>ISO-8601 formatted strings are parsed directly via {@link LocalTime#parse(CharSequence)}</li>
      * </ul>
+     *
+     * <p>Every string produced by {@link LocalTime#toString()} can be parsed back into an equivalent value,
+     * including the minute-precision form (e.g. {@code "10:30"}), the seconds form (e.g. {@code "10:30:45"}),
+     * and fractional seconds of any precision (e.g. {@code "10:30:45.123456789"}).</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -129,10 +140,16 @@ public class LocalTimeType extends AbstractTemporalType<LocalTime> {
      * LocalTime time3 = type.valueOf("1609459200000");
      * }</pre>
      *
+     * <p>This method is the inverse of {@code stringOf} and round-trips with it: it parses the string produced by
+     * {@code stringOf} back into a value of this type. Because {@code stringOf} delegates to
+     * {@link LocalTime#toString()}, the value returned by {@code toString()} round-trips as well.</p>
+     *
      * @param str the string to parse
      * @return the parsed {@code LocalTime} object, or {@code null} if the input is {@code null}, empty, or blank
      * @throws java.time.format.DateTimeParseException if the string is not a valid millisecond
      *         number nor an ISO-8601 {@code LocalTime} representation
+     * @see #valueOf(Object)
+     * @see #stringOf(LocalTime)
      */
     @Override
     public LocalTime valueOf(final String str) {
@@ -147,7 +164,7 @@ public class LocalTimeType extends AbstractTemporalType<LocalTime> {
         if (isPossibleMillis(str)) {
             try {
                 return LocalTime.ofInstant(Instant.ofEpochMilli(Numbers.toLong(str)), DEFAULT_ZONE_ID);
-            } catch (final NumberFormatException e2) {
+            } catch (final NumberFormatException e) {
                 // ignore;
             }
         }

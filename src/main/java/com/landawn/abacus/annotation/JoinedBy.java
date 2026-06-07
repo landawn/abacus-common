@@ -62,42 +62,40 @@ import java.lang.annotation.Target;
  *     private Long id;
  *
  *     @JoinedBy("id=userId")
- *     private UserProfile profile;  // Single related profile
+ *     private UserProfile profile;  // profile is a single related profile
  * }
  *
  * @Entity
  * public class UserProfile {
  *     @Id
  *     private Long id;
- *     private Long userId;  // Foreign key to User
+ *     private Long userId;  // userId is the foreign key to User
  *     private String bio;
  * }
  * }</pre>
  *
  * <p><b>One-to-Many Join Example:</b></p>
  * <pre>{@code
- *
  * @Entity
  * public class Account {
  *     @Id
  *     private Long id;
  *
  *     @JoinedBy("id=accountId")
- *     private List<Device> devices;  // Multiple related devices
+ *     private List<Device> devices;  // devices are multiple related devices
  * }
  *
  * @Entity
  * public class Device {
  *     @Id
  *     private Long id;
- *     private Long accountId;  // Foreign key to Account
+ *     private Long accountId;  // accountId is the foreign key to Account
  *     private String deviceName;
  * }
  * }</pre>
  *
  * <p><b>Many-to-Many Join Example:</b></p>
  * <pre>{@code
- *
  * @Entity
  * public class Employee {
  *     @Id
@@ -117,8 +115,8 @@ import java.lang.annotation.Target;
  *
  * @Entity
  * public class EmployeeProject {
- *     private Long employeeId;  // FK to Employee
- *     private Long projectId;  // FK to Project
+ *     private Long employeeId;  // employeeId is the FK to Employee
+ *     private Long projectId;  // projectId is the FK to Project
  *     private Date assignedDate;
  * }
  * }</pre>

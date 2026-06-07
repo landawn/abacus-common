@@ -19,7 +19,7 @@ import com.landawn.abacus.util.Throwables;
 
 /**
  * Represents an operation that accepts three byte-valued arguments and returns no result.
- * This is the three-arity specialization of {@link java.util.function.Consumer} for byte values.
+ * This is the three-arity specialization of {@link ByteConsumer} for byte values.
  * Unlike most other functional interfaces, {@code ByteTriConsumer} is expected to operate via side-effects.
  *
  * <p>This is a functional interface whose functional method is {@link #accept(byte, byte, byte)}.

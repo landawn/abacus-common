@@ -185,23 +185,23 @@ public class MutableBooleanTypeTest extends TestBase {
     }
 
     @Test
-    public void testWriteCharacterWithNull() throws IOException {
+    public void testSerializeToWithNull() throws IOException {
         assertDoesNotThrow(() -> {
-            mutableBooleanType.writeCharacter(characterWriter, null, null);
+            mutableBooleanType.serializeTo(characterWriter, null, null);
         });
     }
 
     @Test
-    public void testWriteCharacterWithTrue() throws IOException {
+    public void testSerializeToWithTrue() throws IOException {
         assertDoesNotThrow(() -> {
-            mutableBooleanType.writeCharacter(characterWriter, MutableBoolean.of(true), null);
+            mutableBooleanType.serializeTo(characterWriter, MutableBoolean.of(true), null);
         });
     }
 
     @Test
-    public void testWriteCharacterWithFalse() throws IOException {
+    public void testSerializeToWithFalse() throws IOException {
         assertDoesNotThrow(() -> {
-            mutableBooleanType.writeCharacter(characterWriter, MutableBoolean.of(false), null);
+            mutableBooleanType.serializeTo(characterWriter, MutableBoolean.of(false), null);
         });
     }
 }

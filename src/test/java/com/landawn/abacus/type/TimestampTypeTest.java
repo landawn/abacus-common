@@ -42,6 +42,38 @@ public class TimestampTypeTest extends TestBase {
     }
 
     @Test
+    public void test_valueOf_Object_TimestampPreservesNanos() {
+        Timestamp timestamp = Timestamp.valueOf("2020-01-01 00:00:00.123456789");
+        Timestamp result = type.valueOf((Object) timestamp);
+
+        assertEquals(timestamp.getTime(), result.getTime());
+        assertEquals(123456789, result.getNanos());
+    }
+
+    @Test
+    public void test_stringOf_PreservesNanosForRoundTrip() {
+        {
+            Timestamp timestamp = Timestamp.valueOf("2020-01-01 00:00:00.123456789");
+            String text = type.stringOf(timestamp);
+            Timestamp result = type.valueOf(text);
+
+            assertEquals("2020-01-01T08:00:00.123Z", text);
+            assertEquals(timestamp.getTime(), result.getTime());
+            assertEquals(123000000, result.getNanos());
+        }
+
+        {
+            Timestamp timestamp = Timestamp.valueOf("2020-01-01 00:00:00.123456789");
+            String text = "2020-01-01 00:00:00.123456789";
+            Timestamp result = type.valueOf(text);
+
+            assertEquals("2020-01-01 00:00:00.123456789", text);
+            assertEquals(timestamp.getTime(), result.getTime());
+            assertEquals(123456789, result.getNanos());
+        }
+    }
+
+    @Test
     public void test_valueOf_String_SysTime() {
         Timestamp result = type.valueOf("sysTime");
         assertNotNull(result);

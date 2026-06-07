@@ -105,8 +105,15 @@ public class OptionalIntType extends AbstractOptionalType<OptionalInt> {
      * // Returns: null
      * }</pre>
      *
+     * <p>The returned string is a serializable representation designed to be parsed back into an equivalent value
+     * via {@link #valueOf(String)}; {@code stringOf} and {@code valueOf} are inverse operations that round-trip. This
+     * is the key distinction from {@link Object#toString()}, whose result is not guaranteed to be convertible back
+     * into the original value.</p>
+     *
      * @param x the OptionalInt object to convert
      * @return the string representation of the integer value, or {@code null} if empty or null
+     * @see #valueOf(String)
+     * @see #valueOf(Object)
      */
     @Override
     public String stringOf(final OptionalInt x) {
@@ -133,9 +140,15 @@ public class OptionalIntType extends AbstractOptionalType<OptionalInt> {
      * // Returns: OptionalInt.empty()
      * }</pre>
      *
+     * <p>This method is the inverse of {@code stringOf} and round-trips with it: it parses the string produced by
+     * {@code stringOf} back into a value of this type. Strings produced by {@link Object#toString()} are not
+     * guaranteed to be parseable in this way.</p>
+     *
      * @param str the string to convert
      * @return an OptionalInt containing the parsed integer value, or empty if the input is empty or null
      * @throws NumberFormatException if the string cannot be parsed as an integer
+     * @see #valueOf(Object)
+     * @see #stringOf(OptionalInt)
      */
     @Override
     public OptionalInt valueOf(final String str) {
@@ -272,10 +285,24 @@ public class OptionalIntType extends AbstractOptionalType<OptionalInt> {
 
     /**
      * Appends the string representation of an {@link OptionalInt} to an Appendable.
+     * <p>
+     * <b>appendTo vs. serializeTo:</b> {@code appendTo} produces a plain, {@code toString()}-style rendering with no
+     * JSON/XML quoting or escaping (for general text output), whereas {@code serializeTo} produces the JSON/XML
+     * serialized form (applying string quotation and character escaping per the serialization config) and is used by the
+     * JSON/XML serializers.
      *
      * @param appendable the Appendable to write to
      * @param x the OptionalInt value to append
      * @throws IOException if an I/O error occurs during the append operation
+     * @implNote
+     * This method appends a string representation of {@code x} to {@code appendable} (the literal {@code "null"} for a
+     * {@code null} value). Conceptually this is the human-readable form produced by {@code toString()}, <i>not</i> the
+     * value returned by {@code stringOf}, which is a formatted, serializable representation (typically a JSON string)
+     * that {@link #valueOf(String)} can convert back into an equivalent value. For values whose nested structure makes
+     * the two forms differ (collections, maps, arrays), {@code appendTo} emits the unquoted, {@code toString()}-style
+     * form; it is therefore not, in the general contract, a plain
+     * {@code appendable.append(x == null ? NULL_STRING : stringOf(x))}. (For value types whose human-readable and
+     * serialized forms coincide, the appended text is naturally identical to {@code stringOf(x)}.)
      */
     @Override
     public void appendTo(final Appendable appendable, final OptionalInt x) throws IOException {
@@ -289,6 +316,15 @@ public class OptionalIntType extends AbstractOptionalType<OptionalInt> {
     /**
      * Writes the character representation of an {@link OptionalInt} to a CharacterWriter.
      * This method is typically used for JSON/XML serialization.
+     * <p>
+     * This method is specifically designed for JSON/XML serialization: it writes the serialized form of {@code x} to the
+     * {@code CharacterWriter}, applying string quotation and character escaping according to the supplied serialization
+     * config (a {@code null} config means no surrounding quotation). It is the streaming counterpart of {@code stringOf}
+     * and is invoked by the JSON/XML serializers.
+     * <p>
+     * <b>serializeTo vs. appendTo:</b> {@code serializeTo} produces machine-readable JSON/XML (quoted and escaped),
+     * whereas {@code appendTo} produces a plain, human-readable {@code toString()}-style rendering without JSON/XML
+     * quoting or escaping.
      *
      * @param writer the CharacterWriter to write to
      * @param x the OptionalInt value to write
@@ -296,7 +332,7 @@ public class OptionalIntType extends AbstractOptionalType<OptionalInt> {
      * @throws IOException if an I/O error occurs during the write operation
      */
     @Override
-    public void writeCharacter(final CharacterWriter writer, final OptionalInt x, final JsonXmlSerConfig<?> config) throws IOException {
+    public void serializeTo(final CharacterWriter writer, final OptionalInt x, final JsonXmlSerConfig<?> config) throws IOException {
         if (x == null || x.isEmpty()) {
             writer.write(NULL_CHAR_ARRAY);
         } else {

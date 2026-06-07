@@ -99,8 +99,15 @@ public class URIType extends AbstractType<URI> {
      * String str = type.stringOf(uri);   // Returns "https://example.com/path"
      * }</pre>
      *
+     * <p>The returned string is a serializable representation designed to be parsed back into an equivalent value
+     * via {@link #valueOf(String)}; {@code stringOf} and {@code valueOf} are inverse operations that round-trip. This
+     * is the key distinction from {@link Object#toString()}, whose result is not guaranteed to be convertible back
+     * into the original value.</p>
+     *
      * @param x the URI instance to convert to string
      * @return the string representation of the URI, or {@code null} if the input is null
+     * @see #valueOf(String)
+     * @see #valueOf(Object)
      */
     @Override
     public String stringOf(final URI x) {
@@ -120,9 +127,15 @@ public class URIType extends AbstractType<URI> {
      * URI uri = type.valueOf("https://example.com/path");   // Creates a URI
      * }</pre>
      *
+     * <p>This method is the inverse of {@code stringOf} and round-trips with it: it parses the string produced by
+     * {@code stringOf} back into a value of this type. Strings produced by {@link Object#toString()} are not
+     * guaranteed to be parseable in this way.</p>
+     *
      * @param str the string to convert to a URI
      * @return a URI instance created from the string, or {@code null} if the string is {@code null} or empty
      * @throws IllegalArgumentException if the string violates RFC 2396 URI syntax rules
+     * @see #valueOf(Object)
+     * @see #stringOf(URI)
      */
     @Override
     public URI valueOf(final String str) {

@@ -227,15 +227,15 @@ public class NullableTypeTest extends TestBase {
     }
 
     @Test
-    public void testWriteCharacterWithNull() throws IOException {
-        nullableStringType.writeCharacter(writer, null, config);
+    public void testSerializeToWithNull() throws IOException {
+        nullableStringType.serializeTo(writer, null, config);
         verify(writer).write(any(char[].class));
     }
 
     @Test
-    public void testWriteCharacterWithEmpty() throws IOException {
+    public void testSerializeToWithEmpty() throws IOException {
         Nullable<String> empty = Nullable.empty();
-        nullableStringType.writeCharacter(writer, empty, config);
+        nullableStringType.serializeTo(writer, empty, config);
         verify(writer).write(any(char[].class));
     }
 }

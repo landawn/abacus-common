@@ -30,7 +30,7 @@ import com.landawn.abacus.util.stream.ShortStream;
  *
  * <p>The iterator is immutable, meaning elements cannot be removed during iteration.
  * It provides specialized methods like {@code nextShort()} to avoid boxing overhead,
- * and various transformation methods like {@code skip()}, {@code limit()}, and {@code filter()}.
+ * and various transformation methods like {@code skip()}, {@code limit()}, and {@code filter()}.</p>
  *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
@@ -302,6 +302,13 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
      * Returns the next element in the iteration as a boxed Short.
      * This method is deprecated in favor of {@link #nextShort()} to avoid unnecessary boxing.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * ShortIterator iter = ShortIterator.of((short)1, (short)2);
+     * Short boxed = iter.next();          // returns Short.valueOf(1) — avoid this
+     * short primitive = iter.nextShort(); // returns 2 — prefer this
+     * }</pre>
+     *
      * @return the next {@code short} element as a boxed {@link Short} object
      * @throws NoSuchElementException if the iteration has no more elements
      * @deprecated use {@link #nextShort()} instead to avoid boxing overhead
@@ -318,8 +325,8 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ShortIterator iter = ShortIterator.of((short)1, (short)2, (short)3);
-     * short first = iter.nextShort();    // 1
-     * short second = iter.nextShort();   // 2
+     * short first = iter.nextShort();    // returns 1
+     * short second = iter.nextShort();   // returns 2
      * }</pre>
      *
      * @return the next {@code short} value
@@ -334,7 +341,7 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ShortIterator iter = ShortIterator.of(new short[] {1, 2, 3, 4, 5});
-     * ShortIterator skipped = iter.skip(2);   // Will iterate over 3, 4, 5
+     * ShortIterator skipped = iter.skip(2);   // will iterate over 3, 4, 5
      * }</pre>
      *
      * @param n the number of elements to skip; must be non-negative
@@ -392,7 +399,7 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ShortIterator iter = ShortIterator.generate(() -> (short)1);
-     * ShortIterator limited = iter.limit(3);   // Will only return three 1s
+     * ShortIterator limited = iter.limit(3);   // will only return three 1s
      * }</pre>
      *
      * @param count the maximum number of elements to iterate; must be non-negative
@@ -437,7 +444,7 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ShortIterator iter = ShortIterator.of(new short[] {1, 2, 3, 4, 5});
-     * ShortIterator evens = iter.filter(x -> x % 2 == 0);   // Will iterate over 2, 4
+     * ShortIterator evens = iter.filter(x -> x % 2 == 0);   // will iterate over 2, 4
      * }</pre>
      *
      * @param predicate the predicate to test each element; must not be {@code null}
@@ -495,7 +502,7 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
      * // array = [1, 2, 3, 4, 5]
      *
      * // Empty iterator returns empty array
-     * short[] empty = ShortIterator.empty().toArray();   // empty.length == 0
+     * short[] empty = ShortIterator.empty().toArray();   // returns empty.length == 0
      * }</pre>
      *
      * @return a {@code short} array containing all remaining elements; an empty array if there are none
@@ -519,7 +526,7 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
      * // list contains [1, 2, 3, 4, 5]
      *
      * // Empty iterator returns empty list
-     * ShortList empty = ShortIterator.empty().toList();   // empty.size() == 0
+     * ShortList empty = ShortIterator.empty().toList();   // returns empty.size() == 0
      * }</pre>
      *
      * @return a {@link ShortList} containing all remaining elements; an empty list if there are none
@@ -611,6 +618,12 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
     /**
      * Performs the given action for each remaining element.
      * This method is deprecated because it boxes each primitive {@code short} to a {@link Short} object.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * ShortIterator iter = ShortIterator.of((short)1, (short)2);
+     * iter.forEachRemaining(value -> System.out.println(value));   // Boxes each short — avoid this
+     * }</pre>
      *
      * @param action the action to perform on each element
      * @deprecated use {@link #foreachRemaining(Throwables.ShortConsumer)} instead to avoid boxing overhead

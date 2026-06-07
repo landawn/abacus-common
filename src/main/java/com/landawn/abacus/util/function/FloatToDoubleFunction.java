@@ -13,6 +13,8 @@
  */
 package com.landawn.abacus.util.function;
 
+import com.landawn.abacus.util.Throwables;
+
 /**
  * Represents a function that accepts a float-valued argument and produces a double-valued result.
  * This is a functional interface whose functional method is {@link #applyAsDouble(float)}.
@@ -28,7 +30,7 @@ package com.landawn.abacus.util.function;
  * @see FloatToLongFunction
  */
 @FunctionalInterface
-public interface FloatToDoubleFunction {
+public interface FloatToDoubleFunction extends Throwables.FloatToDoubleFunction<RuntimeException> {
     /**
      * A default function that converts a float value to double through widening primitive conversion.
      * This is equivalent to a simple cast from float to double.
@@ -54,5 +56,6 @@ public interface FloatToDoubleFunction {
      * @param value the float function argument
      * @return the double function result
      */
+    @Override
     double applyAsDouble(float value);
 }

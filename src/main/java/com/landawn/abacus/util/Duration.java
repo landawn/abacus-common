@@ -82,20 +82,20 @@ import java.time.temporal.TemporalUnit;
  * Duration halfSecond = Duration.ofMillis(500);
  *
  * // Duration arithmetic
- * Duration total = fiveMinutes.plus(twoHours);   // 2 hours 5 minutes
- * Duration difference = oneDay.minus(twoHours);   // 22 hours
- * Duration doubled = fiveMinutes.multipliedBy(2);   // 10 minutes
- * Duration halved = twoHours.dividedBy(2);   // 1 hour
+ * Duration total = fiveMinutes.plus(twoHours);      // returns 2 hours 5 minutes
+ * Duration difference = oneDay.minus(twoHours);     // returns 22 hours
+ * Duration doubled = fiveMinutes.multipliedBy(2);   // returns 10 minutes
+ * Duration halved = twoHours.dividedBy(2);          // returns 1 hour
  *
  * // Duration properties and testing
- * boolean isZero = Duration.ZERO.isZero();   // true
- * boolean isNegative = fiveMinutes.minus(twoHours).isNegative();   // true
- * Duration positive = fiveMinutes.minus(twoHours).abs();   // 1 hour 55 minutes
+ * boolean isZero = Duration.ZERO.isZero();                         // returns true
+ * boolean isNegative = fiveMinutes.minus(twoHours).isNegative();   // returns true
+ * Duration positive = fiveMinutes.minus(twoHours).abs();           // returns 1 hour 55 minutes
  *
  * // Converting to different units
- * long totalMinutes = twoHours.toMinutes();   // 120
- * long totalSeconds = fiveMinutes.toSeconds();   // 300
- * long totalMillis = halfSecond.toMillis();   // 500
+ * long totalMinutes = twoHours.toMinutes();      // returns 120
+ * long totalSeconds = fiveMinutes.toSeconds();   // returns 300
+ * long totalMillis = halfSecond.toMillis();      // returns 500
  * }</pre>
  *
  * <p><b>Advanced Usage Examples:</b></p>
@@ -104,7 +104,7 @@ import java.time.temporal.TemporalUnit;
  * Duration workDay = Duration.ofHours(8);
  * Duration lunchBreak = Duration.ofMinutes(30);
  * Duration shortBreaks = Duration.ofMinutes(15).multipliedBy(2);
- * Duration totalWorkTime = workDay.minus(lunchBreak).minus(shortBreaks);   // 7 hours
+ * Duration totalWorkTime = workDay.minus(lunchBreak).minus(shortBreaks);   // returns 7 hours
  *
  * // Performance measurement
  * Duration executionTime = measureExecutionTime(() -> performOperation());
@@ -114,7 +114,7 @@ import java.time.temporal.TemporalUnit;
  *
  * // Duration formatting for display
  * Duration uptime = Duration.ofDays(5).plusHours(3).plusMinutes(45);
- * String formatted = uptime.toString();   // "PT123H45M" (ISO 8601 format)
+ * String formatted = uptime.toString();   // returns "PT123H45M" (ISO 8601 format)
  *
  * // Interoperability with java.time.Duration
  * Duration customDuration = Duration.ofMinutes(90);
@@ -322,8 +322,8 @@ public final class Duration implements Comparable<Duration>, Immutable {
      * <pre>{@code
      * Duration oneDay = Duration.ofDays(1);
      * Duration oneWeek = Duration.ofDays(7);
-     * Duration negativeDuration = Duration.ofDays(-3);   // -3 days
-     * long millis = oneWeek.toMillis();                  // 604800000
+     * Duration negativeDuration = Duration.ofDays(-3);   // returns -3 days
+     * long millis = oneWeek.toMillis();                  // returns 604800000
      * }</pre>
      *
      * @param days the number of days, positive or negative.
@@ -345,8 +345,8 @@ public final class Duration implements Comparable<Duration>, Immutable {
      * <pre>{@code
      * Duration twoHours = Duration.ofHours(2);
      * Duration workDay = Duration.ofHours(8);
-     * Duration negativeHour = Duration.ofHours(-1);   // -1 hour
-     * long minutes = twoHours.toMinutes();            // 120
+     * Duration negativeHour = Duration.ofHours(-1);   // returns -1 hour
+     * long minutes = twoHours.toMinutes();            // returns 120
      * }</pre>
      *
      * @param hours the number of hours, positive or negative.
@@ -368,8 +368,8 @@ public final class Duration implements Comparable<Duration>, Immutable {
      * <pre>{@code
      * Duration fiveMinutes = Duration.ofMinutes(5);
      * Duration oneHourThirty = Duration.ofMinutes(90);
-     * Duration negativeMinutes = Duration.ofMinutes(-15);   // -15 minutes
-     * long seconds = fiveMinutes.toSeconds();               // 300
+     * Duration negativeMinutes = Duration.ofMinutes(-15);   // returns -15 minutes
+     * long seconds = fiveMinutes.toSeconds();               // returns 300
      * }</pre>
      *
      * @param minutes the number of minutes, positive or negative.
@@ -391,8 +391,8 @@ public final class Duration implements Comparable<Duration>, Immutable {
      * <pre>{@code
      * Duration thirtySeconds = Duration.ofSeconds(30);
      * Duration twoMinutes = Duration.ofSeconds(120);
-     * Duration negativeSeconds = Duration.ofSeconds(-10);   // -10 seconds
-     * long millis = thirtySeconds.toMillis();               // 30000
+     * Duration negativeSeconds = Duration.ofSeconds(-10);   // returns -10 seconds
+     * long millis = thirtySeconds.toMillis();               // returns 30000
      * }</pre>
      *
      * @param seconds the number of seconds, positive or negative.
@@ -414,8 +414,8 @@ public final class Duration implements Comparable<Duration>, Immutable {
      * <pre>{@code
      * Duration halfSecond = Duration.ofMillis(500);
      * Duration oneSecond = Duration.ofMillis(1000);
-     * Duration negativeMillis = Duration.ofMillis(-250);   // -250 milliseconds
-     * boolean isZero = Duration.ofMillis(0).isZero();      // true
+     * Duration negativeMillis = Duration.ofMillis(-250);   // returns -250 milliseconds
+     * boolean isZero = Duration.ofMillis(0).isZero();      // returns true
      * }</pre>
      *
      * @param millis the number of milliseconds, positive or negative.
@@ -593,13 +593,13 @@ public final class Duration implements Comparable<Duration>, Immutable {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Duration zero = Duration.ZERO;
-     * boolean isZero = zero.isZero();  // true
+     * boolean isZero = zero.isZero();  // returns true
      *
      * Duration fiveMinutes = Duration.ofMinutes(5);
-     * boolean notZero = fiveMinutes.isZero();  // false
+     * boolean notZero = fiveMinutes.isZero();  // returns false
      *
      * Duration result = fiveMinutes.minus(fiveMinutes);
-     * boolean isResultZero = result.isZero();  // true
+     * boolean isResultZero = result.isZero();  // returns true
      * }</pre>
      *
      * @return {@code true} if this duration is zero, {@code false} otherwise.
@@ -618,13 +618,13 @@ public final class Duration implements Comparable<Duration>, Immutable {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Duration positive = Duration.ofHours(2);
-     * boolean isNegative = positive.isNegative();  // false
+     * boolean isNegative = positive.isNegative();  // returns false
      *
      * Duration negative = Duration.ofMinutes(-30);
-     * boolean isNeg = negative.isNegative();  // true
+     * boolean isNeg = negative.isNegative();  // returns true
      *
      * Duration diff = Duration.ofMinutes(10).minus(Duration.ofHours(1));
-     * boolean isDiffNegative = diff.isNegative();  // true (-50 minutes)
+     * boolean isDiffNegative = diff.isNegative();  // returns true (-50 minutes)
      * }</pre>
      *
      * @return {@code true} if this duration is negative, {@code false} otherwise.
@@ -645,10 +645,10 @@ public final class Duration implements Comparable<Duration>, Immutable {
      * <pre>{@code
      * Duration twoHours = Duration.ofHours(2);
      * Duration thirtyMinutes = Duration.ofMinutes(30);
-     * Duration total = twoHours.plus(thirtyMinutes);  // 2 hours 30 minutes
+     * Duration total = twoHours.plus(thirtyMinutes);  // returns 2 hours 30 minutes
      *
      * Duration oneDay = Duration.ofDays(1);
-     * Duration twoHalfDays = oneDay.plus(Duration.ofHours(12));  // 1.5 days
+     * Duration oneAndHalfDays = oneDay.plus(Duration.ofHours(12));  // returns 1.5 days
      * }</pre>
      *
      * @param duration the duration to add, must not be {@code null}.
@@ -671,10 +671,10 @@ public final class Duration implements Comparable<Duration>, Immutable {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Duration oneWeek = Duration.ofDays(7);
-     * Duration tenDays = oneWeek.plusDays(3);  // 10 days
+     * Duration tenDays = oneWeek.plusDays(3);  // returns 10 days
      *
      * Duration twoHours = Duration.ofHours(2);
-     * Duration oneDayTwoHours = twoHours.plusDays(1);  // 26 hours
+     * Duration oneDayTwoHours = twoHours.plusDays(1);  // returns 26 hours
      * }</pre>
      *
      * @param daysToAdd the days to add, may be negative.
@@ -696,10 +696,10 @@ public final class Duration implements Comparable<Duration>, Immutable {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Duration oneDay = Duration.ofDays(1);
-     * Duration oneDayThreeHours = oneDay.plusHours(3);  // 27 hours
+     * Duration oneDayThreeHours = oneDay.plusHours(3);  // returns 27 hours
      *
      * Duration twoHours = Duration.ofHours(2);
-     * Duration fiveHours = twoHours.plusHours(3);  // 5 hours
+     * Duration fiveHours = twoHours.plusHours(3);  // returns 5 hours
      * }</pre>
      *
      * @param hoursToAdd the hours to add, may be negative.
@@ -721,10 +721,10 @@ public final class Duration implements Comparable<Duration>, Immutable {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Duration oneHour = Duration.ofHours(1);
-     * Duration oneHourFifteen = oneHour.plusMinutes(15);  // 75 minutes
+     * Duration oneHourFifteen = oneHour.plusMinutes(15);  // returns 75 minutes
      *
      * Duration thirtyMinutes = Duration.ofMinutes(30);
-     * Duration twoHours = thirtyMinutes.plusMinutes(90);  // 120 minutes
+     * Duration twoHours = thirtyMinutes.plusMinutes(90);  // returns 120 minutes
      * }</pre>
      *
      * @param minutesToAdd the minutes to add, may be negative.
@@ -746,10 +746,10 @@ public final class Duration implements Comparable<Duration>, Immutable {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Duration oneMinute = Duration.ofMinutes(1);
-     * Duration oneMinuteFifteen = oneMinute.plusSeconds(15);  // 75 seconds
+     * Duration oneMinuteFifteen = oneMinute.plusSeconds(15);  // returns 75 seconds
      *
      * Duration tenSeconds = Duration.ofSeconds(10);
-     * Duration oneMinuteTen = tenSeconds.plusSeconds(60);  // 70 seconds
+     * Duration oneMinuteTen = tenSeconds.plusSeconds(60);  // returns 70 seconds
      * }</pre>
      *
      * @param secondsToAdd the seconds to add, may be negative.
@@ -771,10 +771,10 @@ public final class Duration implements Comparable<Duration>, Immutable {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Duration oneSecond = Duration.ofSeconds(1);
-     * Duration onePointFive = oneSecond.plusMillis(500);  // 1500 milliseconds
+     * Duration onePointFive = oneSecond.plusMillis(500);  // returns 1500 milliseconds
      *
      * Duration halfSecond = Duration.ofMillis(500);
-     * Duration twoSeconds = halfSecond.plusMillis(1500);  // 2000 milliseconds
+     * Duration twoSeconds = halfSecond.plusMillis(1500);  // returns 2000 milliseconds
      * }</pre>
      *
      * @param millisToAdd the milliseconds to add, may be negative.
@@ -801,10 +801,10 @@ public final class Duration implements Comparable<Duration>, Immutable {
      * <pre>{@code
      * Duration twoHours = Duration.ofHours(2);
      * Duration thirtyMinutes = Duration.ofMinutes(30);
-     * Duration oneHourThirty = twoHours.minus(thirtyMinutes);  // 90 minutes
+     * Duration oneHourThirty = twoHours.minus(thirtyMinutes);  // returns 90 minutes
      *
      * Duration oneDay = Duration.ofDays(1);
-     * Duration twentyTwoHours = oneDay.minus(Duration.ofHours(2));  // 22 hours
+     * Duration twentyTwoHours = oneDay.minus(Duration.ofHours(2));  // returns 22 hours
      * }</pre>
      *
      * @param duration the duration to subtract, must not be {@code null}.
@@ -827,10 +827,10 @@ public final class Duration implements Comparable<Duration>, Immutable {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Duration tenDays = Duration.ofDays(10);
-     * Duration sevenDays = tenDays.minusDays(3);  // 7 days
+     * Duration sevenDays = tenDays.minusDays(3);  // returns 7 days
      *
      * Duration oneDay = Duration.ofDays(1);
-     * Duration negativeDay = oneDay.minusDays(2);  // -1 day
+     * Duration negativeDay = oneDay.minusDays(2);  // returns -1 day
      * }</pre>
      *
      * @param daysToSubtract the days to subtract, may be negative.
@@ -852,10 +852,10 @@ public final class Duration implements Comparable<Duration>, Immutable {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Duration oneDay = Duration.ofDays(1);
-     * Duration twentyHours = oneDay.minusHours(4);  // 20 hours
+     * Duration twentyHours = oneDay.minusHours(4);  // returns 20 hours
      *
      * Duration twoHours = Duration.ofHours(2);
-     * Duration negativeHour = twoHours.minusHours(3);  // -1 hour
+     * Duration negativeHour = twoHours.minusHours(3);  // returns -1 hour
      * }</pre>
      *
      * @param hoursToSubtract the hours to subtract, may be negative.
@@ -877,10 +877,10 @@ public final class Duration implements Comparable<Duration>, Immutable {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Duration oneHour = Duration.ofHours(1);
-     * Duration fortyFiveMinutes = oneHour.minusMinutes(15);  // 45 minutes
+     * Duration fortyFiveMinutes = oneHour.minusMinutes(15);  // returns 45 minutes
      *
      * Duration thirtyMinutes = Duration.ofMinutes(30);
-     * Duration negativeMinutes = thirtyMinutes.minusMinutes(45);  // -15 minutes
+     * Duration negativeMinutes = thirtyMinutes.minusMinutes(45);  // returns -15 minutes
      * }</pre>
      *
      * @param minutesToSubtract the minutes to subtract, may be negative.
@@ -902,10 +902,10 @@ public final class Duration implements Comparable<Duration>, Immutable {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Duration twoMinutes = Duration.ofMinutes(2);
-     * Duration oneMinuteFortyFive = twoMinutes.minusSeconds(15);  // 105 seconds
+     * Duration oneMinuteFortyFive = twoMinutes.minusSeconds(15);  // returns 105 seconds
      *
      * Duration thirtySeconds = Duration.ofSeconds(30);
-     * Duration negativeSeconds = thirtySeconds.minusSeconds(45);  // -15 seconds
+     * Duration negativeSeconds = thirtySeconds.minusSeconds(45);  // returns -15 seconds
      * }</pre>
      *
      * @param secondsToSubtract the seconds to subtract, may be negative.
@@ -927,10 +927,10 @@ public final class Duration implements Comparable<Duration>, Immutable {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Duration oneSecond = Duration.ofSeconds(1);
-     * Duration halfSecond = oneSecond.minusMillis(500);  // 500 milliseconds
+     * Duration halfSecond = oneSecond.minusMillis(500);  // returns 500 milliseconds
      *
-     * Duration halfSecond = Duration.ofMillis(500);
-     * Duration negativeMillis = halfSecond.minusMillis(750);  // -250 milliseconds
+     * Duration base = Duration.ofMillis(500);
+     * Duration negativeMillis = base.minusMillis(750);  // returns -250 milliseconds
      * }</pre>
      *
      * @param millisToSubtract the milliseconds to subtract, may be negative.
@@ -960,13 +960,13 @@ public final class Duration implements Comparable<Duration>, Immutable {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Duration oneHour = Duration.ofHours(1);
-     * Duration threeHours = oneHour.multipliedBy(3);  // 3 hours
+     * Duration threeHours = oneHour.multipliedBy(3);  // returns 3 hours
      *
      * Duration fiveMinutes = Duration.ofMinutes(5);
-     * Duration twentyMinutes = fiveMinutes.multipliedBy(4);  // 20 minutes
+     * Duration twentyMinutes = fiveMinutes.multipliedBy(4);  // returns 20 minutes
      *
      * Duration twoHours = Duration.ofHours(2);
-     * Duration negativeTwoHours = twoHours.multipliedBy(-1);  // -2 hours
+     * Duration negativeTwoHours = twoHours.multipliedBy(-1);  // returns -2 hours
      * }</pre>
      *
      * @param multiplicand the value to multiply the duration by, positive or negative.
@@ -998,13 +998,13 @@ public final class Duration implements Comparable<Duration>, Immutable {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Duration twoHours = Duration.ofHours(2);
-     * Duration oneHour = twoHours.dividedBy(2);  // 1 hour
+     * Duration oneHour = twoHours.dividedBy(2);  // returns 1 hour
      *
      * Duration tenMinutes = Duration.ofMinutes(10);
-     * Duration twoMinutes = tenMinutes.dividedBy(5);  // 2 minutes
+     * Duration twoMinutes = tenMinutes.dividedBy(5);  // returns 2 minutes
      *
      * Duration fiveSeconds = Duration.ofSeconds(5);
-     * Duration oneSecond = fiveSeconds.dividedBy(5);  // 1 second
+     * Duration oneSecond = fiveSeconds.dividedBy(5);  // returns 1 second
      * }</pre>
      *
      * @param divisor the value to divide the duration by, positive or negative but not zero.
@@ -1036,12 +1036,12 @@ public final class Duration implements Comparable<Duration>, Immutable {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Duration twoHours = Duration.ofHours(2);
-     * Duration negativeTwoHours = twoHours.negated();  // -2 hours
+     * Duration negativeTwoHours = twoHours.negated();  // returns -2 hours
      *
      * Duration negativeOneHour = Duration.ofHours(-1);
-     * Duration oneHour = negativeOneHour.negated();  // 1 hour
+     * Duration oneHour = negativeOneHour.negated();  // returns 1 hour
      *
-     * Duration zero = Duration.ZERO.negated();  // still 0
+     * Duration zero = Duration.ZERO.negated();  // returns 0 (zero stays zero)
      * }</pre>
      *
      * @return a Duration based on this duration with the amount negated.
@@ -1062,13 +1062,13 @@ public final class Duration implements Comparable<Duration>, Immutable {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Duration twoHours = Duration.ofHours(2);
-     * Duration absTwoHours = twoHours.abs();  // 2 hours (unchanged)
+     * Duration absTwoHours = twoHours.abs();  // returns 2 hours (unchanged)
      *
      * Duration negativeOneHour = Duration.ofHours(-1);
-     * Duration oneHour = negativeOneHour.abs();  // 1 hour (now positive)
+     * Duration oneHour = negativeOneHour.abs();  // returns 1 hour (now positive)
      *
      * Duration diff = Duration.ofMinutes(30).minus(Duration.ofHours(1));
-     * Duration absoluteDiff = diff.abs();  // 30 minutes (positive)
+     * Duration absoluteDiff = diff.abs();  // returns 30 minutes (positive)
      * }</pre>
      *
      * @return a Duration based on this duration with an absolute length.
@@ -1089,13 +1089,13 @@ public final class Duration implements Comparable<Duration>, Immutable {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Duration oneWeek = Duration.ofDays(7);
-     * long days = oneWeek.toDays();  // 7
+     * long days = oneWeek.toDays();  // returns 7
      *
      * Duration thirtyHours = Duration.ofHours(30);
-     * long daysInThirtyHours = thirtyHours.toDays();  // 1 (truncated)
+     * long daysInThirtyHours = thirtyHours.toDays();  // returns 1 (truncated)
      *
      * Duration oneDay = Duration.ofDays(1).plusHours(12);
-     * long daysCount = oneDay.toDays();  // 1 (partial day ignored)
+     * long daysCount = oneDay.toDays();  // returns 1 (partial day ignored)
      * }</pre>
      *
      * @return the number of days in the duration, may be negative.
@@ -1115,13 +1115,13 @@ public final class Duration implements Comparable<Duration>, Immutable {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Duration twoHours = Duration.ofHours(2);
-     * long hours = twoHours.toHours();  // 2
+     * long hours = twoHours.toHours();  // returns 2
      *
      * Duration ninetyMinutes = Duration.ofMinutes(90);
-     * long hoursInNinety = ninetyMinutes.toHours();  // 1 (truncated)
+     * long hoursInNinety = ninetyMinutes.toHours();  // returns 1 (truncated)
      *
      * Duration oneDay = Duration.ofDays(1);
-     * long hoursInDay = oneDay.toHours();  // 24
+     * long hoursInDay = oneDay.toHours();  // returns 24
      * }</pre>
      *
      * @return the number of hours in the duration, may be negative.
@@ -1141,13 +1141,13 @@ public final class Duration implements Comparable<Duration>, Immutable {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Duration twoHours = Duration.ofHours(2);
-     * long minutes = twoHours.toMinutes();  // 120
+     * long minutes = twoHours.toMinutes();  // returns 120
      *
      * Duration ninetySeconds = Duration.ofSeconds(90);
-     * long minutesInNinety = ninetySeconds.toMinutes();  // 1 (truncated)
+     * long minutesInNinety = ninetySeconds.toMinutes();  // returns 1 (truncated)
      *
      * Duration fiveMinutes = Duration.ofMinutes(5);
-     * long minutesCount = fiveMinutes.toMinutes();  // 5
+     * long minutesCount = fiveMinutes.toMinutes();  // returns 5
      * }</pre>
      *
      * @return the number of minutes in the duration, may be negative.
@@ -1167,13 +1167,13 @@ public final class Duration implements Comparable<Duration>, Immutable {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Duration fiveMinutes = Duration.ofMinutes(5);
-     * long seconds = fiveMinutes.toSeconds();  // 300
+     * long seconds = fiveMinutes.toSeconds();  // returns 300
      *
      * Duration fifteenHundredMillis = Duration.ofMillis(1500);
-     * long secondsInFifteen = fifteenHundredMillis.toSeconds();  // 1 (truncated)
+     * long secondsInFifteen = fifteenHundredMillis.toSeconds();  // returns 1 (truncated)
      *
      * Duration oneHour = Duration.ofHours(1);
-     * long secondsInHour = oneHour.toSeconds();  // 3600
+     * long secondsInHour = oneHour.toSeconds();  // returns 3600
      * }</pre>
      *
      * @return the number of seconds in the duration, may be negative.
@@ -1192,13 +1192,13 @@ public final class Duration implements Comparable<Duration>, Immutable {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Duration oneSecond = Duration.ofSeconds(1);
-     * long millis = oneSecond.toMillis();  // 1000
+     * long millis = oneSecond.toMillis();  // returns 1000
      *
      * Duration halfSecond = Duration.ofMillis(500);
-     * long millisCount = halfSecond.toMillis();  // 500
+     * long millisCount = halfSecond.toMillis();  // returns 500
      *
      * Duration fiveMinutes = Duration.ofMinutes(5);
-     * long millisInFive = fiveMinutes.toMillis();  // 300000
+     * long millisInFive = fiveMinutes.toMillis();  // returns 300000
      * }</pre>
      *
      * @return the number of milliseconds in the duration, may be negative.
@@ -1218,7 +1218,7 @@ public final class Duration implements Comparable<Duration>, Immutable {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Duration d = Duration.ofHours(2);
-     * java.time.Duration jdkDuration = d.toJdkDuration();   // 2 hours
+     * java.time.Duration jdkDuration = d.toJdkDuration();   // returns 2 hours
      * }</pre>
      *
      * @return a {@code java.time.Duration} with the same milliseconds value, not null.
@@ -1234,6 +1234,21 @@ public final class Duration implements Comparable<Duration>, Immutable {
      * A duration is considered less than another if it represents a shorter amount of time,
      * regardless of whether the durations are positive or negative.
      * </p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Duration oneHour = Duration.ofHours(1);
+     * Duration thirtyMinutes = Duration.ofMinutes(30);
+     *
+     * int cmp = oneHour.compareTo(thirtyMinutes);           // returns > 0 (1 hour > 30 min)
+     * int cmp2 = thirtyMinutes.compareTo(oneHour);          // returns < 0 (30 min < 1 hour)
+     * int cmp3 = oneHour.compareTo(Duration.ofMinutes(60)); // returns == 0 (equal)
+     *
+     * // Sorting durations
+     * List<Duration> times = Arrays.asList(
+     *     Duration.ofHours(2), Duration.ofMinutes(30), Duration.ofSeconds(10));
+     * Collections.sort(times);   // times is now ordered: [10s, 30m, 2h]
+     * }</pre>
      *
      * @param other the other duration to compare to, must not be {@code null}.
      * @return the comparator value, negative if less, positive if greater, zero if equal.
@@ -1311,11 +1326,22 @@ public final class Duration implements Comparable<Duration>, Immutable {
         // negative.  Without this, a duration like -90_500 ms would incorrectly
         // produce "PT-1M-30.500S" (each component carrying its own sign) instead
         // of the correct "PT-1M30.500S".
-        final long absMillis = Math.abs(milliseconds);
-        final long hours = absMillis / MILLIS_PER_HOUR;
-        final int minutes = (int) ((absMillis % MILLIS_PER_HOUR) / MILLIS_PER_MINUTE);
-        final int seconds = (int) ((absMillis % MILLIS_PER_MINUTE) / MILLIS_PER_SECOND);
-        int millis = (int) (absMillis % MILLIS_PER_SECOND);
+        final long absMillis = milliseconds == Long.MIN_VALUE ? Long.MAX_VALUE : Math.abs(milliseconds);
+        long hours = absMillis / MILLIS_PER_HOUR;
+        long remainder = absMillis % MILLIS_PER_HOUR;
+
+        if (milliseconds == Long.MIN_VALUE) {
+            remainder++;
+
+            if (remainder == MILLIS_PER_HOUR) {
+                hours++;
+                remainder = 0;
+            }
+        }
+
+        final int minutes = (int) (remainder / MILLIS_PER_MINUTE);
+        final int seconds = (int) ((remainder % MILLIS_PER_MINUTE) / MILLIS_PER_SECOND);
+        int millis = (int) (remainder % MILLIS_PER_SECOND);
 
         final StringBuilder sb = Objectory.createStringBuilder();
 

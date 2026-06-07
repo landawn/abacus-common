@@ -567,6 +567,24 @@ public class FractionTest extends TestBase {
     }
 
     @Test
+    public void testFactory_double_numeratorOverflow() {
+        // Regression: for a large whole-number part the reconstructed numerator
+        // (numer0 + wholeNumber * denom0) overflows int. Previously of(2147483646.5)
+        // silently returned -3/2 instead of throwing.
+        assertThrows(ArithmeticException.class, () -> Fraction.of(2147483646.5d));
+        assertThrows(ArithmeticException.class, () -> Fraction.of(-2147483646.5d));
+        // First value whose numerator (2147483649) just exceeds Integer.MAX_VALUE.
+        assertThrows(ArithmeticException.class, () -> Fraction.of(1073741824.5d));
+
+        // Boundary just below overflow must still succeed: 1073741823.5 == 2147483647/2,
+        // numerator exactly Integer.MAX_VALUE.
+        final Fraction f = Fraction.of(1073741823.5d);
+        assertEquals(Integer.MAX_VALUE, f.getNumerator());
+        assertEquals(2, f.getDenominator());
+        assertEquals(-Integer.MAX_VALUE, Fraction.of(-1073741823.5d).getNumerator());
+    }
+
+    @Test
     public void testFactory_String_double() {
         Fraction f = null;
 

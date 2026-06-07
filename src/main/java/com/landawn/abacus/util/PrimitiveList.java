@@ -86,8 +86,8 @@ import com.landawn.abacus.annotation.Beta;
  * // Set operations for data analysis
  * IntList set1 = IntList.of(1, 2, 3, 4);
  * IntList set2 = IntList.of(3, 4, 5, 6);
- * IntList intersection = set1.intersection(set2);   // [3, 4]
- * IntList difference = set1.difference(set2);   // [1, 2]
+ * IntList intersection = set1.intersection(set2);   // returns [3, 4]
+ * IntList difference = set1.difference(set2);       // returns [1, 2]
  *
  * // Efficient sorting and searching
  * numbers.sort();
@@ -257,6 +257,12 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
      * The array may be larger than the list size; only elements from index 0 to size()-1
      * are valid list elements.</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * IntList list = IntList.of(1, 2, 3);
+     * int[] internal = list.internalArray();   // returns the backing int[]; internal[0] == 1, internal[1] == 2, internal[2] == 3
+     * }</pre>
+     *
      * @return the internal array backing this list
      * @deprecated use {@link #toArray()} instead, which returns a safe copy
      */
@@ -270,6 +276,15 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
      *
      * <p>This operation may cause the list to reallocate its internal array if the
      * current capacity is insufficient to accommodate all new elements.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * IntList list = IntList.of(1, 2, 3);
+     * list.addAll(IntList.of(4, 5));   // returns true; list now contains [1, 2, 3, 4, 5]
+     *
+     * IntList list2 = IntList.of(1, 2, 3);
+     * list2.addAll(new IntList());     // returns false (empty other); list2 still [1, 2, 3]
+     * }</pre>
      *
      * @param other the PrimitiveList containing elements to be added to this list.
      *          If {@code null} or empty, this list remains unchanged.
@@ -286,6 +301,15 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
      *
      * <p>This operation may cause the list to reallocate its internal array if the
      * current capacity is insufficient to accommodate all new elements.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * IntList list = IntList.of(1, 2, 3);
+     * list.addAll(1, IntList.of(8, 9));   // returns true; list now contains [1, 8, 9, 2, 3]
+     *
+     * IntList list2 = IntList.of(1, 2, 3);
+     * list2.addAll(5, IntList.of(8, 9));  // throws IndexOutOfBoundsException (index > size)
+     * }</pre>
      *
      * @param index the index at which to insert the first element from the specified list.
      *              Must be between 0 and size() (inclusive).
@@ -305,6 +329,15 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
      * <p>This operation may cause the list to reallocate its internal array if the
      * current capacity is insufficient to accommodate all new elements.</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * IntList list = IntList.of(1, 2, 3);
+     * list.addAll(new int[] {4, 5});   // returns true; list now contains [1, 2, 3, 4, 5]
+     *
+     * IntList list2 = IntList.of(1, 2, 3);
+     * list2.addAll(new int[] {});      // returns false (empty array); list2 still [1, 2, 3]
+     * }</pre>
+     *
      * @param values the array containing elements to be added to this list.
      *          If {@code null} or empty, this list remains unchanged.
      * @return {@code true} if this list changed as a result of the call (i.e., if the array was not empty),
@@ -320,6 +353,15 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
      *
      * <p>This operation may cause the list to reallocate its internal array if the
      * current capacity is insufficient to accommodate all new elements.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * IntList list = IntList.of(1, 2, 3);
+     * list.addAll(1, new int[] {8, 9});   // returns true; list now contains [1, 8, 9, 2, 3]
+     *
+     * IntList list2 = IntList.of(1, 2, 3);
+     * list2.addAll(5, new int[] {8, 9});  // throws IndexOutOfBoundsException (index > size)
+     * }</pre>
      *
      * @param index the index at which to insert the first element from the specified array.
      *              Must be between 0 and size() (inclusive).
@@ -339,6 +381,15 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
      * <p>For elements that appear multiple times in this list, all occurrences will be removed
      * if the element appears at least once in the specified list. The comparison is done by value.</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * IntList list = IntList.of(1, 2, 3, 2, 4);
+     * list.removeAll(IntList.of(2, 4));   // returns true; list now contains [1, 3]
+     *
+     * IntList list2 = IntList.of(1, 2, 3);
+     * list2.removeAll(IntList.of(5, 6));  // returns false (no common elements); list2 still [1, 2, 3]
+     * }</pre>
+     *
      * @param other the PrimitiveList containing elements to be removed from this list.
      *          If {@code null} or empty, this list remains unchanged.
      * @return {@code true} if this list was modified as a result of the call,
@@ -352,6 +403,15 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
      *
      * <p>For elements that appear multiple times in this list, all occurrences will be removed
      * if the element appears at least once in the specified array. The comparison is done by value.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * IntList list = IntList.of(1, 2, 3, 2, 4);
+     * list.removeAll(new int[] {2, 4});   // returns true; list now contains [1, 3]
+     *
+     * IntList list2 = IntList.of(1, 2, 3);
+     * list2.removeAll(new int[] {5, 6});  // returns false (no common elements); list2 still [1, 2, 3]
+     * }</pre>
      *
      * @param values the array containing elements to be removed from this list.
      *          If {@code null} or empty, this list remains unchanged.
@@ -387,6 +447,15 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
      *
      * <p>Elements are compared by value. The relative order of retained elements is preserved.</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * IntList list = IntList.of(1, 2, 3, 4, 5);
+     * list.retainAll(IntList.of(2, 4, 6));   // returns true; list now contains [2, 4]
+     *
+     * IntList list2 = IntList.of(1, 2, 3);
+     * list2.retainAll(new IntList());        // returns true (empty other clears list); list2 now []
+     * }</pre>
+     *
      * @param other the PrimitiveList containing elements to be retained in this list.
      *          If {@code null} or empty, this list will be cleared.
      * @return {@code true} if this list was modified as a result of the call,
@@ -401,6 +470,15 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
      * that also appear in the specified array.
      *
      * <p>Elements are compared by value. The relative order of retained elements is preserved.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * IntList list = IntList.of(1, 2, 3, 4, 5);
+     * list.retainAll(new int[] {2, 4, 6});   // returns true; list now contains [2, 4]
+     *
+     * IntList list2 = IntList.of(1, 2, 3);
+     * list2.retainAll(new int[] {});         // returns true (empty array clears list); list2 now []
+     * }</pre>
      *
      * @param values the array containing elements to be retained in this list.
      *          If {@code null} or empty, this list will be cleared.
@@ -687,12 +765,12 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
      * <pre>{@code
      * IntList list1 = IntList.of(0, 1, 2, 2, 3);
      * IntList list2 = IntList.of(1, 2, 2, 4);
-     * IntList result = list1.intersection(list2);   // result will be [1, 2, 2]
+     * IntList result = list1.intersection(list2);   // returns result will be [1, 2, 2]
      * // One occurrence of '1' (minimum count in both lists) and two occurrences of '2'
      *
      * IntList list3 = IntList.of(5, 5, 6);
      * IntList list4 = IntList.of(5, 7);
-     * IntList result2 = list3.intersection(list4);   // result will be [5]
+     * IntList result2 = list3.intersection(list4);   // returns result will be [5]
      * // One occurrence of '5' (minimum count in both lists)
      * }</pre>
      *
@@ -717,12 +795,12 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
      * <pre>{@code
      * IntList list1 = IntList.of(0, 1, 2, 2, 3);
      * int[] array = new int[] {1, 2, 2, 4};
-     * IntList result = list1.intersection(array);   // result will be [1, 2, 2]
+     * IntList result = list1.intersection(array);   // returns result will be [1, 2, 2]
      * // One occurrence of '1' (minimum count in both sources) and two occurrences of '2'
      *
      * IntList list2 = IntList.of(5, 5, 6);
      * int[] array2 = new int[] {5, 7};
-     * IntList result2 = list2.intersection(array2);   // result will be [5]
+     * IntList result2 = list2.intersection(array2);   // returns result will be [5]
      * // One occurrence of '5' (minimum count in both sources)
      * }</pre>
      *
@@ -747,12 +825,12 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
      * <pre>{@code
      * IntList list1 = IntList.of(0, 1, 2, 2, 3);
      * IntList list2 = IntList.of(2, 5, 1);
-     * IntList result = list1.difference(list2);   // result will be [0, 2, 3]
+     * IntList result = list1.difference(list2);   // returns result will be [0, 2, 3]
      * // One '2' remains because list1 has two occurrences and list2 has one
      *
      * IntList list3 = IntList.of(5, 6);
      * IntList list4 = IntList.of(5, 5, 6);
-     * IntList result2 = list3.difference(list4);   // result will be [] (empty)
+     * IntList result2 = list3.difference(list4);   // returns result will be [] (empty)
      * // No elements remain because list4 has at least as many occurrences of each value as list3
      * }</pre>
      *
@@ -777,12 +855,12 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
      * <pre>{@code
      * IntList list1 = IntList.of(0, 1, 2, 2, 3);
      * int[] array = new int[] {2, 5, 1};
-     * IntList result = list1.difference(array);   // result will be [0, 2, 3]
+     * IntList result = list1.difference(array);   // returns result will be [0, 2, 3]
      * // One '2' remains because list1 has two occurrences and array has one
      *
      * IntList list2 = IntList.of(5, 6);
      * int[] array2 = new int[] {5, 5, 6};
-     * IntList result2 = list2.difference(array2);   // result will be [] (empty)
+     * IntList result2 = list2.difference(array2);   // returns result will be [] (empty)
      * // No elements remain because array2 has at least as many occurrences of each value as list2
      * }</pre>
      *
@@ -955,6 +1033,7 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
      * list.sort();
      * // list now contains [1, 1, 3, 4, 5, 9]
      * }</pre>
+     *
      */
     public abstract void sort();
 
@@ -972,6 +1051,7 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
      * list.reverseSort();
      * // list now contains [9, 5, 4, 3, 1, 1]
      * }</pre>
+     *
      */
     public abstract void reverseSort();
 
@@ -987,6 +1067,7 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
      * list.reverse();
      * // list now contains [5, 4, 3, 2, 1]
      * }</pre>
+     *
      */
     public abstract void reverse();
 
@@ -1054,6 +1135,7 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
      * list.shuffle();
      * // list now contains elements in random order, e.g., [3, 1, 5, 2, 4]
      * }</pre>
+     *
      */
     public abstract void shuffle();
 
@@ -1069,7 +1151,7 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IntList list = IntList.of(1, 2, 3, 4, 5);
-     * Random rnd = new Random(12345);   // seed for reproducibility
+     * Random rnd = new Random(12345);
      * list.shuffle(rnd);
      * // list now contains elements in a random order determined by the seed
      * }</pre>
@@ -1241,7 +1323,7 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * IntList list = new IntList(100);   // capacity = 100
+     * IntList list = new IntList(100);
      * list.add(1);
      * list.add(2);
      * list.add(3);
@@ -1270,6 +1352,7 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
      * // list.size() returns 0
      * // list.isEmpty() returns true
      * }</pre>
+     *
      */
     public abstract void clear();
 
@@ -1382,6 +1465,12 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
      *
      * <p>This method is equivalent to {@link #boxed()}.</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * IntList list = IntList.of(1, 2, 3);
+     * List<Integer> boxed = list.toList();   // returns [1, 2, 3] as a List<Integer>
+     * }</pre>
+     *
      * @return a new List containing all elements from this list as boxed objects
      * @deprecated use {@link #boxed()} instead.
      */
@@ -1396,6 +1485,13 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
      * is independent of this list.
      *
      * <p>This method is equivalent to {@link #boxed(int, int)}.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * IntList list = IntList.of(1, 2, 3, 4, 5);
+     * List<Integer> boxed = list.toList(1, 4);   // returns [2, 3, 4] as a List<Integer>
+     * list.toList(1, 10);                        // throws IndexOutOfBoundsException (toIndex > size)
+     * }</pre>
      *
      * @param fromIndex the starting index (inclusive) of the range to convert
      * @param toIndex the ending index (exclusive) of the range to convert
@@ -1480,6 +1576,13 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
      * The type of Collection returned is determined by the provided supplier function.
      * The returned collection is independent of this list.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * IntList list = IntList.of(1, 2, 3, 4, 5);
+     * LinkedList<Integer> coll = list.toCollection(1, 4, size -> new LinkedList<>());   // returns [2, 3, 4]
+     * list.toCollection(1, 10, size -> new LinkedList<>());                             // throws IndexOutOfBoundsException (toIndex > size)
+     * }</pre>
+     *
      * @param <C> the type of Collection to create, must extend Collection&lt;B&gt;
      * @param fromIndex the starting index (inclusive) of the range to convert
      * @param toIndex the ending index (exclusive) of the range to convert
@@ -1494,6 +1597,15 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
      * Returns a Multiset containing all elements from this list converted to their boxed type.
      * A Multiset is a collection that allows duplicate elements and provides occurrence counting.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * IntList list = IntList.of(1, 2, 2, 3, 1);
+     * Multiset<Integer> ms = list.toMultiset();
+     * ms.getCount(1);   // returns 2
+     * ms.getCount(2);   // returns 2
+     * ms.getCount(3);   // returns 1
+     * }</pre>
+     *
      * @return a Multiset containing all elements from this primitive list with their occurrence counts
      */
     public Multiset<B> toMultiset() {
@@ -1503,6 +1615,16 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
     /**
      * Returns a Multiset containing all elements from the specified range converted to their boxed type.
      * A Multiset is a collection that allows duplicate elements and provides occurrence counting.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * IntList list = IntList.of(1, 2, 2, 3, 1);
+     * Multiset<Integer> ms = list.toMultiset(1, 4);   // covers elements [2, 2, 3]
+     * ms.getCount(2);                                 // returns 2
+     * ms.getCount(3);                                 // returns 1
+     * ms.getCount(1);                                 // returns 0 (outside the range)
+     * list.toMultiset(1, 10);                         // throws IndexOutOfBoundsException (toIndex > size)
+     * }</pre>
      *
      * @param fromIndex the starting index (inclusive) of the range to convert
      * @param toIndex the ending index (exclusive) of the range to convert
@@ -1522,6 +1644,15 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
      * The type of Multiset returned is determined by the provided supplier function.
      * A Multiset is a collection that allows duplicate elements and provides occurrence counting.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * IntList list = IntList.of(1, 2, 2, 3);
+     * Multiset<Integer> ms = list.toMultiset(size -> new Multiset<>());
+     * ms.getCount(1);   // returns 1
+     * ms.getCount(2);   // returns 2
+     * ms.getCount(3);   // returns 1
+     * }</pre>
+     *
      * @param supplier a function that creates a new Multiset instance with the given initial capacity
      * @return a Multiset containing all elements from this primitive list with their occurrence counts
      * @throws RuntimeException if the supplier throws an exception during Multiset creation
@@ -1534,6 +1665,16 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
      * Returns a Multiset containing all elements from the specified range converted to their boxed type.
      * The type of Multiset returned is determined by the provided supplier function.
      * A Multiset is a collection that allows duplicate elements and provides occurrence counting.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * IntList list = IntList.of(1, 2, 2, 3, 1);
+     * Multiset<Integer> ms = list.toMultiset(1, 4, size -> new Multiset<>());   // covers elements [2, 2, 3]
+     * ms.getCount(2);                                                           // returns 2
+     * ms.getCount(3);                                                           // returns 1
+     * ms.getCount(1);                                                           // returns 0 (outside the range)
+     * list.toMultiset(1, 10, size -> new Multiset<>());                         // throws IndexOutOfBoundsException (toIndex > size)
+     * }</pre>
      *
      * @param fromIndex the starting index (inclusive) of the range to convert
      * @param toIndex the ending index (exclusive) of the range to convert
@@ -1548,6 +1689,17 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
      * Returns an iterator over the elements in this primitive list.
      * The iterator returns elements in the order they appear in the list, from index 0 to size()-1.
      * The returned iterator does not support the remove() operation by default.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * IntList list = IntList.of(10, 20, 30);
+     * Iterator<Integer> it = list.iterator();
+     * it.hasNext();   // returns true
+     * it.next();      // returns 10
+     * it.next();      // returns 20
+     * it.next();      // returns 30
+     * it.hasNext();   // returns false
+     * }</pre>
      *
      * @return an {@code Iterator} over the boxed elements of type {@code B} in this list,
      *         in list order

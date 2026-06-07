@@ -48,6 +48,12 @@ abstract class AbstractIndexed implements Immutable {
      * is thrown to prevent silent data loss. Use {@link #longIndex()} when the index
      * may exceed the {@code int} range.</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Indexed<String> item = Indexed.of("value", 5);
+     * int index = item.index();   // 5
+     * }</pre>
+     *
      * @return the index value as an {@code int}
      * @throws ArithmeticException if the index value overflows an {@code int}
      * @see #longIndex()
@@ -62,6 +68,12 @@ abstract class AbstractIndexed implements Immutable {
      *
      * <p>Unlike {@link #index()}, this method never throws an exception and
      * safely represents any index value within the full {@code long} range.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Indexed<String> item = Indexed.of("value", 5_000_000_000L);
+     * long index = item.longIndex();   // 5000000000
+     * }</pre>
      *
      * @return the index value as a {@code long}
      * @see #index()

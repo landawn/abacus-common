@@ -6573,6 +6573,30 @@ public class NumbersTest extends TestBase {
         Assertions.assertEquals(-3.0, Numbers.round(-3.4, 0), 0.0);
     }
 
+    /**
+     * Regression test for bug: round(double/float, scale) with 1 &lt;= scale &lt;= 6 used
+     * Math.round(x * factor) which saturates at Long.MAX_VALUE / Long.MIN_VALUE once x*factor
+     * exceeds the long range, silently returning a value off by orders of magnitude. Only the
+     * scale==0 branch had been guarded; the 1..6 fast path had not.
+     */
+    @Test
+    public void testRound_LargeValueBeyondLongRange_Scale1To6() {
+        // double: 1e17 * 100 = 1e19 > Long.MAX_VALUE; old code returned ~9.22E16
+        assertEquals(1e17, Numbers.round(1e17, 2), 1e6);
+        assertEquals(-1e17, Numbers.round(-1e17, 2), 1e6);
+        // 9.3e12 * 1e6 = 9.3e18 > Long.MAX_VALUE; old code returned ~9.2233E12
+        assertEquals(9.3e12, Numbers.round(9.3e12, 6), 1.0);
+        assertEquals(1e18, Numbers.round(1e18, 1), 1e3);
+
+        // float: 1e18f * 1e6 saturates the long; old code returned ~9.22E12
+        assertEquals(1e18f, Numbers.round(1e18f, 6), 1e12f);
+        assertEquals(-1e18f, Numbers.round(-1e18f, 6), 1e12f);
+
+        // Values within long range must still round correctly on the fast path
+        assertEquals(123456.79, Numbers.round(123456.789, 2), 1e-6);
+        assertEquals(123.5f, Numbers.round(123.456f, 1), 1e-4f);
+    }
+
     @Test
     public void testRoundFloatWithStringFormat() {
         float result = Numbers.round(1.234f, "#.#");

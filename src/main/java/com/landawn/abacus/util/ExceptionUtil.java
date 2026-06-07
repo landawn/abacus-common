@@ -72,6 +72,7 @@ import com.landawn.abacus.util.u.Optional;
  *     }
  * }
  * }</pre>
+ *
  */
 public final class ExceptionUtil {
 
@@ -151,7 +152,7 @@ public final class ExceptionUtil {
      * ExceptionUtil.registerRuntimeExceptionMapper(
      *     CustomException.class,
      *     e -> new CustomRuntimeException(e),
-     *     true  // force overwrite
+     *     true
      * );
      * }</pre>
      *

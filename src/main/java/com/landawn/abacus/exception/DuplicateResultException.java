@@ -52,6 +52,7 @@ public class DuplicateResultException extends IllegalStateException {
      * <pre>{@code
      * throw new DuplicateResultException();
      * }</pre>
+     *
      */
     public DuplicateResultException() {
         super();

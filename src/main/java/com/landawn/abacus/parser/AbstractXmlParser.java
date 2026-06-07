@@ -355,9 +355,9 @@ abstract class AbstractXmlParser extends AbstractParser<XmlSerConfig, XmlDeserCo
             }
         }
 
-        final Class<?> attribeTypeClass = getAttributeTypeClass(node);
+        final Class<?> attributeTypeClass = getAttributeTypeClass(node);
 
-        return newPropInstance(propClass, attribeTypeClass);
+        return newPropInstance(propClass, attributeTypeClass);
     }
 
     /**
@@ -387,9 +387,9 @@ abstract class AbstractXmlParser extends AbstractParser<XmlSerConfig, XmlDeserCo
             }
         }
 
-        final Class<?> attribeTypeClass = getAttributeTypeClass(attrs);
+        final Class<?> attributeTypeClass = getAttributeTypeClass(attrs);
 
-        return newPropInstance(propClass, attribeTypeClass);
+        return newPropInstance(propClass, attributeTypeClass);
     }
 
     /**

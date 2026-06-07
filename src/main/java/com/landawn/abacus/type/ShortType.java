@@ -77,7 +77,7 @@ public final class ShortType extends AbstractShortType {
      * @throws SQLException if a database access error occurs
      */
     @Override
-    public Short get(ResultSet rs, int columnIndex) throws SQLException {
+    public Short get(final ResultSet rs, final int columnIndex) throws SQLException {
         final short value = rs.getShort(columnIndex);
 
         return rs.wasNull() ? null : value;
@@ -100,7 +100,7 @@ public final class ShortType extends AbstractShortType {
      * @throws SQLException if a database access error occurs
      */
     @Override
-    public Short get(ResultSet rs, String columnName) throws SQLException {
+    public Short get(final ResultSet rs, final String columnName) throws SQLException {
         final short value = rs.getShort(columnName);
 
         return rs.wasNull() ? null : value;

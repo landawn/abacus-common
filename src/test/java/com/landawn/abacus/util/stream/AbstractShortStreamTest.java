@@ -298,6 +298,13 @@ public class AbstractShortStreamTest extends TestBase {
     }
 
     @Test
+    public void testArrayStepIteratorCountConsumes() {
+        ShortIterator iter = ShortStream.of(new short[] { 1, 2, 3, 4, 5, 6 }).step(2).iterator();
+        assertEquals(3, iter.count());
+        assertFalse(iter.hasNext());
+    }
+
+    @Test
     public void testScan() {
         ShortStream result = createShortStream(new short[] { 1, 2, 3, 4 }).scan((a, b) -> (short) (a + b));
         assertArrayEquals(new short[] { 1, 3, 6, 10 }, result.toArray());

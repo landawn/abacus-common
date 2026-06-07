@@ -158,17 +158,17 @@ public class NumberTypeTest extends TestBase {
     }
 
     @Test
-    public void testWriteCharacterWithNull() throws IOException {
-        intNumberType.writeCharacter(writer, null, config);
+    public void testSerializeToWithNull() throws IOException {
+        intNumberType.serializeTo(writer, null, config);
         verify(writer).write(new char[] { 'n', 'u', 'l', 'l' });
     }
 
     @Test
-    public void testWriteCharacterWithValue() throws IOException {
-        intNumberType.writeCharacter(writer, 123, config);
+    public void testSerializeToWithValue() throws IOException {
+        intNumberType.serializeTo(writer, 123, config);
         verify(writer).writeInt(123);
 
-        doubleNumberType.writeCharacter(writer, 123.45, config);
+        doubleNumberType.serializeTo(writer, 123.45, config);
         verify(writer).write(123.45);
     }
 }

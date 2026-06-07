@@ -167,7 +167,7 @@ public final class Hashing {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * HashFunction murmur = Hashing.murmur3_32(42);   // seed = 42
+     * HashFunction murmur = Hashing.murmur3_32(42);   // seed is 42
      * HashCode hash = murmur.hash("example".getBytes());
      * }</pre>
      *
@@ -704,7 +704,7 @@ public final class Hashing {
     public static HashFunction concatenating(final Iterable<HashFunction> hashFunctions) {
         final List<com.google.common.hash.HashFunction> guavaHashFunctions = new ArrayList<>();
 
-        for (HashFunction hashFunction : hashFunctions) {
+        for (final HashFunction hashFunction : hashFunctions) {
             if (hashFunction instanceof GuavaHashFunction guavaHashFunction) {
                 guavaHashFunctions.add(guavaHashFunction.gHashFunction);
             } else {

@@ -968,7 +968,7 @@ public abstract class Files { //NOSONAR
      * <pre>{@code
      * // Create a read-write mapping
      * MappedByteBuffer buffer = Files.map(new File("data.bin"), MapMode.READ_WRITE);
-     * buffer.putInt(0, 42);   // Write to the beginning of the file
+     * buffer.putInt(0, 42);   // inserts an int at the beginning of the file
      * }</pre>
      *
      * @param file the file to map.
@@ -1456,7 +1456,7 @@ public abstract class Files { //NOSONAR
      * @see java.nio.file.Files#readString(Path, Charset)
      * @see IOUtil#readAllToString(File, Charset)
      */
-    public static String readString(final File file, Charset charset) throws IOException {
+    public static String readString(final File file, final Charset charset) throws IOException {
         return java.nio.file.Files.readString(file.toPath(), charset);
     }
 
@@ -1528,7 +1528,7 @@ public abstract class Files { //NOSONAR
      * @see java.nio.file.Files#readAllLines(Path, Charset)
      * @see IOUtil#readAllLines(File, Charset)
      */
-    public static List<String> readAllLines(final File file, Charset charset) throws IOException {
+    public static List<String> readAllLines(final File file, final Charset charset) throws IOException {
         return java.nio.file.Files.readAllLines(file.toPath(), charset);
     }
 

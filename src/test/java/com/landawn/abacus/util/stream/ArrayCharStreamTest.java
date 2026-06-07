@@ -149,6 +149,13 @@ public class ArrayCharStreamTest extends TestBase {
     }
 
     @Test
+    public void testStepIteratorCountConsumes() {
+        CharIterator iter = createCharStream('a', 'b', 'c', 'd', 'e', 'f').step(2).iterator();
+        assertEquals(3, iter.count());
+        assertFalse(iter.hasNext());
+    }
+
+    @Test
     public void testStepWithZero() {
         assertThrows(IllegalArgumentException.class, () -> createCharStream(new char[] { 'a', 'b' }).step(0));
     }

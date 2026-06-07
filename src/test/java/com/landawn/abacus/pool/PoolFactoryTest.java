@@ -121,6 +121,17 @@ public class PoolFactoryTest extends TestBase {
     }
 
     @Test
+    public void testCreateObjectPoolWithZeroCapacity() {
+        ObjectPool<TestPoolable> pool = PoolFactory.createObjectPool(0);
+
+        assertNotNull(pool);
+        assertEquals(0, pool.capacity());
+        assertTrue(pool.isEmpty());
+        assertFalse(pool.add(new TestPoolable(10000, 5000)));
+        pool.close();
+    }
+
+    @Test
     public void testCreateObjectPoolWithLargeCapacity() {
         ObjectPool<TestPoolable> pool = PoolFactory.createObjectPool(10000);
 

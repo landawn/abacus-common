@@ -228,45 +228,45 @@ public class ByteArrayTypeTest extends TestBase {
     }
 
     @Test
-    public void test_writeCharacter() throws IOException {
+    public void test_serializeTo() throws IOException {
         CharacterWriter writer = mock(BufferedJsonWriter.class);
         JsonXmlSerConfig<?> config = mock(JsonXmlSerConfig.class);
 
         Byte[] arr = new Byte[] { (byte) 1, (byte) 2 };
-        type.writeCharacter(writer, arr, config);
+        type.serializeTo(writer, arr, config);
         verify(writer, atLeastOnce()).write(any(String.class));
 
         reset(writer);
-        type.writeCharacter(writer, null, config);
+        type.serializeTo(writer, null, config);
         verify(writer).write(NULL_CHAR_ARRAY);
     }
 
     @Test
-    public void testWriteCharacter_Empty() throws IOException {
+    public void testSerializeTo_Empty() throws IOException {
         CharacterWriter mockWriter = createCharacterWriter();
         Byte[] array = new Byte[0];
-        type.writeCharacter(mockWriter, array, null);
+        type.serializeTo(mockWriter, array, null);
         verify(mockWriter).write('[');
         verify(mockWriter).write(']');
     }
 
     @Test
-    public void testWriteCharacter_SingleElement() throws IOException {
+    public void testSerializeTo_SingleElement() throws IOException {
         CharacterWriter mockWriter = createCharacterWriter();
         Byte[] array = new Byte[] { (byte) 42 };
-        type.writeCharacter(mockWriter, array, null);
+        type.serializeTo(mockWriter, array, null);
         verify(mockWriter).write('[');
         verify(mockWriter).write((byte) 42);
         verify(mockWriter).write(']');
     }
 
     @Test
-    public void testWriteCharacter_MultipleElements() throws IOException {
+    public void testSerializeTo_MultipleElements() throws IOException {
         CharacterWriter mockWriter = createCharacterWriter();
         Byte[] array = new Byte[] { (byte) 1, null, (byte) -1 };
         JsonXmlSerConfig<?> config = mock(JsonXmlSerConfig.class);
 
-        type.writeCharacter(mockWriter, array, config);
+        type.serializeTo(mockWriter, array, config);
 
         verify(mockWriter).write('[');
         verify(mockWriter).write((byte) 1);

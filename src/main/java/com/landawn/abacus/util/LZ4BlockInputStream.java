@@ -68,6 +68,15 @@ public final class LZ4BlockInputStream extends InputStream {
      * <p>This method blocks until input data is available, the end of the stream
      * is detected, or an exception is thrown.</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * int b = lz4In.read();
+     * if (b != -1) {
+     *     byte data = (byte) b;
+     *     // Process the byte
+     * }
+     * }</pre>
+     *
      * @return the next byte of data, or -1 if the end of the stream is reached
      * @throws IOException if an I/O error occurs
      */
@@ -154,6 +163,15 @@ public final class LZ4BlockInputStream extends InputStream {
      * <p>Note that this method provides only an estimate; the actual number of bytes
      * that can be read without blocking may be more or less than the returned value.</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * int n = lz4In.available();
+     * if (n > 0) {
+     *     byte[] buffer = new byte[n];
+     *     lz4In.read(buffer);
+     * }
+     * }</pre>
+     *
      * @return an estimate of the number of bytes that can be read without blocking
      * @throws IOException if an I/O error occurs
      */
@@ -213,6 +231,16 @@ public final class LZ4BlockInputStream extends InputStream {
      * been closed typically fail with an {@link IOException}.
      *
      * <p>Closing a previously closed stream has no effect.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * LZ4BlockInputStream lz4In = new LZ4BlockInputStream(compressedStream);
+     * try {
+     *     // Read decompressed data
+     * } finally {
+     *     lz4In.close();
+     * }
+     * }</pre>
      *
      * @throws IOException if an I/O error occurs
      */

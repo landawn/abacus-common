@@ -33,7 +33,7 @@ public class ByteIteratorExTest extends TestBase {
         Assertions.assertThrows(NoSuchElementException.class, () -> iter.nextByte());
         Assertions.assertEquals(0, iter.count());
         Assertions.assertArrayEquals(new byte[0], iter.toArray());
-        iter.close();
+        iter.closeResource();
     }
 
     // ---- of(byte[] a, int fromIndex, int toIndex) ----
@@ -324,7 +324,7 @@ public class ByteIteratorExTest extends TestBase {
 
         Assertions.assertEquals(1, iter.count());
 
-        iter.close();
+        iter.closeResource();
     }
 
     @Test
@@ -378,12 +378,12 @@ public class ByteIteratorExTest extends TestBase {
         Assertions.assertFalse(iter.hasNext());
     }
 
-    // ---- close() ----
+    // ---- closeResource() ----
 
     @Test
-    public void testClose() {
+    public void testCloseResource() {
         ByteIteratorEx iter = ByteIteratorEx.of((byte) 1, (byte) 2, (byte) 3);
-        iter.close();
+        iter.closeResource();
         assertNotNull(iter);
     }
 

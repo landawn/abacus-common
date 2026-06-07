@@ -92,16 +92,16 @@ public class Tuple7TypeTest extends TestBase {
     }
 
     @Test
-    public void test_writeCharacter_Null() throws IOException {
+    public void test_serializeTo_Null() throws IOException {
         var writer = Objectory.createBufferedJsonWriter();
-        assertDoesNotThrow(() -> type.writeCharacter(writer, null, null));
+        assertDoesNotThrow(() -> type.serializeTo(writer, null, null));
     }
 
     @Test
-    public void test_writeCharacter_NonNull() throws IOException {
+    public void test_serializeTo_NonNull() throws IOException {
         Tuple7<String, String, String, String, String, String, String> t = Tuple.of("a", "b", "c", "d", "e", "f", "g");
         var writer = Objectory.createBufferedJsonWriter();
-        assertDoesNotThrow(() -> type.writeCharacter(writer, t, null));
+        assertDoesNotThrow(() -> type.serializeTo(writer, t, null));
     }
 
     @Test

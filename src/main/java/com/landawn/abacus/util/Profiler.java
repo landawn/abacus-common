@@ -863,7 +863,7 @@ public final class Profiler {
      * try {
      *     // This runs with just 1 thread, 1 loop regardless of parameters
      *     Profiler.run(100, 1000, 10, () -> {
-     *         complexMethod(); // Just verify it doesn't crash
+     *         complexMethod();
      *     });
      * } finally {
      *     Profiler.suspend(false); // Always resume
@@ -880,7 +880,7 @@ public final class Profiler {
      *
      * // Integration test scenario
      * if (!"production".equals(environment)) {
-     *     Profiler.suspend(true); // Skip heavy testing in non-prod
+     *     Profiler.suspend(true);
      * }
      * performanceTestSuite.run();
      * }</pre>
@@ -899,6 +899,16 @@ public final class Profiler {
      *
      * <p>When suspended, all profiler runs execute with exactly one thread, one loop, and one round,
      * regardless of the parameters specified in the test method calls.</p>
+     *
+     * <p><b>Usage Example:</b></p>
+     * <pre>{@code
+     * // Check suspension state before running tests
+     * if (Profiler.isSuspended()) {
+     *     System.out.println("Profiler is in minimal execution mode");
+     * } else {
+     *     Profiler.run(10, 1000, 3, () -> heavyOperation());
+     * }
+     * }</pre>
      *
      * @return {@code true} if the profiler is suspended, {@code false} if it is running normally
      * @see #suspend(boolean)
@@ -1248,6 +1258,15 @@ public final class Profiler {
         /**
          * Creates a new MethodStatistics instance with the specified method name.
          *
+         * <p><b>Usage Example:</b></p>
+         * <pre>{@code
+         * MethodStatistics stats = new MethodStatistics("dataProcess");
+         * stats.setStartTimeInNano(System.nanoTime());
+         * dataProcess();
+         * stats.setEndTimeInNano(System.nanoTime());
+         * double elapsed = stats.getElapsedTimeInMillis();
+         * }</pre>
+         *
          * @param methodName the name of the method
          */
         public MethodStatistics(final String methodName) {
@@ -1256,6 +1275,17 @@ public final class Profiler {
 
         /**
          * Creates a new MethodStatistics instance with timing information.
+         *
+         * <p><b>Usage Example:</b></p>
+         * <pre>{@code
+         * long startNano = System.nanoTime();
+         * long startMillis = System.currentTimeMillis();
+         * performQuery();
+         * long endNano = System.nanoTime();
+         * long endMillis = System.currentTimeMillis();
+         * MethodStatistics stats = new MethodStatistics("query", startMillis, endMillis, startNano, endNano);
+         * System.out.println("Elapsed: " + stats.getElapsedTimeInMillis() + " ms");
+         * }</pre>
          *
          * @param methodName the name of the method
          * @param startTimeInMillis the start time in milliseconds since epoch
@@ -1270,6 +1300,24 @@ public final class Profiler {
 
         /**
          * Creates a new MethodStatistics instance with complete information.
+         *
+         * <p><b>Usage Example:</b></p>
+         * <pre>{@code
+         * long startNano = System.nanoTime();
+         * long startMillis = System.currentTimeMillis();
+         * Object result = null;
+         * try {
+         *     result = database.query();
+         * } catch (Exception e) {
+         *     result = e;
+         * }
+         * long endNano = System.nanoTime();
+         * long endMillis = System.currentTimeMillis();
+         * MethodStatistics stats = new MethodStatistics("dbQuery", startMillis, endMillis, startNano, endNano, result);
+         * if (stats.isFailed()) {
+         *     System.err.println("Method failed: " + stats);
+         * }
+         * }</pre>
          *
          * @param methodName the name of the method
          * @param startTimeInMillis the start time in milliseconds since epoch
@@ -1288,6 +1336,14 @@ public final class Profiler {
         /**
          * Gets the name of the method that was executed.
          *
+         * <p><b>Usage Example:</b></p>
+         * <pre>{@code
+         * MultiLoopsStatistics stats = Profiler.run(4, 1000, 1, "myLabel", () -> doWork());
+         * for (String methodName : stats.getMethodNameList()) {
+         *     System.out.println("Method: " + methodName);
+         * }
+         * }</pre>
+         *
          * @return the method name
          */
         public String getMethodName() {
@@ -1301,6 +1357,17 @@ public final class Profiler {
          * <p>This field shadows the {@code result} field in {@code AbstractStatistics} so that
          * {@link MethodStatistics} can maintain its own independent result state.</p>
          *
+         * <p><b>Usage Example:</b></p>
+         * <pre>{@code
+         * MultiLoopsStatistics stats = Profiler.run(1, 100, 1, () -> doWork());
+         * for (MethodStatistics ms : stats.getMethodStatisticsList("run")) {
+         *     Object result = ms.getResult();
+         *     if (ms.isFailed()) {
+         *         System.err.println("Execution failed: " + result);
+         *     }
+         * }
+         * }</pre>
+         *
          * @return the execution result, or {@code null} if the method completed normally
          */
         @Override
@@ -1310,6 +1377,13 @@ public final class Profiler {
 
         /**
          * Sets the execution result for this method invocation.
+         *
+         * <p><b>Usage Example:</b></p>
+         * <pre>{@code
+         * MethodStatistics stats = new MethodStatistics("test");
+         * stats.setResult(new RuntimeException("simulated failure"));
+         * System.out.println("Failed: " + stats.isFailed());
+         * }</pre>
          *
          * @param result the result to set; use {@code null} to indicate success, or an
          *               {@link Exception} to indicate failure
@@ -1326,6 +1400,18 @@ public final class Profiler {
          * instance of {@link Exception} (i.e., an exception was thrown and captured during
          * profiling). Successful executions have a {@code null} result.</p>
          *
+         * <p><b>Usage Example:</b></p>
+         * <pre>{@code
+         * MultiLoopsStatistics stats = Profiler.run(2, 100, 1, () -> {
+         *     if (Math.random() < 0.1) throw new RuntimeException("random error");
+         * });
+         * for (MethodStatistics ms : stats.getMethodStatisticsList("run")) {
+         *     if (ms.isFailed()) {
+         *         System.err.println("Failed execution at " + ms.getStartTimeInMillis());
+         *     }
+         * }
+         * }</pre>
+         *
          * @return {@code true} if the result is an {@code Exception} instance, {@code false} otherwise
          */
         public boolean isFailed() {
@@ -1335,6 +1421,14 @@ public final class Profiler {
         /**
          * Returns a string representation of this method statistics.
          * For failed executions, includes the exception class and message.
+         *
+         * <p><b>Usage Example:</b></p>
+         * <pre>{@code
+         * MultiLoopsStatistics stats = Profiler.run(1, 100, 1, "test", () -> doWork());
+         * for (MethodStatistics ms : stats.getMethodStatisticsList("test")) {
+         *     System.out.println(ms.toString());
+         * }
+         * }</pre>
          *
          * @return a string representation of the statistics
          */
@@ -1635,6 +1729,17 @@ public final class Profiler {
         /**
          * Creates a new MultiLoopsStatistics instance with timing information.
          *
+         * <p><b>Usage Example:</b></p>
+         * <pre>{@code
+         * long startMillis = System.currentTimeMillis();
+         * long startNano = System.nanoTime();
+         * // ... run performance test ...
+         * long endNano = System.nanoTime();
+         * long endMillis = System.currentTimeMillis();
+         * MultiLoopsStatistics stats = new MultiLoopsStatistics(startMillis, endMillis, startNano, endNano, 4);
+         * stats.printResult();
+         * }</pre>
+         *
          * @param startTimeInMillis the overall start time in milliseconds since epoch
          * @param endTimeInMillis the overall end time in milliseconds since epoch
          * @param startTimeInNano the overall start time in nanoseconds (from {@link System#nanoTime()})
@@ -1648,6 +1753,18 @@ public final class Profiler {
 
         /**
          * Creates a new MultiLoopsStatistics instance with complete information.
+         *
+         * <p><b>Usage Example:</b></p>
+         * <pre>{@code
+         * List<LoopStatistics> loopStats = new ArrayList<>();
+         * long startMillis = System.currentTimeMillis();
+         * long startNano = System.nanoTime();
+         * // ... collect loop statistics from multiple threads ...
+         * long endNano = System.nanoTime();
+         * long endMillis = System.currentTimeMillis();
+         * MultiLoopsStatistics stats = new MultiLoopsStatistics(startMillis, endMillis, startNano, endNano, 8, loopStats);
+         * System.out.println("Average time: " + stats.getMethodAverageElapsedTimeInMillis("run") + " ms");
+         * }</pre>
          *
          * @param startTimeInMillis the overall start time in milliseconds since epoch
          * @param endTimeInMillis the overall end time in milliseconds since epoch
@@ -1665,6 +1782,12 @@ public final class Profiler {
 
         /**
          * Gets the number of threads used in the performance test.
+         *
+         * <p><b>Usage Example:</b></p>
+         * <pre>{@code
+         * MultiLoopsStatistics stats = Profiler.run(16, 1000, 1, "loadTest", () -> makeRequest());
+         * System.out.println("Tested with " + stats.getThreadNum() + " concurrent threads");
+         * }</pre>
          *
          * @return the thread count
          */
@@ -1686,6 +1809,14 @@ public final class Profiler {
         /**
          * Gets the loop statistics list.
          *
+         * <p><b>Usage Example:</b></p>
+         * <pre>{@code
+         * MultiLoopsStatistics stats = Profiler.run(4, 100, 1, () -> doWork());
+         * for (LoopStatistics loop : stats.getLoopStatisticsList()) {
+         *     System.out.println("Loop elapsed: " + loop.getElapsedTimeInMillis() + " ms");
+         * }
+         * }</pre>
+         *
          * @return the list of loop statistics from all threads
          */
         public List<LoopStatistics> getLoopStatisticsList() {
@@ -1698,6 +1829,15 @@ public final class Profiler {
         /**
          * Sets the loop statistics list.
          *
+         * <p><b>Usage Example:</b></p>
+         * <pre>{@code
+         * MultiLoopsStatistics stats = Profiler.run(1, 100, 1, () -> doWork());
+         * List<LoopStatistics> filtered = stats.getLoopStatisticsList().stream()
+         *         .filter(ls -> ls.getElapsedTimeInMillis() < 100)
+         *         .collect(Collectors.toList());
+         * stats.setLoopStatisticsList(filtered);
+         * }</pre>
+         *
          * @param loopStatisticsList the new loop statistics list
          */
         public void setLoopStatisticsList(final List<LoopStatistics> loopStatisticsList) {
@@ -1709,6 +1849,14 @@ public final class Profiler {
          *
          * <p><b>Note:</b> Despite the method name, this method adds a {@link LoopStatistics} entry
          * (not a method statistics list) to the internal {@code loopStatisticsList}.</p>
+         *
+         * <p><b>Usage Example:</b></p>
+         * <pre>{@code
+         * MultiLoopsStatistics stats = Profiler.run(1, 100, 1, "test", () -> doWork());
+         * for (LoopStatistics loopStat : stats.getLoopStatisticsList()) {
+         *     stats.addMethodStatisticsList(loopStat);
+         * }
+         * }</pre>
          *
          * @param loopStatistics the loop statistics to add; must not be {@code null}
          */
@@ -1749,6 +1897,13 @@ public final class Profiler {
         /**
          * Gets the method total elapsed time in millis.
          *
+         * <p><b>Usage Example:</b></p>
+         * <pre>{@code
+         * MultiLoopsStatistics stats = Profiler.run(4, 1000, 3, "dataQuery", () -> queryDatabase());
+         * double totalTime = stats.getMethodTotalElapsedTimeInMillis("dataQuery");
+         * System.out.println("Total time spent in dataQuery: " + totalTime + " ms");
+         * }</pre>
+         *
          * @param methodName the name of the method
          * @return the total elapsed time in milliseconds
          */
@@ -1765,6 +1920,13 @@ public final class Profiler {
 
         /**
          * Gets the method max elapsed time in millis.
+         *
+         * <p><b>Usage Example:</b></p>
+         * <pre>{@code
+         * MultiLoopsStatistics stats = Profiler.run(4, 1000, 3, "request", () -> handleRequest());
+         * double maxTime = stats.getMethodMaxElapsedTimeInMillis("request");
+         * System.out.println("Worst-case response time: " + maxTime + " ms");
+         * }</pre>
          *
          * @param methodName the name of the method
          * @return the maximum elapsed time in milliseconds, or {@code 0} if the method was never executed
@@ -1785,6 +1947,13 @@ public final class Profiler {
 
         /**
          * Gets the method min elapsed time in millis.
+         *
+         * <p><b>Usage Example:</b></p>
+         * <pre>{@code
+         * MultiLoopsStatistics stats = Profiler.run(4, 1000, 3, "cacheGet", () -> cache.get(key));
+         * double minTime = stats.getMethodMinElapsedTimeInMillis("cacheGet");
+         * System.out.println("Best-case cache response: " + minTime + " ms");
+         * }</pre>
          *
          * @param methodName the name of the method
          * @return the minimum elapsed time in milliseconds, or {@code 0} if the method was never executed
@@ -1807,6 +1976,13 @@ public final class Profiler {
 
         /**
          * Gets the method average elapsed time in millis.
+         *
+         * <p><b>Usage Example:</b></p>
+         * <pre>{@code
+         * MultiLoopsStatistics stats = Profiler.run(4, 1000, 3, "sort", () -> sortData());
+         * double avgTime = stats.getMethodAverageElapsedTimeInMillis("sort");
+         * System.out.println("Average sort time: " + avgTime + " ms");
+         * }</pre>
          *
          * @param methodName the name of the method
          * @return the average elapsed time in milliseconds

@@ -93,6 +93,15 @@ public final class ActivityPrint implements Cloneable, Serializable {
     /**
      * Creates a new ActivityPrint with the specified lifetime and idle time limits.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * ActivityPrint activity = new ActivityPrint(3600000, 600000); // 1 hour live, 10 min idle
+     * activity.getLiveTime();                                      // returns 3600000
+     * activity.getMaxIdleTime();                                   // returns 600000
+     * new ActivityPrint(0, 600000);                                // throws IllegalArgumentException (liveTime not positive)
+     * new ActivityPrint(3600000, -1);                              // throws IllegalArgumentException (maxIdleTime not positive)
+     * }</pre>
+     *
      * @param liveTime maximum lifetime in milliseconds (must be positive)
      * @param maxIdleTime maximum idle time in milliseconds (must be positive)
      * @throws IllegalArgumentException if liveTime or maxIdleTime is not positive
@@ -136,6 +145,12 @@ public final class ActivityPrint implements Cloneable, Serializable {
     /**
      * Returns the maximum lifetime for this activity print.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * ActivityPrint activity = new ActivityPrint(3600000, 600000);
+     * activity.getLiveTime();   // returns 3600000
+     * }</pre>
+     *
      * @return the maximum lifetime in milliseconds
      */
     public long getLiveTime() {
@@ -147,7 +162,7 @@ public final class ActivityPrint implements Cloneable, Serializable {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * activity.setLiveTime(7200000);   // set to 2 hours
+     * activity.setLiveTime(7200000);   // 7200000 ms is 2 hours
      * }</pre>
      *
      * @param liveTime the new maximum lifetime in milliseconds (must be positive)
@@ -167,6 +182,12 @@ public final class ActivityPrint implements Cloneable, Serializable {
     /**
      * Returns the maximum idle time for this activity print.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * ActivityPrint activity = new ActivityPrint(3600000, 600000);
+     * activity.getMaxIdleTime();   // returns 600000
+     * }</pre>
+     *
      * @return the maximum idle time in milliseconds
      */
     public long getMaxIdleTime() {
@@ -178,7 +199,7 @@ public final class ActivityPrint implements Cloneable, Serializable {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * activity.setMaxIdleTime(600000);   // set to 10 minutes
+     * activity.setMaxIdleTime(600000);   // 600000 ms is 10 minutes
      * }</pre>
      *
      * @param maxIdleTime the new maximum idle time in milliseconds (must be positive)
@@ -197,6 +218,12 @@ public final class ActivityPrint implements Cloneable, Serializable {
 
     /**
      * Returns the creation time of the object associated with this activity print.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * ActivityPrint activity = new ActivityPrint(3600000, 600000);
+     * activity.getCreatedTime();   // returns the timestamp (millis since epoch) when this print was created
+     * }</pre>
      *
      * @return the creation time in milliseconds since epoch
      */
@@ -220,6 +247,12 @@ public final class ActivityPrint implements Cloneable, Serializable {
     /**
      * Returns the last access time for the object associated with this activity print.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * ActivityPrint activity = new ActivityPrint(3600000, 600000);
+     * activity.getLastAccessTime();   // initially equals getCreatedTime() (set on construction)
+     * }</pre>
+     *
      * @return the last access time in milliseconds since epoch
      */
     public long getLastAccessTime() {
@@ -232,11 +265,12 @@ public final class ActivityPrint implements Cloneable, Serializable {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * E pooledObject = pool.get();
+     * E pooledObject = pool.take();
      * if (pooledObject != null) {
      *     pooledObject.activityPrint().updateLastAccessTime();
      * }
      * }</pre>
+     *
      */
     public void updateLastAccessTime() {
         lastAccessTime = System.currentTimeMillis();
@@ -244,6 +278,14 @@ public final class ActivityPrint implements Cloneable, Serializable {
 
     /**
      * Returns the number of times the associated object has been accessed.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * ActivityPrint activity = new ActivityPrint(3600000, 600000);
+     * activity.getAccessCount();   // returns 0 initially
+     * activity.updateAccessCount();
+     * activity.getAccessCount();   // returns 1 after one update
+     * }</pre>
      *
      * @return the access count
      */
@@ -259,6 +301,7 @@ public final class ActivityPrint implements Cloneable, Serializable {
      * <pre>{@code
      * pooledObject.activityPrint().updateAccessCount();
      * }</pre>
+     *
      */
     public void updateAccessCount() {
         ACCESS_COUNT_UPDATER.incrementAndGet(this);

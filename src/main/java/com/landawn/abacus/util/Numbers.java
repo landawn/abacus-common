@@ -104,37 +104,37 @@ import com.landawn.abacus.util.Strings.StrUtil;
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * // Mathematical operations
- * long factorial          = Numbers.factorialToLong(10);         // Returns 3,628,800
- * BigInteger bigFactorial = Numbers.factorialToBigInteger(50);   // Large factorial
- * int binomial            = Numbers.binomial(10, 3);             // Returns 120 (10 choose 3)
- * double mean             = Numbers.mean(1, 2, 3, 4, 5);         // Returns 3.0
+ * long factorial          = Numbers.factorialToLong(10);         // returns 3628800L
+ * BigInteger bigFactorial = Numbers.factorialToBigInteger(50);   // returns 50! as BigInteger
+ * int binomial            = Numbers.binomial(10, 3);             // returns 120
+ * double mean             = Numbers.mean(1, 2, 3, 4, 5);         // returns 3.0
  *
  * // Rounding operations with various modes
- * double rounded   = Numbers.round(3.14159, 2);   // Returns 3.14
- * double roundedUp = Numbers.round(3.14159, 2, RoundingMode.CEILING);   // Returns 3.15
- * float formatted  = Numbers.round(3.14159f, "##.##");   // Format-based rounding
+ * double rounded   = Numbers.round(3.14159, 2);                         // returns 3.14
+ * double roundedUp = Numbers.round(3.14159, 2, RoundingMode.CEILING);   // returns 3.15
+ * float formatted  = Numbers.round(3.14159f, "##.##");                  // returns 3.14f
  *
  * // Type conversions with overflow detection
- * int roundedInt    = Numbers.roundToInt(3.7, RoundingMode.HALF_UP);    // Returns 4
- * long roundedLong  = Numbers.roundToLong(3.7, RoundingMode.HALF_UP);   // Returns 4L
+ * int roundedInt    = Numbers.roundToInt(3.7, RoundingMode.HALF_UP);    // returns 4
+ * long roundedLong  = Numbers.roundToLong(3.7, RoundingMode.HALF_UP);   // returns 4L
  * BigInteger bigInt = Numbers.roundToBigInteger(3.7, RoundingMode.HALF_UP);
  *
  * // Fuzzy comparisons for floating-point numbers
- * boolean equal  = Numbers.fuzzyEquals(3.14159, 3.14160, 0.001);    // Returns true
- * int comparison = Numbers.fuzzyCompare(3.14159, 3.14160, 0.001);   // Returns 0
+ * boolean equal  = Numbers.fuzzyEquals(3.14159, 3.14160, 0.001);    // returns true
+ * int comparison = Numbers.fuzzyCompare(3.14159, 3.14160, 0.001);   // returns 0
  *
  * // Number validation and checking
- * boolean isInteger = Numbers.isMathematicalInteger(3.0);   // Returns true
+ * boolean isInteger = Numbers.isMathematicalInteger(3.0);   // returns true
  *
  * // Hyperbolic functions
- * double asinh = Numbers.asinh(1.0);                      // Inverse hyperbolic sine
- * double acosh = Numbers.acosh(2.0);                      // Inverse hyperbolic cosine
- * double atanh = Numbers.atanh(0.5);                      // Inverse hyperbolic tangent
+ * double asinh = Numbers.asinh(1.0);                      // returns about 0.88137
+ * double acosh = Numbers.acosh(2.0);                      // returns about 1.31696
+ * double atanh = Numbers.atanh(0.5);                      // returns about 0.54931
  *
  * // Working with different number types
- * double doubleMean = Numbers.mean(1.5, 2.5, 3.5);       // Returns 2.5
- * double longMean   = Numbers.mean(1L, 2L, 3L);          // Returns 2.0
- * double intMean    = Numbers.mean(1, 2, 3);             // Returns 2.0
+ * double doubleMean = Numbers.mean(1.5, 2.5, 3.5);       // returns 2.5
+ * double longMean   = Numbers.mean(1L, 2L, 3L);          // returns 2.0
+ * double intMean    = Numbers.mean(1, 2, 3);             // returns 2.0
  * }</pre>
  *
  * <p><b>Rounding Operations:</b>
@@ -241,7 +241,7 @@ import com.landawn.abacus.util.Strings.StrUtil;
  *   <li><b>{@link java.math.RoundingMode}:</b> Standard rounding mode enumeration</li>
  * </ul>
  *
- * <p><b>Usage Examples: Financial Calculations</b>
+ * <p><b>Usage Examples: Financial Calculations</b></p>
  * <pre>{@code
  * // Financial calculation with proper rounding
  * double principal = 10000.0;
@@ -270,13 +270,13 @@ import com.landawn.abacus.util.Strings.StrUtil;
  * String formattedInterest = String.format("$%.2f", totalInterest);
  * }</pre>
  *
- * <p><b>Usage Examples: Scientific Calculations</b>
+ * <p><b>Usage Examples: Scientific Calculations</b></p>
  * <pre>{@code
  * // Hyperbolic function calculations
  * double x           = 2.0;
- * double sinhInverse = Numbers.asinh(x);    // Inverse hyperbolic sine
- * double coshInverse = Numbers.acosh(x);    // Inverse hyperbolic cosine
- * double tanhInverse = Numbers.atanh(0.5);   // Inverse hyperbolic tangent
+ * double sinhInverse = Numbers.asinh(x);    // returns about 1.44364
+ * double coshInverse = Numbers.acosh(x);    // returns about 1.31696
+ * double tanhInverse = Numbers.atanh(0.5);  // returns about 0.54931
  *
  * // Statistical analysis
  * double[] dataset = {1.2, 2.3, 3.1, 4.7, 5.2, 6.1, 7.3, 8.4, 9.1, 10.2};
@@ -285,7 +285,7 @@ import com.landawn.abacus.util.Strings.StrUtil;
  * // Combinatorial calculations
  * int n                        = 20;
  * int k                        = 5;
- * long combinations            = Numbers.binomialToLong(n, k);   // 20 choose 5
+ * long combinations            = Numbers.binomialToLong(n, k);   // returns 15504L
  * BigInteger largeCombinations = Numbers.binomialToBigInteger(100, 50);
  *
  * // Fuzzy comparisons for experimental data
@@ -978,13 +978,12 @@ public final class Numbers {
      * <pre>{@code
      * // Convert a double to an int (throws ArithmeticException if outside int range)
      * Integer result = Numbers.convert(123.45, Integer.class);
-     *
      * // Convert a BigInteger to a long (throws ArithmeticException if too large)
      * Long longValue = Numbers.convert(new BigInteger("9223372036854775807"), Long.class);
      *
      * // Null values return the default value for the target type
-     * Byte byteValue = Numbers.convert(null, Byte.class);       // Returns null
-     * byte primByteValue = Numbers.convert(null, byte.class);   // Returns 0
+     * Byte byteValue = Numbers.convert(null, Byte.class);       // returns null
+     * byte primByteValue = Numbers.convert(null, byte.class);   // returns 0
      * }</pre>
      *
      * @param <T> the target type of the conversion (must extend Number)
@@ -1062,14 +1061,13 @@ public final class Numbers {
      * // Convert a double to an int (throws ArithmeticException if outside int range)
      * Type<Integer> intType = Type.of(Integer.class);
      * Integer result        = Numbers.convert(123.45, intType);
-     *
      * // Convert a BigInteger to a long (throws ArithmeticException if too large)
      * Type<Long> longType = Type.of(Long.class);
      * Long longValue      = Numbers.convert(new BigInteger("9223372036854775807"), longType);
      *
      * // Null values return the default value of the target Type
      * Type<Byte> byteType = Type.of(Byte.class);
-     * Byte byteValue = Numbers.convert(null, byteType);   // Returns Byte's default value (null)
+     * Byte byteValue = Numbers.convert(null, byteType);   // returns null
      * }</pre>
      *
      * @param <T> the target type of the conversion (must extend Number)
@@ -1186,10 +1184,10 @@ public final class Numbers {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Numbers.format(1234, "#,###");       // returns "1,234"
-     * Numbers.format(1234, "0.00");        // returns "1234.00"
-     * Numbers.format(null, "#,###");       // returns "0"
-     * Numbers.format(1234, "$#,###.00");   // returns "$1,234.00"
+     * Numbers.format(1234, "#,###");             // returns "1,234"
+     * Numbers.format(1234, "0.00");              // returns "1234.00"
+     * Numbers.format((Integer) null, "#,###");   // returns "0"
+     * Numbers.format(1234, "$#,###.00");         // returns "$1,234.00"
      * }</pre>
      *
      * @param x the Integer value to be formatted (null will be treated as 0)
@@ -1265,7 +1263,7 @@ public final class Numbers {
      * <pre>{@code
      * Numbers.format(123456789L, "#,###");       // returns "123,456,789"
      * Numbers.format(123456789L, "0.00");        // returns "123456789.00"
-     * Numbers.format(null, "#,###");             // returns "0"
+     * Numbers.format((Long) null, "#,###");      // returns "0"
      * Numbers.format(123456789L, "$#,###.00");   // returns "$123,456,789.00"
      * }</pre>
      *
@@ -1341,11 +1339,11 @@ public final class Numbers {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Numbers.format(12.105f, "0.00");     // returns "12.10"
-     * Numbers.format(12.105f, "#.##");     // returns "12.1"
-     * Numbers.format(null, "0.00");        // returns "0.00"
-     * Numbers.format(0.121f, "#.##%");     // returns "12.1%"
-     * Numbers.format(0.12156f, "#.##%");   // returns "12.16%"
+     * Numbers.format(12.105f, "0.00");      // returns "12.10"
+     * Numbers.format(12.105f, "#.##");      // returns "12.1"
+     * Numbers.format((Float) null, "0.00"); // returns "0.00"
+     * Numbers.format(0.121f, "#.##%");      // returns "12.1%"
+     * Numbers.format(0.12156f, "#.##%");    // returns "12.16%"
      * }</pre>
      *
      * @param x the Float value to be formatted. If {@code null}, it will be treated as 0f.
@@ -1423,11 +1421,11 @@ public final class Numbers {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Numbers.format(12.105, "0.00");     // returns "12.11"
-     * Numbers.format(12.105, "#.##");     // returns "12.11"
-     * Numbers.format(null, "0.00");       // returns "0.00"
-     * Numbers.format(0.121, "#.##%");     // returns "12.1%"
-     * Numbers.format(0.12156, "#.##%");   // returns "12.16%"
+     * Numbers.format(12.105, "0.00");        // returns "12.11"
+     * Numbers.format(12.105, "#.##");        // returns "12.11"
+     * Numbers.format((Double) null, "0.00"); // returns "0.00"
+     * Numbers.format(0.121, "#.##%");        // returns "12.1%"
+     * Numbers.format(0.12156, "#.##%");      // returns "12.16%"
      * }</pre>
      *
      * @param x the Double value to be formatted. If {@code null}, it will be treated as 0d.
@@ -1782,11 +1780,11 @@ public final class Numbers {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Numbers.toByte("12")    = 12
-     * Numbers.toByte("-42")   = -42
-     * Numbers.toByte("127")   = 127
-     * Numbers.toByte(null)    = 0
-     * Numbers.toByte("")      = 0
+     * Numbers.toByte("12");            // returns 12
+     * Numbers.toByte("-42");           // returns -42
+     * Numbers.toByte("127");           // returns 127
+     * Numbers.toByte((String) null);   // returns 0
+     * Numbers.toByte("");              // returns 0
      * }</pre>
      *
      * @param str the string to convert. This can be any instance of String.
@@ -1811,10 +1809,10 @@ public final class Numbers {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Numbers.toByte(Integer.valueOf(42))        = 42
-     * Numbers.toByte("123")                      = 123
-     * Numbers.toByte(null)                       = 0
-     * Numbers.toByte(Byte.valueOf((byte) 100))   = 100
+     * Numbers.toByte((Object) Integer.valueOf(42));        // returns 42
+     * Numbers.toByte((Object) "123");                      // returns 123
+     * Numbers.toByte((Object) null);                       // returns 0
+     * Numbers.toByte((Object) Byte.valueOf((byte) 100));   // returns 100
      * }</pre>
      *
      * @param obj the object to convert. This can be any instance of Object.
@@ -1840,13 +1838,13 @@ public final class Numbers {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Numbers.toByte("12", (byte) 0)    = 12
-     * Numbers.toByte("-42", (byte) 0)   = -42
-     * Numbers.toByte("127", (byte) 0)   = 127
-     * Numbers.toByte(null, (byte) 1)    = 1
-     * Numbers.toByte("", (byte) 1)      = 1
-     * Numbers.toByte("abc", (byte) 0);    // throws NumberFormatException
-     * Numbers.toByte("128", (byte) 0);    // throws NumberFormatException (out of range)
+     * Numbers.toByte("12", (byte) 0);            // returns 12
+     * Numbers.toByte("-42", (byte) 0);           // returns -42
+     * Numbers.toByte("127", (byte) 0);           // returns 127
+     * Numbers.toByte((String) null, (byte) 1);   // returns 1
+     * Numbers.toByte("", (byte) 1);              // returns 1
+     * Numbers.toByte("abc", (byte) 0);           // throws NumberFormatException
+     * Numbers.toByte("128", (byte) 0);           // throws NumberFormatException (out of range)
      * }</pre>
      *
      * @param str the string to convert. This can be any instance of String.
@@ -1889,12 +1887,12 @@ public final class Numbers {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Numbers.toByte(Integer.valueOf(42), (byte) 0)        = 42
-     * Numbers.toByte("123", (byte) 0)                      = 123
-     * Numbers.toByte(null, (byte) 1)                       = 1
-     * Numbers.toByte(Byte.valueOf((byte) 100), (byte) 0)   = 100
-     * Numbers.toByte("", (byte) 5)                         = 5
-     * Numbers.toByte("abc", (byte) 0);                      // throws NumberFormatException
+     * Numbers.toByte((Object) Integer.valueOf(42), (byte) 0);        // returns 42
+     * Numbers.toByte((Object) "123", (byte) 0);                      // returns 123
+     * Numbers.toByte((Object) null, (byte) 1);                       // returns 1
+     * Numbers.toByte((Object) Byte.valueOf((byte) 100), (byte) 0);   // returns 100
+     * Numbers.toByte((Object) "", (byte) 5);                         // returns 5
+     * Numbers.toByte((Object) "abc", (byte) 0);                      // throws NumberFormatException
      * }</pre>
      *
      * @param obj the object to convert. This can be any instance of Object.
@@ -1937,11 +1935,11 @@ public final class Numbers {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Numbers.toShort("1234")    = 1234
-     * Numbers.toShort("-5678")   = -5678
-     * Numbers.toShort("32767")   = 32767
-     * Numbers.toShort(null)      = 0
-     * Numbers.toShort("")        = 0
+     * Numbers.toShort("1234");          // returns 1234
+     * Numbers.toShort("-5678");         // returns -5678
+     * Numbers.toShort("32767");         // returns 32767
+     * Numbers.toShort((String) null);   // returns 0
+     * Numbers.toShort("");              // returns 0
      * }</pre>
      *
      * @param str the string to convert. This can be any instance of String.
@@ -1966,10 +1964,10 @@ public final class Numbers {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Numbers.toShort(Integer.valueOf(1234))          = 1234
-     * Numbers.toShort("5678")                         = 5678
-     * Numbers.toShort(null)                           = 0
-     * Numbers.toShort(Short.valueOf((short) 32767))   = 32767
+     * Numbers.toShort((Object) Integer.valueOf(1234));          // returns 1234
+     * Numbers.toShort((Object) "5678");                         // returns 5678
+     * Numbers.toShort((Object) null);                           // returns 0
+     * Numbers.toShort((Object) Short.valueOf((short) 32767));   // returns 32767
      * }</pre>
      *
      * @param obj the object to convert. This can be any instance of Object.
@@ -1995,13 +1993,13 @@ public final class Numbers {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Numbers.toShort("1234", (short) 0)    = 1234
-     * Numbers.toShort("-5678", (short) 0)   = -5678
-     * Numbers.toShort("32767", (short) 0)   = 32767
-     * Numbers.toShort(null, (short) 1)      = 1
-     * Numbers.toShort("", (short) 1)        = 1
-     * Numbers.toShort("abc", (short) 0);       // throws NumberFormatException
-     * Numbers.toShort("32768", (short) 0);     // throws NumberFormatException (out of range)
+     * Numbers.toShort("1234", (short) 0);          // returns 1234
+     * Numbers.toShort("-5678", (short) 0);         // returns -5678
+     * Numbers.toShort("32767", (short) 0);         // returns 32767
+     * Numbers.toShort((String) null, (short) 1);   // returns 1
+     * Numbers.toShort("", (short) 1);              // returns 1
+     * Numbers.toShort("abc", (short) 0);           // throws NumberFormatException
+     * Numbers.toShort("32768", (short) 0);         // throws NumberFormatException (out of range)
      * }</pre>
      *
      * @param str the string to convert. This can be any instance of String.
@@ -2044,12 +2042,12 @@ public final class Numbers {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Numbers.toShort(Integer.valueOf(1234), (short) 0)          = 1234
-     * Numbers.toShort("5678", (short) 0)                         = 5678
-     * Numbers.toShort(null, (short) 1)                           = 1
-     * Numbers.toShort(Short.valueOf((short) 32767), (short) 0)   = 32767
-     * Numbers.toShort("", (short) 5)                             = 5
-     * Numbers.toShort("abc", (short) 0);                          // throws NumberFormatException
+     * Numbers.toShort((Object) Integer.valueOf(1234), (short) 0);          // returns 1234
+     * Numbers.toShort((Object) "5678", (short) 0);                         // returns 5678
+     * Numbers.toShort((Object) null, (short) 1);                           // returns 1
+     * Numbers.toShort((Object) Short.valueOf((short) 32767), (short) 0);   // returns 32767
+     * Numbers.toShort((Object) "", (short) 5);                             // returns 5
+     * Numbers.toShort((Object) "abc", (short) 0);                          // throws NumberFormatException
      * }</pre>
      *
      * @param obj the object to convert. This can be any instance of Object.
@@ -2092,11 +2090,11 @@ public final class Numbers {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Numbers.toInt("12345")        = 12345
-     * Numbers.toInt("-98765")       = -98765
-     * Numbers.toInt("2147483647")   = 2147483647
-     * Numbers.toInt(null)           = 0
-     * Numbers.toInt("")             = 0
+     * Numbers.toInt("12345");        // returns 12345
+     * Numbers.toInt("-98765");       // returns -98765
+     * Numbers.toInt("2147483647");   // returns 2147483647
+     * Numbers.toInt((String) null);  // returns 0
+     * Numbers.toInt("");             // returns 0
      * }</pre>
      *
      * @param str the string to convert. This can be any instance of String.
@@ -2121,10 +2119,10 @@ public final class Numbers {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Numbers.toInt(Long.valueOf(12345))           = 12345
-     * Numbers.toInt("98765")                       = 98765
-     * Numbers.toInt(null)                          = 0
-     * Numbers.toInt(Integer.valueOf(2147483647))   = 2147483647
+     * Numbers.toInt((Object) Long.valueOf(12345));           // returns 12345
+     * Numbers.toInt((Object) "98765");                       // returns 98765
+     * Numbers.toInt((Object) null);                          // returns 0
+     * Numbers.toInt((Object) Integer.valueOf(2147483647));   // returns 2147483647
      * }</pre>
      *
      * @param obj the object to convert. This can be any instance of Object.
@@ -2150,13 +2148,13 @@ public final class Numbers {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Numbers.toInt("12345", 0)        = 12345
-     * Numbers.toInt("-98765", 0)       = -98765
-     * Numbers.toInt("2147483647", 0)   = 2147483647
-     * Numbers.toInt(null, 1)           = 1
-     * Numbers.toInt("", 1)             = 1
-     * Numbers.toInt("abc", 0);            // throws NumberFormatException
-     * Numbers.toInt("2147483648", 0);     // throws NumberFormatException (out of range)
+     * Numbers.toInt("12345", 0);        // returns 12345
+     * Numbers.toInt("-98765", 0);       // returns -98765
+     * Numbers.toInt("2147483647", 0);   // returns 2147483647
+     * Numbers.toInt((String) null, 1);  // returns 1
+     * Numbers.toInt("", 1);             // returns 1
+     * Numbers.toInt("abc", 0);          // throws NumberFormatException
+     * Numbers.toInt("2147483648", 0);   // throws NumberFormatException (out of range)
      * }</pre>
      *
      * @param str the string to convert. This can be any instance of String.
@@ -2195,12 +2193,12 @@ public final class Numbers {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Numbers.toInt(Long.valueOf(12345), 0)           = 12345
-     * Numbers.toInt("98765", 0)                       = 98765
-     * Numbers.toInt(null, 1)                          = 1
-     * Numbers.toInt(Integer.valueOf(2147483647), 0)   = 2147483647
-     * Numbers.toInt("", 5)                            = 5
-     * Numbers.toInt("abc", 0);                         // throws NumberFormatException
+     * Numbers.toInt((Object) Long.valueOf(12345), 0);           // returns 12345
+     * Numbers.toInt((Object) "98765", 0);                       // returns 98765
+     * Numbers.toInt((Object) null, 1);                          // returns 1
+     * Numbers.toInt((Object) Integer.valueOf(2147483647), 0);   // returns 2147483647
+     * Numbers.toInt((Object) "", 5);                            // returns 5
+     * Numbers.toInt((Object) "abc", 0);                         // throws NumberFormatException
      * }</pre>
      *
      * @param obj the object to convert. This can be any instance of Object.
@@ -2243,11 +2241,11 @@ public final class Numbers {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Numbers.toLong("123456789")             = 123456789L
-     * Numbers.toLong("-987654321")            = -987654321L
-     * Numbers.toLong("9223372036854775807")   = 9223372036854775807L
-     * Numbers.toLong(null)                    = 0L
-     * Numbers.toLong("")                      = 0L
+     * Numbers.toLong("123456789");             // returns 123456789L
+     * Numbers.toLong("-987654321");            // returns -987654321L
+     * Numbers.toLong("9223372036854775807");   // returns 9223372036854775807L
+     * Numbers.toLong((String) null);           // returns 0L
+     * Numbers.toLong("");                      // returns 0L
      * }</pre>
      *
      * @param str the string to convert. This can be any instance of String.
@@ -2272,10 +2270,10 @@ public final class Numbers {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Numbers.toLong(Integer.valueOf(123456))              = 123456L
-     * Numbers.toLong("987654321")                          = 987654321L
-     * Numbers.toLong(null)                                 = 0L
-     * Numbers.toLong(Long.valueOf(9223372036854775807L))   = 9223372036854775807L
+     * Numbers.toLong((Object) Integer.valueOf(123456));              // returns 123456L
+     * Numbers.toLong((Object) "987654321");                          // returns 987654321L
+     * Numbers.toLong((Object) null);                                 // returns 0L
+     * Numbers.toLong((Object) Long.valueOf(9223372036854775807L));   // returns 9223372036854775807L
      * }</pre>
      *
      * @param obj the object to convert. This can be any instance of Object.
@@ -2302,14 +2300,14 @@ public final class Numbers {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Numbers.toLong("123456789", 0L)             = 123456789L
-     * Numbers.toLong("-987654321", 0L)            = -987654321L
-     * Numbers.toLong("9223372036854775807", 0L)   = 9223372036854775807L
-     * Numbers.toLong("123L", 0L)                  = 123L
-     * Numbers.toLong(null, 1L)                    = 1L
-     * Numbers.toLong("", 1L)                      = 1L
-     * Numbers.toLong("abc", 0L);                       // throws NumberFormatException
-     * Numbers.toLong("9223372036854775808", 0L);       // throws NumberFormatException (out of range)
+     * Numbers.toLong("123456789", 0L);             // returns 123456789L
+     * Numbers.toLong("-987654321", 0L);            // returns -987654321L
+     * Numbers.toLong("9223372036854775807", 0L);   // returns 9223372036854775807L
+     * Numbers.toLong("123L", 0L);                  // returns 123L
+     * Numbers.toLong((String) null, 1L);           // returns 1L
+     * Numbers.toLong("", 1L);                      // returns 1L
+     * Numbers.toLong("abc", 0L);                   // throws NumberFormatException
+     * Numbers.toLong("9223372036854775808", 0L);   // throws NumberFormatException (out of range)
      * }</pre>
      *
      * @param str the string to convert. This can be any instance of String.
@@ -2358,12 +2356,12 @@ public final class Numbers {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Numbers.toLong(Integer.valueOf(123456), 0L)              = 123456L
-     * Numbers.toLong("987654321", 0L)                          = 987654321L
-     * Numbers.toLong(null, 1L)                                 = 1L
-     * Numbers.toLong(Long.valueOf(9223372036854775807L), 0L)   = 9223372036854775807L
-     * Numbers.toLong("", 5L)                                   = 5L
-     * Numbers.toLong("abc", 0L);                                // throws NumberFormatException
+     * Numbers.toLong((Object) Integer.valueOf(123456), 0L);              // returns 123456L
+     * Numbers.toLong((Object) "987654321", 0L);                          // returns 987654321L
+     * Numbers.toLong((Object) null, 1L);                                 // returns 1L
+     * Numbers.toLong((Object) Long.valueOf(9223372036854775807L), 0L);   // returns 9223372036854775807L
+     * Numbers.toLong((Object) "", 5L);                                   // returns 5L
+     * Numbers.toLong((Object) "abc", 0L);                                // throws NumberFormatException
      * }</pre>
      *
      * @param obj the object to convert. This can be any instance of Object.
@@ -2416,12 +2414,12 @@ public final class Numbers {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Numbers.toFloat("123.45")    = 123.45f
-     * Numbers.toFloat("3.14159")   = 3.14159f
-     * Numbers.toFloat("-42.5")     = -42.5f
-     * Numbers.toFloat(null)        = 0.0f
-     * Numbers.toFloat("")          = 0.0f
-     * Numbers.toFloat("1.23e10")   = 1.23e10f
+     * Numbers.toFloat("123.45");        // returns 123.45f
+     * Numbers.toFloat("3.14159");       // returns 3.14159f
+     * Numbers.toFloat("-42.5");         // returns -42.5f
+     * Numbers.toFloat((String) null);   // returns 0.0f
+     * Numbers.toFloat("");              // returns 0.0f
+     * Numbers.toFloat("1.23e10");       // returns 1.23e10f
      * }</pre>
      *
      * @param str the string to convert. This can be any instance of String.
@@ -2448,10 +2446,10 @@ public final class Numbers {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Numbers.toFloat(Double.valueOf(123.45))   = 123.45f
-     * Numbers.toFloat("98.76")                  = 98.76f
-     * Numbers.toFloat(null)                     = 0.0f
-     * Numbers.toFloat(Float.valueOf(3.14f))     = 3.14f
+     * Numbers.toFloat((Object) Double.valueOf(123.45));   // returns 123.45f
+     * Numbers.toFloat((Object) "98.76");                  // returns 98.76f
+     * Numbers.toFloat((Object) null);                     // returns 0.0f
+     * Numbers.toFloat((Object) Float.valueOf(3.14f));     // returns 3.14f
      * }</pre>
      *
      * @param obj the object to convert. This can be any instance of Object.
@@ -2475,13 +2473,13 @@ public final class Numbers {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Numbers.toFloat("123.45", 0.0f)    = 123.45f
-     * Numbers.toFloat("3.14159", 0.0f)   = 3.14159f
-     * Numbers.toFloat("-42.5", 0.0f)     = -42.5f
-     * Numbers.toFloat(null, 1.0f)        = 1.0f
-     * Numbers.toFloat("", 1.0f)          = 1.0f
-     * Numbers.toFloat("1.23e10", 0.0f)   = 1.23e10f
-     * Numbers.toFloat("abc", 0.0f);          // throws NumberFormatException
+     * Numbers.toFloat("123.45", 0.0f);        // returns 123.45f
+     * Numbers.toFloat("3.14159", 0.0f);       // returns 3.14159f
+     * Numbers.toFloat("-42.5", 0.0f);         // returns -42.5f
+     * Numbers.toFloat((String) null, 1.0f);   // returns 1.0f
+     * Numbers.toFloat("", 1.0f);              // returns 1.0f
+     * Numbers.toFloat("1.23e10", 0.0f);       // returns 1.23e10f
+     * Numbers.toFloat("abc", 0.0f);           // throws NumberFormatException
      * }</pre>
      *
      * @param str the string to convert. This can be any instance of String.
@@ -2511,12 +2509,12 @@ public final class Numbers {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Numbers.toFloat(Double.valueOf(123.45), 0.0f)   = 123.45f
-     * Numbers.toFloat("98.76", 0.0f)                  = 98.76f
-     * Numbers.toFloat(null, 1.0f)                     = 1.0f
-     * Numbers.toFloat(Float.valueOf(3.14f), 0.0f)     = 3.14f
-     * Numbers.toFloat("", 5.0f)                       = 5.0f
-     * Numbers.toFloat("abc", 0.0f);                    // throws NumberFormatException
+     * Numbers.toFloat((Object) Double.valueOf(123.45), 0.0f);   // returns 123.45f
+     * Numbers.toFloat((Object) "98.76", 0.0f);                  // returns 98.76f
+     * Numbers.toFloat((Object) null, 1.0f);                     // returns 1.0f
+     * Numbers.toFloat((Object) Float.valueOf(3.14f), 0.0f);     // returns 3.14f
+     * Numbers.toFloat((Object) "", 5.0f);                       // returns 5.0f
+     * Numbers.toFloat((Object) "abc", 0.0f);                    // throws NumberFormatException
      * }</pre>
      *
      * @param obj the object to convert. This can be any instance of Object.
@@ -2553,13 +2551,13 @@ public final class Numbers {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Numbers.toDouble("123.45")              = 123.45
-     * Numbers.toDouble("3.141592653589793")   = 3.141592653589793
-     * Numbers.toDouble("-42.5")               = -42.5
-     * Numbers.toDouble(null)                  = 0.0
-     * Numbers.toDouble("")                    = 0.0
-     * Numbers.toDouble("1.23e100")            = 1.23e100
-     * Numbers.toDouble("NaN")                 = NaN
+     * Numbers.toDouble("123.45");              // returns 123.45
+     * Numbers.toDouble("3.141592653589793");   // returns 3.141592653589793
+     * Numbers.toDouble("-42.5");               // returns -42.5
+     * Numbers.toDouble((String) null);         // returns 0.0
+     * Numbers.toDouble("");                    // returns 0.0
+     * Numbers.toDouble("1.23e100");            // returns 1.23e100
+     * Numbers.toDouble("NaN");                 // returns NaN
      * }</pre>
      *
      * @param str the string to convert. This can be any instance of String.
@@ -2586,10 +2584,10 @@ public final class Numbers {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Numbers.toDouble(Integer.valueOf(123))       = 123.0
-     * Numbers.toDouble("456.789")                  = 456.789
-     * Numbers.toDouble(null)                       = 0.0
-     * Numbers.toDouble(Double.valueOf(3.141592))   = 3.141592
+     * Numbers.toDouble((Object) Integer.valueOf(123));       // returns 123.0
+     * Numbers.toDouble((Object) "456.789");                  // returns 456.789
+     * Numbers.toDouble((Object) null);                       // returns 0.0
+     * Numbers.toDouble((Object) Double.valueOf(3.141592));   // returns 3.141592
      * }</pre>
      *
      * @param obj the object to convert. This can be any instance of Object.
@@ -2613,13 +2611,13 @@ public final class Numbers {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Numbers.toDouble("123.45", 0.0)              = 123.45
-     * Numbers.toDouble("3.141592653589793", 0.0)   = 3.141592653589793
-     * Numbers.toDouble("-42.5", 0.0)               = -42.5
-     * Numbers.toDouble(null, 1.0)                  = 1.0
-     * Numbers.toDouble("", 1.0)                    = 1.0
-     * Numbers.toDouble("1.23e100", 0.0)            = 1.23e100
-     * Numbers.toDouble("abc", 0.0);                  // throws NumberFormatException
+     * Numbers.toDouble("123.45", 0.0);              // returns 123.45
+     * Numbers.toDouble("3.141592653589793", 0.0);   // returns 3.141592653589793
+     * Numbers.toDouble("-42.5", 0.0);               // returns -42.5
+     * Numbers.toDouble((String) null, 1.0);         // returns 1.0
+     * Numbers.toDouble("", 1.0);                    // returns 1.0
+     * Numbers.toDouble("1.23e100", 0.0);            // returns 1.23e100
+     * Numbers.toDouble("abc", 0.0);                 // throws NumberFormatException
      * }</pre>
      *
      * @param str the string to convert. This can be any instance of String.
@@ -2649,12 +2647,12 @@ public final class Numbers {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Numbers.toDouble(Integer.valueOf(123), 0.0)       = 123.0
-     * Numbers.toDouble("456.789", 0.0)                  = 456.789
-     * Numbers.toDouble(null, 1.0)                       = 1.0
-     * Numbers.toDouble(Double.valueOf(3.141592), 0.0)   = 3.141592
-     * Numbers.toDouble("", 5.0)                         = 5.0
-     * Numbers.toDouble("abc", 0.0);                      // throws NumberFormatException
+     * Numbers.toDouble((Object) Integer.valueOf(123), 0.0);       // returns 123.0
+     * Numbers.toDouble((Object) "456.789", 0.0);                  // returns 456.789
+     * Numbers.toDouble((Object) null, 1.0);                       // returns 1.0
+     * Numbers.toDouble((Object) Double.valueOf(3.141592), 0.0);   // returns 3.141592
+     * Numbers.toDouble((Object) "", 5.0);                         // returns 5.0
+     * Numbers.toDouble((Object) "abc", 0.0);                      // throws NumberFormatException
      * }</pre>
      *
      * @param obj the object to convert. This can be any instance of Object.
@@ -2690,8 +2688,8 @@ public final class Numbers {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Numbers.toDouble(null)                      = 0.0
-     * Numbers.toDouble(BigDecimal.valueOf(8.5))   = 8.5
+     * Numbers.toDouble((BigDecimal) null);         // returns 0.0
+     * Numbers.toDouble(BigDecimal.valueOf(8.5));   // returns 8.5
      * }</pre>
      *
      * @param value the {@code BigDecimal} to convert, may be {@code null}.
@@ -2708,8 +2706,8 @@ public final class Numbers {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Numbers.toDouble(null, 1.1)                      = 1.1
-     * Numbers.toDouble(BigDecimal.valueOf(8.5), 1.1)   = 8.5
+     * Numbers.toDouble((BigDecimal) null, 1.1);         // returns 1.1
+     * Numbers.toDouble(BigDecimal.valueOf(8.5), 1.1);   // returns 8.5
      * }</pre>
      *
      * @param value the {@code BigDecimal} to convert, may be {@code null}.
@@ -2957,12 +2955,12 @@ public final class Numbers {
      * Integer hex = Numbers.createInteger("0xFF");       // returns 255
      * Integer octal = Numbers.createInteger("010");      // returns 8
      * Integer nullValue = Numbers.createInteger(null);   // returns null
-     * Numbers.createInteger("");                         // NumberFormatException!
-     * Numbers.createInteger("   ");                      // NumberFormatException!
-     * Numbers.createInteger("abc");                      // NumberFormatException!
+     * Numbers.createInteger("");                         // throws NumberFormatException
+     * Numbers.createInteger("   ");                      // throws NumberFormatException
+     * Numbers.createInteger("abc");                      // throws NumberFormatException
      * }</pre>
      *
-     * @param str the string to convert; must not be {@code null} or empty
+     * @param str the string to convert; may be {@code null} (returns {@code null}), but must not be empty
      * @return the Integer value represented by the string, or {@code null} if the input string is {@code null}
      * @throws NumberFormatException if the string is empty or cannot be parsed as a valid integer
      * @see #isConvertibleToNumber(String)
@@ -3000,12 +2998,12 @@ public final class Numbers {
      * Long octal = Numbers.createLong("010");         // returns 8L
      * Long withSuffix = Numbers.createLong("123L");   // returns 123L
      * Long nullValue = Numbers.createLong(null);      // returns null
-     * Numbers.createLong("");                         // NumberFormatException!
-     * Numbers.createLong("   ");                      // NumberFormatException!
-     * Numbers.createLong("abc");                      // NumberFormatException!
+     * Numbers.createLong("");                         // throws NumberFormatException
+     * Numbers.createLong("   ");                      // throws NumberFormatException
+     * Numbers.createLong("abc");                      // throws NumberFormatException
      * }</pre>
      *
-     * @param str the string to convert; must not be {@code null} or empty
+     * @param str the string to convert; may be {@code null} (returns {@code null}), but must not be empty
      * @return the Long value represented by the string, or {@code null} if the input string is {@code null}
      * @throws NumberFormatException if the string is empty or cannot be parsed as a valid long
      * @see #isConvertibleToNumber(String)
@@ -3044,12 +3042,12 @@ public final class Numbers {
      * Float f3 = Numbers.createFloat("NaN");         // returns Float.NaN
      * Float f4 = Numbers.createFloat("Infinity");    // returns Float.POSITIVE_INFINITY
      * Float nullValue = Numbers.createFloat(null);   // returns null
-     * Numbers.createFloat("");                       // NumberFormatException!
-     * Numbers.createFloat("   ");                    // NumberFormatException!
-     * Numbers.createFloat("abc");                    // NumberFormatException!
+     * Numbers.createFloat("");                       // throws NumberFormatException
+     * Numbers.createFloat("   ");                    // throws NumberFormatException
+     * Numbers.createFloat("abc");                    // throws NumberFormatException
      * }</pre>
      *
-     * @param str the string to convert; must not be {@code null} or empty
+     * @param str the string to convert; may be {@code null} (returns {@code null}), but must not be empty
      * @return the Float value represented by the string, or {@code null} if the input string is {@code null}
      * @throws NumberFormatException if the string is empty or cannot be parsed as a valid float
      * @see #isConvertibleToNumber(String)
@@ -3078,12 +3076,12 @@ public final class Numbers {
      * Double d3 = Numbers.createDouble("NaN");         // returns Double.NaN
      * Double d4 = Numbers.createDouble("Infinity");    // returns Double.POSITIVE_INFINITY
      * Double nullValue = Numbers.createDouble(null);   // returns null
-     * Numbers.createDouble("");                        // NumberFormatException!
-     * Numbers.createDouble("   ");                     // NumberFormatException!
-     * Numbers.createDouble("abc");                     // NumberFormatException!
+     * Numbers.createDouble("");                        // throws NumberFormatException
+     * Numbers.createDouble("   ");                     // throws NumberFormatException
+     * Numbers.createDouble("abc");                     // throws NumberFormatException
      * }</pre>
      *
-     * @param str the string to convert; must not be {@code null} or empty
+     * @param str the string to convert; may be {@code null} (returns {@code null}), but must not be empty
      * @return the Double value represented by the string, or {@code null} if the input string is {@code null}
      * @throws NumberFormatException if the string is empty or cannot be parsed as a valid double
      * @see #isConvertibleToNumber(String)
@@ -3114,17 +3112,17 @@ public final class Numbers {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * BigInteger decimal = Numbers.createBigInteger("123456789012345");   // decimal
+     * BigInteger decimal = Numbers.createBigInteger("123456789012345");   // returns 123456789012345
      * BigInteger hex = Numbers.createBigInteger("0xFFFFFFFF");            // returns 4294967295
      * BigInteger octal = Numbers.createBigInteger("0777");                // returns 511
      * BigInteger negative = Numbers.createBigInteger("-0xFF");            // returns -255
      * BigInteger nullValue = Numbers.createBigInteger(null);              // returns null
-     * Numbers.createBigInteger("");                                       // NumberFormatException!
-     * Numbers.createBigInteger("   ");                                    // NumberFormatException!
-     * Numbers.createBigInteger("abc");                                    // NumberFormatException!
+     * Numbers.createBigInteger("");                                       // throws NumberFormatException
+     * Numbers.createBigInteger("   ");                                    // throws NumberFormatException
+     * Numbers.createBigInteger("abc");                                    // throws NumberFormatException
      * }</pre>
      *
-     * @param str the string to convert; must not be {@code null} or empty
+     * @param str the string to convert; may be {@code null} (returns {@code null}), but must not be empty
      * @return the BigInteger value represented by the string, or {@code null} if the input string is {@code null}
      * @throws NumberFormatException if the string is empty or not a valid BigInteger representation
      * @see #isConvertibleToNumber(String)
@@ -3184,16 +3182,16 @@ public final class Numbers {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * BigDecimal bd1 = Numbers.createBigDecimal("123.45");     // exact decimal representation
-     * BigDecimal bd2 = Numbers.createBigDecimal("1.23E+10");   // scientific notation
-     * BigDecimal bd3 = Numbers.createBigDecimal("-0.001");     // negative small number
+     * BigDecimal bd1 = Numbers.createBigDecimal("123.45");     // returns 123.45
+     * BigDecimal bd2 = Numbers.createBigDecimal("1.23E+10");   // returns 1.23E+10
+     * BigDecimal bd3 = Numbers.createBigDecimal("-0.001");     // returns -0.001
      * BigDecimal nullValue = Numbers.createBigDecimal(null);   // returns null
-     * Numbers.createBigDecimal("");                            // NumberFormatException!
-     * Numbers.createBigDecimal("   ");                         // NumberFormatException!
-     * Numbers.createBigDecimal("abc");                         // NumberFormatException!
+     * Numbers.createBigDecimal("");                            // throws NumberFormatException
+     * Numbers.createBigDecimal("   ");                         // throws NumberFormatException
+     * Numbers.createBigDecimal("abc");                         // throws NumberFormatException
      * }</pre>
      *
-     * @param str the string to convert; must not be {@code null} or empty
+     * @param str the string to convert; may be {@code null} (returns {@code null}), but must not be empty
      * @return the BigDecimal value represented by the string, or {@code null} if the input string is {@code null}
      * @throws NumberFormatException if the string is empty or not a valid BigDecimal representation
      * @see #isConvertibleToNumber(String)
@@ -3244,11 +3242,11 @@ public final class Numbers {
      * Number n5 = Numbers.createNumber("0xFF");        // returns Integer (255)
      * Number n6 = Numbers.createNumber("010");         // returns Integer (8, octal)
      * Number nullValue = Numbers.createNumber(null);   // returns null
-     * Numbers.createNumber("");                        // NumberFormatException!
-     * Numbers.createNumber("abc");                     // NumberFormatException!
+     * Numbers.createNumber("");                        // throws NumberFormatException
+     * Numbers.createNumber("abc");                     // throws NumberFormatException
      * }</pre>
      *
-     * @param str the string to convert; must not be {@code null} or empty
+     * @param str the string to convert; may be {@code null} (returns {@code null}), but must not be empty
      * @return the parsed Number value, or {@code null} if the input string is {@code null}
      * @throws NumberFormatException if the string is empty or the value cannot be converted
      * @see #isConvertibleToNumber(String)
@@ -3453,13 +3451,13 @@ public final class Numbers {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Numbers.isDigits("12345")    = true
-     * Numbers.isDigits("0")        = true
-     * Numbers.isDigits("123.45")   = false
-     * Numbers.isDigits("-123")     = false
-     * Numbers.isDigits("abc")      = false
-     * Numbers.isDigits(null)       = false
-     * Numbers.isDigits("")         = false
+     * Numbers.isDigits("12345");    // returns true
+     * Numbers.isDigits("0");        // returns true
+     * Numbers.isDigits("123.45");   // returns false
+     * Numbers.isDigits("-123");     // returns false
+     * Numbers.isDigits("abc");      // returns false
+     * Numbers.isDigits(null);       // returns false
+     * Numbers.isDigits("");         // returns false
      * }</pre>
      *
      * @param str the string to check
@@ -3547,14 +3545,14 @@ public final class Numbers {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Numbers.isNumber("123")       = true
-     * Numbers.isNumber("-123")      = true
-     * Numbers.isNumber("123.45")    = true
-     * Numbers.isNumber("1.23e10")   = true
-     * Numbers.isNumber("0xFF")      = true
-     * Numbers.isNumber("abc")       = false
-     * Numbers.isNumber(null)        = false
-     * Numbers.isNumber("")          = false
+     * Numbers.isNumber("123");       // returns true
+     * Numbers.isNumber("-123");      // returns true
+     * Numbers.isNumber("123.45");    // returns true
+     * Numbers.isNumber("1.23e10");   // returns true
+     * Numbers.isNumber("0xFF");      // returns true
+     * Numbers.isNumber("abc");       // returns false
+     * Numbers.isNumber(null);        // returns false
+     * Numbers.isNumber("");          // returns false
      * }</pre>
      *
      * @param str the string to check
@@ -3579,17 +3577,17 @@ public final class Numbers {
      * or {@code long}). Use {@link Integer#parseInt(String)} or {@link Long#parseLong(String)} for
      * range-validated parsing.</p>
      *
-     * <p>Examples:</p>
-     * <ul>
-     *   <li>{@code isInteger("123")}  → {@code true}</li>
-     *   <li>{@code isInteger("-456")} → {@code true}</li>
-     *   <li>{@code isInteger("+7")}   → {@code true}</li>
-     *   <li>{@code isInteger("0")}    → {@code true}</li>
-     *   <li>{@code isInteger("12.3")} → {@code false} (decimal point not allowed)</li>
-     *   <li>{@code isInteger("abc")}  → {@code false}</li>
-     *   <li>{@code isInteger("")}     → {@code false}</li>
-     *   <li>{@code isInteger(null)}   → {@code false}</li>
-     * </ul>
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Numbers.isInteger("123");    // returns true
+     * Numbers.isInteger("-456");   // returns true
+     * Numbers.isInteger("+7");     // returns true
+     * Numbers.isInteger("0");      // returns true
+     * Numbers.isInteger("12.3");   // returns false (decimal point not allowed)
+     * Numbers.isInteger("abc");    // returns false
+     * Numbers.isInteger("");       // returns false
+     * Numbers.isInteger(null);     // returns false
+     * }</pre>
      *
      * @param str the string to check, may be {@code null}
      * @return {@code true} if the string is a valid integer representation, {@code false} otherwise
@@ -3689,18 +3687,18 @@ public final class Numbers {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Numbers.isConvertibleToNumber("123")       = true
-     * Numbers.isConvertibleToNumber("123.45")    = true
-     * Numbers.isConvertibleToNumber("1.23e10")   = true
-     * Numbers.isConvertibleToNumber("0xFF")      = true   // hexadecimal
-     * Numbers.isConvertibleToNumber("0X1A")      = true   // hexadecimal
-     * Numbers.isConvertibleToNumber("010")       = true   // octal
-     * Numbers.isConvertibleToNumber("09")        = false  // invalid octal (9 not valid in octal)
-     * Numbers.isConvertibleToNumber("123L")      = true   // long type qualifier
-     * Numbers.isConvertibleToNumber("123.45f")   = true   // float type qualifier
-     * Numbers.isConvertibleToNumber("abc")       = false
-     * Numbers.isConvertibleToNumber(null)        = false
-     * Numbers.isConvertibleToNumber("")          = false
+     * Numbers.isConvertibleToNumber("123");       // returns true
+     * Numbers.isConvertibleToNumber("123.45");    // returns true
+     * Numbers.isConvertibleToNumber("1.23e10");   // returns true
+     * Numbers.isConvertibleToNumber("0xFF");      // returns true   (hexadecimal)
+     * Numbers.isConvertibleToNumber("0X1A");      // returns true   (hexadecimal)
+     * Numbers.isConvertibleToNumber("010");       // returns true   (octal)
+     * Numbers.isConvertibleToNumber("09");        // returns false  (invalid octal, 9 not valid in octal)
+     * Numbers.isConvertibleToNumber("123L");      // returns true   (long type qualifier)
+     * Numbers.isConvertibleToNumber("123.45f");   // returns true   (float type qualifier)
+     * Numbers.isConvertibleToNumber("abc");       // returns false
+     * Numbers.isConvertibleToNumber(null);        // returns false
+     * Numbers.isConvertibleToNumber("");          // returns false
      * }</pre>
      *
      * @param str the string to check
@@ -3836,6 +3834,17 @@ public final class Numbers {
      *
      * <p>Note, {@link #createNumber(String)} should return a number for every input resulting in {@code true}.</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Numbers.isCreatable("123");       // returns true
+     * Numbers.isCreatable("123.45");    // returns true
+     * Numbers.isCreatable("0xFF");      // returns true   (hexadecimal)
+     * Numbers.isCreatable("09");        // returns false  (invalid octal)
+     * Numbers.isCreatable("abc");       // returns false
+     * Numbers.isCreatable(null);        // returns false
+     * Numbers.isCreatable("");          // returns false
+     * }</pre>
+     *
      * @param str the string to check
      * @return {@code true} if the string is a correctly formatted number
      * @see #isNumber(String)
@@ -3862,14 +3871,14 @@ public final class Numbers {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Numbers.isParsable("123")       = true
-     * Numbers.isParsable("-123")      = true
-     * Numbers.isParsable("123.45")    = true
-     * Numbers.isParsable("1.23e10")   = false  // scientific notation not supported
-     * Numbers.isParsable("0xFF")      = false  // hexadecimal not supported
-     * Numbers.isParsable("abc")       = false
-     * Numbers.isParsable(null)        = false
-     * Numbers.isParsable("")          = false
+     * Numbers.isParsable("123");       // returns true
+     * Numbers.isParsable("-123");      // returns true
+     * Numbers.isParsable("123.45");    // returns true
+     * Numbers.isParsable("1.23e10");   // returns false  (scientific notation not supported)
+     * Numbers.isParsable("0xFF");      // returns false  (hexadecimal not supported)
+     * Numbers.isParsable("abc");       // returns false
+     * Numbers.isParsable(null);        // returns false
+     * Numbers.isParsable("");          // returns false
      * }</pre>
      *
      * @param str the String to check
@@ -4198,15 +4207,16 @@ public final class Numbers {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Numbers.log2(8, RoundingMode.DOWN)    = 3    // 2^3 = 8
-     * Numbers.log2(16, RoundingMode.DOWN)   = 4    // 2^4 = 16
-     * Numbers.log2(10, RoundingMode.DOWN)          = 3    // floor(log2(10))
-     * Numbers.log2(10, RoundingMode.UP)            = 4    // ceiling(log2(10))
-     * Numbers.log2(10, RoundingMode.CEILING)       = 4
-     * Numbers.log2(10, RoundingMode.FLOOR)         = 3
-     * Numbers.log2(10, RoundingMode.HALF_UP)       = 3    // 10 < 2^3.5 (~11.3), so rounds down
-     * Numbers.log2(16, RoundingMode.UNNECESSARY)   = 4    // exact power of 2
+     * Numbers.log2(8, RoundingMode.DOWN);          // returns 3    (2^3 = 8)
+     * Numbers.log2(16, RoundingMode.DOWN);         // returns 4    (2^4 = 16)
+     * Numbers.log2(10, RoundingMode.DOWN);         // returns 3    (floor(log2(10)))
+     * Numbers.log2(10, RoundingMode.UP);           // returns 4    (ceiling(log2(10)))
+     * Numbers.log2(10, RoundingMode.CEILING);      // returns 4
+     * Numbers.log2(10, RoundingMode.FLOOR);        // returns 3
+     * Numbers.log2(10, RoundingMode.HALF_UP);      // returns 3    (10 < 2^3.5 (~11.3), so rounds down)
+     * Numbers.log2(16, RoundingMode.UNNECESSARY);  // returns 4    (exact power of 2)
      * }</pre>
+     *
      * @param x the integer value to compute the logarithm of, must be positive
      * @param mode the rounding mode to apply
      * @return the base-2 logarithm of the specified value, rounded according to the specified rounding mode
@@ -4218,9 +4228,11 @@ public final class Numbers {
      * @see #log2(double, RoundingMode)
      * @see #log2(BigInteger, RoundingMode)
      * @see RoundingMode
+     * @throws IllegalArgumentException if {@code mode} is {@code null}
      */
     @SuppressFBWarnings("SF_SWITCH_FALLTHROUGH")
     public static int log2(final int x, final RoundingMode mode) {
+        N.checkArgNotNull(mode);
         checkPositive("x", x);
 
         switch (mode) {
@@ -4255,13 +4267,14 @@ public final class Numbers {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Numbers.log2(8L, RoundingMode.DOWN)      = 3    // 2^3 = 8
-     * Numbers.log2(1024L, RoundingMode.DOWN)   = 10   // 2^10 = 1024
-     * Numbers.log2(1000L, RoundingMode.DOWN)              = 9    // floor(log2(1000))
-     * Numbers.log2(1000L, RoundingMode.UP)                = 10   // ceiling(log2(1000))
-     * Numbers.log2(1000L, RoundingMode.HALF_UP)           = 10   // 1000 > 2^9.5 (~724), so rounds up
-     * Numbers.log2(1048576L, RoundingMode.UNNECESSARY)    = 20   // exact power of 2 (2^20)
+     * Numbers.log2(8L, RoundingMode.DOWN);              // returns 3    (2^3 = 8)
+     * Numbers.log2(1024L, RoundingMode.DOWN);           // returns 10   (2^10 = 1024)
+     * Numbers.log2(1000L, RoundingMode.DOWN);           // returns 9    (floor(log2(1000)))
+     * Numbers.log2(1000L, RoundingMode.UP);             // returns 10   (ceiling(log2(1000)))
+     * Numbers.log2(1000L, RoundingMode.HALF_UP);        // returns 10   (1000 > 2^9.5 (~724), so rounds up)
+     * Numbers.log2(1048576L, RoundingMode.UNNECESSARY); // returns 20   (exact power of 2 (2^20))
      * }</pre>
+     *
      * @param x the value to compute the logarithm of, must be positive
      * @param mode the rounding mode to apply
      * @return the base-2 logarithm of x, rounded according to the specified mode
@@ -4273,9 +4286,11 @@ public final class Numbers {
      * @see #log2(double, RoundingMode)
      * @see #log2(BigInteger, RoundingMode)
      * @see RoundingMode
+     * @throws IllegalArgumentException if {@code mode} is {@code null}
      */
     @SuppressFBWarnings("SF_SWITCH_FALLTHROUGH")
     public static int log2(final long x, final RoundingMode mode) {
+        N.checkArgNotNull(mode);
         // TODO(kevinb): remove after this warning is disabled globally
         checkPositive("x", x);
         switch (mode) {
@@ -4328,6 +4343,7 @@ public final class Numbers {
      * double log4 = Numbers.log2(1024.0);   // returns 10.0 (2^10 = 1024)
      * double log5 = Numbers.log2(0.5);      // returns -1.0 (2^-1 = 0.5)
      * }</pre>
+     *
      * @param x the value to compute the logarithm of
      * @return the base-2 logarithm of the specified value
      * @see #log2(int, RoundingMode)
@@ -4349,14 +4365,15 @@ public final class Numbers {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Numbers.log2(8.0, RoundingMode.DOWN)           = 3    // 2^3 = 8
-     * Numbers.log2(10.0, RoundingMode.DOWN)          = 3    // floor(log2(10))
-     * Numbers.log2(10.0, RoundingMode.UP)            = 4    // ceiling(log2(10))
-     * Numbers.log2(10.0, RoundingMode.FLOOR)         = 3
-     * Numbers.log2(10.0, RoundingMode.CEILING)       = 4
-     * Numbers.log2(10.0, RoundingMode.HALF_UP)       = 3
-     * Numbers.log2(16.0, RoundingMode.UNNECESSARY)   = 4    // exact power of 2
+     * Numbers.log2(8.0, RoundingMode.DOWN);          // returns 3    (2^3 = 8)
+     * Numbers.log2(10.0, RoundingMode.DOWN);         // returns 3    (floor(log2(10)))
+     * Numbers.log2(10.0, RoundingMode.UP);           // returns 4    (ceiling(log2(10)))
+     * Numbers.log2(10.0, RoundingMode.FLOOR);        // returns 3
+     * Numbers.log2(10.0, RoundingMode.CEILING);      // returns 4
+     * Numbers.log2(10.0, RoundingMode.HALF_UP);      // returns 3
+     * Numbers.log2(16.0, RoundingMode.UNNECESSARY);  // returns 4    (exact power of 2)
      * }</pre>
+     *
      * @param x the value to compute the logarithm of, must be positive and finite
      * @param mode the rounding mode to apply
      * @return the base-2 logarithm of the specified value, rounded to an int
@@ -4369,9 +4386,11 @@ public final class Numbers {
      * @see #log2(double)
      * @see #log2(BigInteger, RoundingMode)
      * @see RoundingMode
+     * @throws IllegalArgumentException if {@code mode} is {@code null}, or if {@code x} is not positive or not finite
      */
     @SuppressFBWarnings("SF_SWITCH_FALLTHROUGH")
     public static int log2(final double x, final RoundingMode mode) throws IllegalArgumentException {
+        N.checkArgNotNull(mode);
         N.checkArgument(x > 0.0 && isFinite(x), "x must be positive and finite");
         final int exponent = getExponent(x);
         if (!isNormal(x)) {
@@ -4416,18 +4435,19 @@ public final class Numbers {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BigInteger bi1 = BigInteger.valueOf(8);
-     * Numbers.log2(bi1, RoundingMode.DOWN)        = 3    // 2^3 = 8
+     * Numbers.log2(bi1, RoundingMode.DOWN);        // returns 3    (2^3 = 8)
      *
      * BigInteger bi2 = BigInteger.valueOf(1024);
-     * Numbers.log2(bi2, RoundingMode.DOWN)        = 10   // 2^10 = 1024
+     * Numbers.log2(bi2, RoundingMode.DOWN);        // returns 10   (2^10 = 1024)
      *
      * BigInteger bi3 = BigInteger.valueOf(1000);
-     * Numbers.log2(bi3, RoundingMode.DOWN)        = 9    // floor(log2(1000))
-     * Numbers.log2(bi3, RoundingMode.UP)          = 10   // ceiling(log2(1000))
+     * Numbers.log2(bi3, RoundingMode.DOWN);        // returns 9    (floor(log2(1000)))
+     * Numbers.log2(bi3, RoundingMode.UP);          // returns 10   (ceiling(log2(1000)))
      *
      * BigInteger large = new BigInteger("2").pow(100);
-     * Numbers.log2(large, RoundingMode.DOWN)      = 100  // exact power of 2
+     * Numbers.log2(large, RoundingMode.DOWN);      // returns 100  (exact power of 2)
      * }</pre>
+     *
      * @param x the value to compute the logarithm of, must be positive
      * @param mode the rounding mode to apply
      * @return the base-2 logarithm of the specified value, rounded according to the specified rounding mode
@@ -4439,10 +4459,12 @@ public final class Numbers {
      * @see #log2(double)
      * @see #log2(double, RoundingMode)
      * @see RoundingMode
+     * @throws IllegalArgumentException if {@code mode} is {@code null}
      */
     @SuppressFBWarnings("SF_SWITCH_FALLTHROUGH")
     @SuppressWarnings("fallthrough")
     public static int log2(final BigInteger x, final RoundingMode mode) throws IllegalArgumentException {
+        N.checkArgNotNull(mode);
         // TODO(kevinb): remove after this warning is disabled globally
         checkPositive("x", N.checkArgNotNull(x));
         final int logFloor = x.bitLength() - 1;
@@ -4483,13 +4505,14 @@ public final class Numbers {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Numbers.log10(100, RoundingMode.DOWN)    = 2    // 10^2 = 100
-     * Numbers.log10(1000, RoundingMode.DOWN)   = 3    // 10^3 = 1000
-     * Numbers.log10(999, RoundingMode.DOWN)          = 2    // floor(log10(999))
-     * Numbers.log10(999, RoundingMode.UP)            = 3    // ceiling(log10(999))
-     * Numbers.log10(500, RoundingMode.HALF_UP)        = 3    // 500 > 10^2.5 (~316), so rounds up
-     * Numbers.log10(1000, RoundingMode.UNNECESSARY)   = 3    // exact power of 10
+     * Numbers.log10(100, RoundingMode.DOWN);           // returns 2    (10^2 = 100)
+     * Numbers.log10(1000, RoundingMode.DOWN);          // returns 3    (10^3 = 1000)
+     * Numbers.log10(999, RoundingMode.DOWN);           // returns 2    (floor(log10(999)))
+     * Numbers.log10(999, RoundingMode.UP);             // returns 3    (ceiling(log10(999)))
+     * Numbers.log10(500, RoundingMode.HALF_UP);        // returns 3    (500 > 10^2.5 (~316), so rounds up)
+     * Numbers.log10(1000, RoundingMode.UNNECESSARY);   // returns 3    (exact power of 10)
      * }</pre>
+     *
      * @param x the integer value to compute the logarithm of, must be positive
      * @param mode the rounding mode to apply
      * @return the base-10 logarithm of the specified value, rounded according to the specified rounding mode
@@ -4500,9 +4523,11 @@ public final class Numbers {
      * @see #log10(double)
      * @see #log10(BigInteger, RoundingMode)
      * @see RoundingMode
+     * @throws IllegalArgumentException if {@code mode} is {@code null}
      */
     @SuppressFBWarnings("SF_SWITCH_FALLTHROUGH")
     public static int log10(final int x, final RoundingMode mode) {
+        N.checkArgNotNull(mode);
         checkPositive("x", x);
 
         final int logFloor = log10Floor(x);
@@ -4548,12 +4573,13 @@ public final class Numbers {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Numbers.log10(100L, RoundingMode.DOWN)       = 2    // 10^2 = 100
-     * Numbers.log10(1000000L, RoundingMode.DOWN)   = 6    // 10^6 = 1000000
-     * Numbers.log10(999999L, RoundingMode.DOWN)              = 5    // floor(log10(999999))
-     * Numbers.log10(999999L, RoundingMode.UP)                = 6    // ceiling(log10(999999))
-     * Numbers.log10(1000000000L, RoundingMode.UNNECESSARY)   = 9    // exact power of 10 (10^9)
+     * Numbers.log10(100L, RoundingMode.DOWN);               // returns 2    (10^2 = 100)
+     * Numbers.log10(1000000L, RoundingMode.DOWN);           // returns 6    (10^6 = 1000000)
+     * Numbers.log10(999999L, RoundingMode.DOWN);            // returns 5    (floor(log10(999999)))
+     * Numbers.log10(999999L, RoundingMode.UP);              // returns 6    (ceiling(log10(999999)))
+     * Numbers.log10(1000000000L, RoundingMode.UNNECESSARY); // returns 9    (exact power of 10 (10^9))
      * }</pre>
+     *
      * @param x the value to compute the logarithm of, must be positive
      * @param mode the rounding mode to apply
      * @return the base-10 logarithm of the specified value, rounded according to the specified rounding mode
@@ -4564,9 +4590,11 @@ public final class Numbers {
      * @see #log10(double)
      * @see #log10(BigInteger, RoundingMode)
      * @see RoundingMode
+     * @throws IllegalArgumentException if {@code mode} is {@code null}
      */
     @SuppressFBWarnings("SF_SWITCH_FALLTHROUGH")
     public static int log10(final long x, final RoundingMode mode) {
+        N.checkArgNotNull(mode);
         // TODO(kevinb): remove after this warning is disabled globally
         checkPositive("x", x);
 
@@ -4642,17 +4670,18 @@ public final class Numbers {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BigInteger bi1 = BigInteger.valueOf(100);
-     * Numbers.log10(bi1, RoundingMode.DOWN)       = 2    // 10^2 = 100
+     * Numbers.log10(bi1, RoundingMode.DOWN);       // returns 2    (10^2 = 100)
      *
      * BigInteger bi2 = BigInteger.valueOf(1000000);
-     * Numbers.log10(bi2, RoundingMode.DOWN)       = 6    // 10^6 = 1000000
+     * Numbers.log10(bi2, RoundingMode.DOWN);       // returns 6    (10^6 = 1000000)
      *
      * BigInteger bi3 = new BigInteger("1000000000000");
-     * Numbers.log10(bi3, RoundingMode.DOWN)       = 12   // 10^12
+     * Numbers.log10(bi3, RoundingMode.DOWN);       // returns 12   (10^12)
      *
      * BigInteger large = BigInteger.TEN.pow(100);
-     * Numbers.log10(large, RoundingMode.DOWN)     = 100  // exact power of 10
+     * Numbers.log10(large, RoundingMode.DOWN);     // returns 100  (exact power of 10)
      * }</pre>
+     *
      * @param x the value to compute the logarithm of, must be positive
      * @param mode the rounding mode to apply
      * @return the base-10 logarithm of the specified value, rounded according to the specified rounding mode
@@ -4663,9 +4692,11 @@ public final class Numbers {
      * @see #log10(long, RoundingMode)
      * @see #log10(double)
      * @see RoundingMode
+     * @throws IllegalArgumentException if {@code mode} is {@code null}
      */
     @SuppressFBWarnings("SF_SWITCH_FALLTHROUGH")
     public static int log10(final BigInteger x, final RoundingMode mode) {
+        N.checkArgNotNull(mode);
         checkPositive("x", x);
         if (fitsInLong(x)) {
             return log10(x.longValue(), mode);
@@ -4750,15 +4781,15 @@ public final class Numbers {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Numbers.pow(2, 3)    = 8
-     * Numbers.pow(3, 4)    = 81
-     * Numbers.pow(5, 0)    = 1        // any number to power 0 is 1
-     * Numbers.pow(0, 5)    = 0        // 0 to any positive power is 0
-     * Numbers.pow(0, 0)    = 1        // by convention
-     * Numbers.pow(-2, 3)   = -8
-     * Numbers.pow(-2, 4)   = 16
-     * Numbers.pow(10, 9)   = 1000000000
-     * Numbers.pow(10, 10);          // overflows, returns low-order bits
+     * Numbers.pow(2, 3);    // returns 8
+     * Numbers.pow(3, 4);    // returns 81
+     * Numbers.pow(5, 0);    // returns 1          (any number to power 0 is 1)
+     * Numbers.pow(0, 5);    // returns 0          (0 to any positive power is 0)
+     * Numbers.pow(0, 0);    // returns 1          (by convention)
+     * Numbers.pow(-2, 3);   // returns -8
+     * Numbers.pow(-2, 4);   // returns 16
+     * Numbers.pow(10, 9);   // returns 1000000000
+     * Numbers.pow(10, 10);  // returns 1410065408 (overflows, returns low-order bits)
      * }</pre>
      *
      * @param b the base integer
@@ -4815,15 +4846,15 @@ public final class Numbers {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Numbers.pow(2L, 3)     = 8L
-     * Numbers.pow(3L, 4)     = 81L
-     * Numbers.pow(5L, 0)     = 1L        // any number to power 0 is 1
-     * Numbers.pow(0L, 5)     = 0L        // 0 to any positive power is 0
-     * Numbers.pow(0L, 0)     = 1L        // by convention
-     * Numbers.pow(-2L, 3)    = -8L
-     * Numbers.pow(-2L, 4)    = 16L
-     * Numbers.pow(10L, 18)   = 1000000000000000000L
-     * Numbers.pow(10L, 19);           // overflows, returns low-order bits
+     * Numbers.pow(2L, 3);    // returns 8L
+     * Numbers.pow(3L, 4);    // returns 81L
+     * Numbers.pow(5L, 0);    // returns 1L        (any number to power 0 is 1)
+     * Numbers.pow(0L, 5);    // returns 0L        (0 to any positive power is 0)
+     * Numbers.pow(0L, 0);    // returns 1L        (by convention)
+     * Numbers.pow(-2L, 3);   // returns -8L
+     * Numbers.pow(-2L, 4);   // returns 16L
+     * Numbers.pow(10L, 18);  // returns 1000000000000000000L
+     * Numbers.pow(10L, 19);  // returns -8446744073709551616L (overflows, returns low-order bits)
      * }</pre>
      *
      * @param b the base long integer
@@ -4875,12 +4906,13 @@ public final class Numbers {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Numbers.ceilingPowerOfTwo(7L)      = 8     // next power of 2 after 7
-     * Numbers.ceilingPowerOfTwo(8L)      = 8     // 8 is already a power of 2
-     * Numbers.ceilingPowerOfTwo(9L)      = 16    // next power of 2 after 9
-     * Numbers.ceilingPowerOfTwo(100L)    = 128   // 2^7 = 128
-     * Numbers.ceilingPowerOfTwo(1000L)   = 1024  // 2^10 = 1024
+     * Numbers.ceilingPowerOfTwo(7L);      // returns 8     (next power of 2 after 7)
+     * Numbers.ceilingPowerOfTwo(8L);      // returns 8     (8 is already a power of 2)
+     * Numbers.ceilingPowerOfTwo(9L);      // returns 16    (next power of 2 after 9)
+     * Numbers.ceilingPowerOfTwo(100L);    // returns 128   (2^7 = 128)
+     * Numbers.ceilingPowerOfTwo(1000L);   // returns 1024  (2^10 = 1024)
      * }</pre>
+     *
      * @param x the value to compute the ceiling power of two for, must be positive
      * @return the smallest power of two greater than or equal to x
      * @throws IllegalArgumentException if {@code x <= 0}
@@ -4925,10 +4957,10 @@ public final class Numbers {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Numbers.floorPowerOfTwo(100L)   = 64    // 2^6
-     * Numbers.floorPowerOfTwo(128L)   = 128   // already power of 2
-     * Numbers.floorPowerOfTwo(129L)   = 128
-     * Numbers.floorPowerOfTwo(1L)     = 1     // 2^0
+     * Numbers.floorPowerOfTwo(100L);   // returns 64    (2^6)
+     * Numbers.floorPowerOfTwo(128L);   // returns 128   (already power of 2)
+     * Numbers.floorPowerOfTwo(129L);   // returns 128
+     * Numbers.floorPowerOfTwo(1L);     // returns 1     (2^0)
      * }</pre>
      *
      * @param x the value to compute the floor power of two for, must be positive
@@ -4975,14 +5007,14 @@ public final class Numbers {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Numbers.sqrt(9, RoundingMode.DOWN)           = 3    // perfect square
-     * Numbers.sqrt(10, RoundingMode.DOWN)          = 3    // rounds toward zero
-     * Numbers.sqrt(10, RoundingMode.UP)            = 4    // rounds away from zero
-     * Numbers.sqrt(10, RoundingMode.FLOOR)         = 3    // rounds toward negative infinity
-     * Numbers.sqrt(10, RoundingMode.CEILING)       = 4    // rounds toward positive infinity
-     * Numbers.sqrt(10, RoundingMode.HALF_UP)       = 3    // rounds to nearest, ties away from zero
-     * Numbers.sqrt(11, RoundingMode.HALF_UP)       = 3    // 11 is closer to 9 than 16
-     * Numbers.sqrt(16, RoundingMode.UNNECESSARY)   = 4    // exact square root required
+     * Numbers.sqrt(9, RoundingMode.DOWN);          // returns 3    (perfect square)
+     * Numbers.sqrt(10, RoundingMode.DOWN);         // returns 3    (rounds toward zero)
+     * Numbers.sqrt(10, RoundingMode.UP);           // returns 4    (rounds away from zero)
+     * Numbers.sqrt(10, RoundingMode.FLOOR);        // returns 3    (rounds toward negative infinity)
+     * Numbers.sqrt(10, RoundingMode.CEILING);      // returns 4    (rounds toward positive infinity)
+     * Numbers.sqrt(10, RoundingMode.HALF_UP);      // returns 3    (rounds to nearest, ties away from zero)
+     * Numbers.sqrt(11, RoundingMode.HALF_UP);      // returns 3    (11 is closer to 9 than 16)
+     * Numbers.sqrt(16, RoundingMode.UNNECESSARY);  // returns 4    (exact square root required)
      * }</pre>
      *
      * @param x the value to compute the square root of; must be non-negative
@@ -4994,10 +5026,12 @@ public final class Numbers {
      * @see #sqrt(long, RoundingMode)
      * @see #sqrt(BigInteger, RoundingMode)
      * @see RoundingMode
+     * @throws IllegalArgumentException if {@code mode} is {@code null}
      */
     @SuppressFBWarnings("SF_SWITCH_FALLTHROUGH")
     @SuppressWarnings("fallthrough")
     public static int sqrt(final int x, final RoundingMode mode) {
+        N.checkArgNotNull(mode);
         checkNonNegative("x", x);
         final int sqrtFloor = sqrtFloor(x);
         switch (mode) {
@@ -5044,15 +5078,15 @@ public final class Numbers {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Numbers.sqrt(9L, RoundingMode.DOWN)                    = 3L    // perfect square
-     * Numbers.sqrt(10L, RoundingMode.DOWN)                   = 3L    // rounds toward zero
-     * Numbers.sqrt(10L, RoundingMode.UP)                     = 4L    // rounds away from zero
-     * Numbers.sqrt(10L, RoundingMode.FLOOR)                  = 3L    // rounds toward negative infinity
-     * Numbers.sqrt(10L, RoundingMode.CEILING)                = 4L    // rounds toward positive infinity
-     * Numbers.sqrt(10L, RoundingMode.HALF_UP)                = 3L    // rounds to nearest, ties away from zero
-     * Numbers.sqrt(100000000000L, RoundingMode.DOWN)         = 316227L
-     * Numbers.sqrt(100000000000L, RoundingMode.UP)           = 316228L
-     * Numbers.sqrt(10000000000L, RoundingMode.UNNECESSARY)   = 100000L  // exact square root
+     * Numbers.sqrt(9L, RoundingMode.DOWN);                   // returns 3L    (perfect square)
+     * Numbers.sqrt(10L, RoundingMode.DOWN);                  // returns 3L    (rounds toward zero)
+     * Numbers.sqrt(10L, RoundingMode.UP);                    // returns 4L    (rounds away from zero)
+     * Numbers.sqrt(10L, RoundingMode.FLOOR);                 // returns 3L    (rounds toward negative infinity)
+     * Numbers.sqrt(10L, RoundingMode.CEILING);               // returns 4L    (rounds toward positive infinity)
+     * Numbers.sqrt(10L, RoundingMode.HALF_UP);               // returns 3L    (rounds to nearest, ties away from zero)
+     * Numbers.sqrt(100000000000L, RoundingMode.DOWN);        // returns 316227L
+     * Numbers.sqrt(100000000000L, RoundingMode.UP);          // returns 316228L
+     * Numbers.sqrt(10000000000L, RoundingMode.UNNECESSARY);  // returns 100000L  (exact square root)
      * }</pre>
      *
      * @param x the value to compute the square root of; must be non-negative
@@ -5064,8 +5098,10 @@ public final class Numbers {
      * @see #sqrt(int, RoundingMode)
      * @see #sqrt(BigInteger, RoundingMode)
      * @see RoundingMode
+     * @throws IllegalArgumentException if {@code mode} is {@code null}
      */
     public static long sqrt(final long x, final RoundingMode mode) {
+        N.checkArgNotNull(mode);
         checkNonNegative("x", x);
 
         if (fitsInInt(x)) {
@@ -5139,16 +5175,16 @@ public final class Numbers {
      * <pre>{@code
      * BigInteger nine = BigInteger.valueOf(9);
      * BigInteger ten = BigInteger.valueOf(10);
-     * Numbers.sqrt(nine, RoundingMode.DOWN)     = 3      // perfect square
-     * Numbers.sqrt(ten, RoundingMode.DOWN)      = 3      // rounds toward zero
-     * Numbers.sqrt(ten, RoundingMode.UP)        = 4      // rounds away from zero
-     * Numbers.sqrt(ten, RoundingMode.FLOOR)     = 3      // rounds toward negative infinity
-     * Numbers.sqrt(ten, RoundingMode.CEILING)   = 4      // rounds toward positive infinity
-     * Numbers.sqrt(ten, RoundingMode.HALF_UP)   = 3      // rounds to nearest, ties away from zero
+     * Numbers.sqrt(nine, RoundingMode.DOWN);     // returns 3      (perfect square)
+     * Numbers.sqrt(ten, RoundingMode.DOWN);      // returns 3      (rounds toward zero)
+     * Numbers.sqrt(ten, RoundingMode.UP);        // returns 4      (rounds away from zero)
+     * Numbers.sqrt(ten, RoundingMode.FLOOR);     // returns 3      (rounds toward negative infinity)
+     * Numbers.sqrt(ten, RoundingMode.CEILING);   // returns 4      (rounds toward positive infinity)
+     * Numbers.sqrt(ten, RoundingMode.HALF_UP);   // returns 3      (rounds to nearest, ties away from zero)
      *
      * // Large value example
      * BigInteger large = new BigInteger("123456789012345678901234567890");
-     * Numbers.sqrt(large, RoundingMode.DOWN);   // computes sqrt with arbitrary precision
+     * Numbers.sqrt(large, RoundingMode.DOWN);   // returns the rounded-down square root
      * }</pre>
      *
      * @param x the value to compute the square root of; must be non-negative
@@ -5160,10 +5196,12 @@ public final class Numbers {
      * @see RoundingMode
      * @see #sqrt(int, RoundingMode)
      * @see #sqrt(long, RoundingMode)
+     * @throws IllegalArgumentException if {@code mode} is {@code null}
      */
     @SuppressFBWarnings("SF_SWITCH_FALLTHROUGH")
     @SuppressWarnings("fallthrough")
     public static BigInteger sqrt(final BigInteger x, final RoundingMode mode) {
+        N.checkArgNotNull(mode);
         checkNonNegative("x", x);
         if (fitsInLong(x)) {
             return BigInteger.valueOf(sqrt(x.longValue(), mode));
@@ -5251,14 +5289,14 @@ public final class Numbers {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Numbers.divide(7, 3, RoundingMode.DOWN)          = 2   // rounds toward zero
-     * Numbers.divide(7, 3, RoundingMode.UP)            = 3   // rounds away from zero
-     * Numbers.divide(7, 3, RoundingMode.FLOOR)         = 2   // rounds toward negative infinity
-     * Numbers.divide(-7, 3, RoundingMode.FLOOR)        = -3  // rounds toward negative infinity
-     * Numbers.divide(7, 3, RoundingMode.CEILING)       = 3   // rounds toward positive infinity
-     * Numbers.divide(7, 2, RoundingMode.HALF_UP)       = 4   // rounds to nearest, ties away from zero
-     * Numbers.divide(8, 3, RoundingMode.HALF_EVEN)     = 3   // rounds to nearest, ties to even
-     * Numbers.divide(9, 3, RoundingMode.UNNECESSARY)   = 3   // exact division required
+     * Numbers.divide(7, 3, RoundingMode.DOWN);         // returns 2   (rounds toward zero)
+     * Numbers.divide(7, 3, RoundingMode.UP);           // returns 3   (rounds away from zero)
+     * Numbers.divide(7, 3, RoundingMode.FLOOR);        // returns 2   (rounds toward negative infinity)
+     * Numbers.divide(-7, 3, RoundingMode.FLOOR);       // returns -3  (rounds toward negative infinity)
+     * Numbers.divide(7, 3, RoundingMode.CEILING);      // returns 3   (rounds toward positive infinity)
+     * Numbers.divide(7, 2, RoundingMode.HALF_UP);      // returns 4   (rounds to nearest, ties away from zero)
+     * Numbers.divide(8, 3, RoundingMode.HALF_EVEN);    // returns 3   (rounds to nearest, ties to even)
+     * Numbers.divide(9, 3, RoundingMode.UNNECESSARY);  // returns 3   (exact division required)
      * }</pre>
      *
      * @param p the dividend
@@ -5341,14 +5379,14 @@ public final class Numbers {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Numbers.divide(7L, 3L, RoundingMode.DOWN)          = 2L   // rounds toward zero
-     * Numbers.divide(7L, 3L, RoundingMode.UP)            = 3L   // rounds away from zero
-     * Numbers.divide(7L, 3L, RoundingMode.FLOOR)         = 2L   // rounds toward negative infinity
-     * Numbers.divide(-7L, 3L, RoundingMode.FLOOR)        = -3L  // rounds toward negative infinity
-     * Numbers.divide(7L, 3L, RoundingMode.CEILING)       = 3L   // rounds toward positive infinity
-     * Numbers.divide(7L, 2L, RoundingMode.HALF_UP)       = 4L   // rounds to nearest, ties away from zero
-     * Numbers.divide(8L, 3L, RoundingMode.HALF_EVEN)     = 3L   // rounds to nearest, ties to even
-     * Numbers.divide(9L, 3L, RoundingMode.UNNECESSARY)   = 3L   // exact division required
+     * Numbers.divide(7L, 3L, RoundingMode.DOWN);         // returns 2L   (rounds toward zero)
+     * Numbers.divide(7L, 3L, RoundingMode.UP);           // returns 3L   (rounds away from zero)
+     * Numbers.divide(7L, 3L, RoundingMode.FLOOR);        // returns 2L   (rounds toward negative infinity)
+     * Numbers.divide(-7L, 3L, RoundingMode.FLOOR);       // returns -3L  (rounds toward negative infinity)
+     * Numbers.divide(7L, 3L, RoundingMode.CEILING);      // returns 3L   (rounds toward positive infinity)
+     * Numbers.divide(7L, 2L, RoundingMode.HALF_UP);      // returns 4L   (rounds to nearest, ties away from zero)
+     * Numbers.divide(8L, 3L, RoundingMode.HALF_EVEN);    // returns 3L   (rounds to nearest, ties to even)
+     * Numbers.divide(9L, 3L, RoundingMode.UNNECESSARY);  // returns 3L   (exact division required)
      * }</pre>
      *
      * @param p the dividend
@@ -5430,25 +5468,28 @@ public final class Numbers {
      * <pre>{@code
      * BigInteger seven = BigInteger.valueOf(7);
      * BigInteger three = BigInteger.valueOf(3);
-     * Numbers.divide(seven, three, RoundingMode.DOWN)                          = 2   // rounds toward zero
-     * Numbers.divide(seven, three, RoundingMode.UP)                            = 3   // rounds away from zero
-     * Numbers.divide(seven, three, RoundingMode.FLOOR)                         = 2   // rounds toward negative infinity
-     * Numbers.divide(seven, three, RoundingMode.CEILING)                       = 3   // rounds toward positive infinity
-     * Numbers.divide(seven, BigInteger.valueOf(2), RoundingMode.HALF_UP)       = 4   // rounds to nearest
-     * Numbers.divide(BigInteger.valueOf(9), three, RoundingMode.UNNECESSARY)   = 3   // exact division
+     * Numbers.divide(seven, three, RoundingMode.DOWN);                         // returns 2   (rounds toward zero)
+     * Numbers.divide(seven, three, RoundingMode.UP);                           // returns 3   (rounds away from zero)
+     * Numbers.divide(seven, three, RoundingMode.FLOOR);                        // returns 2   (rounds toward negative infinity)
+     * Numbers.divide(seven, three, RoundingMode.CEILING);                      // returns 3   (rounds toward positive infinity)
+     * Numbers.divide(seven, BigInteger.valueOf(2), RoundingMode.HALF_UP);      // returns 4   (rounds to nearest)
+     * Numbers.divide(BigInteger.valueOf(9), three, RoundingMode.UNNECESSARY);  // returns 3   (exact division)
      * }</pre>
      *
      * @param p the dividend
      * @param q the divisor
      * @param mode the rounding mode to apply
      * @return the result of {@code p / q} rounded according to the specified mode as a BigInteger
+     * @throws IllegalArgumentException if {@code mode} is {@code null}
      * @throws ArithmeticException if {@code q} is zero, or if {@code mode == UNNECESSARY} and {@code p}
      *         is not an integer multiple of {@code q}
      * @see RoundingMode
      * @see #divide(int, int, RoundingMode)
      * @see #divide(long, long, RoundingMode)
      */
-    public static BigInteger divide(final BigInteger p, final BigInteger q, final RoundingMode mode) throws ArithmeticException {
+    public static BigInteger divide(final BigInteger p, final BigInteger q, final RoundingMode mode) throws IllegalArgumentException, ArithmeticException {
+        N.checkArgNotNull(mode);
+
         final BigDecimal pDec = new BigDecimal(p);
         final BigDecimal qDec = new BigDecimal(q);
         return pDec.divide(qDec, 0, mode).toBigIntegerExact();
@@ -5460,11 +5501,11 @@ public final class Numbers {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Numbers.mod(7, 4)    = 3
-     * Numbers.mod(-7, 4)   = 1
-     * Numbers.mod(-1, 4)   = 3
-     * Numbers.mod(-8, 4)   = 0
-     * Numbers.mod(8, 4)    = 0
+     * Numbers.mod(7, 4);    // returns 3
+     * Numbers.mod(-7, 4);   // returns 1
+     * Numbers.mod(-1, 4);   // returns 3
+     * Numbers.mod(-8, 4);   // returns 0
+     * Numbers.mod(8, 4);    // returns 0
      * }</pre>
      *
      * @param x the dividend
@@ -5487,11 +5528,11 @@ public final class Numbers {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Numbers.mod(7, 4)    = 3
-     * Numbers.mod(-7, 4)   = 1
-     * Numbers.mod(-1, 4)   = 3
-     * Numbers.mod(-8, 4)   = 0
-     * Numbers.mod(8, 4)    = 0
+     * Numbers.mod(7L, 4);    // returns 3
+     * Numbers.mod(-7L, 4);   // returns 1
+     * Numbers.mod(-1L, 4);   // returns 3
+     * Numbers.mod(-8L, 4);   // returns 0
+     * Numbers.mod(8L, 4);    // returns 0
      * }</pre>
      *
      * @param x the dividend
@@ -5511,11 +5552,11 @@ public final class Numbers {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Numbers.mod(7, 4)    = 3
-     * Numbers.mod(-7, 4)   = 1
-     * Numbers.mod(-1, 4)   = 3
-     * Numbers.mod(-8, 4)   = 0
-     * Numbers.mod(8, 4)    = 0
+     * Numbers.mod(7L, 4L);    // returns 3L
+     * Numbers.mod(-7L, 4L);   // returns 1L
+     * Numbers.mod(-1L, 4L);   // returns 3L
+     * Numbers.mod(-8L, 4L);   // returns 0L
+     * Numbers.mod(8L, 4L);    // returns 0L
      * }</pre>
      *
      * @param x the dividend
@@ -5542,11 +5583,11 @@ public final class Numbers {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Numbers.gcd(12, 8)    = 4
-     * Numbers.gcd(17, 19)   = 1  // coprime numbers
-     * Numbers.gcd(0, 5)     = 5
-     * Numbers.gcd(0, 0)     = 0
-     * Numbers.gcd(-12, 8)   = 4  // handles negatives
+     * Numbers.gcd(12, 8);    // returns 4
+     * Numbers.gcd(17, 19);   // returns 1  (coprime numbers)
+     * Numbers.gcd(0, 5);     // returns 5
+     * Numbers.gcd(0, 0);     // returns 0
+     * Numbers.gcd(-12, 8);   // returns 4  (handles negatives)
      * }</pre>
      *
      * @param a the first integer
@@ -5622,12 +5663,12 @@ public final class Numbers {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Numbers.gcd(12L, 8L)                         = 4L
-     * Numbers.gcd(17L, 19L)                        = 1L  // coprime numbers
-     * Numbers.gcd(0L, 5L)                          = 5L
-     * Numbers.gcd(0L, 0L)                          = 0L
-     * Numbers.gcd(-12L, 8L)                        = 4L  // handles negatives
-     * Numbers.gcd(1000000000000L, 500000000000L)   = 500000000000L
+     * Numbers.gcd(12L, 8L);                         // returns 4L
+     * Numbers.gcd(17L, 19L);                        // returns 1L  (coprime numbers)
+     * Numbers.gcd(0L, 5L);                          // returns 5L
+     * Numbers.gcd(0L, 0L);                          // returns 0L
+     * Numbers.gcd(-12L, 8L);                        // returns 4L  (handles negatives)
+     * Numbers.gcd(1000000000000L, 500000000000L);   // returns 500000000000L
      * }</pre>
      *
      * @param a the first long integer
@@ -5703,11 +5744,11 @@ public final class Numbers {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Numbers.lcm(4, 6)     = 12
-     * Numbers.lcm(3, 7)     = 21  // coprime numbers: lcm equals product
-     * Numbers.lcm(0, 5)     = 0
-     * Numbers.lcm(12, 18)   = 36
-     * Numbers.lcm(-4, 6)    = 12  // handles negatives
+     * Numbers.lcm(4, 6);     // returns 12
+     * Numbers.lcm(3, 7);     // returns 21  (coprime numbers: lcm equals product)
+     * Numbers.lcm(0, 5);     // returns 0
+     * Numbers.lcm(12, 18);   // returns 36
+     * Numbers.lcm(-4, 6);    // returns 12  (handles negatives)
      * }</pre>
      *
      * <p>Special cases:
@@ -5751,12 +5792,12 @@ public final class Numbers {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Numbers.lcm(4L, 6L)                         = 12L
-     * Numbers.lcm(3L, 7L)                         = 21L  // coprime numbers: lcm equals product
-     * Numbers.lcm(0L, 5L)                         = 0L
-     * Numbers.lcm(12L, 18L)                       = 36L
-     * Numbers.lcm(-4L, 6L)                        = 12L  // handles negatives
-     * Numbers.lcm(100000000000L, 150000000000L)   = 300000000000L
+     * Numbers.lcm(4L, 6L);                         // returns 12L
+     * Numbers.lcm(3L, 7L);                         // returns 21L  (coprime numbers: lcm equals product)
+     * Numbers.lcm(0L, 5L);                         // returns 0L
+     * Numbers.lcm(12L, 18L);                       // returns 36L
+     * Numbers.lcm(-4L, 6L);                        // returns 12L  (handles negatives)
+     * Numbers.lcm(100000000000L, 150000000000L);   // returns 300000000000L
      * }</pre>
      *
      * <p>Special cases:
@@ -5975,15 +6016,15 @@ public final class Numbers {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Numbers.powExact(2, 3)    = 8
-     * Numbers.powExact(3, 4)    = 81
-     * Numbers.powExact(5, 0)    = 1
-     * Numbers.powExact(10, 9)   = 1000000000
-     * Numbers.powExact(10, 10);       // throws ArithmeticException (overflow)
-     * Numbers.powExact(2, 31);        // throws ArithmeticException (overflow)
-     * Numbers.powExact(-2, 30) = 1073741824
-     * Numbers.powExact(-2, 31) = Integer.MIN_VALUE   // exactly representable
-     * Numbers.powExact(-2, 32);       // throws ArithmeticException (overflow)
+     * Numbers.powExact(2, 3);    // returns 8
+     * Numbers.powExact(3, 4);    // returns 81
+     * Numbers.powExact(5, 0);    // returns 1
+     * Numbers.powExact(10, 9);   // returns 1000000000
+     * Numbers.powExact(10, 10);  // throws ArithmeticException (overflow)
+     * Numbers.powExact(2, 31);   // throws ArithmeticException (overflow)
+     * Numbers.powExact(-2, 30);  // returns 1073741824
+     * Numbers.powExact(-2, 31);  // returns Integer.MIN_VALUE   (exactly representable)
+     * Numbers.powExact(-2, 32);  // throws ArithmeticException (overflow)
      * }</pre>
      *
      * @param b the base integer
@@ -6041,15 +6082,15 @@ public final class Numbers {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Numbers.powExact(2L, 3)     = 8L
-     * Numbers.powExact(3L, 4)     = 81L
-     * Numbers.powExact(5L, 0)     = 1L
-     * Numbers.powExact(10L, 18)   = 1000000000000000000L
-     * Numbers.powExact(10L, 19);      // throws ArithmeticException (overflow)
-     * Numbers.powExact(2L, 63);       // throws ArithmeticException (overflow)
-     * Numbers.powExact(-2L, 62) = 4611686018427387904L
-     * Numbers.powExact(-2L, 63) = Long.MIN_VALUE   // exactly representable
-     * Numbers.powExact(-2L, 64);      // throws ArithmeticException (overflow)
+     * Numbers.powExact(2L, 3);     // returns 8L
+     * Numbers.powExact(3L, 4);     // returns 81L
+     * Numbers.powExact(5L, 0);     // returns 1L
+     * Numbers.powExact(10L, 18);   // returns 1000000000000000000L
+     * Numbers.powExact(10L, 19);   // throws ArithmeticException (overflow)
+     * Numbers.powExact(2L, 63);    // throws ArithmeticException (overflow)
+     * Numbers.powExact(-2L, 62);   // returns 4611686018427387904L
+     * Numbers.powExact(-2L, 63);   // returns Long.MIN_VALUE   (exactly representable)
+     * Numbers.powExact(-2L, 64);   // throws ArithmeticException (overflow)
      * }</pre>
      *
      * @param b the base long integer
@@ -6109,13 +6150,13 @@ public final class Numbers {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Numbers.saturatedAdd(100, 200)                  = 300
-     * Numbers.saturatedAdd(Integer.MAX_VALUE, 1)      = Integer.MAX_VALUE  // saturates at max
-     * Numbers.saturatedAdd(Integer.MAX_VALUE, 100)    = Integer.MAX_VALUE  // saturates at max
-     * Numbers.saturatedAdd(Integer.MIN_VALUE, -1)     = Integer.MIN_VALUE  // saturates at min
-     * Numbers.saturatedAdd(Integer.MIN_VALUE, -100)   = Integer.MIN_VALUE  // saturates at min
-     * Numbers.saturatedAdd(1000000000, 1000000000)    = 2000000000
-     * Numbers.saturatedAdd(2000000000, 2000000000)    = Integer.MAX_VALUE  // saturates
+     * Numbers.saturatedAdd(100, 200);                  // returns 300
+     * Numbers.saturatedAdd(Integer.MAX_VALUE, 1);      // returns Integer.MAX_VALUE  (saturates at max)
+     * Numbers.saturatedAdd(Integer.MAX_VALUE, 100);    // returns Integer.MAX_VALUE  (saturates at max)
+     * Numbers.saturatedAdd(Integer.MIN_VALUE, -1);     // returns Integer.MIN_VALUE  (saturates at min)
+     * Numbers.saturatedAdd(Integer.MIN_VALUE, -100);   // returns Integer.MIN_VALUE  (saturates at min)
+     * Numbers.saturatedAdd(1000000000, 1000000000);    // returns 2000000000
+     * Numbers.saturatedAdd(2000000000, 2000000000);    // returns Integer.MAX_VALUE  (saturates)
      * }</pre>
      *
      * @param a the first integer
@@ -6137,11 +6178,11 @@ public final class Numbers {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Numbers.saturatedAdd(100L, 200L)              = 300L
-     * Numbers.saturatedAdd(Long.MAX_VALUE, 1L)      = Long.MAX_VALUE  // saturates at max
-     * Numbers.saturatedAdd(Long.MAX_VALUE, 100L)    = Long.MAX_VALUE  // saturates at max
-     * Numbers.saturatedAdd(Long.MIN_VALUE, -1L)     = Long.MIN_VALUE  // saturates at min
-     * Numbers.saturatedAdd(Long.MIN_VALUE, -100L)   = Long.MIN_VALUE  // saturates at min
+     * Numbers.saturatedAdd(100L, 200L);              // returns 300L
+     * Numbers.saturatedAdd(Long.MAX_VALUE, 1L);      // returns Long.MAX_VALUE  (saturates at max)
+     * Numbers.saturatedAdd(Long.MAX_VALUE, 100L);    // returns Long.MAX_VALUE  (saturates at max)
+     * Numbers.saturatedAdd(Long.MIN_VALUE, -1L);     // returns Long.MIN_VALUE  (saturates at min)
+     * Numbers.saturatedAdd(Long.MIN_VALUE, -100L);   // returns Long.MIN_VALUE  (saturates at min)
      * }</pre>
      *
      * @param a the first long integer
@@ -6170,12 +6211,12 @@ public final class Numbers {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Numbers.saturatedSubtract(200, 100)                  = 100
-     * Numbers.saturatedSubtract(Integer.MAX_VALUE, -1)     = Integer.MAX_VALUE  // saturates at max
-     * Numbers.saturatedSubtract(Integer.MAX_VALUE, -100)   = Integer.MAX_VALUE  // saturates at max
-     * Numbers.saturatedSubtract(Integer.MIN_VALUE, 1)      = Integer.MIN_VALUE  // saturates at min
-     * Numbers.saturatedSubtract(Integer.MIN_VALUE, 100)    = Integer.MIN_VALUE  // saturates at min
-     * Numbers.saturatedSubtract(-1000000000, 1500000000)   = Integer.MIN_VALUE  // saturates
+     * Numbers.saturatedSubtract(200, 100);                  // returns 100
+     * Numbers.saturatedSubtract(Integer.MAX_VALUE, -1);     // returns Integer.MAX_VALUE  (saturates at max)
+     * Numbers.saturatedSubtract(Integer.MAX_VALUE, -100);   // returns Integer.MAX_VALUE  (saturates at max)
+     * Numbers.saturatedSubtract(Integer.MIN_VALUE, 1);      // returns Integer.MIN_VALUE  (saturates at min)
+     * Numbers.saturatedSubtract(Integer.MIN_VALUE, 100);    // returns Integer.MIN_VALUE  (saturates at min)
+     * Numbers.saturatedSubtract(-1000000000, 1500000000);   // returns Integer.MIN_VALUE  (saturates)
      * }</pre>
      *
      * @param a the first integer
@@ -6197,11 +6238,11 @@ public final class Numbers {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Numbers.saturatedSubtract(200L, 100L)              = 100L
-     * Numbers.saturatedSubtract(Long.MAX_VALUE, -1L)     = Long.MAX_VALUE  // saturates at max
-     * Numbers.saturatedSubtract(Long.MAX_VALUE, -100L)   = Long.MAX_VALUE  // saturates at max
-     * Numbers.saturatedSubtract(Long.MIN_VALUE, 1L)      = Long.MIN_VALUE  // saturates at min
-     * Numbers.saturatedSubtract(Long.MIN_VALUE, 100L)    = Long.MIN_VALUE  // saturates at min
+     * Numbers.saturatedSubtract(200L, 100L);              // returns 100L
+     * Numbers.saturatedSubtract(Long.MAX_VALUE, -1L);     // returns Long.MAX_VALUE  (saturates at max)
+     * Numbers.saturatedSubtract(Long.MAX_VALUE, -100L);   // returns Long.MAX_VALUE  (saturates at max)
+     * Numbers.saturatedSubtract(Long.MIN_VALUE, 1L);      // returns Long.MIN_VALUE  (saturates at min)
+     * Numbers.saturatedSubtract(Long.MIN_VALUE, 100L);    // returns Long.MIN_VALUE  (saturates at min)
      * }</pre>
      *
      * @param a the first long value
@@ -6230,12 +6271,12 @@ public final class Numbers {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Numbers.saturatedMultiply(100, 200)                = 20000
-     * Numbers.saturatedMultiply(Integer.MAX_VALUE, 2)    = Integer.MAX_VALUE  // saturates at max
-     * Numbers.saturatedMultiply(100000, 100000)          = Integer.MAX_VALUE  // saturates at max
-     * Numbers.saturatedMultiply(Integer.MIN_VALUE, 2)    = Integer.MIN_VALUE  // saturates at min
-     * Numbers.saturatedMultiply(-100000, 100000)         = Integer.MIN_VALUE  // saturates at min
-     * Numbers.saturatedMultiply(Integer.MAX_VALUE, -1)   = -Integer.MAX_VALUE
+     * Numbers.saturatedMultiply(100, 200);                // returns 20000
+     * Numbers.saturatedMultiply(Integer.MAX_VALUE, 2);    // returns Integer.MAX_VALUE  (saturates at max)
+     * Numbers.saturatedMultiply(100000, 100000);          // returns Integer.MAX_VALUE  (saturates at max)
+     * Numbers.saturatedMultiply(Integer.MIN_VALUE, 2);    // returns Integer.MIN_VALUE  (saturates at min)
+     * Numbers.saturatedMultiply(-100000, 100000);         // returns Integer.MIN_VALUE  (saturates at min)
+     * Numbers.saturatedMultiply(Integer.MAX_VALUE, -1);   // returns -Integer.MAX_VALUE
      * }</pre>
      *
      * @param a the first integer
@@ -6257,11 +6298,11 @@ public final class Numbers {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Numbers.saturatedMultiply(100L, 200L)                    = 20000L
-     * Numbers.saturatedMultiply(Long.MAX_VALUE, 2L)            = Long.MAX_VALUE  // saturates at max
-     * Numbers.saturatedMultiply(10000000000L, 10000000000L)    = Long.MAX_VALUE  // saturates at max
-     * Numbers.saturatedMultiply(Long.MIN_VALUE, 2L)            = Long.MIN_VALUE  // saturates at min
-     * Numbers.saturatedMultiply(-10000000000L, 10000000000L)   = Long.MIN_VALUE  // saturates at min
+     * Numbers.saturatedMultiply(100L, 200L);                    // returns 20000L
+     * Numbers.saturatedMultiply(Long.MAX_VALUE, 2L);            // returns Long.MAX_VALUE  (saturates at max)
+     * Numbers.saturatedMultiply(10000000000L, 10000000000L);    // returns Long.MAX_VALUE  (saturates at max)
+     * Numbers.saturatedMultiply(Long.MIN_VALUE, 2L);            // returns Long.MIN_VALUE  (saturates at min)
+     * Numbers.saturatedMultiply(-10000000000L, 10000000000L);   // returns Long.MIN_VALUE  (saturates at min)
      * }</pre>
      *
      * @param a the first long integer
@@ -6301,14 +6342,14 @@ public final class Numbers {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Numbers.saturatedPow(2, 3)     = 8
-     * Numbers.saturatedPow(3, 4)     = 81
-     * Numbers.saturatedPow(10, 9)    = 1000000000
-     * Numbers.saturatedPow(10, 10)   = Integer.MAX_VALUE    // saturates instead of overflowing
-     * Numbers.saturatedPow(2, 31)    = Integer.MAX_VALUE    // saturates at max value
-     * Numbers.saturatedPow(2, 100)   = Integer.MAX_VALUE    // saturates at max value
-     * Numbers.saturatedPow(-2, 31)   = Integer.MIN_VALUE    // saturates at min value (odd exponent)
-     * Numbers.saturatedPow(-2, 32)   = Integer.MAX_VALUE    // saturates at max value (even exponent)
+     * Numbers.saturatedPow(2, 3);     // returns 8
+     * Numbers.saturatedPow(3, 4);     // returns 81
+     * Numbers.saturatedPow(10, 9);    // returns 1000000000
+     * Numbers.saturatedPow(10, 10);   // returns Integer.MAX_VALUE    (saturates instead of overflowing)
+     * Numbers.saturatedPow(2, 31);    // returns Integer.MAX_VALUE    (saturates at max value)
+     * Numbers.saturatedPow(2, 100);   // returns Integer.MAX_VALUE    (saturates at max value)
+     * Numbers.saturatedPow(-2, 31);   // returns Integer.MIN_VALUE    (saturates at min value, odd exponent)
+     * Numbers.saturatedPow(-2, 32);   // returns Integer.MAX_VALUE    (saturates at max value, even exponent)
      * }</pre>
      *
      * @param b the base integer
@@ -6376,14 +6417,14 @@ public final class Numbers {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Numbers.saturatedPow(2L, 3)     = 8L
-     * Numbers.saturatedPow(3L, 4)     = 81L
-     * Numbers.saturatedPow(10L, 18)   = 1000000000000000000L
-     * Numbers.saturatedPow(10L, 19)   = Long.MAX_VALUE      // saturates instead of overflowing
-     * Numbers.saturatedPow(2L, 63)    = Long.MAX_VALUE      // saturates at max value
-     * Numbers.saturatedPow(2L, 100)   = Long.MAX_VALUE      // saturates at max value
-     * Numbers.saturatedPow(-2L, 63)   = Long.MIN_VALUE      // saturates at min value (odd exponent)
-     * Numbers.saturatedPow(-2L, 64)   = Long.MAX_VALUE      // saturates at max value (even exponent)
+     * Numbers.saturatedPow(2L, 3);     // returns 8L
+     * Numbers.saturatedPow(3L, 4);     // returns 81L
+     * Numbers.saturatedPow(10L, 18);   // returns 1000000000000000000L
+     * Numbers.saturatedPow(10L, 19);   // returns Long.MAX_VALUE      (saturates instead of overflowing)
+     * Numbers.saturatedPow(2L, 63);    // returns Long.MAX_VALUE      (saturates at max value)
+     * Numbers.saturatedPow(2L, 100);   // returns Long.MAX_VALUE      (saturates at max value)
+     * Numbers.saturatedPow(-2L, 63);   // returns Long.MIN_VALUE      (saturates at min value, odd exponent)
+     * Numbers.saturatedPow(-2L, 64);   // returns Long.MAX_VALUE      (saturates at max value, even exponent)
      * }</pre>
      *
      * @param b the base long integer
@@ -6451,13 +6492,13 @@ public final class Numbers {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Numbers.saturatedCast(100L)            = 100
-     * Numbers.saturatedCast(2147483647L)     = Integer.MAX_VALUE  // exact fit
-     * Numbers.saturatedCast(2147483648L)     = Integer.MAX_VALUE  // saturates at max
-     * Numbers.saturatedCast(10000000000L)    = Integer.MAX_VALUE  // saturates at max
-     * Numbers.saturatedCast(-2147483648L)    = Integer.MIN_VALUE  // exact fit
-     * Numbers.saturatedCast(-2147483649L)    = Integer.MIN_VALUE  // saturates at min
-     * Numbers.saturatedCast(-10000000000L)   = Integer.MIN_VALUE  // saturates at min
+     * Numbers.saturatedCast(100L);            // returns 100
+     * Numbers.saturatedCast(2147483647L);     // returns Integer.MAX_VALUE  (exact fit)
+     * Numbers.saturatedCast(2147483648L);     // returns Integer.MAX_VALUE  (saturates at max)
+     * Numbers.saturatedCast(10000000000L);    // returns Integer.MAX_VALUE  (saturates at max)
+     * Numbers.saturatedCast(-2147483648L);    // returns Integer.MIN_VALUE  (exact fit)
+     * Numbers.saturatedCast(-2147483649L);    // returns Integer.MIN_VALUE  (saturates at min)
+     * Numbers.saturatedCast(-10000000000L);   // returns Integer.MIN_VALUE  (saturates at min)
      * }</pre>
      *
      * @param value any {@code long} value
@@ -6485,13 +6526,13 @@ public final class Numbers {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Numbers.factorial(0)     = 1
-     * Numbers.factorial(1)     = 1
-     * Numbers.factorial(5)     = 120
-     * Numbers.factorial(10)    = 3628800
-     * Numbers.factorial(12)    = 479001600
-     * Numbers.factorial(13)    = Integer.MAX_VALUE  // overflow, saturates
-     * Numbers.factorial(100)   = Integer.MAX_VALUE  // overflow, saturates
+     * Numbers.factorial(0);     // returns 1
+     * Numbers.factorial(1);     // returns 1
+     * Numbers.factorial(5);     // returns 120
+     * Numbers.factorial(10);    // returns 3628800
+     * Numbers.factorial(12);    // returns 479001600
+     * Numbers.factorial(13);    // returns Integer.MAX_VALUE  (overflow, saturates)
+     * Numbers.factorial(100);   // returns Integer.MAX_VALUE  (overflow, saturates)
      * }</pre>
      *
      * @param n the non-negative integer to compute the factorial of
@@ -6516,14 +6557,14 @@ public final class Numbers {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Numbers.factorialToLong(0)     = 1L
-     * Numbers.factorialToLong(1)     = 1L
-     * Numbers.factorialToLong(5)     = 120L
-     * Numbers.factorialToLong(10)    = 3628800L
-     * Numbers.factorialToLong(15)    = 1307674368000L
-     * Numbers.factorialToLong(20)    = 2432902008176640000L
-     * Numbers.factorialToLong(21)    = Long.MAX_VALUE  // overflow, saturates
-     * Numbers.factorialToLong(100)   = Long.MAX_VALUE  // overflow, saturates
+     * Numbers.factorialToLong(0);     // returns 1L
+     * Numbers.factorialToLong(1);     // returns 1L
+     * Numbers.factorialToLong(5);     // returns 120L
+     * Numbers.factorialToLong(10);    // returns 3628800L
+     * Numbers.factorialToLong(15);    // returns 1307674368000L
+     * Numbers.factorialToLong(20);    // returns 2432902008176640000L
+     * Numbers.factorialToLong(21);    // returns Long.MAX_VALUE  (overflow, saturates)
+     * Numbers.factorialToLong(100);   // returns Long.MAX_VALUE  (overflow, saturates)
      * }</pre>
      *
      * @param n the non-negative integer to compute the factorial of
@@ -6549,14 +6590,14 @@ public final class Numbers {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Numbers.factorialToDouble(0)      = 1.0
-     * Numbers.factorialToDouble(1)      = 1.0
-     * Numbers.factorialToDouble(5)      = 120.0
-     * Numbers.factorialToDouble(10)     = 3628800.0
-     * Numbers.factorialToDouble(20)     = 2.43290200817664E18
-     * Numbers.factorialToDouble(170)    = 7.257415615307999E306
-     * Numbers.factorialToDouble(171)    = Double.POSITIVE_INFINITY  // exceeds Double.MAX_VALUE
-     * Numbers.factorialToDouble(1000)   = Double.POSITIVE_INFINITY  // exceeds Double.MAX_VALUE
+     * Numbers.factorialToDouble(0);      // returns 1.0
+     * Numbers.factorialToDouble(1);      // returns 1.0
+     * Numbers.factorialToDouble(5);      // returns 120.0
+     * Numbers.factorialToDouble(10);     // returns 3628800.0
+     * Numbers.factorialToDouble(20);     // returns 2.43290200817664E18
+     * Numbers.factorialToDouble(170);    // returns 7.257415615307999E306
+     * Numbers.factorialToDouble(171);    // returns Double.POSITIVE_INFINITY  (exceeds Double.MAX_VALUE)
+     * Numbers.factorialToDouble(1000);   // returns Double.POSITIVE_INFINITY  (exceeds Double.MAX_VALUE)
      * }</pre>
      *
      * @param n the non-negative integer to compute the factorial of
@@ -6693,13 +6734,13 @@ public final class Numbers {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Numbers.binomial(5, 0)      = 1      // only one way to choose nothing
-     * Numbers.binomial(5, 1)      = 5      // five ways to choose one item
-     * Numbers.binomial(5, 2)      = 10
-     * Numbers.binomial(5, 3)      = 10
-     * Numbers.binomial(10, 5)     = 252
-     * Numbers.binomial(52, 5)     = 2598960  // poker hands from a deck
-     * Numbers.binomial(100, 50)   = Integer.MAX_VALUE  // overflow, saturates
+     * Numbers.binomial(5, 0);      // returns 1      (only one way to choose nothing)
+     * Numbers.binomial(5, 1);      // returns 5      (five ways to choose one item)
+     * Numbers.binomial(5, 2);      // returns 10
+     * Numbers.binomial(5, 3);      // returns 10
+     * Numbers.binomial(10, 5);     // returns 252
+     * Numbers.binomial(52, 5);     // returns 2598960  (poker hands from a deck)
+     * Numbers.binomial(100, 50);   // returns Integer.MAX_VALUE  (overflow, saturates)
      * }</pre>
      *
      * @param n the total number of items; must be non-negative
@@ -6743,13 +6784,13 @@ public final class Numbers {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Numbers.binomialToLong(5, 0)      = 1L        // only one way to choose nothing
-     * Numbers.binomialToLong(5, 1)      = 5L        // five ways to choose one item
-     * Numbers.binomialToLong(5, 2)      = 10L
-     * Numbers.binomialToLong(10, 5)     = 252L
-     * Numbers.binomialToLong(52, 5)     = 2598960L  // poker hands from a deck
-     * Numbers.binomialToLong(60, 30)    = 118264581564861424L
-     * Numbers.binomialToLong(100, 50)   = Long.MAX_VALUE  // overflow, saturates
+     * Numbers.binomialToLong(5, 0);      // returns 1L        (only one way to choose nothing)
+     * Numbers.binomialToLong(5, 1);      // returns 5L        (five ways to choose one item)
+     * Numbers.binomialToLong(5, 2);      // returns 10L
+     * Numbers.binomialToLong(10, 5);     // returns 252L
+     * Numbers.binomialToLong(52, 5);     // returns 2598960L  (poker hands from a deck)
+     * Numbers.binomialToLong(60, 30);    // returns 118264581564861424L
+     * Numbers.binomialToLong(100, 50);   // returns Long.MAX_VALUE  (overflow, saturates)
      * }</pre>
      *
      * @param n the total number of items; must be non-negative
@@ -6835,7 +6876,7 @@ public final class Numbers {
      * Numbers.binomialToBigInteger(10, 5);       // returns 252
      * Numbers.binomialToBigInteger(52, 5);       // returns 2598960
      * Numbers.binomialToBigInteger(100, 50);     // returns exact value (large number)
-     * Numbers.binomialToBigInteger(1000, 500);   // computes exact value (very large, use cautiously)
+     * Numbers.binomialToBigInteger(1000, 500);   // returns exact value as BigInteger
      * }</pre>
      *
      * @param n the total number of items; must be non-negative
@@ -6904,11 +6945,11 @@ public final class Numbers {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Numbers.mean(10, 20)                                     = 15
-     * Numbers.mean(Integer.MAX_VALUE, Integer.MAX_VALUE)       = Integer.MAX_VALUE  // no overflow
-     * Numbers.mean(Integer.MAX_VALUE, Integer.MAX_VALUE - 1)   = Integer.MAX_VALUE - 1
-     * Numbers.mean(-10, 10)                                    = 0
-     * Numbers.mean(7, 8)                                       = 7  // rounds toward negative infinity
+     * Numbers.mean(10, 20);                                     // returns 15
+     * Numbers.mean(Integer.MAX_VALUE, Integer.MAX_VALUE);       // returns Integer.MAX_VALUE  (no overflow)
+     * Numbers.mean(Integer.MAX_VALUE, Integer.MAX_VALUE - 1);   // returns Integer.MAX_VALUE - 1
+     * Numbers.mean(-10, 10);                                    // returns 0
+     * Numbers.mean(7, 8);                                       // returns 7  (rounds toward negative infinity)
      * }</pre>
      *
      * @param x first value
@@ -6943,11 +6984,11 @@ public final class Numbers {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Numbers.mean(10L, 20L)                             = 15L
-     * Numbers.mean(Long.MAX_VALUE, Long.MAX_VALUE)       = Long.MAX_VALUE  // no overflow
-     * Numbers.mean(Long.MAX_VALUE, Long.MAX_VALUE - 1)   = Long.MAX_VALUE - 1
-     * Numbers.mean(-10L, 10L)                            = 0L
-     * Numbers.mean(7L, 8L)                               = 7L  // rounds toward negative infinity
+     * Numbers.mean(10L, 20L);                             // returns 15L
+     * Numbers.mean(Long.MAX_VALUE, Long.MAX_VALUE);       // returns Long.MAX_VALUE  (no overflow)
+     * Numbers.mean(Long.MAX_VALUE, Long.MAX_VALUE - 1);   // returns Long.MAX_VALUE - 1
+     * Numbers.mean(-10L, 10L);                            // returns 0L
+     * Numbers.mean(7L, 8L);                               // returns 7L  (rounds toward negative infinity)
      * }</pre>
      *
      * @param x first value
@@ -6974,10 +7015,10 @@ public final class Numbers {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Numbers.mean(10.0, 20.0)                           = 15.0
-     * Numbers.mean(1.5, 2.5)                             = 2.0
-     * Numbers.mean(-10.0, 10.0)                          = 0.0
-     * Numbers.mean(Double.MAX_VALUE, Double.MAX_VALUE)   = Double.MAX_VALUE
+     * Numbers.mean(10.0, 20.0);                           // returns 15.0
+     * Numbers.mean(1.5, 2.5);                             // returns 2.0
+     * Numbers.mean(-10.0, 10.0);                          // returns 0.0
+     * Numbers.mean(Double.MAX_VALUE, Double.MAX_VALUE);   // returns Double.MAX_VALUE
      * }</pre>
      *
      * @param x the first double value; must be finite
@@ -7003,10 +7044,10 @@ public final class Numbers {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Numbers.mean(1, 2, 3, 4, 5)   = 3.0
-     * Numbers.mean(10, 20)          = 15.0
-     * Numbers.mean(5)               = 5.0
-     * Numbers.mean(-10, 0, 10)      = 0.0
+     * Numbers.mean(1, 2, 3, 4, 5);          // returns 3.0
+     * Numbers.mean(new int[] {10, 20});     // returns 15.0
+     * Numbers.mean(5);                      // returns 5.0
+     * Numbers.mean(-10, 0, 10);             // returns 0.0
      * }</pre>
      *
      * @param values a nonempty series of values
@@ -7039,10 +7080,10 @@ public final class Numbers {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Numbers.mean(1L, 2L, 3L, 4L, 5L)   = 3.0
-     * Numbers.mean(10L, 20L)             = 15.0
-     * Numbers.mean(5L)                   = 5.0
-     * Numbers.mean(-10L, 0L, 10L)        = 0.0
+     * Numbers.mean(1L, 2L, 3L, 4L, 5L);        // returns 3.0
+     * Numbers.mean(new long[] {10L, 20L});     // returns 15.0
+     * Numbers.mean(5L);                        // returns 5.0
+     * Numbers.mean(-10L, 0L, 10L);             // returns 0.0
      * }</pre>
      *
      * @param values a nonempty series of values, which will be converted to {@code double} values
@@ -7079,9 +7120,9 @@ public final class Numbers {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Numbers.mean(1.0, 2.0, 3.0)      = 2.0
-     * Numbers.mean(10.5, 20.5, 30.0)   = 20.333...
-     * Numbers.mean(5.0)                = 5.0
+     * Numbers.mean(1.0, 2.0, 3.0);      // returns 2.0
+     * Numbers.mean(10.5, 20.5, 30.0);   // returns 20.333... (20.333333333333332)
+     * Numbers.mean(5.0);                // returns 5.0
      * }</pre>
      *
      * @param values a nonempty series of finite double values
@@ -7112,6 +7153,8 @@ public final class Numbers {
     }
 
     static double roundIntermediate(final double x, final RoundingMode mode) {
+        N.checkArgNotNull(mode);
+
         if (!isFinite(x)) {
             throw new ArithmeticException("input is infinite or NaN");
         }
@@ -7177,11 +7220,11 @@ public final class Numbers {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Numbers.round(3.14159f, 2)    = 3.14f
-     * Numbers.round(123.456f, 1)    = 123.5f
-     * Numbers.round(10.0f, 0)       = 10.0f
-     * Numbers.round(2.5f, 0)        = 3.0f
-     * Numbers.round(-3.14159f, 3)   = -3.142f
+     * Numbers.round(3.14159f, 2);    // returns 3.14f
+     * Numbers.round(123.456f, 1);    // returns 123.5f
+     * Numbers.round(10.0f, 0);       // returns 10.0f
+     * Numbers.round(2.5f, 0);        // returns 3.0f
+     * Numbers.round(-3.14159f, 3);   // returns -3.142f
      * }</pre>
      *
      * @param x the float value to be rounded
@@ -7192,7 +7235,7 @@ public final class Numbers {
      * @see #round(double, int)
      * @see Math#round(double)
      */
-    public static float round(final float x, final int scale) {
+    public static float round(final float x, final int scale) throws IllegalArgumentException {
         N.checkArgNotNegative(scale, cs.scale);
 
         if (scale == 0) {
@@ -7208,7 +7251,14 @@ public final class Numbers {
             final long factor = pow(10, scale);
             // Multiply in float precision (preserves the half-tie semantics callers depend on),
             // then widen the float product to double for Math.round so we get a long without int saturation.
-            return ((float) Math.round((double) (x * factor))) / factor; //NOSONAR
+            // Math.round(double)->long still saturates at Long.MAX_VALUE/Long.MIN_VALUE once the scaled
+            // product exceeds the long range, silently returning a value off by orders of magnitude
+            // (e.g. round(1e18f, 6)). Fall back to the BigDecimal path in that case, mirroring the
+            // saturation guard already present in the scale==0 branch.
+            if (Math.abs(x) < 0x1p63f / factor) {
+                return ((float) Math.round((double) (x * factor))) / factor; //NOSONAR
+            }
+            return round(x, scale, RoundingMode.HALF_UP);
         } else {
             return round(x, scale, RoundingMode.HALF_UP);
         }
@@ -7221,12 +7271,12 @@ public final class Numbers {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Numbers.round(3.14159, 2)      = 3.14
-     * Numbers.round(123.456, 1)      = 123.5
-     * Numbers.round(10.0, 0)         = 10.0
-     * Numbers.round(2.5, 0)          = 3.0
-     * Numbers.round(-3.14159, 3)     = -3.142
-     * Numbers.round(1.23456789, 5)   = 1.23457
+     * Numbers.round(3.14159, 2);      // returns 3.14
+     * Numbers.round(123.456, 1);      // returns 123.5
+     * Numbers.round(10.0, 0);         // returns 10.0
+     * Numbers.round(2.5, 0);          // returns 3.0
+     * Numbers.round(-3.14159, 3);     // returns -3.142
+     * Numbers.round(1.23456789, 5);   // returns 1.23457
      * }</pre>
      *
      * @param x the double value to be rounded
@@ -7249,7 +7299,14 @@ public final class Numbers {
             return Math.round(x);
         } else if (scale <= 6) {
             final long factor = pow(10, scale);
-            return ((double) Math.round(x * factor)) / factor; //NOSONAR
+            // Math.round(double)->long saturates at Long.MAX_VALUE/Long.MIN_VALUE once x*factor
+            // exceeds the long range, silently returning a value off by orders of magnitude
+            // (e.g. round(1e17, 2)). Fall back to the BigDecimal path when the scaled product
+            // would overflow, mirroring the saturation guard already present in the scale==0 branch.
+            if (Math.abs(x) < 0x1p63 / factor) {
+                return ((double) Math.round(x * factor)) / factor; //NOSONAR
+            }
+            return round(x, scale, RoundingMode.HALF_UP);
         } else {
             return round(x, scale, RoundingMode.HALF_UP);
         }
@@ -7260,11 +7317,11 @@ public final class Numbers {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Numbers.round(3.14159f, 2, RoundingMode.HALF_UP)   = 3.14f
-     * Numbers.round(2.5f, 0, RoundingMode.HALF_UP)       = 3.0f
-     * Numbers.round(2.5f, 0, RoundingMode.HALF_DOWN)     = 2.0f
-     * Numbers.round(2.5f, 0, RoundingMode.CEILING)       = 3.0f
-     * Numbers.round(-2.5f, 0, RoundingMode.FLOOR)        = -3.0f
+     * Numbers.round(3.14159f, 2, RoundingMode.HALF_UP);   // returns 3.14f
+     * Numbers.round(2.5f, 0, RoundingMode.HALF_UP);       // returns 3.0f
+     * Numbers.round(2.5f, 0, RoundingMode.HALF_DOWN);     // returns 2.0f
+     * Numbers.round(2.5f, 0, RoundingMode.CEILING);       // returns 3.0f
+     * Numbers.round(-2.5f, 0, RoundingMode.FLOOR);        // returns -3.0f
      * }</pre>
      *
      * @param x the float value to be rounded
@@ -7288,11 +7345,11 @@ public final class Numbers {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Numbers.round(3.14159, 2, RoundingMode.HALF_UP)   = 3.14
-     * Numbers.round(2.5, 0, RoundingMode.HALF_UP)       = 3.0
-     * Numbers.round(2.5, 0, RoundingMode.HALF_DOWN)     = 2.0
-     * Numbers.round(2.5, 0, RoundingMode.CEILING)       = 3.0
-     * Numbers.round(-2.5, 0, RoundingMode.FLOOR)        = -3.0
+     * Numbers.round(3.14159, 2, RoundingMode.HALF_UP);   // returns 3.14
+     * Numbers.round(2.5, 0, RoundingMode.HALF_UP);       // returns 3.0
+     * Numbers.round(2.5, 0, RoundingMode.HALF_DOWN);     // returns 2.0
+     * Numbers.round(2.5, 0, RoundingMode.CEILING);       // returns 3.0
+     * Numbers.round(-2.5, 0, RoundingMode.FLOOR);        // returns -3.0
      * }</pre>
      *
      * @param x the double value to be rounded
@@ -7355,10 +7412,10 @@ public final class Numbers {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Numbers.round(3.14159f, "#.##")   = 3.14f
-     * Numbers.round(3.1f, "0.00")       = 3.1f
-     * Numbers.round(123.456f, "#.#")    = 123.5f
-     * Numbers.round(2.5f, "#")          = 2.0f   // DecimalFormat rounds half to even by default
+     * Numbers.round(3.14159f, "#.##");   // returns 3.14f
+     * Numbers.round(3.1f, "0.00");       // returns 3.1f
+     * Numbers.round(123.456f, "#.#");    // returns 123.5f
+     * Numbers.round(2.5f, "#");          // returns 2.0f   (DecimalFormat rounds half to even by default)
      * }</pre>
      *
      * @param x the float value to be rounded
@@ -7386,10 +7443,10 @@ public final class Numbers {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Numbers.round(3.14159, "#.##")   = 3.14
-     * Numbers.round(3.1, "0.00")       = 3.1
-     * Numbers.round(123.456, "#.#")    = 123.5
-     * Numbers.round(2.5, "#")          = 2.0   // DecimalFormat rounds half to even by default
+     * Numbers.round(3.14159, "#.##");   // returns 3.14
+     * Numbers.round(3.1, "0.00");       // returns 3.1
+     * Numbers.round(123.456, "#.#");    // returns 123.5
+     * Numbers.round(2.5, "#");          // returns 2.0   (DecimalFormat rounds half to even by default)
      * }</pre>
      *
      * @param x the double value to be rounded
@@ -7414,11 +7471,11 @@ public final class Numbers {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * DecimalFormat df = new DecimalFormat("#.##");
-     * Numbers.round(3.14159f, df)   = 3.14f
-     * Numbers.round(123.456f, df)   = 123.46f
+     * Numbers.round(3.14159f, df);   // returns 3.14f
+     * Numbers.round(123.456f, df);   // returns 123.46f
      *
      * DecimalFormat df2 = new DecimalFormat("0.000");
-     * Numbers.round(3.1f, df2)      = 3.1f
+     * Numbers.round(3.1f, df2);      // returns 3.1f
      * }</pre>
      *
      * @param x the float value to be rounded
@@ -7451,11 +7508,11 @@ public final class Numbers {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * DecimalFormat df = new DecimalFormat("#.##");
-     * Numbers.round(3.14159, df)   = 3.14
-     * Numbers.round(123.456, df)   = 123.46
+     * Numbers.round(3.14159, df);   // returns 3.14
+     * Numbers.round(123.456, df);   // returns 123.46
      *
      * DecimalFormat df2 = new DecimalFormat("0.000");
-     * Numbers.round(3.1, df2)      = 3.1
+     * Numbers.round(3.1, df2);      // returns 3.1
      * }</pre>
      *
      * @param x the double value to be rounded
@@ -7483,12 +7540,12 @@ public final class Numbers {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Numbers.roundToInt(5.5, RoundingMode.UP)            = 6
-     * Numbers.roundToInt(5.5, RoundingMode.DOWN)          = 5
-     * Numbers.roundToInt(5.5, RoundingMode.HALF_UP)       = 6
-     * Numbers.roundToInt(-5.5, RoundingMode.UP)           = -6
-     * Numbers.roundToInt(-5.5, RoundingMode.DOWN)         = -5
-     * Numbers.roundToInt(5.0, RoundingMode.UNNECESSARY)   = 5  // exact value
+     * Numbers.roundToInt(5.5, RoundingMode.UP);            // returns 6
+     * Numbers.roundToInt(5.5, RoundingMode.DOWN);          // returns 5
+     * Numbers.roundToInt(5.5, RoundingMode.HALF_UP);       // returns 6
+     * Numbers.roundToInt(-5.5, RoundingMode.UP);           // returns -6
+     * Numbers.roundToInt(-5.5, RoundingMode.DOWN);         // returns -5
+     * Numbers.roundToInt(5.0, RoundingMode.UNNECESSARY);   // returns 5  (exact value)
      * }</pre>
      *
      * @param x the value to round
@@ -7506,6 +7563,7 @@ public final class Numbers {
      * @see #roundToLong(double, RoundingMode)
      * @see #roundToBigInteger(double, RoundingMode)
      * @see RoundingMode
+     * @throws IllegalArgumentException if {@code mode} is {@code null}
      */
     public static int roundToInt(final double x, final RoundingMode mode) {
         final double z = roundIntermediate(x, mode);
@@ -7518,12 +7576,12 @@ public final class Numbers {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Numbers.roundToLong(5.5, RoundingMode.UP)            = 6L
-     * Numbers.roundToLong(5.5, RoundingMode.DOWN)          = 5L
-     * Numbers.roundToLong(5.5, RoundingMode.HALF_UP)       = 6L
-     * Numbers.roundToLong(-5.5, RoundingMode.UP)           = -6L
-     * Numbers.roundToLong(-5.5, RoundingMode.DOWN)         = -5L
-     * Numbers.roundToLong(5.0, RoundingMode.UNNECESSARY)   = 5L  // exact value
+     * Numbers.roundToLong(5.5, RoundingMode.UP);            // returns 6L
+     * Numbers.roundToLong(5.5, RoundingMode.DOWN);          // returns 5L
+     * Numbers.roundToLong(5.5, RoundingMode.HALF_UP);       // returns 6L
+     * Numbers.roundToLong(-5.5, RoundingMode.UP);           // returns -6L
+     * Numbers.roundToLong(-5.5, RoundingMode.DOWN);         // returns -5L
+     * Numbers.roundToLong(5.0, RoundingMode.UNNECESSARY);   // returns 5L  (exact value)
      * }</pre>
      *
      * @param x the value to round
@@ -7541,6 +7599,7 @@ public final class Numbers {
      * @see #roundToInt(double, RoundingMode)
      * @see #roundToBigInteger(double, RoundingMode)
      * @see RoundingMode
+     * @throws IllegalArgumentException if {@code mode} is {@code null}
      */
     public static long roundToLong(final double x, final RoundingMode mode) {
         final double z = roundIntermediate(x, mode);
@@ -7553,12 +7612,12 @@ public final class Numbers {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Numbers.roundToBigInteger(5.5, RoundingMode.UP)           = BigInteger.valueOf(6)
-     * Numbers.roundToBigInteger(5.5, RoundingMode.DOWN)         = BigInteger.valueOf(5)
-     * Numbers.roundToBigInteger(5.5, RoundingMode.HALF_UP)      = BigInteger.valueOf(6)
-     * Numbers.roundToBigInteger(-5.5, RoundingMode.UP)          = BigInteger.valueOf(-6)
-     * Numbers.roundToBigInteger(5.0, RoundingMode.UNNECESSARY)  = BigInteger.valueOf(5)
-     * Numbers.roundToBigInteger(1e20, RoundingMode.DOWN);       // returns a BigInteger for large values
+     * Numbers.roundToBigInteger(5.5, RoundingMode.UP);           // returns BigInteger.valueOf(6)
+     * Numbers.roundToBigInteger(5.5, RoundingMode.DOWN);         // returns BigInteger.valueOf(5)
+     * Numbers.roundToBigInteger(5.5, RoundingMode.HALF_UP);      // returns BigInteger.valueOf(6)
+     * Numbers.roundToBigInteger(-5.5, RoundingMode.UP);          // returns BigInteger.valueOf(-6)
+     * Numbers.roundToBigInteger(5.0, RoundingMode.UNNECESSARY);  // returns BigInteger.valueOf(5)
+     * Numbers.roundToBigInteger(1e20, RoundingMode.DOWN);        // returns a BigInteger for large values
      * }</pre>
      *
      * @param x the value to round
@@ -7573,6 +7632,7 @@ public final class Numbers {
      * @see #roundToInt(double, RoundingMode)
      * @see #roundToLong(double, RoundingMode)
      * @see RoundingMode
+     * @throws IllegalArgumentException if {@code mode} is {@code null}
      */
     public static BigInteger roundToBigInteger(double x, final RoundingMode mode) {
         // #roundIntermediate, java.lang.Math.getExponent, com.google.common.math.DoubleUtils
@@ -7599,11 +7659,8 @@ public final class Numbers {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * // Returns true, the values are within tolerance
-     * boolean result = Numbers.fuzzyEquals(1.0001f, 1.0002f, 0.001f);
-     *
-     * // Returns false, the values exceed the tolerance
-     * boolean result = Numbers.fuzzyEquals(1.0f, 1.1f, 0.01f);
+     * Numbers.fuzzyEquals(1.0001f, 1.0002f, 0.001f);   // returns true  (within tolerance)
+     * Numbers.fuzzyEquals(1.0f, 1.1f, 0.01f);          // returns false (exceeds tolerance)
      * }</pre>
      *
      * @param a the first float value to compare
@@ -7650,6 +7707,14 @@ public final class Numbers {
      * equivalence relation and <em>not</em> suitable for use in {@link Object#equals}
      * implementations.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Numbers.fuzzyEquals(1.0001, 1.0002, 0.001);         // returns true  (within tolerance)
+     * Numbers.fuzzyEquals(1.0, 1.1, 0.01);                // returns false (exceeds tolerance)
+     * Numbers.fuzzyEquals(0.0, -0.0, 0.0);                // returns true  (positive and negative zero are equal)
+     * Numbers.fuzzyEquals(Double.NaN, Double.NaN, 0.1);   // returns true  (all NaNs are fuzzily equal)
+     * }</pre>
+     *
      * @param a the first double value to compare
      * @param b the second double value to compare
      * @param tolerance the maximum absolute difference allowed between the two values to consider them equal; must be non-negative
@@ -7684,10 +7749,10 @@ public final class Numbers {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Numbers.fuzzyCompare(1.0f, 1.0001f, 0.001f)        = 0   // fuzzily equal
-     * Numbers.fuzzyCompare(1.0f, 2.0f, 0.1f)             = -1  // 1.0 is less than 2.0
-     * Numbers.fuzzyCompare(2.0f, 1.0f, 0.1f)             = 1   // 2.0 is greater than 1.0
-     * Numbers.fuzzyCompare(Float.NaN, Float.NaN, 0.1f)   = 0   // NaN values are equal
+     * Numbers.fuzzyCompare(1.0f, 1.0001f, 0.001f);        // returns 0   (fuzzily equal)
+     * Numbers.fuzzyCompare(1.0f, 2.0f, 0.1f);             // returns -1  (1.0 is less than 2.0)
+     * Numbers.fuzzyCompare(2.0f, 1.0f, 0.1f);             // returns 1   (2.0 is greater than 1.0)
+     * Numbers.fuzzyCompare(Float.NaN, Float.NaN, 0.1f);   // returns 0   (NaN values are equal)
      * }</pre>
      *
      * @param a the first float value to compare
@@ -7724,10 +7789,10 @@ public final class Numbers {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Numbers.fuzzyCompare(1.0, 1.0001, 0.001)            = 0   // fuzzily equal
-     * Numbers.fuzzyCompare(1.0, 2.0, 0.1)                 = -1  // 1.0 is less than 2.0
-     * Numbers.fuzzyCompare(2.0, 1.0, 0.1)                 = 1   // 2.0 is greater than 1.0
-     * Numbers.fuzzyCompare(Double.NaN, Double.NaN, 0.1)   = 0   // NaN values are equal
+     * Numbers.fuzzyCompare(1.0, 1.0001, 0.001);            // returns 0   (fuzzily equal)
+     * Numbers.fuzzyCompare(1.0, 2.0, 0.1);                 // returns -1  (1.0 is less than 2.0)
+     * Numbers.fuzzyCompare(2.0, 1.0, 0.1);                 // returns 1   (2.0 is greater than 1.0)
+     * Numbers.fuzzyCompare(Double.NaN, Double.NaN, 0.1);   // returns 0   (NaN values are equal)
      * }</pre>
      *
      * @param a the first double value to compare
@@ -7759,12 +7824,12 @@ public final class Numbers {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Numbers.isMathematicalInteger(5.0)                        = true
-     * Numbers.isMathematicalInteger(-3.0)                       = true
-     * Numbers.isMathematicalInteger(0.0)                        = true
-     * Numbers.isMathematicalInteger(5.5)                        = false
-     * Numbers.isMathematicalInteger(Double.NaN)                 = false
-     * Numbers.isMathematicalInteger(Double.POSITIVE_INFINITY)   = false
+     * Numbers.isMathematicalInteger(5.0);                        // returns true
+     * Numbers.isMathematicalInteger(-3.0);                       // returns true
+     * Numbers.isMathematicalInteger(0.0);                        // returns true
+     * Numbers.isMathematicalInteger(5.5);                        // returns false
+     * Numbers.isMathematicalInteger(Double.NaN);                 // returns false
+     * Numbers.isMathematicalInteger(Double.POSITIVE_INFINITY);   // returns false
      * }</pre>
      *
      * @param x the value to check
@@ -8011,10 +8076,10 @@ public final class Numbers {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Numbers.asinh(0.0) = 0.0
-     * Numbers.asinh(1.0) ≈ 0.88137
-     * Numbers.asinh(-1.0) ≈ -0.88137
-     * Numbers.asinh(10.0) ≈ 2.99822
+     * Numbers.asinh(0.0);    // returns 0.0
+     * Numbers.asinh(1.0);    // returns ~0.88137
+     * Numbers.asinh(-1.0);   // returns ~-0.88137
+     * Numbers.asinh(10.0);   // returns ~2.99822
      * }</pre>
      *
      * @param a the number on which to compute the inverse hyperbolic sine
@@ -8069,10 +8134,10 @@ public final class Numbers {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Numbers.acosh(1.0) = 0.0
-     * Numbers.acosh(2.0) ≈ 1.31696
-     * Numbers.acosh(10.0) ≈ 2.99322
-     * Numbers.acosh(0.5);   // NaN (outside domain)
+     * Numbers.acosh(1.0);    // returns 0.0
+     * Numbers.acosh(2.0);    // returns ~1.31696
+     * Numbers.acosh(10.0);   // returns ~2.99322
+     * Numbers.acosh(0.5);    // returns NaN (outside domain)
      * }</pre>
      *
      * @param a the number on which to compute the inverse hyperbolic cosine; must be &gt;= 1
@@ -8105,12 +8170,12 @@ public final class Numbers {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Numbers.atanh(0.0) = 0.0
-     * Numbers.atanh(0.5) ≈ 0.54931
-     * Numbers.atanh(-0.5) ≈ -0.54931
-     * Numbers.atanh(0.9) ≈ 1.47222
-     * Numbers.atanh(1.0);   // ±∞
-     * Numbers.atanh(1.5);   // NaN (outside domain)
+     * Numbers.atanh(0.0);    // returns 0.0
+     * Numbers.atanh(0.5);    // returns ~0.54931
+     * Numbers.atanh(-0.5);   // returns ~-0.54931
+     * Numbers.atanh(0.9);    // returns ~1.47222
+     * Numbers.atanh(1.0);    // returns Double.POSITIVE_INFINITY
+     * Numbers.atanh(1.5);    // returns NaN (outside domain)
      * }</pre>
      *
      * @param a the number on which to compute the inverse hyperbolic tangent; should be in (-1, 1)

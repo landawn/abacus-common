@@ -455,6 +455,11 @@ public class ISO8601UtilTest extends TestBase {
         assertThrows(Exception.class, () -> ISO8601Util.parse("2023-12-25T10:30:45X"));
     }
 
+    @Test
+    public void testParse_InvalidDateOnlyIsRejected() {
+        assertThrows(Exception.class, () -> ISO8601Util.parse("2023-02-30"));
+    }
+
     // ===== Constants =====
 
     @Test

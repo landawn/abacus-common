@@ -91,7 +91,7 @@ import com.landawn.abacus.util.TypeReference;
  * // Basic type operations
  * Type<String> stringType = Type.of(String.class);
  * String value = stringType.valueOf("Hello");   // Parse from string
- * String repr = stringType.stringOf(value);   // Convert to string
+ * String repr = stringType.stringOf(value);     // Convert to string
  *
  * // Generic type handling
  * Type<List<Integer>> listType = Type.of(new TypeReference<List<Integer>>(){});
@@ -100,11 +100,11 @@ import com.landawn.abacus.util.TypeReference;
  * // Database operations
  * Type<Date> dateType = Type.of(Date.class);
  * Date date = dateType.get(resultSet, "created_date");   // Get from ResultSet
- * dateType.set(preparedStmt, 1, date);   // Set parameter
+ * dateType.set(preparedStmt, 1, date);                   // Set parameter
  *
  * // Collection/Array conversions
  * Type<int[]> arrayType = Type.of(int[].class);
- * int[] array = arrayType.collectionToArray(Arrays.asList(1, 2, 3));   // Collection to array
+ * int[] array = arrayType.collectionToArray(Arrays.asList(1, 2, 3));                // Collection to array
  * Collection<Integer> list = arrayType.arrayToCollection(array, ArrayList.class);   // Array to collection
  *
  * // Type checking and metadata
@@ -114,7 +114,7 @@ import com.landawn.abacus.util.TypeReference;
  * }
  * if (type.isSerializable()) {
  *     // Direct serialization possible
- *     type.writeCharacter(writer, value, config);
+ *     type.serializeTo(writer, value, config);
  * }
  * }</pre>
  *
@@ -1188,8 +1188,17 @@ public interface Type<T> {
      * Converts a value of this type to its string representation.
      * This is the standard way to serialize values as strings.
      *
+     * <p>Unlike {@link Object#toString()}, the returned string is a <i>formatted</i>, serializable
+     * representation (for example, a JSON-format string for collections, maps, arrays and beans) that is
+     * designed to be parsed back into an equivalent value via {@link #valueOf(String)}; that is, {@code stringOf}
+     * and {@code valueOf} are inverse operations that round-trip, so {@code type.valueOf(type.stringOf(x))} should
+     * yield a value equal to the original {@code x}. By contrast, {@code toString()} only produces a human-readable
+     * representation that generally cannot be converted back into the original object.</p>
+     *
      * @param x the value to convert; may be {@code null}
-     * @return the string representation, or {@code null} if {@code x} is {@code null}
+     * @return the string representation (round-trippable via {@link #valueOf(String)}), or {@code null} if {@code x} is {@code null}
+     * @see #valueOf(String)
+     * @see #valueOf(Object)
      */
     String stringOf(T x);
 
@@ -1197,8 +1206,16 @@ public interface Type<T> {
      * Parses a string to create a value of this type.
      * This is the standard way to deserialize values from strings.
      *
+     * <p>This method is the inverse of {@code stringOf}: it parses the formatted string produced by {@code stringOf}
+     * (for example, a JSON-format string for collections, maps, arrays and beans) back into a value of this type. The
+     * two methods are designed to round-trip, so {@code type.valueOf(type.stringOf(x))} should yield a value equal to
+     * the original {@code x}. This generally does not hold for strings produced by {@link Object#toString()}, which are
+     * not guaranteed to be parseable back into the original object.</p> 
+     *
      * @param str the string to parse; may be {@code null} or empty
      * @return the parsed value, or {@code null} (or the type's default) when {@code str} is {@code null} or empty
+     * @see #valueOf(Object)
+     * @see #stringOf(Object)
      */
     T valueOf(String str);
 
@@ -1209,6 +1226,8 @@ public interface Type<T> {
      *
      * @param obj the object to convert; may be {@code null}
      * @return the converted value, or {@code null} if {@code obj} is {@code null}
+     * @see #valueOf(String)
+     * @see #stringOf(Object)
      */
     T valueOf(Object obj);
 
@@ -1223,6 +1242,8 @@ public interface Type<T> {
      * @param len the number of characters to parse from {@code offset}
      * @return the parsed value, or {@code null} when {@code cbuf} is {@code null}
      *         (and typically also when {@code len == 0}, depending on the concrete implementation)
+     * @see #valueOf(String)
+     * @see #stringOf(Object)
      */
     T valueOf(char[] cbuf, int offset, int len);
 
@@ -1289,24 +1310,45 @@ public interface Type<T> {
     void set(CallableStatement stmt, String parameterName, T x, int sqlTypeOrLength) throws SQLException;
 
     /**
-     * Appends the string representation of a value to an Appendable.
+     * Appends a plain, human-readable string representation of a value to an {@code Appendable}
+     * (the literal {@code "null"} string for a {@code null} value).
+     * <p>
+     * Conceptually this is the form produced by {@code toString()}, as opposed to {@link #stringOf(Object)}, which
+     * returns a formatted, serializable representation (typically a JSON string) that {@link #valueOf(String)} can
+     * convert back into an equivalent value. For structured values (collections, maps, arrays) the appended text is the
+     * unquoted, {@code toString()}-style form and therefore differs from the {@code stringOf} (serialized) form.
+     * <p>
+     * <b>appendTo vs. serializeTo:</b> {@code appendTo} produces a plain, {@code toString()}-style rendering with no
+     * JSON/XML quoting or escaping (for general text output), whereas
+     * {@link #serializeTo(CharacterWriter, Object, JsonXmlSerConfig)} produces the JSON/XML-serialized form (with
+     * string quotation and character escaping applied per the supplied {@link JsonXmlSerConfig}) and is used by the
+     * JSON/XML serializers.
      *
      * @param appendable the target to append to
      * @param x the value to append
      * @throws IOException if an I/O error occurs
+     * @see #serializeTo(CharacterWriter, Object, JsonXmlSerConfig)
      */
     void appendTo(Appendable appendable, T x) throws IOException;
 
     /**
-     * Writes a value to a CharacterWriter with serialization configuration.
-     * Used for JSON/XML serialization with format control.
+     * Writes the serialized form of a value to a {@code CharacterWriter}, applying string quotation and character
+     * escaping according to the supplied configuration (a {@code null} config means no surrounding quotation).
+     * <p>
+     * This method is specifically designed for JSON/XML serialization; it is the streaming counterpart of
+     * {@link #stringOf(Object)} and is invoked by the JSON/XML serializers.
+     * <p>
+     * <b>serializeTo vs. appendTo:</b> {@code serializeTo} produces machine-readable JSON/XML (quoted and escaped),
+     * whereas {@link #appendTo(Appendable, Object)} produces a plain, human-readable {@code toString()}-style rendering
+     * without JSON/XML quoting or escaping.
      *
      * @param writer the CharacterWriter to write to
      * @param x the value to write
      * @param config the serialization configuration, may be {@code null}
      * @throws IOException if an I/O error occurs
+     * @see #appendTo(Appendable, Object)
      */
-    void writeCharacter(CharacterWriter writer, T x, JsonXmlSerConfig<?> config) throws IOException;
+    void serializeTo(CharacterWriter writer, T x, JsonXmlSerConfig<?> config) throws IOException;
 
     /**
      * Converts a collection to an array of this type.

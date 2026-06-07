@@ -1122,6 +1122,59 @@ public class DatesTest extends TestBase {
         assertNull(Dates.parseTimestamp(""));
     }
 
+    @Test
+    public void testParseTimestamp_timestampToStringFormat_roundTrip() {
+        // Every string produced by java.sql.Timestamp.toString() must parse back to an equal Timestamp,
+        // for all supported fractional-second lengths (1 to 9 digits, with trailing zeros trimmed).
+        final long base = 1736937045000L; // arbitrary instant
+        final int[] nanos = { 0, 1, 100000000, 120000000, 123000000, 123400000, 123450000, 123456000, 123456700, 123456780, 123456789, 500000000 };
+
+        for (final int n : nanos) {
+            final Timestamp orig = new Timestamp(base);
+            orig.setNanos(n);
+            final String s = orig.toString();
+
+            final Timestamp parsed = Dates.parseTimestamp(s);
+            assertNotNull(parsed, "failed to parse: " + s);
+            assertEquals(orig, parsed, "round-trip mismatch for: " + s);
+            assertEquals(s, parsed.toString());
+        }
+    }
+
+    @Test
+    public void testParseTimestamp_timestampToStringFormat_matchesValueOf() {
+        // Dates.parseTimestamp must agree with Timestamp.valueOf (the exact inverse of Timestamp.toString)
+        // for the JDBC timestamp escape format, regardless of the number of fractional digits.
+        final String[] inputs = { "2023-12-25 15:30:00.0", "2025-01-15 10:30:45.5", "2025-01-15 10:30:45.12", "2025-01-15 10:30:45.123",
+                "2025-01-15 10:30:45.1234", "2025-01-15 10:30:45.123456", "2025-01-15 10:30:45.123456789", "2025-01-15 10:30:45.000000001" };
+
+        for (final String s : inputs) {
+            assertEquals(Timestamp.valueOf(s), Dates.parseTimestamp(s), "mismatch for: " + s);
+        }
+    }
+
+    @Test
+    public void testParseTimestamp_timestampToStringFormat_fractionSemantics() {
+        // The fractional part is a fraction of a second (nanoseconds), not a millisecond count.
+        assertEquals(123456789, Dates.parseTimestamp("2025-01-15 10:30:45.123456789").getNanos());
+        assertEquals(500000000, Dates.parseTimestamp("2025-01-15 10:30:45.5").getNanos());
+        assertEquals(120000000, Dates.parseTimestamp("2025-01-15 10:30:45.12").getNanos());
+        assertEquals(1, Dates.parseTimestamp("2025-01-15 10:30:45.000000001").getNanos());
+        // A 3-digit fraction (the previously supported case) keeps meaning milliseconds: .123 == 123 ms == 123000000 ns.
+        assertEquals(123000000, Dates.parseTimestamp("2025-01-15 10:30:45.123").getNanos());
+    }
+
+    @Test
+    public void testParseTimestamp_timestampToStringFormat_doesNotAffectOtherFormats() {
+        // Non-JDBC inputs must keep their existing handling and not be diverted to the Timestamp.valueOf fast path.
+        assertEquals(1736937045123L, Dates.parseTimestamp("1736937045123").getTime()); // numeric epoch millis
+        assertEquals(1736937045123L, Dates.parseTimestamp("2025-01-15T10:30:45.123Z").getTime()); // ISO-8601 UTC
+        assertNotNull(Dates.parseTimestamp("2024-07-31T23:42:38-07:00")); // ISO offset (T-separated)
+        assertNotNull(Dates.parseTimestamp("2025-01-15 10:30:45")); // no fractional second (length 19)
+        assertNull(Dates.parseTimestamp((String) null));
+        assertNull(Dates.parseTimestamp("null"));
+    }
+
     // ===== parseCalendar =====
 
     @Test

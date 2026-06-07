@@ -72,7 +72,7 @@ public interface NoCachingNoUpdating {
      * String[] array = {"a", "b", "c"};
      * DisposableArray<String> disposable = DisposableArray.wrap(array);
      * String first = disposable.get(0);          // "a"
-     * List<String> list = disposable.toList();   // Creates a new list
+     * List<String> list = disposable.toList();   // creates a new list
      * }</pre>
      *
      * @param <T> the type of elements in the array
@@ -141,6 +141,15 @@ public interface NoCachingNoUpdating {
         /**
          * Returns the element at the specified index.
          *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * DisposableArray<String> arr = DisposableArray.wrap(new String[] {"a", "b", "c"});
+         * arr.get(0);   // returns "a"
+         * arr.get(2);   // returns "c"
+         * arr.get(-1);  // throws ArrayIndexOutOfBoundsException
+         * arr.get(3);   // throws ArrayIndexOutOfBoundsException
+         * }</pre>
+         *
          * @param index the index of the element to return
          * @return the element at the specified index
          * @throws ArrayIndexOutOfBoundsException if the index is out of range
@@ -151,6 +160,15 @@ public interface NoCachingNoUpdating {
 
         /**
          * Returns the length of the wrapped array.
+         *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * DisposableArray<String> arr = DisposableArray.wrap(new String[] {"a", "b", "c"});
+         * arr.length();                                          // returns 3
+         * DisposableArray.wrap(new String[0]).length();          // returns 0
+         * DisposableArray.create(String.class, 10).length();     // returns 10
+         * DisposableArray.wrap(new String[] {"x"}).length();     // returns 1
+         * }</pre>
          *
          * @return the length of the array
          */
@@ -202,6 +220,17 @@ public interface NoCachingNoUpdating {
          * the wrapped array itself may be reused by the producer and must not be stored.
          * The returned array is a fresh instance independent of this DisposableArray.
          *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * DisposableArray<String> arr = DisposableArray.wrap(new String[] {"a", "b", "c"});
+         * String[] copy = arr.copy();   // returns ["a", "b", "c"]
+         * DisposableArray<String> empty = DisposableArray.wrap(new String[0]);
+         * empty.copy();                  // returns empty String[]
+         * DisposableArray<String> single = DisposableArray.wrap(new String[] {"x"});
+         * single.copy();                 // returns ["x"]
+         * arr.copy() != arr.copy();      // true (independent copies)
+         * }</pre>
+         *
          * @return a new array containing copies of the elements
          */
         public T[] copy() { //NOSONAR
@@ -211,6 +240,16 @@ public interface NoCachingNoUpdating {
         /**
          * Converts the array to a List.
          * The returned list is a new instance and can be safely cached or modified.
+         *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * DisposableArray<String> arr = DisposableArray.wrap(new String[] {"a", "b", "c"});
+         * arr.toList();                                   // returns ["a", "b", "c"]
+         * DisposableArray.wrap(new String[0]).toList();   // returns []
+         * DisposableArray<String> dup = DisposableArray.wrap(new String[] {"a", "a", "b"});
+         * dup.toList();                                        // returns ["a", "a", "b"] (keeps duplicates)
+         * DisposableArray.wrap(new String[] {"x"}).toList();   // returns ["x"]
+         * }</pre>
          *
          * @return a new List containing the array elements
          */
@@ -222,6 +261,16 @@ public interface NoCachingNoUpdating {
          * Converts the array to a Set.
          * The returned set is a new instance and can be safely cached or modified.
          * Duplicate elements in the array will appear only once in the set.
+         *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * DisposableArray<String> arr = DisposableArray.wrap(new String[] {"a", "b", "c"});
+         * arr.toSet();   // returns Set containing "a", "b", "c"
+         * DisposableArray<String> dup = DisposableArray.wrap(new String[] {"a", "a", "b"});
+         * dup.toSet();                                        // returns Set containing "a", "b" (duplicates removed)
+         * DisposableArray.wrap(new String[0]).toSet();        // returns empty Set
+         * DisposableArray.wrap(new String[] {"x"}).toSet();   // returns Set containing "x"
+         * }</pre>
          *
          * @return a new Set containing the unique array elements
          */
@@ -254,7 +303,7 @@ public interface NoCachingNoUpdating {
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * DisposableArray<String> disposable = DisposableArray.wrap(new String[] {"a", "b", "c"});
-         * disposable.foreach(System.out::println);   // Prints each element
+         * disposable.foreach(System.out::println);   // prints each element
          * }</pre>
          *
          * @param <E> the type of exception that the action may throw
@@ -297,6 +346,17 @@ public interface NoCachingNoUpdating {
          *
          * <p>The live backing array is passed to {@code action}; the action must not retain a
          * reference to it or modify it.</p>
+         *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * DisposableArray<String> arr = DisposableArray.wrap(new String[] {"a", "b", "c"});
+         * arr.accept(a -> System.out.println(a.length));   // prints 3
+         * DisposableArray<String> empty = DisposableArray.wrap(new String[0]);
+         * empty.accept(a -> System.out.println(a.length));  // prints 0
+         * DisposableArray<String> single = DisposableArray.wrap(new String[] {"x"});
+         * single.accept(a -> System.out.println(a[0]));    // prints "x"
+         * arr.accept(a -> {});                             // invokes a no-op consumer
+         * }</pre>
          *
          * @param <E> the type of exception that the action may throw
          * @param action the action to perform with the array
@@ -346,6 +406,17 @@ public interface NoCachingNoUpdating {
          * The iterator reads directly from the (potentially reused) backing array; do not
          * cache the returned iterator beyond the current use.
          *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * DisposableArray<String> arr = DisposableArray.wrap(new String[] {"a", "b", "c"});
+         * Iterator<String> iter = arr.iterator();
+         * iter.hasNext();                                             // returns true
+         * iter.next();                                                // returns "a"
+         * iter.next();                                                // returns "b"
+         * DisposableArray.wrap(new String[0]).iterator().hasNext();   // returns false
+         * DisposableArray.wrap(new String[] {"x"}).iterator().next(); // returns "x"
+         * }</pre>
+         *
          * @return an iterator over the array elements
          */
         @Override
@@ -356,6 +427,15 @@ public interface NoCachingNoUpdating {
         /**
          * Returns a string representation of the wrapped array, formatted as by
          * {@link N#toString(Object[])}.
+         *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * DisposableArray<String> arr = DisposableArray.wrap(new String[] {"a", "b", "c"});
+         * arr.toString();                                                // returns "[a, b, c]"
+         * DisposableArray.wrap(new String[0]).toString();                // returns "[]"
+         * DisposableArray.wrap(new String[] {"x"}).toString();           // returns "[x]"
+         * DisposableArray.wrap(new Integer[] {1, null, 3}).toString();   // returns "[1, null, 3]"
+         * }</pre>
          *
          * @return a string representation of the array
          */
@@ -407,6 +487,14 @@ public interface NoCachingNoUpdating {
         /**
          * Creates a new DisposableObjArray backed by a new Object array of the specified length.
          *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * DisposableObjArray arr = DisposableObjArray.create(5);    // array has length 5, all null
+         * DisposableObjArray.create(0);                             // creates an empty array
+         * DisposableObjArray.create(-1);                            // throws IllegalArgumentException
+         * DisposableObjArray.create(1);                             // array has length 1
+         * }</pre>
+         *
          * @param len the length of the array; must be non-negative
          * @return a new DisposableObjArray instance
          * @throws IllegalArgumentException if {@code len} is negative
@@ -422,6 +510,12 @@ public interface NoCachingNoUpdating {
          * This method is not supported for DisposableObjArray.
          * Use the {@link #create(int)} method instead.
          *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * DisposableObjArray.create(String.class, 5);   // throws UnsupportedOperationException
+         * DisposableObjArray.create(Object.class, 0);   // throws UnsupportedOperationException
+         * }</pre>
+         *
          * @param <T> the component type (not used)
          * @param componentType the component type (not used)
          * @param len the length (not used)
@@ -436,6 +530,15 @@ public interface NoCachingNoUpdating {
 
         /**
          * Wraps an existing Object array in a DisposableObjArray.
+         *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * DisposableObjArray arr = DisposableObjArray.wrap(new Object[] {1, "hello", true});
+         * arr.get(0);                                    // returns 1
+         * DisposableObjArray.wrap(new Object[0]);        // creates a wrapper over the empty array
+         * DisposableObjArray.wrap(null);                 // throws IllegalArgumentException
+         * DisposableObjArray.wrap(new Object[] {"x"});   // creates a wrapper over the single-element array
+         * }</pre>
          *
          * @param a the Object array to wrap; must not be {@code null}
          * @return a new DisposableObjArray wrapping the given array
@@ -456,7 +559,7 @@ public interface NoCachingNoUpdating {
      * boolean[] array = {true, false, true};
      * DisposableBooleanArray disposable = DisposableBooleanArray.wrap(array);
      * boolean first = disposable.get(0);        // true
-     * BooleanList list = disposable.toList();   // Creates a new list
+     * BooleanList list = disposable.toList();   // creates a new list
      * }</pre>
      *
      */
@@ -481,6 +584,14 @@ public interface NoCachingNoUpdating {
         /**
          * Creates a new DisposableBooleanArray backed by a new boolean array of the specified length.
          *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * DisposableBooleanArray arr = DisposableBooleanArray.create(5);    // array has length 5, all false
+         * DisposableBooleanArray.create(0);                                 // creates an empty array
+         * DisposableBooleanArray.create(-1);                                // throws IllegalArgumentException
+         * DisposableBooleanArray.create(1);                                 // array has length 1
+         * }</pre>
+         *
          * @param len the length of the array; must be non-negative
          * @return a new DisposableBooleanArray instance
          * @throws IllegalArgumentException if {@code len} is negative
@@ -495,6 +606,15 @@ public interface NoCachingNoUpdating {
         /**
          * Wraps an existing boolean array in a DisposableBooleanArray.
          *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * DisposableBooleanArray arr = DisposableBooleanArray.wrap(new boolean[] {true, false, true});
+         * arr.get(0);                                           // returns true
+         * DisposableBooleanArray.wrap(new boolean[0]);          // creates a wrapper over the empty array
+         * DisposableBooleanArray.wrap(null);                    // throws IllegalArgumentException
+         * DisposableBooleanArray.wrap(new boolean[] {false});   // creates a wrapper over the single-element array
+         * }</pre>
+         *
          * @param a the boolean array to wrap; must not be {@code null}
          * @return a new DisposableBooleanArray wrapping the given array
          * @throws IllegalArgumentException if {@code a} is {@code null}
@@ -506,6 +626,15 @@ public interface NoCachingNoUpdating {
         /**
          * Returns the boolean value at the specified index.
          *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * DisposableBooleanArray arr = DisposableBooleanArray.wrap(new boolean[] {true, false, true});
+         * arr.get(0);    // returns true
+         * arr.get(1);    // returns false
+         * arr.get(-1);   // throws ArrayIndexOutOfBoundsException
+         * arr.get(3);    // throws ArrayIndexOutOfBoundsException
+         * }</pre>
+         *
          * @param index the index of the element to return
          * @return the boolean value at the specified index
          * @throws ArrayIndexOutOfBoundsException if the index is out of range
@@ -516,6 +645,15 @@ public interface NoCachingNoUpdating {
 
         /**
          * Returns the length of the wrapped boolean array.
+         *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * DisposableBooleanArray arr = DisposableBooleanArray.wrap(new boolean[] {true, false, true});
+         * arr.length();                                                 // returns 3
+         * DisposableBooleanArray.wrap(new boolean[0]).length();         // returns 0
+         * DisposableBooleanArray.create(10).length();                   // returns 10
+         * DisposableBooleanArray.wrap(new boolean[] {false}).length();  // returns 1
+         * }</pre>
          *
          * @return the length of the array
          */
@@ -529,6 +667,15 @@ public interface NoCachingNoUpdating {
          * array may be reused by the producer and must not be stored. The returned array
          * is independent of this instance.
          *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * DisposableBooleanArray arr = DisposableBooleanArray.wrap(new boolean[] {true, false, true});
+         * arr.copy();                                                  // returns [true, false, true]
+         * DisposableBooleanArray.wrap(new boolean[0]).copy();          // returns empty boolean[]
+         * DisposableBooleanArray.wrap(new boolean[] {false}).copy();   // returns [false]
+         * arr.copy() != arr.copy();                                    // true (independent copies)
+         * }</pre>
+         *
          * @return a new boolean array containing copies of the elements
          */
         public boolean[] copy() { //NOSONAR
@@ -539,6 +686,15 @@ public interface NoCachingNoUpdating {
          * Converts the boolean array to a Boolean object array.
          * This is useful when you need to work with the wrapper type.
          *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * DisposableBooleanArray arr = DisposableBooleanArray.wrap(new boolean[] {true, false, true});
+         * arr.box();                                                  // returns [Boolean.TRUE, Boolean.FALSE, Boolean.TRUE]
+         * DisposableBooleanArray.wrap(new boolean[0]).box();          // returns empty Boolean[]
+         * DisposableBooleanArray.wrap(new boolean[] {false}).box();   // returns [Boolean.FALSE]
+         * arr.box().length;                                           // returns 3
+         * }</pre>
+         *
          * @return a new Boolean array containing boxed values
          */
         public Boolean[] box() {
@@ -548,6 +704,15 @@ public interface NoCachingNoUpdating {
         /**
          * Converts the array to a BooleanList.
          * The returned list is a new instance and can be safely cached or modified.
+         *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * DisposableBooleanArray arr = DisposableBooleanArray.wrap(new boolean[] {true, false, true});
+         * arr.toList();                                                  // returns BooleanList [true, false, true]
+         * DisposableBooleanArray.wrap(new boolean[0]).toList();          // returns empty BooleanList
+         * DisposableBooleanArray.wrap(new boolean[] {false}).toList();   // returns BooleanList [false]
+         * arr.toList().size();                                           // returns 3
+         * }</pre>
          *
          * @return a new BooleanList containing the array elements
          */
@@ -582,6 +747,15 @@ public interface NoCachingNoUpdating {
         /**
          * Performs the given action for each element of the array.
          *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * DisposableBooleanArray arr = DisposableBooleanArray.wrap(new boolean[] {true, false, true});
+         * List<Boolean> collected = new ArrayList<>();
+         * arr.foreach(collected::add);                                                  // collected contains [true, false, true]
+         * DisposableBooleanArray.wrap(new boolean[0]).foreach(e -> {});                 // invokes nothing for the empty array
+         * DisposableBooleanArray.wrap(new boolean[] {false}).foreach(collected::add);   // adds false
+         * }</pre>
+         *
          * @param <E> the type of exception that the action may throw
          * @param action the action to be performed for each element
          * @throws E if the action throws an exception
@@ -594,6 +768,15 @@ public interface NoCachingNoUpdating {
 
         /**
          * Applies the given function to the wrapped array and returns the result.
+         *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * DisposableBooleanArray arr = DisposableBooleanArray.wrap(new boolean[] {true, false, true});
+         * arr.apply(a -> a.length);                                                   // returns 3
+         * arr.apply(a -> { int c = 0; for (boolean b : a) if (b) c++; return c; });   // returns 2
+         * DisposableBooleanArray.wrap(new boolean[0]).apply(a -> a.length);           // returns 0
+         * DisposableBooleanArray.wrap(new boolean[] {false}).apply(a -> a.length);    // returns 1
+         * }</pre>
          *
          * @param <R> the type of the result
          * @param <E> the type of exception that the function may throw
@@ -608,6 +791,15 @@ public interface NoCachingNoUpdating {
         /**
          * Performs the given action with the wrapped array.
          *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * DisposableBooleanArray arr = DisposableBooleanArray.wrap(new boolean[] {true, false, true});
+         * arr.accept(a -> System.out.println(a.length));                                              // prints 3
+         * DisposableBooleanArray.wrap(new boolean[0]).accept(a -> System.out.println(a.length));      // prints 0
+         * DisposableBooleanArray.wrap(new boolean[] {false}).accept(a -> System.out.println(a[0]));   // prints false
+         * arr.accept(a -> {});                                                                        // invokes a no-op consumer
+         * }</pre>
+         *
          * @param <E> the type of exception that the action may throw
          * @param action the action to perform with the array
          * @throws E if the action throws an exception
@@ -618,6 +810,15 @@ public interface NoCachingNoUpdating {
 
         /**
          * Joins the string representations of the array elements using the specified delimiter.
+         *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * DisposableBooleanArray arr = DisposableBooleanArray.wrap(new boolean[] {true, false, true});
+         * arr.join(", ");                                                  // returns "true, false, true"
+         * DisposableBooleanArray.wrap(new boolean[0]).join(", ");          // returns ""
+         * DisposableBooleanArray.wrap(new boolean[] {false}).join(", ");   // returns "false"
+         * arr.join("-");                                                   // returns "true-false-true"
+         * }</pre>
          *
          * @param delimiter the delimiter to use between elements
          * @return a string containing the joined elements
@@ -630,6 +831,15 @@ public interface NoCachingNoUpdating {
          * Joins the string representations of the array elements using the specified delimiter,
          * prefix, and suffix.
          *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * DisposableBooleanArray arr = DisposableBooleanArray.wrap(new boolean[] {true, false, true});
+         * arr.join(", ", "[", "]");                                                  // returns "[true, false, true]"
+         * DisposableBooleanArray.wrap(new boolean[0]).join(", ", "[", "]");          // returns "[]"
+         * DisposableBooleanArray.wrap(new boolean[] {false}).join(", ", "[", "]");   // returns "[false]"
+         * arr.join("-", "{", "}");                                                   // returns "{true-false-true}"
+         * }</pre>
+         *
          * @param delimiter the delimiter to use between elements
          * @param prefix the prefix to prepend to the result
          * @param suffix the suffix to append to the result
@@ -641,6 +851,14 @@ public interface NoCachingNoUpdating {
 
         /**
          * Returns a string representation of the wrapped boolean array.
+         *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * DisposableBooleanArray arr = DisposableBooleanArray.wrap(new boolean[] {true, false, true});
+         * arr.toString();                                                  // returns string representation containing true, false
+         * DisposableBooleanArray.wrap(new boolean[0]).toString();          // returns string representation of empty array
+         * DisposableBooleanArray.wrap(new boolean[] {false}).toString();   // returns string representation containing false
+         * }</pre>
          *
          * @return a string representation of the array
          */
@@ -671,7 +889,7 @@ public interface NoCachingNoUpdating {
      * char[] array = {'a', 'b', 'c'};
      * DisposableCharArray disposable = DisposableCharArray.wrap(array);
      * char first = disposable.get(0);   // 'a'
-     * int sum = disposable.sum();       // Sum of char values
+     * int sum = disposable.sum();       // sums the char values
      * }</pre>
      *
      */
@@ -696,6 +914,14 @@ public interface NoCachingNoUpdating {
         /**
          * Creates a new DisposableCharArray backed by a new char array of the specified length.
          *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * DisposableCharArray arr = DisposableCharArray.create(5);    // array has length 5, all '\\0'
+         * DisposableCharArray.create(0);                              // creates an empty array
+         * DisposableCharArray.create(-1);                             // throws IllegalArgumentException
+         * DisposableCharArray.create(1);                              // array has length 1
+         * }</pre>
+         *
          * @param len the length of the array; must be non-negative
          * @return a new DisposableCharArray instance
          * @throws IllegalArgumentException if {@code len} is negative
@@ -710,6 +936,15 @@ public interface NoCachingNoUpdating {
         /**
          * Wraps an existing char array in a DisposableCharArray.
          *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * DisposableCharArray arr = DisposableCharArray.wrap(new char[] {'a', 'b', 'c'});
+         * arr.get(0);                                   // returns 'a'
+         * DisposableCharArray.wrap(new char[0]);        // creates a wrapper over the empty array
+         * DisposableCharArray.wrap(null);               // throws IllegalArgumentException
+         * DisposableCharArray.wrap(new char[] {'x'});   // creates a wrapper over the single-element array
+         * }</pre>
+         *
          * @param a the char array to wrap; must not be {@code null}
          * @return a new DisposableCharArray wrapping the given array
          * @throws IllegalArgumentException if {@code a} is {@code null}
@@ -721,6 +956,15 @@ public interface NoCachingNoUpdating {
         /**
          * Returns the char value at the specified index.
          *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * DisposableCharArray arr = DisposableCharArray.wrap(new char[] {'a', 'b', 'c'});
+         * arr.get(0);    // returns 'a'
+         * arr.get(2);    // returns 'c'
+         * arr.get(-1);   // throws ArrayIndexOutOfBoundsException
+         * arr.get(3);    // throws ArrayIndexOutOfBoundsException
+         * }</pre>
+         *
          * @param index the index of the element to return
          * @return the char value at the specified index
          * @throws ArrayIndexOutOfBoundsException if the index is out of range
@@ -731,6 +975,15 @@ public interface NoCachingNoUpdating {
 
         /**
          * Returns the length of the wrapped char array.
+         *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * DisposableCharArray arr = DisposableCharArray.wrap(new char[] {'a', 'b', 'c'});
+         * arr.length();                                         // returns 3
+         * DisposableCharArray.wrap(new char[0]).length();       // returns 0
+         * DisposableCharArray.create(10).length();              // returns 10
+         * DisposableCharArray.wrap(new char[] {'x'}).length();  // returns 1
+         * }</pre>
          *
          * @return the length of the array
          */
@@ -744,6 +997,15 @@ public interface NoCachingNoUpdating {
          * array may be reused by the producer and must not be stored. The returned array
          * is independent of this instance.
          *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * DisposableCharArray arr = DisposableCharArray.wrap(new char[] {'a', 'b', 'c'});
+         * arr.copy();                                          // returns ['a', 'b', 'c']
+         * DisposableCharArray.wrap(new char[0]).copy();        // returns empty char[]
+         * DisposableCharArray.wrap(new char[] {'x'}).copy();   // returns ['x']
+         * arr.copy() != arr.copy();                            // true (independent copies)
+         * }</pre>
+         *
          * @return a new char array containing copies of the elements
          */
         public char[] copy() { //NOSONAR
@@ -752,6 +1014,15 @@ public interface NoCachingNoUpdating {
 
         /**
          * Converts the char array to a Character object array.
+         *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * DisposableCharArray arr = DisposableCharArray.wrap(new char[] {'a', 'b', 'c'});
+         * arr.box();                                          // returns [Character.valueOf('a'), Character.valueOf('b'), Character.valueOf('c')]
+         * DisposableCharArray.wrap(new char[0]).box();        // returns empty Character[]
+         * DisposableCharArray.wrap(new char[] {'x'}).box();   // returns [Character.valueOf('x')]
+         * arr.box().length;                                   // returns 3
+         * }</pre>
          *
          * @return a new Character array containing boxed values
          */
@@ -762,6 +1033,15 @@ public interface NoCachingNoUpdating {
         /**
          * Converts the array to a CharList.
          *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * DisposableCharArray arr = DisposableCharArray.wrap(new char[] {'a', 'b', 'c'});
+         * arr.toList();                                          // returns CharList ['a', 'b', 'c']
+         * DisposableCharArray.wrap(new char[0]).toList();        // returns empty CharList
+         * DisposableCharArray.wrap(new char[] {'x'}).toList();   // returns CharList ['x']
+         * arr.toList().size();                                   // returns 3
+         * }</pre>
+         *
          * @return a new CharList containing the array elements
          */
         public CharList toList() {
@@ -771,6 +1051,15 @@ public interface NoCachingNoUpdating {
         /**
          * Converts the array to a Collection of the specified type.
          * Each char value is boxed to Character.
+         *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * DisposableCharArray arr = DisposableCharArray.wrap(new char[] {'a', 'b', 'c'});
+         * arr.toCollection(ArrayList::new);                                          // returns [a, b, c]
+         * DisposableCharArray.wrap(new char[0]).toCollection(ArrayList::new);        // returns empty list
+         * DisposableCharArray.wrap(new char[] {'x'}).toCollection(ArrayList::new);   // returns [x]
+         * arr.toCollection(HashSet::new);                                            // returns Set containing a, b, c
+         * }</pre>
          *
          * @param <C> the type of the collection to create
          * @param supplier a function that creates a new collection instance with the specified capacity
@@ -790,6 +1079,15 @@ public interface NoCachingNoUpdating {
          * Calculates the sum of all char values in the array.
          * The char values are treated as their numeric Unicode values.
          *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * DisposableCharArray arr = DisposableCharArray.wrap(new char[] {'a', 'b', 'c'});
+         * arr.sum();                                                   // returns 294 (97 + 98 + 99)
+         * DisposableCharArray.wrap(new char[0]).sum();                 // returns 0
+         * DisposableCharArray.wrap(new char[] {'A'}).sum();            // returns 65
+         * DisposableCharArray.wrap(new char[] {'\\0', '\\0'}).sum();   // returns 0
+         * }</pre>
+         *
          * @return the sum of all elements
          */
         public int sum() {
@@ -800,6 +1098,15 @@ public interface NoCachingNoUpdating {
          * Calculates the average of all char values in the array.
          * The char values are treated as their numeric Unicode values.
          *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * DisposableCharArray arr = DisposableCharArray.wrap(new char[] {'a', 'b', 'c'});
+         * arr.average();                                               // returns 98.0
+         * DisposableCharArray.wrap(new char[0]).average();             // returns 0.0
+         * DisposableCharArray.wrap(new char[] {'a'}).average();        // returns 97.0
+         * DisposableCharArray.wrap(new char[] {'A', 'B'}).average();   // returns 65.5
+         * }</pre>
+         *
          * @return the average of all elements, or 0 if the array is empty
          */
         public double average() {
@@ -808,6 +1115,15 @@ public interface NoCachingNoUpdating {
 
         /**
          * Finds the minimum char value in the array.
+         *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * DisposableCharArray arr = DisposableCharArray.wrap(new char[] {'c', 'a', 'b'});
+         * arr.min();                                               // returns 'a'
+         * DisposableCharArray.wrap(new char[] {'z'}).min();        // returns 'z'
+         * DisposableCharArray.wrap(new char[0]).min();             // throws IllegalArgumentException
+         * DisposableCharArray.wrap(new char[] {'A', 'a'}).min();   // returns 'A' (65 < 97)
+         * }</pre>
          *
          * @return the minimum value
          * @throws IllegalArgumentException if the array is empty
@@ -819,6 +1135,15 @@ public interface NoCachingNoUpdating {
         /**
          * Finds the maximum char value in the array.
          *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * DisposableCharArray arr = DisposableCharArray.wrap(new char[] {'a', 'c', 'b'});
+         * arr.max();                                               // returns 'c'
+         * DisposableCharArray.wrap(new char[] {'a'}).max();        // returns 'a'
+         * DisposableCharArray.wrap(new char[0]).max();             // throws IllegalArgumentException
+         * DisposableCharArray.wrap(new char[] {'A', 'a'}).max();   // returns 'a' (97 > 65)
+         * }</pre>
+         *
          * @return the maximum value
          * @throws IllegalArgumentException if the array is empty
          */
@@ -828,6 +1153,15 @@ public interface NoCachingNoUpdating {
 
         /**
          * Performs the given action for each element of the array.
+         *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * DisposableCharArray arr = DisposableCharArray.wrap(new char[] {'a', 'b', 'c'});
+         * List<Character> collected = new ArrayList<>();
+         * arr.foreach(collected::add);                                          // collected contains [a, b, c]
+         * DisposableCharArray.wrap(new char[0]).foreach(e -> {});               // invokes nothing for the empty array
+         * DisposableCharArray.wrap(new char[] {'x'}).foreach(collected::add);   // adds 'x'
+         * }</pre>
          *
          * @param <E> the type of exception that the action may throw
          * @param action the action to be performed for each element
@@ -842,6 +1176,15 @@ public interface NoCachingNoUpdating {
         /**
          * Applies the given function to the wrapped array and returns the result.
          *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * DisposableCharArray arr = DisposableCharArray.wrap(new char[] {'a', 'b', 'c'});
+         * arr.apply(a -> a.length);                                          // returns 3
+         * arr.apply(a -> (int) a[0]);                                        // returns 97
+         * DisposableCharArray.wrap(new char[0]).apply(a -> a.length);        // returns 0
+         * DisposableCharArray.wrap(new char[] {'x'}).apply(a -> a.length);   // returns 1
+         * }</pre>
+         *
          * @param <R> the type of the result
          * @param <E> the type of exception that the function may throw
          * @param func the function to apply to the array
@@ -855,6 +1198,15 @@ public interface NoCachingNoUpdating {
         /**
          * Performs the given action with the wrapped array.
          *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * DisposableCharArray arr = DisposableCharArray.wrap(new char[] {'a', 'b', 'c'});
+         * arr.accept(a -> System.out.println(a.length));                                      // prints 3
+         * DisposableCharArray.wrap(new char[0]).accept(a -> System.out.println(a.length));    // prints 0
+         * DisposableCharArray.wrap(new char[] {'x'}).accept(a -> System.out.println(a[0]));   // prints 'x'
+         * arr.accept(a -> {});                                                                // invokes a no-op consumer
+         * }</pre>
+         *
          * @param <E> the type of exception that the action may throw
          * @param action the action to perform with the array
          * @throws E if the action throws an exception
@@ -865,6 +1217,15 @@ public interface NoCachingNoUpdating {
 
         /**
          * Joins the string representations of the array elements using the specified delimiter.
+         *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * DisposableCharArray arr = DisposableCharArray.wrap(new char[] {'a', 'b', 'c'});
+         * arr.join(", ");                                          // returns "a, b, c"
+         * DisposableCharArray.wrap(new char[0]).join(", ");        // returns ""
+         * DisposableCharArray.wrap(new char[] {'x'}).join(", ");   // returns "x"
+         * arr.join("-");                                           // returns "a-b-c"
+         * }</pre>
          *
          * @param delimiter the delimiter to use between elements
          * @return a string containing the joined elements
@@ -877,6 +1238,15 @@ public interface NoCachingNoUpdating {
          * Joins the string representations of the array elements using the specified delimiter,
          * prefix, and suffix.
          *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * DisposableCharArray arr = DisposableCharArray.wrap(new char[] {'a', 'b', 'c'});
+         * arr.join(", ", "[", "]");                                          // returns "[a, b, c]"
+         * DisposableCharArray.wrap(new char[0]).join(", ", "[", "]");        // returns "[]"
+         * DisposableCharArray.wrap(new char[] {'x'}).join(", ", "[", "]");   // returns "[x]"
+         * arr.join("-", "{", "}");                                           // returns "{a-b-c}"
+         * }</pre>
+         *
          * @param delimiter the delimiter to use between elements
          * @param prefix the prefix to prepend to the result
          * @param suffix the suffix to append to the result
@@ -888,6 +1258,14 @@ public interface NoCachingNoUpdating {
 
         /**
          * Returns a string representation of the wrapped char array.
+         *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * DisposableCharArray arr = DisposableCharArray.wrap(new char[] {'a', 'b', 'c'});
+         * arr.toString();                                          // returns string representation of [a, b, c]
+         * DisposableCharArray.wrap(new char[0]).toString();        // returns string representation of empty array
+         * DisposableCharArray.wrap(new char[] {'x'}).toString();   // returns string representation of [x]
+         * }</pre>
          *
          * @return a string representation of the array
          */
@@ -943,6 +1321,14 @@ public interface NoCachingNoUpdating {
         /**
          * Creates a new DisposableByteArray backed by a new byte array of the specified length.
          *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * DisposableByteArray arr = DisposableByteArray.create(5);    // array has length 5, all 0
+         * DisposableByteArray.create(0);                              // creates an empty array
+         * DisposableByteArray.create(-1);                             // throws IllegalArgumentException
+         * DisposableByteArray.create(1);                              // array has length 1
+         * }</pre>
+         *
          * @param len the length of the array; must be non-negative
          * @return a new DisposableByteArray instance
          * @throws IllegalArgumentException if {@code len} is negative
@@ -957,6 +1343,15 @@ public interface NoCachingNoUpdating {
         /**
          * Wraps an existing byte array in a DisposableByteArray.
          *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * DisposableByteArray arr = DisposableByteArray.wrap(new byte[] {1, 2, 3});
+         * arr.get(0);                                // returns 1
+         * DisposableByteArray.wrap(new byte[0]);     // creates a wrapper over the empty array
+         * DisposableByteArray.wrap(null);            // throws IllegalArgumentException
+         * DisposableByteArray.wrap(new byte[] {99}); // creates a wrapper over the single-element array
+         * }</pre>
+         *
          * @param a the byte array to wrap; must not be {@code null}
          * @return a new DisposableByteArray wrapping the given array
          * @throws IllegalArgumentException if {@code a} is {@code null}
@@ -968,6 +1363,15 @@ public interface NoCachingNoUpdating {
         /**
          * Returns the byte value at the specified index.
          *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * DisposableByteArray arr = DisposableByteArray.wrap(new byte[] {1, 2, 3});
+         * arr.get(0);    // returns 1
+         * arr.get(2);    // returns 3
+         * arr.get(-1);   // throws ArrayIndexOutOfBoundsException
+         * arr.get(3);    // throws ArrayIndexOutOfBoundsException
+         * }</pre>
+         *
          * @param index the index of the element to return
          * @return the byte value at the specified index
          * @throws ArrayIndexOutOfBoundsException if the index is out of range
@@ -978,6 +1382,14 @@ public interface NoCachingNoUpdating {
 
         /**
          * Returns the length of the wrapped byte array.
+         *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * DisposableByteArray.wrap(new byte[] {1, 2, 3}).length();   // returns 3
+         * DisposableByteArray.wrap(new byte[0]).length();            // returns 0
+         * DisposableByteArray.create(10).length();                   // returns 10
+         * DisposableByteArray.wrap(new byte[] {99}).length();        // returns 1
+         * }</pre>
          *
          * @return the length of the array
          */
@@ -991,6 +1403,15 @@ public interface NoCachingNoUpdating {
          * array may be reused by the producer and must not be stored. The returned array
          * is independent of this instance.
          *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * DisposableByteArray arr = DisposableByteArray.wrap(new byte[] {1, 2, 3});
+         * arr.copy();                                         // returns [1, 2, 3]
+         * DisposableByteArray.wrap(new byte[0]).copy();       // returns empty byte[]
+         * DisposableByteArray.wrap(new byte[] {99}).copy();   // returns [99]
+         * arr.copy() != arr.copy();                           // true (independent copies)
+         * }</pre>
+         *
          * @return a new byte array containing copies of the elements
          */
         public byte[] copy() { //NOSONAR
@@ -999,6 +1420,15 @@ public interface NoCachingNoUpdating {
 
         /**
          * Converts the byte array to a Byte object array.
+         *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * DisposableByteArray arr = DisposableByteArray.wrap(new byte[] {1, 2, 3});
+         * arr.box();                                         // returns [Byte.valueOf((byte)1), Byte.valueOf((byte)2), Byte.valueOf((byte)3)]
+         * DisposableByteArray.wrap(new byte[0]).box();       // returns empty Byte[]
+         * DisposableByteArray.wrap(new byte[] {99}).box();   // returns [Byte.valueOf((byte)99)]
+         * arr.box().length;                                  // returns 3
+         * }</pre>
          *
          * @return a new Byte array containing boxed values
          */
@@ -1009,6 +1439,15 @@ public interface NoCachingNoUpdating {
         /**
          * Converts the array to a ByteList.
          *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * DisposableByteArray arr = DisposableByteArray.wrap(new byte[] {1, 2, 3});
+         * arr.toList();                                         // returns ByteList [1, 2, 3]
+         * DisposableByteArray.wrap(new byte[0]).toList();       // returns empty ByteList
+         * DisposableByteArray.wrap(new byte[] {99}).toList();   // returns ByteList [99]
+         * arr.toList().size();                                  // returns 3
+         * }</pre>
+         *
          * @return a new ByteList containing the array elements
          */
         public ByteList toList() {
@@ -1018,6 +1457,15 @@ public interface NoCachingNoUpdating {
         /**
          * Converts the array to a Collection of the specified type.
          * Each byte value is boxed to Byte.
+         *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * DisposableByteArray arr = DisposableByteArray.wrap(new byte[] {1, 2, 3});
+         * arr.toCollection(ArrayList::new);                                         // returns [1, 2, 3]
+         * DisposableByteArray.wrap(new byte[0]).toCollection(ArrayList::new);       // returns empty list
+         * DisposableByteArray.wrap(new byte[] {99}).toCollection(ArrayList::new);   // returns [99]
+         * arr.toCollection(HashSet::new);                                           // returns Set containing 1, 2, 3
+         * }</pre>
          *
          * @param <C> the type of the collection to create
          * @param supplier a function that creates a new collection instance with the specified capacity
@@ -1036,6 +1484,14 @@ public interface NoCachingNoUpdating {
         /**
          * Calculates the sum of all byte values in the array.
          *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * DisposableByteArray.wrap(new byte[] {1, 2, 3}).sum();   // returns 6
+         * DisposableByteArray.wrap(new byte[0]).sum();            // returns 0
+         * DisposableByteArray.wrap(new byte[] {127}).sum();       // returns 127
+         * DisposableByteArray.wrap(new byte[] {-1, 1}).sum();     // returns 0
+         * }</pre>
+         *
          * @return the sum of all elements
          */
         public int sum() {
@@ -1045,6 +1501,14 @@ public interface NoCachingNoUpdating {
         /**
          * Calculates the average of all byte values in the array.
          *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * DisposableByteArray.wrap(new byte[] {1, 2, 3}).average();   // returns 2.0
+         * DisposableByteArray.wrap(new byte[0]).average();            // returns 0.0
+         * DisposableByteArray.wrap(new byte[] {5}).average();         // returns 5.0
+         * DisposableByteArray.wrap(new byte[] {1, 3}).average();      // returns 2.0
+         * }</pre>
+         *
          * @return the average of all elements, or 0 if the array is empty
          */
         public double average() {
@@ -1053,6 +1517,14 @@ public interface NoCachingNoUpdating {
 
         /**
          * Finds the minimum byte value in the array.
+         *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * DisposableByteArray.wrap(new byte[] {3, 1, 2}).min();    // returns 1
+         * DisposableByteArray.wrap(new byte[] {5}).min();          // returns 5
+         * DisposableByteArray.wrap(new byte[0]).min();             // throws IllegalArgumentException
+         * DisposableByteArray.wrap(new byte[] {-1, 0, 1}).min();   // returns -1
+         * }</pre>
          *
          * @return the minimum value
          * @throws IllegalArgumentException if the array is empty
@@ -1064,6 +1536,14 @@ public interface NoCachingNoUpdating {
         /**
          * Finds the maximum byte value in the array.
          *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * DisposableByteArray.wrap(new byte[] {1, 3, 2}).max();    // returns 3
+         * DisposableByteArray.wrap(new byte[] {5}).max();          // returns 5
+         * DisposableByteArray.wrap(new byte[0]).max();             // throws IllegalArgumentException
+         * DisposableByteArray.wrap(new byte[] {-1, 0, 1}).max();   // returns 1
+         * }</pre>
+         *
          * @return the maximum value
          * @throws IllegalArgumentException if the array is empty
          */
@@ -1073,6 +1553,15 @@ public interface NoCachingNoUpdating {
 
         /**
          * Performs the given action for each element of the array.
+         *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * DisposableByteArray arr = DisposableByteArray.wrap(new byte[] {1, 2, 3});
+         * List<Byte> collected = new ArrayList<>();
+         * arr.foreach(collected::add);                                         // collected contains [1, 2, 3]
+         * DisposableByteArray.wrap(new byte[0]).foreach(e -> {});              // invokes nothing for the empty array
+         * DisposableByteArray.wrap(new byte[] {99}).foreach(collected::add);   // adds 99
+         * }</pre>
          *
          * @param <E> the type of exception that the action may throw
          * @param action the action to be performed for each element
@@ -1087,6 +1576,15 @@ public interface NoCachingNoUpdating {
         /**
          * Applies the given function to the wrapped array and returns the result.
          *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * DisposableByteArray arr = DisposableByteArray.wrap(new byte[] {1, 2, 3});
+         * arr.apply(a -> a.length);                                         // returns 3
+         * arr.apply(a -> (int) a[0]);                                       // returns 1
+         * DisposableByteArray.wrap(new byte[0]).apply(a -> a.length);       // returns 0
+         * DisposableByteArray.wrap(new byte[] {99}).apply(a -> a.length);   // returns 1
+         * }</pre>
+         *
          * @param <R> the type of the result
          * @param <E> the type of exception that the function may throw
          * @param func the function to apply to the array
@@ -1100,6 +1598,15 @@ public interface NoCachingNoUpdating {
         /**
          * Performs the given action with the wrapped array.
          *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * DisposableByteArray arr = DisposableByteArray.wrap(new byte[] {1, 2, 3});
+         * arr.accept(a -> System.out.println(a.length));                                     // prints 3
+         * DisposableByteArray.wrap(new byte[0]).accept(a -> System.out.println(a.length));   // prints 0
+         * DisposableByteArray.wrap(new byte[] {99}).accept(a -> System.out.println(a[0]));   // prints 99
+         * arr.accept(a -> {});                                                               // invokes a no-op consumer
+         * }</pre>
+         *
          * @param <E> the type of exception that the action may throw
          * @param action the action to perform with the array
          * @throws E if the action throws an exception
@@ -1110,6 +1617,15 @@ public interface NoCachingNoUpdating {
 
         /**
          * Joins the string representations of the array elements using the specified delimiter.
+         *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * DisposableByteArray arr = DisposableByteArray.wrap(new byte[] {1, 2, 3});
+         * arr.join(", ");                                         // returns "1, 2, 3"
+         * DisposableByteArray.wrap(new byte[0]).join(", ");       // returns ""
+         * DisposableByteArray.wrap(new byte[] {99}).join(", ");   // returns "99"
+         * arr.join("-");                                          // returns "1-2-3"
+         * }</pre>
          *
          * @param delimiter the delimiter to use between elements
          * @return a string containing the joined elements
@@ -1122,6 +1638,15 @@ public interface NoCachingNoUpdating {
          * Joins the string representations of the array elements using the specified delimiter,
          * prefix, and suffix.
          *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * DisposableByteArray arr = DisposableByteArray.wrap(new byte[] {1, 2, 3});
+         * arr.join(", ", "[", "]");                                         // returns "[1, 2, 3]"
+         * DisposableByteArray.wrap(new byte[0]).join(", ", "[", "]");       // returns "[]"
+         * DisposableByteArray.wrap(new byte[] {99}).join(", ", "[", "]");   // returns "[99]"
+         * arr.join("-", "{", "}");                                          // returns "{1-2-3}"
+         * }</pre>
+         *
          * @param delimiter the delimiter to use between elements
          * @param prefix the prefix to prepend to the result
          * @param suffix the suffix to append to the result
@@ -1133,6 +1658,14 @@ public interface NoCachingNoUpdating {
 
         /**
          * Returns a string representation of the wrapped byte array.
+         *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * DisposableByteArray arr = DisposableByteArray.wrap(new byte[] {1, 2, 3});
+         * arr.toString();                                         // returns string representation of [1, 2, 3]
+         * DisposableByteArray.wrap(new byte[0]).toString();       // returns string representation of empty array
+         * DisposableByteArray.wrap(new byte[] {99}).toString();   // returns string representation of [99]
+         * }</pre>
          *
          * @return a string representation of the array
          */
@@ -1188,6 +1721,14 @@ public interface NoCachingNoUpdating {
         /**
          * Creates a new DisposableShortArray backed by a new short array of the specified length.
          *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * DisposableShortArray arr = DisposableShortArray.create(5);    // array has length 5, all 0
+         * DisposableShortArray.create(0);                               // creates an empty array
+         * DisposableShortArray.create(-1);                              // throws IllegalArgumentException
+         * DisposableShortArray.create(1);                               // array has length 1
+         * }</pre>
+         *
          * @param len the length of the array; must be non-negative
          * @return a new DisposableShortArray instance
          * @throws IllegalArgumentException if {@code len} is negative
@@ -1202,6 +1743,15 @@ public interface NoCachingNoUpdating {
         /**
          * Wraps an existing short array in a DisposableShortArray.
          *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * DisposableShortArray arr = DisposableShortArray.wrap(new short[] {1, 2, 3});
+         * arr.get(0);                                    // returns 1
+         * DisposableShortArray.wrap(new short[0]);       // creates a wrapper over the empty array
+         * DisposableShortArray.wrap(null);               // throws IllegalArgumentException
+         * DisposableShortArray.wrap(new short[] {99});   // creates a wrapper over the single-element array
+         * }</pre>
+         *
          * @param a the short array to wrap; must not be {@code null}
          * @return a new DisposableShortArray wrapping the given array
          * @throws IllegalArgumentException if {@code a} is {@code null}
@@ -1213,6 +1763,15 @@ public interface NoCachingNoUpdating {
         /**
          * Returns the short value at the specified index.
          *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * DisposableShortArray arr = DisposableShortArray.wrap(new short[] {1, 2, 3});
+         * arr.get(0);    // returns 1
+         * arr.get(2);    // returns 3
+         * arr.get(-1);   // throws ArrayIndexOutOfBoundsException
+         * arr.get(3);    // throws ArrayIndexOutOfBoundsException
+         * }</pre>
+         *
          * @param index the index of the element to return
          * @return the short value at the specified index
          * @throws ArrayIndexOutOfBoundsException if the index is out of range
@@ -1223,6 +1782,14 @@ public interface NoCachingNoUpdating {
 
         /**
          * Returns the length of the wrapped short array.
+         *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * DisposableShortArray.wrap(new short[] {1, 2, 3}).length();   // returns 3
+         * DisposableShortArray.wrap(new short[0]).length();            // returns 0
+         * DisposableShortArray.create(10).length();                    // returns 10
+         * DisposableShortArray.wrap(new short[] {99}).length();        // returns 1
+         * }</pre>
          *
          * @return the length of the array
          */
@@ -1236,6 +1803,15 @@ public interface NoCachingNoUpdating {
          * array may be reused by the producer and must not be stored. The returned array
          * is independent of this instance.
          *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * DisposableShortArray arr = DisposableShortArray.wrap(new short[] {1, 2, 3});
+         * arr.copy();                                           // returns [1, 2, 3]
+         * DisposableShortArray.wrap(new short[0]).copy();       // returns empty short[]
+         * DisposableShortArray.wrap(new short[] {99}).copy();   // returns [99]
+         * arr.copy() != arr.copy();                             // true (independent copies)
+         * }</pre>
+         *
          * @return a new short array containing copies of the elements
          */
         public short[] copy() { //NOSONAR
@@ -1244,6 +1820,15 @@ public interface NoCachingNoUpdating {
 
         /**
          * Converts the short array to a Short object array.
+         *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * DisposableShortArray arr = DisposableShortArray.wrap(new short[] {1, 2, 3});
+         * arr.box();                                           // returns [Short.valueOf(1), Short.valueOf(2), Short.valueOf(3)]
+         * DisposableShortArray.wrap(new short[0]).box();       // returns empty Short[]
+         * DisposableShortArray.wrap(new short[] {99}).box();   // returns [Short.valueOf(99)]
+         * arr.box().length;                                    // returns 3
+         * }</pre>
          *
          * @return a new Short array containing boxed values
          */
@@ -1254,6 +1839,15 @@ public interface NoCachingNoUpdating {
         /**
          * Converts the array to a ShortList.
          *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * DisposableShortArray arr = DisposableShortArray.wrap(new short[] {1, 2, 3});
+         * arr.toList();                                           // returns ShortList [1, 2, 3]
+         * DisposableShortArray.wrap(new short[0]).toList();       // returns empty ShortList
+         * DisposableShortArray.wrap(new short[] {99}).toList();   // returns ShortList [99]
+         * arr.toList().size();                                    // returns 3
+         * }</pre>
+         *
          * @return a new ShortList containing the array elements
          */
         public ShortList toList() {
@@ -1263,6 +1857,15 @@ public interface NoCachingNoUpdating {
         /**
          * Converts the array to a Collection of the specified type.
          * Each short value is boxed to Short.
+         *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * DisposableShortArray arr = DisposableShortArray.wrap(new short[] {1, 2, 3});
+         * arr.toCollection(ArrayList::new);                                           // returns [1, 2, 3]
+         * DisposableShortArray.wrap(new short[0]).toCollection(ArrayList::new);       // returns empty list
+         * DisposableShortArray.wrap(new short[] {99}).toCollection(ArrayList::new);   // returns [99]
+         * arr.toCollection(HashSet::new);                                             // returns Set containing 1, 2, 3
+         * }</pre>
          *
          * @param <C> the type of the collection to create
          * @param supplier a function that creates a new collection instance with the specified capacity
@@ -1281,6 +1884,14 @@ public interface NoCachingNoUpdating {
         /**
          * Calculates the sum of all short values in the array.
          *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * DisposableShortArray.wrap(new short[] {1, 2, 3}).sum();   // returns 6
+         * DisposableShortArray.wrap(new short[0]).sum();            // returns 0
+         * DisposableShortArray.wrap(new short[] {5}).sum();         // returns 5
+         * DisposableShortArray.wrap(new short[] {-1, 1}).sum();     // returns 0
+         * }</pre>
+         *
          * @return the sum of all elements
          */
         public int sum() {
@@ -1290,6 +1901,14 @@ public interface NoCachingNoUpdating {
         /**
          * Calculates the average of all short values in the array.
          *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * DisposableShortArray.wrap(new short[] {1, 2, 3}).average();   // returns 2.0
+         * DisposableShortArray.wrap(new short[0]).average();            // returns 0.0
+         * DisposableShortArray.wrap(new short[] {5}).average();         // returns 5.0
+         * DisposableShortArray.wrap(new short[] {1, 3}).average();      // returns 2.0
+         * }</pre>
+         *
          * @return the average of all elements, or 0 if the array is empty
          */
         public double average() {
@@ -1298,6 +1917,14 @@ public interface NoCachingNoUpdating {
 
         /**
          * Finds the minimum short value in the array.
+         *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * DisposableShortArray.wrap(new short[] {3, 1, 2}).min();    // returns 1
+         * DisposableShortArray.wrap(new short[] {5}).min();          // returns 5
+         * DisposableShortArray.wrap(new short[0]).min();             // throws IllegalArgumentException
+         * DisposableShortArray.wrap(new short[] {-1, 0, 1}).min();   // returns -1
+         * }</pre>
          *
          * @return the minimum value
          * @throws IllegalArgumentException if the array is empty
@@ -1309,6 +1936,14 @@ public interface NoCachingNoUpdating {
         /**
          * Finds the maximum short value in the array.
          *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * DisposableShortArray.wrap(new short[] {1, 3, 2}).max();    // returns 3
+         * DisposableShortArray.wrap(new short[] {5}).max();          // returns 5
+         * DisposableShortArray.wrap(new short[0]).max();             // throws IllegalArgumentException
+         * DisposableShortArray.wrap(new short[] {-1, 0, 1}).max();   // returns 1
+         * }</pre>
+         *
          * @return the maximum value
          * @throws IllegalArgumentException if the array is empty
          */
@@ -1318,6 +1953,15 @@ public interface NoCachingNoUpdating {
 
         /**
          * Performs the given action for each element of the array.
+         *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * DisposableShortArray arr = DisposableShortArray.wrap(new short[] {1, 2, 3});
+         * List<Short> collected = new ArrayList<>();
+         * arr.foreach(collected::add);                                           // collected contains [1, 2, 3]
+         * DisposableShortArray.wrap(new short[0]).foreach(e -> {});              // invokes nothing for the empty array
+         * DisposableShortArray.wrap(new short[] {99}).foreach(collected::add);   // adds 99
+         * }</pre>
          *
          * @param <E> the type of exception that the action may throw
          * @param action the action to be performed for each element
@@ -1332,6 +1976,15 @@ public interface NoCachingNoUpdating {
         /**
          * Applies the given function to the wrapped array and returns the result.
          *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * DisposableShortArray arr = DisposableShortArray.wrap(new short[] {1, 2, 3});
+         * arr.apply(a -> a.length);                                           // returns 3
+         * arr.apply(a -> (int) a[0]);                                         // returns 1
+         * DisposableShortArray.wrap(new short[0]).apply(a -> a.length);       // returns 0
+         * DisposableShortArray.wrap(new short[] {99}).apply(a -> a.length);   // returns 1
+         * }</pre>
+         *
          * @param <R> the type of the result
          * @param <E> the type of exception that the function may throw
          * @param func the function to apply to the array
@@ -1345,6 +1998,15 @@ public interface NoCachingNoUpdating {
         /**
          * Performs the given action with the wrapped array.
          *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * DisposableShortArray arr = DisposableShortArray.wrap(new short[] {1, 2, 3});
+         * arr.accept(a -> System.out.println(a.length));                                       // prints 3
+         * DisposableShortArray.wrap(new short[0]).accept(a -> System.out.println(a.length));   // prints 0
+         * DisposableShortArray.wrap(new short[] {99}).accept(a -> System.out.println(a[0]));   // prints 99
+         * arr.accept(a -> {});                                                                 // invokes a no-op consumer
+         * }</pre>
+         *
          * @param <E> the type of exception that the action may throw
          * @param action the action to perform with the array
          * @throws E if the action throws an exception
@@ -1355,6 +2017,15 @@ public interface NoCachingNoUpdating {
 
         /**
          * Joins the string representations of the array elements using the specified delimiter.
+         *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * DisposableShortArray arr = DisposableShortArray.wrap(new short[] {1, 2, 3});
+         * arr.join(", ");                                           // returns "1, 2, 3"
+         * DisposableShortArray.wrap(new short[0]).join(", ");       // returns ""
+         * DisposableShortArray.wrap(new short[] {99}).join(", ");   // returns "99"
+         * arr.join("-");                                            // returns "1-2-3"
+         * }</pre>
          *
          * @param delimiter the delimiter to use between elements
          * @return a string containing the joined elements
@@ -1367,6 +2038,15 @@ public interface NoCachingNoUpdating {
          * Joins the string representations of the array elements using the specified delimiter,
          * prefix, and suffix.
          *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * DisposableShortArray arr = DisposableShortArray.wrap(new short[] {1, 2, 3});
+         * arr.join(", ", "[", "]");                                           // returns "[1, 2, 3]"
+         * DisposableShortArray.wrap(new short[0]).join(", ", "[", "]");       // returns "[]"
+         * DisposableShortArray.wrap(new short[] {99}).join(", ", "[", "]");   // returns "[99]"
+         * arr.join("-", "{", "}");                                            // returns "{1-2-3}"
+         * }</pre>
+         *
          * @param delimiter the delimiter to use between elements
          * @param prefix the prefix to prepend to the result
          * @param suffix the suffix to append to the result
@@ -1378,6 +2058,14 @@ public interface NoCachingNoUpdating {
 
         /**
          * Returns a string representation of the wrapped short array.
+         *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * DisposableShortArray arr = DisposableShortArray.wrap(new short[] {1, 2, 3});
+         * arr.toString();                                           // returns string representation of [1, 2, 3]
+         * DisposableShortArray.wrap(new short[0]).toString();       // returns string representation of empty array
+         * DisposableShortArray.wrap(new short[] {99}).toString();   // returns string representation of [99]
+         * }</pre>
          *
          * @return a string representation of the array
          */
@@ -1434,6 +2122,14 @@ public interface NoCachingNoUpdating {
         /**
          * Creates a new DisposableIntArray backed by a new int array of the specified length.
          *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * DisposableIntArray arr = DisposableIntArray.create(5);    // array has length 5, all 0
+         * DisposableIntArray.create(0);                             // creates an empty array
+         * DisposableIntArray.create(-1);                            // throws IllegalArgumentException
+         * DisposableIntArray.create(1);                             // array has length 1
+         * }</pre>
+         *
          * @param len the length of the array; must be non-negative
          * @return a new DisposableIntArray instance
          * @throws IllegalArgumentException if {@code len} is negative
@@ -1448,6 +2144,15 @@ public interface NoCachingNoUpdating {
         /**
          * Wraps an existing int array in a DisposableIntArray.
          *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * DisposableIntArray arr = DisposableIntArray.wrap(new int[] {1, 2, 3});
+         * arr.get(0);                                // returns 1
+         * DisposableIntArray.wrap(new int[0]);       // creates a wrapper over the empty array
+         * DisposableIntArray.wrap(null);             // throws IllegalArgumentException
+         * DisposableIntArray.wrap(new int[] {99});   // creates a wrapper over the single-element array
+         * }</pre>
+         *
          * @param a the int array to wrap; must not be {@code null}
          * @return a new DisposableIntArray wrapping the given array
          * @throws IllegalArgumentException if {@code a} is {@code null}
@@ -1458,6 +2163,15 @@ public interface NoCachingNoUpdating {
 
         /**
          * Returns the int value at the specified index.
+         *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * DisposableIntArray arr = DisposableIntArray.wrap(new int[] {1, 2, 3});
+         * arr.get(0);    // returns 1
+         * arr.get(2);    // returns 3
+         * arr.get(-1);   // throws ArrayIndexOutOfBoundsException
+         * arr.get(3);    // throws ArrayIndexOutOfBoundsException
+         * }</pre>
          *
          * @param index the index of the element to return
          * @return the int value at the specified index
@@ -1470,6 +2184,14 @@ public interface NoCachingNoUpdating {
         /**
          * Returns the length of the wrapped int array.
          *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * DisposableIntArray.wrap(new int[] {1, 2, 3}).length();   // returns 3
+         * DisposableIntArray.wrap(new int[0]).length();            // returns 0
+         * DisposableIntArray.create(10).length();                  // returns 10
+         * DisposableIntArray.wrap(new int[] {99}).length();        // returns 1
+         * }</pre>
+         *
          * @return the length of the array
          */
         public int length() {
@@ -1481,6 +2203,15 @@ public interface NoCachingNoUpdating {
          * Use this method when the data must be retained or modified, since the wrapped
          * array may be reused by the producer and must not be stored. The returned array
          * is independent of this instance.
+         *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * DisposableIntArray arr = DisposableIntArray.wrap(new int[] {1, 2, 3});
+         * arr.copy();                                       // returns [1, 2, 3]
+         * DisposableIntArray.wrap(new int[0]).copy();       // returns empty int[]
+         * DisposableIntArray.wrap(new int[] {99}).copy();   // returns [99]
+         * arr.copy() != arr.copy();                         // true (independent copies)
+         * }</pre>
          *
          * @return a new int array containing copies of the elements
          */
@@ -1498,7 +2229,16 @@ public interface NoCachingNoUpdating {
         }
 
         /**
-         * Converts the array to an IntList.
+         * Converts the array to a IntList.
+         *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * DisposableIntArray arr = DisposableIntArray.wrap(new int[] {1, 2, 3});
+         * arr.toList();                                       // returns IntList [1, 2, 3]
+         * DisposableIntArray.wrap(new int[0]).toList();       // returns empty IntList
+         * DisposableIntArray.wrap(new int[] {99}).toList();   // returns IntList [99]
+         * arr.toList().size();                                // returns 3
+         * }</pre>
          *
          * @return a new IntList containing the array elements
          */
@@ -1509,6 +2249,15 @@ public interface NoCachingNoUpdating {
         /**
          * Converts the array to a Collection of the specified type.
          * Each int value is boxed to Integer.
+         *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * DisposableIntArray arr = DisposableIntArray.wrap(new int[] {1, 2, 3});
+         * arr.toCollection(ArrayList::new);                                       // returns [1, 2, 3]
+         * DisposableIntArray.wrap(new int[0]).toCollection(ArrayList::new);       // returns empty list
+         * DisposableIntArray.wrap(new int[] {99}).toCollection(ArrayList::new);   // returns [99]
+         * arr.toCollection(HashSet::new);                                         // returns Set containing 1, 2, 3
+         * }</pre>
          *
          * @param <C> the type of the collection to create
          * @param supplier a function that creates a new collection instance with the specified capacity
@@ -1527,6 +2276,14 @@ public interface NoCachingNoUpdating {
         /**
          * Calculates the sum of all int values in the array.
          *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * DisposableIntArray.wrap(new int[] {1, 2, 3}).sum();   // returns 6
+         * DisposableIntArray.wrap(new int[0]).sum();            // returns 0
+         * DisposableIntArray.wrap(new int[] {5}).sum();         // returns 5
+         * DisposableIntArray.wrap(new int[] {-1, 1}).sum();     // returns 0
+         * }</pre>
+         *
          * @return the sum of all elements
          */
         public int sum() {
@@ -1536,6 +2293,14 @@ public interface NoCachingNoUpdating {
         /**
          * Calculates the average of all int values in the array.
          *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * DisposableIntArray.wrap(new int[] {1, 2, 3}).average();   // returns 2.0
+         * DisposableIntArray.wrap(new int[0]).average();            // returns 0.0
+         * DisposableIntArray.wrap(new int[] {5}).average();         // returns 5.0
+         * DisposableIntArray.wrap(new int[] {1, 3}).average();      // returns 2.0
+         * }</pre>
+         *
          * @return the average of all elements, or 0 if the array is empty
          */
         public double average() {
@@ -1544,6 +2309,14 @@ public interface NoCachingNoUpdating {
 
         /**
          * Finds the minimum int value in the array.
+         *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * DisposableIntArray.wrap(new int[] {3, 1, 2}).min();    // returns 1
+         * DisposableIntArray.wrap(new int[] {5}).min();          // returns 5
+         * DisposableIntArray.wrap(new int[0]).min();             // throws IllegalArgumentException
+         * DisposableIntArray.wrap(new int[] {-1, 0, 1}).min();   // returns -1
+         * }</pre>
          *
          * @return the minimum value
          * @throws IllegalArgumentException if the array is empty
@@ -1555,6 +2328,14 @@ public interface NoCachingNoUpdating {
         /**
          * Finds the maximum int value in the array.
          *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * DisposableIntArray.wrap(new int[] {1, 3, 2}).max();    // returns 3
+         * DisposableIntArray.wrap(new int[] {5}).max();          // returns 5
+         * DisposableIntArray.wrap(new int[0]).max();             // throws IllegalArgumentException
+         * DisposableIntArray.wrap(new int[] {-1, 0, 1}).max();   // returns 1
+         * }</pre>
+         *
          * @return the maximum value
          * @throws IllegalArgumentException if the array is empty
          */
@@ -1564,6 +2345,15 @@ public interface NoCachingNoUpdating {
 
         /**
          * Performs the given action for each element of the array.
+         *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * DisposableIntArray arr = DisposableIntArray.wrap(new int[] {1, 2, 3});
+         * List<Integer> collected = new ArrayList<>();
+         * arr.foreach(collected::add);                                       // collected contains [1, 2, 3]
+         * DisposableIntArray.wrap(new int[0]).foreach(e -> {});              // invokes nothing for the empty array
+         * DisposableIntArray.wrap(new int[] {99}).foreach(collected::add);   // adds 99
+         * }</pre>
          *
          * @param <E> the type of exception that the action may throw
          * @param action the action to be performed for each element
@@ -1578,6 +2368,15 @@ public interface NoCachingNoUpdating {
         /**
          * Applies the given function to the wrapped array and returns the result.
          *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * DisposableIntArray arr = DisposableIntArray.wrap(new int[] {1, 2, 3});
+         * arr.apply(a -> a.length);                                       // returns 3
+         * arr.apply(a -> (int) a[0]);                                     // returns 1
+         * DisposableIntArray.wrap(new int[0]).apply(a -> a.length);       // returns 0
+         * DisposableIntArray.wrap(new int[] {99}).apply(a -> a.length);   // returns 1
+         * }</pre>
+         *
          * @param <R> the type of the result
          * @param <E> the type of exception that the function may throw
          * @param func the function to apply to the array
@@ -1591,6 +2390,15 @@ public interface NoCachingNoUpdating {
         /**
          * Performs the given action with the wrapped array.
          *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * DisposableIntArray arr = DisposableIntArray.wrap(new int[] {1, 2, 3});
+         * arr.accept(a -> System.out.println(a.length));                                   // prints 3
+         * DisposableIntArray.wrap(new int[0]).accept(a -> System.out.println(a.length));   // prints 0
+         * DisposableIntArray.wrap(new int[] {99}).accept(a -> System.out.println(a[0]));   // prints 99
+         * arr.accept(a -> {});                                                             // invokes a no-op consumer
+         * }</pre>
+         *
          * @param <E> the type of exception that the action may throw
          * @param action the action to perform with the array
          * @throws E if the action throws an exception
@@ -1601,6 +2409,15 @@ public interface NoCachingNoUpdating {
 
         /**
          * Joins the string representations of the array elements using the specified delimiter.
+         *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * DisposableIntArray arr = DisposableIntArray.wrap(new int[] {1, 2, 3});
+         * arr.join(", ");                                       // returns "1, 2, 3"
+         * DisposableIntArray.wrap(new int[0]).join(", ");       // returns ""
+         * DisposableIntArray.wrap(new int[] {99}).join(", ");   // returns "99"
+         * arr.join("-");                                        // returns "1-2-3"
+         * }</pre>
          *
          * @param delimiter the delimiter to use between elements
          * @return a string containing the joined elements
@@ -1613,6 +2430,15 @@ public interface NoCachingNoUpdating {
          * Joins the string representations of the array elements using the specified delimiter,
          * prefix, and suffix.
          *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * DisposableIntArray arr = DisposableIntArray.wrap(new int[] {1, 2, 3});
+         * arr.join(", ", "[", "]");                                       // returns "[1, 2, 3]"
+         * DisposableIntArray.wrap(new int[0]).join(", ", "[", "]");       // returns "[]"
+         * DisposableIntArray.wrap(new int[] {99}).join(", ", "[", "]");   // returns "[99]"
+         * arr.join("-", "{", "}");                                        // returns "{1-2-3}"
+         * }</pre>
+         *
          * @param delimiter the delimiter to use between elements
          * @param prefix the prefix to prepend to the result
          * @param suffix the suffix to append to the result
@@ -1624,6 +2450,14 @@ public interface NoCachingNoUpdating {
 
         /**
          * Returns a string representation of the wrapped int array.
+         *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * DisposableIntArray arr = DisposableIntArray.wrap(new int[] {1, 2, 3});
+         * arr.toString();                                       // returns string representation of [1, 2, 3]
+         * DisposableIntArray.wrap(new int[0]).toString();       // returns string representation of empty array
+         * DisposableIntArray.wrap(new int[] {99}).toString();   // returns string representation of [99]
+         * }</pre>
          *
          * @return a string representation of the array
          */
@@ -1679,6 +2513,14 @@ public interface NoCachingNoUpdating {
         /**
          * Creates a new DisposableLongArray backed by a new long array of the specified length.
          *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * DisposableLongArray arr = DisposableLongArray.create(5);    // array has length 5, all 0
+         * DisposableLongArray.create(0);                              // creates an empty array
+         * DisposableLongArray.create(-1);                             // throws IllegalArgumentException
+         * DisposableLongArray.create(1);                              // array has length 1
+         * }</pre>
+         *
          * @param len the length of the array; must be non-negative
          * @return a new DisposableLongArray instance
          * @throws IllegalArgumentException if {@code len} is negative
@@ -1693,6 +2535,15 @@ public interface NoCachingNoUpdating {
         /**
          * Wraps an existing long array in a DisposableLongArray.
          *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * DisposableLongArray arr = DisposableLongArray.wrap(new long[] {1, 2, 3});
+         * arr.get(0);                                  // returns 1
+         * DisposableLongArray.wrap(new long[0]);       // creates a wrapper over the empty array
+         * DisposableLongArray.wrap(null);              // throws IllegalArgumentException
+         * DisposableLongArray.wrap(new long[] {99});   // creates a wrapper over the single-element array
+         * }</pre>
+         *
          * @param a the long array to wrap; must not be {@code null}
          * @return a new DisposableLongArray wrapping the given array
          * @throws IllegalArgumentException if {@code a} is {@code null}
@@ -1704,6 +2555,15 @@ public interface NoCachingNoUpdating {
         /**
          * Returns the long value at the specified index.
          *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * DisposableLongArray arr = DisposableLongArray.wrap(new long[] {1, 2, 3});
+         * arr.get(0);    // returns 1
+         * arr.get(2);    // returns 3
+         * arr.get(-1);   // throws ArrayIndexOutOfBoundsException
+         * arr.get(3);    // throws ArrayIndexOutOfBoundsException
+         * }</pre>
+         *
          * @param index the index of the element to return
          * @return the long value at the specified index
          * @throws ArrayIndexOutOfBoundsException if the index is out of range
@@ -1714,6 +2574,14 @@ public interface NoCachingNoUpdating {
 
         /**
          * Returns the length of the wrapped long array.
+         *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * DisposableLongArray.wrap(new long[] {1, 2, 3}).length();   // returns 3
+         * DisposableLongArray.wrap(new long[0]).length();            // returns 0
+         * DisposableLongArray.create(10).length();                   // returns 10
+         * DisposableLongArray.wrap(new long[] {99}).length();        // returns 1
+         * }</pre>
          *
          * @return the length of the array
          */
@@ -1727,6 +2595,15 @@ public interface NoCachingNoUpdating {
          * array may be reused by the producer and must not be stored. The returned array
          * is independent of this instance.
          *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * DisposableLongArray arr = DisposableLongArray.wrap(new long[] {1, 2, 3});
+         * arr.copy();                                         // returns [1, 2, 3]
+         * DisposableLongArray.wrap(new long[0]).copy();       // returns empty long[]
+         * DisposableLongArray.wrap(new long[] {99}).copy();   // returns [99]
+         * arr.copy() != arr.copy();                           // true (independent copies)
+         * }</pre>
+         *
          * @return a new long array containing copies of the elements
          */
         public long[] copy() { //NOSONAR
@@ -1735,6 +2612,15 @@ public interface NoCachingNoUpdating {
 
         /**
          * Converts the long array to a Long object array.
+         *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * DisposableLongArray arr = DisposableLongArray.wrap(new long[] {1, 2, 3});
+         * arr.box();                                         // returns [Long.valueOf(1), Long.valueOf(2), Long.valueOf(3)]
+         * DisposableLongArray.wrap(new long[0]).box();       // returns empty Long[]
+         * DisposableLongArray.wrap(new long[] {99}).box();   // returns [Long.valueOf(99)]
+         * arr.box().length;                                  // returns 3
+         * }</pre>
          *
          * @return a new Long array containing boxed values
          */
@@ -1745,6 +2631,15 @@ public interface NoCachingNoUpdating {
         /**
          * Converts the array to a LongList.
          *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * DisposableLongArray arr = DisposableLongArray.wrap(new long[] {1, 2, 3});
+         * arr.toList();                                         // returns LongList [1, 2, 3]
+         * DisposableLongArray.wrap(new long[0]).toList();       // returns empty LongList
+         * DisposableLongArray.wrap(new long[] {99}).toList();   // returns LongList [99]
+         * arr.toList().size();                                  // returns 3
+         * }</pre>
+         *
          * @return a new LongList containing the array elements
          */
         public LongList toList() {
@@ -1754,6 +2649,15 @@ public interface NoCachingNoUpdating {
         /**
          * Converts the array to a Collection of the specified type.
          * Each long value is boxed to Long.
+         *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * DisposableLongArray arr = DisposableLongArray.wrap(new long[] {1, 2, 3});
+         * arr.toCollection(ArrayList::new);                                         // returns [1, 2, 3]
+         * DisposableLongArray.wrap(new long[0]).toCollection(ArrayList::new);       // returns empty list
+         * DisposableLongArray.wrap(new long[] {99}).toCollection(ArrayList::new);   // returns [99]
+         * arr.toCollection(HashSet::new);                                           // returns Set containing 1, 2, 3
+         * }</pre>
          *
          * @param <C> the type of the collection to create
          * @param supplier a function that creates a new collection instance with the specified capacity
@@ -1772,6 +2676,14 @@ public interface NoCachingNoUpdating {
         /**
          * Calculates the sum of all long values in the array.
          *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * DisposableLongArray.wrap(new long[] {1, 2, 3}).sum();   // returns 6L
+         * DisposableLongArray.wrap(new long[0]).sum();            // returns 0
+         * DisposableLongArray.wrap(new long[] {5}).sum();         // returns 5
+         * DisposableLongArray.wrap(new long[] {-1, 1}).sum();     // returns 0
+         * }</pre>
+         *
          * @return the sum of all elements
          */
         public long sum() {
@@ -1781,6 +2693,14 @@ public interface NoCachingNoUpdating {
         /**
          * Calculates the average of all long values in the array.
          *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * DisposableLongArray.wrap(new long[] {1, 2, 3}).average();   // returns 2.0
+         * DisposableLongArray.wrap(new long[0]).average();            // returns 0.0
+         * DisposableLongArray.wrap(new long[] {5}).average();         // returns 5.0
+         * DisposableLongArray.wrap(new long[] {1, 3}).average();      // returns 2.0
+         * }</pre>
+         *
          * @return the average of all elements, or 0 if the array is empty
          */
         public double average() {
@@ -1789,6 +2709,14 @@ public interface NoCachingNoUpdating {
 
         /**
          * Finds the minimum long value in the array.
+         *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * DisposableLongArray.wrap(new long[] {3, 1, 2}).min();    // returns 1
+         * DisposableLongArray.wrap(new long[] {5}).min();          // returns 5
+         * DisposableLongArray.wrap(new long[0]).min();             // throws IllegalArgumentException
+         * DisposableLongArray.wrap(new long[] {-1, 0, 1}).min();   // returns -1
+         * }</pre>
          *
          * @return the minimum value
          * @throws IllegalArgumentException if the array is empty
@@ -1800,6 +2728,14 @@ public interface NoCachingNoUpdating {
         /**
          * Finds the maximum long value in the array.
          *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * DisposableLongArray.wrap(new long[] {1, 3, 2}).max();    // returns 3
+         * DisposableLongArray.wrap(new long[] {5}).max();          // returns 5
+         * DisposableLongArray.wrap(new long[0]).max();             // throws IllegalArgumentException
+         * DisposableLongArray.wrap(new long[] {-1, 0, 1}).max();   // returns 1
+         * }</pre>
+         *
          * @return the maximum value
          * @throws IllegalArgumentException if the array is empty
          */
@@ -1809,6 +2745,15 @@ public interface NoCachingNoUpdating {
 
         /**
          * Performs the given action for each element of the array.
+         *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * DisposableLongArray arr = DisposableLongArray.wrap(new long[] {1, 2, 3});
+         * List<Long> collected = new ArrayList<>();
+         * arr.foreach(collected::add);                                         // collected contains [1, 2, 3]
+         * DisposableLongArray.wrap(new long[0]).foreach(e -> {});              // invokes nothing for the empty array
+         * DisposableLongArray.wrap(new long[] {99}).foreach(collected::add);   // adds 99
+         * }</pre>
          *
          * @param <E> the type of exception that the action may throw
          * @param action the action to be performed for each element
@@ -1823,6 +2768,15 @@ public interface NoCachingNoUpdating {
         /**
          * Applies the given function to the wrapped array and returns the result.
          *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * DisposableLongArray arr = DisposableLongArray.wrap(new long[] {1, 2, 3});
+         * arr.apply(a -> a.length);                                         // returns 3
+         * arr.apply(a -> (int) a[0]);                                       // returns 1
+         * DisposableLongArray.wrap(new long[0]).apply(a -> a.length);       // returns 0
+         * DisposableLongArray.wrap(new long[] {99}).apply(a -> a.length);   // returns 1
+         * }</pre>
+         *
          * @param <R> the type of the result
          * @param <E> the type of exception that the function may throw
          * @param func the function to apply to the array
@@ -1836,6 +2790,15 @@ public interface NoCachingNoUpdating {
         /**
          * Performs the given action with the wrapped array.
          *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * DisposableLongArray arr = DisposableLongArray.wrap(new long[] {1, 2, 3});
+         * arr.accept(a -> System.out.println(a.length));                                     // prints 3
+         * DisposableLongArray.wrap(new long[0]).accept(a -> System.out.println(a.length));   // prints 0
+         * DisposableLongArray.wrap(new long[] {99}).accept(a -> System.out.println(a[0]));   // prints 99
+         * arr.accept(a -> {});                                                               // invokes a no-op consumer
+         * }</pre>
+         *
          * @param <E> the type of exception that the action may throw
          * @param action the action to perform with the array
          * @throws E if the action throws an exception
@@ -1846,6 +2809,15 @@ public interface NoCachingNoUpdating {
 
         /**
          * Joins the string representations of the array elements using the specified delimiter.
+         *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * DisposableLongArray arr = DisposableLongArray.wrap(new long[] {1, 2, 3});
+         * arr.join(", ");                                         // returns "1, 2, 3"
+         * DisposableLongArray.wrap(new long[0]).join(", ");       // returns ""
+         * DisposableLongArray.wrap(new long[] {99}).join(", ");   // returns "99"
+         * arr.join("-");                                          // returns "1-2-3"
+         * }</pre>
          *
          * @param delimiter the delimiter to use between elements
          * @return a string containing the joined elements
@@ -1858,6 +2830,15 @@ public interface NoCachingNoUpdating {
          * Joins the string representations of the array elements using the specified delimiter,
          * prefix, and suffix.
          *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * DisposableLongArray arr = DisposableLongArray.wrap(new long[] {1, 2, 3});
+         * arr.join(", ", "[", "]");                                         // returns "[1, 2, 3]"
+         * DisposableLongArray.wrap(new long[0]).join(", ", "[", "]");       // returns "[]"
+         * DisposableLongArray.wrap(new long[] {99}).join(", ", "[", "]");   // returns "[99]"
+         * arr.join("-", "{", "}");                                          // returns "{1-2-3}"
+         * }</pre>
+         *
          * @param delimiter the delimiter to use between elements
          * @param prefix the prefix to prepend to the result
          * @param suffix the suffix to append to the result
@@ -1869,6 +2850,14 @@ public interface NoCachingNoUpdating {
 
         /**
          * Returns a string representation of the wrapped long array.
+         *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * DisposableLongArray arr = DisposableLongArray.wrap(new long[] {1, 2, 3});
+         * arr.toString();                                         // returns string representation of [1, 2, 3]
+         * DisposableLongArray.wrap(new long[0]).toString();       // returns string representation of empty array
+         * DisposableLongArray.wrap(new long[] {99}).toString();   // returns string representation of [99]
+         * }</pre>
          *
          * @return a string representation of the array
          */
@@ -1924,6 +2913,14 @@ public interface NoCachingNoUpdating {
         /**
          * Creates a new DisposableFloatArray backed by a new float array of the specified length.
          *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * DisposableFloatArray arr = DisposableFloatArray.create(5);    // array has length 5, all 0
+         * DisposableFloatArray.create(0);                               // creates an empty array
+         * DisposableFloatArray.create(-1);                              // throws IllegalArgumentException
+         * DisposableFloatArray.create(1);                               // array has length 1
+         * }</pre>
+         *
          * @param len the length of the array; must be non-negative
          * @return a new DisposableFloatArray instance
          * @throws IllegalArgumentException if {@code len} is negative
@@ -1938,6 +2935,15 @@ public interface NoCachingNoUpdating {
         /**
          * Wraps an existing float array in a DisposableFloatArray.
          *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * DisposableFloatArray arr = DisposableFloatArray.wrap(new float[] {1, 2, 3});
+         * arr.get(0);                                    // returns 1
+         * DisposableFloatArray.wrap(new float[0]);       // creates a wrapper over the empty array
+         * DisposableFloatArray.wrap(null);               // throws IllegalArgumentException
+         * DisposableFloatArray.wrap(new float[] {99});   // creates a wrapper over the single-element array
+         * }</pre>
+         *
          * @param a the float array to wrap; must not be {@code null}
          * @return a new DisposableFloatArray wrapping the given array
          * @throws IllegalArgumentException if {@code a} is {@code null}
@@ -1949,6 +2955,15 @@ public interface NoCachingNoUpdating {
         /**
          * Returns the float value at the specified index.
          *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * DisposableFloatArray arr = DisposableFloatArray.wrap(new float[] {1, 2, 3});
+         * arr.get(0);    // returns 1
+         * arr.get(2);    // returns 3
+         * arr.get(-1);   // throws ArrayIndexOutOfBoundsException
+         * arr.get(3);    // throws ArrayIndexOutOfBoundsException
+         * }</pre>
+         *
          * @param index the index of the element to return
          * @return the float value at the specified index
          * @throws ArrayIndexOutOfBoundsException if the index is out of range
@@ -1959,6 +2974,14 @@ public interface NoCachingNoUpdating {
 
         /**
          * Returns the length of the wrapped float array.
+         *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * DisposableFloatArray.wrap(new float[] {1, 2, 3}).length();   // returns 3
+         * DisposableFloatArray.wrap(new float[0]).length();            // returns 0
+         * DisposableFloatArray.create(10).length();                    // returns 10
+         * DisposableFloatArray.wrap(new float[] {99}).length();        // returns 1
+         * }</pre>
          *
          * @return the length of the array
          */
@@ -1972,6 +2995,15 @@ public interface NoCachingNoUpdating {
          * array may be reused by the producer and must not be stored. The returned array
          * is independent of this instance.
          *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * DisposableFloatArray arr = DisposableFloatArray.wrap(new float[] {1, 2, 3});
+         * arr.copy();                                           // returns [1, 2, 3]
+         * DisposableFloatArray.wrap(new float[0]).copy();       // returns empty float[]
+         * DisposableFloatArray.wrap(new float[] {99}).copy();   // returns [99]
+         * arr.copy() != arr.copy();                             // true (independent copies)
+         * }</pre>
+         *
          * @return a new float array containing copies of the elements
          */
         public float[] copy() { //NOSONAR
@@ -1980,6 +3012,15 @@ public interface NoCachingNoUpdating {
 
         /**
          * Converts the float array to a Float object array.
+         *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * DisposableFloatArray arr = DisposableFloatArray.wrap(new float[] {1, 2, 3});
+         * arr.box();                                           // returns [Float.valueOf(1), Float.valueOf(2), Float.valueOf(3)]
+         * DisposableFloatArray.wrap(new float[0]).box();       // returns empty Float[]
+         * DisposableFloatArray.wrap(new float[] {99}).box();   // returns [Float.valueOf(99)]
+         * arr.box().length;                                    // returns 3
+         * }</pre>
          *
          * @return a new Float array containing boxed values
          */
@@ -1990,6 +3031,15 @@ public interface NoCachingNoUpdating {
         /**
          * Converts the array to a FloatList.
          *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * DisposableFloatArray arr = DisposableFloatArray.wrap(new float[] {1, 2, 3});
+         * arr.toList();                                           // returns FloatList [1, 2, 3]
+         * DisposableFloatArray.wrap(new float[0]).toList();       // returns empty FloatList
+         * DisposableFloatArray.wrap(new float[] {99}).toList();   // returns FloatList [99]
+         * arr.toList().size();                                    // returns 3
+         * }</pre>
+         *
          * @return a new FloatList containing the array elements
          */
         public FloatList toList() {
@@ -1999,6 +3049,15 @@ public interface NoCachingNoUpdating {
         /**
          * Converts the array to a Collection of the specified type.
          * Each float value is boxed to Float.
+         *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * DisposableFloatArray arr = DisposableFloatArray.wrap(new float[] {1, 2, 3});
+         * arr.toCollection(ArrayList::new);                                           // returns [1, 2, 3]
+         * DisposableFloatArray.wrap(new float[0]).toCollection(ArrayList::new);       // returns empty list
+         * DisposableFloatArray.wrap(new float[] {99}).toCollection(ArrayList::new);   // returns [99]
+         * arr.toCollection(HashSet::new);                                             // returns Set containing 1, 2, 3
+         * }</pre>
          *
          * @param <C> the type of the collection to create
          * @param supplier a function that creates a new collection instance with the specified capacity
@@ -2017,6 +3076,14 @@ public interface NoCachingNoUpdating {
         /**
          * Calculates the sum of all float values in the array.
          *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * DisposableFloatArray.wrap(new float[] {1, 2, 3}).sum();   // returns 6.0f
+         * DisposableFloatArray.wrap(new float[0]).sum();            // returns 0
+         * DisposableFloatArray.wrap(new float[] {5}).sum();         // returns 5
+         * DisposableFloatArray.wrap(new float[] {-1, 1}).sum();     // returns 0
+         * }</pre>
+         *
          * @return the sum of all elements
          */
         public float sum() {
@@ -2026,6 +3093,14 @@ public interface NoCachingNoUpdating {
         /**
          * Calculates the average of all float values in the array.
          *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * DisposableFloatArray.wrap(new float[] {1, 2, 3}).average();   // returns 2.0
+         * DisposableFloatArray.wrap(new float[0]).average();            // returns 0.0
+         * DisposableFloatArray.wrap(new float[] {5}).average();         // returns 5.0
+         * DisposableFloatArray.wrap(new float[] {1, 3}).average();      // returns 2.0
+         * }</pre>
+         *
          * @return the average of all elements, or 0 if the array is empty
          */
         public double average() {
@@ -2034,6 +3109,14 @@ public interface NoCachingNoUpdating {
 
         /**
          * Finds the minimum float value in the array.
+         *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * DisposableFloatArray.wrap(new float[] {3, 1, 2}).min();    // returns 1
+         * DisposableFloatArray.wrap(new float[] {5}).min();          // returns 5
+         * DisposableFloatArray.wrap(new float[0]).min();             // throws IllegalArgumentException
+         * DisposableFloatArray.wrap(new float[] {-1, 0, 1}).min();   // returns -1
+         * }</pre>
          *
          * @return the minimum value
          * @throws IllegalArgumentException if the array is empty
@@ -2045,6 +3128,14 @@ public interface NoCachingNoUpdating {
         /**
          * Finds the maximum float value in the array.
          *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * DisposableFloatArray.wrap(new float[] {1, 3, 2}).max();    // returns 3
+         * DisposableFloatArray.wrap(new float[] {5}).max();          // returns 5
+         * DisposableFloatArray.wrap(new float[0]).max();             // throws IllegalArgumentException
+         * DisposableFloatArray.wrap(new float[] {-1, 0, 1}).max();   // returns 1
+         * }</pre>
+         *
          * @return the maximum value
          * @throws IllegalArgumentException if the array is empty
          */
@@ -2054,6 +3145,15 @@ public interface NoCachingNoUpdating {
 
         /**
          * Performs the given action for each element of the array.
+         *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * DisposableFloatArray arr = DisposableFloatArray.wrap(new float[] {1, 2, 3});
+         * List<Float> collected = new ArrayList<>();
+         * arr.foreach(collected::add);                                           // collected contains [1, 2, 3]
+         * DisposableFloatArray.wrap(new float[0]).foreach(e -> {});              // invokes nothing for the empty array
+         * DisposableFloatArray.wrap(new float[] {99}).foreach(collected::add);   // adds 99
+         * }</pre>
          *
          * @param <E> the type of exception that the action may throw
          * @param action the action to be performed for each element
@@ -2068,6 +3168,15 @@ public interface NoCachingNoUpdating {
         /**
          * Applies the given function to the wrapped array and returns the result.
          *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * DisposableFloatArray arr = DisposableFloatArray.wrap(new float[] {1, 2, 3});
+         * arr.apply(a -> a.length);                                           // returns 3
+         * arr.apply(a -> (int) a[0]);                                         // returns 1
+         * DisposableFloatArray.wrap(new float[0]).apply(a -> a.length);       // returns 0
+         * DisposableFloatArray.wrap(new float[] {99}).apply(a -> a.length);   // returns 1
+         * }</pre>
+         *
          * @param <R> the type of the result
          * @param <E> the type of exception that the function may throw
          * @param func the function to apply to the array
@@ -2081,6 +3190,15 @@ public interface NoCachingNoUpdating {
         /**
          * Performs the given action with the wrapped array.
          *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * DisposableFloatArray arr = DisposableFloatArray.wrap(new float[] {1, 2, 3});
+         * arr.accept(a -> System.out.println(a.length));                                       // prints 3
+         * DisposableFloatArray.wrap(new float[0]).accept(a -> System.out.println(a.length));   // prints 0
+         * DisposableFloatArray.wrap(new float[] {99}).accept(a -> System.out.println(a[0]));   // prints 99
+         * arr.accept(a -> {});                                                                 // invokes a no-op consumer
+         * }</pre>
+         *
          * @param <E> the type of exception that the action may throw
          * @param action the action to perform with the array
          * @throws E if the action throws an exception
@@ -2091,6 +3209,15 @@ public interface NoCachingNoUpdating {
 
         /**
          * Joins the string representations of the array elements using the specified delimiter.
+         *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * DisposableFloatArray arr = DisposableFloatArray.wrap(new float[] {1, 2, 3});
+         * arr.join(", ");                                           // returns "1, 2, 3"
+         * DisposableFloatArray.wrap(new float[0]).join(", ");       // returns ""
+         * DisposableFloatArray.wrap(new float[] {99}).join(", ");   // returns "99"
+         * arr.join("-");                                            // returns "1-2-3"
+         * }</pre>
          *
          * @param delimiter the delimiter to use between elements
          * @return a string containing the joined elements
@@ -2103,6 +3230,15 @@ public interface NoCachingNoUpdating {
          * Joins the string representations of the array elements using the specified delimiter,
          * prefix, and suffix.
          *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * DisposableFloatArray arr = DisposableFloatArray.wrap(new float[] {1, 2, 3});
+         * arr.join(", ", "[", "]");                                           // returns "[1, 2, 3]"
+         * DisposableFloatArray.wrap(new float[0]).join(", ", "[", "]");       // returns "[]"
+         * DisposableFloatArray.wrap(new float[] {99}).join(", ", "[", "]");   // returns "[99]"
+         * arr.join("-", "{", "}");                                            // returns "{1-2-3}"
+         * }</pre>
+         *
          * @param delimiter the delimiter to use between elements
          * @param prefix the prefix to prepend to the result
          * @param suffix the suffix to append to the result
@@ -2114,6 +3250,14 @@ public interface NoCachingNoUpdating {
 
         /**
          * Returns a string representation of the wrapped float array.
+         *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * DisposableFloatArray arr = DisposableFloatArray.wrap(new float[] {1, 2, 3});
+         * arr.toString();                                           // returns string representation of [1, 2, 3]
+         * DisposableFloatArray.wrap(new float[0]).toString();       // returns string representation of empty array
+         * DisposableFloatArray.wrap(new float[] {99}).toString();   // returns string representation of [99]
+         * }</pre>
          *
          * @return a string representation of the array
          */
@@ -2170,6 +3314,14 @@ public interface NoCachingNoUpdating {
         /**
          * Creates a new DisposableDoubleArray backed by a new double array of the specified length.
          *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * DisposableDoubleArray arr = DisposableDoubleArray.create(5);    // array has length 5, all 0
+         * DisposableDoubleArray.create(0);                                // creates an empty array
+         * DisposableDoubleArray.create(-1);                               // throws IllegalArgumentException
+         * DisposableDoubleArray.create(1);                                // array has length 1
+         * }</pre>
+         *
          * @param len the length of the array; must be non-negative
          * @return a new DisposableDoubleArray instance
          * @throws IllegalArgumentException if {@code len} is negative
@@ -2184,6 +3336,15 @@ public interface NoCachingNoUpdating {
         /**
          * Wraps an existing double array in a DisposableDoubleArray.
          *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * DisposableDoubleArray arr = DisposableDoubleArray.wrap(new double[] {1, 2, 3});
+         * arr.get(0);                                      // returns 1
+         * DisposableDoubleArray.wrap(new double[0]);       // creates a wrapper over the empty array
+         * DisposableDoubleArray.wrap(null);                // throws IllegalArgumentException
+         * DisposableDoubleArray.wrap(new double[] {99});   // creates a wrapper over the single-element array
+         * }</pre>
+         *
          * @param a the double array to wrap; must not be {@code null}
          * @return a new DisposableDoubleArray wrapping the given array
          * @throws IllegalArgumentException if {@code a} is {@code null}
@@ -2195,6 +3356,15 @@ public interface NoCachingNoUpdating {
         /**
          * Returns the double value at the specified index.
          *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * DisposableDoubleArray arr = DisposableDoubleArray.wrap(new double[] {1, 2, 3});
+         * arr.get(0);    // returns 1
+         * arr.get(2);    // returns 3
+         * arr.get(-1);   // throws ArrayIndexOutOfBoundsException
+         * arr.get(3);    // throws ArrayIndexOutOfBoundsException
+         * }</pre>
+         *
          * @param index the index of the element to return
          * @return the double value at the specified index
          * @throws ArrayIndexOutOfBoundsException if the index is out of range
@@ -2205,6 +3375,14 @@ public interface NoCachingNoUpdating {
 
         /**
          * Returns the length of the wrapped double array.
+         *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * DisposableDoubleArray.wrap(new double[] {1, 2, 3}).length();   // returns 3
+         * DisposableDoubleArray.wrap(new double[0]).length();            // returns 0
+         * DisposableDoubleArray.create(10).length();                     // returns 10
+         * DisposableDoubleArray.wrap(new double[] {99}).length();        // returns 1
+         * }</pre>
          *
          * @return the length of the array
          */
@@ -2218,6 +3396,15 @@ public interface NoCachingNoUpdating {
          * array may be reused by the producer and must not be stored. The returned array
          * is independent of this instance.
          *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * DisposableDoubleArray arr = DisposableDoubleArray.wrap(new double[] {1, 2, 3});
+         * arr.copy();                                             // returns [1, 2, 3]
+         * DisposableDoubleArray.wrap(new double[0]).copy();       // returns empty double[]
+         * DisposableDoubleArray.wrap(new double[] {99}).copy();   // returns [99]
+         * arr.copy() != arr.copy();                               // true (independent copies)
+         * }</pre>
+         *
          * @return a new double array containing copies of the elements
          */
         public double[] copy() { //NOSONAR
@@ -2226,6 +3413,15 @@ public interface NoCachingNoUpdating {
 
         /**
          * Converts the double array to a Double object array.
+         *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * DisposableDoubleArray arr = DisposableDoubleArray.wrap(new double[] {1, 2, 3});
+         * arr.box();                                             // returns [Double.valueOf(1), Double.valueOf(2), Double.valueOf(3)]
+         * DisposableDoubleArray.wrap(new double[0]).box();       // returns empty Double[]
+         * DisposableDoubleArray.wrap(new double[] {99}).box();   // returns [Double.valueOf(99)]
+         * arr.box().length;                                      // returns 3
+         * }</pre>
          *
          * @return a new Double array containing boxed values
          */
@@ -2236,6 +3432,15 @@ public interface NoCachingNoUpdating {
         /**
          * Converts the array to a DoubleList.
          *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * DisposableDoubleArray arr = DisposableDoubleArray.wrap(new double[] {1, 2, 3});
+         * arr.toList();                                             // returns DoubleList [1, 2, 3]
+         * DisposableDoubleArray.wrap(new double[0]).toList();       // returns empty DoubleList
+         * DisposableDoubleArray.wrap(new double[] {99}).toList();   // returns DoubleList [99]
+         * arr.toList().size();                                      // returns 3
+         * }</pre>
+         *
          * @return a new DoubleList containing the array elements
          */
         public DoubleList toList() {
@@ -2245,6 +3450,15 @@ public interface NoCachingNoUpdating {
         /**
          * Converts the array to a Collection of the specified type.
          * Each double value is boxed to Double.
+         *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * DisposableDoubleArray arr = DisposableDoubleArray.wrap(new double[] {1, 2, 3});
+         * arr.toCollection(ArrayList::new);                                             // returns [1, 2, 3]
+         * DisposableDoubleArray.wrap(new double[0]).toCollection(ArrayList::new);       // returns empty list
+         * DisposableDoubleArray.wrap(new double[] {99}).toCollection(ArrayList::new);   // returns [99]
+         * arr.toCollection(HashSet::new);                                               // returns Set containing 1, 2, 3
+         * }</pre>
          *
          * @param <C> the type of the collection to create
          * @param supplier a function that creates a new collection instance with the specified capacity
@@ -2263,6 +3477,14 @@ public interface NoCachingNoUpdating {
         /**
          * Calculates the sum of all double values in the array.
          *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * DisposableDoubleArray.wrap(new double[] {1, 2, 3}).sum();   // returns 6.0
+         * DisposableDoubleArray.wrap(new double[0]).sum();            // returns 0
+         * DisposableDoubleArray.wrap(new double[] {5}).sum();         // returns 5
+         * DisposableDoubleArray.wrap(new double[] {-1, 1}).sum();     // returns 0
+         * }</pre>
+         *
          * @return the sum of all elements
          */
         public double sum() {
@@ -2272,6 +3494,14 @@ public interface NoCachingNoUpdating {
         /**
          * Calculates the average of all double values in the array.
          *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * DisposableDoubleArray.wrap(new double[] {1, 2, 3}).average();   // returns 2.0
+         * DisposableDoubleArray.wrap(new double[0]).average();            // returns 0.0
+         * DisposableDoubleArray.wrap(new double[] {5}).average();         // returns 5.0
+         * DisposableDoubleArray.wrap(new double[] {1, 3}).average();      // returns 2.0
+         * }</pre>
+         *
          * @return the average of all elements, or 0 if the array is empty
          */
         public double average() {
@@ -2280,6 +3510,14 @@ public interface NoCachingNoUpdating {
 
         /**
          * Finds the minimum double value in the array.
+         *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * DisposableDoubleArray.wrap(new double[] {3, 1, 2}).min();    // returns 1
+         * DisposableDoubleArray.wrap(new double[] {5}).min();          // returns 5
+         * DisposableDoubleArray.wrap(new double[0]).min();             // throws IllegalArgumentException
+         * DisposableDoubleArray.wrap(new double[] {-1, 0, 1}).min();   // returns -1
+         * }</pre>
          *
          * @return the minimum value
          * @throws IllegalArgumentException if the array is empty
@@ -2291,6 +3529,14 @@ public interface NoCachingNoUpdating {
         /**
          * Finds the maximum double value in the array.
          *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * DisposableDoubleArray.wrap(new double[] {1, 3, 2}).max();    // returns 3
+         * DisposableDoubleArray.wrap(new double[] {5}).max();          // returns 5
+         * DisposableDoubleArray.wrap(new double[0]).max();             // throws IllegalArgumentException
+         * DisposableDoubleArray.wrap(new double[] {-1, 0, 1}).max();   // returns 1
+         * }</pre>
+         *
          * @return the maximum value
          * @throws IllegalArgumentException if the array is empty
          */
@@ -2300,6 +3546,15 @@ public interface NoCachingNoUpdating {
 
         /**
          * Performs the given action for each element of the array.
+         *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * DisposableDoubleArray arr = DisposableDoubleArray.wrap(new double[] {1, 2, 3});
+         * List<Double> collected = new ArrayList<>();
+         * arr.foreach(collected::add);                                             // collected contains [1, 2, 3]
+         * DisposableDoubleArray.wrap(new double[0]).foreach(e -> {});              // invokes nothing for the empty array
+         * DisposableDoubleArray.wrap(new double[] {99}).foreach(collected::add);   // adds 99
+         * }</pre>
          *
          * @param <E> the type of exception that the action may throw
          * @param action the action to be performed for each element
@@ -2314,6 +3569,15 @@ public interface NoCachingNoUpdating {
         /**
          * Applies the given function to the wrapped array and returns the result.
          *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * DisposableDoubleArray arr = DisposableDoubleArray.wrap(new double[] {1, 2, 3});
+         * arr.apply(a -> a.length);                                             // returns 3
+         * arr.apply(a -> (int) a[0]);                                           // returns 1
+         * DisposableDoubleArray.wrap(new double[0]).apply(a -> a.length);       // returns 0
+         * DisposableDoubleArray.wrap(new double[] {99}).apply(a -> a.length);   // returns 1
+         * }</pre>
+         *
          * @param <R> the type of the result
          * @param <E> the type of exception that the function may throw
          * @param func the function to apply to the array
@@ -2327,6 +3591,15 @@ public interface NoCachingNoUpdating {
         /**
          * Performs the given action with the wrapped array.
          *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * DisposableDoubleArray arr = DisposableDoubleArray.wrap(new double[] {1, 2, 3});
+         * arr.accept(a -> System.out.println(a.length));                                         // prints 3
+         * DisposableDoubleArray.wrap(new double[0]).accept(a -> System.out.println(a.length));   // prints 0
+         * DisposableDoubleArray.wrap(new double[] {99}).accept(a -> System.out.println(a[0]));   // prints 99
+         * arr.accept(a -> {});                                                                   // invokes a no-op consumer
+         * }</pre>
+         *
          * @param <E> the type of exception that the action may throw
          * @param action the action to perform with the array
          * @throws E if the action throws an exception
@@ -2337,6 +3610,15 @@ public interface NoCachingNoUpdating {
 
         /**
          * Joins the string representations of the array elements using the specified delimiter.
+         *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * DisposableDoubleArray arr = DisposableDoubleArray.wrap(new double[] {1, 2, 3});
+         * arr.join(", ");                                             // returns "1, 2, 3"
+         * DisposableDoubleArray.wrap(new double[0]).join(", ");       // returns ""
+         * DisposableDoubleArray.wrap(new double[] {99}).join(", ");   // returns "99"
+         * arr.join("-");                                              // returns "1-2-3"
+         * }</pre>
          *
          * @param delimiter the delimiter to use between elements
          * @return a string containing the joined elements
@@ -2349,6 +3631,15 @@ public interface NoCachingNoUpdating {
          * Joins the string representations of the array elements using the specified delimiter,
          * prefix, and suffix.
          *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * DisposableDoubleArray arr = DisposableDoubleArray.wrap(new double[] {1, 2, 3});
+         * arr.join(", ", "[", "]");                                             // returns "[1, 2, 3]"
+         * DisposableDoubleArray.wrap(new double[0]).join(", ", "[", "]");       // returns "[]"
+         * DisposableDoubleArray.wrap(new double[] {99}).join(", ", "[", "]");   // returns "[99]"
+         * arr.join("-", "{", "}");                                              // returns "{1-2-3}"
+         * }</pre>
+         *
          * @param delimiter the delimiter to use between elements
          * @param prefix the prefix to prepend to the result
          * @param suffix the suffix to append to the result
@@ -2360,6 +3651,14 @@ public interface NoCachingNoUpdating {
 
         /**
          * Returns a string representation of the wrapped double array.
+         *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * DisposableDoubleArray arr = DisposableDoubleArray.wrap(new double[] {1, 2, 3});
+         * arr.toString();                                             // returns string representation of [1, 2, 3]
+         * DisposableDoubleArray.wrap(new double[0]).toString();       // returns string representation of empty array
+         * DisposableDoubleArray.wrap(new double[] {99}).toString();   // returns string representation of [99]
+         * }</pre>
          *
          * @return a string representation of the array
          */
@@ -2392,7 +3691,7 @@ public interface NoCachingNoUpdating {
      * deque.add("second");
      * DisposableDeque<String> disposable = DisposableDeque.wrap(deque);
      * String first = disposable.getFirst();      // "first"
-     * List<String> list = disposable.toList();   // Creates a new list
+     * List<String> list = disposable.toList();   // creates a new list
      * }</pre>
      *
      * @param <T> the type of elements in the deque
@@ -2418,6 +3717,14 @@ public interface NoCachingNoUpdating {
         /**
          * Creates a new DisposableDeque backed by a new ArrayDeque with the specified initial capacity.
          *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * DisposableDeque<String> deque = DisposableDeque.create(5);    // creates an empty deque with capacity 5
+         * DisposableDeque.create(0);                                    // creates an empty deque with capacity 0
+         * DisposableDeque.create(-1);                                   // throws IllegalArgumentException
+         * DisposableDeque.create(10);                                   // creates an empty deque with capacity 10
+         * }</pre>
+         *
          * @param <T> the type of elements in the deque
          * @param len the initial capacity of the deque; must be non-negative
          * @return a new DisposableDeque instance
@@ -2433,6 +3740,16 @@ public interface NoCachingNoUpdating {
         /**
          * Wraps an existing Deque in a DisposableDeque.
          *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * Deque<String> data = new ArrayDeque<>(Arrays.asList("a", "b", "c"));
+         * DisposableDeque<String> deque = DisposableDeque.wrap(data);
+         * deque.size();                                           // returns 3
+         * DisposableDeque.wrap(new ArrayDeque<>());               // creates a wrapper over the empty deque
+         * DisposableDeque.wrap(null);                             // throws IllegalArgumentException
+         * DisposableDeque.wrap(new ArrayDeque<>(List.of("x")));   // creates a wrapper over the single-element deque
+         * }</pre>
+         *
          * @param <T> the type of elements in the deque
          * @param deque the deque to wrap; must not be {@code null}
          * @return a new DisposableDeque wrapping the given deque
@@ -2445,6 +3762,14 @@ public interface NoCachingNoUpdating {
         /**
          * Returns the number of elements in the deque.
          *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * Deque<String> data = new ArrayDeque<>(Arrays.asList("a", "b", "c"));
+         * DisposableDeque<String> deque = DisposableDeque.wrap(data);
+         * deque.size();                                      // returns 3
+         * DisposableDeque.wrap(new ArrayDeque<>()).size();   // returns 0
+         * }</pre>
+         *
          * @return the size of the deque
          */
         public int size() {
@@ -2453,6 +3778,15 @@ public interface NoCachingNoUpdating {
 
         /**
          * Retrieves the first element of the deque.
+         *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * Deque<String> data = new ArrayDeque<>(Arrays.asList("a", "b", "c"));
+         * DisposableDeque<String> deque = DisposableDeque.wrap(data);
+         * deque.getFirst();   // returns "a"
+         * DisposableDeque<String> empty = DisposableDeque.wrap(new ArrayDeque<>());
+         * empty.getFirst();   // throws NoSuchElementException
+         * }</pre>
          *
          * @return the first element of the deque
          * @throws NoSuchElementException if the deque is empty
@@ -2464,6 +3798,15 @@ public interface NoCachingNoUpdating {
         /**
          * Retrieves the last element of the deque.
          *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * Deque<String> data = new ArrayDeque<>(Arrays.asList("a", "b", "c"));
+         * DisposableDeque<String> deque = DisposableDeque.wrap(data);
+         * deque.getLast();   // returns "c"
+         * DisposableDeque<String> empty = DisposableDeque.wrap(new ArrayDeque<>());
+         * empty.getLast();   // throws NoSuchElementException
+         * }</pre>
+         *
          * @return the last element of the deque
          * @throws NoSuchElementException if the deque is empty
          */
@@ -2473,6 +3816,15 @@ public interface NoCachingNoUpdating {
 
         /**
          * Returns an array containing all elements of the deque.
+         *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * Deque<String> data = new ArrayDeque<>(Arrays.asList("a", "b", "c"));
+         * DisposableDeque<String> deque = DisposableDeque.wrap(data);
+         * deque.toArray(new String[0]);   // returns ["a", "b", "c"]
+         * deque.toArray(new String[5]);   // returns ["a", "b", "c", null, null] (padded)
+         * }</pre>
+         *
          * If the supplied array is large enough, the elements are stored in it; otherwise a new
          * array of the same runtime type is allocated. Follows the same contract as
          * {@link java.util.Collection#toArray(Object[])}.
@@ -2493,6 +3845,14 @@ public interface NoCachingNoUpdating {
          * Converts the deque to a List.
          * The returned list is a new instance and can be safely cached or modified.
          *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * Deque<String> data = new ArrayDeque<>(Arrays.asList("a", "b", "c"));
+         * DisposableDeque<String> deque = DisposableDeque.wrap(data);
+         * deque.toList();                                      // returns ["a", "b", "c"]
+         * DisposableDeque.wrap(new ArrayDeque<>()).toList();   // returns []
+         * }</pre>
+         *
          * @return a new List containing all elements from the deque
          */
         public List<T> toList() {
@@ -2504,6 +3864,14 @@ public interface NoCachingNoUpdating {
          * The returned set is a new instance and can be safely cached or modified.
          * Duplicate elements in the deque will appear only once in the set.
          *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * Deque<String> data = new ArrayDeque<>(Arrays.asList("a", "b", "a"));
+         * DisposableDeque<String> deque = DisposableDeque.wrap(data);
+         * deque.toSet();                                      // returns Set containing "a", "b" (duplicates removed)
+         * DisposableDeque.wrap(new ArrayDeque<>()).toSet();   // returns empty Set
+         * }</pre>
+         *
          * @return a new Set containing the unique elements from the deque
          */
         public Set<T> toSet() {
@@ -2512,6 +3880,14 @@ public interface NoCachingNoUpdating {
 
         /**
          * Converts the deque to a Collection of the specified type.
+         *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * Deque<String> data = new ArrayDeque<>(Arrays.asList("a", "b", "c"));
+         * DisposableDeque<String> deque = DisposableDeque.wrap(data);
+         * deque.toCollection(ArrayList::new);                                      // returns ["a", "b", "c"]
+         * DisposableDeque.wrap(new ArrayDeque<>()).toCollection(ArrayList::new);   // returns empty list
+         * }</pre>
          *
          * @param <C> the type of the collection to create
          * @param supplier a function that creates a new collection instance with the specified capacity
@@ -2526,6 +3902,15 @@ public interface NoCachingNoUpdating {
         /**
          * Performs the given action for each element of the deque.
          *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * Deque<String> data = new ArrayDeque<>(Arrays.asList("a", "b", "c"));
+         * DisposableDeque<String> deque = DisposableDeque.wrap(data);
+         * List<String> collected = new ArrayList<>();
+         * deque.foreach(collected::add);                               // collected contains ["a", "b", "c"]
+         * DisposableDeque.wrap(new ArrayDeque<>()).foreach(e -> {});   // invokes nothing for the empty deque
+         * }</pre>
+         *
          * @param <E> the type of exception that the action may throw
          * @param action the action to be performed for each element
          * @throws E if the action throws an exception
@@ -2538,6 +3923,14 @@ public interface NoCachingNoUpdating {
 
         /**
          * Applies the given function to the wrapped deque and returns the result.
+         *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * Deque<String> data = new ArrayDeque<>(Arrays.asList("a", "b", "c"));
+         * DisposableDeque<String> deque = DisposableDeque.wrap(data);
+         * deque.apply(Deque::size);                                      // returns 3
+         * DisposableDeque.wrap(new ArrayDeque<>()).apply(Deque::size);   // returns 0
+         * }</pre>
          *
          * @param <R> the type of the result
          * @param <E> the type of exception that the function may throw
@@ -2552,6 +3945,14 @@ public interface NoCachingNoUpdating {
         /**
          * Performs the given action with the wrapped deque.
          *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * Deque<String> data = new ArrayDeque<>(Arrays.asList("a", "b", "c"));
+         * DisposableDeque<String> deque = DisposableDeque.wrap(data);
+         * deque.accept(d -> System.out.println(d.size()));                                      // prints 3
+         * DisposableDeque.wrap(new ArrayDeque<>()).accept(d -> System.out.println(d.size()));   // prints 0
+         * }</pre>
+         *
          * @param <E> the type of exception that the action may throw
          * @param action the action to perform with the deque
          * @throws E if the action throws an exception
@@ -2563,6 +3964,14 @@ public interface NoCachingNoUpdating {
         /**
          * Joins the string representations of the deque elements using the specified delimiter.
          *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * Deque<String> data = new ArrayDeque<>(Arrays.asList("a", "b", "c"));
+         * DisposableDeque<String> deque = DisposableDeque.wrap(data);
+         * deque.join(", ");                                      // returns "a, b, c"
+         * DisposableDeque.wrap(new ArrayDeque<>()).join(", ");   // returns ""
+         * }</pre>
+         *
          * @param delimiter the delimiter to use between elements
          * @return a string containing the joined elements
          */
@@ -2573,6 +3982,14 @@ public interface NoCachingNoUpdating {
         /**
          * Joins the string representations of the deque elements using the specified delimiter,
          * prefix, and suffix.
+         *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * Deque<String> data = new ArrayDeque<>(Arrays.asList("a", "b", "c"));
+         * DisposableDeque<String> deque = DisposableDeque.wrap(data);
+         * deque.join(", ", "[", "]");                                      // returns "[a, b, c]"
+         * DisposableDeque.wrap(new ArrayDeque<>()).join(", ", "[", "]");   // returns "[]"
+         * }</pre>
          *
          * @param delimiter the delimiter to use between elements
          * @param prefix the prefix to prepend to the result
@@ -2600,7 +4017,7 @@ public interface NoCachingNoUpdating {
      * DisposableEntry<String, Integer> disposable = DisposableEntry.wrap(entry);
      * String key = disposable.getKey();                      // "key"
      * Integer value = disposable.getValue();                 // 100
-     * Map.Entry<String, Integer> copy = disposable.copy();   // Creates a mutable copy
+     * Map.Entry<String, Integer> copy = disposable.copy();   // creates a mutable copy
      * }</pre>
      *
      * @param <K> the type of the key
@@ -2619,6 +4036,15 @@ public interface NoCachingNoUpdating {
 
         /**
          * Wraps an existing Map.Entry in a DisposableEntry.
+         *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * Map.Entry<String, Integer> entry = Map.entry("key", 100);
+         * DisposableEntry<String, Integer> disposable = DisposableEntry.wrap(entry);
+         * disposable.getKey();                       // returns "key"
+         * DisposableEntry.wrap(null);                // throws IllegalArgumentException
+         * DisposableEntry.wrap(Map.entry("x", 1));   // creates a wrapper over the single entry
+         * }</pre>
          *
          * @param <K> the type of the key
          * @param <V> the type of the value
@@ -2647,6 +4073,13 @@ public interface NoCachingNoUpdating {
         /**
          * This operation is not supported as DisposableEntry is read-only.
          *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * Map.Entry<String, Integer> entry = Map.entry("key", 100);
+         * DisposableEntry<String, Integer> disposable = DisposableEntry.wrap(entry);
+         * disposable.setValue(200);   // throws UnsupportedOperationException
+         * }</pre>
+         *
          * @param value the new value (ignored)
          * @return never returns
          * @throws UnsupportedOperationException always thrown
@@ -2662,6 +4095,15 @@ public interface NoCachingNoUpdating {
          * Creates a mutable copy of this entry.
          * The returned entry can be safely cached and modified.
          *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * Map.Entry<String, Integer> entry = Map.entry("key", 100);
+         * DisposableEntry<String, Integer> disposable = DisposableEntry.wrap(entry);
+         * Map.Entry<String, Integer> copy = disposable.copy();   // returns mutable copy with key="key", value=100
+         * copy.setValue(200);                                    // copy is mutable so this succeeds
+         * disposable.copy().getKey();                            // returns "key"
+         * }</pre>
+         *
          * @return a new mutable Map.Entry with the same key and value
          */
         public Map.Entry<K, V> copy() {
@@ -2670,6 +4112,14 @@ public interface NoCachingNoUpdating {
 
         /**
          * Applies the given function to this entry and returns the result.
+         *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * Map.Entry<String, Integer> entry = Map.entry("key", 100);
+         * DisposableEntry<String, Integer> disposable = DisposableEntry.wrap(entry);
+         * disposable.apply(e -> e.getKey() + "=" + e.getValue());             // returns "key=100"
+         * DisposableEntry.wrap(Map.entry("x", 1)).apply(e -> e.getValue());   // returns 1
+         * }</pre>
          *
          * @param <R> the type of the result
          * @param <E> the type of exception that the function may throw
@@ -2703,6 +4153,14 @@ public interface NoCachingNoUpdating {
         /**
          * Performs the given action with this entry.
          *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * Map.Entry<String, Integer> entry = Map.entry("key", 100);
+         * DisposableEntry<String, Integer> disposable = DisposableEntry.wrap(entry);
+         * disposable.accept(e -> System.out.println(e.getKey()));    // prints "key"
+         * DisposableEntry.wrap(Map.entry("x", 1)).accept(e -> {});   // invokes a no-op consumer
+         * }</pre>
+         *
          * @param <E> the type of exception that the action may throw
          * @param action the action to perform with this entry
          * @throws E if the action throws an exception
@@ -2713,6 +4171,14 @@ public interface NoCachingNoUpdating {
 
         /**
          * Performs the given bi-consumer action with the key and value of this entry.
+         *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * Map.Entry<String, Integer> entry = Map.entry("key", 100);
+         * DisposableEntry<String, Integer> disposable = DisposableEntry.wrap(entry);
+         * disposable.accept((k, v) -> System.out.println(k + "=" + v));   // prints "key=100"
+         * DisposableEntry.wrap(Map.entry("x", 1)).accept((k, v) -> {});   // invokes a no-op consumer
+         * }</pre>
          *
          * @param <E> the type of exception that the action may throw
          * @param action the bi-consumer action to perform with the key and value
@@ -2743,7 +4209,7 @@ public interface NoCachingNoUpdating {
      * DisposablePair<String, Integer> disposable = DisposablePair.wrap(pair);
      * String left = disposable.left();                  // "left"
      * Integer right = disposable.right();               // 100
-     * Pair<String, Integer> copy = disposable.copy();   // Creates a mutable copy
+     * Pair<String, Integer> copy = disposable.copy();   // creates a mutable copy
      * }</pre>
      *
      * @param <L> the type of the left element
@@ -2762,6 +4228,15 @@ public interface NoCachingNoUpdating {
 
         /**
          * Wraps an existing Pair in a DisposablePair.
+         *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * Pair<String, Integer> pair = Pair.of("left", 100);
+         * DisposablePair<String, Integer> disposable = DisposablePair.wrap(pair);
+         * disposable.left();                      // returns "left"
+         * DisposablePair.wrap(null);              // throws IllegalArgumentException
+         * DisposablePair.wrap(Pair.of("x", 1));   // creates a wrapper over the single pair
+         * }</pre>
          *
          * @param <L> the type of the left element
          * @param <R> the type of the right element
@@ -2790,12 +4265,28 @@ public interface NoCachingNoUpdating {
         /**
          * Returns the left element of the pair.
          *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * Pair<String, Integer> pair = Pair.of("left", 100);
+         * DisposablePair<String, Integer> disposable = DisposablePair.wrap(pair);
+         * disposable.left();                             // returns "left"
+         * DisposablePair.wrap(Pair.of("x", 1)).left();   // returns "x"
+         * }</pre>
+         *
          * @return the left element
          */
         public abstract L left();
 
         /**
          * Returns the right element of the pair.
+         *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * Pair<String, Integer> pair = Pair.of("left", 100);
+         * DisposablePair<String, Integer> disposable = DisposablePair.wrap(pair);
+         * disposable.right();                             // returns 100
+         * DisposablePair.wrap(Pair.of("x", 1)).right();   // returns 1
+         * }</pre>
          *
          * @return the right element
          */
@@ -2804,6 +4295,15 @@ public interface NoCachingNoUpdating {
         /**
          * Creates a mutable copy of this pair.
          * The returned pair can be safely cached and modified.
+         *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * Pair<String, Integer> pair = Pair.of("left", 100);
+         * DisposablePair<String, Integer> disposable = DisposablePair.wrap(pair);
+         * Pair<String, Integer> copy = disposable.copy();   // returns Pair("left", 100)
+         * copy.setRight(200);                               // copy is mutable so this succeeds
+         * disposable.copy().left();                         // returns "left"
+         * }</pre>
          *
          * @return a new mutable Pair with the same left and right values
          */
@@ -2844,6 +4344,14 @@ public interface NoCachingNoUpdating {
         /**
          * Returns a string representation of this pair in the form "[left, right]".
          *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * Pair<String, Integer> pair = Pair.of("left", 100);
+         * DisposablePair<String, Integer> disposable = DisposablePair.wrap(pair);
+         * disposable.toString();                             // returns "[left, 100]"
+         * DisposablePair.wrap(Pair.of("x", 1)).toString();   // returns "[x, 1]"
+         * }</pre>
+         *
          * @return a string representation of this pair
          */
         @Override
@@ -2864,7 +4372,7 @@ public interface NoCachingNoUpdating {
      * String left = disposable.left();                             // "left"
      * Integer middle = disposable.middle();                        // 100
      * Boolean right = disposable.right();                          // true
-     * Triple<String, Integer, Boolean> copy = disposable.copy();   // Creates a mutable copy
+     * Triple<String, Integer, Boolean> copy = disposable.copy();   // creates a mutable copy
      * }</pre>
      *
      * @param <L> the type of the left element
@@ -2884,6 +4392,15 @@ public interface NoCachingNoUpdating {
 
         /**
          * Wraps an existing Triple in a DisposableTriple.
+         *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * Triple<String, Integer, Boolean> triple = Triple.of("left", 100, true);
+         * DisposableTriple<String, Integer, Boolean> disposable = DisposableTriple.wrap(triple);
+         * disposable.left();                                 // returns "left"
+         * DisposableTriple.wrap(null);                       // throws IllegalArgumentException
+         * DisposableTriple.wrap(Triple.of("x", 1, false));   // creates a wrapper over the single triple
+         * }</pre>
          *
          * @param <L> the type of the left element
          * @param <M> the type of the middle element
@@ -2918,12 +4435,28 @@ public interface NoCachingNoUpdating {
         /**
          * Returns the left element of the triple.
          *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * Triple<String, Integer, Boolean> triple = Triple.of("left", 100, true);
+         * DisposableTriple<String, Integer, Boolean> disposable = DisposableTriple.wrap(triple);
+         * disposable.left();                                        // returns "left"
+         * DisposableTriple.wrap(Triple.of("x", 1, false)).left();   // returns "x"
+         * }</pre>
+         *
          * @return the left element
          */
         public abstract L left();
 
         /**
          * Returns the middle element of the triple.
+         *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * Triple<String, Integer, Boolean> triple = Triple.of("left", 100, true);
+         * DisposableTriple<String, Integer, Boolean> disposable = DisposableTriple.wrap(triple);
+         * disposable.middle();                                        // returns 100
+         * DisposableTriple.wrap(Triple.of("x", 1, false)).middle();   // returns 1
+         * }</pre>
          *
          * @return the middle element
          */
@@ -2932,6 +4465,14 @@ public interface NoCachingNoUpdating {
         /**
          * Returns the right element of the triple.
          *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * Triple<String, Integer, Boolean> triple = Triple.of("left", 100, true);
+         * DisposableTriple<String, Integer, Boolean> disposable = DisposableTriple.wrap(triple);
+         * disposable.right();                                        // returns true
+         * DisposableTriple.wrap(Triple.of("x", 1, false)).right();   // returns false
+         * }</pre>
+         *
          * @return the right element
          */
         public abstract R right();
@@ -2939,6 +4480,14 @@ public interface NoCachingNoUpdating {
         /**
          * Creates a mutable copy of this triple.
          * The returned triple can be safely cached and modified.
+         *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * Triple<String, Integer, Boolean> triple = Triple.of("left", 100, true);
+         * DisposableTriple<String, Integer, Boolean> disposable = DisposableTriple.wrap(triple);
+         * Triple<String, Integer, Boolean> copy = disposable.copy();   // returns Triple("left", 100, true)
+         * disposable.copy().left();                                    // returns "left"
+         * }</pre>
          *
          * @return a new mutable Triple with the same left, middle, and right values
          */
@@ -2968,6 +4517,14 @@ public interface NoCachingNoUpdating {
         /**
          * Performs the given tri-consumer action with the left, middle, and right elements.
          *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * Triple<String, Integer, Boolean> triple = Triple.of("left", 100, true);
+         * DisposableTriple<String, Integer, Boolean> disposable = DisposableTriple.wrap(triple);
+         * disposable.accept((l, m, r) -> System.out.println(l + "=" + m + "=" + r));   // prints "left=100=true"
+         * DisposableTriple.wrap(Triple.of("x", 1, false)).accept((l, m, r) -> {});     // invokes a no-op consumer
+         * }</pre>
+         *
          * @param <E> the type of exception that the action may throw
          * @param action the tri-consumer action to perform
          * @throws E if the action throws an exception
@@ -2978,6 +4535,14 @@ public interface NoCachingNoUpdating {
 
         /**
          * Returns a string representation of this triple in the form "[left, middle, right]".
+         *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * Triple<String, Integer, Boolean> triple = Triple.of("left", 100, true);
+         * DisposableTriple<String, Integer, Boolean> disposable = DisposableTriple.wrap(triple);
+         * disposable.toString();                                        // returns "[left, 100, true]"
+         * DisposableTriple.wrap(Triple.of("x", 1, false)).toString();   // returns "[x, 1, false]"
+         * }</pre>
          *
          * @return a string representation of this triple
          */
@@ -2997,7 +4562,7 @@ public interface NoCachingNoUpdating {
      * <pre>{@code
      * Timed<String> timedValue = Timed.of("Hello", System.currentTimeMillis());
      * String value = timedValue.value();    // "Hello"
-     * long time = timedValue.timestamp();   // The timestamp in milliseconds
+     * long time = timedValue.timestamp();   // timestamp is in milliseconds
      * }</pre>
      *
      * @param <T> the type of the value
@@ -3024,6 +4589,14 @@ public interface NoCachingNoUpdating {
         /**
          * Creates a new Timed instance with the specified value and timestamp.
          *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * Timed<String> timed = Timed.of("Hello", 12345L);
+         * Timed.of(null, 0L);          // null value is allowed
+         * Timed.of("value", 0L);       // timestamp is zero
+         * Timed.of("value", -1L);      // timestamp is negative
+         * }</pre>
+         *
          * @param <T> the type of the value
          * @param value the value to wrap
          * @param timeInMillis the timestamp in milliseconds
@@ -3048,6 +4621,14 @@ public interface NoCachingNoUpdating {
         /**
          * Returns the wrapped value.
          *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * Timed<String> timed = Timed.of("Hello", 12345L);
+         * timed.value();                // returns "Hello"
+         * Timed.of(null, 0L).value();   // returns null
+         * Timed.of("x", 1L).value();    // returns "x"
+         * }</pre>
+         *
          * @return the wrapped value
          */
         public T value() {
@@ -3056,6 +4637,14 @@ public interface NoCachingNoUpdating {
 
         /**
          * Returns the timestamp associated with the value.
+         *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * Timed<String> timed = Timed.of("Hello", 12345L);
+         * timed.timestamp();                   // returns 12345L
+         * Timed.of("value", 0L).timestamp();   // returns 0L
+         * Timed.of("value", -1L).timestamp();  // returns -1L
+         * }</pre>
          *
          * @return the timestamp in milliseconds
          */
@@ -3066,6 +4655,14 @@ public interface NoCachingNoUpdating {
         /**
          * Returns the hash code of this Timed instance.
          * The hash code is computed based on both the timestamp and the value.
+         *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * Timed<String> t1 = Timed.of("value", 12345L);
+         * Timed<String> t2 = Timed.of("value", 12345L);
+         * t1.hashCode() == t2.hashCode();   // returns true
+         * Timed.of(null, 0L).hashCode();    // returns valid hash code
+         * }</pre>
          *
          * @return the hash code
          */
@@ -3079,6 +4676,16 @@ public interface NoCachingNoUpdating {
         /**
          * Compares this Timed instance with another object for equality.
          * Two Timed instances are equal if they have the same timestamp and value.
+         *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * Timed<String> t1 = Timed.of("value", 12345L);
+         * Timed<String> t2 = Timed.of("value", 12345L);
+         * t1.equals(t2);                          // returns true
+         * t1.equals(Timed.of("other", 12345L));   // returns false
+         * t1.equals(null);                        // returns false
+         * t1.equals("not a Timed");               // returns false
+         * }</pre>
          *
          * @param obj the object to compare with
          * @return {@code true} if the objects are equal, {@code false} otherwise
@@ -3098,6 +4705,14 @@ public interface NoCachingNoUpdating {
 
         /**
          * Returns a string representation of this Timed instance in the form "timestamp: value".
+         *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * Timed<String> timed = Timed.of("Hello", 12345L);
+         * timed.toString();                // returns "12345: Hello"
+         * Timed.of(null, 0L).toString();   // returns "0: null"
+         * Timed.of("x", 1L).toString();    // returns "1: x"
+         * }</pre>
          *
          * @return a string representation
          */

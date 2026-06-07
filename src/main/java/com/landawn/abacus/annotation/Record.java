@@ -53,14 +53,14 @@ import java.lang.annotation.Target;
  * <p><b>Lombok-backed record-like class on a pre-Java-14 codebase:</b></p>
  * <pre>{@code
  * @Record
- * @Value          // Lombok: all-args ctor, getters, equals/hashCode/toString from final fields.
+ * @Value          // creates all-args ctor, getters, equals/hashCode/toString from final fields (Lombok).
  * public class PersonRecord {
  *     String name;
  *     int    age;
  *     String email;
  * }
  *
- * Beans.isRecordClass(PersonRecord.class);  // -> true (because of @Record)
+ * Beans.isRecordClass(PersonRecord.class);  // true (because of @Record)
  *
  * // Behaves like:
  * // public record PersonRecord(String name, int age, String email) {}

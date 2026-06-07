@@ -127,6 +127,7 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
      * pair.setLeft("Hello");
      * pair.setRight(42);
      * }</pre>
+     *
      */
     public Pair() {
     }
@@ -147,7 +148,7 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Pair<String, Integer> coordinates = Pair.of("X", 10);
-     * Pair<String, String> nullPair = Pair.of(null, null);   // Valid
+     * Pair<String, String> nullPair = Pair.of(null, null);   // valid: both elements may be null
      * }</pre>
      *
      * @param <L> the type of the left element.
@@ -228,7 +229,7 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Pair<String, Integer> pair = Pair.of("Hello", 42);
-     * String left = pair.left();   // Returns "Hello"
+     * String left = pair.left();   // returns "Hello"
      * }</pre>
      *
      * @return the left element of this pair, may be {@code null}.
@@ -246,7 +247,7 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Pair<String, Integer> pair = Pair.of("Hello", 42);
-     * Integer right = pair.right();   // Returns 42
+     * Integer right = pair.right();   // returns 42
      * }</pre>
      *
      * @return the right element of this pair, may be {@code null}.
@@ -261,7 +262,7 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Pair<String, Integer> pair = Pair.of("Hello", 42);
-     * String left = pair.getLeft();   // Returns "Hello"
+     * String left = pair.getLeft();   // returns "Hello"
      * }</pre>
      *
      * @return the left element of the pair, may be {@code null}.
@@ -297,7 +298,7 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Pair<String, Integer> pair = Pair.of("Hello", 42);
-     * Integer right = pair.getRight();   // Returns 42
+     * Integer right = pair.getRight();   // returns 42
      * }</pre>
      *
      * @return the right element of the pair, may be {@code null}.
@@ -450,7 +451,7 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
      * <p>The predicate is evaluated at most once. If it throws an exception,
      * the left element is not modified and the exception is propagated.</p>
      *
-     * <p><b>Usage examples:</b></p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Pair<String, Integer> pair = Pair.of("Hello", 10);
      *
@@ -489,7 +490,7 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
      * <p>The predicate is evaluated at most once. If it throws an exception,
      * the right element is not modified and the exception is propagated.</p>
      *
-     * <p><b>Usage examples:</b></p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Pair<String, Integer> pair = Pair.of("Hello", 10);
      *
@@ -532,7 +533,7 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
      * exception is propagated. Note: this class is not thread-safe; the two field
      * assignments are not atomic with respect to other threads.</p>
      *
-     * <p><b>Usage examples:</b></p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Pair<String, Integer> pair = Pair.of("Hello", 10);
      *
@@ -927,7 +928,7 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
      * <pre>{@code
      * Pair<String, Integer> pair = Pair.of("key", 100);
      * Map.Entry<String, Integer> entry = pair;
-     * String key = entry.getKey();   // Returns "key"
+     * String key = entry.getKey();   // returns "key"
      * }</pre>
      *
      * @return the left element of this pair, may be {@code null}.
@@ -951,7 +952,7 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
      * <pre>{@code
      * Pair<String, Integer> pair = Pair.of("key", 100);
      * Map.Entry<String, Integer> entry = pair;
-     * Integer value = entry.getValue();   // Returns 100
+     * Integer value = entry.getValue();   // returns 100
      * }</pre>
      *
      * @return the right element of this pair, may be {@code null}.
@@ -997,8 +998,8 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
      *
      * <p>Equal pairs (as determined by {@link #equals(Object)}) are guaranteed to have the
      * same hash code, making them suitable for use as keys in hash-based collections.
-     * Note that because XOR is commutative, pairs with swapped elements may share the
-     * same hash code.</p>
+     * Note that because XOR is commutative, {@code Pair.of(a, b)} and {@code Pair.of(b, a)} always have the
+     * same hash code, regardless of the element values.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1009,7 +1010,7 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
      * Map<Pair<String, Integer>, String> map = new HashMap<>();
      * map.put(pair1, "value");
      * // Can retrieve using pair2 because they have the same hash code and are equal
-     * String value = map.get(pair2);   // Returns "value"
+     * String value = map.get(pair2);   // returns "value"
      * }</pre>
      *
      * @return a hash code value for this pair.
@@ -1071,10 +1072,10 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Pair<String, Integer> pair = Pair.of("Hello", 42);
-     * System.out.println(pair);   // Prints: (Hello, 42)
+     * System.out.println(pair);   // prints (Hello, 42)
      *
      * Pair<String, String> nullPair = Pair.of(null, "World");
-     * System.out.println(nullPair);   // Prints: (null, World)
+     * System.out.println(nullPair);   // prints (null, World)
      * }</pre>
      *
      * @return a string representation of this pair in the format (left, right).

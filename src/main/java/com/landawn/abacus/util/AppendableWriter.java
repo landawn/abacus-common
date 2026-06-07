@@ -38,7 +38,7 @@ import java.nio.CharBuffer;
  *     writer.write("Hello, ");
  *     writer.write("World!");
  * }
- * System.out.println(sb.toString());   // "Hello, World!"
+ * System.out.println(sb.toString());   // prints "Hello, World!"
  * }</pre>
  *
  * @see StringWriter
@@ -281,7 +281,7 @@ public sealed class AppendableWriter extends Writer permits StringWriter {
      * <pre>{@code
      * try (AppendableWriter writer = new AppendableWriter(appendable)) {
      *     writer.write("Data");
-     * } // Automatically closed
+     * }
      * }</pre>
      *
      * @throws IOException if an I/O error occurs while flushing or closing
@@ -329,7 +329,7 @@ public sealed class AppendableWriter extends Writer permits StringWriter {
      * StringBuilder sb = new StringBuilder();
      * AppendableWriter writer = new AppendableWriter(sb);
      * writer.write("Hello");
-     * System.out.println(writer.toString());   // "Hello"
+     * System.out.println(writer.toString());   // prints "Hello"
      * }</pre>
      *
      * @return the string representation of the underlying {@code Appendable}

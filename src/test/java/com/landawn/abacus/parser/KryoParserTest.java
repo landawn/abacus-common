@@ -527,4 +527,25 @@ public class KryoParserTest extends TestBase {
     public void testRegisterNullSerializer() {
         assertThrows(IllegalArgumentException.class, () -> parser.register(TestObject.class, null));
     }
+
+    @Test
+    public void testDeserializeTypedWriteClassPayload() {
+        final String encoded = parser.serialize("abc", KryoSerConfig.create().setWriteClass(true));
+
+        assertEquals("abc", parser.deserialize(encoded, null, String.class));
+    }
+
+    @Test
+    public void testDeserializeTypedWriteClassInputStreamPayload() {
+        final String encoded = parser.serialize("abc", KryoSerConfig.create().setWriteClass(true));
+
+        assertEquals("abc", parser.deserialize(new ByteArrayInputStream(Strings.base64Decode(encoded)), null, String.class));
+    }
+
+    @Test
+    public void testDeserializeTypedNullPayload() {
+        final String encoded = parser.serialize(null, (KryoSerConfig) null);
+
+        assertNull(parser.deserialize(encoded, null, String.class));
+    }
 }

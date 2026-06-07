@@ -54,7 +54,6 @@ import java.lang.annotation.Target;
  *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
- *
  * public class DataProcessor {
  *     @LazyEvaluation
  *     public Stream<String> processLargeFile(Path filePath) throws IOException {
@@ -76,7 +75,7 @@ import java.lang.annotation.Target;
  *     private final Function<Integer, T> generator;
  *
  *     public T get(int index) {
- *         return generator.apply(index);   // Computed only when requested
+ *         return generator.apply(index);   // value is computed only when requested
  *     }
  * }
  * }</pre>

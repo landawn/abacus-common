@@ -102,8 +102,15 @@ public class FractionType extends AbstractType<Fraction> {
      * Uses {@link Fraction#toString()}, which produces a string in the form
      * {@code "numerator/denominator"} (e.g., {@code "3/4"}).
      *
+     * <p>The returned string is a serializable representation designed to be parsed back into an equivalent value
+     * via {@link #valueOf(String)}; {@code stringOf} and {@code valueOf} are inverse operations that round-trip. This
+     * is the key distinction from {@link Object#toString()}, whose result is not guaranteed to be convertible back
+     * into the original value.</p>
+     *
      * @param x the {@link Fraction} to convert; may be {@code null}
      * @return the string representation of the fraction, or {@code null} if {@code x} is {@code null}
+     * @see #valueOf(String)
+     * @see #valueOf(Object)
      */
     @Override
     public String stringOf(final Fraction x) {
@@ -120,9 +127,15 @@ public class FractionType extends AbstractType<Fraction> {
      *   <li>Integer format, e.g., {@code "5"}</li>
      * </ul>
      *
+     * <p>This method is the inverse of {@code stringOf} and round-trips with it: it parses the string produced by
+     * {@code stringOf} back into a value of this type. Strings produced by {@link Object#toString()} are not
+     * guaranteed to be parseable in this way.</p>
+     *
      * @param str the string to parse; may be {@code null} or empty
      * @return the parsed {@link Fraction}, or {@code null} if {@code str} is {@code null} or empty
      * @throws NumberFormatException if the string is non-empty but cannot be parsed as a fraction
+     * @see #valueOf(Object)
+     * @see #stringOf(Fraction)
      */
     @Override
     public Fraction valueOf(final String str) {

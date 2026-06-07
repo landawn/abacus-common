@@ -43,6 +43,7 @@ import org.apache.logging.log4j.spi.ExtendedLogger;
  * Exception sqlException = new Exception("Connection timeout");
  * logger.error("Database connection failed", sqlException);
  * }</pre>
+ *
  */
 class Log4Jv2Logger extends AbstractLogger {
 
@@ -75,10 +76,6 @@ class Log4Jv2Logger extends AbstractLogger {
      */
     public Log4Jv2Logger(final String name) {
         super(name);
-        // if (!existsLog4JFile) {
-        // throw new RuntimeException("Failed to initialize Log4j Logger Factory");
-        // }
-        //
         loggerImpl = (ExtendedLogger) org.apache.logging.log4j.LogManager.getLogger(name);
     }
 

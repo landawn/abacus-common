@@ -214,22 +214,22 @@ public class OptionalDoubleTypeTest extends TestBase {
     }
 
     @Test
-    public void testWriteCharacterWithNull() throws IOException {
-        optionalDoubleType.writeCharacter(writer, null, config);
+    public void testSerializeToWithNull() throws IOException {
+        optionalDoubleType.serializeTo(writer, null, config);
         verify(writer).write(any(char[].class));
     }
 
     @Test
-    public void testWriteCharacterWithEmpty() throws IOException {
+    public void testSerializeToWithEmpty() throws IOException {
         OptionalDouble empty = OptionalDouble.empty();
-        optionalDoubleType.writeCharacter(writer, empty, config);
+        optionalDoubleType.serializeTo(writer, empty, config);
         verify(writer).write(any(char[].class));
     }
 
     @Test
-    public void testWriteCharacterWithValue() throws IOException {
+    public void testSerializeToWithValue() throws IOException {
         OptionalDouble opt = OptionalDouble.of(1.5);
-        optionalDoubleType.writeCharacter(writer, opt, config);
+        optionalDoubleType.serializeTo(writer, opt, config);
         verify(writer).write(1.5);
     }
 }

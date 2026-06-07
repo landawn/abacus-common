@@ -68,7 +68,7 @@ import com.landawn.abacus.annotation.MayReturnNull;
  *     try {
  *         // use connection
  *     } finally {
- *         pool.put("database1", borrowed);   // return to pool
+ *         pool.put("database1", borrowed);   // adds it back to the pool
  *     }
  * }
  * }</pre>
@@ -218,8 +218,8 @@ public interface KeyedObjectPool<K, E extends Poolable> extends Pool {
     E peek(K key);
 
     /**
-     * Returns a Set view of the keys contained in this pool.
-     * The returned set is a snapshot and will not reflect subsequent changes to the pool.
+     * Returns a Set containing a snapshot of the keys contained in this pool.
+     * The returned set will not reflect subsequent changes to the pool.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -235,8 +235,8 @@ public interface KeyedObjectPool<K, E extends Poolable> extends Pool {
     Set<K> keySet();
 
     /**
-     * Returns a Collection view of the values contained in this pool.
-     * The returned collection is a snapshot and will not reflect subsequent changes to the pool.
+     * Returns a Collection containing a snapshot of the values contained in this pool.
+     * The returned collection will not reflect subsequent changes to the pool.
      *
      * @return a collection containing all values currently in the pool
      * @throws IllegalStateException if the pool has been closed
@@ -259,7 +259,7 @@ public interface KeyedObjectPool<K, E extends Poolable> extends Pool {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MemoryMeasure<String, CachedData> measure = (key, data) ->
-     *     key.length() * 2 + data.getDataSize();   // * 2 for UTF-16 encoding (2 bytes per char)
+     *     key.length() * 2 + data.getDataSize();   // uses 2 bytes per char for UTF-16 encoding
      *
      * KeyedObjectPool<String, CachedData> pool = PoolFactory.createKeyedObjectPool(
      *     1000, 3000, EvictionPolicy.LAST_ACCESS_TIME,

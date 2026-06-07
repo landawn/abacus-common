@@ -122,8 +122,15 @@ public class HBaseColumnType<T> extends AbstractType<HBaseColumn<T>> {
      * where {@code version} is the column's timestamp/version number and {@code value}
      * is the element type's string representation of the stored value.
      *
+     * <p>The returned string is a serializable representation designed to be parsed back into an equivalent value
+     * via {@link #valueOf(String)}; {@code stringOf} and {@code valueOf} are inverse operations that round-trip. This
+     * is the key distinction from {@link Object#toString()}, whose result is not guaranteed to be convertible back
+     * into the original value.</p>
+     *
      * @param x the HBaseColumn to serialize; may be {@code null}
      * @return the serialized string, or {@code null} if {@code x} is {@code null}
+     * @see #valueOf(String)
+     * @see #valueOf(Object)
      */
     @Override
     public String stringOf(final HBaseColumn<T> x) {
@@ -135,10 +142,16 @@ public class HBaseColumnType<T> extends AbstractType<HBaseColumn<T>> {
      * The part before the first {@code ':'} is parsed as the {@code long} version/timestamp,
      * and the remainder is parsed by the element type handler.
      *
+     * <p>This method is the inverse of {@code stringOf} and round-trips with it: it parses the string produced by
+     * {@code stringOf} back into a value of this type. Strings produced by {@link Object#toString()} are not
+     * guaranteed to be parseable in this way.</p>
+     *
      * @param str the string to parse in {@code "version:value"} format; may be {@code null} or empty
      * @return a new {@link HBaseColumn} with the parsed version and value,
      *         or {@code null} if {@code str} is {@code null} or empty
      * @throws IllegalArgumentException if the string does not contain a {@code ':'} separator
+     * @see #valueOf(Object)
+     * @see #stringOf(HBaseColumn)
      */
     @Override
     public HBaseColumn<T> valueOf(final String str) {

@@ -234,13 +234,14 @@ public enum NamingPolicy {
      * which naming policy constant is used (e.g., CAMEL_CASE, SCREAMING_SNAKE_CASE, etc.).</p>
      *
      * <p>How word boundaries are detected depends on the target policy. The camel-case policies
-     * ({@link #CAMEL_CASE} and {@link #UPPER_CAMEL_CASE}) split the input on the following boundaries:</p>
+     * ({@link #CAMEL_CASE} and {@link #UPPER_CAMEL_CASE}) split the input on the following separators:</p>
      * <ul>
      *   <li>Underscores (_)</li>
      *   <li>Hyphens (-)</li>
-     *   <li>Spaces</li>
-     *   <li>Case transitions (e.g., "camelCase" is treated as the words "camel" and "case")</li>
+     *   <li>Whitespace</li>
      * </ul>
+     * <p>The camel-case policies do not split on case transitions, so an input that is already in
+     * camelCase or UpperCamelCase form (with no separators) is returned unchanged.</p>
      * <p>The {@link #SNAKE_CASE}, {@link #SCREAMING_SNAKE_CASE}, and {@link #KEBAB_CASE} policies
      * insert their separator only at case transitions and preserve any existing underscores, hyphens,
      * or spaces in the input. The {@link #NO_CHANGE} policy performs no transformation at all.</p>

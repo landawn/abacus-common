@@ -163,6 +163,12 @@ public final class LZ4BlockOutputStream extends OutputStream {
      * {@link #finish()} or {@link #close()} is called. Calling this method only
      * forwards the flush to the underlying output stream.</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * lz4Out.write(data);
+     * lz4Out.flush();   // Flush underlying stream (data still buffered until finish())
+     * }</pre>
+     *
      * @throws IOException if an I/O error occurs
      */
     @Override
@@ -205,6 +211,16 @@ public final class LZ4BlockOutputStream extends OutputStream {
      * {@link #flush()} after the stream is closed has no effect.</p>
      *
      * <p>Closing a previously closed stream has no effect.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * LZ4BlockOutputStream lz4Out = new LZ4BlockOutputStream(new FileOutputStream("data.lz4"));
+     * try {
+     *     lz4Out.write(data);
+     * } finally {
+     *     lz4Out.close();   // Finishes and releases resources
+     * }
+     * }</pre>
      *
      * @throws IOException if an I/O error occurs
      */

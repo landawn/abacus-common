@@ -183,6 +183,22 @@ public class GenericObjectPoolTest extends TestBase {
     }
 
     @Test
+    public void testAddTimedReturnsFalseWhenMemoryMeasureThrows() throws InterruptedException {
+        ObjectPool.MemoryMeasure<TestPoolable> measure = e -> {
+            throw new IllegalStateException("boom");
+        };
+
+        GenericObjectPool<TestPoolable> memPool = new GenericObjectPool<>(10, 0, EvictionPolicy.LAST_ACCESS_TIME, 250, measure);
+
+        try {
+            assertFalse(memPool.add(new TestPoolable("timed"), 1, TimeUnit.MILLISECONDS));
+            assertEquals(0, memPool.size());
+        } finally {
+            memPool.close();
+        }
+    }
+
+    @Test
     public void testAddWithAutoDestroyFalse() {
         GenericObjectPool<TestPoolable> noBalancePool = new GenericObjectPool<>(2, 0, EvictionPolicy.LAST_ACCESS_TIME, false, 0.2f);
         try {

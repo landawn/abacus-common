@@ -400,10 +400,7 @@ abstract class AbstractParser<SC extends SerializationConfig<?>, DC extends Dese
             return null;
         }
 
-        //noinspection StatementWithEmptyBody
-        if (targetType.isPrimitiveArray()) {
-            // continue
-        } else {
+        if (!targetType.isPrimitiveArray()) {
             // looking for the right array class.
             for (final Object e : c) {
                 if (e != null) {

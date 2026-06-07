@@ -57,7 +57,7 @@ import com.landawn.abacus.util.cs;
  *
  * // Register Kryo classes for better performance
  * ParserFactory.registerKryo(MyClass.class);
- * ParserFactory.registerKryo(MyClass.class, 100);   // with ID
+ * ParserFactory.registerKryo(MyClass.class, 100);   // uses an explicit ID
  * }</pre>
  *
  * @see JsonParser
@@ -290,7 +290,6 @@ public final class ParserFactory {
      * }</pre>
      *
      * @return a new {@code JsonParser} instance
-     * @throws NoClassDefFoundError if JSON parser implementation is not available
      */
     public static JsonParser createJsonParser() {
         return new JsonParserImpl();
@@ -313,7 +312,6 @@ public final class ParserFactory {
      * @param jsc the JSON serialization configuration (may be {@code null} for default behavior)
      * @param jdc the JSON deserialization configuration (may be {@code null} for default behavior)
      * @return a new {@code JsonParser} instance with the specified configurations
-     * @throws NoClassDefFoundError if JSON parser implementation is not available
      */
     public static JsonParser createJsonParser(final JsonSerConfig jsc, final JsonDeserConfig jdc) {
         return new JsonParserImpl(jsc, jdc);

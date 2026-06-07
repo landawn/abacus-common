@@ -58,6 +58,7 @@ public final class Charsets {
      * <pre>{@code
      * byte[] asciiBytes = "Hello".getBytes(Charsets.US_ASCII);
      * }</pre>
+     *
      */
     public static final Charset US_ASCII = StandardCharsets.US_ASCII;
 
@@ -70,6 +71,7 @@ public final class Charsets {
      * <pre>{@code
      * byte[] latinBytes = "Café".getBytes(Charsets.ISO_8859_1);
      * }</pre>
+     *
      */
     public static final Charset ISO_8859_1 = StandardCharsets.ISO_8859_1;
 
@@ -85,6 +87,7 @@ public final class Charsets {
      * byte[] utf8Bytes = "Hello 世界".getBytes(Charsets.UTF_8);
      * String text = new String(utf8Bytes, Charsets.UTF_8);
      * }</pre>
+     *
      */
     public static final Charset UTF_8 = StandardCharsets.UTF_8;
 
@@ -98,6 +101,7 @@ public final class Charsets {
      * <pre>{@code
      * byte[] utf16Bytes = "Hello".getBytes(Charsets.UTF_16);
      * }</pre>
+     *
      */
     public static final Charset UTF_16 = StandardCharsets.UTF_16;
 
@@ -110,6 +114,7 @@ public final class Charsets {
      * <pre>{@code
      * byte[] utf16beBytes = "Hello".getBytes(Charsets.UTF_16BE);
      * }</pre>
+     *
      */
     public static final Charset UTF_16BE = StandardCharsets.UTF_16BE;
 
@@ -122,6 +127,7 @@ public final class Charsets {
      * <pre>{@code
      * byte[] utf16leBytes = "Hello".getBytes(Charsets.UTF_16LE);
      * }</pre>
+     *
      */
     public static final Charset UTF_16LE = StandardCharsets.UTF_16LE;
 
@@ -137,6 +143,7 @@ public final class Charsets {
      * Charset systemDefault = Charsets.DEFAULT;
      * System.out.println("System default charset: " + systemDefault.name());
      * }</pre>
+     *
      */
     public static final Charset DEFAULT = Charset.defaultCharset();
 

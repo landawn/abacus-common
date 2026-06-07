@@ -59,8 +59,15 @@ public class StringBuilderType extends AbstractCharSequenceType<StringBuilder> {
      * String str = type.stringOf(sb);   // Returns "Hello World"
      * }</pre>
      *
+     * <p>The returned string is a serializable representation designed to be parsed back into an equivalent value
+     * via {@link #valueOf(String)}; {@code stringOf} and {@code valueOf} are inverse operations that round-trip. This
+     * is the key distinction from {@link Object#toString()}, whose result is not guaranteed to be convertible back
+     * into the original value.</p>
+     *
      * @param x the StringBuilder object to convert
      * @return the string representation of the StringBuilder's content, or {@code null} if x is null
+     * @see #valueOf(String)
+     * @see #valueOf(Object)
      */
     @Override
     public String stringOf(final StringBuilder x) {
@@ -77,8 +84,14 @@ public class StringBuilderType extends AbstractCharSequenceType<StringBuilder> {
      * StringBuilder sb = type.valueOf("Hello World");   // Creates StringBuilder with "Hello World"
      * }</pre>
      *
+     * <p>This method is the inverse of {@code stringOf} and round-trips with it: it parses the string produced by
+     * {@code stringOf} back into a value of this type. Strings produced by {@link Object#toString()} are not
+     * guaranteed to be parseable in this way.</p>
+     *
      * @param str the string to convert to a StringBuilder
      * @return a new StringBuilder containing the string content, or {@code null} if str is null
+     * @see #valueOf(Object)
+     * @see #stringOf(StringBuilder)
      */
     @Override
     public StringBuilder valueOf(final String str) {

@@ -91,9 +91,9 @@ public class ImmutableMapEntryTypeTest extends TestBase {
     }
 
     @Test
-    public void testWriteCharacter() throws IOException {
+    public void testSerializeTo() throws IOException {
         assertDoesNotThrow(() -> {
-            immutableMapEntryType.writeCharacter(characterWriter, null, config);
+            immutableMapEntryType.serializeTo(characterWriter, null, config);
         });
     }
 

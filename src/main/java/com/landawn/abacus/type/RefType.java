@@ -59,6 +59,7 @@ import java.sql.SQLException;
  * // String str = type.stringOf(ref);   // Throws UnsupportedOperationException
  * // Ref ref = type.valueOf("string");   // Throws UnsupportedOperationException
  * }</pre>
+ *
  */
 public class RefType extends AbstractType<Ref> {
 

@@ -79,23 +79,23 @@ public class PrimitiveDoubleListTypeTest extends TestBase {
     }
 
     @Test
-    public void testWriteCharacterEmptyList() throws IOException {
+    public void testSerializeToEmptyList() throws IOException {
         CharacterWriter writer = createCharacterWriter();
         DoubleList list = DoubleList.of(new double[0]);
         JsonXmlSerConfig<?> config = mock(JsonXmlSerConfig.class);
 
-        type.writeCharacter(writer, list, config);
+        type.serializeTo(writer, list, config);
         verify(writer).write('[');
         verify(writer).write(']');
     }
 
     @Test
-    public void testWriteCharacterNonEmptyList() throws IOException {
+    public void testSerializeToNonEmptyList() throws IOException {
         CharacterWriter writer = createCharacterWriter();
         DoubleList list = DoubleList.of(new double[] { 1.5, 2.7 });
         JsonXmlSerConfig<?> config = mock(JsonXmlSerConfig.class);
 
-        type.writeCharacter(writer, list, config);
+        type.serializeTo(writer, list, config);
         verify(writer).write('[');
         verify(writer).write(1.5);
         verify(writer).write(", ");

@@ -268,6 +268,27 @@ public class JsonParserImplTest extends TestBase {
     }
 
     @Test
+    public void testDeserializeMapClassHonorsConfiguredMapInstanceType() {
+        JsonDeserConfig config = JsonDeserConfig.create().setMapInstanceType(LinkedHashMap.class);
+        Map<String, Object> result = parser.deserialize("{\"b\":1,\"a\":2}", config, Map.class);
+
+        assertTrue(result instanceof LinkedHashMap);
+        java.util.Iterator<String> iter = result.keySet().iterator();
+        assertEquals("b", iter.next());
+        assertEquals("a", iter.next());
+    }
+
+    @Test
+    public void testDeserializeIgnoreNullOrEmptyKeepsEmptyKeyWithNonEmptyValue() {
+        JsonDeserConfig config = JsonDeserConfig.create().setIgnoreNullOrEmpty(true).setMapValueType(String.class);
+        Map<String, Object> result = parser.deserialize("{\"\":\"kept\",\"blank\":\"\"}", config, Map.class);
+
+        assertEquals("kept", result.get(""));
+        assertTrue(result.containsKey(""));
+        assertTrue(!result.containsKey("blank"));
+    }
+
+    @Test
     public void testparse_ComplexTypes() {
         Map<String, Object> result1 = parser.parse("{\"key\":\"value\"}", null, Map.class);
         Assertions.assertEquals("value", result1.get("key"));
@@ -1498,9 +1519,8 @@ public class JsonParserImplTest extends TestBase {
 
     @Test
     public void testDeserialize_Pair() {
-        Type<com.landawn.abacus.util.Pair<String, Integer>> type = Type
-                .of(new TypeReference<com.landawn.abacus.util.Pair<String, Integer>>() {
-                }.javaType());
+        Type<com.landawn.abacus.util.Pair<String, Integer>> type = Type.of(new TypeReference<com.landawn.abacus.util.Pair<String, Integer>>() {
+        }.javaType());
 
         com.landawn.abacus.util.Pair<String, Integer> result = parser.deserialize("[\"a\", 1]", null, type);
         assertEquals("a", result.left());
@@ -1521,9 +1541,8 @@ public class JsonParserImplTest extends TestBase {
 
     @Test
     public void testDeserialize_Tuple2() {
-        Type<com.landawn.abacus.util.Tuple.Tuple2<String, Integer>> type = Type
-                .of(new TypeReference<com.landawn.abacus.util.Tuple.Tuple2<String, Integer>>() {
-                }.javaType());
+        Type<com.landawn.abacus.util.Tuple.Tuple2<String, Integer>> type = Type.of(new TypeReference<com.landawn.abacus.util.Tuple.Tuple2<String, Integer>>() {
+        }.javaType());
 
         com.landawn.abacus.util.Tuple.Tuple2<String, Integer> result = parser.deserialize("[\"x\", 5]", null, type);
         assertEquals("x", result._1);
@@ -1591,8 +1610,8 @@ public class JsonParserImplTest extends TestBase {
                 .of(new TypeReference<com.landawn.abacus.util.Tuple.Tuple7<Integer, Integer, Integer, Integer, Integer, Integer, Integer>>() {
                 }.javaType());
 
-        com.landawn.abacus.util.Tuple.Tuple7<Integer, Integer, Integer, Integer, Integer, Integer, Integer> result = parser
-                .deserialize("[1, 2, 3, 4, 5, 6, 7]", null, type);
+        com.landawn.abacus.util.Tuple.Tuple7<Integer, Integer, Integer, Integer, Integer, Integer, Integer> result = parser.deserialize("[1, 2, 3, 4, 5, 6, 7]",
+                null, type);
         assertEquals(Integer.valueOf(7), result._7);
     }
 
@@ -1609,8 +1628,8 @@ public class JsonParserImplTest extends TestBase {
 
     @Test
     public void testDeserialize_Tuple9() {
-        Type<com.landawn.abacus.util.Tuple.Tuple9<Integer, Integer, Integer, Integer, Integer, Integer, Integer, Integer, Integer>> type = Type.of(
-                new TypeReference<com.landawn.abacus.util.Tuple.Tuple9<Integer, Integer, Integer, Integer, Integer, Integer, Integer, Integer, Integer>>() {
+        Type<com.landawn.abacus.util.Tuple.Tuple9<Integer, Integer, Integer, Integer, Integer, Integer, Integer, Integer, Integer>> type = Type
+                .of(new TypeReference<com.landawn.abacus.util.Tuple.Tuple9<Integer, Integer, Integer, Integer, Integer, Integer, Integer, Integer, Integer>>() {
                 }.javaType());
 
         com.landawn.abacus.util.Tuple.Tuple9<Integer, Integer, Integer, Integer, Integer, Integer, Integer, Integer, Integer> result = parser

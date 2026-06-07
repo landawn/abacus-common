@@ -5263,6 +5263,27 @@ public class StringsTest extends AbstractTest {
     }
 
     @Test
+    public void testEmptySearchStringClampsExplicitIndexToLength() {
+        assertEquals(3, Strings.indexOf("abc", "", 3));
+        assertEquals(3, Strings.indexOf("abc", "", 4));
+        assertEquals(0, Strings.indexOf("", "", 1));
+
+        assertEquals(3, Strings.indexOfIgnoreCase("abc", "", 4));
+        assertEquals(0, Strings.indexOfIgnoreCase("", "", 1));
+
+        assertEquals(3, Strings.lastIndexOf("abc", "", 3));
+        assertEquals(3, Strings.lastIndexOf("abc", "", 4));
+        assertEquals(0, Strings.lastIndexOf("", "", 0));
+
+        assertEquals(3, Strings.lastIndexOfIgnoreCase("abc", "", 4));
+        assertEquals(0, Strings.lastIndexOfIgnoreCase("", "", 0));
+
+        assertEquals(3, Strings.minLastIndexOfAll("abc", 4, ""));
+        assertEquals(3, Strings.maxLastIndexOfAll("abc", 4, ""));
+        assertEquals(3, Strings.maxLastIndexOfAll("abc", ""));
+    }
+
+    @Test
     @DisplayName("Test indexOfAny() with char array")
     public void testIndexOfAny_CharArray() {
         assertEquals(0, Strings.indexOfAny("abc", 'a', 'x'));
@@ -5764,9 +5785,12 @@ public class StringsTest extends AbstractTest {
     }
 
     @Test
-    public void testLastIndexOfAny_RejectsSurrogateInput() {
-        assertThrows(IllegalArgumentException.class, () -> Strings.lastIndexOfAny("abc", '\uDC00', 'a'));
-        assertThrows(IllegalArgumentException.class, () -> Strings.lastIndexOfAny("abc", 2, '\uDC00', 'a'));
+    public void testLastIndexOfAny_TreatsSurrogateAsCodeUnit() {
+        // Lone surrogate code units are treated as ordinary UTF-16 code units (no validation, no exception).
+        assertEquals(0, Strings.lastIndexOfAny("abc", '\uDC00', 'a'));
+        assertEquals(0, Strings.lastIndexOfAny("abc", 2, '\uDC00', 'a'));
+        // A lone surrogate that does not occur in the string simply does not match.
+        assertEquals(-1, Strings.lastIndexOfAny("abc", '\uDC00', '\uDFFF'));
     }
 
     @Test
@@ -6297,8 +6321,9 @@ public class StringsTest extends AbstractTest {
         assertFalse(Strings.containsAll("abc", 'a', 'x'));
         assertTrue(Strings.containsAll("abc", (char[]) null));
         assertFalse(Strings.containsAll(null, 'a', 'b'));
-        assertThrows(IllegalArgumentException.class, () -> Strings.containsAll("abc", '\uDC00', 'a'));
-        assertThrows(IllegalArgumentException.class, () -> Strings.containsAll("abc", '\uDFFF', 'a'));
+        // Lone surrogate code units are treated as ordinary UTF-16 code units (no validation, no exception).
+        assertFalse(Strings.containsAll("abc", '\uDC00', 'a')); // '\uDC00' is not present in "abc"
+        assertFalse(Strings.containsAll("abc", '\uDFFF', 'a')); // '\uDFFF' is not present in "abc"
     }
 
     @Test
@@ -6583,16 +6608,18 @@ public class StringsTest extends AbstractTest {
     }
 
     @Test
-    @DisplayName("containsOnly should validate input characters for surrogate pairs")
-    public void testContainsOnly_SurrogateValidation() {
+    @DisplayName("containsOnly treats surrogate code units as ordinary UTF-16 code units")
+    public void testContainsOnly_TreatsSurrogateAsCodeUnit() {
         char highSurrogate = '\uD800';
         char lowSurrogate = '\uDC00';
 
-        assertThrows(IllegalArgumentException.class, () -> Strings.containsOnly("test", highSurrogate));
+        // No validation/exception: "test" contains characters outside the allowed set, so containsOnly is false.
+        assertFalse(Strings.containsOnly("test", highSurrogate));
+        assertFalse(Strings.containsOnly("test", lowSurrogate));
+        assertFalse(Strings.containsOnly("test", 'a', highSurrogate, 'b'));
 
-        assertThrows(IllegalArgumentException.class, () -> Strings.containsOnly("test", lowSurrogate));
-
-        assertThrows(IllegalArgumentException.class, () -> Strings.containsOnly("test", 'a', highSurrogate, 'b'));
+        // A string made up only of the given (surrogate) code units is matched as code units.
+        assertTrue(Strings.containsOnly("\uD800\uD800", highSurrogate));
     }
 
     @Test
@@ -11901,6 +11928,11 @@ public class StringsTest extends AbstractTest {
         assertEquals("b" + emoji + "a", reversed);
         // Round-trip
         assertEquals(input, Strings.reverse(reversed));
+    }
+
+    @Test
+    public void testValidSurrogatePairAtNullStringReturnsFalse() {
+        assertFalse(Strings.validSurrogatePairAt(null, 0));
     }
 
     @Test

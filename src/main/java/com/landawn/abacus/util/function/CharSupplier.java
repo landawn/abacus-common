@@ -23,7 +23,6 @@ import com.landawn.abacus.util.Throwables;
  *
  * <p>This is a functional interface whose functional method is {@link #getAsChar()}.
  *
- *
  * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
  *
  * @see java.util.function.Supplier
@@ -38,6 +37,7 @@ public interface CharSupplier extends Throwables.CharSupplier<RuntimeException> 
      * <pre>{@code
      * char nul = CharSupplier.ZERO.getAsChar();   // Returns '\0'
      * }</pre>
+     *
      */
     CharSupplier ZERO = () -> 0;
     /**
@@ -51,6 +51,7 @@ public interface CharSupplier extends Throwables.CharSupplier<RuntimeException> 
      * char randomChar1 = CharSupplier.RANDOM.getAsChar();   // Returns a random char, e.g., 'k'
      * char randomChar2 = CharSupplier.RANDOM.getAsChar();   // Returns another random char, e.g., '&'
      * }</pre>
+     *
      */
     CharSupplier RANDOM = () -> {
         char ch;

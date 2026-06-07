@@ -70,6 +70,7 @@ public class BigDecimalSummaryStatistics implements Consumer<BigDecimal> {
      * BigDecimalSummaryStatistics stats = new BigDecimalSummaryStatistics();
      * stats.accept(new BigDecimal("100.00"));
      * }</pre>
+     *
      */
     public BigDecimalSummaryStatistics() {
     }
@@ -118,7 +119,7 @@ public class BigDecimalSummaryStatistics implements Consumer<BigDecimal> {
      * Records a new BigDecimal value into the summary information.
      *
      * <p>This method updates the count, sum, min, and max values based on
-     * the provided value. Null values should not be passed to this method.</p>
+     * the provided value.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -176,7 +177,7 @@ public class BigDecimalSummaryStatistics implements Consumer<BigDecimal> {
      * BigDecimalSummaryStatistics stats = new BigDecimalSummaryStatistics();
      * stats.accept(new BigDecimal("10.50"));
      * stats.accept(new BigDecimal("5.25"));
-     * BigDecimal min = stats.getMin();   // Returns 5.25
+     * BigDecimal min = stats.getMin();   // returns 5.25
      * }</pre>
      *
      * @return the minimum value, or {@code null} if none
@@ -193,7 +194,7 @@ public class BigDecimalSummaryStatistics implements Consumer<BigDecimal> {
      * BigDecimalSummaryStatistics stats = new BigDecimalSummaryStatistics();
      * stats.accept(new BigDecimal("10.50"));
      * stats.accept(new BigDecimal("25.75"));
-     * BigDecimal max = stats.getMax();   // Returns 25.75
+     * BigDecimal max = stats.getMax();   // returns 25.75
      * }</pre>
      *
      * @return the maximum value, or {@code null} if none
@@ -210,7 +211,7 @@ public class BigDecimalSummaryStatistics implements Consumer<BigDecimal> {
      * BigDecimalSummaryStatistics stats = new BigDecimalSummaryStatistics();
      * stats.accept(new BigDecimal("10"));
      * stats.accept(new BigDecimal("20"));
-     * long count = stats.getCount();   // Returns 2
+     * long count = stats.getCount();   // returns 2
      * }</pre>
      *
      * @return the count of values
@@ -227,7 +228,7 @@ public class BigDecimalSummaryStatistics implements Consumer<BigDecimal> {
      * BigDecimalSummaryStatistics stats = new BigDecimalSummaryStatistics();
      * stats.accept(new BigDecimal("10.50"));
      * stats.accept(new BigDecimal("20.50"));
-     * BigDecimal sum = stats.getSum();   // Returns 31.00
+     * BigDecimal sum = stats.getSum();   // returns 31.00
      * }</pre>
      *
      * @return the sum of values, or {@link BigDecimal#ZERO} if none
@@ -249,7 +250,7 @@ public class BigDecimalSummaryStatistics implements Consumer<BigDecimal> {
      * stats.accept(new BigDecimal("10.00"));
      * stats.accept(new BigDecimal("20.00"));
      * stats.accept(new BigDecimal("30.00"));
-     * BigDecimal avg = stats.getAverage();   // Returns 20.00
+     * BigDecimal avg = stats.getAverage();   // returns 20.00
      * }</pre>
      *
      * @return the arithmetic mean of values as a {@link BigDecimal}, or {@link BigDecimal#ZERO} if none

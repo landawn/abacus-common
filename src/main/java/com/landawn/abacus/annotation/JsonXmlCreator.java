@@ -76,7 +76,7 @@ import java.lang.annotation.Target;
  * <pre>{@code
  * public final class Money {
  *     @JsonXmlValue
- *     private final String value;       // e.g. "USD 19.99"
+ *     private final String value;       // "USD 19.99" (example value)
  *
  *     private Money(String value) { this.value = value; }
  *

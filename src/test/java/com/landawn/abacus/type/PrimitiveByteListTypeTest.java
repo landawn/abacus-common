@@ -214,23 +214,23 @@ public class PrimitiveByteListTypeTest extends TestBase {
     }
 
     @Test
-    public void testWriteCharacterEmptyList() throws IOException {
+    public void testSerializeToEmptyList() throws IOException {
         CharacterWriter writer = createCharacterWriter();
         ByteList list = ByteList.of(new byte[0]);
         JsonXmlSerConfig<?> config = mock(JsonXmlSerConfig.class);
 
-        type.writeCharacter(writer, list, config);
+        type.serializeTo(writer, list, config);
         verify(writer).write('[');
         verify(writer).write(']');
     }
 
     @Test
-    public void testWriteCharacterNonEmptyList() throws IOException {
+    public void testSerializeToNonEmptyList() throws IOException {
         CharacterWriter writer = createCharacterWriter();
         ByteList list = ByteList.of(new byte[] { 1, 2 });
         JsonXmlSerConfig<?> config = mock(JsonXmlSerConfig.class);
 
-        type.writeCharacter(writer, list, config);
+        type.serializeTo(writer, list, config);
         verify(writer).write('[');
         verify(writer).write((byte) 1);
         verify(writer).write(", ");

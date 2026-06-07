@@ -228,7 +228,7 @@ import com.landawn.abacus.util.u.OptionalShort;
  *   <li><b>{@link java.util.stream.Stream}:</b> Java 8+ Stream API</li>
  * </ul>
  *
- * <p><b>Usage Examples: Data Analysis Pipeline</b>
+ * <p><b>Usage Examples: Data Analysis Pipeline</b></p>
  * <pre>{@code
  * // Statistical analysis with null safety
  * List<Double> salesData = Arrays.asList(1200.50, 1450.75, 980.25, 1350.00, 1600.25);
@@ -251,15 +251,15 @@ import com.landawn.abacus.util.u.OptionalShort;
  * Nullable<Double> median = Iterables.median(salesData);         // Nullable[1350.0]
  * }</pre>
  *
- * <p><b>Usage Examples: Set and Collection Operations</b>
+ * <p><b>Usage Examples: Set and Collection Operations</b></p>
  * <pre>{@code
  * Set<String> catalogA = new HashSet<>(Arrays.asList("Electronics", "Books", "Clothing"));
  * Set<String> catalogB = new HashSet<>(Arrays.asList("Books", "Toys"));
  *
  * // Set views (unmodifiable, backed by the inputs)
- * SetView<String> all = Iterables.union(catalogA, catalogB);                 // {Electronics, Books, Clothing, Toys}
- * SetView<String> common = Iterables.intersection(catalogA, catalogB);       // {Books}
- * SetView<String> onlyA = Iterables.difference(catalogA, catalogB);          // {Electronics, Clothing}
+ * SetView<String> all = Iterables.union(catalogA, catalogB);                   // {Electronics, Books, Clothing, Toys}
+ * SetView<String> common = Iterables.intersection(catalogA, catalogB);         // {Books}
+ * SetView<String> onlyA = Iterables.difference(catalogA, catalogB);            // {Electronics, Clothing}
  * SetView<String> symDiff = Iterables.symmetricDifference(catalogA, catalogB); // {Electronics, Clothing, Toys}
  *
  * // Materialize a view into a concrete set when needed
@@ -272,7 +272,7 @@ import com.landawn.abacus.util.u.OptionalShort;
  *
  * // Combinatorial helpers
  * List<List<String>> rollup = Iterables.rollup(Arrays.asList("a", "b"));   // [[], [a], [a, b]]
- * Set<Set<String>> powerSet = Iterables.powerSet(catalogB);               // {{}, {Books}, {Toys}, {Books, Toys}}
+ * Set<Set<String>> powerSet = Iterables.powerSet(catalogB);                // {{}, {Books}, {Toys}, {Books, Toys}}
  * }</pre>
  *
  * <p><b>Attribution:</b>
@@ -2556,6 +2556,15 @@ public final class Iterables {
      * Returns the average of the integer values of the provided numbers in the specified range as an {@code OptionalDouble}.
      * If the specified range is empty ({@code fromIndex == toIndex}), it returns an empty {@code OptionalDouble}.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Integer[] array = {10, 20, 30, 40};
+     * Iterables.averageInt(array, 1, 3);   // OptionalDouble[25.0] (average of 20, 30)
+     * Iterables.averageInt(array, 0, 4);   // OptionalDouble[25.0] (average of all)
+     * Iterables.averageInt(array, 2, 2);   // OptionalDouble.empty() (empty range)
+     * Iterables.averageInt(array, 0, 5);   // throws IndexOutOfBoundsException (toIndex > length)
+     * }</pre>
+     *
      * @param <T> the type of the elements.
      * @param a the array of elements to evaluate.
      * @param fromIndex the start index of the range, inclusive.
@@ -2628,6 +2637,15 @@ public final class Iterables {
      * Returns the average of the integer values of the provided numbers in the specified range as an {@code OptionalDouble}.
      * Each element's value is extracted via {@link Number#intValue()}.
      * If the specified range is empty ({@code fromIndex == toIndex}), it returns an empty {@code OptionalDouble}.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<Integer> list = Arrays.asList(10, 20, 30, 40);
+     * Iterables.averageInt(list, 1, 3);   // OptionalDouble[25.0] (average of 20, 30)
+     * Iterables.averageInt(list, 0, 4);   // OptionalDouble[25.0] (average of all)
+     * Iterables.averageInt(list, 2, 2);   // OptionalDouble.empty() (empty range)
+     * Iterables.averageInt(list, 0, 5);   // throws IndexOutOfBoundsException (toIndex > size)
+     * }</pre>
      *
      * @param <T> the type of the elements, which must extend {@code Number}.
      * @param c the collection of elements to evaluate.
@@ -2707,12 +2725,8 @@ public final class Iterables {
      * List<String> words = Arrays.asList("a", "bb", "ccc", "dddd");
      * OptionalDouble avgLength = Iterables.averageInt(words, String::length);   // OptionalDouble[2.5] (avg of 1,2,3,4)
      *
-     * List<Person> people = Arrays.asList(
-     *     new Person("Alice", 25),
-     *     new Person("Bob", 30),
-     *     new Person("Carol", 35)
-     * );
-     * OptionalDouble avgAge = Iterables.averageInt(people, Person::getAge);   // OptionalDouble[30.0]
+     * List<String> empty = new ArrayList<>();
+     * Iterables.averageInt(empty, String::length);                             // OptionalDouble.empty()
      * }</pre>
      *
      * @param <T> the type of the elements.
@@ -2744,6 +2758,14 @@ public final class Iterables {
      * Returns the average of the long values of the provided numbers as an {@code OptionalDouble}.
      * If the array is {@code null} or empty, it returns an empty {@code OptionalDouble}.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Long[] array = {1L, 2L, 3L, 4L, 5L};
+     * Iterables.averageLong(array);          // OptionalDouble[3.0]
+     * Iterables.averageLong(new Long[0]);    // OptionalDouble.empty()
+     * Iterables.averageLong((Long[]) null);  // OptionalDouble.empty()
+     * }</pre>
+     *
      * @param <T> the type of the elements.
      * @param a the array of elements to evaluate.
      * @return an {@code OptionalDouble} containing the average if the array is not {@code null} or empty, otherwise an empty {@code OptionalDouble}.
@@ -2756,6 +2778,14 @@ public final class Iterables {
     /**
      * Returns the average of the long values of the provided numbers in the specified range as an {@code OptionalDouble}.
      * If the specified range is empty ({@code fromIndex == toIndex}), it returns an empty {@code OptionalDouble}.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Long[] array = {10L, 20L, 30L, 40L};
+     * Iterables.averageLong(array, 1, 3);   // OptionalDouble[25.0] (average of 20, 30)
+     * Iterables.averageLong(array, 2, 2);   // OptionalDouble.empty() (empty range)
+     * Iterables.averageLong(array, 0, 5);   // throws IndexOutOfBoundsException (toIndex > length)
+     * }</pre>
      *
      * @param <T> the type of the elements.
      * @param a the array of elements to evaluate.
@@ -2772,6 +2802,13 @@ public final class Iterables {
     /**
      * Returns the average of the long values extracted from the elements in the provided array by the input {@code func} function as an {@code OptionalDouble}.
      * If the array is {@code null} or empty, it returns an empty {@code OptionalDouble}.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * String[] words = {"a", "bb", "ccc", "dddd"};
+     * Iterables.averageLong(words, s -> (long) s.length());           // OptionalDouble[2.5] (avg of 1,2,3,4)
+     * Iterables.averageLong(new String[0], s -> (long) s.length());   // OptionalDouble.empty()
+     * }</pre>
      *
      * @param <T> the type of the elements.
      * @param a the array of elements to evaluate.
@@ -2790,6 +2827,13 @@ public final class Iterables {
     /**
      * Returns the average of the long values extracted from the elements in the specified range by the input {@code func} function as an {@code OptionalDouble}.
      * If the specified range is empty ({@code fromIndex == toIndex}), it returns an empty {@code OptionalDouble}.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * String[] words = {"a", "bb", "ccc", "dddd", "eeeee"};
+     * Iterables.averageLong(words, 1, 4, s -> (long) s.length());   // OptionalDouble[3.0] (avg of 2,3,4)
+     * Iterables.averageLong(words, 2, 2, s -> (long) s.length());   // OptionalDouble.empty() (empty range)
+     * }</pre>
      *
      * @param <T> the type of the elements.
      * @param a the array of elements to evaluate.
@@ -2815,6 +2859,14 @@ public final class Iterables {
      * Returns the average of the long values of the provided numbers in the specified range as an {@code OptionalDouble}.
      * If the specified range is empty ({@code fromIndex == toIndex}), it returns an empty {@code OptionalDouble}.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<Long> list = Arrays.asList(10L, 20L, 30L, 40L);
+     * Iterables.averageLong(list, 1, 3);   // OptionalDouble[25.0] (average of 20, 30)
+     * Iterables.averageLong(list, 2, 2);   // OptionalDouble.empty() (empty range)
+     * Iterables.averageLong(list, 0, 5);   // throws IndexOutOfBoundsException (toIndex > size)
+     * }</pre>
+     *
      * @param <T> the type of the elements.
      * @param c the collection of elements to evaluate.
      * @param fromIndex the start index of the range, inclusive.
@@ -2831,6 +2883,13 @@ public final class Iterables {
     /**
      * Returns the average of the long values extracted from the elements in the specified range by the input {@code func} function as an {@code OptionalDouble}.
      * If the specified range is empty ({@code fromIndex == toIndex}), it returns an empty {@code OptionalDouble}.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<String> words = Arrays.asList("a", "bb", "ccc", "dddd", "eeeee");
+     * Iterables.averageLong(words, 1, 4, s -> (long) s.length());   // OptionalDouble[3.0] (avg of 2,3,4)
+     * Iterables.averageLong(words, 2, 2, s -> (long) s.length());   // OptionalDouble.empty() (empty range)
+     * }</pre>
      *
      * @param <T> the type of the elements.
      * @param c the collection of elements to evaluate.
@@ -2883,8 +2942,8 @@ public final class Iterables {
      * List<String> timestamps = Arrays.asList("1000000000", "2000000000", "3000000000");
      * OptionalDouble avg = Iterables.averageLong(timestamps, Long::parseLong);   // OptionalDouble[2.0E9]
      *
-     * List<File> files = Arrays.asList(file1, file2, file3);
-     * OptionalDouble avgSize = Iterables.averageLong(files, File::length);   // average file size
+     * List<String> empty = new ArrayList<>();
+     * Iterables.averageLong(empty, Long::parseLong);                             // OptionalDouble.empty()
      * }</pre>
      *
      * @param <T> the type of the elements.
@@ -2916,6 +2975,14 @@ public final class Iterables {
      * Returns the average of the double values of the provided numbers as an {@code OptionalDouble}.
      * If the array is {@code null} or empty, it returns an empty {@code OptionalDouble}.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Double[] array = {1.5, 2.5, 3.5, 4.5};
+     * Iterables.averageDouble(array);            // OptionalDouble[3.0]
+     * Iterables.averageDouble(new Double[0]);    // OptionalDouble.empty()
+     * Iterables.averageDouble((Double[]) null);  // OptionalDouble.empty()
+     * }</pre>
+     *
      * @param <T> the type of the elements.
      * @param a the array of elements to evaluate.
      * @return an {@code OptionalDouble} containing the average if the array is not {@code null} or empty, otherwise an empty {@code OptionalDouble}.
@@ -2928,6 +2995,14 @@ public final class Iterables {
     /**
      * Returns the average of the double values of the provided numbers in the specified range as an {@code OptionalDouble}.
      * If the specified range is empty ({@code fromIndex == toIndex}), it returns an empty {@code OptionalDouble}.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Double[] array = {10.0, 20.0, 30.0, 40.0};
+     * Iterables.averageDouble(array, 1, 3);   // OptionalDouble[25.0] (average of 20.0, 30.0)
+     * Iterables.averageDouble(array, 2, 2);   // OptionalDouble.empty() (empty range)
+     * Iterables.averageDouble(array, 0, 5);   // throws IndexOutOfBoundsException (toIndex > length)
+     * }</pre>
      *
      * @param <T> the type of the elements.
      * @param a the array of elements to evaluate.
@@ -2946,6 +3021,13 @@ public final class Iterables {
      * The average is computed using Kahan compensated summation for improved numerical accuracy.
      * If the array is {@code null} or empty, it returns an empty {@code OptionalDouble}.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * String[] words = {"a", "bb", "ccc", "dddd"};
+     * Iterables.averageDouble(words, s -> (double) s.length());           // OptionalDouble[2.5] (avg of 1,2,3,4)
+     * Iterables.averageDouble(new String[0], s -> (double) s.length());   // OptionalDouble.empty()
+     * }</pre>
+     *
      * @param <T> the type of the elements.
      * @param a the array of elements to evaluate.
      * @param func the function to extract a {@code double} value from each element.
@@ -2963,6 +3045,13 @@ public final class Iterables {
     /**
      * Returns the average of the double values extracted from the elements in the specified range by the input {@code func} function as an {@code OptionalDouble}.
      * If the specified range is empty ({@code fromIndex == toIndex}), it returns an empty {@code OptionalDouble}.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * String[] words = {"a", "bb", "ccc", "dddd", "eeeee"};
+     * Iterables.averageDouble(words, 1, 4, s -> (double) s.length());   // OptionalDouble[3.0] (avg of 2,3,4)
+     * Iterables.averageDouble(words, 2, 2, s -> (double) s.length());   // OptionalDouble.empty() (empty range)
+     * }</pre>
      *
      * @param <T> the type of the elements.
      * @param a the array of elements to evaluate.
@@ -2994,6 +3083,14 @@ public final class Iterables {
      * Returns the average of the double values of the provided numbers in the specified range as an {@code OptionalDouble}.
      * If the specified range is empty ({@code fromIndex == toIndex}), it returns an empty {@code OptionalDouble}.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<Double> list = Arrays.asList(10.0, 20.0, 30.0, 40.0);
+     * Iterables.averageDouble(list, 1, 3);   // OptionalDouble[25.0] (average of 20.0, 30.0)
+     * Iterables.averageDouble(list, 2, 2);   // OptionalDouble.empty() (empty range)
+     * Iterables.averageDouble(list, 0, 5);   // throws IndexOutOfBoundsException (toIndex > size)
+     * }</pre>
+     *
      * @param <T> the type of the elements.
      * @param c the collection of elements to evaluate.
      * @param fromIndex the start index of the range, inclusive.
@@ -3010,6 +3107,13 @@ public final class Iterables {
     /**
      * Returns the average of the double values extracted from the elements in the specified range by the input {@code func} function as an {@code OptionalDouble}.
      * If the specified range is empty ({@code fromIndex == toIndex}), it returns an empty {@code OptionalDouble}.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<String> words = Arrays.asList("a", "bb", "ccc", "dddd", "eeeee");
+     * Iterables.averageDouble(words, 1, 4, s -> (double) s.length());   // OptionalDouble[3.0] (avg of 2,3,4)
+     * Iterables.averageDouble(words, 2, 2, s -> (double) s.length());   // OptionalDouble.empty() (empty range)
+     * }</pre>
      *
      * @param <T> the type of the elements.
      * @param c the collection of elements to evaluate.
@@ -3066,7 +3170,7 @@ public final class Iterables {
      * OptionalDouble avg = Iterables.averageDouble(numbers);   // OptionalDouble[3.0]
      *
      * List<Float> floats = Arrays.asList(1.1f, 2.2f, 3.3f);
-     * OptionalDouble avg2 = Iterables.averageDouble(floats);   // OptionalDouble[2.2]
+     * OptionalDouble avg2 = Iterables.averageDouble(floats);   // OptionalDouble[2.1999999999999997] (float->double widening)
      * }</pre>
      *
      * @param <T> the type of the elements, which must extend {@code Number}.
@@ -3087,12 +3191,8 @@ public final class Iterables {
      * List<String> prices = Arrays.asList("10.5", "20.75", "15.25");
      * OptionalDouble avgPrice = Iterables.averageDouble(prices, Double::parseDouble);   // OptionalDouble[15.5]
      *
-     * List<Product> products = Arrays.asList(
-     *     new Product("A", 99.99),
-     *     new Product("B", 149.99),
-     *     new Product("C", 199.99)
-     * );
-     * OptionalDouble avgPrice2 = Iterables.averageDouble(products, Product::getPrice);   // OptionalDouble[149.99]
+     * List<String> empty = new ArrayList<>();
+     * Iterables.averageDouble(empty, Double::parseDouble);                              // OptionalDouble.empty()
      * }</pre>
      *
      * @param <T> the type of the elements.
@@ -3122,6 +3222,14 @@ public final class Iterables {
      * If all elements yield {@code null}, returns {@code Optional[0]}.
      * If the iterable is {@code null} or empty, it returns an empty {@code Optional<BigDecimal>}.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<BigInteger> nums = Arrays.asList(BigInteger.valueOf(2), BigInteger.valueOf(4), BigInteger.valueOf(6));
+     * Iterables.averageBigInteger(nums);                                  // Optional[4]
+     * Iterables.averageBigInteger(new ArrayList<BigInteger>());           // Optional.empty() (empty)
+     * Iterables.averageBigInteger((Iterable<BigInteger>) null);           // Optional.empty() (null)
+     * }</pre>
+     *
      * @param c the iterable of {@code BigInteger} elements to evaluate.
      * @return an {@code Optional<BigDecimal>} containing the average if the iterable is not {@code null} or empty, otherwise an empty {@code Optional}.
      * @see N#averageBigInteger(Iterable)
@@ -3136,6 +3244,13 @@ public final class Iterables {
      * {@code null} values returned by the extractor are skipped and not counted in the divisor.
      * If all elements yield {@code null}, returns {@code Optional[0]}.
      * If the iterable is {@code null} or empty, it returns an empty {@code Optional<BigDecimal>}.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<String> list = Arrays.asList("2", "4", "6");
+     * Iterables.averageBigInteger(list, BigInteger::new);                    // Optional[4]
+     * Iterables.averageBigInteger(new ArrayList<String>(), BigInteger::new); // Optional.empty() (empty)
+     * }</pre>
      *
      * @param <T> the type of the elements.
      * @param c the iterable of elements to evaluate.
@@ -3173,6 +3288,14 @@ public final class Iterables {
      * If all elements are {@code null}, returns {@code Optional[0]}.
      * If the iterable is {@code null} or empty, it returns an empty {@code Optional<BigDecimal>}.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<BigDecimal> nums = Arrays.asList(new BigDecimal("1.5"), new BigDecimal("2.5"));
+     * Iterables.averageBigDecimal(nums).get().doubleValue();             // 2.0
+     * Iterables.averageBigDecimal(new ArrayList<BigDecimal>());          // Optional.empty() (empty)
+     * Iterables.averageBigDecimal((Iterable<BigDecimal>) null);          // Optional.empty() (null)
+     * }</pre>
+     *
      * @param c the iterable of {@code BigDecimal} elements to evaluate.
      * @return an {@code Optional<BigDecimal>} containing the average if the iterable is not {@code null} or empty, otherwise an empty {@code Optional}.
      * @see N#averageBigDecimal(Iterable)
@@ -3187,6 +3310,13 @@ public final class Iterables {
      * {@code null} values returned by the extractor are skipped and not counted in the divisor.
      * If all elements yield {@code null}, returns {@code Optional[0]}.
      * If the iterable is {@code null} or empty, it returns an empty {@code Optional<BigDecimal>}.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<String> list = Arrays.asList("1.5", "2.5");
+     * Iterables.averageBigDecimal(list, BigDecimal::new).get().doubleValue();    // 2.0
+     * Iterables.averageBigDecimal(new ArrayList<String>(), BigDecimal::new);     // Optional.empty() (empty)
+     * }</pre>
      *
      * @param <T> the type of the elements.
      * @param c the iterable of elements to evaluate.
@@ -3317,6 +3447,15 @@ public final class Iterables {
      * or if no such element is found, returns the last element that satisfies the {@code predicateForLast}.
      * If the array is {@code null} or doesn't contain any element that satisfies the predicates, it returns an empty {@code Nullable}.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Integer[] array = {1, 2, 3, 4, 5};
+     * Iterables.findFirstOrLast(array, n -> n > 2, n -> n < 2);          // Nullable[3] (first matching predicateForFirst)
+     * Iterables.findFirstOrLast(array, n -> n > 9, n -> n < 4);          // Nullable[3] (no first match; last < 4)
+     * Iterables.findFirstOrLast(array, n -> n > 9, n -> n > 9);          // Nullable.empty() (no match)
+     * Iterables.findFirstOrLast(new Integer[0], n -> true, n -> true);   // Nullable.empty() (empty array)
+     * }</pre>
+     *
      * @param <T> the type of the elements.
      * @param a the array of elements to evaluate.
      * @param predicateForFirst the predicate to test for the first element.
@@ -3339,6 +3478,15 @@ public final class Iterables {
      * Returns the first element in the provided collection that satisfies the given {@code predicateForFirst},
      * or if no such element is found, returns the last element that satisfies the {@code predicateForLast}.
      * If the collection is {@code null} or doesn't contain any element that satisfies the predicates, it returns an empty {@code Nullable}.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<Integer> list = Arrays.asList(1, 2, 3, 4, 5);
+     * Iterables.findFirstOrLast(list, n -> n > 2, n -> n < 2);                     // Nullable[3] (first matching predicateForFirst)
+     * Iterables.findFirstOrLast(list, n -> n > 9, n -> n < 4);                     // Nullable[3] (no first match; last < 4)
+     * Iterables.findFirstOrLast(list, n -> n > 9, n -> n > 9);                     // Nullable.empty() (no match)
+     * Iterables.findFirstOrLast(new ArrayList<Integer>(), n -> true, n -> true);   // Nullable.empty() (empty)
+     * }</pre>
      *
      * @param <T> the type of the elements.
      * @param c the collection of elements to evaluate.
@@ -3364,6 +3512,15 @@ public final class Iterables {
      * or if no such element is found, returns the index of the last element that satisfies the {@code predicateForLast}.
      * If the array is {@code null} or doesn't contain any element that satisfies the predicates, it returns an empty {@code OptionalInt}.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Integer[] array = {1, 2, 3, 4, 5};
+     * Iterables.findFirstOrLastIndex(array, n -> n > 2, n -> n < 2);          // OptionalInt[2] (index of first > 2)
+     * Iterables.findFirstOrLastIndex(array, n -> n > 9, n -> n < 4);          // OptionalInt[2] (index of last < 4)
+     * Iterables.findFirstOrLastIndex(array, n -> n > 9, n -> n > 9);          // OptionalInt.empty() (no match)
+     * Iterables.findFirstOrLastIndex(new Integer[0], n -> true, n -> true);   // OptionalInt.empty() (empty array)
+     * }</pre>
+     *
      * @param <T> the type of the elements.
      * @param a the array of elements to evaluate.
      * @param predicateForFirst the predicate to test for the first element.
@@ -3386,6 +3543,15 @@ public final class Iterables {
      * Returns the index of the first element in the provided collection that satisfies the given {@code predicateForFirst},
      * or if no such element is found, returns the index of the last element that satisfies the {@code predicateForLast}.
      * If the collection is {@code null} or doesn't contain any element that satisfies the predicates, it returns an empty {@code OptionalInt}.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<Integer> list = Arrays.asList(1, 2, 3, 4, 5);
+     * Iterables.findFirstOrLastIndex(list, n -> n > 2, n -> n < 2);                     // OptionalInt[2] (index of first > 2)
+     * Iterables.findFirstOrLastIndex(list, n -> n > 9, n -> n < 4);                     // OptionalInt[2] (index of last < 4)
+     * Iterables.findFirstOrLastIndex(list, n -> n > 9, n -> n > 9);                     // OptionalInt.empty() (no match)
+     * Iterables.findFirstOrLastIndex(new ArrayList<Integer>(), n -> true, n -> true);   // OptionalInt.empty() (empty)
+     * }</pre>
      *
      * @param <T> the type of the elements.
      * @param c the collection of elements to evaluate.
@@ -3410,6 +3576,17 @@ public final class Iterables {
      * Returns a pair of {@code Nullable} objects containing the first and last elements in the provided array that satisfy the given {@code predicate}.
      * If the array is {@code null} or doesn't contain any element that satisfies the predicate, it returns a pair of empty {@code Nullable} objects.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Integer[] array = {1, 2, 3, 4, 5};
+     * Pair<Nullable<Integer>, Nullable<Integer>> p = Iterables.findFirstAndLast(array, n -> n % 2 == 1);
+     * // p.left() => Nullable[1] (first odd), p.right() => Nullable[5] (last odd)
+     * Iterables.findFirstAndLast(array, n -> n > 9);
+     * // both Nullable.empty() (no match)
+     * Iterables.findFirstAndLast(new Integer[0], n -> true);
+     * // both Nullable.empty() (empty array)
+     * }</pre>
+     *
      * @param <T> the type of the elements.
      * @param a the array of elements to evaluate.
      * @param predicate the predicate to test for the first and last elements.
@@ -3426,6 +3603,17 @@ public final class Iterables {
     /**
      * Returns a pair of {@code Nullable} objects containing the first and last elements in the provided array that satisfy the given predicates.
      * If the array is {@code null} or doesn't contain any element that satisfies the predicates, it returns a pair of empty {@code Nullable} objects.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Integer[] array = {1, 2, 3, 4, 5};
+     * Pair<Nullable<Integer>, Nullable<Integer>> p = Iterables.findFirstAndLast(array, n -> n < 3, n -> n > 3);
+     * // p.left() => Nullable[1] (first < 3), p.right() => Nullable[5] (last > 3)
+     * Iterables.findFirstAndLast(array, n -> n > 9, n -> n > 9);
+     * // both Nullable.empty() (no match)
+     * Iterables.findFirstAndLast(new Integer[0], n -> true, n -> true);
+     * // both Nullable.empty() (empty array)
+     * }</pre>
      *
      * @param <T> the type of the elements.
      * @param a the array of elements to evaluate.
@@ -3450,6 +3638,17 @@ public final class Iterables {
      * Returns a pair of {@code Nullable} objects containing the first and last elements in the provided collection that satisfy the given {@code predicate}.
      * If the collection is {@code null} or doesn't contain any element that satisfies the predicate, it returns a pair of empty {@code Nullable} objects.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<Integer> list = Arrays.asList(1, 2, 3, 4, 5);
+     * Pair<Nullable<Integer>, Nullable<Integer>> p = Iterables.findFirstAndLast(list, n -> n % 2 == 1);
+     * // p.left() => Nullable[1] (first odd), p.right() => Nullable[5] (last odd)
+     * Iterables.findFirstAndLast(list, n -> n > 9);
+     * // both Nullable.empty() (no match)
+     * Iterables.findFirstAndLast(new ArrayList<Integer>(), n -> true);
+     * // both Nullable.empty() (empty)
+     * }</pre>
+     *
      * @param <T> the type of the elements.
      * @param c the collection of elements to evaluate.
      * @param predicate the predicate to test for the first and last elements.
@@ -3466,6 +3665,17 @@ public final class Iterables {
     /**
      * Returns a pair of {@code Nullable} objects containing the first and last elements in the provided collection that satisfy the given predicates.
      * If the collection is {@code null} or doesn't contain any element that satisfies the predicates, it returns a pair of empty {@code Nullable} objects.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<Integer> list = Arrays.asList(1, 2, 3, 4, 5);
+     * Pair<Nullable<Integer>, Nullable<Integer>> p = Iterables.findFirstAndLast(list, n -> n < 3, n -> n > 3);
+     * // p.left() => Nullable[1] (first < 3), p.right() => Nullable[5] (last > 3)
+     * Iterables.findFirstAndLast(list, n -> n > 9, n -> n > 9);
+     * // both Nullable.empty() (no match)
+     * Iterables.findFirstAndLast(new ArrayList<Integer>(), n -> true, n -> true);
+     * // both Nullable.empty() (empty)
+     * }</pre>
      *
      * @param <T> the type of the elements.
      * @param c the collection of elements to evaluate.
@@ -3490,6 +3700,17 @@ public final class Iterables {
      * Returns a pair of OptionalInt objects containing the indices of the first and last elements in the provided array that satisfy the given {@code predicate}.
      * If the array is {@code null} or doesn't contain any element that satisfies the predicate, it returns a pair of empty {@code OptionalInt} objects.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Integer[] array = {1, 2, 3, 4, 5};
+     * Pair<OptionalInt, OptionalInt> p = Iterables.findFirstAndLastIndex(array, n -> n % 2 == 1);
+     * // p.left() => OptionalInt[0] (index of first odd), p.right() => OptionalInt[4] (index of last odd)
+     * Iterables.findFirstAndLastIndex(array, n -> n > 9);
+     * // both OptionalInt.empty() (no match)
+     * Iterables.findFirstAndLastIndex(new Integer[0], n -> true);
+     * // both OptionalInt.empty() (empty array)
+     * }</pre>
+     *
      * @param <T> the type of the elements.
      * @param a the array of elements to evaluate.
      * @param predicate the predicate to test for the first and last elements.
@@ -3506,6 +3727,17 @@ public final class Iterables {
     /**
      * Returns a pair of OptionalInt objects containing the indices of the first and last elements in the provided array that satisfy the given predicates.
      * If the array is {@code null} or doesn't contain any element that satisfies the predicates, it returns a pair of empty {@code OptionalInt} objects.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Integer[] array = {1, 2, 3, 4, 5};
+     * Pair<OptionalInt, OptionalInt> p = Iterables.findFirstAndLastIndex(array, n -> n < 3, n -> n > 3);
+     * // p.left() => OptionalInt[0] (index of first < 3), p.right() => OptionalInt[4] (index of last > 3)
+     * Iterables.findFirstAndLastIndex(array, n -> n > 9, n -> n > 9);
+     * // both OptionalInt.empty() (no match)
+     * Iterables.findFirstAndLastIndex(new Integer[0], n -> true, n -> true);
+     * // both OptionalInt.empty() (empty array)
+     * }</pre>
      *
      * @param <T> the type of the elements.
      * @param a the array of elements to evaluate.
@@ -3530,6 +3762,17 @@ public final class Iterables {
      * Returns a pair of OptionalInt objects containing the indices of the first and last elements in the provided collection that satisfy the given {@code predicate}.
      * If the collection is {@code null} or doesn't contain any element that satisfies the predicate, it returns a pair of empty {@code OptionalInt} objects.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<Integer> list = Arrays.asList(1, 2, 3, 4, 5);
+     * Pair<OptionalInt, OptionalInt> p = Iterables.findFirstAndLastIndex(list, n -> n % 2 == 1);
+     * // p.left() => OptionalInt[0] (index of first odd), p.right() => OptionalInt[4] (index of last odd)
+     * Iterables.findFirstAndLastIndex(list, n -> n > 9);
+     * // both OptionalInt.empty() (no match)
+     * Iterables.findFirstAndLastIndex(new ArrayList<Integer>(), n -> true);
+     * // both OptionalInt.empty() (empty)
+     * }</pre>
+     *
      * @param <T> the type of the elements.
      * @param c the collection of elements to evaluate.
      * @param predicate the predicate to test for the first and last elements.
@@ -3546,6 +3789,17 @@ public final class Iterables {
     /**
      * Returns a pair of OptionalInt objects containing the indices of the first and last elements in the provided collection that satisfy the given predicates.
      * If the collection is {@code null} or doesn't contain any element that satisfies the predicates, it returns a pair of empty {@code OptionalInt} objects.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<Integer> list = Arrays.asList(1, 2, 3, 4, 5);
+     * Pair<OptionalInt, OptionalInt> p = Iterables.findFirstAndLastIndex(list, n -> n < 3, n -> n > 3);
+     * // p.left() => OptionalInt[0] (index of first < 3), p.right() => OptionalInt[4] (index of last > 3)
+     * Iterables.findFirstAndLastIndex(list, n -> n > 9, n -> n > 9);
+     * // both OptionalInt.empty() (no match)
+     * Iterables.findFirstAndLastIndex(new ArrayList<Integer>(), n -> true, n -> true);
+     * // both OptionalInt.empty() (empty)
+     * }</pre>
      *
      * @param <T> the type of the elements.
      * @param c the collection of elements to evaluate.
@@ -3569,6 +3823,19 @@ public final class Iterables {
     /**
      * Fills every slot of the specified array with values provided by the specified supplier.
      * If the array is {@code null} or empty, this method does nothing.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * String[] a = new String[3];
+     * Iterables.fill(a, () -> "x");          // a is ["x", "x", "x"]
+     *
+     * Integer[] b = new Integer[4];
+     * int[] counter = {0};
+     * Iterables.fill(b, () -> ++counter[0]); // b is [1, 2, 3, 4]
+     *
+     * Iterables.fill(new String[0], () -> "x");   // no change (empty array)
+     * Iterables.fill((String[]) null, () -> "x"); // no change (null array)
+     * }</pre>
      *
      * @param <T> the type of the elements.
      * @param a the array to be filled. If {@code null} or empty, no action is taken.
@@ -3597,6 +3864,14 @@ public final class Iterables {
     /**
      * Fills the specified array with values provided by the specified supplier from {@code fromIndex} (inclusive) to {@code toIndex} (exclusive).
      * If {@code fromIndex == toIndex}, this method does nothing.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * String[] a = {"a", "b", "c", "d"};
+     * Iterables.fill(a, 1, 3, () -> "x");   // a is ["a", "x", "x", "d"]
+     * Iterables.fill(a, 2, 2, () -> "y");   // a is unchanged (empty range)
+     * Iterables.fill(a, 0, 5, () -> "z");   // throws IndexOutOfBoundsException (toIndex > length)
+     * }</pre>
      *
      * @param <T> the type of elements in the array.
      * @param a the array to be filled.
@@ -4060,6 +4335,15 @@ public final class Iterables {
         /**
          * Copies all elements from this set view into the specified set.
          *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * Set<Integer> s1 = new LinkedHashSet<>(Arrays.asList(1, 2, 3));
+         * Set<Integer> s2 = new LinkedHashSet<>(Arrays.asList(3, 4, 5));
+         * SetView<Integer> view = Iterables.union(s1, s2);
+         * Set<Integer> materialized = view.copyInto(new LinkedHashSet<>());
+         * // materialized => [1, 2, 3, 4, 5] (a real, independent Set)
+         * }</pre>
+         *
          * @param <S> the type of the set.
          * @param set the set to copy elements into.
          * @return the set after copying elements into it.
@@ -4203,32 +4487,24 @@ public final class Iterables {
      * the two sets. If you have reason to believe one of your sets will generally be smaller than the
      * other, pass it first. Unfortunately, since this method sets the generic type of the returned
      * set based on the type of the first set passed, this could in rare cases force you to make a
-     * cast, for example:
+     * cast.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * // Basic intersection
-     * Set<Integer> set1 = new HashSet<>(Arrays.asList(1, 2, 3, 4));
-     * Set<Integer> set2 = new HashSet<>(Arrays.asList(3, 4, 5, 6));
+     * // Iteration order follows set1 (use LinkedHashSet for a determinate order)
+     * Set<Integer> set1 = new LinkedHashSet<>(Arrays.asList(1, 2, 3, 4));
+     * Set<Integer> set2 = new LinkedHashSet<>(Arrays.asList(3, 4, 5, 6));
      * SetView<Integer> common = Iterables.intersection(set1, set2);
-     * // common contains: [3, 4]
+     * // new ArrayList<>(common) => [3, 4]
      *
-     * // Finding common elements in two collections
-     * Set<String> users1 = new HashSet<>(Arrays.asList("alice", "bob", "charlie"));
-     * Set<String> users2 = new HashSet<>(Arrays.asList("bob", "charlie", "david"));
+     * Set<String> users1 = new LinkedHashSet<>(Arrays.asList("alice", "bob", "charlie"));
+     * Set<String> users2 = new LinkedHashSet<>(Arrays.asList("bob", "charlie", "david"));
      * SetView<String> commonUsers = Iterables.intersection(users1, users2);
-     * // commonUsers contains: ["bob", "charlie"]
+     * // new ArrayList<>(commonUsers) => ["bob", "charlie"]
      *
-     * // Type casting example for heterogeneous types
-     * Set<Object> aFewBadObjects = ...
-     * Set<String> manyBadStrings = ...
-     * // impossible for a non-String to be in the intersection
-     * @SuppressWarnings("unchecked")
-     * Set<String> badStrings = (Set) Iterables.intersection(
-     *     aFewBadObjects, manyBadStrings);
+     * Iterables.intersection(set1, new HashSet<Integer>()).size();   // 0 (empty set2)
+     * Iterables.intersection((Set<Integer>) null, set2).size();      // 0 (null set1)
      * }</pre>
-     *
-     * <p>This is unfortunate, but should come up only very rarely.
      *
      * @param <E> the type of the elements.
      * @param set1 the first set, whose iteration order determines the iteration order of the view. May be {@code null} or empty.
@@ -4585,6 +4861,15 @@ public final class Iterables {
      *
      * <p>If the specified set is {@code null} or empty, an empty {@code NavigableSet} is returned.</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * NavigableSet<Integer> set = new TreeSet<>(Arrays.asList(1, 2, 3, 4, 5));
+     * Iterables.subSet(set, Range.closedOpen(2, 4));                        // [2, 3] (2 inclusive, 4 exclusive)
+     * Iterables.subSet(set, Range.closed(2, 4));                            // [2, 3, 4] (both inclusive)
+     * Iterables.subSet(set, Range.open(2, 4));                              // [3] (both exclusive)
+     * Iterables.subSet((NavigableSet<Integer>) null, Range.closed(2, 4));   // [] (null set)
+     * }</pre>
+     *
      * @param <K> the type of the elements, which must implement {@link Comparable}.
      * @param set the original {@code NavigableSet} from which to derive the subset. May be {@code null} or empty.
      * @param range the {@code Range} that defines the lower and upper bounds of the subset (inclusive/exclusive per bound type).
@@ -4607,8 +4892,6 @@ public final class Iterables {
 
     /**
      * <p>Note: It's copied from Google Guava under Apache License 2.0 and may be modified.</p>
-     *
-     *
      * Returns the set of all possible subsets of {@code set}. For example,
      * {@code powerSet(ImmutableSet.of(1, 2))} returns the set {@code {{},
      * {1}, {2}, {1, 2}}}.
@@ -4629,6 +4912,19 @@ public final class Iterables {
      * themselves occupy only a small constant amount of memory.
      *
      * <p>A {@code null} set is treated as an empty set, whose power set is a one-element set containing the empty set.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Set<Integer> set = new LinkedHashSet<>(Arrays.asList(1, 2));
+     * Set<Set<Integer>> ps = Iterables.powerSet(set);
+     * // ps.size() => 4 : {}, {1}, {2}, {1, 2}
+     *
+     * Iterables.powerSet(new LinkedHashSet<Integer>()).size();   // 1 (just the empty set)
+     * Iterables.powerSet((Set<Integer>) null).size();            // 1 (null treated as empty)
+     *
+     * Set<Integer> three = new LinkedHashSet<>(Arrays.asList(1, 2, 3));
+     * Iterables.powerSet(three).size();                          // 8 (2^3)
+     * }</pre>
      *
      * @param <E> the type of the elements.
      * @param set the set of elements to construct a power set from.
@@ -4691,6 +4987,15 @@ public final class Iterables {
      *
      * <p>An empty collection has only one permutation, which is an empty list.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Collection<List<Integer>> perms = Iterables.permutations(Arrays.asList(1, 2, 3));
+     * // perms.size() => 6 : every ordering of {1, 2, 3}, e.g. [1,2,3], [1,3,2], [2,1,3], ...
+     *
+     * Iterables.permutations(new ArrayList<Integer>()).size();   // 1 (the single empty permutation)
+     * Iterables.permutations(Arrays.asList(1, 1)).size();        // 2 (equal elements still permuted)
+     * }</pre>
+     *
      * @param <E> the type of the elements.
      * @param elements the original collection whose elements have to be permuted.
      * @return an unmodifiable {@code Collection} of all permutations of the original collection.
@@ -4723,6 +5028,15 @@ public final class Iterables {
      *
      * <p>This method is equivalent to
      * {@code Collections2.orderedPermutations(list, Ordering.natural())}.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Collection<List<Integer>> perms = Iterables.orderedPermutations(Arrays.asList(3, 1, 2));
+     * // perms.size() => 6, first is [1, 2, 3] (ascending), last is [3, 2, 1] (descending)
+     *
+     * Iterables.orderedPermutations(Arrays.asList(1, 1, 2)).size();   // 3 (duplicates collapse: 3!/2!)
+     * Iterables.orderedPermutations(new ArrayList<Integer>()).size(); // 1 (the single empty permutation)
+     * }</pre>
      *
      * @param <E> the type of the elements.
      * @param elements the original collection whose elements have to be permuted.
@@ -4800,9 +5114,9 @@ public final class Iterables {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     *   Lists.cartesianProduct(ImmutableList.of(
-     *       ImmutableList.of(1, 2),
-     *       ImmutableList.of("A", "B", "C")))
+     * List<List<Object>> product = Iterables.<Object>cartesianProduct(
+     *         Arrays.asList(1, 2), Arrays.asList("A", "B", "C"));
+     * // product is [[1, A], [1, B], [1, C], [2, A], [2, B], [2, C]]
      * }</pre>
      *
      * <p>returns a list containing six lists in the following order:
@@ -4821,13 +5135,14 @@ public final class Iterables {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     *   for (B b0 : lists.get(0)) {
-     *     for (B b1 : lists.get(1)) {
-     *       ...
-     *       ImmutableList<B> tuple = ImmutableList.of(b0, b1, ...);
      *       // operate on tuple
+     * List<List<String>> lists = Arrays.asList(Arrays.asList("S", "M"), Arrays.asList("red", "blue"));
+     * for (String size : lists.get(0)) {
+     *     for (String color : lists.get(1)) {
+     *         List<String> tuple = Arrays.asList(size, color);
+     *         // tuple is [S, red], then [S, blue], [M, red], [M, blue]
      *     }
-     *   }
+     * }
      * }</pre>
      *
      * <p>Note that if any input list is empty, the Cartesian product will also be
@@ -4864,9 +5179,10 @@ public final class Iterables {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     *   Lists.cartesianProduct(ImmutableList.of(
-     *       ImmutableList.of(1, 2),
-     *       ImmutableList.of("A", "B", "C")))
+     * List<Collection<? extends Object>> axes = Arrays.asList(
+     *         Arrays.asList(1, 2), Arrays.asList("A", "B", "C"));
+     * List<List<Object>> product = Iterables.cartesianProduct(axes);
+     * // product is [[1, A], [1, B], [1, C], [2, A], [2, B], [2, C]]
      * }</pre>
      *
      * <p>returns a list containing six lists in the following order:
@@ -4883,13 +5199,14 @@ public final class Iterables {
      * <p>The result is guaranteed to be in the "traditional", lexicographical
      * order for Cartesian products that you would get from nesting for loops:
      * <pre>{@code
-     *   for (B b0 : lists.get(0)) {
-     *     for (B b1 : lists.get(1)) {
-     *       ...
-     *       ImmutableList<B> tuple = ImmutableList.of(b0, b1, ...);
      *       // operate on tuple
+     * List<List<String>> lists = Arrays.asList(Arrays.asList("S", "M"), Arrays.asList("red", "blue"));
+     * for (String size : lists.get(0)) {
+     *     for (String color : lists.get(1)) {
+     *         List<String> tuple = Arrays.asList(size, color);
+     *         // tuple is [S, red], then [S, blue], [M, red], [M, blue]
      *     }
-     *   }
+     * }
      * }</pre>
      *
      * <p>Note that if any input list is empty, the Cartesian product will also be

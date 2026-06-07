@@ -112,15 +112,15 @@ public class AtomicLongTypeTest extends TestBase {
     }
 
     @Test
-    public void test_writeCharacter() throws Exception {
+    public void test_serializeTo() throws Exception {
         CharacterWriter writer = mock(BufferedJsonWriter.class);
 
         // Test value
-        type.writeCharacter(writer, new AtomicLong(456789L), null);
+        type.serializeTo(writer, new AtomicLong(456789L), null);
         verify(writer).write(456789L);
 
         // Test null
-        type.writeCharacter(writer, null, null);
+        type.serializeTo(writer, null, null);
         verify(writer).write("null".toCharArray());
     }
 

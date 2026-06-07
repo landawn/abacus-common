@@ -114,11 +114,11 @@ public class IteratorExTest extends TestBase {
     }
 
     @Test
-    public void testClose() {
+    public void testCloseResource() {
         List<String> list = Arrays.asList("a", "b", "c");
         IteratorEx<String> iter = new TestIteratorEx<>(list);
 
-        iter.close();
+        iter.closeResource();
 
         Assertions.assertTrue(iter.hasNext());
         Assertions.assertEquals("a", iter.next());
@@ -138,12 +138,14 @@ public class IteratorExTest extends TestBase {
     }
 
     @Test
-    public void testIteratorExAsAutoCloseable() throws Exception {
+    public void testCloseResourceInTryFinally() {
         List<String> list = Arrays.asList("a", "b", "c");
-
-        try (IteratorEx<String> iter = new TestIteratorEx<>(list)) {
+        IteratorEx<String> iter = new TestIteratorEx<>(list);
+        try {
             Assertions.assertTrue(iter.hasNext());
             Assertions.assertEquals("a", iter.next());
+        } finally {
+            iter.closeResource();
         }
     }
 

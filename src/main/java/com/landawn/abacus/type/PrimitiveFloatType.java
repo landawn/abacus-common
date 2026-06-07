@@ -27,7 +27,7 @@ package com.landawn.abacus.type;
  * Type<Float> type = TypeFactory.getType(float.class);
  *
  * // Convert string to float
- * Float value = type.valueOf("3.14");   // Returns 3.14f
+ * Float value = type.valueOf("3.14");    // Returns 3.14f
  * Float value2 = type.valueOf("-0.5");   // Returns -0.5f
  *
  * // Get default value
@@ -40,6 +40,7 @@ package com.landawn.abacus.type;
  *     }
  * }
  * }</pre>
+ *
  */
 @SuppressWarnings("java:S2160")
 public final class PrimitiveFloatType extends AbstractFloatType {

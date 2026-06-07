@@ -59,8 +59,15 @@ public class StringBufferType extends AbstractCharSequenceType<StringBuffer> {
      * String str = type.stringOf(sb);   // Returns "Hello World"
      * }</pre>
      *
+     * <p>The returned string is a serializable representation designed to be parsed back into an equivalent value
+     * via {@link #valueOf(String)}; {@code stringOf} and {@code valueOf} are inverse operations that round-trip. This
+     * is the key distinction from {@link Object#toString()}, whose result is not guaranteed to be convertible back
+     * into the original value.</p>
+     *
      * @param x the StringBuffer object to convert
      * @return the string representation of the StringBuffer's content, or {@code null} if x is null
+     * @see #valueOf(String)
+     * @see #valueOf(Object)
      */
     @Override
     public String stringOf(final StringBuffer x) {
@@ -77,8 +84,14 @@ public class StringBufferType extends AbstractCharSequenceType<StringBuffer> {
      * StringBuffer sb = type.valueOf("Hello World");   // Creates StringBuffer with "Hello World"
      * }</pre>
      *
+     * <p>This method is the inverse of {@code stringOf} and round-trips with it: it parses the string produced by
+     * {@code stringOf} back into a value of this type. Strings produced by {@link Object#toString()} are not
+     * guaranteed to be parseable in this way.</p>
+     *
      * @param str the string to convert to a StringBuffer
      * @return a new StringBuffer containing the string content, or {@code null} if str is null
+     * @see #valueOf(Object)
+     * @see #stringOf(StringBuffer)
      */
     @Override
     public StringBuffer valueOf(final String str) {

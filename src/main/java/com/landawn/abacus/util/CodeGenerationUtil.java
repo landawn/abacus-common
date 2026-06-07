@@ -944,6 +944,7 @@ public final class CodeGenerationUtil {
      *         .propFunctions(N.asMap("min", CodeGenerationUtil.MIN_FUNC, "max", CodeGenerationUtil.MAX_FUNC))
      *         .build();
      * }</pre>
+     *
      */
     @Builder
     @Data
@@ -1017,7 +1018,25 @@ public final class CodeGenerationUtil {
          */
         private Map<String, TriFunction<Class<?>, Class<?>, String, String>> propFunctions;
 
-        /** Default constructor for framework/tooling compatibility. */
+        /**
+         * Default constructor for framework/tooling compatibility.
+         *
+         * <p>Creates a config with all fields at their defaults (object fields are {@code null};
+         * boolean flags are {@code false}). Prefer the Lombok builder via
+         * {@link #builder()}; this no-arg constructor exists mainly to be populated through the
+         * chainable setters (note {@code @Accessors(chain = true)}).</p>
+         *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * PropNameTableCodeConfig config = new PropNameTableCodeConfig();
+         * config.getEntityClasses();        // returns null (object fields default to null)
+         * config.isGenerateSnakeCase();     // returns false (boolean flags default to false)
+         *
+         * config.setClassName("S").setGenerateSnakeCase(true); // returns this (chainable setters)
+         * config.getClassName();                               // returns "S"
+         * }</pre>
+         *
+         */
         public PropNameTableCodeConfig() {
         }
     }

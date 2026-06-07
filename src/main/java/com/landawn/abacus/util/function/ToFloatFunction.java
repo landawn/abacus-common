@@ -30,7 +30,6 @@ import com.landawn.abacus.util.Throwables;
  *
  * <p>This is a functional interface whose functional method is {@link #applyAsFloat(Object)}.
  *
- *
  * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
  *
  * @param <T> the type of the input to the function
@@ -47,6 +46,7 @@ public interface ToFloatFunction<T> extends Throwables.ToFloatFunction<T, Runtim
      * float primitive = ToFloatFunction.UNBOX.applyAsFloat(boxed);     // returns 3.14f
      * float defaultValue = ToFloatFunction.UNBOX.applyAsFloat(null);   // returns 0.0f
      * }</pre>
+     *
      */
     ToFloatFunction<Float> UNBOX = value -> value == null ? 0 : value;
     /**
@@ -68,6 +68,7 @@ public interface ToFloatFunction<T> extends Throwables.ToFloatFunction<T, Runtim
      *
      * float defaultValue = ToFloatFunction.FROM_NUM.applyAsFloat(null);   // returns 0.0f
      * }</pre>
+     *
      */
     ToFloatFunction<Number> FROM_NUM = value -> value == null ? 0 : Numbers.toFloat(value);
 

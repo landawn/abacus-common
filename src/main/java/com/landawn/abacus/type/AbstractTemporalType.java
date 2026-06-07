@@ -57,7 +57,7 @@ public abstract class AbstractTemporalType<T extends Temporal> extends AbstractT
      * {@link DateTimeFormatter} for the ISO 8601 timestamp format with UTC offset.
      * <p>
      * Backed by {@link DateTimeFormatter#ISO_OFFSET_DATE_TIME}, which formats and parses
-     * date-times with an offset such as {@code 2011-12-03T10:15:30.999+01:00}.
+     * date-times with an offset such as {@code 2011-12-03T10:15:30+01:00}.
      * Used by subclasses when the {@link com.landawn.abacus.util.DateTimeFormat#ISO_8601_TIMESTAMP}
      * serialization option is selected. Kept separate from {@link #iso8601DateTimeDTF} to
      * allow independent customization if finer granularity is needed in the future.

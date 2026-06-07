@@ -260,28 +260,28 @@ public class CharacterTypeTest extends TestBase {
     }
 
     @Test
-    public void test_writeCharacter_null() throws Exception {
+    public void test_serializeTo_null() throws Exception {
         CharacterWriter writer = mock(BufferedJsonWriter.class);
 
-        type.writeCharacter(writer, null, null);
+        type.serializeTo(writer, null, null);
         verify(writer).write("null".toCharArray());
     }
 
     @Test
-    public void test_writeCharacter_withValue_noConfig() throws Exception {
+    public void test_serializeTo_withValue_noConfig() throws Exception {
         CharacterWriter writer = mock(BufferedJsonWriter.class);
 
-        type.writeCharacter(writer, 'A', null);
+        type.serializeTo(writer, 'A', null);
         verify(writer).writeCharacter('A');
     }
 
     @Test
-    public void test_writeCharacter_withValue_withQuotation() throws Exception {
+    public void test_serializeTo_withValue_withQuotation() throws Exception {
         CharacterWriter writer = mock(BufferedJsonWriter.class);
         JsonXmlSerConfig<?> config = mock(JsonXmlSerConfig.class);
         when(config.getCharQuotation()).thenReturn('\'');
 
-        type.writeCharacter(writer, 'A', config);
+        type.serializeTo(writer, 'A', config);
         verify(writer, times(2)).write('\'');
         verify(writer).writeCharacter('A');
     }

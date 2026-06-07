@@ -149,6 +149,7 @@ public class ByteArrayOutputStreamTest extends TestBase {
         assertThrows(IndexOutOfBoundsException.class, () -> baos.write(data, -1, 2));
         assertThrows(IndexOutOfBoundsException.class, () -> baos.write(data, 0, 10));
         assertThrows(IndexOutOfBoundsException.class, () -> baos.write(data, 5, 1));
+        assertThrows(IndexOutOfBoundsException.class, () -> baos.write(data, 1, Integer.MAX_VALUE));
     }
 
     @Test

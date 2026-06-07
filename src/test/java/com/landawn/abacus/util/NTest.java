@@ -27990,8 +27990,7 @@ public class NTest extends AbstractParserTest {
         List<Iterable<Integer>> lists = new ArrayList<>();
         lists.add(Arrays.asList(1, 3, 5));
         lists.add(Arrays.asList(2, 4, 6));
-        List<Integer> merged = N.merge(lists, (x, y) -> x <= y ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND,
-                IntFunctions.ofList());
+        List<Integer> merged = N.merge(lists, (x, y) -> x <= y ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND, IntFunctions.ofList());
         assertEquals(Arrays.asList(1, 2, 3, 4, 5, 6), merged);
     }
 
@@ -28010,8 +28009,7 @@ public class NTest extends AbstractParserTest {
         lists.add(Arrays.asList(1, 4, 7));
         lists.add(Arrays.asList(2, 5, 8));
         lists.add(Arrays.asList(3, 6, 9));
-        List<Integer> merged = N.merge(lists, (x, y) -> x <= y ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND,
-                IntFunctions.ofList());
+        List<Integer> merged = N.merge(lists, (x, y) -> x <= y ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND, IntFunctions.ofList());
         assertEquals(Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9), merged);
     }
 
@@ -28052,19 +28050,16 @@ public class NTest extends AbstractParserTest {
         AtomicInteger count = new AtomicInteger();
         N.forEach(new String[0], new Integer[] { 1 }, new Long[] { 1L }, (x, y, z) -> count.incrementAndGet());
         assertEquals(0, count.get());
-        N.forEach(new String[] { "a", "b", "c" }, new Integer[] { 1, 2 }, new Long[] { 1L, 2L, 3L },
-                (x, y, z) -> count.incrementAndGet());
+        N.forEach(new String[] { "a", "b", "c" }, new Integer[] { 1, 2 }, new Long[] { 1L, 2L, 3L }, (x, y, z) -> count.incrementAndGet());
         assertEquals(2, count.get());
     }
 
     @org.junit.jupiter.api.Test
     public void testForEachThreeIterables_EmptyGuard_uncovered() {
         AtomicInteger count = new AtomicInteger();
-        N.forEach(Collections.<String> emptyList(), Arrays.asList(1), Arrays.asList(1L),
-                (x, y, z) -> count.incrementAndGet());
+        N.forEach(Collections.<String> emptyList(), Arrays.asList(1), Arrays.asList(1L), (x, y, z) -> count.incrementAndGet());
         assertEquals(0, count.get());
-        N.forEach(Arrays.asList("a", "b"), Arrays.asList(1, 2, 3), Arrays.asList(1L, 2L),
-                (x, y, z) -> count.incrementAndGet());
+        N.forEach(Arrays.asList("a", "b"), Arrays.asList(1, 2, 3), Arrays.asList(1L, 2L), (x, y, z) -> count.incrementAndGet());
         assertEquals(2, count.get());
     }
 
@@ -28130,8 +28125,7 @@ public class NTest extends AbstractParserTest {
 
     @org.junit.jupiter.api.Test
     public void testReplaceAllList_LinkedListIteratorBranch_NullOldVal_uncovered() {
-        List<String> list = new LinkedList<>(
-                Arrays.asList("a", null, "b", null, "c", null, "d", null, "e", null, "f", null));
+        List<String> list = new LinkedList<>(Arrays.asList("a", null, "b", null, "c", null, "d", null, "e", null, "f", null));
         int replaced = N.replaceAll(list, null, "x");
         assertEquals(6, replaced);
         assertEquals("x", list.get(1));

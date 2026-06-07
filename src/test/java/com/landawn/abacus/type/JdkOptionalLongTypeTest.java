@@ -46,6 +46,15 @@ public class JdkOptionalLongTypeTest extends TestBase {
     }
 
     @Test
+    public void testCompare() {
+        assertEquals(0, optionalLongType.compare(OptionalLong.of(1L), OptionalLong.of(1L)));
+        assertTrue(optionalLongType.compare(OptionalLong.of(1L), OptionalLong.of(2L)) < 0);
+        assertTrue(optionalLongType.compare(OptionalLong.of(2L), OptionalLong.of(1L)) > 0);
+        assertTrue(optionalLongType.compare(OptionalLong.empty(), OptionalLong.of(1L)) < 0);
+        assertEquals(0, optionalLongType.compare(OptionalLong.empty(), OptionalLong.empty()));
+    }
+
+    @Test
     public void test_isCsvQuoteRequired() {
         assertFalse(optionalLongType.isCsvQuoteRequired());
     }
@@ -187,31 +196,31 @@ public class JdkOptionalLongTypeTest extends TestBase {
     }
 
     @Test
-    public void testWriteCharacter_Null() throws IOException {
-        optionalLongType.writeCharacter(characterWriter, null, null);
+    public void testSerializeTo_Null() throws IOException {
+        optionalLongType.serializeTo(characterWriter, null, null);
         verify(characterWriter).write(any(char[].class));
     }
 
     @Test
-    public void testWriteCharacter_Empty() throws IOException {
-        optionalLongType.writeCharacter(characterWriter, OptionalLong.empty(), null);
+    public void testSerializeTo_Empty() throws IOException {
+        optionalLongType.serializeTo(characterWriter, OptionalLong.empty(), null);
         verify(characterWriter).write(any(char[].class));
     }
 
     @Test
-    public void testWriteCharacter_Present() throws IOException {
+    public void testSerializeTo_Present() throws IOException {
         OptionalLong opt = OptionalLong.of(42L);
 
-        optionalLongType.writeCharacter(characterWriter, opt, null);
+        optionalLongType.serializeTo(characterWriter, opt, null);
         verify(characterWriter).write(42L);
     }
 
     @Test
-    public void testWriteCharacter_WithConfig() throws IOException {
+    public void testSerializeTo_WithConfig() throws IOException {
         OptionalLong opt = OptionalLong.of(42L);
         JsonXmlSerConfig<?> config = mock(JsonXmlSerConfig.class);
 
-        optionalLongType.writeCharacter(characterWriter, opt, config);
+        optionalLongType.serializeTo(characterWriter, opt, config);
         verify(characterWriter).write(42L);
     }
 }

@@ -39,10 +39,31 @@ public class ImmutableSetTypeTest extends TestBase {
 
     @Test
     public void testAppendTo() throws IOException {
+        StringBuilder sb = new StringBuilder();
+        type.appendTo(sb, ImmutableSet.of("x"));
+        // appendTo emits the plain, toString()-style form: the String element is NOT quoted
+        org.junit.jupiter.api.Assertions.assertEquals("[x]", sb.toString());
+
+        sb.setLength(0);
+        type.appendTo(sb, null);
+        org.junit.jupiter.api.Assertions.assertEquals("null", sb.toString());
     }
 
     @Test
-    public void testWriteCharacter() throws IOException {
+    public void testSerializeTo() throws IOException {
+        ImmutableSet<String> set = ImmutableSet.of("x");
+        com.landawn.abacus.util.BufferedJsonWriter writer = com.landawn.abacus.util.Objectory.createBufferedJsonWriter();
+        type.serializeTo(writer, set, com.landawn.abacus.parser.JsonSerConfig.create());
+        String json = writer.toString();
+        com.landawn.abacus.util.Objectory.recycle(writer);
+
+        // serializeTo emits JSON: the String element IS quoted; equals stringOf and differs from appendTo
+        org.junit.jupiter.api.Assertions.assertEquals("[\"x\"]", json);
+        org.junit.jupiter.api.Assertions.assertEquals(type.stringOf(set), json);
+
+        StringBuilder sb = new StringBuilder();
+        type.appendTo(sb, set);
+        org.junit.jupiter.api.Assertions.assertNotEquals(sb.toString(), json);
     }
 
     @Test

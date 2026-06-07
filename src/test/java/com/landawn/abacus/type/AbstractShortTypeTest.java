@@ -153,15 +153,15 @@ public class AbstractShortTypeTest extends TestBase {
     }
 
     @Test
-    public void testWriteCharacter() throws IOException {
-        shortType.writeCharacter(writer, null, null);
+    public void testSerializeTo() throws IOException {
+        shortType.serializeTo(writer, null, null);
         verify(writer).write(any(char[].class));
 
-        shortType.writeCharacter(writer, (short) 123, null);
+        shortType.serializeTo(writer, (short) 123, null);
         verify(writer).write((short) 123);
 
         when(config.isWriteNullNumberAsZero()).thenReturn(true);
-        shortType.writeCharacter(writer, null, config);
+        shortType.serializeTo(writer, null, config);
         verify(writer).write((short) 0);
     }
 

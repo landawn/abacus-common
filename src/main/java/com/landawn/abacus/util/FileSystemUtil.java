@@ -242,9 +242,10 @@ final class FileSystemUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * FileSystemUtil.freeSpaceKb("C:");        // Windows
-     * FileSystemUtil.freeSpaceKb("/volume");   // *nix
+     * FileSystemUtil.freeSpaceKb("C:");        // uses a Windows path
+     * FileSystemUtil.freeSpaceKb("/volume");   // uses a *nix path
      * }</pre>
+     *
      * The free space is calculated via the command line.
      * It uses 'dir /a /-c' on Windows and <i>df</i> on *nix.
      *

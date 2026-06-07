@@ -226,42 +226,42 @@ public class BooleanIntTypeTest extends TestBase {
     }
 
     @Test
-    public void test_writeCharacter() throws IOException {
+    public void test_serializeTo() throws IOException {
         CharacterWriter writer = mock(BufferedJsonWriter.class);
         JsonXmlSerConfig<?> config = mock(JsonXmlSerConfig.class);
 
-        type.writeCharacter(writer, null, config);
+        type.serializeTo(writer, null, config);
         verify(writer, atLeastOnce()).write(any(String.class));
     }
 
     @Test
-    public void testWriteCharacter_NoQuotation() throws IOException {
+    public void testSerializeTo_NoQuotation() throws IOException {
         CharacterWriter mockWriter = createCharacterWriter();
         JsonXmlSerConfig<?> config = mock(JsonXmlSerConfig.class);
         when(config.getCharQuotation()).thenReturn((char) 0);
 
-        type.writeCharacter(mockWriter, Boolean.TRUE, config);
+        type.serializeTo(mockWriter, Boolean.TRUE, config);
 
         verify(mockWriter).write("1");
     }
 
     @Test
-    public void testWriteCharacter_WithQuotation() throws IOException {
+    public void testSerializeTo_WithQuotation() throws IOException {
         CharacterWriter mockWriter = createCharacterWriter();
         JsonXmlSerConfig<?> config = mock(JsonXmlSerConfig.class);
         when(config.getCharQuotation()).thenReturn('"');
 
-        type.writeCharacter(mockWriter, Boolean.FALSE, config);
+        type.serializeTo(mockWriter, Boolean.FALSE, config);
 
         verify(mockWriter).write("0");
         verify(mockWriter, times(2)).write('"');
     }
 
     @Test
-    public void testWriteCharacter_NullConfig() throws IOException {
+    public void testSerializeTo_NullConfig() throws IOException {
         CharacterWriter mockWriter = createCharacterWriter();
 
-        type.writeCharacter(mockWriter, Boolean.TRUE, null);
+        type.serializeTo(mockWriter, Boolean.TRUE, null);
 
         verify(mockWriter).write("1");
     }

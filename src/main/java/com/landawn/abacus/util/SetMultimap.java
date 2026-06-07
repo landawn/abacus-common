@@ -51,8 +51,8 @@ import com.landawn.abacus.annotation.Internal;
  * SetMultimap<String, String> userRoles = N.newSetMultimap();
  * userRoles.put("alice", "admin");
  * userRoles.put("alice", "user");
- * userRoles.put("alice", "admin");   // duplicate ignored
- * Set<String> roles = userRoles.get("alice");   // {"admin", "user"}
+ * userRoles.put("alice", "admin");
+ * Set<String> roles = userRoles.get("alice");   // returns {"admin", "user"}
  *
  * // Build from a collection
  * List<String> words = Arrays.asList("apple", "apricot", "banana");
@@ -154,8 +154,12 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * SetMultimap<String, Integer> map = SetMultimap.of("key1", 100);
-     * // map contains: {"key1" -> [100]}
+     * SetMultimap<String, Integer> mm = SetMultimap.of("key1", 100);
+     * mm.get("key1");                                    // returns [100]
+     * mm.get("absent");                                  // returns null (absent key)
+     *
+     * SetMultimap<String, String> nullVal = SetMultimap.of("k", null);
+     * nullVal.get("k");                                  // returns [null] (null value stored)
      * }</pre>
      *
      * @param <K> the type of the key
@@ -184,11 +188,16 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * SetMultimap<String, Integer> map = SetMultimap.of("a", 1, "b", 2);
-     * // map contains: {"a" -> [1], "b" -> [2]}
+     * SetMultimap<String, Integer> mm = SetMultimap.of("a", 1, "b", 2);
+     * mm.get("a");                                       // returns [1]
+     * mm.get("b");                                       // returns [2]
+     * mm.get("x");                                       // returns null (absent key)
      *
-     * SetMultimap<String, Integer> map2 = SetMultimap.of("a", 1, "a", 2);
-     * // map2 contains: {"a" -> [1, 2]}
+     * SetMultimap<String, Integer> same = SetMultimap.of("a", 1, "a", 2);
+     * same.get("a");                                     // returns [1, 2] (same key merged)
+     *
+     * SetMultimap<String, Integer> dup = SetMultimap.of("a", 1, "a", 1);
+     * dup.get("a");                                      // returns [1] (duplicate removed)
      * }</pre>
      *
      * @param <K> the type of the keys
@@ -220,8 +229,13 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * SetMultimap<String, Integer> map = SetMultimap.of("a", 1, "b", 2, "c", 3);
-     * // map contains: {"a" -> [1], "b" -> [2], "c" -> [3]}
+     * SetMultimap<String, Integer> mm = SetMultimap.of("a", 1, "b", 2, "c", 3);
+     * mm.size();                                         // returns 3 (number of keys)
+     * mm.get("a");                                       // returns [1]
+     * mm.get("z");                                       // returns null (absent key)
+     *
+     * SetMultimap<String, Integer> dup = SetMultimap.of("a", 1, "a", 1, "a", 2);
+     * dup.get("a");                                      // returns [1, 2] (duplicate removed)
      * }</pre>
      *
      * @param <K> the type of the keys
@@ -256,8 +270,13 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * SetMultimap<String, Integer> map = SetMultimap.of("a", 1, "b", 2, "c", 3, "d", 4);
-     * // map contains: {"a" -> [1], "b" -> [2], "c" -> [3], "d" -> [4]}
+     * SetMultimap<String, Integer> mm = SetMultimap.of("a", 1, "b", 2, "c", 3, "d", 4);
+     * mm.size();                                         // returns 4 (number of keys)
+     * mm.get("d");                                       // returns [4]
+     * mm.get("z");                                       // returns null (absent key)
+     *
+     * SetMultimap<String, Integer> dup = SetMultimap.of("a", 1, "a", 2, "a", 1, "b", 5);
+     * dup.get("a");                                      // returns [1, 2] (duplicate removed)
      * }</pre>
      *
      * @param <K> the type of the keys
@@ -295,8 +314,10 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * SetMultimap<String, Integer> map = SetMultimap.of("a", 1, "b", 2, "c", 3, "d", 4, "e", 5);
-     * // map contains: {"a" -> [1], "b" -> [2], "c" -> [3], "d" -> [4], "e" -> [5]}
+     * SetMultimap<String, Integer> mm = SetMultimap.of("a", 1, "b", 2, "c", 3, "d", 4, "e", 5);
+     * mm.size();                                         // returns 5 (number of keys)
+     * mm.get("e");                                       // returns [5]
+     * mm.get("z");                                       // returns null (absent key)
      * }</pre>
      *
      * @param <K> the type of the keys
@@ -338,8 +359,10 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * SetMultimap<String, Integer> map = SetMultimap.of("a", 1, "b", 2, "c", 3, "d", 4, "e", 5, "f", 6);
-     * // map contains: {"a" -> [1], "b" -> [2], "c" -> [3], "d" -> [4], "e" -> [5], "f" -> [6]}
+     * SetMultimap<String, Integer> mm = SetMultimap.of("a", 1, "b", 2, "c", 3, "d", 4, "e", 5, "f", 6);
+     * mm.size();                                         // returns 6 (number of keys)
+     * mm.get("f");                                       // returns [6]
+     * mm.get("z");                                       // returns null (absent key)
      * }</pre>
      *
      * @param <K> the type of the keys
@@ -384,8 +407,10 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * SetMultimap<String, Integer> map = SetMultimap.of("a", 1, "b", 2, "c", 3, "d", 4, "e", 5, "f", 6, "g", 7);
-     * // map contains: {"a" -> [1], "b" -> [2], "c" -> [3], "d" -> [4], "e" -> [5], "f" -> [6], "g" -> [7]}
+     * SetMultimap<String, Integer> mm = SetMultimap.of("a", 1, "b", 2, "c", 3, "d", 4, "e", 5, "f", 6, "g", 7);
+     * mm.size();                                         // returns 7 (number of keys)
+     * mm.get("g");                                       // returns [7]
+     * mm.get("z");                                       // returns null (absent key)
      * }</pre>
      *
      * @param <K> the type of the keys
@@ -433,8 +458,13 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Map<String, Integer> map = Map.of("a", 1, "b", 2);
-     * SetMultimap<String, Integer> multimap = SetMultimap.fromMap(map);
-     * // multimap contains: {"a" -> [1], "b" -> [2]}
+     * SetMultimap<String, Integer> mm = SetMultimap.fromMap(map);
+     * mm.get("a");                                       // returns [1]
+     * mm.get("b");                                       // returns [2]
+     * mm.get("x");                                       // returns null (absent key)
+     *
+     * SetMultimap<String, Integer> empty = SetMultimap.fromMap(null);
+     * empty.isEmpty();                                   // returns true (null map -> empty)
      * }</pre>
      *
      * @param <K> the type of the keys
@@ -462,8 +492,15 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<String> words = List.of("apple", "ant", "banana", "bear");
-     * SetMultimap<Character, String> grouped = SetMultimap.fromCollection(words, s -> s.charAt(0));
-     * // grouped contains: {'a' -> ["apple", "ant"], 'b' -> ["banana", "bear"]}
+     * SetMultimap<Character, String> mm = SetMultimap.fromCollection(words, s -> s.charAt(0));
+     * mm.get('a');                                       // returns ["apple", "ant"]
+     * mm.get('b');                                       // returns ["banana", "bear"]
+     * mm.get('z');                                       // returns null (absent key)
+     *
+     * SetMultimap<Character, String> empty = SetMultimap.fromCollection(null, s -> s.charAt(0));
+     * empty.isEmpty();                                   // returns true (null collection -> empty)
+     *
+     * SetMultimap.fromCollection(words, null);           // throws IllegalArgumentException (null keyExtractor)
      * }</pre>
      *
      * @param <T> the type of the elements in the collection
@@ -499,9 +536,18 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<String> words = List.of("apple", "ant", "banana");
-     * SetMultimap<Character, Integer> multimap =
+     * SetMultimap<Character, Integer> mm =
      *     SetMultimap.fromCollection(words, s -> s.charAt(0), String::length);
-     * // multimap contains: {'a' -> [5, 3], 'b' -> [6]}
+     * mm.get('a');                                       // returns [3, 5] (apple=5, ant=3)
+     * mm.get('b');                                       // returns [6] (banana=6)
+     * mm.get('z');                                       // returns null (absent key)
+     *
+     * // duplicate extracted values under the same key are deduplicated
+     * SetMultimap<Integer, Integer> dup =
+     *     SetMultimap.fromCollection(List.of("xy", "zw"), String::length, String::length);
+     * dup.get(2);                                        // returns [2] (both length 2, deduped)
+     *
+     * SetMultimap.fromCollection(words, null, String::length); // throws IllegalArgumentException (null keyExtractor)
      * }</pre>
      *
      * @param <T> the type of the elements in the collection
@@ -540,8 +586,13 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
      * <pre>{@code
      * Map<String, Integer> map1 = Map.of("a", 1, "b", 2);
      * Map<String, Integer> map2 = Map.of("c", 3, "a", 4);
-     * SetMultimap<String, Integer> concatenated = SetMultimap.merge(map1, map2);
-     * // concatenated contains: {"a" -> [1, 4], "b" -> [2], "c" -> [3]}
+     * SetMultimap<String, Integer> mm = SetMultimap.merge(map1, map2);
+     * mm.get("a");                                       // returns [1, 4] (shared key merged)
+     * mm.get("b");                                       // returns [2]
+     * mm.get("c");                                       // returns [3]
+     *
+     * SetMultimap<String, Integer> nulls = SetMultimap.merge((Map<String, Integer>) null, (Map<String, Integer>) null);
+     * nulls.isEmpty();                                   // returns true (both null -> empty)
      * }</pre>
      *
      * @param <K> the type of the keys
@@ -571,9 +622,15 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
      * <pre>{@code
      * Map<String, Integer> map1 = Map.of("a", 1);
      * Map<String, Integer> map2 = Map.of("b", 2);
-     * Map<String, Integer> map3 = Map.of("c", 3);
-     * SetMultimap<String, Integer> concatenated = SetMultimap.merge(map1, map2, map3);
-     * // concatenated contains: {"a" -> [1], "b" -> [2], "c" -> [3]}
+     * Map<String, Integer> map3 = Map.of("a", 9);
+     * SetMultimap<String, Integer> mm = SetMultimap.merge(map1, map2, map3);
+     * mm.get("a");                                       // returns [1, 9] (shared key merged)
+     * mm.get("b");                                       // returns [2]
+     * mm.get("c");                                       // returns null (absent key)
+     *
+     * SetMultimap<String, Integer> empty = SetMultimap.merge(
+     *         (Map<String, Integer>) null, (Map<String, Integer>) null, (Map<String, Integer>) null);
+     * empty.isEmpty();                                   // returns true (all null -> empty)
      * }</pre>
      *
      * @param <K> the type of the keys
@@ -615,8 +672,13 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
      *     Map.of("c", 3),
      *     Map.of("a", 4)
      * );
-     * SetMultimap<String, Integer> concatenated = SetMultimap.merge(maps);
-     * // concatenated contains: {"a" -> [1, 4], "b" -> [2], "c" -> [3]}
+     * SetMultimap<String, Integer> mm = SetMultimap.merge(maps);
+     * mm.get("a");                                       // returns [1, 4] (shared key merged)
+     * mm.get("b");                                       // returns [2]
+     * mm.get("c");                                       // returns [3]
+     *
+     * SetMultimap<String, Integer> empty = SetMultimap.merge((List<Map<String, Integer>>) null);
+     * empty.isEmpty();                                   // returns true (null collection -> empty)
      * }</pre>
      *
      * @param <K> the type of the keys
@@ -654,8 +716,16 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
      * <pre>{@code
      * Map<String, Set<Integer>> map = new HashMap<>();
      * map.put("a", new HashSet<>(List.of(1, 2)));
-     * SetMultimap<String, Integer> multimap = SetMultimap.wrap(map);
-     * multimap.put("a", 3);   // modifies the original map
+     * SetMultimap<String, Integer> mm = SetMultimap.wrap(map);
+     * mm.get("a");                                       // returns [1, 2]
+     * mm.put("a", 3);                                    // returns true; also mutates the wrapped map
+     * map.get("a");                                      // returns [1, 2, 3] (backing map changed)
+     *
+     * SetMultimap.wrap((Map<String, Set<Integer>>) null); // throws IllegalArgumentException (null map)
+     *
+     * Map<String, Set<Integer>> bad = new HashMap<>();
+     * bad.put("x", new HashSet<>());                     // empty value not allowed
+     * SetMultimap.wrap(bad);                             // throws IllegalArgumentException (empty value)
      * }</pre>
      *
      * @param <K> the type of the keys in the map
@@ -686,10 +756,13 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Map<String, TreeSet<Integer>> map = new HashMap<>();
-     * SetMultimap<String, Integer> multimap =
-     *     SetMultimap.wrap(map, TreeSet::new);
-     * multimap.put("a", 3);   // Creates a TreeSet for key "a"
-     * multimap.put("a", 1);   // Added to the same TreeSet; values will be sorted
+     * SetMultimap<String, Integer> mm = SetMultimap.wrap(map, TreeSet::new);
+     * mm.put("a", 3);                                    // returns true; creates a TreeSet for key "a"
+     * mm.put("a", 1);                                    // returns true; added to the same TreeSet
+     * mm.get("a");                                       // returns [1, 3] (TreeSet keeps values sorted)
+     * mm.get("a").iterator().next();                     // returns 1 (smallest, sorted order)
+     *
+     * SetMultimap.wrap((Map<String, TreeSet<Integer>>) null, TreeSet::new); // throws IllegalArgumentException (null map)
      * }</pre>
      *
      * @param <K> the type of the keys in the map
@@ -725,7 +798,12 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
      * SetMultimap<String, Integer> original = SetMultimap.of("a", 1, "a", 2, "b", 1);
      * // original: {"a" -> [1, 2], "b" -> [1]}
      * SetMultimap<Integer, String> inverted = original.invert();
-     * // inverted: {1 -> ["a", "b"], 2 -> ["a"]}
+     * inverted.get(1);                                   // returns ["a", "b"]
+     * inverted.get(2);                                   // returns ["a"]
+     * inverted.get(9);                                   // returns null (absent key)
+     *
+     * SetMultimap<String, Integer> empty = SetMultimap.fromMap(null);
+     * empty.invert().isEmpty();                          // returns true (empty -> empty)
      * }</pre>
      *
      * @return a new SetMultimap where each original value is mapped to the set of keys that contained it;
@@ -753,7 +831,7 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
     }
 
     /**
-     * Creates a deep copy of this SetMultimap. The returned multimap contains all key-value pairs from the original,
+     * Creates a copy of this SetMultimap. The returned multimap contains all key-value pairs from the original,
      * but uses new set instances for value collections.
      *
      * <p>The new SetMultimap uses the same map and set suppliers as the original, ensuring consistent behavior
@@ -765,7 +843,10 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
      * <pre>{@code
      * SetMultimap<String, Integer> original = SetMultimap.of("a", 1, "b", 2);
      * SetMultimap<String, Integer> copy = original.copy();
-     * copy.put("c", 3);   // Does not modify original
+     * copy.get("a");                                     // returns [1]
+     * copy.put("c", 3);                                  // returns true; mutates copy only
+     * copy.get("c");                                     // returns [3]
+     * original.get("c");                                 // returns null (original unaffected)
      * }</pre>
      *
      * @return a new SetMultimap containing all the key-value pairs of this SetMultimap
@@ -886,7 +967,10 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
      * <pre>{@code
      * SetMultimap<String, Integer> map = SetMultimap.of("a", 1, "a", 2, "b", 3);
      * ImmutableMap<String, ImmutableSet<Integer>> immutable = map.toImmutableMap();
-     * // immutable.get("a") returns ImmutableSet[1, 2]
+     * immutable.get("a");                                // returns [1, 2]
+     * immutable.get("b");                                // returns [3]
+     * immutable.get("z");                                // returns null (absent key)
+     * immutable.put("c", null);                          // throws UnsupportedOperationException (immutable)
      * }</pre>
      *
      * @return an {@link ImmutableMap} where each key from this multimap is associated with an
@@ -918,7 +1002,9 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
      * SetMultimap<String, Integer> map = SetMultimap.of("b", 2, "a", 1);
      * ImmutableMap<String, ImmutableSet<Integer>> sorted =
      *     map.toImmutableMap(size -> new TreeMap<>());
-     * // Keys will be in sorted order: "a", "b"
+     * sorted.keySet();                                   // returns ["a", "b"] (sorted by TreeMap)
+     * sorted.get("a");                                   // returns [1]
+     * sorted.get("z");                                   // returns null (absent key)
      * }</pre>
      *
      * @param mapSupplier a function that creates a new map instance given an initial capacity;

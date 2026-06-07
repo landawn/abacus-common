@@ -174,15 +174,22 @@ public final class BrotliInputStream extends InputStream {
     /**
      * Returns an estimate of the number of bytes that can be read (or skipped over)
      * from this input stream without blocking by the next invocation of a method
-     * for this input stream. The underlying Brotli decoder does not override this
-     * method, so it always returns {@code 0}.
+     * for this input stream. This is delegated to the underlying stream and may
+     * return {@code 0} if the underlying Brotli decoder does not provide an estimate.
+     *
+     * <p>Note that this method provides only an estimate; the actual number of bytes
+     * that can be read without blocking may be more or less than the returned value.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * int n = brotliStream.available(); // always 0 with the current Brotli decoder
+     * int n = brotliStream.available();
+     * if (n > 0) {
+     *     byte[] buffer = new byte[n];
+     *     brotliStream.read(buffer);
+     * }
      * }</pre>
      *
-     * @return always {@code 0}, because the underlying Brotli decoder does not override this method
+     * @return an estimate of the number of bytes that can be read without blocking
      * @throws IOException if an I/O error occurs
      */
     @Override
@@ -192,14 +199,15 @@ public final class BrotliInputStream extends InputStream {
 
     /**
      * Marks the current position in this input stream.
-     * The underlying Brotli decoder does not support mark/reset, so this method has no effect.
+     * This call is delegated to the underlying input stream; its effect depends on whether that
+     * stream supports mark/reset (see {@link #markSupported()}).
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * if (brotliStream.markSupported()) {
      *     brotliStream.mark(1024);   // Mark with 1KB read limit
      *     // Read some data
-     *     brotliStream.reset();   // Return to marked position
+     *     brotliStream.reset();   // Resets to marked position
      * }
      * }</pre>
      *
@@ -212,10 +220,9 @@ public final class BrotliInputStream extends InputStream {
 
     /**
      * Repositions this stream to the position at the time the mark method was last called.
-     * The underlying Brotli decoder does not support mark/reset, so this method always
-     * throws an {@link IOException}.
+     * This call is delegated to the underlying input stream.
      *
-     * @throws IOException always, because the underlying Brotli decoder does not support mark/reset
+     * @throws IOException if the underlying input stream has not been marked, or does not support mark/reset
      */
     @Override
     public synchronized void reset() throws IOException {

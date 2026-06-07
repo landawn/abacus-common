@@ -31,7 +31,10 @@ import java.util.concurrent.TimeUnit;
  *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
- * ThreadPoolExecutor executor = new ThreadPoolExecutor(...);
+ * ThreadPoolExecutor executor = new ThreadPoolExecutor(
+ *     1, 1, 0L, TimeUnit.MILLISECONDS,
+ *     new java.util.concurrent.LinkedBlockingQueue<Runnable>()
+ * );
  * ExecutorService exitingExecutor = MoreExecutors.getExitingExecutorService(executor);
  * // The executor will now shut down automatically when the JVM exits
  * }</pre>
@@ -96,7 +99,10 @@ public final class MoreExecutors {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * ThreadPoolExecutor threadPool = new ThreadPoolExecutor(...);
+     * ThreadPoolExecutor threadPool = new ThreadPoolExecutor(
+     *     1, 1, 0L, TimeUnit.MILLISECONDS,
+     *     new java.util.concurrent.LinkedBlockingQueue<Runnable>()
+     * );
      * ExecutorService exitingService = MoreExecutors.getExitingExecutorService(
      *     threadPool, 30, TimeUnit.SECONDS
      * );

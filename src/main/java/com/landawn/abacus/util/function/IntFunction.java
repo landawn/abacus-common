@@ -44,6 +44,7 @@ public interface IntFunction<R> extends Throwables.IntFunction<R, RuntimeExcepti
      * IntFunction<Integer> boxer = IntFunction.BOX;
      * Integer boxed = boxer.apply(42);   // Returns Integer.valueOf(42)
      * }</pre>
+     *
      */
     IntFunction<Integer> BOX = value -> value;
 

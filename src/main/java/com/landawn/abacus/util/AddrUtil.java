@@ -212,12 +212,13 @@ public final class AddrUtil {
      *
      * @param servers a collection of server addresses where each string is in the format {@code "host:port"}; must not be {@code null}
      * @return a non-empty list of {@link InetSocketAddress} instances corresponding to the server addresses
-     * @throws IllegalArgumentException if any server address is invalid (missing colon, invalid port number, empty host or port, or port out of valid range 0-65535) or if the collection results in an empty address list
-     * @throws NullPointerException if {@code servers} is {@code null}
+     * @throws IllegalArgumentException if {@code servers} is {@code null}, any server address is invalid (missing colon, invalid port number, empty host or port, or port out of valid range 0-65535), or if the collection results in an empty address list
      * @see #getAddressList(String)
      * @see #getServerList(String)
      */
     public static List<InetSocketAddress> getAddressList(final Collection<String> servers) {
+        N.checkArgNotNull(servers, "servers");
+
         final List<InetSocketAddress> addrs = new ArrayList<>(servers.size());
 
         for (final String url : servers) {

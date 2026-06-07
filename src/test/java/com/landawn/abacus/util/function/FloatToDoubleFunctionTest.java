@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
+import com.landawn.abacus.util.Throwables;
 
 public class FloatToDoubleFunctionTest extends TestBase {
 
@@ -40,6 +41,13 @@ public class FloatToDoubleFunctionTest extends TestBase {
     public void testFunctionalInterfaceContract() {
         final FloatToDoubleFunction function = value -> (double) value;
         assertNotNull(function);
+        assertEquals(42.5, function.applyAsDouble(42.5f), 0.001);
+    }
+
+    @Test
+    public void testThrowableFunctionCompatibility() {
+        final Throwables.FloatToDoubleFunction<RuntimeException> function = FloatToDoubleFunction.DEFAULT;
+
         assertEquals(42.5, function.applyAsDouble(42.5f), 0.001);
     }
 }

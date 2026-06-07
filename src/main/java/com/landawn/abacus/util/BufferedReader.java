@@ -248,7 +248,7 @@ final class BufferedReader extends java.io.BufferedReader { // NOSONAR
      * <pre>{@code
      * BufferedReader reader = new BufferedReader("Hello World");
      * char[] buffer = new char[5];
-     * int count = reader.read(buffer, 0, 5);              // Reads "Hello"
+     * int count = reader.read(buffer, 0, 5);              // "Hello"
      * System.out.println(new String(buffer, 0, count));   // "Hello"
      * }</pre>
      *
@@ -592,7 +592,7 @@ final class BufferedReader extends java.io.BufferedReader { // NOSONAR
      *     String line = reader.readLine();
      *     // Process line
      * } finally {
-     *     reader.close();   // Always close in finally block
+     *     reader.close();   // closes in a finally block
      * }
      * }</pre>
      *
@@ -650,6 +650,15 @@ final class BufferedReader extends java.io.BufferedReader { // NOSONAR
      * <p>The stream is wrapped with an InputStreamReader using the default
      * character encoding.</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * BufferedReader reader = new BufferedReader("Initial");
+     * System.out.println(reader.readLine());   // "Initial"
+     *
+     * reader.reinit(new FileInputStream("another.txt"));
+     * System.out.println(reader.readLine());   // line is the first line of another.txt
+     * }</pre>
+     *
      * @param is the new input stream to read from
      */
     void reinit(final InputStream is) {
@@ -661,6 +670,15 @@ final class BufferedReader extends java.io.BufferedReader { // NOSONAR
      *
      * <p>This method allows reusing the same BufferedReader instance for
      * reading from different sources.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * BufferedReader reader = new BufferedReader("First source");
+     * System.out.println(reader.readLine());   // "First source"
+     *
+     * reader.reinit(new StringReader("Second source"));
+     * System.out.println(reader.readLine());   // "Second source"
+     * }</pre>
      *
      * @param reader the new reader to read from
      */

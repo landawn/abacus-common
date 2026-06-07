@@ -23,7 +23,7 @@ import com.landawn.abacus.util.Throwables;
  * {@link Throwables.IntSupplier}, providing compatibility with the standard Java functional
  * interfaces while also supporting the Throwables framework.
  *
- * <p>There is no requirement that a distinct result be returned each time the supplier is invoked.
+ * <p>There is no requirement that a new or distinct result be returned each time the supplier is invoked.
  *
  * <p>This is a functional interface whose functional method is {@link #getAsInt()}.
  *

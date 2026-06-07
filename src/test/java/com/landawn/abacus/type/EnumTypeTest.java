@@ -126,9 +126,16 @@ public class EnumTypeTest extends TestBase {
 
     @Test
     public void testGetByColumnLabelWithOrdinal() throws SQLException {
-        when(resultSet.getInt("enumColumn")).thenReturn(2);
+        when(resultSet.getObject("enumColumn")).thenReturn("2");
         assertEquals(TestEnum.VALUE3, enumTypeByOrdinal.get(resultSet, "enumColumn"));
-        verify(resultSet).getInt("enumColumn");
+        verify(resultSet).getObject("enumColumn");
+    }
+
+    @Test
+    public void testGetByColumnLabelWithOrdinalNull() throws SQLException {
+        when(resultSet.getObject("enumColumn")).thenReturn(null);
+        assertNull(enumTypeByOrdinal.get(resultSet, "enumColumn"));
+        verify(resultSet).getObject("enumColumn");
     }
 
     @Test
@@ -168,16 +175,16 @@ public class EnumTypeTest extends TestBase {
     }
 
     @Test
-    public void testWriteCharacter() throws IOException {
+    public void testSerializeTo() throws IOException {
         assertDoesNotThrow(() -> {
-            enumTypeByName.writeCharacter(characterWriter, null, config);
+            enumTypeByName.serializeTo(characterWriter, null, config);
 
-            enumTypeByName.writeCharacter(characterWriter, TestEnum.VALUE1, config);
+            enumTypeByName.serializeTo(characterWriter, TestEnum.VALUE1, config);
 
-            enumTypeByOrdinal.writeCharacter(characterWriter, TestEnum.VALUE2, config);
+            enumTypeByOrdinal.serializeTo(characterWriter, TestEnum.VALUE2, config);
 
             when(config.getStringQuotation()).thenReturn('"');
-            enumTypeByName.writeCharacter(characterWriter, TestEnum.VALUE3, config);
+            enumTypeByName.serializeTo(characterWriter, TestEnum.VALUE3, config);
         });
     }
 }

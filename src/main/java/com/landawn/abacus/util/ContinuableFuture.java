@@ -446,7 +446,7 @@ public class ContinuableFuture<T> implements Future<T> {
      * ContinuableFuture<String> future = ContinuableFuture.completed("Hello");
      *
      * // This doesn't block and returns immediately
-     * String result = future.get();   // "Hello"
+     * String result = future.get();   // returns "Hello"
      *
      * // Useful for conditional async operations
      * ContinuableFuture<Data> loadData(boolean useCache) {
@@ -806,7 +806,7 @@ public class ContinuableFuture<T> implements Future<T> {
      * Data data;
      * if (result.isFailure()) {
      *     data = (result.getException() instanceof TimeoutException)
-     *         ? getCachedData()   // Fallback on timeout
+     *         ? getCachedData()
      *         : getDefaultData();
      * } else {
      *     data = result.orElseThrow();
@@ -880,12 +880,12 @@ public class ContinuableFuture<T> implements Future<T> {
      *
      * // Transform the result synchronously after completion
      * String result = future.getThenApply(num -> "The answer is: " + num);
-     * System.out.println(result);   // "The answer is: 42"
+     * System.out.println(result);   // prints "The answer is: 42"
      *
      * // Can throw checked exceptions
      * Data processed = future.getThenApply(num -> {
      *     if (num < 0) throw new IllegalArgumentException("Negative!");
-     *     return processNumber(num);   // May throw IOException
+     *     return processNumber(num);
      * });
      * }</pre>
      *
@@ -1153,7 +1153,7 @@ public class ContinuableFuture<T> implements Future<T> {
      * // Transformation is applied when get() is called
      * ContinuableFuture<String> stringFuture = future.map(num -> "The result is: " + (num * 2));
      *
-     * System.out.println(stringFuture.get());   // "The result is: 42"
+     * System.out.println(stringFuture.get());   // prints "The result is: 42"
      * }</pre>
      *
      * @param <U> the type of the transformed result.
@@ -1387,7 +1387,7 @@ public class ContinuableFuture<T> implements Future<T> {
      *     .thenCallAsync((data, exception) -> {
      *         if (exception != null) {
      *             logger.warn("Primary failed, using fallback", exception);
-     *             return fetchFromSecondary();   // Recovery
+     *             return fetchFromSecondary();
      *         }
      *         return enhanceData(data);
      *     });
@@ -1487,9 +1487,9 @@ public class ContinuableFuture<T> implements Future<T> {
      * ContinuableFuture<Data> backup = ContinuableFuture.call(() -> fetchBackup());
      *
      * primary.runAsyncAfterBoth(backup, tuple -> {
-     *     if (tuple._2 == null) {  // primary succeeded
+     *     if (tuple._2 == null) {
      *         processData(tuple._1);
-     *     } else if (tuple._4 == null) {  // backup succeeded
+     *     } else if (tuple._4 == null) {
      *         processData(tuple._3);
      *     } else {
      *         handleBothFailed(tuple._2, tuple._4);
@@ -1749,7 +1749,7 @@ public class ContinuableFuture<T> implements Future<T> {
      * ContinuableFuture<Weather> remoteWeather = ContinuableFuture.call(() -> getRemoteWeather());
      *
      * localWeather.runAsyncAfterEither(remoteWeather, weather -> {
-     *     displayWeather(weather);   // weather may be null if the first future failed
+     *     displayWeather(weather);
      *     logSource(weather.getSource());
      * });
      * }</pre>
@@ -1774,8 +1774,8 @@ public class ContinuableFuture<T> implements Future<T> {
      * it receives {@code (firstSuccessfulResult, null)}; only if both futures fail does it receive
      * {@code (null, exception)} with the failure of the first future to complete.
      *
-     * <p>Unlike the {@link #runAsyncAfterEither(ContinuableFuture, Throwables.Consumer) Consumer} and
-     * {@link #runAsyncAfterEither(ContinuableFuture, Throwables.BiFunction) BiFunction} overloads (which react to
+     * <p>Unlike the {@link #runAsyncAfterEither(ContinuableFuture, Throwables.Runnable) Runnable} and
+     * {@link #runAsyncAfterEither(ContinuableFuture, Throwables.Consumer) Consumer} overloads (which react to
      * the first future to complete, whether it succeeds or fails), this overload waits for the first
      * <i>successful</i> completion and only surfaces an exception when neither future succeeds.
      *
@@ -1855,7 +1855,7 @@ public class ContinuableFuture<T> implements Future<T> {
      *
      * ContinuableFuture<Order> order = vendorA.callAsyncAfterEither(vendorB, price -> {
      *     // Process the first available price
-     *     return createOrder(price);   // price may be null if the first future failed
+     *     return createOrder(price);
      * });
      * }</pre>
      *
@@ -2201,8 +2201,6 @@ public class ContinuableFuture<T> implements Future<T> {
         }, other);
     }
 
-    //    /**
-
     private <R> ContinuableFuture<R> execute(final Callable<R> command) {
         return execute(command, null);
     }
@@ -2261,10 +2259,10 @@ public class ContinuableFuture<T> implements Future<T> {
      * ExecutorService ioExecutor = Executors.newCachedThreadPool();
      * ExecutorService cpuExecutor = Executors.newFixedThreadPool(4);
      *
-     * ContinuableFuture.call(() -> readFromFile())          // Runs on default executor
-     *     .thenUse(cpuExecutor)                             // Switch to CPU executor
-     *     .thenCallAsync(() -> processData())                    // CPU-intensive processing
-     *     .thenUse(ioExecutor)                              // Switch to I/O executor
+     * ContinuableFuture.call(() -> readFromFile())        // Runs on default executor
+     *     .thenUse(cpuExecutor)
+     *     .thenCallAsync(() -> processData())             // CPU-intensive processing
+     *     .thenUse(ioExecutor)
      *     .thenRunAsync(result -> writeToFile(result));   // I/O operation
      * }</pre>
      *

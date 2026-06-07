@@ -364,39 +364,39 @@ public class SingleValueTypeTest extends TestBase {
     }
 
     @Test
-    public void testWriteCharacter() throws IOException {
+    public void testSerializeTo() throws IOException {
         CharacterWriter writer = createCharacterWriter();
         JsonXmlSerConfig<?> config = mock(JsonXmlSerConfig.class);
 
         TestValue value = new TestValue("test");
-        singleValueType.writeCharacter(writer, value, config);
+        singleValueType.serializeTo(writer, value, config);
 
-        singleValueType.writeCharacter(writer, null, config);
+        singleValueType.serializeTo(writer, null, config);
 
         when(config.getStringQuotation()).thenReturn('"');
-        singleValueType.writeCharacter(writer, value, config);
+        singleValueType.serializeTo(writer, value, config);
         assertNotNull(value);
     }
 
     @Test
-    public void testWriteCharacter_withJsonValueMethod() throws IOException {
+    public void testSerializeTo_withJsonValueMethod() throws IOException {
         AnnotatedSingleValueType type = new AnnotatedSingleValueType();
         CharacterWriter writer = createCharacterWriter();
         JsonXmlSerConfig<?> config = mock(JsonXmlSerConfig.class);
 
         AnnotatedValue av = AnnotatedValue.of("hello");
-        type.writeCharacter(writer, av, config);
+        type.serializeTo(writer, av, config);
         assertNotNull(av);
     }
 
     @Test
-    public void testWriteCharacter_null_withAnnotatedType() throws IOException {
+    public void testSerializeTo_null_withAnnotatedType() throws IOException {
         AnnotatedSingleValueType type = new AnnotatedSingleValueType();
         CharacterWriter writer = createCharacterWriter();
         JsonXmlSerConfig<?> config = mock(JsonXmlSerConfig.class);
 
         // writing null should write "null"
-        type.writeCharacter(writer, null, config);
+        type.serializeTo(writer, null, config);
         assertNotNull(writer);
     }
 

@@ -63,8 +63,15 @@ public class OffsetDateTimeType extends AbstractTemporalType<OffsetDateTime> {
      * Uses a format equivalent to {@link java.time.format.DateTimeFormatter#ISO_OFFSET_DATE_TIME}
      * (e.g., {@code "2011-12-03T10:15:30+01:00"}), preserving the OffsetDateTime's UTC offset.
      *
+     * <p>The returned string is a serializable representation designed to be parsed back into an equivalent value
+     * via {@link #valueOf(String)}; {@code stringOf} and {@code valueOf} are inverse operations that round-trip. This
+     * is the key distinction from {@link Object#toString()}, whose result is not guaranteed to be convertible back
+     * into the original value.</p>
+     *
      * @param x the OffsetDateTime object to convert
      * @return the ISO-8601 formatted string, or {@code null} if the input is null
+     * @see #valueOf(String)
+     * @see #valueOf(Object)
      */
     @Override
     public String stringOf(final OffsetDateTime x) {
@@ -95,13 +102,28 @@ public class OffsetDateTimeType extends AbstractTemporalType<OffsetDateTime> {
      *   <li>Epoch milliseconds as a numeric string</li>
      *   <li>ISO-8601 date-time format (20 characters ending with {@code 'Z'})</li>
      *   <li>ISO-8601 timestamp format (24 characters ending with {@code 'Z'})</li>
-     *   <li>Standard {@link OffsetDateTime#parse(CharSequence)} format</li>
+     *   <li>Any other value is parsed with the default {@link OffsetDateTime#parse(CharSequence)} parser</li>
      *   <li>Special value {@code "SYS_TIME"} returns the current system time</li>
      * </ul>
+     *
+     * <p>Every string produced by {@link OffsetDateTime#toString()} can be parsed back into an equivalent value,
+     * including:</p>
+     * <ul>
+     *   <li>the seconds-omitted form (e.g. {@code "2023-10-15T10:30Z"})</li>
+     *   <li>fractional seconds of any precision (e.g. {@code "2023-10-15T10:30:45.123456789Z"})</li>
+     *   <li>numeric UTC offsets, with optional offset-seconds (e.g. {@code "2023-10-15T10:30:45+05:30:15"})</li>
+     * </ul>
+     *
+     * <p>This method is the inverse of {@code stringOf} and round-trips with it: it parses the string produced by
+     * {@code stringOf} back into a value of this type. Because {@code stringOf} formats with the same
+     * {@link java.time.format.DateTimeFormatter#ISO_OFFSET_DATE_TIME ISO_OFFSET_DATE_TIME} representation used by
+     * {@link OffsetDateTime#toString()}, the value returned by {@code toString()} round-trips as well.</p>
      *
      * @param str the string to parse
      * @return the parsed OffsetDateTime, or {@code null} if the input is {@code null} or represents a {@code null} date-time
      * @throws DateTimeParseException if the string cannot be parsed as an OffsetDateTime
+     * @see #valueOf(Object)
+     * @see #stringOf(OffsetDateTime)
      */
     @Override
     public OffsetDateTime valueOf(final String str) {
@@ -116,20 +138,35 @@ public class OffsetDateTimeType extends AbstractTemporalType<OffsetDateTime> {
         if (isPossibleMillis(str)) {
             try {
                 return OffsetDateTime.ofInstant(Instant.ofEpochMilli(Numbers.toLong(str)), DEFAULT_ZONE_ID);
-            } catch (final NumberFormatException e2) {
+            } catch (final NumberFormatException e) {
                 // ignore;
             }
         }
 
         final int len = str.length();
 
-        return len == 20 && str.charAt(19) == 'Z' ? OffsetDateTime.parse(str, iso8601DateTimeDTF)
-                : (len == 24 && str.charAt(23) == 'Z' ? OffsetDateTime.parse(str, iso8601TimestampDTF) : OffsetDateTime.parse(str));
+        // Fast path for the two most common ISO-8601 UTC forms produced by stringOf/serializeTo. If the fast-path
+        // formatter rejects the input, fall back to the general parser below so that every OffsetDateTime.toString()
+        // form remains parseable.
+        if ((len == 20 && str.charAt(19) == 'Z') || (len == 24 && str.charAt(23) == 'Z')) {
+            try {
+                return OffsetDateTime.parse(str, len == 20 ? iso8601DateTimeDTF : iso8601TimestampDTF);
+            } catch (final DateTimeParseException e) {
+                // fall through to the general parser below.
+            }
+        }
+
+        // General path: ISO_OFFSET_DATE_TIME, which parses every form produced by OffsetDateTime.toString(),
+        // including numeric offsets (with optional offset-seconds), fractional seconds of any precision,
+        // and the seconds-omitted form.
+        return OffsetDateTime.parse(str);
     }
 
     /**
      * Converts a character array to an {@link OffsetDateTime} object.
-     * This method creates a string from the character array and delegates to the string parsing method.
+     * This method first checks if the character array represents a long value (epoch milliseconds).
+     * If so, it creates an OffsetDateTime from that timestamp. Otherwise, it converts the
+     * character array to a string and delegates to {@link #valueOf(String)}.
      *
      * @param cbuf the character array containing the date-time string
      * @param offset the offset in the array where the date-time string starts
@@ -215,10 +252,24 @@ public class OffsetDateTimeType extends AbstractTemporalType<OffsetDateTime> {
 
     /**
      * Appends the string representation of an {@link OffsetDateTime} to an Appendable.
+     * <p>
+     * <b>appendTo vs. serializeTo:</b> {@code appendTo} produces a plain, {@code toString()}-style rendering with no
+     * JSON/XML quoting or escaping (for general text output), whereas {@code serializeTo} produces the JSON/XML
+     * serialized form (applying string quotation and character escaping per the serialization config) and is used by the
+     * JSON/XML serializers.
      *
      * @param appendable the Appendable to write to
      * @param x the OffsetDateTime value to append
      * @throws IOException if an I/O error occurs during the append operation
+     * @implNote
+     * This method appends a string representation of {@code x} to {@code appendable} (the literal {@code "null"} for a
+     * {@code null} value). Conceptually this is the human-readable form produced by {@code toString()}, <i>not</i> the
+     * value returned by {@code stringOf}, which is a formatted, serializable representation (typically a JSON string)
+     * that {@link #valueOf(String)} can convert back into an equivalent value. For values whose nested structure makes
+     * the two forms differ (collections, maps, arrays), {@code appendTo} emits the unquoted, {@code toString()}-style
+     * form; it is therefore not, in the general contract, a plain
+     * {@code appendable.append(x == null ? NULL_STRING : stringOf(x))}. (For value types whose human-readable and
+     * serialized forms coincide, the appended text is naturally identical to {@code stringOf(x)}.)
      */
     @Override
     public void appendTo(final Appendable appendable, final OffsetDateTime x) throws IOException {
@@ -243,6 +294,15 @@ public class OffsetDateTimeType extends AbstractTemporalType<OffsetDateTime> {
      * </ul>
      * When the format is not {@code LONG} and the config specifies a string quotation character,
      * the formatted value is wrapped in that quotation character.
+     * <p>
+     * This method is specifically designed for JSON/XML serialization: it writes the serialized form of {@code x} to the
+     * {@code CharacterWriter}, applying string quotation and character escaping according to the supplied serialization
+     * config (a {@code null} config means no surrounding quotation). It is the streaming counterpart of {@code stringOf}
+     * and is invoked by the JSON/XML serializers.
+     * <p>
+     * <b>serializeTo vs. appendTo:</b> {@code serializeTo} produces machine-readable JSON/XML (quoted and escaped),
+     * whereas {@code appendTo} produces a plain, human-readable {@code toString()}-style rendering without JSON/XML
+     * quoting or escaping.
      *
      * @param writer the CharacterWriter to write to
      * @param x the OffsetDateTime value to write; if {@code null}, writes the literal {@code "null"}
@@ -251,7 +311,7 @@ public class OffsetDateTimeType extends AbstractTemporalType<OffsetDateTime> {
      */
     @SuppressWarnings("null")
     @Override
-    public void writeCharacter(final CharacterWriter writer, final OffsetDateTime x, final JsonXmlSerConfig<?> config) throws IOException {
+    public void serializeTo(final CharacterWriter writer, final OffsetDateTime x, final JsonXmlSerConfig<?> config) throws IOException {
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {

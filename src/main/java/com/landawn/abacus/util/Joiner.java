@@ -95,7 +95,7 @@ import com.landawn.abacus.util.u.Optional;
  *                      .skipNulls()
  *                      .trimBeforeAppend()
  *                      .append("  hello  ")
- *                      .append(null)           // skipped
+ *                      .append(null)
  *                      .append("  world  ")
  *                      .toString();
  * // Result: "hello | world"
@@ -113,7 +113,7 @@ import com.landawn.abacus.util.u.Optional;
  *         joiner.append(i);
  *     }
  *     return joiner.toString();
- * } // Automatic buffer cleanup
+ * }
  * }</pre>
  *
  * <p><b>Factory Methods:</b>
@@ -330,7 +330,7 @@ public final class Joiner implements Closeable {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Joiner.withDefault().appendAll(new String[]{"a", "b", "c"}).toString();   // Returns: "a, b, c"
+     * Joiner.withDefault().appendAll(new String[]{"a", "b", "c"}).toString();   // returns: "a, b, c"
      * }</pre>
      *
      * @return a new Joiner instance with default delimiters.
@@ -350,8 +350,8 @@ public final class Joiner implements Closeable {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Joiner.with(", ").appendAll(new String[]{"a", "b", "c"}).toString();   // Returns: "a, b, c"
-     * Joiner.with("-").appendAll(new int[]{1, 2, 3}).toString();             // Returns: "1-2-3"
+     * Joiner.with(", ").appendAll(new String[]{"a", "b", "c"}).toString();   // returns: "a, b, c"
+     * Joiner.with("-").appendAll(new int[]{1, 2, 3}).toString();             // returns: "1-2-3"
      * }</pre>
      *
      * @param separator the delimiter to use between joined elements, must not be null.
@@ -368,8 +368,8 @@ public final class Joiner implements Closeable {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Joiner.with(", ", "=").appendEntry("key", "value").toString();   // Returns: "key=value"
-     * Joiner.with("; ", ": ").appendEntries(map).toString();           // Returns: "a: 1; b: 2"
+     * Joiner.with(", ", "=").appendEntry("key", "value").toString();   // returns: "key=value"
+     * Joiner.with("; ", ": ").appendEntries(map).toString();           // returns: "a: 1; b: 2"
      * }</pre>
      *
      * @param separator the delimiter to use between joined elements, must not be null.
@@ -387,8 +387,8 @@ public final class Joiner implements Closeable {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Joiner.with(", ", "[", "]").appendAll(new String[]{"a", "b", "c"}).toString();   // Returns: "[a, b, c]"
-     * Joiner.with(" | ", "{", "}").appendAll(new int[]{1, 2, 3}).toString();            // Returns: "{1 | 2 | 3}"
+     * Joiner.with(", ", "[", "]").appendAll(new String[]{"a", "b", "c"}).toString();   // returns: "[a, b, c]"
+     * Joiner.with(" | ", "{", "}").appendAll(new int[]{1, 2, 3}).toString();           // returns: "{1 | 2 | 3}"
      * }</pre>
      *
      * @param separator the delimiter to use between joined elements, must not be null.
@@ -429,8 +429,8 @@ public final class Joiner implements Closeable {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Joiner.with(", ").setEmptyValue("NONE").toString();                       // Returns: "NONE"
-     * Joiner.with(", ").setEmptyValue("[]").appendAll(new int[0]).toString();   // Returns: "[]"
+     * Joiner.with(", ").setEmptyValue("NONE").toString();                       // returns: "NONE"
+     * Joiner.with(", ").setEmptyValue("[]").appendAll(new int[0]).toString();   // returns: "[]"
      * }</pre>
      *
      * @param emptyValue the value to return when no elements have been added, must not be null.
@@ -469,8 +469,8 @@ public final class Joiner implements Closeable {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Joiner.with(", ").skipNulls().appendAll(new Object[]{"a", null, "b"}).toString();   // Returns: "a, b"
-     * Joiner.with(", ").appendAll(new Object[]{"a", null, "b"}).toString();               // Returns: "a, null, b"
+     * Joiner.with(", ").skipNulls().appendAll(new Object[]{"a", null, "b"}).toString();   // returns: "a, b"
+     * Joiner.with(", ").appendAll(new Object[]{"a", null, "b"}).toString();               // returns: "a, null, b"
      * }</pre>
      *
      * @return this Joiner instance for method chaining.
@@ -500,8 +500,6 @@ public final class Joiner implements Closeable {
 
         return this;
     }
-
-    //    /**
 
     /**
      * Enables the use of a cached StringBuilder from an object pool to improve performance.
@@ -541,7 +539,7 @@ public final class Joiner implements Closeable {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Joiner.with(", ").append(true).append(false).toString();   // Returns: "true, false"
+     * Joiner.with(", ").append(true).append(false).toString();   // returns: "true, false"
      * }</pre>
      *
      * @param element the boolean value to append
@@ -557,7 +555,7 @@ public final class Joiner implements Closeable {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Joiner.with(", ").append('a').append('b').toString();   // Returns: "a, b"
+     * Joiner.with(", ").append('a').append('b').toString();   // returns: "a, b"
      * }</pre>
      *
      * @param element the char value to append
@@ -573,7 +571,7 @@ public final class Joiner implements Closeable {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Joiner.with(", ").append(1).append(2).append(3).toString();   // Returns: "1, 2, 3"
+     * Joiner.with(", ").append(1).append(2).append(3).toString();   // returns: "1, 2, 3"
      * }</pre>
      *
      * @param element the int value to append
@@ -589,7 +587,7 @@ public final class Joiner implements Closeable {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Joiner.with(", ").append(100L).append(200L).toString();   // Returns: "100, 200"
+     * Joiner.with(", ").append(100L).append(200L).toString();   // returns: "100, 200"
      * }</pre>
      *
      * @param element the long value to append
@@ -605,7 +603,7 @@ public final class Joiner implements Closeable {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Joiner.with(", ").append(1.5f).append(2.5f).toString();   // Returns: "1.5, 2.5"
+     * Joiner.with(", ").append(1.5f).append(2.5f).toString();   // returns: "1.5, 2.5"
      * }</pre>
      *
      * @param element the float value to append
@@ -621,7 +619,7 @@ public final class Joiner implements Closeable {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Joiner.with(", ").append(1.5).append(2.5).toString();   // Returns: "1.5, 2.5"
+     * Joiner.with(", ").append(1.5).append(2.5).toString();   // returns: "1.5, 2.5"
      * }</pre>
      *
      * @param element the double value to append
@@ -639,8 +637,8 @@ public final class Joiner implements Closeable {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Joiner.with(", ").append("hello").append("world").toString();                    // Returns: "hello, world"
-     * Joiner.with(", ").skipNulls().append("a").append(null).append("b").toString();   // Returns: "a, b"
+     * Joiner.with(", ").append("hello").append("world").toString();                    // returns: "hello, world"
+     * Joiner.with(", ").skipNulls().append("a").append(null).append("b").toString();   // returns: "a, b"
      * }</pre>
      *
      * @param element the String to append, may be null
@@ -662,7 +660,7 @@ public final class Joiner implements Closeable {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * StringBuilder sb = new StringBuilder("test");
-     * Joiner.with(", ").append("hello").append(sb).toString();   // Returns: "hello, test"
+     * Joiner.with(", ").append("hello").append(sb).toString();   // returns: "hello, test"
      * }</pre>
      *
      * @param element the CharSequence to append, may be null
@@ -715,7 +713,7 @@ public final class Joiner implements Closeable {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * StringBuilder sb = new StringBuilder("world");
-     * Joiner.with(", ").append("hello").append(sb).toString();   // Returns: "hello, world"
+     * Joiner.with(", ").append("hello").append(sb).toString();   // returns: "hello, world"
      * }</pre>
      *
      * @param element the StringBuilder to append, may be null
@@ -786,7 +784,7 @@ public final class Joiner implements Closeable {
      * boolean includeDetails = true;
      * Joiner.with(", ").append("basic")
      *     .appendIf(includeDetails, () -> "detailed info")
-     *     .toString();   // Returns: "basic, detailed info"
+     *     .toString();   // returns: "basic, detailed info"
      * }</pre>
      *
      * @param b the condition to check
@@ -812,7 +810,7 @@ public final class Joiner implements Closeable {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * boolean[] arr = {true, false, true};
-     * Joiner.with(", ").appendAll(arr).toString();   // Returns: "true, false, true"
+     * Joiner.with(", ").appendAll(arr).toString();   // returns: "true, false, true"
      * }</pre>
      *
      * @param a the boolean array to append, may be {@code null} or empty
@@ -833,7 +831,7 @@ public final class Joiner implements Closeable {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * boolean[] arr = {true, false, true, false};
-     * Joiner.with(", ").appendAll(arr, 1, 3).toString();   // Returns: "false, true"
+     * Joiner.with(", ").appendAll(arr, 1, 3).toString();   // returns: "false, true"
      * }</pre>
      *
      * @param a the boolean array to append from
@@ -873,7 +871,7 @@ public final class Joiner implements Closeable {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * char[] arr = {'a', 'b', 'c'};
-     * Joiner.with(", ").appendAll(arr).toString();   // Returns: "a, b, c"
+     * Joiner.with(", ").appendAll(arr).toString();   // returns: "a, b, c"
      * }</pre>
      *
      * @param a the char array to append, may be {@code null} or empty
@@ -894,7 +892,7 @@ public final class Joiner implements Closeable {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * char[] arr = {'a', 'b', 'c', 'd'};
-     * Joiner.with("-").appendAll(arr, 1, 3).toString();   // Returns: "b-c"
+     * Joiner.with("-").appendAll(arr, 1, 3).toString();   // returns: "b-c"
      * }</pre>
      *
      * @param a the char array to append from
@@ -934,7 +932,7 @@ public final class Joiner implements Closeable {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * byte[] arr = {1, 2, 3};
-     * Joiner.with(", ").appendAll(arr).toString();   // Returns: "1, 2, 3"
+     * Joiner.with(", ").appendAll(arr).toString();   // returns: "1, 2, 3"
      * }</pre>
      *
      * @param a the byte array to append, may be {@code null} or empty
@@ -955,7 +953,7 @@ public final class Joiner implements Closeable {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * byte[] arr = {1, 2, 3, 4};
-     * Joiner.with("-").appendAll(arr, 1, 3).toString();   // Returns: "2-3"
+     * Joiner.with("-").appendAll(arr, 1, 3).toString();   // returns: "2-3"
      * }</pre>
      *
      * @param a the byte array to append from
@@ -995,7 +993,7 @@ public final class Joiner implements Closeable {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * short[] arr = {10, 20, 30};
-     * Joiner.with(", ").appendAll(arr).toString();   // Returns: "10, 20, 30"
+     * Joiner.with(", ").appendAll(arr).toString();   // returns: "10, 20, 30"
      * }</pre>
      *
      * @param a the short array to append, may be {@code null} or empty
@@ -1016,7 +1014,7 @@ public final class Joiner implements Closeable {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * short[] arr = {10, 20, 30, 40};
-     * Joiner.with(" | ").appendAll(arr, 1, 3).toString();   // Returns: "20 | 30"
+     * Joiner.with(" | ").appendAll(arr, 1, 3).toString();   // returns: "20 | 30"
      * }</pre>
      *
      * @param a the short array to append from
@@ -1056,7 +1054,7 @@ public final class Joiner implements Closeable {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * int[] arr = {1, 2, 3};
-     * Joiner.with(", ").appendAll(arr).toString();   // Returns: "1, 2, 3"
+     * Joiner.with(", ").appendAll(arr).toString();   // returns: "1, 2, 3"
      * }</pre>
      *
      * @param a the int array to append, may be {@code null} or empty
@@ -1077,7 +1075,7 @@ public final class Joiner implements Closeable {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * int[] arr = {1, 2, 3, 4, 5};
-     * Joiner.with("-").appendAll(arr, 1, 4).toString();   // Returns: "2-3-4"
+     * Joiner.with("-").appendAll(arr, 1, 4).toString();   // returns: "2-3-4"
      * }</pre>
      *
      * @param a the int array to append from
@@ -1117,7 +1115,7 @@ public final class Joiner implements Closeable {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * long[] arr = {100L, 200L, 300L};
-     * Joiner.with(", ").appendAll(arr).toString();   // Returns: "100, 200, 300"
+     * Joiner.with(", ").appendAll(arr).toString();   // returns: "100, 200, 300"
      * }</pre>
      *
      * @param a the long array to append, may be {@code null} or empty
@@ -1138,7 +1136,7 @@ public final class Joiner implements Closeable {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * long[] arr = {100L, 200L, 300L, 400L};
-     * Joiner.with(" - ").appendAll(arr, 1, 3).toString();   // Returns: "200 - 300"
+     * Joiner.with(" - ").appendAll(arr, 1, 3).toString();   // returns: "200 - 300"
      * }</pre>
      *
      * @param a the long array to append from
@@ -1178,7 +1176,7 @@ public final class Joiner implements Closeable {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * float[] arr = {1.5f, 2.5f, 3.5f};
-     * Joiner.with(", ").appendAll(arr).toString();   // Returns: "1.5, 2.5, 3.5"
+     * Joiner.with(", ").appendAll(arr).toString();   // returns: "1.5, 2.5, 3.5"
      * }</pre>
      *
      * @param a the float array to append, may be {@code null} or empty
@@ -1199,7 +1197,7 @@ public final class Joiner implements Closeable {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * float[] arr = {1.1f, 2.2f, 3.3f, 4.4f};
-     * Joiner.with("; ").appendAll(arr, 1, 3).toString();   // Returns: "2.2; 3.3"
+     * Joiner.with("; ").appendAll(arr, 1, 3).toString();   // returns: "2.2; 3.3"
      * }</pre>
      *
      * @param a the float array to append from
@@ -1239,7 +1237,7 @@ public final class Joiner implements Closeable {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * double[] arr = {1.5, 2.5, 3.5};
-     * Joiner.with(", ").appendAll(arr).toString();   // Returns: "1.5, 2.5, 3.5"
+     * Joiner.with(", ").appendAll(arr).toString();   // returns: "1.5, 2.5, 3.5"
      * }</pre>
      *
      * @param a the double array to append, may be {@code null} or empty
@@ -1260,7 +1258,7 @@ public final class Joiner implements Closeable {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * double[] arr = {1.1, 2.2, 3.3, 4.4};
-     * Joiner.with(" | ").appendAll(arr, 0, 2).toString();   // Returns: "1.1 | 2.2"
+     * Joiner.with(" | ").appendAll(arr, 0, 2).toString();   // returns: "1.1 | 2.2"
      * }</pre>
      *
      * @param a the double array to append from
@@ -1301,7 +1299,7 @@ public final class Joiner implements Closeable {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Object[] arr = {"a", 1, null, "b"};
-     * Joiner.with(", ").skipNulls().appendAll(arr).toString();   // Returns: "a, 1, b"
+     * Joiner.with(", ").skipNulls().appendAll(arr).toString();   // returns: "a, 1, b"
      * }</pre>
      *
      * @param a the Object array to append, may be {@code null} or empty
@@ -1323,7 +1321,7 @@ public final class Joiner implements Closeable {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String[] arr = {"a", "b", "c", "d"};
-     * Joiner.with("-").appendAll(arr, 1, 3).toString();   // Returns: "b-c"
+     * Joiner.with("-").appendAll(arr, 1, 3).toString();   // returns: "b-c"
      * }</pre>
      *
      * @param a the Object array to append from
@@ -1365,7 +1363,7 @@ public final class Joiner implements Closeable {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BooleanList list = BooleanList.of(true, false, true);
-     * Joiner.with(", ").appendAll(list).toString();   // Returns: "true, false, true"
+     * Joiner.with(", ").appendAll(list).toString();   // returns: "true, false, true"
      * }</pre>
      *
      * @param c the BooleanList to append, may be {@code null} or empty
@@ -1387,7 +1385,7 @@ public final class Joiner implements Closeable {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BooleanList list = BooleanList.of(true, false, true, false);
-     * Joiner.with("-").appendAll(list, 1, 3).toString();   // Returns: "false-true"
+     * Joiner.with("-").appendAll(list, 1, 3).toString();   // returns: "false-true"
      * }</pre>
      *
      * @param c the BooleanList to append from
@@ -1414,7 +1412,7 @@ public final class Joiner implements Closeable {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * CharList list = CharList.of('a', 'b', 'c');
-     * Joiner.with(", ").appendAll(list).toString();   // Returns: "a, b, c"
+     * Joiner.with(", ").appendAll(list).toString();   // returns: "a, b, c"
      * }</pre>
      *
      * @param c the CharList to append, may be {@code null} or empty
@@ -1436,7 +1434,7 @@ public final class Joiner implements Closeable {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * CharList list = CharList.of('a', 'b', 'c', 'd');
-     * Joiner.with("-").appendAll(list, 1, 3).toString();   // Returns: "b-c"
+     * Joiner.with("-").appendAll(list, 1, 3).toString();   // returns: "b-c"
      * }</pre>
      *
      * @param c the CharList to append from
@@ -1463,7 +1461,7 @@ public final class Joiner implements Closeable {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ByteList list = ByteList.of((byte)1, (byte)2, (byte)3);
-     * Joiner.with(", ").appendAll(list).toString();   // Returns: "1, 2, 3"
+     * Joiner.with(", ").appendAll(list).toString();   // returns: "1, 2, 3"
      * }</pre>
      *
      * @param c the ByteList to append, may be {@code null} or empty
@@ -1485,7 +1483,7 @@ public final class Joiner implements Closeable {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ByteList list = ByteList.of((byte)1, (byte)2, (byte)3, (byte)4);
-     * Joiner.with("-").appendAll(list, 1, 3).toString();   // Returns: "2-3"
+     * Joiner.with("-").appendAll(list, 1, 3).toString();   // returns: "2-3"
      * }</pre>
      *
      * @param c the ByteList to append from
@@ -1512,7 +1510,7 @@ public final class Joiner implements Closeable {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ShortList list = ShortList.of((short)10, (short)20, (short)30);
-     * Joiner.with(", ").appendAll(list).toString();   // Returns: "10, 20, 30"
+     * Joiner.with(", ").appendAll(list).toString();   // returns: "10, 20, 30"
      * }</pre>
      *
      * @param c the ShortList to append, may be {@code null} or empty
@@ -1534,7 +1532,7 @@ public final class Joiner implements Closeable {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ShortList list = ShortList.of((short)10, (short)20, (short)30, (short)40);
-     * Joiner.with("-").appendAll(list, 1, 3).toString();   // Returns: "20-30"
+     * Joiner.with("-").appendAll(list, 1, 3).toString();   // returns: "20-30"
      * }</pre>
      *
      * @param c the ShortList to append from
@@ -1561,7 +1559,7 @@ public final class Joiner implements Closeable {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IntList list = IntList.of(1, 2, 3);
-     * Joiner.with(", ").appendAll(list).toString();   // Returns: "1, 2, 3"
+     * Joiner.with(", ").appendAll(list).toString();   // returns: "1, 2, 3"
      * }</pre>
      *
      * @param c the IntList to append, may be {@code null} or empty
@@ -1583,7 +1581,7 @@ public final class Joiner implements Closeable {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IntList list = IntList.of(1, 2, 3, 4);
-     * Joiner.with("-").appendAll(list, 1, 3).toString();   // Returns: "2-3"
+     * Joiner.with("-").appendAll(list, 1, 3).toString();   // returns: "2-3"
      * }</pre>
      *
      * @param c the IntList to append from
@@ -1610,7 +1608,7 @@ public final class Joiner implements Closeable {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * LongList list = LongList.of(100L, 200L, 300L);
-     * Joiner.with(", ").appendAll(list).toString();   // Returns: "100, 200, 300"
+     * Joiner.with(", ").appendAll(list).toString();   // returns: "100, 200, 300"
      * }</pre>
      *
      * @param c the LongList to append, may be {@code null} or empty
@@ -1632,7 +1630,7 @@ public final class Joiner implements Closeable {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * LongList list = LongList.of(100L, 200L, 300L, 400L);
-     * Joiner.with("-").appendAll(list, 1, 3).toString();   // Returns: "200-300"
+     * Joiner.with("-").appendAll(list, 1, 3).toString();   // returns: "200-300"
      * }</pre>
      *
      * @param c the LongList to append from
@@ -1660,7 +1658,7 @@ public final class Joiner implements Closeable {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * FloatList list = FloatList.of(1.5f, 2.5f, 3.5f);
-     * Joiner.with(", ").appendAll(list).toString();   // Returns: "1.5, 2.5, 3.5"
+     * Joiner.with(", ").appendAll(list).toString();   // returns: "1.5, 2.5, 3.5"
      * }</pre>
      *
      * @param c the FloatList to append; may be {@code null} or empty
@@ -1683,7 +1681,7 @@ public final class Joiner implements Closeable {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * FloatList list = FloatList.of(1.5f, 2.5f, 3.5f, 4.5f);
-     * Joiner.with(", ").appendAll(list, 1, 3).toString();   // Returns: "2.5, 3.5"
+     * Joiner.with(", ").appendAll(list, 1, 3).toString();   // returns: "2.5, 3.5"
      * }</pre>
      *
      * @param c the FloatList to append from
@@ -1711,7 +1709,7 @@ public final class Joiner implements Closeable {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * DoubleList list = DoubleList.of(1.5, 2.5, 3.5);
-     * Joiner.with(", ").appendAll(list).toString();   // Returns: "1.5, 2.5, 3.5"
+     * Joiner.with(", ").appendAll(list).toString();   // returns: "1.5, 2.5, 3.5"
      * }</pre>
      *
      * @param c the DoubleList to append; may be {@code null} or empty
@@ -1734,7 +1732,7 @@ public final class Joiner implements Closeable {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * DoubleList list = DoubleList.of(1.5, 2.5, 3.5, 4.5);
-     * Joiner.with(", ").appendAll(list, 1, 3).toString();   // Returns: "2.5, 3.5"
+     * Joiner.with(", ").appendAll(list, 1, 3).toString();   // returns: "2.5, 3.5"
      * }</pre>
      *
      * @param c the DoubleList to append from
@@ -1762,7 +1760,7 @@ public final class Joiner implements Closeable {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<String> list = Arrays.asList("apple", "banana", "cherry");
-     * Joiner.with(", ").appendAll(list).toString();   // Returns: "apple, banana, cherry"
+     * Joiner.with(", ").appendAll(list).toString();   // returns: "apple, banana, cherry"
      * }</pre>
      *
      * @param c the Collection to append; may be {@code null} or empty
@@ -1784,7 +1782,7 @@ public final class Joiner implements Closeable {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<String> list = Arrays.asList("a", "b", "c", "d");
-     * Joiner.with("-").appendAll(list, 1, 3).toString();   // Returns: "b-c"
+     * Joiner.with("-").appendAll(list, 1, 3).toString();   // returns: "b-c"
      * }</pre>
      *
      * @param c the Collection to append from
@@ -1836,7 +1834,7 @@ public final class Joiner implements Closeable {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Iterable<String> iterable = Arrays.asList("one", "two", "three");
-     * Joiner.with(" | ").appendAll(iterable).toString();   // Returns: "one | two | three"
+     * Joiner.with(" | ").appendAll(iterable).toString();   // returns: "one | two | three"
      * }</pre>
      *
      * @param c the Iterable to append; may be {@code null}
@@ -1872,7 +1870,7 @@ public final class Joiner implements Closeable {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<Integer> numbers = Arrays.asList(1, 2, 3, 4, 5);
-     * Joiner.with(", ").appendAll(numbers, n -> n % 2 == 0).toString();   // Returns: "2, 4"
+     * Joiner.with(", ").appendAll(numbers, n -> n % 2 == 0).toString();   // returns: "2, 4"
      * }</pre>
      *
      * @param <T> the type of elements in the Iterable
@@ -1915,7 +1913,7 @@ public final class Joiner implements Closeable {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Iterator<String> iter = Arrays.asList("x", "y", "z").iterator();
-     * Joiner.with("->").appendAll(iter).toString();   // Returns: "x->y->z"
+     * Joiner.with("->").appendAll(iter).toString();   // returns: "x->y->z"
      * }</pre>
      *
      * @param iter the Iterator to append from; may be {@code null}
@@ -1954,7 +1952,7 @@ public final class Joiner implements Closeable {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Iterator<String> iter = Arrays.asList("cat", "dog", "bird", "fish").iterator();
-     * Joiner.with(", ").appendAll(iter, s -> s.length() > 3).toString();   // Returns: "bird, fish"
+     * Joiner.with(", ").appendAll(iter, s -> s.length() > 3).toString();   // returns: "bird, fish"
      * }</pre>
      *
      * @param <T> the type of elements from the Iterator
@@ -2000,7 +1998,7 @@ public final class Joiner implements Closeable {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Joiner.with(", ").appendEntry("enabled", true).toString();   // Returns: "enabled=true"
+     * Joiner.with(", ").appendEntry("enabled", true).toString();   // returns: "enabled=true"
      * }</pre>
      *
      * @param key the key to append
@@ -2025,7 +2023,7 @@ public final class Joiner implements Closeable {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Joiner.with(", ").appendEntry("grade", 'A').toString();   // Returns: "grade=A"
+     * Joiner.with(", ").appendEntry("grade", 'A').toString();   // returns: "grade=A"
      * }</pre>
      *
      * @param key the key to append
@@ -2050,7 +2048,7 @@ public final class Joiner implements Closeable {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Joiner.with(", ").appendEntry("count", 42).toString();   // Returns: "count=42"
+     * Joiner.with(", ").appendEntry("count", 42).toString();   // returns: "count=42"
      * }</pre>
      *
      * @param key the key to append
@@ -2075,7 +2073,7 @@ public final class Joiner implements Closeable {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Joiner.with(", ").appendEntry("timestamp", 1234567890L).toString();   // Returns: "timestamp=1234567890"
+     * Joiner.with(", ").appendEntry("timestamp", 1234567890L).toString();   // returns: "timestamp=1234567890"
      * }</pre>
      *
      * @param key the key to append
@@ -2100,7 +2098,7 @@ public final class Joiner implements Closeable {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Joiner.with(", ").appendEntry("price", 19.99f).toString();   // Returns: "price=19.99"
+     * Joiner.with(", ").appendEntry("price", 19.99f).toString();   // returns: "price=19.99"
      * }</pre>
      *
      * @param key the key to append
@@ -2125,7 +2123,7 @@ public final class Joiner implements Closeable {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Joiner.with(", ").appendEntry("temperature", 98.6).toString();   // Returns: "temperature=98.6"
+     * Joiner.with(", ").appendEntry("temperature", 98.6).toString();   // returns: "temperature=98.6"
      * }</pre>
      *
      * @param key the key to append
@@ -2150,7 +2148,7 @@ public final class Joiner implements Closeable {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Joiner.with(", ").appendEntry("name", "John").toString();   // Returns: "name=John"
+     * Joiner.with(", ").appendEntry("name", "John").toString();   // returns: "name=John"
      * }</pre>
      *
      * @param key the key to append
@@ -2176,7 +2174,7 @@ public final class Joiner implements Closeable {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * StringBuilder sb = new StringBuilder("value");
-     * Joiner.with(", ").appendEntry("key", sb).toString();   // Returns: "key=value"
+     * Joiner.with(", ").appendEntry("key", sb).toString();   // returns: "key=value"
      * }</pre>
      *
      * @param key the key to append
@@ -2202,7 +2200,7 @@ public final class Joiner implements Closeable {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * StringBuilder sb = new StringBuilder("dynamic content");
-     * Joiner.with(", ").appendEntry("data", sb).toString();   // Returns: "data=dynamic content"
+     * Joiner.with(", ").appendEntry("data", sb).toString();   // returns: "data=dynamic content"
      * }</pre>
      *
      * @param key the key to append
@@ -2244,7 +2242,7 @@ public final class Joiner implements Closeable {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Date date = new Date();
-     * Joiner.with(", ").appendEntry("created", date).toString();   // Returns: "created=<date string>"
+     * Joiner.with(", ").appendEntry("created", date).toString();   // returns: "created=<date string>"
      * }</pre>
      *
      * @param key the key to append
@@ -2271,7 +2269,7 @@ public final class Joiner implements Closeable {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Map.Entry<String, Integer> entry = new AbstractMap.SimpleEntry<>("score", 100);
-     * Joiner.with(", ").appendEntry(entry).toString();   // Returns: "score=100"
+     * Joiner.with(", ").appendEntry(entry).toString();   // returns: "score=100"
      * }</pre>
      *
      * @param entry the {@code Map.Entry} to append; may be {@code null}
@@ -2299,7 +2297,7 @@ public final class Joiner implements Closeable {
      * Map<String, Integer> map = new HashMap<>();
      * map.put("a", 1);
      * map.put("b", 2);
-     * Joiner.with(", ").appendEntries(map).toString();   // Returns: "a=1, b=2"
+     * Joiner.with(", ").appendEntries(map).toString();   // returns: "a=1, b=2"
      * }</pre>
      *
      * @param m the map containing the entries to be appended; may be {@code null} or empty
@@ -2322,7 +2320,7 @@ public final class Joiner implements Closeable {
      * <pre>{@code
      * Map<String, Integer> map = new LinkedHashMap<>();
      * map.put("a", 1); map.put("b", 2); map.put("c", 3);
-     * Joiner.with(", ").appendEntries(map, 1, 3).toString();   // Returns: "b=2, c=3"
+     * Joiner.with(", ").appendEntries(map, 1, 3).toString();   // returns: "b=2, c=3"
      * }</pre>
      *
      * @param m the Map to append entries from
@@ -2379,7 +2377,7 @@ public final class Joiner implements Closeable {
      * <pre>{@code
      * Map<String, Integer> map = new HashMap<>();
      * map.put("a", 1); map.put("b", 2); map.put("c", 3);
-     * Joiner.with(", ").appendEntries(map, e -> e.getValue() > 1).toString();   // Returns: "b=2, c=3"
+     * Joiner.with(", ").appendEntries(map, e -> e.getValue() > 1).toString();   // returns: "b=2, c=3"
      * }</pre>
      *
      * @param <K> the type of keys in the map
@@ -2432,7 +2430,7 @@ public final class Joiner implements Closeable {
      * <pre>{@code
      * Map<String, Integer> map = new HashMap<>();
      * map.put("apple", 5); map.put("banana", 3); map.put("cherry", 8);
-     * Joiner.with(", ").appendEntries(map, (k, v) -> k.length() > 5 && v > 4).toString();   // Returns: "cherry=8"
+     * Joiner.with(", ").appendEntries(map, (k, v) -> k.length() > 5 && v > 4).toString();   // returns: "cherry=8"
      * }</pre>
      *
      * @param <K> the type of keys in the map
@@ -2483,11 +2481,11 @@ public final class Joiner implements Closeable {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Map<String, Integer> map = new HashMap<>();
+     * Map<String, Integer> map = new LinkedHashMap<>();
      * map.put("item1", 100); map.put("item2", 200);
      * Joiner.with(", ").appendEntries(map,
      *     k -> k.toUpperCase(),
-     *     v -> "$" + v).toString();   // Returns: "ITEM1=$100, ITEM2=$200"
+     *     v -> "$" + v).toString();   // returns: "ITEM1=$100, ITEM2=$200"
      * }</pre>
      *
      * @param <K> the type of keys in the map
@@ -2548,7 +2546,7 @@ public final class Joiner implements Closeable {
      *     // getters/setters...
      * }
      * Person p = new Person();
-     * Joiner.with(", ").appendBean(p).toString();   // Returns: "name=John, age=30"
+     * Joiner.with(", ").appendBean(p).toString();   // returns: "name=John, age=30"
      * }</pre>
      *
      * @param bean the bean object whose properties to append; may be {@code null}
@@ -2584,12 +2582,12 @@ public final class Joiner implements Closeable {
      * Person person = new Person();
      * String result = Joiner.with(", ")
      *     .appendBean(person, Arrays.asList("name", "city"))
-     *     .toString();   // Returns: "name=John, city=NYC"
+     *     .toString();   // returns: "name=John, city=NYC"
      *
      * // With custom separators
      * String result2 = Joiner.with(" | ", ":")
      *     .appendBean(person, Arrays.asList("name", "age"))
-     *     .toString();   // Returns: "name:John | age:30"
+     *     .toString();   // returns: "name:John | age:30"
      * }</pre>
      *
      * @param bean the bean object whose selected properties to append; may be {@code null}
@@ -2651,7 +2649,7 @@ public final class Joiner implements Closeable {
      * }
      * User u = new User();
      * Set<String> ignored = new HashSet<>(Arrays.asList("password"));
-     * Joiner.with(", ").appendBean(u, true, ignored).toString();   // Returns: "id=123, name=Alice"
+     * Joiner.with(", ").appendBean(u, true, ignored).toString();   // returns: "id=123, name=Alice"
      * }</pre>
      *
      * <p>If {@code bean} is {@code null}, this Joiner is returned unchanged.</p>
@@ -2723,7 +2721,7 @@ public final class Joiner implements Closeable {
      * }
      * Product p = new Product();
      * Joiner.with(", ").appendBean(p, (prop, val) ->
-     *     !prop.equals("stock") || (Integer)val > 0).toString();   // Returns: "name=Laptop, price=999.99"
+     *     !prop.equals("stock") || (Integer)val > 0).toString();   // returns: "name=Laptop, price=999.99"
      * }</pre>
      *
      * <p>If {@code bean} is {@code null}, this Joiner is returned unchanged (after the {@code filter}
@@ -2786,7 +2784,7 @@ public final class Joiner implements Closeable {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Joiner.with(", ").repeat("Hello", 3).toString();   // Returns: "Hello, Hello, Hello"
+     * Joiner.with(", ").repeat("Hello", 3).toString();   // returns: "Hello, Hello, Hello"
      * }</pre>
      *
      * @param str the string to repeat; {@code null} is rendered as the configured null text
@@ -2820,7 +2818,7 @@ public final class Joiner implements Closeable {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Integer num = 42;
-     * Joiner.with("-").repeat(num, 3).toString();   // Returns: "42-42-42"
+     * Joiner.with("-").repeat(num, 3).toString();   // returns: "42-42-42"
      * }</pre>
      *
      * @param obj the object to repeat; {@code null} is rendered as the configured null text
@@ -2843,7 +2841,7 @@ public final class Joiner implements Closeable {
      * <pre>{@code
      * Joiner j1 = Joiner.with(", ").append("a").append("b");
      * Joiner j2 = Joiner.with(", ").append("c").append("d");
-     * j1.merge(j2).toString();   // Returns: "a, b, c, d"
+     * j1.merge(j2).toString();   // returns: "a, b, c, d"
      * }</pre>
      *
      * @param other the Joiner to merge content from
@@ -2873,7 +2871,7 @@ public final class Joiner implements Closeable {
      * <pre>{@code
      * Joiner j = Joiner.with(", ", "[", "]");
      * j.append("a").append("b");
-     * j.length();   // Returns: 6 (for "[a, b]")
+     * j.length();   // returns: 6 (for "[a, b]")
      * }</pre>
      *
      * @return the length of the current joined content
@@ -2899,7 +2897,7 @@ public final class Joiner implements Closeable {
      * <pre>{@code
      * Joiner j = Joiner.with(", ", "[", "]");
      * j.append("a").append("b").append("c");
-     * j.toString();   // Returns: "[a, b, c]"
+     * j.toString();   // returns: "[a, b, c]"
      * }</pre>
      *
      * @return the joined string with prefix and suffix
@@ -2947,7 +2945,7 @@ public final class Joiner implements Closeable {
      * <pre>{@code
      * StringBuilder sb = new StringBuilder("Result: ");
      * Joiner.with(", ").append("a").append("b").appendTo(sb);
-     * sb.toString();   // Returns: "Result: a, b"
+     * sb.toString();   // returns: "Result: a, b"
      * }</pre>
      *
      * @param <A> the type of the {@code Appendable}
@@ -2977,7 +2975,7 @@ public final class Joiner implements Closeable {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * int length = Joiner.with(", ").append("a").append("b").map(String::length);   // Returns: 4
+     * int length = Joiner.with(", ").append("a").append("b").map(String::length);   // returns: 4
      * }</pre>
      *
      * @param <T> the type of the result
@@ -3000,9 +2998,9 @@ public final class Joiner implements Closeable {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Optional<Integer> result1 = Joiner.with(", ").mapIfNotEmpty(String::length);                   // Returns: Optional.empty()
-     * Optional<Integer> result2 = Joiner.with(", ", "[", "]").mapIfNotEmpty(String::length);         // Returns: Optional.empty()
-     * Optional<Integer> result3 = Joiner.with(", ").append("hello").mapIfNotEmpty(String::length);   // Returns: Optional.of(5)
+     * Optional<Integer> result1 = Joiner.with(", ").mapIfNotEmpty(String::length);                   // returns: Optional.empty()
+     * Optional<Integer> result2 = Joiner.with(", ", "[", "]").mapIfNotEmpty(String::length);         // returns: Optional.empty()
+     * Optional<Integer> result3 = Joiner.with(", ").append("hello").mapIfNotEmpty(String::length);   // returns: Optional.of(5)
      * }</pre>
      *
      * @param <T> the type of the result
@@ -3028,8 +3026,9 @@ public final class Joiner implements Closeable {
      * try (Joiner j = Joiner.with(", ").reuseBuffer()) {
      *     j.append("a").append("b");
      *     System.out.println(j.toString());
-     * } // Joiner is automatically closed
+     * }
      * }</pre>
+     *
      */
     @Override
     public synchronized void close() {

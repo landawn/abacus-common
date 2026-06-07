@@ -284,8 +284,15 @@ abstract class SingleValueType<T> extends AbstractType<T> { //NOSONAR
      * value's runtime {@link Type} (falling back to {@link Object#toString()} when that runtime
      * type resolves to a generic {@link ObjectType}).
      *
+     * <p>The returned string is a serializable representation designed to be parsed back into an equivalent value
+     * via {@link #valueOf(String)}; {@code stringOf} and {@code valueOf} are inverse operations that round-trip. This
+     * is the key distinction from {@link Object#toString()}, whose result is not guaranteed to be convertible back
+     * into the original value.</p>
+     *
      * @param x the object to convert
      * @return the string representation, or {@code null} if {@code x} is {@code null}
+     * @see #valueOf(String)
+     * @see #valueOf(Object)
      */
     @Override
     public String stringOf(final T x) {
@@ -317,8 +324,14 @@ abstract class SingleValueType<T> extends AbstractType<T> { //NOSONAR
      * Uses the JSON creator method (paired with the JSON value type) if available, otherwise the
      * auto-detected factory-method/constructor creator.
      *
+     * <p>This method is the inverse of {@code stringOf} and round-trips with it: it parses the string produced by
+     * {@code stringOf} back into a value of this type. Strings produced by {@link Object#toString()} are not
+     * guaranteed to be parseable in this way.</p>
+     *
      * @param str the string to parse
      * @return an instance of type T, or the string itself (cast to {@code T}) if no creator is available
+     * @see #valueOf(Object)
+     * @see #stringOf(Object)
      */
     @Override
     public T valueOf(final String str) {
@@ -514,6 +527,15 @@ abstract class SingleValueType<T> extends AbstractType<T> { //NOSONAR
     /**
      * Writes the character representation of a value to the given CharacterWriter for JSON/XML serialization.
      * Extracts and writes the wrapped value if JSON annotations or value extractors are available.
+     * <p>
+     * This method is specifically designed for JSON/XML serialization: it writes the serialized form of {@code x} to the
+     * {@code CharacterWriter}, applying string quotation and character escaping according to the supplied serialization
+     * config (a {@code null} config means no surrounding quotation). It is the streaming counterpart of {@code stringOf}
+     * and is invoked by the JSON/XML serializers.
+     * <p>
+     * <b>serializeTo vs. appendTo:</b> {@code serializeTo} produces machine-readable JSON/XML (quoted and escaped),
+     * whereas {@code appendTo} produces a plain, human-readable {@code toString()}-style rendering without JSON/XML
+     * quoting or escaping.
      *
      * @param writer the CharacterWriter to write to
      * @param x the value to write, may be null
@@ -521,22 +543,22 @@ abstract class SingleValueType<T> extends AbstractType<T> { //NOSONAR
      * @throws IOException if an I/O error occurs during writing
      */
     @Override
-    public void writeCharacter(final CharacterWriter writer, final T x, final JsonXmlSerConfig<?> config) throws IOException {
+    public void serializeTo(final CharacterWriter writer, final T x, final JsonXmlSerConfig<?> config) throws IOException {
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {
             if (jsonValueType != null) {
                 try {
                     if (jsonValueField != null) {
-                        jsonValueType.writeCharacter(writer, jsonValueField.get(x), config);
+                        jsonValueType.serializeTo(writer, jsonValueField.get(x), config);
                     } else {
-                        jsonValueType.writeCharacter(writer, jsonValueMethod.invoke(x), config);
+                        jsonValueType.serializeTo(writer, jsonValueMethod.invoke(x), config);
                     }
                 } catch (IllegalAccessException | InvocationTargetException e) {
                     throw new RuntimeException(e);
                 }
             } else if (valueType != null && valueExtractor != null) {
-                valueType.writeCharacter(writer, valueExtractor.apply(x), config);
+                valueType.serializeTo(writer, valueExtractor.apply(x), config);
             } else {
                 final char ch = config == null ? 0 : config.getStringQuotation();
 

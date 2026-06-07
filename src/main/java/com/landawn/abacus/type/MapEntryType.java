@@ -122,8 +122,15 @@ public class MapEntryType<K, V> extends AbstractType<Map.Entry<K, V>> {
      * Converts a {@link Map.Entry} object to its JSON string representation.
      * The entry is serialized as a single-pair JSON object, e.g., {@code {"age":25}}.
      *
+     * <p>The returned string is a serializable representation designed to be parsed back into an equivalent value
+     * via {@link #valueOf(String)}; {@code stringOf} and {@code valueOf} are inverse operations that round-trip. This
+     * is the key distinction from {@link Object#toString()}, whose result is not guaranteed to be convertible back
+     * into the original value.</p>
+     *
      * @param x the {@code Map.Entry} object to convert, may be {@code null}
      * @return the JSON string representation of the entry, or {@code null} if the input is {@code null}
+     * @see #valueOf(String)
+     * @see #valueOf(Object)
      */
     @Override
     public String stringOf(final Map.Entry<K, V> x) {
@@ -135,10 +142,16 @@ public class MapEntryType<K, V> extends AbstractType<Map.Entry<K, V>> {
      * The string must represent a JSON object with exactly one key-value pair,
      * for example {@code {"age":25}}.
      *
+     * <p>This method is the inverse of {@code stringOf} and round-trips with it: it parses the string produced by
+     * {@code stringOf} back into a value of this type. Strings produced by {@link Object#toString()} are not
+     * guaranteed to be parseable in this way.</p>
+     *
      * @param str the JSON string to parse; may be {@code null}, empty, or {@code "{}"}
      * @return the parsed {@code Map.Entry}, or {@code null} if the input is {@code null},
      *         empty, or an empty JSON object ({@code "{}"})
      * @throws IllegalArgumentException if the JSON object contains more than one entry
+     * @see #valueOf(Object)
+     * @see #stringOf(Map.Entry)
      */
     @Override
     public Map.Entry<K, V> valueOf(final String str) {
@@ -160,16 +173,30 @@ public class MapEntryType<K, V> extends AbstractType<Map.Entry<K, V>> {
     }
 
     /**
-     * Appends the JSON representation of a {@link Map.Entry} to an {@link Appendable}.
-     * The entry is formatted as a single-pair JSON object with the key and value
-     * serialized according to their respective type handlers.
+     * Appends the {@code toString()}-style string representation of a {@link Map.Entry} to an {@link Appendable}.
+     * The entry is formatted as a single {@code key:value} pair with the key and value
+     * rendered according to their respective type handlers.
      * When the {@code Appendable} is a {@link java.io.Writer}, a buffered wrapper is used
      * for better I/O performance.
      * If the entry is {@code null}, the literal string {@code "null"} is appended.
+     * <p>
+     * <b>appendTo vs. serializeTo:</b> {@code appendTo} produces a plain, {@code toString()}-style rendering with no
+     * JSON/XML quoting or escaping (for general text output), whereas {@code serializeTo} produces the JSON/XML
+     * serialized form (applying string quotation and character escaping per the serialization config) and is used by the
+     * JSON/XML serializers.
      *
      * @param appendable the target to write to
      * @param x the {@code Map.Entry} to append, may be {@code null}
      * @throws IOException if an I/O error occurs while appending
+     * @implNote
+     * This method appends a string representation of {@code x} to {@code appendable} (the literal {@code "null"} for a
+     * {@code null} value). Conceptually this is the human-readable form produced by {@code toString()}, <i>not</i> the
+     * value returned by {@code stringOf}, which is a formatted, serializable representation (typically a JSON string)
+     * that {@link #valueOf(String)} can convert back into an equivalent value. For values whose nested structure makes
+     * the two forms differ (collections, maps, arrays), {@code appendTo} emits the unquoted, {@code toString()}-style
+     * form; it is therefore not, in the general contract, a plain
+     * {@code appendable.append(x == null ? NULL_STRING : stringOf(x))}. (For value types whose human-readable and
+     * serialized forms coincide, the appended text is naturally identical to {@code stringOf(x)}.)
      */
     @Override
     public void appendTo(final Appendable appendable, final Map.Entry<K, V> x) throws IOException {
@@ -216,6 +243,15 @@ public class MapEntryType<K, V> extends AbstractType<Map.Entry<K, V>> {
      * The entry is formatted as a single-pair JSON object, with the key and value serialized
      * using their respective type handlers and the provided configuration.
      * If the entry is {@code null}, the literal {@code "null"} character array is written.
+     * <p>
+     * This method is specifically designed for JSON/XML serialization: it writes the serialized form of {@code x} to the
+     * {@code CharacterWriter}, applying string quotation and character escaping according to the supplied serialization
+     * config (a {@code null} config means no surrounding quotation). It is the streaming counterpart of {@code stringOf}
+     * and is invoked by the JSON/XML serializers.
+     * <p>
+     * <b>serializeTo vs. appendTo:</b> {@code serializeTo} produces machine-readable JSON/XML (quoted and escaped),
+     * whereas {@code appendTo} produces a plain, human-readable {@code toString()}-style rendering without JSON/XML
+     * quoting or escaping.
      *
      * @param writer the {@code CharacterWriter} to write to
      * @param x the {@code Map.Entry} to write, may be {@code null}
@@ -223,16 +259,16 @@ public class MapEntryType<K, V> extends AbstractType<Map.Entry<K, V>> {
      * @throws IOException if an I/O error occurs while writing
      */
     @Override
-    public void writeCharacter(final CharacterWriter writer, final Map.Entry<K, V> x, final JsonXmlSerConfig<?> config) throws IOException {
+    public void serializeTo(final CharacterWriter writer, final Map.Entry<K, V> x, final JsonXmlSerConfig<?> config) throws IOException {
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {
             try {
                 writer.write(SK._BRACE_L);
 
-                keyType.writeCharacter(writer, x.getKey(), config);
+                keyType.serializeTo(writer, x.getKey(), config);
                 writer.write(SK._COLON);
-                valueType.writeCharacter(writer, x.getValue(), config);
+                valueType.serializeTo(writer, x.getValue(), config);
 
                 writer.write(SK._BRACE_R);
 

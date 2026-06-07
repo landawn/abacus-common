@@ -59,8 +59,9 @@ public final class MutableByte extends Number implements Comparable<MutableByte>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * MutableByte num = new MutableByte();   // value is 0
+     * MutableByte num = new MutableByte();
      * }</pre>
+     *
      */
     MutableByte() {
     }
@@ -70,7 +71,7 @@ public final class MutableByte extends Number implements Comparable<MutableByte>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * MutableByte num = new MutableByte((byte)127);   // value is 127
+     * MutableByte num = new MutableByte((byte)127);
      * }</pre>
      *
      * @param value the initial value to store
@@ -117,6 +118,18 @@ public final class MutableByte extends Number implements Comparable<MutableByte>
      *
      * <p>This method is deprecated in favor of {@link #value()} which provides
      * the same functionality with a more concise name.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * MutableByte num = MutableByte.of((byte) 42);
+     * byte val = num.getValue();         // returns 42, value is unchanged
+     *
+     * num.setValue((byte) 7);
+     * val = num.getValue();              // returns 7, value is unchanged
+     *
+     * MutableByte max = MutableByte.of(Byte.MAX_VALUE);
+     * val = max.getValue();              // returns 127 (Byte.MAX_VALUE)
+     * }</pre>
      *
      * @return the current byte value
      * @deprecated replaced by {@link #value()}.
@@ -222,6 +235,7 @@ public final class MutableByte extends Number implements Comparable<MutableByte>
      * MutableByte num = MutableByte.of((byte)10);
      * num.increment();   // value is now 11
      * }</pre>
+     *
      */
     public void increment() {
         value++;
@@ -237,6 +251,7 @@ public final class MutableByte extends Number implements Comparable<MutableByte>
      * MutableByte num = MutableByte.of((byte)10);
      * num.decrement();   // value is now 9
      * }</pre>
+     *
      */
     public void decrement() {
         value--;
@@ -385,7 +400,7 @@ public final class MutableByte extends Number implements Comparable<MutableByte>
     }
 
     //-----------------------------------------------------------------------
-    // shortValue relies on Number implementation
+    // byteValue and shortValue are overridden below
 
     /**
      * Returns the value of this MutableByte as a byte.

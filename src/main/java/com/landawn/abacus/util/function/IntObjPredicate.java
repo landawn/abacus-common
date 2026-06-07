@@ -64,7 +64,7 @@ public interface IntObjPredicate<T> extends Throwables.IntObjPredicate<T, Runtim
      * @return a predicate that represents the logical negation of this predicate
      */
     default IntObjPredicate<T> negate() {
-        return (i, t) -> !test(i, t);
+        return (t, u) -> !test(t, u);
     }
 
     /**
@@ -90,7 +90,7 @@ public interface IntObjPredicate<T> extends Throwables.IntObjPredicate<T, Runtim
      */
     default IntObjPredicate<T> and(final IntObjPredicate<T> other) {
         Objects.requireNonNull(other);
-        return (i, t) -> test(i, t) && other.test(i, t);
+        return (t, u) -> test(t, u) && other.test(t, u);
     }
 
     /**
@@ -116,6 +116,6 @@ public interface IntObjPredicate<T> extends Throwables.IntObjPredicate<T, Runtim
      */
     default IntObjPredicate<T> or(final IntObjPredicate<T> other) {
         Objects.requireNonNull(other);
-        return (i, t) -> test(i, t) || other.test(i, t);
+        return (t, u) -> test(t, u) || other.test(t, u);
     }
 }

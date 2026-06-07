@@ -21,6 +21,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.time.Instant;
+import java.time.format.DateTimeParseException;
 
 import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.CharacterWriter;
@@ -62,8 +63,15 @@ public class InstantType extends AbstractTemporalType<Instant> {
      * Uses a format equivalent to {@link java.time.format.DateTimeFormatter#ISO_OFFSET_DATE_TIME}
      * with the UTC zone, so the result ends in {@code 'Z'} (e.g., {@code "2023-12-25T10:30:45.123Z"}).
      *
+     * <p>The returned string is a serializable representation designed to be parsed back into an equivalent value
+     * via {@link #valueOf(String)}; {@code stringOf} and {@code valueOf} are inverse operations that round-trip. This
+     * is the key distinction from {@link Object#toString()}, whose result is not guaranteed to be convertible back
+     * into the original value.</p>
+     *
      * @param x the {@link Instant} to serialize; may be {@code null}
      * @return the ISO-8601 timestamp string, or {@code null} if {@code x} is {@code null}
+     * @see #valueOf(String)
+     * @see #valueOf(Object)
      */
     @Override
     public String stringOf(final Instant x) {
@@ -102,8 +110,18 @@ public class InstantType extends AbstractTemporalType<Instant> {
      *   <li>All other values: parsed via {@link Instant#parse(CharSequence)}</li>
      * </ul>
      *
+     * <p>Every string produced by {@link Instant#toString()} can be parsed back into an equivalent value,
+     * including the second-precision form (e.g. {@code "2023-10-15T10:30:45Z"}) and fractional seconds of any
+     * precision (e.g. {@code "2023-10-15T10:30:45.123456789Z"}).</p>
+     *
+     * <p>This method is the inverse of {@code stringOf} and round-trips with it: it parses the string produced by
+     * {@code stringOf} back into a value of this type. The value returned by {@link Instant#toString()} round-trips
+     * as well.</p>
+     *
      * @param str the string to parse; may be {@code null} or empty
      * @return the parsed {@link Instant}, or {@code null} if {@code str} is {@code null} or a null-datetime string
+     * @see #valueOf(Object)
+     * @see #stringOf(Instant)
      */
     @Override
     public Instant valueOf(final String str) {
@@ -118,15 +136,27 @@ public class InstantType extends AbstractTemporalType<Instant> {
         if (isPossibleMillis(str)) {
             try {
                 return Instant.ofEpochMilli(Numbers.toLong(str));
-            } catch (final NumberFormatException e2) {
+            } catch (final NumberFormatException e) {
                 // ignore;
             }
         }
 
         final int len = str.length();
 
-        return len == 20 && str.charAt(19) == 'Z' ? iso8601DateTimeDTF.parse(str, Instant::from)
-                : (len == 24 && str.charAt(23) == 'Z' ? iso8601TimestampDTF.parse(str, Instant::from) : Instant.parse(str));
+        // Fast path for the two most common ISO-8601 UTC forms produced by stringOf/serializeTo. If the fast-path
+        // formatter rejects the input, fall back to the general parser below so that every Instant.toString()
+        // form remains parseable.
+        if ((len == 20 && str.charAt(19) == 'Z') || (len == 24 && str.charAt(23) == 'Z')) {
+            try {
+                return (len == 20 ? iso8601DateTimeDTF : iso8601TimestampDTF).parse(str, Instant::from);
+            } catch (final DateTimeParseException e) {
+                // fall through to the general parser below.
+            }
+        }
+
+        // General path: ISO_INSTANT, which parses every form produced by Instant.toString(),
+        // including fractional seconds of any precision.
+        return Instant.parse(str);
     }
 
     /**
@@ -224,10 +254,24 @@ public class InstantType extends AbstractTemporalType<Instant> {
      * Appends the string representation of an {@link Instant} to an {@link Appendable}.
      * Uses the default ISO-8601 timestamp format (e.g., {@code "2023-12-25T10:30:45.123Z"}).
      * If {@code x} is {@code null}, the literal {@code null} is appended.
+     * <p>
+     * <b>appendTo vs. serializeTo:</b> {@code appendTo} produces a plain, {@code toString()}-style rendering with no
+     * JSON/XML quoting or escaping (for general text output), whereas {@code serializeTo} produces the JSON/XML
+     * serialized form (applying string quotation and character escaping per the serialization config) and is used by the
+     * JSON/XML serializers.
      *
      * @param appendable the {@link Appendable} to write to
      * @param x          the {@link Instant} to append; may be {@code null}
      * @throws IOException if an I/O error occurs during writing
+     * @implNote
+     * This method appends a string representation of {@code x} to {@code appendable} (the literal {@code "null"} for a
+     * {@code null} value). Conceptually this is the human-readable form produced by {@code toString()}, <i>not</i> the
+     * value returned by {@code stringOf}, which is a formatted, serializable representation (typically a JSON string)
+     * that {@link #valueOf(String)} can convert back into an equivalent value. For values whose nested structure makes
+     * the two forms differ (collections, maps, arrays), {@code appendTo} emits the unquoted, {@code toString()}-style
+     * form; it is therefore not, in the general contract, a plain
+     * {@code appendable.append(x == null ? NULL_STRING : stringOf(x))}. (For value types whose human-readable and
+     * serialized forms coincide, the appended text is naturally identical to {@code stringOf(x)}.)
      */
     @Override
     public void appendTo(final Appendable appendable, final Instant x) throws IOException {
@@ -249,6 +293,15 @@ public class InstantType extends AbstractTemporalType<Instant> {
      * </ul>
      * Non-{@code LONG} formats are quoted when {@code config} specifies a string quotation character.
      * If {@code x} is {@code null}, the literal {@code null} is written.
+     * <p>
+     * This method is specifically designed for JSON/XML serialization: it writes the serialized form of {@code x} to the
+     * {@code CharacterWriter}, applying string quotation and character escaping according to the supplied serialization
+     * config (a {@code null} config means no surrounding quotation). It is the streaming counterpart of {@code stringOf}
+     * and is invoked by the JSON/XML serializers.
+     * <p>
+     * <b>serializeTo vs. appendTo:</b> {@code serializeTo} produces machine-readable JSON/XML (quoted and escaped),
+     * whereas {@code appendTo} produces a plain, human-readable {@code toString()}-style rendering without JSON/XML
+     * quoting or escaping.
      *
      * @param writer the {@link CharacterWriter} to write to
      * @param x      the {@link Instant} to write; may be {@code null}
@@ -257,7 +310,7 @@ public class InstantType extends AbstractTemporalType<Instant> {
      */
     @SuppressWarnings("null")
     @Override
-    public void writeCharacter(final CharacterWriter writer, final Instant x, final JsonXmlSerConfig<?> config) throws IOException {
+    public void serializeTo(final CharacterWriter writer, final Instant x, final JsonXmlSerConfig<?> config) throws IOException {
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {

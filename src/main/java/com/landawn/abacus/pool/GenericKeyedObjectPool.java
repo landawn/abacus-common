@@ -15,6 +15,8 @@
 package com.landawn.abacus.pool;
 
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.Serial;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -978,7 +980,7 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
      * @throws IOException if an I/O error occurs
      */
     @Serial
-    private void writeObject(final java.io.ObjectOutputStream os) throws IOException {
+    private void writeObject(final ObjectOutputStream os) throws IOException {
         lock.lock();
 
         try {
@@ -997,7 +999,7 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
      * @throws ClassNotFoundException if the class of a serialized object cannot be found
      */
     @Serial
-    private void readObject(final java.io.ObjectInputStream is) throws IOException, ClassNotFoundException {
+    private void readObject(final ObjectInputStream is) throws IOException, ClassNotFoundException {
         is.defaultReadObject();
 
         lock = newLock();

@@ -137,16 +137,16 @@ public class MutableLongTypeTest extends TestBase {
     }
 
     @Test
-    public void testWriteCharacterWithNull() throws IOException {
+    public void testSerializeToWithNull() throws IOException {
         assertDoesNotThrow(() -> {
-            mutableLongType.writeCharacter(characterWriter, null, null);
+            mutableLongType.serializeTo(characterWriter, null, null);
         });
     }
 
     @Test
-    public void testWriteCharacterWithNonNull() throws IOException {
+    public void testSerializeToWithNonNull() throws IOException {
         assertDoesNotThrow(() -> {
-            mutableLongType.writeCharacter(characterWriter, MutableLong.of(123456L), null);
+            mutableLongType.serializeTo(characterWriter, MutableLong.of(123456L), null);
         });
     }
 }

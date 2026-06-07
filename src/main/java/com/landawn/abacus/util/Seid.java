@@ -92,6 +92,14 @@ public class Seid implements EntityId {
      * Creates a new Seid with the specified entity name.
      * This constructor is deprecated and for internal use only.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Seid seid = new Seid("User");
+     * String name = seid.entityName();   // returns "User"
+     * boolean empty = seid.isEmpty();    // returns true
+     * int size = seid.size();            // returns 0
+     * }</pre>
+     *
      * @param entityName the name of the entity
      * @deprecated for internal use only
      */
@@ -154,6 +162,13 @@ public class Seid implements EntityId {
     /**
      * Creates a new Seid with the specified entity name.
      * This factory method is deprecated and for internal use only.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Seid seid = Seid.of("Account");
+     * String name = seid.entityName();   // returns "Account"
+     * boolean empty = seid.isEmpty();    // returns true
+     * }</pre>
      *
      * @param entityName the name of the entity
      * @return a new Seid instance
@@ -263,7 +278,7 @@ public class Seid implements EntityId {
      * }
      *
      * User user = new User(123L, "John");
-     * Seid userId = Seid.create(user);   // Will contain id=123
+     * Seid userId = Seid.create(user);   // will contain id=123
      * }</pre>
      *
      * @param entity the entity object to extract ID from
@@ -317,7 +332,7 @@ public class Seid implements EntityId {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Seid userId = Seid.of("User.id", 123);
-     * String entityName = userId.entityName();   // Returns "User"
+     * String entityName = userId.entityName();   // returns "User"
      * }</pre>
      *
      * @return the entity name
@@ -334,8 +349,8 @@ public class Seid implements EntityId {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Seid seid = Seid.of("User.id", 123);
-     * Integer id = seid.get("id");         // Returns 123
-     * Integer id2 = seid.get("User.id");   // Also returns 123
+     * Integer id = seid.get("id");         // returns 123
+     * Integer id2 = seid.get("User.id");   // also returns 123
      * }</pre>
      *
      * @param <T> the expected type of the property value
@@ -360,7 +375,7 @@ public class Seid implements EntityId {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Seid seid = Seid.of("User.age", "25");
-     * int age = seid.getInt("age");   // Returns 25 (converted from String)
+     * int age = seid.getInt("age");   // returns 25 (converted from String)
      * }</pre>
      *
      * @param propName the property name
@@ -381,7 +396,7 @@ public class Seid implements EntityId {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Seid seid = Seid.of("User.id", 123);
-     * long id = seid.getLong("id");   // Returns 123L
+     * long id = seid.getLong("id");   // returns 123L
      * }</pre>
      *
      * @param propName the property name
@@ -403,7 +418,7 @@ public class Seid implements EntityId {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Seid seid = Seid.of("User.active", "true");
-     * Boolean active = seid.get("active", Boolean.class);   // Returns Boolean.TRUE
+     * Boolean active = seid.get("active", Boolean.class);   // returns Boolean.TRUE
      * }</pre>
      *
      * @param <T> the target type
@@ -427,6 +442,16 @@ public class Seid implements EntityId {
      * Sets a property value in this Seid.
      * This method is deprecated and for internal use only.
      * Supports both simple and canonical property names.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Seid seid = Seid.of("User");
+     * seid.set("User.id", 123);             // canonical name stored as "id"
+     * Integer id = seid.get("id");          // returns 123
+     * seid.set("name", "John").get("name"); // returns "John" (chaining returns this)
+     * seid.set("id", 456);                  // overwrites existing value
+     * Integer newId = seid.get("id");       // returns 456
+     * }</pre>
      *
      * @param propName the property name
      * @param propValue the property value
@@ -458,6 +483,19 @@ public class Seid implements EntityId {
      * Both simple and canonical property names are accepted; canonical names are
      * automatically converted to their simple form before storage.
      * This method is deprecated and for internal use only.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Seid seid = Seid.of("User");
+     * Map<String, Object> props = new HashMap<>();
+     * props.put("User.id", 123);   // canonical name stored as "id"
+     * props.put("name", "John");
+     * seid.set(props);
+     * Integer id = seid.get("id");          // returns 123
+     * String name = seid.get("name");       // returns "John"
+     * int size = seid.size();               // returns 2
+     * seid.set((Map<String, Object>) null); // null map is ignored, size stays 2
+     * }</pre>
      *
      * @param nameValues a map of property names (simple or canonical) to their values; ignored if {@code null} or empty
      * @deprecated for internal use only
@@ -497,8 +535,8 @@ public class Seid implements EntityId {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Seid seid = Seid.of("User.id", 123);
-     * boolean hasId = seid.containsKey("id");                 // Returns true
-     * boolean hasIdCanonical = seid.containsKey("User.id");   // Also returns true
+     * boolean hasId = seid.containsKey("id");                 // returns true
+     * boolean hasIdCanonical = seid.containsKey("User.id");   // also returns true
      * }</pre>
      *
      * @param propName the property name to check
@@ -529,7 +567,7 @@ public class Seid implements EntityId {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Seid seid = Seid.of("User.id", 123, "User.name", "John");
-     * Set<String> keys = seid.keySet();   // Contains ["id", "name"]
+     * Set<String> keys = seid.keySet();   // contains ["id", "name"]
      * }</pre>
      *
      * @return a set view of the property names
@@ -568,7 +606,7 @@ public class Seid implements EntityId {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Seid seid = Seid.of("User.id", 123, "User.version", 1);
-     * int count = seid.size();   // Returns 2
+     * int count = seid.size();   // returns 2
      * }</pre>
      *
      * @return the number of properties
@@ -584,7 +622,7 @@ public class Seid implements EntityId {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Seid seid = Seid.of("User");
-     * boolean empty = seid.isEmpty();   // Returns true
+     * boolean empty = seid.isEmpty();   // returns true
      * }</pre>
      *
      * @return {@code true} if this Seid contains no properties, {@code false} otherwise
@@ -597,6 +635,15 @@ public class Seid implements EntityId {
     /**
      * Removes all properties from this Seid.
      * This method is deprecated and for internal use only.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Seid seid = Seid.of("User.id", 123);
+     * boolean before = seid.isEmpty();   // returns false
+     * seid.clear();
+     * boolean after = seid.isEmpty();    // returns true
+     * int size = seid.size();            // returns 0
+     * }</pre>
      *
      * @deprecated for internal use only
      */
@@ -612,6 +659,16 @@ public class Seid implements EntityId {
      * Creates a copy of this Seid.
      * The copy contains the same entity name and all property-value pairs.
      * This method is deprecated and for internal use only.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Seid original = Seid.of("User.id", 123, "User.name", "John");
+     * Seid copy = original.copy();
+     * boolean equal = original.equals(copy);   // returns true
+     * boolean same = (original == copy);       // returns false (distinct instances)
+     * copy.set("id", 999);                     // mutating the copy
+     * Integer origId = original.get("id");     // returns 123 (original unaffected)
+     * }</pre>
      *
      * @return a copy of this Seid
      * @deprecated for internal use only
@@ -636,7 +693,7 @@ public class Seid implements EntityId {
      * <pre>{@code
      * Seid seid1 = Seid.of("User.id", 123);
      * Seid seid2 = Seid.of("User.id", 123);
-     * boolean equal = seid1.equals(seid2);   // Returns true
+     * boolean equal = seid1.equals(seid2);   // returns true
      * }</pre>
      *
      * @param obj the object to compare with
@@ -671,7 +728,7 @@ public class Seid implements EntityId {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Seid seid = Seid.of("User.id", 123, "User.name", "John");
-     * String str = seid.toString();   // Returns "User: {id=123, name=John}"
+     * String str = seid.toString();   // returns "User: {id=123, name=John}"
      * }</pre>
      *
      * @return a string representation of this Seid

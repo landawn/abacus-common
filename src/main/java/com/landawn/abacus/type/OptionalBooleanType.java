@@ -104,8 +104,15 @@ public class OptionalBooleanType extends AbstractOptionalType<OptionalBoolean> {
      * // Returns: null
      * }</pre>
      *
+     * <p>The returned string is a serializable representation designed to be parsed back into an equivalent value
+     * via {@link #valueOf(String)}; {@code stringOf} and {@code valueOf} are inverse operations that round-trip. This
+     * is the key distinction from {@link Object#toString()}, whose result is not guaranteed to be convertible back
+     * into the original value.</p>
+     *
      * @param x the OptionalBoolean object to convert
      * @return "true" or "false" if the Optional contains a value, or {@code null} if empty or null
+     * @see #valueOf(String)
+     * @see #valueOf(Object)
      */
     @Override
     public String stringOf(final OptionalBoolean x) {
@@ -132,8 +139,14 @@ public class OptionalBooleanType extends AbstractOptionalType<OptionalBoolean> {
      * // Returns: OptionalBoolean.empty()
      * }</pre>
      *
+     * <p>This method is the inverse of {@code stringOf} and round-trips with it: it parses the string produced by
+     * {@code stringOf} back into a value of this type. Strings produced by {@link Object#toString()} are not
+     * guaranteed to be parseable in this way.</p>
+     *
      * @param str the string to convert ("true", "false", or parseable boolean strings)
      * @return an OptionalBoolean containing the parsed boolean value, or empty if the input is empty or null
+     * @see #valueOf(Object)
+     * @see #stringOf(OptionalBoolean)
      */
     @Override
     public OptionalBoolean valueOf(final String str) {
@@ -167,7 +180,7 @@ public class OptionalBooleanType extends AbstractOptionalType<OptionalBoolean> {
     public OptionalBoolean get(final ResultSet rs, final int columnIndex) throws SQLException {
         final Object result = rs.getObject(columnIndex);
 
-        return result == null ? OptionalBoolean.empty() : OptionalBoolean.of(result instanceof Boolean ? (Boolean) result : N.convert(result, Boolean.class));
+        return result == null ? OptionalBoolean.empty() : OptionalBoolean.of(result instanceof Boolean b ? b : N.convert(result, Boolean.class));
     }
 
     /**
@@ -197,7 +210,7 @@ public class OptionalBooleanType extends AbstractOptionalType<OptionalBoolean> {
     public OptionalBoolean get(final ResultSet rs, final String columnName) throws SQLException {
         final Object result = rs.getObject(columnName);
 
-        return result == null ? OptionalBoolean.empty() : OptionalBoolean.of(result instanceof Boolean ? (Boolean) result : N.convert(result, Boolean.class));
+        return result == null ? OptionalBoolean.empty() : OptionalBoolean.of(result instanceof Boolean b ? b : N.convert(result, Boolean.class));
     }
 
     /**
@@ -267,10 +280,24 @@ public class OptionalBooleanType extends AbstractOptionalType<OptionalBoolean> {
     /**
      * Appends the string representation of an {@link OptionalBoolean} to an Appendable.
      * Writes "true", "false", or "null" depending on the value.
+     * <p>
+     * <b>appendTo vs. serializeTo:</b> {@code appendTo} produces a plain, {@code toString()}-style rendering with no
+     * JSON/XML quoting or escaping (for general text output), whereas {@code serializeTo} produces the JSON/XML
+     * serialized form (applying string quotation and character escaping per the serialization config) and is used by the
+     * JSON/XML serializers.
      *
      * @param appendable the Appendable to write to
      * @param x the OptionalBoolean value to append
      * @throws IOException if an I/O error occurs during the append operation
+     * @implNote
+     * This method appends a string representation of {@code x} to {@code appendable} (the literal {@code "null"} for a
+     * {@code null} value). Conceptually this is the human-readable form produced by {@code toString()}, <i>not</i> the
+     * value returned by {@code stringOf}, which is a formatted, serializable representation (typically a JSON string)
+     * that {@link #valueOf(String)} can convert back into an equivalent value. For values whose nested structure makes
+     * the two forms differ (collections, maps, arrays), {@code appendTo} emits the unquoted, {@code toString()}-style
+     * form; it is therefore not, in the general contract, a plain
+     * {@code appendable.append(x == null ? NULL_STRING : stringOf(x))}. (For value types whose human-readable and
+     * serialized forms coincide, the appended text is naturally identical to {@code stringOf(x)}.)
      */
     @Override
     public void appendTo(final Appendable appendable, final OptionalBoolean x) throws IOException {
@@ -280,6 +307,15 @@ public class OptionalBooleanType extends AbstractOptionalType<OptionalBoolean> {
     /**
      * Writes the character representation of an {@link OptionalBoolean} to a CharacterWriter.
      * This method is typically used for JSON/XML serialization.
+     * <p>
+     * This method is specifically designed for JSON/XML serialization: it writes the serialized form of {@code x} to the
+     * {@code CharacterWriter}, applying string quotation and character escaping according to the supplied serialization
+     * config (a {@code null} config means no surrounding quotation). It is the streaming counterpart of {@code stringOf}
+     * and is invoked by the JSON/XML serializers.
+     * <p>
+     * <b>serializeTo vs. appendTo:</b> {@code serializeTo} produces machine-readable JSON/XML (quoted and escaped),
+     * whereas {@code appendTo} produces a plain, human-readable {@code toString()}-style rendering without JSON/XML
+     * quoting or escaping.
      *
      * @param writer the CharacterWriter to write to
      * @param x the OptionalBoolean value to write
@@ -287,7 +323,7 @@ public class OptionalBooleanType extends AbstractOptionalType<OptionalBoolean> {
      * @throws IOException if an I/O error occurs during the write operation
      */
     @Override
-    public void writeCharacter(final CharacterWriter writer, final OptionalBoolean x, final JsonXmlSerConfig<?> config) throws IOException {
+    public void serializeTo(final CharacterWriter writer, final OptionalBoolean x, final JsonXmlSerConfig<?> config) throws IOException {
         writer.write((x == null || x.isEmpty()) ? NULL_CHAR_ARRAY : (x.get() ? TRUE_CHAR_ARRAY : FALSE_CHAR_ARRAY));
     }
 }

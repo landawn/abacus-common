@@ -102,8 +102,14 @@ public class TimeType extends AbstractDateType<Time> {
      * Time time3 = type.valueOf(null);         // Returns null
      * }</pre>
      *
+     * <p>This method is the inverse of {@code stringOf} and round-trips with it: it parses the string produced by
+     * {@code stringOf} back into a value of this type. Strings produced by {@link Object#toString()} are not
+     * guaranteed to be parseable in this way.</p>
+     *
      * @param str the string to parse
      * @return a Time object, or {@code null} if {@code str} is {@code null}, empty, or the literal {@code "null"}
+     * @see #valueOf(Object)
+     * @see #stringOf(java.util.Date)
      */
     @Override
     public Time valueOf(final String str) {

@@ -132,14 +132,14 @@ import com.landawn.abacus.util.u.Optional;
  * // Custom type registration with simple functions
  * TypeFactory.registerType(
  *     LocalDate.class,
- *     date -> date.toString(),                    // Serialization function
+ *     date -> date.toString(),                   // Serialization function
  *     str -> LocalDate.parse(str)                // Deserialization function
  * );
  *
  * // Custom type registration with JsonParser support
  * TypeFactory.registerType(
  *     MyCustomClass.class,
- *     (obj, parser) -> obj.toJson(),             // Serialization with parser
+ *     (obj, parser) -> obj.toJson(),                                // Serialization with parser
  *     (str, parser) -> parser.deserialize(str, MyCustomClass.class) // Deserialization with parser
  * );
  *
@@ -1301,6 +1301,7 @@ public final class TypeFactory {
      * it extracts the type information including type parameters and creates the appropriate
      * Type object. Results are cached for performance.
      * </p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * java.lang.reflect.Type listType = new TypeReference<List<String>>() {}.getType();
@@ -1362,6 +1363,18 @@ public final class TypeFactory {
      * The method caches Type objects for reuse. If the type pool size reaches multiples of 100,
      * a warning is logged about the pool size.
      * </p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<String> t1 = TypeFactory.getType("String");
+     * t1.javaType();                  // returns String.class
+     *
+     * Type<List<String>> t2 = TypeFactory.getType("List<String>");
+     * t2.name();                      // returns "List<String>"
+     * t2.javaType();                  // returns List.class
+     *
+     * TypeFactory.getType((String) null);   // throws IllegalArgumentException
+     * }</pre>
      *
      * @param <T> the Java type represented by the requested {@code Type} object
      * @param typeName the name of the type to retrieve, with optional type parameters

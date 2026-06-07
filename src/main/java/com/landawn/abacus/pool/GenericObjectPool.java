@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.Deque;
+import java.util.Iterator;
 import java.util.List;
 import java.util.PriorityQueue;
 import java.util.Queue;
@@ -71,7 +72,7 @@ import com.landawn.abacus.util.Objectory;
  * try {
  *     // use resource
  * } finally {
- *     pool.add(resource);   // return to pool
+ *     pool.add(resource);   // adds it back to the pool
  * }
  * }</pre>
  *
@@ -163,7 +164,7 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
         super(capacity, evictDelayInMillis, evictionPolicy, autoBalance, balanceFactor, maxMemorySize);
 
         this.memoryMeasure = memoryMeasure;
-        pool = new ArrayDeque<>(Math.min(capacity, 1000));
+        pool = new ArrayDeque<>(Math.max(1, Math.min(capacity, 1000)));
 
         cmp = createComparator();
         scheduleEvictionTask();
@@ -411,7 +412,14 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
                     }
 
                     if (memoryMeasure != null) {
-                        final long elementMemorySize = memoryMeasure.sizeOf(element);
+                        final long elementMemorySize;
+
+                        try {
+                            elementMemorySize = memoryMeasure.sizeOf(element);
+                        } catch (final Exception ex) {
+                            logger.warn("Error measuring memory size of element", ex);
+                            return false;
+                        }
 
                         if (elementMemorySize < 0) {
                             logger.warn("Memory measure returned negative size for element: " + elementMemorySize);
@@ -509,7 +517,7 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
      *     try {
      *         // use the object
      *     } finally {
-     *         pool.add(obj);   // return to pool
+     *         pool.add(obj);   // adds it back to the pool
      *     }
      * } else {
      *     // pool is empty, create new object if needed
@@ -550,24 +558,7 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
                     activityPrint.updateAccessCount();
 
                     if (memoryMeasure != null) {
-                        // Wrap memoryMeasure call: a user-supplied sizeOf that throws after we
-                        // popped the element would otherwise propagate the exception while leaving
-                        // the popped element neither in the pool nor returned to the caller — a
-                        // pure leak (its destroy() never fires). Log and continue with totalDataSize
-                        // unchanged; better to drift one accounting unit than leak a live resource.
-                        try {
-                            final long elementMemorySize = memoryMeasure.sizeOf(element);
-
-                            if (elementMemorySize < 0) {
-                                logger.warn("Memory measure returned negative size for element: " + elementMemorySize);
-                            } else {
-                                totalDataSize.addAndGet(-elementMemorySize); //NOSONAR
-                            }
-                        } catch (final Exception ex) {
-                            if (logger.isWarnEnabled()) {
-                                logger.warn("Error measuring memory size during take: " + ExceptionUtil.getErrorMessage(ex, true));
-                            }
-                        }
+                        subtractTakenElementMemory(element);
                     }
 
                     notFull.signal();
@@ -634,21 +625,7 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
                         activityPrint.updateAccessCount();
 
                         if (memoryMeasure != null) {
-                            // See take(): never let a user sizeOf() throw after we've popped — that
-                            // would leak the live element. Log and continue.
-                            try {
-                                final long elementMemorySize = memoryMeasure.sizeOf(element);
-
-                                if (elementMemorySize < 0) {
-                                    logger.warn("Memory measure returned negative size for element: " + elementMemorySize);
-                                } else {
-                                    totalDataSize.addAndGet(-elementMemorySize); //NOSONAR
-                                }
-                            } catch (final Exception ex) {
-                                if (logger.isWarnEnabled()) {
-                                    logger.warn("Error measuring memory size during take: " + ExceptionUtil.getErrorMessage(ex, true));
-                                }
-                            }
+                            subtractTakenElementMemory(element);
                         }
                     }
 
@@ -685,6 +662,33 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
         }
 
         return element;
+    }
+
+    /**
+     * Subtracts the just-taken element's measured memory size from {@link #totalDataSize}.
+     * <p>
+     * Must be called while holding {@link #lock} and only when {@link #memoryMeasure} is non-{@code null}.
+     * A user-supplied {@code sizeOf} that throws after the element has already been popped would otherwise
+     * propagate the exception while leaving the popped element neither in the pool nor returned to the
+     * caller — a pure leak (its {@code destroy()} never fires). Any exception is therefore logged and
+     * swallowed; drifting one accounting unit is preferable to leaking a live resource.
+     *
+     * @param element the element that was just popped from the pool
+     */
+    private void subtractTakenElementMemory(final E element) {
+        try {
+            final long elementMemorySize = memoryMeasure.sizeOf(element);
+
+            if (elementMemorySize < 0) {
+                logger.warn("Memory measure returned negative size for element: " + elementMemorySize);
+            } else {
+                totalDataSize.addAndGet(-elementMemorySize); //NOSONAR
+            }
+        } catch (final Exception ex) {
+            if (logger.isWarnEnabled()) {
+                logger.warn("Error measuring memory size during take: " + ExceptionUtil.getErrorMessage(ex, true));
+            }
+        }
     }
 
     /**
@@ -887,7 +891,7 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
         }
     }
 
-    private void removeByIdentity(final java.util.Collection<E> targets) {
+    private void removeByIdentity(final Collection<E> targets) {
         if (targets == null || targets.isEmpty()) {
             return;
         }
@@ -896,7 +900,7 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
         // ArrayDeque.remove(Object) cardinality but using identity instead of equals so a
         // content-equal-but-distinct entry isn't accidentally evicted.
         for (final E target : targets) {
-            final java.util.Iterator<E> it = pool.iterator();
+            final Iterator<E> it = pool.iterator();
             while (it.hasNext()) {
                 if (it.next() == target) {
                     it.remove();

@@ -586,7 +586,7 @@ public class StreamBaseTest extends TestBase {
                 }
 
                 @Override
-                public void close() {
+                public void closeResource() {
                     closeCount.incrementAndGet();
                 }
             });
@@ -608,7 +608,7 @@ public class StreamBaseTest extends TestBase {
             }
 
             @Override
-            public void close() {
+            public void closeResource() {
                 throw new RuntimeException("Close error");
             }
         });
@@ -1560,6 +1560,16 @@ public class StreamBaseTest extends TestBase {
         }
 
         Assertions.assertEquals(1, closeCount.get(), "Underlying AutoCloseable must be closed exactly once across concurrent run() calls");
+    }
+
+    @Test
+    public void testCloseRunsRemainingHandlersAfterError() {
+        final AtomicInteger closed = new AtomicInteger();
+
+        Assertions.assertThrows(Throwable.class, () -> Stream.of(1).onClose(() -> {
+            throw new AssertionError("first");
+        }).onClose(closed::incrementAndGet).close());
+        Assertions.assertEquals(1, closed.get());
     }
 
 }

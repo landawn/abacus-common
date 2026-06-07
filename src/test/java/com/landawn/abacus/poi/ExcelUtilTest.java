@@ -19,7 +19,9 @@ import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.util.CellRangeAddress;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -411,6 +413,19 @@ public class ExcelUtilTest extends TestBase {
         Assertions.assertEquals("txt", readRows.get(0).get(0));
         Assertions.assertEquals("99.0", readRows.get(0).get(1));
         Assertions.assertEquals("false", readRows.get(0).get(2));
+    }
+
+    @Test
+    public void test_RowMappers_PreserveSparseCellPositions() throws Exception {
+        try (Workbook workbook = new XSSFWorkbook()) {
+            Sheet sheet = workbook.createSheet("Sparse");
+            Row row = sheet.createRow(0);
+            row.createCell(0).setCellValue("first");
+            row.createCell(2).setCellValue("third");
+
+            Assertions.assertEquals(Arrays.asList("first", null, "third"), RowMappers.DEFAULT.apply(row));
+            Assertions.assertEquals("first||third", RowMappers.toDelimitedString("|").apply(row));
+        }
     }
 
     // ========== writeSheet(String, List, List, File) ==========

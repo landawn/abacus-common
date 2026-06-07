@@ -100,44 +100,44 @@ public class AbstractCalendarTypeTest extends TestBase {
     }
 
     @Test
-    public void testWriteCharacter_ValidCalendar_NoConfig() throws IOException {
+    public void testSerializeTo_ValidCalendar_NoConfig() throws IOException {
         Calendar calendar = new GregorianCalendar(2023, Calendar.JANUARY, 15);
-        type.writeCharacter(characterWriter, calendar, null);
+        type.serializeTo(characterWriter, calendar, null);
     }
 
     @Test
-    public void testWriteCharacter_ValidCalendar_WithQuotation() throws IOException {
+    public void testSerializeTo_ValidCalendar_WithQuotation() throws IOException {
         Calendar calendar = new GregorianCalendar(2023, Calendar.JANUARY, 15);
         when(config.getStringQuotation()).thenReturn('"');
         when(config.getDateTimeFormat()).thenReturn(null);
 
-        type.writeCharacter(characterWriter, calendar, config);
+        type.serializeTo(characterWriter, calendar, config);
     }
 
     @Test
-    public void testWriteCharacter_ValidCalendar_ISO8601DateTime() throws IOException {
+    public void testSerializeTo_ValidCalendar_ISO8601DateTime() throws IOException {
         Calendar calendar = new GregorianCalendar(2023, Calendar.JANUARY, 15);
         when(config.getDateTimeFormat()).thenReturn(DateTimeFormat.ISO_8601_DATE_TIME);
         when(config.getStringQuotation()).thenReturn((char) 0);
 
-        type.writeCharacter(characterWriter, calendar, config);
+        type.serializeTo(characterWriter, calendar, config);
     }
 
     @Test
-    public void testWriteCharacter_ValidCalendar_ISO8601Timestamp() throws IOException {
+    public void testSerializeTo_ValidCalendar_ISO8601Timestamp() throws IOException {
         Calendar calendar = new GregorianCalendar(2023, Calendar.JANUARY, 15);
         when(config.getDateTimeFormat()).thenReturn(DateTimeFormat.ISO_8601_TIMESTAMP);
         when(config.getStringQuotation()).thenReturn((char) 0);
 
-        type.writeCharacter(characterWriter, calendar, config);
+        type.serializeTo(characterWriter, calendar, config);
     }
 
     @Test
-    public void testWriteCharacter_ValidCalendar_QuotationWithLongFormat() throws IOException {
+    public void testSerializeTo_ValidCalendar_QuotationWithLongFormat() throws IOException {
         Calendar calendar = new GregorianCalendar(2023, Calendar.JANUARY, 15);
         when(config.getDateTimeFormat()).thenReturn(DateTimeFormat.LONG);
         when(config.getStringQuotation()).thenReturn('"');
 
-        type.writeCharacter(characterWriter, calendar, config);
+        type.serializeTo(characterWriter, calendar, config);
     }
 }

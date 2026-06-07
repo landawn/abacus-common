@@ -130,30 +130,30 @@ public class BigDecimalTypeTest extends TestBase {
     }
 
     @Test
-    public void test_writeCharacter_withoutConfig() throws Exception {
+    public void test_serializeTo_withoutConfig() throws Exception {
         CharacterWriter writer = mock(BufferedJsonWriter.class);
         BigDecimal value = new BigDecimal("123.456");
 
-        type.writeCharacter(writer, value, null);
+        type.serializeTo(writer, value, null);
         verify(writer).writeCharacter(value.toString());
     }
 
     @Test
-    public void test_writeCharacter_withConfig_asPlain() throws Exception {
+    public void test_serializeTo_withConfig_asPlain() throws Exception {
         CharacterWriter writer = mock(BufferedJsonWriter.class);
         JsonXmlSerConfig<?> config = mock(JsonXmlSerConfig.class);
         when(config.isWriteBigDecimalAsPlain()).thenReturn(true);
 
         BigDecimal value = new BigDecimal("1.23E+3");
-        type.writeCharacter(writer, value, config);
+        type.serializeTo(writer, value, config);
         verify(writer).writeCharacter(value.toPlainString());
     }
 
     @Test
-    public void test_writeCharacter_null() throws Exception {
+    public void test_serializeTo_null() throws Exception {
         CharacterWriter writer = mock(BufferedJsonWriter.class);
 
-        type.writeCharacter(writer, null, null);
+        type.serializeTo(writer, null, null);
         verify(writer).write("null".toCharArray());
     }
 

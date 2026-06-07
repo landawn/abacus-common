@@ -6731,8 +6731,9 @@ public class SeqTest extends AbstractTest {
 
     @Test
     public void test_top_naturalOrder() throws Exception {
-        Seq<Integer, Exception> seq = Seq.of(5, 1, null, 4, 2, null, 3).top(3);
-        assertThrows(NullPointerException.class, () -> drainWithException(seq));
+        List<Integer> result = Seq.of(5, 1, null, 4, 2, null, 3).top(3).toList();
+        Collections.sort(result);
+        assertEquals(Arrays.asList(3, 4, 5), result);
     }
 
     @Test
@@ -11922,6 +11923,14 @@ public class SeqTest extends AbstractTest {
         // Bug fix: top(int n) advertises "must not be negative" so n=0 should be allowed and yield an empty seq.
         // Previously top(0) delegated to top(0, comparator) which used checkArgPositive and threw.
         assertEquals(Collections.emptyList(), Seq.of(3, 1, 4, 1, 5, 9, 2, 6).top(0).toList());
+    }
+
+    @Test
+    public void testReview_kthLargestWithNullAwareComparator() throws Exception {
+        Optional<Integer> kth = Seq.of(3, null, 1, 2).kthLargest(2, Comparator.nullsFirst(Integer::compareTo));
+
+        assertTrue(kth.isPresent());
+        assertEquals(Integer.valueOf(2), kth.get());
     }
 
 }

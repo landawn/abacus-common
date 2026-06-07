@@ -396,7 +396,7 @@ public final class XmlUtil {
      * <pre>{@code
      * String xml = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?><person><age>30</age><name>John</name></person>";
      * Person person = XmlUtil.unmarshal(Person.class, xml);
-     * System.out.println(person.getName());   // Prints: John
+     * System.out.println(person.getName());   // prints John
      * }</pre>
      *
      * @param <T> The type of the object to be returned
@@ -1426,11 +1426,11 @@ public final class XmlUtil {
      * <pre>{@code
      * Element elem = doc.createElement("name");
      * elem.setTextContent("John");
-     * boolean isText = XmlUtil.isTextElement(elem);   // Returns true
+     * boolean isText = XmlUtil.isTextElement(elem);   // returns true
      *
      * Element parent = doc.createElement("person");
      * parent.appendChild(elem);
-     * boolean isParentText = XmlUtil.isTextElement(parent);   // Returns false
+     * boolean isParentText = XmlUtil.isTextElement(parent);   // returns false
      * }</pre>
      *
      * @param node The node to be checked
@@ -1464,8 +1464,8 @@ public final class XmlUtil {
      * Element elem = doc.createElement("message");
      * elem.setTextContent("  Hello World  ");
      *
-     * String content = XmlUtil.getTextContent(elem);   // Returns "  Hello World  "
-     * String missing = XmlUtil.getTextContent(null);   // Returns null
+     * String content = XmlUtil.getTextContent(elem);   // returns "  Hello World  "
+     * String missing = XmlUtil.getTextContent(null);   // returns null
      * }</pre>
      *
      * @param node the XML node to read text from
@@ -1491,9 +1491,9 @@ public final class XmlUtil {
      * Element elem = doc.createElement("message");
      * elem.setTextContent("  Hello\n\tWorld  ");
      *
-     * String normalized = XmlUtil.getTextContent(elem, true);   // Returns "Hello World"
-     * String raw = XmlUtil.getTextContent(elem, false);         // Returns "  Hello\n\tWorld  "
-     * String missing = XmlUtil.getTextContent(null, true);      // Returns null
+     * String normalized = XmlUtil.getTextContent(elem, true);   // returns "Hello World"
+     * String raw = XmlUtil.getTextContent(elem, false);         // returns "  Hello\n\tWorld  "
+     * String missing = XmlUtil.getTextContent(null, true);      // returns null
      * }</pre>
      *
      * @param node the XML node to read text from
@@ -1843,7 +1843,7 @@ public final class XmlUtil {
      * <pre>{@code
      * StringWriter writer = new StringWriter();
      * XmlUtil.writeCharacters("Hello <world>", 0, 13, writer);
-     * String result = writer.toString();   // "Hello &lt;world&gt;"
+     * String result = writer.toString();   // returns "Hello &lt;world&gt;"
      * }</pre>
      *
      * @param str The string containing the characters to be written

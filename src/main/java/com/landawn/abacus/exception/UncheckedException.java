@@ -90,14 +90,9 @@ public class UncheckedException extends RuntimeException {
      * @throws IllegalArgumentException if {@code cause} is {@code null}
      */
     public UncheckedException(final Throwable cause) {
-        super(getCause(cause));
+        super(requireCause(cause));
 
-        final Throwable[] suppressedExceptions = cause.getSuppressed();
-        if (N.notEmpty(suppressedExceptions)) {
-            for (final Throwable suppressedException : suppressedExceptions) {
-                this.addSuppressed(suppressedException);
-            }
-        }
+        copySuppressed(cause);
     }
 
     /**
@@ -126,14 +121,9 @@ public class UncheckedException extends RuntimeException {
      * @throws IllegalArgumentException if {@code cause} is {@code null}
      */
     public UncheckedException(final String message, final Throwable cause) {
-        super(message, getCause(cause));
+        super(message, requireCause(cause));
 
-        final Throwable[] suppressedExceptions = cause.getSuppressed();
-        if (N.notEmpty(suppressedExceptions)) {
-            for (final Throwable suppressedException : suppressedExceptions) {
-                this.addSuppressed(suppressedException);
-            }
-        }
+        copySuppressed(cause);
     }
 
     /**
@@ -143,10 +133,26 @@ public class UncheckedException extends RuntimeException {
      * @return {@code cause}, unchanged
      * @throws IllegalArgumentException if {@code cause} is {@code null}
      */
-    private static Throwable getCause(final Throwable cause) {
+    private static Throwable requireCause(final Throwable cause) {
         N.checkArgNotNull(cause, cs.cause);
 
         return cause;
+    }
+
+    /**
+     * Copies all suppressed exceptions from the wrapped cause onto this exception, so that no
+     * information from the original exception is lost.
+     *
+     * @param cause the wrapped exception whose suppressed exceptions should be preserved
+     */
+    private void copySuppressed(final Throwable cause) {
+        final Throwable[] suppressedExceptions = cause.getSuppressed();
+
+        if (N.notEmpty(suppressedExceptions)) {
+            for (final Throwable suppressedException : suppressedExceptions) {
+                this.addSuppressed(suppressedException);
+            }
+        }
     }
 
 }

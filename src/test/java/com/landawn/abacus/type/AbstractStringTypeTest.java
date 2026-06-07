@@ -183,23 +183,23 @@ public class AbstractStringTypeTest extends TestBase {
     }
 
     @Test
-    public void testWriteCharacter() throws IOException {
-        stringType.writeCharacter(writer, null, null);
+    public void testSerializeTo() throws IOException {
+        stringType.serializeTo(writer, null, null);
         verify(writer).write(any(char[].class));
 
-        stringType.writeCharacter(writer, "", null);
+        stringType.serializeTo(writer, "", null);
         verify(writer).writeCharacter("");
 
-        stringType.writeCharacter(writer, "hello", null);
+        stringType.serializeTo(writer, "hello", null);
         verify(writer).writeCharacter("hello");
 
         when(config.isWriteNullStringAsEmpty()).thenReturn(true);
         when(config.getStringQuotation()).thenReturn((char) 0);
-        stringType.writeCharacter(writer, null, config);
+        stringType.serializeTo(writer, null, config);
         verify(writer, times(2)).writeCharacter("");
 
         when(config.getStringQuotation()).thenReturn('"');
-        stringType.writeCharacter(writer, "world", config);
+        stringType.serializeTo(writer, "world", config);
         verify(writer, times(2)).write('"');
         verify(writer).writeCharacter("world");
     }

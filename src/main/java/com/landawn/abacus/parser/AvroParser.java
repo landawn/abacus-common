@@ -95,6 +95,17 @@ public final class AvroParser extends AbstractParser<AvroSerConfig, AvroDeserCon
     /**
      * Constructs a new AvroParser instance.
      * This parser can be used to serialize and deserialize objects to/from Apache Avro format.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * AvroParser parser = new AvroParser();  // creates a ready-to-use parser
+     *
+     * Schema schema = new Schema.Parser().parse(schemaJson);
+     * AvroSerConfig config = new AvroSerConfig().setSchema(schema);
+     * Map<String, Object> data = Map.of("name", "John", "age", 30);
+     * String encoded = parser.serialize(data, config);  // returns a Base64 encoded string
+     * }</pre>
+     *
      */
     public AvroParser() {
         // Default constructor
@@ -348,7 +359,7 @@ public final class AvroParser extends AbstractParser<AvroSerConfig, AvroDeserCon
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * String base64Data = "...";  // Base64 encoded Avro data
+     * String base64Data = "...";  // base64Data is Base64-encoded Avro data
      * AvroDeserConfig config = new AvroDeserConfig()
      *     .setSchema(User.getSchema());
      * User user = parser.deserialize(base64Data, config, User.class);
@@ -373,7 +384,7 @@ public final class AvroParser extends AbstractParser<AvroSerConfig, AvroDeserCon
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * String base64Data = "...";  // Base64 encoded Avro data
+     * String base64Data = "...";  // base64Data is Base64-encoded Avro data
      * AvroDeserConfig config = new AvroDeserConfig()
      *     .setSchema(User.getSchema());
      * User user = parser.deserialize(base64Data, config, User.class);
@@ -702,9 +713,7 @@ public final class AvroParser extends AbstractParser<AvroSerConfig, AvroDeserCon
                 propName = field.name();
                 propValue = source.get(propName);
 
-                if (propValue != null) {
-                    m.put(propName, propValue);
-                }
+                m.put(propName, propValue);
             }
 
             return (T) m;
@@ -716,9 +725,7 @@ public final class AvroParser extends AbstractParser<AvroSerConfig, AvroDeserCon
             for (final Field field : source.getSchema().getFields()) {
                 propValue = source.get(field.pos());
 
-                if (propValue != null) {
-                    c.add(propValue);
-                }
+                c.add(propValue);
             }
 
             return (T) c;

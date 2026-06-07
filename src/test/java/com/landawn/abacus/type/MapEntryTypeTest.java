@@ -131,16 +131,16 @@ public class MapEntryTypeTest extends TestBase {
     }
 
     @Test
-    public void testWriteCharacterWithNull() throws IOException {
+    public void testSerializeToWithNull() throws IOException {
         assertDoesNotThrow(() -> {
-            mapEntryType.writeCharacter(characterWriter, null, null);
+            mapEntryType.serializeTo(characterWriter, null, null);
         });
     }
 
     @Test
-    public void testWriteCharacterWithNonNull() throws IOException {
+    public void testSerializeToWithNonNull() throws IOException {
         Map.Entry<String, Integer> entry = new AbstractMap.SimpleEntry<>("key", 123);
         JsonXmlSerConfig<?> config = null;
-        mapEntryType.writeCharacter(characterWriter, entry, config);
+        mapEntryType.serializeTo(characterWriter, entry, config);
     }
 }

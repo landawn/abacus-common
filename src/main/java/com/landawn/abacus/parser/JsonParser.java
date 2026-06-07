@@ -587,7 +587,7 @@ public interface JsonParser extends Parser<JsonSerConfig, JsonDeserConfig> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * try (Reader reader = new FileReader("data.json");
-     *     Stream<Product> stream = parser.stream(reader, true, Type.of(Product.class))) {
+     *     Stream<Product> stream             = parser.stream(reader, true, Type.of(Product.class))) {
      *     Map<String, List<Product>> grouped = stream
      *         .collect(Collectors.groupingBy(Product::getCategory));
      * }

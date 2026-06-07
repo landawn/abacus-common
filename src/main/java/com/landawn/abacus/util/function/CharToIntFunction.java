@@ -19,7 +19,6 @@ package com.landawn.abacus.util.function;
  *
  * <p>This is a functional interface whose functional method is {@link #applyAsInt(char)}.
  *
- *
  * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
  *
  * @see java.util.function.Function
@@ -37,6 +36,7 @@ public interface CharToIntFunction {
      * CharToIntFunction defaultConversion = CharToIntFunction.DEFAULT;
      * int codePoint = defaultConversion.applyAsInt('A');   // Returns 65
      * }</pre>
+     *
      */
     CharToIntFunction DEFAULT = value -> value;
 

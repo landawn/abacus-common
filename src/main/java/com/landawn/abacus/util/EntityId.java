@@ -48,6 +48,7 @@ import com.landawn.abacus.annotation.MayReturnNull;
  *     .put("regionCode", "US")
  *     .build();
  * }</pre>
+ *
  */
 public interface EntityId {
 
@@ -230,7 +231,7 @@ public interface EntityId {
      * User user = new User();
      * user.setUserId(12345);
      * user.setName("John");
-     * EntityId id = EntityId.create(user);   // Extracts userId if marked as @Id
+     * EntityId id = EntityId.create(user);   // creates ID from userId if marked as @Id
      * }</pre>
      *
      * @param entity the entity object to extract ID from
@@ -270,7 +271,7 @@ public interface EntityId {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * EntityId id = EntityId.of("User", "userId", 100);
-     * String name = id.entityName();   // Returns "User"
+     * String name = id.entityName();   // returns "User"
      * }</pre>
      *
      * @return the entity name as a String
@@ -283,7 +284,7 @@ public interface EntityId {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * EntityId id = EntityId.of("User.id", 12345);
-     * Integer userId = id.get("id");   // Returns 12345
+     * Integer userId = id.get("id");   // returns 12345
      * }</pre>
      *
      * @param <T> the expected type of the property value
@@ -302,7 +303,7 @@ public interface EntityId {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * EntityId id = EntityId.of("Product.quantity", 50);
-     * int qty = id.getInt("quantity");   // Returns 50
+     * int qty = id.getInt("quantity");   // returns 50
      * }</pre>
      *
      * @param propName the property name
@@ -319,7 +320,7 @@ public interface EntityId {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * EntityId id = EntityId.of("Transaction.amount", 1000000L);
-     * long amount = id.getLong("amount");   // Returns 1000000
+     * long amount = id.getLong("amount");   // returns 1000000
      * }</pre>
      *
      * @param propName the property name
@@ -356,8 +357,8 @@ public interface EntityId {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * EntityId id = EntityId.of("User.id", 100, "User.name", "John");
-     * boolean hasId = id.containsKey("id");         // Returns true
-     * boolean hasEmail = id.containsKey("email");   // Returns false
+     * boolean hasId = id.containsKey("id");         // returns true
+     * boolean hasEmail = id.containsKey("email");   // returns false
      * }</pre>
      *
      * @param propName the property name to check
@@ -371,7 +372,7 @@ public interface EntityId {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * EntityId id = EntityId.of("User.id", 100, "User.name", "John");
-     * Set<String> keys = id.keySet();   // Returns {"id", "name"}
+     * Set<String> keys = id.keySet();   // returns {"id", "name"}
      * }</pre>
      *
      * @return a Set containing all property names
@@ -399,7 +400,7 @@ public interface EntityId {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * EntityId id = EntityId.of("User.id", 100, "User.name", "John");
-     * int count = id.size();   // Returns 2
+     * int count = id.size();   // returns 2
      * }</pre>
      *
      * @return the number of properties
@@ -412,10 +413,10 @@ public interface EntityId {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * EntityId id1 = EntityId.builder().build();
-     * boolean empty1 = id1.isEmpty();   // Returns true
+     * boolean empty1 = id1.isEmpty();   // returns true
      *
      * EntityId id2 = EntityId.of("User.id", 100);
-     * boolean empty2 = id2.isEmpty();   // Returns false
+     * boolean empty2 = id2.isEmpty();   // returns false
      * }</pre>
      *
      * @return {@code true} if this EntityId contains no properties, {@code false} otherwise
@@ -470,6 +471,7 @@ public interface EntityId {
      *     .put("orderDate", LocalDate.now())
      *     .build();
      * }</pre>
+     *
      */
     class EntityIdBuilder {
         private Seid entityId = null;

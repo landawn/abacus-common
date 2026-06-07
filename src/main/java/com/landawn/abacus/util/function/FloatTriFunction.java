@@ -47,7 +47,7 @@ public interface FloatTriFunction<R> extends Throwables.FloatTriFunction<R, Runt
      * String result = formatter.apply(1.5f, 2.5f, 3.5f); // Returns "1.50, 2.50, 3.50"
      *
      * FloatTriFunction<Float> sum = (a, b, c) -> a + b + c;
-     * Float total = sum.apply(1.0f, 2.0f, 3.0f); // Returns 6.0
+     * Float total = sum.apply(1.0f, 2.0f, 3.0f); // Returns 6.0f
      * }</pre>
      *
      * @param a the first float function argument

@@ -677,7 +677,10 @@ public final class Comparators {
      *     String name;
      *     Integer age;
      * }
-     * List<Person> people = ...;
+     * List<Person> people = new ArrayList<>(Arrays.asList(
+     *     new Person() {{ name = "Bob"; age = 30; }},
+     *     new Person() {{ name = "Alice"; age = null; }}
+     * ));
      * people.sort(Comparators.nullsFirstBy(person -> person.age));
      * // Sorts by age with null ages first
      * }</pre>
@@ -783,7 +786,10 @@ public final class Comparators {
      *     String name;
      *     Double price;
      * }
-     * List<Product> products = ...;
+     * List<Product> products = new ArrayList<>(Arrays.asList(
+     *     new Product() {{ name = "Book"; price = 19.99; }},
+     *     new Product() {{ name = "Gift"; price = null; }}
+     * ));
      * products.sort(Comparators.nullsLastBy(product -> product.price));
      * // Sorts by price with null prices last
      * }</pre>
@@ -937,7 +943,10 @@ public final class Comparators {
      *     String name;
      *     int age;
      * }
-     * List<Person> people = ...;
+     * List<Person> people = new ArrayList<>(Arrays.asList(
+     *     new Person() {{ name = "Bob"; age = 30; }},
+     *     new Person() {{ name = "Alice"; age = 25; }}
+     * ));
      * people.sort(Comparators.comparingBy(person -> person.name));
      * // Sorts people by name in natural order
      * }</pre>
@@ -1049,7 +1058,10 @@ public final class Comparators {
      *     String city;
      * }
      * Comparator<String> cityComparator = String.CASE_INSENSITIVE_ORDER;
-     * List<Person> people = ...;
+     * List<Person> people = new ArrayList<>(Arrays.asList(
+     *     new Person() {{ name = "Bob"; address = new Address(); address.city = "seattle"; }},
+     *     new Person() {{ name = "Alice"; address = new Address(); address.city = "Austin"; }}
+     * ));
      * people.sort(Comparators.comparingBy(p -> p.address.city, cityComparator));
      * // Sorts people by city name case-insensitively
      * }</pre>
@@ -1147,7 +1159,10 @@ public final class Comparators {
      *     String name;
      *     boolean completed;
      * }
-     * List<Task> tasks = ...;
+     * List<Task> tasks = new ArrayList<>(Arrays.asList(
+     *     new Task() {{ name = "write"; completed = true; }},
+     *     new Task() {{ name = "test"; completed = false; }}
+     * ));
      * tasks.sort(Comparators.comparingBoolean(task -> task.completed));
      * // Result: incomplete tasks first, then completed tasks
      * }</pre>
@@ -1172,9 +1187,12 @@ public final class Comparators {
      * <pre>{@code
      * class Grade {
      *     String student;
-     *     char letter;  // 'A', 'B', 'C', etc.
+     *     char letter;  // e.g. 'A', 'B', 'C', etc.
      * }
-     * List<Grade> grades = ...;
+     * List<Grade> grades = new ArrayList<>(Arrays.asList(
+     *     new Grade() {{ student = "Bob"; letter = 'B'; }},
+     *     new Grade() {{ student = "Alice"; letter = 'A'; }}
+     * ));
      * grades.sort(Comparators.comparingChar(grade -> grade.letter));
      * // Result: grades sorted by letter (A, B, C, ...)
      * }</pre>
@@ -1201,7 +1219,10 @@ public final class Comparators {
      *     byte priority;
      *     byte[] data;
      * }
-     * List<Packet> packets = ...;
+     * List<Packet> packets = new ArrayList<>(Arrays.asList(
+     *     new Packet() {{ priority = 2; data = new byte[] {1}; }},
+     *     new Packet() {{ priority = 1; data = new byte[] {2}; }}
+     * ));
      * packets.sort(Comparators.comparingByte(packet -> packet.priority));
      * // Result: packets sorted by priority (lowest to highest)
      * }</pre>
@@ -1228,7 +1249,10 @@ public final class Comparators {
      *     String name;
      *     short quantity;
      * }
-     * List<Product> inventory = ...;
+     * List<Product> inventory = new ArrayList<>(Arrays.asList(
+     *     new Product() {{ name = "Book"; quantity = 10; }},
+     *     new Product() {{ name = "Pen"; quantity = 2; }}
+     * ));
      * inventory.sort(Comparators.comparingShort(product -> product.quantity));
      * // Result: products sorted by quantity (lowest to highest)
      * }</pre>
@@ -1255,7 +1279,10 @@ public final class Comparators {
      *     String name;
      *     int age;
      * }
-     * List<Person> people = ...;
+     * List<Person> people = new ArrayList<>(Arrays.asList(
+     *     new Person() {{ name = "Bob"; age = 30; }},
+     *     new Person() {{ name = "Alice"; age = 25; }}
+     * ));
      * people.sort(Comparators.comparingInt(person -> person.age));
      * // Result: people sorted by age (youngest to oldest)
      * }</pre>
@@ -1282,7 +1309,10 @@ public final class Comparators {
      *     String name;
      *     long size;
      * }
-     * List<File> files = ...;
+     * List<File> files = new ArrayList<>(Arrays.asList(
+     *     new File() {{ name = "large.log"; size = 1024L; }},
+     *     new File() {{ name = "small.log"; size = 128L; }}
+     * ));
      * files.sort(Comparators.comparingLong(file -> file.size));
      * // Result: files sorted by size (smallest to largest)
      * }</pre>
@@ -1308,7 +1338,10 @@ public final class Comparators {
      *     String name;
      *     float value;
      * }
-     * List<Measurement> measurements = ...;
+     * List<Measurement> measurements = new ArrayList<>(Arrays.asList(
+     *     new Measurement() {{ name = "high"; value = 9.5f; }},
+     *     new Measurement() {{ name = "low"; value = 2.0f; }}
+     * ));
      * measurements.sort(Comparators.comparingFloat(m -> m.value));
      * // Result: measurements sorted by value (lowest to highest)
      * }</pre>
@@ -1335,7 +1368,10 @@ public final class Comparators {
      *     String player;
      *     double points;
      * }
-     * List<Score> scores = ...;
+     * List<Score> scores = new ArrayList<>(Arrays.asList(
+     *     new Score() {{ player = "Bob"; points = 7.5d; }},
+     *     new Score() {{ player = "Alice"; points = 9.0d; }}
+     * ));
      * scores.sort(Comparators.comparingDouble(score -> score.points));
      * // Result: scores sorted by points (lowest to highest)
      * }</pre>
@@ -1379,7 +1415,10 @@ public final class Comparators {
      *     String username;
      *     String email;
      * }
-     * List<User> users = ...;
+     * List<User> users = new ArrayList<>(Arrays.asList(
+     *     new User() {{ username = "bob"; email = "bob@example.com"; }},
+     *     new User() {{ username = "alice"; email = "Alice@example.com"; }}
+     * ));
      * users.sort(Comparators.comparingIgnoreCase(user -> user.email));
      * // Result: users sorted by email case-insensitively
      * }</pre>
@@ -1401,7 +1440,8 @@ public final class Comparators {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * List<Map.Entry<String, Integer>> entries = map.entrySet().stream()
+     * Map<String, Integer> scores = N.asMap("Bob", 80, "Alice", 95);
+     * List<Map.Entry<String, Integer>> entries = scores.entrySet().stream()
      *     .collect(Collectors.toList());
      * entries.sort(Comparators.comparingByKey());
      * // Result: entries sorted by key in natural order
@@ -1421,7 +1461,7 @@ public final class Comparators {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Map<String, Integer> scores = ...;
+     * Map<String, Integer> scores = N.asMap("Bob", 80, "Alice", 95);
      * List<Map.Entry<String, Integer>> sortedScores = scores.entrySet().stream()
      *     .sorted(Comparators.comparingByValue())
      *     .collect(Collectors.toList());
@@ -1443,7 +1483,8 @@ public final class Comparators {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Comparator<String> lengthComparator = Comparator.comparingInt(String::length);
-     * List<Map.Entry<String, Integer>> entries = ...;
+     * Map<String, Integer> scores = N.asMap("bb", 80, "a", 95);
+     * List<Map.Entry<String, Integer>> entries = new ArrayList<>(scores.entrySet());
      * entries.sort(Comparators.comparingByKey(lengthComparator));
      * // Result: entries sorted by key length
      * }</pre>
@@ -1467,7 +1508,7 @@ public final class Comparators {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Comparator<Integer> reverseOrder = Comparator.reverseOrder();
-     * Map<String, Integer> scores = ...;
+     * Map<String, Integer> scores = N.asMap("Bob", 80, "Alice", 95);
      * List<Map.Entry<String, Integer>> topScores = scores.entrySet().stream()
      *     .sorted(Comparators.comparingByValue(reverseOrder))
      *     .collect(Collectors.toList());
@@ -2444,7 +2485,7 @@ public final class Comparators {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * List<Employee> employees = getEmployees();   // May contain null entries
+     * List<Employee> employees = getEmployees();
      * // Sort by salary in descending order, with null employees first
      * employees.sort(Comparators.reversedComparingByIfNotNullOrElseNullsFirst(
      *     emp -> emp.getSalary()
@@ -2478,7 +2519,7 @@ public final class Comparators {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * List<Product> products = getProducts();   // May contain null entries
+     * List<Product> products = getProducts();
      * // Sort by price in descending order, with null products last
      * products.sort(Comparators.reversedComparingByIfNotNullOrElseNullsLast(
      *     prod -> prod.getPrice()

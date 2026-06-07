@@ -52,6 +52,7 @@ public class ObjectNotFoundException extends IllegalStateException {
      * <pre>{@code
      * throw new ObjectNotFoundException();
      * }</pre>
+     *
      */
     public ObjectNotFoundException() {
         super();

@@ -1277,25 +1277,21 @@ public class FuturesTest extends TestBase {
 
     @Test
     public void testIterateWithAsyncFutures() throws Exception {
-        CompletableFuture<Integer> cf1 = CompletableFuture.supplyAsync(() -> {
-            try {
-                Thread.sleep(10);
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-            }
-            return 1;
-        }, executor);
-
-        CompletableFuture<Integer> cf2 = CompletableFuture.supplyAsync(() -> {
-            try {
-                Thread.sleep(5);
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-            }
-            return 2;
-        }, executor);
+        CompletableFuture<Integer> cf1 = new CompletableFuture<>();
+        CompletableFuture<Integer> cf2 = new CompletableFuture<>();
 
         ObjIterator<Integer> iter = Futures.iterate(cf1, cf2);
+
+        executor.submit(() -> {
+            try {
+                Thread.sleep(5);
+                cf2.complete(2);
+                Thread.sleep(5);
+                cf1.complete(1);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+        });
 
         List<Integer> results = new ArrayList<>();
         while (iter.hasNext()) {
@@ -1305,6 +1301,24 @@ public class FuturesTest extends TestBase {
         assertEquals(2, results.size());
         assertEquals(2, results.get(0));
         assertEquals(1, results.get(1));
+    }
+
+    @Test
+    public void testIterateWithCompletableFuturesCompletedOutOfInputOrder() {
+        CompletableFuture<Integer> cf1 = new CompletableFuture<>();
+        CompletableFuture<Integer> cf2 = new CompletableFuture<>();
+
+        ObjIterator<Integer> iter = Futures.iterate(cf1, cf2);
+
+        cf2.complete(2);
+        cf1.complete(1);
+
+        List<Integer> results = new ArrayList<>();
+        while (iter.hasNext()) {
+            results.add(iter.next());
+        }
+
+        assertEquals(Arrays.asList(2, 1), results);
     }
 
     @Test

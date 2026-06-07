@@ -32,8 +32,8 @@ import com.landawn.abacus.util.Throwables;
 @FunctionalInterface
 public interface ShortFunction<R> extends Throwables.ShortFunction<R, RuntimeException> { //NOSONAR
     /**
-     * A function that boxes a primitive short value into a Short object.
-     * This is equivalent to {@code Short::valueOf}.
+     * A function that boxes a primitive {@code short} value into a {@code Short} object.
+     * This is equivalent to {@code Short.valueOf(short)}.
      */
     ShortFunction<Short> BOX = value -> value;
 

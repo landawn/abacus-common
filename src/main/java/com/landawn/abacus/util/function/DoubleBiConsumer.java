@@ -19,7 +19,7 @@ import com.landawn.abacus.util.Throwables;
 
 /**
  * Represents an operation that accepts two double-valued arguments and returns no result.
- * This is the two-arity specialization of {@link java.util.function.Consumer}.
+ * This is the primitive type specialization of {@link java.util.function.BiConsumer} for {@code double}.
  * Unlike most other functional interfaces, {@code DoubleBiConsumer} is expected to operate via side-effects.
  *
  * <p>This is a functional interface whose functional method is {@link #accept(double, double)}.

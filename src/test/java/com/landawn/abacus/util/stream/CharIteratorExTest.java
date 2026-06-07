@@ -33,7 +33,7 @@ public class CharIteratorExTest extends TestBase {
         Assertions.assertThrows(NoSuchElementException.class, () -> iter.nextChar());
         Assertions.assertEquals(0, iter.count());
         Assertions.assertArrayEquals(new char[0], iter.toArray());
-        iter.close();
+        iter.closeResource();
     }
 
     // ---- of(char[] a, int fromIndex, int toIndex) ----
@@ -300,7 +300,7 @@ public class CharIteratorExTest extends TestBase {
 
         Assertions.assertEquals(1, iter.count());
 
-        iter.close();
+        iter.closeResource();
     }
 
     @Test
@@ -354,12 +354,12 @@ public class CharIteratorExTest extends TestBase {
         Assertions.assertFalse(iter.hasNext());
     }
 
-    // ---- close() ----
+    // ---- closeResource() ----
 
     @Test
-    public void testClose() {
+    public void testCloseResource() {
         CharIteratorEx iter = CharIteratorEx.of('a', 'b', 'c');
-        iter.close();
+        iter.closeResource();
         assertNotNull(iter);
     }
 

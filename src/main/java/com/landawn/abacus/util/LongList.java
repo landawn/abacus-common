@@ -78,36 +78,36 @@ import com.landawn.abacus.util.stream.LongStream;
  * <pre>{@code
  * // Creating and initializing long lists
  * LongList timestamps = LongList.of(1640995200000L, 1640995260000L, 1640995320000L);
- * LongList range = LongList.range(1L, 1000000L);   // [1, 2, 3, ..., 999999]
- * LongList sequence = LongList.range(0L, 100L, 5L);   // [0, 5, 10, 15, ..., 95]
- * LongList userIds = new LongList(10000);   // Pre-sized for performance
+ * LongList range = LongList.range(1L, 1000000L);      // returns [1, 2, 3, ..., 999999]
+ * LongList sequence = LongList.range(0L, 100L, 5L);   // returns [0, 5, 10, 15, ..., 95]
+ * LongList userIds = new LongList(10000);
  *
  * // Basic operations
  * timestamps.add(System.currentTimeMillis());   // Add current timestamp
- * long firstTime = timestamps.get(0);   // Access by index
- * timestamps.set(1, System.nanoTime());   // Modify with nanosecond precision
+ * long firstTime = timestamps.get(0);           // Access by index
+ * timestamps.set(1, System.nanoTime());         // Modify with nanosecond precision
  *
  * // Mathematical operations for large numbers
- * OptionalLong min = timestamps.min();   // Find earliest timestamp
- * OptionalLong max = timestamps.max();   // Find latest timestamp
+ * OptionalLong min = timestamps.min();         // Find earliest timestamp
+ * OptionalLong max = timestamps.max();         // Find latest timestamp
  * OptionalLong median = timestamps.median();   // Calculate median timestamp
  *
  * // Set operations for data analysis
  * LongList set1 = LongList.of(100L, 200L, 300L, 400L);
  * LongList set2 = LongList.of(300L, 400L, 500L, 600L);
- * LongList intersection = set1.intersection(set2);   // [300, 400]
- * LongList difference = set1.difference(set2);   // [100, 200]
+ * LongList intersection = set1.intersection(set2);   // returns [300, 400]
+ * LongList difference = set1.difference(set2);       // returns [100, 200]
  *
  * // High-performance sorting and searching
- * timestamps.sort();   // Sort chronologically
- * timestamps.parallelSort();   // Parallel sort for large datasets
+ * timestamps.sort();                                     // Sort chronologically
+ * timestamps.parallelSort();                             // Parallel sort for large datasets
  * int index = timestamps.binarySearch(1640995200000L);   // Fast lookup
  *
  * // Type conversions for different precision needs
  * DoubleList doubleValues = timestamps.toDoubleList();   // Convert to double precision
- * FloatList floatValues = timestamps.toFloatList();   // Convert to float (with precision loss)
- * long[] primitiveArray = timestamps.toArray();   // To primitive array
- * List<Long> boxedList = timestamps.boxed();   // To boxed collection
+ * FloatList floatValues = timestamps.toFloatList();      // Convert to float (with precision loss)
+ * long[] primitiveArray = timestamps.toArray();          // To primitive array
+ * List<Long> boxedList = timestamps.boxed();             // To boxed collection
  * }</pre>
  *
  * <p><b>Performance Characteristics:</b>
@@ -260,7 +260,7 @@ import com.landawn.abacus.util.stream.LongStream;
  *   <li><b>{@link LongStream}:</b> Functional processing of long sequences</li>
  * </ul>
  *
- * <p><b>Usage Examples: Timestamp Analysis</b>
+ * <p><b>Usage Examples: Timestamp Analysis</b></p>
  * <pre>{@code
  * // Collect and analyze system timestamps
  * LongList systemEvents = new LongList(1000);
@@ -270,9 +270,9 @@ import com.landawn.abacus.util.stream.LongStream;
  * // ... record more events
  *
  * // Analyze timing data
- * systemEvents.sort();   // Sort chronologically
- * OptionalLong firstEvent = systemEvents.first();   // Earliest event
- * OptionalLong lastEvent = systemEvents.last();   // Latest event
+ * systemEvents.sort();                               // Sort chronologically
+ * OptionalLong firstEvent = systemEvents.first();    // Earliest event
+ * OptionalLong lastEvent = systemEvents.last();      // Latest event
  * OptionalLong medianTime = systemEvents.median();   // Median timestamp
  *
  * // Calculate duration and intervals
@@ -320,6 +320,15 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * Constructs an empty LongList with an initial capacity of zero.
      * The internal array will be initialized to an empty array and will grow
      * as needed when elements are added.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * LongList list = new LongList();
+     * list.size();      // returns 0
+     * list.isEmpty();   // returns true
+     * list.add(1L);     // list is now [1]
+     * }</pre>
+     *
      */
     public LongList() {
     }
@@ -329,6 +338,14 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      *
      * <p>This constructor is useful when the approximate size of the list is known in advance,
      * as it can help avoid the performance overhead of array resizing during element additions.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * LongList list = new LongList(100);
+     * list.size();        // returns 0 (capacity does not affect size)
+     * list.isEmpty();     // returns true
+     * new LongList(-1);   // throws IllegalArgumentException
+     * }</pre>
      *
      * @param initialCapacity the initial capacity of the list. Must be non-negative.
      * @throws IllegalArgumentException if the specified initial capacity is negative
@@ -347,6 +364,17 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * <p>Changes to the provided array after construction will be reflected in this list
      * and vice versa, as they share the same underlying array.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * long[] a = {1L, 2L, 3L};
+     * LongList list = new LongList(a);
+     * list.size();         // returns 3
+     * list.get(0);         // returns 1
+     * a[0] = 99L;          // backing array is shared
+     * list.get(0);         // returns 99
+     * new LongList(null);  // throws NullPointerException
+     * }</pre>
+     *
      * @param a the array whose elements are to be placed into this list. Must not be {@code null}.
      * @throws NullPointerException if {@code a} is {@code null}
      */
@@ -363,6 +391,15 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      *
      * <p>Changes to the provided array after construction will be reflected in this list
      * and vice versa, as they share the same underlying array.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * long[] a = {1L, 2L, 3L, 4L};
+     * LongList list = new LongList(a, 2);   // uses only the first 2 elements
+     * list.size();                          // returns 2
+     * list.get(1);                          // returns 2
+     * new LongList(a, 5);                   // throws IndexOutOfBoundsException (size > a.length)
+     * }</pre>
      *
      * @param a the array to be used as the internal storage for this list. Must not be {@code null}.
      * @param size the number of elements in the list, must be between 0 and {@code a.length} (inclusive)
@@ -381,6 +418,15 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * as the backing array without copying, so subsequent modifications to the array will affect the list.
      * If the input array is {@code null}, an empty list is returned.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * LongList list = LongList.of(1L, 2L, 3L);
+     * list.size();                                      // returns 3
+     * list.get(2);                                      // returns 3
+     * LongList empty = LongList.of();                   // returns []
+     * LongList fromNull = LongList.of((long[]) null);   // returns []
+     * }</pre>
+     *
      * @param a the array of elements to be included in the new list. Can be {@code null}.
      * @return a new LongList containing the elements from the specified array, or an empty list if the array is {@code null}
      * @see #copyOf(long[])
@@ -393,6 +439,14 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * Creates a new LongList containing the first {@code size} elements of the specified array.
      * The array is used directly as the backing array without copying for efficiency.
      * If the input array is {@code null}, it is treated as an empty array.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * long[] a = {1L, 2L, 3L, 4L};
+     * LongList list = LongList.of(a, 2);   // returns [1, 2]
+     * list.size();                         // returns 2
+     * LongList.of(a, 5);                   // throws IndexOutOfBoundsException (size > a.length)
+     * }</pre>
      *
      * @param a the array of long values to be used as the backing array. Can be {@code null}.
      * @param size the number of elements from the array to include in the list.
@@ -414,6 +468,15 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      *
      * <p>If the input array is {@code null}, an empty list is returned.</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * long[] a = {1L, 2L, 3L};
+     * LongList list = LongList.copyOf(a);
+     * a[0] = 99L;                                  // does NOT affect the list (defensive copy)
+     * list.get(0);                                 // returns 1
+     * LongList fromNull = LongList.copyOf(null);   // returns []
+     * }</pre>
+     *
      * @param a the array to be copied. Can be {@code null}.
      * @return a new LongList containing a copy of the elements from the specified array,
      *         or an empty list if the array is {@code null}
@@ -427,6 +490,14 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      *
      * <p>This method creates a defensive copy of the elements in the range [fromIndex, toIndex),
      * ensuring that modifications to the returned list do not affect the original array.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * long[] a = {10L, 20L, 30L, 40L, 50L};
+     * LongList list = LongList.copyOf(a, 1, 4);   // returns [20, 30, 40]
+     * list.size();                                // returns 3
+     * LongList.copyOf(a, 1, 6);                   // throws IndexOutOfBoundsException
+     * }</pre>
      *
      * @param a the array from which a range is to be copied. Must not be {@code null}.
      * @param fromIndex the initial index of the range to be copied, inclusive.
@@ -560,6 +631,14 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * <p>The random values are generated using a secure random number generator
      * and can be any valid long value (positive or negative).
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * LongList list = LongList.random(5);
+     * list.size();             // returns 5 (values are unpredictable longs)
+     * LongList.random(0);      // returns []
+     * LongList.random(-1);     // throws NegativeArraySizeException
+     * }</pre>
+     *
      * @param len the number of random elements to generate. Must be non-negative.
      * @return a new LongList containing random long values
      * @throws NegativeArraySizeException if {@code len} is negative
@@ -600,6 +679,14 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
     /**
      * Returns the element at the specified position in this list.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * LongList list = LongList.of(10L, 20L, 30L);
+     * list.get(0);   // returns 10
+     * list.get(2);   // returns 30
+     * list.get(3);   // throws IndexOutOfBoundsException
+     * }</pre>
+     *
      * @param index the index of the element to return
      * @return the element at the specified position in this list
      * @throws IndexOutOfBoundsException if {@code index < 0 || index >= size()}
@@ -612,6 +699,14 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
 
     /**
      * Replaces the element at the specified position in this list with the specified element.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * LongList list = LongList.of(10L, 20L, 30L);
+     * long old = list.set(1, 99L);   // returns 20; list is now [10, 99, 30]
+     * list.get(1);                   // returns 99
+     * list.set(3, 5L);               // throws IndexOutOfBoundsException
+     * }</pre>
      *
      * @param index the index of the element to replace
      * @param e the element to be stored at the specified position
@@ -637,6 +732,14 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * resized to accommodate the new element, all existing elements will be copied to
      * a new, larger array.</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * LongList list = new LongList();
+     * list.add(1L);   // list is now [1]
+     * list.add(2L);   // list is now [1, 2]
+     * list.size();    // returns 2
+     * }</pre>
+     *
      * @param e the long value to be appended to this list
      */
     public void add(final long e) {
@@ -654,6 +757,15 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      *
      * <p>This method runs in linear time in the worst case (when inserting at the beginning
      * of the list), as it may need to shift all existing elements.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * LongList list = LongList.of(1L, 2L, 3L);
+     * list.add(1, 99L);   // list is now [1, 99, 2, 3]
+     * list.add(0, 0L);    // list is now [0, 1, 99, 2, 3]
+     * list.add(5, 5L);    // list is now [0, 1, 99, 2, 3, 5] (insert at end)
+     * list.add(7, 7L);    // throws IndexOutOfBoundsException
+     * }</pre>
      *
      * @param index the index at which the specified element is to be inserted
      * @param e the long value to be inserted
@@ -811,6 +923,13 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      *
      * <p><b>Note:</b> This method removes by value. To remove by index, use {@link #removeAt(int)}.</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * LongList numbers = LongList.of(1L, 2L, 3L, 2L, 4L);
+     * boolean removed = numbers.remove(2L);     // returns true; list is now [1, 3, 2, 4]
+     * boolean notFound = numbers.remove(99L);   // returns false; list unchanged
+     * }</pre>
+     *
      * @param e the element to be removed from this list, if present
      * @return {@code true} if this list contained the specified element (and it was removed);
      *         {@code false} otherwise
@@ -833,6 +952,13 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      *
      * <p>This method removes every element in the list that equals the specified value,
      * not just the first occurrence. The remaining elements are shifted to close any gaps.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * LongList numbers = LongList.of(1L, 2L, 3L, 2L, 4L, 2L, 5L);
+     * boolean removed = numbers.removeAllOccurrences(2L);   // returns true; list is now [1, 3, 4, 5]
+     * boolean notFound = numbers.removeAllOccurrences(9L);  // returns false; list unchanged
+     * }</pre>
      *
      * @param e the element to be removed from this list
      * @return {@code true} if this list was modified (at least one element was removed)
@@ -912,6 +1038,13 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * <p>Each element in the list is tested with the predicate, and elements for which
      * the predicate returns {@code true} are removed. The order of remaining elements
      * is preserved.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * LongList list = LongList.of(1L, -2L, 3L, -4L, 5L);
+     * boolean changed = list.removeIf(i -> i < 0);    // returns true; list is now [1, 3, 5]
+     * boolean noChange = list.removeIf(i -> i > 99);  // returns false; list unchanged
+     * }</pre>
      *
      * @param p the predicate which returns {@code true} for elements to be removed. Must not be {@code null}.
      * @return {@code true} if any elements were removed from this list
@@ -1089,6 +1222,14 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      *
      * <p>This is the preferred index-based removal method.
      * Unlike {@link #remove(long)}, this method removes by index, not by value.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * LongList list = LongList.of(10L, 20L, 30L, 40L);
+     * long removed = list.removeAt(1);   // returns 20; list is now [10, 30, 40]
+     * list.removeAt(0);                  // returns 10; list is now [30, 40]
+     * list.removeAt(5);                  // throws IndexOutOfBoundsException
+     * }</pre>
      *
      * @param index the index of the element to remove
      * @return the removed element
@@ -1299,6 +1440,13 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * <p>This method scans through the entire list and replaces every element that
      * equals oldVal with newVal.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * LongList list = LongList.of(1L, 2L, 1L, 3L, 1L);
+     * int count = list.replaceAll(1L, 9L);   // returns 3; list is now [9, 2, 9, 3, 9]
+     * int none = list.replaceAll(7L, 0L);    // returns 0; list unchanged
+     * }</pre>
+     *
      * @param oldVal the value to be replaced
      * @param newVal the value to replace oldVal with
      * @return the number of elements that were replaced
@@ -1327,6 +1475,13 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * <p>This method applies the provided unary operator to each element in the list,
      * replacing the element with the result of the operation.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * LongList list = LongList.of(1L, 2L, 3L);
+     * list.replaceAll(x -> x * 10L);   // list is now [10, 20, 30]
+     * list.replaceAll(x -> x + 1L);    // list is now [11, 21, 31]
+     * }</pre>
+     *
      * @param operator the operator to apply to each element. Must not be {@code null}.
      * @throws NullPointerException if the specified operator is {@code null}
      */
@@ -1343,6 +1498,13 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      *
      * <p>Each element is tested with the predicate, and elements for which the predicate
      * returns {@code true} are replaced with newValue.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * LongList list = LongList.of(1L, -2L, 3L, -4L);
+     * boolean changed = list.replaceIf(x -> x < 0, 0L);   // returns true; list is now [1, 0, 3, 0]
+     * boolean noChange = list.replaceIf(x -> x > 99, 1L); // returns false; list unchanged
+     * }</pre>
      *
      * @param predicate the predicate to test each element. Must not be {@code null}.
      * @param newValue the value to replace matching elements with
@@ -1371,6 +1533,13 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * <p>After this operation, every element in the list will have the same value.
      * The size of the list remains unchanged.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * LongList list = LongList.of(1L, 2L, 3L);
+     * list.fill(0L);    // list is now [0, 0, 0]
+     * list.size();      // returns 3 (size unchanged)
+     * }</pre>
+     *
      * @param val the value to fill the list with
      */
     public void fill(final long val) {
@@ -1382,6 +1551,13 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      *
      * <p>Elements from fromIndex (inclusive) to toIndex (exclusive) are set to the given value.
      * Other elements in the list remain unchanged.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * LongList list = LongList.of(1L, 2L, 3L, 4L, 5L);
+     * list.fill(1, 4, 0L);     // list is now [1, 0, 0, 0, 5]
+     * list.fill(0, 6, 9L);     // throws IndexOutOfBoundsException (toIndex > size)
+     * }</pre>
      *
      * @param fromIndex the index of the first element to fill (inclusive)
      * @param toIndex the index after the last element to fill (exclusive)
@@ -1401,6 +1577,13 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * at least one element {@code e} such that {@code e == valueToFind}.
      *
      * <p>This method performs a linear search through the list.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * LongList list = LongList.of(1L, 2L, 3L);
+     * list.contains(2L);   // returns true
+     * list.contains(9L);   // returns false
+     * }</pre>
      *
      * @param valueToFind the element whose presence in this list is to be tested
      * @return {@code true} if this list contains the specified element, {@code false} otherwise
@@ -1561,12 +1744,12 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * <pre>{@code
      * LongList list1 = LongList.of(0L, 1L, 1L, 2L, 3L);
      * LongList list2 = LongList.of(1L, 2L, 2L, 4L);
-     * LongList result = list1.intersection(list2);   // result will be [1L, 2L]
+     * LongList result = list1.intersection(list2);   // returns result will be [1L, 2L]
      * // One occurrence of '1L' (minimum count in both lists) and one occurrence of '2L'
      *
      * LongList list3 = LongList.of(5L, 5L, 6L);
      * LongList list4 = LongList.of(5L, 7L);
-     * LongList result2 = list3.intersection(list4);   // result will be [5L]
+     * LongList result2 = list3.intersection(list4);   // returns result will be [5L]
      * // One occurrence of '5L' (minimum count in both lists)
      * }</pre>
      *
@@ -1606,12 +1789,12 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * <pre>{@code
      * LongList list1 = LongList.of(0L, 1L, 1L, 2L, 3L);
      * long[] array = new long[] {1L, 2L, 2L, 4L};
-     * LongList result = list1.intersection(array);   // result will be [1L, 2L]
+     * LongList result = list1.intersection(array);   // returns result will be [1L, 2L]
      * // One occurrence of '1L' (minimum count in both sources) and one occurrence of '2L'
      *
      * LongList list2 = LongList.of(5L, 5L, 6L);
      * long[] array2 = new long[] {5L, 7L};
-     * LongList result2 = list2.intersection(array2);   // result will be [5L]
+     * LongList result2 = list2.intersection(array2);   // returns result will be [5L]
      * // One occurrence of '5L' (minimum count in both sources)
      * }</pre>
      *
@@ -1641,12 +1824,12 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * <pre>{@code
      * LongList list1 = LongList.of(1L, 1L, 2L, 3L);
      * LongList list2 = LongList.of(1L, 4L);
-     * LongList result = list1.difference(list2);   // result will be [1L, 2L, 3L]
+     * LongList result = list1.difference(list2);   // returns result will be [1L, 2L, 3L]
      * // One '1L' remains because list1 has two occurrences and list2 has one
      *
      * LongList list3 = LongList.of(5L, 6L);
      * LongList list4 = LongList.of(5L, 5L, 6L);
-     * LongList result2 = list3.difference(list4);   // result will be [] (empty)
+     * LongList result2 = list3.difference(list4);   // returns result will be [] (empty)
      * // No elements remain because list4 has at least as many occurrences of each value as list3
      * }</pre>
      *
@@ -1686,12 +1869,12 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * <pre>{@code
      * LongList list1 = LongList.of(1L, 1L, 2L, 3L);
      * long[] array = new long[] {1L, 4L};
-     * LongList result = list1.difference(array);   // result will be [1L, 2L, 3L]
+     * LongList result = list1.difference(array);   // returns result will be [1L, 2L, 3L]
      * // One '1L' remains because list1 has two occurrences and array has one
      *
      * LongList list2 = LongList.of(5L, 6L);
      * long[] array2 = new long[] {5L, 5L, 6L};
-     * LongList result2 = list2.difference(array2);   // result will be [] (empty)
+     * LongList result2 = list2.difference(array2);   // returns result will be [] (empty)
      * // No elements remain because array2 has at least as many occurrences of each value as list2
      * }</pre>
      *
@@ -1822,6 +2005,13 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * <p>This method performs a linear scan through the list, counting elements
      * that are equal to the specified value.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * LongList list = LongList.of(1L, 2L, 2L, 3L, 2L);
+     * list.frequency(2L);   // returns 3
+     * list.frequency(9L);   // returns 0
+     * }</pre>
+     *
      * @param valueToFind the value to count occurrences of
      * @return the number of times the specified value appears in this list
      */
@@ -1848,6 +2038,13 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * The search starts from the beginning of the list (index 0).
      * </p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * LongList list = LongList.of(10L, 20L, 30L, 20L);
+     * list.indexOf(20L);   // returns 1 (first occurrence)
+     * list.indexOf(99L);   // returns -1 (not found)
+     * }</pre>
+     *
      * @param valueToFind the long value to search for
      * @return the index of the first occurrence of the specified value in this list,
      *         or {@code N.INDEX_NOT_FOUND} (-1) if the value is not found
@@ -1865,6 +2062,14 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * If {@code fromIndex} is negative, the search starts from index 0.
      * If {@code fromIndex} is greater than or equal to the list size, {@code N.INDEX_NOT_FOUND} is returned.
      * </p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * LongList list = LongList.of(10L, 20L, 30L, 20L);
+     * list.indexOf(20L, 2);   // returns 3 (first occurrence at or after index 2)
+     * list.indexOf(10L, 1);   // returns -1 (10 only exists before index 1)
+     * list.indexOf(20L, 5);   // returns -1 (fromIndex >= size)
+     * }</pre>
      *
      * @param valueToFind the long value to search for
      * @param fromIndex the index to start the search from (inclusive)
@@ -1892,6 +2097,13 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * The search starts from the end of the list and proceeds backwards to the beginning.
      * </p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * LongList list = LongList.of(10L, 20L, 30L, 20L);
+     * list.lastIndexOf(20L);   // returns 3 (last occurrence)
+     * list.lastIndexOf(99L);   // returns -1 (not found)
+     * }</pre>
+     *
      * @param valueToFind the long value to search for
      * @return the index of the last occurrence of the specified value in this list,
      *         or {@code N.INDEX_NOT_FOUND} (-1) if the value is not found
@@ -1910,6 +2122,14 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * greater than or equal to the list size, the search starts from the last element.
      * If {@code startIndexFromBack} is negative or the list is empty, {@code N.INDEX_NOT_FOUND} is returned.
      * </p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * LongList list = LongList.of(10L, 20L, 30L, 20L);
+     * list.lastIndexOf(20L, 2);    // returns 1 (last occurrence at or before index 2)
+     * list.lastIndexOf(30L, 1);    // returns -1 (30 only exists after index 1)
+     * list.lastIndexOf(20L, -1);   // returns -1 (negative start index)
+     * }</pre>
      *
      * @param valueToFind the long value to search for
      * @param startIndexFromBack the index to start the backwards search from (inclusive)
@@ -1937,6 +2157,13 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * This method iterates through all elements to find the minimum value.
      * </p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * LongList list = LongList.of(5L, 2L, 8L, 1L, 9L);
+     * OptionalLong min = list.min();               // returns OptionalLong[1]
+     * OptionalLong empty = new LongList().min();   // returns OptionalLong.empty
+     * }</pre>
+     *
      * @return an {@code OptionalLong} containing the minimum element of this list,
      *         or an empty {@code OptionalLong} if this list is empty
      */
@@ -1952,11 +2179,17 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * This method iterates through the specified range to find the minimum value.
      * </p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * LongList list = LongList.of(5L, 2L, 8L, 1L, 9L);
+     * OptionalLong min = list.min(1, 4);  // returns min of [2L, 8L, 1L] = OptionalLong[1]
+     * }</pre>
+     *
      * @param fromIndex the starting index of the range (inclusive)
      * @param toIndex the ending index of the range (exclusive)
      * @return an {@code OptionalLong} containing the minimum element in the specified range,
      *         or an empty {@code OptionalLong} if the range is empty
-     * @throws IndexOutOfBoundsException if {@code fromIndex < 0} or {@code toIndex > size}
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0} or {@code toIndex > size()}
      *         or {@code fromIndex > toIndex}
      */
     public OptionalLong min(final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
@@ -1971,6 +2204,13 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * <p>
      * This method iterates through all elements to find the maximum value.
      * </p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * LongList list = LongList.of(5L, 2L, 8L, 1L, 9L);
+     * OptionalLong max = list.max();               // returns OptionalLong[9]
+     * OptionalLong empty = new LongList().max();   // returns OptionalLong.empty
+     * }</pre>
      *
      * @return an {@code OptionalLong} containing the maximum element of this list,
      *         or an empty {@code OptionalLong} if this list is empty
@@ -1987,11 +2227,17 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * This method iterates through the specified range to find the maximum value.
      * </p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * LongList list = LongList.of(5L, 2L, 8L, 1L, 9L);
+     * OptionalLong max = list.max(1, 4);  // returns max of [2L, 8L, 1L] = OptionalLong[8]
+     * }</pre>
+     *
      * @param fromIndex the starting index of the range (inclusive)
      * @param toIndex the ending index of the range (exclusive)
      * @return an {@code OptionalLong} containing the maximum element in the specified range,
      *         or an empty {@code OptionalLong} if the range is empty
-     * @throws IndexOutOfBoundsException if {@code fromIndex < 0} or {@code toIndex > size}
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0} or {@code toIndex > size()}
      *         or {@code fromIndex > toIndex}
      */
     public OptionalLong max(final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
@@ -2007,6 +2253,12 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * an odd number of elements, this is the exact middle element. For lists with an even number of
      * elements, this method returns the lower of the two middle elements (not the average).</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * LongList list = LongList.of(5L, 2L, 8L, 1L, 9L);
+     * OptionalLong median = list.median();  // returns sorted: [1, 2, 5, 8, 9]; median = OptionalLong[5]
+     * }</pre>
+     *
      * @return an OptionalLong containing the median value if the list is non-empty, or an empty OptionalLong if the list is empty
      */
     public OptionalLong median() {
@@ -2019,6 +2271,12 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * <p>The median is computed for elements from {@code fromIndex} (inclusive) to {@code toIndex} (exclusive).
      * For ranges with an odd number of elements, this returns the exact middle element when sorted.
      * For ranges with an even number of elements, this returns the lower of the two middle elements.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * LongList list = LongList.of(5L, 2L, 8L, 1L, 9L);
+     * OptionalLong median = list.median(1, 4);  // returns median of [2L, 8L, 1L] = OptionalLong[2]
+     * }</pre>
      *
      * @param fromIndex the starting index (inclusive) of the range to calculate median for
      * @param toIndex the ending index (exclusive) of the range to calculate median for
@@ -2037,6 +2295,14 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * The action is performed on each element in the order of iteration, from the first
      * element (index 0) to the last element.
      * </p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * LongList list = LongList.of(1L, 2L, 3L);
+     * long[] sum = {0L};
+     * list.forEach(x -> sum[0] += x);          // sum[0] is now 6
+     * new LongList().forEach(x -> sum[0]++);   // no-op on empty list
+     * }</pre>
      *
      * @param action the action to be performed for each element. Must not be {@code null}.
      * @throws NullPointerException if the specified action is {@code null}
@@ -2060,6 +2326,19 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * Special case: if {@code toIndex} is -1 and {@code fromIndex} is greater than -1,
      * the iteration starts from {@code fromIndex} and goes backwards to index 0.
      * </p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * LongList list = LongList.of(10L, 20L, 30L, 40L);
+     * LongList collected = new LongList();
+     * list.forEach(1, 3, collected::add);    // collected is now [20, 30] (ascending)
+     *
+     * LongList reverse = new LongList();
+     * list.forEach(3, 0, reverse::add);      // reverse is now [40, 30, 20] (descending, excludes index 0)
+     *
+     * LongList toStart = new LongList();
+     * list.forEach(2, -1, toStart::add);     // toStart is now [30, 20, 10] (down to index 0 inclusive)
+     * }</pre>
      *
      * @param fromIndex the starting index (inclusive)
      * @param toIndex the ending index (exclusive), or -1 for reverse iteration to index 0
@@ -2087,6 +2366,13 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * Returns an {@code OptionalLong} containing the first element of this list,
      * or an empty {@code OptionalLong} if this list is empty.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * LongList list = LongList.of(10L, 20L, 30L);
+     * list.first().getAsLong();      // returns 10
+     * new LongList().first();        // returns OptionalLong.empty
+     * }</pre>
+     *
      * @return an {@code OptionalLong} containing the first element of this list,
      *         or an empty {@code OptionalLong} if this list is empty
      */
@@ -2097,6 +2383,13 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
     /**
      * Returns an {@code OptionalLong} containing the last element of this list,
      * or an empty {@code OptionalLong} if this list is empty.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * LongList list = LongList.of(10L, 20L, 30L);
+     * list.last().getAsLong();       // returns 30
+     * new LongList().last();         // returns OptionalLong.empty
+     * }</pre>
      *
      * @return an {@code OptionalLong} containing the last element of this list,
      *         or an empty {@code OptionalLong} if this list is empty
@@ -2118,7 +2411,7 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * @param fromIndex the starting index of the range (inclusive)
      * @param toIndex the ending index of the range (exclusive)
      * @return a new {@code LongList} containing only the distinct elements from the specified range
-     * @throws IndexOutOfBoundsException if {@code fromIndex < 0} or {@code toIndex > size}
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0} or {@code toIndex > size()}
      *         or {@code fromIndex > toIndex}
      */
     @Override
@@ -2181,6 +2474,13 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * better performance than sequential sort for large lists on multi-core systems.
      * After this method returns, the elements will be arranged in ascending numerical order.
      * </p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * LongList list = LongList.of(3L, 1L, 4L, 1L, 5L);
+     * list.parallelSort();   // list is now [1, 1, 3, 4, 5]
+     * }</pre>
+     *
      */
     public void parallelSort() {
         if (size > 1) {
@@ -2211,6 +2511,13 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * elements equal to the specified value, there is no guarantee which one will be found.
      * </p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * LongList list = LongList.of(1L, 2L, 3L, 4L, 5L);   // must be sorted
+     * list.binarySearch(3L);                             // returns 2
+     * list.binarySearch(6L);                             // returns -6 (insertion point 5: -(5)-1)
+     * }</pre>
+     *
      * @param valueToFind the value to search for
      * @return the index of the search key if it is contained in the list;
      *         otherwise, {@code (-insertion point - 1)}. The insertion point is defined
@@ -2230,6 +2537,13 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * elements equal to the specified value, there is no guarantee which one will be found.
      * </p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * LongList list = LongList.of(1L, 2L, 3L, 4L, 5L);   // range must be sorted
+     * list.binarySearch(0, 3, 2L);                       // returns 1 (searches [1, 2, 3])
+     * list.binarySearch(0, 3, 5L);                       // returns -4 (5 not in range; insertion point 3)
+     * }</pre>
+     *
      * @param fromIndex the starting index of the range to search (inclusive)
      * @param toIndex the ending index of the range to search (exclusive)
      * @param valueToFind the value to search for
@@ -2238,7 +2552,7 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      *         as the point at which the key would be inserted into the range: the index
      *         of the first element in the range greater than the key, or {@code toIndex}
      *         if all elements in the range are less than the specified key
-     * @throws IndexOutOfBoundsException if {@code fromIndex < 0} or {@code toIndex > size}
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0} or {@code toIndex > size()}
      *         or {@code fromIndex > toIndex}
      */
     public int binarySearch(final int fromIndex, final int toIndex, final long valueToFind) throws IndexOutOfBoundsException {
@@ -2272,7 +2586,7 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      *
      * @param fromIndex the starting index of the range to reverse (inclusive)
      * @param toIndex the ending index of the range to reverse (exclusive)
-     * @throws IndexOutOfBoundsException if {@code fromIndex < 0} or {@code toIndex > size}
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0} or {@code toIndex > size()}
      *         or {@code fromIndex > toIndex}
      */
     @Override
@@ -2382,7 +2696,7 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * @param fromIndex the starting index of the range to copy (inclusive)
      * @param toIndex the ending index of the range to copy (exclusive)
      * @return a new {@code LongList} containing a copy of the elements in the specified range
-     * @throws IndexOutOfBoundsException if {@code fromIndex < 0} or {@code toIndex > size}
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0} or {@code toIndex > size()}
      *         or {@code fromIndex > toIndex}
      */
     @Override
@@ -2439,7 +2753,7 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * @param toIndex the ending index of the range to split (exclusive)
      * @param chunkSize the desired size of each subsequence (must be positive)
      * @return a list of {@code LongList} instances, each containing a subsequence of elements
-     * @throws IndexOutOfBoundsException if {@code fromIndex < 0} or {@code toIndex > size}
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0} or {@code toIndex > size()}
      *         or {@code fromIndex > toIndex}
      * @throws IllegalArgumentException if {@code chunkSize} is not positive
      */
@@ -2535,7 +2849,7 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * @param fromIndex the starting index of the range (inclusive)
      * @param toIndex the ending index of the range (exclusive)
      * @return a new {@code List<Long>} containing the elements in the specified range as boxed values
-     * @throws IndexOutOfBoundsException if {@code fromIndex < 0} or {@code toIndex > size}
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0} or {@code toIndex > size()}
      *         or {@code fromIndex > toIndex}
      */
     @Override
@@ -2568,6 +2882,13 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * precision for large long values that cannot be exactly represented as float.
      * </p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * LongList list = LongList.of(1L, 2L, 3L);
+     * FloatList floats = list.toFloatList();   // returns [1.0, 2.0, 3.0]
+     * floats.size();                           // returns 3
+     * }</pre>
+     *
      * @return a new {@code FloatList} containing all elements from this list as float values
      */
     public FloatList toFloatList() {
@@ -2586,6 +2907,13 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * Each long value is converted to a double value. Note that this conversion may lose
      * precision for very large long values that cannot be exactly represented as double.
      * </p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * LongList list = LongList.of(1L, 2L, 3L);
+     * DoubleList doubles = list.toDoubleList();   // returns [1.0, 2.0, 3.0]
+     * doubles.size();                             // returns 3
+     * }</pre>
      *
      * @return a new {@code DoubleList} containing all elements from this list as double values
      */
@@ -2610,7 +2938,7 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * @param supplier a function which produces a new collection of the desired type,
      *                given the size of the range
      * @return a collection containing the elements in the specified range
-     * @throws IndexOutOfBoundsException if {@code fromIndex < 0} or {@code toIndex > size}
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0} or {@code toIndex > size()}
      *         or {@code fromIndex > toIndex}
      */
     @Override
@@ -2637,7 +2965,7 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * @param supplier a function which produces a new {@code Multiset} instance,
      *                given the size of the range
      * @return a {@code Multiset} containing the elements in the specified range with their counts
-     * @throws IndexOutOfBoundsException if {@code fromIndex < 0} or {@code toIndex > size}
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0} or {@code toIndex > size()}
      *         or {@code fromIndex > toIndex}
      */
     @Override
@@ -2677,6 +3005,13 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * The stream processes all elements of this list in order.
      * </p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * LongList list = LongList.of(1L, 2L, 3L, 4L, 5L);
+     * long sum = list.stream().filter(x -> x > 2).sum();   // returns 12
+     * long count = list.stream().count();                  // returns 5
+     * }</pre>
+     *
      * @return a sequential {@code LongStream} over the elements in this list
      */
     public LongStream stream() {
@@ -2690,10 +3025,17 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * The stream processes elements in the specified range in order.
      * </p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * LongList list = LongList.of(1L, 2L, 3L, 4L, 5L, 6L);
+     * long sum = list.stream(2, 5).sum();   // returns 12 (sums [3, 4, 5])
+     * list.stream(0, 7);                    // throws IndexOutOfBoundsException
+     * }</pre>
+     *
      * @param fromIndex the starting index of the range (inclusive)
      * @param toIndex the ending index of the range (exclusive)
      * @return a sequential {@code LongStream} over the elements in the specified range
-     * @throws IndexOutOfBoundsException if {@code fromIndex < 0} or {@code toIndex > size}
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0} or {@code toIndex > size()}
      *         or {@code fromIndex > toIndex}
      */
     public LongStream stream(final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
@@ -2707,6 +3049,13 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * <p>
      * This method provides direct access to the first element without using Optional.
      * </p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * LongList list = LongList.of(10L, 20L, 30L);
+     * list.getFirst();             // returns 10
+     * new LongList().getFirst();   // throws NoSuchElementException
+     * }</pre>
      *
      * @return the first long value in this list
      * @throws NoSuchElementException if this list is empty
@@ -2722,6 +3071,13 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * <p>
      * This method provides direct access to the last element without using Optional.
      * </p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * LongList list = LongList.of(10L, 20L, 30L);
+     * list.getLast();              // returns 30
+     * new LongList().getLast();    // throws NoSuchElementException
+     * }</pre>
      *
      * @return the last long value in this list
      * @throws NoSuchElementException if this list is empty
@@ -2739,6 +3095,13 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * This operation has O(n) time complexity where n is the size of the list.
      * </p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * LongList list = LongList.of(2L, 3L, 4L);
+     * list.addFirst(1L);   // list is now [1, 2, 3, 4]
+     * list.getFirst();     // returns 1
+     * }</pre>
+     *
      * @param e the element to add at the beginning of this list
      */
     public void addFirst(final long e) {
@@ -2750,6 +3113,13 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * <p>
      * This operation has O(1) amortized time complexity.
      * </p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * LongList list = LongList.of(1L, 2L, 3L);
+     * list.addLast(4L);   // list is now [1, 2, 3, 4]
+     * list.getLast();     // returns 4
+     * }</pre>
      *
      * @param e the element to add at the end of this list
      */
@@ -2763,6 +3133,13 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * Shifts all remaining elements to the left (subtracts one from their indices).
      * This operation has O(n) time complexity where n is the size of the list.
      * </p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * LongList list = LongList.of(1L, 2L, 3L);
+     * long first = list.removeFirst();   // returns 1; list is now [2, 3]
+     * new LongList().removeFirst();      // throws NoSuchElementException
+     * }</pre>
      *
      * @return the first element that was removed from this list
      * @throws NoSuchElementException if this list is empty
@@ -2778,6 +3155,13 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * <p>
      * This operation has O(1) time complexity.
      * </p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * LongList list = LongList.of(1L, 2L, 3L);
+     * long last = list.removeLast();   // returns 3; list is now [1, 2]
+     * new LongList().removeLast();     // throws NoSuchElementException
+     * }</pre>
      *
      * @return the last element that was removed from this list
      * @throws NoSuchElementException if this list is empty

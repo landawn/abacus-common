@@ -545,8 +545,8 @@ public class DigestUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * MessageDigest sha = DigestUtil.getShaDigest();     // Deprecated
-     * MessageDigest sha1 = DigestUtil.getSha1Digest();   // Preferred
+     * MessageDigest sha = DigestUtil.getShaDigest();     // deprecated
+     * MessageDigest sha1 = DigestUtil.getSha1Digest();   // preferred
      * }</pre>
      *
      * @return An SHA-1 MessageDigest instance (produces 20-byte/160-bit hashes)
@@ -820,8 +820,8 @@ public class DigestUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * byte[] hash = DigestUtil.sha("data".getBytes());    // Deprecated
-     * byte[] hash = DigestUtil.sha1("data".getBytes());   // Preferred
+     * byte[] hash = DigestUtil.sha("data".getBytes());    // deprecated
+     * byte[] hash = DigestUtil.sha1("data".getBytes());   // preferred
      * }</pre>
      *
      * @param data The data to digest (must not be {@code null})
@@ -842,7 +842,7 @@ public class DigestUtil {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * try (InputStream is = new FileInputStream("file.dat")) {
-     *     byte[] hash = DigestUtil.sha(is);  // Deprecated
+     *     byte[] hash = DigestUtil.sha(is);  // deprecated
      *     // Prefer: DigestUtil.sha1(is)
      * }
      * }</pre>
@@ -864,8 +864,8 @@ public class DigestUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * byte[] hash = DigestUtil.sha("message");    // Deprecated
-     * byte[] hash = DigestUtil.sha1("message");   // Preferred
+     * byte[] hash = DigestUtil.sha("message");    // deprecated
+     * byte[] hash = DigestUtil.sha1("message");   // preferred
      * }</pre>
      *
      * @param data The string to digest (must not be {@code null})
@@ -1945,8 +1945,8 @@ public class DigestUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * String hash = DigestUtil.shaHex("data".getBytes());    // Deprecated
-     * String hash = DigestUtil.sha1Hex("data".getBytes());   // Preferred
+     * String hash = DigestUtil.shaHex("data".getBytes());    // deprecated
+     * String hash = DigestUtil.sha1Hex("data".getBytes());   // preferred
      * }</pre>
      *
      * @param data The data to digest (must not be {@code null})
@@ -1967,7 +1967,7 @@ public class DigestUtil {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * try (InputStream is = new FileInputStream("file.dat")) {
-     *     String hash = DigestUtil.shaHex(is);  // Deprecated
+     *     String hash = DigestUtil.shaHex(is);  // deprecated
      *     // Prefer: DigestUtil.sha1Hex(is)
      * }
      * }</pre>
@@ -1989,8 +1989,8 @@ public class DigestUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * String hash = DigestUtil.shaHex("message");    // Deprecated
-     * String hash = DigestUtil.sha1Hex("message");   // Preferred
+     * String hash = DigestUtil.shaHex("message");    // deprecated
+     * String hash = DigestUtil.sha1Hex("message");   // preferred
      * }</pre>
      *
      * @param data The string to digest (must not be {@code null})

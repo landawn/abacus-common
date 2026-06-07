@@ -174,8 +174,8 @@ public final class Timed<T> implements Immutable {
      * Timed<String> t2 = Timed.of("hello", 1000L);
      * Timed<String> t3 = Timed.of("hello", 2000L);
      *
-     * assertTrue(t1.equals(t2));    // Same value and timestamp
-     * assertFalse(t1.equals(t3));   // Same value, different timestamp
+     * assertTrue(t1.equals(t2));    // same value and timestamp
+     * assertFalse(t1.equals(t3));   // same value, different timestamp
      * }</pre>
      *
      * @param obj the reference object with which to compare.
@@ -204,7 +204,7 @@ public final class Timed<T> implements Immutable {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Timed<String> t = Timed.of("Hello", 1609459200000L);
-     * System.out.println(t);   // Prints: "1609459200000: Hello"
+     * System.out.println(t);   // prints "1609459200000: Hello"
      * }</pre>
      *
      * @return a string representation of this timed instance.

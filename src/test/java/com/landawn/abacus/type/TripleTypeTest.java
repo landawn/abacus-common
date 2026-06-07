@@ -124,22 +124,47 @@ public class TripleTypeTest extends TestBase {
     }
 
     @Test
-    public void testWriteCharacter() throws IOException {
+    public void testSerializeTo() throws IOException {
         CharacterWriter writer = createCharacterWriter();
         JsonXmlSerConfig<?> config = null;
 
-        tripleType.writeCharacter(writer, testTriple, config);
+        tripleType.serializeTo(writer, testTriple, config);
 
         verify(writer, atLeastOnce()).write(anyChar());
     }
 
     @Test
-    public void testWriteCharacterNull() throws IOException {
+    public void testSerializeToNull() throws IOException {
         CharacterWriter writer = createCharacterWriter();
         JsonXmlSerConfig<?> config = null;
 
-        tripleType.writeCharacter(writer, null, config);
+        tripleType.serializeTo(writer, null, config);
 
         verify(writer).write(any(char[].class));
+    }
+
+    @Test
+    public void testAppendTo_unquotedToStringForm() throws IOException {
+        StringBuilder sb = new StringBuilder();
+        tripleType.appendTo(sb, Triple.of("a", 1, true));
+        // appendTo emits the plain, toString()-style form: the String element is NOT quoted
+        assertEquals("[a, 1, true]", sb.toString());
+    }
+
+    @Test
+    public void testSerializeTo_jsonQuotedForm() throws IOException {
+        Triple<String, Integer, Boolean> triple = Triple.of("a", 1, true);
+        com.landawn.abacus.util.BufferedJsonWriter writer = com.landawn.abacus.util.Objectory.createBufferedJsonWriter();
+        tripleType.serializeTo(writer, triple, com.landawn.abacus.parser.JsonSerConfig.create());
+        String json = writer.toString();
+        com.landawn.abacus.util.Objectory.recycle(writer);
+
+        // serializeTo emits JSON: the String element IS quoted; equals stringOf and differs from appendTo
+        assertEquals("[\"a\", 1, true]", json);
+        assertEquals(tripleType.stringOf(triple), json);
+
+        StringBuilder sb = new StringBuilder();
+        tripleType.appendTo(sb, triple);
+        org.junit.jupiter.api.Assertions.assertNotEquals(sb.toString(), json);
     }
 }

@@ -1087,9 +1087,9 @@ public final class Clazz {
      * Class<BlockingQueue<Task>> taskQueueClass = Clazz.ofLinkedBlockingQueue(Task.class);
      *
      * // Producer-consumer pattern
-     * BlockingQueue<Task> queue = new LinkedBlockingQueue<>(100);   // capacity of 100
-     * queue.put(new Task());                                        // blocks if queue is full
-     * Task task = queue.take();                                     // blocks if queue is empty
+     * BlockingQueue<Task> queue = new LinkedBlockingQueue<>(100);
+     * queue.put(new Task());                                        // waits if the queue is full
+     * Task task = queue.take();                                     // waits if the queue is empty
      * }</pre>
      *
      * @param <T> the element type of the blocking queue.

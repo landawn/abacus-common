@@ -120,7 +120,7 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BiIterator<String, Integer> empty = BiIterator.empty();
-     * assertFalse(empty.hasNext());   // hasNext() returns false - no elements
+     * assertFalse(empty.hasNext());
      * }</pre>
      *
      * @param <A> the first type of elements returned by this iterator
@@ -944,7 +944,7 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
      * <pre>{@code
      * BiIterator<String, Integer> iter = BiIterator.of(Map.of("a", 1, "b", 2));
      * iter.foreachRemaining((key, value) -> {
-     *     processEntry(key, value); // method may throw checked exception
+     *     processEntry(key, value);
      * });
      * }</pre>
      *
@@ -1312,7 +1312,7 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
      * <pre>{@code
      * BiIterator<String, Integer> iter = BiIterator.of(Map.of("a", 1, "b", 2));
      * Pair<String, Integer>[] array = iter.toArray();
-     * System.out.println("Array length: " + array.length); // 2
+     * System.out.println("Array length: " + array.length); // prints: Array length: 2
      * }</pre>
      *
      * @return an array containing all remaining pairs from this BiIterator
@@ -1325,6 +1325,15 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
     /**
      * Converts all remaining pairs in this {@code BiIterator} to an array of the specified type.
      * This method consumes the entire iterator.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Map<String, Integer> map = new LinkedHashMap<>();
+     * map.put("a", 1);
+     * map.put("b", 2);
+     * Pair<String, Integer>[] arr = BiIterator.of(map).toArray(new Pair[0]); // length is 2
+     * // arr[0] -> (a, 1), arr[1] -> (b, 2)
+     * }</pre>
      *
      * @param <T> the type of the array elements; it should be a super type of {@code Pair}
      * @param a the array into which the elements of this {@code BiIterator} are to be stored, if it is big enough;

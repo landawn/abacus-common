@@ -263,6 +263,13 @@ public class AbstractDoubleStreamTest extends TestBase {
     }
 
     @Test
+    public void testArrayStepIteratorCountConsumes() {
+        DoubleIterator iter = DoubleStream.of(new double[] { 1.0, 2.0, 3.0, 4.0, 5.0, 6.0 }).step(2).iterator();
+        assertEquals(3, iter.count());
+        assertFalse(iter.hasNext());
+    }
+
+    @Test
     public void testStepWithInvalidStep() {
         assertThrows(IllegalArgumentException.class, () -> stream.step(0));
         assertThrows(IllegalArgumentException.class, () -> stream2.step(-1));

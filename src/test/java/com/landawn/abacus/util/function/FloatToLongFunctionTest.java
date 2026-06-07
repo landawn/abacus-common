@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
+import com.landawn.abacus.util.Throwables;
 
 public class FloatToLongFunctionTest extends TestBase {
 
@@ -40,6 +41,13 @@ public class FloatToLongFunctionTest extends TestBase {
     public void testFunctionalInterfaceContract() {
         final FloatToLongFunction function = value -> (long) value;
         assertNotNull(function);
+        assertEquals(42L, function.applyAsLong(42.5f));
+    }
+
+    @Test
+    public void testThrowableFunctionCompatibility() {
+        final Throwables.FloatToLongFunction<RuntimeException> function = FloatToLongFunction.DEFAULT;
+
         assertEquals(42L, function.applyAsLong(42.5f));
     }
 }

@@ -32,10 +32,10 @@ package com.landawn.abacus.util;
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * AccountStatus status = AccountStatus.ACTIVE;
- * int statusCode = status.code();   // Returns 1
+ * int statusCode = status.code();   // returns 1
  *
  * // Convert from int to enum
- * AccountStatus restored = AccountStatus.fromCode(1);   // Returns ACTIVE
+ * AccountStatus restored = AccountStatus.fromCode(1);   // returns ACTIVE
  *
  * // Use in switch statements
  * switch (status) {
@@ -94,7 +94,7 @@ public enum AccountStatus {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * AccountStatus status = AccountStatus.SUSPENDED;
-     * int code = status.code();   // Returns 2
+     * int code = status.code();   // returns 2
      * }</pre>
      *
      * @return the integer value of this status
@@ -109,8 +109,8 @@ public enum AccountStatus {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * AccountStatus status = AccountStatus.fromCode(1);      // Returns ACTIVE
-     * AccountStatus suspended = AccountStatus.fromCode(2);   // Returns SUSPENDED
+     * AccountStatus status = AccountStatus.fromCode(1);      // returns ACTIVE
+     * AccountStatus suspended = AccountStatus.fromCode(2);   // returns SUSPENDED
      * }</pre>
      *
      * @param code the integer value to convert (0–5)

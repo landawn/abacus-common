@@ -137,6 +137,15 @@ public final class EnumType<T extends Enum<T>> extends SingleValueType<T> {
      * Returns the enumeration strategy used by this type handler:
      * {@code NAME}, {@code ORDINAL}, or {@code CODE}.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * EnumType<TimeUnit> nameType = (EnumType<TimeUnit>) (Type) TypeFactory.getType("java.util.concurrent.TimeUnit");
+     * nameType.enumerated();   // returns com.landawn.abacus.util.EnumType.NAME
+     *
+     * EnumType<TimeUnit> ordType = (EnumType<TimeUnit>) (Type) TypeFactory.getType("java.util.concurrent.TimeUnit(ORDINAL)");
+     * ordType.enumerated();    // returns com.landawn.abacus.util.EnumType.ORDINAL
+     * }</pre>
+     *
      * @return the configured enum representation
      */
     public com.landawn.abacus.util.EnumType enumerated() {
@@ -170,8 +179,15 @@ public final class EnumType<T extends Enum<T>> extends SingleValueType<T> {
      * If a custom JSON value type is defined, uses the parent class implementation.
      * Otherwise, returns the enum constant name.
      *
+     * <p>The returned string is a serializable representation designed to be parsed back into an equivalent value
+     * via {@link #valueOf(String)}; {@code stringOf} and {@code valueOf} are inverse operations that round-trip. This
+     * is the key distinction from {@link Object#toString()}, whose result is not guaranteed to be convertible back
+     * into the original value.</p>
+     *
      * @param x the enum value to convert; may be {@code null}
      * @return the enum constant name, or {@code null} if input is null
+     * @see #valueOf(String)
+     * @see #valueOf(Object)
      */
     @Override
     public String stringOf(final T x) {
@@ -186,9 +202,15 @@ public final class EnumType<T extends Enum<T>> extends SingleValueType<T> {
      * Empty strings return {@code null}. The literal string {@code "null"} returns {@code null}
      * when the enum does not define a constant named {@code "null"}.
      *
+     * <p>This method is the inverse of {@code stringOf} and round-trips with it: it parses the string produced by
+     * {@code stringOf} back into a value of this type. Strings produced by {@link Object#toString()} are not
+     * guaranteed to be parseable in this way.</p>
+     *
      * @param str the string to convert; may be {@code null} or empty
      * @return the enum value corresponding to the string, or {@code null} if input is null/empty
      * @throws IllegalArgumentException if the string doesn't match any enum value
+     * @see #valueOf(Object)
+     * @see #stringOf(Enum)
      */
     @Override
     public T valueOf(final String str) {
@@ -214,6 +236,14 @@ public final class EnumType<T extends Enum<T>> extends SingleValueType<T> {
      * For {@code CODE} representation, the value is matched against the {@code code()} values;
      * otherwise it is matched against ordinal values.
      * Returns {@code null} when {@code value} is {@code 0} and no constant is mapped to {@code 0}.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * EnumType<TimeUnit> t = (EnumType<TimeUnit>) (Type) TypeFactory.getType("java.util.concurrent.TimeUnit(ORDINAL)");
+     * t.valueOf(0);    // returns TimeUnit.NANOSECONDS
+     * t.valueOf(2);    // returns TimeUnit.MILLISECONDS
+     * t.valueOf(99);   // throws IllegalArgumentException
+     * }</pre>
      *
      * @param value the ordinal or code value
      * @return the enum constant for the specified value, or {@code null} if the value is {@code 0} and no constant maps to {@code 0}
@@ -273,8 +303,8 @@ public final class EnumType<T extends Enum<T>> extends SingleValueType<T> {
     public T get(final ResultSet rs, final String columnName) throws SQLException {
         if (jsonValueType == null) {
             if (enumRepresentation == com.landawn.abacus.util.EnumType.ORDINAL || enumRepresentation == com.landawn.abacus.util.EnumType.CODE) {
-                final int intValue = rs.getInt(columnName);
-                return rs.wasNull() ? null : valueOf(intValue);
+                final Object intValue = rs.getObject(columnName);
+                return intValue == null ? null : valueOf(Numbers.toInt(intValue));
             } else {
                 return valueOf(rs.getString(columnName));
             }
@@ -351,6 +381,15 @@ public final class EnumType<T extends Enum<T>> extends SingleValueType<T> {
      *   <li>NAME: writes the JSON/XML field name, optionally quoted based on {@code config}</li>
      * </ul>
      * A {@code null} value writes the literal {@code null}.
+     * <p>
+     * This method is specifically designed for JSON/XML serialization: it writes the serialized form of {@code x} to the
+     * {@code CharacterWriter}, applying string quotation and character escaping according to the supplied serialization
+     * config (a {@code null} config means no surrounding quotation). It is the streaming counterpart of {@code stringOf}
+     * and is invoked by the JSON/XML serializers.
+     * <p>
+     * <b>serializeTo vs. appendTo:</b> {@code serializeTo} produces machine-readable JSON/XML (quoted and escaped),
+     * whereas {@code appendTo} produces a plain, human-readable {@code toString()}-style rendering without JSON/XML
+     * quoting or escaping.
      *
      * @param writer the {@link CharacterWriter} to write to
      * @param x      the enum value to write; may be {@code null}
@@ -358,7 +397,7 @@ public final class EnumType<T extends Enum<T>> extends SingleValueType<T> {
      * @throws IOException if an I/O error occurs during writing
      */
     @Override
-    public void writeCharacter(final CharacterWriter writer, final T x, final JsonXmlSerConfig<?> config) throws IOException {
+    public void serializeTo(final CharacterWriter writer, final T x, final JsonXmlSerConfig<?> config) throws IOException {
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {
@@ -377,7 +416,7 @@ public final class EnumType<T extends Enum<T>> extends SingleValueType<T> {
                     }
                 }
             } else {
-                super.writeCharacter(writer, x, config);
+                super.serializeTo(writer, x, config);
             }
         }
     }

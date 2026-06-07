@@ -57,8 +57,8 @@ package com.landawn.abacus.util;
  * <pre>{@code
  * // Basic creation and access
  * Indexed<String> indexed = Indexed.of("Hello", 5);
- * String value = indexed.value();  // "Hello"
- * int index = indexed.index();     // 5
+ * String value = indexed.value();  // returns "Hello"
+ * int index = indexed.index();     // returns 5
  *
  * // Stream processing with indices
  * List<String> items = Arrays.asList("a", "b", "c");
@@ -310,12 +310,12 @@ public final class Indexed<T> extends AbstractIndexed {
      * <pre>{@code
      * // Basic value retrieval
      * Indexed<String> indexed = Indexed.of("Hello", 5);
-     * String value = indexed.value();  // "Hello"
-     * int index = indexed.index();     // 5
+     * String value = indexed.value();  // returns "Hello"
+     * int index = indexed.index();     // returns 5
      *
      * // Handling null values
      * Indexed<String> nullIndexed = Indexed.of(null, 0);
-     * String nullValue = nullIndexed.value();   // null
+     * String nullValue = nullIndexed.value();   // returns null
      *
      * // Using in stream operations
      * List<Indexed<String>> indexedItems = Arrays.asList(
@@ -361,14 +361,14 @@ public final class Indexed<T> extends AbstractIndexed {
      * Indexed<String> idx2 = Indexed.of("Hello", 5);
      * Indexed<String> idx3 = Indexed.of("World", 5);
      *
-     * idx1.hashCode() == idx2.hashCode();   // true (same index and value)
-     * idx1.hashCode() == idx3.hashCode();   // likely false (different values)
+     * idx1.hashCode() == idx2.hashCode();   // returns true (same index and value)
+     * idx1.hashCode() == idx3.hashCode();   // returns likely false (different values)
      *
      * // Using in HashSet
      * Set<Indexed<String>> set = new HashSet<>();
      * set.add(Indexed.of("A", 0));
-     * set.add(Indexed.of("A", 0));   // Duplicate, won't be added
-     * set.size();                    // 1
+     * set.add(Indexed.of("A", 0));
+     * set.size();                    // returns 1
      * }</pre>
      *
      * @return the hash code value for this Indexed instance.
@@ -404,29 +404,29 @@ public final class Indexed<T> extends AbstractIndexed {
      * Indexed<String> idx3 = Indexed.of("World", 5);
      * Indexed<String> idx4 = Indexed.of("Hello", 6);
      *
-     * idx1.equals(idx2);   // true (same index and value)
-     * idx1.equals(idx3);   // false (different values)
-     * idx1.equals(idx4);   // false (different indices)
+     * idx1.equals(idx2);   // returns true (same index and value)
+     * idx1.equals(idx3);   // returns false (different values)
+     * idx1.equals(idx4);   // returns false (different indices)
      *
      * // Null value handling
      * Indexed<String> nullIdx1 = Indexed.of(null, 0);
      * Indexed<String> nullIdx2 = Indexed.of(null, 0);
      * Indexed<String> nullIdx3 = Indexed.of(null, 1);
      *
-     * nullIdx1.equals(nullIdx2);   // true (both have null values and same index)
-     * nullIdx1.equals(nullIdx3);   // false (different indices)
+     * nullIdx1.equals(nullIdx2);   // returns true (both have null values and same index)
+     * nullIdx1.equals(nullIdx3);   // returns false (different indices)
      *
      * // Different types
      * Indexed<String> strIdx = Indexed.of("Hello", 5);
      * String str = "Hello";
-     * strIdx.equals(str);   // false (different types)
+     * strIdx.equals(str);   // returns false (different types)
      *
      * // Using in collections
      * List<Indexed<String>> list = new ArrayList<>();
      * Indexed<String> item = Indexed.of("test", 0);
      * list.add(item);
-     * list.contains(Indexed.of("test", 0));   // true
-     * list.contains(Indexed.of("test", 1));   // false
+     * list.contains(Indexed.of("test", 0));   // returns true
+     * list.contains(Indexed.of("test", 1));   // returns false
      * }</pre>
      *
      * @param obj the object to be compared for equality with this Indexed instance.
@@ -464,18 +464,18 @@ public final class Indexed<T> extends AbstractIndexed {
      * <pre>{@code
      * // Basic string representation
      * Indexed<String> indexed = Indexed.of("Hello", 5);
-     * System.out.println(indexed);   // prints: [5]=Hello
+     * System.out.println(indexed);   // prints [5]=Hello
      *
      * // With null value
      * Indexed<String> nullIndexed = Indexed.of(null, 0);
-     * System.out.println(nullIndexed);   // prints: [0]=null
+     * System.out.println(nullIndexed);   // prints [0]=null
      *
      * // With different types
      * Indexed<Integer> intIndexed = Indexed.of(42, 10);
-     * System.out.println(intIndexed);   // prints: [10]=42
+     * System.out.println(intIndexed);   // prints [10]=42
      *
      * Indexed<List<String>> listIndexed = Indexed.of(Arrays.asList("a", "b"), 3);
-     * System.out.println(listIndexed);   // prints: [3]=[a, b]
+     * System.out.println(listIndexed);   // prints [3]=[a, b]
      *
      * // Using in logging
      * List<Indexed<String>> items = Arrays.asList(
@@ -491,7 +491,7 @@ public final class Indexed<T> extends AbstractIndexed {
      *
      * // Large index values
      * Indexed<String> largeIdx = Indexed.of("data", 5_000_000_000L);
-     * System.out.println(largeIdx);   // prints: [5000000000]=data
+     * System.out.println(largeIdx);   // prints [5000000000]=data
      * }</pre>
      *
      * @return a string representation in the format {@code [index]=value}.

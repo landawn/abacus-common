@@ -348,7 +348,7 @@ public final class Try<T extends AutoCloseable> {
      * // With expensive fallback
      * Data data = Try.call(
      *     () -> fetchFromCache(key),
-     *     () -> fetchFromDatabase(key) // Only called if cache fails
+     *     () -> fetchFromDatabase(key)
      * );
      * }</pre>
      *
@@ -613,7 +613,7 @@ public final class Try<T extends AutoCloseable> {
      * JsonNode config = Try.with(() -> new FileInputStream("config.json"))
      *     .call(
      *         stream -> objectMapper.readTree(stream),
-     *         ex -> objectMapper.createObjectNode() // Return empty config on error
+     *         ex -> objectMapper.createObjectNode() // returns empty config on error
      *     );
      * }</pre>
      *
@@ -646,7 +646,7 @@ public final class Try<T extends AutoCloseable> {
      * Properties props = Try.with(() -> new FileInputStream("app.properties"))
      *     .call(
      *         stream -> { Properties p = new Properties(); p.load(stream); return p; },
-     *         () -> loadDefaultProperties() // Only called if loading fails
+     *         () -> loadDefaultProperties()
      *     );
      * }</pre>
      *
@@ -677,7 +677,7 @@ public final class Try<T extends AutoCloseable> {
      * int lineCount = Try.with(Files.newBufferedReader(path))
      *     .call(
      *         reader -> (int) reader.lines().count(),
-     *         0 // Default to 0 if file cannot be read
+     *         0
      *     );
      * }</pre>
      *
@@ -712,7 +712,7 @@ public final class Try<T extends AutoCloseable> {
      *     .call(
      *         conn -> userDao.findById(conn, userId),
      *         ex -> ex instanceof SQLException && ex.getMessage().contains("timeout"),
-     *         () -> User.guest() // Return guest user only for timeout errors
+     *         () -> User.guest() // returns guest user only for timeout errors
      *     );
      * }</pre>
      *
@@ -752,7 +752,7 @@ public final class Try<T extends AutoCloseable> {
      *     .call(
      *         stream -> new String(stream.readAllBytes()),
      *         ex -> ex instanceof FileNotFoundException,
-     *         "" // Return empty string only if file not found
+     *         "" // returns empty string only if file not found
      *     );
      * }</pre>
      *

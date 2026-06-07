@@ -176,19 +176,19 @@ public class ShortTypeTest extends TestBase {
     }
 
     @Test
-    public void test_writeCharacter_withoutConfig() throws Exception {
+    public void test_serializeTo_withoutConfig() throws Exception {
         CharacterWriter writer = mock(BufferedJsonWriter.class);
 
         // Test null
-        shortType.writeCharacter(writer, null, null);
+        shortType.serializeTo(writer, null, null);
         verify(writer).write("null".toCharArray());
     }
 
     @Test
-    public void test_writeCharacter_withValue() throws Exception {
+    public void test_serializeTo_withValue() throws Exception {
         CharacterWriter writer = mock(BufferedJsonWriter.class);
 
-        shortType.writeCharacter(writer, (short) 42, null);
+        shortType.serializeTo(writer, (short) 42, null);
         verify(writer).write((short) 42);
     }
 

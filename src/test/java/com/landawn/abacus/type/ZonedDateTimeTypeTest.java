@@ -22,6 +22,7 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeParseException;
 
@@ -76,6 +77,19 @@ public class ZonedDateTimeTypeTest extends TestBase {
         assertNotNull(result);
         assertTrue(result.contains("2023-12-25"));
         assertTrue(result.contains("10:30:45"));
+    }
+
+    @Test
+    public void testStringOfUsesOffsetFormatForRoundTrip() {
+        ZonedDateTime zonedDateTime = ZonedDateTime.of(2023, 12, 25, 10, 30, 45, 0, ZoneId.of("America/Los_Angeles"));
+        String text = zonedDateTimeType.stringOf(zonedDateTime);
+        ZonedDateTime result = zonedDateTimeType.valueOf(text);
+
+        // stringOf serializes with the ISO_OFFSET_DATE_TIME representation: offset only, no region-zone suffix.
+        assertFalse(text.contains("["));
+        assertTrue(text.contains("-08:00"));
+        // The round-trip preserves the instant; the region zone collapses to its offset.
+        assertEquals(zonedDateTime.toInstant(), result.toInstant());
     }
 
     @Test
@@ -155,6 +169,53 @@ public class ZonedDateTimeTypeTest extends TestBase {
         String dateTimeString = "2023-12-25T10:30:45+02:00";
         ZonedDateTime result = zonedDateTimeType.valueOf(dateTimeString);
         assertNotNull(result);
+    }
+
+    @Test
+    public void testValueOfParsesZonedDateTimeToString() {
+        // Every form produced by ZonedDateTime.toString() must round-trip through valueOf.
+        ZonedDateTime[] values = { //
+                ZonedDateTime.of(2023, 10, 15, 10, 30, 0, 0, ZoneOffset.UTC), // seconds omitted, "...:30Z"
+                ZonedDateTime.of(2023, 10, 15, 10, 30, 45, 0, ZoneOffset.UTC), // seconds, "...:45Z"
+                ZonedDateTime.of(2023, 10, 15, 10, 30, 45, 123000000, ZoneOffset.UTC), // millis, "...45.123Z"
+                ZonedDateTime.of(2023, 10, 15, 10, 30, 45, 123456789, ZoneOffset.UTC), // nanos
+                ZonedDateTime.of(2023, 10, 15, 10, 30, 45, 0, ZoneOffset.ofHours(1)), // numeric offset
+                ZonedDateTime.of(2023, 10, 15, 10, 30, 0, 0, ZoneOffset.ofHours(1)), // offset, seconds omitted
+                ZonedDateTime.of(2023, 10, 15, 10, 30, 45, 0, ZoneOffset.ofHoursMinutes(5, 30)), // +05:30
+                ZonedDateTime.of(2023, 10, 15, 10, 30, 45, 0, ZoneOffset.ofHoursMinutesSeconds(5, 30, 15)) // +05:30:15
+        };
+
+        for (ZonedDateTime value : values) {
+            String text = value.toString();
+            ZonedDateTime result = zonedDateTimeType.valueOf(text);
+            assertNotNull(result, () -> "Failed to parse: " + text);
+            assertEquals(value.toInstant(), result.toInstant(), () -> "Instant mismatch for: " + text);
+        }
+    }
+
+    @Test
+    public void testValueOfParsesZonedDateTimeToStringWithRegionZone() {
+        // ZonedDateTime.toString() appends the region zone in brackets; valueOf must preserve it.
+        String[] zones = { "America/Los_Angeles", "Europe/Paris", "Asia/Kolkata", "Asia/Kathmandu", "UTC" };
+
+        for (String zoneId : zones) {
+            ZonedDateTime value = ZonedDateTime.of(2023, 10, 15, 10, 30, 45, 123000000, ZoneId.of(zoneId));
+            String text = value.toString();
+            assertTrue(text.contains("[" + zoneId + "]"), () -> "Expected region zone in: " + text);
+
+            ZonedDateTime result = zonedDateTimeType.valueOf(text);
+            assertEquals(value, result, () -> "Value mismatch for: " + text);
+            assertEquals(value.getZone(), result.getZone(), () -> "Zone mismatch for: " + text);
+        }
+    }
+
+    @Test
+    public void testValueOfParsesZonedDateTimeNowToString() {
+        // ZonedDateTime.now() typically carries nanosecond precision in a region zone.
+        ZonedDateTime value = ZonedDateTime.now(ZoneId.of("America/Los_Angeles"));
+        ZonedDateTime result = zonedDateTimeType.valueOf(value.toString());
+        assertEquals(value, result);
+        assertEquals(value.getZone(), result.getZone());
     }
 
     @Test
@@ -286,72 +347,72 @@ public class ZonedDateTimeTypeTest extends TestBase {
     }
 
     @Test
-    public void testWriteCharacterWithNull() throws IOException {
+    public void testSerializeToWithNull() throws IOException {
         CharacterWriter writer = createCharacterWriter();
 
-        zonedDateTimeType.writeCharacter(writer, null, null);
+        zonedDateTimeType.serializeTo(writer, null, null);
 
         verify(writer).write(any(char[].class));
     }
 
     @Test
-    public void testWriteCharacterWithZonedDateTimeNoConfig() throws IOException {
+    public void testSerializeToWithZonedDateTimeNoConfig() throws IOException {
         CharacterWriter writer = createCharacterWriter();
         ZonedDateTime zonedDateTime = ZonedDateTime.of(2023, 12, 25, 10, 30, 45, 0, ZoneId.of("UTC"));
 
-        zonedDateTimeType.writeCharacter(writer, zonedDateTime, null);
+        zonedDateTimeType.serializeTo(writer, zonedDateTime, null);
 
         verify(writer).write(anyString());
     }
 
     @Test
-    public void testWriteCharacterWithLongFormat() throws IOException {
+    public void testSerializeToWithLongFormat() throws IOException {
         CharacterWriter writer = createCharacterWriter();
         ZonedDateTime zonedDateTime = ZonedDateTime.of(2023, 12, 25, 10, 30, 45, 0, ZoneId.of("UTC"));
 
         when(config.getDateTimeFormat()).thenReturn(DateTimeFormat.LONG);
         when(config.getStringQuotation()).thenReturn((char) 0);
 
-        zonedDateTimeType.writeCharacter(writer, zonedDateTime, config);
+        zonedDateTimeType.serializeTo(writer, zonedDateTime, config);
 
         verify(writer).write(anyLong());
     }
 
     @Test
-    public void testWriteCharacterWithISO8601DateTime() throws IOException {
+    public void testSerializeToWithISO8601DateTime() throws IOException {
         CharacterWriter writer = createCharacterWriter();
         ZonedDateTime zonedDateTime = ZonedDateTime.of(2023, 12, 25, 10, 30, 45, 0, ZoneId.of("UTC"));
 
         when(config.getDateTimeFormat()).thenReturn(DateTimeFormat.ISO_8601_DATE_TIME);
         when(config.getStringQuotation()).thenReturn((char) 0);
 
-        zonedDateTimeType.writeCharacter(writer, zonedDateTime, config);
+        zonedDateTimeType.serializeTo(writer, zonedDateTime, config);
 
         verify(writer).write(anyString());
     }
 
     @Test
-    public void testWriteCharacterWithISO8601Timestamp() throws IOException {
+    public void testSerializeToWithISO8601Timestamp() throws IOException {
         CharacterWriter writer = createCharacterWriter();
         ZonedDateTime zonedDateTime = ZonedDateTime.of(2023, 12, 25, 10, 30, 45, 0, ZoneId.of("UTC"));
 
         when(config.getDateTimeFormat()).thenReturn(DateTimeFormat.ISO_8601_TIMESTAMP);
         when(config.getStringQuotation()).thenReturn((char) 0);
 
-        zonedDateTimeType.writeCharacter(writer, zonedDateTime, config);
+        zonedDateTimeType.serializeTo(writer, zonedDateTime, config);
 
         verify(writer).write(anyString());
     }
 
     @Test
-    public void testWriteCharacterWithQuotation() throws IOException {
+    public void testSerializeToWithQuotation() throws IOException {
         CharacterWriter writer = createCharacterWriter();
         ZonedDateTime zonedDateTime = ZonedDateTime.of(2023, 12, 25, 10, 30, 45, 0, ZoneId.of("UTC"));
 
         when(config.getDateTimeFormat()).thenReturn(DateTimeFormat.ISO_8601_TIMESTAMP);
         when(config.getStringQuotation()).thenReturn('"');
 
-        zonedDateTimeType.writeCharacter(writer, zonedDateTime, config);
+        zonedDateTimeType.serializeTo(writer, zonedDateTime, config);
 
         verify(writer, times(2)).write('"');
         verify(writer).write(anyString());

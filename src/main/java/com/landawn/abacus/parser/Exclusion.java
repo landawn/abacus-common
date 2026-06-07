@@ -41,10 +41,11 @@ public enum Exclusion {
      * <pre>{@code
      * Person person = new Person();
      * person.setName("John");
-     * person.setAge(null);   // This property will be excluded
+     * person.setAge(null);   // property is excluded
      *
      * // With Exclusion.NULL, output: {"name": "John"}
      * }</pre>
+     *
      */
     NULL,
 
@@ -56,11 +57,12 @@ public enum Exclusion {
      * <pre>{@code
      * Person person = new Person();
      * person.setName("John");
-     * person.setAge(0);          // Default int value, will be excluded
-     * person.setActive(false);   // Default boolean value, will be excluded
+     * person.setAge(0);          // value is excluded (default int)
+     * person.setActive(false);   // value is excluded (default boolean)
      *
      * // With Exclusion.DEFAULT, output: {"name": "John"}
      * }</pre>
+     *
      */
     DEFAULT,
 
@@ -76,6 +78,7 @@ public enum Exclusion {
      *
      * // With Exclusion.NONE, output: {"name": "John", "age": null}
      * }</pre>
+     *
      */
     NONE
 }

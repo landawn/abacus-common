@@ -95,7 +95,7 @@ public final class ImmutableBiMap<K, V> extends AbstractImmutableMap<K, V> {
      * <p><b>Usage example:</b></p>
      * <pre>{@code
      * ImmutableBiMap<String, Integer> empty = ImmutableBiMap.empty();
-     * System.out.println(empty.size());   // prints: 0
+     * System.out.println(empty.size());   // prints 0
      * }</pre>
      *
      * @param <K> the type of keys in the returned map
@@ -114,8 +114,8 @@ public final class ImmutableBiMap<K, V> extends AbstractImmutableMap<K, V> {
      * <p><b>Usage example:</b></p>
      * <pre>{@code
      * ImmutableBiMap<String, Integer> single = ImmutableBiMap.of("one", 1);
-     * System.out.println(single.get("one"));      // prints: 1
-     * System.out.println(single.getByValue(1));   // prints: "one"
+     * System.out.println(single.get("one"));      // prints 1
+     * System.out.println(single.getByValue(1));   // prints "one"
      * }</pre>
      *
      * @param <K> the type of the key
@@ -164,6 +164,13 @@ public final class ImmutableBiMap<K, V> extends AbstractImmutableMap<K, V> {
      * Returns an {@code ImmutableBiMap} containing exactly three key-value mappings.
      * All keys and values must be unique as required by {@link BiMap}.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * ImmutableBiMap<String, Integer> map = ImmutableBiMap.of(
+     *     "one", 1, "two", 2, "three", 3
+     * );
+     * }</pre>
+     *
      * @param <K> the type of the keys
      * @param <V> the type of the values
      * @param k1 the first key
@@ -185,6 +192,13 @@ public final class ImmutableBiMap<K, V> extends AbstractImmutableMap<K, V> {
     /**
      * Returns an {@code ImmutableBiMap} containing exactly four key-value mappings.
      * All keys and values must be unique as required by {@link BiMap}.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * ImmutableBiMap<String, Integer> map = ImmutableBiMap.of(
+     *     "one", 1, "two", 2, "three", 3, "four", 4
+     * );
+     * }</pre>
      *
      * @param <K> the type of the keys
      * @param <V> the type of the values
@@ -209,6 +223,13 @@ public final class ImmutableBiMap<K, V> extends AbstractImmutableMap<K, V> {
     /**
      * Returns an {@code ImmutableBiMap} containing exactly five key-value mappings.
      * All keys and values must be unique as required by {@link BiMap}.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * ImmutableBiMap<String, Integer> map = ImmutableBiMap.of(
+     *     "one", 1, "two", 2, "three", 3, "four", 4, "five", 5
+     * );
+     * }</pre>
      *
      * @param <K> the type of the keys
      * @param <V> the type of the values
@@ -236,6 +257,13 @@ public final class ImmutableBiMap<K, V> extends AbstractImmutableMap<K, V> {
     /**
      * Returns an {@code ImmutableBiMap} containing exactly six key-value mappings.
      * All keys and values must be unique as required by {@link BiMap}.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * ImmutableBiMap<String, Integer> map = ImmutableBiMap.of(
+     *     "one", 1, "two", 2, "three", 3, "four", 4, "five", 5, "six", 6
+     * );
+     * }</pre>
      *
      * @param <K> the type of the keys
      * @param <V> the type of the values
@@ -265,6 +293,13 @@ public final class ImmutableBiMap<K, V> extends AbstractImmutableMap<K, V> {
     /**
      * Returns an {@code ImmutableBiMap} containing exactly seven key-value mappings.
      * All keys and values must be unique as required by {@link BiMap}.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * ImmutableBiMap<String, Integer> map = ImmutableBiMap.of(
+     *     "one", 1, "two", 2, "three", 3, "four", 4, "five", 5, "six", 6, "seven", 7
+     * );
+     * }</pre>
      *
      * @param <K> the type of the keys
      * @param <V> the type of the values
@@ -296,6 +331,14 @@ public final class ImmutableBiMap<K, V> extends AbstractImmutableMap<K, V> {
     /**
      * Returns an {@code ImmutableBiMap} containing exactly eight key-value mappings.
      * All keys and values must be unique as required by {@link BiMap}.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * ImmutableBiMap<String, Integer> map = ImmutableBiMap.of(
+     *     "one", 1, "two", 2, "three", 3, "four", 4,
+     *     "five", 5, "six", 6, "seven", 7, "eight", 8
+     * );
+     * }</pre>
      *
      * @param <K> the type of the keys
      * @param <V> the type of the values
@@ -329,6 +372,14 @@ public final class ImmutableBiMap<K, V> extends AbstractImmutableMap<K, V> {
     /**
      * Returns an {@code ImmutableBiMap} containing exactly nine key-value mappings.
      * All keys and values must be unique as required by {@link BiMap}.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * ImmutableBiMap<String, Integer> map = ImmutableBiMap.of(
+     *     "one", 1, "two", 2, "three", 3, "four", 4,
+     *     "five", 5, "six", 6, "seven", 7, "eight", 8, "nine", 9
+     * );
+     * }</pre>
      *
      * @param <K> the type of the keys
      * @param <V> the type of the values
@@ -364,6 +415,14 @@ public final class ImmutableBiMap<K, V> extends AbstractImmutableMap<K, V> {
     /**
      * Returns an {@code ImmutableBiMap} containing exactly ten key-value mappings.
      * All keys and values must be unique as required by {@link BiMap}.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * ImmutableBiMap<String, Integer> map = ImmutableBiMap.of(
+     *     "one", 1, "two", 2, "three", 3, "four", 4, "five", 5,
+     *     "six", 6, "seven", 7, "eight", 8, "nine", 9, "ten", 10
+     * );
+     * }</pre>
      *
      * @param <K> the type of the keys
      * @param <V> the type of the values

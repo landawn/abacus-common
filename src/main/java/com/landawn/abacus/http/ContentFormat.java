@@ -24,7 +24,7 @@ package com.landawn.abacus.http;
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * ContentFormat format = ContentFormat.JSON_GZIP;
- * String contentType = format.contentType();   // returns "application/json"
+ * String contentType = format.contentType();    // returns "application/json"
  * String encoding = format.contentEncoding();   // returns "gzip"
  * }</pre>
  *
@@ -82,6 +82,13 @@ public enum ContentFormat {
      * {@code "application/json"} for JSON data or {@code "application/xml"} for XML data.
      * An empty string is returned for formats that don't have a specific content type.</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * String json = ContentFormat.JSON_GZIP.contentType();   // returns "application/json"
+     * String xml = ContentFormat.XML.contentType();          // returns "application/xml"
+     * String none = ContentFormat.GZIP.contentType();        // returns "" (compression-only format)
+     * }</pre>
+     *
      * @return the content type string, or an empty string if not applicable
      */
     public String contentType() {
@@ -94,6 +101,13 @@ public enum ContentFormat {
      * <p>The content encoding indicates how the content has been compressed, such as
      * {@code "gzip"} for GZIP compression, {@code "lz4"} for LZ4 compression, or {@code "br"} for Brotli compression.
      * An empty string is returned for uncompressed formats.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * String gzip = ContentFormat.JSON_GZIP.contentEncoding();   // returns "gzip"
+     * String br = ContentFormat.XML_BR.contentEncoding();        // returns "br"
+     * String none = ContentFormat.JSON.contentEncoding();        // returns "" (no compression)
+     * }</pre>
      *
      * @return the content encoding string, or an empty string if no compression is used
      */

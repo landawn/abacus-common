@@ -171,12 +171,12 @@ public @interface Subscribe {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * @Subscribe(intervalMillis = 1000)  // Maximum one event per second
+     * @Subscribe(intervalMillis = 1000)  // keeps at most one event per second
      * public void onSensorData(SensorEvent event) {
      *     updateDisplay(event.getValue());
      * }
      *
-     * @Subscribe(intervalMillis = 5000)  // Maximum one event per 5 seconds
+     * @Subscribe(intervalMillis = 5000)  // keeps at most one event per 5 seconds
      * public void onLocationUpdate(Location location) {
      *     saveLocationToServer(location);
      * }

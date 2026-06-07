@@ -7,7 +7,10 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.Authenticator;
+import java.net.InetSocketAddress;
 import java.net.PasswordAuthentication;
 import java.net.URI;
 import java.net.URL;
@@ -16,17 +19,20 @@ import java.net.http.HttpRequest.BodyPublisher;
 import java.net.http.HttpRequest.BodyPublishers;
 import java.net.http.HttpResponse;
 import java.net.http.HttpResponse.BodyHandlers;
+import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.http.HttpMethod;
+import com.sun.net.httpserver.HttpServer;
 
 public class HttpRequestTest extends TestBase {
 
@@ -2062,6 +2068,62 @@ public class HttpRequestTest extends TestBase {
                 .header("Accept", "application/json")
                 .header("User-Agent", "TestAgent");
         assertNotNull(request);
+    }
+
+    @Test
+    public void testExecuteInputStreamBodyCanBeReadBeforeClientCleanup() throws Exception {
+        final HttpServer server = startLocalServer("stream body");
+
+        try {
+            final HttpResponse<InputStream> response = HttpRequest.url(localUrl(server), 1_000L, 5_000L).execute(HttpMethod.GET, BodyHandlers.ofInputStream());
+
+            assertEquals(200, response.statusCode());
+
+            try (InputStream inputStream = response.body()) {
+                assertEquals("stream body", new String(inputStream.readAllBytes(), StandardCharsets.UTF_8));
+            }
+        } finally {
+            server.stop(0);
+        }
+    }
+
+    @Test
+    public void testAsyncExecuteInputStreamFutureCompletesBeforeBodyRead() throws Exception {
+        final HttpServer server = startLocalServer("async stream body");
+
+        try {
+            final CompletableFuture<HttpResponse<InputStream>> future = HttpRequest.url(localUrl(server), 1_000L, 5_000L)
+                    .asyncExecute(HttpMethod.GET, BodyHandlers.ofInputStream());
+            final HttpResponse<InputStream> response = future.get(2, TimeUnit.SECONDS);
+
+            assertEquals(200, response.statusCode());
+
+            try (InputStream inputStream = response.body()) {
+                assertEquals("async stream body", new String(inputStream.readAllBytes(), StandardCharsets.UTF_8));
+            }
+        } finally {
+            server.stop(0);
+        }
+    }
+
+    private static HttpServer startLocalServer(final String body) throws Exception {
+        final HttpServer server = HttpServer.create(new InetSocketAddress("127.0.0.1", 0), 0);
+
+        server.createContext("/", exchange -> {
+            final byte[] bytes = body.getBytes(StandardCharsets.UTF_8);
+            exchange.sendResponseHeaders(200, bytes.length);
+
+            try (OutputStream outputStream = exchange.getResponseBody()) {
+                outputStream.write(bytes);
+            }
+        });
+
+        server.start();
+        return server;
+    }
+
+    private static String localUrl(final HttpServer server) {
+        return "http://127.0.0.1:" + server.getAddress().getPort() + "/";
     }
 
 }

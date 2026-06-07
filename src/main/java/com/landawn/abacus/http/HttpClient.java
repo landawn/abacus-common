@@ -220,8 +220,8 @@ import com.landawn.abacus.util.URLEncodedUtil;
  *
  * // Connection pooling and timeout tuning
  * HttpClient optimizedClient = HttpClient.create("https://high-throughput-api.com",
- *     50,      // Maximum concurrent connections
- *     2000,    // 2 seconds connection timeout
+ *     50,       // 50 maximum concurrent connections
+ *     2000,     // 2 seconds connection timeout
  *     15000);   // 15 seconds read timeout
  * }</pre>
  *
@@ -245,8 +245,8 @@ import com.landawn.abacus.util.URLEncodedUtil;
  *
  * <p><b>Error Handling and Exception Management:</b>
  * <ul>
- *   <li><b>HttpException:</b> Thrown for HTTP error status codes (4xx, 5xx) with response details</li>
- *   <li><b>UncheckedIOException:</b> Wraps IOException for runtime exception handling</li>
+ *   <li><b>UncheckedIOException:</b> Wraps {@link IOException} for runtime exception handling, including
+ *       HTTP error status codes (4xx, 5xx) when the result type is not {@link HttpResponse}</li>
  *   <li><b>Timeout Exceptions:</b> Specific exceptions for connection and read timeouts</li>
  *   <li><b>SSL Exceptions:</b> Detailed SSL/TLS handshake and certificate validation errors</li>
  *   <li><b>Serialization Errors:</b> Content serialization/deserialization exception handling</li>
@@ -1409,7 +1409,7 @@ public final class HttpClient {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * client.head();   // Check if resource exists
+     * client.head();   // gets headers only
      * }</pre>
      *
      * @throws UncheckedIOException if an I/O error occurs
@@ -1455,6 +1455,13 @@ public final class HttpClient {
     /**
      * Executes an HTTP request and deserializes the response to the specified type.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * HttpClient client = HttpClient.create("https://example.com/api/users");
+     * User user = client.execute(HttpMethod.GET, null, User.class);
+     * // returns the response deserialized into a User instance (when executed)
+     * }</pre>
+     *
      * @param <T> The type of the response object
      * @param httpMethod The HTTP method to use (GET, POST, PUT, DELETE, HEAD, etc.)
      * @param request The request body (can be {@code null} for GET/DELETE)
@@ -1469,6 +1476,14 @@ public final class HttpClient {
     /**
      * Executes an HTTP request with custom settings and returns the response as a String.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * HttpClient client = HttpClient.create("https://example.com/api/data");
+     * HttpSettings settings = HttpSettings.create().header("Accept", "application/json");
+     * String response = client.execute(HttpMethod.GET, null, settings);
+     * // returns the response body as a String (when executed)
+     * }</pre>
+     *
      * @param httpMethod The HTTP method to use (GET, POST, PUT, DELETE, HEAD, etc.)
      * @param request The request body (can be {@code null} for GET/DELETE)
      * @param settings Additional HTTP settings for this request (headers, timeouts, etc.)
@@ -1482,6 +1497,14 @@ public final class HttpClient {
     /**
      * Executes an HTTP request with all options and deserializes the response to the specified type.
      * This is the core method that all other request methods delegate to.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * HttpClient client = HttpClient.create("https://example.com/api/users");
+     * HttpSettings settings = HttpSettings.create().header("Authorization", "Bearer token123");
+     * User created = client.execute(HttpMethod.POST, new User("John"), settings, User.class);
+     * // returns the created resource deserialized into a User (when executed)
+     * }</pre>
      *
      * @param <T> The type of the response object
      * @param httpMethod The HTTP method to use (GET, POST, PUT, DELETE, HEAD, etc.)
@@ -1526,6 +1549,15 @@ public final class HttpClient {
      * Executes an HTTP request and writes the response to an output stream.
      * The output stream is not closed by this method.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * HttpClient client = HttpClient.create("https://example.com/file.zip");
+     * try (OutputStream out = new FileOutputStream("download.zip")) {
+     *     client.execute(HttpMethod.GET, null, null, out);
+     *     // streams the response body into 'out' (when executed)
+     * }
+     * }</pre>
+     *
      * @param httpMethod The HTTP method to use (GET, POST, PUT, DELETE, HEAD, etc.)
      * @param request The request body (can be {@code null} for GET/DELETE)
      * @param settings Additional HTTP settings for this request (headers, timeouts, etc.)
@@ -1539,6 +1571,15 @@ public final class HttpClient {
     /**
      * Executes an HTTP request and writes the response to a writer.
      * The writer is not closed by this method.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * HttpClient client = HttpClient.create("https://example.com/api/data");
+     * try (Writer writer = new StringWriter()) {
+     *     client.execute(HttpMethod.GET, null, null, writer);
+     *     // writes the response body into 'writer' (when executed)
+     * }
+     * }</pre>
      *
      * @param httpMethod The HTTP method to use (GET, POST, PUT, DELETE, HEAD, etc.)
      * @param request The request body (can be {@code null} for GET/DELETE)
@@ -1897,8 +1938,13 @@ public final class HttpClient {
 
             connection.setUseCaches(settings != null ? settings.useCaches() : (_settings != null && _settings.useCaches()));
 
-            //noinspection DataFlowIssue
-            setHttpProperties(connection, settings == null || settings.headers().isEmpty() ? _settings : settings);
+            if (_settings != null) {
+                setHttpProperties(connection, _settings);
+            }
+
+            if (settings != null && settings != _settings) {
+                setHttpProperties(connection, settings);
+            }
 
             connection.setRequestMethod(httpMethod.name());
 
@@ -2179,6 +2225,15 @@ public final class HttpClient {
     /**
      * Performs an asynchronous DELETE request with query parameters and custom settings.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * HttpClient client = HttpClient.create("https://example.com/api/users");
+     * Map<String, Object> params = Map.of("id", 123);
+     * HttpSettings settings = HttpSettings.create().header("Authorization", "Bearer token123");
+     * ContinuableFuture<String> future = client.asyncDelete(params, settings);
+     * // future completes with the response body as a String (when executed)
+     * }</pre>
+     *
      * @param queryParameters Query parameters as a String, Map, or Bean object (will be URL-encoded)
      * @param settings Additional HTTP settings for this request
      * @return A ContinuableFuture that will complete with the response body as a String
@@ -2190,6 +2245,13 @@ public final class HttpClient {
     /**
      * Performs an asynchronous DELETE request and deserializes the response to the specified type.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * HttpClient client = HttpClient.create("https://example.com/api/users/123");
+     * ContinuableFuture<User> future = client.asyncDelete(User.class);
+     * // future completes with the response deserialized into a User (when executed)
+     * }</pre>
+     *
      * @param <T> The type of the response object
      * @param resultClass The class of the expected response object (for deserialization)
      * @return A ContinuableFuture that will complete with the deserialized response object
@@ -2200,6 +2262,14 @@ public final class HttpClient {
 
     /**
      * Performs an asynchronous DELETE request with custom settings and deserializes the response to the specified type.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * HttpClient client = HttpClient.create("https://example.com/api/users/123");
+     * HttpSettings settings = HttpSettings.create().header("Authorization", "Bearer token123");
+     * ContinuableFuture<User> future = client.asyncDelete(settings, User.class);
+     * // future completes with the response deserialized into a User (when executed)
+     * }</pre>
      *
      * @param <T> The type of the response object
      * @param settings Additional HTTP settings for this request (headers, timeouts, etc.)
@@ -2213,6 +2283,14 @@ public final class HttpClient {
     /**
      * Performs an asynchronous DELETE request with query parameters and deserializes the response to the specified type.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * HttpClient client = HttpClient.create("https://example.com/api/users");
+     * Map<String, Object> params = Map.of("id", 123);
+     * ContinuableFuture<User> future = client.asyncDelete(params, User.class);
+     * // future completes with the response deserialized into a User (when executed)
+     * }</pre>
+     *
      * @param <T> The type of the response object
      * @param queryParameters Query parameters as a String, Map, or Bean object (will be URL-encoded)
      * @param resultClass The class of the expected response object (for deserialization)
@@ -2224,6 +2302,15 @@ public final class HttpClient {
 
     /**
      * Performs an asynchronous DELETE request with all options and deserializes the response to the specified type.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * HttpClient client = HttpClient.create("https://example.com/api/users");
+     * Map<String, Object> params = Map.of("id", 123);
+     * HttpSettings settings = HttpSettings.create().header("Authorization", "Bearer token123");
+     * ContinuableFuture<User> future = client.asyncDelete(params, settings, User.class);
+     * // future completes with the response deserialized into a User (when executed)
+     * }</pre>
      *
      * @param <T> The type of the response object
      * @param queryParameters Query parameters as a String, Map, or Bean object (will be URL-encoded)
@@ -2255,6 +2342,13 @@ public final class HttpClient {
     /**
      * Performs an asynchronous POST request and deserializes the response to the specified type.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * HttpClient client = HttpClient.create("https://example.com/api/users");
+     * ContinuableFuture<User> future = client.asyncPost(new User("John"), User.class);
+     * // future completes with the created resource deserialized into a User (when executed)
+     * }</pre>
+     *
      * @param <T> The type of the response object
      * @param request The request body (can be String, byte[], File, InputStream, Reader, or any object for serialization)
      * @param resultClass The class of the expected response object (for deserialization)
@@ -2267,6 +2361,14 @@ public final class HttpClient {
     /**
      * Performs an asynchronous POST request with custom settings and returns the response as a String.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * HttpClient client = HttpClient.create("https://example.com/api/users");
+     * HttpSettings settings = HttpSettings.create().setContentType("application/json");
+     * ContinuableFuture<String> future = client.asyncPost("{\"name\":\"John\"}", settings);
+     * // future completes with the response body as a String (when executed)
+     * }</pre>
+     *
      * @param request The request body (can be String, byte[], File, InputStream, Reader, or any object for serialization)
      * @param settings Additional HTTP settings for this request (headers, timeouts, etc.)
      * @return A ContinuableFuture that will complete with the response body as a String
@@ -2277,6 +2379,14 @@ public final class HttpClient {
 
     /**
      * Performs an asynchronous POST request with custom settings and deserializes the response to the specified type.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * HttpClient client = HttpClient.create("https://example.com/api/users");
+     * HttpSettings settings = HttpSettings.create().header("Authorization", "Bearer token123");
+     * ContinuableFuture<User> future = client.asyncPost(new User("John"), settings, User.class);
+     * // future completes with the created resource deserialized into a User (when executed)
+     * }</pre>
      *
      * @param <T> The type of the response object
      * @param request The request body (can be String, byte[], File, InputStream, Reader, or any object for serialization)
@@ -2376,6 +2486,13 @@ public final class HttpClient {
     /**
      * Performs an asynchronous HEAD request with default settings.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * HttpClient client = HttpClient.create("https://example.com/api/status");
+     * ContinuableFuture<Void> future = client.asyncHead();
+     * // future completes (with a null result) once the headers are retrieved (when executed)
+     * }</pre>
+     *
      * @return A ContinuableFuture that will complete when the request finishes
      */
     public ContinuableFuture<Void> asyncHead() {
@@ -2384,6 +2501,14 @@ public final class HttpClient {
 
     /**
      * Performs an asynchronous HEAD request with custom settings.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * HttpClient client = HttpClient.create("https://example.com/api/status");
+     * HttpSettings settings = HttpSettings.create().header("Authorization", "Bearer token123");
+     * ContinuableFuture<Void> future = client.asyncHead(settings);
+     * // future completes (with a null result) once the headers are retrieved (when executed)
+     * }</pre>
      *
      * @param settings Additional HTTP settings for this request (headers, timeouts, etc.)
      * @return A ContinuableFuture that will complete when the request finishes
@@ -2396,6 +2521,13 @@ public final class HttpClient {
      * Executes an asynchronous HTTP request with the specified method and request body, returning the response as a String.
      * The request is submitted to the executor and returns immediately without blocking the calling thread.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * HttpClient client = HttpClient.create("https://example.com/api/data");
+     * ContinuableFuture<String> future = client.asyncExecute(HttpMethod.GET, null);
+     * // future completes with the response body as a String (when executed)
+     * }</pre>
+     *
      * @param httpMethod The HTTP method to use (GET, POST, PUT, DELETE, HEAD, etc.)
      * @param request The request body (can be {@code null} for GET/DELETE)
      * @return A ContinuableFuture that will complete with the response body as a String
@@ -2407,6 +2539,13 @@ public final class HttpClient {
     /**
      * Executes an asynchronous HTTP request and deserializes the response to the specified type.
      * The request is submitted to the executor and returns immediately without blocking the calling thread.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * HttpClient client = HttpClient.create("https://example.com/api/users/1");
+     * ContinuableFuture<User> future = client.asyncExecute(HttpMethod.GET, null, User.class);
+     * // future completes with the response deserialized into a User (when executed)
+     * }</pre>
      *
      * @param <T> The type of the response object
      * @param httpMethod The HTTP method to use (GET, POST, PUT, DELETE, HEAD, etc.)
@@ -2423,6 +2562,14 @@ public final class HttpClient {
      * The request is submitted to the executor with the specified HTTP settings and returns immediately
      * without blocking the calling thread.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * HttpClient client = HttpClient.create("https://example.com/api/data");
+     * HttpSettings settings = HttpSettings.create().header("Accept", "application/json");
+     * ContinuableFuture<String> future = client.asyncExecute(HttpMethod.GET, null, settings);
+     * // future completes with the response body as a String (when executed)
+     * }</pre>
+     *
      * @param httpMethod The HTTP method to use (GET, POST, PUT, DELETE, HEAD, etc.)
      * @param request The request body (can be {@code null} for GET/DELETE)
      * @param settings Additional HTTP settings for this request (headers, timeouts, etc.)
@@ -2436,6 +2583,14 @@ public final class HttpClient {
      * Executes an asynchronous HTTP request with all options and deserializes the response to the specified type.
      * This is the core async method that all other async request methods delegate to. Provides full control
      * over the HTTP method, request body, settings, and response deserialization type.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * HttpClient client = HttpClient.create("https://example.com/api/users");
+     * HttpSettings settings = HttpSettings.create().header("Authorization", "Bearer token123");
+     * ContinuableFuture<User> future = client.asyncExecute(HttpMethod.POST, new User("John"), settings, User.class);
+     * // future completes with the created resource deserialized into a User (when executed)
+     * }</pre>
      *
      * @param <T> The type of the response object
      * @param httpMethod The HTTP method to use (GET, POST, PUT, DELETE, HEAD, etc.)
@@ -2454,6 +2609,14 @@ public final class HttpClient {
      * Executes an asynchronous HTTP request and writes the response body to the specified file.
      * The request is submitted to the executor and the response is streamed directly to the file
      * without returning the body as an object.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * HttpClient client = HttpClient.create("https://example.com/file.zip");
+     * File output = new File("download.zip");
+     * ContinuableFuture<Void> future = client.asyncExecute(HttpMethod.GET, null, null, output);
+     * // future completes (with a null result) after the body is written to the file (when executed)
+     * }</pre>
      *
      * @param httpMethod The HTTP method to use (GET, POST, PUT, DELETE, HEAD, etc.)
      * @param request The request body (can be {@code null} for GET/DELETE)
@@ -2475,6 +2638,14 @@ public final class HttpClient {
      * Executes an asynchronous HTTP request and writes the response body to the given output stream.
      * The stream is not closed by this method; the caller is responsible for closing it.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * HttpClient client = HttpClient.create("https://example.com/file.zip");
+     * OutputStream out = new FileOutputStream("download.zip");
+     * ContinuableFuture<Void> future = client.asyncExecute(HttpMethod.GET, null, null, out);
+     * // future completes (with a null result) after the body is written to the stream (when executed)
+     * }</pre>
+     *
      * @param httpMethod The HTTP method to use (GET, POST, PUT, DELETE, HEAD, etc.)
      * @param request The request body (can be {@code null} for GET/DELETE)
      * @param settings Additional HTTP settings for this request (headers, timeouts, etc.)
@@ -2494,6 +2665,14 @@ public final class HttpClient {
     /**
      * Executes an asynchronous HTTP request and writes the response body to the given writer.
      * The writer is not closed by this method; the caller is responsible for closing it.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * HttpClient client = HttpClient.create("https://example.com/api/data");
+     * Writer writer = new StringWriter();
+     * ContinuableFuture<Void> future = client.asyncExecute(HttpMethod.GET, null, null, writer);
+     * // future completes (with a null result) after the body is written to the writer (when executed)
+     * }</pre>
      *
      * @param httpMethod The HTTP method to use (GET, POST, PUT, DELETE, HEAD, etc.)
      * @param request The request body (can be {@code null} for GET/DELETE)
@@ -2523,6 +2702,15 @@ public final class HttpClient {
      * across clients.</p>
      *
      * <p>This method is idempotent and never throws.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * HttpClient client = HttpClient.create("https://example.com/api");
+     * // ... use the client ...
+     * client.close();   // releases owned resources; safe to call more than once
+     * client.close();   // idempotent: a second call is a no-op and never throws
+     * }</pre>
+     *
      */
     public synchronized void close() {
         if (_asyncExecutor != HttpUtil.DEFAULT_ASYNC_EXECUTOR) {

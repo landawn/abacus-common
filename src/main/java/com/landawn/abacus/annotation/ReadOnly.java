@@ -70,22 +70,22 @@ import java.lang.annotation.Target;
  *
  *     @ReadOnly
  *     @Column(name = "created_time")
- *     private Timestamp createdTime;     // Set by database DEFAULT or trigger.
+ *     private Timestamp createdTime;     // createdTime is set by database DEFAULT or trigger.
  *
  *     @ReadOnly
  *     @Column(name = "last_modified")
- *     private Timestamp lastModified;    // Set by database trigger.
+ *     private Timestamp lastModified;    // lastModified is set by database trigger.
  *
  *     @ReadOnly
  *     @Column(name = "view_count")
- *     private Integer viewCount;         // Updated by stored procedure.
+ *     private Integer viewCount;         // viewCount is updated by stored procedure.
  * }
  *
  * // Equivalent to @ReadOnlyId for the id property:
  * @Entity
  * public class AuditEntry {
  *     @Id @ReadOnly
- *     private Long id;     // Read-only primary key (DB-generated).
+ *     private Long id;     // id is a read-only primary key (DB-generated).
  *     ...
  * }
  * }</pre>

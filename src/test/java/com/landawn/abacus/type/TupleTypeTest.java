@@ -121,21 +121,21 @@ public class TupleTypeTest extends TestBase {
     }
 
     @Test
-    public void testWriteCharacter() throws IOException {
+    public void testSerializeTo() throws IOException {
         CharacterWriter writer = createCharacterWriter();
         JsonXmlSerConfig<?> config = null;
 
-        tuple1Type.writeCharacter(writer, testTuple1, config);
+        tuple1Type.serializeTo(writer, testTuple1, config);
 
         verify(writer, atLeastOnce()).write(anyChar());
     }
 
     @Test
-    public void testWriteCharacterNull() throws IOException {
+    public void testSerializeToNull() throws IOException {
         CharacterWriter writer = createCharacterWriter();
         JsonXmlSerConfig<?> config = null;
 
-        tuple1Type.writeCharacter(writer, null, config);
+        tuple1Type.serializeTo(writer, null, config);
 
         verify(writer).write(any(char[].class));
     }

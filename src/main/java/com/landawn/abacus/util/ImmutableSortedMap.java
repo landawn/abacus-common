@@ -47,7 +47,7 @@ import com.landawn.abacus.annotation.Beta;
  *
  * // Map is automatically sorted by keys: {apple=3, banana=2, cherry=5}
  * ImmutableSortedMap<String, Integer> subMap = map.subMap("banana", "cherry");
- * System.out.println(subMap);   // {banana=2}
+ * System.out.println(subMap);   // prints {banana=2}
  * }</pre>
  *
  * @param <K> the key type
@@ -75,7 +75,7 @@ public class ImmutableSortedMap<K, V> extends ImmutableMap<K, V> implements Sort
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableSortedMap<String, Integer> emptyMap = ImmutableSortedMap.empty();
-     * System.out.println(emptyMap.size());   // 0
+     * System.out.println(emptyMap.size());   // prints 0
      * }</pre>
      *
      * @param <K> the type of the keys in the ImmutableSortedMap
@@ -93,7 +93,7 @@ public class ImmutableSortedMap<K, V> extends ImmutableMap<K, V> implements Sort
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableSortedMap<String, Integer> singleEntry = ImmutableSortedMap.of("count", 42);
-     * System.out.println(singleEntry.firstKey());   // "count"
+     * System.out.println(singleEntry.firstKey());   // prints "count"
      * }</pre>
      *
      * @param <K> the type of the key in the ImmutableSortedMap, must extend Comparable
@@ -122,7 +122,7 @@ public class ImmutableSortedMap<K, V> extends ImmutableMap<K, V> implements Sort
      *     2, "two",
      *     1, "one"
      * );
-     * System.out.println(map);   // {1=one, 2=two}
+     * System.out.println(map);   // prints {1=one, 2=two}
      * }</pre>
      *
      * @param <K> the type of the keys in the ImmutableSortedMap, must extend Comparable
@@ -147,6 +147,14 @@ public class ImmutableSortedMap<K, V> extends ImmutableMap<K, V> implements Sort
      * Returns an ImmutableSortedMap containing the provided key-value pairs.
      * The keys must implement Comparable to determine their natural ordering.
      * If duplicate keys are provided, the last value for a key wins.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * ImmutableSortedMap<Integer, String> map = ImmutableSortedMap.of(
+     *     3, "three", 1, "one", 2, "two"
+     * );
+     * System.out.println(map);   // prints {1=one, 2=two, 3=three}
+     * }</pre>
      *
      * @param <K> the type of the keys in the ImmutableSortedMap, must extend Comparable
      * @param <V> the type of the values in the ImmutableSortedMap
@@ -173,6 +181,14 @@ public class ImmutableSortedMap<K, V> extends ImmutableMap<K, V> implements Sort
      * Returns an ImmutableSortedMap containing the provided key-value pairs.
      * The keys must implement Comparable to determine their natural ordering.
      * If duplicate keys are provided, the last value for a key wins.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * ImmutableSortedMap<Integer, String> map = ImmutableSortedMap.of(
+     *     4, "four", 1, "one", 3, "three", 2, "two"
+     * );
+     * System.out.println(map);   // prints {1=one, 2=two, 3=three, 4=four}
+     * }</pre>
      *
      * @param <K> the type of the keys in the ImmutableSortedMap, must extend Comparable
      * @param <V> the type of the values in the ImmutableSortedMap
@@ -203,6 +219,14 @@ public class ImmutableSortedMap<K, V> extends ImmutableMap<K, V> implements Sort
      * Returns an ImmutableSortedMap containing the provided key-value pairs.
      * The keys must implement Comparable to determine their natural ordering.
      * If duplicate keys are provided, the last value for a key wins.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * ImmutableSortedMap<String, Integer> map = ImmutableSortedMap.of(
+     *     "banana", 2, "apple", 1, "cherry", 3, "date", 4, "elderberry", 5
+     * );
+     * System.out.println(map.firstKey());   // prints "apple"
+     * }</pre>
      *
      * @param <K> the type of the keys in the ImmutableSortedMap, must extend Comparable
      * @param <V> the type of the values in the ImmutableSortedMap
@@ -236,6 +260,14 @@ public class ImmutableSortedMap<K, V> extends ImmutableMap<K, V> implements Sort
      * Returns an ImmutableSortedMap containing the provided key-value pairs.
      * The keys must implement Comparable to determine their natural ordering.
      * If duplicate keys are provided, the last value for a key wins.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * ImmutableSortedMap<Integer, String> map = ImmutableSortedMap.of(
+     *     3, "three", 1, "one", 4, "four", 2, "two", 6, "six", 5, "five"
+     * );
+     * System.out.println(map.lastKey());   // prints 6
+     * }</pre>
      *
      * @param <K> the type of the keys in the ImmutableSortedMap, must extend Comparable
      * @param <V> the type of the values in the ImmutableSortedMap
@@ -272,6 +304,14 @@ public class ImmutableSortedMap<K, V> extends ImmutableMap<K, V> implements Sort
      * Returns an ImmutableSortedMap containing the provided key-value pairs.
      * The keys must implement Comparable to determine their natural ordering.
      * If duplicate keys are provided, the last value for a key wins.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * ImmutableSortedMap<String, Integer> map = ImmutableSortedMap.of(
+     *     "g", 7, "a", 1, "f", 6, "b", 2, "e", 5, "c", 3, "d", 4
+     * );
+     * System.out.println(map);   // prints {a=1, b=2, c=3, d=4, e=5, f=6, g=7}
+     * }</pre>
      *
      * @param <K> the type of the keys in the ImmutableSortedMap, must extend Comparable
      * @param <V> the type of the values in the ImmutableSortedMap
@@ -311,6 +351,15 @@ public class ImmutableSortedMap<K, V> extends ImmutableMap<K, V> implements Sort
      * Returns an ImmutableSortedMap containing the provided key-value pairs.
      * The keys must implement Comparable to determine their natural ordering.
      * If duplicate keys are provided, the last value for a key wins.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * ImmutableSortedMap<Integer, String> map = ImmutableSortedMap.of(
+     *     8, "eight", 3, "three", 5, "five", 1, "one", 7, "seven", 2, "two", 6, "six", 4, "four"
+     * );
+     * System.out.println(map.firstKey());   // prints 1
+     * System.out.println(map.lastKey());    // prints 8
+     * }</pre>
      *
      * @param <K> the type of the keys in the ImmutableSortedMap, must extend Comparable
      * @param <V> the type of the values in the ImmutableSortedMap
@@ -353,6 +402,15 @@ public class ImmutableSortedMap<K, V> extends ImmutableMap<K, V> implements Sort
      * Returns an ImmutableSortedMap containing the provided key-value pairs.
      * The keys must implement Comparable to determine their natural ordering.
      * If duplicate keys are provided, the last value for a key wins.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * ImmutableSortedMap<Integer, String> map = ImmutableSortedMap.of(
+     *     1, "one", 2, "two", 3, "three", 4, "four", 5, "five",
+     *     6, "six", 7, "seven", 8, "eight", 9, "nine"
+     * );
+     * System.out.println(map.size());   // prints 9
+     * }</pre>
      *
      * @param <K> the type of the keys in the ImmutableSortedMap, must extend Comparable
      * @param <V> the type of the values in the ImmutableSortedMap
@@ -398,6 +456,15 @@ public class ImmutableSortedMap<K, V> extends ImmutableMap<K, V> implements Sort
      * Returns an ImmutableSortedMap containing the provided key-value pairs.
      * The keys must implement Comparable to determine their natural ordering.
      * If duplicate keys are provided, the last value for a key wins.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * ImmutableSortedMap<Integer, String> map = ImmutableSortedMap.of(
+     *     1, "one", 2, "two", 3, "three", 4, "four", 5, "five",
+     *     6, "six", 7, "seven", 8, "eight", 9, "nine", 10, "ten"
+     * );
+     * System.out.println(map.lastKey());   // prints 10
+     * }</pre>
      *
      * @param <K> the type of the keys in the ImmutableSortedMap, must extend Comparable
      * @param <V> the type of the values in the ImmutableSortedMap
@@ -459,8 +526,8 @@ public class ImmutableSortedMap<K, V> extends ImmutableMap<K, V> implements Sort
      * mutable.put("b", 2);
      * mutable.put("a", 1);
      * ImmutableSortedMap<String, Integer> immutable = ImmutableSortedMap.copyOf(mutable);
-     * mutable.put("c", 3);             // Does not affect immutable
-     * System.out.println(immutable);   // {a=1, b=2}
+     * mutable.put("c", 3);             // does not affect immutable
+     * System.out.println(immutable);   // prints {a=1, b=2}
      * }</pre>
      *
      * @param <K> the type of keys in the Map
@@ -498,7 +565,7 @@ public class ImmutableSortedMap<K, V> extends ImmutableMap<K, V> implements Sort
      * <pre>{@code
      * SortedMap<Integer, String> mutable = new TreeMap<>();
      * ImmutableSortedMap<Integer, String> wrapped = ImmutableSortedMap.wrap(mutable);
-     * mutable.put(1, "one");   // This change is visible in wrapped!
+     * mutable.put(1, "one");   // this change is visible in wrapped!
      * }</pre>
      *
      * @param <K> the type of keys in the SortedMap
@@ -522,6 +589,12 @@ public class ImmutableSortedMap<K, V> extends ImmutableMap<K, V> implements Sort
      * This method is deprecated and will throw an UnsupportedOperationException if used.
      * Use {@link #wrap(SortedMap)} for SortedMap or {@link ImmutableMap#wrap(Map)} for regular Maps.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Map<String, Integer> map = new HashMap<>();
+     * ImmutableSortedMap.wrap(map);   // throws UnsupportedOperationException
+     * }</pre>
+     *
      * @param <K> the key type
      * @param <V> the value type
      * @param map ignored
@@ -541,13 +614,13 @@ public class ImmutableSortedMap<K, V> extends ImmutableMap<K, V> implements Sort
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableSortedMap<String, Integer> naturalOrder = ImmutableSortedMap.of("a", 1, "b", 2);
-     * System.out.println(naturalOrder.comparator());   // null
+     * System.out.println(naturalOrder.comparator());   // prints null
      *
      * Comparator<String> reverseOrder = Comparator.reverseOrder();
      * SortedMap<String, Integer> customMap = new TreeMap<>(reverseOrder);
      * customMap.put("a", 1);
      * ImmutableSortedMap<String, Integer> customOrder = ImmutableSortedMap.wrap(customMap);
-     * System.out.println(customOrder.comparator() == reverseOrder);   // true
+     * System.out.println(customOrder.comparator() == reverseOrder);   // prints true
      * }</pre>
      *
      * @return the comparator used to order the keys in this map, or {@code null}
@@ -569,7 +642,7 @@ public class ImmutableSortedMap<K, V> extends ImmutableMap<K, V> implements Sort
      *     1, "one", 2, "two", 3, "three", 4, "four", 5, "five"
      * );
      * ImmutableSortedMap<Integer, String> subMap = map.subMap(2, 4);
-     * System.out.println(subMap);   // {2=two, 3=three}
+     * System.out.println(subMap);   // prints {2=two, 3=three}
      * }</pre>
      *
      * @param fromKey low endpoint (inclusive) of the keys in the returned map
@@ -601,7 +674,7 @@ public class ImmutableSortedMap<K, V> extends ImmutableMap<K, V> implements Sort
      *     "a", 1, "b", 2, "c", 3, "d", 4
      * );
      * ImmutableSortedMap<String, Integer> headMap = map.headMap("c");
-     * System.out.println(headMap);   // {a=1, b=2}
+     * System.out.println(headMap);   // prints {a=1, b=2}
      * }</pre>
      *
      * @param toKey high endpoint (exclusive) of the keys in the returned map
@@ -627,7 +700,7 @@ public class ImmutableSortedMap<K, V> extends ImmutableMap<K, V> implements Sort
      *     10, "ten", 20, "twenty", 30, "thirty", 40, "forty"
      * );
      * ImmutableSortedMap<Integer, String> tailMap = map.tailMap(25);
-     * System.out.println(tailMap);   // {30=thirty, 40=forty}
+     * System.out.println(tailMap);   // prints {30=thirty, 40=forty}
      * }</pre>
      *
      * @param fromKey low endpoint (inclusive) of the keys in the returned map
@@ -651,7 +724,7 @@ public class ImmutableSortedMap<K, V> extends ImmutableMap<K, V> implements Sort
      * ImmutableSortedMap<String, Integer> map = ImmutableSortedMap.of(
      *     "banana", 2, "apple", 1, "cherry", 3
      * );
-     * System.out.println(map.firstKey());   // "apple"
+     * System.out.println(map.firstKey());   // prints "apple"
      * }</pre>
      *
      * @return the first (lowest) key currently in this map
@@ -695,7 +768,7 @@ public class ImmutableSortedMap<K, V> extends ImmutableMap<K, V> implements Sort
      * ImmutableSortedMap<Integer, String> map = ImmutableSortedMap.of(
      *     3, "three", 1, "one", 4, "four", 1, "uno", 5, "five"
      * );
-     * System.out.println(map.lastKey());   // 5
+     * System.out.println(map.lastKey());   // prints 5
      * }</pre>
      *
      * @return the last (highest) key currently in this map

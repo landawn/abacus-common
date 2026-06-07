@@ -21,6 +21,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Reader;
 import java.io.Writer;
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.IdentityHashMap;
@@ -197,11 +198,12 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
             return Strings.EMPTY;
         }
 
+        final XmlSerConfig configToUse = check(config);
         final BufferedXmlWriter bw = Objectory.createBufferedXmlWriter();
-        final IdentityHashSet<Object> serializedObjects = config == null || !config.isSupportCircularReference() ? null : new IdentityHashSet<>();
+        final IdentityHashSet<Object> serializedObjects = !configToUse.isSupportCircularReference() ? null : new IdentityHashSet<>();
 
         try {
-            write(obj, null, config, null, serializedObjects, bw, false);
+            write(obj, null, configToUse, null, serializedObjects, bw, false);
 
             return bw.toString();
         } catch (final IOException e) {
@@ -284,11 +286,12 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
      */
     @Override
     public void serialize(final Object obj, final XmlSerConfig config, final OutputStream output) {
+        final XmlSerConfig configToUse = check(config);
         final BufferedXmlWriter bw = Objectory.createBufferedXmlWriter(output);
-        final IdentityHashSet<Object> serializedObjects = config == null || !config.isSupportCircularReference() ? null : new IdentityHashSet<>();
+        final IdentityHashSet<Object> serializedObjects = !configToUse.isSupportCircularReference() ? null : new IdentityHashSet<>();
 
         try {
-            write(obj, null, config, null, serializedObjects, bw, true);
+            write(obj, null, configToUse, null, serializedObjects, bw, true);
         } catch (final IOException e) {
             throw new UncheckedIOException(e);
         } finally {
@@ -326,12 +329,13 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
      */
     @Override
     public void serialize(final Object obj, final XmlSerConfig config, final Writer output) {
+        final XmlSerConfig configToUse = check(config);
         final boolean isBufferedWriter = output instanceof BufferedXmlWriter;
         final BufferedXmlWriter bw = isBufferedWriter ? (BufferedXmlWriter) output : Objectory.createBufferedXmlWriter(output);
-        final IdentityHashSet<Object> serializedObjects = config == null || !config.isSupportCircularReference() ? null : new IdentityHashSet<>();
+        final IdentityHashSet<Object> serializedObjects = !configToUse.isSupportCircularReference() ? null : new IdentityHashSet<>();
 
         try {
-            write(obj, null, config, null, serializedObjects, bw, true);
+            write(obj, null, configToUse, null, serializedObjects, bw, true);
         } catch (final IOException e) {
             throw new UncheckedIOException(e);
         } finally {
@@ -372,7 +376,7 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
                     if (propInfo != null && propInfo.hasFormat) {
                         propInfo.writePropValue(bw, obj, configToUse);
                     } else {
-                        type.writeCharacter(bw, obj, configToUse);
+                        type.serializeTo(bw, obj, configToUse);
                     }
                 }
 
@@ -548,12 +552,12 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
                     if (propInfo.jsonXmlType.isObjectArray() || propInfo.jsonXmlType.isCollection()) {
                         // jsonParser.serialize(bw, propValue);
 
-                        strType.writeCharacter(bw, jsonParser.serialize(propValue, getJSC(config)), config);
+                        strType.serializeTo(bw, jsonParser.serialize(propValue, getJSC(config)), config);
                     } else {
                         if (propInfo.hasFormat) {
                             propInfo.writePropValue(bw, propValue, config);
                         } else {
-                            propInfo.jsonXmlType.writeCharacter(bw, propValue, config);
+                            propInfo.jsonXmlType.serializeTo(bw, propValue, config);
                         }
                     }
                 } else {
@@ -645,7 +649,7 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
                         bw.write(XmlConstants.KEY_ELE_START);
                     }
 
-                    stringType.writeCharacter(bw, key, config);
+                    stringType.serializeTo(bw, key, config);
                 } else {
                     keyType = Type.of(key.getClass());
 
@@ -661,9 +665,9 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
                         if (keyType.isObjectArray() || keyType.isCollection()) {
                             // jsonParser.serialize(bw, key);
 
-                            strType.writeCharacter(bw, jsonParser.serialize(key, getJSC(config)), config);
+                            strType.serializeTo(bw, jsonParser.serialize(key, getJSC(config)), config);
                         } else {
-                            keyType.writeCharacter(bw, key, config);
+                            keyType.serializeTo(bw, key, config);
                         }
                     } else {
                         write(key, null, config, nextIndentation, serializedObjects, bw, false);
@@ -700,9 +704,9 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
                     if (valueType.isObjectArray() || valueType.isCollection()) {
                         // jsonParser.serialize(bw, value);
 
-                        strType.writeCharacter(bw, jsonParser.serialize(value, getJSC(config)), config);
+                        strType.serializeTo(bw, jsonParser.serialize(value, getJSC(config)), config);
                     } else {
-                        valueType.writeCharacter(bw, value, config);
+                        valueType.serializeTo(bw, value, config);
                     }
                 } else {
                     write(value, null, config, nextIndentation, serializedObjects, bw, false);
@@ -760,10 +764,12 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
 
         final String eleIndentation = isPrettyFormat ? ((indentation == null ? Strings.EMPTY : indentation) + config.getIndentation()) : null;
         final String nextIndentation = isPrettyFormat ? (eleIndentation + config.getIndentation()) : null;
-        final Object[] a = (Object[]) obj;
+        final int len = Array.getLength(obj);
         Type<Object> eleType = null;
 
-        for (final Object e : a) {
+        for (int i = 0; i < len; i++) {
+            final Object e = Array.get(obj, i);
+
             if (isPrettyFormat) {
                 bw.write(IOUtil.LINE_SEPARATOR_UNIX);
                 bw.write(eleIndentation);
@@ -786,9 +792,9 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
                     if (eleType.isObjectArray() || eleType.isCollection()) {
                         // jsonParser.serialize(bw, e);
 
-                        strType.writeCharacter(bw, jsonParser.serialize(e, getJSC(config)), config);
+                        strType.serializeTo(bw, jsonParser.serialize(e, getJSC(config)), config);
                     } else {
-                        eleType.writeCharacter(bw, e, config);
+                        eleType.serializeTo(bw, e, config);
                     }
                 } else {
                     write(e, null, config, nextIndentation, serializedObjects, bw, false);
@@ -882,9 +888,9 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
                     if (eleType.isObjectArray() || eleType.isCollection()) {
                         // jsonParser.serialize(bw, e);
 
-                        strType.writeCharacter(bw, jsonParser.serialize(e, getJSC(config)), config);
+                        strType.serializeTo(bw, jsonParser.serialize(e, getJSC(config)), config);
                     } else {
-                        eleType.writeCharacter(bw, e, config);
+                        eleType.serializeTo(bw, e, config);
                     }
                 } else {
                     write(e, null, config, nextIndentation, serializedObjects, bw, false);
@@ -2226,8 +2232,7 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
                                 break;
                             }
 
-                            // simple array with sample format <array>[1, 2,
-                            // 3...]</array>
+                            // simple array with sample format <array>[1, 2, 3...]</array>
                             case XMLStreamConstants.CHARACTERS: {
                                 text = xmlReader.getText();
 
@@ -3526,6 +3531,10 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
                     if (inIgnorePropRefCount == 1) {
                         inIgnorePropRefCount--;
 
+                        if (!isTagByPropertyName) {
+                            beanOrPropNameQueue.remove(beanOrPropNameQueue.size() - 1);
+                        }
+
                         eleValue = null;
                         propInfo = null;
                         propType = null;
@@ -3631,6 +3640,15 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
                 }
 
                 case ENTRY:
+                    // If the key of this entry was marked to be ignored (inIgnorePropRefCount set to 1 at the end of
+                    // the <key> element), the matching <value> element was skipped wholesale by the inIgnorePropRefCount
+                    // increment/decrement in startElement/endElement, so the VALUE case never got a chance to reset the
+                    // flag or to drain the key that was pushed onto keyQueue. Reset both here at the entry boundary;
+                    // otherwise the flag stays set and every following entry is silently swallowed.
+                    if (inIgnorePropRefCount == 1) {
+                        inIgnorePropRefCount--;
+                        keyQueue.remove(keyQueue.size() - 1);
+                    }
 
                     break;
 

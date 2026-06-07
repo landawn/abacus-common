@@ -40,6 +40,7 @@ package com.landawn.abacus.type;
  *     }
  * }
  * }</pre>
+ *
  */
 @SuppressWarnings("java:S2160")
 public final class PrimitiveDoubleType extends AbstractDoubleType {

@@ -30,12 +30,13 @@ package com.landawn.abacus.util;
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * YesNo answer = YesNo.YES;
- * int dbValue = answer.intValue();   // Returns 1
+ * int dbValue = answer.intValue();   // returns 1
  *
  * // Converting from database
  * int storedValue = resultSet.getInt("active");
  * YesNo isActive = YesNo.valueOf(storedValue);
  * }</pre>
+ *
  */
 public enum YesNo {
 
@@ -67,7 +68,7 @@ public enum YesNo {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * YesNo consent = YesNo.YES;
-     * int value = consent.intValue();   // Returns 1
+     * int value = consent.intValue();   // returns 1
      *
      * // Storing in database
      * preparedStatement.setInt(1, userConsent.intValue());

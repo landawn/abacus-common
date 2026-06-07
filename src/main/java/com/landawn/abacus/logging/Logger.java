@@ -86,6 +86,7 @@ public interface Logger {
      * Logger rootLogger = LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
      * rootLogger.info("Root logger message");
      * }</pre>
+     *
      */
     String ROOT_LOGGER_NAME = "ROOT";
 

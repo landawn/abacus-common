@@ -23,8 +23,8 @@ import com.landawn.abacus.util.Strings;
  * This class provides serialization, deserialization, and database operations for
  * {@code MutableChar} instances, which are mutable wrappers around primitive
  * {@code char} values. Values are serialized as the unwrapped character
- * (identical to {@link CharacterType}); database storage uses SQL {@code INTEGER}
- * for the character's numeric code point.
+ * (identical to {@link CharacterType}); database storage uses SQL {@code VARCHAR}
+ * for the single-character string value.
  *
  * @see com.landawn.abacus.util.MutableChar
  * @see AbstractType
@@ -66,8 +66,15 @@ public class MutableCharType extends AbstractType<MutableChar> {
     /**
      * Converts a {@link MutableChar} object to its single-character string representation.
      *
+     * <p>The returned string is a serializable representation designed to be parsed back into an equivalent value
+     * via {@link #valueOf(String)}; {@code stringOf} and {@code valueOf} are inverse operations that round-trip. This
+     * is the key distinction from {@link Object#toString()}, whose result is not guaranteed to be convertible back
+     * into the original value.</p>
+     *
      * @param x the {@code MutableChar} object to convert, may be {@code null}
      * @return the single-character string representation, or {@code null} if the input is {@code null}
+     * @see #valueOf(String)
+     * @see #valueOf(Object)
      */
     @Override
     public String stringOf(final MutableChar x) {
@@ -79,11 +86,17 @@ public class MutableCharType extends AbstractType<MutableChar> {
      * A single-character string yields that character; a longer string is parsed as an
      * integer and cast to the corresponding {@code char} (e.g. {@code "65"} yields {@code 'A'}).
      *
+     * <p>This method is the inverse of {@code stringOf} and round-trips with it: it parses the string produced by
+     * {@code stringOf} back into a value of this type. Strings produced by {@link Object#toString()} are not
+     * guaranteed to be parseable in this way.</p>
+     *
      * @param str the string to parse, may be {@code null} or empty
      * @return a {@code MutableChar} containing the parsed character,
      *         or {@code null} if the input is {@code null} or empty
      * @throws NumberFormatException if the string has more than one character and cannot be parsed as an integer
      * @throws IllegalArgumentException if the string represents an integer outside the valid char range [0, 65535]
+     * @see #valueOf(Object)
+     * @see #stringOf(MutableChar)
      */
     @Override
     public MutableChar valueOf(final String str) {
@@ -91,9 +104,8 @@ public class MutableCharType extends AbstractType<MutableChar> {
     }
 
     /**
-     * Retrieves an integer value from the specified column in the {@link ResultSet},
-     * casts it to {@code char}, and wraps it in a {@link MutableChar}.
-     * Returns {@code null} if the column value is SQL {@code NULL} (detected via {@link ResultSet#wasNull()}).
+     * Retrieves a string value from the specified column in the {@link ResultSet}
+     * and wraps its first character in a {@link MutableChar}.
      *
      * @param rs the {@code ResultSet} containing the data
      * @param columnIndex the 1-based index of the column to retrieve
@@ -103,15 +115,14 @@ public class MutableCharType extends AbstractType<MutableChar> {
      */
     @Override
     public MutableChar get(final ResultSet rs, final int columnIndex) throws SQLException {
-        final int value = rs.getInt(columnIndex);
+        final String result = rs.getString(columnIndex);
 
-        return rs.wasNull() ? null : MutableChar.of((char) value);
+        return Strings.isEmpty(result) ? null : MutableChar.of(result.charAt(0));
     }
 
     /**
-     * Retrieves an integer value from the specified column in the {@link ResultSet},
-     * casts it to {@code char}, and wraps it in a {@link MutableChar}.
-     * Returns {@code null} if the column value is SQL {@code NULL} (detected via {@link ResultSet#wasNull()}).
+     * Retrieves a string value from the specified column in the {@link ResultSet}
+     * and wraps its first character in a {@link MutableChar}.
      *
      * @param rs the {@code ResultSet} containing the data
      * @param columnName the label of the column to retrieve (as specified in the SQL AS clause)
@@ -121,15 +132,15 @@ public class MutableCharType extends AbstractType<MutableChar> {
      */
     @Override
     public MutableChar get(final ResultSet rs, final String columnName) throws SQLException {
-        final int value = rs.getInt(columnName);
+        final String result = rs.getString(columnName);
 
-        return rs.wasNull() ? null : MutableChar.of((char) value);
+        return Strings.isEmpty(result) ? null : MutableChar.of(result.charAt(0));
     }
 
     /**
      * Sets a {@link MutableChar} parameter in a {@link PreparedStatement} at the specified index.
-     * The character is stored as an integer (SQL {@code INTEGER}) value.
-     * If {@code x} is {@code null}, SQL {@code NULL} ({@link java.sql.Types#INTEGER}) is set.
+     * The character is stored as a single-character string (SQL {@code VARCHAR}) value.
+     * If {@code x} is {@code null}, SQL {@code NULL} ({@link java.sql.Types#VARCHAR}) is set.
      *
      * @param stmt the {@code PreparedStatement} to set the parameter on
      * @param columnIndex the 1-based index of the parameter to set
@@ -139,16 +150,16 @@ public class MutableCharType extends AbstractType<MutableChar> {
     @Override
     public void set(final PreparedStatement stmt, final int columnIndex, final MutableChar x) throws SQLException {
         if (x == null) {
-            stmt.setNull(columnIndex, Types.INTEGER);
+            stmt.setNull(columnIndex, Types.VARCHAR);
         } else {
-            stmt.setInt(columnIndex, x.value());
+            stmt.setString(columnIndex, String.valueOf(x.value()));
         }
     }
 
     /**
      * Sets a {@link MutableChar} parameter in a {@link CallableStatement} by name.
-     * The character is stored as an integer (SQL {@code INTEGER}) value.
-     * If {@code x} is {@code null}, SQL {@code NULL} ({@link java.sql.Types#INTEGER}) is set.
+     * The character is stored as a single-character string (SQL {@code VARCHAR}) value.
+     * If {@code x} is {@code null}, SQL {@code NULL} ({@link java.sql.Types#VARCHAR}) is set.
      *
      * @param stmt the {@code CallableStatement} to set the parameter on
      * @param parameterName the name of the parameter to set
@@ -158,9 +169,9 @@ public class MutableCharType extends AbstractType<MutableChar> {
     @Override
     public void set(final CallableStatement stmt, final String parameterName, final MutableChar x) throws SQLException {
         if (x == null) {
-            stmt.setNull(parameterName, Types.INTEGER);
+            stmt.setNull(parameterName, Types.VARCHAR);
         } else {
-            stmt.setInt(parameterName, x.value());
+            stmt.setString(parameterName, String.valueOf(x.value()));
         }
     }
 
@@ -168,10 +179,24 @@ public class MutableCharType extends AbstractType<MutableChar> {
      * Appends the character value of a {@link MutableChar} directly to an {@link Appendable}
      * (unquoted, as a single character).
      * Writes the literal string {@code "null"} when {@code x} is {@code null}.
+     * <p>
+     * <b>appendTo vs. serializeTo:</b> {@code appendTo} produces a plain, {@code toString()}-style rendering with no
+     * JSON/XML quoting or escaping (for general text output), whereas {@code serializeTo} produces the JSON/XML
+     * serialized form (applying string quotation and character escaping per the serialization config) and is used by the
+     * JSON/XML serializers.
      *
      * @param appendable the target to write to
      * @param x the {@code MutableChar} to append, may be {@code null}
      * @throws IOException if an I/O error occurs while appending
+     * @implNote
+     * This method appends a string representation of {@code x} to {@code appendable} (the literal {@code "null"} for a
+     * {@code null} value). Conceptually this is the human-readable form produced by {@code toString()}, <i>not</i> the
+     * value returned by {@code stringOf}, which is a formatted, serializable representation (typically a JSON string)
+     * that {@link #valueOf(String)} can convert back into an equivalent value. For values whose nested structure makes
+     * the two forms differ (collections, maps, arrays), {@code appendTo} emits the unquoted, {@code toString()}-style
+     * form; it is therefore not, in the general contract, a plain
+     * {@code appendable.append(x == null ? NULL_STRING : stringOf(x))}. (For value types whose human-readable and
+     * serialized forms coincide, the appended text is naturally identical to {@code stringOf(x)}.)
      */
     @Override
     public void appendTo(final Appendable appendable, final MutableChar x) throws IOException {
@@ -188,6 +213,15 @@ public class MutableCharType extends AbstractType<MutableChar> {
      * {@link com.landawn.abacus.parser.JsonXmlSerConfig#getCharQuotation()}),
      * the character is wrapped in that quotation character; otherwise it is written unquoted.
      * Writes {@code NULL_CHAR_ARRAY} when {@code x} is {@code null}.
+     * <p>
+     * This method is specifically designed for JSON/XML serialization: it writes the serialized form of {@code x} to the
+     * {@code CharacterWriter}, applying string quotation and character escaping according to the supplied serialization
+     * config (a {@code null} config means no surrounding quotation). It is the streaming counterpart of {@code stringOf}
+     * and is invoked by the JSON/XML serializers.
+     * <p>
+     * <b>serializeTo vs. appendTo:</b> {@code serializeTo} produces machine-readable JSON/XML (quoted and escaped),
+     * whereas {@code appendTo} produces a plain, human-readable {@code toString()}-style rendering without JSON/XML
+     * quoting or escaping.
      *
      * @param writer the {@code CharacterWriter} to write to
      * @param x the {@code MutableChar} to write, may be {@code null}
@@ -195,7 +229,7 @@ public class MutableCharType extends AbstractType<MutableChar> {
      * @throws IOException if an I/O error occurs while writing
      */
     @Override
-    public void writeCharacter(final CharacterWriter writer, final MutableChar x, final JsonXmlSerConfig<?> config) throws IOException {
+    public void serializeTo(final CharacterWriter writer, final MutableChar x, final JsonXmlSerConfig<?> config) throws IOException {
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {

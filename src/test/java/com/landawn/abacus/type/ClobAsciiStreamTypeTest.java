@@ -159,25 +159,25 @@ public class ClobAsciiStreamTypeTest extends TestBase {
     }
 
     @Test
-    public void testWriteCharacter_NoQuotation() throws IOException {
+    public void testSerializeTo_NoQuotation() throws IOException {
         CharacterWriter mockWriter = createCharacterWriter();
         InputStream stream = new ByteArrayInputStream("ASCII content".getBytes());
         JsonXmlSerConfig<?> config = mock(JsonXmlSerConfig.class);
         when(config.getStringQuotation()).thenReturn((char) 0);
 
-        type.writeCharacter(mockWriter, stream, config);
+        type.serializeTo(mockWriter, stream, config);
 
         verify(mockWriter, atLeastOnce()).writeCharacter(any(char[].class), anyInt(), anyInt());
     }
 
     @Test
-    public void testWriteCharacter_WithQuotation() throws IOException {
+    public void testSerializeTo_WithQuotation() throws IOException {
         CharacterWriter mockWriter = createCharacterWriter();
         InputStream stream = new ByteArrayInputStream("data".getBytes());
         JsonXmlSerConfig<?> config = mock(JsonXmlSerConfig.class);
         when(config.getStringQuotation()).thenReturn('"');
 
-        type.writeCharacter(mockWriter, stream, config);
+        type.serializeTo(mockWriter, stream, config);
 
         verify(mockWriter, times(2)).write('"');
         verify(mockWriter, atLeastOnce()).writeCharacter(any(char[].class), anyInt(), anyInt());
@@ -202,13 +202,13 @@ public class ClobAsciiStreamTypeTest extends TestBase {
     }
 
     /**
-     * Bug fix verification: writeCharacter declares {@code throws IOException}, so an
+     * Bug fix verification: serializeTo declares {@code throws IOException}, so an
      * {@link IOException} raised by the underlying stream must propagate as an
      * {@link IOException} to the caller — not be wrapped/swallowed as
      * {@code UncheckedIOException}.
      */
     @Test
-    public void testWriteCharacter_IOExceptionPropagates() {
+    public void testSerializeTo_IOExceptionPropagates() {
         CharacterWriter mockWriter = createCharacterWriter();
         final IOException expected = new IOException("boom");
         InputStream failingStream = new InputStream() {
@@ -223,7 +223,7 @@ public class ClobAsciiStreamTypeTest extends TestBase {
             }
         };
 
-        IOException thrown = Assertions.assertThrows(IOException.class, () -> type.writeCharacter(mockWriter, failingStream, null));
+        IOException thrown = Assertions.assertThrows(IOException.class, () -> type.serializeTo(mockWriter, failingStream, null));
         assertEquals(expected, thrown);
     }
 

@@ -87,7 +87,7 @@ import com.landawn.abacus.util.u.Optional;
  *
  * // Checking result state
  * if (result.isSuccess()) {
- *     String value = result.orElseThrow();   // Safe to call
+ *     String value = result.orElseThrow();   // safe to call
  * } else {
  *     IOException error = result.getException();
  *     handleError(error);
@@ -230,7 +230,7 @@ import com.landawn.abacus.util.u.Optional;
  *   <li><b>{@link Throwables}:</b> Compatible with throwable utility methods for exception handling</li>
  * </ul>
  *
- * <p><b>Usage Examples: File Processing Pipeline</b>
+ * <p><b>Usage Examples: File Processing Pipeline</b></p>
  * <pre>{@code
  * public class FileProcessor {
  *     public Result<String, IOException> readFile(String filename) {
@@ -330,13 +330,13 @@ public class Result<T, E extends Throwable> implements Immutable {
      * <pre>{@code
      * // Creating a success result with a non-null value
      * Result<String, IOException> result = Result.success("Hello World");
-     * assert result.isSuccess();                    // true
-     * assert result.orElseThrow().equals("Hello World");  // "Hello World"
+     * assert result.isSuccess();                          // returns true
+     * assert result.orElseThrow().equals("Hello World");  // returns "Hello World"
      *
      * // Creating a success result with a null value (valid use case)
      * Result<User, SQLException> nullResult = Result.success(null);
-     * assert nullResult.isSuccess();                // true - operation succeeded
-     * assert nullResult.orElseThrow() == null;      // null - but that's the actual result
+     * assert nullResult.isSuccess();                // returns true - operation succeeded
+     * assert nullResult.orElseThrow() == null;      // returns null - but that's the actual result
      *
      * // Using with different value types
      * Result<Integer, ArithmeticException> intResult = Result.success(42);
@@ -347,7 +347,7 @@ public class Result<T, E extends Throwable> implements Immutable {
      * public Result<User, DatabaseException> findUserById(long id) {
      *     try {
      *         User user = userRepository.findById(id);
-     *         return Result.success(user);  // user may be null if not found
+     *         return Result.success(user);
      *     } catch (DatabaseException e) {
      *         return Result.failure(e);
      *     }
@@ -441,7 +441,7 @@ public class Result<T, E extends Throwable> implements Immutable {
      * <pre>{@code
      * // Creating a failure result with a specific exception
      * Result<String, IOException> result = Result.failure(new IOException("File not found"));
-     * assert result.isFailure();                    // true
+     * assert result.isFailure();                    // returns true
      * assert result.getException().getMessage().equals("File not found");
      *
      * // Attempting to get value throws the exception
@@ -938,6 +938,17 @@ public class Result<T, E extends Throwable> implements Immutable {
      * <p><b>Note:</b> This method is deprecated in favor of {@link #getException()} which provides
      * direct access to the exception without the Optional wrapper overhead.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Result<String, IOException> success = Result.of("ok", null);
+     * success.getExceptionIfPresent().isPresent();   // returns false (empty Optional for a success)
+     *
+     * IOException ex = new IOException("error");
+     * Result<String, IOException> failure = Result.of(null, ex);
+     * failure.getExceptionIfPresent().isPresent();   // returns true (failure carries an exception)
+     * failure.getExceptionIfPresent().get();         // returns the original IOException instance
+     * }</pre>
+     *
      * @return an Optional containing the exception if present, otherwise an empty Optional.
      * @deprecated Use {@link #getException()} instead for direct access to the exception.
      */
@@ -1018,11 +1029,11 @@ public class Result<T, E extends Throwable> implements Immutable {
      * <pre>{@code
      * Result<String, Exception> r1 = Result.of("value", null);
      * Result<String, Exception> r2 = Result.of("value", null);
-     * boolean isEqual = r1.equals(r2);   // true
+     * boolean isEqual = r1.equals(r2);   // returns true
      *
      * Result<String, IOException> r3 = Result.of(null, new IOException("error"));
      * Result<String, IOException> r4 = Result.of(null, new IOException("error"));
-     * boolean isEqual2 = r3.equals(r4);  // depends on IOException's equals implementation
+     * boolean isEqual2 = r3.equals(r4);  // result depends on IOException's equals implementation
      * }</pre>
      *
      * @param obj the object to compare with this Result.

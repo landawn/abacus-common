@@ -15,7 +15,9 @@
 package com.landawn.abacus.type;
 
 import java.lang.reflect.Array;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.SK;
@@ -97,38 +99,153 @@ public abstract class AbstractArrayType<T> extends AbstractType<T> {
     }
 
     /**
-     * Splits the specified string into an array of substrings using predefined delimiters.
+     * Splits the string representation of an array into its element substrings.
      * <p>
-     * This method first attempts to split using the {@code ELEMENT_SEPARATOR}. If that
-     * yields a single element and the string contains a comma, it falls back to splitting
-     * by comma. A leading {@code '['} on the first element and a trailing {@code ']'} on
-     * the last element are stripped if both are present.
+     * If the string is wrapped in a matching pair of square brackets ({@code '['} ... {@code ']'}),
+     * the surrounding brackets are removed first. The remaining content is then split on the
+     * {@code ELEMENT_SEPARATOR}, honoring quoted regions so that a delimiter occurring inside a
+     * single- or double-quoted element is not treated as a separator. As a fallback for
+     * comma-delimited representations, if splitting on {@code ELEMENT_SEPARATOR} yields a single
+     * element but the content contains a comma, the content is re-split on a comma instead.
      * </p>
      *
-     * @param str the string to split; must not be {@code null}
-     * @return an array of substrings after splitting and bracket-stripping
+     * @param str the array string to split, optionally enclosed in {@code []}; must not be {@code null}
+     * @return the array of element substrings; quote characters that delimit an individual element
+     *         are preserved in that element
      * @throws NullPointerException if {@code str} is {@code null}
      */
     protected static String[] split(final String str) {
-        String[] elements = str.split(ELEMENT_SEPARATOR); // NOSONAR
+        final String source;
 
-        if ((elements.length == 1) && (str.indexOf(SK._COMMA) >= 0)) {
-            elements = str.split(SK.COMMA);
+        if (str.length() >= 2 && str.charAt(0) == SK._BRACKET_L && str.charAt(str.length() - 1) == SK._BRACKET_R) {
+            source = str.substring(1, str.length() - 1);
+        } else {
+            source = str;
         }
 
-        final int len = elements.length;
+        final String[] elements = splitElements(source, ELEMENT_SEPARATOR);
 
-        if (len > 0) {
-            final int lastIndex = len - 1;
+        return (elements.length == 1 && source.indexOf(SK._COMMA) >= 0) ? splitElements(source, String.valueOf(SK._COMMA)) : elements;
+    }
 
-            if (!elements[0].isEmpty() && !elements[lastIndex].isEmpty() && (elements[0].charAt(0) == SK._BRACKET_L)
-                    && (elements[lastIndex].charAt(elements[lastIndex].length() - 1) == SK._BRACKET_R)) {
-                elements[0] = elements[0].substring(1);
+    /**
+     * Splits the given string on the specified delimiter, ignoring any delimiter that occurs
+     * inside a quoted element.
+     * <p>
+     * An element is treated as quoted when a single-quote ({@code '}) or double-quote ({@code "})
+     * character appears as its first non-whitespace character and has a matching closing quote
+     * followed by the delimiter or the end of the string (see
+     * {@link #isQuotedElementStart(String, int, StringBuilder, String)}). Within a quoted region the
+     * delimiter and the opposite quote character are treated literally, and a backslash ({@code \})
+     * escapes the following character. The surrounding quote characters are retained in the returned
+     * substrings.
+     * </p>
+     *
+     * @param str the string to split
+     * @param delimiter the delimiter to split on
+     * @return the array of element substrings separated by unquoted occurrences of {@code delimiter}
+     */
+    private static String[] splitElements(final String str, final String delimiter) {
+        final List<String> result = new ArrayList<>();
+        final StringBuilder sb = new StringBuilder();
+        char quoteChar = 0;
+        boolean escaped = false;
 
-                elements[lastIndex] = elements[lastIndex].substring(0, elements[lastIndex].length() - 1);
+        for (int i = 0, len = str.length(); i < len; i++) {
+            final char ch = str.charAt(i);
+
+            if (quoteChar == 0) {
+                if (startsWithDelimiter(str, i, delimiter)) {
+                    result.add(sb.toString());
+                    sb.setLength(0);
+                    i += delimiter.length() - 1;
+                } else {
+                    sb.append(ch);
+
+                    if ((ch == '\'' || ch == '"') && isQuotedElementStart(str, i, sb, delimiter)) {
+                        quoteChar = ch;
+                    }
+                }
+            } else {
+                sb.append(ch);
+
+                if (escaped) {
+                    escaped = false;
+                } else if (ch == '\\') {
+                    escaped = true;
+                } else if (ch == quoteChar) {
+                    quoteChar = 0;
+                }
             }
         }
 
-        return elements;
+        result.add(sb.toString());
+
+        return result.toArray(new String[result.size()]);
+    }
+
+    /**
+     * Tests whether the specified delimiter occurs in {@code str} starting exactly at {@code index}.
+     *
+     * @param str the string to test
+     * @param index the position at which to look for the delimiter
+     * @param delimiter the delimiter to match
+     * @return {@code true} if {@code str} contains {@code delimiter} starting at {@code index};
+     *         {@code false} otherwise, including when the delimiter would extend past the end of {@code str}
+     */
+    private static boolean startsWithDelimiter(final String str, final int index, final String delimiter) {
+        final int delimiterLength = delimiter.length();
+
+        return index + delimiterLength <= str.length() && str.regionMatches(index, delimiter, 0, delimiterLength);
+    }
+
+    /**
+     * Determines whether the quote character at {@code quoteIndex} opens a quoted element.
+     * <p>
+     * The quote is treated as an element-opening quote only when both of the following hold: every
+     * character accumulated for the current element before this quote (the characters in {@code sb}
+     * up to, but not including, the just-appended quote) is whitespace, and a matching unescaped
+     * closing quote exists later such that the next non-whitespace position after it is either the
+     * end of the string or the start of {@code delimiter}. This prevents a quote character that
+     * appears in the middle of an element (for example an apostrophe within an unquoted word) from
+     * being misinterpreted as the start of a quoted element.
+     * </p>
+     *
+     * @param str the full string being split
+     * @param quoteIndex the index in {@code str} of the candidate opening quote character
+     * @param sb the buffer holding the characters accumulated for the current element,
+     *           ending with the candidate quote character
+     * @param delimiter the element delimiter being used for the current split
+     * @return {@code true} if the quote at {@code quoteIndex} begins a quoted element; {@code false} otherwise
+     */
+    private static boolean isQuotedElementStart(final String str, final int quoteIndex, final StringBuilder sb, final String delimiter) {
+        for (int i = 0, len = sb.length() - 1; i < len; i++) {
+            if (!Character.isWhitespace(sb.charAt(i))) {
+                return false;
+            }
+        }
+
+        final char quoteChar = str.charAt(quoteIndex);
+        boolean escaped = false;
+
+        for (int i = quoteIndex + 1, len = str.length(); i < len; i++) {
+            final char ch = str.charAt(i);
+
+            if (escaped) {
+                escaped = false;
+            } else if (ch == '\\') {
+                escaped = true;
+            } else if (ch == quoteChar) {
+                int next = i + 1;
+
+                while (next < len && Character.isWhitespace(str.charAt(next))) {
+                    next++;
+                }
+
+                return next == len || startsWithDelimiter(str, next, delimiter);
+            }
+        }
+
+        return false;
     }
 }

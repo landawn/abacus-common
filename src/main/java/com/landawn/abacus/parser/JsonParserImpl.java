@@ -758,7 +758,7 @@ final class JsonParserImpl extends AbstractJsonParser {
         try {
             switch (type.serializationType()) {
                 case SERIALIZABLE:
-                    type.writeCharacter(bw, obj, config);
+                    type.serializeTo(bw, obj, config);
 
                     break;
 
@@ -1008,7 +1008,7 @@ final class JsonParserImpl extends AbstractJsonParser {
 
                 if (propInfo.isJsonRawValue) {
                     // Raw JSON: write the serialized payload verbatim. Routing through
-                    // strType.writeCharacter() would quote and JSON-escape the result, producing
+                    // strType.serializeTo() would quote and JSON-escape the result, producing
                     // {"metadata":"{\"k\":\"v\"}"} instead of the documented {"metadata":{"k":"v"}}.
                     bw.write(serialize(propValue, config));
                 } else if (propInfo.jsonXmlType.isSerializable()) {
@@ -1019,9 +1019,7 @@ final class JsonParserImpl extends AbstractJsonParser {
             }
         }
 
-        if (config.isWrapRootValue())
-
-        {
+        if (config.isWrapRootValue()) {
             if (isPrettyFormat && cnt > 0) {
                 bw.write(IOUtil.LINE_SEPARATOR_UNIX);
 
@@ -1048,7 +1046,6 @@ final class JsonParserImpl extends AbstractJsonParser {
         }
     }
 
-    @SuppressWarnings("unused")
     /**
      * Writes a map to JSON as an object with one entry per map entry.
      *
@@ -1061,6 +1058,7 @@ final class JsonParserImpl extends AbstractJsonParser {
      * @param bw the buffered JSON writer
      * @throws IOException if an I/O error occurs
      */
+    @SuppressWarnings("unused")
     protected void writeMap(final Map<?, ?> m, final JsonSerConfig config, final boolean isFirstCall, final String indentation,
             final IdentityHashSet<Object> serializedObjects, final Type<Object> type, final BufferedJsonWriter bw) throws IOException {
         //    if (hasCircularReference(m, serializedObjects, config, bw)) {
@@ -1225,7 +1223,6 @@ final class JsonParserImpl extends AbstractJsonParser {
         }
     }
 
-    @SuppressWarnings("unused")
     /**
      * Writes a collection to JSON as a JSON array.
      *
@@ -1238,6 +1235,7 @@ final class JsonParserImpl extends AbstractJsonParser {
      * @param bw the buffered JSON writer
      * @throws IOException if an I/O error occurs
      */
+    @SuppressWarnings("unused")
     protected void writeCollection(final Collection<?> c, final JsonSerConfig config, final boolean isFirstCall, final String indentation,
             final IdentityHashSet<Object> serializedObjects, final Type<Object> type, final BufferedJsonWriter bw) throws IOException {
         //    if (hasCircularReference(c, serializedObjects, config, bw)) {
@@ -1287,7 +1285,6 @@ final class JsonParserImpl extends AbstractJsonParser {
         }
     }
 
-    @SuppressWarnings("unused")
     /**
      * Writes a {@link MapEntity} to JSON as an object whose single property is the entity name
      * mapping to the entity's property map.
@@ -1301,6 +1298,7 @@ final class JsonParserImpl extends AbstractJsonParser {
      * @param bw the buffered JSON writer
      * @throws IOException if an I/O error occurs
      */
+    @SuppressWarnings("unused")
     protected void writeMapEntity(final MapEntity mapEntity, final JsonSerConfig config, final boolean isFirstCall, final String indentation,
             final IdentityHashSet<Object> serializedObjects, final Type<Object> type, final BufferedJsonWriter bw) throws IOException {
         //    if (hasCircularReference(mapEntity, serializedObjects, config, bw)) {
@@ -1400,7 +1398,6 @@ final class JsonParserImpl extends AbstractJsonParser {
         }
     }
 
-    @SuppressWarnings("unused")
     /**
      * Writes an {@link EntityId} to JSON as an object with one entry per id property.
      *
@@ -1413,6 +1410,7 @@ final class JsonParserImpl extends AbstractJsonParser {
      * @param bw the buffered JSON writer
      * @throws IOException if an I/O error occurs
      */
+    @SuppressWarnings("unused")
     protected void writeEntityId(final EntityId entityId, final JsonSerConfig config, final boolean isFirstCall, final String indentation,
             final IdentityHashSet<Object> serializedObjects, final Type<Object> type, final BufferedJsonWriter bw) throws IOException {
         //    if (hasCircularReference(entityId, serializedObjects, config, bw)) {
@@ -1512,7 +1510,6 @@ final class JsonParserImpl extends AbstractJsonParser {
         }
     }
 
-    @SuppressWarnings({ "unused" })
     /**
      * Writes a {@link Dataset} to JSON, by columns or by rows depending on
      * {@code config.isWriteDatasetByRow()}, optionally including column type information.
@@ -1526,6 +1523,7 @@ final class JsonParserImpl extends AbstractJsonParser {
      * @param bw the buffered JSON writer
      * @throws IOException if an I/O error occurs
      */
+    @SuppressWarnings({ "unused" })
     protected void writeDataset(final Dataset ds, final JsonSerConfig config, final boolean isFirstCall, final String indentation,
             final IdentityHashSet<Object> serializedObjects, final Type<Object> type, final BufferedJsonWriter bw) throws IOException {
         //    if (hasCircularReference(ds, serializedObjects, config, bw)) {
@@ -1776,7 +1774,6 @@ final class JsonParserImpl extends AbstractJsonParser {
         }
     }
 
-    @SuppressWarnings({ "unused", "rawtypes" })
     /**
      * Writes a {@link Sheet} to JSON, emitting its row keys, column keys, and cell values,
      * optionally including row/column key type and column type information per the configuration.
@@ -1790,6 +1787,7 @@ final class JsonParserImpl extends AbstractJsonParser {
      * @param bw the buffered JSON writer
      * @throws IOException if an I/O error occurs
      */
+    @SuppressWarnings({ "unused", "rawtypes" })
     protected void writeSheet(final Sheet sheet, final JsonSerConfig config, final boolean isFirstCall, final String indentation,
             final IdentityHashSet<Object> serializedObjects, final Type<Object> type, final BufferedJsonWriter bw) throws IOException {
         //    if (hasCircularReference(sheet, serializedObjects, config, bw)) {
@@ -2919,9 +2917,9 @@ final class JsonParserImpl extends AbstractJsonParser {
         final Tuple2<Function<Class<?>, Object>, Function<Object, Object>> creatorAndConverter = getCreatorAndConverterForTargetType(targetClass, null);
 
         @SuppressWarnings("rawtypes")
-        final Map<Object, Object> result = output == null
-                ? (Map.class.isAssignableFrom(targetClass) ? (Map<Object, Object>) creatorAndConverter._1.apply(targetClass)
-                        : N.newMap(Map.class.equals(targetClass) ? config.getMapInstanceType() : (Class<Map>) targetClass))
+        final Map<Object, Object> result = output == null ? (Map.class.equals(targetClass) ? (Map<Object, Object>) N.newMap(config.getMapInstanceType())
+                : Map.class.isAssignableFrom(targetClass) ? (Map<Object, Object>) creatorAndConverter._1.apply(targetClass)
+                        : N.newMap((Class<Map>) targetClass))
                 : output;
 
         String propName = null;
@@ -2952,7 +2950,7 @@ final class JsonParserImpl extends AbstractJsonParser {
                 case END_DOUBLE_QUOTE, END_SINGLE_QUOTE:
 
                     if (isKey) {
-                        key = readValue(jr, readNullToEmpty, keyType);
+                        key = isStringKey && !jr.hasText() ? "" : readValue(jr, readNullToEmpty, keyType);
                         propName = isStringKey ? (String) key : (key == null ? "null" : key.toString());
                         propType = hasValueTypes ? config.getValueType(propName, valueType) : valueType;
                     } else {
@@ -2961,7 +2959,7 @@ final class JsonParserImpl extends AbstractJsonParser {
                         } else {
                             value = readValue(jr, readNullToEmpty, propType);
 
-                            if (!ignoreNullOrEmpty || (!isNullOrEmptyValue(keyType, key) && !isNullOrEmptyValue(propType, value))) {
+                            if (!ignoreNullOrEmpty || !isNullOrEmptyValue(propType, value)) {
                                 result.put(key, value);
                             }
                         }
@@ -2998,7 +2996,7 @@ final class JsonParserImpl extends AbstractJsonParser {
                             } else {
                                 value = readValue(jr, readNullToEmpty, propType);
 
-                                if (!ignoreNullOrEmpty || (!isNullOrEmptyValue(keyType, key) && !isNullOrEmptyValue(propType, value))) {
+                                if (!ignoreNullOrEmpty || !isNullOrEmptyValue(propType, value)) {
                                     result.put(key, value);
                                 }
                             }
@@ -3020,7 +3018,7 @@ final class JsonParserImpl extends AbstractJsonParser {
                             //noinspection DataFlowIssue
                             value = readBracedValue(jr, config, propType);
 
-                            if (!ignoreNullOrEmpty || (!isNullOrEmptyValue(keyType, key) && !isNullOrEmptyValue(propType, value))) {
+                            if (!ignoreNullOrEmpty || !isNullOrEmptyValue(propType, value)) {
                                 result.put(key, value);
                             }
                         }
@@ -3043,7 +3041,7 @@ final class JsonParserImpl extends AbstractJsonParser {
                             value = readBracketedValue(jr, config,
                                     key instanceof String && Strings.isNotEmpty((String) key) ? config.getPropHandler((String) key) : null, propType);
 
-                            if (!ignoreNullOrEmpty || (!isNullOrEmptyValue(keyType, key) && !isNullOrEmptyValue(propType, value))) {
+                            if (!ignoreNullOrEmpty || !isNullOrEmptyValue(propType, value)) {
                                 result.put(key, value);
                             }
                         }
@@ -3065,7 +3063,7 @@ final class JsonParserImpl extends AbstractJsonParser {
                             } else {
                                 value = readValue(jr, readNullToEmpty, propType);
 
-                                if (!ignoreNullOrEmpty || (!isNullOrEmptyValue(keyType, key) && !isNullOrEmptyValue(propType, value))) {
+                                if (!ignoreNullOrEmpty || !isNullOrEmptyValue(propType, value)) {
                                     result.put(key, value);
                                 }
                             }
@@ -4584,7 +4582,7 @@ final class JsonParserImpl extends AbstractJsonParser {
     public <T> Stream<T> stream(final InputStream source, final boolean closeInputStreamWhenStreamIsClosed, final JsonDeserConfig config,
             final Type<? extends T> elementType) {
         // See deserialize(InputStream): JSON is UTF-8 per RFC 8259.
-        final Reader reader = IOUtil.newInputStreamReader(source, java.nio.charset.StandardCharsets.UTF_8); // NOSONAR
+        final Reader reader = IOUtil.newInputStreamReader(source, Charsets.UTF_8); // NOSONAR
 
         return stream(reader, closeInputStreamWhenStreamIsClosed, config, elementType);
     }

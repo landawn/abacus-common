@@ -119,6 +119,7 @@ public final class cs { // NOSONAR
     public static final String date2 = "date2";
     public static final String decimalFormat = "decimalFormat";
     public static final String defaultValue = "defaultValue";
+    public static final String defaultValueSupplier = "defaultValueSupplier";
     public static final String delay = "delay";
     public static final String delimiter = "delimiter";
     public static final String delimiterRegex = "delimiterRegex";
@@ -138,6 +139,7 @@ public final class cs { // NOSONAR
     // public static final String elementConsumer = "elementConsumer";
     public static final String endExclusive = "endExclusive";
     public static final String entry = "entry";
+    public static final String entryFilter = "entryFilter";
     public static final String enumClass = "enumClass";
     public static final String equalsFunction = "equalsFunction";
     public static final String exceptionClass = "exceptionClass";
@@ -174,7 +176,9 @@ public final class cs { // NOSONAR
     public static final String k = "k";
     public static final String keepAliveTime = "keepAliveTime";
     public static final String keyColumnNames = "keyColumnNames";
+    public static final String keyConverter = "keyConverter";
     public static final String keyExtractor = "keyExtractor";
+    public static final String keyFilter = "keyFilter";
     public static final String keyMapper = "keyMapper";
     // public static final String keyExtractor = "keyExtractor";
     public static final String keyType = "keyType";

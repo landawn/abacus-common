@@ -37,7 +37,7 @@ import java.lang.annotation.Target;
  *       returns the wrapped value.</li>
  *   <li>When applied to a {@link ElementType#FIELD}, the field holds the wrapped value directly.</li>
  *   <li>The wrapped value's type must match the parameter of the class's
- *       {@link JsonXmlCreator}-annotated constructor or factory method.</li>
+ *       {@link JsonXmlCreator}-annotated {@code static} factory method.</li>
  * </ul>
  *
  * <p><b>Usage Examples:</b></p>
@@ -48,14 +48,16 @@ import java.lang.annotation.Target;
  *     @JsonXmlValue
  *     private final long value;
  *
+ *     private CustomerId(long value) { this.value = value; }
+ *
  *     @JsonXmlCreator
- *     public CustomerId(long value) { this.value = value; }
+ *     public static CustomerId of(long value) { return new CustomerId(value); }
  *
  *     public long value() { return value; }
  * }
  *
- * // CustomerId(42)  ->  serialized as: 42
- * //                 ->  NOT as: {"value": 42}
+ * // CustomerId.of(42)  ->  serialized as: 42
+ * //                    ->  NOT as: {"value": 42}
  * }</pre>
  *
  * <p><b>Method-style value (e.g., to apply a transformation before serialization):</b></p>

@@ -93,8 +93,15 @@ public class DatasetType extends AbstractType<Dataset> {
      * Serializes a {@link Dataset} to its JSON string representation, preserving all
      * column names, row data, and tabular structure.
      *
+     * <p>The returned string is a serializable representation designed to be parsed back into an equivalent value
+     * via {@link #valueOf(String)}; {@code stringOf} and {@code valueOf} are inverse operations that round-trip. This
+     * is the key distinction from {@link Object#toString()}, whose result is not guaranteed to be convertible back
+     * into the original value.</p>
+     *
      * @param x the {@link Dataset} to serialize; may be {@code null}
      * @return the JSON string, or {@code null} if {@code x} is {@code null}
+     * @see #valueOf(String)
+     * @see #valueOf(Object)
      */
     @Override
     public String stringOf(final Dataset x) {
@@ -105,8 +112,14 @@ public class DatasetType extends AbstractType<Dataset> {
      * Deserializes a JSON string back into a {@link Dataset} object.
      * The JSON must represent a valid {@link Dataset} structure with column names and row data.
      *
+     * <p>This method is the inverse of {@code stringOf} and round-trips with it: it parses the string produced by
+     * {@code stringOf} back into a value of this type. Strings produced by {@link Object#toString()} are not
+     * guaranteed to be parseable in this way.</p>
+     *
      * @param str the JSON string to parse; may be {@code null} or empty
      * @return the deserialized {@link Dataset}, or {@code null} if {@code str} is {@code null} or empty
+     * @see #valueOf(Object)
+     * @see #stringOf(Dataset)
      */
     @Override
     public Dataset valueOf(final String str) {

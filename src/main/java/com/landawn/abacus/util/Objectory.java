@@ -59,7 +59,7 @@ import com.landawn.abacus.logging.LoggerFactory;
  *     sb.append("Hello").append(" ").append("World");
  *     return sb.toString();
  * } finally {
- *     Objectory.recycle(sb);   // Return to pool for reuse
+ *     Objectory.recycle(sb);   // returns sb to the pool for reuse
  * }
  * }</pre>
  *
@@ -287,6 +287,17 @@ public final class Objectory {
      *
      * <p>After use, the array should be recycled using {@link #recycle(Object[])}.</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Object[] array = Objectory.createObjectArray();
+     * try {
+     *     array[0] = "Hello";
+     *     array[1] = 42;
+     * } finally {
+     *     Objectory.recycle(array);
+     * }
+     * }</pre>
+     *
      * @return an {@code Object[]} of length {@code 128} obtained from the pool,
      *         or a new instance if the pool is empty
      * @see #createObjectArray(int)
@@ -351,6 +362,17 @@ public final class Objectory {
      *
      * <p>After use, the buffer should be recycled using {@link #recycle(char[])}.</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * char[] buffer = Objectory.createCharArrayBuffer();
+     * try {
+     *     Reader reader = new FileReader("file.txt");
+     *     int charsRead = reader.read(buffer);
+     * } finally {
+     *     Objectory.recycle(buffer);
+     * }
+     * }</pre>
+     *
      * @return a {@code char[]} buffer obtained from the pool, or a new instance
      *         if the pool is empty
      * @see #createCharArrayBuffer(int)
@@ -406,6 +428,17 @@ public final class Objectory {
      * The returned buffer's length is the internal default buffer size.
      *
      * <p>After use, the buffer should be recycled using {@link #recycle(byte[])}.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * byte[] buffer = Objectory.createByteArrayBuffer();
+     * try {
+     *     InputStream input = new FileInputStream("file.bin");
+     *     int bytesRead = input.read(buffer);
+     * } finally {
+     *     Objectory.recycle(buffer);
+     * }
+     * }</pre>
      *
      * @return a {@code byte[]} buffer obtained from the pool, or a new instance
      *         if the pool is empty
@@ -464,6 +497,17 @@ public final class Objectory {
      * <p>After use, the {@code StringBuilder} should be recycled using
      * {@link #recycle(StringBuilder)}.</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * StringBuilder sb = Objectory.createStringBuilder();
+     * try {
+     *     sb.append("Hello").append(" ").append("World");
+     *     return sb.toString();
+     * } finally {
+     *     Objectory.recycle(sb);
+     * }
+     * }</pre>
+     *
      * @return a {@code StringBuilder} obtained from the pool, or a new instance
      *         if the pool is empty
      * @see #createStringBuilder(int)
@@ -517,6 +561,17 @@ public final class Objectory {
      *
      * <p>After use, the stream should be recycled using {@link #recycle(ByteArrayOutputStream)}.</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * ByteArrayOutputStream baos = Objectory.createByteArrayOutputStream();
+     * try {
+     *     baos.write("Hello".getBytes());
+     *     byte[] result = baos.toByteArray();
+     * } finally {
+     *     Objectory.recycle(baos);
+     * }
+     * }</pre>
+     *
      * @return a {@code ByteArrayOutputStream} obtained from the pool, or a new
      *         instance if the pool is empty
      * @see #createByteArrayOutputStream(int)
@@ -534,7 +589,7 @@ public final class Objectory {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * ByteArrayOutputStream baos = Objectory.createByteArrayOutputStream();
+     * ByteArrayOutputStream baos = Objectory.createByteArrayOutputStream(4096);
      * try {
      *     baos.write("Hello".getBytes());
      *     byte[] result = baos.toByteArray();
@@ -571,6 +626,20 @@ public final class Objectory {
      *
      * <p>After use, the writer should be recycled using {@link #recycle(java.io.BufferedWriter)}.</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * try (OutputStream os = new FileOutputStream("output.txt")) {
+     *     java.io.BufferedWriter bw = Objectory.createBufferedWriter();
+     *     bw.reinit(os);
+     *     try {
+     *         bw.write("Hello World");
+     *         bw.newLine();
+     *     } finally {
+     *         Objectory.recycle(bw);
+     *     }
+     * }
+     * }</pre>
+     *
      * @return a {@code BufferedWriter} obtained from the pool, or a new instance
      *         if the pool is empty
      */
@@ -593,6 +662,19 @@ public final class Objectory {
      * {@link OutputStream}.
      *
      * <p>After use, the writer should be recycled using {@link #recycle(java.io.BufferedWriter)}.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * try (OutputStream os = new FileOutputStream("output.txt")) {
+     *     java.io.BufferedWriter bw = Objectory.createBufferedWriter(os);
+     *     try {
+     *         bw.write("Hello World");
+     *         bw.newLine();
+     *     } finally {
+     *         Objectory.recycle(bw);
+     *     }
+     * }
+     * }</pre>
      *
      * @param os the {@code OutputStream} to write to
      * @return a {@code BufferedWriter} writing to the specified stream
@@ -660,6 +742,19 @@ public final class Objectory {
      *
      * <p>After use, the writer should be recycled using {@link #recycle(BufferedXmlWriter)}.</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * BufferedXmlWriter writer = Objectory.createBufferedXmlWriter();
+     * try {
+     *     writer.reinit(outputStream);
+     *     writer.write("<root>");
+     *     writer.write("Hello");
+     *     writer.write("</root>");
+     * } finally {
+     *     Objectory.recycle(writer);
+     * }
+     * }</pre>
+     *
      * @return a {@code BufferedXmlWriter} obtained from the pool, or a new
      *         instance if the pool is empty
      */
@@ -716,6 +811,18 @@ public final class Objectory {
      *
      * <p>After use, the writer should be recycled using {@link #recycle(BufferedXmlWriter)}.</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * try (Writer fileWriter = new FileWriter("output.xml")) {
+     *     BufferedXmlWriter writer = Objectory.createBufferedXmlWriter(fileWriter);
+     *     try {
+     *         writer.write("Hello");
+     *     } finally {
+     *         Objectory.recycle(writer);
+     *     }
+     * }
+     * }</pre>
+     *
      * @param writer the {@code Writer} to write to
      * @return a {@code BufferedXmlWriter} writing to the specified writer
      */
@@ -739,6 +846,17 @@ public final class Objectory {
      * can be used for output.
      *
      * <p>After use, the writer should be recycled using {@link #recycle(BufferedJsonWriter)}.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * BufferedJsonWriter writer = Objectory.createBufferedJsonWriter();
+     * try {
+     *     writer.reinit(outputStream);
+     *     writer.write("{\"name\": \"Hello\"}");
+     * } finally {
+     *     Objectory.recycle(writer);
+     * }
+     * }</pre>
      *
      * @return a {@code BufferedJsonWriter} obtained from the pool, or a new
      *         instance if the pool is empty
@@ -796,6 +914,18 @@ public final class Objectory {
      *
      * <p>After use, the writer should be recycled using {@link #recycle(BufferedJsonWriter)}.</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * try (Writer fileWriter = new FileWriter("output.json")) {
+     *     BufferedJsonWriter writer = Objectory.createBufferedJsonWriter(fileWriter);
+     *     try {
+     *         writer.write("Hello");
+     *     } finally {
+     *         Objectory.recycle(writer);
+     *     }
+     * }
+     * }</pre>
+     *
      * @param writer the {@code Writer} to write to
      * @return a {@code BufferedJsonWriter} writing to the specified writer
      */
@@ -821,6 +951,17 @@ public final class Objectory {
      * {@code CsvUtil} backslash-escape setting.
      *
      * <p>After use, the writer should be recycled using {@link #recycle(BufferedCsvWriter)}.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * BufferedCsvWriter writer = Objectory.createBufferedCsvWriter();
+     * try {
+     *     writer.reinit(outputStream);
+     *     writer.write("Hello");
+     * } finally {
+     *     Objectory.recycle(writer);
+     * }
+     * }</pre>
      *
      * @return a {@code BufferedCsvWriter} obtained from the pool, or a new
      *         instance if the pool is empty
@@ -878,6 +1019,18 @@ public final class Objectory {
      *
      * <p>After use, the writer should be recycled using {@link #recycle(BufferedCsvWriter)}.</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * try (Writer fileWriter = new FileWriter("output.csv")) {
+     *     BufferedCsvWriter writer = Objectory.createBufferedCsvWriter(fileWriter);
+     *     try {
+     *         writer.write("Hello");
+     *     } finally {
+     *         Objectory.recycle(writer);
+     *     }
+     * }
+     * }</pre>
+     *
      * @param writer the {@code Writer} to write to
      * @return a {@code BufferedCsvWriter} writing to the specified writer
      */
@@ -927,6 +1080,21 @@ public final class Objectory {
      * specified {@link InputStream}.
      *
      * <p>After use, the reader should be recycled using {@link #recycle(java.io.BufferedReader)}.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * try (InputStream is = new FileInputStream("input.txt")) {
+     *     java.io.BufferedReader reader = Objectory.createBufferedReader(is);
+     *     try {
+     *         String line;
+     *         while ((line = reader.readLine()) != null) {
+     *             System.out.println(line);
+     *         }
+     *     } finally {
+     *         Objectory.recycle(reader);
+     *     }
+     * }
+     * }</pre>
      *
      * @param is the {@code InputStream} to read from
      * @return a {@code BufferedReader} reading from the specified stream
@@ -1043,6 +1211,16 @@ public final class Objectory {
      * {@link LinkedHashSet} instances are pooled separately from other
      * {@code Set} implementations.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Set<String> set = Objectory.createSet();
+     * try {
+     *     set.add("hello");
+     * } finally {
+     *     Objectory.recycle(set);
+     * }
+     * }</pre>
+     *
      * @param set the set to recycle; may be {@code null}
      * @deprecated for internal use only
      * @see #createSet()
@@ -1074,6 +1252,17 @@ public final class Objectory {
      * when the relevant pool is already full is silently ignored (not pooled).
      * {@link LinkedHashMap} instances are pooled separately from other
      * {@code Map} implementations.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Map<String, String> map = Objectory.createMap();
+     * try {
+     *     map.put("k1", "v1");
+     *     map.put("k2", "v2");
+     * } finally {
+     *     Objectory.recycle(map);
+     * }
+     * }</pre>
      *
      * @param map the map to recycle; may be {@code null}
      * @deprecated for internal use only
@@ -1146,6 +1335,16 @@ public final class Objectory {
      * Only arrays whose length is exactly the internal default buffer size are
      * pooled; a {@code null} array or any other length is silently ignored.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * char[] buffer = Objectory.createCharArrayBuffer();
+     * try {
+     *     // Use the buffer
+     * } finally {
+     *     Objectory.recycle(buffer);
+     * }
+     * }</pre>
+     *
      * @param cbuf the char array to recycle; may be {@code null}
      * @see #createCharArrayBuffer(int)
      */
@@ -1166,6 +1365,16 @@ public final class Objectory {
      * Returns a {@code byte[]} buffer to the object pool for reuse.
      * Only arrays whose length is exactly the internal default buffer size are
      * pooled; a {@code null} array or any other length is silently ignored.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * byte[] buffer = Objectory.createByteArrayBuffer();
+     * try {
+     *     // Use the buffer
+     * } finally {
+     *     Objectory.recycle(buffer);
+     * }
+     * }</pre>
      *
      * @param bbuf the byte array to recycle; may be {@code null}
      * @see #createByteArrayBuffer(int)
@@ -1218,6 +1427,17 @@ public final class Objectory {
      * or a stream offered when the pool is already full is silently ignored
      * (not pooled).
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * ByteArrayOutputStream baos = Objectory.createByteArrayOutputStream();
+     * try {
+     *     baos.write("data".getBytes());
+     *     byte[] result = baos.toByteArray();
+     * } finally {
+     *     Objectory.recycle(baos);
+     * }
+     * }</pre>
+     *
      * @param os the ByteArrayOutputStream to recycle; may be {@code null}
      * @see #createByteArrayOutputStream(int)
      */
@@ -1237,6 +1457,16 @@ public final class Objectory {
      * The writer's buffer is flushed to its underlying target and the writer is
      * reset before being added to the pool. A {@code null} writer is silently
      * ignored.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * BufferedXmlWriter writer = Objectory.createBufferedXmlWriter(outputStream);
+     * try {
+     *     writer.write("<root>Hello</root>");
+     * } finally {
+     *     Objectory.recycle(writer);
+     * }
+     * }</pre>
      *
      * @param bw the BufferedXmlWriter to recycle; may be {@code null}
      * @throws UncheckedIOException if an I/O error occurs while flushing the buffer
@@ -1263,6 +1493,16 @@ public final class Objectory {
      * reset before being added to the pool. A {@code null} writer is silently
      * ignored.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * BufferedJsonWriter writer = Objectory.createBufferedJsonWriter(outputStream);
+     * try {
+     *     writer.write("{\"name\": \"value\"}");
+     * } finally {
+     *     Objectory.recycle(writer);
+     * }
+     * }</pre>
+     *
      * @param bw the BufferedJsonWriter to recycle; may be {@code null}
      * @throws UncheckedIOException if an I/O error occurs while flushing the buffer
      * @see #createBufferedJsonWriter()
@@ -1288,6 +1528,16 @@ public final class Objectory {
      * reset before being added to the pool. Writers using a backslash escape
      * character are pooled separately from those that do not. A {@code null}
      * writer is silently ignored.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * BufferedCsvWriter writer = Objectory.createBufferedCsvWriter(outputStream);
+     * try {
+     *     writer.write("Hello");
+     * } finally {
+     *     Objectory.recycle(writer);
+     * }
+     * }</pre>
      *
      * @param bw the BufferedCsvWriter to recycle; may be {@code null}
      * @throws UncheckedIOException if an I/O error occurs while flushing the buffer

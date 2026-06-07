@@ -1092,7 +1092,7 @@ public class TypeFactoryTest extends TestBase {
             }
 
             @Override
-            public void writeCharacter(com.landawn.abacus.util.CharacterWriter writer, CustomClass3 x, com.landawn.abacus.parser.JsonXmlSerConfig<?> config) {
+            public void serializeTo(com.landawn.abacus.util.CharacterWriter writer, CustomClass3 x, com.landawn.abacus.parser.JsonXmlSerConfig<?> config) {
             }
 
             @Override
@@ -1409,7 +1409,7 @@ public class TypeFactoryTest extends TestBase {
             }
 
             @Override
-            public void writeCharacter(com.landawn.abacus.util.CharacterWriter writer, Object x, com.landawn.abacus.parser.JsonXmlSerConfig<?> config) {
+            public void serializeTo(com.landawn.abacus.util.CharacterWriter writer, Object x, com.landawn.abacus.parser.JsonXmlSerConfig<?> config) {
             }
 
             @Override

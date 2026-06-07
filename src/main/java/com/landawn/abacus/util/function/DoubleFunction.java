@@ -42,6 +42,7 @@ public interface DoubleFunction<R> extends Throwables.DoubleFunction<R, RuntimeE
      * DoubleFunction<Double> boxer = DoubleFunction.BOX;
      * Double boxed = boxer.apply(3.14);   // Returns Double.valueOf(3.14)
      * }</pre>
+     *
      */
     DoubleFunction<Double> BOX = value -> value;
 

@@ -36,7 +36,7 @@ import com.landawn.abacus.annotation.MayReturnNull;
  *
  * // Only the key is used for equality
  * Keyed<String, User> sameKey = Keyed.of("userId123", new User("Jane", "Smith"));
- * System.out.println(userKeyed.equals(sameKey));   // true
+ * System.out.println(userKeyed.equals(sameKey));   // prints true
  * }</pre>
  *
  * @param <K> the type of the key.
@@ -181,8 +181,8 @@ public sealed class Keyed<K, T> implements Immutable permits IndexedKeyed {
      * Keyed<String, Integer> k2 = Keyed.of("key", 200);
      * Keyed<String, Integer> k3 = Keyed.of("other", 100);
      *
-     * k1.equals(k2);   // true - same key, different values
-     * k1.equals(k3);   // false - different keys
+     * k1.equals(k2);   // returns true - same key, different values
+     * k1.equals(k3);   // returns false - different keys
      * }</pre>
      *
      * @param obj the reference object with which to compare.
@@ -214,9 +214,9 @@ public sealed class Keyed<K, T> implements Immutable permits IndexedKeyed {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Keyed.of("abc", 123).toString();      // "{key=abc, val=123}"
-     * Keyed.of(null, "value").toString();   // "{key=null, val=value}"
-     * Keyed.of("key", null).toString();     // "{key=key, val=null}"
+     * Keyed.of("abc", 123).toString();      // returns "{key=abc, val=123}"
+     * Keyed.of(null, "value").toString();   // returns "{key=null, val=value}"
+     * Keyed.of("key", null).toString();     // returns "{key=key, val=null}"
      * }</pre>
      *
      * @return a string representation of this object in the format "{key=&lt;key&gt;, val=&lt;value&gt;}".

@@ -172,7 +172,7 @@ public abstract class Observer<T> implements Immutable {
      * <pre>{@code
      * BlockingQueue<String> queue = new LinkedBlockingQueue<>();
      * // Add elements to queue...
-     * Observer.complete(queue);   // Signal completion
+     * Observer.complete(queue);   // signals completion
      * }</pre>
      *
      * @param queue the {@code BlockingQueue} to complete
@@ -269,7 +269,7 @@ public abstract class Observer<T> implements Immutable {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Observer.timer(1000) // Wait 1 second
+     * Observer.timer(1000)
      *     .observe(value -> System.out.println("Timer fired!"));
      * }</pre>
      *
@@ -312,7 +312,7 @@ public abstract class Observer<T> implements Immutable {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Observer.interval(1000) // Emit every second
+     * Observer.interval(1000)
      *     .limit(5)
      *     .observe(System.out::println);   // Prints 0, 1, 2, 3, 4
      * }</pre>
@@ -333,7 +333,7 @@ public abstract class Observer<T> implements Immutable {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Observer.interval(2000, 1000) // Wait 2s, then emit every 1s
+     * Observer.interval(2000, 1000) // wait 2s, then emit every 1s
      *     .limit(3)
      *     .observe(System.out::println);
      * }</pre>
@@ -377,7 +377,7 @@ public abstract class Observer<T> implements Immutable {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Observer.interval(5, 2, TimeUnit.SECONDS) // Wait 5s, then emit every 2s
+     * Observer.interval(5, 2, TimeUnit.SECONDS) // wait 5s, then emit every 2s
      *     .map(n -> "Event " + n)
      *     .observe(System.out::println);
      * }</pre>
@@ -404,7 +404,7 @@ public abstract class Observer<T> implements Immutable {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * userInputObserver
-     *     .debounce(300) // Wait 300ms after last input
+     *     .debounce(300)
      *     .observe(text -> performSearch(text));
      * }</pre>
      *
@@ -511,7 +511,7 @@ public abstract class Observer<T> implements Immutable {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * buttonClickObserver
-     *     .throttleFirst(1000) // Prevent rapid clicks
+     *     .throttleFirst(1000)
      *     .observe(click -> handleButtonClick());
      * }</pre>
      *
@@ -533,7 +533,7 @@ public abstract class Observer<T> implements Immutable {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * apiCallObserver
-     *     .throttleFirst(5, TimeUnit.SECONDS) // Rate limit API calls
+     *     .throttleFirst(5, TimeUnit.SECONDS) // rate limit API calls
      *     .observe(request -> makeApiCall(request));
      * }</pre>
      *
@@ -603,7 +603,7 @@ public abstract class Observer<T> implements Immutable {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * mousePositionObserver
-     *     .throttleLast(100) // Sample mouse position every 100ms
+     *     .throttleLast(100)
      *     .observe(pos -> updateCursorPosition(pos));
      * }</pre>
      *
@@ -625,7 +625,7 @@ public abstract class Observer<T> implements Immutable {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * temperatureSensor
-     *     .throttleLast(1, TimeUnit.MINUTES) // Sample every minute
+     *     .throttleLast(1, TimeUnit.MINUTES) // sample every minute
      *     .observe(temp -> logTemperature(temp));
      * }</pre>
      *
@@ -698,7 +698,7 @@ public abstract class Observer<T> implements Immutable {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Observer.of(Arrays.asList("A", "B", "C"))
-     *     .delay(1000) // Delay the first emission by 1 second
+     *     .delay(1000)
      *     .observe(System.out::println);
      * }</pre>
      *
@@ -836,7 +836,7 @@ public abstract class Observer<T> implements Immutable {
      * <pre>{@code
      * Observer.of(Arrays.asList(1, 2, 3, 4, 5))
      *     .skip(2)
-     *     .observe(System.out::println);   // Prints: 3, 4, 5
+     *     .observe(System.out::println);   // prints 3, 4, 5
      * }</pre>
      *
      * @param n the number of items to skip; if zero, no items are skipped (a negative
@@ -871,7 +871,7 @@ public abstract class Observer<T> implements Immutable {
      * <pre>{@code
      * Observer.interval(100)
      *     .limit(5)
-     *     .observe(System.out::println);   // Prints: 0, 1, 2, 3, 4
+     *     .observe(System.out::println);   // prints 0, 1, 2, 3, 4
      * }</pre>
      *
      * @param maxSize the maximum number of items to emit; once this count is reached the
@@ -907,7 +907,7 @@ public abstract class Observer<T> implements Immutable {
      * <pre>{@code
      * Observer.of(Arrays.asList(1, 2, 2, 3, 1, 3))
      *     .distinct()
-     *     .observe(System.out::println);   // Prints: 1, 2, 3
+     *     .observe(System.out::println);   // prints 1, 2, 3
      * }</pre>
      *
      * @return this Observer instance for method chaining
@@ -935,8 +935,8 @@ public abstract class Observer<T> implements Immutable {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Observer.of(Arrays.asList("apple", "banana", "apricot", "blueberry"))
-     *     .distinctBy(s -> s.charAt(0)) // Distinct by first letter
-     *     .observe(System.out::println);   // Prints: apple, banana
+     *     .distinctBy(s -> s.charAt(0))  // distinct by first letter
+     *     .observe(System.out::println); // prints apple, banana
      * }</pre>
      *
      * @param keyExtractor function to extract the key used to determine uniqueness; key
@@ -966,7 +966,7 @@ public abstract class Observer<T> implements Immutable {
      * <pre>{@code
      * Observer.of(Arrays.asList(1, 2, 3, 4, 5))
      *     .filter(n -> n % 2 == 0)
-     *     .observe(System.out::println);   // Prints: 2, 4
+     *     .observe(System.out::println);   // prints 2, 4
      * }</pre>
      *
      * @param filter the predicate used to test each item; items for which the predicate returns
@@ -993,7 +993,7 @@ public abstract class Observer<T> implements Immutable {
      * <pre>{@code
      * Observer.of(Arrays.asList(1, 2, 3))
      *     .map(n -> n * n)
-     *     .observe(System.out::println);   // Prints: 1, 4, 9
+     *     .observe(System.out::println);   // prints 1, 4, 9
      * }</pre>
      *
      * @param <R> the type of items emitted after transformation
@@ -1023,7 +1023,7 @@ public abstract class Observer<T> implements Immutable {
      * <pre>{@code
      * Observer.of(Arrays.asList("Hello World", "Foo Bar"))
      *     .flatMap(s -> Arrays.asList(s.split(" ")))
-     *     .observe(System.out::println);   // Prints: Hello, World, Foo, Bar
+     *     .observe(System.out::println);   // prints Hello, World, Foo, Bar
      * }</pre>
      *
      * @param <R> the type of items in the flattened sequence

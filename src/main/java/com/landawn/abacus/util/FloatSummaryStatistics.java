@@ -54,13 +54,13 @@ public class FloatSummaryStatistics implements FloatConsumer {
 
     /**
      * Constructs an empty instance with zero count, zero sum,
-     * {@code Float.POSITIVE_INFINITY} min, {@code Float.NEGATIVE_INFINITY} max,
-     * and zero average.
+     * {@code Float.POSITIVE_INFINITY} min, and {@code Float.NEGATIVE_INFINITY} max.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * FloatSummaryStatistics stats = new FloatSummaryStatistics();
      * }</pre>
+     *
      */
     public FloatSummaryStatistics() {
     }
@@ -157,7 +157,7 @@ public class FloatSummaryStatistics implements FloatConsumer {
      * FloatSummaryStatistics stats = new FloatSummaryStatistics();
      * stats.accept(5.0f);
      * stats.accept(2.0f);
-     * float min = stats.getMin();   // Returns 2.0f
+     * float min = stats.getMin();   // returns 2.0f
      * }</pre>
      *
      * @return the minimum value, or {@code Float.POSITIVE_INFINITY} if none
@@ -177,7 +177,7 @@ public class FloatSummaryStatistics implements FloatConsumer {
      * FloatSummaryStatistics stats = new FloatSummaryStatistics();
      * stats.accept(5.0f);
      * stats.accept(8.0f);
-     * float max = stats.getMax();   // Returns 8.0f
+     * float max = stats.getMax();   // returns 8.0f
      * }</pre>
      *
      * @return the maximum value, or {@code Float.NEGATIVE_INFINITY} if none
@@ -198,7 +198,7 @@ public class FloatSummaryStatistics implements FloatConsumer {
      * stats.accept(1.0f);
      * stats.accept(2.0f);
      * stats.accept(3.0f);
-     * long count = stats.getCount();   // Returns 3
+     * long count = stats.getCount();   // returns 3
      * }</pre>
      *
      * @return the count of values
@@ -221,7 +221,7 @@ public class FloatSummaryStatistics implements FloatConsumer {
      * stats.accept(1.1f);
      * stats.accept(2.2f);
      * stats.accept(3.3f);
-     * double sum = stats.getSum();   // Returns 6.6 (approximately)
+     * double sum = stats.getSum();   // returns 6.6 (approximately)
      * }</pre>
      *
      * @return the sum of values as a {@code double}, or {@code 0.0} if none
@@ -244,7 +244,7 @@ public class FloatSummaryStatistics implements FloatConsumer {
      * stats.accept(2.0f);
      * stats.accept(4.0f);
      * stats.accept(6.0f);
-     * double avg = stats.getAverage();   // Returns 4.0
+     * double avg = stats.getAverage();   // returns 4.0
      * }</pre>
      *
      * @return the arithmetic mean of values as a {@code double}, or {@code 0.0} if none

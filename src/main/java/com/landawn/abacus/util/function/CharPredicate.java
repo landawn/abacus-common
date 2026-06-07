@@ -39,6 +39,7 @@ public interface CharPredicate extends Throwables.CharPredicate<RuntimeException
      * boolean result = CharPredicate.ALWAYS_TRUE.test('a');    // Always returns true
      * boolean result2 = CharPredicate.ALWAYS_TRUE.test('5');   // Always returns true
      * }</pre>
+     *
      */
     CharPredicate ALWAYS_TRUE = value -> true;
     /**
@@ -49,6 +50,7 @@ public interface CharPredicate extends Throwables.CharPredicate<RuntimeException
      * boolean result = CharPredicate.ALWAYS_FALSE.test('a');    // Always returns false
      * boolean result2 = CharPredicate.ALWAYS_FALSE.test('5');   // Always returns false
      * }</pre>
+     *
      */
     CharPredicate ALWAYS_FALSE = value -> false;
     /**
@@ -59,6 +61,7 @@ public interface CharPredicate extends Throwables.CharPredicate<RuntimeException
      * boolean result = CharPredicate.IS_ZERO.test('\0');   // Returns true
      * boolean result2 = CharPredicate.IS_ZERO.test('a');   // Returns false
      * }</pre>
+     *
      */
     CharPredicate IS_ZERO = value -> value == 0;
     /**
@@ -69,6 +72,7 @@ public interface CharPredicate extends Throwables.CharPredicate<RuntimeException
      * boolean result = CharPredicate.NOT_ZERO.test('a');     // Returns true
      * boolean result2 = CharPredicate.NOT_ZERO.test('\0');   // Returns false
      * }</pre>
+     *
      */
     CharPredicate NOT_ZERO = value -> value != 0;
 

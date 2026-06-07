@@ -69,53 +69,53 @@ public class AbstractDateTypeTest extends TestBase {
     }
 
     @Test
-    public void testWriteCharacter_ValidDate_NoConfig() throws IOException {
+    public void testSerializeTo_ValidDate_NoConfig() throws IOException {
         Date date = new Date();
-        type.writeCharacter(characterWriter, date, null);
+        type.serializeTo(characterWriter, date, null);
     }
 
     @Test
-    public void testWriteCharacter_ValidDate_WithQuotation() throws IOException {
+    public void testSerializeTo_ValidDate_WithQuotation() throws IOException {
         Date date = new Date();
         when(config.getStringQuotation()).thenReturn('"');
         when(config.getDateTimeFormat()).thenReturn(null);
 
-        type.writeCharacter(characterWriter, date, config);
+        type.serializeTo(characterWriter, date, config);
     }
 
     @Test
-    public void testWriteCharacter_ValidDate_ISO8601DateTime() throws IOException {
+    public void testSerializeTo_ValidDate_ISO8601DateTime() throws IOException {
         Date date = new Date();
         when(config.getDateTimeFormat()).thenReturn(DateTimeFormat.ISO_8601_DATE_TIME);
         when(config.getStringQuotation()).thenReturn((char) 0);
 
-        type.writeCharacter(characterWriter, date, config);
+        type.serializeTo(characterWriter, date, config);
     }
 
     @Test
-    public void testWriteCharacter_ValidDate_ISO8601Timestamp() throws IOException {
+    public void testSerializeTo_ValidDate_ISO8601Timestamp() throws IOException {
         Date date = new Date();
         when(config.getDateTimeFormat()).thenReturn(DateTimeFormat.ISO_8601_TIMESTAMP);
         when(config.getStringQuotation()).thenReturn((char) 0);
 
-        type.writeCharacter(characterWriter, date, config);
+        type.serializeTo(characterWriter, date, config);
     }
 
     @Test
-    public void testWriteCharacter_ValidDate_QuotationWithLongFormat() throws IOException {
+    public void testSerializeTo_ValidDate_QuotationWithLongFormat() throws IOException {
         Date date = new Date();
         when(config.getDateTimeFormat()).thenReturn(DateTimeFormat.LONG);
         when(config.getStringQuotation()).thenReturn('"');
 
-        type.writeCharacter(characterWriter, date, config);
+        type.serializeTo(characterWriter, date, config);
     }
 
     @Test
-    public void testWriteCharacter_ValidDate_WithQuotationAndISO8601() throws IOException {
+    public void testSerializeTo_ValidDate_WithQuotationAndISO8601() throws IOException {
         Date date = new Date();
         when(config.getDateTimeFormat()).thenReturn(DateTimeFormat.ISO_8601_DATE_TIME);
         when(config.getStringQuotation()).thenReturn('\'');
 
-        type.writeCharacter(characterWriter, date, config);
+        type.serializeTo(characterWriter, date, config);
     }
 }

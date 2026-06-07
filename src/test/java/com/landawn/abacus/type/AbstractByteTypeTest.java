@@ -209,25 +209,25 @@ public class AbstractByteTypeTest extends TestBase {
     }
 
     @Test
-    public void testWriteCharacter_ByteValue_NoConfig() throws IOException {
-        type.writeCharacter(characterWriter, (byte) 42, null);
+    public void testSerializeTo_ByteValue_NoConfig() throws IOException {
+        type.serializeTo(characterWriter, (byte) 42, null);
     }
 
     @Test
-    public void testWriteCharacter_Null_WithWriteNullNumberAsZero() throws IOException {
+    public void testSerializeTo_Null_WithWriteNullNumberAsZero() throws IOException {
         when(config.isWriteNullNumberAsZero()).thenReturn(true);
-        type.writeCharacter(characterWriter, null, config);
+        type.serializeTo(characterWriter, null, config);
     }
 
     @Test
-    public void testWriteCharacter_Null_WithoutWriteNullNumberAsZero() throws IOException {
+    public void testSerializeTo_Null_WithoutWriteNullNumberAsZero() throws IOException {
         when(config.isWriteNullNumberAsZero()).thenReturn(false);
-        type.writeCharacter(characterWriter, null, config);
+        type.serializeTo(characterWriter, null, config);
     }
 
     @Test
-    public void testWriteCharacter_NumberValue() throws IOException {
-        type.writeCharacter(characterWriter, (byte) 100, config);
+    public void testSerializeTo_NumberValue() throws IOException {
+        type.serializeTo(characterWriter, (byte) 100, config);
     }
 
     // Bug: appendTo previously delegated to x.toString() instead of byteValue(),

@@ -47,6 +47,50 @@ public class IOUtilTest extends TestBase {
     private static final Charset UTF_16 = StandardCharsets.UTF_16;
     private static final Charset ISO_8859_1 = StandardCharsets.ISO_8859_1;
 
+    private static final class ZeroThenEofInputStream extends InputStream {
+        private int arrayReads = 0;
+
+        @Override
+        public int read(final byte[] b, final int off, final int len) {
+            arrayReads++;
+
+            if (arrayReads == 1) {
+                return 0;
+            } else if (arrayReads == 2) {
+                return -1;
+            }
+
+            throw new AssertionError("zero-progress InputStream was read again");
+        }
+
+        @Override
+        public int read() {
+            return -1;
+        }
+    }
+
+    private static final class ZeroThenEofReader extends Reader {
+        private int arrayReads = 0;
+
+        @Override
+        public int read(final char[] cbuf, final int off, final int len) {
+            arrayReads++;
+
+            if (arrayReads == 1) {
+                return 0;
+            } else if (arrayReads == 2) {
+                return -1;
+            }
+
+            throw new AssertionError("zero-progress Reader was read again");
+        }
+
+        @Override
+        public void close() {
+            // no resources
+        }
+    }
+
     @BeforeEach
     public void setUp() throws Exception {
         tempFile = Files.createTempFile(tempFolder, "test", ".txt").toFile();
@@ -570,6 +614,14 @@ public class IOUtilTest extends TestBase {
     }
 
     @Test
+    public void testReadBytes_BreaksOnZeroProgressInputStream() throws IOException {
+        final byte[] bytes = IOUtil.readBytes(new ZeroThenEofInputStream(), 0, 10);
+
+        assertNotNull(bytes);
+        assertEquals(0, bytes.length);
+    }
+
+    @Test
     public void testReadBytes_PartialLargeFile() throws IOException {
         byte[] bytes = IOUtil.readBytes(largeFile, 100, 50);
         assertNotNull(bytes);
@@ -774,6 +826,14 @@ public class IOUtilTest extends TestBase {
             assertNotNull(chars);
             assertEquals("56789", new String(chars));
         }
+    }
+
+    @Test
+    public void testReadChars_BreaksOnZeroProgressReader() throws IOException {
+        final char[] chars = IOUtil.readChars(new ZeroThenEofReader(), 0, 10);
+
+        assertNotNull(chars);
+        assertEquals(0, chars.length);
     }
 
     @Test
@@ -2488,6 +2548,14 @@ public class IOUtilTest extends TestBase {
     }
 
     @Test
+    public void testWrite_InputStreamToOutputStreamBreaksOnZeroProgress() throws IOException {
+        final java.io.ByteArrayOutputStream output = new java.io.ByteArrayOutputStream();
+
+        assertEquals(0, IOUtil.write(new ZeroThenEofInputStream(), output));
+        assertEquals(0, output.size());
+    }
+
+    @Test
     public void testWrite_InputStreamWithOffsetCountToOutputStream() throws IOException {
         File outputFile = Files.createTempFile(tempFolder, "output", ".txt").toFile();
         try (InputStream is = new ByteArrayInputStream("0123456789ABCDEF".getBytes(UTF_8));
@@ -2611,6 +2679,14 @@ public class IOUtilTest extends TestBase {
         writer.flush();
         assertEquals(TEST_CONTENT, sb.toString());
         writer.close();
+    }
+
+    @Test
+    public void testWrite_ReaderToWriterBreaksOnZeroProgress() throws IOException {
+        final java.io.StringWriter writer = new java.io.StringWriter();
+
+        assertEquals(0, IOUtil.write(new ZeroThenEofReader(), writer));
+        assertEquals("", writer.toString());
     }
 
     @Test
@@ -3512,6 +3588,11 @@ public class IOUtilTest extends TestBase {
     }
 
     @Test
+    public void testSkip_InputStreamBreaksOnZeroProgress() throws IOException {
+        assertEquals(0, IOUtil.skip(new ZeroThenEofInputStream(), 10));
+    }
+
+    @Test
     public void testSkip_InputStreamNegativeBytes() {
         try (InputStream is = new ByteArrayInputStream("Test".getBytes(UTF_8))) {
             assertThrows(IllegalArgumentException.class, () -> {
@@ -3549,6 +3630,11 @@ public class IOUtilTest extends TestBase {
             assertEquals(5, skipped);
             assertEquals(-1, reader.read());
         }
+    }
+
+    @Test
+    public void testSkip_ReaderBreaksOnZeroProgress() throws IOException {
+        assertEquals(0, IOUtil.skip(new ZeroThenEofReader(), 10));
     }
 
     @Test

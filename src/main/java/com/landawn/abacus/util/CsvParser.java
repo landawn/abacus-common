@@ -149,6 +149,7 @@ public class CsvParser {
      * CsvParser parser = new CsvParser();
      * List<String> fields = parser.parseLine("a,b,c");
      * }</pre>
+     *
      */
     public CsvParser() {
         this(DEFAULT_SEPARATOR, DEFAULT_QUOTE_CHARACTER, DEFAULT_ESCAPE_CHARACTER);
@@ -316,6 +317,12 @@ public class CsvParser {
     /**
      * Returns the separator character used by this parser.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * CsvParser parser = new CsvParser('|');
+     * char sep = parser.getSeparator();   // returns '|'
+     * }</pre>
+     *
      * @return the separator character
      */
     public char getSeparator() {
@@ -324,6 +331,12 @@ public class CsvParser {
 
     /**
      * Returns the quotation character used by this parser.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * CsvParser parser = new CsvParser(',', '\'');
+     * char quote = parser.getQuoteChar();   // returns '\''
+     * }</pre>
      *
      * @return the quotation character
      */
@@ -334,6 +347,12 @@ public class CsvParser {
     /**
      * Returns the escape character used by this parser.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * CsvParser parser = new CsvParser();
+     * char esc = parser.getEscape();   // returns '\\'
+     * }</pre>
+     *
      * @return the escape character
      */
     public char getEscape() {
@@ -343,6 +362,12 @@ public class CsvParser {
     /**
      * Returns whether this parser uses strict quotes mode.
      * In strict quotes mode, characters outside quotes are ignored.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * CsvParser parser = new CsvParser(',', '"', '\\', true);
+     * boolean strict = parser.isStrictQuotes();   // returns true
+     * }</pre>
      *
      * @return {@code true} if strict quotes mode is enabled
      */
@@ -355,6 +380,12 @@ public class CsvParser {
      * When {@code true}, surrounding whitespace is stripped from unquoted fields and whitespace
      * immediately after a separator is skipped.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * CsvParser parser = new CsvParser(',', '"', '\\', false, true);
+     * boolean ignoreWs = parser.isIgnoreLeadingWhiteSpace();   // returns true
+     * }</pre>
+     *
      * @return {@code true} if leading (and trailing) whitespace around unquoted fields is ignored
      */
     public boolean isIgnoreLeadingWhiteSpace() {
@@ -364,6 +395,12 @@ public class CsvParser {
     /**
      * Returns whether this parser ignores quotation marks.
      * When {@code true}, quotes are treated as regular characters.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * CsvParser parser = new CsvParser(',', '"', '\\', false, true, true);
+     * boolean ignoreQuotes = parser.isIgnoreQuotations();   // returns true
+     * }</pre>
      *
      * @return {@code true} if quotations are ignored
      */

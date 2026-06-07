@@ -54,9 +54,11 @@ public abstract class LongIterator extends ImmutableIterator<Long> {
     }
 
     /**
-     * An empty LongIterator that always returns {@code false} for hasNext() and throws
-     * NoSuchElementException for nextLong(). This constant is useful for representing
-     * an iterator over an empty collection of longs.
+     * A singleton empty {@code LongIterator} instance that contains no elements.
+     * This iterator's {@code hasNext()} always returns {@code false}, and {@code nextLong()}
+     * always throws {@link NoSuchElementException}.
+     *
+     * @see #empty()
      */
     public static final LongIterator EMPTY = new LongIterator() {
         @Override
@@ -81,7 +83,7 @@ public abstract class LongIterator extends ImmutableIterator<Long> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * LongIterator iter = LongIterator.empty();
-     * System.out.println(iter.hasNext());   // false
+     * System.out.println(iter.hasNext());   // returns false
      * }</pre>
      *
      * @return an empty {@code LongIterator}
@@ -298,6 +300,13 @@ public abstract class LongIterator extends ImmutableIterator<Long> {
      * with the {@link java.util.Iterator} interface but should be avoided in favor of
      * {@link #nextLong()} for better performance.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * LongIterator iter = LongIterator.of(1L, 2L);
+     * Long boxed = iter.next();         // returns 1L (boxed) — avoid this
+     * long primitive = iter.nextLong(); // returns 2L — prefer this
+     * }</pre>
+     *
      * @return the next long value as a boxed {@link Long}
      * @throws NoSuchElementException if the iteration has no more elements
      * @deprecated use {@link #nextLong()} instead to avoid boxing overhead
@@ -314,8 +323,8 @@ public abstract class LongIterator extends ImmutableIterator<Long> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * LongIterator iter = LongIterator.of(1L, 2L, 3L);
-     * long first = iter.nextLong();    // 1
-     * long second = iter.nextLong();   // 2
+     * long first = iter.nextLong();    // returns 1
+     * long second = iter.nextLong();   // returns 2
      * }</pre>
      *
      * @return the next long value
@@ -491,7 +500,7 @@ public abstract class LongIterator extends ImmutableIterator<Long> {
      * // array = [1, 2, 3, 4, 5]
      *
      * // Empty iterator returns empty array
-     * long[] empty = LongIterator.empty().toArray();   // empty.length == 0
+     * long[] empty = LongIterator.empty().toArray();   // returns empty.length == 0
      * }</pre>
      *
      * @return a {@code long} array containing all remaining elements; an empty array if there are none
@@ -514,7 +523,7 @@ public abstract class LongIterator extends ImmutableIterator<Long> {
      * // list contains [1, 2, 3, 4, 5]
      *
      * // Empty iterator returns empty list
-     * LongList empty = LongIterator.empty().toList();   // empty.size() == 0
+     * LongList empty = LongIterator.empty().toList();   // returns empty.size() == 0
      * }</pre>
      *
      * @return a {@link LongList} containing all remaining elements; an empty list if there are none
@@ -600,6 +609,12 @@ public abstract class LongIterator extends ImmutableIterator<Long> {
      * Performs the given action for each remaining element, boxing each {@code long} to a {@link Long}.
      * This method is provided for compatibility with the {@link java.util.Iterator} interface but
      * should be avoided in favor of {@link #foreachRemaining(Throwables.LongConsumer)} for better performance.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * LongIterator iter = LongIterator.of(1L, 2L, 3L);
+     * iter.forEachRemaining(value -> System.out.println(value));   // Boxes each long — avoid this
+     * }</pre>
      *
      * @param action the action to be performed for each element
      * @deprecated use {@link #foreachRemaining(Throwables.LongConsumer)} instead to avoid boxing overhead

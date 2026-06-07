@@ -61,6 +61,16 @@ public abstract class ParserConfig<C extends ParserConfig<C>> implements Cloneab
      *   <li>The special key {@code Object.class} contains globally ignored properties</li>
      * </ul>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * KryoSerConfig config = new KryoSerConfig();
+     * Map<Class<?>, Set<String>> none = config.getIgnoredPropNames();  // returns null (none configured)
+     *
+     * config.setIgnoredPropNames(Set.of("password", "version"));
+     * Map<Class<?>, Set<String>> map = config.getIgnoredPropNames();
+     * Set<String> global = map.get(Object.class);  // returns ["password", "version"] (global ignores)
+     * }</pre>
+     *
      * @return the map of ignored properties by class, or {@code null} if none are configured
      */
     public Map<Class<?>, Set<String>> getIgnoredPropNames() {

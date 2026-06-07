@@ -20,10 +20,14 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorCompletionService;
 import java.util.concurrent.Future;
+import java.util.concurrent.FutureTask;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.function.Function;
@@ -93,7 +97,7 @@ import com.landawn.abacus.util.Tuple.Tuple7;
  * Future<Profile> profileFuture = profileService.fetchProfile(userId);
  *
  * ContinuableFuture<List<Object>> allResults = Futures.allOf(userFuture, ordersFuture, profileFuture);
- * List<Object> results = allResults.get();   // [User, List<Order>, Profile]
+ * List<Object> results = allResults.get();   // returns [User, List<Order>, Profile]
  *
  * // Structured result combination using Tuples
  * ContinuableFuture<Tuple3<User, List<Order>, Profile>> structuredResult =
@@ -254,7 +258,7 @@ import com.landawn.abacus.util.Tuple.Tuple7;
  *   <li><b>Resource Cleanup:</b> Proper cleanup of resources when operations timeout or are cancelled</li>
  * </ul>
  *
- * <p><b>Usage Examples: Microservice Orchestration</b>
+ * <p><b>Usage Examples: Microservice Orchestration</b></p>
  * <pre>{@code
  * public class OrderProcessingOrchestrator {
  *     private final UserService userService;
@@ -275,7 +279,7 @@ import com.landawn.abacus.util.Tuple.Tuple7;
  *         // Step 3: Process order if all validations pass.
  *         // ContinuableFuture exposes thenCallAsync(Function) for chaining a follow-up async stage.
  *         return validations.thenCallAsync(result -> {
- *             if (!result._2) { // inventory not available
+ *             if (!result._2) {
  *                 throw new OrderProcessingException("Insufficient inventory");
  *             }
  *
@@ -371,7 +375,7 @@ public final class Futures {
      * ContinuableFuture<Integer> sum = Futures.compose(future1, future2,
      *     (f1, f2) -> f1.get() + f2.get());
      *
-     * System.out.println(sum.get());   // Prints: 15
+     * System.out.println(sum.get());   // prints 15
      *
      * // Custom error handling
      * Future<String> mayFail1 = riskyOperation1();
@@ -395,7 +399,7 @@ public final class Futures {
      *         if (condFuture.get()) {
      *             return dataFuture.get();
      *         } else {
-     *             return Data.DEFAULT;  // Skip expensive retrieval
+     *             return Data.DEFAULT;
      *         }
      *     });
      * }</pre>
@@ -554,7 +558,7 @@ public final class Futures {
      *     (f1, f2, f3) -> String.format("%s, %d years old, from %s",
      *         f1.get(), f2.get(), f3.get()));
      *
-     * System.out.println(profile.get());   // "John, 30 years old, from New York"
+     * System.out.println(profile.get());   // prints "John, 30 years old, from New York"
      *
      * // Complex data aggregation from multiple sources
      * Future<UserData> userData = fetchUserData(userId);
@@ -761,7 +765,7 @@ public final class Futures {
      *     return total;
      * });
      *
-     * System.out.println(sum.get());   // Prints: 6
+     * System.out.println(sum.get());   // prints 6
      *
      * // Complex data aggregation with error handling
      * List<Future<DataPoint>> dataFutures = sensors.stream()
@@ -856,7 +860,7 @@ public final class Futures {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Basic partial aggregation under timeout
-     * Set<Future<DataPoint>> dataFutures = // ... multiple data source futures
+     * Set<Future<DataPoint>> dataFutures =
      *
      * ContinuableFuture<Summary> summary = Futures.compose(dataFutures,
      *     futures -> {
@@ -1626,7 +1630,7 @@ public final class Futures {
      *     cacheSource, primarySource, secondarySource
      * );
      *
-     * Data result = firstAvailable.get();   // Gets the fastest result
+     * Data result = firstAvailable.get();   // gets the fastest result
      * }</pre>
      *
      * @param <T> the result type of the futures.
@@ -1953,7 +1957,7 @@ public final class Futures {
      * @return an {@code ObjIterator} that yields transformed results in completion order
      *         (first-finished, first-out).
      * @throws IllegalArgumentException if {@code resultHandler} is {@code null}.
-     * @throws NullPointerException if {@code cfs} is {@code null}.
+     * @throws IllegalArgumentException if {@code cfs} is {@code null} or empty.
      */
     public static <T, R> ObjIterator<R> iterate(final Collection<? extends Future<? extends T>> cfs,
             final Function<? super Result<T, Exception>, ? extends R> resultHandler) {
@@ -2007,7 +2011,7 @@ public final class Futures {
      *         {@code resultHandler}.
      * @throws IllegalArgumentException if {@code totalTimeoutForAll} is not positive, or
      *         {@code unit} or {@code resultHandler} is {@code null}.
-     * @throws NullPointerException if {@code cfs} is {@code null}.
+     * @throws IllegalArgumentException if {@code cfs} is {@code null} or empty.
      */
     public static <T, R> ObjIterator<R> iterate(final Collection<? extends Future<? extends T>> cfs, final long totalTimeoutForAll, final TimeUnit unit,
             final Function<? super Result<T, Exception>, ? extends R> resultHandler) {
@@ -2021,29 +2025,39 @@ public final class Futures {
 
     private static <T, R> ObjIterator<R> iterate02(final Collection<? extends Future<? extends T>> cfs, final long totalTimeoutForAll, final TimeUnit unit,
             final Function<? super Result<T, Exception>, ? extends R> resultHandler) {
+        N.checkArgument(N.notEmpty(cfs), "The specified collection cannot be null or empty");
         N.checkArgPositive(totalTimeoutForAll, cs.totalTimeoutForAll);
         N.checkArgNotNull(unit, cs.unit);
         N.checkArgNotNull(resultHandler, cs.resultHandler);
 
         final long startTime = System.currentTimeMillis();
         final long totalTimeoutForAllInMillis = totalTimeoutForAll == Long.MAX_VALUE ? Long.MAX_VALUE : unit.toMillis(totalTimeoutForAll);
-        final ExecutorCompletionService<Result<T, Exception>> completionService = new ExecutorCompletionService<>(N.ASYNC_EXECUTOR.getExecutor());
+        final BlockingQueue<Result<T, Exception>> completedResults = new LinkedBlockingQueue<>();
         final int futureCount = cfs.size();
 
         // Track every submitted wrapper task so we can cancel still-running ones when
         // the iterator is abandoned, the global timeout fires, or the consumer is
         // interrupted. Without this, blocked future.get() calls keep occupying threads in
         // the shared async executor long after the caller has stopped consuming results.
-        final List<Future<Result<T, Exception>>> submitted = new ArrayList<>(futureCount);
+        final List<Future<?>> submitted = new ArrayList<>(futureCount);
 
         for (final Future<? extends T> future : cfs) {
-            submitted.add(completionService.submit(() -> {
-                try {
-                    return Result.of(future.get(), null);
-                } catch (final Exception e) {
-                    return Result.of(null, convertException(e));
-                }
-            }));
+            if (future instanceof CompletableFuture<? extends T> completableFuture) {
+                completableFuture.whenComplete((value, error) -> {
+                    completedResults.offer(error == null ? Result.of(value, null) : Result.of(null, convertException(error)));
+                });
+            } else {
+                final FutureTask<Void> submittedTask = new FutureTask<>(() -> {
+                    try {
+                        completedResults.offer(Result.of(future.get(), null));
+                    } catch (final Exception e) {
+                        completedResults.offer(Result.of(null, convertException(e)));
+                    }
+                }, null);
+
+                submitted.add(submittedTask);
+                N.ASYNC_EXECUTOR.getExecutor().execute(submittedTask);
+            }
         }
 
         return new ObjIterator<>() {
@@ -2070,15 +2084,13 @@ public final class Futures {
                 final long remainingTimeInMillis = totalTimeoutForAllInMillis == Long.MAX_VALUE ? Long.MAX_VALUE
                         : totalTimeoutForAllInMillis - (System.currentTimeMillis() - startTime);
 
-                final Future<Result<T, Exception>> doneFuture;
-
                 try {
                     if (remainingTimeInMillis == Long.MAX_VALUE) {
-                        doneFuture = completionService.take();
+                        nextResult = completedResults.take();
                     } else if (remainingTimeInMillis > 0) {
-                        doneFuture = completionService.poll(remainingTimeInMillis, TimeUnit.MILLISECONDS);
+                        nextResult = completedResults.poll(remainingTimeInMillis, TimeUnit.MILLISECONDS);
                     } else {
-                        doneFuture = null;
+                        nextResult = null;
                     }
                 } catch (final InterruptedException e) {
                     Thread.currentThread().interrupt();
@@ -2089,7 +2101,7 @@ public final class Futures {
                     return true;
                 }
 
-                if (doneFuture == null) {
+                if (nextResult == null) {
                     cancelPending();
                     noMore = true;
                     resultReady = true;
@@ -2097,14 +2109,7 @@ public final class Futures {
                     return true;
                 }
 
-                try {
-                    nextResult = doneFuture.get();
-                } catch (final Exception e) {
-                    nextResult = Result.of(null, e);
-                } finally {
-                    remainingCount--;
-                }
-
+                remainingCount--;
                 resultReady = true;
                 return true;
             }
@@ -2132,28 +2137,31 @@ public final class Futures {
     }
 
     /**
-     * Unwraps an {@link ExecutionException} to its underlying cause when the cause is itself
-     * an {@link Exception}. Used internally by the iteration machinery to avoid presenting
-     * callers with double-wrapped exceptions from {@link java.util.concurrent.CompletionService}.
+     * Unwraps an {@link ExecutionException} or {@link CompletionException} to its underlying cause
+     * when the cause is itself an {@link Exception}. Used internally by the iteration machinery to
+     * avoid presenting callers with double-wrapped exceptions.
      *
      * <p>Conversion rules:
      * <ul>
-     *   <li>If {@code e} is an {@link ExecutionException} and its cause is an {@code Exception},
-     *       returns the cause.</li>
-     *   <li>If {@code e} is an {@link ExecutionException} but its cause is not an
-     *       {@code Exception} (e.g., an {@link Error}), returns {@code e} unchanged.</li>
-     *   <li>If {@code e} is not an {@link ExecutionException}, returns {@code e} unchanged.</li>
+     *   <li>If {@code e} is an {@link ExecutionException} or {@link CompletionException} and its
+     *       cause is an {@code Exception}, returns the cause.</li>
+     *   <li>Otherwise, if {@code e} is itself an {@code Exception} (including an
+     *       {@link ExecutionException}/{@link CompletionException} whose cause is not an
+     *       {@code Exception}), returns {@code e} unchanged.</li>
+     *   <li>Otherwise (e.g., {@code e} is an {@link Error}), returns a new {@link ExecutionException}
+     *       wrapping {@code e}.</li>
      * </ul>
      *
-     * @param e the exception to convert; must not be {@code null}.
-     * @return the unwrapped cause if applicable, otherwise {@code e} itself; never {@code null}.
+     * @param e the throwable to convert; must not be {@code null}.
+     * @return the unwrapped cause when applicable, otherwise {@code e} itself or, for a non-{@code Exception}
+     *         throwable, a new {@link ExecutionException} wrapping it; never {@code null}.
      * @see ExecutionException
      */
-    static Exception convertException(final Exception e) {
-        if (e instanceof ExecutionException && e.getCause() instanceof Exception ex) {
+    static Exception convertException(final Throwable e) {
+        if ((e instanceof ExecutionException || e instanceof CompletionException) && e.getCause() instanceof Exception ex) {
             return ex;
         }
 
-        return e;
+        return e instanceof Exception ex ? ex : new ExecutionException(e);
     }
 }

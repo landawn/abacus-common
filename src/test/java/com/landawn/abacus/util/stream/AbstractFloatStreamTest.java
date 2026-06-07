@@ -198,6 +198,13 @@ public class AbstractFloatStreamTest extends TestBase {
     }
 
     @Test
+    public void testArrayStepIteratorCountConsumes() {
+        FloatIterator iter = FloatStream.of(new float[] { 1.0f, 2.0f, 3.0f, 4.0f, 5.0f, 6.0f }).step(2).iterator();
+        assertEquals(3, iter.count());
+        assertFalse(iter.hasNext());
+    }
+
+    @Test
     public void testScan() {
         FloatStream result = stream.scan((a, b) -> a + b);
         assertArrayEquals(new float[] { 1.0f, 3.0f, 6.0f, 10.0f, 15.0f }, result.toArray());

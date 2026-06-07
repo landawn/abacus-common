@@ -262,31 +262,56 @@ public class CollectionTypeTest extends TestBase {
     }
 
     @Test
-    public void testWriteCharacter_Null() throws IOException {
+    public void testSerializeTo_Null() throws IOException {
         CharacterWriter mockWriter = createCharacterWriter();
-        listType.writeCharacter(mockWriter, null, null);
+        listType.serializeTo(mockWriter, null, null);
         verify(mockWriter).write("null".toCharArray());
     }
 
     @Test
-    public void testWriteCharacter_Empty() throws IOException {
+    public void testSerializeTo_Empty() throws IOException {
         CharacterWriter mockWriter = createCharacterWriter();
         List<String> empty = new ArrayList<>();
-        listType.writeCharacter(mockWriter, empty, null);
+        listType.serializeTo(mockWriter, empty, null);
         verify(mockWriter).write('[');
         verify(mockWriter).write(']');
     }
 
     @Test
-    public void testWriteCharacter_Elements() throws IOException {
+    public void testSerializeTo_Elements() throws IOException {
         CharacterWriter mockWriter = createCharacterWriter();
         List<String> list = Arrays.asList("a", "b");
         JsonXmlSerConfig<?> config = mock(JsonXmlSerConfig.class);
 
-        listType.writeCharacter(mockWriter, list, config);
+        listType.serializeTo(mockWriter, list, config);
 
         verify(mockWriter).write('[');
         verify(mockWriter).write(']');
         verify(mockWriter, atLeastOnce()).write(any(char[].class));
+    }
+
+    @Test
+    public void testAppendTo_unquotedToStringForm() throws IOException {
+        StringBuilder sb = new StringBuilder();
+        listType.appendTo(sb, Arrays.asList("a", "b"));
+        // appendTo emits the plain, toString()-style form: string elements are NOT quoted
+        assertEquals("[a, b]", sb.toString());
+    }
+
+    @Test
+    public void testSerializeTo_jsonQuotedForm() throws IOException {
+        List<String> list = Arrays.asList("a", "b");
+        com.landawn.abacus.util.BufferedJsonWriter writer = com.landawn.abacus.util.Objectory.createBufferedJsonWriter();
+        listType.serializeTo(writer, list, com.landawn.abacus.parser.JsonSerConfig.create());
+        String json = writer.toString();
+        com.landawn.abacus.util.Objectory.recycle(writer);
+
+        // serializeTo emits JSON: string elements ARE quoted; equals stringOf and differs from appendTo
+        assertEquals("[\"a\", \"b\"]", json);
+        assertEquals(listType.stringOf(list), json);
+
+        StringBuilder sb = new StringBuilder();
+        listType.appendTo(sb, list);
+        org.junit.jupiter.api.Assertions.assertNotEquals(sb.toString(), json);
     }
 }

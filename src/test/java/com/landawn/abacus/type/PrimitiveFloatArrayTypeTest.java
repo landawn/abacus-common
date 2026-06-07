@@ -132,31 +132,31 @@ public class PrimitiveFloatArrayTypeTest extends TestBase {
     }
 
     @Test
-    public void test_writeCharacter() throws IOException {
+    public void test_serializeTo() throws IOException {
         CharacterWriter writer = mock(BufferedJsonWriter.class);
         JsonXmlSerConfig<?> config = mock(JsonXmlSerConfig.class);
 
         float[] arr = new float[] { 1.1f, 2.2f };
-        type.writeCharacter(writer, arr, config);
+        type.serializeTo(writer, arr, config);
         verify(writer, atLeastOnce()).write(any(String.class));
 
         reset(writer);
-        type.writeCharacter(writer, null, config);
+        type.serializeTo(writer, null, config);
         verify(writer).write(NULL_CHAR_ARRAY);
     }
 
     @Test
-    public void testWriteCharacterEmptyArray() throws IOException {
+    public void testSerializeToEmptyArray() throws IOException {
         CharacterWriter writer = createCharacterWriter();
-        type.writeCharacter(writer, new float[0], null);
+        type.serializeTo(writer, new float[0], null);
         verify(writer).write('[');
         verify(writer).write(']');
     }
 
     @Test
-    public void testWriteCharacterNonEmptyArray() throws IOException {
+    public void testSerializeToNonEmptyArray() throws IOException {
         CharacterWriter writer = createCharacterWriter();
-        type.writeCharacter(writer, new float[] { 1.5f, 2.7f }, null);
+        type.serializeTo(writer, new float[] { 1.5f, 2.7f }, null);
         verify(writer).write('[');
         verify(writer).write(1.5f);
         verify(writer).write(", ");

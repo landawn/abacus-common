@@ -237,7 +237,6 @@ import com.landawn.abacus.util.u.Nullable;
  *   <li>Together they form a complete functional programming toolkit with exception handling</li>
  * </ul>
  *
- *
  * @see Seq
  * @see Fnn
  * @see java.util.function
@@ -621,6 +620,14 @@ public final class Throwables {
         /**
          * Returns an empty iterator that has no elements and whose hasNext() always returns {@code false}.
          *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * Iterator<String, IOException> empty = Iterator.empty();
+         * assert !empty.hasNext();  // returns always false
+         *
+         * Iterator<Integer, RuntimeException> noItems = Iterator.empty();
+         * }</pre>
+         *
          * @param <T> the type of elements that would be returned by this iterator
          * @param <E> the type of exception that may be thrown
          * @return an empty iterator
@@ -631,6 +638,15 @@ public final class Throwables {
 
         /**
          * Returns an iterator containing only the specified single element.
+         *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * Iterator<String, IOException> single = Iterator.just("hello");
+         * String value = single.next(); // returns "hello"
+         * assert !single.hasNext();     // returns exhausted
+         *
+         * Iterator<Integer, RuntimeException> one = Iterator.just(42);
+         * }</pre>
          *
          * @param <T> the type of the element
          * @param <E> the type of exception that may be thrown
@@ -662,6 +678,15 @@ public final class Throwables {
         /**
          * Returns an iterator over the specified array of elements.
          *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * Iterator<String, RuntimeException> iter = Iterator.of("a", "b", "c");
+         * String first = iter.next(); // returns "a"
+         *
+         * String[] data = {"x", "y", "z"};
+         * Iterator<String, RuntimeException> iter2 = Iterator.of(data);
+         * }</pre>
+         *
          * @param <T> the type of elements in the array
          * @param <E> the type of exception that may be thrown
          * @param a the array of elements to iterate over
@@ -674,6 +699,15 @@ public final class Throwables {
 
         /**
          * Returns an iterator over a range of elements in the specified array.
+         *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * String[] data = {"a", "b", "c", "d", "e"};
+         * Iterator<String, RuntimeException> iter = Iterator.of(data, 1, 4);
+         * iter.next(); // returns "b"
+         * iter.next(); // returns "c"
+         * iter.next(); // returns "d"
+         * }</pre>
          *
          * @param <T> the type of elements in the array
          * @param <E> the type of exception that may be thrown
@@ -736,6 +770,13 @@ public final class Throwables {
         /**
          * Returns an iterator over the elements in the specified Iterable.
          *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * List<String> list = Arrays.asList("a", "b", "c");
+         * Iterator<String, RuntimeException> iter = Iterator.of(list);
+         * iter.next(); // returns "a"
+         * }</pre>
+         *
          * @param <T> the type of elements in the iterable
          * @param <E> the type of exception that may be thrown
          * @param iterable the iterable whose elements are to be iterated over
@@ -763,6 +804,13 @@ public final class Throwables {
 
         /**
          * Returns a Throwables.Iterator that wraps the specified java.util.Iterator.
+         *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * java.util.Iterator<String> utilIter = Arrays.asList("x", "y").iterator();
+         * Iterator<String, RuntimeException> iter = Iterator.of(utilIter);
+         * iter.next(); // returns "x"
+         * }</pre>
          *
          * @param <T> the type of elements returned by the iterator
          * @param <E> the type of exception that may be thrown
@@ -877,6 +925,17 @@ public final class Throwables {
          * Concatenates multiple iterators into a single iterator that iterates over all elements
          * from all the iterators in sequence.
          *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * Iterator<String, RuntimeException> iter1 = Iterator.of("a", "b");
+         * Iterator<String, RuntimeException> iter2 = Iterator.of("c", "d");
+         * Iterator<String, RuntimeException> combined = Iterator.concat(iter1, iter2);
+         * combined.next(); // returns "a"
+         * combined.next(); // returns "b"
+         * combined.next(); // returns "c"
+         * combined.next(); // returns "d"
+         * }</pre>
+         *
          * @param <T> the type of elements returned by the iterators
          * @param <E> the type of exception that may be thrown
          * @param a the array of iterators to concatenate
@@ -891,6 +950,16 @@ public final class Throwables {
         /**
          * Concatenates a collection of iterators into a single iterator that iterates over all elements
          * from all the iterators in sequence.
+         *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * List<Iterator<String, RuntimeException>> iterators = Arrays.asList(
+         *     Iterator.of("a", "b"),
+         *     Iterator.of("c", "d")
+         * );
+         * Iterator<String, RuntimeException> combined = Iterator.concat(iterators);
+         * combined.next(); // returns "a"
+         * }</pre>
          *
          * @param <T> the type of elements returned by the iterators
          * @param <E> the type of exception that may be thrown
@@ -1001,6 +1070,17 @@ public final class Throwables {
         /**
          * Returns {@code true} if the iterator has more elements to iterate over.
          *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * Iterator<Integer, RuntimeException> iter = Iterator.of(1, 2);
+         * iter.hasNext(); // returns true
+         * iter.next();
+         * iter.next();
+         * iter.hasNext(); // returns false
+         *
+         * Iterator.empty().hasNext(); // returns false
+         * }</pre>
+         *
          * @return {@code true} if there are more elements, {@code false} otherwise
          * @throws E if an exception occurs while checking for more elements
          */
@@ -1008,6 +1088,14 @@ public final class Throwables {
 
         /**
          * Returns the next element in the iteration.
+         *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * Iterator<String, RuntimeException> iter = Iterator.of("a", "b");
+         * iter.next(); // returns "a"
+         * iter.next(); // returns "b"
+         * iter.next(); // throws NoSuchElementException (no more elements)
+         * }</pre>
          *
          * @return the next element in the iteration
          * @throws E if an exception occurs while retrieving the next element
@@ -1019,6 +1107,18 @@ public final class Throwables {
          * Advances the iterator by skipping the specified number of elements.
          * If {@code n} is greater than the number of remaining elements, the iterator will be
          * positioned at the end. If {@code n} is zero or negative, this method has no effect.
+         *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * Iterator<Integer, RuntimeException> iter = Iterator.of(1, 2, 3, 4, 5);
+         * iter.advance(2);     // skips 1 and 2
+         * iter.next();         // returns 3
+         *
+         * iter.advance(10);    // skips past the end (only 4, 5 remained)
+         * iter.hasNext();      // returns false
+         *
+         * Iterator.of(1, 2, 3).advance(0); // no-op; next() still returns 1
+         * }</pre>
          *
          * @param n the number of elements to skip; no-op if zero or negative
          * @throws E if an exception occurs while advancing the iterator
@@ -1036,6 +1136,16 @@ public final class Throwables {
         /**
          * Returns the count of remaining elements in the iterator.
          * This method will consume all remaining elements in the iterator.
+         *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * Iterator<Integer, RuntimeException> iter = Iterator.of(10, 20, 30);
+         * iter.count(); // returns 3 (and consumes all elements)
+         *
+         * Iterator<Integer, RuntimeException> iter2 = Iterator.of(10, 20, 30);
+         * iter2.next();  // consumes 10
+         * iter2.count(); // returns 2 (counts only the remaining elements)
+         * }</pre>
          *
          * @return the number of remaining elements
          * @throws E if an exception occurs while counting the elements
@@ -1083,6 +1193,14 @@ public final class Throwables {
          * Returns a new iterator that contains only elements matching the specified predicate.
          * Elements that do not satisfy the predicate will be skipped.
          *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * Iterator<Integer, RuntimeException> iter = Iterator.of(1, 2, 3, 4, 5);
+         * Iterator<Integer, RuntimeException> even = iter.filter(x -> x % 2 == 0);
+         * even.next(); // returns 2
+         * even.next(); // returns 4
+         * }</pre>
+         *
          * @param predicate the predicate to test each element
          * @return a new iterator containing only elements that satisfy the predicate
          * @throws E if an exception occurs while iterating or evaluating the predicate
@@ -1127,6 +1245,14 @@ public final class Throwables {
         /**
          * Returns a new iterator that applies the specified mapping function to each element.
          *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * Iterator<String, RuntimeException> iter = Iterator.of("1", "2", "3");
+         * Iterator<Integer, RuntimeException> ints = iter.map(Integer::parseInt);
+         * ints.next(); // returns 1
+         * ints.next(); // returns 2
+         * }</pre>
+         *
          * @param <U> the type of elements returned by the new iterator
          * @param mapper the function to apply to each element
          * @return a new iterator with the mapping function applied to each element
@@ -1152,6 +1278,12 @@ public final class Throwables {
          * Returns the first element from this iterator wrapped in a {@code Nullable}.
          * If the iterator is empty, returns an empty {@code Nullable}.
          *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * Iterator<String, RuntimeException> iter = Iterator.of("a", "b", "c");
+         * Nullable<String> first = iter.first(); // returns Nullable.of("a")
+         * }</pre>
+         *
          * @return a {@code Nullable} containing the first element if present, otherwise an empty Nullable
          * @throws E if an exception occurs while retrieving the first element
          */
@@ -1166,6 +1298,12 @@ public final class Throwables {
         /**
          * Returns the first {@code non-null} element from this iterator wrapped in an Optional.
          * If no {@code non-null} element is found or the iterator is empty, returns an empty Optional.
+         *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * Iterator<String, RuntimeException> iter = Iterator.of(null, "b", "c");
+         * u.Optional<String> first = iter.firstNonNull(); // returns Optional.of("b")
+         * }</pre>
          *
          * @return an Optional containing the first {@code non-null} element if present, otherwise an empty Optional
          * @throws E if an exception occurs while searching for a {@code non-null} element
@@ -1189,6 +1327,12 @@ public final class Throwables {
          * This method will consume all elements in the iterator.
          * If the iterator is empty, returns an empty {@code Nullable}.
          *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * Iterator<String, RuntimeException> iter = Iterator.of("a", "b", "c");
+         * Nullable<String> last = iter.last(); // returns Nullable.of("c")
+         * }</pre>
+         *
          * @return a {@code Nullable} containing the last element if present, otherwise an empty Nullable
          * @throws E if an exception occurs while iterating through the elements
          */
@@ -1210,6 +1354,12 @@ public final class Throwables {
          * Returns an array containing all remaining elements in this iterator.
          * This method will consume all remaining elements.
          *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * Iterator<String, RuntimeException> iter = Iterator.of("a", "b");
+         * Object[] arr = iter.toArray(); // returns ["a", "b"]
+         * }</pre>
+         *
          * @return an array containing all remaining elements
          * @throws E if an exception occurs while iterating through the elements
          */
@@ -1223,6 +1373,12 @@ public final class Throwables {
          * Otherwise, a new array of the same type is created.
          * This method will consume all remaining elements.
          *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * Iterator<String, RuntimeException> iter = Iterator.of("a", "b");
+         * String[] arr = iter.toArray(new String[0]); // returns ["a", "b"]
+         * }</pre>
+         *
          * @param <A> the component type of the array
          * @param a the array into which the elements are to be stored, if it is big enough
          * @return an array containing all remaining elements
@@ -1235,6 +1391,12 @@ public final class Throwables {
         /**
          * Returns a List containing all remaining elements in this iterator.
          * This method will consume all remaining elements.
+         *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * Iterator<String, RuntimeException> iter = Iterator.of("a", "b", "c");
+         * List<String> list = iter.toList(); // returns ["a", "b", "c"]
+         * }</pre>
          *
          * @return a List containing all remaining elements
          * @throws E if an exception occurs while iterating through the elements
@@ -1253,6 +1415,12 @@ public final class Throwables {
          * Performs the given action for each remaining element in this iterator.
          * This method will consume all remaining elements.
          *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * Iterator<String, RuntimeException> iter = Iterator.of("a", "b", "c");
+         * iter.forEachRemaining(System.out::println); // prints a b c
+         * }</pre>
+         *
          * @param action the action to be performed for each element
          * @throws E if an exception occurs while iterating through the elements
          */
@@ -1265,6 +1433,18 @@ public final class Throwables {
         /**
          * Performs the given action for each remaining element in this iterator.
          * This method will consume all remaining elements.
+         *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * List<String> collected = new ArrayList<>();
+         * Iterator<String, RuntimeException> iter = Iterator.of("x", "y", "z");
+         * iter.foreachRemaining(collected::add); // collected becomes [x, y, z]
+         *
+         * List<String> rest = new ArrayList<>();
+         * Iterator<String, RuntimeException> iter2 = Iterator.of("x", "y", "z");
+         * iter2.next();                        // consumes "x"
+         * iter2.foreachRemaining(rest::add);   // rest becomes [y, z]
+         * }</pre>
          *
          * @param <E2> the type of exception that the action may throw
          * @param action the action to be performed for each element
@@ -1281,6 +1461,14 @@ public final class Throwables {
          * Performs the given action for each remaining element in this iterator,
          * providing both the element and its index (starting from 0).
          * This method will consume all remaining elements.
+         *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * List<String> collected = new ArrayList<>();
+         * Iterator<String, RuntimeException> iter = Iterator.of("x", "y", "z");
+         * // action receives (index, element): the int index comes first
+         * iter.foreachIndexed((idx, val) -> collected.add(idx + "=" + val)); // collected becomes [0=x, 1=y, 2=z]
+         * }</pre>
          *
          * @param <E2> the type of exception that the action may throw
          * @param action the action to be performed for each element with its index
@@ -5574,6 +5762,14 @@ public final class Throwables {
             /**
              * Executes the task.
              *
+             * <p><b>Usage Examples:</b></p>
+             * <pre>{@code
+             * Throwables.EE.Runnable<IOException, SQLException> task = () -> {
+             *     Files.readString(path);
+             *     connection.commit();
+             * };
+             * }</pre>
+             *
              * @throws E if the first type of error occurs during execution
              * @throws E2 if the second type of error occurs during execution
              */
@@ -5592,6 +5788,15 @@ public final class Throwables {
 
             /**
              * Computes a result.
+             *
+             * <p><b>Usage Examples:</b></p>
+             * <pre>{@code
+             * Throwables.EE.Callable<String, IOException, SQLException> task = () -> {
+             *     String data = Files.readString(path);
+             *     connection.commit();
+             *     return data;
+             * };
+             * }</pre>
              *
              * @return the computed result
              * @throws E if the first type of error occurs during computation
@@ -5613,6 +5818,13 @@ public final class Throwables {
             /**
              * Gets a result.
              *
+             * <p><b>Usage Examples:</b></p>
+             * <pre>{@code
+             * Throwables.EE.Supplier<String, IOException, SQLException> supplier = () -> {
+             *     return queryDatabase();
+             * };
+             * }</pre>
+             *
              * @return a result
              * @throws E if the first type of error occurs while getting the result
              * @throws E2 if the second type of error occurs while getting the result
@@ -5632,6 +5844,13 @@ public final class Throwables {
 
             /**
              * Evaluates this predicate on the given argument.
+             *
+             * <p><b>Usage Examples:</b></p>
+             * <pre>{@code
+             * Throwables.EE.Predicate<String, IOException, SQLException> pred = s -> {
+             *     return !Files.readString(path).isEmpty();
+             * };
+             * }</pre>
              *
              * @param t the input argument
              * @return {@code true} if the input argument matches the predicate, otherwise {@code false}
@@ -5654,6 +5873,13 @@ public final class Throwables {
 
             /**
              * Evaluates this predicate on the given arguments.
+             *
+             * <p><b>Usage Examples:</b></p>
+             * <pre>{@code
+             * Throwables.EE.BiPredicate<String, String, IOException, SQLException> pred = (s1, s2) -> {
+             *     return Files.readString(Path.of(s1)).equals(Files.readString(Path.of(s2)));
+             * };
+             * }</pre>
              *
              * @param t the first input argument
              * @param u the second input argument
@@ -5679,6 +5905,13 @@ public final class Throwables {
             /**
              * Evaluates this predicate on the given arguments.
              *
+             * <p><b>Usage Examples:</b></p>
+             * <pre>{@code
+             * Throwables.EE.TriPredicate<String, String, String, IOException, SQLException> pred = (a, b, c) -> {
+             *     return Files.readString(Path.of(a)).contains(Files.readString(Path.of(b)));
+             * };
+             * }</pre>
+             *
              * @param a the first input argument
              * @param b the second input argument
              * @param c the third input argument
@@ -5703,6 +5936,13 @@ public final class Throwables {
             /**
              * Applies this function to the given argument.
              *
+             * <p><b>Usage Examples:</b></p>
+             * <pre>{@code
+             * Throwables.EE.Function<String, String, IOException, SQLException> func = path -> {
+             *     return Files.readString(Path.of(path));
+             * };
+             * }</pre>
+             *
              * @param t the function argument
              * @return the function result
              * @throws E if the first type of error occurs during function execution
@@ -5725,6 +5965,13 @@ public final class Throwables {
 
             /**
              * Applies this function to the given arguments.
+             *
+             * <p><b>Usage Examples:</b></p>
+             * <pre>{@code
+             * Throwables.EE.BiFunction<String, String, String, IOException, SQLException> func = (a, b) -> {
+             *     return Files.readString(Path.of(a)) + Files.readString(Path.of(b));
+             * };
+             * }</pre>
              *
              * @param t the first function argument
              * @param u the second function argument
@@ -5751,6 +5998,13 @@ public final class Throwables {
             /**
              * Applies this function to the given arguments.
              *
+             * <p><b>Usage Examples:</b></p>
+             * <pre>{@code
+             * Throwables.EE.TriFunction<String, String, String, String, IOException, SQLException> func = (a, b, c) -> {
+             *     return Files.readString(Path.of(a)) + Files.readString(Path.of(b)) + c;
+             * };
+             * }</pre>
+             *
              * @param a the first function argument
              * @param b the second function argument
              * @param c the third function argument
@@ -5774,6 +6028,13 @@ public final class Throwables {
             /**
              * Performs this operation on the given argument.
              *
+             * <p><b>Usage Examples:</b></p>
+             * <pre>{@code
+             * Throwables.EE.Consumer<String, IOException, SQLException> consumer = path -> {
+             *     Files.readString(Path.of(path));
+             * };
+             * }</pre>
+             *
              * @param t the input argument
              * @throws E if the first type of error occurs during operation execution
              * @throws E2 if the second type of error occurs during operation execution
@@ -5794,6 +6055,13 @@ public final class Throwables {
 
             /**
              * Performs this operation on the given arguments.
+             *
+             * <p><b>Usage Examples:</b></p>
+             * <pre>{@code
+             * Throwables.EE.BiConsumer<String, String, IOException, SQLException> consumer = (a, b) -> {
+             *     Files.writeString(Path.of(a), b);
+             * };
+             * }</pre>
              *
              * @param t the first input argument
              * @param u the second input argument
@@ -5817,6 +6085,13 @@ public final class Throwables {
 
             /**
              * Performs this operation on the given arguments.
+             *
+             * <p><b>Usage Examples:</b></p>
+             * <pre>{@code
+             * Throwables.EE.TriConsumer<String, String, String, IOException, SQLException> consumer = (a, b, c) -> {
+             *     System.out.println(a + b + c);
+             * };
+             * }</pre>
              *
              * @param a the first input argument
              * @param b the second input argument
@@ -5850,6 +6125,14 @@ public final class Throwables {
             /**
              * Executes the task.
              *
+             * <p><b>Usage Examples:</b></p>
+             * <pre>{@code
+             * Throwables.EEE.Runnable<IOException, SQLException, RuntimeException> task = () -> {
+             *     Files.readString(path);
+             *     connection.commit();
+             * };
+             * }</pre>
+             *
              * @throws E if the first type of error occurs during execution
              * @throws E2 if the second type of error occurs during execution
              * @throws E3 if the third type of error occurs during execution
@@ -5870,6 +6153,15 @@ public final class Throwables {
 
             /**
              * Computes a result.
+             *
+             * <p><b>Usage Examples:</b></p>
+             * <pre>{@code
+             * Throwables.EEE.Callable<String, IOException, SQLException, RuntimeException> task = () -> {
+             *     String data = Files.readString(path);
+             *     connection.commit();
+             *     return data;
+             * };
+             * }</pre>
              *
              * @return the computed result
              * @throws E if the first type of error occurs during computation
@@ -5893,6 +6185,13 @@ public final class Throwables {
             /**
              * Gets a result.
              *
+             * <p><b>Usage Examples:</b></p>
+             * <pre>{@code
+             * Throwables.EEE.Supplier<String, IOException, SQLException, RuntimeException> supplier = () -> {
+             *     return queryDatabase();
+             * };
+             * }</pre>
+             *
              * @return a result
              * @throws E if the first type of error occurs while getting the result
              * @throws E2 if the second type of error occurs while getting the result
@@ -5914,6 +6213,13 @@ public final class Throwables {
 
             /**
              * Evaluates this predicate on the given argument.
+             *
+             * <p><b>Usage Examples:</b></p>
+             * <pre>{@code
+             * Throwables.EEE.Predicate<String, IOException, SQLException, RuntimeException> pred = s -> {
+             *     return !Files.readString(path).isEmpty();
+             * };
+             * }</pre>
              *
              * @param t the input argument
              * @return {@code true} if the input argument matches the predicate, otherwise {@code false}
@@ -5938,6 +6244,13 @@ public final class Throwables {
 
             /**
              * Evaluates this predicate on the given arguments.
+             *
+             * <p><b>Usage Examples:</b></p>
+             * <pre>{@code
+             * Throwables.EEE.BiPredicate<String, String, IOException, SQLException, RuntimeException> pred = (s1, s2) -> {
+             *     return Files.readString(Path.of(s1)).equals(Files.readString(Path.of(s2)));
+             * };
+             * }</pre>
              *
              * @param t the first input argument
              * @param u the second input argument
@@ -5965,6 +6278,13 @@ public final class Throwables {
             /**
              * Evaluates this predicate on the given arguments.
              *
+             * <p><b>Usage Examples:</b></p>
+             * <pre>{@code
+             * Throwables.EEE.TriPredicate<String, String, String, IOException, SQLException, RuntimeException> pred = (a, b, c) -> {
+             *     return Files.readString(Path.of(a)).contains(Files.readString(Path.of(b)));
+             * };
+             * }</pre>
+             *
              * @param a the first input argument
              * @param b the second input argument
              * @param c the third input argument
@@ -5991,6 +6311,13 @@ public final class Throwables {
             /**
              * Applies this function to the given argument.
              *
+             * <p><b>Usage Examples:</b></p>
+             * <pre>{@code
+             * Throwables.EEE.Function<String, String, IOException, SQLException, RuntimeException> func = path -> {
+             *     return Files.readString(Path.of(path));
+             * };
+             * }</pre>
+             *
              * @param t the function argument
              * @return the function result
              * @throws E if the first type of error occurs during function execution
@@ -6015,6 +6342,13 @@ public final class Throwables {
 
             /**
              * Applies this function to the given arguments.
+             *
+             * <p><b>Usage Examples:</b></p>
+             * <pre>{@code
+             * Throwables.EEE.BiFunction<String, String, String, IOException, SQLException, RuntimeException> func = (a, b) -> {
+             *     return Files.readString(Path.of(a)) + Files.readString(Path.of(b));
+             * };
+             * }</pre>
              *
              * @param t the first function argument
              * @param u the second function argument
@@ -6043,6 +6377,13 @@ public final class Throwables {
             /**
              * Applies this function to the given arguments.
              *
+             * <p><b>Usage Examples:</b></p>
+             * <pre>{@code
+             * Throwables.EEE.TriFunction<String, String, String, String, IOException, SQLException, RuntimeException> func = (a, b, c) -> {
+             *     return Files.readString(Path.of(a)) + Files.readString(Path.of(b)) + c;
+             * };
+             * }</pre>
+             *
              * @param a the first function argument
              * @param b the second function argument
              * @param c the third function argument
@@ -6068,6 +6409,13 @@ public final class Throwables {
             /**
              * Performs this operation on the given argument.
              *
+             * <p><b>Usage Examples:</b></p>
+             * <pre>{@code
+             * Throwables.EEE.Consumer<String, IOException, SQLException, RuntimeException> consumer = path -> {
+             *     Files.readString(Path.of(path));
+             * };
+             * }</pre>
+             *
              * @param t the input argument
              * @throws E if the first type of error occurs during operation execution
              * @throws E2 if the second type of error occurs during operation execution
@@ -6090,6 +6438,13 @@ public final class Throwables {
 
             /**
              * Performs this operation on the given arguments.
+             *
+             * <p><b>Usage Examples:</b></p>
+             * <pre>{@code
+             * Throwables.EEE.BiConsumer<String, String, IOException, SQLException, RuntimeException> consumer = (a, b) -> {
+             *     Files.writeString(Path.of(a), b);
+             * };
+             * }</pre>
              *
              * @param t the first input argument
              * @param u the second input argument
@@ -6115,6 +6470,13 @@ public final class Throwables {
 
             /**
              * Performs this operation on the given arguments.
+             *
+             * <p><b>Usage Examples:</b></p>
+             * <pre>{@code
+             * Throwables.EEE.TriConsumer<String, String, String, IOException, SQLException, RuntimeException> consumer = (a, b, c) -> {
+             *     System.out.println(a + b + c);
+             * };
+             * }</pre>
              *
              * @param a the first input argument
              * @param b the second input argument
@@ -6158,8 +6520,8 @@ public final class Throwables {
          *     createExpensiveDatabase()
          * );
          * // Database is not created until first call to dbInit.get()
-         * Database db = dbInit.get();       // Initializes once
-         * Database sameDb = dbInit.get();   // Returns cached instance
+         * Database db = dbInit.get();       // initializes once and returns the instance
+         * Database sameDb = dbInit.get();   // returns the cached instance
          * }</pre>
          *
          * @param <T> the type of the value to be lazily initialized

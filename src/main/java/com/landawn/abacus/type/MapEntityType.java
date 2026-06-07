@@ -93,9 +93,16 @@ public class MapEntityType extends AbstractType<MapEntity> {
      * Converts a {@link MapEntity} object to its JSON string representation.
      * The {@code MapEntity} is serialized using the configured JSON parser with default settings.
      *
+     * <p>The returned string is a serializable representation designed to be parsed back into an equivalent value
+     * via {@link #valueOf(String)}; {@code stringOf} and {@code valueOf} are inverse operations that round-trip. This
+     * is the key distinction from {@link Object#toString()}, whose result is not guaranteed to be convertible back
+     * into the original value.</p>
+     *
      * @param x the {@code MapEntity} object to convert, may be {@code null}
      * @return the JSON string representation of the {@code MapEntity},
      *         or {@code null} if the input is {@code null}
+     * @see #valueOf(String)
+     * @see #valueOf(Object)
      */
     @Override
     public String stringOf(final MapEntity x) {
@@ -106,8 +113,14 @@ public class MapEntityType extends AbstractType<MapEntity> {
      * Parses a JSON string to create a {@link MapEntity} object.
      * The string must be a valid JSON object representation that can be deserialized into a {@code MapEntity}.
      *
+     * <p>This method is the inverse of {@code stringOf} and round-trips with it: it parses the string produced by
+     * {@code stringOf} back into a value of this type. Strings produced by {@link Object#toString()} are not
+     * guaranteed to be parseable in this way.</p>
+     *
      * @param str the JSON string to parse, may be {@code null} or blank
      * @return the parsed {@code MapEntity} object, or {@code null} if the input is {@code null} or blank
+     * @see #valueOf(Object)
+     * @see #stringOf(MapEntity)
      */
     @Override
     public MapEntity valueOf(final String str) {

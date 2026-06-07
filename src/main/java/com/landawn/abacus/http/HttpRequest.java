@@ -101,6 +101,13 @@ public final class HttpRequest {
      * Creates an HttpRequest instance with the specified HttpClient.
      * This method is useful when you want to use an existing HttpClient with specific configuration.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * HttpClient client = HttpClient.create("http://localhost:18080/data");
+     * HttpRequest request = HttpRequest.create(client);
+     * // String response = request.get(String.class);  // network call happens here (when executed)
+     * }</pre>
+     *
      * @param httpClient The HttpClient to use for the request. Must not be {@code null}.
      * @return a new HttpRequest instance
      */
@@ -148,6 +155,13 @@ public final class HttpRequest {
      * Creates an HttpRequest for the specified URL with default connection and read timeouts.
      * A new HttpClient will be created internally and closed after the request execution.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * URL url = new URL("http://localhost:18080/data");
+     * HttpRequest request = HttpRequest.url(url);
+     * // String response = request.get(String.class);  // network call happens here (when executed)
+     * }</pre>
+     *
      * @param url The target URL for the request
      * @return a new HttpRequest instance
      * @throws IllegalArgumentException if the scheme of {@code url} is not {@code http} or {@code https}.
@@ -159,6 +173,13 @@ public final class HttpRequest {
     /**
      * Creates an HttpRequest for the specified URL with custom timeouts.
      * A new HttpClient will be created internally and closed after the request execution.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * URL url = new URL("http://localhost:18080/data");
+     * HttpRequest request = HttpRequest.url(url, 5000, 10000);  // 5s connect, 10s read timeout
+     * // String response = request.get(String.class);  // network call happens here (when executed)
+     * }</pre>
      *
      * @param url The target URL for the request
      * @param connectTimeoutInMillis Connection timeout in milliseconds
@@ -960,6 +981,13 @@ public final class HttpRequest {
     /**
      * Executes an HTTP request with the specified method and deserializes the response to the specified type.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Account account = HttpRequest.url("http://localhost:18080/account/123")
+     *         .execute(HttpMethod.GET, Account.class);
+     * // returns the response body deserialized into an Account (when executed against a live server)
+     * }</pre>
+     *
      * @param <T> The type of the response object
      * @param httpMethod The HTTP method to use
      * @param resultClass The class of the expected response object
@@ -1451,6 +1479,14 @@ public final class HttpRequest {
     /**
      * Executes an asynchronous HEAD request with a custom executor and the specified result class.
      * HEAD responses have no body, so non-{@link HttpResponse} result classes will typically yield {@code null}.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Executor executor = Executors.newSingleThreadExecutor();
+     * ContinuableFuture<HttpResponse> future = HttpRequest.url("http://localhost:18080/data")
+     *         .asyncHead(HttpResponse.class, executor);
+     * HttpResponse response = future.get();  // the HEAD response (when executed against a live server)
+     * }</pre>
      *
      * @param <T> The type of the response object
      * @param resultClass The class of the expected response object. Must not be {@code null}.

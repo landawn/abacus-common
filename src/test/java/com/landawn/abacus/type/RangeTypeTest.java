@@ -160,22 +160,22 @@ public class RangeTypeTest extends TestBase {
     }
 
     @Test
-    public void test_writeCharacter_AllBoundTypes() throws IOException {
+    public void test_serializeTo_AllBoundTypes() throws IOException {
         var writer = com.landawn.abacus.util.Objectory.createBufferedJsonWriter();
 
-        assertDoesNotThrow(() -> rangeType.writeCharacter(writer, Range.open(1, 10), null));
-        assertDoesNotThrow(() -> rangeType.writeCharacter(writer, Range.openClosed(1, 10), null));
-        assertDoesNotThrow(() -> rangeType.writeCharacter(writer, Range.closedOpen(1, 10), null));
-        assertDoesNotThrow(() -> rangeType.writeCharacter(writer, Range.closed(1, 10), null));
-        assertDoesNotThrow(() -> rangeType.writeCharacter(writer, null, null));
+        assertDoesNotThrow(() -> rangeType.serializeTo(writer, Range.open(1, 10), null));
+        assertDoesNotThrow(() -> rangeType.serializeTo(writer, Range.openClosed(1, 10), null));
+        assertDoesNotThrow(() -> rangeType.serializeTo(writer, Range.closedOpen(1, 10), null));
+        assertDoesNotThrow(() -> rangeType.serializeTo(writer, Range.closed(1, 10), null));
+        assertDoesNotThrow(() -> rangeType.serializeTo(writer, null, null));
     }
 
     @Test
-    public void test_writeCharacter_StringEndpointsMatchesStringOf() throws IOException {
+    public void test_serializeTo_StringEndpointsMatchesStringOf() throws IOException {
         final var writer = com.landawn.abacus.util.Objectory.createBufferedJsonWriter();
         final Range<String> range = Range.closed("a,b", "x\"y]");
 
-        stringRangeType.writeCharacter(writer, range, null);
+        stringRangeType.serializeTo(writer, range, null);
 
         assertTrue(writer.toString().contains("\\\"a,b\\\""));
         assertTrue(writer.toString().contains("\\\"x\\\\\\\"y]\\\""));

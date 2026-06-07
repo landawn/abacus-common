@@ -142,12 +142,10 @@ public class NClobReaderType extends ReaderType {
      * @throws SQLException if a database access error occurs while accessing the NClob
      */
     static Reader clobToReader(final NClob clob) throws SQLException {
-        Reader reader = null;
-
         if (clob != null) {
-            reader = clob.getCharacterStream();
+            return clob.getCharacterStream();
         }
 
-        return reader;
+        return null; // NOSONAR
     }
 }

@@ -61,7 +61,7 @@ public class BlobType extends AbstractType<Blob> {
      *
      * @param clazz the specific {@code Blob} implementation class to use as the Java type
      */
-    BlobType(Class<? extends Blob> clazz) {
+    BlobType(final Class<? extends Blob> clazz) {
         super(BLOB);
         this.clazz = (Class<Blob>) clazz;
     }

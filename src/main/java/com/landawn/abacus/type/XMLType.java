@@ -94,8 +94,15 @@ public class XMLType<T> extends AbstractType<T> {
      * If the input object is {@code null}, this method returns {@code null}.
      * </p>
      *
+     * <p>The returned string is a serializable representation designed to be parsed back into an equivalent value
+     * via {@link #valueOf(String)}; {@code stringOf} and {@code valueOf} are inverse operations that round-trip. This
+     * is the key distinction from {@link Object#toString()}, whose result is not guaranteed to be convertible back
+     * into the original value.</p>
+     *
      * @param x the object to convert to XML
      * @return the XML string representation of the object, or {@code null} if the input is null
+     * @see #valueOf(String)
+     * @see #valueOf(Object)
      */
     @Override
     public String stringOf(final T x) {
@@ -109,9 +116,15 @@ public class XMLType<T> extends AbstractType<T> {
      * object of the target class. If the string is {@code null} or empty, this method returns {@code null}.
      * </p>
      *
+     * <p>This method is the inverse of {@code stringOf} and round-trips with it: it parses the string produced by
+     * {@code stringOf} back into a value of this type. Strings produced by {@link Object#toString()} are not
+     * guaranteed to be parseable in this way.</p>
+     *
      * @param str the XML string to deserialize
      * @return an object of type {@code T} deserialized from the XML string, or {@code null} if the string is {@code null} or empty
      * @throws RuntimeException if the XML parsing fails or the XML doesn't match the target type
+     * @see #valueOf(Object)
+     * @see #stringOf(Object)
      */
     @Override
     public T valueOf(final String str) {

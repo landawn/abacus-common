@@ -40,7 +40,7 @@ import com.landawn.abacus.util.stream.FloatStream;
  * FloatIterator filtered = iter.skip(1).limit(2);
  *
  * // Convert to array
- * float[] array = filtered.toArray();   // [2.5f, 3.7f]
+ * float[] array = filtered.toArray();   // returns [2.5f, 3.7f]
  * }</pre>
  *
  * @see ObjIterator
@@ -88,7 +88,7 @@ public abstract class FloatIterator extends ImmutableIterator<Float> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * FloatIterator empty = FloatIterator.empty();
-     * empty.hasNext();   // false
+     * empty.hasNext();   // returns false
      * }</pre>
      *
      * @return an empty {@code FloatIterator}
@@ -193,7 +193,7 @@ public abstract class FloatIterator extends ImmutableIterator<Float> {
      *     return FloatIterator.of(data);
      * });
      * // Iterator is not created until first use
-     * if (lazy.hasNext()) { // Supplier is invoked here
+     * if (lazy.hasNext()) {
      *     float value = lazy.nextFloat();
      * }
      * }</pre>
@@ -321,7 +321,7 @@ public abstract class FloatIterator extends ImmutableIterator<Float> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * FloatIterator iter = FloatIterator.of(1.0f, 2.0f);
-     * Float boxed = iter.next();   // 1.0f (boxed)
+     * Float boxed = iter.next();   // returns 1.0f (boxed)
      * }</pre>
      *
      * @return the next element as a {@link Float} object
@@ -340,8 +340,8 @@ public abstract class FloatIterator extends ImmutableIterator<Float> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * FloatIterator iter = FloatIterator.of(1.0f, 2.0f, 3.0f);
-     * float first = iter.nextFloat();    // 1.0f
-     * float second = iter.nextFloat();   // 2.0f
+     * float first = iter.nextFloat();    // returns 1.0f
+     * float second = iter.nextFloat();   // returns 2.0f
      * }</pre>
      *
      * @return the next float value
@@ -520,7 +520,7 @@ public abstract class FloatIterator extends ImmutableIterator<Float> {
      * // array = [1.0, 2.0, 3.0, 4.0, 5.0]
      *
      * // Empty iterator returns empty array
-     * float[] empty = FloatIterator.empty().toArray();   // empty.length == 0
+     * float[] empty = FloatIterator.empty().toArray();   // returns empty.length == 0
      * }</pre>
      *
      * @return a float array containing all remaining elements
@@ -543,7 +543,7 @@ public abstract class FloatIterator extends ImmutableIterator<Float> {
      * // list contains [1.0, 2.0, 3.0, 4.0, 5.0]
      *
      * // Empty iterator returns empty list
-     * FloatList empty = FloatIterator.empty().toList();   // empty.size() == 0
+     * FloatList empty = FloatIterator.empty().toList();   // returns empty.size() == 0
      * }</pre>
      *
      * @return a FloatList containing all remaining elements
@@ -584,7 +584,7 @@ public abstract class FloatIterator extends ImmutableIterator<Float> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * FloatIterator iter = FloatIterator.of(1.5f, 2.5f, 3.5f);
-     * iter.indexed().forEach(indexed ->
+     * iter.indexed().foreachRemaining(indexed ->
      *     System.out.println("Index: " + indexed.index() + ", Value: " + indexed.value())
      * );
      * }</pre>
@@ -603,7 +603,7 @@ public abstract class FloatIterator extends ImmutableIterator<Float> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * FloatIterator iter = FloatIterator.of(1.5f, 2.5f, 3.5f);
-     * iter.indexed(10).forEach(indexed ->
+     * iter.indexed(10).foreachRemaining(indexed ->
      *     System.out.println("Index: " + indexed.index() + ", Value: " + indexed.value())
      * );
      * // Prints indices starting from 10, 11, 12...
@@ -643,7 +643,7 @@ public abstract class FloatIterator extends ImmutableIterator<Float> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * FloatIterator iter = FloatIterator.of(1.0f, 2.0f, 3.0f);
-     * iter.forEachRemaining(value -> System.out.println(value));   // Boxes each float
+     * iter.forEachRemaining(value -> System.out.println(value));   // Boxes each float — avoid this
      * }</pre>
      *
      * @param action the action to be performed for each element, must not be null

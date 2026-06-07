@@ -69,6 +69,7 @@ import com.landawn.abacus.util.CharacterWriter;
  * // Note: This operation is NOT supported
  * // RowId restored = type.valueOf(rowIdStr);   // Throws UnsupportedOperationException
  * }</pre>
+ *
  */
 public class RowIdType extends AbstractType<RowId> {
 
@@ -251,8 +252,17 @@ public class RowIdType extends AbstractType<RowId> {
      * <pre>{@code
      * Type<RowId> type = TypeFactory.getType(RowId.class);
      * CharacterWriter writer = new CharacterWriter();
-     * type.writeCharacter(writer, rowId, config);   // Writes RowId to character stream
+     * type.serializeTo(writer, rowId, config);   // Writes RowId to character stream
      * }</pre>
+     * <p>
+     * This method is specifically designed for JSON/XML serialization: it writes the serialized form of {@code x} to the
+     * {@code CharacterWriter}, applying string quotation and character escaping according to the supplied serialization
+     * config (a {@code null} config means no surrounding quotation). It is the streaming counterpart of {@code stringOf}
+     * and is invoked by the JSON/XML serializers.
+     * <p>
+     * <b>serializeTo vs. appendTo:</b> {@code serializeTo} produces machine-readable JSON/XML (quoted and escaped),
+     * whereas {@code appendTo} produces a plain, human-readable {@code toString()}-style rendering without JSON/XML
+     * quoting or escaping.
      *
      * @param writer the CharacterWriter to write to
      * @param x the RowId to write
@@ -260,7 +270,7 @@ public class RowIdType extends AbstractType<RowId> {
      * @throws IOException if an I/O error occurs during the write operation
      */
     @Override
-    public void writeCharacter(final CharacterWriter writer, final RowId x, final JsonXmlSerConfig<?> config) throws IOException {
+    public void serializeTo(final CharacterWriter writer, final RowId x, final JsonXmlSerConfig<?> config) throws IOException {
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {

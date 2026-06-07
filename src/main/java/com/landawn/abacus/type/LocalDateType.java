@@ -77,8 +77,15 @@ public class LocalDateType extends AbstractTemporalType<LocalDate> {
      * String str = type.stringOf(date);   // "2021-01-01"
      * }</pre>
      *
+     * <p>The returned string is a serializable representation designed to be parsed back into an equivalent value
+     * via {@link #valueOf(String)}; {@code stringOf} and {@code valueOf} are inverse operations that round-trip. This
+     * is the key distinction from {@link Object#toString()}, whose result is not guaranteed to be convertible back
+     * into the original value.</p>
+     *
      * @param x the LocalDate object to convert; may be {@code null}
      * @return the ISO-8601 date string (e.g., {@code "2021-01-01"}), or {@code null} if the input is {@code null}
+     * @see #valueOf(String)
+     * @see #valueOf(Object)
      */
     @Override
     public String stringOf(final LocalDate x) {
@@ -116,8 +123,11 @@ public class LocalDateType extends AbstractTemporalType<LocalDate> {
      *   <li>{@code null}, empty, or blank string returns {@code null}</li>
      *   <li>{@code "SYS_TIME"} returns the current {@code LocalDate}</li>
      *   <li>Numeric strings are treated as milliseconds since the epoch</li>
-     *   <li>ISO-8601 formatted strings are parsed directly</li>
+     *   <li>ISO-8601 formatted strings are parsed directly via {@link LocalDate#parse(CharSequence)}</li>
      * </ul>
+     *
+     * <p>Every string produced by {@link LocalDate#toString()} can be parsed back into an equivalent value
+     * (e.g. {@code "2021-01-01"}, including the zero-padded {@code yyyy-MM-dd} form for years 1000&ndash;9999).</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -127,10 +137,16 @@ public class LocalDateType extends AbstractTemporalType<LocalDate> {
      * LocalDate date3 = type.valueOf("1609459200000");
      * }</pre>
      *
+     * <p>This method is the inverse of {@code stringOf} and round-trips with it: it parses the string produced by
+     * {@code stringOf} back into a value of this type. Because {@code stringOf} delegates to
+     * {@link LocalDate#toString()}, the value returned by {@code toString()} round-trips as well.</p>
+     *
      * @param str the string to parse
      * @return the parsed {@code LocalDate} object, or {@code null} if the input is {@code null}, empty, or blank
      * @throws java.time.format.DateTimeParseException if the string is not a valid millisecond
      *         number nor an ISO-8601 {@code LocalDate} representation
+     * @see #valueOf(Object)
+     * @see #stringOf(LocalDate)
      */
     @Override
     public LocalDate valueOf(final String str) {
@@ -145,7 +161,7 @@ public class LocalDateType extends AbstractTemporalType<LocalDate> {
         if (isPossibleMillis(str)) {
             try {
                 return LocalDate.ofInstant(Instant.ofEpochMilli(Numbers.toLong(str)), DEFAULT_ZONE_ID);
-            } catch (final NumberFormatException e2) {
+            } catch (final NumberFormatException e) {
                 // ignore;
             }
         }

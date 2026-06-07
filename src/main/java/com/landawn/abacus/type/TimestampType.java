@@ -89,6 +89,10 @@ public class TimestampType extends AbstractDateType<Timestamp> {
     public Timestamp valueOf(final Object obj) {
         if (obj instanceof Number) {
             return new Timestamp(((Number) obj).longValue());
+        } else if (obj instanceof Timestamp ts) {
+            final Timestamp result = new Timestamp(ts.getTime());
+            result.setNanos(ts.getNanos());
+            return result;
         } else if (obj instanceof java.util.Date) {
             return new Timestamp(((java.util.Date) obj).getTime());
         }
@@ -114,8 +118,14 @@ public class TimestampType extends AbstractDateType<Timestamp> {
      * Timestamp ts3 = type.valueOf(null);         // Returns null
      * }</pre>
      *
+     * <p>This method is the inverse of {@code stringOf} and round-trips with it: it parses the string produced by
+     * {@code stringOf} back into a value of this type. Strings produced by {@link Object#toString()} are not
+     * guaranteed to be parseable in this way.</p>
+     *
      * @param str the string to parse
      * @return a Timestamp parsed from the string, or {@code null} if {@code str} is {@code null}, empty, or the literal {@code "null"}
+     * @see #valueOf(Object)
+     * @see #stringOf(java.util.Date)
      */
     @Override
     public Timestamp valueOf(final String str) {

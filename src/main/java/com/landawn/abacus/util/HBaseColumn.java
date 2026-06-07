@@ -106,6 +106,11 @@ public final class HBaseColumn<T> implements Comparable<HBaseColumn<T>> {
      * Constructs an HBaseColumn with the specified value and the latest timestamp.
      * The version is set to {@code Long.MAX_VALUE}, which represents the latest version in HBase.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * HBaseColumn<String> col = new HBaseColumn<>("myValue");
+     * }</pre>
+     *
      * @param value the column value (may be {@code null})
      * @see #HBaseColumn(Object, long)
      */
@@ -115,6 +120,11 @@ public final class HBaseColumn<T> implements Comparable<HBaseColumn<T>> {
 
     /**
      * Constructs an HBaseColumn with the specified value and version.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * HBaseColumn<String> col = new HBaseColumn<>("myValue", 123456789L);
+     * }</pre>
      *
      * @param value the column value (may be {@code null})
      * @param version the version timestamp associated with the value
@@ -152,6 +162,11 @@ public final class HBaseColumn<T> implements Comparable<HBaseColumn<T>> {
      * Creates an HBaseColumn instance with the specified value and the latest timestamp
      * ({@code Long.MAX_VALUE}).
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * HBaseColumn<String> col = HBaseColumn.valueOf("myValue");
+     * }</pre>
+     *
      * @param <T> the type of the column value
      * @param value the column value (may be {@code null})
      * @return a new HBaseColumn instance
@@ -162,6 +177,11 @@ public final class HBaseColumn<T> implements Comparable<HBaseColumn<T>> {
 
     /**
      * Creates an HBaseColumn instance with the specified value and version.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * HBaseColumn<String> col = HBaseColumn.valueOf("myValue", 123456789L);
+     * }</pre>
      *
      * @param <T> the type of the column value
      * @param value the column value (may be {@code null})
@@ -176,6 +196,11 @@ public final class HBaseColumn<T> implements Comparable<HBaseColumn<T>> {
      * Creates a {@link List} containing a single HBaseColumn with the specified value
      * and the latest timestamp ({@code Long.MAX_VALUE}).
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<HBaseColumn<String>> list = HBaseColumn.asList("myValue");
+     * }</pre>
+     *
      * @param <T> the type of the column value
      * @param value the column value
      * @return a mutable {@link List} containing the HBaseColumn
@@ -186,6 +211,11 @@ public final class HBaseColumn<T> implements Comparable<HBaseColumn<T>> {
 
     /**
      * Creates a {@link List} containing a single HBaseColumn with the specified value and version.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<HBaseColumn<String>> list = HBaseColumn.asList("myValue", 123456789L);
+     * }</pre>
      *
      * @param <T> the type of the column value
      * @param value the column value
@@ -200,6 +230,11 @@ public final class HBaseColumn<T> implements Comparable<HBaseColumn<T>> {
      * Creates a {@link Set} containing a single HBaseColumn with the specified value
      * and the latest timestamp ({@code Long.MAX_VALUE}).
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Set<HBaseColumn<String>> set = HBaseColumn.asSet("myValue");
+     * }</pre>
+     *
      * @param <T> the type of the column value
      * @param value the column value
      * @return a mutable {@link Set} containing the HBaseColumn
@@ -210,6 +245,11 @@ public final class HBaseColumn<T> implements Comparable<HBaseColumn<T>> {
 
     /**
      * Creates a {@link Set} containing a single HBaseColumn with the specified value and version.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Set<HBaseColumn<String>> set = HBaseColumn.asSet("myValue", 123456789L);
+     * }</pre>
      *
      * @param <T> the type of the column value
      * @param value the column value
@@ -224,6 +264,11 @@ public final class HBaseColumn<T> implements Comparable<HBaseColumn<T>> {
      * Creates a {@link SortedSet} containing a single HBaseColumn with the specified value
      * and the latest timestamp ({@code Long.MAX_VALUE}), sorted by version in descending order.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * SortedSet<HBaseColumn<String>> sortedSet = HBaseColumn.asSortedSet("myValue");
+     * }</pre>
+     *
      * @param <T> the type of the column value
      * @param value the column value
      * @return a {@link SortedSet} containing the HBaseColumn, ordered by version descending
@@ -235,6 +280,11 @@ public final class HBaseColumn<T> implements Comparable<HBaseColumn<T>> {
     /**
      * Creates a {@link SortedSet} containing a single HBaseColumn with the specified value
      * and the latest timestamp ({@code Long.MAX_VALUE}), using the provided comparator for ordering.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * SortedSet<HBaseColumn<String>> sortedSet = HBaseColumn.asSortedSet("myValue", HBaseColumn.DESC_HBASE_COLUMN_COMPARATOR);
+     * }</pre>
      *
      * @param <T> the type of the column value
      * @param value the column value
@@ -253,6 +303,11 @@ public final class HBaseColumn<T> implements Comparable<HBaseColumn<T>> {
      * Creates a {@link SortedSet} containing a single HBaseColumn with the specified value and version,
      * sorted by version in descending order.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * SortedSet<HBaseColumn<String>> sortedSet = HBaseColumn.asSortedSet("myValue", 123456789L);
+     * }</pre>
+     *
      * @param <T> the type of the column value
      * @param value the column value
      * @param version the version timestamp
@@ -265,6 +320,11 @@ public final class HBaseColumn<T> implements Comparable<HBaseColumn<T>> {
     /**
      * Creates a {@link SortedSet} containing a single HBaseColumn with the specified value and version,
      * using the provided comparator for ordering.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * SortedSet<HBaseColumn<String>> sortedSet = HBaseColumn.asSortedSet("myValue", 123456789L, HBaseColumn.DESC_HBASE_COLUMN_COMPARATOR);
+     * }</pre>
      *
      * @param <T> the type of the column value
      * @param value the column value
@@ -284,6 +344,11 @@ public final class HBaseColumn<T> implements Comparable<HBaseColumn<T>> {
      * Creates a {@link Map} with a single entry mapping the version ({@code Long.MAX_VALUE}) to an
      * HBaseColumn containing the specified value and the latest timestamp.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Map<Long, HBaseColumn<String>> map = HBaseColumn.asMap("myValue");
+     * }</pre>
+     *
      * @param <T> the type of the column value
      * @param value the column value
      * @return a mutable {@link Map} with the version as key and the HBaseColumn as value
@@ -300,6 +365,11 @@ public final class HBaseColumn<T> implements Comparable<HBaseColumn<T>> {
     /**
      * Creates a {@link Map} with a single entry mapping the given version to an HBaseColumn
      * containing the specified value and version.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Map<Long, HBaseColumn<String>> map = HBaseColumn.asMap("myValue", 123456789L);
+     * }</pre>
      *
      * @param <T> the type of the column value
      * @param value the column value
@@ -318,6 +388,11 @@ public final class HBaseColumn<T> implements Comparable<HBaseColumn<T>> {
      * Creates a {@link SortedMap} with a single entry mapping the version ({@code Long.MAX_VALUE}) to
      * an HBaseColumn containing the specified value, sorted by version in descending order.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * SortedMap<Long, HBaseColumn<String>> sortedMap = HBaseColumn.asSortedMap("myValue");
+     * }</pre>
+     *
      * @param <T> the type of the column value
      * @param value the column value
      * @return a {@link SortedMap} with the version as key and the HBaseColumn as value,
@@ -330,6 +405,11 @@ public final class HBaseColumn<T> implements Comparable<HBaseColumn<T>> {
     /**
      * Creates a {@link SortedMap} with a single entry mapping the version ({@code Long.MAX_VALUE}) to
      * an HBaseColumn containing the specified value, using the provided comparator for ordering keys.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * SortedMap<Long, HBaseColumn<String>> sortedMap = HBaseColumn.asSortedMap("myValue", HBaseColumn.DESC_HBASE_VERSION_COMPARATOR);
+     * }</pre>
      *
      * @param <T> the type of the column value
      * @param value the column value
@@ -349,6 +429,11 @@ public final class HBaseColumn<T> implements Comparable<HBaseColumn<T>> {
      * Creates a {@link SortedMap} with a single entry mapping the given version to an HBaseColumn
      * containing the specified value and version, sorted by version in descending order.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * SortedMap<Long, HBaseColumn<String>> sortedMap = HBaseColumn.asSortedMap("myValue", 123456789L);
+     * }</pre>
+     *
      * @param <T> the type of the column value
      * @param value the column value
      * @param version the version timestamp
@@ -362,6 +447,11 @@ public final class HBaseColumn<T> implements Comparable<HBaseColumn<T>> {
     /**
      * Creates a {@link SortedMap} with a single entry mapping the given version to an HBaseColumn
      * containing the specified value and version, using the provided comparator for ordering keys.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * SortedMap<Long, HBaseColumn<String>> sortedMap = HBaseColumn.asSortedMap("myValue", 123456789L, HBaseColumn.DESC_HBASE_VERSION_COMPARATOR);
+     * }</pre>
      *
      * @param <T> the type of the column value
      * @param value the column value
@@ -381,6 +471,12 @@ public final class HBaseColumn<T> implements Comparable<HBaseColumn<T>> {
     /**
      * Returns the value of this HBase column.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * HBaseColumn<String> col = HBaseColumn.valueOf("myValue");
+     * String value = col.value();   // returns "myValue"
+     * }</pre>
+     *
      * @return the column value
      */
     public T value() {
@@ -390,6 +486,12 @@ public final class HBaseColumn<T> implements Comparable<HBaseColumn<T>> {
     /**
      * Returns the version (timestamp) of this HBase column.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * HBaseColumn<String> col = HBaseColumn.valueOf("myValue", 123456789L);
+     * long version = col.version();   // returns 123456789L
+     * }</pre>
+     *
      * @return the version timestamp
      */
     public long version() {
@@ -398,6 +500,12 @@ public final class HBaseColumn<T> implements Comparable<HBaseColumn<T>> {
 
     /**
      * Creates a copy of this HBaseColumn with the same value and version.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * HBaseColumn<String> original = HBaseColumn.valueOf("myValue", 123L);
+     * HBaseColumn<String> copy = original.copy();
+     * }</pre>
      *
      * @return a new HBaseColumn instance with the same value and version
      */
@@ -411,6 +519,15 @@ public final class HBaseColumn<T> implements Comparable<HBaseColumn<T>> {
      * or if it is equal (by {@link #equals(Object)}) to any of the predefined empty column
      * constants registered in the internal pool (e.g. {@link #EMPTY_INT_COLUMN},
      * {@link #EMPTY_OBJECT_COLUMN}, etc.).
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * HBaseColumn<String> col1 = HBaseColumn.valueOf(null, 0);
+     * boolean empty1 = col1.isNull();   // returns true
+     *
+     * HBaseColumn<String> col2 = HBaseColumn.valueOf("myValue");
+     * boolean empty2 = col2.isNull();   // returns false
+     * }</pre>
      *
      * @return {@code true} if this column is null/empty; {@code false} otherwise
      */

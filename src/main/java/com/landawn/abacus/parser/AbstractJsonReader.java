@@ -139,7 +139,7 @@ abstract class AbstractJsonReader implements JsonReader { //NOSONAR
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * JsonReader reader = // obtain reader
+     * JsonReader reader = // gets a reader instance
      * int token = reader.nextToken();
      * if (token == START_BRACE) {
      *     // Process JSON object

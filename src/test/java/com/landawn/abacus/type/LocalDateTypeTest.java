@@ -107,6 +107,23 @@ public class LocalDateTypeTest extends TestBase {
     }
 
     @Test
+    public void testValueOf_ParsesLocalDateToString() {
+        // Every form produced by LocalDate.toString() must round-trip through valueOf.
+        LocalDate[] values = { //
+                LocalDate.of(2021, 1, 1), //
+                LocalDate.of(1000, 1, 1), //
+                LocalDate.of(9999, 12, 31), //
+                LocalDate.now() };
+
+        for (LocalDate value : values) {
+            String text = value.toString();
+            LocalDate result = localDateType.valueOf(text);
+            assertNotNull(result, () -> "Failed to parse: " + text);
+            assertEquals(value, result, () -> "Mismatch for: " + text);
+        }
+    }
+
+    @Test
     public void testValueOf_CharArray_Null() {
         assertNull(localDateType.valueOf(null, 0, 0));
     }

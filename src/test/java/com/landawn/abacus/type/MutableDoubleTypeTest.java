@@ -137,16 +137,16 @@ public class MutableDoubleTypeTest extends TestBase {
     }
 
     @Test
-    public void testWriteCharacterWithNull() throws IOException {
+    public void testSerializeToWithNull() throws IOException {
         assertDoesNotThrow(() -> {
-            mutableDoubleType.writeCharacter(characterWriter, null, null);
+            mutableDoubleType.serializeTo(characterWriter, null, null);
         });
     }
 
     @Test
-    public void testWriteCharacterWithNonNull() throws IOException {
+    public void testSerializeToWithNonNull() throws IOException {
         assertDoesNotThrow(() -> {
-            mutableDoubleType.writeCharacter(characterWriter, MutableDouble.of(3.0), null);
+            mutableDoubleType.serializeTo(characterWriter, MutableDouble.of(3.0), null);
         });
     }
 }

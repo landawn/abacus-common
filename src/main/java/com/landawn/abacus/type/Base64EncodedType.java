@@ -61,9 +61,16 @@ public class Base64EncodedType extends AbstractType<byte[]> {
      * yields an empty string (never {@code null}), because {@code Strings.base64Encode} short-circuits
      * to {@link com.landawn.abacus.util.Strings#EMPTY} for both cases.</p>
      *
+     * <p>The returned string is a serializable representation designed to be parsed back into an equivalent value
+     * via {@link #valueOf(String)}; {@code stringOf} and {@code valueOf} are inverse operations that round-trip. This
+     * is the key distinction from {@link Object#toString()}, whose result is not guaranteed to be convertible back
+     * into the original value.</p>
+     *
      * @param x the byte array to encode; may be {@code null}
      * @return the Base64-encoded string representation of the byte array;
      *         an empty string if {@code x} is {@code null} or empty
+     * @see #valueOf(String)
+     * @see #valueOf(Object)
      */
     @Override
     public String stringOf(final byte[] x) {
@@ -74,9 +81,15 @@ public class Base64EncodedType extends AbstractType<byte[]> {
      * Decodes a Base64-encoded string back to a byte array.
      * Uses {@link com.landawn.abacus.util.Strings#base64Decode(String)} internally.
      *
+     * <p>This method is the inverse of {@code stringOf} and round-trips with it: it parses the string produced by
+     * {@code stringOf} back into a value of this type. Strings produced by {@link Object#toString()} are not
+     * guaranteed to be parseable in this way.</p>
+     *
      * @param base64String the Base64-encoded string to decode; may be {@code null} or empty
      * @return the decoded byte array; an empty byte array if the input is {@code null} or empty
      * @throws IllegalArgumentException if {@code base64String} contains characters outside the Base64 alphabet
+     * @see #valueOf(Object)
+     * @see #stringOf(byte[])
      */
     @Override
     public byte[] valueOf(final String base64String) {

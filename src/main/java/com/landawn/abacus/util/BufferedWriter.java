@@ -114,6 +114,7 @@ sealed class BufferedWriter extends java.io.BufferedWriter permits CharacterWrit
      * writer.write("Hello World");
      * String content = writer.toString();   // "Hello World"
      * }</pre>
+     *
      */
     BufferedWriter() {
         super(DUMMY_WRITER, 1);
@@ -161,8 +162,8 @@ sealed class BufferedWriter extends java.io.BufferedWriter permits CharacterWrit
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * writer.write(true);    // Writes "true"
-     * writer.write(false);   // Writes "false"
+     * writer.write(true);    // "true" is written
+     * writer.write(false);   // "false" is written
      * }</pre>
      *
      * @param b the boolean value to write
@@ -177,8 +178,8 @@ sealed class BufferedWriter extends java.io.BufferedWriter permits CharacterWrit
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * writer.write((byte) 127);   // Writes "127"
-     * writer.write((byte) -1);    // Writes "-1"
+     * writer.write((byte) 127);   // "127" is written
+     * writer.write((byte) -1);    // "-1" is written
      * }</pre>
      *
      * @param b the byte value to write
@@ -193,7 +194,7 @@ sealed class BufferedWriter extends java.io.BufferedWriter permits CharacterWrit
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * writer.write((short) 32767);   // Writes "32767"
+     * writer.write((short) 32767);   // "32767" is written
      * }</pre>
      *
      * @param s the short value to write
@@ -222,8 +223,8 @@ sealed class BufferedWriter extends java.io.BufferedWriter permits CharacterWrit
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * writer.writeInt(12345);   // Writes "12345"
-     * writer.writeInt(-999);    // Writes "-999"
+     * writer.writeInt(12345);   // "12345" is written
+     * writer.writeInt(-999);    // "-999" is written
      * }</pre>
      *
      * @param i the integer value to write
@@ -238,7 +239,7 @@ sealed class BufferedWriter extends java.io.BufferedWriter permits CharacterWrit
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * writer.write(1234567890L);   // Writes "1234567890"
+     * writer.write(1234567890L);   // "1234567890" is written
      * }</pre>
      *
      * @param lng the long value to write
@@ -255,8 +256,8 @@ sealed class BufferedWriter extends java.io.BufferedWriter permits CharacterWrit
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * writer.write(3.14f);       // Writes "3.14"
-     * writer.write(1.0f/3.0f);   // Writes "0.33333334"
+     * writer.write(3.14f);       // "3.14" is written
+     * writer.write(1.0f/3.0f);   // "0.33333334" is written
      * }</pre>
      *
      * @param f the float value to write
@@ -273,8 +274,8 @@ sealed class BufferedWriter extends java.io.BufferedWriter permits CharacterWrit
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * writer.write(3.14159);   // Writes "3.14159"
-     * writer.write(1.0/3.0);   // Writes "0.3333333333333333"
+     * writer.write(3.14159);   // "3.14159" is written
+     * writer.write(1.0/3.0);   // "0.3333333333333333" is written
      * }</pre>
      *
      * @param d the double value to write
@@ -291,8 +292,8 @@ sealed class BufferedWriter extends java.io.BufferedWriter permits CharacterWrit
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * writer.write(new Date());   // e.g. writes "2024-06-15T10:30:00Z"
-     * writer.write((Date) null);  // writes "null"
+     * writer.write(new Date());   // "2024-06-15T10:30:00Z" is written (example value)
+     * writer.write((Date) null);  // "null" is written
      * }</pre>
      *
      * @param date the date to write; if {@code null}, {@code "null"} is written
@@ -310,8 +311,8 @@ sealed class BufferedWriter extends java.io.BufferedWriter permits CharacterWrit
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Calendar cal = Calendar.getInstance();
-     * writer.write(cal);            // e.g. writes "2024-06-15T10:30:00Z"
-     * writer.write((Calendar) null); // writes "null"
+     * writer.write(cal);             // "2024-06-15T10:30:00Z" is written (example value)
+     * writer.write((Calendar) null); // "null" is written
      * }</pre>
      *
      * @param c the calendar to write; if {@code null}, {@code "null"} is written
@@ -329,8 +330,8 @@ sealed class BufferedWriter extends java.io.BufferedWriter permits CharacterWrit
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * XMLGregorianCalendar xmlCal = DatatypeFactory.newInstance().newXMLGregorianCalendar();
-     * writer.write(xmlCal);                          // e.g. writes "2024-06-15T10:30:00Z"
-     * writer.write((XMLGregorianCalendar) null);     // writes "null"
+     * writer.write(xmlCal);                          // "2024-06-15T10:30:00Z" is written (example value)
+     * writer.write((XMLGregorianCalendar) null);     // "null" is written
      * }</pre>
      *
      * @param c the XMLGregorianCalendar to write; if {@code null}, {@code "null"} is written
@@ -345,8 +346,8 @@ sealed class BufferedWriter extends java.io.BufferedWriter permits CharacterWrit
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * writer.write('A');    // Writes "A"
-     * writer.write('\n');   // Writes newline
+     * writer.write('A');    // "A" is written
+     * writer.write('\n');   // newline is written
      * }</pre>
      *
      * @param c the character to write
@@ -379,8 +380,8 @@ sealed class BufferedWriter extends java.io.BufferedWriter permits CharacterWrit
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * writer.write("Hello");   // Writes "Hello"
-     * writer.write(null);      // Writes "null"
+     * writer.write("Hello");   // "Hello" is written
+     * writer.write(null);      // "null" is written
      * }</pre>
      *
      * @param str the string to write
@@ -401,7 +402,7 @@ sealed class BufferedWriter extends java.io.BufferedWriter permits CharacterWrit
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * writer.write("Hello World", 6, 5);   // Writes "World"
+     * writer.write("Hello World", 6, 5);   // "World" is written
      * }</pre>
      *
      * @param str the string to write; if {@code null}, {@code "null"} is written
@@ -484,7 +485,7 @@ sealed class BufferedWriter extends java.io.BufferedWriter permits CharacterWrit
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * char[] chars = {'H', 'e', 'l', 'l', 'o'};
-     * writer.write(chars);   // Writes "Hello"
+     * writer.write(chars);   // "Hello" is written
      * }</pre>
      *
      * @param cbuf the character array to write; must not be {@code null}
@@ -528,7 +529,7 @@ sealed class BufferedWriter extends java.io.BufferedWriter permits CharacterWrit
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * char[] chars = {'H', 'e', 'l', 'l', 'o', ' ', 'W', 'o', 'r', 'l', 'd'};
-     * writer.write(chars, 6, 5);   // Writes "World"
+     * writer.write(chars, 6, 5);   // "World" is written
      * }</pre>
      *
      * @param cbuf the character array; must not be {@code null}
@@ -600,6 +601,11 @@ sealed class BufferedWriter extends java.io.BufferedWriter permits CharacterWrit
     /**
      * Appends the specified character sequence to this writer.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * writer.append("Hello").append(" ").append("World");
+     * }</pre>
+     *
      * @param csq the character sequence to append. If {@code null}, then
      *        the four characters "null" are appended
      * @return this writer
@@ -612,6 +618,11 @@ sealed class BufferedWriter extends java.io.BufferedWriter permits CharacterWrit
 
     /**
      * Appends a subsequence of the specified character sequence to this writer.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * writer.append("Hello World", 0, 5);   // "Hello" is appended
+     * }</pre>
      *
      * @param csq the character sequence from which a subsequence will be appended.
      *        If {@code null}, then characters will be appended as if {@code csq}
@@ -630,6 +641,11 @@ sealed class BufferedWriter extends java.io.BufferedWriter permits CharacterWrit
 
     /**
      * Appends the specified character to this writer.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * writer.append('H').append('i').append('!');
+     * }</pre>
      *
      * @param c the character to append
      * @return this writer
@@ -669,6 +685,12 @@ sealed class BufferedWriter extends java.io.BufferedWriter permits CharacterWrit
      * In internal buffer mode (created via {@link #BufferedWriter()}) there is no
      * underlying destination, so the accumulated content is retained and this method only
      * releases the transient flush buffer.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * writer.write("Important data");
+     * writer.flush();   // data is flushed to the underlying stream
+     * }</pre>
      *
      * @throws IOException if an I/O error occurs
      */
@@ -711,7 +733,7 @@ sealed class BufferedWriter extends java.io.BufferedWriter permits CharacterWrit
      * try {
      *     writer.write("Hello World");
      * } finally {
-     *     writer.close();   // Always close in finally block
+     *     writer.close();   // closes in finally block
      * }
      * }</pre>
      *
@@ -778,6 +800,18 @@ sealed class BufferedWriter extends java.io.BufferedWriter permits CharacterWrit
      * state. Any previously held internal or flush buffers are recycled, and a
      * fresh internal character buffer is allocated. This allows reusing the same
      * writer instance without creating a new object.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * BufferedWriter writer = new BufferedWriter();
+     * writer.write("First use");
+     * System.out.println(writer.toString());   // "First use"
+     *
+     * writer.reinit();
+     * writer.write("Second use");
+     * System.out.println(writer.toString());   // "Second use"
+     * }</pre>
+     *
      */
     void reinit() {
         isClosed = false;
@@ -798,6 +832,14 @@ sealed class BufferedWriter extends java.io.BufferedWriter permits CharacterWrit
      * {@link java.io.OutputStreamWriter}. Any previously held buffers are recycled.
      * This allows reusing the same writer instance with a different output stream.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * BufferedWriter writer = new BufferedWriter();
+     * writer.write("First file");
+     * writer.reinit(new FileOutputStream("second.txt"));
+     * writer.write("Second file");
+     * }</pre>
+     *
      * @param os the new OutputStream to write to; must not be {@code null}
      */
     void reinit(final OutputStream os) {
@@ -809,6 +851,15 @@ sealed class BufferedWriter extends java.io.BufferedWriter permits CharacterWrit
      * replacing any previous state. Any previously held internal buffers are
      * recycled. This allows reusing the same writer instance with a different
      * underlying writer.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * BufferedWriter writer = new BufferedWriter(new FileWriter("first.txt"));
+     * writer.write("First content");
+     *
+     * writer.reinit(new FileWriter("second.txt"));
+     * writer.write("Second content");
+     * }</pre>
      *
      * @param writer the new Writer to write to; must not be {@code null}
      */

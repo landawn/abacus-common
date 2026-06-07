@@ -85,10 +85,10 @@ import com.landawn.abacus.util.function.TriPredicate;
  * List<String> list2 = Arrays.asList("b", "c", "d", "c");
  * Difference<List<String>, List<String>> diff = Difference.of(list1, list2);
  *
- * List<String> common = diff.common();   // ["b", "c"]
- * List<String> onlyOnLeft = diff.onlyOnLeft();   // ["a", "b"]
- * List<String> onlyOnRight = diff.onlyOnRight();   // ["c", "d"]
- * boolean equal = diff.areEqual();   // false
+ * List<String> common = diff.common();             // returns ["b", "c"]
+ * List<String> onlyOnLeft = diff.onlyOnLeft();     // returns ["a", "b"]
+ * List<String> onlyOnRight = diff.onlyOnRight();   // returns ["c", "d"]
+ * boolean equal = diff.areEqual();                 // returns false
  *
  * // Array comparison with primitive types
  * int[] array1 = {1, 2, 3, 2};
@@ -98,12 +98,12 @@ import com.landawn.abacus.util.function.TriPredicate;
  * // Map comparison (using specialized MapDifference)
  * Map<String, Integer> map1 = Map.of("a", 1, "b", 2, "c", 3);
  * Map<String, Integer> map2 = Map.of("b", 2, "c", 4, "d", 5);
- * MapDifference<...> mapDiff = MapDifference.of(map1, map2);
+ * MapDifference<?, ?, ?> mapDiff = MapDifference.of(map1, map2);
  *
  * // Bean comparison (using specialized BeanDifference)
  * Person person1 = new Person("John", 30);
  * Person person2 = new Person("John", 31);
- * BeanDifference<...> beanDiff = BeanDifference.of(person1, person2);
+ * BeanDifference<?, ?, ?> beanDiff = BeanDifference.of(person1, person2);
  * }</pre>
  *
  * <p><b>Supported Data Types:</b>
@@ -226,6 +226,16 @@ public sealed class Difference<L, R> permits KeyValueDifference {
      * if {@code true} appears twice in the first array and once in the second array, the result will
      * have one {@code true} in common and one {@code true} in left only.
      *
+     * <p><b>Usage Examples:</b>
+     * <pre>{@code
+     * boolean[] a = {true, false, true};
+     * boolean[] b = {true, true, true};
+     * Difference<BooleanList, BooleanList> diff = Difference.of(a, b);
+     * // common: [true, true]
+     * // onlyOnLeft: [false]
+     * // onlyOnRight: [true]
+     * }</pre>
+     *
      * @param a the first boolean array to compare. Can be {@code null}, which is treated as an empty array.
      * @param b the second boolean array to compare. Can be {@code null}, which is treated as an empty array.
      * @return a {@code Difference} object containing {@code BooleanList} instances for common elements,
@@ -250,6 +260,16 @@ public sealed class Difference<L, R> permits KeyValueDifference {
      * <p>The comparison takes into account the number of occurrences of each value. For example,
      * if {@code 'a'} appears twice in the first array and once in the second array, the result will
      * have one {@code 'a'} in common and one {@code 'a'} in left only.
+     *
+     * <p><b>Usage Examples:</b>
+     * <pre>{@code
+     * char[] a = {'a', 'b', 'c', 'a'};
+     * char[] b = {'a', 'b', 'd'};
+     * Difference<CharList, CharList> diff = Difference.of(a, b);
+     * // common: ['a', 'b']
+     * // onlyOnLeft: ['c', 'a']
+     * // onlyOnRight: ['d']
+     * }</pre>
      *
      * @param a the first char array to compare. Can be {@code null}, which is treated as an empty array.
      * @param b the second char array to compare. Can be {@code null}, which is treated as an empty array.
@@ -276,6 +296,16 @@ public sealed class Difference<L, R> permits KeyValueDifference {
      * if {@code 1} appears twice in the first array and once in the second array, the result will
      * have one {@code 1} in common and one {@code 1} in left only.
      *
+     * <p><b>Usage Examples:</b>
+     * <pre>{@code
+     * byte[] a = {1, 2, 3, 2};
+     * byte[] b = {2, 3, 4, 3};
+     * Difference<ByteList, ByteList> diff = Difference.of(a, b);
+     * // common: [2, 3]
+     * // onlyOnLeft: [1, 2]
+     * // onlyOnRight: [3, 4]
+     * }</pre>
+     *
      * @param a the first byte array to compare. Can be {@code null}, which is treated as an empty array.
      * @param b the second byte array to compare. Can be {@code null}, which is treated as an empty array.
      * @return a {@code Difference} object containing {@code ByteList} instances for common elements,
@@ -300,6 +330,16 @@ public sealed class Difference<L, R> permits KeyValueDifference {
      * <p>The comparison takes into account the number of occurrences of each value. For example,
      * if {@code 1} appears twice in the first array and once in the second array, the result will
      * have one {@code 1} in common and one {@code 1} in left only.
+     *
+     * <p><b>Usage Examples:</b>
+     * <pre>{@code
+     * short[] a = {1, 2, 3, 2};
+     * short[] b = {2, 3, 4, 3};
+     * Difference<ShortList, ShortList> diff = Difference.of(a, b);
+     * // common: [2, 3]
+     * // onlyOnLeft: [1, 2]
+     * // onlyOnRight: [3, 4]
+     * }</pre>
      *
      * @param a the first short array to compare. Can be {@code null}, which is treated as an empty array.
      * @param b the second short array to compare. Can be {@code null}, which is treated as an empty array.
@@ -326,6 +366,16 @@ public sealed class Difference<L, R> permits KeyValueDifference {
      * if {@code 1} appears twice in the first array and once in the second array, the result will
      * have one {@code 1} in common and one {@code 1} in left only.
      *
+     * <p><b>Usage Examples:</b>
+     * <pre>{@code
+     * int[] a = {1, 2, 3, 2};
+     * int[] b = {2, 3, 4, 3};
+     * Difference<IntList, IntList> diff = Difference.of(a, b);
+     * // common: [2, 3]
+     * // onlyOnLeft: [1, 2]
+     * // onlyOnRight: [3, 4]
+     * }</pre>
+     *
      * @param a the first int array to compare. Can be {@code null}, which is treated as an empty array.
      * @param b the second int array to compare. Can be {@code null}, which is treated as an empty array.
      * @return a {@code Difference} object containing {@code IntList} instances for common elements,
@@ -350,6 +400,16 @@ public sealed class Difference<L, R> permits KeyValueDifference {
      * <p>The comparison takes into account the number of occurrences of each value. For example,
      * if {@code 1} appears twice in the first array and once in the second array, the result will
      * have one {@code 1} in common and one {@code 1} in left only.
+     *
+     * <p><b>Usage Examples:</b>
+     * <pre>{@code
+     * long[] a = {1L, 2L, 3L, 2L};
+     * long[] b = {2L, 3L, 4L, 3L};
+     * Difference<LongList, LongList> diff = Difference.of(a, b);
+     * // common: [2, 3]
+     * // onlyOnLeft: [1, 2]
+     * // onlyOnRight: [3, 4]
+     * }</pre>
      *
      * @param a the first long array to compare. Can be {@code null}, which is treated as an empty array.
      * @param b the second long array to compare. Can be {@code null}, which is treated as an empty array.
@@ -381,6 +441,16 @@ public sealed class Difference<L, R> permits KeyValueDifference {
      * if {@code 1} appears twice in the first array and once in the second array, the result will
      * have one {@code 1} in common and one {@code 1} in left only.
      *
+     * <p><b>Usage Examples:</b>
+     * <pre>{@code
+     * float[] a = {1.0f, 2.0f, 3.0f, 2.0f};
+     * float[] b = {2.0f, 3.0f, 4.0f, 3.0f};
+     * Difference<FloatList, FloatList> diff = Difference.of(a, b);
+     * // common: [2.0, 3.0]
+     * // onlyOnLeft: [1.0, 2.0]
+     * // onlyOnRight: [3.0, 4.0]
+     * }</pre>
+     *
      * @param a the first float array to compare. Can be {@code null}, which is treated as an empty array.
      * @param b the second float array to compare. Can be {@code null}, which is treated as an empty array.
      * @return a {@code Difference} object containing {@code FloatList} instances for common elements,
@@ -410,6 +480,16 @@ public sealed class Difference<L, R> permits KeyValueDifference {
      * <p>The comparison takes into account the number of occurrences of each value. For example,
      * if {@code 1} appears twice in the first array and once in the second array, the result will
      * have one {@code 1} in common and one {@code 1} in left only.
+     *
+     * <p><b>Usage Examples:</b>
+     * <pre>{@code
+     * double[] a = {1.0, 2.0, 3.0, 2.0};
+     * double[] b = {2.0, 3.0, 4.0, 3.0};
+     * Difference<DoubleList, DoubleList> diff = Difference.of(a, b);
+     * // common: [2.0, 3.0]
+     * // onlyOnLeft: [1.0, 2.0]
+     * // onlyOnRight: [3.0, 4.0]
+     * }</pre>
      *
      * @param a the first double array to compare. Can be {@code null}, which is treated as an empty array.
      * @param b the second double array to compare. Can be {@code null}, which is treated as an empty array.
@@ -442,6 +522,16 @@ public sealed class Difference<L, R> permits KeyValueDifference {
      * have one {@code "apple"} in common and one {@code "apple"} in left only.
      *
      * <p>The returned lists maintain the order of elements as they appear in the original arrays.
+     *
+     * <p><b>Usage Examples:</b>
+     * <pre>{@code
+     * String[] a = {"apple", "banana", "cherry", "banana"};
+     * String[] b = {"banana", "cherry", "date", "date"};
+     * Difference<List<String>, List<String>> diff = Difference.of(a, b);
+     * // common: ["banana", "cherry"]
+     * // onlyOnLeft: ["apple", "banana"]
+     * // onlyOnRight: ["date", "date"]
+     * }</pre>
      *
      * @param <T1> the element type of the first array
      * @param <T2> the element type of the second array
@@ -561,6 +651,16 @@ public sealed class Difference<L, R> permits KeyValueDifference {
      * if {@code true} appears twice in the first list and once in the second list, the result will
      * have one {@code true} in common and one {@code true} in left only.
      *
+     * <p><b>Usage Examples:</b>
+     * <pre>{@code
+     * BooleanList a = BooleanList.of(true, false, true);
+     * BooleanList b = BooleanList.of(true, true, true);
+     * Difference<BooleanList, BooleanList> diff = Difference.of(a, b);
+     * // common: [true, true]
+     * // onlyOnLeft: [false]
+     * // onlyOnRight: [true]
+     * }</pre>
+     *
      * @param a the first BooleanList to compare. Can be {@code null} or empty.
      * @param b the second BooleanList to compare. Can be {@code null} or empty.
      * @return a {@code Difference} object containing BooleanLists for common elements,
@@ -624,6 +724,16 @@ public sealed class Difference<L, R> permits KeyValueDifference {
      * <p>The comparison takes into account the number of occurrences of each value. For example,
      * if {@code 'a'} appears twice in the first list and once in the second list, the result will
      * have one {@code 'a'} in common and one {@code 'a'} in left only.
+     *
+     * <p><b>Usage Examples:</b>
+     * <pre>{@code
+     * CharList a = CharList.of('a', 'b', 'c', 'a');
+     * CharList b = CharList.of('a', 'b', 'd');
+     * Difference<CharList, CharList> diff = Difference.of(a, b);
+     * // common: ['a', 'b']
+     * // onlyOnLeft: ['c', 'a']
+     * // onlyOnRight: ['d']
+     * }</pre>
      *
      * @param a the first CharList to compare. Can be {@code null} or empty.
      * @param b the second CharList to compare. Can be {@code null} or empty.
@@ -689,6 +799,16 @@ public sealed class Difference<L, R> permits KeyValueDifference {
      * if {@code 1} appears twice in the first list and once in the second list, the result will
      * have one {@code 1} in common and one {@code 1} in left only.
      *
+     * <p><b>Usage Examples:</b>
+     * <pre>{@code
+     * ByteList a = ByteList.of((byte) 1, (byte) 2, (byte) 3, (byte) 2);
+     * ByteList b = ByteList.of((byte) 2, (byte) 3, (byte) 4, (byte) 3);
+     * Difference<ByteList, ByteList> diff = Difference.of(a, b);
+     * // common: [2, 3]
+     * // onlyOnLeft: [1, 2]
+     * // onlyOnRight: [3, 4]
+     * }</pre>
+     *
      * @param a the first ByteList to compare. Can be {@code null} or empty.
      * @param b the second ByteList to compare. Can be {@code null} or empty.
      * @return a {@code Difference} object containing ByteLists for common elements,
@@ -752,6 +872,16 @@ public sealed class Difference<L, R> permits KeyValueDifference {
      * <p>The comparison takes into account the number of occurrences of each value. For example,
      * if {@code 1} appears twice in the first list and once in the second list, the result will
      * have one {@code 1} in common and one {@code 1} in left only.
+     *
+     * <p><b>Usage Examples:</b>
+     * <pre>{@code
+     * ShortList a = ShortList.of((short) 1, (short) 2, (short) 3, (short) 2);
+     * ShortList b = ShortList.of((short) 2, (short) 3, (short) 4, (short) 3);
+     * Difference<ShortList, ShortList> diff = Difference.of(a, b);
+     * // common: [2, 3]
+     * // onlyOnLeft: [1, 2]
+     * // onlyOnRight: [3, 4]
+     * }</pre>
      *
      * @param a the first ShortList to compare. Can be {@code null} or empty.
      * @param b the second ShortList to compare. Can be {@code null} or empty.
@@ -817,6 +947,16 @@ public sealed class Difference<L, R> permits KeyValueDifference {
      * if {@code 1} appears twice in the first list and once in the second list, the result will
      * have one {@code 1} in common and one {@code 1} in left only.
      *
+     * <p><b>Usage Examples:</b>
+     * <pre>{@code
+     * IntList a = IntList.of(1, 2, 3, 2);
+     * IntList b = IntList.of(2, 3, 4, 3);
+     * Difference<IntList, IntList> diff = Difference.of(a, b);
+     * // common: [2, 3]
+     * // onlyOnLeft: [1, 2]
+     * // onlyOnRight: [3, 4]
+     * }</pre>
+     *
      * @param a the first IntList to compare. Can be {@code null} or empty.
      * @param b the second IntList to compare. Can be {@code null} or empty.
      * @return a {@code Difference} object containing IntLists for common elements,
@@ -880,6 +1020,16 @@ public sealed class Difference<L, R> permits KeyValueDifference {
      * <p>The comparison takes into account the number of occurrences of each value. For example,
      * if {@code 1} appears twice in the first list and once in the second list, the result will
      * have one {@code 1} in common and one {@code 1} in left only.
+     *
+     * <p><b>Usage Examples:</b>
+     * <pre>{@code
+     * LongList a = LongList.of(1L, 2L, 3L, 2L);
+     * LongList b = LongList.of(2L, 3L, 4L, 3L);
+     * Difference<LongList, LongList> diff = Difference.of(a, b);
+     * // common: [2, 3]
+     * // onlyOnLeft: [1, 2]
+     * // onlyOnRight: [3, 4]
+     * }</pre>
      *
      * @param a the first LongList to compare. Can be {@code null} or empty.
      * @param b the second LongList to compare. Can be {@code null} or empty.
@@ -951,6 +1101,16 @@ public sealed class Difference<L, R> permits KeyValueDifference {
      * if {@code 1} appears twice in the first list and once in the second list, the result will
      * have one {@code 1} in common and one {@code 1} in left only.
      *
+     * <p><b>Usage Examples:</b>
+     * <pre>{@code
+     * FloatList a = FloatList.of(1.0f, 2.0f, 3.0f, 2.0f);
+     * FloatList b = FloatList.of(2.0f, 3.0f, 4.0f, 3.0f);
+     * Difference<FloatList, FloatList> diff = Difference.of(a, b);
+     * // common: [2.0, 3.0]
+     * // onlyOnLeft: [1.0, 2.0]
+     * // onlyOnRight: [3.0, 4.0]
+     * }</pre>
+     *
      * @param a the first FloatList to compare. Can be {@code null} or empty.
      * @param b the second FloatList to compare. Can be {@code null} or empty.
      * @return a {@code Difference} object containing FloatLists for common elements,
@@ -1021,6 +1181,16 @@ public sealed class Difference<L, R> permits KeyValueDifference {
      * if {@code 1} appears twice in the first list and once in the second list, the result will
      * have one {@code 1} in common and one {@code 1} in left only.
      *
+     * <p><b>Usage Examples:</b>
+     * <pre>{@code
+     * DoubleList a = DoubleList.of(1.0, 2.0, 3.0, 2.0);
+     * DoubleList b = DoubleList.of(2.0, 3.0, 4.0, 3.0);
+     * Difference<DoubleList, DoubleList> diff = Difference.of(a, b);
+     * // common: [2.0, 3.0]
+     * // onlyOnLeft: [1.0, 2.0]
+     * // onlyOnRight: [3.0, 4.0]
+     * }</pre>
+     *
      * @param a the first DoubleList to compare. Can be {@code null} or empty.
      * @param b the second DoubleList to compare. Can be {@code null} or empty.
      * @return a {@code Difference} object containing DoubleLists for common elements,
@@ -1083,6 +1253,14 @@ public sealed class Difference<L, R> permits KeyValueDifference {
      * as they appear in the first collection. For {@link MapDifference} and {@link BeanDifference}
      * the returned value is instead a map of the common entries/properties.
      *
+     * <p><b>Usage Examples:</b>
+     * <pre>{@code
+     * List<String> list1 = Arrays.asList("a", "b", "c", "b");
+     * List<String> list2 = Arrays.asList("b", "c", "d", "c");
+     * Difference<List<String>, List<String>> diff = Difference.of(list1, list2);
+     * List<String> common = diff.common();  // returns ["b", "c"]
+     * }</pre>
+     *
      * @return a non-{@code null} collection (or map, for key-value differences) containing the common
      *         elements; never {@code null} but may be empty
      * @see #onlyOnLeft()
@@ -1103,6 +1281,14 @@ public sealed class Difference<L, R> permits KeyValueDifference {
      * <p>For collection/array comparisons the returned collection maintains the order of elements
      * as they appear in the first collection. For {@link MapDifference} and {@link BeanDifference}
      * the returned value is instead a map of the entries/properties present only on the left.
+     *
+     * <p><b>Usage Examples:</b>
+     * <pre>{@code
+     * List<String> list1 = Arrays.asList("a", "b", "c", "b");
+     * List<String> list2 = Arrays.asList("b", "c", "d", "c");
+     * Difference<List<String>, List<String>> diff = Difference.of(list1, list2);
+     * List<String> onlyOnLeft = diff.onlyOnLeft();  // returns ["a", "b"]
+     * }</pre>
      *
      * @return a non-{@code null} collection (or map, for key-value differences) containing elements
      *         present only in the left structure; never {@code null} but may be empty
@@ -1125,6 +1311,14 @@ public sealed class Difference<L, R> permits KeyValueDifference {
      * as they appear in the second collection. For {@link MapDifference} and {@link BeanDifference}
      * the returned value is instead a map of the entries/properties present only on the right.
      *
+     * <p><b>Usage Examples:</b>
+     * <pre>{@code
+     * List<String> list1 = Arrays.asList("a", "b", "c", "b");
+     * List<String> list2 = Arrays.asList("b", "c", "d", "c");
+     * Difference<List<String>, List<String>> diff = Difference.of(list1, list2);
+     * List<String> onlyOnRight = diff.onlyOnRight();  // returns ["c", "d"]
+     * }</pre>
+     *
      * @return a non-{@code null} collection (or map, for key-value differences) containing elements
      *         present only in the right structure; never {@code null} but may be empty
      * @see #common()
@@ -1146,6 +1340,14 @@ public sealed class Difference<L, R> permits KeyValueDifference {
      * <p>Note that element order is not considered - only the presence and count of each element matters.
      * For example, [1, 2, 3] and [3, 2, 1] would be considered equal, but [1, 2, 2] and [1, 2, 3]
      * would not be equal.
+     *
+     * <p><b>Usage Examples:</b>
+     * <pre>{@code
+     * List<String> list1 = Arrays.asList("a", "b", "c");
+     * List<String> list2 = Arrays.asList("c", "b", "a");
+     * Difference<List<String>, List<String>> diff = Difference.of(list1, list2);
+     * boolean equal = diff.areEqual();  // returns true (order does not matter)
+     * }</pre>
      *
      * @return {@code true} if the two compared collections have exactly the same elements with the same occurrences, {@code false} otherwise
      * @see #common()
@@ -1171,6 +1373,13 @@ public sealed class Difference<L, R> permits KeyValueDifference {
      *
      * <p>This method properly handles {@code null} values and ensures type safety by checking
      * that the compared object is also a {@code Difference} instance.
+     *
+     * <p><b>Usage Examples:</b>
+     * <pre>{@code
+     * Difference<List<String>, List<String>> diff1 = Difference.of(Arrays.asList("a", "b"), Arrays.asList("a", "c"));
+     * Difference<List<String>, List<String>> diff2 = Difference.of(Arrays.asList("a", "b"), Arrays.asList("a", "c"));
+     * boolean eq = diff1.equals(diff2);  // returns true
+     * }</pre>
      *
      * @param obj the object to compare with this {@code Difference}; may be {@code null}
      * @return {@code true} if the specified object is also a {@code Difference} with equal common,
@@ -1200,6 +1409,12 @@ public sealed class Difference<L, R> permits KeyValueDifference {
      * <p>The implementation uses a standard hash code calculation pattern with a prime
      * number (31) to combine the hash codes of the three components.
      *
+     * <p><b>Usage Examples:</b>
+     * <pre>{@code
+     * Difference<List<String>, List<String>> diff = Difference.of(Arrays.asList("a", "b"), Arrays.asList("a", "c"));
+     * int hash = diff.hashCode();  // returns consistent with equals()
+     * }</pre>
+     *
      * @return a hash code value for this {@code Difference} object
      */
     @Override
@@ -1225,6 +1440,12 @@ public sealed class Difference<L, R> permits KeyValueDifference {
      * <p>Format: {@code {areEqual=<boolean>, common=<common>, onlyOnLeft=<onlyOnLeft>, onlyOnRight=<onlyOnRight>}}
      *
      * <p>This method is useful for debugging and logging purposes.
+     *
+     * <p><b>Usage Examples:</b>
+     * <pre>{@code
+     * Difference<List<String>, List<String>> diff = Difference.of(Arrays.asList("a", "b"), Arrays.asList("a", "c"));
+     * String str = diff.toString();  // returns "{areEqual=false, common=[a], onlyOnLeft=[b], onlyOnRight=[c]}"
+     * }</pre>
      *
      * @return a string representation of this {@code Difference} object
      */
@@ -1289,7 +1510,7 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          * <pre>{@code
          * Map<String, Integer> map1 = Map.of("a", 1, "b", 2);
          * Map<String, Integer> map2 = Map.of("a", 1, "b", 3);
-         * MapDifference<...> diff = MapDifference.of(map1, map2);
+         * MapDifference<?, ?, ?> diff = MapDifference.of(map1, map2);
          * // diff.differentValues() returns {"b": Pair.of(2, 3)}
          * }</pre>
          *
@@ -1317,6 +1538,14 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          * <p>This is a stricter equality check than the parent class's {@link #areEqual()} method,
          * as it also considers whether any entries/properties have different values.
          *
+         * <p><b>Usage Examples:</b>
+         * <pre>{@code
+         * Map<String, Integer> map1 = Map.of("a", 1, "b", 2);
+         * Map<String, Integer> map2 = Map.of("a", 1, "b", 3);
+         * MapDifference<?, ?, ?> diff = MapDifference.of(map1, map2);
+         * boolean equal = diff.areEqual();  // returns false (different values for "b")
+         * }</pre>
+         *
          * @return {@code true} if the two structures have exactly the same entries/properties with the same values, {@code false} otherwise
          * @see #differentValues()
          */
@@ -1336,6 +1565,15 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          *   <li>Right-only entries/properties</li>
          *   <li>Entries/properties with different values</li>
          * </ul>
+         *
+         * <p><b>Usage Examples:</b>
+         * <pre>{@code
+         * Map<String, Integer> map1 = Map.of("a", 1);
+         * Map<String, Integer> map2 = Map.of("a", 2);
+         * MapDifference<?, ?, ?> diff1 = MapDifference.of(map1, map2);
+         * MapDifference<?, ?, ?> diff2 = MapDifference.of(map1, map2);
+         * boolean eq = diff1.equals(diff2);  // returns true
+         * }</pre>
          *
          * @param obj the object to compare with this {@code KeyValueDifference}; may be {@code null}
          * @return {@code true} if the specified object is also a {@code KeyValueDifference} with equal
@@ -1367,6 +1605,14 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          *   <li>Entries/properties with different values</li>
          * </ul>
          *
+         * <p><b>Usage Examples:</b>
+         * <pre>{@code
+         * Map<String, Integer> map1 = Map.of("a", 1);
+         * Map<String, Integer> map2 = Map.of("a", 2);
+         * MapDifference<?, ?, ?> diff = MapDifference.of(map1, map2);
+         * int hash = diff.hashCode();  // returns consistent with equals()
+         * }</pre>
+         *
          * @return a hash code value for this {@code KeyValueDifference} object
          */
         @Override
@@ -1392,6 +1638,14 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          * </ul>
          *
          * <p>Format: {@code {areEqual=<boolean>, common=<common>, onlyOnLeft=<onlyOnLeft>, onlyOnRight=<onlyOnRight>, differentValues=<diffValues>}}
+         *
+         * <p><b>Usage Examples:</b>
+         * <pre>{@code
+         * Map<String, Integer> map1 = Map.of("a", 1, "b", 2);
+         * Map<String, Integer> map2 = Map.of("a", 1, "b", 3);
+         * MapDifference<?, ?, ?> diff = MapDifference.of(map1, map2);
+         * String str = diff.toString();  // returns "{areEqual=false, common={a=1}, differentValues={b=Pair[2, 3]}}"
+         * }</pre>
          *
          * @return a string representation of this {@code KeyValueDifference} object
          */
@@ -1422,7 +1676,7 @@ public sealed class Difference<L, R> permits KeyValueDifference {
      * <pre>{@code
      * Map<String, Integer> map1 = Map.of("a", 1, "b", 2, "c", 3);
      * Map<String, Integer> map2 = Map.of("b", 2, "c", 4, "d", 5);
-     * MapDifference<...> diff = MapDifference.of(map1, map2);
+     * MapDifference<?, ?, ?> diff = MapDifference.of(map1, map2);
      *
      * // diff.common() returns {"b": 2}
      * // diff.onlyOnLeft() returns {"a": 1}
@@ -1474,7 +1728,7 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          * <pre>{@code
          * Map<String, Integer> map1 = Map.of("a", 1, "b", 2, "c", 3);
          * Map<String, Integer> map2 = Map.of("b", 2, "c", 4, "d", 5);
-         * MapDifference<...> diff = MapDifference.of(map1, map2);
+         * MapDifference<?, ?, ?> diff = MapDifference.of(map1, map2);
          * // Results in:
          * // common: {"b": 2}
          * // onlyOnLeft: {"a": 1}
@@ -1527,7 +1781,7 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          * Map<String, Integer> map1 = Map.of("a", 1, "b", 2, "c", 3, "d", 4);
          * Map<String, Integer> map2 = Map.of("a", 1, "b", 5, "c", 3, "e", 6);
          * Collection<String> keys = Arrays.asList("a", "b", "e");
-         * MapDifference<...> diff = MapDifference.of(map1, map2, keys);
+         * MapDifference<?, ?, ?> diff = MapDifference.of(map1, map2, keys);
          * // Results in:
          * // common: {"a": 1}
          * // onlyOnLeft: {} (empty, since the compared keys "a" and "b" both exist in map2)
@@ -1585,7 +1839,7 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          *
          * // Compare with tolerance of 0.01
          * BiPredicate<Double, Double> approxEqual = (v1, v2) -> Math.abs(v1 - v2) < 0.01;
-         * MapDifference<...> diff = MapDifference.of(map1, map2, approxEqual);
+         * MapDifference<?, ?, ?> diff = MapDifference.of(map1, map2, approxEqual);
          * // Results in:
          * // common: {"a": 1.0, "b": 2.001} (both are considered equal)
          * // onlyOnLeft: {}
@@ -1657,7 +1911,7 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          *     return Math.abs(v1 - v2) <= tolerance;
          * };
          *
-         * MapDifference<...> diff = MapDifference.of(prices1, prices2, priceEqual);
+         * MapDifference<?, ?, ?> diff = MapDifference.of(prices1, prices2, priceEqual);
          * // Results in:
          * // common: {"gold": 1850.50} (within $5 tolerance)
          * // onlyOnLeft: {}
@@ -1721,7 +1975,7 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          *     "url", "http://api.com"
          * );
          * Map<String, Object> config2 = Map.of(
-         *     "timeout", 30.0,  // Note: different type
+         *     "timeout", 30.0,
          *     "retries", 5,
          *     "debug", true,
          *     "proxy", "proxy.com"
@@ -1737,7 +1991,7 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          *     return Objects.equals(v1, v2);
          * };
          *
-         * MapDifference<...> diff = MapDifference.of(config1, config2, keysToCheck, configEqual);
+         * MapDifference<?, ?, ?> diff = MapDifference.of(config1, config2, keysToCheck, configEqual);
          * // Results in:
          * // common: {"timeout": 30, "debug": true}
          * // onlyOnLeft: {}
@@ -1900,11 +2154,11 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          *     Map.of("id", 2, "name", "Jane", "age", 25)
          * );
          * List<Map<String, Object>> users2 = Arrays.asList(
-         *     Map.of("id", 1, "name", "John", "age", 31),  // age changed
+         *     Map.of("id", 1, "name", "John", "age", 31),
          *     Map.of("id", 3, "name", "Bob", "age", 28)
          * );
          *
-         * MapDifference<...> diff = MapDifference.of(users1, users2, map -> map.get("id"));
+         * MapDifference<?, ?, ?> diff = MapDifference.of(users1, users2, map -> map.get("id"));
          * // Results in:
          * // common: [] (empty, no identical maps)
          * // onlyOnLeft: [{"id": 2, "name": "Jane", "age": 25}]
@@ -1956,7 +2210,7 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          *
          * // Only compare name and age, ignore lastLogin
          * Collection<String> keysToCompare = Arrays.asList("name", "age");
-         * MapDifference<...> diff = MapDifference.of(users1, users2, keysToCompare,
+         * MapDifference<?, ?, ?> diff = MapDifference.of(users1, users2, keysToCompare,
          *                                            map -> map.get("id"));
          * // Results in:
          * // common: [{"id": 1, ...}] (John's record, since name and age match)
@@ -2007,10 +2261,10 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          *     Map.of("id", 3, "firstName", "Bob", "lastName", "Johnson")
          * );
          *
-         * MapDifference<...> diff = MapDifference.of(
+         * MapDifference<?, ?, ?> diff = MapDifference.of(
          *     oldFormat, newFormat,
-         *     map -> map.get("user_id"),  // ID extractor for old format
-         *     map -> map.get("id")        // ID extractor for new format
+         *     map -> map.get("user_id"),
+         *     map -> map.get("id")
          * );
          * // Results in:
          * // common: [] (empty, different structures)
@@ -2080,10 +2334,10 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          * // Only compare the shared "username" field
          * Collection<String> keysToCompare = Arrays.asList("username");
          *
-         * MapDifference<...> diff = MapDifference.of(
+         * MapDifference<?, ?, ?> diff = MapDifference.of(
          *     v1Data, v2Data, keysToCompare,
-         *     map -> map.get("userId"),  // V1 uses "userId"
-         *     map -> map.get("id")       // V2 uses "id"
+         *     map -> map.get("userId"),
+         *     map -> map.get("id")
          * );
          * // Results in:
          * // common: Maps with ID 1 (john_doe) - username matches
@@ -2201,7 +2455,7 @@ public sealed class Difference<L, R> permits KeyValueDifference {
      * Person person1 = new Person("John", 30, "john@old.com");
      * Person person2 = new Person("John", 31, "john@new.com");
      *
-     * BeanDifference<...> diff = BeanDifference.of(person1, person2);
+     * BeanDifference<?, ?, ?> diff = BeanDifference.of(person1, person2);
      * // diff.common() returns {"name": "John"}
      * // diff.onlyOnLeft() returns {} (empty)
      * // diff.onlyOnRight() returns {} (empty)
@@ -2254,7 +2508,7 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          * User user1 = new User("John", "john@old.com");
          * User user2 = new User("John", "john@new.com");
          *
-         * BeanDifference<...> diff = BeanDifference.of(user1, user2);
+         * BeanDifference<?, ?, ?> diff = BeanDifference.of(user1, user2);
          * // Results in:
          * // common: {"name": "John"}
          * // onlyOnLeft: {}
@@ -2317,7 +2571,7 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          *
          * // Compare only id and name
          * Collection<String> propsToCompare = Arrays.asList("id", "name");
-         * BeanDifference<...> diff = BeanDifference.of(emp1, emp2, propsToCompare);
+         * BeanDifference<?, ?, ?> diff = BeanDifference.of(emp1, emp2, propsToCompare);
          * // Results in:
          * // common: {"id": "E001", "name": "John"}
          * // onlyOnLeft: {}
@@ -2386,7 +2640,7 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          *     return Objects.equals(v1, v2);
          * };
          *
-         * BeanDifference<...> diff = BeanDifference.of(p1, p2, fuzzyEquals);
+         * BeanDifference<?, ?, ?> diff = BeanDifference.of(p1, p2, fuzzyEquals);
          * // Results in:
          * // common: {"name": "Widget", "price": 10.99, "description": "A useful widget"}
          * // All properties are considered equal due to custom comparison
@@ -2465,7 +2719,7 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          *     }
          * };
          *
-         * BeanDifference<...> diff = BeanDifference.of(acc1, acc2, smartEquals);
+         * BeanDifference<?, ?, ?> diff = BeanDifference.of(acc1, acc2, smartEquals);
          * // Results may show all properties as common if they meet the criteria
          * }</pre>
          *
@@ -2538,7 +2792,7 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          *     }
          * };
          *
-         * BeanDifference<...> diff = BeanDifference.of(c1, c2, fieldsToCheck, fieldEquals);
+         * BeanDifference<?, ?, ?> diff = BeanDifference.of(c1, c2, fieldsToCheck, fieldEquals);
          * // Results in:
          * // common: {"name": "John Doe", "creditLimit": 5000.0}
          * // differentValues: {"email": Pair.of("john@old.com", "john@new.com")}
@@ -2738,11 +2992,11 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          *     new Employee("E002", "Jane", "Marketing")
          * );
          * List<Employee> team2 = Arrays.asList(
-         *     new Employee("E001", "John", "Engineering"),  // Different department
+         *     new Employee("E001", "John", "Engineering"),
          *     new Employee("E003", "Bob", "Sales")
          * );
          *
-         * BeanDifference<...> diff = BeanDifference.of(team1, team2, emp -> emp.getId());
+         * BeanDifference<?, ?, ?> diff = BeanDifference.of(team1, team2, emp -> emp.getId());
          * // Results in:
          * // common: [] (empty, as E001 has different department)
          * // onlyOnLeft: [Employee E002]
@@ -2801,7 +3055,7 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          *
          * // Compare only name and price, ignoring dates and notes
          * Collection<String> propsToCompare = Arrays.asList("name", "price");
-         * BeanDifference<...> diff = BeanDifference.of(
+         * BeanDifference<?, ?, ?> diff = BeanDifference.of(
          *     catalog1, catalog2, propsToCompare,
          *     product -> product.getSku()
          * );
@@ -2848,10 +3102,10 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          * }
          *
          * class CustomerV2 {
-         *     private String id;  // Changed from Long to String
-         *     private String fullName;  // Same property name
-         *     private String email;  // Renamed from emailAddress
-         *     private String phoneNumber;  // New field
+         *     private String id;
+         *     private String fullName;  // same property name
+         *     private String email;
+         *     private String phoneNumber;
          *     // getters and setters...
          * }
          *
@@ -2864,9 +3118,9 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          *     new CustomerV2("103", "Bob Johnson", "bob@example.com", "555-5678")
          * );
          *
-         * BeanDifference<...> diff = BeanDifference.of(
+         * BeanDifference<?, ?, ?> diff = BeanDifference.of(
          *     oldCustomers, newCustomers,
-         *     v1 -> v1.getCustomerId().toString(),  // Convert Long to String
+         *     v1 -> v1.getCustomerId().toString(),
          *     v2 -> v2.getId()
          * );
          * // Results show:
@@ -2928,10 +3182,10 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          *
          * class OrderSummary {
          *     private Long id;
-         *     private String customer;  // Maps to customerName
-         *     private BigDecimal total;  // Maps to totalAmount
+         *     private String customer;
+         *     private BigDecimal total;
          *     private String status;
-         *     private LocalDate date;  // Different date type
+         *     private LocalDate date;
          *     private Map<String, Object> metadata;
          *     // getters and setters...
          * }
@@ -2949,9 +3203,9 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          * // Compare only status field (the only field with matching names)
          * Collection<String> propsToCompare = Arrays.asList("status");
          *
-         * BeanDifference<...> diff = BeanDifference.of(
+         * BeanDifference<?, ?, ?> diff = BeanDifference.of(
          *     orders, summaries, propsToCompare,
-         *     order -> order.getOrderId().substring(4),  // Extract numeric part
+         *     order -> order.getOrderId().substring(4),
          *     summary -> summary.getId().toString()
          * );
          * // Compares only the "status" property for matched orders

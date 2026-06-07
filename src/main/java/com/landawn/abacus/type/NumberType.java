@@ -203,10 +203,16 @@ public class NumberType<T extends Number> extends AbstractPrimaryType<T> {
      * Converts a string representation to an instance of the number type.
      * This method uses the discovered factory method or constructor to create instances.
      *
+     * <p>This method is the inverse of {@code stringOf} and round-trips with it: it parses the string produced by
+     * {@code stringOf} back into a value of this type. Strings produced by {@link Object#toString()} are not
+     * guaranteed to be parseable in this way.</p>
+     *
      * @param str the string to convert, may be {@code null} or empty
      * @return an instance of the number type, or {@code null} if the input string is {@code null} or empty
      * @throws NumberFormatException if the string cannot be parsed as the target number type
      * @throws UnsupportedOperationException if no suitable factory method or constructor was found
+     * @see #valueOf(Object)
+     * @see #stringOf(Number)
      */
     @Override
     public T valueOf(final String str) {
@@ -216,8 +222,15 @@ public class NumberType<T extends Number> extends AbstractPrimaryType<T> {
     /**
      * Converts a number object to its string representation.
      *
+     * <p>The returned string is a serializable representation designed to be parsed back into an equivalent value
+     * via {@link #valueOf(String)}; {@code stringOf} and {@code valueOf} are inverse operations that round-trip. This
+     * is the key distinction from {@link Object#toString()}, whose result is not guaranteed to be convertible back
+     * into the original value.</p>
+     *
      * @param x the number object to convert, may be {@code null}
      * @return the string representation using {@code toString()}, or {@code null} if the input is {@code null}
+     * @see #valueOf(String)
+     * @see #valueOf(Object)
      */
     @Override
     public String stringOf(final T x) {
@@ -228,10 +241,24 @@ public class NumberType<T extends Number> extends AbstractPrimaryType<T> {
      * Appends the string representation of a number to an {@link Appendable}.
      * Writes {@code "null"} when {@code x} is {@code null}; otherwise appends the result
      * of {@link #stringOf(Number)}.
+     * <p>
+     * <b>appendTo vs. serializeTo:</b> {@code appendTo} produces a plain, {@code toString()}-style rendering with no
+     * JSON/XML quoting or escaping (for general text output), whereas {@code serializeTo} produces the JSON/XML
+     * serialized form (applying string quotation and character escaping per the serialization config) and is used by the
+     * JSON/XML serializers.
      *
      * @param appendable the target to write to
      * @param x the number value to append, may be {@code null}
      * @throws IOException if an I/O error occurs during the append operation
+     * @implNote
+     * This method appends a string representation of {@code x} to {@code appendable} (the literal {@code "null"} for a
+     * {@code null} value). Conceptually this is the human-readable form produced by {@code toString()}, <i>not</i> the
+     * value returned by {@code stringOf}, which is a formatted, serializable representation (typically a JSON string)
+     * that {@link #valueOf(String)} can convert back into an equivalent value. For values whose nested structure makes
+     * the two forms differ (collections, maps, arrays), {@code appendTo} emits the unquoted, {@code toString()}-style
+     * form; it is therefore not, in the general contract, a plain
+     * {@code appendable.append(x == null ? NULL_STRING : stringOf(x))}. (For value types whose human-readable and
+     * serialized forms coincide, the appended text is naturally identical to {@code stringOf(x)}.)
      */
     @Override
     public void appendTo(final Appendable appendable, final T x) throws IOException {
@@ -245,6 +272,15 @@ public class NumberType<T extends Number> extends AbstractPrimaryType<T> {
     /**
      * Writes the character representation of a number to a {@link CharacterWriter} by delegating
      * to {@link #appendTo(Appendable, Object)}.
+     * <p>
+     * This method is specifically designed for JSON/XML serialization: it writes the serialized form of {@code x} to the
+     * {@code CharacterWriter}, applying string quotation and character escaping according to the supplied serialization
+     * config (a {@code null} config means no surrounding quotation). It is the streaming counterpart of {@code stringOf}
+     * and is invoked by the JSON/XML serializers.
+     * <p>
+     * <b>serializeTo vs. appendTo:</b> {@code serializeTo} produces machine-readable JSON/XML (quoted and escaped),
+     * whereas {@code appendTo} produces a plain, human-readable {@code toString()}-style rendering without JSON/XML
+     * quoting or escaping.
      *
      * @param writer the {@code CharacterWriter} to write to
      * @param x the number value to write, may be {@code null}
@@ -252,7 +288,7 @@ public class NumberType<T extends Number> extends AbstractPrimaryType<T> {
      * @throws IOException if an I/O error occurs during the write operation
      */
     @Override
-    public void writeCharacter(final CharacterWriter writer, final T x, final JsonXmlSerConfig<?> config) throws IOException {
+    public void serializeTo(final CharacterWriter writer, final T x, final JsonXmlSerConfig<?> config) throws IOException {
         appendTo(writer, x);
     }
 }

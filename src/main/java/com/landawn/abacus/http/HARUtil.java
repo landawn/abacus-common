@@ -131,6 +131,7 @@ public final class HARUtil {
      * <pre>{@code
      * HARUtil.resetThreadLocalHeaderFilter();
      * }</pre>
+     *
      */
     public static void resetThreadLocalHeaderFilter() {
         httpHeaderFilterForHARRequest_TL.set(defaultHttpHeaderFilterForHARRequest);
@@ -481,6 +482,15 @@ public final class HARUtil {
      *   <li>Send the HTTP request and return the response</li>
      * </ul>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Map<String, Object> requestEntry = new HashMap<>();
+     * requestEntry.put("url", "http://localhost:18080/users");
+     * requestEntry.put("method", "GET");
+     * HttpResponse response = HARUtil.sendRequestByRequestEntry(requestEntry, HttpResponse.class);
+     * // returns the HttpResponse from replaying the HAR entry (when executed against a live server)
+     * }</pre>
+     *
      * @param <T> the type of the response.
      * @param requestEntry the HAR request entry map containing request details.
      * @param responseClass the class to deserialize the response into.
@@ -670,8 +680,8 @@ public final class HARUtil {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Tuple2<String, String> bodyAndType = HARUtil.getBodyAndMimeTypeByRequestEntry(requestEntry);
-     * String requestBody = bodyAndType._1;  // e.g., {"user":"john","pass":"secret"}
-     * String mimeType = bodyAndType._2;  // e.g., "application/json"
+     * String requestBody = bodyAndType._1;  // {"user":"john","pass":"secret"}, for example
+     * String mimeType = bodyAndType._2;     // "application/json", for example
      * }</pre>
      *
      * @param requestEntry the HAR request entry map.

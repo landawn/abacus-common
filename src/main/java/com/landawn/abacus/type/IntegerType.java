@@ -27,7 +27,7 @@ import com.landawn.abacus.util.Numbers;
  * {@link java.sql.ResultSet#getObject(int) ResultSet.getObject} to preserve SQL {@code NULL}:
  * a {@code null} result returns {@code null}, an {@link Integer} result is returned directly,
  * any other {@link Number} is narrowed via {@link Number#intValue()}, and
- * non-numeric values are parsed via {@link com.landawn.abacus.util.Numbers#toInt(Object)}.
+ * non-numeric values are parsed via {@link com.landawn.abacus.util.Numbers#toInt(String)}.
  *
  * @see AbstractIntegerType
  */
@@ -73,7 +73,7 @@ public final class IntegerType extends AbstractIntegerType {
      * The column is read via {@link java.sql.ResultSet#getObject(int)} to preserve SQL {@code NULL}.
      * If the returned object is already an {@link Integer} it is returned directly; any other
      * {@link Number} is narrowed via {@link Number#intValue()}; non-numeric values are parsed via
-     * {@link com.landawn.abacus.util.Numbers#toInt(Object)}.
+     * {@link com.landawn.abacus.util.Numbers#toInt(String)}.
      *
      * @param rs          the {@link java.sql.ResultSet} to read from; must not be {@code null}
      * @param columnIndex the 1-based column index
@@ -101,7 +101,7 @@ public final class IntegerType extends AbstractIntegerType {
      * The column is read via {@link java.sql.ResultSet#getObject(String)} to preserve SQL {@code NULL}.
      * If the returned object is already an {@link Integer} it is returned directly; any other
      * {@link Number} is narrowed via {@link Number#intValue()}; non-numeric values are parsed via
-     * {@link com.landawn.abacus.util.Numbers#toInt(Object)}.
+     * {@link com.landawn.abacus.util.Numbers#toInt(String)}.
      *
      * @param rs         the {@link java.sql.ResultSet} to read from; must not be {@code null}
      * @param columnName the label of the column to retrieve

@@ -2296,6 +2296,31 @@ public class ParallelArrayStreamTest extends TestBase {
     }
 
     @Test
+    public void testConcurrentOrderedCollectorUsesIndependentContainers() {
+        final AtomicInteger supplierCount = new AtomicInteger();
+        final Collector<Integer, ?, List<Integer>> concurrentOrderedCollector = Collector.of(() -> {
+            supplierCount.incrementAndGet();
+            return Collections.synchronizedList(new ArrayList<Integer>());
+        }, (list, value) -> {
+            if (value <= 50) {
+                N.sleep(1);
+            }
+
+            list.add(value);
+        }, (left, right) -> {
+            left.addAll(right);
+            return left;
+        }, Collector.Characteristics.CONCURRENT);
+
+        try (Stream<Integer> local = Stream.rangeClosed(1, 100).parallel(PS.create(Splitor.ARRAY).maxThreadNum(4))) {
+            final List<Integer> result = local.collect(concurrentOrderedCollector);
+
+            assertTrue(supplierCount.get() > 1);
+            assertHaveSameElements(Stream.rangeClosed(1, 100).toList(), result);
+        }
+    }
+
+    @Test
     @DisplayName("toMultiset() should convert to multiset")
     public void testToMultiset() {
         Integer[] arrayWithDuplicates = { 1, 2, 2, 3, 3, 3 };

@@ -79,9 +79,9 @@ public interface ObjDoubleConsumer<T> extends Throwables.ObjDoubleConsumer<T, Ru
      */
     default ObjDoubleConsumer<T> andThen(final ObjDoubleConsumer<? super T> after) {
         Objects.requireNonNull(after);
-        return (t, u) -> {
-            accept(t, u);
-            after.accept(t, u);
+        return (t, value) -> {
+            accept(t, value);
+            after.accept(t, value);
         };
     }
 }

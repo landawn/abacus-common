@@ -13,6 +13,8 @@
  */
 package com.landawn.abacus.util.function;
 
+import com.landawn.abacus.util.Throwables;
+
 /**
  * Represents a function that accepts a float-valued argument and produces a long-valued result.
  * This is a functional interface whose functional method is {@link #applyAsLong(float)}.
@@ -28,7 +30,7 @@ package com.landawn.abacus.util.function;
  * @see java.util.function.ToLongFunction
  */
 @FunctionalInterface
-public interface FloatToLongFunction {
+public interface FloatToLongFunction extends Throwables.FloatToLongFunction<RuntimeException> {
     /**
      * A default function that converts a float value to long through narrowing primitive conversion (casting).
      * This truncates the decimal portion and may result in precision loss for large float values.
@@ -58,5 +60,6 @@ public interface FloatToLongFunction {
      * @param value the float function argument
      * @return the long function result
      */
+    @Override
     long applyAsLong(float value);
 }

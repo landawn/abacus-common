@@ -88,6 +88,8 @@ public class BufferedReaderTest extends AbstractTest {
         assertEquals("abc", reader.readLine());
 
         IOUtil.close(is);
+
+        file.delete();
     }
 
     @Test

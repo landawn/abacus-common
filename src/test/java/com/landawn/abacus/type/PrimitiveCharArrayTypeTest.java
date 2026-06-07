@@ -188,31 +188,31 @@ public class PrimitiveCharArrayTypeTest extends TestBase {
     }
 
     @Test
-    public void test_writeCharacter() throws IOException {
+    public void test_serializeTo() throws IOException {
         CharacterWriter writer = mock(BufferedJsonWriter.class);
         JsonXmlSerConfig<?> config = mock(JsonXmlSerConfig.class);
 
         char[] arr = new char[] { 'A', 'B' };
-        type.writeCharacter(writer, arr, config);
+        type.serializeTo(writer, arr, config);
         verify(writer, atLeastOnce()).write(any(String.class));
 
         reset(writer);
-        type.writeCharacter(writer, null, config);
+        type.serializeTo(writer, null, config);
         verify(writer).write(NULL_CHAR_ARRAY);
     }
 
     @Test
-    public void testWriteCharacterEmptyArray() throws IOException {
+    public void testSerializeToEmptyArray() throws IOException {
         CharacterWriter writer = createCharacterWriter();
-        type.writeCharacter(writer, new char[0], null);
+        type.serializeTo(writer, new char[0], null);
         verify(writer).write('[');
         verify(writer).write(']');
     }
 
     @Test
-    public void testWriteCharacterNonEmptyArrayNoQuotation() throws IOException {
+    public void testSerializeToNonEmptyArrayNoQuotation() throws IOException {
         CharacterWriter writer = createCharacterWriter();
-        type.writeCharacter(writer, new char[] { 'a', 'b' }, null);
+        type.serializeTo(writer, new char[] { 'a', 'b' }, null);
         verify(writer).write('[');
         verify(writer).writeCharacter('a');
         verify(writer).write(", ");
@@ -221,12 +221,12 @@ public class PrimitiveCharArrayTypeTest extends TestBase {
     }
 
     @Test
-    public void testWriteCharacterWithQuotation() throws IOException {
+    public void testSerializeToWithQuotation() throws IOException {
         CharacterWriter writer = createCharacterWriter();
         JsonXmlSerConfig<?> config = mock(JsonXmlSerConfig.class);
         when(config.getCharQuotation()).thenReturn('\'');
 
-        type.writeCharacter(writer, new char[] { 'a', 'b' }, config);
+        type.serializeTo(writer, new char[] { 'a', 'b' }, config);
         verify(writer).write('[');
         verify(writer, times(4)).write('\'');
         verify(writer).writeCharacter('a');
@@ -236,12 +236,12 @@ public class PrimitiveCharArrayTypeTest extends TestBase {
     }
 
     @Test
-    public void testWriteCharacterWithQuotationAndEscape() throws IOException {
+    public void testSerializeToWithQuotationAndEscape() throws IOException {
         CharacterWriter writer = createCharacterWriter();
         JsonXmlSerConfig<?> config = mock(JsonXmlSerConfig.class);
         when(config.getCharQuotation()).thenReturn('\'');
 
-        type.writeCharacter(writer, new char[] { '\'' }, config);
+        type.serializeTo(writer, new char[] { '\'' }, config);
         verify(writer).write('[');
         verify(writer, times(2)).write('\'');
         verify(writer).write('\\');
@@ -361,6 +361,23 @@ public class PrimitiveCharArrayTypeTest extends TestBase {
     @Test
     public void test_isPrimitiveArray() {
         assertTrue(type.isPrimitiveArray());
+    }
+
+    @Test
+    public void testValueOfQuotedCommaElement() {
+        final char[] chars = new char[] { ',' };
+
+        assertArrayEquals(chars, type.valueOf(type.stringOf(chars)));
+    }
+
+    @Test
+    public void testValueOfLegacyAppendToSpecialCharacters() throws IOException {
+        final char[] chars = new char[] { '\r', '\t', '"', '\'', ' ', ',', ' ', ',' };
+        final StringBuilder sb = new StringBuilder();
+
+        type.appendTo(sb, chars);
+
+        assertArrayEquals(chars, type.valueOf(sb.toString()));
     }
 
 }

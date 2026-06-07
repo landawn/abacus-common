@@ -26,7 +26,7 @@ package com.landawn.abacus.util;
  * <pre>{@code
  * Color myColor = Color.RED;
  * int colorCode = myColor.intValue();   // returns 2
- * Color fromCode = Color.valueOf(2);   // returns Color.RED
+ * Color fromCode = Color.valueOf(2);    // returns Color.RED
  * }</pre>
  *
  * @see WeekDay

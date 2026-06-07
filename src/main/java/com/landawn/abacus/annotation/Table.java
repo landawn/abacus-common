@@ -57,8 +57,8 @@ import java.lang.annotation.Target;
  *     private Long id;
  *     private String name;
  *     private BigDecimal price;
- *     private transient String tempData;  // Excluded from mapping
- *     private Map cache;  // Excluded from mapping
+ *     private transient String tempData;  // tempData is excluded from mapping
+ *     private Map cache;  // cache is excluded from mapping
  * }
  * }</pre>
  *
@@ -93,7 +93,7 @@ public @interface Table {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * @Table(name = "user_accounts")  // Maps to 'user_accounts' table
+     * @Table(name = "user_accounts")  // maps to 'user_accounts' table
      * public class User { }
      * }</pre>
      *
@@ -143,8 +143,8 @@ public @interface Table {
      *     private Long id;
      *     private String username;
      *     private String email;
-     *     private String tempToken;  // Not mapped
-     *     private List<Role> roles;  // Not mapped
+     *     private String tempToken;  // tempToken is not mapped
+     *     private List<Role> roles;  // roles is not mapped
      * }
      * }</pre>
      *
@@ -169,12 +169,12 @@ public @interface Table {
      * <pre>{@code
      * @Table(name = "products", nonColumnFields = {"displayPrice", "cache", "dirty"})
      * public class Product {
-     *     private Long id;  // Mapped
-     *     private String name;  // Mapped
-     *     private BigDecimal price;  // Mapped
-     *     private String displayPrice;  // Not mapped - calculated field
-     *     private Map<String, Object> cache;  // Not mapped - temporary cache
-     *     private boolean dirty;  // Not mapped - state tracking
+     *     private Long id;                    // id is mapped
+     *     private String name;                // name is mapped
+     *     private BigDecimal price;           // price is mapped
+     *     private String displayPrice;        // displayPrice is not mapped - calculated field
+     *     private Map<String, Object> cache;  // cache is not mapped - temporary cache
+     *     private boolean dirty;              // dirty is not mapped - state tracking
      * }
      * }</pre>
      *

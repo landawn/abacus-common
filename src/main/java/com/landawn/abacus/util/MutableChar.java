@@ -36,9 +36,9 @@ import java.io.Serializable;
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * MutableChar letter = MutableChar.of('A');
- * letter.increment();       // Now 'B'
- * letter.incrementAndGet(); // Now 'C', returns 'C'
- * char old = letter.getAndSet('Z');  // old is 'C', now 'Z'
+ * letter.increment();               // value is now 'B'
+ * letter.incrementAndGet();         // returns 'C', value is now 'C'
+ * char old = letter.getAndSet('Z'); // returns 'C' (old value), value is now 'Z'
  * }</pre>
  *
  * <p>Note: This class is adapted from Apache Commons Lang.</p>
@@ -64,8 +64,9 @@ public final class MutableChar implements Mutable, Serializable, Comparable<Muta
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * MutableChar ch = new MutableChar();   // value is '\0'
+     * MutableChar ch = new MutableChar();
      * }</pre>
+     *
      */
     MutableChar() {
     }
@@ -76,7 +77,7 @@ public final class MutableChar implements Mutable, Serializable, Comparable<Muta
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * MutableChar ch = new MutableChar('X');   // value is 'X'
+     * MutableChar ch = new MutableChar('X');
      * }</pre>
      *
      * @param value the initial value to store
@@ -121,6 +122,18 @@ public final class MutableChar implements Mutable, Serializable, Comparable<Muta
 
     /**
      * Gets the value as a primitive char.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * MutableChar ch = MutableChar.of('A');
+     * char val = ch.getValue();          // returns 'A', value is unchanged
+     *
+     * ch.setValue('Z');
+     * val = ch.getValue();               // returns 'Z', value is unchanged
+     *
+     * MutableChar max = MutableChar.of(Character.MAX_VALUE);
+     * val = max.getValue();              // returns '\uffff' (Character.MAX_VALUE)
+     * }</pre>
      *
      * @return the current char value
      * @deprecated replaced by {@link #value()}.
@@ -233,6 +246,7 @@ public final class MutableChar implements Mutable, Serializable, Comparable<Muta
      * ch.increment();   // value is now 'B'
      * ch.increment();   // value is now 'C'
      * }</pre>
+     *
      */
     public void increment() {
         value++;
@@ -250,6 +264,7 @@ public final class MutableChar implements Mutable, Serializable, Comparable<Muta
      * MutableChar ch = MutableChar.of('B');
      * ch.decrement();   // value is now 'A'
      * }</pre>
+     *
      */
     public void decrement() {
         value--;
@@ -351,7 +366,7 @@ public final class MutableChar implements Mutable, Serializable, Comparable<Muta
      * @param other the other MutableChar to compare to
      * @return a negative integer, zero, or a positive integer as this value
      *         is less than, equal to, or greater than the specified value
-     * @throws NullPointerException if {@code other} is null
+     * @throws NullPointerException if {@code other} is {@code null}
      */
     @Override
     public int compareTo(final MutableChar other) {
@@ -380,7 +395,7 @@ public final class MutableChar implements Mutable, Serializable, Comparable<Muta
      * }</pre>
      *
      * @param obj the object to compare with, may be {@code null}
-     * @return {@code true} if the objects are the same; {@code false} otherwise
+     * @return {@code true} if the objects represent the same char value; {@code false} otherwise
      */
     @Override
     public boolean equals(final Object obj) {
@@ -402,9 +417,9 @@ public final class MutableChar implements Mutable, Serializable, Comparable<Muta
      * MutableChar a = MutableChar.of('A');
      * MutableChar b = MutableChar.of('A');
      *
-     * int hash1 = a.hashCode();   // returns 65 (Unicode value of 'A')
-     * int hash2 = b.hashCode();   // returns 65
-     * assert hash1 == hash2;  // true
+     * int hash1 = a.hashCode();  // returns 65 (Unicode value of 'A')
+     * int hash2 = b.hashCode();  // returns 65
+     * assert hash1 == hash2;     // returns true
      * }</pre>
      *
      * @return a hash code value for this object, equal to the char value

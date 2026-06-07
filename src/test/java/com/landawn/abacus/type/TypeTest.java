@@ -398,7 +398,7 @@ public class TypeTest extends AbstractTest {
             assertEquals(str, writer.toString());
 
             BufferedJsonWriter bw = Objectory.createBufferedJsonWriter();
-            type.writeCharacter(bw, a, JsonSerConfig.create());
+            type.serializeTo(bw, a, JsonSerConfig.create());
             assertEquals(str, bw.toString());
 
             assertTrue(N.equals(a, type.valueOf(type.stringOf(a))));
@@ -418,7 +418,7 @@ public class TypeTest extends AbstractTest {
             assertEquals(str, writer.toString());
 
             BufferedJsonWriter bw = Objectory.createBufferedJsonWriter();
-            type.writeCharacter(bw, a, JsonSerConfig.create());
+            type.serializeTo(bw, a, JsonSerConfig.create());
 
             assertTrue(N.equals(a, type.valueOf(type.stringOf(a))));
 
@@ -437,7 +437,7 @@ public class TypeTest extends AbstractTest {
             assertEquals(str, writer.toString());
 
             BufferedJsonWriter bw = Objectory.createBufferedJsonWriter();
-            type.writeCharacter(bw, a, JsonSerConfig.create());
+            type.serializeTo(bw, a, JsonSerConfig.create());
             assertEquals(str, bw.toString());
 
             assertTrue(N.equals(a, type.valueOf(type.stringOf(a))));
@@ -457,7 +457,7 @@ public class TypeTest extends AbstractTest {
             assertEquals(str, writer.toString());
 
             BufferedJsonWriter bw = Objectory.createBufferedJsonWriter();
-            type.writeCharacter(bw, a, JsonSerConfig.create());
+            type.serializeTo(bw, a, JsonSerConfig.create());
             assertEquals(str, bw.toString());
 
             assertTrue(N.equals(a, type.valueOf(type.stringOf(a))));
@@ -477,7 +477,7 @@ public class TypeTest extends AbstractTest {
             assertEquals(str, writer.toString());
 
             BufferedJsonWriter bw = Objectory.createBufferedJsonWriter();
-            type.writeCharacter(bw, a, JsonSerConfig.create());
+            type.serializeTo(bw, a, JsonSerConfig.create());
             assertEquals(str, bw.toString());
 
             assertTrue(N.equals(a, type.valueOf(type.stringOf(a))));
@@ -497,7 +497,7 @@ public class TypeTest extends AbstractTest {
             assertEquals(str, writer.toString());
 
             BufferedJsonWriter bw = Objectory.createBufferedJsonWriter();
-            type.writeCharacter(bw, a, JsonSerConfig.create());
+            type.serializeTo(bw, a, JsonSerConfig.create());
             assertEquals(str, bw.toString());
 
             assertTrue(N.equals(a, type.valueOf(type.stringOf(a))));
@@ -517,7 +517,7 @@ public class TypeTest extends AbstractTest {
             assertEquals(str, writer.toString());
 
             BufferedJsonWriter bw = Objectory.createBufferedJsonWriter();
-            type.writeCharacter(bw, a, JsonSerConfig.create());
+            type.serializeTo(bw, a, JsonSerConfig.create());
             assertEquals(str, bw.toString());
 
             assertTrue(N.equals(a, type.valueOf(type.stringOf(a))));
@@ -537,7 +537,7 @@ public class TypeTest extends AbstractTest {
             assertEquals(str, writer.toString());
 
             BufferedJsonWriter bw = Objectory.createBufferedJsonWriter();
-            type.writeCharacter(bw, a, JsonSerConfig.create());
+            type.serializeTo(bw, a, JsonSerConfig.create());
             assertEquals(str, bw.toString());
 
             assertTrue(N.equals(a, type.valueOf(type.stringOf(a))));
@@ -560,7 +560,7 @@ public class TypeTest extends AbstractTest {
             assertEquals(str, writer.toString());
 
             BufferedJsonWriter bw = Objectory.createBufferedJsonWriter();
-            type.writeCharacter(bw, a, JsonSerConfig.create());
+            type.serializeTo(bw, a, JsonSerConfig.create());
             assertEquals(str, bw.toString());
 
             assertTrue(N.equals(a, type.valueOf(type.stringOf(a))));
@@ -580,7 +580,7 @@ public class TypeTest extends AbstractTest {
             assertEquals(str, writer.toString());
 
             BufferedJsonWriter bw = Objectory.createBufferedJsonWriter();
-            type.writeCharacter(bw, a, JsonSerConfig.create());
+            type.serializeTo(bw, a, JsonSerConfig.create());
 
             assertTrue(N.equals(a, type.valueOf(type.stringOf(a))));
 
@@ -599,7 +599,7 @@ public class TypeTest extends AbstractTest {
             assertEquals(str, writer.toString());
 
             BufferedJsonWriter bw = Objectory.createBufferedJsonWriter();
-            type.writeCharacter(bw, a, JsonSerConfig.create());
+            type.serializeTo(bw, a, JsonSerConfig.create());
             assertEquals(str, bw.toString());
 
             assertTrue(N.equals(a, type.valueOf(type.stringOf(a))));
@@ -619,7 +619,7 @@ public class TypeTest extends AbstractTest {
             assertEquals(str, writer.toString());
 
             BufferedJsonWriter bw = Objectory.createBufferedJsonWriter();
-            type.writeCharacter(bw, a, JsonSerConfig.create());
+            type.serializeTo(bw, a, JsonSerConfig.create());
             assertEquals(str, bw.toString());
 
             assertTrue(N.equals(a, type.valueOf(type.stringOf(a))));
@@ -639,7 +639,7 @@ public class TypeTest extends AbstractTest {
             assertEquals(str, writer.toString());
 
             BufferedJsonWriter bw = Objectory.createBufferedJsonWriter();
-            type.writeCharacter(bw, a, JsonSerConfig.create());
+            type.serializeTo(bw, a, JsonSerConfig.create());
             assertEquals(str, bw.toString());
 
             assertTrue(N.equals(a, type.valueOf(type.stringOf(a))));
@@ -659,7 +659,7 @@ public class TypeTest extends AbstractTest {
             assertEquals(str, writer.toString());
 
             BufferedJsonWriter bw = Objectory.createBufferedJsonWriter();
-            type.writeCharacter(bw, a, JsonSerConfig.create());
+            type.serializeTo(bw, a, JsonSerConfig.create());
             assertEquals(str, bw.toString());
 
             assertTrue(N.equals(a, type.valueOf(type.stringOf(a))));
@@ -679,7 +679,7 @@ public class TypeTest extends AbstractTest {
             assertEquals(str, writer.toString());
 
             BufferedJsonWriter bw = Objectory.createBufferedJsonWriter();
-            type.writeCharacter(bw, a, JsonSerConfig.create());
+            type.serializeTo(bw, a, JsonSerConfig.create());
             assertEquals(str, bw.toString());
 
             assertTrue(N.equals(a, type.valueOf(type.stringOf(a))));
@@ -699,7 +699,7 @@ public class TypeTest extends AbstractTest {
             assertEquals(str, writer.toString());
 
             BufferedJsonWriter bw = Objectory.createBufferedJsonWriter();
-            type.writeCharacter(bw, a, JsonSerConfig.create());
+            type.serializeTo(bw, a, JsonSerConfig.create());
             assertEquals(str, bw.toString());
 
             assertTrue(N.equals(a, type.valueOf(type.stringOf(a))));
@@ -722,7 +722,7 @@ public class TypeTest extends AbstractTest {
             assertEquals(str, writer.toString());
 
             BufferedJsonWriter bw = Objectory.createBufferedJsonWriter();
-            type.writeCharacter(bw, list, JsonSerConfig.create());
+            type.serializeTo(bw, list, JsonSerConfig.create());
             assertEquals(str, bw.toString());
 
             assertTrue(N.equals(list, type.valueOf(type.stringOf(list))));
@@ -740,7 +740,7 @@ public class TypeTest extends AbstractTest {
             type.appendTo(writer, list);
 
             BufferedJsonWriter bw = Objectory.createBufferedJsonWriter();
-            type.writeCharacter(bw, list, JsonSerConfig.create());
+            type.serializeTo(bw, list, JsonSerConfig.create());
 
             assertTrue(N.equals(list, type.valueOf(type.stringOf(list))));
 
@@ -760,7 +760,7 @@ public class TypeTest extends AbstractTest {
             assertEquals(str, writer.toString());
 
             BufferedJsonWriter bw = Objectory.createBufferedJsonWriter();
-            type.writeCharacter(bw, list, JsonSerConfig.create());
+            type.serializeTo(bw, list, JsonSerConfig.create());
             assertEquals(str, bw.toString());
 
             assertTrue(N.equals(list, type.valueOf(type.stringOf(list))));
@@ -780,7 +780,7 @@ public class TypeTest extends AbstractTest {
             assertEquals(str, writer.toString());
 
             BufferedJsonWriter bw = Objectory.createBufferedJsonWriter();
-            type.writeCharacter(bw, list, JsonSerConfig.create());
+            type.serializeTo(bw, list, JsonSerConfig.create());
             assertEquals(str, bw.toString());
 
             assertTrue(N.equals(list, type.valueOf(type.stringOf(list))));
@@ -800,7 +800,7 @@ public class TypeTest extends AbstractTest {
             assertEquals(str, writer.toString());
 
             BufferedJsonWriter bw = Objectory.createBufferedJsonWriter();
-            type.writeCharacter(bw, list, JsonSerConfig.create());
+            type.serializeTo(bw, list, JsonSerConfig.create());
             assertEquals(str, bw.toString());
 
             assertTrue(N.equals(list, type.valueOf(type.stringOf(list))));
@@ -820,7 +820,7 @@ public class TypeTest extends AbstractTest {
             assertEquals(str, writer.toString());
 
             BufferedJsonWriter bw = Objectory.createBufferedJsonWriter();
-            type.writeCharacter(bw, list, JsonSerConfig.create());
+            type.serializeTo(bw, list, JsonSerConfig.create());
             assertEquals(str, bw.toString());
 
             assertTrue(N.equals(list, type.valueOf(type.stringOf(list))));
@@ -840,7 +840,7 @@ public class TypeTest extends AbstractTest {
             assertEquals(str, writer.toString());
 
             BufferedJsonWriter bw = Objectory.createBufferedJsonWriter();
-            type.writeCharacter(bw, list, JsonSerConfig.create());
+            type.serializeTo(bw, list, JsonSerConfig.create());
             assertEquals(str, bw.toString());
 
             assertTrue(N.equals(list, type.valueOf(type.stringOf(list))));
@@ -860,7 +860,7 @@ public class TypeTest extends AbstractTest {
             assertEquals(str, writer.toString());
 
             BufferedJsonWriter bw = Objectory.createBufferedJsonWriter();
-            type.writeCharacter(bw, list, JsonSerConfig.create());
+            type.serializeTo(bw, list, JsonSerConfig.create());
             assertEquals(str, bw.toString());
 
             assertTrue(N.equals(list, type.valueOf(type.stringOf(list))));
@@ -883,7 +883,7 @@ public class TypeTest extends AbstractTest {
             assertEquals(str, writer.toString());
 
             BufferedJsonWriter bw = Objectory.createBufferedJsonWriter();
-            type.writeCharacter(bw, list, JsonSerConfig.create());
+            type.serializeTo(bw, list, JsonSerConfig.create());
             assertEquals(str, bw.toString());
 
             assertTrue(N.equals(list, type.valueOf(type.stringOf(list))));
@@ -901,7 +901,7 @@ public class TypeTest extends AbstractTest {
             assertEquals(str, writer.toString());
 
             BufferedJsonWriter bw = Objectory.createBufferedJsonWriter();
-            type.writeCharacter(bw, list, JsonSerConfig.create());
+            type.serializeTo(bw, list, JsonSerConfig.create());
 
             assertTrue(N.equals(list, type.valueOf(type.stringOf(list))));
 
@@ -919,7 +919,7 @@ public class TypeTest extends AbstractTest {
             assertEquals(str, writer.toString());
 
             BufferedJsonWriter bw = Objectory.createBufferedJsonWriter();
-            type.writeCharacter(bw, list, JsonSerConfig.create());
+            type.serializeTo(bw, list, JsonSerConfig.create());
             assertEquals(str, bw.toString());
 
             assertTrue(N.equals(list, type.valueOf(type.stringOf(list))));
@@ -937,7 +937,7 @@ public class TypeTest extends AbstractTest {
             assertEquals(str, writer.toString());
 
             BufferedJsonWriter bw = Objectory.createBufferedJsonWriter();
-            type.writeCharacter(bw, list, JsonSerConfig.create());
+            type.serializeTo(bw, list, JsonSerConfig.create());
             assertEquals(str, bw.toString());
 
             assertTrue(N.equals(list, type.valueOf(type.stringOf(list))));
@@ -955,7 +955,7 @@ public class TypeTest extends AbstractTest {
             assertEquals(str, writer.toString());
 
             BufferedJsonWriter bw = Objectory.createBufferedJsonWriter();
-            type.writeCharacter(bw, list, JsonSerConfig.create());
+            type.serializeTo(bw, list, JsonSerConfig.create());
             assertEquals(str, bw.toString());
 
             assertTrue(N.equals(list, type.valueOf(type.stringOf(list))));
@@ -974,7 +974,7 @@ public class TypeTest extends AbstractTest {
             assertEquals(str, writer.toString());
 
             BufferedJsonWriter bw = Objectory.createBufferedJsonWriter();
-            type.writeCharacter(bw, list, JsonSerConfig.create());
+            type.serializeTo(bw, list, JsonSerConfig.create());
             assertEquals(str, bw.toString());
 
             assertTrue(N.equals(list, type.valueOf(type.stringOf(list))));
@@ -993,7 +993,7 @@ public class TypeTest extends AbstractTest {
             assertEquals(str, writer.toString());
 
             BufferedJsonWriter bw = Objectory.createBufferedJsonWriter();
-            type.writeCharacter(bw, list, JsonSerConfig.create());
+            type.serializeTo(bw, list, JsonSerConfig.create());
             assertEquals(str, bw.toString());
 
             assertTrue(N.equals(list, type.valueOf(type.stringOf(list))));
@@ -1011,7 +1011,7 @@ public class TypeTest extends AbstractTest {
             assertEquals(str, writer.toString());
 
             BufferedJsonWriter bw = Objectory.createBufferedJsonWriter();
-            type.writeCharacter(bw, list, JsonSerConfig.create());
+            type.serializeTo(bw, list, JsonSerConfig.create());
             assertEquals(str, bw.toString());
 
             assertTrue(N.equals(list, type.valueOf(type.stringOf(list))));
@@ -1031,12 +1031,12 @@ public class TypeTest extends AbstractTest {
         N.println(writer.toString());
 
         BufferedJsonWriter writer1 = Objectory.createBufferedJsonWriter();
-        type.writeCharacter(writer1, IOUtil.stringToInputStream("[abc, 123, 213]"), null);
+        type.serializeTo(writer1, IOUtil.stringToInputStream("[abc, 123, 213]"), null);
 
         N.println(writer1.toString());
 
         writer1 = Objectory.createBufferedJsonWriter();
-        type.writeCharacter(writer1, IOUtil.stringToInputStream("[abc, 123, 213]"), JsonSerConfig.create().setStringQuotation('\''));
+        type.serializeTo(writer1, IOUtil.stringToInputStream("[abc, 123, 213]"), JsonSerConfig.create().setStringQuotation('\''));
 
         N.println(writer1.toString());
         assertNotNull(writer1);
@@ -1052,12 +1052,12 @@ public class TypeTest extends AbstractTest {
         N.println(writer.toString());
 
         BufferedJsonWriter writer1 = Objectory.createBufferedJsonWriter();
-        type.writeCharacter(writer1, IOUtil.stringToInputStream("[abc, 123, 213]"), null);
+        type.serializeTo(writer1, IOUtil.stringToInputStream("[abc, 123, 213]"), null);
 
         N.println(writer1.toString());
 
         writer1 = Objectory.createBufferedJsonWriter();
-        type.writeCharacter(writer1, IOUtil.stringToInputStream("[abc, 123, 213]"), JsonSerConfig.create().setStringQuotation('\''));
+        type.serializeTo(writer1, IOUtil.stringToInputStream("[abc, 123, 213]"), JsonSerConfig.create().setStringQuotation('\''));
 
         N.println(writer1.toString());
         assertNotNull(writer1);
@@ -1073,12 +1073,12 @@ public class TypeTest extends AbstractTest {
         N.println(writer.toString());
 
         BufferedJsonWriter writer1 = Objectory.createBufferedJsonWriter();
-        type.writeCharacter(writer1, IOUtil.stringToInputStream("[abc, 123, 213]"), null);
+        type.serializeTo(writer1, IOUtil.stringToInputStream("[abc, 123, 213]"), null);
 
         N.println(writer1.toString());
 
         writer1 = Objectory.createBufferedJsonWriter();
-        type.writeCharacter(writer1, IOUtil.stringToInputStream("[abc, 123, 213]"), JsonSerConfig.create().setStringQuotation('\''));
+        type.serializeTo(writer1, IOUtil.stringToInputStream("[abc, 123, 213]"), JsonSerConfig.create().setStringQuotation('\''));
 
         N.println(writer1.toString());
         assertNotNull(writer1);
@@ -1094,12 +1094,12 @@ public class TypeTest extends AbstractTest {
         N.println(writer.toString());
 
         BufferedJsonWriter writer1 = Objectory.createBufferedJsonWriter();
-        type.writeCharacter(writer1, IOUtil.stringToReader("[abc, 123, 213]"), null);
+        type.serializeTo(writer1, IOUtil.stringToReader("[abc, 123, 213]"), null);
 
         N.println(writer1.toString());
 
         writer1 = Objectory.createBufferedJsonWriter();
-        type.writeCharacter(writer1, IOUtil.stringToReader("[abc, 123, 213]"), JsonSerConfig.create().setStringQuotation('\''));
+        type.serializeTo(writer1, IOUtil.stringToReader("[abc, 123, 213]"), JsonSerConfig.create().setStringQuotation('\''));
 
         N.println(writer1.toString());
         assertNotNull(writer1);
@@ -1140,17 +1140,17 @@ public class TypeTest extends AbstractTest {
         Dates.currentXMLGregorianCalendar();
 
         BufferedJsonWriter writer = Objectory.createBufferedJsonWriter();
-        type.writeCharacter(writer, Dates.currentXMLGregorianCalendar(), JsonSerConfig.create().setDateTimeFormat(DateTimeFormat.LONG));
+        type.serializeTo(writer, Dates.currentXMLGregorianCalendar(), JsonSerConfig.create().setDateTimeFormat(DateTimeFormat.LONG));
 
         N.println(writer.toString());
 
         writer = Objectory.createBufferedJsonWriter();
-        type.writeCharacter(writer, Dates.currentXMLGregorianCalendar(), JsonSerConfig.create().setDateTimeFormat(DateTimeFormat.ISO_8601_DATE_TIME));
+        type.serializeTo(writer, Dates.currentXMLGregorianCalendar(), JsonSerConfig.create().setDateTimeFormat(DateTimeFormat.ISO_8601_DATE_TIME));
 
         N.println(writer.toString());
 
         writer = Objectory.createBufferedJsonWriter();
-        type.writeCharacter(writer, Dates.currentXMLGregorianCalendar(), JsonSerConfig.create().setDateTimeFormat(DateTimeFormat.ISO_8601_TIMESTAMP));
+        type.serializeTo(writer, Dates.currentXMLGregorianCalendar(), JsonSerConfig.create().setDateTimeFormat(DateTimeFormat.ISO_8601_TIMESTAMP));
 
         N.println(writer.toString());
         assertNotNull(writer);

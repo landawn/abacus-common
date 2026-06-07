@@ -1855,4 +1855,75 @@ public class JsonMappersTest extends TestBase {
         Assertions.assertEquals(2, list.size());
     }
 
+    @Test
+    public void testAllPublicMethodsHaveUsageExamples() throws IOException {
+        final File sourceFile = findSourceFile();
+        final String source = Files.readString(sourceFile.toPath());
+        final String[] lines = source.split("\r?\n");
+
+        final List<String> methodsWithoutExamples = new ArrayList<>();
+
+        int javadocStart = -1;
+        int javadocEnd = -1;
+
+        for (int i = 0; i < lines.length; i++) {
+            final String trimmed = lines[i].trim();
+
+            if (trimmed.equals("/**")) {
+                javadocStart = i;
+                javadocEnd = -1;
+            } else if (javadocStart >= 0 && trimmed.equals("*/")) {
+                javadocEnd = i;
+            } else if (javadocEnd >= 0) {
+                if (isPublicMethodSignature(trimmed) || isMultiLineMethodContinuation(lines, i)) {
+                    if (isPublicMethodSignature(lines, javadocEnd, i)) {
+                        final StringBuilder javadocContent = new StringBuilder();
+                        for (int j = javadocStart; j <= javadocEnd; j++) {
+                            javadocContent.append(lines[j]).append('\n');
+                        }
+                        final String javadoc = javadocContent.toString();
+                        if (!javadoc.contains("<p><b>Usage Examples:</b></p>")) {
+                            methodsWithoutExamples.add("Line " + (javadocStart + 1) + ": method after javadoc missing usage examples");
+                        }
+                    }
+                    javadocStart = -1;
+                    javadocEnd = -1;
+                }
+            }
+        }
+
+        Assertions.assertTrue(methodsWithoutExamples.isEmpty(), "Methods without usage examples:\n" + String.join("\n", methodsWithoutExamples));
+    }
+
+    private static boolean isPublicMethodSignature(final String trimmed) {
+        return trimmed.startsWith("public ") && trimmed.contains("(") && !trimmed.startsWith("public class ");
+    }
+
+    private static boolean isMultiLineMethodContinuation(final String[] lines, final int i) {
+        final String curr = lines[i].trim();
+        return !curr.isEmpty() && !curr.startsWith("//") && !curr.startsWith("/*") && !curr.startsWith("*") && !curr.startsWith("@") && curr.contains("(")
+                && !curr.startsWith("public ");
+    }
+
+    private static boolean isPublicMethodSignature(final String[] lines, final int javadocEnd, final int methodStart) {
+        for (int i = javadocEnd + 1; i <= methodStart; i++) {
+            final String trimmed = lines[i].trim();
+            if (trimmed.isEmpty() || trimmed.startsWith("@")) {
+                continue;
+            }
+            return trimmed.startsWith("public ") && trimmed.contains("(") && !trimmed.startsWith("public class ");
+        }
+        return false;
+    }
+
+    private static File findSourceFile() throws IOException {
+        final String relativePath = "src" + File.separator + "main" + File.separator + "java" + File.separator + "com" + File.separator + "landawn"
+                + File.separator + "abacus" + File.separator + "util" + File.separator + "JsonMappers.java";
+        final File file = new File(relativePath);
+        if (file.exists()) {
+            return file;
+        }
+        return new File("..", relativePath);
+    }
+
 }

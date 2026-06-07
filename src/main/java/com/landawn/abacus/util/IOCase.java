@@ -125,6 +125,12 @@ public enum IOCase {
     /**
      * Gets the name of this IOCase constant.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * String name = IOCase.SENSITIVE.getName();    // "Sensitive"
+     * String systemName = IOCase.SYSTEM.getName(); // "System"
+     * }</pre>
+     *
      * @return the name of the constant ("Sensitive", "Insensitive", or "System")
      */
     public String getName() {

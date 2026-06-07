@@ -42,6 +42,7 @@ public interface LongFunction<R> extends Throwables.LongFunction<R, RuntimeExcep
      * LongFunction<Long> boxer = LongFunction.BOX;
      * Long boxed = boxer.apply(42L);   // Returns Long.valueOf(42L)
      * }</pre>
+     *
      */
     LongFunction<Long> BOX = value -> value;
 

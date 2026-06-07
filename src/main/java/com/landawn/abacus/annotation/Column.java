@@ -51,7 +51,7 @@ import java.lang.annotation.Target;
  *     @Column(name = "user_name")
  *     private String userName;
  *
- *     @Column  // Uses field name "email" as column name
+ *     @Column  // uses field name "email" as column name
  *     private String email;
  * }
  * }</pre>

@@ -70,6 +70,12 @@ public class XMLGregorianCalendarTypeTest extends TestBase {
     }
 
     @Test
+    public void testValueOfNullStringLiteral() {
+        XMLGregorianCalendar result = xmlCalendarType.valueOf("null");
+        assertNull(result);
+    }
+
+    @Test
     public void testValueOfSysTime() {
         XMLGregorianCalendar result = xmlCalendarType.valueOf("sysTime");
         assertNotNull(result);
@@ -85,6 +91,13 @@ public class XMLGregorianCalendarTypeTest extends TestBase {
     @Test
     public void testValueOfCharArrayNull() {
         XMLGregorianCalendar result = xmlCalendarType.valueOf(null, 0, 0);
+        assertNull(result);
+    }
+
+    @Test
+    public void testValueOfCharArrayNullLiteral() {
+        char[] chars = "null".toCharArray();
+        XMLGregorianCalendar result = xmlCalendarType.valueOf(chars, 0, chars.length);
         assertNull(result);
     }
 
@@ -205,66 +218,66 @@ public class XMLGregorianCalendarTypeTest extends TestBase {
     }
 
     @Test
-    public void testWriteCharacter() throws IOException {
+    public void testSerializeTo() throws IOException {
         CharacterWriter writer = createCharacterWriter();
 
-        xmlCalendarType.writeCharacter(writer, testCalendar, null);
+        xmlCalendarType.serializeTo(writer, testCalendar, null);
         assertNotNull(writer);
     }
 
     @Test
-    public void testWriteCharacterNull() throws IOException {
+    public void testSerializeToNull() throws IOException {
         CharacterWriter writer = createCharacterWriter();
 
-        xmlCalendarType.writeCharacter(writer, null, null);
+        xmlCalendarType.serializeTo(writer, null, null);
 
         verify(writer).write(any(char[].class));
     }
 
     @Test
-    public void testWriteCharacterWithConfigLong() throws IOException {
+    public void testSerializeToWithConfigLong() throws IOException {
         CharacterWriter writer = createCharacterWriter();
         JsonXmlSerConfig<?> config = mock(JsonXmlSerConfig.class);
         when(config.getDateTimeFormat()).thenReturn(DateTimeFormat.LONG);
         when(config.getStringQuotation()).thenReturn((char) 0);
 
-        xmlCalendarType.writeCharacter(writer, testCalendar, config);
+        xmlCalendarType.serializeTo(writer, testCalendar, config);
 
         verify(writer).write(anyString());
     }
 
     @Test
-    public void testWriteCharacterWithConfigISO8601DateTime() throws IOException {
+    public void testSerializeToWithConfigISO8601DateTime() throws IOException {
         CharacterWriter writer = createCharacterWriter();
         JsonXmlSerConfig<?> config = mock(JsonXmlSerConfig.class);
         when(config.getDateTimeFormat()).thenReturn(DateTimeFormat.ISO_8601_DATE_TIME);
         when(config.getStringQuotation()).thenReturn((char) 0);
 
-        xmlCalendarType.writeCharacter(writer, testCalendar, config);
+        xmlCalendarType.serializeTo(writer, testCalendar, config);
 
         verify(writer, atLeastOnce()).append(anyString());
     }
 
     @Test
-    public void testWriteCharacterWithConfigISO8601Timestamp() throws IOException {
+    public void testSerializeToWithConfigISO8601Timestamp() throws IOException {
         CharacterWriter writer = createCharacterWriter();
         JsonXmlSerConfig<?> config = mock(JsonXmlSerConfig.class);
         when(config.getDateTimeFormat()).thenReturn(DateTimeFormat.ISO_8601_TIMESTAMP);
         when(config.getStringQuotation()).thenReturn((char) 0);
 
-        xmlCalendarType.writeCharacter(writer, testCalendar, config);
+        xmlCalendarType.serializeTo(writer, testCalendar, config);
 
         verify(writer, atLeastOnce()).append(anyString());
     }
 
     @Test
-    public void testWriteCharacterWithQuotation() throws IOException {
+    public void testSerializeToWithQuotation() throws IOException {
         CharacterWriter writer = createCharacterWriter();
         JsonXmlSerConfig<?> config = mock(JsonXmlSerConfig.class);
         when(config.getDateTimeFormat()).thenReturn(DateTimeFormat.ISO_8601_DATE_TIME);
         when(config.getStringQuotation()).thenReturn('"');
 
-        xmlCalendarType.writeCharacter(writer, testCalendar, config);
+        xmlCalendarType.serializeTo(writer, testCalendar, config);
 
         verify(writer, atLeast(2)).write('"');
     }

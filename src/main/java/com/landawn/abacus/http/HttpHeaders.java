@@ -663,7 +663,7 @@ public final class HttpHeaders {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String value = HttpHeaders.valueOf(Arrays.asList("gzip", "deflate"));   // "gzip, deflate"
-     * String date = HttpHeaders.valueOf(new Date());                          // HTTP date format
+     * String date = HttpHeaders.valueOf(new Date());                          // date is formatted as an HTTP date
      * }</pre>
      *
      * @param headerValue the header value to convert
@@ -1056,8 +1056,11 @@ public final class HttpHeaders {
      * @param name The header name
      * @param value The header value (can be a {@code String}, {@code Collection}, {@code Date}, {@code Instant}, or any object)
      * @return This HttpHeaders instance for method chaining
+     * @throws IllegalArgumentException if {@code name} is {@code null}
      */
     public HttpHeaders set(final String name, final Object value) {
+        N.checkArgNotNull(name, cs.name);
+
         map.put(name, value);
 
         return this;
@@ -1159,6 +1162,7 @@ public final class HttpHeaders {
      * <pre>{@code
      * headers.clear();
      * }</pre>
+     *
      */
     public void clear() {
         map.clear();
@@ -1205,7 +1209,7 @@ public final class HttpHeaders {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * HttpHeaders copy = headers.copy();
-     * copy.set("X-Modified", "true");   // Original is not affected
+     * copy.set("X-Modified", "true");   // original is not affected
      * }</pre>
      *
      * @return a new HttpHeaders instance with a copy of all headers

@@ -43,11 +43,11 @@ import java.util.concurrent.TimeUnit;
  * <pre>{@code
  * Stopwatch stopwatch = Stopwatch.createStarted();
  * doSomething();
- * stopwatch.stop();   // optional
+ * stopwatch.stop();   // stops timing
  *
  * Duration duration = stopwatch.elapsed();
  *
- * log.info("time: " + stopwatch);   // formatted string like "12.30 ms"
+ * log.info("time: " + stopwatch);   // logs formatted string like "12.30 ms"
  * }</pre>
  *
  * <p>Stopwatch methods are not idempotent; it is an error to start or stop a stopwatch that is
@@ -88,10 +88,20 @@ public final class Stopwatch {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Stopwatch stopwatch = Stopwatch.createUnstarted();
-     * stopwatch.start();
-     * // ... do something ...
-     * stopwatch.stop();
+     * Stopwatch sw = Stopwatch.createUnstarted();          // returns Stopwatch, not running
+     * sw.isRunning();                                      // returns false
+     * sw.elapsed(TimeUnit.NANOSECONDS);                    // returns 0
+     * sw.elapsed();                                        // returns Duration.ZERO
+     *
+     * sw.start();
+     * doSomething();
+     * sw.stop();
+     * sw.elapsed(TimeUnit.MILLISECONDS);                   // returns elapsed time
+     *
+     * sw.start();                                          // resumes accumulation after stop
+     *
+     * sw.reset();
+     * sw.elapsed(TimeUnit.MILLISECONDS);                   // returns 0 after reset
      * }</pre>
      *
      * @return a new stopwatch instance that is not running
@@ -106,11 +116,25 @@ public final class Stopwatch {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
+     * Ticker ticker = Ticker.systemTicker();
+     * Stopwatch sw = Stopwatch.createUnstarted(ticker);    // returns Stopwatch using given ticker
+     * sw.isRunning();                                      // returns false
+     *
+     * sw.start();
+     * doSomething();
+     * sw.stop();
+     * sw.elapsed(TimeUnit.MILLISECONDS);                   // returns elapsed based on ticker
+     *
      * Ticker mockTicker = new Ticker() {
      *     private long time = 0;
-     *     public long read() { return time += 1000000; } // Advance 1ms each call
+     *     public long read() { return time += 1000000; }
      * };
-     * Stopwatch stopwatch = Stopwatch.createUnstarted(mockTicker);
+     * Stopwatch sw2 = Stopwatch.createUnstarted(mockTicker);
+     * sw2.start();
+     * sw2.stop();
+     * sw2.elapsed(TimeUnit.MILLISECONDS);                  // returns elapsed based on mock ticker
+     *
+     * Stopwatch.createUnstarted((Ticker) null);            // throws IllegalArgumentException
      * }</pre>
      *
      * @param ticker the time source to use for measuring elapsed time
@@ -127,9 +151,21 @@ public final class Stopwatch {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Stopwatch stopwatch = Stopwatch.createStarted();
+     * Stopwatch sw = Stopwatch.createStarted();            // starts immediately
+     * sw.isRunning();                                      // returns true
      * doSomething();
-     * long elapsed = stopwatch.elapsed(TimeUnit.MILLISECONDS);
+     * sw.elapsed(TimeUnit.MILLISECONDS);                   // returns elapsed time
+     *
+     * sw.stop();
+     * sw.elapsed();                                        // returns Duration of elapsed time
+     *
+     * sw.start();                                          // resumes accumulation after stop (no reset needed)
+     *
+     * Stopwatch.createStarted().start();                    // throws IllegalStateException (already running)
+     *
+     * sw.reset();
+     * sw.elapsed(TimeUnit.NANOSECONDS);                    // returns 0 after reset
+     * sw.start();                                          // OK, can restart after reset
      * }</pre>
      *
      * @return a new stopwatch instance that is already running
@@ -144,12 +180,21 @@ public final class Stopwatch {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Stopwatch stopwatch = Stopwatch.createStarted(
-     *     new Ticker() {
-     *         public long read() {
-     *             return android.os.SystemClock.elapsedRealtimeNanos();
-     *         }
-     *     });
+     * Ticker ticker = Ticker.systemTicker();
+     * Stopwatch sw = Stopwatch.createStarted(ticker);     // starts immediately with given ticker
+     * sw.isRunning();                                     // returns true
+     * doSomething();
+     * sw.stop();
+     * sw.elapsed(TimeUnit.MILLISECONDS);                   // returns elapsed based on ticker
+     *
+     * Ticker mockTicker = new Ticker() {
+     *     private long time = 0;
+     *     public long read() { return time += 1000000; }
+     * };
+     * Stopwatch sw2 = Stopwatch.createStarted(mockTicker); // starts with mock ticker
+     * sw2.elapsed(TimeUnit.MILLISECONDS);                  // returns elapsed based on mock
+     *
+     * Stopwatch.createStarted((Ticker) null);              // throws IllegalArgumentException
      * }</pre>
      *
      * @param ticker the time source to use for measuring elapsed time
@@ -174,9 +219,19 @@ public final class Stopwatch {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * if (stopwatch.isRunning()) {
-     *     stopwatch.stop();
-     * }
+     * Stopwatch sw = Stopwatch.createUnstarted();
+     * sw.isRunning();                                      // returns false
+     *
+     * sw.start();
+     * sw.isRunning();                                      // returns true
+     *
+     * sw.stop();
+     * sw.isRunning();                                      // returns false
+     *
+     * sw.reset();
+     * sw.isRunning();                                      // returns false after reset
+     *
+     * if (sw.isRunning()) { sw.stop(); }
      * }</pre>
      *
      * @return {@code true} if the stopwatch is currently running, {@code false} otherwise
@@ -190,10 +245,20 @@ public final class Stopwatch {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Stopwatch stopwatch = Stopwatch.createUnstarted();
-     * stopwatch.start();
-     * // ... timed operation ...
-     * stopwatch.stop();
+     * Stopwatch sw = Stopwatch.createUnstarted();
+     * Stopwatch same = sw.start();                         // returns this for method chaining
+     * sw.isRunning();                                      // returns true
+     *
+     * sw.stop();
+     * sw.elapsed(TimeUnit.MILLISECONDS);                   // returns elapsed for first period
+     *
+     * sw.start();                                          // resumes accumulation after stop (no reset needed)
+     * sw.stop();
+     * sw.elapsed(TimeUnit.MILLISECONDS);                   // returns total accumulated time
+     *
+     * Stopwatch.createStarted().start();                   // throws IllegalStateException (already running)
+     *
+     * sw.start().stop().reset().start();                   // chain: start → stop → reset → start fresh
      * }</pre>
      *
      * @return this {@code Stopwatch} instance for method chaining
@@ -215,10 +280,18 @@ public final class Stopwatch {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * stopwatch.stop();
-     * Duration duration = stopwatch.elapsed();   // Time when stopped
-     * Thread.sleep(1000);
-     * Duration sameDuration = stopwatch.elapsed();   // Still the same time
+     * Stopwatch sw = Stopwatch.createStarted();
+     * doSomething();
+     * Stopwatch same = sw.stop();                          // returns this for method chaining
+     * sw.isRunning();                                      // returns false
+     * long millis = sw.elapsed(TimeUnit.MILLISECONDS);     // returns elapsed at stop time
+     *
+     * Thread.sleep(10);
+     * long millis2 = sw.elapsed(TimeUnit.MILLISECONDS);    // returns same as millis (stopped, no advance)
+     *
+     * sw.stop();                                           // throws IllegalStateException (already stopped)
+     *
+     * Stopwatch.createUnstarted().stop();                  // throws IllegalStateException (never started)
      * }</pre>
      *
      * @return this {@code Stopwatch} instance for method chaining
@@ -240,13 +313,20 @@ public final class Stopwatch {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Stopwatch stopwatch = Stopwatch.createStarted();
-     * doFirstOperation();
-     * System.out.println("First: " + stopwatch.elapsed(TimeUnit.MILLISECONDS));
+     * Stopwatch sw = Stopwatch.createStarted();
+     * doSomeWork();
+     * Stopwatch same = sw.reset();                         // returns this for method chaining
+     * sw.isRunning();                                      // returns false
+     * sw.elapsed(TimeUnit.NANOSECONDS);                    // returns 0
      *
-     * stopwatch.reset().start();
-     * doSecondOperation();
-     * System.out.println("Second: " + stopwatch.elapsed(TimeUnit.MILLISECONDS));
+     * sw.start();                                          // start fresh after reset
+     * doMoreWork();
+     * sw.stop();
+     * sw.elapsed(TimeUnit.MILLISECONDS);                   // returns elapsed for second period only
+     *
+     * Stopwatch.createStarted().stop().reset();            // reset while stopped, no exception
+     *
+     * sw.start().stop().reset().start();                   // method chaining: start → stop → reset → start
      * }</pre>
      *
      * @return this {@code Stopwatch} instance for method chaining
@@ -275,8 +355,15 @@ public final class Stopwatch {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * long millis = stopwatch.elapsed(TimeUnit.MILLISECONDS);
-     * long seconds = stopwatch.elapsed(TimeUnit.SECONDS);
+     * Stopwatch sw = Stopwatch.createStarted();
+     * doSomething();
+     * sw.elapsed(TimeUnit.MILLISECONDS);                   // returns elapsed in milliseconds
+     * sw.elapsed(TimeUnit.NANOSECONDS);                    // returns elapsed in nanoseconds
+     * sw.elapsed(TimeUnit.SECONDS);                        // returns elapsed in seconds (rounded down)
+     *
+     * Stopwatch.createUnstarted().elapsed(TimeUnit.MILLISECONDS); // returns 0 (never started)
+     *
+     * sw.elapsed((TimeUnit) null);                         // throws NullPointerException
      * }</pre>
      *
      * @param desiredUnit the unit of time to express the elapsed time in; must not be {@code null}
@@ -295,12 +382,18 @@ public final class Stopwatch {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Duration elapsed = stopwatch.elapsed();
-     * System.out.println("Elapsed: " + elapsed.toMillis() + " ms");
+     * Stopwatch sw = Stopwatch.createStarted();
+     * doSomething();
+     * Duration d = sw.elapsed();                           // returns Duration with nanosecond precision
+     * d.toNanos();                                         // returns total nanoseconds
+     * d.toMillis();                                        // returns total milliseconds
      *
-     * // Can be used with Java 8+ time APIs
-     * if (elapsed.compareTo(Duration.ofSeconds(5)) > 0) {
-     *     System.out.println("Operation took more than 5 seconds");
+     * Duration d2 = sw.elapsed();                          // returns updated Duration if still running
+     *
+     * Stopwatch.createUnstarted().elapsed();               // returns Duration.ZERO
+     *
+     * if (d.compareTo(Duration.ofSeconds(5)) > 0) {
+     *     System.out.println("Took more than 5 seconds");
      * }
      * }</pre>
      *
@@ -327,9 +420,16 @@ public final class Stopwatch {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Stopwatch stopwatch = Stopwatch.createStarted();
+     * Stopwatch sw = Stopwatch.createStarted();
      * doSomething();
-     * System.out.println("Time elapsed: " + stopwatch);   // e.g., "Time elapsed: 12.34 ms"
+     * sw.toString();                                       // returns e.g. "12.34 ms"
+     *
+     * sw.stop();
+     * sw.toString();                                       // returns same formatted string while stopped
+     *
+     * Stopwatch.createUnstarted().toString();              // returns e.g. "0.000 ns" (not null)
+     *
+     * String s = sw.toString();                            // the returned string is never null
      * }</pre>
      *
      * @return a string representation of the elapsed time with appropriate unit

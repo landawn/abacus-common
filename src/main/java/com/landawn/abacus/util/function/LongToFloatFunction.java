@@ -14,14 +14,14 @@
 package com.landawn.abacus.util.function;
 
 /**
- * Represents a function that accepts a long-valued argument and produces a float-valued result.
- * This is the long-to-float primitive specialization for {@code Function}.
+ * Represents a function that accepts a {@code long}-valued argument and produces a
+ * {@code float}-valued result. This is the {@code long}-to-{@code float} primitive
+ * specialization for {@link java.util.function.Function}.
  *
  * <p>This is a functional interface whose functional method is {@link #applyAsFloat(long)}.
  *
  * <p>Note: Unlike other primitive function interfaces in this package, this interface does not extend
  * from java.util.function as the JDK does not provide a LongToFloatFunction interface.
- *
  *
  * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
  *
@@ -45,6 +45,7 @@ public interface LongToFloatFunction {
      * float result = converter.applyAsFloat(42L);                         // returns 42.0f
      * float largeResult = converter.applyAsFloat(9223372036854775807L);   // precision loss occurs
      * }</pre>
+     *
      */
     LongToFloatFunction DEFAULT = value -> value;
 

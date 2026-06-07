@@ -183,4 +183,16 @@ public class FloatPredicateTest extends TestBase {
         FloatPredicate instance = a -> false;
         org.junit.jupiter.api.Assertions.assertThrows(NullPointerException.class, () -> instance.and((FloatPredicate) null));
     }
+
+    @Test
+    public void testNaNDoesNotSatisfyRelationalPredicates() {
+        assertFalse(FloatPredicate.IS_POSITIVE.test(Float.NaN));
+        assertFalse(FloatPredicate.NOT_POSITIVE.test(Float.NaN));
+        assertFalse(FloatPredicate.IS_NEGATIVE.test(Float.NaN));
+        assertFalse(FloatPredicate.NOT_NEGATIVE.test(Float.NaN));
+        assertFalse(FloatPredicate.greaterThan(0f).test(Float.NaN));
+        assertFalse(FloatPredicate.greaterThanOrEqual(0f).test(Float.NaN));
+        assertFalse(FloatPredicate.lessThan(0f).test(Float.NaN));
+        assertFalse(FloatPredicate.lessThanOrEqual(0f).test(Float.NaN));
+    }
 }

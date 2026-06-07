@@ -59,8 +59,9 @@ public final class MutableLong extends Number implements Comparable<MutableLong>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * MutableLong num = new MutableLong();   // value is 0L
+     * MutableLong num = new MutableLong();
      * }</pre>
+     *
      */
     MutableLong() {
     }
@@ -70,7 +71,7 @@ public final class MutableLong extends Number implements Comparable<MutableLong>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * MutableLong num = new MutableLong(1000000L);   // value is 1000000L
+     * MutableLong num = new MutableLong(1000000L);
      * }</pre>
      *
      * @param value the initial value to store
@@ -115,6 +116,18 @@ public final class MutableLong extends Number implements Comparable<MutableLong>
     /**
      * Gets the value as a long.
      * This method is deprecated in favor of {@link #value()}.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * MutableLong num = MutableLong.of(42L);
+     * long val = num.getValue();         // returns 42L, value is unchanged
+     *
+     * num.setValue(7L);
+     * val = num.getValue();              // returns 7L, value is unchanged
+     *
+     * MutableLong max = MutableLong.of(Long.MAX_VALUE);
+     * val = max.getValue();              // returns 9223372036854775807L (Long.MAX_VALUE)
+     * }</pre>
      *
      * @return the current long value
      * @deprecated replaced by {@link #value()}.
@@ -214,6 +227,7 @@ public final class MutableLong extends Number implements Comparable<MutableLong>
      * MutableLong num = MutableLong.of(10L);
      * num.increment();   // value is now 11L
      * }</pre>
+     *
      */
     public void increment() {
         value++;
@@ -227,6 +241,7 @@ public final class MutableLong extends Number implements Comparable<MutableLong>
      * MutableLong num = MutableLong.of(10L);
      * num.decrement();   // value is now 9L
      * }</pre>
+     *
      */
     public void decrement() {
         value--;
@@ -366,6 +381,12 @@ public final class MutableLong extends Number implements Comparable<MutableLong>
      * This may involve truncation of the high-order bits if the value exceeds the range
      * of an int ({@link Integer#MIN_VALUE} to {@link Integer#MAX_VALUE}).
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * MutableLong num = MutableLong.of(42L);
+     * int intVal = num.intValue();   // returns 42
+     * }</pre>
+     *
      * @return the numeric value represented by this object after conversion to type int
      */
     @Override
@@ -376,6 +397,12 @@ public final class MutableLong extends Number implements Comparable<MutableLong>
     /**
      * Returns the value of this MutableLong as a long.
      * This is the natural and exact representation since the internal value is stored as a long.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * MutableLong num = MutableLong.of(42L);
+     * long longVal = num.longValue();   // returns 42L
+     * }</pre>
      *
      * @return the numeric value represented by this object after conversion to type long
      */
@@ -389,6 +416,12 @@ public final class MutableLong extends Number implements Comparable<MutableLong>
      * This conversion may involve rounding and precision loss for large values due to
      * float's limited precision (24 significant bits).
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * MutableLong num = MutableLong.of(42L);
+     * float val = num.floatValue();   // returns 42.0f
+     * }</pre>
+     *
      * @return the numeric value represented by this object after conversion to type float
      */
     @Override
@@ -400,6 +433,12 @@ public final class MutableLong extends Number implements Comparable<MutableLong>
      * Returns the value of this MutableLong as a double.
      * This conversion may involve rounding and precision loss for long values beyond the
      * exact representable range in double (approximately beyond 2^53).
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * MutableLong num = MutableLong.of(42L);
+     * double val = num.doubleValue();   // returns 42.0
+     * }</pre>
      *
      * @return the numeric value represented by this object after conversion to type double
      */
@@ -461,6 +500,12 @@ public final class MutableLong extends Number implements Comparable<MutableLong>
      * Returns a hash code for this MutableLong.
      * The hash code is computed using {@link Long#hashCode(long)} on the wrapped value,
      * ensuring consistency with the {@link #equals(Object)} method.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * MutableLong num = MutableLong.of(42L);
+     * int hash = num.hashCode();   // returns Long.hashCode(42L)
+     * }</pre>
      *
      * @return a hash code value for this object
      */

@@ -69,7 +69,7 @@ import com.landawn.abacus.annotation.MayReturnNull;
  * try {
  *     // use borrowed object
  * } finally {
- *     pool.add(borrowed);   // return to pool
+ *     pool.add(borrowed);   // adds it back to the pool
  * }
  * }</pre>
  *
@@ -193,7 +193,7 @@ public interface ObjectPool<E extends Poolable> extends Pool {
      *     try {
      *         // use the object
      *     } finally {
-     *         pool.add(obj);   // return to pool
+     *         pool.add(obj);   // adds it back to the pool
      *     }
      * }
      * }</pre>
@@ -219,7 +219,7 @@ public interface ObjectPool<E extends Poolable> extends Pool {
      *     try {
      *         // use the object
      *     } finally {
-     *         pool.add(obj);   // return to pool
+     *         pool.add(obj);   // adds it back to the pool
      *     }
      * } else {
      *     // timeout - pool was empty

@@ -146,8 +146,15 @@ public class GuavaMultisetType<E, T extends Multiset<E>> extends AbstractType<T>
      * (e.g., {@code {"apple":3,"banana":2}}).
      * For ordered multisets ({@link LinkedHashMultiset}, {@link TreeMultiset}), insertion or sort order is preserved.
      *
+     * <p>The returned string is a serializable representation designed to be parsed back into an equivalent value
+     * via {@link #valueOf(String)}; {@code stringOf} and {@code valueOf} are inverse operations that round-trip. This
+     * is the key distinction from {@link Object#toString()}, whose result is not guaranteed to be convertible back
+     * into the original value.</p>
+     *
      * @param x the multiset to serialize; may be {@code null}
      * @return the JSON string representation, or {@code null} if {@code x} is {@code null}
+     * @see #valueOf(String)
+     * @see #valueOf(Object)
      */
     @Override
     public String stringOf(final T x) {
@@ -169,9 +176,15 @@ public class GuavaMultisetType<E, T extends Multiset<E>> extends AbstractType<T>
      * The string must represent a {@code Map<E, Integer>} in JSON format, where each value is the element count.
      * Creates the appropriate multiset implementation based on the type class.
      *
+     * <p>This method is the inverse of {@code stringOf} and round-trips with it: it parses the string produced by
+     * {@code stringOf} back into a value of this type. Strings produced by {@link Object#toString()} are not
+     * guaranteed to be parseable in this way.</p>
+     *
      * @param str the JSON string to parse; may be {@code null} or empty
      * @return a new multiset instance containing the parsed elements with their counts,
      *         or {@code null} if {@code str} is {@code null} or empty
+     * @see #valueOf(Object)
+     * @see #stringOf(Multiset)
      */
     @Override
     public T valueOf(final String str) {

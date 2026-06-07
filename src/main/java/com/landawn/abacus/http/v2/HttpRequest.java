@@ -28,7 +28,10 @@ import java.net.http.HttpResponse.BodyHandlers;
 import java.net.http.HttpResponse.PushPromiseHandler;
 import java.time.Duration;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
+
+import javax.net.ssl.SSLSession;
 
 import com.landawn.abacus.annotation.Beta;
 import com.landawn.abacus.exception.UncheckedIOException;
@@ -113,6 +116,14 @@ public final class HttpRequest {
      * thrown later, when the request is executed, if it is not a valid {@code http} or
      * {@code https} URI.</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * HttpClient client = HttpClient.newHttpClient();
+     * HttpRequest request = HttpRequest.create("http://localhost:18080/users", client);
+     * // configure, then execute (network call happens only on get()/post()/etc.):
+     * // String body = request.get(String.class);
+     * }</pre>
+     *
      * @param url the URL string for the request
      * @param httpClient the HttpClient to use for executing the request
      * @return a new HttpRequest instance
@@ -128,6 +139,14 @@ public final class HttpRequest {
      * thrown later, when the request is executed, if it is not a valid {@code http} or
      * {@code https} URI.</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * HttpClient client = HttpClient.newHttpClient();
+     * URL url = new URL("http://localhost:18080/users");
+     * HttpRequest request = HttpRequest.create(url, client);
+     * // String body = request.get(String.class);  // network call happens here (when executed)
+     * }</pre>
+     *
      * @param url the URL object for the request
      * @param httpClient the HttpClient to use for executing the request
      * @return a new HttpRequest instance
@@ -142,6 +161,14 @@ public final class HttpRequest {
      * <p>Note: the URI is not validated here. An {@link IllegalArgumentException} may be
      * thrown later, when the request is executed, if its scheme is not {@code http} or
      * {@code https}.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * HttpClient client = HttpClient.newHttpClient();
+     * URI uri = URI.create("http://localhost:18080/users");
+     * HttpRequest request = HttpRequest.create(uri, client);
+     * // String body = request.get(String.class);  // network call happens here (when executed)
+     * }</pre>
      *
      * @param uri the URI object for the request
      * @param httpClient the HttpClient to use for executing the request
@@ -196,6 +223,13 @@ public final class HttpRequest {
      * thrown later, when the request is executed, if it is not a valid {@code http} or
      * {@code https} URI.</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * URL url = new URL("http://localhost:18080/users");
+     * HttpRequest request = HttpRequest.url(url);  // uses the default HttpClient
+     * // String body = request.get(String.class);  // network call happens here (when executed)
+     * }</pre>
+     *
      * @param url the URL object for the request
      * @return a new HttpRequest instance
      */
@@ -206,6 +240,13 @@ public final class HttpRequest {
     /**
      * Creates a new HttpRequest instance with the specified URL and timeout settings.
      * A new HTTP client is created with the specified timeouts and will be closed after execution.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * URL url = new URL("http://localhost:18080/data");
+     * HttpRequest request = HttpRequest.url(url, 5000, 30000);  // 5s connect, 30s read timeout
+     * // String body = request.get(String.class);  // network call happens here (when executed)
+     * }</pre>
      *
      * @param url the URL object for the request
      * @param connectTimeoutInMillis the connection timeout in milliseconds
@@ -224,6 +265,13 @@ public final class HttpRequest {
      * thrown later, when the request is executed, if its scheme is not {@code http} or
      * {@code https}.</p>
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * URI uri = URI.create("http://localhost:18080/users");
+     * HttpRequest request = HttpRequest.url(uri);  // uses the default HttpClient
+     * // String body = request.get(String.class);  // network call happens here (when executed)
+     * }</pre>
+     *
      * @param uri the URI object for the request
      * @return a new HttpRequest instance
      */
@@ -234,6 +282,13 @@ public final class HttpRequest {
     /**
      * Creates a new HttpRequest instance with the specified URI and timeout settings.
      * A new HTTP client is created with the specified timeouts and will be closed after execution.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * URI uri = URI.create("http://localhost:18080/data");
+     * HttpRequest request = HttpRequest.url(uri, 5000, 30000);  // 5s connect, 30s read timeout
+     * // String body = request.get(String.class);  // network call happens here (when executed)
+     * }</pre>
      *
      * @param uri the URI object for the request
      * @param connectTimeoutInMillis the connection timeout in milliseconds
@@ -1169,13 +1224,19 @@ public final class HttpRequest {
         N.checkArgNotNull(httpMethod, HTTP_METHOD_STR);
 
         final HttpClient httpClientToUse = checkUrlAndHttpClient();
+        boolean cleanupHandled = false;
 
         try {
-            return httpClientToUse.send(requestBuilder.method(httpMethod.name(), checkBodyPublisher()).build(), responseBodyHandler);
+            final HttpResponse<T> response = httpClientToUse.send(requestBuilder.method(httpMethod.name(), checkBodyPublisher()).build(), responseBodyHandler);
+            final HttpResponse<T> result = prepareResponseForClientCleanup(response, httpClientToUse);
+            cleanupHandled = true;
+            return result;
         } catch (IOException | InterruptedException e) {
             throw ExceptionUtil.toRuntimeException(e, true);
         } finally {
-            doAfterExecution(httpClientToUse);
+            if (!cleanupHandled) {
+                doAfterExecution(httpClientToUse);
+            }
         }
     }
 
@@ -1833,7 +1894,12 @@ public final class HttpRequest {
         final HttpClient httpClientToUse = checkUrlAndHttpClient();
 
         return httpClientToUse.sendAsync(requestBuilder.method(httpMethod.name(), checkBodyPublisher()).build(), responseBodyHandler)
-                .whenComplete((r, t) -> doAfterExecution(httpClientToUse));
+                .thenApply(response -> prepareResponseForClientCleanup(response, httpClientToUse))
+                .whenComplete((r, t) -> {
+                    if (t != null) {
+                        doAfterExecution(httpClientToUse);
+                    }
+                });
     }
 
     /**
@@ -1866,8 +1932,13 @@ public final class HttpRequest {
         final BodyHandler<?> responseBodyHandler = createResponseBodyHandler(resultClass);
 
         return httpClientToUse.sendAsync(requestBuilder.method(httpMethod.name(), checkBodyPublisher()).build(), responseBodyHandler)
-                .whenComplete((r, t) -> doAfterExecution(httpClientToUse))
-                .thenApply(it -> getBody(it, resultClass));
+                .thenApply(response -> prepareResponseForClientCleanup(response, httpClientToUse))
+                .thenApply(it -> getBody(it, resultClass))
+                .whenComplete((r, t) -> {
+                    if (t != null) {
+                        doAfterExecution(httpClientToUse);
+                    }
+                });
     }
 
     /**
@@ -1904,7 +1975,141 @@ public final class HttpRequest {
         final HttpClient httpClientToUse = checkUrlAndHttpClient();
 
         return httpClientToUse.sendAsync(requestBuilder.method(httpMethod.name(), checkBodyPublisher()).build(), responseBodyHandler, pushPromiseHandler)
-                .whenComplete((r, t) -> doAfterExecution(httpClientToUse));
+                .thenApply(response -> prepareResponseForClientCleanup(response, httpClientToUse))
+                .whenComplete((r, t) -> {
+                    if (t != null) {
+                        doAfterExecution(httpClientToUse);
+                    }
+                });
+    }
+
+    private <T> HttpResponse<T> prepareResponseForClientCleanup(final HttpResponse<T> response, final HttpClient httpClientUsed) {
+        if (response.body() instanceof InputStream inputStream) {
+            @SuppressWarnings("unchecked")
+            final T body = (T) new CleanupInputStream(inputStream, () -> doAfterExecution(httpClientUsed));
+
+            return new DelegatingHttpResponse<>(response, body);
+        }
+
+        doAfterExecution(httpClientUsed);
+        return response;
+    }
+
+    private static final class DelegatingHttpResponse<T> implements HttpResponse<T> {
+        private final HttpResponse<?> response;
+        private final T body;
+
+        private DelegatingHttpResponse(final HttpResponse<?> response, final T body) {
+            this.response = response;
+            this.body = body;
+        }
+
+        @Override
+        public int statusCode() {
+            return response.statusCode();
+        }
+
+        @Override
+        public java.net.http.HttpRequest request() {
+            return response.request();
+        }
+
+        @Override
+        public Optional<HttpResponse<T>> previousResponse() {
+            return Optional.empty();
+        }
+
+        @Override
+        public java.net.http.HttpHeaders headers() {
+            return response.headers();
+        }
+
+        @Override
+        public T body() {
+            return body;
+        }
+
+        @Override
+        public Optional<SSLSession> sslSession() {
+            return response.sslSession();
+        }
+
+        @Override
+        public URI uri() {
+            return response.uri();
+        }
+
+        @Override
+        public HttpClient.Version version() {
+            return response.version();
+        }
+    }
+
+    private static final class CleanupInputStream extends InputStream {
+        private final InputStream inputStream;
+        private final Runnable cleanup;
+        private volatile boolean closed = false;
+
+        private CleanupInputStream(final InputStream inputStream, final Runnable cleanup) {
+            this.inputStream = inputStream;
+            this.cleanup = cleanup;
+        }
+
+        @Override
+        public int read() throws IOException {
+            return inputStream.read();
+        }
+
+        @Override
+        public int read(final byte[] b) throws IOException {
+            return inputStream.read(b);
+        }
+
+        @Override
+        public int read(final byte[] b, final int off, final int len) throws IOException {
+            return inputStream.read(b, off, len);
+        }
+
+        @Override
+        public long skip(final long n) throws IOException {
+            return inputStream.skip(n);
+        }
+
+        @Override
+        public int available() throws IOException {
+            return inputStream.available();
+        }
+
+        @Override
+        public void close() throws IOException {
+            try {
+                inputStream.close();
+            } finally {
+                closeOnce();
+            }
+        }
+
+        @Override
+        public synchronized void mark(final int readlimit) {
+            inputStream.mark(readlimit);
+        }
+
+        @Override
+        public synchronized void reset() throws IOException {
+            inputStream.reset();
+        }
+
+        @Override
+        public boolean markSupported() {
+            return inputStream.markSupported();
+        }
+
+        private void closeOnce() {
+            if (!closed) {
+                closed = true;
+                cleanup.run();
+            }
+        }
     }
 
     private BodyPublisher checkBodyPublisher() {

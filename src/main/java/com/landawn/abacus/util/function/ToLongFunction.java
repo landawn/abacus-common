@@ -41,6 +41,7 @@ public interface ToLongFunction<T> extends Throwables.ToLongFunction<T, RuntimeE
      * long primitive = ToLongFunction.UNBOX.applyAsLong(boxed);     // returns 42L
      * long defaultValue = ToLongFunction.UNBOX.applyAsLong(null);   // returns 0L
      * }</pre>
+     *
      */
     ToLongFunction<Long> UNBOX = value -> value == null ? 0 : value;
     /**
@@ -64,6 +65,7 @@ public interface ToLongFunction<T> extends Throwables.ToLongFunction<T, RuntimeE
      *
      * long defaultValue = ToLongFunction.FROM_NUM.applyAsLong(null);   // returns 0L
      * }</pre>
+     *
      */
     ToLongFunction<Number> FROM_NUM = value -> value == null ? 0 : value.longValue();
 

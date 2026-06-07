@@ -28,8 +28,8 @@ package com.landawn.abacus.util;
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * IndexedFloat ifloat = IndexedFloat.of(3.14f, 2);
- * System.out.println(ifloat.value());   // prints: 3.14
- * System.out.println(ifloat.index());   // prints: 2
+ * System.out.println(ifloat.value());   // prints 3.14
+ * System.out.println(ifloat.index());   // prints 2
  * }</pre>
  *
  * @see Indexed
@@ -104,6 +104,13 @@ public final class IndexedFloat extends AbstractIndexed {
      *
      * <p>The index associated with this value can be retrieved through the {@link #index()}
      * method inherited from {@link AbstractIndexed}.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * IndexedFloat indexed = IndexedFloat.of(2.718f, 10);
+     * float v = indexed.value();   // returns 2.718f
+     * int i = indexed.index();     // returns 10
+     * }</pre>
      *
      * @return the float value associated with this index
      */

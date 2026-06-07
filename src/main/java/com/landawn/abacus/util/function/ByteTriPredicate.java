@@ -19,10 +19,9 @@ import com.landawn.abacus.util.Throwables;
 
 /**
  * Represents a predicate (boolean-valued function) of three byte-valued arguments.
- * This is the three-arity specialization of {@link java.util.function.Predicate} for byte values.
+ * This is the three-arity specialization of {@link BytePredicate} for byte values.
  *
  * <p>This is a functional interface whose functional method is {@link #test(byte, byte, byte)}.
- *
  *
  * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
  *
@@ -40,6 +39,7 @@ public interface ByteTriPredicate extends Throwables.ByteTriPredicate<RuntimeExc
      * ByteTriPredicate alwaysTrue = ByteTriPredicate.ALWAYS_TRUE;
      * boolean result = alwaysTrue.test((byte) 1, (byte) 2, (byte) 3);   // Returns true
      * }</pre>
+     *
      */
     ByteTriPredicate ALWAYS_TRUE = (a, b, c) -> true;
     /**
@@ -50,6 +50,7 @@ public interface ByteTriPredicate extends Throwables.ByteTriPredicate<RuntimeExc
      * ByteTriPredicate alwaysFalse = ByteTriPredicate.ALWAYS_FALSE;
      * boolean result = alwaysFalse.test((byte) 1, (byte) 2, (byte) 3);   // Returns false
      * }</pre>
+     *
      */
     ByteTriPredicate ALWAYS_FALSE = (a, b, c) -> false;
 

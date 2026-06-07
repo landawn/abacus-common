@@ -59,8 +59,9 @@ public final class MutableDouble extends Number implements Comparable<MutableDou
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * MutableDouble num = new MutableDouble();   // value is 0.0
+     * MutableDouble num = new MutableDouble();
      * }</pre>
+     *
      */
     MutableDouble() {
     }
@@ -70,7 +71,7 @@ public final class MutableDouble extends Number implements Comparable<MutableDou
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * MutableDouble num = new MutableDouble(3.14159);   // value is 3.14159
+     * MutableDouble num = new MutableDouble(3.14159);
      * }</pre>
      *
      * @param value the initial value to store
@@ -114,6 +115,18 @@ public final class MutableDouble extends Number implements Comparable<MutableDou
 
     /**
      * Gets the value as a primitive double.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * MutableDouble num = MutableDouble.of(42.5);
+     * double val = num.getValue();       // returns 42.5, value is unchanged
+     *
+     * num.setValue(7.25);
+     * val = num.getValue();              // returns 7.25, value is unchanged
+     *
+     * MutableDouble max = MutableDouble.of(Double.MAX_VALUE);
+     * val = max.getValue();              // returns 1.7976931348623157E308 (Double.MAX_VALUE)
+     * }</pre>
      *
      * @return the current double value
      * @deprecated replaced by {@link #value()}.
@@ -193,7 +206,7 @@ public final class MutableDouble extends Number implements Comparable<MutableDou
      * @param <E> the type of exception that the predicate may throw
      * @param predicate the predicate that tests the current value
      * @param newValue the new value to set if the predicate evaluates to {@code true}
-     * @return {@code true} if the value was set, {@code false} otherwise
+     * @return {@code true} if the value was updated, {@code false} otherwise
      * @throws E if the predicate throws an exception
      */
     public <E extends Exception> boolean setIf(final Throwables.DoublePredicate<E> predicate, final double newValue) throws E {
@@ -247,6 +260,7 @@ public final class MutableDouble extends Number implements Comparable<MutableDou
      * MutableDouble num = MutableDouble.of(5.5);
      * num.increment();   // value is now 6.5
      * }</pre>
+     *
      */
     public void increment() {
         value++;
@@ -260,6 +274,7 @@ public final class MutableDouble extends Number implements Comparable<MutableDou
      * MutableDouble num = MutableDouble.of(5.5);
      * num.decrement();   // value is now 4.5
      * }</pre>
+     *
      */
     public void decrement() {
         value--;
@@ -366,7 +381,7 @@ public final class MutableDouble extends Number implements Comparable<MutableDou
      * double old = num.getAndAdd(5.5);   // returns 10.0, value is now 15.5
      * }</pre>
      *
-     * @param delta the value to add
+     * @param delta the value to add to the current value
      * @return the value before adding delta
      */
     public double getAndAdd(final double delta) {
@@ -384,7 +399,7 @@ public final class MutableDouble extends Number implements Comparable<MutableDou
      * double newVal = num.addAndGet(5.5);   // returns 15.5, value is now 15.5
      * }</pre>
      *
-     * @param delta the value to add
+     * @param delta the value to add to the current value
      * @return the value after adding delta
      */
     public double addAndGet(final double delta) {

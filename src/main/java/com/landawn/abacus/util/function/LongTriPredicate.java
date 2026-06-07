@@ -37,7 +37,6 @@ import com.landawn.abacus.util.Throwables;
  * LongTriPredicate combined = allPositive.and(sumGreaterThan100);
  * }</pre>
  *
- *
  * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
  *
  * @see java.util.function.Predicate
@@ -56,6 +55,7 @@ public interface LongTriPredicate extends Throwables.LongTriPredicate<RuntimeExc
      * alwaysTrue.test(1L, 2L, 3L);    // returns true
      * alwaysTrue.test(-1L, 0L, 1L);   // returns true
      * }</pre>
+     *
      */
     LongTriPredicate ALWAYS_TRUE = (a, b, c) -> true;
     /**
@@ -69,6 +69,7 @@ public interface LongTriPredicate extends Throwables.LongTriPredicate<RuntimeExc
      * alwaysFalse.test(1L, 2L, 3L);    // returns false
      * alwaysFalse.test(-1L, 0L, 1L);   // returns false
      * }</pre>
+     *
      */
     LongTriPredicate ALWAYS_FALSE = (a, b, c) -> false;
 

@@ -296,4 +296,35 @@ public class ImmutableMapTypeTest extends TestBase {
         assertTrue(result.contains("key0"));
         assertTrue(result.contains("key99"));
     }
+
+    @Test
+    public void testAppendTo_unquotedToStringForm() throws IOException {
+        ImmutableMap<String, Integer> map = ImmutableMap.of("k", 1);
+        StringBuilder sb = new StringBuilder();
+        immutableMapType.appendTo(sb, map);
+        // appendTo emits the plain, toString()-style form: keys/values are NOT quoted
+        assertEquals("{k:1}", sb.toString());
+
+        sb.setLength(0);
+        immutableMapType.appendTo(sb, ImmutableMap.empty());
+        assertEquals("{}", sb.toString());
+    }
+
+    @Test
+    public void testSerializeTo_inheritedQuotedForm() throws IOException {
+        // ImmutableMapType inherits AbstractType's default serializeTo, which writes stringOf(map)
+        // as a quoted/escaped JSON string -- distinct from appendTo's unquoted toString form.
+        ImmutableMap<String, Integer> map = ImmutableMap.of("k", 1);
+        com.landawn.abacus.util.BufferedJsonWriter writer = com.landawn.abacus.util.Objectory.createBufferedJsonWriter();
+        immutableMapType.serializeTo(writer, map, com.landawn.abacus.parser.JsonSerConfig.create());
+        String json = writer.toString();
+        com.landawn.abacus.util.Objectory.recycle(writer);
+
+        org.junit.jupiter.api.Assertions.assertTrue(json.startsWith("\"") && json.endsWith("\""));
+        org.junit.jupiter.api.Assertions.assertTrue(json.contains("k"));
+
+        StringBuilder sb = new StringBuilder();
+        immutableMapType.appendTo(sb, map);
+        org.junit.jupiter.api.Assertions.assertNotEquals(sb.toString(), json);
+    }
 }

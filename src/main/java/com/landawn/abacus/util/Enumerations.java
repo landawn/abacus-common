@@ -87,7 +87,7 @@ public final class Enumerations {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Enumeration<String> empty = Enumerations.empty();
-     * empty.hasMoreElements();   // false
+     * empty.hasMoreElements();   // returns false
      * }</pre>
      *
      * @param <T> the type of elements (not) enumerated
@@ -104,9 +104,9 @@ public final class Enumerations {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Enumeration<String> single = Enumerations.just("Hello");
-     * single.hasMoreElements();   // true
-     * single.nextElement();       // "Hello"
-     * single.hasMoreElements();   // false
+     * single.hasMoreElements();   // returns true
+     * single.nextElement();       // returns "Hello"
+     * single.hasMoreElements();   // returns false
      * }</pre>
      *
      * @param <T> the type of the element

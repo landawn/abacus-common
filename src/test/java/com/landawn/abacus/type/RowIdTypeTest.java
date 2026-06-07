@@ -93,15 +93,15 @@ public class RowIdTypeTest extends TestBase {
     }
 
     @Test
-    public void testWriteCharacter() throws IOException {
+    public void testSerializeTo() throws IOException {
         CharacterWriter writer = createCharacterWriter();
         JsonXmlSerConfig<?> config = mock(JsonXmlSerConfig.class);
 
         RowId rowId = mock(RowId.class);
         when(rowId.toString()).thenReturn("rowid123");
-        rowIdType.writeCharacter(writer, rowId, config);
+        rowIdType.serializeTo(writer, rowId, config);
 
-        rowIdType.writeCharacter(writer, null, config);
+        rowIdType.serializeTo(writer, null, config);
         assertNotNull(rowId);
     }
 }

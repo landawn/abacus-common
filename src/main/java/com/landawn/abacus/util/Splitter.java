@@ -680,6 +680,12 @@ public final class Splitter {
      * parameter is {@code true}. Empty strings can occur when there are consecutive delimiters
      * or when delimiters appear at the beginning or end of the input.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Splitter.with(",").omitEmptyStrings(true).split("a,,b,");   // returns ["a", "b"]
+     * Splitter.with(",").omitEmptyStrings(false).split("a,,b,");  // returns ["a", "", "b", ""]
+     * }</pre>
+     *
      * @param omitEmptyStrings {@code true} to omit empty strings from results, {@code false} to include them.
      * @return this Splitter instance for method chaining.
      * @deprecated replaced by {@link #omitEmptyStrings()}
@@ -718,6 +724,12 @@ public final class Splitter {
      * Configures this Splitter to trim leading and trailing spaces from each
      * resulting substring when the specified parameter is {@code true}. Only space
      * characters (not all whitespace) are trimmed.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Splitter.with(",").trim(true).split("a , b , c");   // returns ["a", "b", "c"]
+     * Splitter.with(",").trim(false).split("a , b , c");  // returns ["a ", " b ", " c"]
+     * }</pre>
      *
      * @param trim {@code true} to trim spaces from results, {@code false} to leave them as-is.
      * @return this Splitter instance for method chaining.
@@ -758,6 +770,12 @@ public final class Splitter {
      * from each resulting substring when the specified parameter is {@code true}. This method
      * removes all whitespace as defined by {@link Character#isWhitespace(char)},
      * including spaces, tabs, newlines, etc.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Splitter.with(",").strip(true).split("a\t,\nb ,\tc");  // returns ["a", "b", "c"]
+     * Splitter.with(",").strip(false).split("a\t, b ,c");    // returns ["a\t", " b ", "c"]
+     * }</pre>
      *
      * @param strip {@code true} to strip whitespace from results, {@code false} to leave them as-is.
      * @return this Splitter instance for method chaining.
@@ -1467,6 +1485,7 @@ public final class Splitter {
      *     .split("1 : apple ; 2 : banana", Integer.class, String.class);
      * // Returns {1=apple, 2=banana}
      * }</pre>
+     *
      */
     public static final class MapSplitter {
 
@@ -1584,6 +1603,11 @@ public final class Splitter {
          * Configures this MapSplitter to omit empty entry strings when the
          * specified parameter is {@code true}. This applies to the entry splitting phase.
          *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * MapSplitter.with(",", "=").omitEmptyStrings(true).split("a=1,,b=2");  // returns {a=1, b=2}
+         * }</pre>
+         *
          * @param omitEmptyStrings {@code true} to omit empty entry strings, {@code false} to include them.
          * @return this MapSplitter instance for method chaining.
          * @deprecated replaced by {@link #omitEmptyStrings()}
@@ -1621,6 +1645,11 @@ public final class Splitter {
         /**
          * Configures this MapSplitter to trim spaces from both entries and
          * key-value pairs when the specified parameter is {@code true}.
+         *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * MapSplitter.with(",", "=").trim(true).split("a = 1 , b = 2");  // returns {a=1, b=2}
+         * }</pre>
          *
          * @param trim {@code true} to trim spaces, {@code false} to leave them as-is.
          * @return this MapSplitter instance for method chaining.
@@ -1663,6 +1692,11 @@ public final class Splitter {
          * Configures this MapSplitter to strip all leading and trailing whitespace
          * characters from both entries and key-value pairs when the specified
          * parameter is {@code true}.
+         *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * MapSplitter.with(",", "=").strip(true).split("a\t=\n1\t, b = 2");  // returns {a=1, b=2}
+         * }</pre>
          *
          * @param strip {@code true} to strip whitespace, {@code false} to leave it as-is.
          * @return this MapSplitter instance for method chaining.
@@ -1727,7 +1761,7 @@ public final class Splitter {
          *
          * // Input has more entries than limit
          * splitter.limit(2).split("a=1,b=2,c=3,d=4")
-         * // Returns: {a=1, b=2} - exactly 2 entries
+         * // Returns: {a=1, b=2,c=3,d=4} - 2 entries; the last value absorbs the remaining input
          *
          * // Input has exactly limit entries
          * splitter.limit(2).split("a=1,b=2")
@@ -1743,7 +1777,7 @@ public final class Splitter {
          *
          * // Combined with other options
          * splitter.limit(2).trimResults().omitEmptyStrings().split(" a = 1 , , b = 2 , c = 3 ")
-         * // Returns: {a=1, b=2} - 2 entries after trimming and omitting empty
+         * // Returns: {a=1, , b=2 , c = 3} - 2 entries; limit applies before trim/omit, so the last entry absorbs the rest
          * }</pre>
          *
          * <p><b>Common Mistakes:</b></p>

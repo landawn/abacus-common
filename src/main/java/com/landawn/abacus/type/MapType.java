@@ -15,7 +15,6 @@
 package com.landawn.abacus.type;
 
 import java.io.IOException;
-import java.io.Writer;
 import java.util.List;
 import java.util.Map;
 
@@ -166,9 +165,16 @@ public class MapType<K, V, T extends Map<K, V>> extends AbstractType<T> {
      * Converts a {@link java.util.Map} object to its JSON string representation.
      * An empty map is represented as {@code "{}"}.
      *
+     * <p>The returned string is a serializable representation designed to be parsed back into an equivalent value
+     * via {@link #valueOf(String)}; {@code stringOf} and {@code valueOf} are inverse operations that round-trip. This
+     * is the key distinction from {@link Object#toString()}, whose result is not guaranteed to be convertible back
+     * into the original value.</p>
+     *
      * @param x the {@code Map} object to convert, may be {@code null}
      * @return the JSON string representation of the map ({@code "{}"} for an empty map),
      *         or {@code null} if the input is {@code null}
+     * @see #valueOf(String)
+     * @see #valueOf(Object)
      */
     @Override
     public String stringOf(final T x) {
@@ -190,8 +196,14 @@ public class MapType<K, V, T extends Map<K, V>> extends AbstractType<T> {
      *   <li>Any other valid JSON object string — deserializes into a populated {@code Map}</li>
      * </ul>
      *
+     * <p>This method is the inverse of {@code stringOf} and round-trips with it: it parses the string produced by
+     * {@code stringOf} back into a value of this type. Strings produced by {@link Object#toString()} are not
+     * guaranteed to be parseable in this way.</p>
+     *
      * @param str the JSON string to parse, may be {@code null} or blank
      * @return the parsed {@code Map} object, or {@code null} if the input is {@code null} or blank
+     * @see #valueOf(Object)
+     * @see #stringOf(Map)
      */
     @Override
     public T valueOf(final String str) {
@@ -205,27 +217,61 @@ public class MapType<K, V, T extends Map<K, V>> extends AbstractType<T> {
     }
 
     /**
-     * Appends the JSON representation of a {@link java.util.Map} to an {@link Appendable}.
-     * When the {@code Appendable} is a {@link java.io.Writer}, the JSON serializer writes
-     * directly to the {@code Writer} for better performance.
+     * Appends the {@code toString()}-style string representation of a {@link java.util.Map} to an {@link Appendable},
+     * in the form {@code {key1:value1, key2:value2}}, with each key and value rendered by its own type's {@code appendTo}.
      * If the map is {@code null}, the literal string {@code "null"} is appended.
+     * <p>
+     * <b>appendTo vs. serializeTo:</b> {@code appendTo} produces a plain, {@code toString()}-style rendering with no
+     * JSON/XML quoting or escaping (for general text output), whereas {@code serializeTo} produces the JSON/XML
+     * serialized form (applying string quotation and character escaping per the serialization config) and is used by the
+     * JSON/XML serializers.
      *
      * @param appendable the target to write to
      * @param x the {@code Map} to append, may be {@code null}
      * @throws IOException if an I/O error occurs while appending
+     * @implNote
+     * This method appends a string representation of {@code x} to {@code appendable} (the literal {@code "null"} for a
+     * {@code null} value). Conceptually this is the human-readable form produced by {@code toString()}, <i>not</i> the
+     * value returned by {@code stringOf}, which is a formatted, serializable representation (typically a JSON string)
+     * that {@link #valueOf(String)} can convert back into an equivalent value. For values whose nested structure makes
+     * the two forms differ (collections, maps, arrays), {@code appendTo} emits the unquoted, {@code toString()}-style
+     * form; it is therefore not, in the general contract, a plain
+     * {@code appendable.append(x == null ? NULL_STRING : stringOf(x))}. (For value types whose human-readable and
+     * serialized forms coincide, the appended text is naturally identical to {@code stringOf(x)}.)
      */
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     @Override
     public void appendTo(final Appendable appendable, final T x) throws IOException {
         if (x == null) {
             appendable.append(NULL_STRING);
         } else {
-            // writer.write(stringOf(x));
+            final Type keyType = parameterTypes.get(0);
+            final Type valueType = parameterTypes.get(1);
 
-            if (appendable instanceof Writer writer) {
-                Utils.jsonParser.serialize(x, Utils.jsc, writer);
-            } else {
-                appendable.append(Utils.jsonParser.serialize(x, Utils.jsc));
+            appendable.append(SK._BRACE_L);
+
+            int i = 0;
+            for (final Map.Entry<K, V> entry : x.entrySet()) {
+                if (i++ > 0) {
+                    appendable.append(ELEMENT_SEPARATOR);
+                }
+
+                if (entry.getKey() == null) {
+                    appendable.append(NULL_STRING);
+                } else {
+                    keyType.appendTo(appendable, entry.getKey());
+                }
+
+                appendable.append(SK._COLON);
+
+                if (entry.getValue() == null) {
+                    appendable.append(NULL_STRING);
+                } else {
+                    valueType.appendTo(appendable, entry.getValue());
+                }
             }
+
+            appendable.append(SK._BRACE_R);
         }
     }
 

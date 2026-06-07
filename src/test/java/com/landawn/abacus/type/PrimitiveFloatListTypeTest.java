@@ -79,23 +79,23 @@ public class PrimitiveFloatListTypeTest extends TestBase {
     }
 
     @Test
-    public void testWriteCharacterEmptyList() throws IOException {
+    public void testSerializeToEmptyList() throws IOException {
         CharacterWriter writer = createCharacterWriter();
         FloatList list = FloatList.of(new float[0]);
         JsonXmlSerConfig<?> config = mock(JsonXmlSerConfig.class);
 
-        type.writeCharacter(writer, list, config);
+        type.serializeTo(writer, list, config);
         verify(writer).write('[');
         verify(writer).write(']');
     }
 
     @Test
-    public void testWriteCharacterNonEmptyList() throws IOException {
+    public void testSerializeToNonEmptyList() throws IOException {
         CharacterWriter writer = createCharacterWriter();
         FloatList list = FloatList.of(new float[] { 1.5f, 2.7f });
         JsonXmlSerConfig<?> config = mock(JsonXmlSerConfig.class);
 
-        type.writeCharacter(writer, list, config);
+        type.serializeTo(writer, list, config);
         verify(writer).write('[');
         verify(writer).write(1.5f);
         verify(writer).write(", ");

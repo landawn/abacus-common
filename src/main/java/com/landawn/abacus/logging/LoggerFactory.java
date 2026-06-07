@@ -49,6 +49,7 @@ import com.landawn.abacus.annotation.SuppressFBWarnings;
  * // Get root logger
  * Logger rootLogger = LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
  * }</pre>
+ *
  */
 public final class LoggerFactory {
 

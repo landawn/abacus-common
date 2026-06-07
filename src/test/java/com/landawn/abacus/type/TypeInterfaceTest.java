@@ -763,18 +763,18 @@ public class TypeInterfaceTest extends TestBase {
     }
 
     @Test
-    @DisplayName("Test writeCharacter()")
-    public void testWriteCharacter() throws IOException {
+    @DisplayName("Test serializeTo()")
+    public void testSerializeTo() throws IOException {
         CharacterWriter writer = createCharacterWriter();
         JsonXmlSerConfig<?> config = null;
 
-        stringType.writeCharacter(writer, "test", config);
+        stringType.serializeTo(writer, "test", config);
 
-        stringType.writeCharacter(writer, null, config);
+        stringType.serializeTo(writer, null, config);
 
         config = mock(JsonXmlSerConfig.class);
         when(config.getStringQuotation()).thenReturn('"');
-        stringType.writeCharacter(writer, "test", config);
+        stringType.serializeTo(writer, "test", config);
     }
 
     @Test

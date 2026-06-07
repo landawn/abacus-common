@@ -233,22 +233,22 @@ public class OptionalByteTypeTest extends TestBase {
     }
 
     @Test
-    public void testWriteCharacterWithNull() throws IOException {
-        optionalByteType.writeCharacter(writer, null, config);
+    public void testSerializeToWithNull() throws IOException {
+        optionalByteType.serializeTo(writer, null, config);
         verify(writer).write(any(char[].class));
     }
 
     @Test
-    public void testWriteCharacterWithEmpty() throws IOException {
+    public void testSerializeToWithEmpty() throws IOException {
         OptionalByte empty = OptionalByte.empty();
-        optionalByteType.writeCharacter(writer, empty, config);
+        optionalByteType.serializeTo(writer, empty, config);
         verify(writer).write(any(char[].class));
     }
 
     @Test
-    public void testWriteCharacterWithValue() throws IOException {
+    public void testSerializeToWithValue() throws IOException {
         OptionalByte opt = OptionalByte.of((byte) 64);
-        optionalByteType.writeCharacter(writer, opt, config);
+        optionalByteType.serializeTo(writer, opt, config);
         verify(writer).write((byte) 64);
     }
 }

@@ -30,9 +30,9 @@ package com.landawn.abacus.util;
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * // Encoding bytes to hex
- * byte[] data = {0x48, 0x65, 0x6C, 0x6C, 0x6F};  // "Hello" in ASCII
- * String hexString = Hex.encodeToString(data);   // returns "48656c6c6f"
- * String hexUpper = Hex.encodeToString(data, false);   // returns "48656C6C6F"
+ * byte[] data = {0x48, 0x65, 0x6C, 0x6C, 0x6F};
+ * String hexString = Hex.encodeToString(data);        // returns "48656c6c6f"
+ * String hexUpper = Hex.encodeToString(data, false);  // returns "48656C6C6F"
  *
  * // Decoding hex to bytes
  * byte[] decoded = Hex.decode("48656c6c6f");   // returns original byte array
@@ -118,8 +118,8 @@ public final class Hex {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * byte[] data = {0x48, 0x65, 0x6C, 0x6C, 0x6F};  // "Hello" in ASCII
-     * String hex = Hex.encodeToString(data);   // returns "48656c6c6f"
+     * byte[] data = {0x48, 0x65, 0x6C, 0x6C, 0x6F};
+     * String hex = Hex.encodeToString(data);         // returns "48656c6c6f"
      * }</pre>
      *
      * @param data the byte array to convert to a hexadecimal string.
@@ -192,7 +192,7 @@ public final class Hex {
      * <pre>{@code
      * byte[] data1 = Hex.decode("48656c6c6f");   // returns bytes for "Hello"
      * byte[] data2 = Hex.decode("FF00");         // returns {(byte)0xFF, 0x00}
-     * byte[] data3 = Hex.decode("DeadBeef");     // mixed case is accepted
+     * byte[] data3 = Hex.decode("DeadBeef");     // returns {(byte)0xDE, (byte)0xAD, (byte)0xBE, (byte)0xEF}; mixed case is accepted
      * }</pre>
      *
      * @param data a string containing hexadecimal digits (0-9, A-F, a-f).
