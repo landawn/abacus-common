@@ -570,15 +570,6 @@ public class MultisetTest extends AbstractTest {
     }
 
     @Test
-    public void testGet_Deprecated() {
-        multiset.add("apple", 5);
-        assertEquals(5, multiset.get("apple"));
-        assertEquals(0, multiset.get("nonexistent"));
-        // Verify get() returns the same result as getCount()
-        assertEquals(multiset.getCount("apple"), multiset.get("apple"));
-    }
-
-    @Test
     public void testOccurrencesOf() {
         multiset.add("apple", 3);
         assertEquals(3, multiset.getCount("apple"));
@@ -655,7 +646,7 @@ public class MultisetTest extends AbstractTest {
         assertFalse(testMultiset.contains(null));
 
         testMultiset.add(null, 7);
-        int removed = testMultiset.removeAllOccurrences((String) null);
+        int removed = testMultiset.removeAllOccurrencesOf((String) null);
         assertEquals(7, removed);
     }
 
@@ -1659,7 +1650,7 @@ public class MultisetTest extends AbstractTest {
     @Test
     public void testRemoveAllOccurrences_Element() {
         multiset.add("apple", 5);
-        int removed = multiset.removeAllOccurrences("apple");
+        int removed = multiset.removeAllOccurrencesOf("apple");
         assertEquals(5, removed);
         assertFalse(multiset.contains("apple"));
     }
@@ -1669,7 +1660,7 @@ public class MultisetTest extends AbstractTest {
         multiset.add("a", 3);
         multiset.add("b", 2);
         multiset.add("c", 1);
-        assertTrue(multiset.removeAllOccurrences(Arrays.asList("a", "c")));
+        assertTrue(multiset.removeAllOccurrencesOf(Arrays.asList("a", "c")));
         assertFalse(multiset.contains("a"));
         assertTrue(multiset.contains("b"));
         assertFalse(multiset.contains("c"));
@@ -1678,12 +1669,12 @@ public class MultisetTest extends AbstractTest {
     @Test
     public void testRemoveAllOccurrences_Object() {
         Multiset<String> multiset = Multiset.of("a", "a", "a", "b");
-        assertEquals(3, multiset.removeAllOccurrences("a"));
+        assertEquals(3, multiset.removeAllOccurrencesOf("a"));
         assertEquals(0, multiset.getCount("a"));
         assertEquals(1, multiset.getCount("b"));
         assertEquals(1, multiset.size());
 
-        assertEquals(0, multiset.removeAllOccurrences("c"));
+        assertEquals(0, multiset.removeAllOccurrencesOf("c"));
         assertEquals(1, multiset.getCount("b"));
     }
 
@@ -1692,11 +1683,11 @@ public class MultisetTest extends AbstractTest {
         multiset.add("apple", 5);
         multiset.add("banana", 3);
 
-        assertEquals(5, multiset.removeAllOccurrences("apple"));
+        assertEquals(5, multiset.removeAllOccurrencesOf("apple"));
         assertFalse(multiset.contains("apple"));
         assertEquals(3, multiset.getCount("banana"));
 
-        assertEquals(0, multiset.removeAllOccurrences("cherry"));
+        assertEquals(0, multiset.removeAllOccurrencesOf("cherry"));
     }
 
     @Test
@@ -1706,7 +1697,7 @@ public class MultisetTest extends AbstractTest {
         multiset.add("c", 1);
 
         List<String> toRemove = Arrays.asList("a", "b");
-        assertTrue(multiset.removeAllOccurrences(toRemove));
+        assertTrue(multiset.removeAllOccurrencesOf(toRemove));
         assertFalse(multiset.contains("a"));
         assertFalse(multiset.contains("b"));
         assertTrue(multiset.contains("c"));
@@ -1714,7 +1705,7 @@ public class MultisetTest extends AbstractTest {
 
     @Test
     public void testRemoveAllOccurrences_NonExistent() {
-        int removed = multiset.removeAllOccurrences("nonexistent");
+        int removed = multiset.removeAllOccurrencesOf("nonexistent");
         assertEquals(0, removed);
     }
 
@@ -1723,16 +1714,16 @@ public class MultisetTest extends AbstractTest {
     public void testRemoveAllOccurrencesSingle() {
         multiset.add("apple", 5);
 
-        assertEquals(5, multiset.removeAllOccurrences("apple"));
+        assertEquals(5, multiset.removeAllOccurrencesOf("apple"));
         assertFalse(multiset.contains("apple"));
 
-        assertEquals(0, multiset.removeAllOccurrences("banana"));
+        assertEquals(0, multiset.removeAllOccurrencesOf("banana"));
     }
 
     @Test
     public void testRemoveAllOccurrences_EmptyCollection() {
         multiset.add("a", 3);
-        assertFalse(multiset.removeAllOccurrences(Collections.emptyList()));
+        assertFalse(multiset.removeAllOccurrencesOf(Collections.emptyList()));
         assertEquals(3, multiset.getCount("a"));
     }
 
@@ -2436,7 +2427,7 @@ public class MultisetTest extends AbstractTest {
 
         assertTrue(it.hasNext());
         String firstElement = it.next();
-        multiset.removeAllOccurrences(firstElement);
+        multiset.removeAllOccurrencesOf(firstElement);
 
         assertEquals(0, multiset.getCount(firstElement), "Element should be removed from multiset after elementSet().iterator().remove()");
         assertFalse(multiset.contains(firstElement), "Multiset should not contain element after elementSet().iterator().remove()");
@@ -2779,7 +2770,7 @@ public class MultisetTest extends AbstractTest {
         multiset.setCount("a", 10);
         assertEquals(18, multiset.size());
 
-        multiset.removeAllOccurrences("c");
+        multiset.removeAllOccurrencesOf("c");
         assertEquals(11, multiset.size());
         assertEquals(2, multiset.countOfDistinctElements());
     }
@@ -2832,7 +2823,7 @@ public class MultisetTest extends AbstractTest {
         multiset.add("c", 1);
         assertEquals(3, multiset.countOfDistinctElements());
 
-        multiset.removeAllOccurrences("b");
+        multiset.removeAllOccurrencesOf("b");
         assertEquals(2, multiset.countOfDistinctElements());
     }
 
@@ -3778,7 +3769,7 @@ public class MultisetTest extends AbstractTest {
     public void testRemoveAllOccurrencesSelfClearsWithoutConcurrentModification() {
         Multiset<String> set = Multiset.of("a", "a", "b");
 
-        assertTrue(set.removeAllOccurrences(set));
+        assertTrue(set.removeAllOccurrencesOf(set));
         assertTrue(set.isEmpty());
     }
 }

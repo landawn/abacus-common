@@ -280,6 +280,43 @@ import com.landawn.abacus.util.u.OptionalShort;
  * projects under the Apache License 2.0. Methods from these libraries may have been modified for
  * consistency, performance optimization, and enhanced null-safety within the Abacus framework.</p>
  *
+ * <p><b>{@code Iterables} vs. related APIs:</b> {@code Iterables} eagerly computes a result <em>from</em> an
+ * existing collection; pick a sibling when you need lazy iteration or a multi-step pipeline instead.</p>
+ * <table border="1" summary="When to use Iterables versus Iterators, N, and Stream">
+ *   <tr>
+ *     <th>API</th>
+ *     <th>Operates on</th>
+ *     <th>Returns</th>
+ *     <th>Use when</th>
+ *   </tr>
+ *   <tr>
+ *     <td>{@code Iterables}</td>
+ *     <td>an {@link Iterable} / {@link java.util.Collection}</td>
+ *     <td>concrete values, {@code Optional}/{@code OptionalInt}, or new collections (eager)</td>
+ *     <td>you need a one-shot aggregate or lookup — {@code min}/{@code max}/{@code sum}, {@code indexOf},
+ *         set operations, {@code powerSet} — over an existing collection</td>
+ *   </tr>
+ *   <tr>
+ *     <td>{@link Iterators}</td>
+ *     <td>{@link java.util.Iterator}s</td>
+ *     <td>new {@code Iterator}s (lazy)</td>
+ *     <td>you want to compose or adapt iteration ({@code concat}/{@code skip}/{@code limit}/{@code filter}/{@code map})
+ *         without materializing</td>
+ *   </tr>
+ *   <tr>
+ *     <td>{@link N}</td>
+ *     <td>arrays, {@code Collection}s, {@code Iterable}s</td>
+ *     <td>concrete values &amp; collections (eager)</td>
+ *     <td>doing common, broadly-applicable collection/array operations</td>
+ *   </tr>
+ *   <tr>
+ *     <td>{@link com.landawn.abacus.util.stream.Stream Stream} / {@link Seq}</td>
+ *     <td>any source</td>
+ *     <td>a lazy, chainable pipeline</td>
+ *     <td>chaining many transformations or processing large/streamed data</td>
+ *   </tr>
+ * </table>
+ *
  * @see com.landawn.abacus.util.N
  * @see com.landawn.abacus.util.Iterators
  * @see com.landawn.abacus.util.CommonUtil

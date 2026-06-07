@@ -3488,9 +3488,9 @@ public class IntListTest extends TestBase {
     public void test_toMultiset() {
         IntList list = IntList.of(1, 2, 2, 3, 3, 3);
         Multiset<Integer> multiset = list.toMultiset(0, 6, Multiset::new);
-        assertEquals(3, multiset.get(3));
-        assertEquals(2, multiset.get(2));
-        assertEquals(1, multiset.get(1));
+        assertEquals(3, multiset.getCount(3));
+        assertEquals(2, multiset.getCount(2));
+        assertEquals(1, multiset.getCount(1));
     }
 
     @Test

@@ -20359,7 +20359,14 @@ sealed class CommonUtil permits N {
     /**
      * Returns the input array as-is without any modification or copying.
      * This is a type-safe varargs method that allows creating arrays inline.
-     * Note: No defensive copy is made, so the returned array is the same instance as the input.
+     *
+     * <p><b>IMPORTANT — this method does NOT follow the same {@code as*} convention as the other
+     * {@code asXxx} methods in this class.</b> The collection-returning {@code asList}, {@code asSet},
+     * and {@code asMap} methods return <i>immutable views</i> of their arguments. In contrast,
+     * {@code asArray} performs <b>no copy</b> and returns the <b>exact same, fully mutable array
+     * instance</b> that was passed in. Any change to the returned array is reflected in the original
+     * (and vice versa). If you need a defensive copy, use {@link N#clone(Object[])} or
+     * {@link N#copyOf(Object[], int)} instead.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -20371,6 +20378,12 @@ sealed class CommonUtil permits N {
      * void processArray(String[] arr) { }
      * processArray(N.asArray("x", "y", "z"));
      *
+     * // No copy is made: the returned array is the same instance as the (array) argument
+     * String[] src = {"a", "b"};
+     * String[] same = N.asArray(src);
+     * same[0] = "z";              // also mutates src
+     * // src is now ["z", "b"]
+     *
      * // returns null for null input
      * String[] nullArray = N.asArray((String[]) null);
      * // nullArray is null
@@ -20378,7 +20391,9 @@ sealed class CommonUtil permits N {
      *
      * @param <T> the type of the array elements
      * @param a the input array. Can be {@code null}.
-     * @return the input array unchanged (same reference). Returns {@code null} if {@code a} is {@code null}.
+     * @return the input array unchanged (same reference; <b>not</b> a copy). Returns {@code null} if {@code a} is {@code null}.
+     * @see Array#of(CharSequence...)
+     * @see Array#ofValues(Object...)
      * @see Array#asList(Object[])
      * @see Arrays#asList(Object[])
      * @see N#copyOf(Object[], int)

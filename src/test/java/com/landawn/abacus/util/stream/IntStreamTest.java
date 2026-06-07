@@ -4163,9 +4163,9 @@ public class IntStreamTest extends TestBase {
     @Test
     public void testToMultiset_HappyPath() {
         Multiset<Integer> result = IntStream.of(1, 2, 2, 3, 3, 3).toMultiset();
-        assertEquals(1, result.get(1));
-        assertEquals(2, result.get(2));
-        assertEquals(3, result.get(3));
+        assertEquals(1, result.getCount(1));
+        assertEquals(2, result.getCount(2));
+        assertEquals(3, result.getCount(3));
     }
 
     @Test
@@ -4320,9 +4320,9 @@ public class IntStreamTest extends TestBase {
     @Test
     public void testToMultiset_Supplier() {
         Multiset<Integer> result = IntStream.of(1, 2, 2, 3, 3, 3).toMultiset(Multiset::new);
-        assertEquals(1, result.get(1));
-        assertEquals(2, result.get(2));
-        assertEquals(3, result.get(3));
+        assertEquals(1, result.getCount(1));
+        assertEquals(2, result.getCount(2));
+        assertEquals(3, result.getCount(3));
     }
 
     // of(int[], int, int) - array range factory

@@ -523,7 +523,7 @@ public class AsyncExecutor {
 
                     Runtime.getRuntime().addShutdownHook(new Thread(() -> {
                         try {
-                            shutdown(120, TimeUnit.SECONDS);
+                            shutdownAndAwait(120, TimeUnit.SECONDS);
                         } catch (Exception e) {
                             logger.warn("Error during shutdown: " + e.getMessage(), e);
                         }
@@ -541,7 +541,7 @@ public class AsyncExecutor {
      * <p>This method initiates an orderly shutdown in which previously submitted
      * tasks are executed, but no new tasks will be accepted. This method does not
      * wait for previously submitted tasks to complete execution. Use
-     * {@link #shutdown(long, TimeUnit)} to wait for task completion.</p>
+     * {@link #shutdownAndAwait(long, TimeUnit)} to wait for task completion.</p>
      *
      * <p>If the executor is not an {@code ExecutorService} or has not been initialized,
      * this method still marks the executor as shut down to prevent future initialization.</p>
@@ -555,7 +555,7 @@ public class AsyncExecutor {
      *
      */
     public synchronized void shutdown() {
-        shutdown(0, TimeUnit.SECONDS);
+        shutdownAndAwait(0, TimeUnit.SECONDS);
     }
 
     /**
@@ -577,7 +577,7 @@ public class AsyncExecutor {
      * <pre>{@code
      * AsyncExecutor executor = new AsyncExecutor();
      * // Use executor...
-     * executor.shutdown(30, TimeUnit.SECONDS);   // Waits up to 30 seconds for tasks to complete
+     * executor.shutdownAndAwait(30, TimeUnit.SECONDS);   // Waits up to 30 seconds for tasks to complete
      * }</pre>
      *
      * @param terminationTimeout the maximum time to wait for executor termination; if 0 or negative,
@@ -585,7 +585,7 @@ public class AsyncExecutor {
      * @param timeUnit the time unit of the {@code terminationTimeout} argument; must not be
      *                 {@code null} when {@code terminationTimeout} is greater than 0
      */
-    public synchronized void shutdown(final long terminationTimeout, final TimeUnit timeUnit) {
+    public synchronized void shutdownAndAwait(final long terminationTimeout, final TimeUnit timeUnit) {
         if (executor == null || !(executor instanceof ExecutorService executorService)) {
             isShutdown = true; // Mark as shutdown even if executor is null
             executor = null;
@@ -619,7 +619,7 @@ public class AsyncExecutor {
      * {@code ExecutorService}. Returns {@code false} if the executor is still processing tasks.</p>
      *
      * <p>Note that, for an initialized {@code ExecutorService}, this returns {@code true} only after
-     * {@link #shutdown()} (or {@link #shutdown(long, TimeUnit)}) has been called and all tasks have
+     * {@link #shutdown()} (or {@link #shutdownAndAwait(long, TimeUnit)}) has been called and all tasks have
      * completed.</p>
      *
      * <p><b>Usage Examples:</b></p>

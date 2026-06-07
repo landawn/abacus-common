@@ -577,7 +577,7 @@ public class AsyncExecutorTest extends TestBase {
             latch.countDown();
         });
 
-        executor.shutdown(2, TimeUnit.SECONDS);
+        executor.shutdownAndAwait(2, TimeUnit.SECONDS);
         Assertions.assertTrue(latch.await(3, TimeUnit.SECONDS));
     }
 
@@ -587,7 +587,7 @@ public class AsyncExecutorTest extends TestBase {
         executor.execute((Throwables.Runnable<Exception>) () -> {
             Thread.sleep(100);
         });
-        executor.shutdown(0, TimeUnit.SECONDS);
+        executor.shutdownAndAwait(0, TimeUnit.SECONDS);
         assertNotNull(executor);
     }
 
@@ -600,7 +600,7 @@ public class AsyncExecutorTest extends TestBase {
             }
         };
         AsyncExecutor executor = new AsyncExecutor(plainExecutor);
-        executor.shutdown(1, TimeUnit.SECONDS);
+        executor.shutdownAndAwait(1, TimeUnit.SECONDS);
         Assertions.assertThrows(IllegalStateException.class, executor::getExecutor);
     }
 
@@ -664,7 +664,7 @@ public class AsyncExecutorTest extends TestBase {
         });
 
         latch.await(1, TimeUnit.SECONDS);
-        executor.shutdown(2, TimeUnit.SECONDS);
+        executor.shutdownAndAwait(2, TimeUnit.SECONDS);
         Assertions.assertTrue(executor.isTerminated());
     }
 

@@ -292,6 +292,48 @@ import com.landawn.abacus.util.stream.Stream;
  * open source projects under the Apache License 2.0. Methods from these libraries may have been
  * modified for consistency, performance optimization, and null-safety enhancement.
  *
+ * <p><b>{@code Strings} (Abacus) vs. {@code StringUtils} (Apache Commons Lang):</b> {@code Strings} is adapted
+ * from {@code StringUtils} and keeps the familiar, null-safe core, with a few deliberate differences:</p>
+ * <table border="1" summary="Strings (Abacus) compared with Apache Commons Lang StringUtils">
+ *   <tr>
+ *     <th>Aspect</th>
+ *     <th>{@code Strings} (Abacus)</th>
+ *     <th>{@code StringUtils} (Commons Lang)</th>
+ *   </tr>
+ *   <tr>
+ *     <td>Origin</td>
+ *     <td>adapted from {@code StringUtils} (and Guava), tuned for consistency and null-safety</td>
+ *     <td>the original third-party utility</td>
+ *   </tr>
+ *   <tr>
+ *     <td>Dependency</td>
+ *     <td>bundled in this library — no extra dependency</td>
+ *     <td>requires {@code org.apache.commons:commons-lang3}</td>
+ *   </tr>
+ *   <tr>
+ *     <td>Core predicates</td>
+ *     <td>{@link #isEmpty(CharSequence) isEmpty} / {@link #isBlank(CharSequence) isBlank} / {@code isNotEmpty} /
+ *         {@code isNotBlank} — same null-safe semantics</td>
+ *     <td>same names and semantics</td>
+ *   </tr>
+ *   <tr>
+ *     <td>{@code null} handling</td>
+ *     <td>null-safe; explicit {@link #nullToEmpty(String) nullToEmpty} converter; consult each method for its null contract</td>
+ *     <td>generally null-in &rarr; null/empty-out per method</td>
+ *   </tr>
+ *   <tr>
+ *     <td>Ecosystem</td>
+ *     <td>integrates with {@link Joiner}, {@link Splitter}, {@link com.landawn.abacus.util.RegExUtil RegExUtil}, {@link N}</td>
+ *     <td>standalone</td>
+ *   </tr>
+ *   <tr>
+ *     <td>Extras</td>
+ *     <td>adds e.g. Base64 ({@link #base64Encode(byte[]) base64Encode}), {@link #uuid() uuid}, and rich
+ *         {@code split}/{@code substring} families</td>
+ *     <td>focused on the classic string helpers</td>
+ *   </tr>
+ * </table>
+ *
  * @see Joiner
  * @see Splitter
  * @see com.landawn.abacus.util.RegExUtil

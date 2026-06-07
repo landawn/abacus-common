@@ -3527,13 +3527,13 @@ public class EntryStreamTest extends TestBase {
     @Test
     public void testToMultiset() {
         Multiset<Entry<String, Integer>> result = EntryStream.of("a", 1, "a", 1, "b", 2).toMultiset();
-        assertEquals(2, result.get(new AbstractMap.SimpleEntry<>("a", 1)));
+        assertEquals(2, result.getCount(new AbstractMap.SimpleEntry<>("a", 1)));
     }
 
     @Test
     public void testToMultiset_WithSupplier() {
         Multiset<Entry<String, Integer>> result = EntryStream.of("a", 1, "a", 1).toMultiset(Multiset::new);
-        assertEquals(2, result.get(new AbstractMap.SimpleEntry<>("a", 1)));
+        assertEquals(2, result.getCount(new AbstractMap.SimpleEntry<>("a", 1)));
     }
 
     @Test

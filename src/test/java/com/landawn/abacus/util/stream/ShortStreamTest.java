@@ -4068,8 +4068,8 @@ public class ShortStreamTest extends TestBase {
     @Test
     public void testToMultisetDefault() {
         Multiset<Short> multiset = createShortStream((short) 1, (short) 2, (short) 1).toMultiset();
-        assertEquals(2, multiset.get((short) 1));
-        assertEquals(1, multiset.get((short) 2));
+        assertEquals(2, multiset.getCount((short) 1));
+        assertEquals(1, multiset.getCount((short) 2));
     }
 
     @Test
@@ -4250,9 +4250,9 @@ public class ShortStreamTest extends TestBase {
     @Test
     public void testToMultisetWithSupplierMethod() {
         Multiset<Short> result = createShortStream((short) 1, (short) 2, (short) 2, (short) 3, (short) 3, (short) 3).toMultiset(Suppliers.ofMultiset());
-        assertEquals(1, result.get((short) 1));
-        assertEquals(2, result.get((short) 2));
-        assertEquals(3, result.get((short) 3));
+        assertEquals(1, result.getCount((short) 1));
+        assertEquals(2, result.getCount((short) 2));
+        assertEquals(3, result.getCount((short) 3));
     }
 
     @Test

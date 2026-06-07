@@ -44,11 +44,11 @@ public interface IntObjOperator<T> extends Throwables.IntObjOperator<T, RuntimeE
      * int result = repeater.applyAsInt(3, "hello");   // Returns 15 (5 * 3)
      * }</pre>
      *
-     * @param operand the {@code int} operand
-     * @param obj the object operand of type {@code T}
+     * @param t the {@code int} operand
+     * @param u the object operand of type {@code T}
      * @return the {@code int}-valued result of applying this operator to the given operands
      */
     // @ai-ignore IntObj*/ObjInt* argument order convention - intentional: class name prefix determines parameter order. IntObj* has int first; ObjInt* has object first. Do not suggest reordering.
     @Override
-    int applyAsInt(int operand, T obj);
+    int applyAsInt(int t, T u);
 }

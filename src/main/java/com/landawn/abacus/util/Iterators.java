@@ -262,6 +262,41 @@ import com.landawn.abacus.util.stream.Stream;
  * consistency, performance optimization, and enhanced iterator-specific functionality within the
  * Abacus framework.</p>
  *
+ * <p><b>{@code Iterators} vs. related APIs:</b> {@code Iterators} is a factory/adapter toolkit for lazy
+ * {@link java.util.Iterator}s; pick a sibling when you want an eager result or a chainable pipeline instead.</p>
+ * <table border="1" summary="When to use Iterators versus Iterables, N, and Stream">
+ *   <tr>
+ *     <th>API</th>
+ *     <th>Focus</th>
+ *     <th>Evaluation</th>
+ *     <th>Use when</th>
+ *   </tr>
+ *   <tr>
+ *     <td>{@code Iterators}</td>
+ *     <td>factory &amp; adapter methods returning {@link java.util.Iterator}/{@link ObjIterator}</td>
+ *     <td>lazy — elements are pulled on demand</td>
+ *     <td>composing iteration: {@code concat}, {@code merge}, {@code skip}, {@code limit}, {@code filter}, {@code map}, {@code cycle}</td>
+ *   </tr>
+ *   <tr>
+ *     <td>{@link Iterables}</td>
+ *     <td>aggregate operations over an {@link Iterable}/{@code Collection}</td>
+ *     <td>eager — returns values/collections</td>
+ *     <td>computing a result ({@code min}/{@code max}/{@code sum}, {@code indexOf}, set operations) over an existing collection</td>
+ *   </tr>
+ *   <tr>
+ *     <td>{@link N}</td>
+ *     <td>general array/collection utilities</td>
+ *     <td>eager</td>
+ *     <td>broadly-applicable, one-shot operations</td>
+ *   </tr>
+ *   <tr>
+ *     <td>{@link com.landawn.abacus.util.stream.Stream Stream} / {@link Seq}</td>
+ *     <td>chainable functional pipeline</td>
+ *     <td>lazy</td>
+ *     <td>multi-step transformations ending in a terminal collect/reduce</td>
+ *   </tr>
+ * </table>
+ *
  * @see com.landawn.abacus.util.Iterables
  * @see com.landawn.abacus.util.ObjIterator
  * @see com.landawn.abacus.util.N

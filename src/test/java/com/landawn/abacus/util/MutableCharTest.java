@@ -713,4 +713,86 @@ public class MutableCharTest extends TestBase {
         assertEquals("\0", mc.toString());
     }
 
+    @Test
+    public void test_add() {
+        MutableChar mc = MutableChar.of('A');
+        mc.add((char) 2);
+        assertEquals('C', mc.value());
+    }
+
+    @Test
+    public void test_add_zero() {
+        MutableChar mc = MutableChar.of('A');
+        mc.add((char) 0);
+        assertEquals('A', mc.value());
+    }
+
+    @Test
+    public void test_add_overflow() {
+        MutableChar mc = MutableChar.of(Character.MAX_VALUE);
+        mc.add((char) 1);
+        assertEquals('\0', mc.value());
+    }
+
+    @Test
+    public void test_subtract() {
+        MutableChar mc = MutableChar.of('C');
+        mc.subtract((char) 2);
+        assertEquals('A', mc.value());
+    }
+
+    @Test
+    public void test_subtract_zero() {
+        MutableChar mc = MutableChar.of('A');
+        mc.subtract((char) 0);
+        assertEquals('A', mc.value());
+    }
+
+    @Test
+    public void test_subtract_underflow() {
+        MutableChar mc = MutableChar.of('\0');
+        mc.subtract((char) 1);
+        assertEquals(Character.MAX_VALUE, mc.value());
+    }
+
+    @Test
+    public void test_getAndAdd() {
+        MutableChar mc = MutableChar.of('A');
+        char old = mc.getAndAdd((char) 2);
+        assertEquals('A', old);
+        assertEquals('C', mc.value());
+    }
+
+    @Test
+    public void test_getAndAdd_overflow() {
+        MutableChar mc = MutableChar.of(Character.MAX_VALUE);
+        char old = mc.getAndAdd((char) 1);
+        assertEquals(Character.MAX_VALUE, old);
+        assertEquals('\0', mc.value());
+    }
+
+    @Test
+    public void test_addAndGet() {
+        MutableChar mc = MutableChar.of('A');
+        char newVal = mc.addAndGet((char) 2);
+        assertEquals('C', newVal);
+        assertEquals('C', mc.value());
+    }
+
+    @Test
+    public void test_addAndGet_overflow() {
+        MutableChar mc = MutableChar.of(Character.MAX_VALUE);
+        char newVal = mc.addAndGet((char) 1);
+        assertEquals('\0', newVal);
+        assertEquals('\0', mc.value());
+    }
+
+    @Test
+    public void test_add_subtract_roundTrip() {
+        MutableChar mc = MutableChar.of('M');
+        mc.add((char) 5);
+        mc.subtract((char) 5);
+        assertEquals('M', mc.value());
+    }
+
 }

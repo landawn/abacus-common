@@ -273,6 +273,50 @@ public final class MutableChar implements Mutable, Serializable, Comparable<Muta
     //-----------------------------------------------------------------------
 
     /**
+     * Adds the specified delta to the current value, moving forward in Unicode order.
+     *
+     * <p>Note: This operation wraps around if adding causes overflow.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * MutableChar ch = MutableChar.of('A');
+     * ch.add((char) 2);   // value is now 'C'
+     * }</pre>
+     *
+     * @param delta the value to add to the current value
+     * @deprecated arithmetic on a {@code char} value rarely carries meaning and is easily confused with
+     *             numeric addition; prefer working with a numeric {@code Mutable*} (e.g. {@link MutableInt})
+     *             if you need arithmetic, or {@link #increment()} for stepping through Unicode order.
+     */
+    @Deprecated
+    public void add(final char delta) {
+        value += delta;
+    }
+
+    /**
+     * Subtracts the specified delta from the current value, moving backward in Unicode order.
+     *
+     * <p>Note: This operation wraps around if subtracting causes underflow.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * MutableChar ch = MutableChar.of('C');
+     * ch.subtract((char) 2);   // value is now 'A'
+     * }</pre>
+     *
+     * @param delta the value to subtract from the current value
+     * @deprecated arithmetic on a {@code char} value rarely carries meaning and is easily confused with
+     *             numeric subtraction; prefer working with a numeric {@code Mutable*} (e.g. {@link MutableInt})
+     *             if you need arithmetic, or {@link #decrement()} for stepping through Unicode order.
+     */
+    @Deprecated
+    public void subtract(final char delta) {
+        value -= delta;
+    }
+
+    //-----------------------------------------------------------------------
+
+    /**
      * Returns the current value and then increments it by one.
      * This mimics the post-increment operator ({@code value++}) for primitives.
      *
@@ -340,6 +384,52 @@ public final class MutableChar implements Mutable, Serializable, Comparable<Muta
      */
     public char decrementAndGet() {
         return --value;
+    }
+
+    /**
+     * Returns the current value and then adds the specified delta.
+     *
+     * <p>Note: This operation wraps around if adding causes overflow.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * MutableChar ch = MutableChar.of('A');
+     * char old = ch.getAndAdd((char) 2);   // returns 'A', value is now 'C'
+     * }</pre>
+     *
+     * @param delta the value to add to the current value
+     * @return the value before adding
+     * @deprecated arithmetic on a {@code char} value rarely carries meaning and is easily confused with
+     *             numeric addition; prefer working with a numeric {@code Mutable*} (e.g. {@link MutableInt})
+     *             if you need arithmetic, or {@link #getAndIncrement()} for stepping through Unicode order.
+     */
+    @Deprecated
+    public char getAndAdd(final char delta) {
+        final char prev = value;
+        value += delta;
+        return prev;
+    }
+
+    /**
+     * Adds the specified delta to the current value and then returns it.
+     *
+     * <p>Note: This operation wraps around if adding causes overflow.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * MutableChar ch = MutableChar.of('A');
+     * char newVal = ch.addAndGet((char) 2);   // returns 'C', value is now 'C'
+     * }</pre>
+     *
+     * @param delta the value to add to the current value
+     * @return the value after adding
+     * @deprecated arithmetic on a {@code char} value rarely carries meaning and is easily confused with
+     *             numeric addition; prefer working with a numeric {@code Mutable*} (e.g. {@link MutableInt})
+     *             if you need arithmetic, or {@link #incrementAndGet()} for stepping through Unicode order.
+     */
+    @Deprecated
+    public char addAndGet(final char delta) {
+        return value += delta;
     }
 
     //-----------------------------------------------------------------------

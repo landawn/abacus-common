@@ -1939,9 +1939,9 @@ public class LongStreamTest extends TestBase {
     @Test
     public void testToMultiset() {
         Multiset<Long> result = LongStream.of(1L, 2L, 2L, 3L, 3L, 3L).toMultiset();
-        assertEquals(1, result.get(1L));
-        assertEquals(2, result.get(2L));
-        assertEquals(3, result.get(3L));
+        assertEquals(1, result.getCount(1L));
+        assertEquals(2, result.getCount(2L));
+        assertEquals(3, result.getCount(3L));
     }
 
     @Test
@@ -2364,9 +2364,9 @@ public class LongStreamTest extends TestBase {
     @Test
     public void testToMultiset_HappyPath() {
         Multiset<Long> result = LongStream.of(1, 2, 2, 3, 3, 3).toMultiset();
-        assertEquals(1, result.get(1L));
-        assertEquals(2, result.get(2L));
-        assertEquals(3, result.get(3L));
+        assertEquals(1, result.getCount(1L));
+        assertEquals(2, result.getCount(2L));
+        assertEquals(3, result.getCount(3L));
     }
 
     @Test
@@ -2504,9 +2504,9 @@ public class LongStreamTest extends TestBase {
     @Test
     public void testToMultiset_Supplier() {
         Multiset<Long> result = LongStream.of(1L, 2L, 2L, 3L, 3L, 3L).toMultiset(Multiset::new);
-        assertEquals(1, result.get(1L));
-        assertEquals(2, result.get(2L));
-        assertEquals(3, result.get(3L));
+        assertEquals(1, result.getCount(1L));
+        assertEquals(2, result.getCount(2L));
+        assertEquals(3, result.getCount(3L));
     }
 
     @Test

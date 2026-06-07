@@ -6193,9 +6193,9 @@ public class FloatStreamTest extends TestBase {
     @Test
     public void testToMultisetWithSupplier() {
         Multiset<Float> result = createFloatStream(1.0f, 2.0f, 2.0f, 3.0f, 3.0f, 3.0f).toMultiset(Suppliers.ofMultiset());
-        assertEquals(1, result.get(1.0f));
-        assertEquals(2, result.get(2.0f));
-        assertEquals(3, result.get(3.0f));
+        assertEquals(1, result.getCount(1.0f));
+        assertEquals(2, result.getCount(2.0f));
+        assertEquals(3, result.getCount(3.0f));
     }
 
     @Test

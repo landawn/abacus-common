@@ -188,6 +188,28 @@ import com.landawn.abacus.util.stream.Stream;
  *   <li>Use bulk operations instead of row-by-row modifications</li>
  * </ul>
  *
+ * <p><b>{@code Dataset} vs. {@code Sheet}:</b> both are tabular, but they are addressed and typed differently:</p>
+ * <table border="1" summary="Choosing between Dataset and Sheet">
+ *   <tr>
+ *     <th>Type</th>
+ *     <th>Shape</th>
+ *     <th>Cell typing</th>
+ *     <th>Best for</th>
+ *   </tr>
+ *   <tr>
+ *     <td>{@code Dataset}</td>
+ *     <td>rows &times; <em>named</em> columns (a table / DB result set / DataFrame)</td>
+ *     <td>columns may differ in type (heterogeneous); cell values are {@code Object}</td>
+ *     <td>tabular data with named, differently-typed columns: filter, sort, group, join, aggregate, pivot</td>
+ *   </tr>
+ *   <tr>
+ *     <td>{@link Sheet}</td>
+ *     <td>values addressed by a (rowKey, columnKey) pair — a 2D grid / matrix</td>
+ *     <td>a single value type {@code V} (homogeneous)</td>
+ *     <td>spreadsheet-like / matrix data keyed by both a row key and a column key</td>
+ *   </tr>
+ * </table>
+ *
  * @see com.landawn.abacus.util.N#newEmptyDataset()
  * @see com.landawn.abacus.util.N#newEmptyDataset(Collection)
  * @see com.landawn.abacus.util.N#newDataset(Map)

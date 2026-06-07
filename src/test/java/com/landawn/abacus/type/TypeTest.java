@@ -264,10 +264,10 @@ public class TypeTest extends AbstractTest {
         N.println(type.javaType());
 
         // ClazzType handles instances of java.lang.Class; the parameter (int.class) is
-        // exposed via ClazzType.getParameterClass(). Pre-fix this returned int.class which
+        // exposed via ClazzType.parameterClass(). Pre-fix this returned int.class which
         // broke type-system checks like Type.javaType().isAssignableFrom(...).
         assertEquals(Class.class, type.javaType());
-        assertEquals(int.class, ((com.landawn.abacus.type.ClazzType) (Type) type).getParameterClass());
+        assertEquals(int.class, ((com.landawn.abacus.type.ClazzType) (Type) type).parameterClass());
     }
 
     @Test

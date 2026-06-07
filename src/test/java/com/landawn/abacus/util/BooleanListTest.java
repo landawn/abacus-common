@@ -2795,8 +2795,8 @@ public class BooleanListTest extends TestBase {
     public void test_toMultiset() {
         BooleanList list = BooleanList.of(true, false, true, false, true);
         Multiset<Boolean> multiset = list.toMultiset(0, 5, Multiset::new);
-        assertEquals(3, multiset.get(true));
-        assertEquals(2, multiset.get(false));
+        assertEquals(3, multiset.getCount(true));
+        assertEquals(2, multiset.getCount(false));
     }
 
     @Test

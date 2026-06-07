@@ -156,6 +156,41 @@ import com.landawn.abacus.util.stream.Stream;
  *   <li><b>vs Map&lt;E,Integer&gt;:</b> Implements Collection interface, specialized multiset operations</li>
  * </ul>
  *
+ * <p><b>{@code Map} vs. {@code BiMap} vs. {@code Multimap} vs. {@code Multiset}:</b> these model different
+ * key/value relationships — pick by how many (and what kind of) values a key holds:</p>
+ * <table border="1" summary="Choosing between Map, BiMap, Multimap, and Multiset">
+ *   <tr>
+ *     <th>Type</th>
+ *     <th>Models</th>
+ *     <th>Example contents</th>
+ *     <th>Use when</th>
+ *   </tr>
+ *   <tr>
+ *     <td>{@link java.util.Map} (helpers in {@link Maps})</td>
+ *     <td>one key &rarr; one value</td>
+ *     <td>{@code {a=1, b=2}}</td>
+ *     <td>each key has exactly one value</td>
+ *   </tr>
+ *   <tr>
+ *     <td>{@link BiMap}</td>
+ *     <td>one key &harr; one value (both sides unique; invertible)</td>
+ *     <td>{@code {a=1, b=2}} with inverse {@code {1=a, 2=b}}</td>
+ *     <td>you must look up by value as well as by key, and values are unique</td>
+ *   </tr>
+ *   <tr>
+ *     <td>{@link Multimap} ({@link ListMultimap} / {@link SetMultimap})</td>
+ *     <td>one key &rarr; many values</td>
+ *     <td>{@code {a=[1, 2], b=[3]}}</td>
+ *     <td>a key may hold several values (avoids hand-rolling {@code Map<K, List<V>>})</td>
+ *   </tr>
+ *   <tr>
+ *     <td>{@code Multiset}</td>
+ *     <td>element &rarr; occurrence count</td>
+ *     <td>{@code {a x 2, b x 1}}</td>
+ *     <td>counting occurrences / frequencies (a {@code Map<E, Integer>} done right)</td>
+ *   </tr>
+ * </table>
+ *
  * <p><b>Implementation Note:</b>
  * This implementation is backed by a {@link Map} where keys are the distinct elements and values
  * are their occurrence counts stored as {@link MutableInt} objects for efficiency. The backing map type
@@ -647,42 +682,6 @@ public final class Multiset<E> implements Collection<E> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Multiset<String> multiset = Multiset.of("a", "b", "a", "c");
-     * multiset.get("a");   // returns 2
-     * multiset.get("d");   // returns 0 (absent)
-     * }</pre>
-     *
-     * <p><b>Migration Guidance:</b></p>
-     * <p>This method is deprecated. Use {@link #getCount(Object)} instead for clearer semantics.</p>
-     * <pre>{@code
-     * Multiset<String> multiset = Multiset.of("a", "a", "b");
-     * String element = "a";
-     *
-     * // Old code:
-     * int oldCount = multiset.get(element);
-     *
-     * // New code:
-     * int newCount = multiset.getCount(element);
-     * }</pre>
-     *
-     * @param element the element to count occurrences of.
-     * @return the number of occurrences of the element; zero if not present.
-     * @deprecated Use {@link #getCount(Object)} instead for better clarity.
-     * @see #getCount(Object)
-     */
-    @Deprecated
-    public int get(final Object element) {
-        return getCount(element);
-    }
-
-    /**
-     * Returns the number of occurrences of the specified element in this multiset.
-     *
-     * <p>This method gives the same result as {@link Collections#frequency} for an
-     * {@link Object#equals}-based multiset, but with better performance.</p>
-     *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Multiset<String> multiset = Multiset.of("a", "b", "a", "c");
      * System.out.println(multiset.getCount("a"));   // prints 2
      * System.out.println(multiset.getCount("d"));   // prints 0
      * }</pre>
@@ -982,7 +981,7 @@ public final class Multiset<E> implements Collection<E> {
      * @return the count of the element before the operation.
      * @throws IllegalArgumentException if occurrencesToRemove is negative.
      * @see #removeAndGetCount(Object, int)
-     * @see #removeAllOccurrences(Object)
+     * @see #removeAllOccurrencesOf(Object)
      */
     public int remove(final Object element, final int occurrencesToRemove) {
         checkOccurrences(occurrencesToRemove);
@@ -1060,7 +1059,7 @@ public final class Multiset<E> implements Collection<E> {
      * }</pre>
      *
      * <p><b>Migration Guidance:</b></p>
-     * <p>This method is deprecated. Use {@link #removeAllOccurrences(Collection)} instead for clearer semantics.</p>
+     * <p>This method is deprecated. Use {@link #removeAllOccurrencesOf(Collection)} instead for clearer semantics.</p>
      * <pre>{@code
      * Multiset<String> multiset = Multiset.of("a", "a", "b", "c");
      * Collection<String> collection = Arrays.asList("a", "b");
@@ -1074,7 +1073,7 @@ public final class Multiset<E> implements Collection<E> {
      *
      * @param c the collection containing elements to be removed.
      * @return {@code true} if this multiset changed as a result of the call.
-     * @deprecated replaced by {@link #removeAllOccurrences(Collection)} for better clarity.
+     * @deprecated replaced by {@link #removeAllOccurrencesOf(Collection)} for better clarity.
      */
     @Deprecated
     @Override
@@ -1144,7 +1143,7 @@ public final class Multiset<E> implements Collection<E> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Multiset<String> multiset = Multiset.of("a", "a", "a", "b");
-     * int removed = multiset.removeAllOccurrences("a");
+     * int removed = multiset.removeAllOccurrencesOf("a");
      * System.out.println(removed);                  // prints 3
      * System.out.println(multiset.contains("a"));   // prints false
      * }</pre>
@@ -1152,7 +1151,7 @@ public final class Multiset<E> implements Collection<E> {
      * @param e the element whose all occurrences are to be removed.
      * @return the count of the element before removal, or 0 if not present.
      */
-    public int removeAllOccurrences(final Object e) {
+    public int removeAllOccurrencesOf(final Object e) {
         @SuppressWarnings("SuspiciousMethodCalls")
         final MutableInt count = backingMap.remove(e);
 
@@ -1166,7 +1165,7 @@ public final class Multiset<E> implements Collection<E> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Multiset<String> multiset = Multiset.of("a", "a", "b", "b", "c");
-     * multiset.removeAllOccurrences(Arrays.asList("a", "b"));
+     * multiset.removeAllOccurrencesOf(Arrays.asList("a", "b"));
      * System.out.println(multiset);   // prints {c=1} (only "c" remains)
      * }</pre>
      *
@@ -1174,7 +1173,7 @@ public final class Multiset<E> implements Collection<E> {
      * @return {@code true} if this multiset changed as a result of the call.
      */
     @SuppressWarnings("deprecation")
-    public boolean removeAllOccurrences(final Collection<?> c) {
+    public boolean removeAllOccurrencesOf(final Collection<?> c) {
         return removeAll(c);
     }
 
@@ -1420,7 +1419,7 @@ public final class Multiset<E> implements Collection<E> {
             setCount(key, newValue);
         } else {
             if (oldValue > 0) {
-                removeAllOccurrences(key);
+                removeAllOccurrencesOf(key);
             }
         }
 
@@ -1509,7 +1508,7 @@ public final class Multiset<E> implements Collection<E> {
             }
         }
 
-        return !N.isEmpty(others) && removeAllOccurrences(others);
+        return !N.isEmpty(others) && removeAllOccurrencesOf(others);
     }
 
     /**

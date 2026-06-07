@@ -57,9 +57,9 @@ import com.landawn.abacus.type.Type;
  * @param <DC> the deserialization configuration type
  * @see JsonXmlField
  * @see SerializationConfig
- * @see Deserialization
+ * @see DeserializationConfig
  */
-public interface Parser<SC extends SerializationConfig<?>, DC extends Deserialization<?>> {
+public interface Parser<SC extends SerializationConfig<?>, DC extends DeserializationConfig<?>> {
 
     /**
      * Serializes an object to a string representation.

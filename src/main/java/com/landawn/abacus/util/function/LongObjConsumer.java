@@ -70,12 +70,12 @@ public interface LongObjConsumer<T> extends Throwables.LongObjConsumer<T, Runtim
      * logger.accept(System.currentTimeMillis(), "Application started");
      * }</pre>
      *
-     * @param i the first {@code long} input argument
-     * @param t the second input argument of type {@code T}
+     * @param t the first {@code long} input argument
+     * @param u the second input argument of type {@code T}
      */
     // @ai-ignore LongObj*/ObjLong* argument order convention - intentional: class name prefix determines parameter order. LongObj* has long first; ObjLong* has object first. Do not suggest reordering.
     @Override
-    void accept(long i, T t);
+    void accept(long t, T u);
 
     /**
      * Returns a composed {@code LongObjConsumer} that performs, in sequence, this
@@ -107,9 +107,9 @@ public interface LongObjConsumer<T> extends Throwables.LongObjConsumer<T, Runtim
      */
     default LongObjConsumer<T> andThen(final LongObjConsumer<? super T> after) {
         Objects.requireNonNull(after);
-        return (i, t) -> {
-            accept(i, t);
-            after.accept(i, t);
+        return (t, u) -> {
+            accept(t, u);
+            after.accept(t, u);
         };
     }
 }

@@ -82,7 +82,7 @@ import java.util.stream.Collector;
 import com.landawn.abacus.annotation.Beta;
 import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.annotation.NotNull;
-import com.landawn.abacus.parser.Deserialization;
+import com.landawn.abacus.parser.DeserializationConfig;
 import com.landawn.abacus.parser.JsonDeserConfig;
 import com.landawn.abacus.parser.JsonSerConfig;
 import com.landawn.abacus.parser.XmlDeserConfig;
@@ -304,6 +304,64 @@ import com.landawn.abacus.util.stream.Stream;
  *   <li><b>{@link IOUtil}:</b> Input/output and file system utilities</li>
  *   <li><b>{@link Fn}:</b> Functional interface utilities and operations</li>
  * </ul>
+ *
+ * <p><b>Choosing between {@code N} and a specialized utility:</b> {@code N} is the broad, general-purpose
+ * entry point (and extends {@link CommonUtil}). For a specific domain, the focused companion below is
+ * usually clearer:</p>
+ * <table border="1" summary="When to use N versus a specialized utility class">
+ *   <tr>
+ *     <th>Utility</th>
+ *     <th>Domain / best for</th>
+ *     <th>Relationship to {@code N}</th>
+ *   </tr>
+ *   <tr>
+ *     <td>{@code N}</td>
+ *     <td>general default: {@code null}/empty checks, {@code equals}/{@code hashCode}/{@code compare},
+ *         copy/convert, array &amp; collection bulk ops (filter/map/forEach), aggregation, JSON/XML</td>
+ *     <td>the catch-all first stop</td>
+ *   </tr>
+ *   <tr>
+ *     <td>{@link Strings}</td>
+ *     <td>{@code CharSequence}/{@code String}: split, join, pad, substring, case, validation</td>
+ *     <td>separate facade — {@code N} does not duplicate it</td>
+ *   </tr>
+ *   <tr>
+ *     <td>{@link Numbers}</td>
+ *     <td>numeric parsing &amp; math: {@code toInt}/{@code toLong}, {@code round}, {@code format}, exact/saturated math</td>
+ *     <td>separate facade</td>
+ *   </tr>
+ *   <tr>
+ *     <td>{@link Maps}</td>
+ *     <td>{@code Map}-centric ops: {@code get*}, {@code zip}, {@code invert}, {@code filter}, {@code flatten}</td>
+ *     <td>focused home for map logic</td>
+ *   </tr>
+ *   <tr>
+ *     <td>{@link Iterables}</td>
+ *     <td>eager aggregate ops over an {@link Iterable}/{@code Collection}: {@code min}/{@code max}/{@code sum},
+ *         set operations; returns values/{@code Optional}s</td>
+ *     <td>Guava-style helpers beyond {@code N}'s common cases</td>
+ *   </tr>
+ *   <tr>
+ *     <td>{@link Iterators}</td>
+ *     <td>building &amp; adapting lazy {@link java.util.Iterator}s: {@code concat}/{@code skip}/{@code limit}/{@code filter}/{@code map}</td>
+ *     <td>use for lazy iteration instead of materialized results</td>
+ *   </tr>
+ *   <tr>
+ *     <td>{@link Array}</td>
+ *     <td>array creation &amp; element manipulation: {@code newArray}, box/unbox, {@code range}, fill</td>
+ *     <td>focused home for array work</td>
+ *   </tr>
+ *   <tr>
+ *     <td>{@link Comparators}</td>
+ *     <td>constructing {@link java.util.Comparator}s: natural/reverse/{@code comparingBy}</td>
+ *     <td>pair with {@code N.sort} / {@code Iterables.min}</td>
+ *   </tr>
+ *   <tr>
+ *     <td>{@link com.landawn.abacus.util.stream.Stream Stream} / {@link Seq}</td>
+ *     <td>lazy, chainable functional pipelines: {@code map}/{@code filter}/{@code collect} over large or streamed data</td>
+ *     <td>prefer for multi-step pipelines; {@code N} for one-shot ops</td>
+ *   </tr>
+ * </table>
  *
  * <p><b>Usage Examples: Data Processing Pipeline</b></p>
  * <pre>{@code
@@ -34892,7 +34950,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         return configToReturn;
     }
 
-    private static <C extends Deserialization<C>> C setConfig(final Type<?> targetType, final C config, final boolean isJSON) {
+    private static <C extends DeserializationConfig<C>> C setConfig(final Type<?> targetType, final C config, final boolean isJSON) {
         C configToReturn = config;
 
         if (targetType.isCollection() || targetType.isArray()) {

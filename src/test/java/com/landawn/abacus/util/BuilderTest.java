@@ -1113,7 +1113,7 @@ public class BuilderTest extends TestBase {
         Multiset<String> multiset = Multiset.of("a", "a", "a");
         MultisetBuilder<String> builder = Builder.of(multiset);
         builder.remove("a", 2);
-        assertEquals(1, builder.val().get("a"));
+        assertEquals(1, builder.val().getCount("a"));
     }
 
     @Test
@@ -1121,7 +1121,7 @@ public class BuilderTest extends TestBase {
         Multiset<String> multiset = Multiset.of("a", "a", "b");
         MultisetBuilder<String> builder = Builder.of(multiset);
         builder.removeAllOccurrences("a");
-        assertEquals(0, builder.val().get("a"));
+        assertEquals(0, builder.val().getCount("a"));
     }
 
     @Test
@@ -1129,7 +1129,7 @@ public class BuilderTest extends TestBase {
         Multiset<String> multiset = Multiset.of("a", "a", "b");
         MultisetBuilder<String> builder = Builder.of(multiset);
         builder.removeAll(Arrays.asList("a"));
-        assertEquals(0, builder.val().get("a"));
+        assertEquals(0, builder.val().getCount("a"));
     }
 
     @Test
@@ -1137,8 +1137,8 @@ public class BuilderTest extends TestBase {
         Multiset<String> multiset = Multiset.of("a", "a", "b", "c");
         MultisetBuilder<String> builder = Builder.of(multiset);
         builder.removeAllOccurrences(Arrays.asList("a", "b"));
-        assertEquals(0, builder.val().get("a"));
-        assertEquals(0, builder.val().get("b"));
+        assertEquals(0, builder.val().getCount("a"));
+        assertEquals(0, builder.val().getCount("b"));
     }
 
     @Test
@@ -2500,7 +2500,7 @@ public class BuilderTest extends TestBase {
         Multiset<String> multiset = Multiset.of("a", "b", "a");
         MultisetBuilder<String> builder = Builder.of(multiset);
         assertNotNull(builder);
-        assertEquals(2, (Integer) builder.val().get("a"));
+        assertEquals(2, (Integer) builder.val().getCount("a"));
     }
 
     @Test

@@ -2970,9 +2970,9 @@ public class DoubleStreamTest extends TestBase {
     @Test
     public void testToMultiset_HappyPath() {
         Multiset<Double> result = DoubleStream.of(1.0, 2.0, 2.0, 3.0, 3.0, 3.0).toMultiset();
-        assertEquals(1, result.get(1.0));
-        assertEquals(2, result.get(2.0));
-        assertEquals(3, result.get(3.0));
+        assertEquals(1, result.getCount(1.0));
+        assertEquals(2, result.getCount(2.0));
+        assertEquals(3, result.getCount(3.0));
     }
 
     @Test

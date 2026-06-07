@@ -92,9 +92,9 @@ public abstract class AbstractParserTest extends AbstractTest {
         }
     }
 
-    protected final Parser<? extends SerializationConfig, ? extends Deserialization> parser = getParser();
+    protected final Parser<? extends SerializationConfig, ? extends DeserializationConfig> parser = getParser();
 
-    protected abstract Parser<? extends SerializationConfig, ? extends Deserialization> getParser();
+    protected abstract Parser<? extends SerializationConfig, ? extends DeserializationConfig> getParser();
 
     protected static XBean createXBean() {
         XBean xBean = new XBean();

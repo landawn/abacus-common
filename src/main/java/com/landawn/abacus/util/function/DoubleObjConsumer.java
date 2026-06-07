@@ -46,12 +46,12 @@ public interface DoubleObjConsumer<T> extends Throwables.DoubleObjConsumer<T, Ru
      * mapPutter.accept(98.6, "temperature");
      * }</pre>
      *
-     * @param i the double input argument
-     * @param t the object input argument
+     * @param t the double input argument
+     * @param u the object input argument
      */
     // @ai-ignore DoubleObj*/ObjDouble* argument order convention - intentional: class name prefix determines parameter order. DoubleObj* has double first; ObjDouble* has object first. Do not suggest reordering.
     @Override
-    void accept(double i, T t);
+    void accept(double t, T u);
 
     /**
      * Returns a composed {@code DoubleObjConsumer} that performs, in sequence, this operation followed by the {@code after} operation.
@@ -74,9 +74,9 @@ public interface DoubleObjConsumer<T> extends Throwables.DoubleObjConsumer<T, Ru
      */
     default DoubleObjConsumer<T> andThen(final DoubleObjConsumer<? super T> after) {
         Objects.requireNonNull(after);
-        return (i, t) -> {
-            accept(i, t);
-            after.accept(i, t);
+        return (t, u) -> {
+            accept(t, u);
+            after.accept(t, u);
         };
     }
 }

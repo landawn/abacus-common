@@ -5422,17 +5422,17 @@ public class CharStreamTest extends TestBase {
     public void testToMultiset() {
         CharStream stream = createCharStream('a', 'b', 'a', 'c', 'b', 'a');
         com.landawn.abacus.util.Multiset<Character> result = stream.toMultiset();
-        assertEquals(3, result.get('a'));
-        assertEquals(2, result.get('b'));
-        assertEquals(1, result.get('c'));
+        assertEquals(3, result.getCount('a'));
+        assertEquals(2, result.getCount('b'));
+        assertEquals(1, result.getCount('c'));
     }
 
     @Test
     public void testToMultiset_WithSupplier() {
         CharStream stream = createCharStream('a', 'b', 'a');
         com.landawn.abacus.util.Multiset<Character> result = stream.toMultiset(com.landawn.abacus.util.Multiset::new);
-        assertEquals(2, result.get('a'));
-        assertEquals(1, result.get('b'));
+        assertEquals(2, result.getCount('a'));
+        assertEquals(1, result.getCount('b'));
     }
 
     @Test

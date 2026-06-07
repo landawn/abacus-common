@@ -46,7 +46,7 @@ import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
 import com.landawn.abacus.annotation.Internal;
-import com.landawn.abacus.parser.Deserialization;
+import com.landawn.abacus.parser.DeserializationConfig;
 import com.landawn.abacus.parser.JsonParser;
 import com.landawn.abacus.parser.KryoParser;
 import com.landawn.abacus.parser.Parser;
@@ -987,7 +987,7 @@ public final class HttpUtil {
      * @return The parser for the content format, or the default JSON parser if {@code contentFormat} is {@code null}
      * @throws IllegalArgumentException if the content format is not supported
      */
-    public static <SC extends SerializationConfig<?>, DC extends Deserialization<?>> Parser<SC, DC> getParser(final ContentFormat contentFormat) {
+    public static <SC extends SerializationConfig<?>, DC extends DeserializationConfig<?>> Parser<SC, DC> getParser(final ContentFormat contentFormat) {
         if (contentFormat == null) {
             return (Parser<SC, DC>) jsonParser;
         }

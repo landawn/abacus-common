@@ -2402,7 +2402,7 @@ public class LongListTest extends TestBase {
         Multiset<Long> multiset = list.toMultiset();
         assertEquals(3, multiset.size());
         assertEquals(2, multiset.countOfDistinctElements());
-        assertEquals(2, multiset.get(1L));
+        assertEquals(2, multiset.getCount(1L));
     }
 
     @Test
@@ -2414,24 +2414,24 @@ public class LongListTest extends TestBase {
         Multiset<Long> multiset = list.toMultiset(0, 4, n -> new Multiset<>());
         assertEquals(4, multiset.size());
         assertEquals(3, multiset.countOfDistinctElements());
-        assertEquals(2, multiset.get(1L));
+        assertEquals(2, multiset.getCount(1L));
     }
 
     @Test
     public void testToMultisetTwoArgs() {
         LongList original = LongList.of(1L, 2L, 2L, 3L, 3L, 3L);
         Multiset<Long> multiset = original.toMultiset(1, 5);
-        assertEquals(2, multiset.get(Long.valueOf(2L)));
-        assertEquals(2, multiset.get(Long.valueOf(3L)));
+        assertEquals(2, multiset.getCount(Long.valueOf(2L)));
+        assertEquals(2, multiset.getCount(Long.valueOf(3L)));
     }
 
     @Test
     public void testToMultisetWithSupplier() {
         LongList original = LongList.of(1L, 2L, 2L, 3L);
         Multiset<Long> multiset = original.toMultiset(Multiset::new);
-        assertEquals(1, multiset.get(Long.valueOf(1L)));
-        assertEquals(2, multiset.get(Long.valueOf(2L)));
-        assertEquals(1, multiset.get(Long.valueOf(3L)));
+        assertEquals(1, multiset.getCount(Long.valueOf(1L)));
+        assertEquals(2, multiset.getCount(Long.valueOf(2L)));
+        assertEquals(1, multiset.getCount(Long.valueOf(3L)));
     }
 
     @Test

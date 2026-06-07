@@ -213,6 +213,28 @@ import com.landawn.abacus.util.stream.Stream;
  *   <li><b>V</b> = Vertical processing (column-by-column)</li>
  * </ul>
  *
+ * <p><b>{@code Sheet} vs. {@code Dataset}:</b> both are tabular, but they are addressed and typed differently:</p>
+ * <table border="1" summary="Choosing between Sheet and Dataset">
+ *   <tr>
+ *     <th>Type</th>
+ *     <th>Shape</th>
+ *     <th>Cell typing</th>
+ *     <th>Best for</th>
+ *   </tr>
+ *   <tr>
+ *     <td>{@code Sheet}</td>
+ *     <td>values addressed by a (rowKey, columnKey) pair — a 2D grid / matrix</td>
+ *     <td>a single value type {@code V} (homogeneous)</td>
+ *     <td>spreadsheet-like / matrix data keyed by both a row key and a column key</td>
+ *   </tr>
+ *   <tr>
+ *     <td>{@link Dataset}</td>
+ *     <td>rows &times; <em>named</em> columns (a table / DB result set / DataFrame)</td>
+ *     <td>columns may differ in type (heterogeneous); cell values are {@code Object}</td>
+ *     <td>tabular data with named, differently-typed columns: filter, sort, group, join, aggregate, pivot</td>
+ *   </tr>
+ * </table>
+ *
  * @param <R> the type of row keys used to identify rows in the sheet
  * @param <C> the type of column keys used to identify columns in the sheet
  * @param <V> the type of values stored in the cells of the sheet

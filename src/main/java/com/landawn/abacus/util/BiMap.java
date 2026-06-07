@@ -225,6 +225,41 @@ import com.landawn.abacus.annotation.Internal;
  *   <li><b>vs Apache Commons BidiMap:</b> Type-safe generics and modern Java features</li>
  * </ul>
  *
+ * <p><b>{@code Map} vs. {@code BiMap} vs. {@code Multimap} vs. {@code Multiset}:</b> these model different
+ * key/value relationships — pick by how many (and what kind of) values a key holds:</p>
+ * <table border="1" summary="Choosing between Map, BiMap, Multimap, and Multiset">
+ *   <tr>
+ *     <th>Type</th>
+ *     <th>Models</th>
+ *     <th>Example contents</th>
+ *     <th>Use when</th>
+ *   </tr>
+ *   <tr>
+ *     <td>{@link java.util.Map} (helpers in {@link Maps})</td>
+ *     <td>one key &rarr; one value</td>
+ *     <td>{@code {a=1, b=2}}</td>
+ *     <td>each key has exactly one value</td>
+ *   </tr>
+ *   <tr>
+ *     <td>{@code BiMap}</td>
+ *     <td>one key &harr; one value (both sides unique; invertible)</td>
+ *     <td>{@code {a=1, b=2}} with inverse {@code {1=a, 2=b}}</td>
+ *     <td>you must look up by value as well as by key, and values are unique</td>
+ *   </tr>
+ *   <tr>
+ *     <td>{@link Multimap} ({@link ListMultimap} / {@link SetMultimap})</td>
+ *     <td>one key &rarr; many values</td>
+ *     <td>{@code {a=[1, 2], b=[3]}}</td>
+ *     <td>a key may hold several values (avoids hand-rolling {@code Map<K, List<V>>})</td>
+ *   </tr>
+ *   <tr>
+ *     <td>{@link Multiset}</td>
+ *     <td>element &rarr; occurrence count</td>
+ *     <td>{@code {a x 2, b x 1}}</td>
+ *     <td>counting occurrences / frequencies (a {@code Map<E, Integer>} done right)</td>
+ *   </tr>
+ * </table>
+ *
  * @param <K> the type of keys maintained by this BiMap
  * @param <V> the type of mapped values
  *

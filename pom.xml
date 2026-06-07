@@ -5,8 +5,8 @@
 
 	<groupId>com.landawn.abacus</groupId>
 	<artifactId>abacus-common</artifactId>
-	<version>7.7.5</version>
-	<packaging>jar</packaging> 
+	<version>7.7.7</version>
+	<packaging>jar</packaging>
 	<name>abacus-common</name>
 	<description>A general programming library in Java/Android. It's easy to learn and simple to use with concise and powerful APIs.</description>
 	<url>https://github.com/landawn/abacus-common</url>
@@ -55,7 +55,7 @@
 		<dependency>
 			<groupId>com.landawn.abacus</groupId>
 			<artifactId>abacus-common</artifactId>
-			<version>7.7.4</version>
+			<version>7.7.6</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
@@ -294,7 +294,7 @@
 		    <artifactId>okhttp</artifactId>
 		    <version>4.12.0</version>
 			<scope>provided</scope>
-		</dependency> 
+		</dependency>
 
 		<dependency>
 			<groupId>org.springframework</groupId>
@@ -394,7 +394,7 @@
 				<artifactId>maven-source-plugin</artifactId>
 				<version>3.4.0</version>
 				<configuration>
-				</configuration> 
+				</configuration>
 				<executions>
 					<execution>
 						<id>attach-sources</id>
@@ -416,14 +416,14 @@
 					<show>public</show>
 			        <source>25</source>
 			        <encoding>UTF-8</encoding>
-			        <doclint>all</doclint>    
+			        <doclint>all</doclint>
 					<source>${maven.compiler.source}</source>
 					<detectJavaApiLink>false</detectJavaApiLink>
 					<sourceFileExcludes>
 						<exclude>/com/landawn/abacus/type/**/*.java</exclude>
 						<exclude>/com/landawn/abacus/logging/**/*.java</exclude>
 						<exclude>/com/landawn/abacus/util/cs.java</exclude>
-					</sourceFileExcludes> 
+					</sourceFileExcludes>
 				</configuration>
 				<executions>
 					<execution>

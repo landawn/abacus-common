@@ -45,7 +45,7 @@ public class ParserTest extends TestBase {
         }
     }
 
-    private static class TestDeserializationConfig extends Deserialization<TestDeserializationConfig> {
+    private static class TestDeserializationConfig extends DeserializationConfig<TestDeserializationConfig> {
         private boolean ignoreUnknownProperty = false;
 
         public TestDeserializationConfig setIgnoreUnknownProperty(boolean ignoreUnknownProperty) {

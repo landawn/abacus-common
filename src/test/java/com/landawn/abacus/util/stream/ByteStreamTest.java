@@ -2074,9 +2074,9 @@ public class ByteStreamTest extends TestBase {
     public void testToMultiset() {
         ByteStream stream = ByteStream.of((byte) 1, (byte) 2, (byte) 2, (byte) 3, (byte) 3, (byte) 3);
         Multiset<Byte> multiset = stream.toMultiset();
-        assertEquals(1, multiset.get((byte) 1));
-        assertEquals(2, multiset.get((byte) 2));
-        assertEquals(3, multiset.get((byte) 3));
+        assertEquals(1, multiset.getCount((byte) 1));
+        assertEquals(2, multiset.getCount((byte) 2));
+        assertEquals(3, multiset.getCount((byte) 3));
     }
 
     // Parallel operations
@@ -4096,8 +4096,8 @@ public class ByteStreamTest extends TestBase {
     @Test
     public void testToMultisetWithDefaultSupplier() {
         Multiset<Byte> multiset = createByteStream((byte) 1, (byte) 2, (byte) 1).toMultiset();
-        assertEquals(2, multiset.get((byte) 1));
-        assertEquals(1, multiset.get((byte) 2));
+        assertEquals(2, multiset.getCount((byte) 1));
+        assertEquals(1, multiset.getCount((byte) 2));
     }
 
     // ========== New tests for previously untested methods ==========

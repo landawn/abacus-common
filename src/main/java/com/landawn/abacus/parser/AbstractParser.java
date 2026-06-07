@@ -82,7 +82,7 @@ import com.landawn.abacus.util.Tuple.Tuple2;
  * @param <SC> the serialization configuration type
  * @param <DC> the deserialization configuration type
  */
-abstract class AbstractParser<SC extends SerializationConfig<?>, DC extends Deserialization<?>> implements Parser<SC, DC> {
+abstract class AbstractParser<SC extends SerializationConfig<?>, DC extends DeserializationConfig<?>> implements Parser<SC, DC> {
 
     private static final Logger logger = LoggerFactory.getLogger(AbstractParser.class);
 

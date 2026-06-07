@@ -392,8 +392,8 @@ public class ListMultimapTest extends TestBase {
     public void testToMultiset() {
         ListMultimap<String, Integer> multimap = ListMultimap.of("a", 1, "a", 2, "b", 3);
         Multiset<String> multiset = multimap.toMultiset();
-        Assertions.assertEquals(2, multiset.get("a"));
-        Assertions.assertEquals(1, multiset.get("b"));
+        Assertions.assertEquals(2, multiset.getCount("a"));
+        Assertions.assertEquals(1, multiset.getCount("b"));
     }
 
     // ==================== toMap ====================

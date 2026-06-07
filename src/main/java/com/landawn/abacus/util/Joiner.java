@@ -240,13 +240,13 @@ public final class Joiner implements Closeable {
 
     private final String separator;
 
-    private final String keyValueSeparator;
+    private final String keyValueDelimiter;
 
     private final String suffix;
 
     private final boolean isEmptySeparator;
 
-    private final boolean isEmptyKeyValueSeparator;
+    private final boolean isEmptyKeyValueDelimiter;
 
     private boolean trimBeforeAppend = false;
 
@@ -302,26 +302,26 @@ public final class Joiner implements Closeable {
      * prefix, and suffix. This is the primary constructor; all other constructors delegate to this one.
      *
      * @param separator the delimiter inserted between joined elements; must not be {@code null}
-     * @param keyValueSeparator the delimiter inserted between keys and values in key-value pairs; must not be {@code null}
+     * @param keyValueDelimiter the delimiter inserted between keys and values in key-value pairs; must not be {@code null}
      * @param prefix the string prepended to the result; must not be {@code null}
      * @param suffix the string appended to the result; must not be {@code null}
-     * @throws IllegalArgumentException if any of {@code prefix}, {@code separator}, {@code keyValueSeparator},
+     * @throws IllegalArgumentException if any of {@code prefix}, {@code separator}, {@code keyValueDelimiter},
      *         or {@code suffix} is {@code null}
      */
-    Joiner(final CharSequence separator, final CharSequence keyValueSeparator, final CharSequence prefix, final CharSequence suffix) {
+    Joiner(final CharSequence separator, final CharSequence keyValueDelimiter, final CharSequence prefix, final CharSequence suffix) {
         N.checkArgNotNull(prefix, "The prefix must not be null");
         N.checkArgNotNull(separator, "The separator must not be null");
-        N.checkArgNotNull(keyValueSeparator, "The keyValueSeparator must not be null");
+        N.checkArgNotNull(keyValueDelimiter, "The keyValueDelimiter must not be null");
         N.checkArgNotNull(suffix, "The suffix must not be null");
 
         // make defensive copies of arguments
         this.prefix = prefix.toString();
         this.separator = separator.toString();
-        this.keyValueSeparator = keyValueSeparator.toString();
+        this.keyValueDelimiter = keyValueDelimiter.toString();
         this.suffix = suffix.toString();
         emptyValue = this.prefix + this.suffix;
         isEmptySeparator = Strings.isEmpty(separator);
-        isEmptyKeyValueSeparator = Strings.isEmpty(keyValueSeparator);
+        isEmptyKeyValueDelimiter = Strings.isEmpty(keyValueDelimiter);
     }
 
     /**
@@ -412,14 +412,14 @@ public final class Joiner implements Closeable {
      * }</pre>
      *
      * @param separator the delimiter to use between joined elements, must not be null.
-     * @param keyValueSeparator the delimiter to use between keys and values, must not be null.
+     * @param keyValueDelimiter the delimiter to use between keys and values, must not be null.
      * @param prefix the string to prepend to the result, must not be null.
      * @param suffix the string to append to the result, must not be null.
      * @return a new Joiner instance with all specified formatting options.
      * @throws IllegalArgumentException if any parameter is null.
      */
-    public static Joiner with(final CharSequence separator, final CharSequence keyValueSeparator, final CharSequence prefix, final CharSequence suffix) {
-        return new Joiner(separator, keyValueSeparator, prefix, suffix);
+    public static Joiner with(final CharSequence separator, final CharSequence keyValueDelimiter, final CharSequence prefix, final CharSequence suffix) {
+        return new Joiner(separator, keyValueDelimiter, prefix, suffix);
     }
 
     /**
@@ -1992,7 +1992,7 @@ public final class Joiner implements Closeable {
 
     /**
      * Appends a key-value pair with a boolean value to the joiner.
-     * The key and value are separated by the configured keyValueSeparator.
+     * The key and value are separated by the configured keyValueDelimiter.
      * The key is formatted according to trimBeforeAppend setting.
      * If multiple entries are appended, they are separated by the configured separator.
      *
@@ -2006,10 +2006,10 @@ public final class Joiner implements Closeable {
      * @return this Joiner instance for method chaining
      */
     public Joiner appendEntry(final String key, final boolean value) {
-        if (isEmptyKeyValueSeparator) {
+        if (isEmptyKeyValueDelimiter) {
             prepareBuilder().append(format(key)).append(value);
         } else {
-            prepareBuilder().append(format(key)).append(keyValueSeparator).append(value);
+            prepareBuilder().append(format(key)).append(keyValueDelimiter).append(value);
         }
 
         return this;
@@ -2017,7 +2017,7 @@ public final class Joiner implements Closeable {
 
     /**
      * Appends a key-value pair with a char value to the joiner.
-     * The key and value are separated by the configured keyValueSeparator.
+     * The key and value are separated by the configured keyValueDelimiter.
      * The key is formatted according to trimBeforeAppend setting.
      * If multiple entries are appended, they are separated by the configured separator.
      *
@@ -2031,10 +2031,10 @@ public final class Joiner implements Closeable {
      * @return this Joiner instance for method chaining
      */
     public Joiner appendEntry(final String key, final char value) {
-        if (isEmptyKeyValueSeparator) {
+        if (isEmptyKeyValueDelimiter) {
             prepareBuilder().append(format(key)).append(value);
         } else {
-            prepareBuilder().append(format(key)).append(keyValueSeparator).append(value);
+            prepareBuilder().append(format(key)).append(keyValueDelimiter).append(value);
         }
 
         return this;
@@ -2042,7 +2042,7 @@ public final class Joiner implements Closeable {
 
     /**
      * Appends a key-value pair with an int value to the joiner.
-     * The key and value are separated by the configured keyValueSeparator.
+     * The key and value are separated by the configured keyValueDelimiter.
      * The key is formatted according to trimBeforeAppend setting.
      * If multiple entries are appended, they are separated by the configured separator.
      *
@@ -2056,10 +2056,10 @@ public final class Joiner implements Closeable {
      * @return this Joiner instance for method chaining
      */
     public Joiner appendEntry(final String key, final int value) {
-        if (isEmptyKeyValueSeparator) {
+        if (isEmptyKeyValueDelimiter) {
             prepareBuilder().append(format(key)).append(value);
         } else {
-            prepareBuilder().append(format(key)).append(keyValueSeparator).append(value);
+            prepareBuilder().append(format(key)).append(keyValueDelimiter).append(value);
         }
 
         return this;
@@ -2067,7 +2067,7 @@ public final class Joiner implements Closeable {
 
     /**
      * Appends a key-value pair with a long value to the joiner.
-     * The key and value are separated by the configured keyValueSeparator.
+     * The key and value are separated by the configured keyValueDelimiter.
      * The key is formatted according to trimBeforeAppend setting.
      * If multiple entries are appended, they are separated by the configured separator.
      *
@@ -2081,10 +2081,10 @@ public final class Joiner implements Closeable {
      * @return this Joiner instance for method chaining
      */
     public Joiner appendEntry(final String key, final long value) {
-        if (isEmptyKeyValueSeparator) {
+        if (isEmptyKeyValueDelimiter) {
             prepareBuilder().append(format(key)).append(value);
         } else {
-            prepareBuilder().append(format(key)).append(keyValueSeparator).append(value);
+            prepareBuilder().append(format(key)).append(keyValueDelimiter).append(value);
         }
 
         return this;
@@ -2092,7 +2092,7 @@ public final class Joiner implements Closeable {
 
     /**
      * Appends a key-value pair with a float value to the joiner.
-     * The key and value are separated by the configured keyValueSeparator.
+     * The key and value are separated by the configured keyValueDelimiter.
      * The key is formatted according to trimBeforeAppend setting.
      * If multiple entries are appended, they are separated by the configured separator.
      *
@@ -2106,10 +2106,10 @@ public final class Joiner implements Closeable {
      * @return this Joiner instance for method chaining
      */
     public Joiner appendEntry(final String key, final float value) {
-        if (isEmptyKeyValueSeparator) {
+        if (isEmptyKeyValueDelimiter) {
             prepareBuilder().append(format(key)).append(value);
         } else {
-            prepareBuilder().append(format(key)).append(keyValueSeparator).append(value);
+            prepareBuilder().append(format(key)).append(keyValueDelimiter).append(value);
         }
 
         return this;
@@ -2117,7 +2117,7 @@ public final class Joiner implements Closeable {
 
     /**
      * Appends a key-value pair with a double value to the joiner.
-     * The key and value are separated by the configured keyValueSeparator.
+     * The key and value are separated by the configured keyValueDelimiter.
      * The key is formatted according to trimBeforeAppend setting.
      * If multiple entries are appended, they are separated by the configured separator.
      *
@@ -2131,10 +2131,10 @@ public final class Joiner implements Closeable {
      * @return this Joiner instance for method chaining
      */
     public Joiner appendEntry(final String key, final double value) {
-        if (isEmptyKeyValueSeparator) {
+        if (isEmptyKeyValueDelimiter) {
             prepareBuilder().append(format(key)).append(value);
         } else {
-            prepareBuilder().append(format(key)).append(keyValueSeparator).append(value);
+            prepareBuilder().append(format(key)).append(keyValueDelimiter).append(value);
         }
 
         return this;
@@ -2142,7 +2142,7 @@ public final class Joiner implements Closeable {
 
     /**
      * Appends a key-value pair with a String value to the joiner.
-     * The key and value are separated by the configured keyValueSeparator.
+     * The key and value are separated by the configured keyValueDelimiter.
      * Both key and value are formatted according to trimBeforeAppend and nullText settings.
      * If multiple entries are appended, they are separated by the configured separator.
      *
@@ -2156,10 +2156,10 @@ public final class Joiner implements Closeable {
      * @return this Joiner instance for method chaining
      */
     public Joiner appendEntry(final String key, final String value) {
-        if (isEmptyKeyValueSeparator) {
+        if (isEmptyKeyValueDelimiter) {
             prepareBuilder().append(format(key)).append(format(value));
         } else {
-            prepareBuilder().append(format(key)).append(keyValueSeparator).append(format(value));
+            prepareBuilder().append(format(key)).append(keyValueDelimiter).append(format(value));
         }
 
         return this;
@@ -2167,7 +2167,7 @@ public final class Joiner implements Closeable {
 
     /**
      * Appends a key-value pair with a CharSequence value to the joiner.
-     * The key and value are separated by the configured keyValueSeparator.
+     * The key and value are separated by the configured keyValueDelimiter.
      * Both key and value are formatted according to trimBeforeAppend and nullText settings.
      * If multiple entries are appended, they are separated by the configured separator.
      *
@@ -2182,10 +2182,10 @@ public final class Joiner implements Closeable {
      * @return this Joiner instance for method chaining
      */
     public Joiner appendEntry(final String key, final CharSequence value) {
-        if (isEmptyKeyValueSeparator) {
+        if (isEmptyKeyValueDelimiter) {
             prepareBuilder().append(format(key)).append(format(value));
         } else {
-            prepareBuilder().append(format(key)).append(keyValueSeparator).append(format(value));
+            prepareBuilder().append(format(key)).append(keyValueDelimiter).append(format(value));
         }
 
         return this;
@@ -2193,7 +2193,7 @@ public final class Joiner implements Closeable {
 
     /**
      * Appends a key-value pair with a StringBuilder value to the joiner.
-     * The key and value are separated by the configured keyValueSeparator.
+     * The key and value are separated by the configured keyValueDelimiter.
      * Both key and value are formatted according to trimBeforeAppend and nullText settings.
      * If multiple entries are appended, they are separated by the configured separator.
      *
@@ -2209,13 +2209,13 @@ public final class Joiner implements Closeable {
      */
     public Joiner appendEntry(final String key, final StringBuilder value) {
         if (value == null) {
-            if (isEmptyKeyValueSeparator) {
+            if (isEmptyKeyValueDelimiter) {
                 prepareBuilder().append(format(key)).append(nullText);
             } else {
-                prepareBuilder().append(format(key)).append(keyValueSeparator).append(nullText);
+                prepareBuilder().append(format(key)).append(keyValueDelimiter).append(nullText);
             }
         } else {
-            if (isEmptyKeyValueSeparator) {
+            if (isEmptyKeyValueDelimiter) {
                 if (trimBeforeAppend) {
                     prepareBuilder().append(format(key)).append(value.toString().trim());
                 } else {
@@ -2223,9 +2223,9 @@ public final class Joiner implements Closeable {
                 }
             } else {
                 if (trimBeforeAppend) {
-                    prepareBuilder().append(format(key)).append(keyValueSeparator).append(value.toString().trim());
+                    prepareBuilder().append(format(key)).append(keyValueDelimiter).append(value.toString().trim());
                 } else {
-                    prepareBuilder().append(format(key)).append(keyValueSeparator).append(value);
+                    prepareBuilder().append(format(key)).append(keyValueDelimiter).append(value);
                 }
             }
         }
@@ -2235,7 +2235,7 @@ public final class Joiner implements Closeable {
 
     /**
      * Appends a key-value pair with an Object value to the joiner.
-     * The key and value are separated by the configured keyValueSeparator.
+     * The key and value are separated by the configured keyValueDelimiter.
      * The value is converted to string using toString method and formatted according to nullText settings.
      * If multiple entries are appended, they are separated by the configured separator.
      *
@@ -2250,10 +2250,10 @@ public final class Joiner implements Closeable {
      * @return this Joiner instance for method chaining
      */
     public Joiner appendEntry(final String key, final Object value) {
-        if (isEmptyKeyValueSeparator) {
+        if (isEmptyKeyValueDelimiter) {
             prepareBuilder().append(format(key)).append(toString(value));
         } else {
-            prepareBuilder().append(format(key)).append(keyValueSeparator).append(toString(value));
+            prepareBuilder().append(format(key)).append(keyValueDelimiter).append(toString(value));
         }
 
         return this;
@@ -2345,7 +2345,7 @@ public final class Joiner implements Closeable {
             }
 
             if (sb == null) {
-                sb = prepareBuilder().append(toString(entry.getKey())).append(keyValueSeparator).append(toString(entry.getValue()));
+                sb = prepareBuilder().append(toString(entry.getKey())).append(keyValueDelimiter).append(toString(entry.getValue()));
             } else {
                 if (isEmptySeparator) {
                     sb.append(toString(entry.getKey()));
@@ -2353,10 +2353,10 @@ public final class Joiner implements Closeable {
                     sb.append(separator).append(toString(entry.getKey()));
                 }
 
-                if (isEmptyKeyValueSeparator) {
+                if (isEmptyKeyValueDelimiter) {
                     sb.append(toString(entry.getValue()));
                 } else {
-                    sb.append(keyValueSeparator).append(toString(entry.getValue()));
+                    sb.append(keyValueDelimiter).append(toString(entry.getValue()));
                 }
             }
 
@@ -2402,7 +2402,7 @@ public final class Joiner implements Closeable {
             }
 
             if (sb == null) {
-                sb = prepareBuilder().append(toString(entry.getKey())).append(keyValueSeparator).append(toString(entry.getValue()));
+                sb = prepareBuilder().append(toString(entry.getKey())).append(keyValueDelimiter).append(toString(entry.getValue()));
             } else {
                 if (isEmptySeparator) {
                     sb.append(toString(entry.getKey()));
@@ -2410,10 +2410,10 @@ public final class Joiner implements Closeable {
                     sb.append(separator).append(toString(entry.getKey()));
                 }
 
-                if (isEmptyKeyValueSeparator) {
+                if (isEmptyKeyValueDelimiter) {
                     sb.append(toString(entry.getValue()));
                 } else {
-                    sb.append(keyValueSeparator).append(toString(entry.getValue()));
+                    sb.append(keyValueDelimiter).append(toString(entry.getValue()));
                 }
             }
         }
@@ -2455,7 +2455,7 @@ public final class Joiner implements Closeable {
             }
 
             if (sb == null) {
-                sb = prepareBuilder().append(toString(entry.getKey())).append(keyValueSeparator).append(toString(entry.getValue()));
+                sb = prepareBuilder().append(toString(entry.getKey())).append(keyValueDelimiter).append(toString(entry.getValue()));
             } else {
                 if (isEmptySeparator) {
                     sb.append(toString(entry.getKey()));
@@ -2463,10 +2463,10 @@ public final class Joiner implements Closeable {
                     sb.append(separator).append(toString(entry.getKey()));
                 }
 
-                if (isEmptyKeyValueSeparator) {
+                if (isEmptyKeyValueDelimiter) {
                     sb.append(toString(entry.getValue()));
                 } else {
-                    sb.append(keyValueSeparator).append(toString(entry.getValue()));
+                    sb.append(keyValueDelimiter).append(toString(entry.getValue()));
                 }
             }
         }
@@ -2510,7 +2510,7 @@ public final class Joiner implements Closeable {
         for (final Map.Entry<K, V> entry : m.entrySet()) {
             if (sb == null) {
                 sb = prepareBuilder().append(toString(keyExtractor.apply(entry.getKey())))
-                        .append(keyValueSeparator)
+                        .append(keyValueDelimiter)
                         .append(toString(valueExtractor.apply(entry.getValue())));
             } else {
                 if (isEmptySeparator) {
@@ -2519,10 +2519,10 @@ public final class Joiner implements Closeable {
                     sb.append(separator).append(toString(keyExtractor.apply(entry.getKey())));
                 }
 
-                if (isEmptyKeyValueSeparator) {
+                if (isEmptyKeyValueDelimiter) {
                     sb.append(toString(valueExtractor.apply(entry.getValue())));
                 } else {
-                    sb.append(keyValueSeparator).append(toString(valueExtractor.apply(entry.getValue())));
+                    sb.append(keyValueDelimiter).append(toString(valueExtractor.apply(entry.getValue())));
                 }
             }
         }
@@ -2614,7 +2614,7 @@ public final class Joiner implements Closeable {
             propValue = beanInfo.getPropValue(bean, propName);
 
             if (sb == null) {
-                sb = prepareBuilder().append(propName).append(keyValueSeparator).append(toString(propValue));
+                sb = prepareBuilder().append(propName).append(keyValueDelimiter).append(toString(propValue));
             } else {
                 if (isEmptySeparator) {
                     sb.append(propName);
@@ -2622,10 +2622,10 @@ public final class Joiner implements Closeable {
                     sb.append(separator).append(propName);
                 }
 
-                if (isEmptyKeyValueSeparator) {
+                if (isEmptyKeyValueDelimiter) {
                     sb.append(toString(propValue));
                 } else {
-                    sb.append(keyValueSeparator).append(toString(propValue));
+                    sb.append(keyValueDelimiter).append(toString(propValue));
                 }
             }
         }
@@ -2686,7 +2686,7 @@ public final class Joiner implements Closeable {
 
             if (propValue != null || !ignoreNullProperty) {
                 if (sb == null) {
-                    sb = prepareBuilder().append(propName).append(keyValueSeparator).append(toString(propValue));
+                    sb = prepareBuilder().append(propName).append(keyValueDelimiter).append(toString(propValue));
                 } else {
                     if (isEmptySeparator) {
                         sb.append(propName);
@@ -2694,10 +2694,10 @@ public final class Joiner implements Closeable {
                         sb.append(separator).append(propName);
                     }
 
-                    if (isEmptyKeyValueSeparator) {
+                    if (isEmptyKeyValueDelimiter) {
                         sb.append(toString(propValue));
                     } else {
-                        sb.append(keyValueSeparator).append(toString(propValue));
+                        sb.append(keyValueDelimiter).append(toString(propValue));
                     }
                 }
             }
@@ -2758,7 +2758,7 @@ public final class Joiner implements Closeable {
             }
 
             if (sb == null) {
-                sb = prepareBuilder().append(propName).append(keyValueSeparator).append(toString(propValue));
+                sb = prepareBuilder().append(propName).append(keyValueDelimiter).append(toString(propValue));
             } else {
                 if (isEmptySeparator) {
                     sb.append(propName);
@@ -2766,10 +2766,10 @@ public final class Joiner implements Closeable {
                     sb.append(separator).append(propName);
                 }
 
-                if (isEmptyKeyValueSeparator) {
+                if (isEmptyKeyValueDelimiter) {
                     sb.append(toString(propValue));
                 } else {
-                    sb.append(keyValueSeparator).append(toString(propValue));
+                    sb.append(keyValueDelimiter).append(toString(propValue));
                 }
             }
         }

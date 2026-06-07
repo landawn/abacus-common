@@ -469,8 +469,8 @@ public class SetMultimapTest extends TestBase {
     public void testToMultiset() {
         SetMultimap<String, Integer> map = SetMultimap.of("a", 1, "a", 2, "b", 3);
         Multiset<String> multiset = map.toMultiset();
-        assertEquals(2, multiset.get("a"));
-        assertEquals(1, multiset.get("b"));
+        assertEquals(2, multiset.getCount("a"));
+        assertEquals(1, multiset.getCount("b"));
     }
 
     // ==================== size / keyCount ====================

@@ -45,12 +45,12 @@ public interface IntObjConsumer<T> extends Throwables.IntObjConsumer<T, RuntimeE
      * appender.accept(42, sb);   // sb becomes "Value: 42"
      * }</pre>
      *
-     * @param i the {@code int} argument
-     * @param t the object argument
+     * @param t the {@code int} argument
+     * @param u the object argument
      */
     // @ai-ignore IntObj*/ObjInt* argument order convention - intentional: class name prefix determines parameter order. IntObj* has int first; ObjInt* has object first. Do not suggest reordering.
     @Override
-    void accept(int i, T t);
+    void accept(int t, T u);
 
     /**
      * Returns a composed {@code IntObjConsumer} that performs, in sequence, this operation followed by
@@ -65,9 +65,9 @@ public interface IntObjConsumer<T> extends Throwables.IntObjConsumer<T, RuntimeE
      */
     default IntObjConsumer<T> andThen(final IntObjConsumer<? super T> after) {
         Objects.requireNonNull(after);
-        return (i, t) -> {
-            accept(i, t);
-            after.accept(i, t);
+        return (t, u) -> {
+            accept(t, u);
+            after.accept(t, u);
         };
     }
 }

@@ -38,7 +38,7 @@ import com.landawn.abacus.annotation.JsonXmlField;
  * @param <C> the concrete configuration type for method chaining
  * @see JsonXmlField
  * @see SerializationConfig
- * @see Deserialization
+ * @see DeserializationConfig
  */
 public abstract class ParserConfig<C extends ParserConfig<C>> implements Cloneable {
 

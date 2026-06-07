@@ -643,17 +643,17 @@ public class CollectorsTest extends TestBase {
     public void testToMultiset() {
         List<String> duplicates = Arrays.asList("a", "b", "a", "c", "b", "a");
         Multiset<String> result = duplicates.stream().collect(Collectors.toMultiset());
-        assertEquals(3, result.get("a"));
-        assertEquals(2, result.get("b"));
-        assertEquals(1, result.get("c"));
+        assertEquals(3, result.getCount("a"));
+        assertEquals(2, result.getCount("b"));
+        assertEquals(1, result.getCount("c"));
     }
 
     @Test
     public void testToMultiset_WithSupplier() {
         List<String> duplicates = Arrays.asList("a", "b", "a", "c", "b", "a");
         Multiset<String> result = duplicates.stream().collect(Collectors.toMultiset(Multiset::new));
-        assertEquals(3, result.get("a"));
-        assertEquals(2, result.get("b"));
+        assertEquals(3, result.getCount("a"));
+        assertEquals(2, result.getCount("b"));
     }
 
     @Test

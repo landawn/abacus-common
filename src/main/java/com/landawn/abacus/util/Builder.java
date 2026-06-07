@@ -2697,7 +2697,7 @@ public class Builder<T> {
          * @return this builder instance
          */
         public MultisetBuilder<T> removeAllOccurrences(final Object e) {
-            val.removeAllOccurrences(e);
+            val.removeAllOccurrencesOf(e);
 
             return this;
         }
@@ -2717,7 +2717,7 @@ public class Builder<T> {
          * @return this builder instance
          */
         public MultisetBuilder<T> removeAllOccurrences(final Collection<?> c) {
-            val.removeAllOccurrences(c);
+            val.removeAllOccurrencesOf(c);
 
             return this;
         }

@@ -3262,17 +3262,17 @@ public class CharListTest extends TestBase {
     public void testToMultisetNoArg() {
         CharList cl = CharList.of('a', 'b', 'a', 'c');
         Multiset<Character> ms = cl.toMultiset();
-        assertEquals(2, ms.get('a'));
-        assertEquals(1, ms.get('b'));
-        assertEquals(1, ms.get('c'));
+        assertEquals(2, ms.getCount('a'));
+        assertEquals(1, ms.getCount('b'));
+        assertEquals(1, ms.getCount('c'));
     }
 
     @Test
     public void testToMultisetWithSupplier() {
         CharList cl = CharList.of('a', 'b', 'a');
         Multiset<Character> ms = cl.toMultiset(Multiset::new);
-        assertEquals(2, ms.get('a'));
-        assertEquals(1, ms.get('b'));
+        assertEquals(2, ms.getCount('a'));
+        assertEquals(1, ms.getCount('b'));
     }
 
     @Test
@@ -3281,9 +3281,9 @@ public class CharListTest extends TestBase {
         CharList list = CharList.of('a', 'b', 'a', 'c', 'b', 'a');
         com.landawn.abacus.util.Multiset<Character> multiset = list.toMultiset(0, list.size(), com.landawn.abacus.util.Multiset::new);
         assertNotNull(multiset);
-        assertEquals(3, multiset.get('a'));
-        assertEquals(2, multiset.get('b'));
-        assertEquals(1, multiset.get('c'));
+        assertEquals(3, multiset.getCount('a'));
+        assertEquals(2, multiset.getCount('b'));
+        assertEquals(1, multiset.getCount('c'));
     }
 
     @Test
@@ -3292,9 +3292,9 @@ public class CharListTest extends TestBase {
         CharList list = CharList.of('a', 'b', 'a', 'c', 'b', 'a');
         com.landawn.abacus.util.Multiset<Character> multiset = list.toMultiset(0, 4, com.landawn.abacus.util.Multiset::new);
         assertNotNull(multiset);
-        assertEquals(2, multiset.get('a'));
-        assertEquals(1, multiset.get('b'));
-        assertEquals(1, multiset.get('c'));
+        assertEquals(2, multiset.getCount('a'));
+        assertEquals(1, multiset.getCount('b'));
+        assertEquals(1, multiset.getCount('c'));
     }
 
     @Test

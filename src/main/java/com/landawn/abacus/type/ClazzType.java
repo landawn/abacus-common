@@ -58,7 +58,7 @@ public class ClazzType extends AbstractType<Class> {
 
     /**
      * Returns the Class object representing the Java type handled by this Type, which is
-     * always {@link Class}. Use {@link #getParameterClass()} to inspect the resolved
+     * always {@link Class}. Use {@link #parameterClass()} to inspect the resolved
      * type-parameter class of this {@code Clazz<T>}.
      *
      * @return {@link Class}{@code .class}
@@ -75,12 +75,12 @@ public class ClazzType extends AbstractType<Class> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ClazzType type = (ClazzType) TypeFactory.getType("Clazz<java.lang.Integer>");
-     * type.getParameterClass();   // returns Integer.class
+     * type.parameterClass();   // returns Integer.class
      * }</pre>
      *
      * @return the parameter class
      */
-    public Class getParameterClass() {
+    public Class parameterClass() {
         return clazz;
     }
 

@@ -83,6 +83,47 @@ import com.landawn.abacus.util.u.OptionalShort;
  *   <li><b>Null Safety First:</b> Comprehensive null input handling throughout the API</li>
  * </ul>
  *
+ * <p><b>{@code Maps} vs. related map APIs:</b> {@code Maps} provides <em>static utility methods</em> that operate
+ * on existing {@link Map} instances. When you instead need a specialized map-like <em>data structure</em>, reach
+ * for one of the dedicated types:</p>
+ * <table border="1" summary="When to use Maps versus related map utilities and data structures">
+ *   <tr>
+ *     <th>API</th>
+ *     <th>What it is</th>
+ *     <th>Use it when</th>
+ *   </tr>
+ *   <tr>
+ *     <td>{@code Maps}</td>
+ *     <td>static helpers over {@link Map}</td>
+ *     <td>you have a plain {@code Map} and need {@code get*}/{@code zip}/{@code invert}/{@code filter}/{@code merge}/{@code flatten} operations</td>
+ *   </tr>
+ *   <tr>
+ *     <td>{@link N}</td>
+ *     <td>general-purpose facade (also has a few map helpers)</td>
+ *     <td>doing broadly-applicable operations; {@code Maps} is the focused home for map-specific logic</td>
+ *   </tr>
+ *   <tr>
+ *     <td>{@link Multimap} / {@link ListMultimap} / {@link SetMultimap}</td>
+ *     <td>data structure: one key maps to many values</td>
+ *     <td>a key must hold a collection of values</td>
+ *   </tr>
+ *   <tr>
+ *     <td>{@link BiMap}</td>
+ *     <td>data structure: bidirectional one-to-one map</td>
+ *     <td>you must look up by value as well as by key</td>
+ *   </tr>
+ *   <tr>
+ *     <td>{@link ImmutableMap}</td>
+ *     <td>data structure: unmodifiable map</td>
+ *     <td>you need a read-only map</td>
+ *   </tr>
+ *   <tr>
+ *     <td>{@link Multiset}</td>
+ *     <td>data structure: element maps to an occurrence count</td>
+ *     <td>you are counting occurrences</td>
+ *   </tr>
+ * </table>
+ *
  * <p><b>Value Retrieval Method Groups:</b>
  * <br>The {@code get*} methods are organized into five families, each with distinct null-handling and return-type contracts:
  * <ul>
@@ -102,6 +143,84 @@ import com.landawn.abacus.util.u.OptionalShort;
  *       traverses nested map/collection structures via a dot-separated path with optional {@code [index]} segments.
  *       Use for deep navigation into configuration-style nested maps.</li>
  * </ul>
+ *
+ * <p><b>Terminology — {@code Exists} vs. {@code Present} vs. {@code Absent}:</b>
+ * <br>The suffixes {@code IfExists}, {@code IfPresent}, and {@code IfAbsent} are <em>not</em> interchangeable
+ * spellings of one idea; each encodes a distinct null-handling contract:
+ * <table border="1" summary="Meaning of the IfExists / IfPresent / IfAbsent suffixes">
+ *   <tr>
+ *     <th>Term</th>
+ *     <th>A key "counts" when&hellip;</th>
+ *     <th>Example methods</th>
+ *   </tr>
+ *   <tr>
+ *     <td>{@code Exists}</td>
+ *     <td>the key is contained in the map — a key mapped to {@code null} still "exists"; only a missing key
+ *         (or a {@code null}/empty map) is non-existent. This is the only contract that can tell
+ *         "key present with {@code null} value" apart from "key missing".</td>
+ *     <td>{@code getIfExists}</td>
+ *   </tr>
+ *   <tr>
+ *     <td>{@code Present}</td>
+ *     <td>the key is contained in the map <em>and</em> its value is non-{@code null}; a key mapped to
+ *         {@code null} is <em>not</em> "present".</td>
+ *     <td>{@code getValuesIfPresent}</td>
+ *   </tr>
+ *   <tr>
+ *     <td>{@code Absent}</td>
+ *     <td>the logical negation of "present" — the key is missing <em>or</em> its value is {@code null}. These
+ *         methods fall back to (and, for the {@code getOrPut*} family, insert) a default.</td>
+ *     <td>{@code getOrDefaultIfAbsent}, {@code getOrEmpty*IfAbsent}, {@code getOrPut*IfAbsent}</td>
+ *   </tr>
+ * </table>
+ *
+ * <p><b>Comparison of the flagship value-retrieval methods:</b>
+ * <table border="1" summary="How each retrieval method treats a missing key vs. a null value">
+ *   <tr>
+ *     <th>Method</th>
+ *     <th>Keys</th>
+ *     <th>Returns</th>
+ *     <th>Key missing</th>
+ *     <th>Value is {@code null}</th>
+ *     <th>Mutates map?</th>
+ *   </tr>
+ *   <tr>
+ *     <td>{@code getIfExists(map, key)}</td>
+ *     <td>one</td>
+ *     <td>{@code Nullable<V>}</td>
+ *     <td>{@code Nullable.empty()}</td>
+ *     <td>{@code Nullable.of(null)} (still "exists")</td>
+ *     <td>no</td>
+ *   </tr>
+ *   <tr>
+ *     <td>{@code getOrDefaultIfAbsent(map, key, default)}</td>
+ *     <td>one</td>
+ *     <td>{@code V}</td>
+ *     <td>{@code default}</td>
+ *     <td>{@code default} ({@code null} = absent)</td>
+ *     <td>no</td>
+ *   </tr>
+ *   <tr>
+ *     <td>{@code getOrPutIfAbsent(map, key, supplier)}</td>
+ *     <td>one</td>
+ *     <td>{@code V}</td>
+ *     <td>supplied value (also stored)</td>
+ *     <td>supplied value (also stored)</td>
+ *     <td>yes</td>
+ *   </tr>
+ *   <tr>
+ *     <td>{@code getValuesIfPresent(map, keys)}</td>
+ *     <td>many</td>
+ *     <td>{@code List<V>}</td>
+ *     <td>skipped (not added)</td>
+ *     <td>skipped (not added)</td>
+ *     <td>no</td>
+ *   </tr>
+ * </table>
+ *
+ * <p>In short: {@code getIfExists} is the only method that observes a {@code null} value as distinct from a
+ * missing key; the {@code *IfAbsent} family collapses both cases into "absent"; and {@code getValuesIfPresent}
+ * keeps only the keys that resolve to a non-{@code null} value.</p>
  *
  * <p><b>Core Functional Categories:</b>
  * <ul>

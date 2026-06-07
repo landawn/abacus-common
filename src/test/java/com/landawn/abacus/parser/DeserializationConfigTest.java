@@ -23,7 +23,7 @@ public class DeserializationConfigTest extends TestBase {
 
     private TestDeserializationConfig config;
 
-    private static class TestDeserializationConfig extends Deserialization<TestDeserializationConfig> {
+    private static class TestDeserializationConfig extends DeserializationConfig<TestDeserializationConfig> {
         // Concrete implementation for testing
     }
 
@@ -590,8 +590,8 @@ public class DeserializationConfigTest extends TestBase {
 
     @Test
     public void testHashCode() {
-        Deserialization<?> config1 = new JsonDeserConfig();
-        Deserialization<?> config2 = new JsonDeserConfig();
+        DeserializationConfig<?> config1 = new JsonDeserConfig();
+        DeserializationConfig<?> config2 = new JsonDeserConfig();
 
         Assertions.assertEquals(config1.hashCode(), config2.hashCode());
 
@@ -601,8 +601,8 @@ public class DeserializationConfigTest extends TestBase {
 
     @Test
     public void testEquals() {
-        Deserialization<?> config1 = new JsonDeserConfig();
-        Deserialization<?> config2 = new JsonDeserConfig();
+        DeserializationConfig<?> config1 = new JsonDeserConfig();
+        DeserializationConfig<?> config2 = new JsonDeserConfig();
 
         Assertions.assertEquals(config1, config1);
         Assertions.assertEquals(config1, config2);
