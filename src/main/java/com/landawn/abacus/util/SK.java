@@ -174,6 +174,18 @@ public final class SK {
     public static final String SPACE_SINGLE_QUOTE = " '";
 
     /**
+     * Represents the backtick character: {@code '\''}.
+     * Used for identifier quoting.
+     */
+    public static final char _BACKTICK = '`';
+
+    /**
+     * Represents the backtick string: {@code "`"}.
+     * Used for identifier quoting.
+     */
+    public static final String BACKTICK = "`";
+
+    /**
      * Represents single quotation mark followed by space: {@code "' "}.
      * Useful for formatting quoted text.
      */

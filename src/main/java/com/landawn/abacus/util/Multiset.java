@@ -66,7 +66,7 @@ import com.landawn.abacus.util.stream.Stream;
  *   <li><b>Flexible Backing:</b> Customizable backing Map implementation for different performance characteristics</li>
  *   <li><b>Statistical Operations:</b> Built-in methods for analyzing occurrence patterns</li>
  *   <li><b>Stream Integration:</b> Full support for stream operations and functional programming</li>
- *   <li><b>Thread Safety:</b> Thread safety depends on the chosen backing Map implementation</li>
+ *   <li><b>Thread Safety:</b> Not thread-safe; external synchronization is required for concurrent modification</li>
  * </ul>
  *
  * <p><b>IMPORTANT - Count Limitations:</b>
@@ -127,7 +127,7 @@ import com.landawn.abacus.util.stream.Stream;
  *   <li>{@code setCount(element, count)} - Set the count of an element</li>
  *   <li>{@code add(element, count)} - Add multiple occurrences at once</li>
  *   <li>{@code remove(element, count)} - Remove specific number of occurrences</li>
- *   <li>{@code removeAllOccurrences(element)} - Remove all occurrences of an element</li>
+ *   <li>{@code removeAllOccurrencesOf(element)} - Remove all occurrences of an element</li>
  *   <li>{@code elementSet()} - Get the set of distinct elements</li>
  *   <li>{@code entrySet()} - Get entries with element-count pairs</li>
  *   <li>{@code toMap()} - Convert to Map&lt;E, Integer&gt;</li>
@@ -142,12 +142,12 @@ import com.landawn.abacus.util.stream.Stream;
  * </ul>
  *
  * <p><b>Thread Safety:</b>
- * Thread safety depends on the backing Map implementation:
- * <ul>
- *   <li>HashMap backing: Not thread-safe, external synchronization required</li>
- *   <li>ConcurrentHashMap backing: Thread-safe for concurrent access</li>
- *   <li>Collections.synchronizedMap() can be used for thread-safe operations</li>
- * </ul>
+ * This class is <b>not</b> thread-safe, regardless of the backing {@code Map} implementation. Many
+ * operations (for example {@link #add(Object, int)}, {@link #remove(Object, int)}, and the {@code compute}/
+ * {@code merge} family) read a count and then mutate it in place, so they are not atomic even when the
+ * backing map is itself thread-safe (such as {@link java.util.concurrent.ConcurrentHashMap}). If multiple
+ * threads access a multiset concurrently and at least one of them modifies it, the access must be
+ * synchronized externally.
  *
  * <p><b>Comparison with Other Collections:</b>
  * <ul>
@@ -1068,7 +1068,7 @@ public final class Multiset<E> implements Collection<E> {
      * multiset.removeAll(collection);
      *
      * // New code:
-     * multiset.removeAllOccurrences(collection);
+     * multiset.removeAllOccurrencesOf(collection);
      * }</pre>
      *
      * @param c the collection containing elements to be removed.
