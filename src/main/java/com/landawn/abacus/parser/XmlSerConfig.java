@@ -27,6 +27,13 @@ import com.landawn.abacus.util.SK;
  * <p>Note: XML serialization does not use quotation marks for values, so the
  * quotation-related methods inherited from the parent class should not be used.</p>
  *
+ * <p><b>Note — intentional omission of the JSON-only Dataset knobs:</b> the
+ * {@code writeDatasetAsRows} / {@code writeColumnType} / {@code writeRowColumnKeyType}
+ * options live on {@link JsonSerConfig} on purpose: they are read only by the JSON
+ * serializer ({@code JsonParserImpl}). The XML serializers ({@code XmlParserImpl} /
+ * {@code AbacusXmlParserImpl}) do not consume them, so exposing them here would create
+ * dead configuration. They are therefore deliberately NOT provided on {@code XmlSerConfig}.</p>
+ *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * XmlSerConfig config = new XmlSerConfig()
@@ -72,8 +79,12 @@ public class XmlSerConfig extends JsonXmlSerConfig<XmlSerConfig> {
      *
      */
     public XmlSerConfig() {
-        setCharQuotation(SK.CHAR_ZERO); // NOSONAR
-        setStringQuotation(SK.CHAR_ZERO); // NOSONAR
+        // Assign the inherited (package-private) quotation fields directly instead of routing through the
+        // @Deprecated setCharQuotation/setStringQuotation overrides below. The deprecated setters document
+        // "should not be called"; invoking them from our own constructor would contradict that. SK.CHAR_ZERO
+        // is one of the values those setters would accept, so the resulting field values are identical (char 0).
+        charQuotation = SK.CHAR_ZERO; // NOSONAR
+        stringQuotation = SK.CHAR_ZERO; // NOSONAR
     }
 
     /**

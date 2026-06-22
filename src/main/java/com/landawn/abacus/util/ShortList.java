@@ -178,7 +178,7 @@ import com.landawn.abacus.util.stream.ShortStream;
  * <ul>
  *   <li><b>Initial Capacity:</b> Default capacity of 10 elements</li>
  *   <li><b>Growth Strategy:</b> 1.75x expansion when capacity exceeded</li>
- *   <li><b>Manual Control:</b> {@code ensureCapacity()} for performance optimization</li>
+ *   <li><b>Manual Control:</b> specify the initial capacity via the {@code ShortList(int)} constructor</li>
  *   <li><b>Trimming:</b> {@code trimToSize()} to reduce memory footprint</li>
  * </ul>
  *
@@ -208,7 +208,7 @@ import com.landawn.abacus.util.stream.ShortStream;
  *
  * <p><b>Mathematical and Statistical Operations:</b>
  * <ul>
- *   <li><b>Aggregation:</b> Sum, min, max operations via stream API</li>
+ *   <li><b>Aggregation:</b> {@code min()} and {@code max()} are direct methods; sum is available via the stream API</li>
  *   <li><b>Central Tendency:</b> Median calculation with efficient sorting</li>
  *   <li><b>Occurrence Counting:</b> {@code frequency()} for frequency analysis</li>
  *   <li><b>Duplicate Detection:</b> {@code containsDuplicates()}, {@code removeDuplicates()}</li>
@@ -234,7 +234,7 @@ import com.landawn.abacus.util.stream.ShortStream;
  *
  * <p><b>Performance Tips:</b>
  * <ul>
- *   <li>Pre-size lists with known capacity using constructor or {@code ensureCapacity()}</li>
+ *   <li>Pre-size lists with known capacity using the {@code ShortList(int)} constructor</li>
  *   <li>Use {@code addLast()} instead of {@code addFirst()} for better performance</li>
  *   <li>Sort data before using {@code binarySearch()} for O(log n) lookups</li>
  *   <li>Use {@code stream()} API for complex transformations and filtering</li>
@@ -288,6 +288,7 @@ import com.landawn.abacus.util.stream.ShortStream;
  *
  * // Convert to float for DSP processing
  * FloatList floatSamples = monoChannel.stream()
+ *     .asIntStream()
  *     .mapToFloat(sample -> sample / 32768.0f)
  *     .collect(FloatList::new, FloatList::add, FloatList::addAll);
  * }</pre>
@@ -405,6 +406,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      *
      * @param a the array to be used as the backing array for this list. Must not be {@code null}.
      * @param size the number of elements in the list. Must be between 0 and a.length (inclusive).
+     * @throws NullPointerException if {@code a} is {@code null}
      * @throws IndexOutOfBoundsException if size is negative or greater than a.length
      */
     public ShortList(final short[] a, final int size) throws IndexOutOfBoundsException {
@@ -821,7 +823,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
 
         final int numNew = c.size();
 
-        ensureCapacity(size + numNew); // Increments modCount
+        ensureCapacity(size + numNew);
 
         final int numMoved = size - index;
 
@@ -869,7 +871,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
 
         final int numNew = a.length;
 
-        ensureCapacity(size + numNew); // Increments modCount
+        ensureCapacity(size + numNew);
 
         final int numMoved = size - index;
 
@@ -1691,12 +1693,12 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * <pre>{@code
      * ShortList list1 = ShortList.of((short)0, (short)1, (short)2, (short)2, (short)3);
      * ShortList list2 = ShortList.of((short)1, (short)2, (short)2, (short)4);
-     * ShortList result = list1.intersection(list2);   // returns result will be [(short)1, (short)2, (short)2]
+     * ShortList result = list1.intersection(list2);   // result will be [(short)1, (short)2, (short)2]
      * // One occurrence of '1' (minimum count in both lists) and two occurrences of '2'
      *
      * ShortList list3 = ShortList.of((short)5, (short)5, (short)6);
      * ShortList list4 = ShortList.of((short)5, (short)7);
-     * ShortList result2 = list3.intersection(list4);   // returns result will be [(short)5]
+     * ShortList result2 = list3.intersection(list4);   // result will be [(short)5]
      * // One occurrence of '5' (minimum count in both lists)
      * }</pre>
      *
@@ -1737,12 +1739,12 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * <pre>{@code
      * ShortList list1 = ShortList.of((short)0, (short)1, (short)2, (short)2, (short)3);
      * short[] array = new short[] {(short)1, (short)2, (short)2, (short)4};
-     * ShortList result = list1.intersection(array);   // returns result will be [(short)1, (short)2, (short)2]
+     * ShortList result = list1.intersection(array);   // result will be [(short)1, (short)2, (short)2]
      * // One occurrence of '1' (minimum count in both sources) and two occurrences of '2'
      *
      * ShortList list2 = ShortList.of((short)5, (short)5, (short)6);
      * short[] array2 = new short[] {(short)5, (short)7};
-     * ShortList result2 = list2.intersection(array2);   // returns result will be [(short)5]
+     * ShortList result2 = list2.intersection(array2);   // result will be [(short)5]
      * // One occurrence of '5' (minimum count in both sources)
      * }</pre>
      *
@@ -1773,12 +1775,12 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * <pre>{@code
      * ShortList list1 = ShortList.of((short)1, (short)1, (short)2, (short)3);
      * ShortList list2 = ShortList.of((short)1, (short)4);
-     * ShortList result = list1.difference(list2);   // returns result will be [(short)1, (short)2, (short)3]
+     * ShortList result = list1.difference(list2);   // result will be [(short)1, (short)2, (short)3]
      * // One '1' remains because list1 has two occurrences and list2 has one
      *
      * ShortList list3 = ShortList.of((short)5, (short)6);
      * ShortList list4 = ShortList.of((short)5, (short)5, (short)6);
-     * ShortList result2 = list3.difference(list4);   // returns result will be [] (empty)
+     * ShortList result2 = list3.difference(list4);   // result will be [] (empty)
      * // No elements remain because list4 has at least as many occurrences of each value as list3
      * }</pre>
      *
@@ -1819,12 +1821,12 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * <pre>{@code
      * ShortList list1 = ShortList.of((short)1, (short)1, (short)2, (short)3);
      * short[] array = new short[] {(short)1, (short)4};
-     * ShortList result = list1.difference(array);   // returns result will be [(short)1, (short)2, (short)3]
+     * ShortList result = list1.difference(array);   // result will be [(short)1, (short)2, (short)3]
      * // One '1' remains because list1 has two occurrences and array has one
      *
      * ShortList list2 = ShortList.of((short)5, (short)6);
      * short[] array2 = new short[] {(short)5, (short)5, (short)6};
-     * ShortList result2 = list2.difference(array2);   // returns result will be [] (empty)
+     * ShortList result2 = list2.difference(array2);   // result will be [] (empty)
      * // No elements remain because array2 has at least as many occurrences of each value as list2
      * }</pre>
      *
@@ -2015,7 +2017,8 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * }</pre>
      *
      * @param valueToFind the element to search for
-     * @param fromIndex the index to start searching from (inclusive)
+     * @param fromIndex the index to start searching from (inclusive).
+     *                  If negative, it is treated as 0.
      * @return the index of the first occurrence of the element at position &gt;= fromIndex,
      *         or -1 if the element is not found
      */
@@ -2510,10 +2513,13 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * <p>After shuffling, each permutation of the list elements is equally likely,
      * assuming the provided Random instance produces uniformly distributed values.</p>
      *
-     * @param rnd the random number generator to use for shuffling
+     * @param rnd the random number generator to use for shuffling; must not be {@code null}
+     * @throws NullPointerException if {@code rnd} is {@code null}
      */
     @Override
     public void shuffle(final Random rnd) {
+        N.checkArgNotNull(rnd, cs.rnd);
+
         if (size() > 1) {
             N.shuffle(elementData, 0, size, rnd);
         }
@@ -2587,7 +2593,9 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     public ShortList copy(final int fromIndex, final int toIndex, final int step) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), Math.max(fromIndex, toIndex));
 
-        return new ShortList(N.copyOfRange(elementData, fromIndex, toIndex, step));
+        // Clamp a descending start against the logical size (like forEach): N.copyOfRange clamps
+        // against the backing array's length, which may exceed size and expose phantom elements.
+        return new ShortList(N.copyOfRange(elementData, fromIndex > toIndex ? N.min(size - 1, fromIndex) : fromIndex, toIndex, step));
     }
 
     /**

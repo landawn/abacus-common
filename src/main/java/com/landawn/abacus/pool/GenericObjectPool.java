@@ -55,6 +55,8 @@ import com.landawn.abacus.util.Objectory;
  *   <li>LAST_ACCESS_TIME - Evicts least recently accessed objects</li>
  *   <li>ACCESS_COUNT - Evicts least frequently accessed objects</li>
  *   <li>EXPIRATION_TIME - Evicts objects closest to expiration</li>
+ *   <li>CREATED_TIME - Evicts the oldest-created objects first</li>
+ *   <li>FIFO - Evicts in insertion order (oldest-added first)</li>
  * </ul>
  *
  * <p><b>Usage Examples:</b></p>
@@ -186,8 +188,18 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
             case EXPIRATION_TIME:
                 return Comparator.comparingLong(o -> o.activityPrint().getExpirationTime());
 
+            case CREATED_TIME:
+            case FIFO:
+                // FIFO == CREATED_TIME for pool entries: the ActivityPrint is created when the object
+                // enters the pool, so creation order equals insertion order. Earliest-created evicts first.
+                return Comparator.comparingLong(o -> o.activityPrint().getCreatedTime());
+
             default:
-                throw new RuntimeException("Unsupported eviction policy: " + evictionPolicy.name());
+                // Defensive guard: unreachable today since the switch exhaustively covers every
+                // EvictionPolicy constant. It exists so that adding a new constant without updating
+                // this switch fails loudly at runtime with a clear, specific message.
+                throw new IllegalStateException(
+                        "No eviction comparator defined for EvictionPolicy." + evictionPolicy.name() + " (createComparator must be updated for new policies)");
         }
     }
 
@@ -203,7 +215,7 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
             } catch (final Exception e) {
                 // ignore
                 if (logger.isWarnEnabled()) {
-                    logger.warn(ExceptionUtil.getErrorMessage(e, true));
+                    logger.warn("Error removing expired pooled objects", e);
                 }
             }
         };
@@ -291,6 +303,13 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
                         }
                     }
 
+                    // Re-check expiry inside the lock: time spent in sizeOf()/evict() may have
+                    // expired the element; pushing it would corrupt hit/miss accounting and expose
+                    // a doomed object to the next take()er (mirrors the timed add variant).
+                    if (element.activityPrint().isExpired()) {
+                        return false;
+                    }
+
                     pool.push(element);
 
                     totalDataSize.addAndGet(elementMemorySize); //NOSONAR
@@ -299,6 +318,12 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
                     return false;
                 }
             } else {
+                // Re-check expiry inside the lock (the in-lock evict() above may run slow destroy
+                // callbacks), mirroring the timed add variant.
+                if (element.activityPrint().isExpired()) {
+                    return false;
+                }
+
                 pool.push(element);
             }
 
@@ -373,6 +398,8 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
      */
     @Override
     public boolean add(final E element, final long timeout, final TimeUnit unit) throws IllegalStateException, InterruptedException {
+        assertNotClosed();
+
         if (element == null) {
             throw new IllegalArgumentException("Element cannot be null");
         }
@@ -438,6 +465,14 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
                                 // ignore.
                                 return false;
                             }
+                        }
+
+                        // Re-check expiry inside the lock: time spent in sizeOf()/evict() above (which
+                        // may run slow destroy callbacks) could have expired the element; pushing it
+                        // would corrupt hit/miss accounting and expose a doomed object to the next take()er
+                        // (mirrors the non-timed add variant).
+                        if (element.activityPrint().isExpired()) {
+                            return false;
                         }
 
                         pool.push(element);
@@ -736,7 +771,7 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
         lock.lock();
 
         try {
-            evict(numberToAutoBalance()); // NOSONAR
+            vacate(numberToAutoBalance()); // NOSONAR
 
             notFull.signalAll();
         } finally {
@@ -857,12 +892,15 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
     }
 
     /**
-     * Removes the specified number of objects from the pool based on the eviction policy.
+     * Removes (vacates) the specified number of objects from the pool based on the eviction policy.
+     * This is the sized counterpart to the public no-arg {@link #evict()} (which removes a
+     * balance-factor fraction); it removes <em>exactly</em> {@code numberToEvict} objects, choosing
+     * victims via the configured {@link EvictionPolicy}. Destroyed objects use {@link Caller#VACATE}.
      * This method is called internally during eviction operations.
      *
      * @param numberToEvict the number of objects to remove
      */
-    protected void evict(final int numberToEvict) {
+    protected void vacate(final int numberToEvict) {
         final int size = pool.size();
 
         if (numberToEvict >= size) {
@@ -948,7 +986,7 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
             }
 
             if (N.notEmpty(removingObjects)) {
-                // Identity-based removal: see evict(int). pool.removeAll uses equals which can
+                // Identity-based removal: see vacate(int). pool.removeAll uses equals which can
                 // drop multiple distinct entries that happen to be equals-equal to one expired
                 // element, leaking still-valid objects with no destroy callback.
                 removeByIdentity(removingObjects);
@@ -1083,5 +1121,10 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
         notFull = newCondition(lock);
         cmp = createComparator();
         scheduleEvictionTask();
+
+        if (!isClosed) {
+            initShutdownHook();
+            registerShutdownHook();
+        }
     }
 }

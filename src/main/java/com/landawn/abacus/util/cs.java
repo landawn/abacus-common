@@ -20,7 +20,7 @@ import com.landawn.abacus.annotation.Internal;
 import com.landawn.abacus.annotation.SuppressFBWarnings;
 
 /**
- * String constants utility class providing commonly used parameter names, field names, and SQL keywords.
+ * String constants utility class providing commonly used parameter names, field names, and JDBC-related identifiers.
  * This class centralizes string constants to avoid hardcoding strings throughout the codebase,
  * improving maintainability and reducing typos.
  *
@@ -87,6 +87,8 @@ public final class cs { // NOSONAR
     public static final String calendar = "calendar";
     public static final String calendar1 = "calendar1";
     public static final String calendar2 = "calendar2";
+    public static final String calendarClass = "calendarClass";
+    public static final String calendarCreator = "calendarCreator";
     public static final String CalendarField = "CalendarField";
     public static final String chunkSize = "chunkSize";
 
@@ -117,6 +119,8 @@ public final class cs { // NOSONAR
     public static final String date = "date";
     public static final String date1 = "date1";
     public static final String date2 = "date2";
+    public static final String dateClass = "dateClass";
+    public static final String dateCreator = "dateCreator";
     public static final String decimalFormat = "decimalFormat";
     public static final String defaultValue = "defaultValue";
     public static final String defaultValueSupplier = "defaultValueSupplier";
@@ -137,6 +141,9 @@ public final class cs { // NOSONAR
     public static final String element = "element";
     public static final String emptyAction = "emptyAction";
     // public static final String elementConsumer = "elementConsumer";
+    public static final String endDate = "endDate";
+    public static final String endDate1 = "endDate1";
+    public static final String endDate2 = "endDate2";
     public static final String endExclusive = "endExclusive";
     public static final String entry = "entry";
     public static final String entryFilter = "entryFilter";
@@ -148,12 +155,14 @@ public final class cs { // NOSONAR
     public static final String executor = "executor";
     public static final String expectedSize = "expectedSize";
     public static final String f = "f";
+    public static final String field = "field";
     public static final String file = "file";
     public static final String filter = "filter";
     public static final String finalAction = "finalAction";
     public static final String finisher = "finisher";
     public static final String flatMapper = "flatMapper";
     public static final String flatMapper2 = "flatMapper2";
+    public static final String format = "format";
     public static final String fromIndex = "fromIndex";
     public static final String fromStringFunc = "fromStringFunc";
     public static final String func = "func";
@@ -195,6 +204,7 @@ public final class cs { // NOSONAR
     // public static final String mapSupplier = "mapSupplier";
     public static final String max = "max";
     public static final String maxChunkCount = "maxChunkCount";
+    public static final String maxCount = "maxCount";
     public static final String maxDuration = "maxDuration";
     public static final String maxLen = "maxLen";
     public static final String maxSize = "maxSize";
@@ -208,6 +218,7 @@ public final class cs { // NOSONAR
     public static final String mergeFunction = "mergeFunction";
     public static final String mergeOp = "mergeOp";
     public static final String merger = "merger";
+    public static final String minDisplayWidth = "minDisplayWidth";
     public static final String minLength = "minLength";
     public static final String minSize = "minSize";
     public static final String mode = "mode";
@@ -224,6 +235,7 @@ public final class cs { // NOSONAR
     public static final String offset = "offset";
     public static final String onComplete = "onComplete";
     public static final String operator = "operator";
+    public static final String ops = "ops";
     public static final String other = "other";
     public static final String otherIfErrorOccurred = "otherIfErrorOccurred";
     public static final String output = "output";
@@ -238,7 +250,7 @@ public final class cs { // NOSONAR
     public static final String Predicate = "Predicate";
     public static final String prefix = "prefix";
     public static final String prefixSuffix = "prefixSuffix";
-    // public static final String processThreadNum = "processThreadNum";
+    public static final String processThreadNum = "processThreadNum";
     public static final String propName = "propName";
     public static final String ps = "ps";
     public static final String queue = "queue";
@@ -247,6 +259,7 @@ public final class cs { // NOSONAR
     public static final String rateLimiter = "rateLimiter";
     public static final String ReadableByteChannel = "ReadableByteChannel";
     public static final String reader = "reader";
+    public static final String readThreadNum = "readThreadNum";
     public static final String reference = "reference";
     public static final String remappingFunction = "remappingFunction";
     public static final String resultClass = "resultClass";
@@ -266,6 +279,9 @@ public final class cs { // NOSONAR
     public static final String size = "size";
     public static final String source = "source";
     public static final String srcClass = "srcClass";
+    public static final String startDate = "startDate";
+    public static final String startDate1 = "startDate1";
+    public static final String startDate2 = "startDate2";
     public static final String startInclusive = "startInclusive";
     public static final String startIndex = "startIndex";
     public static final String startTime = "startTime";
@@ -295,6 +311,7 @@ public final class cs { // NOSONAR
     public static final String typeName = "typeName";
     public static final String unit = "unit";
     public static final String url = "url";
+    public static final String value = "value";
     public static final String valueEquivalence = "valueEquivalence";
     public static final String valueExtractor = "valueExtractor";
     public static final String valueMapper = "valueMapper";
@@ -336,6 +353,7 @@ public final class cs { // NOSONAR
 
     public static final String keysToCompare = "keysToCompare";
     public static final String propNamesToCompare = "propNamesToCompare";
+    public static final String propNamesToFill = "propNamesToFill";
 
     public static final String elements = "elements";
 
@@ -361,6 +379,16 @@ public final class cs { // NOSONAR
     public static final String temporal2 = "temporal2";
 
     public static final String exceptionHandler = "exceptionHandler";
+
+    public static final String after = "after";
+    public static final String before = "before";
+    public static final String destFile = "destFile";
+    public static final String event = "event";
+    public static final String files = "files";
+    public static final String sourceFile = "sourceFile";
+    public static final String subscriber = "subscriber";
+    public static final String targetFile = "targetFile";
+    public static final String urls = "urls";
 
     private cs() {
         // Utility class for constant string values.

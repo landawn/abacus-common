@@ -356,7 +356,7 @@ abstract class SingleValueType<T> extends AbstractType<T> { //NOSONAR
      *
      * @param rs the ResultSet containing the query results
      * @param columnIndex the index of the column to retrieve (1-based)
-     * @return an instance of type T, or {@code null} if the database value is null
+     * @return an instance of type T; when no creator is configured, {@code null} if the database value is null (with a JSON creator or factory creator, the creator is invoked with the null value and its result is returned)
      * @throws SQLException if a database access error occurs
      */
     @Override
@@ -382,7 +382,7 @@ abstract class SingleValueType<T> extends AbstractType<T> { //NOSONAR
      *
      * @param rs the ResultSet containing the query results
      * @param columnName the label of the column to retrieve
-     * @return an instance of type T, or {@code null} if the database value is null
+     * @return an instance of type T; when no creator is configured, {@code null} if the database value is null (with a JSON creator or factory creator, the creator is invoked with the null value and its result is returned)
      * @throws SQLException if a database access error occurs
      */
     @Override
@@ -594,10 +594,10 @@ abstract class SingleValueType<T> extends AbstractType<T> { //NOSONAR
             matchedFields = N.filter(fields, f -> !Modifier.isStatic(f.getModifiers()) && !Modifier.isFinal(f.getModifiers())//
                     && (N.anyMatch(constructors, c -> Modifier.isPublic(c.getModifiers()) //
                             && c.getParameterCount() == 1 //
-                            && f.getType().isAssignableFrom(c.getParameterTypes()[0]))
+                            && ClassUtil.wrap(c.getParameterTypes()[0]).isAssignableFrom(ClassUtil.wrap(f.getType())))
                             || N.anyMatch(methods, m -> Modifier.isPublic(m.getModifiers()) && Modifier.isStatic(m.getModifiers())//
                                     && m.getParameterCount() == 1 //
-                                    && f.getType().isAssignableFrom(m.getParameterTypes()[0]))));
+                                    && ClassUtil.wrap(m.getParameterTypes()[0]).isAssignableFrom(ClassUtil.wrap(f.getType())))));
         } catch (final Exception e) {
             // ignore
         }
@@ -633,7 +633,7 @@ abstract class SingleValueType<T> extends AbstractType<T> { //NOSONAR
                         && Modifier.isStatic(it.getModifiers()) //
                         && typeClass.isAssignableFrom(it.getReturnType()) //
                         && it.getParameterCount() == 1 //
-                        && (ClassUtil.wrap(valueType).isAssignableFrom(ClassUtil.wrap(it.getParameterTypes()[0])))).orElseNull();
+                        && (ClassUtil.wrap(it.getParameterTypes()[0]).isAssignableFrom(ClassUtil.wrap(valueType)))).orElseNull();
             } catch (final Exception e) {
                 // ignore
             }
@@ -655,10 +655,10 @@ abstract class SingleValueType<T> extends AbstractType<T> { //NOSONAR
                 try {
                     constructor = N.findFirst(constructors, it -> Modifier.isPublic(it.getModifiers()) //
                             && it.getParameterCount() == 1 //
-                            && (valueType.isAssignableFrom(it.getParameterTypes()[0])))
+                            && (it.getParameterTypes()[0].isAssignableFrom(valueType)))
                             .or(() -> N.findFirst(constructors, it -> Modifier.isPublic(it.getModifiers()) //
                                     && it.getParameterCount() == 1 //
-                                    && (ClassUtil.wrap(valueType).isAssignableFrom(ClassUtil.wrap(it.getParameterTypes()[0])))))
+                                    && (ClassUtil.wrap(it.getParameterTypes()[0]).isAssignableFrom(ClassUtil.wrap(valueType)))))
                             .orElseNull();
                 } catch (final Exception e) {
                     // ignore

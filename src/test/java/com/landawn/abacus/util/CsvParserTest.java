@@ -226,14 +226,6 @@ public class CsvParserTest extends TestBase {
     }
 
     @Test
-    public void testParseLineEmpty() throws ParsingException {
-        CsvParser parser = new CsvParser();
-        List<String> result = parser.parseLine("");
-        assertEquals(1, result.size());
-        assertEquals("", result.get(0));
-    }
-
-    @Test
     public void testParseLineWithQuotes() throws ParsingException {
         CsvParser parser = new CsvParser();
         List<String> result = parser.parseLine("a,\"b,c\",d");
@@ -658,5 +650,55 @@ public class CsvParserTest extends TestBase {
         CsvParser parser = new CsvParser();
         String[] output = new String[2];
         assertThrows(ArrayIndexOutOfBoundsException.class, () -> parser.parseLineToArray("a,b,c,d", output));
+    }
+
+    // --- regression tests for 2026-06-11 deep-review fixes ---
+
+    @Test
+    public void testParseLineQuotedFieldWithTrailingWhitespaceBeforeSeparator() throws ParsingException {
+        // regression: the embedded-quote heuristic treated the CLOSING quote as embedded when
+        // followed by whitespace, so a,"b" ,c threw while the end-of-line twin a,b,"c"  worked
+        CsvParser parser = new CsvParser();
+
+        assertEquals(java.util.Arrays.asList("a", "b", "c"), parser.parseLine("a,\"b\" ,c"));
+        assertEquals(java.util.Arrays.asList("a", "b", "c"), parser.parseLine("a, \"b\" ,c"));
+        assertEquals(java.util.Arrays.asList("a", "b", "c"), parser.parseLine("a,  b  ,  \"c\" ")); // EOL twin unchanged
+        assertEquals(java.util.Arrays.asList("a", "bc\"d\"ef", "g"), parser.parseLine("a,bc\"d\"ef,g")); // embedded unchanged
+    }
+
+    // --- regression tests for 2026-06-12 deep-review fixes ---
+
+    @Test
+    public void testTabSeparatorEmptyFieldsNotSwallowed() throws ParsingException {
+        // regression: the whitespace-skip after a separator treated a whitespace SEPARATOR (tab)
+        // as skippable whitespace, so "a\t\tb" parsed to ["a","b"] instead of ["a","","b"]
+        CsvParser parser = new CsvParser('\t');
+
+        assertEquals(java.util.Arrays.asList("a", "", "b"), parser.parseLine("a\t\tb"));
+        assertEquals(java.util.Arrays.asList("", "", ""), parser.parseLine("\t\t"));
+        assertEquals(java.util.Arrays.asList("a", "", "", "b"), parser.parseLine("a\t\t\tb"));
+        // a space-only field between tab separators is still stripped to ""
+        assertEquals(java.util.Arrays.asList("a", "", "b"), parser.parseLine("a\t \tb"));
+        // spaces after a tab separator are still skipped as leading whitespace
+        assertEquals(java.util.Arrays.asList("a", "b"), parser.parseLine("a\t  b"));
+    }
+
+    @Test
+    public void testSpaceSeparatorEmptyFieldsNotSwallowed() throws ParsingException {
+        // same family with a space separator: consecutive separators must yield empty fields
+        CsvParser parser = new CsvParser(' ');
+
+        assertEquals(java.util.Arrays.asList("a", "", "b"), parser.parseLine("a  b"));
+        assertEquals(java.util.Arrays.asList("a", "b"), parser.parseLine("a b"));
+    }
+
+    @Test
+    public void testTabSeparatorEmptyFieldsToOutputArray() throws ParsingException {
+        CsvParser parser = new CsvParser('\t');
+        String[] output = new String[3];
+        parser.parseLineToArray("a\t\tb", output);
+        assertEquals("a", output[0]);
+        assertEquals("", output[1]);
+        assertEquals("b", output[2]);
     }
 }

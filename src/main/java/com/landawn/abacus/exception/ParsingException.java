@@ -53,6 +53,8 @@ public class ParsingException extends RuntimeException {
     /**
      * The token, position, or error code where the parse failure occurred.
      * Defaults to {@code -2} when not specified by the caller.
+     *
+     * @serial
      */
     private int errorToken = -2; //NOSONAR
 
@@ -104,6 +106,35 @@ public class ParsingException extends RuntimeException {
      */
     public ParsingException(final String message, final int errorToken) {
         super(message);
+        this.errorToken = errorToken;
+    }
+
+    /**
+     * Constructs a new {@code ParsingException} with the specified detail message, token, and cause.
+     * This constructor is useful when a parse failure both has a position/token and wraps an
+     * underlying exception.
+     *
+     * <p>Note that the detail message associated with {@code cause} is <i>not</i> automatically
+     * incorporated in this exception's detail message.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * try {
+     *     return tokenizer.next();
+     * } catch (IOException e) {
+     *     throw new ParsingException("Unexpected end of input at position " + position, position, e);
+     * }
+     * }</pre>
+     *
+     * @param message the detail message. The detail message is saved for later retrieval
+     *                by the {@link #getMessage()} method.
+     * @param errorToken an integer value representing the token, position, or error code where the parsing failed.
+     *                   This value can be retrieved later using {@link #getErrorToken()}.
+     * @param cause the cause (which is saved for later retrieval by the {@link #getCause()} method).
+     *              (A {@code null} value is permitted, and indicates that the cause is nonexistent or unknown.)
+     */
+    public ParsingException(final String message, final int errorToken, final Throwable cause) {
+        super(message, cause);
         this.errorToken = errorToken;
     }
 

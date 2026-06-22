@@ -12,6 +12,7 @@ import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -1256,16 +1257,18 @@ public class NTest extends AbstractParserTest {
 
     @Test
     public void test_nCopies() {
-        N.println(Array.repeat(true, 10));
-        N.println(Array.repeat(false, 10));
-        N.println(Array.repeat('1', 10));
-        N.println(Array.repeat((byte) 1, 10));
-        N.println(Array.repeat((short) 1, 10));
-        N.println(Array.repeat(1, 10));
-        N.println(Array.repeat(1L, 10));
-        N.println(Array.repeat(1f, 10));
-        N.println(Array.repeat(1d, 10));
-        N.println(Array.repeat("1", 10));
+        assertDoesNotThrow(() -> {
+            N.println(Array.repeat(true, 10));
+            N.println(Array.repeat(false, 10));
+            N.println(Array.repeat('1', 10));
+            N.println(Array.repeat((byte) 1, 10));
+            N.println(Array.repeat((short) 1, 10));
+            N.println(Array.repeat(1, 10));
+            N.println(Array.repeat(1L, 10));
+            N.println(Array.repeat(1f, 10));
+            N.println(Array.repeat(1d, 10));
+            N.println(Array.repeat("1", 10));
+        });
     }
 
     @Test
@@ -1909,9 +1912,11 @@ public class NTest extends AbstractParserTest {
 
     @Test
     public void test_frequencyMap() {
-        final Map<String, Integer> map = N.frequencyMap(N.toList("a", "b", "a", "c", "a", "D", "b"));
+        assertDoesNotThrow(() -> {
+            final Map<String, Integer> map = N.frequencyMap(N.toList("a", "b", "a", "c", "a", "D", "b"));
 
-        N.println(map);
+            N.println(map);
+        });
     }
 
     @Test
@@ -2842,6 +2847,24 @@ public class NTest extends AbstractParserTest {
     }
 
     @Test
+    public void testContainsAnyNone_ListAndSet_Unambiguous() {
+        // Regression for the overload-ambiguity fix (api_review_2026-06-10 #3.1/#5.1):
+        // a List (statically a Collection) + Set argument pair must compile and resolve to the (Collection, Set) overload.
+        final List<String> list = Arrays.asList("a", "b", "c");
+        final Set<String> setMatch = new HashSet<>(Arrays.asList("c", "d"));
+        final Set<String> setNoMatch = new HashSet<>(Arrays.asList("x", "y"));
+
+        assertTrue(N.containsAny(list, setMatch));
+        assertFalse(N.containsAny(list, setNoMatch));
+        assertFalse(N.containsNone(list, setMatch));
+        assertTrue(N.containsNone(list, setNoMatch));
+
+        // empty Set: containsAny -> false, containsNone -> true
+        assertFalse(N.containsAny(list, new HashSet<>()));
+        assertTrue(N.containsNone(list, new HashSet<>()));
+    }
+
+    @Test
     public void testContainsAnyVarargs() {
         Set<String> colors = new HashSet<>(Arrays.asList("red", "green", "blue"));
         assertTrue(N.containsAny(colors, "red", "orange", "yellow"));
@@ -3192,6 +3215,53 @@ public class NTest extends AbstractParserTest {
     public void testContainsNoneCollectionNull() {
         List<String> invalidColors = Arrays.asList("yellow");
         assertTrue(N.containsNone(null, invalidColors));
+    }
+
+    @Test
+    public void testContainsAnyContainsNone_listAndSet_notAmbiguous() {
+        // These calls were once ambiguous between (Collection, Collection) and (Iterable, Set) and did not
+        // compile; the (Collection, Set) overloads added on 2026-06-11 resolve them as the most specific match.
+        List<String> list = Arrays.asList("a", "b", "c");
+        Set<String> somePresent = new HashSet<>(Arrays.asList("b", "x"));
+        Set<String> nonePresent = new HashSet<>(Arrays.asList("x", "y"));
+
+        assertTrue(N.containsAny(list, somePresent));
+        assertFalse(N.containsAny(list, nonePresent));
+        assertFalse(N.containsNone(list, somePresent));
+        assertTrue(N.containsNone(list, nonePresent));
+        assertTrue(N.containsAll(list, new HashSet<>(Arrays.asList("a", "b"))));
+        assertFalse(N.containsAll(list, new HashSet<>(Arrays.asList("a", "x"))));
+    }
+
+    @Test
+    public void testContainsAll_collectionSet() {
+        List<String> list = Arrays.asList("a", "b", "c", "d");
+        assertTrue(N.containsAll(list, new HashSet<>(Arrays.asList("a", "c"))));
+        assertFalse(N.containsAll(list, new HashSet<>(Arrays.asList("a", "e"))));
+        assertTrue(N.containsAll(list, (Set<?>) null));
+        assertTrue(N.containsAll(list, new HashSet<>()));
+        assertFalse(N.containsAll((Collection<?>) null, new HashSet<>(Arrays.asList("a"))));
+        assertFalse(N.containsAll(new ArrayList<>(), new HashSet<>(Arrays.asList("a"))));
+    }
+
+    @Test
+    public void testContainsAny_collectionSet() {
+        List<String> list = Arrays.asList("a", "b", "c");
+        assertTrue(N.containsAny(list, new HashSet<>(Arrays.asList("c", "d"))));
+        assertFalse(N.containsAny(list, new HashSet<>(Arrays.asList("d", "e"))));
+        assertFalse(N.containsAny(list, (Set<?>) null));
+        assertFalse(N.containsAny(list, new HashSet<>()));
+        assertFalse(N.containsAny((Collection<?>) null, new HashSet<>(Arrays.asList("a"))));
+    }
+
+    @Test
+    public void testContainsNone_collectionSet() {
+        List<String> list = Arrays.asList("a", "b", "c");
+        assertFalse(N.containsNone(list, new HashSet<>(Arrays.asList("c", "d"))));
+        assertTrue(N.containsNone(list, new HashSet<>(Arrays.asList("d", "e"))));
+        assertTrue(N.containsNone(list, (Set<?>) null));
+        assertTrue(N.containsNone(list, new HashSet<>()));
+        assertTrue(N.containsNone((Collection<?>) null, new HashSet<>(Arrays.asList("a"))));
     }
 
     @Test
@@ -4389,14 +4459,16 @@ public class NTest extends AbstractParserTest {
 
     @Test
     public void test_concat_01() {
-        final String[] abc = N.concat(N.asArray("a", "b"), N.asArray("c"));
-        N.println(abc);
-        final List<String> ab123 = N.concat(N.toList("a", "b"), N.toList("1", "2", "3"));
-        N.println(ab123);
-        final List<String> ab = N.concat(N.toList("a", "b"));
-        N.println(ab);
-        final List<String> abcd = N.concat(N.toList(N.toList("a", "b", "c", "d")));
-        N.println(abcd);
+        assertDoesNotThrow(() -> {
+            final String[] abc = N.concat(N.asArray("a", "b"), N.asArray("c"));
+            N.println(abc);
+            final List<String> ab123 = N.concat(N.toList("a", "b"), N.toList("1", "2", "3"));
+            N.println(ab123);
+            final List<String> ab = N.concat(N.toList("a", "b"));
+            N.println(ab);
+            final List<String> abcd = N.concat(N.toList(N.toList("a", "b", "c", "d")));
+            N.println(abcd);
+        });
     }
 
     @Test
@@ -7754,24 +7826,25 @@ public class NTest extends AbstractParserTest {
 
     @Test
     public void test_applyToEach() {
+        assertDoesNotThrow(() -> {
+            {
+                final String[] a = N.asArray("a ", "b", " c");
+                N.replaceAll(a, Strings::trim);
+                N.println(a);
+            }
 
-        {
-            final String[] a = N.asArray("a ", "b", " c");
-            N.replaceAll(a, Strings::trim);
-            N.println(a);
-        }
+            {
+                final List<String> c = N.toList("a ", "b", " c");
+                N.replaceAll(c, Strings::trim);
+                N.println(c);
+            }
 
-        {
-            final List<String> c = N.toList("a ", "b", " c");
-            N.replaceAll(c, Strings::trim);
-            N.println(c);
-        }
-
-        {
-            final List<String> c = N.toLinkedList("a ", "b", " c");
-            N.replaceAll(c, Strings::trim);
-            N.println(c);
-        }
+            {
+                final List<String> c = N.toLinkedList("a ", "b", " c");
+                N.replaceAll(c, Strings::trim);
+                N.println(c);
+            }
+        });
     }
 
     @Test
@@ -8014,50 +8087,66 @@ public class NTest extends AbstractParserTest {
 
     @Test
     public void testReplaceAllBooleanArrayOperatorNull() {
-        boolean[] a = null;
-        N.replaceAll(a, x -> !x);
+        assertDoesNotThrow(() -> {
+            boolean[] a = null;
+            N.replaceAll(a, x -> !x);
+        });
     }
 
     @Test
     public void testReplaceAllCharArrayOperatorNull() {
-        char[] a = null;
-        N.replaceAll(a, x -> x);
+        assertDoesNotThrow(() -> {
+            char[] a = null;
+            N.replaceAll(a, x -> x);
+        });
     }
 
     @Test
     public void testReplaceAllByteArrayOperatorNull() {
-        byte[] a = null;
-        N.replaceAll(a, x -> x);
+        assertDoesNotThrow(() -> {
+            byte[] a = null;
+            N.replaceAll(a, x -> x);
+        });
     }
 
     @Test
     public void testReplaceAllShortArrayOperatorNull() {
-        short[] a = null;
-        N.replaceAll(a, x -> x);
+        assertDoesNotThrow(() -> {
+            short[] a = null;
+            N.replaceAll(a, x -> x);
+        });
     }
 
     @Test
     public void testReplaceAllIntArrayOperatorNull() {
-        int[] a = null;
-        N.replaceAll(a, x -> x);
+        assertDoesNotThrow(() -> {
+            int[] a = null;
+            N.replaceAll(a, x -> x);
+        });
     }
 
     @Test
     public void testReplaceAllLongArrayOperatorNull() {
-        long[] a = null;
-        N.replaceAll(a, x -> x);
+        assertDoesNotThrow(() -> {
+            long[] a = null;
+            N.replaceAll(a, x -> x);
+        });
     }
 
     @Test
     public void testReplaceAllFloatArrayOperatorNull() {
-        float[] a = null;
-        N.replaceAll(a, x -> x);
+        assertDoesNotThrow(() -> {
+            float[] a = null;
+            N.replaceAll(a, x -> x);
+        });
     }
 
     @Test
     public void testReplaceAllDoubleArrayOperatorNull() {
-        double[] a = null;
-        N.replaceAll(a, x -> x);
+        assertDoesNotThrow(() -> {
+            double[] a = null;
+            N.replaceAll(a, x -> x);
+        });
     }
 
     @Test
@@ -8069,14 +8158,18 @@ public class NTest extends AbstractParserTest {
 
     @Test
     public void testReplaceAllObjectArrayOperatorNull() {
-        String[] a = null;
-        N.replaceAll(a, x -> x);
+        assertDoesNotThrow(() -> {
+            String[] a = null;
+            N.replaceAll(a, x -> x);
+        });
     }
 
     @Test
     public void testReplaceAllListOperatorNull() {
-        List<String> list = null;
-        N.replaceAll(list, x -> x);
+        assertDoesNotThrow(() -> {
+            List<String> list = null;
+            N.replaceAll(list, x -> x);
+        });
     }
 
     @Test
@@ -8437,62 +8530,82 @@ public class NTest extends AbstractParserTest {
 
     @Test
     public void testSetAllBooleanArrayNull() {
-        boolean[] a = null;
-        N.setAll(a, i -> true);
+        assertDoesNotThrow(() -> {
+            boolean[] a = null;
+            N.setAll(a, i -> true);
+        });
     }
 
     @Test
     public void testSetAllCharArrayNull() {
-        char[] a = null;
-        N.setAll(a, i -> 'x');
+        assertDoesNotThrow(() -> {
+            char[] a = null;
+            N.setAll(a, i -> 'x');
+        });
     }
 
     @Test
     public void testSetAllByteArrayNull() {
-        byte[] a = null;
-        N.setAll(a, i -> (byte) i);
+        assertDoesNotThrow(() -> {
+            byte[] a = null;
+            N.setAll(a, i -> (byte) i);
+        });
     }
 
     @Test
     public void testSetAllShortArrayNull() {
-        short[] a = null;
-        N.setAll(a, i -> (short) i);
+        assertDoesNotThrow(() -> {
+            short[] a = null;
+            N.setAll(a, i -> (short) i);
+        });
     }
 
     @Test
     public void testSetAllIntArrayNull() {
-        int[] a = null;
-        N.setAll(a, i -> i);
+        assertDoesNotThrow(() -> {
+            int[] a = null;
+            N.setAll(a, i -> i);
+        });
     }
 
     @Test
     public void testSetAllLongArrayNull() {
-        long[] a = null;
-        N.setAll(a, i -> (long) i);
+        assertDoesNotThrow(() -> {
+            long[] a = null;
+            N.setAll(a, i -> (long) i);
+        });
     }
 
     @Test
     public void testSetAllFloatArrayNull() {
-        float[] a = null;
-        N.setAll(a, i -> (float) i);
+        assertDoesNotThrow(() -> {
+            float[] a = null;
+            N.setAll(a, i -> (float) i);
+        });
     }
 
     @Test
     public void testSetAllDoubleArrayNull() {
-        double[] a = null;
-        N.setAll(a, i -> (double) i);
+        assertDoesNotThrow(() -> {
+            double[] a = null;
+            N.setAll(a, i -> (double) i);
+        });
     }
 
     @Test
     public void testSetAllObjectArrayNull() {
-        String[] a = null;
-        N.setAll(a, i -> "Item" + i);
+        assertDoesNotThrow(() -> {
+            String[] a = null;
+            N.setAll(a, i -> "Item" + i);
+        });
     }
 
     @Test
     public void testSetAllListNull() {
-        List<String> list = null;
-        N.setAll(list, i -> "Value" + i);
+        assertDoesNotThrow(() -> {
+            List<String> list = null;
+            N.setAll(list, i -> "Value" + i);
+        });
     }
 
     @Test
@@ -9959,6 +10072,21 @@ public class NTest extends AbstractParserTest {
         assertArrayEquals(new boolean[0], N.removeAt(new boolean[] { true }, 0));
         assertThrows(IndexOutOfBoundsException.class, () -> N.removeAt(new boolean[] { true }, 1));
         assertThrows(IndexOutOfBoundsException.class, () -> N.removeAt(new boolean[0], 0));
+        // @NotNull now enforced on the primitive single-index removeAt cells: null -> IllegalArgumentException
+        assertThrows(IllegalArgumentException.class, () -> N.removeAt((boolean[]) null, 0));
+    }
+
+    @Test
+    public void testRemoveAt_primitiveSingleIndex_nullThrowsIAE() {
+        assertThrows(IllegalArgumentException.class, () -> N.removeAt((char[]) null, 0));
+        assertThrows(IllegalArgumentException.class, () -> N.removeAt((byte[]) null, 0));
+        assertThrows(IllegalArgumentException.class, () -> N.removeAt((short[]) null, 0));
+        assertThrows(IllegalArgumentException.class, () -> N.removeAt((int[]) null, 0));
+        assertThrows(IllegalArgumentException.class, () -> N.removeAt((long[]) null, 0));
+        assertThrows(IllegalArgumentException.class, () -> N.removeAt((float[]) null, 0));
+        assertThrows(IllegalArgumentException.class, () -> N.removeAt((double[]) null, 0));
+        // a non-null empty array still throws IndexOutOfBoundsException (no valid index)
+        assertThrows(IndexOutOfBoundsException.class, () -> N.removeAt(new int[0], 0));
     }
 
     @Test
@@ -9967,7 +10095,8 @@ public class NTest extends AbstractParserTest {
         String[] emptyArr = {};
         assertThrows(IndexOutOfBoundsException.class, () -> N.removeAt(emptyArr, 0));
         String[] nullArr = null;
-        assertThrows(IndexOutOfBoundsException.class, () -> N.removeAt(nullArr, 0));
+        // generic T[] removeAt now enforces @NotNull (binds to removeAt(T[], int))
+        assertThrows(IllegalArgumentException.class, () -> N.removeAt(nullArr, 0));
 
     }
 
@@ -9993,7 +10122,9 @@ public class NTest extends AbstractParserTest {
     public void testDeleteAllByIndicesGeneric() {
         assertArrayEquals(new String[] { "a", "d" }, N.removeAt(new String[] { "a", "b", "c", "d" }, 1, 2));
         String[] arrNull = null;
-        assertThrows(NullPointerException.class, () -> N.removeAt(arrNull, 1, 2));
+        // String[] varargs: a null array with one or more indices now throws IndexOutOfBoundsException consistently
+        // (previously a raw NullPointerException for two-or-more indices)
+        assertThrows(IndexOutOfBoundsException.class, () -> N.removeAt(arrNull, 1, 2));
     }
 
     @Test
@@ -11090,7 +11221,9 @@ public class NTest extends AbstractParserTest {
 
     @Test
     public void testDeleteRangeGenericArray() {
-        assertThrows(IndexOutOfBoundsException.class, () -> N.removeRange((Integer[]) null, 0, 1));
+        // generic T[] now enforces @NotNull (cannot fabricate an array of unknown component type)
+        assertThrows(IllegalArgumentException.class, () -> N.removeRange((Integer[]) null, 0, 1));
+        assertThrows(IllegalArgumentException.class, () -> N.removeRange((Integer[]) null, 0, 0));
         assertArrayEquals(new Integer[] {}, N.removeRange(new Integer[] {}, 0, 0));
         Integer[] originalArr = { 1, 2, 3, 4, 5 };
         assertArrayEquals(new Integer[] { 1, 2, 3, 4, 5 }, N.removeRange(originalArr, 1, 1));
@@ -11171,19 +11304,21 @@ public class NTest extends AbstractParserTest {
 
     @Test
     public void test_replaceRange() {
-        {
-            final int[] a = { 1, 2, 3, 4, 5, 6, 7, 8, 9 };
-            N.println(N.replaceRange(a, 1, 5, Array.of(3, 4, 5)));
+        assertDoesNotThrow(() -> {
+            {
+                final int[] a = { 1, 2, 3, 4, 5, 6, 7, 8, 9 };
+                N.println(N.replaceRange(a, 1, 5, Array.of(3, 4, 5)));
 
-        }
+            }
 
-        N.println(Strings.repeat("=", 80));
+            N.println(Strings.repeat("=", 80));
 
-        {
-            final String str = "123456789";
-            N.println(N.replaceRange(str, 7, 9, "00000"));
+            {
+                final String str = "123456789";
+                N.println(N.replaceRange(str, 7, 9, "00000"));
 
-        }
+            }
+        });
     }
 
     @Test
@@ -11343,8 +11478,9 @@ public class NTest extends AbstractParserTest {
 
         assertArrayEquals(new Integer[] { 8, 9 }, N.replaceRange(new Integer[] {}, 0, 0, new Integer[] { 8, 9 }));
         assertArrayEquals(new Integer[] { 1, 4 }, N.replaceRange(original, 1, 3, new Integer[] {}));
-        Integer[] rep = { 10, 20 };
-        assertArrayEquals(rep, N.replaceRange((Integer[]) null, 0, 0, rep));
+        final Integer[] rep = { 10, 20 };
+        // generic T[] now enforces @NotNull (cannot fabricate an array of unknown component type)
+        assertThrows(IllegalArgumentException.class, () -> N.replaceRange((Integer[]) null, 0, 0, rep));
         assertArrayEquals(new Integer[] { 1, 4 }, N.replaceRange(original, 1, 3, null));
 
         assertThrows(IndexOutOfBoundsException.class, () -> N.replaceRange(new Integer[] { 1 }, 1, 0, new Integer[] {}));
@@ -11406,31 +11542,33 @@ public class NTest extends AbstractParserTest {
 
     @Test
     public void test_moveRanger() {
-        {
-            for (int i = 0; i < 7; i++) {
-                final byte[] a = { 1, 2, 3, 4, 5, 6, 7, 8, 9 };
-                N.moveRange(a, 3, 6, i);
-                N.println(a);
+        assertDoesNotThrow(() -> {
+            {
+                for (int i = 0; i < 7; i++) {
+                    final byte[] a = { 1, 2, 3, 4, 5, 6, 7, 8, 9 };
+                    N.moveRange(a, 3, 6, i);
+                    N.println(a);
+                }
             }
-        }
 
-        N.println(Strings.repeat("=", 80));
+            N.println(Strings.repeat("=", 80));
 
-        {
-            final String str = "123456789";
-            for (int i = 0; i < 7; i++) {
-                N.println(i + ": " + N.moveRange(str, 3, 6, i));
+            {
+                final String str = "123456789";
+                for (int i = 0; i < 7; i++) {
+                    N.println(i + ": " + N.moveRange(str, 3, 6, i));
+                }
             }
-        }
 
-        N.println(Strings.repeat("=", 80));
+            N.println(Strings.repeat("=", 80));
 
-        {
-            final String str = "123456789";
-            for (int i = 0; i < 8; i++) {
-                N.println(i + ": " + N.moveRange(str, 1, 3, i));
+            {
+                final String str = "123456789";
+                for (int i = 0; i < 8; i++) {
+                    N.println(i + ": " + N.moveRange(str, 1, 3, i));
+                }
             }
-        }
+        });
     }
 
     @Test
@@ -11606,14 +11744,16 @@ public class NTest extends AbstractParserTest {
         Integer[] result = N.skipRange(integerArray, 1, 3);
         assertArrayEquals(new Integer[] { 1, 4, 5 }, result);
 
-        assertNull(N.skipRange((Integer[]) null, 0, 0));
+        // generic T[] skipRange delegates to removeRange, which now enforces @NotNull
+        assertThrows(IllegalArgumentException.class, () -> N.skipRange((Integer[]) null, 0, 0));
 
         assertArrayEquals(integerArray.clone(), N.skipRange(integerArray, 0, 0));
     }
 
     @Test
     public void testSkipRangeGenericArray() {
-        assertNull(N.skipRange((Integer[]) null, 0, 0));
+        // generic T[] skipRange delegates to removeRange, which now enforces @NotNull
+        assertThrows(IllegalArgumentException.class, () -> N.skipRange((Integer[]) null, 0, 0));
         Integer[] emptyArr = {};
         assertArrayEquals(emptyArr, N.skipRange(emptyArr, 0, 0));
 
@@ -12697,39 +12837,41 @@ public class NTest extends AbstractParserTest {
 
     @Test
     public void test_min_max() {
-        N.println("==================================================");
+        assertDoesNotThrow(() -> {
+            N.println("==================================================");
 
-        final List<String> coll2 = N.toList("1", "2", "7", "0", "-1");
-        N.println(N.min(coll2));
-        N.println(N.max(coll2));
+            final List<String> coll2 = N.toList("1", "2", "7", "0", "-1");
+            N.println(N.min(coll2));
+            N.println(N.max(coll2));
 
-        N.println("==================================================");
+            N.println("==================================================");
 
-        final Set<String> coll3 = N.toSet("1", "2", "7", "0", "-1");
-        N.println(N.min(coll3));
-        N.println(N.max(coll3));
+            final Set<String> coll3 = N.toSet("1", "2", "7", "0", "-1");
+            N.println(N.min(coll3));
+            N.println(N.max(coll3));
 
-        N.println("==================================================");
+            N.println("==================================================");
 
-        final int[] array = { 1, 2, 7, 0, -1 };
-        N.println(N.sum(array));
-        N.println(N.average(array));
-        N.println(N.min(array));
-        N.println(N.max(array));
+            final int[] array = { 1, 2, 7, 0, -1 };
+            N.println(N.sum(array));
+            N.println(N.average(array));
+            N.println(N.min(array));
+            N.println(N.max(array));
 
-        N.println("==================================================");
+            N.println("==================================================");
 
-        final int[] array1 = { 1, 2, 7, 0, -1 };
-        N.println(N.sum(array1));
-        N.println(N.average(array1));
-        N.println(N.min(array1));
-        N.println(N.max(array1));
+            final int[] array1 = { 1, 2, 7, 0, -1 };
+            N.println(N.sum(array1));
+            N.println(N.average(array1));
+            N.println(N.min(array1));
+            N.println(N.max(array1));
 
-        N.println("==================================================");
+            N.println("==================================================");
 
-        final String[] array2 = { "1", "2", "7", "0", "-1" };
-        N.println(N.min(array2));
-        N.println(N.max(array2));
+            final String[] array2 = { "1", "2", "7", "0", "-1" };
+            N.println(N.min(array2));
+            N.println(N.max(array2));
+        });
     }
 
     @Test
@@ -13010,12 +13152,12 @@ public class NTest extends AbstractParserTest {
 
     @Test
     public void testMinOrDefaultIfEmpty() {
-        assertEquals(Integer.valueOf(1), N.minOrDefaultIfEmpty(new Integer[] { 1, 2, 3 }, x -> x, 99));
-        assertEquals(Integer.valueOf(99), N.minOrDefaultIfEmpty(new Integer[] {}, x -> x, 99));
-        assertEquals(Integer.valueOf(1), N.minOrDefaultIfEmpty(Arrays.asList(1, 2, 3), x -> x, 99));
-        assertEquals(Integer.valueOf(99), N.minOrDefaultIfEmpty(Collections.<Integer> emptyList(), x -> x, 99));
-        assertEquals(Integer.valueOf(1), N.minOrDefaultIfEmpty(Arrays.asList(1, 2, 3).iterator(), x -> x, 99));
-        assertEquals(Integer.valueOf(99), N.minOrDefaultIfEmpty(Collections.<Integer> emptyIterator(), x -> x, 99));
+        assertEquals(Integer.valueOf(1), N.minValueOrDefaultIfEmpty(new Integer[] { 1, 2, 3 }, x -> x, 99));
+        assertEquals(Integer.valueOf(99), N.minValueOrDefaultIfEmpty(new Integer[] {}, x -> x, 99));
+        assertEquals(Integer.valueOf(1), N.minValueOrDefaultIfEmpty(Arrays.asList(1, 2, 3), x -> x, 99));
+        assertEquals(Integer.valueOf(99), N.minValueOrDefaultIfEmpty(Collections.<Integer> emptyList(), x -> x, 99));
+        assertEquals(Integer.valueOf(1), N.minValueOrDefaultIfEmpty(Arrays.asList(1, 2, 3).iterator(), x -> x, 99));
+        assertEquals(Integer.valueOf(99), N.minValueOrDefaultIfEmpty(Collections.<Integer> emptyIterator(), x -> x, 99));
     }
 
     @Test
@@ -13069,9 +13211,9 @@ public class NTest extends AbstractParserTest {
 
     @Test
     public void testMinMaxOrDefaultIfEmpty() {
-        assertEquals(Integer.valueOf(4), N.minOrDefaultIfEmpty(new String[] { "apple", "kiwi", "plum" }, String::length, 100));
-        assertEquals(Integer.valueOf(4), N.minOrDefaultIfEmpty(new String[] { "apple", "kiwi", "plum" }, s -> s.equals("kiwi") ? 4 : s.length(), 100));
-        assertEquals(Integer.valueOf(100), N.minOrDefaultIfEmpty(new String[] {}, String::length, 100));
+        assertEquals(Integer.valueOf(4), N.minValueOrDefaultIfEmpty(new String[] { "apple", "kiwi", "plum" }, String::length, 100));
+        assertEquals(Integer.valueOf(4), N.minValueOrDefaultIfEmpty(new String[] { "apple", "kiwi", "plum" }, s -> s.equals("kiwi") ? 4 : s.length(), 100));
+        assertEquals(Integer.valueOf(100), N.minValueOrDefaultIfEmpty(new String[] {}, String::length, 100));
 
         assertEquals(-9, N.minIntOrDefaultIfEmpty(new String[] { "apple", "kiwi" }, s -> s.charAt(0) - 'j', 99));
         assertEquals(99, N.minIntOrDefaultIfEmpty(new String[] {}, s -> s.charAt(0), 99));
@@ -13079,8 +13221,17 @@ public class NTest extends AbstractParserTest {
         assertEquals(4L, N.minLongOrDefaultIfEmpty(new String[] { "apple", "kiwi", "plum" }, String::length, 100L));
         assertEquals(0.33333333, N.minDoubleOrDefaultIfEmpty(new Integer[] { 1, 2, 3 }, x -> 1.0 / x, 10.0), DELTA);
 
-        assertEquals(Integer.valueOf(5), N.maxOrDefaultIfEmpty(new String[] { "apple", "kiwi", "plum" }, String::length, -1));
-        assertEquals(-1, N.maxOrDefaultIfEmpty(new String[] {}, String::length, -1));
+        assertEquals(Integer.valueOf(5), N.maxValueOrDefaultIfEmpty(new String[] { "apple", "kiwi", "plum" }, String::length, -1));
+        assertEquals(-1, N.maxValueOrDefaultIfEmpty(new String[] {}, String::length, -1));
+
+        // all extracted values are null -> treated as "empty", returns defaultValue (not null)
+        final java.util.function.Function<String, Integer> toNull = s -> null;
+        assertEquals(Integer.valueOf(99), N.minValueOrDefaultIfEmpty(new String[] { "a", "b" }, toNull, 99));
+        assertEquals(Integer.valueOf(99), N.minValueOrDefaultIfEmpty(Arrays.asList("a", "b"), toNull, 99));
+        assertEquals(Integer.valueOf(99), N.minValueOrDefaultIfEmpty(Arrays.asList("a", "b").iterator(), toNull, 99));
+        assertEquals(Integer.valueOf(99), N.maxValueOrDefaultIfEmpty(new String[] { "a", "b" }, toNull, 99));
+        assertEquals(Integer.valueOf(99), N.maxValueOrDefaultIfEmpty(Arrays.asList("a", "b"), toNull, 99));
+        assertEquals(Integer.valueOf(99), N.maxValueOrDefaultIfEmpty(Arrays.asList("a", "b").iterator(), toNull, 99));
     }
 
     @Test
@@ -13112,6 +13263,16 @@ public class NTest extends AbstractParserTest {
         result = N.minMax(new Integer[] { 1 });
         assertEquals(Integer.valueOf(1), result.left());
         assertEquals(Integer.valueOf(1), result.right());
+
+        result = N.minMax(new Integer[] { null, 3, 1, null, 2 });
+        assertEquals(Integer.valueOf(1), result.left());
+        assertEquals(Integer.valueOf(3), result.right());
+
+        assertEquals(Pair.of(null, null), N.minMax(new Integer[] { null, null }));
+        assertEquals(Pair.of(1, 3), N.minMax(Arrays.asList(null, 3, 1, null, 2)));
+        assertEquals(Pair.of(1, 3), N.minMax(Arrays.asList(null, 3, 1, null, 2).iterator()));
+        assertEquals(Pair.of(null, null), N.minMax(Arrays.<Integer> asList(null, null)));
+        assertEquals(Pair.of(null, null), N.minMax(Arrays.<Integer> asList(null, null).iterator()));
     }
 
     @Test
@@ -13480,12 +13641,12 @@ public class NTest extends AbstractParserTest {
 
     @Test
     public void testMaxOrDefaultIfEmpty() {
-        assertEquals(Integer.valueOf(3), N.maxOrDefaultIfEmpty(new Integer[] { 1, 2, 3 }, x -> x, 99));
-        assertEquals(Integer.valueOf(99), N.maxOrDefaultIfEmpty(new Integer[] {}, x -> x, 99));
-        assertEquals(Integer.valueOf(3), N.maxOrDefaultIfEmpty(Arrays.asList(1, 2, 3), x -> x, 99));
-        assertEquals(Integer.valueOf(99), N.maxOrDefaultIfEmpty(Collections.<Integer> emptyList(), x -> x, 99));
-        assertEquals(Integer.valueOf(3), N.maxOrDefaultIfEmpty(Arrays.asList(1, 2, 3).iterator(), x -> x, 99));
-        assertEquals(Integer.valueOf(99), N.maxOrDefaultIfEmpty(Collections.<Integer> emptyIterator(), x -> x, 99));
+        assertEquals(Integer.valueOf(3), N.maxValueOrDefaultIfEmpty(new Integer[] { 1, 2, 3 }, x -> x, 99));
+        assertEquals(Integer.valueOf(99), N.maxValueOrDefaultIfEmpty(new Integer[] {}, x -> x, 99));
+        assertEquals(Integer.valueOf(3), N.maxValueOrDefaultIfEmpty(Arrays.asList(1, 2, 3), x -> x, 99));
+        assertEquals(Integer.valueOf(99), N.maxValueOrDefaultIfEmpty(Collections.<Integer> emptyList(), x -> x, 99));
+        assertEquals(Integer.valueOf(3), N.maxValueOrDefaultIfEmpty(Arrays.asList(1, 2, 3).iterator(), x -> x, 99));
+        assertEquals(Integer.valueOf(99), N.maxValueOrDefaultIfEmpty(Collections.<Integer> emptyIterator(), x -> x, 99));
     }
 
     @Test
@@ -14800,6 +14961,21 @@ public class NTest extends AbstractParserTest {
     }
 
     @Test
+    public void testCount_Iterable() {
+        // Collection path -> uses size()
+        assertEquals(5, N.count(Arrays.asList(1, 2, 3, 4, 5)));
+        assertEquals(0, N.count(new ArrayList<>()));
+        assertEquals(0, N.count((Iterable<?>) null));
+
+        // non-Collection Iterable path -> traverses to count
+        final Iterable<Integer> iterable = () -> Arrays.asList(10, 20, 30).iterator();
+        assertEquals(3, N.count(iterable));
+
+        // consistent with the Iterator overload
+        assertEquals(N.count(Arrays.asList("a", "b").iterator()), N.count(Arrays.asList("a", "b")));
+    }
+
+    @Test
     public void testEmptyCollectionHandling() {
         String[] emptyArray = new String[0];
         assertEquals(Collections.emptyList(), N.filter(emptyArray, s -> true));
@@ -15946,16 +16122,18 @@ public class NTest extends AbstractParserTest {
 
     @Test
     public void test_distinct() {
-        final Account[] a = { createAccount(Account.class), createAccount(Account.class), createAccount(Account.class) };
-        final List<Account> c = N.toList(a);
+        assertDoesNotThrow(() -> {
+            final Account[] a = { createAccount(Account.class), createAccount(Account.class), createAccount(Account.class) };
+            final List<Account> c = N.toList(a);
 
-        final List<Account> m = N.distinctBy(a, (Function<Account, String>) Account::getFirstName);
+            final List<Account> m = N.distinctBy(a, (Function<Account, String>) Account::getFirstName);
 
-        N.println(m);
+            N.println(m);
 
-        final List<Account> m2 = N.distinctBy(c, (Function<Account, String>) Account::getFirstName);
+            final List<Account> m2 = N.distinctBy(c, (Function<Account, String>) Account::getFirstName);
 
-        N.println(m2);
+            N.println(m2);
+        });
     }
 
     @Test
@@ -16724,7 +16902,7 @@ public class NTest extends AbstractParserTest {
         account2.setId(2);
         account2.setFirstName("firstName2");
 
-        Beans.copyInto(account2, account1);
+        Beans.mergeInto(account2, account1);
         N.println(account1);
         assertEquals("firstName2", account1.getFirstName());
 
@@ -16735,7 +16913,7 @@ public class NTest extends AbstractParserTest {
         personType2.setId(2);
         personType2.setFirstName("firstName");
 
-        Beans.copyInto(personType2, personType1);
+        Beans.mergeInto(personType2, personType1);
         N.println(personType1);
         assertEquals("firstName", personType1.getFirstName());
 
@@ -16744,7 +16922,7 @@ public class NTest extends AbstractParserTest {
 
         final PersonsType personsType2 = new PersonsType();
         personsType2.getPerson().add(personType2);
-        Beans.copyInto(personsType2, personsType1);
+        Beans.mergeInto(personsType2, personsType1);
         N.println(personsType1);
 
         assertEquals(1, personsType1.getPerson().size());
@@ -16755,60 +16933,67 @@ public class NTest extends AbstractParserTest {
         final JAXBean jaxBean2 = new JAXBean();
         jaxBean2.getCityList().add("b");
 
-        Beans.copyInto(jaxBean1, jaxBean2);
+        Beans.mergeInto(jaxBean1, jaxBean2);
 
         assertEquals("a", jaxBean2.getCityList().get(0));
     }
 
     @Test
     public void testMerge() {
-        final Account account = new Account();
-        account.setFirstName("fn1");
-        account.setMiddleName("mn1");
-        account.setLastName("ln1");
-        account.setId(100001);
+        assertDoesNotThrow(() -> {
+            final Account account = new Account();
+            account.setFirstName("fn1");
+            account.setMiddleName("mn1");
+            account.setLastName("ln1");
+            account.setId(100001);
 
-        final Account account2 = new Account();
-        account2.setFirstName("fn2");
-        account2.setMiddleName("mn2");
-        account2.setLastName("ln2");
-        account2.setBirthDate(Dates.currentTimestamp());
+            final Account account2 = new Account();
+            account2.setFirstName("fn2");
+            account2.setMiddleName("mn2");
+            account2.setLastName("ln2");
+            account2.setBirthDate(Dates.currentTimestamp());
 
-        Beans.copyInto(account, account2);
-        println(account);
-        println(account2);
+            Beans.mergeInto(account, account2);
+            println(account);
+            println(account2);
 
-        Beans.clearAllProps(account);
-        N.println(account);
-
+            Beans.clearAllProps(account);
+            N.println(account);
+        });
     }
 
     @Test
     public void testMerge2() {
-        final Account account = createAccount(Account.class);
-        final Account account2 = createAccount(Account.class);
+        assertDoesNotThrow(() -> {
+            final Account account = createAccount(Account.class);
+            final Account account2 = createAccount(Account.class);
 
-        Beans.copyInto(account, account2);
-        println(account);
-        println(account2);
+            Beans.mergeInto(account, account2);
+            println(account);
+            println(account2);
+        });
     }
 
     @Test
     public void testMerge_1() {
-        final Account account = createAccountWithContact(Account.class);
-        final com.landawn.abacus.entity.extendDirty.basic.Account copy = Beans.copyAs(account, com.landawn.abacus.entity.extendDirty.basic.Account.class);
+        assertDoesNotThrow(() -> {
+            final Account account = createAccountWithContact(Account.class);
+            final com.landawn.abacus.entity.extendDirty.basic.Account copy = Beans.copyAs(account, com.landawn.abacus.entity.extendDirty.basic.Account.class);
 
-        Beans.copyInto(copy, account);
-        println(account);
+            Beans.mergeInto(copy, account);
+            println(account);
+        });
     }
 
     @Test
     public void testMerge_2() {
-        final com.landawn.abacus.entity.pjo.basic.Account account = createAccountWithContact(com.landawn.abacus.entity.pjo.basic.Account.class);
-        final com.landawn.abacus.entity.extendDirty.basic.Account copy = Beans.copyAs(account, com.landawn.abacus.entity.extendDirty.basic.Account.class);
+        assertDoesNotThrow(() -> {
+            final com.landawn.abacus.entity.pjo.basic.Account account = createAccountWithContact(com.landawn.abacus.entity.pjo.basic.Account.class);
+            final com.landawn.abacus.entity.extendDirty.basic.Account copy = Beans.copyAs(account, com.landawn.abacus.entity.extendDirty.basic.Account.class);
 
-        Beans.copyInto(copy, account);
-        println(account);
+            Beans.mergeInto(copy, account);
+            println(account);
+        });
     }
 
     @Test
@@ -17490,6 +17675,12 @@ public class NTest extends AbstractParserTest {
     }
 
     @Test
+    public void testJsonTypeNullThrowsIllegalArgument() {
+        assertThrows(IllegalArgumentException.class, () -> N.fromJson("{}", (com.landawn.abacus.type.Type<Object>) null));
+        assertThrows(IllegalArgumentException.class, () -> N.streamJson("[]", (com.landawn.abacus.type.Type<Object>) null));
+    }
+
+    @Test
     public void testZipWithDifferentTypesAndTransformations() {
         String[] names = { "Alice", "Bob", "Charlie" };
         Integer[] ages = { 25, 30, 35 };
@@ -17931,6 +18122,36 @@ public class NTest extends AbstractParserTest {
     }
 
     @Test
+    public void testUnzipIterableWithSeparateSuppliers() {
+        List<Pair<String, Integer>> pairs = Arrays.asList(Pair.of("a", 1), Pair.of("b", 2), Pair.of("a", 3));
+
+        Pair<LinkedHashSet<String>, ArrayList<Integer>> result = N.unzip(pairs, (pair, output) -> {
+            output.setLeft(pair.left());
+            output.setRight(pair.right());
+        }, LinkedHashSet::new, ArrayList::new);
+
+        assertTrue(result.left() instanceof LinkedHashSet);
+        assertTrue(result.right() instanceof ArrayList);
+        assertEquals(new LinkedHashSet<>(Arrays.asList("a", "b")), result.left());
+        assertEquals(Arrays.asList(1, 2, 3), result.right());
+    }
+
+    @Test
+    public void testUnzipIteratorWithSeparateSuppliers() {
+        Iterator<Pair<String, Integer>> pairs = Arrays.asList(Pair.of("a", 1), Pair.of("b", 2), Pair.of("a", 3)).iterator();
+
+        Pair<LinkedHashSet<String>, ArrayList<Integer>> result = N.unzip(pairs, (pair, output) -> {
+            output.setLeft(pair.left());
+            output.setRight(pair.right());
+        }, LinkedHashSet::new, ArrayList::new);
+
+        assertTrue(result.left() instanceof LinkedHashSet);
+        assertTrue(result.right() instanceof ArrayList);
+        assertEquals(new LinkedHashSet<>(Arrays.asList("a", "b")), result.left());
+        assertEquals(Arrays.asList(1, 2, 3), result.right());
+    }
+
+    @Test
     public void testUnzipIterableComplexObjects() {
         List<String> strings = Arrays.asList("a:1", "b:2", "c:3");
 
@@ -18057,6 +18278,43 @@ public class NTest extends AbstractParserTest {
         assertEquals(new HashSet<>(Arrays.asList("a", "b")), result.left());
         assertEquals(new HashSet<>(Arrays.asList(1, 2)), result.middle());
         assertEquals(new HashSet<>(Arrays.asList(true, false)), result.right());
+    }
+
+    @Test
+    public void testUnzippIterableWithSeparateSuppliers() {
+        List<Triple<String, Integer, Boolean>> triples = Arrays.asList(Triple.of("a", 1, true), Triple.of("b", 2, false), Triple.of("a", 3, true));
+
+        Triple<LinkedHashSet<String>, ArrayList<Integer>, ArrayDeque<Boolean>> result = N.unzip3(triples, (triple, output) -> {
+            output.setLeft(triple.left());
+            output.setMiddle(triple.middle());
+            output.setRight(triple.right());
+        }, LinkedHashSet::new, ArrayList::new, ArrayDeque::new);
+
+        assertTrue(result.left() instanceof LinkedHashSet);
+        assertTrue(result.middle() instanceof ArrayList);
+        assertTrue(result.right() instanceof ArrayDeque);
+        assertEquals(new LinkedHashSet<>(Arrays.asList("a", "b")), result.left());
+        assertEquals(Arrays.asList(1, 2, 3), result.middle());
+        assertEquals(Arrays.asList(true, false, true), new ArrayList<>(result.right()));
+    }
+
+    @Test
+    public void testUnzippIteratorWithSeparateSuppliers() {
+        Iterator<Triple<String, Integer, Boolean>> triples = Arrays.asList(Triple.of("a", 1, true), Triple.of("b", 2, false), Triple.of("a", 3, true))
+                .iterator();
+
+        Triple<LinkedHashSet<String>, ArrayList<Integer>, ArrayDeque<Boolean>> result = N.unzip3(triples, (triple, output) -> {
+            output.setLeft(triple.left());
+            output.setMiddle(triple.middle());
+            output.setRight(triple.right());
+        }, LinkedHashSet::new, ArrayList::new, ArrayDeque::new);
+
+        assertTrue(result.left() instanceof LinkedHashSet);
+        assertTrue(result.middle() instanceof ArrayList);
+        assertTrue(result.right() instanceof ArrayDeque);
+        assertEquals(new LinkedHashSet<>(Arrays.asList("a", "b")), result.left());
+        assertEquals(Arrays.asList(1, 2, 3), result.middle());
+        assertEquals(Arrays.asList(true, false, true), new ArrayList<>(result.right()));
     }
 
     @Test
@@ -18488,7 +18746,7 @@ public class NTest extends AbstractParserTest {
         List<String> l3 = Collections.emptyList();
         Collection<Iterable<String>> iterables = N.toList(l1, l2, l3, null);
 
-        List<Iterator<String>> resultIterators = N.iterateEach(iterables);
+        List<ObjIterator<String>> resultIterators = N.iterateEach(iterables);
         assertEquals(4, resultIterators.size());
 
         Iterator<String> iter1 = resultIterators.get(0);
@@ -19198,32 +19456,40 @@ public class NTest extends AbstractParserTest {
 
     @Test
     public void testSerialize5() {
-        final List<Account> accounts = createAccountWithContact(Account.class, 100);
-        final String xml = abacusXmlParser.serialize(accounts);
-        println(xml);
+        assertDoesNotThrow(() -> {
+            final List<Account> accounts = createAccountWithContact(Account.class, 100);
+            final String xml = abacusXmlParser.serialize(accounts);
+            println(xml);
 
-        final List<Account> xmlAccounts = abacusXmlParser.deserialize(xml,
-                XmlDeserConfig.create().setElementType(Account.class).setIgnoreUnmatchedProperty(true).setIgnoredPropNames((Map<Class<?>, Set<String>>) null),
-                List.class);
+            final List<Account> xmlAccounts = abacusXmlParser.deserialize(xml,
+                    XmlDeserConfig.create()
+                            .setElementType(Account.class)
+                            .setIgnoreUnmatchedProperty(true)
+                            .setIgnoredPropNames((Map<Class<?>, Set<String>>) null),
+                    List.class);
 
-        N.println(N.stringOf(accounts));
-        N.println(N.stringOf(xmlAccounts));
-
+            N.println(N.stringOf(accounts));
+            N.println(N.stringOf(xmlAccounts));
+        });
     }
 
     @Test
     public void testSerialize5_1() {
-        final List<Account> accounts = createAccountWithContact(Account.class, 100);
-        final String xml = abacusXMLDOMParser.serialize(accounts);
-        println(xml);
+        assertDoesNotThrow(() -> {
+            final List<Account> accounts = createAccountWithContact(Account.class, 100);
+            final String xml = abacusXMLDOMParser.serialize(accounts);
+            println(xml);
 
-        final List<Account> xmlAccounts = abacusXMLDOMParser.deserialize(xml,
-                XmlDeserConfig.create().setElementType(Account.class).setIgnoreUnmatchedProperty(true).setIgnoredPropNames((Map<Class<?>, Set<String>>) null),
-                List.class);
+            final List<Account> xmlAccounts = abacusXMLDOMParser.deserialize(xml,
+                    XmlDeserConfig.create()
+                            .setElementType(Account.class)
+                            .setIgnoreUnmatchedProperty(true)
+                            .setIgnoredPropNames((Map<Class<?>, Set<String>>) null),
+                    List.class);
 
-        N.println(N.stringOf(accounts));
-        N.println(N.stringOf(xmlAccounts));
-
+            N.println(N.stringOf(accounts));
+            N.println(N.stringOf(xmlAccounts));
+        });
     }
 
     @Test
@@ -19511,18 +19777,20 @@ public class NTest extends AbstractParserTest {
 
     @Test
     public void test_xmlToJson() {
-        final Account account = new Account();
-        account.setFirstName("firstName1");
-        account.setLastName("lastName1");
+        assertDoesNotThrow(() -> {
+            final Account account = new Account();
+            account.setFirstName("firstName1");
+            account.setLastName("lastName1");
 
-        final String xml = abacusXmlParser.serialize(account);
-        final String json = jsonParser.serialize(account);
+            final String xml = abacusXmlParser.serialize(account);
+            final String json = jsonParser.serialize(account);
 
-        final String xml2 = N.jsonToXml(json, Account.class);
-        N.println(xml2);
+            final String xml2 = N.jsonToXml(json, Account.class);
+            N.println(xml2);
 
-        final String json2 = N.xmlToJson(xml, Account.class);
-        N.println(json2);
+            final String json2 = N.xmlToJson(xml, Account.class);
+            N.println(json2);
+        });
     }
 
     @Test
@@ -19544,24 +19812,26 @@ public class NTest extends AbstractParserTest {
 
     @Test
     public void test_xml2JSON_1() {
-        final Account account = new Account();
-        account.setFirstName("firstName1");
-        account.setLastName("lastName1");
+        assertDoesNotThrow(() -> {
+            final Account account = new Account();
+            account.setFirstName("firstName1");
+            account.setLastName("lastName1");
 
-        final String xml = abacusXMLDOMParser.serialize(account);
-        final String json = jsonParser.serialize(account);
+            final String xml = abacusXMLDOMParser.serialize(account);
+            final String json = jsonParser.serialize(account);
 
-        final String xml2 = N.jsonToXml(json, Account.class);
-        N.println(xml2);
+            final String xml2 = N.jsonToXml(json, Account.class);
+            N.println(xml2);
 
-        final String json2 = N.xmlToJson(xml, Account.class);
-        N.println(json2);
+            final String json2 = N.xmlToJson(xml, Account.class);
+            N.println(json2);
 
-        final String xml3 = N.jsonToXml(json);
-        N.println(xml3);
+            final String xml3 = N.jsonToXml(json);
+            N.println(xml3);
 
-        final String json3 = N.xmlToJson(xml);
-        N.println(json3);
+            final String json3 = N.xmlToJson(xml);
+            N.println(json3);
+        });
     }
 
     @Test
@@ -20226,11 +20496,13 @@ public class NTest extends AbstractParserTest {
 
     @Test
     public void test_cartesianProduct() throws Exception {
-        Sets.cartesianProduct(N.toList(N.toSet("a", "b"), N.toSet("a", "b", "c"))).forEach(Fn.println());
+        assertDoesNotThrow(() -> {
+            Sets.cartesianProduct(N.toList(N.toSet("a", "b"), N.toSet("a", "b", "c"))).forEach(Fn.println());
 
-        N.println(Strings.repeat('=', 80));
+            N.println(Strings.repeat('=', 80));
 
-        Iterables.cartesianProduct(N.toList(N.toSet("a", "b"), N.toSet("a", "b", "c"))).forEach(Fn.println());
+            Iterables.cartesianProduct(N.toList(N.toSet("a", "b"), N.toSet("a", "b", "c"))).forEach(Fn.println());
+        });
     }
 
     @Test
@@ -20305,12 +20577,12 @@ public class NTest extends AbstractParserTest {
     }
 
     @Test
-    public void forEach_iterable_consumer_threaded() throws InterruptedException {
+    public void forEachInParallel_iterable_consumer_threaded() throws InterruptedException {
         List<Integer> list = Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9, 10);
         AtomicInteger sum = new AtomicInteger(0);
         int numThreads = 2;
 
-        N.forEach(list, (Throwables.Consumer<Integer, RuntimeException>) e -> {
+        N.forEachInParallel(list, (Throwables.Consumer<Integer, RuntimeException>) e -> {
             try {
                 Thread.sleep(10);
             } catch (InterruptedException ex) {
@@ -20322,7 +20594,7 @@ public class NTest extends AbstractParserTest {
     }
 
     @Test
-    public void forEach_iterator_consumer_threaded_withException() {
+    public void forEachInParallel_iterator_consumer_threaded_withException() {
         List<Integer> list = Arrays.asList(1, 2, 3, 4, 5);
         AtomicInteger processedCount = new AtomicInteger(0);
         Throwables.Consumer<Integer, Exception> consumerWithException = val -> {
@@ -20332,7 +20604,7 @@ public class NTest extends AbstractParserTest {
             }
         };
 
-        RuntimeException thrown = assertThrows(RuntimeException.class, () -> N.forEach(list.iterator(), consumerWithException, 2, executorService));
+        RuntimeException thrown = assertThrows(RuntimeException.class, () -> N.forEachInParallel(list.iterator(), consumerWithException, 2, executorService));
         assertTrue(thrown.getCause() instanceof IOException
                 || (thrown.getCause() instanceof ExecutionException && thrown.getCause().getCause() instanceof IOException));
         assertTrue(processedCount.get() >= 1 && processedCount.get() <= list.size());
@@ -20439,10 +20711,10 @@ public class NTest extends AbstractParserTest {
     }
 
     @Test
-    public void testForEachParallel() throws Exception {
+    public void testForEachInParallel() throws Exception {
         List<Integer> list = Arrays.asList(1, 2, 3, 4, 5);
         ConcurrentLinkedQueue<Integer> result = new ConcurrentLinkedQueue<>();
-        N.forEach(list, result::add, 2);
+        N.forEachInParallel(list, result::add, 2);
         assertEquals(5, result.size());
         assertTrue(result.containsAll(list));
     }
@@ -20456,10 +20728,10 @@ public class NTest extends AbstractParserTest {
     }
 
     @Test
-    public void testForEachParallelWithException() {
+    public void testForEachInParallelWithException() {
         List<Integer> list = Arrays.asList(1, 2, 3, 4, 5);
         assertThrows(RuntimeException.class, () -> {
-            N.forEach(list, i -> {
+            N.forEachInParallel(list, i -> {
                 if (i == 3) {
                     throw new RuntimeException("Test exception");
                 }
@@ -20469,7 +20741,7 @@ public class NTest extends AbstractParserTest {
 
     @Test
     @Disabled("Performance assertions are nondeterministic across environments")
-    public void testForEachParallelPerformance() throws Exception {
+    public void testForEachInParallelPerformance() throws Exception {
         int size = 1000;
         List<Integer> list = new ArrayList<>();
         for (int i = 0; i < size; i++) {
@@ -20477,12 +20749,12 @@ public class NTest extends AbstractParserTest {
         }
 
         // initializing first
-        N.forEach(List.of(1), Fn.println(), 10);
+        N.forEachInParallel(List.of(1), Fn.println(), 10);
 
         AtomicInteger sum = new AtomicInteger(0);
         long start = System.currentTimeMillis();
 
-        N.forEach(list, i -> {
+        N.forEachInParallel(list, i -> {
             try {
                 Thread.sleep(1);
             } catch (InterruptedException e) {
@@ -20499,6 +20771,31 @@ public class NTest extends AbstractParserTest {
     }
 
     @Test
+    public void testForEachInParallel_processThreadNumValidation() {
+        final List<Integer> list = Arrays.asList(1, 2, 3);
+        final List<Integer> results = java.util.Collections.synchronizedList(new ArrayList<>());
+
+        // processThreadNum == 0 must throw IllegalArgumentException (was a silent no-op before)
+        assertThrows(IllegalArgumentException.class, () -> N.forEachInParallel(list, results::add, 0));
+        assertThrows(IllegalArgumentException.class, () -> N.forEachInParallel(list.iterator(), results::add, 0));
+        assertThrows(IllegalArgumentException.class, () -> N.forEachIndexedInParallel(list, (idx, e) -> results.add(e), 0));
+        assertThrows(IllegalArgumentException.class, () -> N.forEachIndexedInParallel(list.iterator(), (idx, e) -> results.add(e), 0));
+
+        // negative also throws IllegalArgumentException
+        assertThrows(IllegalArgumentException.class, () -> N.forEachInParallel(list, results::add, -1));
+
+        // an empty collection with a valid processThreadNum is a no-op (must NOT throw)
+        N.forEachInParallel(new ArrayList<Integer>(), results::add, 4);
+        N.forEachIndexedInParallel(new ArrayList<Integer>(), (idx, e) -> results.add(e), 4);
+        assertTrue(results.isEmpty());
+
+        // a valid run still works
+        final List<Integer> collected = java.util.Collections.synchronizedList(new ArrayList<>());
+        N.forEachInParallel(list, collected::add, 2);
+        assertEquals(3, collected.size());
+    }
+
+    @Test
     public void testForEachWithConcurrentModification() {
         List<Integer> list = new ArrayList<>(Arrays.asList(1, 2, 3, 4, 5));
 
@@ -20512,7 +20809,7 @@ public class NTest extends AbstractParserTest {
     }
 
     @Test
-    public void testHighConcurrencyForEach() throws Exception {
+    public void testHighConcurrencyForEachInParallel() throws Exception {
         int threadCount = 50;
         int itemsPerThread = 100;
         ConcurrentLinkedQueue<Integer> results = new ConcurrentLinkedQueue<>();
@@ -20528,7 +20825,7 @@ public class NTest extends AbstractParserTest {
                     for (int i = 0; i < itemsPerThread; i++) {
                         items.add(threadId * itemsPerThread + i);
                     }
-                    N.forEach(items, results::add, 5);
+                    N.forEachInParallel(items, results::add, 5);
                 } catch (Exception e) {
                     e.printStackTrace();
                 } finally {
@@ -20565,10 +20862,10 @@ public class NTest extends AbstractParserTest {
     }
 
     @org.junit.jupiter.api.Test
-    public void testForEach_Iterator_WithProcessThreadNum() throws InterruptedException {
+    public void testForEachInParallel_Iterator_WithProcessThreadNum() throws InterruptedException {
         List<String> items = Arrays.asList("a", "b", "c", "d", "e");
         java.util.concurrent.CopyOnWriteArrayList<String> results = new java.util.concurrent.CopyOnWriteArrayList<>();
-        N.forEach(items.iterator(), (com.landawn.abacus.util.Throwables.Consumer<String, Exception>) item -> results.add(item), 2);
+        N.forEachInParallel(items.iterator(), (com.landawn.abacus.util.Throwables.Consumer<String, Exception>) item -> results.add(item), 2);
         assertEquals(5, results.size());
     }
 
@@ -20963,12 +21260,12 @@ public class NTest extends AbstractParserTest {
     }
 
     @Test
-    public void forEachIndexed_iterable_consumer_threaded() throws InterruptedException {
+    public void forEachIndexedInParallel_iterable_consumer_threaded() throws InterruptedException {
         List<String> data = Arrays.asList("a", "b", "c", "d", "e", "f");
         Map<Integer, String> resultMap = Collections.synchronizedMap(new HashMap<>());
         int numThreads = 3;
 
-        N.forEachIndexed(data, (Throwables.IntObjConsumer<String, InterruptedException>) (idx, val) -> {
+        N.forEachIndexedInParallel(data, (Throwables.IntObjConsumer<String, InterruptedException>) (idx, val) -> {
             try {
                 Thread.sleep(10);
             } catch (InterruptedException e) {
@@ -20985,10 +21282,10 @@ public class NTest extends AbstractParserTest {
     }
 
     @Test
-    public void testForEachIndexedParallel() throws Exception {
+    public void testForEachIndexedInParallel() throws Exception {
         List<Integer> list = Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9, 10);
         ConcurrentHashMap<Integer, Integer> result = new ConcurrentHashMap<>();
-        N.forEachIndexed(list, result::put, 3);
+        N.forEachIndexedInParallel(list, result::put, 3);
 
         assertEquals(10, result.size());
         for (int i = 0; i < 10; i++) {
@@ -20997,12 +21294,12 @@ public class NTest extends AbstractParserTest {
     }
 
     @Test
-    public void testForEachIndexedParallelWithCustomExecutor() throws Exception {
+    public void testForEachIndexedInParallelWithCustomExecutor() throws Exception {
         ExecutorService customExecutor = Executors.newFixedThreadPool(2);
         try {
             List<Integer> list = Arrays.asList(1, 2, 3, 4, 5);
             ConcurrentHashMap<Integer, Integer> result = new ConcurrentHashMap<>();
-            N.forEachIndexed(list, result::put, 2, customExecutor);
+            N.forEachIndexedInParallel(list, result::put, 2, customExecutor);
 
             assertEquals(5, result.size());
             for (int i = 0; i < 5; i++) {
@@ -21014,10 +21311,10 @@ public class NTest extends AbstractParserTest {
     }
 
     @org.junit.jupiter.api.Test
-    public void testForEachIndexed_Iterator_WithProcessThreadNum() throws InterruptedException {
+    public void testForEachIndexedInParallel_Iterator_WithProcessThreadNum() throws InterruptedException {
         List<String> items = Arrays.asList("a", "b", "c", "d", "e");
         java.util.concurrent.CopyOnWriteArrayList<String> results = new java.util.concurrent.CopyOnWriteArrayList<>();
-        N.forEachIndexed(items.iterator(), (idx, item) -> results.add(idx + ":" + item), 2);
+        N.forEachIndexedInParallel(items.iterator(), (idx, item) -> results.add(idx + ":" + item), 2);
         assertEquals(5, results.size());
     }
 
@@ -21181,38 +21478,40 @@ public class NTest extends AbstractParserTest {
 
     @Test
     public void test_asyncExecute() throws InterruptedException, ExecutionException {
-        {
-            final List<Throwables.Runnable<RuntimeException>> runnableList = CommonUtil
-                    .asList((Throwables.Runnable<RuntimeException>) () -> N.println("Runnable"));
+        assertDoesNotThrow(() -> {
+            {
+                final List<Throwables.Runnable<RuntimeException>> runnableList = CommonUtil
+                        .asList((Throwables.Runnable<RuntimeException>) () -> N.println("Runnable"));
 
-            N.asyncExecute(runnableList).get(0).get();
-        }
+                N.asyncExecute(runnableList).get(0).get();
+            }
 
-        {
-            final List<Throwables.Runnable<RuntimeException>> runnableList = N.toList();
-            runnableList.add(() -> N.println("Runnable"));
+            {
+                final List<Throwables.Runnable<RuntimeException>> runnableList = N.toList();
+                runnableList.add(() -> N.println("Runnable"));
 
-            N.asyncExecute(runnableList).get(0).get();
-        }
+                N.asyncExecute(runnableList).get(0).get();
+            }
 
-        {
-            final List<Callable<Void>> callableList = N.toList((Callable<Void>) () -> {
-                N.println("Callable");
-                return null;
-            });
+            {
+                final List<Callable<Void>> callableList = N.toList((Callable<Void>) () -> {
+                    N.println("Callable");
+                    return null;
+                });
 
-            N.asyncExecute(callableList).get(0).get();
-        }
+                N.asyncExecute(callableList).get(0).get();
+            }
 
-        {
-            final List<Callable<Void>> callableList = N.toList();
-            callableList.add(() -> {
-                N.println("Callable");
-                return null;
-            });
+            {
+                final List<Callable<Void>> callableList = N.toList();
+                callableList.add(() -> {
+                    N.println("Callable");
+                    return null;
+                });
 
-            N.asyncExecute(callableList).get(0).get();
-        }
+                N.asyncExecute(callableList).get(0).get();
+            }
+        });
     }
 
     @Test
@@ -21296,6 +21595,59 @@ public class NTest extends AbstractParserTest {
         for (ContinuableFuture<Void> future : futures) {
             future.get();
         }
+    }
+
+    @Test
+    public void testAsyncExecuteAllCollectionOfRunnables() throws Exception {
+        final Collection<Throwables.Runnable<Exception>> commands = new LinkedHashSet<>();
+        final AtomicInteger counter = new AtomicInteger();
+
+        commands.add(() -> counter.addAndGet(1));
+        commands.add(() -> counter.addAndGet(10));
+
+        final List<ContinuableFuture<Void>> futures = N.asyncExecuteAll(commands);
+        assertEquals(2, futures.size());
+
+        for (final ContinuableFuture<Void> future : futures) {
+            future.get();
+        }
+
+        assertEquals(11, counter.get());
+    }
+
+    @Test
+    public void testAsyncExecuteAllCollectionOfRunnablesWithExecutor() throws Exception {
+        final ExecutorService executor = Executors.newSingleThreadExecutor();
+
+        try {
+            final List<Integer> executed = Collections.synchronizedList(new ArrayList<>());
+            final Collection<Throwables.Runnable<Exception>> commands = new LinkedHashSet<>();
+
+            commands.add(() -> executed.add(1));
+            commands.add(() -> executed.add(2));
+            commands.add(() -> executed.add(3));
+
+            final List<ContinuableFuture<Void>> futures = N.asyncExecuteAll(commands, executor);
+            assertEquals(3, futures.size());
+
+            for (final ContinuableFuture<Void> future : futures) {
+                future.get();
+            }
+
+            assertEquals(Arrays.asList(1, 2, 3), executed);
+        } finally {
+            executor.shutdownNow();
+        }
+    }
+
+    @Test
+    public void testAsyncExecuteAllWithNullOrEmptyCollection() {
+        final Collection<Throwables.Runnable<Exception>> nullCommands = null;
+
+        assertTrue(N.asyncExecuteAll(nullCommands).isEmpty());
+        assertTrue(N.asyncExecuteAll(nullCommands, executorService).isEmpty());
+        assertTrue(N.asyncExecuteAll(Collections.<Throwables.Runnable<Exception>> emptySet()).isEmpty());
+        assertTrue(N.asyncExecuteAll(Collections.<Throwables.Runnable<Exception>> emptySet(), executorService).isEmpty());
     }
 
     @Test
@@ -21428,25 +21780,27 @@ public class NTest extends AbstractParserTest {
 
     @Test
     public void testAsyncExecuteListWithDifferentExecutors() throws Exception {
-        ExecutorService executor1 = Executors.newSingleThreadExecutor();
-        ExecutorService executor2 = Executors.newSingleThreadExecutor();
+        assertDoesNotThrow(() -> {
+            ExecutorService executor1 = Executors.newSingleThreadExecutor();
+            ExecutorService executor2 = Executors.newSingleThreadExecutor();
 
-        try {
-            List<Throwables.Runnable<Exception>> commands = Arrays.asList(() -> Thread.sleep(10), () -> Thread.sleep(10));
+            try {
+                List<Throwables.Runnable<Exception>> commands = Arrays.asList(() -> Thread.sleep(10), () -> Thread.sleep(10));
 
-            List<ContinuableFuture<Void>> futures1 = N.asyncExecute(commands, executor1);
-            List<ContinuableFuture<Void>> futures2 = N.asyncExecute(commands, executor2);
+                List<ContinuableFuture<Void>> futures1 = N.asyncExecute(commands, executor1);
+                List<ContinuableFuture<Void>> futures2 = N.asyncExecute(commands, executor2);
 
-            for (ContinuableFuture<Void> future : futures1) {
-                future.get();
+                for (ContinuableFuture<Void> future : futures1) {
+                    future.get();
+                }
+                for (ContinuableFuture<Void> future : futures2) {
+                    future.get();
+                }
+            } finally {
+                executor1.shutdown();
+                executor2.shutdown();
             }
-            for (ContinuableFuture<Void> future : futures2) {
-                future.get();
-            }
-        } finally {
-            executor1.shutdown();
-            executor2.shutdown();
-        }
+        });
     }
 
     @Test
@@ -21956,7 +22310,8 @@ public class NTest extends AbstractParserTest {
             }, c2::incrementAndGet));
 
             assertEquals(0, c1.get());
-            assertEquals(1, c2.get());
+            // runInParallel may fail fast before the sibling task starts.
+            assertTrue(c2.get() == 0 || c2.get() == 1);
         }
         {
             AtomicInteger c1 = new AtomicInteger(0);
@@ -22070,8 +22425,10 @@ public class NTest extends AbstractParserTest {
 
     @Test
     public void testRunInParallelWithEmptyCollection() {
-        List<Throwables.Runnable<Exception>> emptyTasks = Collections.emptyList();
-        N.runInParallel(emptyTasks);
+        assertDoesNotThrow(() -> {
+            List<Throwables.Runnable<Exception>> emptyTasks = Collections.emptyList();
+            N.runInParallel(emptyTasks);
+        });
     }
 
     @Test
@@ -22963,7 +23320,7 @@ public class NTest extends AbstractParserTest {
 
     @Test
     public void testRunUninterruptiblyWithNullCommand() {
-        assertThrows(NullPointerException.class, () -> {
+        assertThrows(IllegalArgumentException.class, () -> {
             N.runUninterruptibly(null);
         });
     }
@@ -23093,7 +23450,7 @@ public class NTest extends AbstractParserTest {
 
     @Test
     public void testCallUninterruptiblyWithNullCommand() {
-        assertThrows(NullPointerException.class, () -> {
+        assertThrows(IllegalArgumentException.class, () -> {
             N.callUninterruptibly(null);
         });
     }
@@ -23979,51 +24336,83 @@ public class NTest extends AbstractParserTest {
     }
 
     @Test
+    public void testToRuntimeException_Throwable_WithCallInterrupt() {
+        // The Throwable overload also handles Error (wrapped, not thrown, by the callInterrupt-only variant)
+        final Error error = new Error("boom");
+        final RuntimeException wrapped = N.toRuntimeException((Throwable) error, false);
+        assertNotNull(wrapped);
+        assertEquals(error, wrapped.getCause());
+
+        // an existing RuntimeException is returned as-is
+        final RuntimeException existing = new IllegalStateException("already runtime");
+        assertSame(existing, N.toRuntimeException((Throwable) existing, false));
+
+        // callInterrupt == true restores the interrupt status for an InterruptedException
+        assertFalse(Thread.currentThread().isInterrupted());
+        try {
+            final RuntimeException r = N.toRuntimeException((Throwable) new InterruptedException("intr"), true);
+            assertNotNull(r);
+            assertTrue(Thread.currentThread().isInterrupted());
+        } finally {
+            Thread.interrupted(); // clear so the flag does not leak into other tests
+        }
+    }
+
+    @Test
     public void test_as() {
-        List<String> list = N.toList("a");
-        N.println(list);
+        assertDoesNotThrow(() -> {
+            List<String> list = N.toList("a");
+            N.println(list);
 
-        list = N.toList("a", "b");
-        N.println(list);
+            list = N.toList("a", "b");
+            N.println(list);
 
-        list = N.toList(Array.of("a", "b", "c"));
-        N.println(list);
+            list = N.toList(Array.of("a", "b", "c"));
+            N.println(list);
+        });
     }
 
     @Test
     public void test_001() {
-        final Account account = Beans.newRandomBean(Account.class);
-        N.println(account);
+        assertDoesNotThrow(() -> {
+            final Account account = Beans.newRandomBean(Account.class);
+            N.println(account);
+        });
     }
 
     @Test
     public void test_pair() {
-        final Pair<Integer, String> pair = Pair.of(1, "abc");
-        N.println(pair);
-        final Triple<Integer, Character, String> triple = Triple.of(1, 'c', "abc");
-        N.println(triple);
+        assertDoesNotThrow(() -> {
+            final Pair<Integer, String> pair = Pair.of(1, "abc");
+            N.println(pair);
+            final Triple<Integer, Character, String> triple = Triple.of(1, 'c', "abc");
+            N.println(triple);
+        });
     }
 
     @Test
     public void test_isNumber() {
-        N.println(1.2345354);
-        N.println(Double.valueOf("2e10"));
-        N.println(Numbers.toDouble("2e10"));
-        N.println(Numbers.createDouble("2e10"));
-        N.println(Numbers.toFloat("2e3"));
-        N.println(Numbers.createFloat("2e3"));
-        N.println(Numbers.createNumber("2e10"));
+        assertDoesNotThrow(() -> {
+            N.println(1.2345354);
+            N.println(Double.valueOf("2e10"));
+            N.println(Numbers.toDouble("2e10"));
+            N.println(Numbers.createDouble("2e10"));
+            N.println(Numbers.toFloat("2e3"));
+            N.println(Numbers.createFloat("2e3"));
+            N.println(Numbers.createNumber("2e10"));
+        });
     }
 
     @Test
     public void test_asImmutableMap() {
-        final Map<String, String> m = ImmutableMap.of("123", "abc", "234", "ijk");
-        N.println(m);
+        assertDoesNotThrow(() -> {
+            final Map<String, String> m = ImmutableMap.of("123", "abc", "234", "ijk");
+            N.println(m);
 
-        for (final Map.Entry<String, String> entry : m.entrySet()) {
-            N.println(entry.getKey() + ": " + entry.getValue());
-        }
-
+            for (final Map.Entry<String, String> entry : m.entrySet()) {
+                N.println(entry.getKey() + ": " + entry.getValue());
+            }
+        });
     }
 
     @Test
@@ -24076,118 +24465,132 @@ public class NTest extends AbstractParserTest {
 
     @Test
     public void test_lastIndexOf() {
-        final String str = "aaa";
-        N.println(str.lastIndexOf("a"));
-        N.println(str.lastIndexOf("a", str.length()));
-        N.println(str.lastIndexOf("a", str.length() - 1));
-        N.println(str.lastIndexOf("a", str.length() - 2));
+        assertDoesNotThrow(() -> {
+            final String str = "aaa";
+            N.println(str.lastIndexOf("a"));
+            N.println(str.lastIndexOf("a", str.length()));
+            N.println(str.lastIndexOf("a", str.length() - 1));
+            N.println(str.lastIndexOf("a", str.length() - 2));
+        });
     }
 
     @Test
     public void test_wrap() {
-        N.println(Array.box(1, 2, 3));
+        assertDoesNotThrow(() -> {
+            N.println(Array.box(1, 2, 3));
+        });
     }
 
     @Test
     public void test_getEnumMap() {
-        final List<UnifiedStatus> statusList = N.enumListOf(UnifiedStatus.class);
-        N.println(statusList);
+        assertDoesNotThrow(() -> {
+            final List<UnifiedStatus> statusList = N.enumListOf(UnifiedStatus.class);
+            N.println(statusList);
 
-        final Set<UnifiedStatus> statusSet = N.enumSetOf(UnifiedStatus.class);
-        N.println(statusSet);
+            final Set<UnifiedStatus> statusSet = N.enumSetOf(UnifiedStatus.class);
+            N.println(statusSet);
 
-        final Map<UnifiedStatus, String> statusMap = N.enumMapOf(UnifiedStatus.class);
-        N.println(statusMap);
+            final Map<UnifiedStatus, String> statusMap = N.enumNameMap(UnifiedStatus.class);
+            N.println(statusMap);
+        });
     }
 
     @Test
     public void test_getPackage() {
-        N.println(ClassUtil.getClassName(int.class));
-        N.println(ClassUtil.getSimpleClassName(int.class));
-        N.println(ClassUtil.getCanonicalClassName(int.class));
+        assertDoesNotThrow(() -> {
+            N.println(ClassUtil.getClassName(int.class));
+            N.println(ClassUtil.getSimpleClassName(int.class));
+            N.println(ClassUtil.getCanonicalClassName(int.class));
 
-        N.println(ClassUtil.getPackage(int.class));
-        N.println(ClassUtil.getPackage(Integer.class));
+            N.println(ClassUtil.getPackage(int.class));
+            N.println(ClassUtil.getPackage(Integer.class));
 
-        N.println(ClassUtil.getPackageName(int.class));
-        N.println(ClassUtil.getPackageName(Integer.class));
+            N.println(ClassUtil.getPackageName(int.class));
+            N.println(ClassUtil.getPackageName(Integer.class));
+        });
     }
 
     @Test
     public void test_uuidPerformance() {
-        final long startTime = System.currentTimeMillis();
-        int k = 0;
-        for (int i = 0; i < 1000000; i++) {
-            Strings.uuid();
-            k++;
-        }
+        assertDoesNotThrow(() -> {
+            final long startTime = System.currentTimeMillis();
+            int k = 0;
+            for (int i = 0; i < 1000000; i++) {
+                Strings.uuid();
+                k++;
+            }
 
-        N.println(k + " took: " + (System.currentTimeMillis() - startTime));
+            N.println(k + " took: " + (System.currentTimeMillis() - startTime));
+        });
     }
 
     @Test
     public void test_propNameMethod() {
-        final Account account = createAccount(Account.class);
+        assertDoesNotThrow(() -> {
+            final Account account = createAccount(Account.class);
 
-        N.println(Beans.getPropValue(account, "firstName"));
-        N.println(Beans.getPropValue(account, "firstname"));
-        N.println(Beans.getPropValue(account, "FirstName"));
-        N.println(Beans.getPropValue(account, "FIRSTNAME"));
+            N.println(Beans.getPropValue(account, "firstName"));
+            N.println(Beans.getPropValue(account, "firstname"));
+            N.println(Beans.getPropValue(account, "FirstName"));
+            N.println(Beans.getPropValue(account, "FIRSTNAME"));
 
-        Beans.setPropValue(account, "lastName", "lastName1");
-        N.println(Beans.getPropValue(account, "LASTNAME"));
+            Beans.setPropValue(account, "lastName", "lastName1");
+            N.println(Beans.getPropValue(account, "LASTNAME"));
 
-        Beans.setPropValue(account, "lastname", "lastName2");
-        N.println(Beans.getPropValue(account, "lastname"));
+            Beans.setPropValue(account, "lastname", "lastName2");
+            N.println(Beans.getPropValue(account, "lastname"));
 
-        Beans.setPropValue(account, "LastName", "lastName3");
-        N.println(Beans.getPropValue(account, "LastName"));
+            Beans.setPropValue(account, "LastName", "lastName3");
+            N.println(Beans.getPropValue(account, "LastName"));
 
-        Beans.setPropValue(account, "LASTNAME", "lastName4");
-        N.println(Beans.getPropValue(account, "LASTNAME"));
-        N.println(Beans.getPropValue(account, "lastName"));
+            Beans.setPropValue(account, "LASTNAME", "lastName4");
+            N.println(Beans.getPropValue(account, "LASTNAME"));
+            N.println(Beans.getPropValue(account, "lastName"));
+        });
     }
 
     @Test
     public void test_arrayOf() {
-        N.println(Array.of(false, true));
-        N.println(Array.of('a', 'b'));
-        N.println(Array.of((byte) 1, (byte) 2));
-        N.println(Array.of((short) 1, (short) 2));
-        N.println(Array.of(1, 2));
-        N.println(Array.of(1L, 2L));
-        N.println(Array.of(1f, 2f));
-        N.println(Array.of(1d, 2d));
-        N.println(N.asArray(Dates.currentJUDate(), Dates.currentDate()));
-        N.println(N.asArray(Dates.currentCalendar(), Dates.currentCalendar()));
+        assertDoesNotThrow(() -> {
+            N.println(Array.of(false, true));
+            N.println(Array.of('a', 'b'));
+            N.println(Array.of((byte) 1, (byte) 2));
+            N.println(Array.of((short) 1, (short) 2));
+            N.println(Array.of(1, 2));
+            N.println(Array.of(1L, 2L));
+            N.println(Array.of(1f, 2f));
+            N.println(Array.of(1d, 2d));
+            N.println(N.asArray(Dates.currentJUDate(), Dates.currentDate()));
+            N.println(N.asArray(Dates.currentCalendar(), Dates.currentCalendar()));
 
-        final String a1 = "a";
-        final String b1 = "b";
-        final List<String> list = N.toList(a1, b1);
-        N.println(list);
+            final String a1 = "a";
+            final String b1 = "b";
+            final List<String> list = N.toList(a1, b1);
+            N.println(list);
 
-        final List<Integer> list2 = N.toList(1, 2, 3);
-        N.println(list2);
+            final List<Integer> list2 = N.toList(1, 2, 3);
+            N.println(list2);
 
-        final int[] a = Array.of(1, 2, 3);
-        N.println(a);
+            final int[] a = Array.of(1, 2, 3);
+            N.println(a);
 
-        final Class<?>[] classes = N.asArray(String.class, Integer.class);
-        N.println(classes);
+            final Class<?>[] classes = N.asArray(String.class, Integer.class);
+            N.println(classes);
 
-        final Type<Object>[] types = N.asArray(N.typeOf(int.class), N.typeOf(long.class));
-        N.println(types);
+            final Type<Object>[] types = N.asArray(N.typeOf(int.class), N.typeOf(long.class));
+            N.println(types);
 
-        final Date[] dates = N.asArray(Dates.currentDate(), Dates.currentDate());
-        N.println(dates);
+            final Date[] dates = N.asArray(Dates.currentDate(), Dates.currentDate());
+            N.println(dates);
 
-        final java.util.Date[] dateTimes = N.asArray(Dates.currentDate(), Dates.currentTime());
-        N.println(dateTimes);
+            final java.util.Date[] dateTimes = N.asArray(Dates.currentDate(), Dates.currentTime());
+            N.println(dateTimes);
 
-        final UnifiedStatus[] status = N.asArray(UnifiedStatus.ACTIVE, UnifiedStatus.CANCELED);
-        N.println(status);
+            final UnifiedStatus[] status = N.asArray(UnifiedStatus.ACTIVE, UnifiedStatus.CANCELED);
+            N.println(status);
 
-        N.println(ClassUtil.getCanonicalClassName(int.class));
+            N.println(ClassUtil.getCanonicalClassName(int.class));
+        });
     }
 
     @Test
@@ -24238,14 +24641,16 @@ public class NTest extends AbstractParserTest {
 
     @Test
     public void test_getPropField() {
-        Field field = Beans.getPropField(Account.class, "firstName");
-        N.println(field);
+        assertDoesNotThrow(() -> {
+            Field field = Beans.getPropField(Account.class, "firstName");
+            N.println(field);
 
-        field = Beans.getPropField(Account.class, "first_Name");
-        N.println(field);
+            field = Beans.getPropField(Account.class, "first_Name");
+            N.println(field);
 
-        field = Beans.getPropField(Account.class, "getfirstName");
-        N.println(field);
+            field = Beans.getPropField(Account.class, "getfirstName");
+            N.println(field);
+        });
     }
 
     @Test
@@ -24264,106 +24669,124 @@ public class NTest extends AbstractParserTest {
 
     @Test
     public void test_invokeConstructor() {
-        final Account account = ClassUtil.invokeConstructor(ClassUtil.getDeclaredConstructor(Account.class));
-        N.println(account);
+        assertDoesNotThrow(() -> {
+            final Account account = ClassUtil.invokeConstructor(ClassUtil.getDeclaredConstructor(Account.class));
+            N.println(account);
+        });
     }
 
     @Test
     public void test_getClassName() {
-        N.println(ClassUtil.getSimpleClassName(long.class));
-        N.println(ClassUtil.getClassName(long.class));
-        N.println(ClassUtil.getCanonicalClassName(long.class));
+        assertDoesNotThrow(() -> {
+            N.println(ClassUtil.getSimpleClassName(long.class));
+            N.println(ClassUtil.getClassName(long.class));
+            N.println(ClassUtil.getCanonicalClassName(long.class));
 
-        N.println(ClassUtil.getSimpleClassName(long[].class));
-        N.println(ClassUtil.getClassName(long[].class));
-        N.println(ClassUtil.getCanonicalClassName(long[].class));
+            N.println(ClassUtil.getSimpleClassName(long[].class));
+            N.println(ClassUtil.getClassName(long[].class));
+            N.println(ClassUtil.getCanonicalClassName(long[].class));
 
-        N.println(ClassUtil.getSimpleClassName(Long.class));
-        N.println(ClassUtil.getClassName(Long.class));
-        N.println(ClassUtil.getCanonicalClassName(Long.class));
+            N.println(ClassUtil.getSimpleClassName(Long.class));
+            N.println(ClassUtil.getClassName(Long.class));
+            N.println(ClassUtil.getCanonicalClassName(Long.class));
 
-        N.println(ClassUtil.getSimpleClassName(Long[].class));
-        N.println(ClassUtil.getClassName(Long[].class));
-        N.println(ClassUtil.getCanonicalClassName(Long[].class));
+            N.println(ClassUtil.getSimpleClassName(Long[].class));
+            N.println(ClassUtil.getClassName(Long[].class));
+            N.println(ClassUtil.getCanonicalClassName(Long[].class));
+        });
     }
 
     @Test
     public void test_asArray() {
-        final String[] a = N.asArray("a", "b");
-        N.println(a);
+        assertDoesNotThrow(() -> {
+            final String[] a = N.asArray("a", "b");
+            N.println(a);
 
-        final Object[] b = N.asArray("a", 'c');
-        N.println(b);
+            final Object[] b = N.asArray("a", 'c');
+            N.println(b);
 
-        final char[] c = Array.of('a', 'c');
-        N.println(c);
+            final char[] c = Array.of('a', 'c');
+            N.println(c);
+        });
     }
 
     @Test
     public void test_Bean2Map() {
-        final Account account = createAccountWithContact(Account.class);
+        assertDoesNotThrow(() -> {
+            final Account account = createAccountWithContact(Account.class);
 
-        Map<String, Object> m = Beans.beanToFlatMap(account);
-        N.println(N.stringOf(m));
+            Map<String, Object> m = Beans.beanToFlatMap(account);
+            N.println(N.stringOf(m));
 
-        final XBean xBean = createBigXBean(1);
-        m = Beans.beanToMap(xBean);
-        N.println(N.stringOf(m));
+            final XBean xBean = createBigXBean(1);
+            m = Beans.beanToMap(xBean);
+            N.println(N.stringOf(m));
 
-        m = Beans.beanToFlatMap(xBean);
-        N.println(N.stringOf(m));
+            m = Beans.beanToFlatMap(xBean);
+            N.println(N.stringOf(m));
+        });
     }
 
     @Test
     public void test_Bean2Map_2() {
-        final com.landawn.abacus.entity.pjo.basic.Account account = createAccountWithContact(com.landawn.abacus.entity.pjo.basic.Account.class);
+        assertDoesNotThrow(() -> {
+            final com.landawn.abacus.entity.pjo.basic.Account account = createAccountWithContact(com.landawn.abacus.entity.pjo.basic.Account.class);
 
-        Map<String, Object> m = Beans.beanToMap(account);
-        N.println(N.stringOf(m));
+            Map<String, Object> m = Beans.beanToMap(account);
+            N.println(N.stringOf(m));
 
-        m = Beans.deepBeanToMap(account);
-        N.println(N.stringOf(m));
+            m = Beans.deepBeanToMap(account);
+            N.println(N.stringOf(m));
 
-        m = Beans.beanToFlatMap(account);
-        N.println(N.stringOf(m));
+            m = Beans.beanToFlatMap(account);
+            N.println(N.stringOf(m));
+        });
     }
 
     @Test
     public void testFormat_1() {
-        N.println(Dates.parseDate("2014-01-01"));
+        assertDoesNotThrow(() -> {
+            N.println(Dates.parseDate("2014-01-01"));
 
-        String st = Dates.format(Dates.currentDate(), Dates.LOCAL_DATE_TIME_FORMAT);
-        N.println(st + " : " + Dates.format(Dates.parseDate(st)));
+            String st = Dates.format(Dates.currentDate(), Dates.LOCAL_DATE_TIME_FORMAT);
+            N.println(st + " : " + Dates.format(Dates.parseDate(st)));
 
-        st = Dates.format(Dates.currentDate(), Dates.LOCAL_DATE_TIME_FORMAT, TimeZone.getTimeZone("UTC"));
-        N.println(st + " : " + Dates.format(Dates.parseDate(st), Dates.LOCAL_DATE_TIME_FORMAT, TimeZone.getTimeZone("PST")));
+            st = Dates.format(Dates.currentDate(), Dates.LOCAL_DATE_TIME_FORMAT, TimeZone.getTimeZone("UTC"));
+            N.println(st + " : " + Dates.format(Dates.parseDate(st), Dates.LOCAL_DATE_TIME_FORMAT, TimeZone.getTimeZone("PST")));
+        });
     }
 
     @Test
     public void testFormat_2() {
-        final String st = Dates.format(Dates.currentDate());
-        N.println(st + " : " + Dates.format(Dates.parseDate(st)));
+        assertDoesNotThrow(() -> {
+            final String st = Dates.format(Dates.currentDate());
+            N.println(st + " : " + Dates.format(Dates.parseDate(st)));
 
-        for (int i = 0; i < 1000000; i++) {
-            Dates.parseDate(st);
-        }
+            for (int i = 0; i < 1000000; i++) {
+                Dates.parseDate(st);
+            }
+        });
     }
 
     @Test
     public void testFormat_3() {
-        final String st = Dates.format(Dates.currentDate(), Dates.ISO_8601_TIMESTAMP_FORMAT);
-        N.println(st + " : " + Dates.format(Dates.parseDate(st), Dates.ISO_8601_TIMESTAMP_FORMAT));
+        assertDoesNotThrow(() -> {
+            final String st = Dates.format(Dates.currentDate(), Dates.ISO_8601_TIMESTAMP_FORMAT);
+            N.println(st + " : " + Dates.format(Dates.parseDate(st), Dates.ISO_8601_TIMESTAMP_FORMAT));
 
-        for (int i = 0; i < 1000000; i++) {
-            Dates.parseDate(st);
-        }
+            for (int i = 0; i < 1000000; i++) {
+                Dates.parseDate(st);
+            }
+        });
     }
 
     @Test
     public void test_string2Array() {
-        final byte[] array = Splitter.with(",").trim(true).splitToArray("1,2,3, 4", byte[].class);
+        assertDoesNotThrow(() -> {
+            final byte[] array = Splitter.with(",").trim(true).splitToArray("1,2,3, 4", byte[].class);
 
-        N.println(array);
+            N.println(array);
+        });
     }
 
     @Test
@@ -24377,44 +24800,54 @@ public class NTest extends AbstractParserTest {
 
     @Test
     public void testString2Array() {
-        N.println(Splitter.withDefault().splitToArray("a, b, c", char[].class));
-        N.println(Splitter.withDefault().splitToArray("1, 2, 3", byte[].class));
-        N.println(Splitter.withDefault().splitToArray("1, 2, 3", int[].class));
+        assertDoesNotThrow(() -> {
+            N.println(Splitter.withDefault().splitToArray("a, b, c", char[].class));
+            N.println(Splitter.withDefault().splitToArray("1, 2, 3", byte[].class));
+            N.println(Splitter.withDefault().splitToArray("1, 2, 3", int[].class));
+        });
     }
 
     @Test
     public void testStringOf() {
-        N.println(N.stringOf(Splitter.withDefault().splitToArray(N.stringOf(Dates.currentDate()), Date[].class)));
-        N.println(N.stringOf(Splitter.withDefault().splitToArray("a, b, c", char[].class)));
-        N.println(N.stringOf(Splitter.withDefault().splitToArray("1, 2, 3", byte[].class)));
-        N.println(N.stringOf(Splitter.withDefault().splitToArray("1, 2, 3", int[].class)));
+        assertDoesNotThrow(() -> {
+            N.println(N.stringOf(Splitter.withDefault().splitToArray(N.stringOf(Dates.currentDate()), Date[].class)));
+            N.println(N.stringOf(Splitter.withDefault().splitToArray("a, b, c", char[].class)));
+            N.println(N.stringOf(Splitter.withDefault().splitToArray("1, 2, 3", byte[].class)));
+            N.println(N.stringOf(Splitter.withDefault().splitToArray("1, 2, 3", int[].class)));
+        });
     }
 
     @Test
     public void testValueOf() {
-        N.println(abacusXmlParser.deserialize("<array><e>" + N.stringOf(Dates.currentDate()) + "</e></array>", Date[].class));
-        N.println(abacusXmlParser.deserialize("<array>a, b, c</array>", char[].class));
-        N.println(abacusXmlParser.deserialize("<array>1, 2, 3</array>", byte[].class));
-        N.println(abacusXmlParser.deserialize("<array>1, 2, 3</array>", int[].class));
+        assertDoesNotThrow(() -> {
+            N.println(abacusXmlParser.deserialize("<array><e>" + N.stringOf(Dates.currentDate()) + "</e></array>", Date[].class));
+            N.println(abacusXmlParser.deserialize("<array>a, b, c</array>", char[].class));
+            N.println(abacusXmlParser.deserialize("<array>1, 2, 3</array>", byte[].class));
+            N.println(abacusXmlParser.deserialize("<array>1, 2, 3</array>", int[].class));
+        });
     }
 
     @Test
     public void testValueOf_1() {
-        N.println(abacusXMLDOMParser.deserialize("<array><e>" + N.stringOf(Dates.currentDate()) + "</e></array>", Date[].class));
-        N.println(abacusXMLDOMParser.deserialize("<array>a, b, c</array>", char[].class));
-        N.println(abacusXMLDOMParser.deserialize("<array>1, 2, 3</array>", byte[].class));
-        N.println(abacusXMLDOMParser.deserialize("<array>1, 2, 3</array>", int[].class));
+        assertDoesNotThrow(() -> {
+            N.println(abacusXMLDOMParser.deserialize("<array><e>" + N.stringOf(Dates.currentDate()) + "</e></array>", Date[].class));
+            N.println(abacusXMLDOMParser.deserialize("<array>a, b, c</array>", char[].class));
+            N.println(abacusXMLDOMParser.deserialize("<array>1, 2, 3</array>", byte[].class));
+            N.println(abacusXMLDOMParser.deserialize("<array>1, 2, 3</array>", int[].class));
+        });
     }
 
     @Test
     public void testPropGetSetMethod() {
-        final Account account = new Account();
-        account.setFirstName("fn");
-        account.setMiddleName("mn");
-        account.setLastName("ln");
+        assertDoesNotThrow(() -> {
+            final Account account = new Account();
+            account.setFirstName("fn");
+            account.setMiddleName("mn");
+            account.setLastName("ln");
 
-        println(Beans.getPropGetter(Account.class, "firstName"));
-        println(Beans.getPropSetter(Account.class, "id"));
+            println(Beans.getPropGetter(Account.class, "firstName"));
+            println(Beans.getPropSetter(Account.class, "id"));
+        });
     }
 
     @Test
@@ -24473,79 +24906,85 @@ public class NTest extends AbstractParserTest {
 
     @Test
     public void testCopy_1() {
-        final Account account = createAccountWithContact(Account.class);
-        final com.landawn.abacus.entity.extendDirty.basic.Account copy = Beans.copyAs(account, com.landawn.abacus.entity.extendDirty.basic.Account.class);
-        println(copy);
+        assertDoesNotThrow(() -> {
+            final Account account = createAccountWithContact(Account.class);
+            final com.landawn.abacus.entity.extendDirty.basic.Account copy = Beans.copyAs(account, com.landawn.abacus.entity.extendDirty.basic.Account.class);
+            println(copy);
+        });
     }
 
     @Test
     public void testCopy_2() {
-        final com.landawn.abacus.entity.pjo.basic.Account account = createAccountWithContact(com.landawn.abacus.entity.pjo.basic.Account.class);
-        final com.landawn.abacus.entity.extendDirty.basic.Account copy = Beans.copyAs(account, com.landawn.abacus.entity.extendDirty.basic.Account.class);
-        println(copy);
+        assertDoesNotThrow(() -> {
+            final com.landawn.abacus.entity.pjo.basic.Account account = createAccountWithContact(com.landawn.abacus.entity.pjo.basic.Account.class);
+            final com.landawn.abacus.entity.extendDirty.basic.Account copy = Beans.copyAs(account, com.landawn.abacus.entity.extendDirty.basic.Account.class);
+            println(copy);
+        });
     }
 
     @Test
     public void testCopyArray() {
-        boolean[] copy = N.copyOfRange(new boolean[] { true, true, false }, 0, 2);
-        println(N.toString(copy));
+        assertDoesNotThrow(() -> {
+            boolean[] copy = N.copyOfRange(new boolean[] { true, true, false }, 0, 2);
+            println(N.toString(copy));
 
-        char[] copy1 = N.copyOfRange(new char[] { 1, 2, 3 }, 0, 2);
-        println(N.toString(copy1));
+            char[] copy1 = N.copyOfRange(new char[] { 1, 2, 3 }, 0, 2);
+            println(N.toString(copy1));
 
-        byte[] copy2 = N.copyOfRange(new byte[] { 1, 2, 3 }, 0, 2);
-        println(N.toString(copy2));
+            byte[] copy2 = N.copyOfRange(new byte[] { 1, 2, 3 }, 0, 2);
+            println(N.toString(copy2));
 
-        short[] copy3 = N.copyOfRange(new short[] { 1, 2, 3 }, 0, 2);
-        println(N.toString(copy3));
+            short[] copy3 = N.copyOfRange(new short[] { 1, 2, 3 }, 0, 2);
+            println(N.toString(copy3));
 
-        int[] copy4 = N.copyOfRange(new int[] { 1, 2, 3 }, 0, 2);
-        println(N.toString(copy4));
+            int[] copy4 = N.copyOfRange(new int[] { 1, 2, 3 }, 0, 2);
+            println(N.toString(copy4));
 
-        long[] copy5 = N.copyOfRange(new long[] { 1, 2, 3 }, 0, 2);
-        println(N.toString(copy5));
+            long[] copy5 = N.copyOfRange(new long[] { 1, 2, 3 }, 0, 2);
+            println(N.toString(copy5));
 
-        float[] copy6 = N.copyOfRange(new float[] { 1, 2, 3 }, 0, 2);
-        println(N.toString(copy6));
+            float[] copy6 = N.copyOfRange(new float[] { 1, 2, 3 }, 0, 2);
+            println(N.toString(copy6));
 
-        double[] copy7 = N.copyOfRange(new double[] { 1, 2, 3 }, 0, 2);
-        println(N.toString(copy7));
+            double[] copy7 = N.copyOfRange(new double[] { 1, 2, 3 }, 0, 2);
+            println(N.toString(copy7));
 
-        Object[] copy8 = N.copyOfRange(new Object[] { 1, 2, 3 }, 0, 2);
-        println(N.toString(copy8));
+            Object[] copy8 = N.copyOfRange(new Object[] { 1, 2, 3 }, 0, 2);
+            println(N.toString(copy8));
 
-        copy8 = N.copyOfRange(new Integer[] { 1, 2, 3 }, 0, 2, Object[].class);
-        println(N.toString(copy8));
+            copy8 = N.copyOfRange(new Integer[] { 1, 2, 3 }, 0, 2, Object[].class);
+            println(N.toString(copy8));
 
-        copy = N.copyOf(new boolean[] { true, true, false }, 9);
-        println(N.toString(copy));
+            copy = N.copyOf(new boolean[] { true, true, false }, 9);
+            println(N.toString(copy));
 
-        copy1 = N.copyOf(new char[] { 1, 2, 3 }, 9);
-        println(N.toString(copy1));
+            copy1 = N.copyOf(new char[] { 1, 2, 3 }, 9);
+            println(N.toString(copy1));
 
-        copy2 = N.copyOf(new byte[] { 1, 2, 3 }, 9);
-        println(N.toString(copy2));
+            copy2 = N.copyOf(new byte[] { 1, 2, 3 }, 9);
+            println(N.toString(copy2));
 
-        copy3 = N.copyOf(new short[] { 1, 2, 3 }, 9);
-        println(N.toString(copy3));
+            copy3 = N.copyOf(new short[] { 1, 2, 3 }, 9);
+            println(N.toString(copy3));
 
-        copy4 = N.copyOf(new int[] { 1, 2, 3 }, 9);
-        println(N.toString(copy4));
+            copy4 = N.copyOf(new int[] { 1, 2, 3 }, 9);
+            println(N.toString(copy4));
 
-        copy5 = N.copyOf(new long[] { 1, 2, 3 }, 9);
-        println(N.toString(copy5));
+            copy5 = N.copyOf(new long[] { 1, 2, 3 }, 9);
+            println(N.toString(copy5));
 
-        copy6 = N.copyOf(new float[] { 1, 2, 3 }, 9);
-        println(N.toString(copy6));
+            copy6 = N.copyOf(new float[] { 1, 2, 3 }, 9);
+            println(N.toString(copy6));
 
-        copy7 = N.copyOf(new double[] { 1, 2, 3 }, 9);
-        println(N.toString(copy7));
+            copy7 = N.copyOf(new double[] { 1, 2, 3 }, 9);
+            println(N.toString(copy7));
 
-        copy8 = N.copyOf(new Object[] { 1, 2, 3 }, 9);
-        println(N.toString(copy8));
+            copy8 = N.copyOf(new Object[] { 1, 2, 3 }, 9);
+            println(N.toString(copy8));
 
-        copy8 = N.copyOf(new String[] { "1", "2", "3" }, 9, Object[].class);
-        println(N.toString(copy8));
+            copy8 = N.copyOf(new String[] { "1", "2", "3" }, 9, Object[].class);
+            println(N.toString(copy8));
+        });
     }
 
     @Test
@@ -24565,8 +25004,10 @@ public class NTest extends AbstractParserTest {
 
     @Test
     public void testBean2Map() {
-        final Account account = createAccount(Account.class);
-        println(Beans.beanToMap(account));
+        assertDoesNotThrow(() -> {
+            final Account account = createAccount(Account.class);
+            println(Beans.beanToMap(account));
+        });
     }
 
     @Test
@@ -24598,48 +25039,56 @@ public class NTest extends AbstractParserTest {
 
     @Test
     public void testAsDateWithString() {
-        final Type<Date> type = TypeFactory.getType(Date.class.getCanonicalName());
-        final String st = type.stringOf(Dates.currentDate());
-        N.println(st);
+        assertDoesNotThrow(() -> {
+            final Type<Date> type = TypeFactory.getType(Date.class.getCanonicalName());
+            final String st = type.stringOf(Dates.currentDate());
+            N.println(st);
+        });
     }
 
     @Test
     public void testToString() {
-        final Object arraysOfDouble = new double[][] { { 1, 1 }, { 1.2111, 2.111 } };
-        println(N.toString(arraysOfDouble));
-        println(N.deepToString(arraysOfDouble));
+        assertDoesNotThrow(() -> {
+            final Object arraysOfDouble = new double[][] { { 1, 1 }, { 1.2111, 2.111 } };
+            println(N.toString(arraysOfDouble));
+            println(N.deepToString(arraysOfDouble));
+        });
     }
 
     @Test
     public void testUUID() {
-        N.println(Strings.uuidWithoutHyphens());
-        N.println(Strings.uuidWithoutHyphens().length());
-        N.println(Strings.uuid());
-        N.println(Strings.uuid().length());
+        assertDoesNotThrow(() -> {
+            N.println(Strings.uuidWithoutHyphens());
+            N.println(Strings.uuidWithoutHyphens().length());
+            N.println(Strings.uuid());
+            N.println(Strings.uuid().length());
 
-        println(UUID.randomUUID().toString());
+            println(UUID.randomUUID().toString());
 
-        final String uuid = Strings.uuid();
-        println(uuid);
-        println(Strings.base64Encode(uuid.getBytes()));
+            final String uuid = Strings.uuid();
+            println(uuid);
+            println(Strings.base64Encode(uuid.getBytes()));
+        });
     }
 
     @Test
     public void testAsString() {
-        final Account account = createAccount(Account.class);
-        final AccountContact contact = createAccountContact(AccountContact.class);
-        account.setContact(contact);
+        assertDoesNotThrow(() -> {
+            final Account account = createAccount(Account.class);
+            final AccountContact contact = createAccountContact(AccountContact.class);
+            account.setContact(contact);
 
-        println(N.stringOf(account));
+            println(N.stringOf(account));
 
-        final Bean bean = new Bean();
-        println(N.stringOf(bean));
+            final Bean bean = new Bean();
+            println(N.stringOf(bean));
 
-        bean.setStrings(N.asArray("a", "b"));
-        println(N.stringOf(bean));
+            bean.setStrings(N.asArray("a", "b"));
+            println(N.stringOf(bean));
 
-        bean.setBytes(new byte[] { 1, 2 });
-        println(N.stringOf(bean));
+            bean.setBytes(new byte[] { 1, 2 });
+            println(N.stringOf(bean));
+        });
     }
 
     @Test
@@ -24766,27 +25215,29 @@ public class NTest extends AbstractParserTest {
 
     @Test
     public void testSerialize1() {
-        final Bean bean = new Bean();
-        bean.setTypeList(N.toList(
-                "‰β,『�?★业€ > \n sfd \r ds \' f d // \\  \\\\ /// /////// \\\\\\\\  \\\\\\\\n \\\\\\\\r  \t sd \" fe stri‰β,『�?★业€ ng黎< > </ <//、\n", '★', '\n',
-                '\r', '\t', '\"', '\'', ' ', new char[] { '\r', '\t', '\"', '\'', ' ' },
-                new String[] {
-                        "‰β,『�?★业€ > \n sfd \r ds \' f d // \\  \\\\ /// /////// \\\\\\\\  \\\\\\\\n \\\\\\\\r  \t sd \" fe stri‰β,『�?★业€ ng黎< > </ <//、\n",
-                        "\r", "\t", "\"", "\'" }));
+        assertDoesNotThrow(() -> {
+            final Bean bean = new Bean();
+            bean.setTypeList(N.toList(
+                    "‰β,『�?★业€ > \n sfd \r ds \' f d // \\  \\\\ /// /////// \\\\\\\\  \\\\\\\\n \\\\\\\\r  \t sd \" fe stri‰β,『�?★业€ ng黎< > </ <//、\n", '★',
+                    '\n', '\r', '\t', '\"', '\'', ' ', new char[] { '\r', '\t', '\"', '\'', ' ' },
+                    new String[] {
+                            "‰β,『�?★业€ > \n sfd \r ds \' f d // \\  \\\\ /// /////// \\\\\\\\  \\\\\\\\n \\\\\\\\r  \t sd \" fe stri‰β,『�?★业€ ng黎< > </ <//、\n",
+                            "\r", "\t", "\"", "\'" }));
 
-        bean.setBytes(new byte[] { 1, 2 });
-        bean.setStrings(new String[] { "aa", "bb", "<>>" });
-        bean.setChars(new char[] { '\r', '\t', '\"', '\'', ' ', ',', ' ', ',' });
+            bean.setBytes(new byte[] { 1, 2 });
+            bean.setStrings(new String[] { "aa", "bb", "<>>" });
+            bean.setChars(new char[] { '\r', '\t', '\"', '\'', ' ', ',', ' ', ',' });
 
-        final String xml = abacusXmlParser.serialize(bean);
-        println(xml);
+            final String xml = abacusXmlParser.serialize(bean);
+            println(xml);
 
-        final Bean xmlBean = abacusXmlParser.deserialize(xml, Bean.class);
-        N.println(abacusXmlParser.serialize(bean));
-        N.println(abacusXmlParser.serialize(xmlBean));
+            final Bean xmlBean = abacusXmlParser.deserialize(xml, Bean.class);
+            N.println(abacusXmlParser.serialize(bean));
+            N.println(abacusXmlParser.serialize(xmlBean));
 
-        N.println(abacusXmlParser.deserialize(abacusXmlParser.serialize(bean), Bean.class));
-        N.println(abacusXmlParser.deserialize(abacusXmlParser.serialize(xmlBean), Bean.class));
+            N.println(abacusXmlParser.deserialize(abacusXmlParser.serialize(bean), Bean.class));
+            N.println(abacusXmlParser.deserialize(abacusXmlParser.serialize(xmlBean), Bean.class));
+        });
     }
 
     @Test
@@ -24961,29 +25412,34 @@ public class NTest extends AbstractParserTest {
 
     @Test
     public void test_PermutationIterator() {
-        PermutationIterator.of(N.toList(1, 2, null, 3)).forEachRemaining(Fn.println());
+        assertDoesNotThrow(() -> {
+            PermutationIterator.of(N.toList(1, 2, null, 3)).forEachRemaining(Fn.println());
 
-        Iterables.powerSet(N.toSet(1, 2, null, 3)).forEach(Fn.println());
+            Iterables.powerSet(N.toSet(1, 2, null, 3)).forEach(Fn.println());
+        });
     }
 
     @Test
     public void test_firstNonEmpty() {
-        final Optional<List<String>> result = N.firstNonEmpty(N.toList(), N.toList("a"), N.toList());
-        N.println(result);
+        assertDoesNotThrow(() -> {
+            final Optional<List<String>> result = N.firstNonEmpty(N.toList(), N.toList("a"), N.toList());
+            N.println(result);
+        });
     }
 
     @Test
     public void test_toString_2() {
-        N.println(N.toString((int[]) null));
-        N.println(N.toString((int[][]) null));
-        N.println(N.toString((int[][]) null));
-        N.println(N.toString(new int[0]));
-        N.println(N.toString(new int[0][]));
-        N.println(N.toString(new int[0][][]));
-        N.println(N.toString(new int[1]));
-        N.println(N.toString(new int[1][]));
-        N.println(N.toString(new int[1][][]));
-
+        assertDoesNotThrow(() -> {
+            N.println(N.toString((int[]) null));
+            N.println(N.toString((int[][]) null));
+            N.println(N.toString((int[][]) null));
+            N.println(N.toString(new int[0]));
+            N.println(N.toString(new int[0][]));
+            N.println(N.toString(new int[0][][]));
+            N.println(N.toString(new int[1]));
+            N.println(N.toString(new int[1][]));
+            N.println(N.toString(new int[1][][]));
+        });
     }
 
     @Test
@@ -25010,31 +25466,32 @@ public class NTest extends AbstractParserTest {
 
     @Test
     public void test_lambda() {
-        int[] a = Array.repeat(3, 10);
-        N.println(a);
+        assertDoesNotThrow(() -> {
+            int[] a = Array.repeat(3, 10);
+            N.println(a);
 
-        N.fill(a, 0);
-        N.println(a);
+            N.fill(a, 0);
+            N.println(a);
 
-        a = Array.of(1, 2, 3, 4, 5, 6);
-        N.reverse(a);
-        N.println(a);
+            a = Array.of(1, 2, 3, 4, 5, 6);
+            N.reverse(a);
+            N.println(a);
 
-        a = Array.of(1, 2, 3, 4, 5, 6);
-        N.rotate(a, 2);
-        N.println(a);
+            a = Array.of(1, 2, 3, 4, 5, 6);
+            N.rotate(a, 2);
+            N.println(a);
 
-        a = Array.of(1, 2, 3, 4, 5, 6);
-        N.shuffle(a);
-        N.println(a);
+            a = Array.of(1, 2, 3, 4, 5, 6);
+            N.shuffle(a);
+            N.println(a);
 
-        a = Array.of(1, 2, 3, 4, 5, 6);
-        N.println(N.sum(a));
-        N.println(N.average(a));
-        N.println(N.min(a));
-        N.println(N.max(a));
-        N.println(N.median(a));
-
+            a = Array.of(1, 2, 3, 4, 5, 6);
+            N.println(N.sum(a));
+            N.println(N.average(a));
+            N.println(N.min(a));
+            N.println(N.max(a));
+            N.println(N.median(a));
+        });
     }
 
     @Test
@@ -25063,81 +25520,86 @@ public class NTest extends AbstractParserTest {
 
     @Test
     public void test_checkNullOrEmpty() {
-        List<String> list = N.toList("a");
-        list = N.checkArgNotEmpty(list, "list");
-        N.println(list);
+        assertDoesNotThrow(() -> {
+            List<String> list = N.toList("a");
+            list = N.checkArgNotEmpty(list, "list");
+            N.println(list);
 
-        Set<String> set = N.toSet("a");
-        set = N.checkArgNotEmpty(set, "set");
-        N.println(set);
+            Set<String> set = N.toSet("a");
+            set = N.checkArgNotEmpty(set, "set");
+            N.println(set);
 
-        Queue<String> queue = N.toQueue("a");
-        queue = N.checkArgNotEmpty(queue, "queue");
-        N.println(queue);
+            Queue<String> queue = N.toQueue("a");
+            queue = N.checkArgNotEmpty(queue, "queue");
+            N.println(queue);
+        });
     }
 
     @Test
     public void test_Collections() {
-        N.println(N.asSingletonSet("abc"));
-        N.println(N.asSingletonList("abc"));
-        N.println(N.asSingletonMap("key", "value"));
+        assertDoesNotThrow(() -> {
+            N.println(N.asSingletonSet("abc"));
+            N.println(N.asSingletonList("abc"));
+            N.println(N.asSingletonMap("key", "value"));
 
-        final List<String> list = N.toList("a", "b", "c", "d");
-        N.println(list);
-        N.reverse(list);
-        N.println(list);
-        N.replaceAll(list, "a", "newValue");
-        N.println(list);
+            final List<String> list = N.toList("a", "b", "c", "d");
+            N.println(list);
+            N.reverse(list);
+            N.println(list);
+            N.replaceAll(list, "a", "newValue");
+            N.println(list);
+        });
     }
 
     @Test
     public void test_format() {
+        assertDoesNotThrow(() -> {
+            N.println(Dates.format(Dates.currentJUDate(), Dates.LOCAL_DATE_FORMAT));
+            N.println(Dates.format(Dates.currentJUDate(), Dates.LOCAL_DATE_TIME_FORMAT));
+            N.println(Dates.format(Dates.currentDate(), Dates.LOCAL_DATE_FORMAT));
+            N.println(Dates.format(Dates.currentDate(), Dates.LOCAL_DATE_TIME_FORMAT));
+            N.println(Dates.format(Dates.currentTime(), Dates.LOCAL_DATE_FORMAT));
+            N.println(Dates.format(Dates.currentTime(), Dates.LOCAL_DATE_TIME_FORMAT));
+            N.println(Dates.format(Dates.currentTimestamp(), Dates.LOCAL_DATE_FORMAT));
+            N.println(Dates.format(Dates.currentTimestamp(), Dates.LOCAL_DATE_TIME_FORMAT));
 
-        N.println(Dates.format(Dates.currentJUDate(), Dates.LOCAL_DATE_FORMAT));
-        N.println(Dates.format(Dates.currentJUDate(), Dates.LOCAL_DATE_TIME_FORMAT));
-        N.println(Dates.format(Dates.currentDate(), Dates.LOCAL_DATE_FORMAT));
-        N.println(Dates.format(Dates.currentDate(), Dates.LOCAL_DATE_TIME_FORMAT));
-        N.println(Dates.format(Dates.currentTime(), Dates.LOCAL_DATE_FORMAT));
-        N.println(Dates.format(Dates.currentTime(), Dates.LOCAL_DATE_TIME_FORMAT));
-        N.println(Dates.format(Dates.currentTimestamp(), Dates.LOCAL_DATE_FORMAT));
-        N.println(Dates.format(Dates.currentTimestamp(), Dates.LOCAL_DATE_TIME_FORMAT));
+            N.println(Dates.parseTimestamp(Dates.format(Dates.currentDate())));
+            com.landawn.abacus.util.BufferedWriter writer = (com.landawn.abacus.util.BufferedWriter) Objectory.createBufferedWriter();
+            N.println(Dates.parseTimestamp(Dates.format(Dates.currentDate())));
+            N.println(Dates.parseTimestamp(Dates.format(Dates.currentDate(), Dates.LOCAL_DATE_FORMAT), Dates.LOCAL_DATE_FORMAT));
+            N.println(Dates.parseTimestamp(Dates.format(Dates.currentDate(), Dates.LOCAL_DATE_FORMAT, Dates.UTC_TIME_ZONE), Dates.LOCAL_DATE_FORMAT,
+                    Dates.UTC_TIME_ZONE));
+            N.println(Dates.parseTimestamp(Dates.format(Dates.currentDate(), Dates.LOCAL_DATE_FORMAT, Dates.UTC_TIME_ZONE), Dates.LOCAL_DATE_FORMAT,
+                    Dates.UTC_TIME_ZONE));
+            Dates.formatTo(Dates.currentDate(), Dates.LOCAL_DATE_FORMAT, Dates.UTC_TIME_ZONE, writer);
+            N.println(Dates.parseTimestamp(writer.toString(), Dates.LOCAL_DATE_FORMAT, Dates.UTC_TIME_ZONE));
+            Objectory.recycle(writer);
 
-        N.println(Dates.parseTimestamp(Dates.format(Dates.currentDate())));
-        com.landawn.abacus.util.BufferedWriter writer = (com.landawn.abacus.util.BufferedWriter) Objectory.createBufferedWriter();
-        N.println(Dates.parseTimestamp(Dates.format(Dates.currentDate())));
-        N.println(Dates.parseTimestamp(Dates.format(Dates.currentDate(), Dates.LOCAL_DATE_FORMAT), Dates.LOCAL_DATE_FORMAT));
-        N.println(Dates.parseTimestamp(Dates.format(Dates.currentDate(), Dates.LOCAL_DATE_FORMAT, Dates.UTC_TIME_ZONE), Dates.LOCAL_DATE_FORMAT,
-                Dates.UTC_TIME_ZONE));
-        N.println(Dates.parseTimestamp(Dates.format(Dates.currentDate(), Dates.LOCAL_DATE_FORMAT, Dates.UTC_TIME_ZONE), Dates.LOCAL_DATE_FORMAT,
-                Dates.UTC_TIME_ZONE));
-        Dates.formatTo(Dates.currentDate(), Dates.LOCAL_DATE_FORMAT, Dates.UTC_TIME_ZONE, writer);
-        N.println(Dates.parseTimestamp(writer.toString(), Dates.LOCAL_DATE_FORMAT, Dates.UTC_TIME_ZONE));
-        Objectory.recycle(writer);
+            writer = (com.landawn.abacus.util.BufferedWriter) Objectory.createBufferedWriter();
+            N.println(Dates.parseTimestamp(Dates.format(Dates.currentCalendar())));
+            N.println(Dates.parseTimestamp(Dates.format(Dates.currentCalendar(), Dates.LOCAL_DATE_FORMAT), Dates.LOCAL_DATE_FORMAT));
+            N.println(Dates.parseTimestamp(Dates.format(Dates.currentCalendar(), Dates.LOCAL_DATE_FORMAT, Dates.UTC_TIME_ZONE), Dates.LOCAL_DATE_FORMAT,
+                    Dates.UTC_TIME_ZONE));
+            N.println(Dates.parseTimestamp(Dates.format(Dates.currentCalendar(), Dates.LOCAL_DATE_FORMAT, Dates.UTC_TIME_ZONE), Dates.LOCAL_DATE_FORMAT,
+                    Dates.UTC_TIME_ZONE));
 
-        writer = (com.landawn.abacus.util.BufferedWriter) Objectory.createBufferedWriter();
-        N.println(Dates.parseTimestamp(Dates.format(Dates.currentCalendar())));
-        N.println(Dates.parseTimestamp(Dates.format(Dates.currentCalendar(), Dates.LOCAL_DATE_FORMAT), Dates.LOCAL_DATE_FORMAT));
-        N.println(Dates.parseTimestamp(Dates.format(Dates.currentCalendar(), Dates.LOCAL_DATE_FORMAT, Dates.UTC_TIME_ZONE), Dates.LOCAL_DATE_FORMAT,
-                Dates.UTC_TIME_ZONE));
-        N.println(Dates.parseTimestamp(Dates.format(Dates.currentCalendar(), Dates.LOCAL_DATE_FORMAT, Dates.UTC_TIME_ZONE), Dates.LOCAL_DATE_FORMAT,
-                Dates.UTC_TIME_ZONE));
+            Dates.formatTo(Dates.currentCalendar(), null, null, writer);
+            Dates.formatTo(Dates.currentCalendar(), Dates.LOCAL_DATE_FORMAT, Dates.UTC_TIME_ZONE, writer);
+            N.println(Dates.parseTimestamp(writer.toString(), Dates.LOCAL_DATE_FORMAT, Dates.UTC_TIME_ZONE));
+            Objectory.recycle(writer);
 
-        Dates.formatTo(Dates.currentCalendar(), null, null, writer);
-        Dates.formatTo(Dates.currentCalendar(), Dates.LOCAL_DATE_FORMAT, Dates.UTC_TIME_ZONE, writer);
-        N.println(Dates.parseTimestamp(writer.toString(), Dates.LOCAL_DATE_FORMAT, Dates.UTC_TIME_ZONE));
-        Objectory.recycle(writer);
-
-        writer = (com.landawn.abacus.util.BufferedWriter) Objectory.createBufferedWriter();
-        N.println(Dates.parseTimestamp(Dates.format(Dates.currentXMLGregorianCalendar())));
-        N.println(Dates.parseTimestamp(Dates.format(Dates.currentXMLGregorianCalendar(), Dates.LOCAL_DATE_FORMAT), Dates.LOCAL_DATE_FORMAT));
-        N.println(Dates.parseTimestamp(Dates.format(Dates.currentXMLGregorianCalendar(), Dates.LOCAL_DATE_FORMAT, Dates.UTC_TIME_ZONE), Dates.LOCAL_DATE_FORMAT,
-                Dates.UTC_TIME_ZONE));
-        N.println(Dates.parseTimestamp(Dates.format(Dates.currentXMLGregorianCalendar(), Dates.LOCAL_DATE_FORMAT, Dates.UTC_TIME_ZONE), Dates.LOCAL_DATE_FORMAT,
-                Dates.UTC_TIME_ZONE));
-        Dates.formatTo(Dates.currentXMLGregorianCalendar(), null, null, writer);
-        Dates.formatTo(Dates.currentXMLGregorianCalendar(), Dates.LOCAL_DATE_FORMAT, Dates.UTC_TIME_ZONE, writer);
-        N.println(Dates.parseTimestamp(writer.toString(), Dates.LOCAL_DATE_FORMAT, Dates.UTC_TIME_ZONE));
-        Objectory.recycle(writer);
+            writer = (com.landawn.abacus.util.BufferedWriter) Objectory.createBufferedWriter();
+            N.println(Dates.parseTimestamp(Dates.format(Dates.currentXMLGregorianCalendar())));
+            N.println(Dates.parseTimestamp(Dates.format(Dates.currentXMLGregorianCalendar(), Dates.LOCAL_DATE_FORMAT), Dates.LOCAL_DATE_FORMAT));
+            N.println(Dates.parseTimestamp(Dates.format(Dates.currentXMLGregorianCalendar(), Dates.LOCAL_DATE_FORMAT, Dates.UTC_TIME_ZONE),
+                    Dates.LOCAL_DATE_FORMAT, Dates.UTC_TIME_ZONE));
+            N.println(Dates.parseTimestamp(Dates.format(Dates.currentXMLGregorianCalendar(), Dates.LOCAL_DATE_FORMAT, Dates.UTC_TIME_ZONE),
+                    Dates.LOCAL_DATE_FORMAT, Dates.UTC_TIME_ZONE));
+            Dates.formatTo(Dates.currentXMLGregorianCalendar(), null, null, writer);
+            Dates.formatTo(Dates.currentXMLGregorianCalendar(), Dates.LOCAL_DATE_FORMAT, Dates.UTC_TIME_ZONE, writer);
+            N.println(Dates.parseTimestamp(writer.toString(), Dates.LOCAL_DATE_FORMAT, Dates.UTC_TIME_ZONE));
+            Objectory.recycle(writer);
+        });
     }
 
     @Test
@@ -25722,15 +26184,17 @@ public class NTest extends AbstractParserTest {
 
     @Test
     public void println_object() {
-        N.println("Test string");
-        N.println(123);
-        N.println(createSampleBean());
-        N.println(Arrays.asList("a", "b"));
-        N.println(new String[] { "c", "d" });
-        Map<String, String> map = new HashMap<>();
-        map.put("key", "value");
-        N.println(map);
-        N.println((Object) null);
+        assertDoesNotThrow(() -> {
+            N.println("Test string");
+            N.println(123);
+            N.println(createSampleBean());
+            N.println(Arrays.asList("a", "b"));
+            N.println(new String[] { "c", "d" });
+            Map<String, String> map = new HashMap<>();
+            map.put("key", "value");
+            N.println(map);
+            N.println((Object) null);
+        });
     }
 
     @Test
@@ -25824,68 +26288,74 @@ public class NTest extends AbstractParserTest {
 
     @Test
     public void test_stream_persist_json() throws IOException {
-        final List<Map<String, Object>> list = new ArrayList<>();
-        list.add(N.asMap("a", 1));
+        assertDoesNotThrow(() -> {
+            final List<Map<String, Object>> list = new ArrayList<>();
+            list.add(N.asMap("a", 1));
 
-        final File file = new File("./a.json");
+            final File file = new File("./a.json");
 
-        Stream.of(list).persistToJson(new File("./a.json"));
+            Stream.of(list).persistToJson(new File("./a.json"));
 
-        final String json = IOUtil.readAllToString(file);
+            final String json = IOUtil.readAllToString(file);
 
-        N.println(json);
+            N.println(json);
 
-        file.delete();
+            file.delete();
+        });
     }
 
     @Test
     public void test_range() throws Exception {
-        N.println(Array.range(0, 10));
-        N.println(Array.rangeClosed(0, 10));
-        N.println(Array.range(0, 10, -1));
-        N.println(Array.range(10, 0, -1));
-        N.println(Array.rangeClosed(10, 0, -1));
-        N.println(Array.range(10, 0, 1));
+        assertDoesNotThrow(() -> {
+            N.println(Array.range(0, 10));
+            N.println(Array.rangeClosed(0, 10));
+            N.println(Array.range(0, 10, -1));
+            N.println(Array.range(10, 0, -1));
+            N.println(Array.rangeClosed(10, 0, -1));
+            N.println(Array.range(10, 0, 1));
+        });
     }
 
     @Test
     public void test_SetView() throws Exception {
-        final Set<?> set1 = N.toSet("a", "c", "d");
-        final Set<?> set2 = N.toSet("b", "a", "c");
-        N.println(set1);
-        N.println(set2);
+        assertDoesNotThrow(() -> {
+            final Set<?> set1 = N.toSet("a", "c", "d");
+            final Set<?> set2 = N.toSet("b", "a", "c");
+            N.println(set1);
+            N.println(set2);
 
-        N.println(Strings.repeat('=', 80));
+            N.println(Strings.repeat('=', 80));
 
-        SetView<?> setView = Iterables.union(set1, set2);
-        N.println(setView);
+            SetView<?> setView = Iterables.union(set1, set2);
+            N.println(setView);
 
-        setView = Iterables.union(set2, set1);
-        N.println(setView);
+            setView = Iterables.union(set2, set1);
+            N.println(setView);
 
-        N.println(Strings.repeat('=', 80));
+            N.println(Strings.repeat('=', 80));
 
-        setView = Iterables.difference(set1, set2);
-        N.println(setView);
+            setView = Iterables.difference(set1, set2);
+            N.println(setView);
 
-        setView = Iterables.difference(set2, set1);
-        N.println(setView);
+            setView = Iterables.difference(set2, set1);
+            N.println(setView);
 
-        N.println(Strings.repeat('=', 80));
+            N.println(Strings.repeat('=', 80));
 
-        setView = Iterables.intersection(set1, set2);
-        N.println(setView);
+            setView = Iterables.intersection(set1, set2);
+            N.println(setView);
 
-        setView = Iterables.intersection(set2, set1);
-        N.println(setView);
+            setView = Iterables.intersection(set2, set1);
+            N.println(setView);
 
-        N.println(Strings.repeat('=', 80));
+            N.println(Strings.repeat('=', 80));
 
-        setView = Iterables.symmetricDifference(set1, set2);
-        N.println(setView);
+            setView = Iterables.symmetricDifference(set1, set2);
+            N.println(setView);
 
-        setView = Iterables.symmetricDifference(set2, set1);
-        N.println(setView);
+            setView = Iterables.symmetricDifference(set2, set1);
+            N.println(setView);
+        });
     }
 
     @Test
@@ -25922,26 +26392,30 @@ public class NTest extends AbstractParserTest {
 
     @Test
     public void test_jaxb_1() throws Exception {
-        Beans.registerXmlBindingClass(JaxbBean.class);
+        assertDoesNotThrow(() -> {
+            Beans.registerXmlBindingClass(JaxbBean.class);
 
-        final JaxbBean jb = new JaxbBean();
-        jb.setString("string1");
-        jb.getList().add("list_e_1");
-        jb.getMap().put("map_key_1", "map_value_1");
-        N.println(abacusXmlParser.serialize(jb));
-        N.println(N.stringOf(abacusXmlParser.deserialize(abacusXmlParser.serialize(jb), JaxbBean.class)));
+            final JaxbBean jb = new JaxbBean();
+            jb.setString("string1");
+            jb.getList().add("list_e_1");
+            jb.getMap().put("map_key_1", "map_value_1");
+            N.println(abacusXmlParser.serialize(jb));
+            N.println(N.stringOf(abacusXmlParser.deserialize(abacusXmlParser.serialize(jb), JaxbBean.class)));
+        });
     }
 
     @Test
     public void test_jaxb_2() throws Exception {
-        Beans.registerXmlBindingClass(JaxbBean.class);
+        assertDoesNotThrow(() -> {
+            Beans.registerXmlBindingClass(JaxbBean.class);
 
-        final JaxbBean jb = new JaxbBean();
-        jb.setString("string1");
-        jb.getList().add("list_e_1");
-        jb.getMap().put("map_key_1", "map_value_1");
-        N.println(abacusXMLDOMParser.serialize(jb));
-        N.println(N.stringOf(abacusXMLDOMParser.deserialize(abacusXMLDOMParser.serialize(jb), JaxbBean.class)));
+            final JaxbBean jb = new JaxbBean();
+            jb.setString("string1");
+            jb.getList().add("list_e_1");
+            jb.getMap().put("map_key_1", "map_value_1");
+            N.println(abacusXMLDOMParser.serialize(jb));
+            N.println(N.stringOf(abacusXMLDOMParser.deserialize(abacusXMLDOMParser.serialize(jb), JaxbBean.class)));
+        });
     }
 
     @Test
@@ -26047,20 +26521,24 @@ public class NTest extends AbstractParserTest {
 
     @Test
     public void testSerialize7() throws Exception {
-        final InputStream is = new FileInputStream("./src/test/resources/XBean.xml");
-        final XBean xmlBean = abacusXmlParser.deserialize(is, XBean.class);
-        is.close();
+        assertDoesNotThrow(() -> {
+            final InputStream is = new FileInputStream("./src/test/resources/XBean.xml");
+            final XBean xmlBean = abacusXmlParser.deserialize(is, XBean.class);
+            is.close();
 
-        N.println(N.stringOf(xmlBean));
+            N.println(N.stringOf(xmlBean));
+        });
     }
 
     @Test
     public void testSerialize7_() throws Exception {
-        final InputStream is = new FileInputStream("./src/test/resources/XBean.xml");
-        final XBean xmlBean = abacusXMLDOMParser.deserialize(is, XBean.class);
-        is.close();
+        assertDoesNotThrow(() -> {
+            final InputStream is = new FileInputStream("./src/test/resources/XBean.xml");
+            final XBean xmlBean = abacusXMLDOMParser.deserialize(is, XBean.class);
+            is.close();
 
-        N.println(N.stringOf(xmlBean));
+            N.println(N.stringOf(xmlBean));
+        });
     }
 
     @Test
@@ -26099,11 +26577,13 @@ public class NTest extends AbstractParserTest {
 
     @Test
     public void fprintln_format() {
-        N.fprintln("Hello, %s! You are %d.", "World", 30);
+        assertDoesNotThrow(() -> {
+            N.fprintln("Hello, %s! You are %d.", "World", 30);
+        });
     }
 
     @Test
-    public void testFprintln() {
+    public void testfprintln() {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         PrintStream originalOut = System.out;
         System.setOut(new PrintStream(baos));
@@ -26118,7 +26598,7 @@ public class NTest extends AbstractParserTest {
     }
 
     @Test
-    public void testFprintlnWithVariousFormats() {
+    public void testfprintlnWithVariousFormats() {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         PrintStream originalOut = System.out;
         System.setOut(new PrintStream(baos));
@@ -26142,32 +26622,34 @@ public class NTest extends AbstractParserTest {
 
     @Test
     public void test_fprintln() {
-        Object[] array = null;
-        N.println(array);
+        assertDoesNotThrow(() -> {
+            Object[] array = null;
+            N.println(array);
 
-        array = new Object[0];
-        N.println(array);
+            array = new Object[0];
+            N.println(array);
 
-        array = N.asArray("123", "abc", "234", "ijk");
-        N.println(array);
+            array = N.asArray("123", "abc", "234", "ijk");
+            N.println(array);
 
-        List<?> list = null;
-        N.println(list);
+            List<?> list = null;
+            N.println(list);
 
-        list = new ArrayList<>();
-        N.println(list);
+            list = new ArrayList<>();
+            N.println(list);
 
-        list = N.toList("123", "abc", "234", "ijk");
-        N.println(list);
+            list = N.toList("123", "abc", "234", "ijk");
+            N.println(list);
 
-        Map<?, ?> map = null;
-        N.println(map);
+            Map<?, ?> map = null;
+            N.println(map);
 
-        map = new HashMap<>();
-        N.println(map);
+            map = new HashMap<>();
+            N.println(map);
 
-        map = N.asMap("123", "abc", "234", "ijk");
-        N.println(map);
+            map = N.asMap("123", "abc", "234", "ijk");
+            N.println(map);
+        });
     }
 
     @Test
@@ -26243,13 +26725,17 @@ public class NTest extends AbstractParserTest {
 
     @Test
     public void test_clone_01() {
-        Beans.deepCopy(u.Optional.of("a"));
-        Beans.deepCopy(u.Nullable.of("a"));
+        assertDoesNotThrow(() -> {
+            Beans.deepCopy(u.Optional.of("a"));
+            Beans.deepCopy(u.Nullable.of("a"));
+        });
     }
 
     @Test
     public void test_repeat() {
-        Array.repeat((String) null, 10);
+        assertDoesNotThrow(() -> {
+            Array.repeat((String) null, 10);
+        });
     }
 
     @Test
@@ -26267,21 +26753,23 @@ public class NTest extends AbstractParserTest {
 
     @Test
     public void test_002() {
-        try {
-            Try.call((Callable<Object>) () -> {
-                throw new Exception();
-            });
-        } catch (final RuntimeException e) {
+        assertDoesNotThrow(() -> {
+            try {
+                Try.call((Callable<Object>) () -> {
+                    throw new Exception();
+                });
+            } catch (final RuntimeException e) {
 
-        }
+            }
 
-        try {
-            Try.run((Throwables.Runnable) () -> {
-                throw new Exception();
-            });
-        } catch (final RuntimeException e) {
+            try {
+                Try.run((Throwables.Runnable) () -> {
+                    throw new Exception();
+                });
+            } catch (final RuntimeException e) {
 
-        }
+            }
+        });
     }
 
     @Test
@@ -26320,7 +26808,7 @@ public class NTest extends AbstractParserTest {
         assertEquals(list1, list2);
 
         list2 = N.toList(4, 5, 6);
-        Iterables.copyRange(list1, 1, list2, 2, 1);
+        Iterables.copyInto(list1, 1, list2, 2, 1);
         assertEquals(N.toList(4, 5, 2), list2);
     }
 
@@ -26393,45 +26881,83 @@ public class NTest extends AbstractParserTest {
 
     @Test
     public void test_parallel_sort() {
+        int[] values = { 3, 1, 2 };
+
+        N.parallelSort(values);
+        assertArrayEquals(new int[] { 1, 2, 3 }, values);
     }
 
     @Test
     public void test_sort_big_int_array() {
+        int[] values = { 5, 1, 3, 2, 4 };
+
+        N.sort(values);
+        assertArrayEquals(new int[] { 1, 2, 3, 4, 5 }, values);
     }
 
     @Test
     public void test_sort_big_int_array_by_parallel_sort() {
+        int[] values = { 5, 1, 3, 2, 4 };
+
+        N.parallelSort(values);
+        assertArrayEquals(new int[] { 1, 2, 3, 4, 5 }, values);
     }
 
     @Test
     public void test_sort_big_long_array() {
+        long[] values = { 5L, 1L, 3L, 2L, 4L };
+
+        N.sort(values);
+        assertArrayEquals(new long[] { 1L, 2L, 3L, 4L, 5L }, values);
     }
 
     @Test
     public void test_sort_big_long_array_by_parallel_sort() {
+        long[] values = { 5L, 1L, 3L, 2L, 4L };
+
+        N.parallelSort(values);
+        assertArrayEquals(new long[] { 1L, 2L, 3L, 4L, 5L }, values);
     }
 
     @Test
     public void test_sort_big_double_array() {
+        double[] values = { 5D, 1D, 3D, 2D, 4D };
+
+        N.sort(values);
+        assertArrayEquals(new double[] { 1D, 2D, 3D, 4D, 5D }, values);
     }
 
     @Test
     public void test_sort_big_double_array_by_parallel_sort() {
+        double[] values = { 5D, 1D, 3D, 2D, 4D };
+
+        N.parallelSort(values);
+        assertArrayEquals(new double[] { 1D, 2D, 3D, 4D, 5D }, values);
     }
 
     @Test
     public void test_sort_big_string_array() {
+        String[] values = { "c", "a", "b" };
+
+        N.sort(values);
+        assertArrayEquals(new String[] { "a", "b", "c" }, values);
     }
 
     @Test
     public void test_sort_big_string_array_by_parallel_sort() {
+        String[] values = { "c", "a", "b" };
+
+        N.parallelSort(values);
+        assertArrayEquals(new String[] { "a", "b", "c" }, values);
     }
 
     @Test
     public void test_stringSplit() {
-        final String str = "123, daskf32rfasdf, sf3qijfdlsafj23i9jqfl;sdjfawdfs, akfj3iq2pflsefj32ijrlqawdfjiq2, i3q2jfals;dfj32i9qjfsdk, askdaf";
+        assertDoesNotThrow(() -> {
+            final String str = "123, daskf32rfasdf, sf3qijfdlsafj23i9jqfl;sdjfawdfs, akfj3iq2pflsefj32ijrlqawdfjiq2, i3q2jfals;dfj32i9qjfsdk, askdaf";
 
-        Profiler.run(1, 1000, 1, () -> Splitter.withDefault().splitToArray(str)).printResult();
+            Profiler.run(1, 1000, 1, () -> Splitter.withDefault().splitToArray(str)).printResult();
+        });
     }
 
     @Test
@@ -26504,6 +27030,11 @@ public class NTest extends AbstractParserTest {
 
     @Test
     public void test_array_performance() {
+        int[] values = Array.random(16);
+        int[] sorted = values.clone();
+
+        N.sort(sorted);
+        assertTrue(N.isSorted(sorted));
     }
 
     @Test
@@ -26515,6 +27046,10 @@ public class NTest extends AbstractParserTest {
 
     @Test
     public void test_requireNonNull() {
+        String value = "value";
+
+        assertSame(value, N.requireNonNull(value));
+        org.junit.jupiter.api.Assertions.assertThrows(NullPointerException.class, () -> N.requireNonNull(null));
     }
 
     @Test
@@ -26643,21 +27178,9 @@ public class NTest extends AbstractParserTest {
             }
         }
 
-        {
-            try {
-                N.convert(-Double.MAX_VALUE, float.class);
-                fail("Should throw ArithmeticException");
-            } catch (final ArithmeticException e) {
-            }
-        }
-
-        {
-            try {
-                N.convert(Double.MAX_VALUE, float.class);
-                fail("Should throw ArithmeticException");
-            } catch (final ArithmeticException e) {
-            }
-        }
+        // A finite double beyond the float range saturates to +-Infinity (IEEE-754), not an exception.
+        assertEquals(Float.NEGATIVE_INFINITY, N.convert(-Double.MAX_VALUE, float.class), 0.0f);
+        assertEquals(Float.POSITIVE_INFINITY, N.convert(Double.MAX_VALUE, float.class), 0.0f);
     }
 
     @Test
@@ -26726,29 +27249,37 @@ public class NTest extends AbstractParserTest {
 
     @Test
     public void test_dateFormat_performance() {
-        Profiler.run(this, "test_dateFormat", 6, 10000, 1).printResult();
+        assertDoesNotThrow(() -> {
+            Profiler.run(this, "test_dateFormat", 6, 10000, 1).printResult();
+        });
     }
 
     @Test
     public void test_dateFormat() {
-        final Timestamp date = Dates.currentTimestamp();
-        final String st = Dates.format(date);
+        assertDoesNotThrow(() -> {
+            final Timestamp date = Dates.currentTimestamp();
+            final String st = Dates.format(date);
 
-        Dates.parseTimestamp(st);
+            Dates.parseTimestamp(st);
+        });
     }
 
     @Test
     public void test_dateFormat_2() throws ParseException {
-        final DateFormat df = new SimpleDateFormat(Dates.ISO_8601_TIMESTAMP_FORMAT);
-        final Timestamp date = Dates.currentTimestamp();
-        final String st = df.format(date);
+        assertDoesNotThrow(() -> {
+            final DateFormat df = new SimpleDateFormat(Dates.ISO_8601_TIMESTAMP_FORMAT);
+            final Timestamp date = Dates.currentTimestamp();
+            final String st = df.format(date);
 
-        df.parse(st);
+            df.parse(st);
+        });
     }
 
     @Test
     public void test_performance() {
-        Profiler.run(this, "execute", 16, 100, 1).printResult();
+        assertDoesNotThrow(() -> {
+            Profiler.run(this, "execute", 16, 100, 1).printResult();
+        });
     }
 
     @Test
@@ -26989,33 +27520,43 @@ public class NTest extends AbstractParserTest {
 
     @Test
     public void testValueOf_2() {
-        valueOf();
+        assertDoesNotThrow(() -> {
+            valueOf();
 
-        Profiler.run(this, "valueOf", 32, 100, 1).printResult();
+            Profiler.run(this, "valueOf", 32, 100, 1).printResult();
+        });
     }
 
     @Test
     public void testPerformanceForBigBean() throws Exception {
+        assertDoesNotThrow(() -> {
+            XBean bean = createBigXBean(3);
+            String xml = abacusXmlParser.serialize(bean);
+            XBean result = abacusXmlParser.deserialize(xml, XBean.class);
+            assertNotNull(result);
+        });
     }
 
     @Test
     public void testJAXB() throws JAXBException {
-        final Customer customer = new Customer();
-        customer.setId(100);
-        customer.setName("mkyong" + ((char) 0) + "kd ");
-        customer.setAge(29);
-        customer.setChar('c');
+        assertDoesNotThrow(() -> {
+            final Customer customer = new Customer();
+            customer.setId(100);
+            customer.setName("mkyong" + ((char) 0) + "kd ");
+            customer.setAge(29);
+            customer.setChar('c');
 
-        try {
-            final JAXBContext jaxbContext = JAXBContext.newInstance(Customer.class);
-            final Marshaller jaxbMarshaller = jaxbContext.createMarshaller();
+            try {
+                final JAXBContext jaxbContext = JAXBContext.newInstance(Customer.class);
+                final Marshaller jaxbMarshaller = jaxbContext.createMarshaller();
 
-            jaxbMarshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
+                jaxbMarshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
 
-            jaxbMarshaller.marshal(customer, System.out);
-        } catch (final JAXBException e) {
-            e.printStackTrace();
-        }
+                jaxbMarshaller.marshal(customer, System.out);
+            } catch (final JAXBException e) {
+                e.printStackTrace();
+            }
+        });
     }
 
     @Test
@@ -27192,8 +27733,8 @@ public class NTest extends AbstractParserTest {
     @Test
     public void testSliceIteratorInvalidIndices() {
         List<String> words = Arrays.asList("a", "b", "c");
-        assertThrows(IllegalArgumentException.class, () -> N.slice(words.iterator(), -1, 2));
-        assertThrows(IllegalArgumentException.class, () -> N.slice(words.iterator(), 2, 1));
+        assertThrows(IndexOutOfBoundsException.class, () -> N.slice(words.iterator(), -1, 2));
+        assertThrows(IndexOutOfBoundsException.class, () -> N.slice(words.iterator(), 2, 1));
     }
 
     @Test
@@ -27255,8 +27796,8 @@ public class NTest extends AbstractParserTest {
         assertIterableEquals(Arrays.asList("b"), iteratorToList(N.slice(Arrays.asList("a", "b").iterator(), 1, 2)));
         assertIterableEquals(Collections.emptyList(), iteratorToList(N.slice(Arrays.asList("a", "b").iterator(), 2, 2)));
 
-        assertThrows(IllegalArgumentException.class, () -> N.slice(Arrays.asList("a").iterator(), -1, 0));
-        assertThrows(IllegalArgumentException.class, () -> N.slice(Arrays.asList("a").iterator(), 1, 0));
+        assertThrows(IndexOutOfBoundsException.class, () -> N.slice(Arrays.asList("a").iterator(), -1, 0));
+        assertThrows(IndexOutOfBoundsException.class, () -> N.slice(Arrays.asList("a").iterator(), 1, 0));
     }
 
     @Test
@@ -27414,6 +27955,162 @@ public class NTest extends AbstractParserTest {
     }
 
     @Test
+    public void testRecursiveEqualsAndHashCodeContractsByMap() {
+        final int OBJECT = 1;
+        final int ARRAY = 2;
+        final int ARRAY_RANGE = 3;
+        final int DEEP = 4;
+        final int EVERYTHING = 5;
+
+        class EqualityHashKey {
+            private final int mode;
+            private final Object value;
+            private final int fromIndex;
+            private final int length;
+
+            EqualityHashKey(final int mode, final Object value) {
+                this(mode, value, 0, value instanceof Object[] ? ((Object[]) value).length : 0);
+            }
+
+            EqualityHashKey(final int mode, final Object value, final int fromIndex, final int length) {
+                this.mode = mode;
+                this.value = value;
+                this.fromIndex = fromIndex;
+                this.length = length;
+            }
+
+            @Override
+            public boolean equals(final Object obj) {
+                if (this == obj) {
+                    return true;
+                } else if (!(obj instanceof EqualityHashKey)) {
+                    return false;
+                }
+
+                final EqualityHashKey other = (EqualityHashKey) obj;
+
+                if (mode != other.mode) {
+                    return false;
+                }
+
+                switch (mode) {
+                    case OBJECT:
+                        return N.equals(value, other.value);
+
+                    case ARRAY:
+                        return N.equals((Object[]) value, (Object[]) other.value);
+
+                    case ARRAY_RANGE:
+                        return length == other.length && N.equals((Object[]) value, fromIndex, (Object[]) other.value, other.fromIndex, length);
+
+                    case DEEP:
+                        return N.deepEquals(value, other.value);
+
+                    case EVERYTHING:
+                        return N.equalsEverything(value, other.value);
+
+                    default:
+                        return false;
+                }
+            }
+
+            @Override
+            public int hashCode() {
+                switch (mode) {
+                    case OBJECT:
+                        return N.hashCode(value);
+
+                    case ARRAY:
+                        return N.hashCode((Object[]) value);
+
+                    case ARRAY_RANGE:
+                        return N.hashCode((Object[]) value, fromIndex, fromIndex + length);
+
+                    case DEEP:
+                        return N.deepHashCode(value);
+
+                    case EVERYTHING:
+                        return Long.hashCode(N.hashCodeEverything(value));
+
+                    default:
+                        return 0;
+                }
+            }
+        }
+
+        final Object objectLeft = new Object[] { "a", new int[] { 1, 2 }, new Object[] { new byte[] { 3, 4 }, null } };
+        final Object objectRight = new Object[] { "a", new int[] { 1, 2 }, new Object[] { new byte[] { 3, 4 }, null } };
+        final Object objectDifferent = new Object[] { "a", new int[] { 1, 9 }, new Object[] { new byte[] { 3, 4 }, null } };
+
+        assertTrue(N.equals(objectLeft, objectRight));
+        assertEquals(N.hashCode(objectLeft), N.hashCode(objectRight));
+        assertEquals(N.deepHashCode(objectLeft), N.hashCode(objectLeft));
+
+        Map<EqualityHashKey, String> map = new HashMap<>();
+        map.put(new EqualityHashKey(OBJECT, objectLeft), "object");
+        assertEquals("object", map.get(new EqualityHashKey(OBJECT, objectRight)));
+        assertNull(map.get(new EqualityHashKey(OBJECT, objectDifferent)));
+
+        final Object[] arrayLeft = { "a", new int[] { 1, 2 }, new Object[] { new char[] { 'x', 'y' }, null } };
+        final Object[] arrayRight = { "a", new int[] { 1, 2 }, new Object[] { new char[] { 'x', 'y' }, null } };
+        final Object[] arrayDifferent = { "a", new int[] { 1, 2 }, new Object[] { new char[] { 'x', 'z' }, null } };
+
+        assertTrue(N.equals(arrayLeft, arrayRight));
+        assertEquals(N.hashCode(arrayLeft), N.hashCode(arrayRight));
+        assertEquals(N.deepHashCode(arrayLeft), N.hashCode(arrayLeft));
+
+        map = new HashMap<>();
+        map.put(new EqualityHashKey(ARRAY, arrayLeft), "array");
+        assertEquals("array", map.get(new EqualityHashKey(ARRAY, arrayRight)));
+        assertNull(map.get(new EqualityHashKey(ARRAY, arrayDifferent)));
+
+        final Object[] rangeLeft = { "left-skip", new int[] { 1, 2 }, new Object[] { new long[] { 3L, 4L } }, "left-tail" };
+        final Object[] rangeRight = { "right-skip", new int[] { 1, 2 }, new Object[] { new long[] { 3L, 4L } }, "right-tail" };
+        final Object[] rangeDifferent = { "left-skip", new int[] { 1, 2 }, new Object[] { new long[] { 3L, 9L } }, "left-tail" };
+
+        assertTrue(N.equals(rangeLeft, 1, rangeRight, 1, 2));
+        assertEquals(N.hashCode(rangeLeft, 1, 3), N.hashCode(rangeRight, 1, 3));
+        assertEquals(N.deepHashCode(rangeLeft, 1, 3), N.hashCode(rangeLeft, 1, 3));
+
+        map = new HashMap<>();
+        map.put(new EqualityHashKey(ARRAY_RANGE, rangeLeft, 1, 2), "arrayRange");
+        assertEquals("arrayRange", map.get(new EqualityHashKey(ARRAY_RANGE, rangeRight, 1, 2)));
+        assertNull(map.get(new EqualityHashKey(ARRAY_RANGE, rangeDifferent, 1, 2)));
+
+        final Object deepLeft = new Object[] { new short[] { 1, 2 }, new Object[] { new double[] { 3.0d, 4.0d } } };
+        final Object deepRight = new Object[] { new short[] { 1, 2 }, new Object[] { new double[] { 3.0d, 4.0d } } };
+        final Object deepDifferent = new Object[] { new short[] { 1, 2 }, new Object[] { new double[] { 3.0d, 5.0d } } };
+
+        assertTrue(N.deepEquals(deepLeft, deepRight));
+        assertEquals(N.deepHashCode(deepLeft), N.deepHashCode(deepRight));
+
+        map = new HashMap<>();
+        map.put(new EqualityHashKey(DEEP, deepLeft), "deep");
+        assertEquals("deep", map.get(new EqualityHashKey(DEEP, deepRight)));
+        assertNull(map.get(new EqualityHashKey(DEEP, deepDifferent)));
+
+        final Map<String, Object> everythingLeft = new LinkedHashMap<>();
+        everythingLeft.put("numbers", new int[] { 1, 2 });
+        everythingLeft.put("nested", Arrays.asList(new Object[] { new byte[] { 3, 4 }, "x" }, null));
+
+        final Map<String, Object> everythingRight = new LinkedHashMap<>();
+        everythingRight.put("numbers", new int[] { 1, 2 });
+        everythingRight.put("nested", Arrays.asList(new Object[] { new byte[] { 3, 4 }, "x" }, null));
+
+        final Map<String, Object> everythingDifferent = new LinkedHashMap<>();
+        everythingDifferent.put("numbers", new int[] { 1, 9 });
+        everythingDifferent.put("nested", Arrays.asList(new Object[] { new byte[] { 3, 4 }, "x" }, null));
+
+        assertTrue(N.equalsEverything(everythingLeft, everythingRight));
+        assertEquals(N.hashCodeEverything(everythingLeft), N.hashCodeEverything(everythingRight));
+
+        map = new HashMap<>();
+        map.put(new EqualityHashKey(EVERYTHING, everythingLeft), "everything");
+        assertEquals("everything", map.get(new EqualityHashKey(EVERYTHING, everythingRight)));
+        assertNull(map.get(new EqualityHashKey(EVERYTHING, everythingDifferent)));
+    }
+
+    @Test
     public void testNewArray() {
         String[] strArray = N.newArray(String.class, 5);
         assertNotNull(strArray);
@@ -27470,7 +28167,9 @@ public class NTest extends AbstractParserTest {
 
     @Test
     public void testCheckArgNotNullValid() {
-        N.checkArgNotNull("valid", "arg");
+        assertDoesNotThrow(() -> {
+            N.checkArgNotNull("valid", "arg");
+        });
     }
 
     @Test
@@ -27495,8 +28194,10 @@ public class NTest extends AbstractParserTest {
 
     @Test
     public void testCheckArgNotEmptyValid() {
-        N.checkArgNotEmpty("valid", "arg");
-        N.checkArgNotEmpty(new int[] { 1 }, "arg");
+        assertDoesNotThrow(() -> {
+            N.checkArgNotEmpty("valid", "arg");
+            N.checkArgNotEmpty(new int[] { 1 }, "arg");
+        });
     }
 
     @Test
@@ -27506,8 +28207,10 @@ public class NTest extends AbstractParserTest {
 
     @Test
     public void testCheckArgNotNegativeValid() {
-        N.checkArgNotNegative(0, "arg");
-        N.checkArgNotNegative(1, "arg");
+        assertDoesNotThrow(() -> {
+            N.checkArgNotNegative(0, "arg");
+            N.checkArgNotNegative(1, "arg");
+        });
     }
 
     @Test
@@ -27517,7 +28220,9 @@ public class NTest extends AbstractParserTest {
 
     @Test
     public void testCheckArgumentValid() {
-        N.checkArgument(true, "Valid argument");
+        assertDoesNotThrow(() -> {
+            N.checkArgument(true, "Valid argument");
+        });
     }
 
     @Test
@@ -27537,14 +28242,16 @@ public class NTest extends AbstractParserTest {
 
     @Test
     public void testCheckFromToIndexValid() {
-        N.checkFromToIndex(0, 5, 5);
-        N.checkFromToIndex(1, 3, 5);
-        N.checkFromToIndex(2, 2, 5);
+        assertDoesNotThrow(() -> {
+            N.checkFromToIndex(0, 5, 5);
+            N.checkFromToIndex(1, 3, 5);
+            N.checkFromToIndex(2, 2, 5);
+        });
     }
 
     @Test
     public void testSliceIteratorInvalidFromIndex() {
-        assertThrows(IllegalArgumentException.class, () -> N.slice(Arrays.asList("a", "b").iterator(), -1, 2));
+        assertThrows(IndexOutOfBoundsException.class, () -> N.slice(Arrays.asList("a", "b").iterator(), -1, 2));
     }
 
     // Regression test for Percentage.intValue() truncation bug.
@@ -28138,5 +28845,147 @@ public class NTest extends AbstractParserTest {
         N.updateAll(list, x -> x * 10);
         assertEquals(120, list.get(11).intValue());
         assertEquals(10, list.get(0).intValue());
+    }
+
+    // --- regression tests for 2026-06-10 deep-review fixes ---
+
+    @Test
+    public void testRemoveAtNullIndices_returnsCloneForPrimitiveArrays() {
+        // regression: indices.length was dereferenced before the null-tolerant isEmpty(indices) guard -> NPE,
+        // while the String[]/T[]/List siblings returned a clone for null indices
+        final boolean[] ba = { true, false };
+        assertArrayEquals(new boolean[] { true, false }, N.removeAt(ba, (int[]) null));
+        assertNotSame(ba, N.removeAt(ba, (int[]) null));
+        assertArrayEquals(new char[] { 'a', 'b' }, N.removeAt(new char[] { 'a', 'b' }, (int[]) null));
+        assertArrayEquals(new byte[] { 1, 2 }, N.removeAt(new byte[] { 1, 2 }, (int[]) null));
+        assertArrayEquals(new short[] { 1, 2 }, N.removeAt(new short[] { 1, 2 }, (int[]) null));
+        assertArrayEquals(new int[] { 1, 2 }, N.removeAt(new int[] { 1, 2 }, (int[]) null));
+        assertArrayEquals(new long[] { 1L, 2L }, N.removeAt(new long[] { 1L, 2L }, (int[]) null));
+        assertArrayEquals(new float[] { 1f, 2f }, N.removeAt(new float[] { 1f, 2f }, (int[]) null), 0f);
+        assertArrayEquals(new double[] { 1d, 2d }, N.removeAt(new double[] { 1d, 2d }, (int[]) null), 0d);
+        assertArrayEquals(new int[0], N.removeAt((int[]) null, (int[]) null));
+    }
+
+    @Test
+    public void testAverageCharByteShortRange_noIntOverflow() {
+        // regression: average(char[]/byte[]/short[], fromIndex, toIndex) accumulated the sum in an int and
+        // silently overflowed (returning a negative average), unlike the long-accumulating int[] sibling
+        final char[] chars = new char[33000];
+        Arrays.fill(chars, Character.MAX_VALUE);
+        assertEquals(65535.0d, N.average(chars), 0.0d);
+
+        final short[] shorts = new short[70000];
+        Arrays.fill(shorts, Short.MAX_VALUE);
+        assertEquals(32767.0d, N.average(shorts), 0.0d);
+
+        final byte[] bytes = new byte[17_000_000];
+        Arrays.fill(bytes, Byte.MAX_VALUE);
+        assertEquals(127.0d, N.average(bytes), 0.0d);
+
+        assertEquals(20.0d, N.average(new char[] { 10, 20, 30 }, 0, 3), 0.0d);
+        assertEquals(20.0d, N.average(new byte[] { 10, 20, 30 }, 0, 3), 0.0d);
+        assertEquals(20.0d, N.average(new short[] { 10, 20, 30 }, 0, 3), 0.0d);
+    }
+
+    @Test
+    public void testMedianTwoElementsWithNaN_treatsNaNAsLargest() {
+        // regression: the len == 2 shortcut used Math.min, returning NaN instead of treating NaN as the
+        // largest value per the total ordering used by the rest of the median family
+        assertEquals(1.0f, N.median(new float[] { 1.0f, Float.NaN }), 0.0f);
+        assertEquals(1.0f, N.median(new float[] { Float.NaN, 1.0f }), 0.0f);
+        assertEquals(1.0d, N.median(new double[] { 1.0d, Double.NaN }), 0.0d);
+        assertEquals(1.0d, N.median(new double[] { Double.NaN, 1.0d }), 0.0d);
+        // unchanged for normal values: lower of the two middle elements
+        assertEquals(1.0f, N.median(new float[] { 2.0f, 1.0f }), 0.0f);
+        assertEquals(1.0d, N.median(new double[] { 2.0d, 1.0d }), 0.0d);
+    }
+
+    @Test
+    public void testKthLargestFloatDoubleWithNaN_consistentTotalOrdering() {
+        // regression: the k == len shortcut used Math.min, ranking NaN as both the largest and the smallest
+        // element and making the true smallest element unreachable for any k
+        final float[] fa = { 1f, 2f, Float.NaN };
+        assertTrue(Float.isNaN(N.kthLargest(fa, 1)));
+        assertEquals(2f, N.kthLargest(fa, 2), 0.0f);
+        assertEquals(1f, N.kthLargest(fa, 3), 0.0f);
+
+        final double[] da = { 1d, 2d, Double.NaN };
+        assertTrue(Double.isNaN(N.kthLargest(da, 1)));
+        assertEquals(2d, N.kthLargest(da, 2), 0.0d);
+        assertEquals(1d, N.kthLargest(da, 3), 0.0d);
+
+        // unchanged for normal values
+        assertEquals(1f, N.kthLargest(new float[] { 3f, 1f, 2f }, 3), 0.0f);
+        assertEquals(1d, N.kthLargest(new double[] { 3d, 1d, 2d }, 3), 0.0d);
+    }
+
+    @Test
+    public void testForEachNullCollectionReverseRange_noNPE() {
+        // regression: forEach/forEachIndexed(Collection, 0, -1, action) threw NPE for a null collection,
+        // while the array siblings and an empty collection were silent no-ops
+        final List<String> seen = new ArrayList<>();
+        N.forEach((Collection<String>) null, 0, -1, seen::add);
+        assertTrue(seen.isEmpty());
+
+        N.forEachIndexed((Collection<String>) null, 0, -1, (i, e) -> seen.add(i + ":" + e));
+        assertTrue(seen.isEmpty());
+
+        N.forEach(new ArrayList<String>(), 0, -1, seen::add);
+        assertTrue(seen.isEmpty());
+
+        // normal reverse iteration unchanged
+        final List<String> reversed = new ArrayList<>();
+        N.forEach(Arrays.asList("a", "b", "c"), 2, -1, reversed::add);
+        assertEquals(Arrays.asList("c", "b", "a"), reversed);
+    }
+
+    @Test
+    public void testSleepUninterruptibly_continuesThroughInterrupt() throws Exception {
+        // regression: the nanoTime deadline guard could mis-clamp (negative System.nanoTime() origins are
+        // permitted), making the remaining wait wrap negative after an interrupt and return early
+        final Thread main = Thread.currentThread();
+        final Thread interrupter = new Thread(() -> {
+            N.sleep(50);
+            main.interrupt();
+        });
+        final long start = System.currentTimeMillis();
+        interrupter.start();
+        N.sleepUninterruptibly(300);
+        final long elapsed = System.currentTimeMillis() - start;
+        assertTrue(elapsed >= 250, "slept only " + elapsed + " ms despite interrupt");
+        assertTrue(Thread.interrupted(), "interrupt status should be restored"); // also clears the flag
+        interrupter.join();
+    }
+
+    @Test
+    public void testSplitIteratorHugeChunkSize_noOOME() {
+        // regression: split(Iterator, chunkSize) pre-allocated an ArrayList of capacity chunkSize,
+        // throwing OOME for huge chunk sizes regardless of the actual number of elements
+        final ObjIterator<List<Integer>> chunks = N.split(Arrays.asList(1, 2, 3).iterator(), Integer.MAX_VALUE);
+        assertTrue(chunks.hasNext());
+        assertEquals(Arrays.asList(1, 2, 3), chunks.next());
+        assertFalse(chunks.hasNext());
+    }
+
+    @Test
+    public void testZipThreeIterablesWithDefaults_NonCollectionSources() {
+        final Iterable<String> names = () -> Arrays.asList("alpha", "beta").iterator();
+        final Iterable<Integer> ids = () -> Arrays.asList(1, 2, 3).iterator();
+        final Iterable<Boolean> flags = () -> Collections.singletonList(true).iterator();
+
+        final List<String> result = N.zip(names, ids, flags, "missing", 0, false, (name, id, flag) -> name + ":" + id + ":" + flag);
+
+        assertEquals(Arrays.asList("alpha:1:true", "beta:2:false", "missing:3:false"), result);
+    }
+
+    @Test
+    public void testMergeCollectionWithIntFunction_ConsumesPlainIterables() {
+        final Iterable<Integer> odd = () -> Arrays.asList(1, 3, 5).iterator();
+        final Iterable<Integer> even = () -> Arrays.asList(2, 4, 6).iterator();
+        final Collection<Iterable<Integer>> inputs = Arrays.asList(odd, even);
+
+        final List<Integer> result = N.merge(inputs, (a, b) -> a <= b ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND, IntFunctions.ofList());
+
+        assertEquals(Arrays.asList(1, 2, 3, 4, 5, 6), result);
     }
 }

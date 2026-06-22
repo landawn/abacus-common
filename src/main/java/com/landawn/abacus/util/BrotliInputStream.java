@@ -248,8 +248,9 @@ public final class BrotliInputStream extends InputStream {
 
     /**
      * Closes this input stream and releases any system resources associated with the stream.
-     * Once the stream has been closed, further read(), available(), reset(), or skip()
-     * invocations will throw an IOException.
+     * After this stream has been closed, further read() or skip() invocations fail (the underlying
+     * Brotli decoder throws {@code IllegalStateException}); available() returns 0; reset() continues
+     * to throw IOException because mark/reset is unsupported.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code

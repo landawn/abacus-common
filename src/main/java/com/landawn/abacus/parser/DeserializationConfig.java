@@ -46,20 +46,20 @@ import com.landawn.abacus.util.N;
  *   <li>Set type information using bean classes for complex deserialization</li>
  * </ul>
  *
- * <p><b>Nested Property Support:</b></p>
- * <p>This configuration supports nested property specifications using dot notation.
- * Nested properties allow you to specify type information for properties at any depth
- * within an object graph. For example:</p>
+ * <p><b>Property-Name Matching:</b></p>
+ * <p>Type lookups during deserialization use the immediate property or map-key name at each
+ * nesting level. Register the local name (e.g. {@code "city"}) to affect any property or key
+ * with that name, at any depth. For example:</p>
  * <pre>{@code
- * config.setValueType("address.city", String.class);             // maps a simple nested property
- * config.setValueType("account.devices.model", String.class);    // maps a multi-level nested property
- * config.setValueType("order.items", List.class);                // maps a collection in a nested property
- * config.setValueType("user.preferences.settings", Map.class);   // maps a map in a deeply nested property
+ * config.setValueType("city", String.class);       // applies to a property/key named "city" at any level
+ * config.setValueType("model", String.class);      // applies to a property/key named "model" at any level
+ * config.setValueType("items", List.class);        // applies to a property/key named "items"
+ * config.setValueType("settings", Map.class);      // applies to a property/key named "settings"
  * }</pre>
  *
- * <p>When using methods that accept property names (such as {@link #setValueType(String, Class)}
- * and {@link #getValueType(String)}), you can use dot notation to reference nested properties
- * at any level of depth.</p>
+ * <p>Dotted keys such as {@code "address.city"} are matched only as literal key strings by
+ * {@link #getValueType(String)}; they are not resolved as paths and are not consulted by the
+ * parsers during deserialization.</p>
  *
  * @param <C> the concrete configuration type for method chaining
  * @see JsonDeserConfig
@@ -169,7 +169,7 @@ public abstract class DeserializationConfig<C extends DeserializationConfig<C>> 
      * <pre>{@code
      * // For deserializing JSON array to List<Person>
      * config.setElementType(Person.class);
-     * List<Person> people = parser.deserialize(jsonArray, List.class);
+     * List<Person> people = parser.deserialize(jsonArray, config, List.class);
      * }</pre>
      *
      * @param elementClass the class of collection/array elements
@@ -327,7 +327,7 @@ public abstract class DeserializationConfig<C extends DeserializationConfig<C>> 
      * // For deserializing to Map<String, Person>
      * config.setMapKeyType(String.class);
      * config.setMapValueType(Person.class);
-     * Map<String, Person> people = parser.deserialize(json, Map.class);
+     * Map<String, Person> people = parser.deserialize(json, config, Map.class);
      * }</pre>
      *
      * @param cls the class of map values
@@ -402,11 +402,11 @@ public abstract class DeserializationConfig<C extends DeserializationConfig<C>> 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<Address> addressType = config.getValueType("address");
-     * Type<String> cityType = config.getValueType("address.city");
+     * Type<String> cityType = config.getValueType("city"); // matched as a literal key, not a nested path
      * }</pre>
      *
      * @param <T> the value type
-     * @param keyName the property name, supporting nested properties (e.g., "account.devices.model") - see class documentation
+     * @param keyName the property/key name as it appears at its nesting level during deserialization (dotted paths are matched only as literal key strings) - see class documentation
      * @return the type for the specified property, or {@code null} if not configured
      */
     public <T> Type<T> getValueType(final String keyName) {
@@ -425,7 +425,7 @@ public abstract class DeserializationConfig<C extends DeserializationConfig<C>> 
      * }</pre>
      *
      * @param <T> the value type
-     * @param keyName the property name, supporting nested properties (e.g., "account.devices.model") - see class documentation
+     * @param keyName the property/key name as it appears at its nesting level during deserialization (dotted paths are matched only as literal key strings) - see class documentation
      * @param defaultType the type to return if no type is configured for the property
      * @return the type for the specified property, or {@code defaultType} if not configured
      */
@@ -455,10 +455,10 @@ public abstract class DeserializationConfig<C extends DeserializationConfig<C>> 
      * <pre>{@code
      * config.setValueType("address", Address.class);
      * config.setValueType("phoneNumbers", List.class);
-     * config.setValueType("metadata.tags", Set.class);
+     * config.setValueType("tags", Set.class); // matched as a literal key, not a nested path
      * }</pre>
      *
-     * @param keyName the property name, supporting nested properties (e.g., "account.devices.model") - see class documentation
+     * @param keyName the property/key name as it appears at its nesting level during deserialization (dotted paths are matched only as literal key strings) - see class documentation
      * @param typeClass the class to use for deserializing this property
      * @return this configuration instance for method chaining
      */
@@ -476,7 +476,7 @@ public abstract class DeserializationConfig<C extends DeserializationConfig<C>> 
      * config.setValueType("tags", listType);
      * }</pre>
      *
-     * @param keyName the property name, supporting nested properties (e.g., "account.devices.model") - see class documentation
+     * @param keyName the property/key name as it appears at its nesting level during deserialization (dotted paths are matched only as literal key strings) - see class documentation
      * @param type the type to use for deserializing this property
      * @return this configuration instance for method chaining
      */
@@ -499,7 +499,7 @@ public abstract class DeserializationConfig<C extends DeserializationConfig<C>> 
      * config.setValueType("metadata", "Map<String, Object>");
      * }</pre>
      *
-     * @param keyName the property name, supporting nested properties (e.g., "account.devices.model") - see class documentation
+     * @param keyName the property/key name as it appears at its nesting level during deserialization (dotted paths are matched only as literal key strings) - see class documentation
      * @param typeName the type name string
      * @return this configuration instance for method chaining
      */

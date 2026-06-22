@@ -198,6 +198,45 @@ public class XmlMappersTest extends TestBase {
     }
 
     @Test
+    public void test_toXml_outputStream_closedByDefaultAutoClose() {
+        final boolean[] closed = { false };
+        ByteArrayOutputStream baos = new ByteArrayOutputStream() {
+            @Override
+            public void close() throws IOException {
+                closed[0] = true;
+                super.close();
+            }
+        };
+
+        XmlMappers.toXml(new Person("AutoClose", 1), baos);
+
+        // Jackson's JsonGenerator.Feature.AUTO_CLOSE_TARGET is enabled by default,
+        // so the stream is closed after writing (as documented).
+        assertTrue(closed[0]);
+        assertTrue(baos.toString().contains("AutoClose"));
+    }
+
+    @Test
+    public void test_fromXml_inputStream_closedByDefaultAutoClose() {
+        final boolean[] closed = { false };
+        String xml = XmlMappers.toXml(new Person("AutoClose", 2));
+        ByteArrayInputStream bais = new ByteArrayInputStream(xml.getBytes()) {
+            @Override
+            public void close() throws IOException {
+                closed[0] = true;
+                super.close();
+            }
+        };
+
+        Person person = XmlMappers.fromXml(bais, Person.class);
+
+        // Jackson's JsonParser.Feature.AUTO_CLOSE_SOURCE is enabled by default,
+        // so the source stream is closed after reading (as documented).
+        assertTrue(closed[0]);
+        assertEquals("AutoClose", person.getName());
+    }
+
+    @Test
     public void test_toXml_object_writer() throws IOException {
         Person person = new Person("Grace", 29);
         StringWriter writer = new StringWriter();

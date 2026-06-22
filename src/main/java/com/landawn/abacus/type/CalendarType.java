@@ -101,7 +101,7 @@ public class CalendarType extends AbstractCalendarType<Calendar> {
     /**
      * Converts a string representation to a {@link Calendar} instance.
      * <ul>
-     *   <li>{@code null} or empty string: returns {@code null}</li>
+     *   <li>{@code null}, empty, or the literal {@code "null"} string: returns {@code null}</li>
      *   <li>{@code "sysTime"}: returns a {@link Calendar} for the current system time</li>
      *   <li>All other values: parsed by {@link com.landawn.abacus.util.Dates#parseCalendar(String)}</li>
      * </ul>
@@ -111,7 +111,7 @@ public class CalendarType extends AbstractCalendarType<Calendar> {
      * guaranteed to be parseable in this way.</p>
      *
      * @param str the string to parse; may be {@code null} or empty
-     * @return a {@link Calendar} parsed from {@code str}, or {@code null} if {@code str} is {@code null} or empty
+     * @return a {@link Calendar} parsed from {@code str}, or {@code null} if {@code str} is {@code null}, empty, or the literal {@code "null"}
      * @see #valueOf(Object)
      * @see #stringOf(java.util.Calendar)
      */
@@ -138,7 +138,7 @@ public class CalendarType extends AbstractCalendarType<Calendar> {
             return null; // NOSONAR
         }
 
-        if (isPossibleLong(cbuf, offset, len)) {
+        if (isPossibleMillis(cbuf, offset, len)) {
             try {
                 return Dates.createCalendar(parseLong(cbuf, offset, len));
             } catch (final NumberFormatException e) {

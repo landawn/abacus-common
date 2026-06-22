@@ -31,7 +31,7 @@ import com.landawn.abacus.annotation.Beta;
  * <p>This class provides several static factory methods for creating instances:
  * <ul>
  * <li>{@link #empty()} - returns an empty immutable map</li>
- * <li>{@link #of(Object, Object)} - creates maps with specific key-value pairs</li>
+ * <li>{@link #of(Object, Object)} (and arity-overloads up to nine key-value pairs) - creates maps with specific key-value pairs</li>
  * <li>{@link #copyOf(Map)} - creates a defensive copy from another map</li>
  * <li>{@link #wrap(Map)} - wraps an existing map (changes to the underlying map will be reflected)</li>
  * <li>{@link #builder()} - provides a builder for constructing immutable maps</li>
@@ -39,6 +39,10 @@ import com.landawn.abacus.annotation.Beta;
  *
  * <p>The implementation preserves the iteration order of entries when created from a LinkedHashMap
  * or SortedMap, otherwise no specific iteration order is guaranteed.</p>
+ *
+ * <p><b>Note:</b> unlike {@link Map#of(Object, Object)}, which throws {@link IllegalArgumentException} on
+ * duplicate keys, the {@code of(...)} factory methods here accept duplicate keys and keep the last value
+ * supplied for each key (last-value-wins).</p>
  *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code

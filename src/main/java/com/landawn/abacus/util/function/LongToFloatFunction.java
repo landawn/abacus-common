@@ -36,8 +36,8 @@ public interface LongToFloatFunction {
      *
      * <p>This is the default conversion function that preserves the numeric value
      * as closely as possible when converting from long to float. Note that for
-     * long values outside the range of float precision (larger than 2^24), there
-     * will be loss of precision due to the limitations of float representation.
+     * long values whose magnitude exceeds 2^24, there may be loss of precision
+     * due to the limitations of float representation.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code

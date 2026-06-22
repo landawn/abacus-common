@@ -20,7 +20,8 @@ package com.landawn.abacus.util;
  * implementing caching mechanisms, or maintaining temporal data.
  *
  * <p>The timestamp represents milliseconds since the Unix epoch (January 1, 1970 UTC).
- * Once created, both the value and timestamp are immutable.
+ * Once created, the value reference and timestamp are fixed. Mutable value objects are
+ * not defensively copied or made immutable by this container.
  *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code

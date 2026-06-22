@@ -299,21 +299,7 @@ public class DigestUtilTest extends TestBase {
     }
 
     @Test
-    public void testGetMd5Digest() {
-        MessageDigest md = DigestUtil.getMd5Digest();
-        assertNotNull(md);
-        assertEquals("MD5", md.getAlgorithm());
-    }
-
-    @Test
     public void test_getSha1Digest() {
-        MessageDigest md = DigestUtil.getSha1Digest();
-        assertNotNull(md);
-        assertEquals("SHA-1", md.getAlgorithm());
-    }
-
-    @Test
-    public void testGetSha1Digest() {
         MessageDigest md = DigestUtil.getSha1Digest();
         assertNotNull(md);
         assertEquals("SHA-1", md.getAlgorithm());
@@ -344,13 +330,6 @@ public class DigestUtilTest extends TestBase {
 
     @Test
     public void test_getSha256Digest() {
-        MessageDigest md = DigestUtil.getSha256Digest();
-        assertNotNull(md);
-        assertEquals("SHA-256", md.getAlgorithm());
-    }
-
-    @Test
-    public void testGetSha256Digest() {
         MessageDigest md = DigestUtil.getSha256Digest();
         assertNotNull(md);
         assertEquals("SHA-256", md.getAlgorithm());
@@ -428,13 +407,6 @@ public class DigestUtilTest extends TestBase {
     }
 
     @Test
-    public void testGetSha384Digest() {
-        MessageDigest md = DigestUtil.getSha384Digest();
-        assertNotNull(md);
-        assertEquals("SHA-384", md.getAlgorithm());
-    }
-
-    @Test
     public void test_getSha512_224Digest() {
         if (DigestUtil.isAvailable("SHA-512/224")) {
             MessageDigest md = DigestUtil.getSha512_224Digest();
@@ -468,13 +440,6 @@ public class DigestUtilTest extends TestBase {
 
     @Test
     public void test_getSha512Digest() {
-        MessageDigest md = DigestUtil.getSha512Digest();
-        assertNotNull(md);
-        assertEquals("SHA-512", md.getAlgorithm());
-    }
-
-    @Test
-    public void testGetSha512Digest() {
         MessageDigest md = DigestUtil.getSha512Digest();
         assertNotNull(md);
         assertEquals("SHA-512", md.getAlgorithm());
@@ -1455,13 +1420,6 @@ public class DigestUtilTest extends TestBase {
     }
 
     @Test
-    public void testSha384_ByteArray() {
-        byte[] result = DigestUtil.sha384(TEST_BYTES);
-        assertNotNull(result);
-        assertEquals(48, result.length);
-    }
-
-    @Test
     public void testSha384_String() {
         byte[] result = DigestUtil.sha384(TEST_STRING);
         assertNotNull(result);
@@ -1496,13 +1454,6 @@ public class DigestUtilTest extends TestBase {
     @Test
     public void test_sha384Hex_String() {
         String result = DigestUtil.sha384Hex(TEST_STRING);
-        assertNotNull(result);
-        assertEquals(96, result.length());
-    }
-
-    @Test
-    public void testSha384Hex_ByteArray() {
-        String result = DigestUtil.sha384Hex(TEST_BYTES);
         assertNotNull(result);
         assertEquals(96, result.length());
     }

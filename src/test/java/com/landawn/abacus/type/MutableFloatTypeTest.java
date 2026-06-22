@@ -101,7 +101,7 @@ public class MutableFloatTypeTest extends TestBase {
     @Test
     public void testSetPreparedStatementWithNull() throws SQLException {
         mutableFloatType.set(mockPreparedStatement, 1, null);
-        Mockito.verify(mockPreparedStatement).setNull(1, Types.FLOAT);
+        Mockito.verify(mockPreparedStatement).setNull(1, Types.REAL);
     }
 
     @Test
@@ -113,7 +113,7 @@ public class MutableFloatTypeTest extends TestBase {
     @Test
     public void testSetCallableStatementWithNull() throws SQLException {
         mutableFloatType.set(mockCallableStatement, "param", null);
-        Mockito.verify(mockCallableStatement).setNull("param", Types.FLOAT);
+        Mockito.verify(mockCallableStatement).setNull("param", Types.REAL);
     }
 
     @Test

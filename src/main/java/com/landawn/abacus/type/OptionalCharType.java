@@ -65,6 +65,21 @@ public class OptionalCharType extends AbstractOptionalType<OptionalChar> {
     }
 
     /**
+     * Indicates whether values of this type require quoting in CSV format.
+     * Unlike the numeric and boolean optional siblings (which return {@code false}), an optional
+     * character value may itself be a CSV delimiter or quote character (such as {@code ','} or
+     * {@code '"'}), so it must be quoted to round-trip safely. This returns the same value as the
+     * inherited interface default; it is overridden explicitly so the abacus {@code Optional*Type}
+     * family uniformly and intentionally declares this predicate.
+     *
+     * @return {@code true}, always, because a character value may collide with CSV delimiters/quotes
+     */
+    @Override
+    public boolean isCsvQuoteRequired() {
+        return true;
+    }
+
+    /**
      * Returns the default value for OptionalChar type, which is an empty OptionalChar.
      *
      * @return OptionalChar.empty()
@@ -136,11 +151,12 @@ public class OptionalCharType extends AbstractOptionalType<OptionalChar> {
      *
      * @param str the string to convert
      * @return an OptionalChar containing the parsed character value, or empty if the input is empty or null
-     * @throws IllegalArgumentException if the string has more than one character and either is not a valid integer
-     *         or represents an integer outside the valid {@code char} range
+     * @throws NumberFormatException if the string has more than one character and cannot be parsed as an integer
+     * @throws IllegalArgumentException if the string represents an integer outside the valid {@code char} range [0, 65535]
      * @see #valueOf(Object)
      * @see #stringOf(OptionalChar)
      */
+    @SuppressWarnings("deprecation")
     @Override
     public OptionalChar valueOf(final String str) {
         return Strings.isEmpty(str) ? OptionalChar.empty() : OptionalChar.of(Strings.parseChar(str));

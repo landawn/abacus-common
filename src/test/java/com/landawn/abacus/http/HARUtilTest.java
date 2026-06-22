@@ -71,14 +71,6 @@ public class HARUtilTest extends TestBase {
     }
 
     @Test
-    public void testResetHeaderFilter() {
-        HARUtil.setThreadLocalHeaderFilter((name, value) -> false);
-        HARUtil.resetThreadLocalHeaderFilter();
-        // After reset, should use default filter
-        assertNotNull(HARUtil.class);
-    }
-
-    @Test
     public void testResetHttpHeaderFilterAfterCustomFilter() {
         // Set a custom filter
         HARUtil.setThreadLocalHeaderFilter((name, value) -> false);
@@ -100,16 +92,7 @@ public class HARUtilTest extends TestBase {
         assertNotNull(headers);
     }
 
-    // --- setThreadLocalHeaderFilter ---
-
-    @Test
-    public void testSetThreadLocalHeaderFilter() {
-        HARUtil.setThreadLocalHeaderFilter((name, value) -> !"Authorization".equalsIgnoreCase(name));
-        // If we get here without exception, the filter was set successfully
-        assertNotNull(HARUtil.class);
-    }
-
-    @Test
+    // --- setThreadLocalHeaderFilter ---    @Test
     public void testSetThreadLocalHeaderFilter_Null() {
         assertThrows(IllegalArgumentException.class, () -> HARUtil.setThreadLocalHeaderFilter(null));
     }
@@ -119,14 +102,7 @@ public class HARUtilTest extends TestBase {
         HARUtil.setThreadLocalHeaderFilter((name, value) -> !"Authorization".equalsIgnoreCase(name));
         // If we get here without exception, the filter was set successfully
         assertNotNull(HARUtil.class);
-    }
-
-    @Test
-    public void testSetHttpHeaderFilterForHARRequestWithNull() {
-        assertThrows(IllegalArgumentException.class, () -> HARUtil.setThreadLocalHeaderFilter(null));
-    }
-
-    // --- resetThreadLocalHeaderFilter ---
+    } // --- resetThreadLocalHeaderFilter ---
 
     @Test
     public void testResetThreadLocalHeaderFilter() {
@@ -204,14 +180,6 @@ public class HARUtilTest extends TestBase {
     }
 
     @Test
-    public void testLogRequestCurlForHARRequestWithLogHandler() {
-        AtomicReference<String> capturedCurl = new AtomicReference<>();
-        HARUtil.configureCurlLoggingForCurrentThread(true, '\'', capturedCurl::set);
-        // If we get here without exception, logging was configured
-        assertNotNull(HARUtil.class);
-    }
-
-    @Test
     public void testLogRequestCurlForHARRequest() {
         assertDoesNotThrow(() -> {
             HARUtil.configureCurlLoggingForCurrentThread(true);
@@ -227,14 +195,7 @@ public class HARUtilTest extends TestBase {
     @Test
     public void testSendRequest_FileAndString() {
         assertThrows(RuntimeException.class, () -> HARUtil.sendRequest(tempHARFile, "https://api.example.com/nonexistent"));
-    }
-
-    @Test
-    public void testSendRequestByHARWithFileAndExactUrl() {
-        assertThrows(RuntimeException.class, () -> HARUtil.sendRequest(tempHARFile, "https://api.example.com/nonexistent"));
-    }
-
-    // --- sendRequest(File, Predicate) ---
+    } // --- sendRequest(File, Predicate) ---
 
     @Test
     public void testSendRequest_FileAndPredicate() {
@@ -253,28 +214,13 @@ public class HARUtilTest extends TestBase {
     @Test
     public void testSendRequest_StringAndString() {
         assertThrows(RuntimeException.class, () -> HARUtil.sendRequest(sampleHAR, "https://api.example.com/nonexistent"));
-    }
-
-    @Test
-    public void testSendRequestByHARWithStringAndExactUrl() {
-        assertThrows(RuntimeException.class, () -> HARUtil.sendRequest(sampleHAR, "https://api.example.com/nonexistent"));
-    }
-
-    // --- sendRequest(String, Predicate) ---
+    } // --- sendRequest(String, Predicate) ---
 
     @Test
     public void testSendRequest_StringAndPredicate() {
         Predicate<String> filter = url -> url.contains("/nonexistent");
         assertThrows(RuntimeException.class, () -> HARUtil.sendRequest(sampleHAR, filter));
-    }
-
-    @Test
-    public void testSendRequestByHARWithStringAndFilter() {
-        Predicate<String> filter = url -> url.contains("/nonexistent");
-        assertThrows(RuntimeException.class, () -> HARUtil.sendRequest(sampleHAR, filter));
-    }
-
-    // --- sendRequests(File, Predicate) ---
+    } // --- sendRequests(File, Predicate) ---
 
     @Test
     public void testSendRequests_FileAndPredicate() {
@@ -315,32 +261,14 @@ public class HARUtilTest extends TestBase {
         Predicate<String> filter = url -> url.contains("/users");
         Stream<Tuple.Tuple2<Map<String, Object>, HttpResponse>> stream = HARUtil.streamRequests(tempHARFile, filter);
         assertNotNull(stream);
-    }
-
-    @Test
-    public void testStreamMultiRequestsByHARWithFile() {
-        Predicate<String> filter = url -> url.contains("/users");
-        Stream<Tuple.Tuple2<Map<String, Object>, HttpResponse>> stream = HARUtil.streamRequests(tempHARFile, filter);
-        assertNotNull(stream);
-    }
-
-    // --- streamRequests(String, Predicate) ---
+    } // --- streamRequests(String, Predicate) ---
 
     @Test
     public void testStreamRequests_StringAndPredicate() {
         Predicate<String> filter = url -> url.contains("/users");
         Stream<Tuple.Tuple2<Map<String, Object>, HttpResponse>> stream = HARUtil.streamRequests(sampleHAR, filter);
         assertNotNull(stream);
-    }
-
-    @Test
-    public void testStreamMultiRequestsByHARWithString() {
-        Predicate<String> filter = url -> url.contains("/users");
-        Stream<Tuple.Tuple2<Map<String, Object>, HttpResponse>> stream = HARUtil.streamRequests(sampleHAR, filter);
-        assertNotNull(stream);
-    }
-
-    // --- sendRequestByRequestEntry ---
+    } // --- sendRequestByRequestEntry ---
 
     @Test
     public void testSendRequestByRequestEntry() {
@@ -463,18 +391,7 @@ public class HARUtilTest extends TestBase {
 
         String url = HARUtil.getRequestUrl(requestEntry);
         assertEquals("https://api.example.com/search?q=test&limit=10", url);
-    }
-
-    @Test
-    public void testGetUrlByRequestEntryWithQueryParams() {
-        Map<String, Object> requestEntry = new HashMap<>();
-        requestEntry.put("url", "https://api.example.com/search?q=test&limit=10");
-
-        String url = HARUtil.getRequestUrl(requestEntry);
-        assertEquals("https://api.example.com/search?q=test&limit=10", url);
-    }
-
-    // --- getHttpMethodByRequestEntry ---
+    } // --- getHttpMethodByRequestEntry ---
 
     @Test
     public void testGetHttpMethodByRequestEntry() {

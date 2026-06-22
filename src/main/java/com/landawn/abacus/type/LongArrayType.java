@@ -268,7 +268,7 @@ public final class LongArrayType extends ObjectArrayType<Long> {
                 if (x[i] == null) {
                     writer.write(NULL_CHAR_ARRAY);
                 } else {
-                    writer.write(x[i]);
+                    elementType.serializeTo(writer, x[i], config);
                 }
             }
 

@@ -27,7 +27,7 @@ package com.landawn.abacus.parser;
  *     .setIgnoreUnmatchedProperty(true)
  *     .setElementType(String.class);
  *
- * KryoParser parser = new KryoParser();
+ * KryoParser parser = ParserFactory.createKryoParser();
  * MyObject obj = parser.deserialize(kryoData, config, MyObject.class);
  * }</pre>
  *

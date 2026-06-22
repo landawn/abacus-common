@@ -39,6 +39,9 @@ public interface ToByteFunction<T> extends Throwables.ToByteFunction<T, RuntimeE
      * A function that converts any Number to a byte value.
      * Returns 0 for {@code null} inputs and calls {@link Number#byteValue()} for {@code non-null} inputs.
      * This provides a convenient way to convert various numeric types to byte.
+     *
+     * <p>Note: This conversion may result in loss of precision for floating-point numbers or
+     * overflow for numbers outside the byte range (-128 to 127).
      */
     ToByteFunction<Number> FROM_NUM = value -> value == null ? 0 : value.byteValue();
 
@@ -64,4 +67,18 @@ public interface ToByteFunction<T> extends Throwables.ToByteFunction<T, RuntimeE
      */
     @Override
     byte applyAsByte(T value);
+
+    /**
+     * Returns this object as a {@link Throwables.ToByteFunction} view.
+     *
+     * <p>The returned object has the same behavior as this one. This method does not translate
+     * exceptions or make the original implementation capable of throwing new checked exceptions; the
+     * exception type parameter is for target-type compatibility with APIs that accept {@code Throwables.ToByteFunction}.
+     *
+     * @param <E> the target exception type for compatibility with {@code Throwables.ToByteFunction}
+     * @return a {@link Throwables.ToByteFunction} view of this object
+     */
+    default <E extends Throwable> Throwables.ToByteFunction<T, E> toThrowable() {
+        return (Throwables.ToByteFunction<T, E>) this;
+    }
 }

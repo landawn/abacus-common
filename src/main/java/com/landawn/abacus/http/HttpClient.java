@@ -76,7 +76,7 @@ import com.landawn.abacus.util.URLEncodedUtil;
  *       PATCH is accepted by the API but is not supported by the underlying {@link HttpURLConnection};
  *       see {@link HttpMethod#PATCH} for details and workarounds</li>
  *   <li><b>Content Serialization:</b> Automatic JSON, XML, Kryo, and form URL-encoded content handling</li>
- *   <li><b>Compression Support:</b> Built-in GZIP, LZ4, Snappy, and Brotli compression/decompression</li>
+ *   <li><b>Compression Support:</b> Built-in GZIP, LZ4 and Snappy compression/decompression; Brotli is supported for response decompression only (request bodies with *_BR formats are rejected)</li>
  *   <li><b>Asynchronous Execution:</b> Non-blocking operations with {@link ContinuableFuture} integration</li>
  *   <li><b>Connection Management:</b> Intelligent connection pooling and timeout configuration</li>
  *   <li><b>SSL/TLS Support:</b> Custom SSL socket factories and certificate handling</li>
@@ -106,13 +106,13 @@ import com.landawn.abacus.util.URLEncodedUtil;
  *     <td>JSON</td>
  *     <td>application/json</td>
  *     <td>abacus internal JSON parser ({@link com.landawn.abacus.parser.ParserFactory#createJsonParser})</td>
- *     <td>GZIP, Brotli, LZ4, Snappy</td>
+ *     <td>GZIP, LZ4, Snappy (Brotli: response decompression only)</td>
  *   </tr>
  *   <tr>
  *     <td>XML</td>
  *     <td>application/xml</td>
  *     <td>abacus internal XML parser ({@link com.landawn.abacus.parser.ParserFactory#createXmlParser}, when available)</td>
- *     <td>GZIP, Brotli, LZ4, Snappy</td>
+ *     <td>GZIP, LZ4, Snappy (Brotli: response decompression only)</td>
  *   </tr>
  *   <tr>
  *     <td>Form URL-encoded</td>
@@ -124,7 +124,7 @@ import com.landawn.abacus.util.URLEncodedUtil;
  *     <td>Kryo Binary</td>
  *     <td>application/kryo</td>
  *     <td>Kryo serialization</td>
- *     <td>LZ4, Snappy</td>
+ *     <td>None (kryo encoding only)</td>
  *   </tr>
  *   <tr>
  *     <td>Plain Text</td>
@@ -400,7 +400,7 @@ import com.landawn.abacus.util.URLEncodedUtil;
  * @see com.landawn.abacus.util.AsyncExecutor
  * @see <a href="https://tools.ietf.org/html/rfc7231">RFC 7231: HTTP/1.1 Semantics and Content</a>
  */
-public final class HttpClient {
+public final class HttpClient implements AutoCloseable {
 
     static final Logger logger = LoggerFactory.getLogger(HttpClient.class);
 
@@ -490,7 +490,7 @@ public final class HttpClient {
 
         _asyncExecutor = executor == null ? HttpUtil.DEFAULT_ASYNC_EXECUTOR : new AsyncExecutor(executor);
 
-        _activeConnectionCounter = sharedActiveConnectionCounter;
+        _activeConnectionCounter = N.checkArgNotNull(sharedActiveConnectionCounter, "sharedActiveConnectionCounter");
     }
 
     /**
@@ -1404,35 +1404,37 @@ public final class HttpClient {
 
     /**
      * Performs a HEAD request with this client's default settings.
-     * HEAD requests are used to retrieve headers without the response body. The response body
-     * (if any) is discarded.
+     * HEAD requests are used to retrieve headers (status, metadata) without a response body.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * client.head();   // gets headers only
+     * HttpResponse response = client.head();
+     * String contentLength = response.headers().get("Content-Length").get(0);
      * }</pre>
      *
+     * @return The {@link HttpResponse} containing the status code and headers (the body is empty for HEAD)
      * @throws UncheckedIOException if an I/O error occurs
      */
-    public void head() throws UncheckedIOException {
-        head(_settings);
+    public HttpResponse head() throws UncheckedIOException {
+        return head(_settings);
     }
 
     /**
      * Performs a HEAD request with custom settings.
-     * HEAD requests retrieve only headers without the response body.
+     * HEAD requests retrieve only headers (status, metadata) without a response body.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * HttpSettings settings = HttpSettings.create().header("Accept", "application/json");
-     * client.head(settings);
+     * HttpResponse response = client.head(settings);
      * }</pre>
      *
      * @param settings Additional HTTP settings for this request (headers, timeouts, etc.)
+     * @return The {@link HttpResponse} containing the status code and headers (the body is empty for HEAD)
      * @throws UncheckedIOException if an I/O error occurs
      */
-    public void head(final HttpSettings settings) throws UncheckedIOException {
-        execute(HttpMethod.HEAD, null, settings, Void.class);
+    public HttpResponse head(final HttpSettings settings) throws UncheckedIOException {
+        return execute(HttpMethod.HEAD, null, settings, HttpResponse.class);
     }
 
     /**
@@ -1889,7 +1891,9 @@ public final class HttpClient {
                 URL netURL = _netURL;
 
                 if (queryParameters != null && (httpMethod == HttpMethod.GET || httpMethod == HttpMethod.DELETE)) {
-                    netURL = URI.create(URLEncodedUtil.encode(_url, queryParameters)).toURL();
+                    // Explicit UTF-8 (like the form-body path): the 2-arg overload uses the
+                    // PLATFORM default charset, mis-encoding non-ASCII query values on non-UTF-8 JVMs.
+                    netURL = URI.create(URLEncodedUtil.encode(_url, queryParameters, HttpUtil.DEFAULT_CHARSET)).toURL();
                 }
 
                 final Proxy proxy = (settings == null ? _settings : settings).getProxy();
@@ -2701,17 +2705,22 @@ public final class HttpClient {
      * ({@code HttpUtil.DEFAULT_ASYNC_EXECUTOR}) is intentionally left alone since it is reused
      * across clients.</p>
      *
-     * <p>This method is idempotent and never throws.</p>
+     * <p>This method is idempotent and never throws. {@code HttpClient} implements
+     * {@link AutoCloseable}, so it can be used in a try-with-resources statement.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
+     * try (HttpClient client = HttpClient.create("https://example.com/api")) {
+     *     // ... use the client ...
+     * }   // close() is called automatically
+     *
      * HttpClient client = HttpClient.create("https://example.com/api");
-     * // ... use the client ...
      * client.close();   // releases owned resources; safe to call more than once
      * client.close();   // idempotent: a second call is a no-op and never throws
      * }</pre>
      *
      */
+    @Override
     public synchronized void close() {
         if (_asyncExecutor != HttpUtil.DEFAULT_ASYNC_EXECUTOR) {
             try {

@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
 import java.io.IOException;
 import java.sql.CallableStatement;
@@ -178,30 +179,40 @@ public class AbstractCharacterTypeTest extends TestBase {
 
     @Test
     public void testSerializeTo_Character_NoQuotation() throws IOException {
-        type.serializeTo(characterWriter, 'A', null);
+        assertDoesNotThrow(() -> {
+            type.serializeTo(characterWriter, 'A', null);
+        });
     }
 
     @Test
     public void testSerializeTo_Character_NoQuotation_WithConfig() throws IOException {
-        when(config.getCharQuotation()).thenReturn((char) 0);
-        type.serializeTo(characterWriter, 'A', config);
+        assertDoesNotThrow(() -> {
+            when(config.getCharQuotation()).thenReturn((char) 0);
+            type.serializeTo(characterWriter, 'A', config);
+        });
     }
 
     @Test
     public void testSerializeTo_Character_WithDoubleQuotes() throws IOException {
-        when(config.getCharQuotation()).thenReturn('"');
-        type.serializeTo(characterWriter, 'A', config);
+        assertDoesNotThrow(() -> {
+            when(config.getCharQuotation()).thenReturn('"');
+            type.serializeTo(characterWriter, 'A', config);
+        });
     }
 
     @Test
     public void testSerializeTo_Character_WithSingleQuotes() throws IOException {
-        when(config.getCharQuotation()).thenReturn('\'');
-        type.serializeTo(characterWriter, 'A', config);
+        assertDoesNotThrow(() -> {
+            when(config.getCharQuotation()).thenReturn('\'');
+            type.serializeTo(characterWriter, 'A', config);
+        });
     }
 
     @Test
     public void testSerializeTo_SingleQuote_WithSingleQuoteQuotation() throws IOException {
-        when(config.getCharQuotation()).thenReturn('\'');
-        type.serializeTo(characterWriter, '\'', config);
+        assertDoesNotThrow(() -> {
+            when(config.getCharQuotation()).thenReturn('\'');
+            type.serializeTo(characterWriter, '\'', config);
+        });
     }
 }

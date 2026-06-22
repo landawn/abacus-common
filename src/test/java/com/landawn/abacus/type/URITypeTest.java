@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -148,5 +149,22 @@ public class URITypeTest extends TestBase {
         uriType.set(stmt, "uri_param", null);
 
         verify(stmt).setString("uri_param", null);
+    }
+
+    @Test
+    public void testIsComparable() {
+        // java.net.URI implements Comparable<URI>, so the type must report it as comparable
+        // and support the natural-ordering compare operation.
+        assertTrue(uriType.isComparable());
+
+        URI a = URI.create("http://a.example.com");
+        URI b = URI.create("http://b.example.com");
+
+        assertTrue(uriType.compare(a, b) < 0);
+        assertTrue(uriType.compare(b, a) > 0);
+        assertEquals(0, uriType.compare(a, a));
+        assertEquals(0, uriType.compare(null, null));
+        assertTrue(uriType.compare(null, a) < 0);
+        assertTrue(uriType.compare(a, null) > 0);
     }
 }

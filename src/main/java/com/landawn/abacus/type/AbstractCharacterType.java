@@ -89,6 +89,7 @@ public abstract class AbstractCharacterType extends AbstractPrimaryType<Characte
      * @see #valueOf(Object)
      * @see #stringOf(Character)
      */
+    @SuppressWarnings("deprecation")
     @Override
     public Character valueOf(final String str) {
         if (Strings.isEmpty(str)) {
@@ -115,7 +116,19 @@ public abstract class AbstractCharacterType extends AbstractPrimaryType<Characte
             return defaultValue();
         }
 
-        return (len == 1) ? cbuf[offset] : (char) parseInt(cbuf, offset, len);
+        if (len == 1) {
+            return cbuf[offset];
+        }
+
+        // Range check like the String overload (Strings.parseChar): a silent (char) cast would
+        // wrap out-of-range codes (e.g. 70000) to an unrelated character.
+        final int ch = parseInt(cbuf, offset, len);
+
+        if (ch < Character.MIN_VALUE || ch > Character.MAX_VALUE) {
+            throw new IllegalArgumentException("Integer value out of char range: " + ch);
+        }
+
+        return (char) ch;
     }
 
     /**

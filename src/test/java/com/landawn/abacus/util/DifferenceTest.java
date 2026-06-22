@@ -2709,4 +2709,22 @@ public class DifferenceTest extends AbstractTest {
                 () -> MapDifference.of(map1, map2, (com.landawn.abacus.util.function.TriPredicate<String, Integer, Integer>) null));
     }
 
+    // --- regression tests for 2026-06-11 deep-review fixes ---
+
+    @Test
+    public void testEqualsSymmetricAcrossDifferenceAndKeyValueDifference() {
+        // regression: Difference.equals accepted any Difference (comparing 3 fields) while
+        // KeyValueDifference.equals required its own type - base.equals(kv) was true while
+        // kv.equals(base) was false, violating symmetry and equals/hashCode consistency
+        java.util.List<Map<String, Object>> a = java.util.List.of(Map.of("id", 1));
+        java.util.List<Map<String, Object>> b = java.util.List.of(Map.of("id", 1));
+
+        Difference<?, ?> plain = Difference.of(a, b);
+        Difference<?, ?> keyed = MapDifference.of(a, b, m -> m.get("id"));
+
+        org.junit.jupiter.api.Assertions.assertFalse(plain.equals(keyed));
+        org.junit.jupiter.api.Assertions.assertFalse(keyed.equals(plain));
+        org.junit.jupiter.api.Assertions.assertEquals(plain, Difference.of(a, b)); // same-type equality unchanged
+    }
+
 }

@@ -149,6 +149,8 @@ public abstract class AbstractStringType extends AbstractCharSequenceType<String
         } else if (obj instanceof Reader reader) {
             return IOUtil.readAllToString(reader);
         } else if (obj instanceof Clob clob) {
+            RuntimeException primaryException = null;
+
             try {
                 final long len = clob.length();
                 if (len > Integer.MAX_VALUE) {
@@ -156,13 +158,22 @@ public abstract class AbstractStringType extends AbstractCharSequenceType<String
                 }
                 return clob.getSubString(1, (int) len);
             } catch (final SQLException e) {
-                throw new UncheckedSQLException(e);
+                primaryException = new UncheckedSQLException(e);
+                throw primaryException;
+            } catch (final RuntimeException e) {
+                primaryException = e;
+                throw primaryException;
             } finally {
                 try {
                     clob.free();
                 } catch (final SQLException e) {
-                    // Log and ignore - don't mask the original exception
-                    // Freeing resources should not override the main exception
+                    final UncheckedSQLException freeException = new UncheckedSQLException(e);
+
+                    if (primaryException != null) {
+                        primaryException.addSuppressed(freeException);
+                    } else {
+                        throw freeException; //NOSONAR
+                    }
                 }
             }
         } else {

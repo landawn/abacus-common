@@ -37,16 +37,20 @@ import com.landawn.abacus.util.stream.Stream;
  * </ul>
  *
  * <p><b>{@code parse()} vs {@code deserialize()}:</b></p>
- * <p>Both methods convert JSON text into Java objects, but they serve different purposes:</p>
+ * <p>Both methods convert JSON text into Java objects. They overlap deliberately for {@code String} input:</p>
  * <ul>
- *   <li>{@code parse()} — Designed for well-formatted JSON <b>string</b> input only. It also supports
- *       JSON array-like strings that may not be strictly bracketed (e.g., CSV rows like {@code "a","b","c"}
- *       without surrounding {@code []}). Use {@code parse()} when working directly with JSON strings,
- *       especially for populating existing arrays, collections, or maps.</li>
+ *   <li>{@code parse(String, ...)} — A {@code String}-only convenience surface and an intentional alias of
+ *       the inherited {@code deserialize(String, ...)} overloads (same default/config behavior). It additionally
+ *       supports JSON array-like strings that may not be strictly bracketed (e.g., CSV rows like
+ *       {@code "a","b","c"} without surrounding {@code []}) and offers the parse-into-existing
+ *       array/collection/map forms not present on {@code deserialize()}. Prefer {@code parse()} when working
+ *       directly with JSON strings, especially for populating existing containers.</li>
  *   <li>{@code deserialize()} — Inherited from {@link Parser}, this is the general-purpose deserialization
  *       method that supports multiple input sources: {@code String}, {@code File}, {@code InputStream},
- *       and {@code Reader}. Use {@code deserialize()} when reading from files, streams, or when you need
- *       substring-based deserialization with {@code fromIndex}/{@code toIndex}.</li>
+ *       and {@code Reader}. Use {@code deserialize()} when reading from files, streams, or readers.</li>
+ *   <li>Substring deserialization ({@link #deserialize(String, int, int, Type)} and its overloads) is a
+ *       {@code String}-only optimization that lives under the {@code deserialize} name for grouping with the
+ *       other {@code deserialize} overloads; there is no corresponding {@code parse(String, int, int, ...)} form.</li>
  * </ul>
  *
  * <p><b>Usage Examples:</b></p>
@@ -77,6 +81,10 @@ public interface JsonParser extends Parser<JsonSerConfig, JsonDeserConfig> {
     /**
      * Parses a JSON string into an object of the specified type.
      * This is a convenience method that uses default deserialization configuration.
+     *
+     * <p>This {@code parse(String, ...)} overload is an intentional {@code String}-convenience alias of the
+     * inherited {@link Parser#deserialize(String, Type)}; both produce identical results for {@code String}
+     * input. See the class-level documentation for when to prefer {@code parse()} over {@code deserialize()}.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -127,7 +135,7 @@ public interface JsonParser extends Parser<JsonSerConfig, JsonDeserConfig> {
     /**
      * Parses a JSON string into an object of the specified type with custom configuration.
      * The configuration allows control over deserialization behavior such as
-     * ignoring unknown properties, handling {@code null} values, date formats, and more.
+     * ignoring unknown properties, handling {@code null} values, and type mappings.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -155,7 +163,7 @@ public interface JsonParser extends Parser<JsonSerConfig, JsonDeserConfig> {
     /**
      * Parses a JSON string into an object of the specified type with custom configuration.
      * The configuration allows control over deserialization behavior such as
-     * ignoring unknown properties, handling {@code null} values, date formats, and more.
+     * ignoring unknown properties, handling {@code null} values, and type mappings.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -193,7 +201,7 @@ public interface JsonParser extends Parser<JsonSerConfig, JsonDeserConfig> {
      * // numbers array is now filled with values [1, 2, 3, 4, 5]
      * }</pre>
      *
-     * @param source the JSON string to parse (may be {@code null}, in which case the method returns without
+     * @param source the JSON string to parse (may be {@code null} or empty, in which case the method returns without
      *               modifying {@code output}); must contain a JSON array when non-empty
      * @param output the pre-allocated array to populate with parsed values (must not be {@code null})
      * @throws com.landawn.abacus.exception.UncheckedIOException if an I/O error occurs during parsing
@@ -216,7 +224,7 @@ public interface JsonParser extends Parser<JsonSerConfig, JsonDeserConfig> {
      * parser.parse(json, config, numbers);
      * }</pre>
      *
-     * @param source the JSON string to parse (may be {@code null}, in which case the method returns without
+     * @param source the JSON string to parse (may be {@code null} or empty, in which case the method returns without
      *               modifying {@code output}); must contain a JSON array when non-empty
      * @param config the deserialization configuration to use (may be {@code null} for default behavior)
      * @param output the pre-allocated array to populate with parsed values (must not be {@code null})
@@ -238,7 +246,7 @@ public interface JsonParser extends Parser<JsonSerConfig, JsonDeserConfig> {
      * // fruits now contains the parsed values added to any existing elements
      * }</pre>
      *
-     * @param source the JSON string to parse (may be {@code null}, in which case the method returns without
+     * @param source the JSON string to parse (may be {@code null} or empty, in which case the method returns without
      *               modifying {@code output}); must contain a JSON array when non-empty
      * @param output the Collection to populate with parsed values, must not be {@code null}; existing elements are preserved
      * @throws com.landawn.abacus.exception.UncheckedIOException if an I/O error occurs during parsing
@@ -260,7 +268,7 @@ public interface JsonParser extends Parser<JsonSerConfig, JsonDeserConfig> {
      * parser.parse(json, config, items);
      * }</pre>
      *
-     * @param source the JSON string to parse (may be {@code null}, in which case the method returns without
+     * @param source the JSON string to parse (may be {@code null} or empty, in which case the method returns without
      *               modifying {@code output}); must contain a JSON array when non-empty
      * @param config the deserialization configuration to use (may be {@code null} for default behavior)
      * @param output the Collection to populate with parsed values, must not be {@code null}; existing elements are preserved
@@ -322,8 +330,8 @@ public interface JsonParser extends Parser<JsonSerConfig, JsonDeserConfig> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String json = "prefix{\"name\":\"John\"}suffix";
-     * // Deserialize only the JSON object part (indices 6 to 23)
-     * Person person = parser.deserialize(json, 6, 23, Type.of(Person.class));
+     * // Deserialize only the JSON object part (indices 6 to 21)
+     * Person person = parser.deserialize(json, 6, 21, Type.of(Person.class));
      * }</pre>
      *
      * @param <T> the target type
@@ -347,8 +355,8 @@ public interface JsonParser extends Parser<JsonSerConfig, JsonDeserConfig> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String json = "prefix{\"name\":\"John\"}suffix";
-     * // Deserialize only the JSON object part (indices 6 to 23)
-     * Person person = parser.deserialize(json, 6, 23, Person.class);
+     * // Deserialize only the JSON object part (indices 6 to 21)
+     * Person person = parser.deserialize(json, 6, 21, Person.class);
      * }</pre>
      *
      * @param <T> the target type

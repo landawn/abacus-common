@@ -3001,6 +3001,12 @@ public class IntListTest extends TestBase {
     }
 
     @Test
+    public void testShuffleNullRandomRejectedForSmallLists() {
+        assertThrows(IllegalArgumentException.class, () -> new IntList().shuffle(null));
+        assertThrows(IllegalArgumentException.class, () -> IntList.of(1).shuffle(null));
+    }
+
+    @Test
     public void testShuffle() {
         IntList list1 = IntList.of(1, 2, 3, 4, 5, 6, 7, 8, 9, 10);
         IntList list2 = list1.copy();
@@ -3861,6 +3867,27 @@ public class IntListTest extends TestBase {
         } catch (OutOfMemoryError e) {
             assertTrue(true);
         }
+    }
+
+    // --- regression tests for 2026-06-10 deep-review fixes ---
+
+    @org.junit.jupiter.api.Test
+    public void testCopyDescendingFromSizeClampsToLogicalSize() {
+        // regression: copy(size, -1, -step) clamped the start against the backing array's CAPACITY,
+        // exposing phantom elements beyond the logical size when capacity > size
+        final IntList padded = new IntList(10);
+        padded.add(1);
+        padded.add(2);
+        padded.add(3);
+        assertEquals(IntList.of(3, 2, 1), padded.copy(3, -1, -1));
+
+        final IntList backed = new IntList(new int[] { 1, 2, 3, 99, 98 }, 3);
+        assertEquals(IntList.of(3, 2, 1), backed.copy(3, -1, -1));
+        assertEquals(IntList.of(3, 1), backed.copy(3, -1, -2));
+
+        // trimmed-capacity behavior unchanged
+        assertEquals(IntList.of(3, 2, 1), IntList.of(1, 2, 3).copy(3, -1, -1));
+        assertEquals(IntList.of(2, 3), IntList.of(1, 2, 3).copy(1, 3, 1));
     }
 
 }

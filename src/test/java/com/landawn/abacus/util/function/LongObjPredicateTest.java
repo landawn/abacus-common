@@ -112,6 +112,19 @@ public class LongObjPredicateTest extends TestBase {
     }
 
     @Test
+    public void testAndOrAcceptSuperTypePredicate() {
+        LongObjPredicate<String> notEmpty = (l, s) -> s != null && !s.isEmpty();
+        LongObjPredicate<CharSequence> expectedLength = (l, s) -> s != null && s.length() == l;
+
+        LongObjPredicate<String> and = notEmpty.and(expectedLength);
+        LongObjPredicate<String> or = notEmpty.or(expectedLength);
+
+        assertTrue(and.test(5L, "hello"));
+        assertFalse(and.test(3L, "hello"));
+        assertTrue(or.test(3L, "hello"));
+    }
+
+    @Test
     public void testAndShortCircuit() {
         final boolean[] secondCalled = { false };
         LongObjPredicate<String> predicate1 = (l, s) -> false;
@@ -160,6 +173,6 @@ public class LongObjPredicateTest extends TestBase {
     @Test
     public void testAndNullThrowsImmediately() {
         LongObjPredicate<String> instance = (a, b) -> false;
-        org.junit.jupiter.api.Assertions.assertThrows(NullPointerException.class, () -> instance.and((LongObjPredicate) null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> instance.and((LongObjPredicate) null));
     }
 }

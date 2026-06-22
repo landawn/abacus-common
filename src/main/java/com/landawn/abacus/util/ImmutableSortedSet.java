@@ -127,7 +127,7 @@ public class ImmutableSortedSet<E> extends ImmutableSet<E> implements SortedSet<
     }
 
     /**
-     * Returns an ImmutableSortedSet containing exactly two elements in sorted order.
+     * Returns an ImmutableSortedSet containing up to two distinct elements in sorted order.
      * The elements must implement {@link Comparable} to determine their natural ordering.
      * Duplicate elements will be removed, potentially resulting in a set with fewer elements.
      *
@@ -148,7 +148,7 @@ public class ImmutableSortedSet<E> extends ImmutableSet<E> implements SortedSet<
     }
 
     /**
-     * Returns an ImmutableSortedSet containing exactly three elements in sorted order.
+     * Returns an ImmutableSortedSet containing up to three distinct elements in sorted order.
      * The elements must implement {@link Comparable} to determine their natural ordering.
      * Duplicate elements will be removed, potentially resulting in a set with fewer elements.
      *
@@ -170,7 +170,7 @@ public class ImmutableSortedSet<E> extends ImmutableSet<E> implements SortedSet<
     }
 
     /**
-     * Returns an ImmutableSortedSet containing exactly four elements in sorted order.
+     * Returns an ImmutableSortedSet containing up to four distinct elements in sorted order.
      * The elements must implement {@link Comparable} to determine their natural ordering.
      * Duplicate elements will be removed, potentially resulting in a set with fewer elements.
      *
@@ -193,7 +193,7 @@ public class ImmutableSortedSet<E> extends ImmutableSet<E> implements SortedSet<
     }
 
     /**
-     * Returns an ImmutableSortedSet containing exactly five elements in sorted order.
+     * Returns an ImmutableSortedSet containing up to five distinct elements in sorted order.
      * The elements must implement {@link Comparable} to determine their natural ordering.
      * Duplicate elements will be removed, potentially resulting in a set with fewer elements.
      *
@@ -217,7 +217,7 @@ public class ImmutableSortedSet<E> extends ImmutableSet<E> implements SortedSet<
     }
 
     /**
-     * Returns an ImmutableSortedSet containing exactly six elements in sorted order.
+     * Returns an ImmutableSortedSet containing up to six distinct elements in sorted order.
      * The elements must implement {@link Comparable} to determine their natural ordering.
      * Duplicate elements will be removed, potentially resulting in a set with fewer elements.
      *
@@ -242,7 +242,7 @@ public class ImmutableSortedSet<E> extends ImmutableSet<E> implements SortedSet<
     }
 
     /**
-     * Returns an ImmutableSortedSet containing exactly seven elements in sorted order.
+     * Returns an ImmutableSortedSet containing up to seven distinct elements in sorted order.
      * The elements must implement {@link Comparable} to determine their natural ordering.
      * Duplicate elements will be removed, potentially resulting in a set with fewer elements.
      *
@@ -272,7 +272,7 @@ public class ImmutableSortedSet<E> extends ImmutableSet<E> implements SortedSet<
     }
 
     /**
-     * Returns an ImmutableSortedSet containing exactly eight elements in sorted order.
+     * Returns an ImmutableSortedSet containing up to eight distinct elements in sorted order.
      * The elements must implement {@link Comparable} to determine their natural ordering.
      * Duplicate elements will be removed, potentially resulting in a set with fewer elements.
      *
@@ -300,7 +300,7 @@ public class ImmutableSortedSet<E> extends ImmutableSet<E> implements SortedSet<
     }
 
     /**
-     * Returns an ImmutableSortedSet containing exactly nine elements in sorted order.
+     * Returns an ImmutableSortedSet containing up to nine distinct elements in sorted order.
      * The elements must implement {@link Comparable} to determine their natural ordering.
      * Duplicate elements will be removed, potentially resulting in a set with fewer elements.
      *
@@ -329,7 +329,7 @@ public class ImmutableSortedSet<E> extends ImmutableSet<E> implements SortedSet<
     }
 
     /**
-     * Returns an ImmutableSortedSet containing exactly ten elements in sorted order.
+     * Returns an ImmutableSortedSet containing up to ten distinct elements in sorted order.
      * The elements must implement {@link Comparable} to determine their natural ordering.
      * Duplicate elements will be removed, potentially resulting in a set with fewer elements.
      *
@@ -378,6 +378,7 @@ public class ImmutableSortedSet<E> extends ImmutableSet<E> implements SortedSet<
      * @param c the collection whose elements are to be placed into this set
      * @return an {@code ImmutableSortedSet} containing the elements of the specified collection, or the same instance if it is already an {@code ImmutableSortedSet}, or an empty instance if {@code c} is {@code null} or empty
      * @throws ClassCastException if the elements are not mutually comparable (when the source collection is not a {@code SortedSet})
+     * @throws NullPointerException if the collection contains a {@code null} element and natural ordering is used
      * @see #wrap(SortedSet)
      */
     public static <E> ImmutableSortedSet<E> copyOf(final Collection<? extends E> c) {

@@ -13,10 +13,10 @@
  */
 package com.landawn.abacus.util.function;
 
-import java.util.Objects;
-
 import com.landawn.abacus.annotation.SuppressFBWarnings;
 import com.landawn.abacus.util.Throwables;
+import com.landawn.abacus.util.N;
+import com.landawn.abacus.util.cs;
 
 /**
  * Represents an operation that accepts a single input argument and returns no result.
@@ -76,11 +76,11 @@ public interface Consumer<T> extends Throwables.Consumer<T, RuntimeException>, j
      * @param after the operation to perform after this operation. Must not be {@code null}.
      * @return a composed {@code Consumer} that performs in sequence this operation followed by
      *         the {@code after} operation
-     * @throws NullPointerException if {@code after} is null
+     * @throws IllegalArgumentException if {@code after} is null
      */
     @Override
     default Consumer<T> andThen(final java.util.function.Consumer<? super T> after) {
-        Objects.requireNonNull(after);
+        N.checkArgNotNull(after, cs.after);
         return (final T t) -> {
             accept(t);
             after.accept(t);

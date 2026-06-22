@@ -28,13 +28,13 @@ package com.landawn.abacus.util.function;
 public interface CharToIntFunction {
     /**
      * A default implementation that performs a widening primitive conversion from char to int.
-     * This is equivalent to a simple cast operation that converts the char's Unicode code point
+     * This is equivalent to a simple cast operation that converts the char's UTF-16 code unit
      * value (ranging from 0 to 65,535) to its corresponding int value.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * CharToIntFunction defaultConversion = CharToIntFunction.DEFAULT;
-     * int codePoint = defaultConversion.applyAsInt('A');   // Returns 65
+     * int codeUnit = defaultConversion.applyAsInt('A');   // Returns 65
      * }</pre>
      *
      */
@@ -54,7 +54,7 @@ public interface CharToIntFunction {
      * }</pre>
      *
      * @param value the char function argument
-     * @return the int function result, typically the Unicode code point value of the char
+     * @return the int function result, typically the UTF-16 code unit value of the char
      */
     int applyAsInt(char value);
 }

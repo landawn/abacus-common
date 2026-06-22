@@ -13,9 +13,9 @@
  */
 package com.landawn.abacus.util.function;
 
-import java.util.Objects;
-
 import com.landawn.abacus.util.Throwables;
+import com.landawn.abacus.util.N;
+import com.landawn.abacus.util.cs;
 
 /**
  * A functional interface that represents a function that accepts an object-valued argument
@@ -30,6 +30,12 @@ import com.landawn.abacus.util.Throwables;
  *
  * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
  *
+ * <p><b>Note:</b> The obj-mixed {@code ObjXxxFunction} and {@code ObjXxxPredicate} families are provided
+ * only for {@code int}/{@code long}/{@code double} by design. The {@code ObjXxxConsumer} family is filled
+ * out for all eight primitives (it is the deliberate outlier — kept for the consumer-style call sites that
+ * need it); the function/predicate forms are not, since callers can box or use the generic
+ * {@code BiFunction}/{@code BiPredicate}.
+ *
  * @param <T> the type of the object argument to the function
  * @param <R> the type of the result of the function
  * @see java.util.function.BiFunction
@@ -41,8 +47,7 @@ public interface ObjIntFunction<T, R> extends Throwables.ObjIntFunction<T, R, Ru
      * Applies this function to the given arguments.
      *
      * <p>This method takes an object of type T and an int value as input and
-     * produces a result of type R. The function should be deterministic, meaning
-     * that for the same inputs, it should always produce the same output.
+     * produces a result of type R.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -93,10 +98,24 @@ public interface ObjIntFunction<T, R> extends Throwables.ObjIntFunction<T, R, Ru
      * @param after the function to apply after this function is applied. Must not be {@code null}.
      * @return a composed function that first applies this function and then
      *         applies the {@code after} function
-     * @throws NullPointerException if {@code after} is null
+     * @throws IllegalArgumentException if {@code after} is null
      */
     default <V> ObjIntFunction<T, V> andThen(final java.util.function.Function<? super R, ? extends V> after) {
-        Objects.requireNonNull(after);
+        N.checkArgNotNull(after, cs.after);
         return (t, u) -> after.apply(apply(t, u));
+    }
+
+    /**
+     * Returns this object as a {@link Throwables.ObjIntFunction} view.
+     *
+     * <p>The returned object has the same behavior as this one. This method does not translate
+     * exceptions or make the original implementation capable of throwing new checked exceptions; the
+     * exception type parameter is for target-type compatibility with APIs that accept {@code Throwables.ObjIntFunction}.
+     *
+     * @param <E> the target exception type for compatibility with {@code Throwables.ObjIntFunction}
+     * @return a {@link Throwables.ObjIntFunction} view of this object
+     */
+    default <E extends Throwable> Throwables.ObjIntFunction<T, R, E> toThrowable() {
+        return (Throwables.ObjIntFunction<T, R, E>) this;
     }
 }

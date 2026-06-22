@@ -2725,165 +2725,6 @@ public class EntryStreamTest extends TestBase {
     }
 
     // ==================== debounce tests ====================
-
-    @Test
-    public void testDebounce_BasicFunctionality() {
-        // Allow 3 elements per 1 second window
-        Map<String, Integer> largeMap = new LinkedHashMap<>();
-        largeMap.put("a", 1);
-        largeMap.put("b", 2);
-        largeMap.put("c", 3);
-        largeMap.put("d", 4);
-        largeMap.put("e", 5);
-
-        List<Entry<String, Integer>> result = EntryStream.of(largeMap).debounce(3, com.landawn.abacus.util.Duration.ofSeconds(1)).toList();
-
-        // Only first 3 entries should pass through within the window
-        assertEquals(3, result.size());
-        assertEquals("a", result.get(0).getKey());
-        assertEquals("b", result.get(1).getKey());
-        assertEquals("c", result.get(2).getKey());
-    }
-
-    @Test
-    public void testDebounce_AllElementsPassWhenWithinLimit() {
-        // Allow 10 elements per window, but only 5 elements in stream
-        List<Entry<String, Integer>> result = EntryStream.of(testMap).debounce(10, com.landawn.abacus.util.Duration.ofSeconds(1)).toList();
-
-        // All elements should pass
-        assertEquals(5, result.size());
-    }
-
-    @Test
-    public void testDebounce_PreservesOrder() {
-        List<Entry<String, Integer>> result = EntryStream.of(testMap).debounce(3, com.landawn.abacus.util.Duration.ofSeconds(1)).toList();
-
-        assertEquals("one", result.get(0).getKey());
-        assertEquals("two", result.get(1).getKey());
-        assertEquals("three", result.get(2).getKey());
-    }
-
-    @Test
-    public void testDebounce_ChainedWithOtherOperations() {
-        Map<String, Integer> map = new LinkedHashMap<>();
-        map.put("a", 1);
-        map.put("b", 2);
-        map.put("c", 3);
-        map.put("d", 4);
-        map.put("e", 5);
-        map.put("f", 6);
-        map.put("g", 7);
-        map.put("h", 8);
-        map.put("i", 9);
-        map.put("j", 10);
-
-        List<Entry<String, Integer>> result = EntryStream.of(map)
-                .filter((k, v) -> v % 2 == 0) // b=2, d=4, f=6, h=8, j=10
-                .debounce(3, com.landawn.abacus.util.Duration.ofSeconds(1)) // b=2, d=4, f=6
-                .mapValue(v -> v * 10) // b=20, d=40, f=60
-                .toList();
-
-        assertEquals(3, result.size());
-        assertEquals(Integer.valueOf(20), result.get(0).getValue());
-        assertEquals(Integer.valueOf(40), result.get(1).getValue());
-        assertEquals(Integer.valueOf(60), result.get(2).getValue());
-    }
-
-    @Test
-    public void testDebounce_ToMap() {
-        Map<String, Integer> largeMap = new LinkedHashMap<>();
-        largeMap.put("a", 1);
-        largeMap.put("b", 2);
-        largeMap.put("c", 3);
-        largeMap.put("d", 4);
-        largeMap.put("e", 5);
-
-        Map<String, Integer> result = EntryStream.of(largeMap).debounce(3, com.landawn.abacus.util.Duration.ofSeconds(1)).toMap();
-
-        assertEquals(3, result.size());
-        assertTrue(result.containsKey("a"));
-        assertTrue(result.containsKey("b"));
-        assertTrue(result.containsKey("c"));
-    }
-
-    @Test
-    public void testDebounce_EmptyStream() {
-        List<Entry<String, Integer>> result = EntryStream.of(emptyMap).debounce(5, com.landawn.abacus.util.Duration.ofSeconds(1)).toList();
-
-        assertTrue(result.isEmpty());
-    }
-
-    @Test
-    public void testDebounce_SingleElement() {
-        Map<String, Integer> singleMap = new LinkedHashMap<>();
-        singleMap.put("only", 1);
-
-        List<Entry<String, Integer>> result = EntryStream.of(singleMap).debounce(1, com.landawn.abacus.util.Duration.ofMillis(100)).toList();
-
-        assertEquals(1, result.size());
-        assertEquals("only", result.get(0).getKey());
-    }
-
-    @Test
-    public void testDebounce_MaxWindowSizeOne() {
-        // Only 1 element allowed per window
-        List<Entry<String, Integer>> result = EntryStream.of(testMap).debounce(1, com.landawn.abacus.util.Duration.ofSeconds(1)).toList();
-
-        assertEquals(1, result.size());
-        assertEquals("one", result.get(0).getKey());
-    }
-
-    @Test
-    public void testDebounce_WithLargeMaxWindowSize() {
-        Map<String, Integer> largeMap = new LinkedHashMap<>();
-        for (int i = 0; i < 100; i++) {
-            largeMap.put("key" + i, i);
-        }
-
-        List<Entry<String, Integer>> result = EntryStream.of(largeMap).debounce(50, com.landawn.abacus.util.Duration.ofSeconds(10)).toList();
-
-        assertEquals(50, result.size());
-    }
-
-    @Test
-    public void testDebounce_WithNullValues() {
-        Map<String, Integer> mapWithNull = new LinkedHashMap<>();
-        mapWithNull.put("a", 1);
-        mapWithNull.put("b", null);
-        mapWithNull.put("c", 3);
-        mapWithNull.put("d", null);
-        mapWithNull.put("e", 5);
-
-        List<Entry<String, Integer>> result = EntryStream.of(mapWithNull).debounce(3, com.landawn.abacus.util.Duration.ofSeconds(1)).toList();
-
-        assertEquals(3, result.size());
-        assertEquals("a", result.get(0).getKey());
-        assertEquals("b", result.get(1).getKey());
-        assertEquals("c", result.get(2).getKey());
-    }
-
-    @Test
-    public void testDebounce_ThrowsExceptionForNonPositiveMaxWindowSize() {
-        assertThrows(IllegalArgumentException.class, () -> {
-            EntryStream.of(testMap).debounce(0, com.landawn.abacus.util.Duration.ofSeconds(1)).toList();
-        });
-
-        assertThrows(IllegalArgumentException.class, () -> {
-            EntryStream.of(testMap).debounce(-1, com.landawn.abacus.util.Duration.ofSeconds(1)).toList();
-        });
-    }
-
-    @Test
-    public void testDebounce_ThrowsExceptionForNonPositiveDuration() {
-        assertThrows(IllegalArgumentException.class, () -> {
-            EntryStream.of(testMap).debounce(5, com.landawn.abacus.util.Duration.ofMillis(0)).toList();
-        });
-
-        assertThrows(IllegalArgumentException.class, () -> {
-            EntryStream.of(testMap).debounce(5, com.landawn.abacus.util.Duration.ofMillis(-100)).toList();
-        });
-    }
-
     @Test
     public void testPeek() {
         Map<String, Integer> map = new HashMap<>();
@@ -5921,6 +5762,86 @@ public class EntryStreamTest extends TestBase {
         List<Integer> values = EntryStream.<String, Integer> of(map.entrySet().iterator()).parallel().values().toList();
         Set<Integer> valueSet = new HashSet<>(values);
         assertEquals(new HashSet<>(Arrays.asList(10, 20, 30)), valueSet);
+    }
+
+    // --- regression tests for 2026-06-10 deep-review fixes ---
+
+    @Test
+    public void testZipWithDefaultsFillsNullSide() {
+        // regression: a null side returned an empty stream, silently dropping the other side's
+        // elements, while the array sibling fills the null side with the default value
+        assertEquals(Arrays.asList(N.newEntry("K", 1), N.newEntry("K", 2)), EntryStream.zip((Iterable<String>) null, Arrays.asList(1, 2), "K", 0).toList());
+        assertEquals(Arrays.asList(N.newEntry("a", 0)), EntryStream.zip(Arrays.asList("a"), (Iterable<Integer>) null, "K", 0).toList());
+        assertEquals(Arrays.asList(N.newEntry("K", 1)), EntryStream.zip((Iterator<String>) null, Arrays.asList(1).iterator(), "K", 0).toList());
+
+        // both sides null is still empty
+        assertTrue(EntryStream.zip((Iterable<String>) null, (Iterable<Integer>) null, "K", 0).toList().isEmpty());
+    }
+
+    @Test
+    public void testFlatMapKeyNullMappedStreamIsEmpty() {
+        assertTrue(EntryStream.of("a", 1).flatMapKey((Function<String, Stream<String>>) k -> null).toList().isEmpty());
+        assertTrue(EntryStream.of("a", 1).flatMapKey((BiFunction<String, Integer, Stream<String>>) (k, v) -> null).toList().isEmpty());
+    }
+
+    @Test
+    public void testFlatMapValueNullMappedStreamIsEmpty() {
+        assertTrue(EntryStream.of("a", 1).flatMapValue((Function<Integer, Stream<String>>) v -> null).toList().isEmpty());
+        assertTrue(EntryStream.of("a", 1).flatMapValue((BiFunction<String, Integer, Stream<String>>) (k, v) -> null).toList().isEmpty());
+    }
+
+    @Test
+    public void testDebounce_emptyEmitsNothing() {
+        assertTrue(EntryStream.of(new java.util.LinkedHashMap<String, Integer>()).debounce(com.landawn.abacus.util.Duration.ofSeconds(1)).toList().isEmpty());
+    }
+
+    @Test
+    public void testDebounce_singleEntrySurvives() {
+        java.util.Map<String, Integer> m = new java.util.LinkedHashMap<>();
+        m.put("a", 1);
+        List<Entry<String, Integer>> result = EntryStream.of(m).debounce(com.landawn.abacus.util.Duration.ofSeconds(1)).toList();
+        assertEquals(1, result.size());
+        assertEquals("a", result.get(0).getKey());
+    }
+
+    @Test
+    public void testDebounce_coldStreamEmitsOnlyLastEntry() {
+        java.util.Map<String, Integer> m = new java.util.LinkedHashMap<>();
+        m.put("a", 1);
+        m.put("b", 2);
+        m.put("c", 3);
+        List<Entry<String, Integer>> result = EntryStream.of(m).debounce(com.landawn.abacus.util.Duration.ofSeconds(1)).toList();
+        assertEquals(1, result.size());
+        assertEquals("c", result.get(0).getKey());
+    }
+
+    @Test
+    public void testDebounce_slowSourceAllEntriesSurviveWhenGapAtLeastDuration() {
+        java.util.Map<String, Integer> m = new java.util.LinkedHashMap<>();
+        m.put("a", 1);
+        m.put("b", 2);
+        m.put("c", 3);
+        List<Entry<String, Integer>> result = EntryStream.of(m)
+                .delay(com.landawn.abacus.util.Duration.ofMillis(60))
+                .debounce(com.landawn.abacus.util.Duration.ofMillis(20))
+                .toList();
+        List<String> keys = new java.util.ArrayList<>();
+        for (Entry<String, Integer> e : result) {
+            keys.add(e.getKey());
+        }
+        assertEquals(Arrays.asList("a", "b", "c"), keys);
+    }
+
+    @Test
+    public void testDebounce_invalidDurationThrows() {
+        java.util.Map<String, Integer> m = new java.util.LinkedHashMap<>();
+        m.put("a", 1);
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class,
+                () -> EntryStream.of(m).debounce((com.landawn.abacus.util.Duration) null).toList());
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class,
+                () -> EntryStream.of(m).debounce(com.landawn.abacus.util.Duration.ofMillis(0)).toList());
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class,
+                () -> EntryStream.of(m).debounce(com.landawn.abacus.util.Duration.ofMillis(-100)).toList());
     }
 
 }

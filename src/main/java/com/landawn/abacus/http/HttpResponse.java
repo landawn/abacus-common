@@ -17,6 +17,7 @@ package com.landawn.abacus.http;
 import java.io.ByteArrayInputStream;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -213,10 +214,10 @@ public class HttpResponse {
      * List<String> contentType = headers.get("Content-Type");
      * }</pre>
      *
-     * @return an unmodifiable map of header names to their values, or {@code null} if no headers were received
+     * @return an unmodifiable map of header names to their values; an empty unmodifiable map if no headers were received (never {@code null})
      */
     public Map<String, List<String>> headers() {
-        return headers;
+        return headers == null ? Collections.emptyMap() : headers;
     }
 
     /**
@@ -230,10 +231,10 @@ public class HttpResponse {
      * // Process raw bytes
      * }</pre>
      *
-     * @return a copy of the response body as a byte array, or {@code null} if no body was received
+     * @return a copy of the response body as a byte array; an empty array if no body was received (never {@code null})
      */
     public byte[] body() {
-        return copyBody(body);
+        return body == null ? N.EMPTY_BYTE_ARRAY : copyBody(body);
     }
 
     /**
@@ -384,6 +385,9 @@ public class HttpResponse {
     /**
      * Computes the hash code for this HttpResponse.
      * The hash code is based on the request URL, status code, message, headers, body format, and body content.
+     * Headers and body are taken from the normalized public accessors ({@link #headers()} and {@link #body()}),
+     * so a response with {@code null} headers (or body) hashes the same as one with an empty headers map
+     * (or empty body), consistent with {@link #equals(Object)}.
      *
      * @return the hash code value for this object
      */
@@ -394,15 +398,18 @@ public class HttpResponse {
         result = prime * result + ((requestUrl == null) ? 0 : requestUrl.hashCode());
         result = prime * result + statusCode;
         result = prime * result + ((message == null) ? 0 : message.hashCode());
-        result = prime * result + ((headers == null) ? 0 : headers.hashCode());
+        result = prime * result + headers().hashCode();
         result = prime * result + bodyFormat.hashCode();
-        return prime * result + ((body == null) ? 0 : N.hashCode(body));
+        return prime * result + Arrays.hashCode(body());
     }
 
     /**
      * Determines whether this HttpResponse is equal to another object.
      * Two HttpResponse objects are considered equal if they have the same request URL,
      * status code, message, headers, body format, and body content.
+     * Headers and body are compared using the normalized public accessors ({@link #headers()} and
+     * {@link #body()}), so {@code null} and empty are treated as equivalent (e.g. a response with
+     * {@code null} headers equals one with an empty headers map, and likewise for the body).
      *
      * @param obj The object to compare with
      * @return {@code true} if the objects are equal, {@code false} otherwise
@@ -416,7 +423,7 @@ public class HttpResponse {
 
         if (obj instanceof HttpResponse other) {
             return N.equals(requestUrl, other.requestUrl) && statusCode == other.statusCode && N.equals(message, other.message)
-                    && N.equals(headers, other.headers) && N.equals(bodyFormat, other.bodyFormat) && N.equals(body, other.body);
+                    && N.equals(headers(), other.headers()) && N.equals(bodyFormat, other.bodyFormat) && Arrays.equals(body(), other.body());
         }
 
         return false;

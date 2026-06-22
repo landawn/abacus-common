@@ -170,7 +170,7 @@ public enum ServiceStatus {
                 return CANCELLED;
 
             default:
-                throw new IllegalArgumentException("No mapping instance found by code: " + code);
+                throw new IllegalArgumentException("No ServiceStatus for code: " + code + ". Expected range: 0-7");
         }
     }
 }

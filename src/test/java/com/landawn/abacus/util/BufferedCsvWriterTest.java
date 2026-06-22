@@ -123,6 +123,53 @@ public class BufferedCsvWriterTest extends TestBase {
         }
     }
 
+    // --- regression tests for 2026-06-12 deep-review fixes ---
+
+    @Test
+    public void testReplacementChars_BackslashMode_EscapesLiteralBackslash() {
+        // regression: REPLACEMENT_CHARS_BACK_SLASH['\\'] was null, so literal backslashes were
+        // written raw in backslash-escape mode; a backslash-aware reader (e.g. the default
+        // CsvParser) then collapsed "\\" to "\" and merged "\" + "\"" into an escaped quote,
+        // corrupting round-trips. In this mode the backslash is the escape character and must
+        // itself be escaped as \\.
+        assertArrayEquals("\\\\".toCharArray(), BufferedCsvWriter.REPLACEMENT_CHARS_BACK_SLASH['\\']);
+        // the default RFC 4180 table is unaffected: backslash stays literal there
+        assertNull(BufferedCsvWriter.REPLACEMENT_CHARS['\\']);
+    }
+
+    @Test
+    public void testWriteCharacter_BackslashMode_EscapesBackslash() throws IOException {
+        try {
+            CsvUtil.setEscapeCharToBackSlashForWrite();
+            BufferedCsvWriter w = new BufferedCsvWriter();
+            w.writeCharacter("c:\\dir\\file \"x\"");
+            assertEquals("c:\\\\dir\\\\file \\\"x\\\"", w.toString());
+        } finally {
+            CsvUtil.resetEscapeCharForWrite();
+        }
+    }
+
+    @Test
+    public void testBackslashMode_RoundTripsThroughCsvParser() throws IOException {
+        // write a quoted field in backslash mode, then read it back with the default CsvParser
+        // (escape = backslash): the value must survive unchanged, including backslash-before-quote
+        try {
+            CsvUtil.setEscapeCharToBackSlashForWrite();
+            final String value = "a\\\\b\\\"c"; // a\\b\"c (backslash pairs and backslash-quote in the data)
+            BufferedCsvWriter w = new BufferedCsvWriter();
+            w.write('"');
+            w.writeCharacter(value);
+            w.write('"');
+            final String csvField = w.toString();
+
+            final java.util.List<String> parsed = new CsvParser().parseLine("x," + csvField + ",y");
+            assertEquals(3, parsed.size());
+            assertEquals(value, parsed.get(1));
+        } finally {
+            CsvUtil.resetEscapeCharForWrite();
+        }
+    }
+
     @Test
     public void testWriteCharacter_NullString_WritesLiteralNullToken() throws IOException {
         BufferedCsvWriter w = new BufferedCsvWriter();

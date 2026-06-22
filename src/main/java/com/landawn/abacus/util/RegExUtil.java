@@ -16,6 +16,8 @@
  */
 package com.landawn.abacus.util;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Function;
 import java.util.regex.MatchResult;
 import java.util.regex.Matcher;
@@ -311,8 +313,8 @@ public final class RegExUtil {
      *
      * <p>Example non-matches:</p>
      * <ul>
-     *   <li>{@code "123invalid"} (starts with digit)</li>
-     *   <li>{@code "my-variable"} (contains hyphen)</li>
+     *   <li>{@code "123invalid"} (not matched as a whole token; only {@code "invalid"} is matched)</li>
+     *   <li>{@code "my-variable"} (not matched as a whole token; {@code "my"} and {@code "variable"} are matched separately)</li>
      *   <li>{@code "class"} (Java keyword, but matches pattern - validation needed separately)</li>
      * </ul>
      *
@@ -349,9 +351,9 @@ public final class RegExUtil {
      *
      * <p>Example non-matches:</p>
      * <ul>
-     *   <li>{@code "12.34"} (contains decimal point)</li>
-     *   <li>{@code "abc"} (contains letters)</li>
-     *   <li>{@code "1.5e10"} (scientific notation)</li>
+     *   <li>{@code "12.34"} (not matched as a whole token; {@code "12"} and {@code "34"} are matched separately)</li>
+     *   <li>{@code "abc"} (contains no digits — no match at all)</li>
+     *   <li>{@code "1.5e10"} (not matched as a whole token; the digit runs are matched separately)</li>
      * </ul>
      *
      * <p><b>Note:</b> This pattern matches integer values but does not validate for overflow
@@ -594,7 +596,7 @@ public final class RegExUtil {
      *
      * <p>Example matches:</p>
      * <ul>
-     *   <li>{@code "+1 (234) 567 8900"}</li>
+     *   <li>{@code "+1 234 567 8900"}</li>
      *   <li>{@code "+44 20 1234 5678"}</li>
      * </ul>
      *
@@ -804,7 +806,8 @@ public final class RegExUtil {
      * @see <a href="https://stackoverflow.com/questions/201323/how-can-i-validate-an-email-address-using-a-regular-expression">Stack Overflow Email Validation</a>
      */
     public static final Pattern EMAIL_ADDRESS_RFC_5322_FINDER = Pattern.compile(
-            "(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*|\"(?:[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x21\\x23-\\x5b\\x5d-\\x7f]|\\\\[\\x01-\\x09\\x0b\\x0c\\x0e-\\x7f])*\")@(?:(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?|\\[(?:(?:(2(5[0-5]|[0-4][0-9])|1[0-9][0-9]|[1-9]?[0-9]))\\.){3}(?:(2(5[0-5]|[0-4][0-9])|1[0-9][0-9]|[1-9]?[0-9])|[a-z0-9-]*[a-z0-9]:(?:[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x21-\\x5a\\x53-\\x7f]|\\\\[\\x01-\\x09\\x0b\\x0c\\x0e-\\x7f])+)\\])");
+            "(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*|\"(?:[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x21\\x23-\\x5b\\x5d-\\x7f]|\\\\[\\x01-\\x09\\x0b\\x0c\\x0e-\\x7f])*\")@(?:(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?|\\[(?:(?:(2(5[0-5]|[0-4][0-9])|1[0-9][0-9]|[1-9]?[0-9]))\\.){3}(?:(2(5[0-5]|[0-4][0-9])|1[0-9][0-9]|[1-9]?[0-9])|[a-z0-9-]*[a-z0-9]:(?:[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x21-\\x5a\\x53-\\x7f]|\\\\[\\x01-\\x09\\x0b\\x0c\\x0e-\\x7f])+)\\])",
+            Pattern.CASE_INSENSITIVE);
 
     /**
      * A regular expression {@link Pattern} that finds URLs within a larger text.
@@ -833,7 +836,7 @@ public final class RegExUtil {
      * <p>Example non-matches:</p>
      * <ul>
      *   <li>{@code "http://.example.com"} — starts with dot after protocol</li>
-     *   <li>{@code "http://example .com"} — contains whitespace</li>
+     *   <li>{@code "http://example .com"} — not matched as a whole; only {@code "http://example"} is matched</li>
      *   <li>{@code "example.com"} — missing protocol</li>
      * </ul>
      *
@@ -1088,7 +1091,7 @@ public final class RegExUtil {
      *
      * @see #EMAIL_ADDRESS_RFC_5322_FINDER
      */
-    public static final Pattern EMAIL_ADDRESS_RFC_5322_MATCHER = Pattern.compile("^" + EMAIL_ADDRESS_RFC_5322_FINDER.pattern() + "$");
+    public static final Pattern EMAIL_ADDRESS_RFC_5322_MATCHER = Pattern.compile("^" + EMAIL_ADDRESS_RFC_5322_FINDER.pattern() + "$", Pattern.CASE_INSENSITIVE);
 
     /**
      * Pattern that matches an entire string if it is a URL.
@@ -1123,9 +1126,10 @@ public final class RegExUtil {
     public static final Pattern ALPHANUMERIC_SPACE_MATCHER = Pattern.compile("^" + ALPHANUMERIC_SPACE_FINDER.pattern() + "$");
 
     /**
-     * Pattern that matches an entire string consisting of a single word that also appears later in the string.
-     * This is the anchored version of {@link #DUPLICATES_FINDER} that requires the entire string to match the
-     * duplicate-word pattern from start to end.
+     * Anchored version of {@link #DUPLICATES_FINDER}. Note: because the anchors require the whole input
+     * to be a single word while the lookahead requires that word to appear again later in the input,
+     * this pattern can never match any input; it is provided only for naming symmetry with the other
+     * *_MATCHER constants.
      *
      * @see #DUPLICATES_FINDER
      */
@@ -1164,8 +1168,6 @@ public final class RegExUtil {
      * @see #splitToLines(String)
      */
     public static final Pattern LINE_SEPARATOR = Pattern.compile("\\R");
-
-    static final Pattern CAMEL_CASE_SEPARATOR = Pattern.compile("[_\\-\\s]");
 
     private RegExUtil() {
         // Singleton for utility class.
@@ -1470,6 +1472,7 @@ public final class RegExUtil {
      * @see Matcher#group()
      * @see Pattern#compile(String)
      */
+    @MayReturnNull
     public static String findFirst(final String source, final Pattern pattern) {
         N.checkArgNotNull(pattern, cs.pattern);
 
@@ -1577,6 +1580,7 @@ public final class RegExUtil {
      * @see Matcher#group()
      * @see Pattern#compile(String)
      */
+    @MayReturnNull
     public static String findLast(final String source, final Pattern pattern) {
         N.checkArgNotNull(pattern, cs.pattern);
 
@@ -1588,6 +1592,73 @@ public final class RegExUtil {
         }
 
         return lastMatch;
+    }
+
+    /**
+     * Finds all the substrings of the given string that match the specified regular expression
+     * and returns them as a {@code List}. Each element of the returned list is the matched text
+     * (i.e. {@link MatchResult#group()}) of one occurrence.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<String> matches = RegExUtil.findAll("abc123def456", "\\d+");
+     * // matches contains: ["123", "456"]
+     * }</pre>
+     *
+     * @param source the string to be searched, may be {@code null} or empty
+     * @param regex the regular expression to match against; must not be {@code null} or empty
+     * @return a list containing the matched text of each occurrence, in order of appearance;
+     *         an empty list is returned if the input source string is {@code null} or empty
+     * @throws IllegalArgumentException if the {@code regex} is {@code null} or empty
+     * @see #matchResults(String, String)
+     * @see #findFirst(String, String)
+     */
+    public static List<String> findAll(final String source, final String regex) throws IllegalArgumentException {
+        N.checkArgNotEmpty(regex, cs.regex);
+
+        if (Strings.isEmpty(source)) {
+            return new ArrayList<>();
+        }
+
+        return findAll(source, Pattern.compile(regex));
+    }
+
+    /**
+     * Finds all the substrings of the given string that match the specified compiled pattern
+     * and returns them as a {@code List}. Each element of the returned list is the matched text
+     * (i.e. {@link MatchResult#group()}) of one occurrence.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Pattern pattern = Pattern.compile("\\b\\w+@\\w+\\.\\w+\\b");
+     * List<String> matches = RegExUtil.findAll("Contact: john@example.com, jane@test.org", pattern);
+     * // matches contains: ["john@example.com", "jane@test.org"]
+     * }</pre>
+     *
+     * @param source the string to be searched, may be {@code null} or empty
+     * @param pattern the compiled regular expression pattern to match against; must not be {@code null}
+     * @return a list containing the matched text of each occurrence, in order of appearance;
+     *         an empty list is returned if the input source string is {@code null} or empty
+     * @throws IllegalArgumentException if the pattern is {@code null}
+     * @see #matchResults(String, Pattern)
+     * @see #findFirst(String, Pattern)
+     */
+    public static List<String> findAll(final String source, final Pattern pattern) throws IllegalArgumentException {
+        N.checkArgNotNull(pattern, cs.pattern);
+
+        final List<String> result = new ArrayList<>();
+
+        if (Strings.isEmpty(source)) {
+            return result;
+        }
+
+        final Matcher matcher = pattern.matcher(checkSourceString(source));
+
+        while (matcher.find()) {
+            result.add(matcher.group());
+        }
+
+        return result;
     }
 
     /**
@@ -1723,6 +1794,12 @@ public final class RegExUtil {
     /**
      * Replaces the first substring of the source string that matches the given regular expression with the given replacement.
      *
+     * <p><b>Note:</b> The {@code replacement} string is interpreted by {@link java.util.regex.Matcher#replaceFirst(String)};
+     * a dollar sign ({@code $}) followed by a digit denotes a back-reference to a capturing group (e.g. {@code $1}),
+     * and a backslash ({@code \}) escapes the following character. To use a literal {@code $} or {@code \}, escape it
+     * with a preceding backslash, or use {@link #replaceFirst(String, String, Function)} which treats its result literally.
+     * (This differs from {@link #replaceLast(String, String, String)}, whose replacement is always literal.)</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String result = RegExUtil.replaceFirst("Hello123World456", "\\d+", "XXX");
@@ -1732,6 +1809,7 @@ public final class RegExUtil {
      * @param source source string to search and replace in, which may be null
      * @param regex the regular expression to which this string is to be matched
      * @param replacement the string to be substituted for the first match
+     *        (group references such as {@code $1} are interpreted; see note above)
      * @return the source string with the first replacement processed, or an empty String {@code ""} if the input source string is {@code null}.
      * @throws IllegalArgumentException if the {@code regex} is {@code null} or empty
      * @see String#replaceFirst(String, String)
@@ -1796,6 +1874,12 @@ public final class RegExUtil {
      * Replaces the first substring of the source string that matches the given regular expression pattern with the given replacement.
      * This method is more efficient than {@link #replaceFirst(String, String, String)} when using the same pattern multiple times.
      *
+     * <p><b>Note:</b> The {@code replacement} string is interpreted by {@link java.util.regex.Matcher#replaceFirst(String)};
+     * a dollar sign ({@code $}) followed by a digit denotes a back-reference to a capturing group (e.g. {@code $1}),
+     * and a backslash ({@code \}) escapes the following character. To use a literal {@code $} or {@code \}, escape it
+     * with a preceding backslash, or use {@link #replaceFirst(String, Pattern, Function)} which treats its result literally.
+     * (This differs from {@link #replaceLast(String, Pattern, String)}, whose replacement is always literal.)</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Pattern pattern = Pattern.compile("\\d+");
@@ -1806,6 +1890,7 @@ public final class RegExUtil {
      * @param source source string to search and replace in, which may be null
      * @param pattern the regular expression pattern to which this string is to be matched
      * @param replacement the string to be substituted for the first match
+     *        (group references such as {@code $1} are interpreted; see note above)
      * @return the source string with the first replacement processed, or an empty String {@code ""} if the input source string is {@code null}.
      * @throws IllegalArgumentException if the pattern is {@code null}
      * @see java.util.regex.Matcher#replaceFirst(String)
@@ -1821,9 +1906,10 @@ public final class RegExUtil {
     }
 
     /**
-     * Replaces the first substring of the source string that matches the given regular expression pattern with the given replacer.
-     * This method is a {@code null} safe equivalent to:
-     * {@code pattern.matcher(checkSourceString(source)).replaceFirst(replacer)}
+     * Replaces the first substring of the source string that matches the given regular expression pattern
+     * with the result of applying the given function to the matched substring.
+     * The string returned by the replacer is used as a literal replacement: dollar signs and backslashes
+     * in it are not treated as group references or escapes.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1848,13 +1934,17 @@ public final class RegExUtil {
 
         final String checkedSource = checkSourceString(source);
 
-        return pattern.matcher(checkedSource).replaceFirst(matcher -> replacer.apply(checkedSource.substring(matcher.start(), matcher.end())));
+        // quoteReplacement: the function result is a literal replacement, not a template -
+        // unquoted '$'/'\' in it would be (mis)interpreted as group references/escapes.
+        return pattern.matcher(checkedSource)
+                .replaceFirst(matcher -> Matcher.quoteReplacement(replacer.apply(checkedSource.substring(matcher.start(), matcher.end()))));
     }
 
     /**
-     * Replaces the first substring of the source string that matches the given regular expression pattern with the given replacer.
-     * This method is a {@code null} safe equivalent to:
-     * {@code pattern.matcher(checkSourceString(source)).replaceFirst(replacer)}
+     * Replaces the first substring of the source string that matches the given regular expression pattern
+     * with the result of applying the given function to the start and end indices of the match.
+     * The string returned by the replacer is used as a literal replacement: dollar signs and backslashes
+     * in it are not treated as group references or escapes.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1877,12 +1967,15 @@ public final class RegExUtil {
             return Strings.EMPTY;
         }
 
-        return pattern.matcher(checkSourceString(source)).replaceFirst(matcher -> replacer.apply(matcher.start(), matcher.end()));
+        // quoteReplacement: the function result is a literal replacement, not a template.
+        return pattern.matcher(checkSourceString(source)).replaceFirst(matcher -> Matcher.quoteReplacement(replacer.apply(matcher.start(), matcher.end())));
     }
 
     /**
      * Searches for the last occurrence of the specified {@code regex} pattern in the specified source string, and replace it with the specified {@code replacement}.
      * This method finds the rightmost match in the string and replaces only that occurrence.
+     * Note that, unlike {@link #replaceFirst(String, String, String)} and {@link #replaceAll(String, String, String)},
+     * the replacement is treated as a literal string: group references such as {@code $1} are not interpreted.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1961,6 +2054,8 @@ public final class RegExUtil {
 
     /**
      * Searches for the last occurrence of the specified {@code regex} pattern in the specified source string, and replace it with the specified {@code replacement}.
+     * Note that, unlike {@link #replaceFirst(String, Pattern, String)} and {@link #replaceAll(String, Pattern, String)},
+     * the replacement is treated as a literal string: group references such as {@code $1} are not interpreted.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1989,21 +2084,14 @@ public final class RegExUtil {
         int start = -1;
         int end = -1;
 
-        for (int i = source.length(); i >= 0; i--) {
-            if (matcher.find(i)) {
-                if (start < 0 || (matcher.start() < start && matcher.end() >= end)) {
-                    start = matcher.start();
-                    end = matcher.end();
-                } else {
-                    return Strings.replaceRange(source, start, end, replacement);
-                }
-            } else if (start >= 0) {
-                return Strings.replaceRange(source, start, end, replacement);
-            }
+        // Forward scan for the LAST match (same iteration semantics as findLast): reverse find(i)
+        // probing could land mid-match and replace a shorter sub-match that forward iteration
+        // would never report (e.g. "(ab)+" on "ababab" replaced only the trailing "ab").
+        while (matcher.find()) {
+            start = matcher.start();
+            end = matcher.end();
         }
 
-        // Loop completed without applying replacement; happens when the rightmost
-        // match's leftmost equivalent extends to position 0.
         if (start >= 0) {
             return Strings.replaceRange(source, start, end, replacement);
         }
@@ -2041,17 +2129,10 @@ public final class RegExUtil {
         int start = -1;
         int end = -1;
 
-        for (int i = source.length(); i >= 0; i--) {
-            if (matcher.find(i)) {
-                if (start < 0 || (matcher.start() < start && matcher.end() >= end)) {
-                    start = matcher.start();
-                    end = matcher.end();
-                } else {
-                    return Strings.replaceRange(source, start, end, replacer.apply(source.substring(start, end)));
-                }
-            } else if (start >= 0) {
-                return Strings.replaceRange(source, start, end, replacer.apply(source.substring(start, end)));
-            }
+        // Forward scan for the LAST match (same iteration semantics as findLast).
+        while (matcher.find()) {
+            start = matcher.start();
+            end = matcher.end();
         }
 
         if (start >= 0) {
@@ -2091,17 +2172,10 @@ public final class RegExUtil {
         int start = -1;
         int end = -1;
 
-        for (int i = source.length(); i >= 0; i--) {
-            if (matcher.find(i)) {
-                if (start < 0 || (matcher.start() < start && matcher.end() >= end)) {
-                    start = matcher.start();
-                    end = matcher.end();
-                } else {
-                    return Strings.replaceRange(source, start, end, replacer.apply(start, end));
-                }
-            } else if (start >= 0) {
-                return Strings.replaceRange(source, start, end, replacer.apply(start, end));
-            }
+        // Forward scan for the LAST match (same iteration semantics as findLast).
+        while (matcher.find()) {
+            start = matcher.start();
+            end = matcher.end();
         }
 
         if (start >= 0) {
@@ -2218,6 +2292,8 @@ public final class RegExUtil {
     /**
      * Replaces each substring of the source string that matches the given regular expression pattern
      * with the result of applying the given function to the matched substring.
+     * The string returned by the replacer is used as a literal replacement: dollar signs and backslashes
+     * in it are not treated as group references or escapes.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -2242,12 +2318,17 @@ public final class RegExUtil {
         }
 
         final String checkedSource = checkSourceString(source);
-        return pattern.matcher(checkedSource).replaceAll(matcher -> replacer.apply(checkedSource.substring(matcher.start(), matcher.end())));
+        // quoteReplacement: the function result is a literal replacement, not a template -
+        // unquoted '$'/'\' in it would be (mis)interpreted as group references/escapes.
+        return pattern.matcher(checkedSource)
+                .replaceAll(matcher -> Matcher.quoteReplacement(replacer.apply(checkedSource.substring(matcher.start(), matcher.end()))));
     }
 
     /**
      * Replaces each substring of the source string that matches the given regular expression pattern
      * with the result of applying the given function to the start and end indices of the match.
+     * The string returned by the replacer is used as a literal replacement: dollar signs and backslashes
+     * in it are not treated as group references or escapes.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -2270,7 +2351,8 @@ public final class RegExUtil {
             return Strings.EMPTY;
         }
 
-        return pattern.matcher(checkSourceString(source)).replaceAll(matcher -> replacer.apply(matcher.start(), matcher.end()));
+        // quoteReplacement: the function result is a literal replacement, not a template.
+        return pattern.matcher(checkSourceString(source)).replaceAll(matcher -> Matcher.quoteReplacement(replacer.apply(matcher.start(), matcher.end())));
     }
 
     /**
@@ -2348,7 +2430,8 @@ public final class RegExUtil {
      *
      * @param source the string to be checked, may be {@code null} or empty
      * @param regex the regular expression to match against; must not be {@code null} or empty
-     * @return a stream of match results for each subsequence of the input sequence that matches the pattern.
+     * @return a stream of match results for each subsequence of the input sequence that matches the pattern;
+     *         an empty stream is returned if the input source string is {@code null} or empty
      * @throws IllegalArgumentException if the {@code regex} is {@code null} or empty
      * @see Matcher#results()
      */
@@ -2376,7 +2459,8 @@ public final class RegExUtil {
      *
      * @param source the string to be checked, may be {@code null} or empty
      * @param pattern the compiled regular expression pattern to match against; must not be {@code null}
-     * @return a stream of match results for each subsequence of the input sequence that matches the pattern.
+     * @return a stream of match results for each subsequence of the input sequence that matches the pattern;
+     *         an empty stream is returned if the input source string is {@code null} or empty
      * @throws IllegalArgumentException if the pattern is {@code null}
      * @see Matcher#results()
      */
@@ -2402,7 +2486,8 @@ public final class RegExUtil {
      *
      * @param source the string to be checked, may be {@code null} or empty
      * @param regex the regular expression to match against; must not be {@code null} or empty
-     * @return a stream of start indices for each subsequence of the input sequence that matches the pattern
+     * @return a stream of start indices for each subsequence of the input sequence that matches the pattern;
+     *         an empty stream is returned if the input source string is {@code null} or empty
      * @throws IllegalArgumentException if the {@code regex} is {@code null} or empty
      * @see Matcher#results()
      * @see Strings#indicesOf(String, String)
@@ -2431,7 +2516,8 @@ public final class RegExUtil {
      *
      * @param source the string to be checked, may be {@code null} or empty
      * @param pattern the compiled regular expression pattern to match against; must not be {@code null}
-     * @return a stream of start indices for each subsequence of the input sequence that matches the pattern
+     * @return a stream of start indices for each subsequence of the input sequence that matches the pattern;
+     *         an empty stream is returned if the input source string is {@code null} or empty
      * @throws IllegalArgumentException if the pattern is {@code null}
      * @see Matcher#results()
      * @see Strings#indicesOf(String, String)

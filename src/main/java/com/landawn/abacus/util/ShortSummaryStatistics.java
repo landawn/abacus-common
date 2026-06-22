@@ -66,7 +66,7 @@ public class ShortSummaryStatistics implements ShortConsumer {
     }
 
     /**
-     * Constructs a non-empty instance with the specified count, min, max, and sum.
+     * Constructs an instance with the specified count, min, max, and sum.
      * This constructor is useful for creating a statistics object from pre-computed values.
      *
      * <p><b>Usage Examples:</b></p>

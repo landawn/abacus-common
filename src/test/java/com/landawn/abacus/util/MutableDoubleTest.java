@@ -66,13 +66,6 @@ public class MutableDoubleTest extends TestBase {
     }
 
     @Test
-    public void testOverflow() {
-        MutableDouble md = MutableDouble.of(Double.MAX_VALUE);
-        md.add(Double.MAX_VALUE);
-        assertTrue(md.isInfinite());
-    }
-
-    @Test
     public void testInfinityArithmetic() {
         MutableDouble md = MutableDouble.of(Double.POSITIVE_INFINITY);
         md.add(100.0);

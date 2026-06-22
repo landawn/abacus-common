@@ -13,9 +13,9 @@
  */
 package com.landawn.abacus.util.function;
 
-import java.util.Objects;
-
 import com.landawn.abacus.util.Throwables;
+import com.landawn.abacus.util.N;
+import com.landawn.abacus.util.cs;
 
 /**
  * Represents a predicate (boolean-valued function) of two {@code int}-valued arguments and a single
@@ -35,7 +35,7 @@ public interface BiIntObjPredicate<T> extends Throwables.BiIntObjPredicate<T, Ru
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * BiIntObjPredicate<String> lengthChecker = (i, j, str) -> str.length() == (i + j);
+     * BiIntObjPredicate<String> lengthChecker = (i, j, str) -> (long) str.length() == (long) i + j;
      * boolean result = lengthChecker.test(3, 2, "hello");   // Returns true (5 == 3+2)
      * }</pre>
      *
@@ -53,7 +53,7 @@ public interface BiIntObjPredicate<T> extends Throwables.BiIntObjPredicate<T, Ru
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * BiIntObjPredicate<String> isEqual = (i, j, str) -> str.length() == (i + j);
+     * BiIntObjPredicate<String> isEqual = (i, j, str) -> (long) str.length() == (long) i + j;
      * BiIntObjPredicate<String> isNotEqual = isEqual.negate();
      * }</pre>
      *
@@ -73,17 +73,17 @@ public interface BiIntObjPredicate<T> extends Throwables.BiIntObjPredicate<T, Ru
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * BiIntObjPredicate<String> positiveSum = (i, j, s) -> (i + j) > 0;
+     * BiIntObjPredicate<String> positiveSum = (i, j, s) -> (long) i + j > 0;
      * BiIntObjPredicate<String> notEmpty = (i, j, s) -> !s.isEmpty();
      * BiIntObjPredicate<String> combined = positiveSum.and(notEmpty);
      * }</pre>
      *
      * @param other a predicate that will be logically-ANDed with this predicate. Must not be {@code null}.
      * @return a composed predicate that represents the short-circuiting logical AND of this predicate and the {@code other} predicate
-     * @throws NullPointerException if {@code other} is null
+     * @throws IllegalArgumentException if {@code other} is null
      */
-    default BiIntObjPredicate<T> and(final BiIntObjPredicate<T> other) {
-        Objects.requireNonNull(other);
+    default BiIntObjPredicate<T> and(final BiIntObjPredicate<? super T> other) {
+        N.checkArgNotNull(other, cs.other);
         return (i, j, t) -> test(i, j, t) && other.test(i, j, t);
     }
 
@@ -97,17 +97,31 @@ public interface BiIntObjPredicate<T> extends Throwables.BiIntObjPredicate<T, Ru
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * BiIntObjPredicate<String> largeSum = (i, j, s) -> (i + j) > 100;
+     * BiIntObjPredicate<String> largeSum = (i, j, s) -> (long) i + j > 100;
      * BiIntObjPredicate<String> longString = (i, j, s) -> s.length() > 50;
      * BiIntObjPredicate<String> combined = largeSum.or(longString);
      * }</pre>
      *
      * @param other a predicate that will be logically-ORed with this predicate. Must not be {@code null}.
      * @return a composed predicate that represents the short-circuiting logical OR of this predicate and the {@code other} predicate
-     * @throws NullPointerException if {@code other} is null
+     * @throws IllegalArgumentException if {@code other} is null
      */
-    default BiIntObjPredicate<T> or(final BiIntObjPredicate<T> other) {
-        Objects.requireNonNull(other);
+    default BiIntObjPredicate<T> or(final BiIntObjPredicate<? super T> other) {
+        N.checkArgNotNull(other, cs.other);
         return (i, j, t) -> test(i, j, t) || other.test(i, j, t);
+    }
+
+    /**
+     * Returns this object as a {@link Throwables.BiIntObjPredicate} view.
+     *
+     * <p>The returned object has the same behavior as this one. This method does not translate
+     * exceptions or make the original implementation capable of throwing new checked exceptions; the
+     * exception type parameter is for target-type compatibility with APIs that accept {@code Throwables.BiIntObjPredicate}.
+     *
+     * @param <E> the target exception type for compatibility with {@code Throwables.BiIntObjPredicate}
+     * @return a {@link Throwables.BiIntObjPredicate} view of this object
+     */
+    default <E extends Throwable> Throwables.BiIntObjPredicate<T, E> toThrowable() {
+        return (Throwables.BiIntObjPredicate<T, E>) this;
     }
 }

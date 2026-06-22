@@ -153,7 +153,7 @@ public class TimedType<T> extends AbstractType<Timed<T>> { //NOSONAR
         }
 
         final long timestamp = a[0] == null ? 0 : (a[0] instanceof Number ? ((Number) a[0]).longValue() : Numbers.toLong(a[0].toString()));
-        final T value = a[1] == null ? null : ((T) (valueType.javaType().isAssignableFrom(a[1].getClass()) ? a[1] : N.convert(a[1], valueType)));
+        final T value = (T) convertTupleElement(a[1], valueType);
 
         return Timed.of(value, timestamp);
     }
@@ -169,7 +169,7 @@ public class TimedType<T> extends AbstractType<Timed<T>> { //NOSONAR
      *
      * @param appendable the Appendable to write to
      * @param x the Timed object to append
-     * @throws IOException if an I/O error occurs during the append operation
+     * @throws IOException if an I/O error occurs during the append operation (when the target is a {@code Writer}, the error is rethrown wrapped in an {@code UncheckedIOException})
      * @implNote
      * This method appends a string representation of {@code x} to {@code appendable} (the literal {@code "null"} for a
      * {@code null} value). Conceptually this is the human-readable form produced by {@code toString()}, <i>not</i> the
@@ -236,7 +236,7 @@ public class TimedType<T> extends AbstractType<Timed<T>> { //NOSONAR
      * @param writer the CharacterWriter to write to
      * @param x the Timed object to write
      * @param config the serialization configuration for formatting options
-     * @throws IOException if an I/O error occurs during the write operation
+     * @throws UncheckedIOException if an I/O error occurs during the write operation (the underlying {@code IOException} is wrapped)
      */
     @Override
     public void serializeTo(final CharacterWriter writer, final Timed<T> x, final JsonXmlSerConfig<?> config) throws IOException {

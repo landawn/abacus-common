@@ -21,10 +21,15 @@ import java.util.Objects;
 import com.landawn.abacus.annotation.MayReturnNull;
 
 /**
- * A utility class for password hashing and verification using {@link MessageDigest}.
- * This class hashes passwords with the configured digest algorithm and returns the
+ * A utility class for digesting and comparing password strings using {@link MessageDigest}.
+ * This class digests input with the configured algorithm and returns the
  * digest encoded as Base64 text. It supports any algorithm available through the
  * active Java security providers.
+ *
+ * <p><b>&#9888; Password storage:</b> This class performs a single deterministic, unsalted,
+ * fast digest. It is not a password-storage key derivation function. Use a dedicated
+ * password hashing algorithm with salt and work factor outside this helper for stored
+ * credentials.</p>
  *
  * <p>The configured algorithm is fixed for the lifetime of an instance. Hashing is
  * synchronized on the instance because the shared {@link MessageDigest} is reused and is
@@ -48,17 +53,19 @@ public final class Password {
     private final MessageDigest msgDigest;
 
     /**
-     * Creates a new {@code Password} instance with the specified hashing algorithm.
+     * Creates a new {@code Password} instance with the specified digest algorithm.
      * The algorithm must be one supported by the Java security provider
-     * (e.g., "MD5", "SHA-1", "SHA-256", "SHA-512").
+     * (for example, "SHA-256" or "SHA-512"). Legacy algorithms such as "MD5" or
+     * "SHA-1" may be available from a provider, but are not appropriate for stored
+     * credentials.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Password sha256Password = new Password("SHA-256");
-     * Password md5Password = new Password("MD5");
+     * Password sha512Password = new Password("SHA-512");
      * }</pre>
      *
-     * @param algorithm the name of the hashing algorithm to use (e.g., {@code "MD5"}, {@code "SHA-1"}, {@code "SHA-256"})
+     * @param algorithm the name of the digest algorithm to use (for example, {@code "SHA-256"} or {@code "SHA-512"})
      * @throws RuntimeException wrapping {@link java.security.NoSuchAlgorithmException} if the specified algorithm
      *         is not available from any registered security provider
      * @see MessageDigest#getInstance(String)
@@ -89,9 +96,12 @@ public final class Password {
     }
 
     /**
-     * Hashes the given password string with the configured digest algorithm and returns
+     * Digests the given password string with the configured algorithm and returns
      * the resulting digest encoded in Base64 format. This method is synchronized because
      * the underlying {@link MessageDigest} instance is reused.
+     *
+     * <p><b>&#9888; Password storage:</b> The returned value is a fast unsalted digest,
+     * not a password-storage hash.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code

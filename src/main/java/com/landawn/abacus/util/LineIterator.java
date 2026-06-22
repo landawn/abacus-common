@@ -122,7 +122,7 @@ public final class LineIterator extends ObjIterator<String> implements AutoClose
      * @see #of(File, Charset)
      */
     public static LineIterator of(final File file) {
-        return of(file, Charsets.DEFAULT);
+        return of(file, IOUtil.DEFAULT_CHARSET);
     }
 
     /**
@@ -198,7 +198,7 @@ public final class LineIterator extends ObjIterator<String> implements AutoClose
      * @see #of(InputStream, Charset)
      */
     public static LineIterator of(final InputStream input) {
-        return of(input, Charsets.DEFAULT);
+        return of(input, IOUtil.DEFAULT_CHARSET);
     }
 
     /**
@@ -353,7 +353,12 @@ public final class LineIterator extends ObjIterator<String> implements AutoClose
      * the {@code Reader} remains open, potentially causing resource leaks.
      * <p>
      * This method can safely be called multiple times; subsequent calls have no effect.
-     * This method is synchronized and may be called concurrently with other threads.
+     * <p>
+     * Although {@code close()} is {@code synchronized}, {@link #hasNext()} and {@link #next()}
+     * are not, and the internal state is not {@code volatile}. This class is therefore
+     * <b>not</b> thread-safe: {@code close()} is intended to be called from the same thread
+     * that performs the iteration (for example in a {@code finally} block or via
+     * try-with-resources), not concurrently from another thread while iteration is in progress.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code

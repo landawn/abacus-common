@@ -13,7 +13,8 @@
  */
 package com.landawn.abacus.util.function;
 
-import java.util.Objects;
+import com.landawn.abacus.util.N;
+import com.landawn.abacus.util.cs;
 
 /**
  * Represents an operation that accepts a variable number of arguments and returns no result.
@@ -46,6 +47,10 @@ import java.util.Objects;
  *
  * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
  *
+ * <p><b>Note:</b> Unlike {@link NFunction}, this interface intentionally does NOT extend a
+ * {@code Throwables.*} parent, so it exposes no {@code toThrowable()} bridge — there is no
+ * {@code Throwables.NConsumer} to delegate to. This is by design.
+ *
  * @param <T> the type of the input to the operation
  *
  * @see java.util.function.Consumer
@@ -67,8 +72,8 @@ public interface NConsumer<T> {
      *   <li>Storing collections of values</li>
      * </ul>
      *
-     * <p>Note: The {@code @SuppressWarnings("unchecked")} annotation is used because
-     * varargs with generics can generate unchecked warnings at the call site.
+     * <p>Note: The {@code @SuppressWarnings("unchecked")} annotation suppresses the
+     * declaration-site generic-varargs warning for this method.
      *
      * @param args the input arguments as a varargs array
      */
@@ -107,10 +112,10 @@ public interface NConsumer<T> {
      * @param after the operation to perform after this operation. Must not be {@code null}.
      * @return a composed {@code NConsumer} that performs in sequence this
      *         operation followed by the {@code after} operation
-     * @throws NullPointerException if {@code after} is null
+     * @throws IllegalArgumentException if {@code after} is null
      */
     default NConsumer<T> andThen(final NConsumer<? super T> after) {
-        Objects.requireNonNull(after);
+        N.checkArgNotNull(after, cs.after);
         return args -> {
             accept(args);
             after.accept(args);

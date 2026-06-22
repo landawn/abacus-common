@@ -122,9 +122,10 @@ import com.landawn.abacus.util.stream.Stream;
  *     .apply(list -> list.stream().map(String::toUpperCase).collect(Collectors.toList()));
  *
  * // Dataset manipulation
- * Dataset result = Builder.of(Dataset.empty())
- *     .addColumn("name", Arrays.asList("Alice", "Bob"))
- *     .addColumn("age", Arrays.asList(25, 30))
+ * Dataset result = Builder.of(Dataset.rows(Arrays.asList("name", "age"),
+ *         new Object[][] { { "Alice", 25 }, { "Bob", 30 } }))
+ *     .addColumn("active", Arrays.asList(true, false))
+ *     .renameColumn("age", "years")
  *     .val();
  * }</pre>
  *
@@ -565,10 +566,10 @@ public class Builder<T> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Dataset dataset = Dataset.empty();
+     * Dataset dataset = Dataset.rows(Arrays.asList("name", "age"),
+     *         new Object[][] { { "Alice", 25 }, { "Bob", 30 }, { "Charlie", 35 } });
      * Dataset result = Builder.of(dataset)
-     *     .addColumn("name", Arrays.asList("Alice", "Bob", "Charlie"))
-     *     .addColumn("age", Arrays.asList(25, 30, 35))
+     *     .addColumn("active", Arrays.asList(true, false, true))
      *     .renameColumn("age", "years")
      *     .val();
      * }</pre>
@@ -4823,7 +4824,7 @@ public class Builder<T> {
          * <pre>{@code
          * Builder
          *     .compare((byte)10, (byte)20)
-         *     .result();   // returns -1
+         *     .result();   // returns a negative value (-10)
          * }</pre>
          *
          * @param left the first byte value
@@ -4847,7 +4848,7 @@ public class Builder<T> {
          * <pre>{@code
          * Builder
          *     .compare((short)100, (short)200)
-         *     .result();   // returns -1
+         *     .result();   // returns a negative value (-100)
          * }</pre>
          *
          * @param left the first short value
@@ -5347,6 +5348,7 @@ public class Builder<T> {
          * @param right the second float to compare
          * @param tolerance the maximum difference allowed for the values to be considered equal
          * @return this EquivalenceBuilder instance for method chaining
+         * @throws IllegalArgumentException if {@code tolerance} is negative or NaN
          */
         public EquivalenceBuilder equals(final float left, final float right, final float tolerance) {
             if (result) {
@@ -5403,6 +5405,7 @@ public class Builder<T> {
          * @param right the second double to compare
          * @param tolerance the maximum difference allowed for the values to be considered equal
          * @return this EquivalenceBuilder instance for method chaining
+         * @throws IllegalArgumentException if {@code tolerance} is negative or NaN
          */
         public EquivalenceBuilder equals(final double left, final double right, final double tolerance) {
             if (result) {
@@ -5443,8 +5446,9 @@ public class Builder<T> {
      * This class follows the builder pattern to allow multiple values to be
      * incorporated into a single hash code calculation.
      *
-     * <p>The hash code is computed using the standard Java convention where each
-     * value's hash code is multiplied by 31 and added to the running total. This
+     * <p>The hash code is computed using the standard Java convention where the
+     * running total is multiplied by 31 before each value's hash code is added
+     * ({@code result = result * 31 + hash(value)}). This
      * provides good distribution of hash values for use in hash-based collections.</p>
      *
      * <p><strong>Thread Safety:</strong> This class is not thread-safe and should
@@ -5698,7 +5702,7 @@ public class Builder<T> {
          * Returns the computed hash code.
          *
          * <p>The hash code is computed using the standard Java algorithm where
-         * each value's contribution is multiplied by 31 and added to the total.
+         * the running total is multiplied by 31 before each value's hash code is added.
          * This provides good distribution for use in hash-based collections.</p>
          *
          * <p><b>Usage Examples:</b></p>

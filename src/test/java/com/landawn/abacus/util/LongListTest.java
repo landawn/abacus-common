@@ -2013,6 +2013,12 @@ public class LongListTest extends TestBase {
     }
 
     @Test
+    public void testShuffleNullRandomRejectedForSmallLists() {
+        assertThrows(IllegalArgumentException.class, () -> new LongList().shuffle(null));
+        assertThrows(IllegalArgumentException.class, () -> LongList.of(1L).shuffle(null));
+    }
+
+    @Test
     public void testShuffle_withRandom_long() {
         LongList ll = LongList.of(1L, 2L, 3L, 4L, 5L);
         Random rnd = new Random(42);

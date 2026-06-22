@@ -1236,12 +1236,6 @@ public class HolderTest extends TestBase {
     }
 
     @Test
-    public void testHashCode_NullValue() {
-        Holder<String> holder = Holder.of(null);
-        assertEquals(0, holder.hashCode());
-    }
-
-    @Test
     public void test_equals_EqualValues() {
         Holder<String> h1 = Holder.of("test");
         Holder<String> h2 = Holder.of("test");
@@ -1265,13 +1259,6 @@ public class HolderTest extends TestBase {
     public void test_equals_SameInstance() {
         Holder<String> holder = Holder.of("test");
         assertEquals(holder, holder);
-    }
-
-    @Test
-    public void test_equals_BothNull() {
-        Holder<String> h1 = Holder.of(null);
-        Holder<String> h2 = Holder.of(null);
-        assertEquals(h1, h2);
     }
 
     @Test

@@ -13,9 +13,9 @@
  */
 package com.landawn.abacus.util.function;
 
-import java.util.Objects;
-
 import com.landawn.abacus.util.Throwables;
+import com.landawn.abacus.util.N;
+import com.landawn.abacus.util.cs;
 
 /**
  * Represents an operation that accepts three short-valued arguments and returns no result.
@@ -69,15 +69,29 @@ public interface ShortTriConsumer extends Throwables.ShortTriConsumer<RuntimeExc
      * combined.accept((short) 10, (short) 20, (short) 30);   // Logs then calculates sum
      * }</pre>
      *
-     * @param after the operation to perform after this operation
+     * @param after the operation to perform after this operation. Must not be {@code null}.
      * @return a composed {@code ShortTriConsumer} that performs in sequence this operation followed by the {@code after} operation
-     * @throws NullPointerException if {@code after} is null
+     * @throws IllegalArgumentException if {@code after} is null
      */
     default ShortTriConsumer andThen(final ShortTriConsumer after) {
-        Objects.requireNonNull(after);
+        N.checkArgNotNull(after, cs.after);
         return (a, b, c) -> {
             accept(a, b, c);
             after.accept(a, b, c);
         };
+    }
+
+    /**
+     * Returns this object as a {@link Throwables.ShortTriConsumer} view.
+     *
+     * <p>The returned object has the same behavior as this one. This method does not translate
+     * exceptions or make the original implementation capable of throwing new checked exceptions; the
+     * exception type parameter is for target-type compatibility with APIs that accept {@code Throwables.ShortTriConsumer}.
+     *
+     * @param <E> the target exception type for compatibility with {@code Throwables.ShortTriConsumer}
+     * @return a {@link Throwables.ShortTriConsumer} view of this object
+     */
+    default <E extends Throwable> Throwables.ShortTriConsumer<E> toThrowable() {
+        return (Throwables.ShortTriConsumer<E>) this;
     }
 }

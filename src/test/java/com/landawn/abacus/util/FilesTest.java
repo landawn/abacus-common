@@ -33,7 +33,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
 import com.google.common.base.Predicate;
-import com.google.common.graph.Traverser;
+import com.landawn.abacus.guava.Traverser;
 import com.google.common.io.ByteSink;
 import com.google.common.io.ByteSource;
 import com.google.common.io.CharSink;
@@ -1176,9 +1176,7 @@ public class FilesTest extends TestBase {
 
         Traverser<File> traverser = Files.fileTraverser();
         List<String> names = new ArrayList<>();
-        for (File file : traverser.breadthFirst(root)) {
-            names.add(file.getName());
-        }
+        traverser.breadthFirst(root).forEach(file -> names.add(file.getName()));
 
         assertTrue(names.contains("root"));
         assertTrue(names.contains("file1.txt"));
@@ -1198,9 +1196,7 @@ public class FilesTest extends TestBase {
 
         Traverser<File> traverser = Files.fileTraverser();
         List<String> names = new ArrayList<>();
-        for (File file : traverser.depthFirstPreOrder(root)) {
-            names.add(file.getName());
-        }
+        traverser.depthFirstPreOrder(root).forEach(file -> names.add(file.getName()));
 
         assertTrue(names.contains("root"));
         assertTrue(names.contains("file1.txt"));
@@ -1215,10 +1211,7 @@ public class FilesTest extends TestBase {
         root.mkdir();
 
         Traverser<File> traverser = Files.fileTraverser();
-        List<File> files = new ArrayList<>();
-        for (File file : traverser.breadthFirst(root)) {
-            files.add(file);
-        }
+        List<File> files = traverser.breadthFirst(root).toList();
 
         assertEquals(1, files.size());
         assertEquals("empty", files.get(0).getName());
@@ -1229,10 +1222,7 @@ public class FilesTest extends TestBase {
         File nonExistent = new File(tempDir.toFile(), "nonexistent");
 
         Traverser<File> traverser = Files.fileTraverser();
-        List<File> files = new ArrayList<>();
-        for (File file : traverser.breadthFirst(nonExistent)) {
-            files.add(file);
-        }
+        List<File> files = traverser.breadthFirst(nonExistent).toList();
 
         assertEquals(1, files.size());
         assertEquals(nonExistent, files.get(0));
@@ -1249,9 +1239,7 @@ public class FilesTest extends TestBase {
 
         Traverser<Path> traverser = Files.pathTraverser();
         Set<String> names = new HashSet<>();
-        for (Path path : traverser.breadthFirst(root)) {
-            names.add(path.getFileName().toString());
-        }
+        traverser.breadthFirst(root).forEach(path -> names.add(path.getFileName().toString()));
 
         assertTrue(names.contains("root"));
         assertTrue(names.contains("file.txt"));
@@ -1268,9 +1256,7 @@ public class FilesTest extends TestBase {
 
         Traverser<Path> traverser = Files.pathTraverser();
         Set<String> names = new HashSet<>();
-        for (Path path : traverser.depthFirstPreOrder(root)) {
-            names.add(path.getFileName().toString());
-        }
+        traverser.depthFirstPreOrder(root).forEach(path -> names.add(path.getFileName().toString()));
 
         assertTrue(names.contains("root"));
         assertTrue(names.contains("file.txt"));
@@ -1283,10 +1269,7 @@ public class FilesTest extends TestBase {
         java.nio.file.Files.createDirectory(root);
 
         Traverser<Path> traverser = Files.pathTraverser();
-        List<Path> paths = new ArrayList<>();
-        for (Path path : traverser.breadthFirst(root)) {
-            paths.add(path);
-        }
+        List<Path> paths = traverser.breadthFirst(root).toList();
 
         assertEquals(1, paths.size());
         assertEquals("empty", paths.get(0).getFileName().toString());
@@ -1787,10 +1770,7 @@ public class FilesTest extends TestBase {
         file.createNewFile();
 
         Traverser<File> traverser = Files.fileTraverser();
-        List<File> files = new ArrayList<>();
-        for (File f : traverser.breadthFirst(file)) {
-            files.add(f);
-        }
+        List<File> files = traverser.breadthFirst(file).toList();
 
         assertEquals(1, files.size());
         assertEquals(file, files.get(0));

@@ -2,6 +2,7 @@ package com.landawn.abacus.type;
 
 import static org.junit.Assert.assertNull;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -23,10 +24,20 @@ public class ImmutableSetTypeTest extends TestBase {
 
     @Test
     public void testStringOf() {
+        ImmutableSet<String> values = ImmutableSet.of("a", "b");
+        String str = type.stringOf(values);
+
+        assertNotNull(str);
+        assertTrue(str.contains("a"));
+        assertTrue(str.contains("b"));
     }
 
     @Test
     public void testValueOf() {
+        ImmutableSet<String> values = type.valueOf("[\"a\", \"b\"]");
+
+        assertNotNull(values);
+        assertEquals(ImmutableSet.of("a", "b"), values);
     }
 
     @Test
@@ -97,6 +108,25 @@ public class ImmutableSetTypeTest extends TestBase {
         CallableStatement stmt = mock(CallableStatement.class);
         // Basic set test - actual implementation will vary by type
         assertDoesNotThrow(() -> type.set(stmt, "param", null));
+    }
+
+    // --- regression tests for 2026-06-10 deep-review fixes ---
+
+    @Test
+    public void testValueOfSortedAndNavigableSubtypes() {
+        // regression: sorted/navigable subclasses routed to this handler, but valueOf always
+        // produced a plain ImmutableSet -> ClassCastException (and lost sort order)
+        final Type<com.landawn.abacus.util.ImmutableSortedSet<Integer>> sortedType = TypeFactory.getType("com.landawn.abacus.util.ImmutableSortedSet<Integer>");
+        final com.landawn.abacus.util.ImmutableSortedSet<Integer> ss = sortedType.valueOf("[3, 1, 2]");
+
+        org.junit.jupiter.api.Assertions.assertEquals(java.util.Arrays.asList(1, 2, 3), new java.util.ArrayList<>(ss));
+
+        final Type<com.landawn.abacus.util.ImmutableNavigableSet<Integer>> navType = TypeFactory
+                .getType("com.landawn.abacus.util.ImmutableNavigableSet<Integer>");
+        final com.landawn.abacus.util.ImmutableNavigableSet<Integer> ns = navType.valueOf("[3, 1, 2]");
+
+        org.junit.jupiter.api.Assertions.assertEquals(Integer.valueOf(1), ns.first());
+        org.junit.jupiter.api.Assertions.assertEquals(Integer.valueOf(3), ns.last());
     }
 
 }

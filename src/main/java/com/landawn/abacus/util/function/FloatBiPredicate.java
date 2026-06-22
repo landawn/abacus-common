@@ -13,9 +13,9 @@
  */
 package com.landawn.abacus.util.function;
 
-import java.util.Objects;
-
 import com.landawn.abacus.util.Throwables;
+import com.landawn.abacus.util.N;
+import com.landawn.abacus.util.cs;
 
 /**
  * Represents a predicate (boolean-valued function) of two float-valued arguments.
@@ -37,6 +37,11 @@ import com.landawn.abacus.util.Throwables;
  *   <li>{@link #LESS_THAN} - Tests if the first value is less than the second</li>
  *   <li>{@link #LESS_THAN_OR_EQUAL} - Tests if the first value is less than or equal to the second</li>
  * </ul>
+ *
+ * <p>These predefined comparison constants use the total ordering of
+ * {@link Float#compare(float, float)}, not primitive relational-operator semantics. For example,
+ * NaN compares equal to itself and greater than all other {@code float} values, and {@code 0.0f}
+ * and {@code -0.0f} are distinct.</p>
  *
  *
  * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
@@ -61,7 +66,8 @@ public interface FloatBiPredicate extends Throwables.FloatBiPredicate<RuntimeExc
      * A predicate that tests if two float values are equal.
      * Uses {@link Float#compare(float, float)} to properly handle NaN and signed zero values.
      *
-     * <p>Note: This comparison follows IEEE 754 standard where:</p>
+     * <p>Note: This comparison uses the total ordering of {@link Float#compare(float, float)},
+     * which differs from the IEEE 754 {@code ==} operator:</p>
      * <ul>
      *   <li>NaN is considered equal to itself</li>
      *   <li>0.0f and -0.0f are considered different</li>
@@ -153,10 +159,10 @@ public interface FloatBiPredicate extends Throwables.FloatBiPredicate<RuntimeExc
      *
      * @param other a predicate that will be logically-ANDed with this predicate
      * @return a composed predicate that represents the short-circuiting logical AND of this predicate and the {@code other} predicate
-     * @throws NullPointerException if {@code other} is null
+     * @throws IllegalArgumentException if {@code other} is null
      */
     default FloatBiPredicate and(final FloatBiPredicate other) {
-        Objects.requireNonNull(other);
+        N.checkArgNotNull(other, cs.other);
         return (a, b) -> test(a, b) && other.test(a, b);
     }
 
@@ -180,10 +186,24 @@ public interface FloatBiPredicate extends Throwables.FloatBiPredicate<RuntimeExc
      *
      * @param other a predicate that will be logically-ORed with this predicate
      * @return a composed predicate that represents the short-circuiting logical OR of this predicate and the {@code other} predicate
-     * @throws NullPointerException if {@code other} is null
+     * @throws IllegalArgumentException if {@code other} is null
      */
     default FloatBiPredicate or(final FloatBiPredicate other) {
-        Objects.requireNonNull(other);
+        N.checkArgNotNull(other, cs.other);
         return (a, b) -> test(a, b) || other.test(a, b);
+    }
+
+    /**
+     * Returns this object as a {@link Throwables.FloatBiPredicate} view.
+     *
+     * <p>The returned object has the same behavior as this one. This method does not translate
+     * exceptions or make the original implementation capable of throwing new checked exceptions; the
+     * exception type parameter is for target-type compatibility with APIs that accept {@code Throwables.FloatBiPredicate}.
+     *
+     * @param <E> the target exception type for compatibility with {@code Throwables.FloatBiPredicate}
+     * @return a {@link Throwables.FloatBiPredicate} view of this object
+     */
+    default <E extends Throwable> Throwables.FloatBiPredicate<E> toThrowable() {
+        return (Throwables.FloatBiPredicate<E>) this;
     }
 }

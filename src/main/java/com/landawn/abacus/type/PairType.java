@@ -171,8 +171,8 @@ public class PairType<L, R> extends AbstractType<Pair<L, R>> {
             throw new IllegalArgumentException("Invalid Pair format. Expected array with at least 2 elements but got: " + str);
         }
 
-        final L left = a[0] == null ? null : ((L) (leftType.javaType().isAssignableFrom(a[0].getClass()) ? a[0] : N.convert(a[0], leftType)));
-        final R right = a[1] == null ? null : ((R) (rightType.javaType().isAssignableFrom(a[1].getClass()) ? a[1] : N.convert(a[1], rightType)));
+        final L left = (L) convertTupleElement(a[0], leftType);
+        final R right = (R) convertTupleElement(a[1], rightType);
 
         return Pair.of(left, right);
     }

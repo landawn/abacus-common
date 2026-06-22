@@ -29,6 +29,11 @@ import java.io.Serial;
  * MutableShort instance concurrently, and at least one thread modifies it, external
  * synchronization is required.</p>
  *
+ * <p><b>Note:</b> {@code byteValue()} is inherited from {@link Number} and performs a narrowing
+ * primitive conversion {@code (byte) intValue()}. For wrapped values outside the range
+ * {@code [-128, 127]} the high-order bits are silently discarded, consistent with
+ * {@link Short#byteValue()}.</p>
+ *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * MutableShort counter = MutableShort.of((short)0);

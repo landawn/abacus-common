@@ -96,6 +96,16 @@ public class MutableBooleanTypeTest extends TestBase {
     }
 
     @Test
+    public void testValueOfSingleCharLenientParsing() {
+        // "Y"/"y"/"1" parse as true, consistent with BooleanType/AtomicBooleanType/OptionalBooleanType
+        Assertions.assertTrue(mutableBooleanType.valueOf("Y").value());
+        Assertions.assertTrue(mutableBooleanType.valueOf("y").value());
+        Assertions.assertTrue(mutableBooleanType.valueOf("1").value());
+        Assertions.assertFalse(mutableBooleanType.valueOf("N").value());
+        Assertions.assertFalse(mutableBooleanType.valueOf("0").value());
+    }
+
+    @Test
     public void testGetByIndexTrue() throws SQLException {
         Mockito.when(mockResultSet.getBoolean(1)).thenReturn(true);
         MutableBoolean result = mutableBooleanType.get(mockResultSet, 1);

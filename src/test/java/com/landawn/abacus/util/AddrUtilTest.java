@@ -391,6 +391,14 @@ public class AddrUtilTest extends AbstractTest {
     }
 
     @Test
+    public void testGetAddressList_Collection_NullElement() {
+        Collection<String> servers = Arrays.asList("localhost:8080", null);
+
+        IllegalArgumentException e = assertThrows(IllegalArgumentException.class, () -> AddrUtil.getAddressList(servers));
+        Assertions.assertTrue(e.getMessage().contains("Invalid server 'null'"));
+    }
+
+    @Test
     public void testGetAddressList_Collection_NegativePort() {
         Collection<String> servers = Arrays.asList("localhost:-8080");
         assertThrows(IllegalArgumentException.class, () -> AddrUtil.getAddressList(servers));

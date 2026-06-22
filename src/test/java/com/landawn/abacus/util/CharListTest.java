@@ -2805,6 +2805,12 @@ public class CharListTest extends TestBase {
     }
 
     @Test
+    public void testShuffleNullRandomRejectedForSmallLists() {
+        assertThrows(IllegalArgumentException.class, () -> new CharList().shuffle(null));
+        assertThrows(IllegalArgumentException.class, () -> CharList.of('a').shuffle(null));
+    }
+
+    @Test
     public void testShuffleWithSeededRandom() {
         CharList list1 = CharList.of('a', 'b', 'c', 'd', 'e', 'f');
         CharList list2 = list1.copy();

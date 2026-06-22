@@ -53,4 +53,18 @@ public interface FloatSupplier extends Throwables.FloatSupplier<RuntimeException
      */
     @Override
     float getAsFloat();
+
+    /**
+     * Returns this object as a {@link Throwables.FloatSupplier} view.
+     *
+     * <p>The returned object has the same behavior as this one. This method does not translate
+     * exceptions or make the original implementation capable of throwing new checked exceptions; the
+     * exception type parameter is for target-type compatibility with APIs that accept {@code Throwables.FloatSupplier}.
+     *
+     * @param <E> the target exception type for compatibility with {@code Throwables.FloatSupplier}
+     * @return a {@link Throwables.FloatSupplier} view of this object
+     */
+    default <E extends Throwable> Throwables.FloatSupplier<E> toThrowable() {
+        return (Throwables.FloatSupplier<E>) this;
+    }
 }

@@ -26,6 +26,8 @@ import org.springframework.http.HttpOutputMessage;
 import org.springframework.http.MediaType;
 
 import com.landawn.abacus.TestBase;
+import com.landawn.abacus.parser.JsonDeserConfig;
+import com.landawn.abacus.parser.JsonSerConfig;
 
 public class JsonHttpMessageConverterTest extends TestBase {
 
@@ -425,5 +427,59 @@ public class JsonHttpMessageConverterTest extends TestBase {
         assertTrue(json.contains("\"name\": \"David\""));
         assertTrue(json.contains("\"age\": 50"));
         assertTrue(json.contains("\"active\": false"));
+    }
+
+    // ========== M55: media-type constructor overloads ==========
+
+    @Test
+    public void testConstructor_MediaTypeVarargs() {
+        MediaType vendor = new MediaType("application", "vnd.api+json");
+        JsonHttpMessageConverter c = new JsonHttpMessageConverter(MediaType.APPLICATION_JSON, vendor);
+
+        List<MediaType> supported = c.getSupportedMediaTypes();
+        assertEquals(2, supported.size());
+        assertTrue(supported.contains(MediaType.APPLICATION_JSON));
+        assertTrue(supported.contains(vendor));
+        // The custom media types are actually honored by content negotiation.
+        assertTrue(c.canRead(TestPerson.class, vendor));
+        assertTrue(c.canWrite(TestPerson.class, vendor));
+        assertFalse(c.canRead(TestPerson.class, MediaType.TEXT_PLAIN));
+    }
+
+    @Test
+    public void testConstructor_MediaTypeVarargs_EmptyKeepsDefaults() {
+        JsonHttpMessageConverter c = new JsonHttpMessageConverter(new MediaType[0]);
+
+        // With no media types supplied, the parent defaults are retained.
+        List<MediaType> supported = c.getSupportedMediaTypes();
+        assertTrue(supported.contains(MediaType.APPLICATION_JSON));
+    }
+
+    @Test
+    public void testConstructor_Config_MediaTypeVarargs() {
+        MediaType textJson = new MediaType("text", "json");
+        JsonHttpMessageConverter c = new JsonHttpMessageConverter(new JsonSerConfig(), new JsonDeserConfig(), textJson);
+
+        List<MediaType> supported = c.getSupportedMediaTypes();
+        assertEquals(1, supported.size());
+        assertTrue(supported.contains(textJson));
+        assertTrue(c.canWrite(TestPerson.class, textJson));
+    }
+
+    @Test
+    public void testConstructor_Config_MediaTypeList() {
+        MediaType vendor = new MediaType("application", "vnd.api+json");
+        JsonHttpMessageConverter c = new JsonHttpMessageConverter(new JsonSerConfig(), new JsonDeserConfig(), List.of(MediaType.APPLICATION_JSON, vendor));
+
+        List<MediaType> supported = c.getSupportedMediaTypes();
+        assertEquals(2, supported.size());
+        assertTrue(supported.contains(vendor));
+    }
+
+    @Test
+    public void testConstructor_Config_MediaTypeList_NullKeepsDefaults() {
+        JsonHttpMessageConverter c = new JsonHttpMessageConverter(new JsonSerConfig(), new JsonDeserConfig(), (List<MediaType>) null);
+
+        assertTrue(c.getSupportedMediaTypes().contains(MediaType.APPLICATION_JSON));
     }
 }

@@ -2,6 +2,7 @@ package com.landawn.abacus.util;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
@@ -148,6 +149,27 @@ public class DataSourceUtilTest extends TestBase {
 
         DataSourceUtil.close(mockRs, mockStmt, mockConn);
 
+        verify(mockRs).close();
+        verify(mockStmt).close();
+        verify(mockConn).close();
+    }
+
+    @Test
+    public void testCloseAllPreservesFirstCloseExceptionAndSuppressesLaterFailures() throws SQLException {
+        ResultSet mockRs = mock(ResultSet.class);
+        Statement mockStmt = mock(Statement.class);
+        Connection mockConn = mock(Connection.class);
+
+        doThrow(new SQLException("result set")).when(mockRs).close();
+        doThrow(new SQLException("statement")).when(mockStmt).close();
+        doThrow(new SQLException("connection")).when(mockConn).close();
+
+        UncheckedSQLException thrown = assertThrows(UncheckedSQLException.class, () -> DataSourceUtil.close(mockRs, mockStmt, mockConn));
+
+        assertEquals("result set", thrown.getCause().getMessage());
+        assertEquals(2, thrown.getCause().getSuppressed().length);
+        assertEquals("statement", thrown.getCause().getSuppressed()[0].getMessage());
+        assertEquals("connection", thrown.getCause().getSuppressed()[1].getMessage());
         verify(mockRs).close();
         verify(mockStmt).close();
         verify(mockConn).close();

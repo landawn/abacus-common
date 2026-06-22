@@ -10,7 +10,6 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 
 import org.junit.jupiter.api.Test;
@@ -20,7 +19,6 @@ import com.landawn.abacus.TestBase;
 public class JsonXmlCreatorTest extends TestBase {
 
     static class TestClass {
-        @JsonXmlCreator
         public TestClass() {
         }
 
@@ -34,21 +32,9 @@ public class JsonXmlCreatorTest extends TestBase {
     }
 
     @Test
-    public void testConstructorAnnotation() throws NoSuchMethodException {
-        Constructor<?> constructor = TestClass.class.getDeclaredConstructor();
-        assertTrue(constructor.isAnnotationPresent(JsonXmlCreator.class));
-    }
-
-    @Test
     public void testMethodAnnotation() throws NoSuchMethodException {
         Method method = TestClass.class.getDeclaredMethod("create");
         assertTrue(method.isAnnotationPresent(JsonXmlCreator.class));
-    }
-
-    @Test
-    public void testNonAnnotatedConstructor() throws NoSuchMethodException {
-        Constructor<?> constructor = TestClass.class.getDeclaredConstructor(String.class);
-        assertTrue(!constructor.isAnnotationPresent(JsonXmlCreator.class));
     }
 
     @Test
@@ -62,7 +48,7 @@ public class JsonXmlCreatorTest extends TestBase {
     public void testTargetElements() {
         Target target = JsonXmlCreator.class.getAnnotation(Target.class);
         assertNotNull(target);
-        ElementType[] expectedTargets = { ElementType.METHOD, ElementType.CONSTRUCTOR };
+        ElementType[] expectedTargets = { ElementType.METHOD };
         assertArrayEquals(expectedTargets, target.value());
     }
 
@@ -73,8 +59,8 @@ public class JsonXmlCreatorTest extends TestBase {
 
     @Test
     public void testAnnotationType() throws NoSuchMethodException {
-        Constructor<?> constructor = TestClass.class.getDeclaredConstructor();
-        JsonXmlCreator annotation = constructor.getAnnotation(JsonXmlCreator.class);
+        Method method = TestClass.class.getDeclaredMethod("create");
+        JsonXmlCreator annotation = method.getAnnotation(JsonXmlCreator.class);
         assertNotNull(annotation);
         assertEquals(JsonXmlCreator.class, annotation.annotationType());
     }

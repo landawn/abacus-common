@@ -46,6 +46,12 @@ public interface Pool extends Serializable, AutoCloseable {
      * this capacity may fail or trigger balancing operations depending on
      * the pool configuration.
      *
+     * <p>Unlike {@link #size()}, {@link #isEmpty()}, {@link #stats()}, {@link #evict()} and
+     * {@link #clear()}, this method does <em>not</em> throw {@link IllegalStateException} after the
+     * pool has been {@link #close() closed}: capacity is an immutable configuration value fixed at
+     * construction, so it remains readable for the life of the object. {@link #capacity()},
+     * {@link #isClosed()} and {@link #close()} are therefore the only members usable after close.
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * int max = pool.capacity();
@@ -54,7 +60,7 @@ public interface Pool extends Serializable, AutoCloseable {
      * }
      * }</pre>
      *
-     * @return the maximum number of objects this pool can hold
+     * @return the maximum number of objects this pool can hold (readable even after the pool is closed)
      */
     int capacity();
 
@@ -72,6 +78,7 @@ public interface Pool extends Serializable, AutoCloseable {
      * }</pre>
      *
      * @return the current number of objects in the pool
+     * @throws IllegalStateException if the pool has been closed
      */
     int size();
 
@@ -88,6 +95,7 @@ public interface Pool extends Serializable, AutoCloseable {
      * }</pre>
      *
      * @return {@code true} if the pool contains no objects, {@code false} otherwise
+     * @throws IllegalStateException if the pool has been closed
      */
     boolean isEmpty();
 
@@ -128,8 +136,9 @@ public interface Pool extends Serializable, AutoCloseable {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * pool.clear();       // removes all objects but keeps the pool open
-     * pool.put(newObj);   // pool is still usable
+     * pool.clear();   // removes all objects but keeps the pool open
+     * // The pool is still usable: insert via the subtype API,
+     * // e.g. ObjectPool.add(newObj) or KeyedObjectPool.put(key, newObj).
      * }</pre>
      *
      * @throws IllegalStateException if the pool has been closed
@@ -157,6 +166,7 @@ public interface Pool extends Serializable, AutoCloseable {
      * }</pre>
      *
      * @return a PoolStats object containing current pool statistics
+     * @throws IllegalStateException if the pool has been closed
      */
     PoolStats stats();
 

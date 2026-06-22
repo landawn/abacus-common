@@ -76,4 +76,18 @@ public interface CharSupplier extends Throwables.CharSupplier<RuntimeException> 
      */
     @Override
     char getAsChar();
+
+    /**
+     * Returns this object as a {@link Throwables.CharSupplier} view.
+     *
+     * <p>The returned object has the same behavior as this one. This method does not translate
+     * exceptions or make the original implementation capable of throwing new checked exceptions; the
+     * exception type parameter is for target-type compatibility with APIs that accept {@code Throwables.CharSupplier}.
+     *
+     * @param <E> the target exception type for compatibility with {@code Throwables.CharSupplier}
+     * @return a {@link Throwables.CharSupplier} view of this object
+     */
+    default <E extends Throwable> Throwables.CharSupplier<E> toThrowable() {
+        return (Throwables.CharSupplier<E>) this;
+    }
 }

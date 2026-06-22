@@ -138,6 +138,6 @@ public class CharConsumerTest extends TestBase {
     public void testAndThenNullThrowsImmediately() {
         CharConsumer instance = a -> {
         };
-        org.junit.jupiter.api.Assertions.assertThrows(NullPointerException.class, () -> instance.andThen((CharConsumer) null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> instance.andThen((CharConsumer) null));
     }
 }

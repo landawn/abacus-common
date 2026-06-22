@@ -132,7 +132,7 @@ public class TimeType extends AbstractDateType<Time> {
             return null; // NOSONAR
         }
 
-        if (isPossibleLong(cbuf, offset, len)) {
+        if (isPossibleMillis(cbuf, offset, len)) {
             try {
                 return Dates.createTime(parseLong(cbuf, offset, len));
             } catch (final NumberFormatException e) {

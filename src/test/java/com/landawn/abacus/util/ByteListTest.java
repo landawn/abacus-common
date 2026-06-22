@@ -1880,16 +1880,6 @@ public class ByteListTest extends TestBase {
     }
 
     @Test
-    public void testSymmetricDifferenceByteList() {
-        ByteList list1 = ByteList.of((byte) 1, (byte) 2, (byte) 3);
-        ByteList list2 = ByteList.of((byte) 2, (byte) 3, (byte) 4);
-        ByteList result = list1.symmetricDifference(list2);
-        assertTrue(result.contains((byte) 1));
-        assertTrue(result.contains((byte) 4));
-        assertFalse(result.contains((byte) 2));
-    }
-
-    @Test
     public void testSymmetricDifferenceArray() {
         ByteList list = ByteList.of((byte) 1, (byte) 2, (byte) 3);
         ByteList result = list.symmetricDifference(new byte[] { 2, 3, 4 });
@@ -1930,14 +1920,6 @@ public class ByteListTest extends TestBase {
 
         list.clear();
         assertEquals(0, list.frequency((byte) 1));
-    }
-
-    @Test
-    public void testFrequency() {
-        ByteList list = ByteList.of((byte) 1, (byte) 2, (byte) 1, (byte) 3, (byte) 1);
-        assertEquals(3, list.frequency((byte) 1));
-        assertEquals(1, list.frequency((byte) 2));
-        assertEquals(0, list.frequency((byte) 5));
     }
 
     @Test
@@ -2031,12 +2013,6 @@ public class ByteListTest extends TestBase {
 
     @Test
     public void test_lastIndexOf_fromIndex() {
-        ByteList list = ByteList.of((byte) 10, (byte) 20, (byte) 30, (byte) 20);
-        assertEquals(1, list.lastIndexOf((byte) 20, 2));
-    }
-
-    @Test
-    public void testLastIndexOfFromIndex() {
         ByteList list = ByteList.of((byte) 10, (byte) 20, (byte) 30, (byte) 20);
         assertEquals(1, list.lastIndexOf((byte) 20, 2));
     }
@@ -2689,13 +2665,6 @@ public class ByteListTest extends TestBase {
     }
 
     @Test
-    public void testReverseRange() {
-        ByteList list = ByteList.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5);
-        list.reverse(1, 4);
-        assertArrayEquals(new byte[] { 1, 4, 3, 2, 5 }, list.toArray());
-    }
-
-    @Test
     public void testReverse_noArg() {
         ByteList bl = ByteList.of((byte) 1, (byte) 2, (byte) 3, (byte) 4);
         bl.reverse();
@@ -2761,6 +2730,12 @@ public class ByteListTest extends TestBase {
         ByteList list = ByteList.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5);
         list.shuffle(new java.util.Random(42));
         assertEquals(5, list.size());
+    }
+
+    @Test
+    public void testShuffleNullRandomRejectedForSmallLists() {
+        assertThrows(IllegalArgumentException.class, () -> new ByteList().shuffle(null));
+        assertThrows(IllegalArgumentException.class, () -> ByteList.of((byte) 1).shuffle(null));
     }
 
     @Test
@@ -2900,22 +2875,6 @@ public class ByteListTest extends TestBase {
         assertEquals((byte) 4, steppedCopy.get(2));
         assertEquals((byte) 6, steppedCopy.get(3));
         assertEquals((byte) 8, steppedCopy.get(4));
-    }
-
-    @Test
-    public void testCopyRange() {
-        ByteList list = ByteList.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5);
-        ByteList copy = list.copy(1, 4);
-        assertEquals(3, copy.size());
-        assertArrayEquals(new byte[] { 2, 3, 4 }, copy.toArray());
-    }
-
-    @Test
-    public void testCopyWithStep() {
-        ByteList list = ByteList.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5, (byte) 6);
-        ByteList copy = list.copy(0, 6, 2);
-        assertEquals(3, copy.size());
-        assertArrayEquals(new byte[] { 1, 3, 5 }, copy.toArray());
     }
 
     @Test

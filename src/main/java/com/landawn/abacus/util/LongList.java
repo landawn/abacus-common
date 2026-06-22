@@ -180,7 +180,7 @@ import com.landawn.abacus.util.stream.LongStream;
  * <ul>
  *   <li><b>Initial Capacity:</b> Default capacity of 10 elements</li>
  *   <li><b>Growth Strategy:</b> 1.75x expansion when capacity exceeded</li>
- *   <li><b>Manual Control:</b> {@code ensureCapacity()} for performance optimization</li>
+ *   <li><b>Manual Control:</b> specify the initial capacity via the {@code LongList(int)} constructor</li>
  *   <li><b>Trimming:</b> {@code trimToSize()} to reduce memory footprint</li>
  * </ul>
  *
@@ -236,7 +236,7 @@ import com.landawn.abacus.util.stream.LongStream;
  *
  * <p><b>Performance Tips:</b>
  * <ul>
- *   <li>Pre-size lists with known capacity using constructor or {@code ensureCapacity()}</li>
+ *   <li>Pre-size lists with known capacity using the {@code LongList(int)} constructor</li>
  *   <li>Use {@code addLast()} instead of {@code addFirst()} for better performance</li>
  *   <li>Sort data before using {@code binarySearch()} for O(log n) lookups</li>
  *   <li>Use {@code parallelSort()} for large datasets to leverage multi-core processors</li>
@@ -277,13 +277,15 @@ import com.landawn.abacus.util.stream.LongStream;
  *
  * // Calculate duration and intervals
  * long totalDuration = lastEvent.orElse(0L) - firstEvent.orElse(0L);
- * LongStream intervals = systemEvents.stream()
- *     .skip(1)
- *     .map(current -> current - systemEvents.get(systemEvents.indexOf(current) - 1));
+ * // Each interval is the gap between consecutive (sorted) events; index by position, not value,
+ * // because indexOf would return the first occurrence and break on duplicate timestamps.
+ * LongList intervals = IntStream.range(1, systemEvents.size())
+ *     .mapToLong(i -> systemEvents.get(i) - systemEvents.get(i - 1))
+ *     .toLongList();
  *
- * // Performance analysis
- * double avgInterval = intervals.average().orElse(0.0);
- * long maxInterval = intervals.max().orElse(0L);
+ * // Performance analysis (a stream can only be consumed once, so create one per terminal op)
+ * double avgInterval = intervals.stream().average().orElse(0.0);
+ * long maxInterval = intervals.stream().max().orElse(0L);
  * }</pre>
  *
  * @see PrimitiveList
@@ -528,7 +530,7 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * @param endExclusive the ending value (exclusive)
      * @return a new LongList containing the ascending sequence, or an empty list if
      *         {@code startInclusive >= endExclusive}
-     * @throws IllegalArgumentException if the resulting range overflows {@code int} capacity
+     * @throws IllegalArgumentException if the number of elements in the range exceeds {@code Integer.MAX_VALUE}
      */
     public static LongList range(final long startInclusive, final long endExclusive) {
         return of(Array.range(startInclusive, endExclusive));
@@ -551,7 +553,7 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * @param endExclusive the ending value (exclusive)
      * @param by the step value for incrementing. Must not be zero.
      * @return a new LongList containing the sequence of values
-     * @throws IllegalArgumentException if {@code by} is zero, or if the resulting range overflows {@code int} capacity
+     * @throws IllegalArgumentException if {@code by} is zero, or if the number of elements in the range exceeds {@code Integer.MAX_VALUE}
      */
     public static LongList range(final long startInclusive, final long endExclusive, final long by) {
         return of(Array.range(startInclusive, endExclusive, by));
@@ -576,7 +578,7 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * @param endInclusive the ending value (inclusive)
      * @return a new LongList containing the ascending sequence, or an empty list if
      *         {@code startInclusive > endInclusive}
-     * @throws IllegalArgumentException if the resulting range overflows {@code int} capacity
+     * @throws IllegalArgumentException if the number of elements in the range exceeds {@code Integer.MAX_VALUE}
      */
     public static LongList rangeClosed(final long startInclusive, final long endInclusive) {
         return of(Array.rangeClosed(startInclusive, endInclusive));
@@ -600,7 +602,7 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * @param endInclusive the ending value (inclusive)
      * @param by the step value for incrementing. Must not be zero.
      * @return a new LongList containing the sequence of values
-     * @throws IllegalArgumentException if {@code by} is zero, or if the resulting range overflows {@code int} capacity
+     * @throws IllegalArgumentException if {@code by} is zero, or if the number of elements in the range exceeds {@code Integer.MAX_VALUE}
      */
     public static LongList rangeClosed(final long startInclusive, final long endInclusive, final long by) {
         return of(Array.rangeClosed(startInclusive, endInclusive, by));
@@ -839,7 +841,7 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
 
         final int numNew = c.size();
 
-        ensureCapacity(size + numNew); // Increments modCount
+        ensureCapacity(size + numNew);
 
         final int numMoved = size - index;
 
@@ -892,7 +894,7 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
 
         final int numNew = a.length;
 
-        ensureCapacity(size + numNew); // Increments modCount
+        ensureCapacity(size + numNew);
 
         final int numMoved = size - index;
 
@@ -1744,12 +1746,12 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * <pre>{@code
      * LongList list1 = LongList.of(0L, 1L, 1L, 2L, 3L);
      * LongList list2 = LongList.of(1L, 2L, 2L, 4L);
-     * LongList result = list1.intersection(list2);   // returns result will be [1L, 2L]
+     * LongList result = list1.intersection(list2);   // result will be [1L, 2L]
      * // One occurrence of '1L' (minimum count in both lists) and one occurrence of '2L'
      *
      * LongList list3 = LongList.of(5L, 5L, 6L);
      * LongList list4 = LongList.of(5L, 7L);
-     * LongList result2 = list3.intersection(list4);   // returns result will be [5L]
+     * LongList result2 = list3.intersection(list4);   // result will be [5L]
      * // One occurrence of '5L' (minimum count in both lists)
      * }</pre>
      *
@@ -1789,12 +1791,12 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * <pre>{@code
      * LongList list1 = LongList.of(0L, 1L, 1L, 2L, 3L);
      * long[] array = new long[] {1L, 2L, 2L, 4L};
-     * LongList result = list1.intersection(array);   // returns result will be [1L, 2L]
+     * LongList result = list1.intersection(array);   // result will be [1L, 2L]
      * // One occurrence of '1L' (minimum count in both sources) and one occurrence of '2L'
      *
      * LongList list2 = LongList.of(5L, 5L, 6L);
      * long[] array2 = new long[] {5L, 7L};
-     * LongList result2 = list2.intersection(array2);   // returns result will be [5L]
+     * LongList result2 = list2.intersection(array2);   // result will be [5L]
      * // One occurrence of '5L' (minimum count in both sources)
      * }</pre>
      *
@@ -1824,12 +1826,12 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * <pre>{@code
      * LongList list1 = LongList.of(1L, 1L, 2L, 3L);
      * LongList list2 = LongList.of(1L, 4L);
-     * LongList result = list1.difference(list2);   // returns result will be [1L, 2L, 3L]
+     * LongList result = list1.difference(list2);   // result will be [1L, 2L, 3L]
      * // One '1L' remains because list1 has two occurrences and list2 has one
      *
      * LongList list3 = LongList.of(5L, 6L);
      * LongList list4 = LongList.of(5L, 5L, 6L);
-     * LongList result2 = list3.difference(list4);   // returns result will be [] (empty)
+     * LongList result2 = list3.difference(list4);   // result will be [] (empty)
      * // No elements remain because list4 has at least as many occurrences of each value as list3
      * }</pre>
      *
@@ -1869,12 +1871,12 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * <pre>{@code
      * LongList list1 = LongList.of(1L, 1L, 2L, 3L);
      * long[] array = new long[] {1L, 4L};
-     * LongList result = list1.difference(array);   // returns result will be [1L, 2L, 3L]
+     * LongList result = list1.difference(array);   // result will be [1L, 2L, 3L]
      * // One '1L' remains because list1 has two occurrences and array has one
      *
      * LongList list2 = LongList.of(5L, 6L);
      * long[] array2 = new long[] {5L, 5L, 6L};
-     * LongList result2 = list2.difference(array2);   // returns result will be [] (empty)
+     * LongList result2 = list2.difference(array2);   // result will be [] (empty)
      * // No elements remain because array2 has at least as many occurrences of each value as list2
      * }</pre>
      *
@@ -1920,7 +1922,8 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      *
      * @param b the list to compare with this list for symmetric difference
      * @return a new LongList containing elements that are present in either this list or the specified list,
-     *         but not in both, considering the number of occurrences
+     *         but not in both, considering the number of occurrences.
+     *         Returns a copy of this list if {@code b} is {@code null} or empty, or a copy of {@code b} if this list is empty.
      * @see #symmetricDifference(long[])
      * @see #difference(LongList)
      * @see #intersection(LongList)
@@ -1981,7 +1984,8 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      *
      * @param b the array to compare with this list for symmetric difference
      * @return a new LongList containing elements that are present in either this list or the specified array,
-     *         but not in both, considering the number of occurrences
+     *         but not in both, considering the number of occurrences.
+     *         Returns a copy of this list if {@code b} is {@code null} or empty, or a copy of {@code b} if this list is empty.
      * @see #symmetricDifference(LongList)
      * @see #difference(long[])
      * @see #intersection(long[])
@@ -2641,10 +2645,13 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * is equally likely, assuming the provided source of randomness is fair.
      * </p>
      *
-     * @param rnd the source of randomness to use for shuffling
+     * @param rnd the source of randomness to use for shuffling; must not be {@code null}
+     * @throws NullPointerException if {@code rnd} is {@code null}
      */
     @Override
     public void shuffle(final Random rnd) {
+        N.checkArgNotNull(rnd, cs.rnd);
+
         if (size() > 1) {
             N.shuffle(elementData, 0, size, rnd);
         }
@@ -2732,7 +2739,9 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
     public LongList copy(final int fromIndex, final int toIndex, final int step) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), Math.max(fromIndex, toIndex));
 
-        return new LongList(N.copyOfRange(elementData, fromIndex, toIndex, step));
+        // Clamp a descending start against the logical size (like forEach): N.copyOfRange clamps
+        // against the backing array's length, which may exceed size and expose phantom elements.
+        return new LongList(N.copyOfRange(elementData, fromIndex > toIndex ? N.min(size - 1, fromIndex) : fromIndex, toIndex, step));
     }
 
     /**

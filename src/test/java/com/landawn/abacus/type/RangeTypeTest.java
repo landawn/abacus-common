@@ -89,6 +89,25 @@ public class RangeTypeTest extends TestBase {
     }
 
     @Test
+    public void test_valueOf_RawRangeUsesComparableEndpoints() {
+        final Type<Range> rawRangeType = TypeFactory.getType(Range.class);
+        final Range<?> result = rawRangeType.valueOf("[1, 10]");
+
+        assertEquals(1, result.lowerEndpoint());
+        assertEquals(10, result.upperEndpoint());
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    public void test_valueOf_PrimitiveEndpointTypeUsesWrapperArray() {
+        final Type<Range<Integer>> primitiveRangeType = TypeFactory.getType("Range<int>");
+        final Range<Integer> result = primitiveRangeType.valueOf("[1, 10]");
+
+        assertEquals(1, result.lowerEndpoint());
+        assertEquals(10, result.upperEndpoint());
+    }
+
+    @Test
     public void test_valueOf_rejectsMalformedEndpointCount() {
         assertThrows(IllegalArgumentException.class, () -> rangeType.valueOf("[1]"));
         assertThrows(IllegalArgumentException.class, () -> rangeType.valueOf("[1,2,3]"));

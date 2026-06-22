@@ -215,9 +215,8 @@ public class JdkOptionalDoubleType extends AbstractOptionalType<OptionalDouble> 
      * Empty optionals are written as "null".
      * <p>
      * <b>appendTo vs. serializeTo:</b> {@code appendTo} produces a plain, {@code toString()}-style rendering with no
-     * JSON/XML quoting or escaping (for general text output), whereas {@code serializeTo} produces the JSON/XML
-     * serialized form (applying string quotation and character escaping per the serialization config) and is used by the
-     * JSON/XML serializers.
+     * JSON/XML quoting or escaping (for general text output), whereas {@code serializeTo} writes this type's JSON/XML
+     * literal form and ignores string quotation/escaping config.
      *
      * @param appendable the Appendable to write to
      * @param x the OptionalDouble to append
@@ -246,12 +245,10 @@ public class JdkOptionalDoubleType extends AbstractOptionalType<OptionalDouble> 
      * Empty optionals are written as {@code null}.
      * Present values are written as numeric values without quotes.
      * <p>
-     * This method is specifically designed for JSON/XML serialization: it writes the serialized form of {@code x} to the
-     * {@code CharacterWriter}, applying string quotation and character escaping according to the supplied serialization
-     * config (a {@code null} config means no surrounding quotation). It is the streaming counterpart of {@code stringOf}
-     * and is invoked by the JSON/XML serializers.
+     * This method is specifically designed for JSON/XML serialization: it writes this type's literal form to the
+     * {@code CharacterWriter}. String quotation/escaping config is ignored.
      * <p>
-     * <b>serializeTo vs. appendTo:</b> {@code serializeTo} produces machine-readable JSON/XML (quoted and escaped),
+     * <b>serializeTo vs. appendTo:</b> {@code serializeTo} produces machine-readable JSON/XML literal output,
      * whereas {@code appendTo} produces a plain, human-readable {@code toString()}-style rendering without JSON/XML
      * quoting or escaping.
      *

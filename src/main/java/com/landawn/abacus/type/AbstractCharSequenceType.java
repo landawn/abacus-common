@@ -20,8 +20,9 @@ package com.landawn.abacus.type;
  * This class provides common functionality for handling {@code CharSequence} implementations
  * such as {@link String}, {@link StringBuilder}, {@link StringBuffer}, and other custom
  * {@code CharSequence} types.
- * {@code CharSequence} types are treated as primary types that are immutable, comparable,
- * and can be directly serialized and deserialized.
+ * {@code CharSequence} types are treated as primary types that are comparable and can be
+ * directly serialized and deserialized; immutability varies by subtype ({@code String}-backed
+ * types are immutable, while the {@code StringBuilder}/{@code StringBuffer} handlers report mutable).
  * </p>
  *
  * @param <T> the specific {@code CharSequence} type (e.g., {@code String}, {@code StringBuilder}, {@code StringBuffer})

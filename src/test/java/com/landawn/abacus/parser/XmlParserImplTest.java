@@ -1343,5 +1343,139 @@ public class XmlParserImplTest extends TestBase {
         Assertions.assertEquals(36, result.getAge());
     }
 
+    @Test
+    public void bugFix_stax_ignoredFirstTextProp_doesNotCrash() {
+        // The ignored property is the FIRST property element, so no propType has been resolved yet;
+        // the StAX CHARACTERS handler used to call propType.valueOf(text) with propType == null -> NPE.
+        String xml = "<testBean><name>abc</name><age>30</age></testBean>";
+        XmlDeserConfig cfg = new XmlDeserConfig().setIgnoredPropNames(TestBean.class, N.asSet("name"));
+
+        TestBean result = staxParser.deserialize(xml, cfg, TestBean.class);
+        Assertions.assertNull(result.getName());
+        Assertions.assertEquals(30, result.getAge());
+
+        // DOM parser was already correct; both must agree.
+        TestBean domResult = domParser.deserialize(xml, cfg, TestBean.class);
+        Assertions.assertNull(domResult.getName());
+        Assertions.assertEquals(30, domResult.getAge());
+    }
+
+    @Test
+    public void bugFix_stax_ignoredTextProp_staleTypeFromPreviousProp() {
+        // After parsing <age>, the stale propType is int; the ignored <name>'s text "abc" used to be
+        // parsed with the stale int type -> NumberFormatException.
+        String xml = "<testBean><age>30</age><name>abc</name><renamedField>keep</renamedField></testBean>";
+        XmlDeserConfig cfg = new XmlDeserConfig().setIgnoredPropNames(TestBean.class, N.asSet("name"));
+
+        TestBean result = staxParser.deserialize(xml, cfg, TestBean.class);
+        Assertions.assertNull(result.getName());
+        Assertions.assertEquals(30, result.getAge());
+    }
+
+    @Test
+    public void bugFix_stax_nullElementInList_keepsFollowingElements() {
+        List<TestBean> beans = new ArrayList<>();
+        beans.add(new TestBean("a", 1));
+        beans.add(null);
+        beans.add(new TestBean("b", 2));
+
+        String xml = staxParser.serialize(beans);
+
+        List<TestBean> result = staxParser.deserialize(xml, new XmlDeserConfig().setElementType(TestBean.class), List.class);
+        Assertions.assertEquals(3, result.size());
+        Assertions.assertEquals("a", result.get(0).getName());
+        Assertions.assertNull(result.get(1));
+        Assertions.assertEquals("b", result.get(2).getName());
+    }
+
+    @Test
+    public void bugFix_stax_nullElementInArray_keepsFollowingElements() {
+        TestBean[] beans = { new TestBean("a", 1), null, new TestBean("b", 2) };
+
+        String xml = staxParser.serialize(beans);
+
+        TestBean[] result = staxParser.deserialize(xml, new XmlDeserConfig().setElementType(TestBean.class), TestBean[].class);
+        Assertions.assertEquals(3, result.length);
+        Assertions.assertEquals("a", result[0].getName());
+        Assertions.assertNull(result[1]);
+        Assertions.assertEquals("b", result[2].getName());
+    }
+
+    @Test
+    public void bugFix_stax_strayTextInMap_skippedLikeDomParser() {
+        // Trailing text after an entry used to be parsed with the stale entry type and stored
+        // under a null key (or crash); the DOM parser skips stray text nodes.
+        Map<String, Object> result = staxParser.deserialize("<map><a>1</a>tail</map>", Map.class);
+        Assertions.assertEquals(1, result.size());
+        Assertions.assertEquals("1", result.get("a"));
+
+        // Text with no entry at all used to throw a raw NullPointerException.
+        Map<String, Object> empty = staxParser.deserialize("<map>abc</map>", Map.class);
+        Assertions.assertTrue(empty.isEmpty());
+    }
+
+    @Test
+    public void bugFix_stax_strayTextInMapEntity_skippedLikeDomParser() {
+        // Used to throw a raw RuntimeException("Unexpected error") / NullPointerException.
+        MapEntity result = staxParser.deserialize("<m><a>1</a>tail</m>", MapEntity.class);
+        Assertions.assertEquals("1", result.get("a"));
+
+        MapEntity empty = staxParser.deserialize("<x>abc</x>", MapEntity.class);
+        Assertions.assertTrue(empty.keySet().isEmpty());
+    }
+
+    @Test
+    public void bugFix_stax_cdataSectionContent_preserved() {
+        // With a non-coalescing StAX provider that reports CDATA events (e.g. Woodstox, which is on
+        // this project's classpath), CDATA content used to be silently dropped by the StAX parser.
+        String xml = "<testBean><name><![CDATA[John & Jane]]></name><age>5</age></testBean>";
+
+        TestBean result = staxParser.deserialize(xml, TestBean.class);
+        Assertions.assertEquals("John & Jane", result.getName());
+        Assertions.assertEquals(5, result.getAge());
+
+        TestBean domResult = domParser.deserialize(xml, TestBean.class);
+        Assertions.assertEquals("John & Jane", domResult.getName());
+    }
+
+    @Test
+    public void testDeserialize_IOExceptionFromReader() {
+        final java.io.Reader failingReader = new java.io.Reader() {
+            @Override
+            public int read(final char[] cbuf, final int off, final int len) throws IOException {
+                throw new IOException("read failed");
+            }
+
+            @Override
+            public void close() throws IOException {
+                // no-op
+            }
+        };
+
+        final com.landawn.abacus.exception.UncheckedIOException ex = Assertions.assertThrows(com.landawn.abacus.exception.UncheckedIOException.class,
+                () -> staxParser.deserialize(failingReader, new XmlDeserConfig(), Map.class));
+
+        Assertions.assertTrue(ex.getCause() instanceof IOException);
+    }
+
+    @Test
+    public void testSharedReferenceIsNotMisdetectedAsCycle() {
+        // regression: write() never removed objects from serializedObjects after writing the subtree,
+        // so two SIBLING references to the same object (a DAG, not a cycle) were misidentified as
+        // circular and the second one was silently emitted as an empty element.
+        final Map<String, Object> shared = N.asMap("name", "x");
+        final Map<String, Object> root = new java.util.LinkedHashMap<>();
+        root.put("a1", shared);
+        root.put("a2", shared);
+
+        final XmlSerConfig xsc = new XmlSerConfig().setSupportCircularReference(true);
+        final String xml = staxParser.serialize(root, xsc);
+
+        // Both sibling references must carry the full nested map; with the bug the second was emitted
+        // as an empty <a2></a2> element.
+        Assertions.assertTrue(xml.contains("<a1><map><name>x</name></map></a1>"), "first reference must be fully serialized: " + xml);
+        Assertions.assertTrue(xml.contains("<a2><map><name>x</name></map></a2>"), "second reference must be fully serialized: " + xml);
+    }
+
     // TODO: Remaining XmlParserImpl coverage gaps are in internal stream/DOM recursion branches that require synthetic XML reader states and target-type resolution not exposed as stable public fixtures.
 }

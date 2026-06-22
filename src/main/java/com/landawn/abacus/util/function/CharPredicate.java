@@ -13,9 +13,9 @@
  */
 package com.landawn.abacus.util.function;
 
-import java.util.Objects;
-
 import com.landawn.abacus.util.Throwables;
+import com.landawn.abacus.util.N;
+import com.landawn.abacus.util.cs;
 
 /**
  * Represents a predicate (boolean-valued function) of one {@code char}-valued argument.
@@ -139,10 +139,10 @@ public interface CharPredicate extends Throwables.CharPredicate<RuntimeException
      *
      * @param other a predicate that will be logically-ANDed with this predicate. Must not be {@code null}.
      * @return a composed predicate that represents the short-circuiting logical AND of this predicate and the {@code other} predicate
-     * @throws NullPointerException if {@code other} is null
+     * @throws IllegalArgumentException if {@code other} is null
      */
     default CharPredicate and(final CharPredicate other) {
-        Objects.requireNonNull(other);
+        N.checkArgNotNull(other, cs.other);
         return t -> test(t) && other.test(t);
     }
 
@@ -161,10 +161,10 @@ public interface CharPredicate extends Throwables.CharPredicate<RuntimeException
      *
      * @param other a predicate that will be logically-ORed with this predicate. Must not be {@code null}.
      * @return a composed predicate that represents the short-circuiting logical OR of this predicate and the {@code other} predicate
-     * @throws NullPointerException if {@code other} is null
+     * @throws IllegalArgumentException if {@code other} is null
      */
     default CharPredicate or(final CharPredicate other) {
-        Objects.requireNonNull(other);
+        N.checkArgNotNull(other, cs.other);
         return t -> test(t) || other.test(t);
     }
 
@@ -202,7 +202,7 @@ public interface CharPredicate extends Throwables.CharPredicate<RuntimeException
 
     /**
      * Returns a predicate that tests if the char value is greater than the specified target value.
-     * Comparison is based on Unicode code point values.
+     * Comparison is based on UTF-16 code unit values.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -219,7 +219,7 @@ public interface CharPredicate extends Throwables.CharPredicate<RuntimeException
 
     /**
      * Returns a predicate that tests if the char value is greater than or equal to the specified target value.
-     * Comparison is based on Unicode code point values.
+     * Comparison is based on UTF-16 code unit values.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -236,7 +236,7 @@ public interface CharPredicate extends Throwables.CharPredicate<RuntimeException
 
     /**
      * Returns a predicate that tests if the char value is less than the specified target value.
-     * Comparison is based on Unicode code point values.
+     * Comparison is based on UTF-16 code unit values.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -253,7 +253,7 @@ public interface CharPredicate extends Throwables.CharPredicate<RuntimeException
 
     /**
      * Returns a predicate that tests if the char value is less than or equal to the specified target value.
-     * Comparison is based on Unicode code point values.
+     * Comparison is based on UTF-16 code unit values.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -271,7 +271,7 @@ public interface CharPredicate extends Throwables.CharPredicate<RuntimeException
     /**
      * Returns a predicate that tests if the char value is between the specified minimum and maximum values (exclusive).
      * The test returns {@code true} if the value is greater than {@code minValue} AND less than {@code maxValue}.
-     * Comparison is based on Unicode code point values.
+     * Comparison is based on UTF-16 code unit values.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -285,5 +285,19 @@ public interface CharPredicate extends Throwables.CharPredicate<RuntimeException
      */
     static CharPredicate between(final char minValue, final char maxValue) {
         return value -> value > minValue && value < maxValue;
+    }
+
+    /**
+     * Returns this object as a {@link Throwables.CharPredicate} view.
+     *
+     * <p>The returned object has the same behavior as this one. This method does not translate
+     * exceptions or make the original implementation capable of throwing new checked exceptions; the
+     * exception type parameter is for target-type compatibility with APIs that accept {@code Throwables.CharPredicate}.
+     *
+     * @param <E> the target exception type for compatibility with {@code Throwables.CharPredicate}
+     * @return a {@link Throwables.CharPredicate} view of this object
+     */
+    default <E extends Throwable> Throwables.CharPredicate<E> toThrowable() {
+        return (Throwables.CharPredicate<E>) this;
     }
 }

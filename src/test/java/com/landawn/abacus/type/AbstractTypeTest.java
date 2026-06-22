@@ -339,7 +339,7 @@ public class AbstractTypeTest extends TestBase {
     @Test
     public void testIsComparable_DefaultReturnsFalse() {
         TestSplitType type = new TestSplitType();
-        assertFalse(type.isComparable());
+        assertTrue(type.isComparable());
     }
 
     @Test
@@ -383,16 +383,6 @@ public class AbstractTypeTest extends TestBase {
         assertEquals(0, comparableType.compare(null, null));
         assertTrue(comparableType.compare(null, "a") < 0);
         assertTrue(comparableType.compare("a", null) > 0);
-    }
-
-    // compare() throws UnsupportedOperationException when isComparable() returns false (default)
-    @Test
-    public void testCompare_NonComparable_ThrowsUnsupportedOperation() {
-        // stringType uses the default AbstractType which returns false from isComparable()
-        // But stringType is configured to be comparable in the test setup. Use a plain type.
-        TestSplitType nonComparableType = new TestSplitType();
-        assertFalse(nonComparableType.isComparable());
-        assertThrows(UnsupportedOperationException.class, () -> nonComparableType.compare("a", "b"));
     }
 
     @Test

@@ -48,7 +48,8 @@ import com.landawn.abacus.util.stream.LongStream;
 public abstract class LongIterator extends ImmutableIterator<Long> {
 
     /**
-     * Protected constructor for subclasses.
+     * Constructs a new {@code LongIterator}.
+     * Intended for use by subclasses only.
      */
     protected LongIterator() {
     }
@@ -117,7 +118,8 @@ public abstract class LongIterator extends ImmutableIterator<Long> {
      *
      * <p>The iterator will iterate over elements from {@code fromIndex} (inclusive) to
      * {@code toIndex} (exclusive). If {@code fromIndex} equals {@code toIndex}, an empty
-     * iterator is returned.</p>
+     * iterator is returned. A {@code null} array is treated as length 0 for range validation,
+     * so only {@code fromIndex == toIndex == 0} is valid.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -129,9 +131,8 @@ public abstract class LongIterator extends ImmutableIterator<Long> {
      * @param a the long array (may be {@code null})
      * @param fromIndex the starting index (inclusive)
      * @param toIndex the ending index (exclusive)
-     * @return a new {@code LongIterator} over the specified range, or an empty iterator if the array is {@code null} or fromIndex equals toIndex
-     * @throws IndexOutOfBoundsException if fromIndex is negative, toIndex is greater than the array length,
-     *         or fromIndex is greater than toIndex
+     * @return a new {@code LongIterator} over the specified range, or an empty iterator if the validated range is empty
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code toIndex > (a == null ? 0 : a.length)}, or {@code fromIndex > toIndex}
      */
     public static LongIterator of(final long[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
@@ -188,13 +189,14 @@ public abstract class LongIterator extends ImmutableIterator<Long> {
      *        must not be {@code null}
      * @return a lazily initialized {@code LongIterator} that delegates to the iterator provided by the supplier
      * @throws IllegalArgumentException if {@code iteratorSupplier} is {@code null}
+     * @throws IllegalStateException if the supplier returns {@code null} when invoked
      */
     public static LongIterator defer(final Supplier<? extends LongIterator> iteratorSupplier) throws IllegalArgumentException {
         N.checkArgNotNull(iteratorSupplier, cs.iteratorSupplier);
 
         return new LongIterator() {
             private LongIterator iter = null;
-            private boolean isInitialized = false;
+            private volatile boolean isInitialized = false;
 
             @Override
             public boolean hasNext() {
@@ -214,10 +216,13 @@ public abstract class LongIterator extends ImmutableIterator<Long> {
                 return iter.nextLong();
             }
 
-            private void init() {
+            private synchronized void init() {
                 if (!isInitialized) {
                     isInitialized = true;
                     iter = iteratorSupplier.get();
+                    if (iter == null) {
+                        throw new IllegalStateException("Iterator supplier returned null");
+                    }
                 }
             }
         };
@@ -257,6 +262,10 @@ public abstract class LongIterator extends ImmutableIterator<Long> {
      * Creates a {@code LongIterator} that generates values using the provided {@link LongSupplier}
      * while the {@link BooleanSupplier} returns {@code true}.
      * This allows for creating finite iterators with dynamic termination conditions.
+     *
+     * <p>Note: The {@code hasNext} supplier may be called multiple times for the same element
+     * (once by the user, once internally for validation), so it should be idempotent or
+     * designed to handle multiple calls.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code

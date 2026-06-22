@@ -53,15 +53,16 @@ import com.landawn.abacus.util.stream.FloatStream;
 public abstract class FloatIterator extends ImmutableIterator<Float> {
 
     /**
-     * Constructor for subclasses.
+     * Constructs a new {@code FloatIterator}.
+     * Intended for use by subclasses only.
      */
     protected FloatIterator() {
     }
 
     /**
-     * A singleton empty {@code FloatIterator} that has no elements.
-     * {@code hasNext()} always returns {@code false}; {@code nextFloat()} always throws
-     * {@link NoSuchElementException}. This instance is immutable and can be safely shared.
+     * A singleton empty {@code FloatIterator} instance that contains no elements.
+     * This iterator's {@code hasNext()} always returns {@code false}, and {@code nextFloat()}
+     * always throws {@link NoSuchElementException}.
      *
      * @see #empty()
      */
@@ -201,13 +202,14 @@ public abstract class FloatIterator extends ImmutableIterator<Float> {
      * @param iteratorSupplier a supplier that provides the {@code FloatIterator} when first needed; must not be {@code null}
      * @return a {@code FloatIterator} that is initialized on first use
      * @throws IllegalArgumentException if {@code iteratorSupplier} is {@code null}
+     * @throws IllegalStateException if the supplier returns {@code null} when invoked
      */
     public static FloatIterator defer(final Supplier<? extends FloatIterator> iteratorSupplier) throws IllegalArgumentException {
         N.checkArgNotNull(iteratorSupplier, cs.iteratorSupplier);
 
         return new FloatIterator() {
             private FloatIterator iter = null;
-            private boolean isInitialized = false;
+            private volatile boolean isInitialized = false;
 
             @Override
             public boolean hasNext() {
@@ -227,10 +229,13 @@ public abstract class FloatIterator extends ImmutableIterator<Float> {
                 return iter.nextFloat();
             }
 
-            private void init() {
+            private synchronized void init() {
                 if (!isInitialized) {
                     isInitialized = true;
                     iter = iteratorSupplier.get();
+                    if (iter == null) {
+                        throw new IllegalStateException("Iterator supplier returned null");
+                    }
                 }
             }
         };
@@ -277,6 +282,10 @@ public abstract class FloatIterator extends ImmutableIterator<Float> {
      * conditions. {@link #nextFloat()} throws {@link NoSuchElementException} when {@code hasNext}
      * returns {@code false}.
      *
+     * <p>Note: The {@code hasNext} supplier may be called multiple times for the same element
+     * (once by the user, once internally for validation), so it should be idempotent or
+     * designed to handle multiple calls.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * int[] counter = {0};
@@ -321,7 +330,8 @@ public abstract class FloatIterator extends ImmutableIterator<Float> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * FloatIterator iter = FloatIterator.of(1.0f, 2.0f);
-     * Float boxed = iter.next();   // returns 1.0f (boxed)
+     * Float boxed = iter.next();           // returns 1.0f (boxed) — avoid this
+     * float primitive = iter.nextFloat();  // returns 2.0f — prefer this
      * }</pre>
      *
      * @return the next element as a {@link Float} object
@@ -351,7 +361,8 @@ public abstract class FloatIterator extends ImmutableIterator<Float> {
 
     /**
      * Returns a new {@code FloatIterator} that skips the first {@code n} elements of this iterator.
-     * If {@code n} is greater than the number of remaining elements, an empty iterator is returned.
+     * If {@code n} is greater than the number of remaining elements, all elements are skipped
+     * and the returned iterator will be empty.
      * The skipping is performed lazily when the returned iterator is first accessed.
      * If {@code n} is zero, this iterator is returned unchanged.
      *
@@ -363,8 +374,8 @@ public abstract class FloatIterator extends ImmutableIterator<Float> {
      * }</pre>
      *
      * @param n the number of elements to skip; must be non-negative
-     * @return a new {@code FloatIterator} with the first {@code n} elements skipped,
-     *         or this iterator if {@code n} is zero
+     * @return this iterator unchanged if {@code n == 0}, otherwise a new {@code FloatIterator}
+     *         with the first {@code n} elements skipped
      * @throws IllegalArgumentException if {@code n} is negative
      */
     public FloatIterator skip(final long n) throws IllegalArgumentException {
@@ -422,7 +433,8 @@ public abstract class FloatIterator extends ImmutableIterator<Float> {
      * }</pre>
      *
      * @param count the maximum number of elements to iterate; must be non-negative
-     * @return a new {@code FloatIterator} limited to at most {@code count} elements
+     * @return an empty iterator if {@code count == 0}, otherwise a new {@code FloatIterator}
+     *         limited to at most {@code count} elements
      * @throws IllegalArgumentException if {@code count} is negative
      */
     public FloatIterator limit(final long count) throws IllegalArgumentException {
@@ -523,7 +535,7 @@ public abstract class FloatIterator extends ImmutableIterator<Float> {
      * float[] empty = FloatIterator.empty().toArray();   // returns empty.length == 0
      * }</pre>
      *
-     * @return a float array containing all remaining elements
+     * @return a {@code float} array containing all remaining elements; an empty array if there are none
      */
     @SuppressWarnings("deprecation")
     public float[] toArray() {
@@ -546,7 +558,7 @@ public abstract class FloatIterator extends ImmutableIterator<Float> {
      * FloatList empty = FloatIterator.empty().toList();   // returns empty.size() == 0
      * }</pre>
      *
-     * @return a FloatList containing all remaining elements
+     * @return a {@link FloatList} containing all remaining elements; an empty list if there are none
      */
     public FloatList toList() {
         final FloatList list = new FloatList();

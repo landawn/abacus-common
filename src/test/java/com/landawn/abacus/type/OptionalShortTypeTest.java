@@ -117,7 +117,7 @@ public class OptionalShortTypeTest extends TestBase {
     @Test
     public void testValueOfWithInvalidString() {
         assertThrows(NumberFormatException.class, () -> optionalShortType.valueOf("not-a-number"));
-        assertThrows(NumberFormatException.class, () -> optionalShortType.valueOf("40000"));
+        assertThrows(ArithmeticException.class, () -> optionalShortType.valueOf("40000"));
     }
 
     @Test

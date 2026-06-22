@@ -126,4 +126,14 @@ public class UncheckedExecutionExceptionTest extends TestBase {
     public void testNullCauseWithMessageThrowsException() {
         assertThrows(IllegalArgumentException.class, () -> new UncheckedExecutionException("message", null));
     }
+
+    @Test
+    public void testGetCauseCovariantReturn() {
+        ExecutionException cause = new ExecutionException("Execution failed", new RuntimeException("root cause"));
+        UncheckedExecutionException exception = new UncheckedExecutionException(cause);
+        // Covariant override: no cast required.
+        ExecutionException returnedCause = exception.getCause();
+        assertNotNull(returnedCause);
+        assertEquals(cause, returnedCause);
+    }
 }

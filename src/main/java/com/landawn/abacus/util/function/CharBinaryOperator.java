@@ -47,4 +47,18 @@ public interface CharBinaryOperator extends Throwables.CharBinaryOperator<Runtim
      */
     @Override
     char applyAsChar(char a, char b);
+
+    /**
+     * Returns this object as a {@link Throwables.CharBinaryOperator} view.
+     *
+     * <p>The returned object has the same behavior as this one. This method does not translate
+     * exceptions or make the original implementation capable of throwing new checked exceptions; the
+     * exception type parameter is for target-type compatibility with APIs that accept {@code Throwables.CharBinaryOperator}.
+     *
+     * @param <E> the target exception type for compatibility with {@code Throwables.CharBinaryOperator}
+     * @return a {@link Throwables.CharBinaryOperator} view of this object
+     */
+    default <E extends Throwable> Throwables.CharBinaryOperator<E> toThrowable() {
+        return (Throwables.CharBinaryOperator<E>) this;
+    }
 }

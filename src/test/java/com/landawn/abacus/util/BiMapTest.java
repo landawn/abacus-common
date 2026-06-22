@@ -11,6 +11,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -949,6 +950,67 @@ public class BiMapTest extends AbstractTest {
         assertThrows(IllegalArgumentException.class, () -> {
             BiMap.builder(null);
         });
+    }
+
+    @Test
+    public void testInverse_supplierBuiltBiMap_withNonInstantiableMapClass() {
+        final BiMap<String, Integer> biMap = new BiMap<String, Integer>(() -> Collections.synchronizedMap(new HashMap<>()),
+                () -> Collections.synchronizedMap(new HashMap<>()));
+        biMap.put("a", 1);
+        biMap.put("b", 2);
+
+        final BiMap<Integer, String> inverse = biMap.inverse();
+        assertEquals("a", inverse.get(1));
+        assertEquals("b", inverse.get(2));
+
+        final BiMap<Integer, String> copy = inverse.copy();
+        assertEquals("a", copy.get(1));
+        assertEquals("b", copy.get(2));
+    }
+
+    @Test
+    public void testInverseCopy_preservesValueMapComparator() {
+        final BiMap<String, Integer> biMap = new BiMap<>(() -> new TreeMap<>(String.CASE_INSENSITIVE_ORDER), HashMap::new);
+        biMap.put("Apple", 1);
+
+        final BiMap<Integer, String> copyOfInverse = biMap.inverse().copy();
+        assertEquals("Apple", copyOfInverse.get(1));
+
+        // the copied inverse keeps the case-insensitive value map, so a value differing only by case is a duplicate
+        assertThrows(IllegalArgumentException.class, () -> copyOfInverse.put(2, "APPLE"));
+    }
+
+    // --- regression tests for 2026-06-10 deep-review fixes ---
+
+    @Test
+    public void testCopyOfComparatorBackedSortedMapThenCopy() {
+        // regression: copyOf derived suppliers from the runtime map class, losing the comparator;
+        // copy() then threw ClassCastException for non-Comparable keys
+        final TreeMap<Object, String> tm = new TreeMap<>(java.util.Comparator.comparingInt(System::identityHashCode));
+        final Object k = new Object();
+        tm.put(k, "one");
+
+        final BiMap<Object, String> bm = BiMap.copyOf(tm);
+        assertEquals("one", bm.copy().get(k));
+        assertEquals(k, bm.inverse().copy().get("one"));
+    }
+
+    @Test
+    public void testPutKeepsLinkedHashMapOrderAndForcePutExactMappingIsNoOp() {
+        // regression: put() removed-then-reinserted the key, moving it to the end of
+        // LinkedHashMap-backed BiMaps; forcePut of the exact existing mapping was documented as a
+        // no-op but also moved the entry
+        final BiMap<String, Integer> m = new BiMap<>(java.util.LinkedHashMap::new, java.util.LinkedHashMap::new);
+        m.put("a", 1);
+        m.put("b", 2);
+        m.put("c", 3);
+
+        m.forcePut("a", 1);
+        assertEquals(N.asList("a", "b", "c"), new java.util.ArrayList<>(m.keySet()));
+
+        m.put("a", 9);
+        assertEquals(N.asList("a", "b", "c"), new java.util.ArrayList<>(m.keySet()));
+        assertEquals(Integer.valueOf(9), m.get("a"));
     }
 
 }

@@ -20,6 +20,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 
+import org.joda.time.DateTimeZone;
 import org.joda.time.MutableDateTime;
 
 import com.landawn.abacus.util.Dates;
@@ -133,8 +134,22 @@ public class JodaMutableDateTimeType extends AbstractJodaDateTimeType<MutableDat
             }
         }
 
-        return str.length() == 20 ? jodaISO8601DateTimeFT.parseMutableDateTime(str)
-                : (str.length() == 24 ? jodaISO8601TimestampFT.parseMutableDateTime(str) : new MutableDateTime(Dates.parseTimestamp(str).getTime()));
+        // The formatters parse the 'Z'-suffixed wall time as UTC (correct instant); re-zone to the
+        // default zone so the result equals() a locally-constructed MutableDateTime of the same
+        // instant, like the numeric-millis path above.
+        final MutableDateTime ret;
+
+        if (str.length() == 20) {
+            ret = jodaISO8601DateTimeFT.parseMutableDateTime(str);
+        } else if (str.length() == 24) {
+            ret = jodaISO8601TimestampFT.parseMutableDateTime(str);
+        } else {
+            return new MutableDateTime(Dates.parseTimestamp(str).getTime());
+        }
+
+        ret.setZone(DateTimeZone.getDefault());
+
+        return ret;
     }
 
     /**
@@ -155,7 +170,7 @@ public class JodaMutableDateTimeType extends AbstractJodaDateTimeType<MutableDat
             return null; // NOSONAR
         }
 
-        if (isPossibleLong(cbuf, offset, len)) {
+        if (isPossibleMillis(cbuf, offset, len)) {
             try {
                 return new MutableDateTime(parseLong(cbuf, offset, len));
             } catch (final NumberFormatException e) {

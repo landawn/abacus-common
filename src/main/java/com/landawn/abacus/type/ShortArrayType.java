@@ -180,8 +180,8 @@ public final class ShortArrayType extends ObjectArrayType<Short> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<Short[]> type = TypeFactory.getType(Short[].class);
-     * CharacterWriter writer = new CharacterWriter();
-     * type.serializeTo(writer, new Short[] {1, 2, 3}, config);   // Writes "[1, 2, 3]"
+     * BufferedJsonWriter writer = new BufferedJsonWriter();
+     * type.serializeTo(writer, new Short[] {1, 2, 3}, null);   // Writes "[1, 2, 3]"
      * }</pre>
      * <p>
      * This method is specifically designed for JSON/XML serialization: it writes the serialized form of {@code x} to the

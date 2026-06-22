@@ -152,7 +152,7 @@ public class IntPredicateTest extends TestBase {
     @Test
     public void test_andRejectsNullPredicateImmediately() {
         IntPredicate isPositive = value -> value > 0;
-        assertThrows(NullPointerException.class, () -> isPositive.and(null));
+        assertThrows(IllegalArgumentException.class, () -> isPositive.and(null));
     }
 
     @Test
@@ -171,7 +171,7 @@ public class IntPredicateTest extends TestBase {
     @Test
     public void test_orRejectsNullPredicateImmediately() {
         IntPredicate isNegative = value -> value < 0;
-        assertThrows(NullPointerException.class, () -> isNegative.or(null));
+        assertThrows(IllegalArgumentException.class, () -> isNegative.or(null));
     }
 
     @Test
@@ -256,6 +256,6 @@ public class IntPredicateTest extends TestBase {
     @Test
     public void testAndNullThrowsImmediately() {
         IntPredicate instance = a -> false;
-        org.junit.jupiter.api.Assertions.assertThrows(NullPointerException.class, () -> instance.and((java.util.function.IntPredicate) null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> instance.and((java.util.function.IntPredicate) null));
     }
 }

@@ -158,7 +158,8 @@ import com.landawn.abacus.util.stream.Stream;
  *
  * <p><b>{@code Map} vs. {@code BiMap} vs. {@code Multimap} vs. {@code Multiset}:</b> these model different
  * key/value relationships — pick by how many (and what kind of) values a key holds:</p>
- * <table border="1" summary="Choosing between Map, BiMap, Multimap, and Multiset">
+ * <table border="1">
+ *   <caption>Choosing between Map, BiMap, Multimap, and Multiset</caption>
  *   <tr>
  *     <th>Type</th>
  *     <th>Models</th>
@@ -248,8 +249,9 @@ public final class Multiset<E> implements Collection<E> {
      * Constructs a multiset containing the elements of the specified collection.
      * The multiset will contain all elements from the collection, preserving duplicates.
      *
-     * <p>If the input collection is a {@link Set}, the initial capacity is set to its size.
-     * Otherwise, the initial capacity is set to half the collection size (assuming duplicates).</p>
+     * <p>If the input is a {@link Set}, the initial capacity is set to its size. If it is any
+     * other {@link Collection}, the initial capacity is set to half its size (assuming duplicates).
+     * For any other (or {@code null}) iterable, a small default capacity is used.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -740,7 +742,7 @@ public final class Multiset<E> implements Collection<E> {
 
     /**
      * Conditionally sets the count of the specified element to a new value if it currently has the expected count.
-     * This operation is useful for concurrent scenarios or conditional updates.
+     * This operation is useful for conditional updates (note: it is not atomic and provides no thread-safety guarantee).
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1046,6 +1048,58 @@ public final class Multiset<E> implements Collection<E> {
     }
 
     /**
+     * Removes the specified number of occurrences of each element in the collection from this multiset.
+     *
+     * @param c the collection containing elements to be removed.
+     * @param occurrencesToRemove the number of occurrences to remove for each element.
+     * @return {@code true} if this multiset changed as a result of the call.
+     * @throws IllegalArgumentException if occurrencesToRemove is negative.
+     * @deprecated The name collides with {@link #removeAll(Collection)} (which removes <i>all</i> occurrences
+     *             of each element); use {@link #removeOccurrences(Collection, int)} for clearer semantics.
+     */
+    @Deprecated
+    public boolean removeAll(final Collection<?> c, final int occurrencesToRemove) {
+        return removeOccurrences(c, occurrencesToRemove);
+    }
+
+    /**
+     * Removes the specified number of occurrences of each element in the collection from this multiset.
+     * If an element has fewer occurrences than specified, all its occurrences are removed.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Multiset<String> multiset = Multiset.of("a", "a", "a", "b", "b");
+     * multiset.removeOccurrences(Arrays.asList("a", "b"), 2);
+     * System.out.println(multiset.getCount("a"));   // prints 1
+     * System.out.println(multiset.getCount("b"));   // prints 0
+     * }</pre>
+     *
+     * @param c the collection containing elements to be removed.
+     * @param occurrencesToRemove the number of occurrences to remove for each element.
+     * @return {@code true} if this multiset changed as a result of the call.
+     * @throws IllegalArgumentException if occurrencesToRemove is negative.
+     */
+    public boolean removeOccurrences(final Collection<?> c, final int occurrencesToRemove) {
+        checkOccurrences(occurrencesToRemove);
+
+        if (N.isEmpty(c) || occurrencesToRemove == 0) {
+            return false;
+        }
+
+        boolean result = false;
+
+        for (final Object e : c) {
+            if (!result) {
+                result = remove(e, occurrencesToRemove) > 0;
+            } else {
+                remove(e, occurrencesToRemove);
+            }
+        }
+
+        return result;
+    }
+
+    /**
      * Removes all occurrences of all elements in the specified collection from this multiset.
      *
      * <p><b>Note:</b> This method ignores the occurrence count in the collection and removes
@@ -1078,62 +1132,7 @@ public final class Multiset<E> implements Collection<E> {
     @Deprecated
     @Override
     public boolean removeAll(final Collection<?> c) {
-        if (N.isEmpty(c)) {
-            return false;
-        } else if (c == this) {
-            final boolean result = !isEmpty();
-            clear();
-            return result;
-        }
-
-        boolean result = false;
-
-        for (final Object e : c) {
-            if (!result) {
-                result = backingMap.remove(e) != null;
-            } else {
-                backingMap.remove(e);
-            }
-        }
-
-        return result;
-    }
-
-    /**
-     * Removes the specified number of occurrences of each element in the collection from this multiset.
-     * If an element has fewer occurrences than specified, all its occurrences are removed.
-     *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Multiset<String> multiset = Multiset.of("a", "a", "a", "b", "b");
-     * multiset.removeAll(Arrays.asList("a", "b"), 2);
-     * System.out.println(multiset.getCount("a"));   // prints 1
-     * System.out.println(multiset.getCount("b"));   // prints 0
-     * }</pre>
-     *
-     * @param c the collection containing elements to be removed.
-     * @param occurrencesToRemove the number of occurrences to remove for each element.
-     * @return {@code true} if this multiset changed as a result of the call.
-     * @throws IllegalArgumentException if occurrencesToRemove is negative.
-     */
-    public boolean removeAll(final Collection<?> c, final int occurrencesToRemove) {
-        checkOccurrences(occurrencesToRemove);
-
-        if (N.isEmpty(c) || occurrencesToRemove == 0) {
-            return false;
-        }
-
-        boolean result = false;
-
-        for (final Object e : c) {
-            if (!result) {
-                result = remove(e, occurrencesToRemove) > 0;
-            } else {
-                remove(e, occurrencesToRemove);
-            }
-        }
-
-        return result;
+        return removeAllOccurrencesOf(c);
     }
 
     /**
@@ -1172,9 +1171,26 @@ public final class Multiset<E> implements Collection<E> {
      * @param c the collection containing elements whose occurrences are to be removed.
      * @return {@code true} if this multiset changed as a result of the call.
      */
-    @SuppressWarnings("deprecation")
     public boolean removeAllOccurrencesOf(final Collection<?> c) {
-        return removeAll(c);
+        if (N.isEmpty(c)) {
+            return false;
+        } else if (c == this) {
+            final boolean result = !isEmpty();
+            clear();
+            return result;
+        }
+
+        boolean result = false;
+
+        for (final Object e : c.toArray()) {
+            if (!result) {
+                result = backingMap.remove(e) != null;
+            } else {
+                backingMap.remove(e);
+            }
+        }
+
+        return result;
     }
 
     /**
@@ -1321,9 +1337,9 @@ public final class Multiset<E> implements Collection<E> {
      *
      * @param e the element whose count is to be computed.
      * @param mappingFunction the function to compute a count.
-     * @return the existing count if the element is already present; otherwise the value returned by
-     *         {@code mappingFunction} (which may be zero or negative if the function returns a
-     *         non-positive value, in which case the element is not added to the multiset)
+     * @return the existing count if the element is already present; otherwise the count returned by
+     *         {@code mappingFunction} when it is positive (the element is then added with that count), or
+     *         {@code 0} when the function returns a non-positive value (in which case the element is not added)
      * @throws IllegalArgumentException if the mapping function is null
      */
     public int computeIfAbsent(final E e, final ToIntFunction<? super E> mappingFunction) throws IllegalArgumentException {
@@ -1341,7 +1357,7 @@ public final class Multiset<E> implements Collection<E> {
             setCount(e, newValue);
         }
 
-        return newValue;
+        return newValue > 0 ? newValue : 0;
     }
 
     /**
@@ -1383,7 +1399,7 @@ public final class Multiset<E> implements Collection<E> {
             backingMap.remove(e);
         }
 
-        return newValue;
+        return newValue > 0 ? newValue : 0;
     }
 
     /**
@@ -1423,12 +1439,14 @@ public final class Multiset<E> implements Collection<E> {
             }
         }
 
-        return newValue;
+        return newValue > 0 ? newValue : 0;
     }
 
     /**
      * Merges the specified value with the current count of the element using the remapping function.
-     * If the element is not present, the value is used as the new count.
+     * If the element is not present, the value is used directly as the new count and the
+     * {@code remappingFunction} is <i>not</i> called (mirroring {@link java.util.Map#merge}, where the
+     * function is invoked only when the key is already mapped).
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1465,7 +1483,7 @@ public final class Multiset<E> implements Collection<E> {
             }
         }
 
-        return newValue;
+        return newValue > 0 ? newValue : 0;
     }
 
     // Comparison and hashing

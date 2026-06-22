@@ -116,6 +116,6 @@ public class ObjShortConsumerTest extends TestBase {
     public void testAndThenNullThrowsImmediately() {
         ObjShortConsumer<String> instance = (a, b) -> {
         };
-        org.junit.jupiter.api.Assertions.assertThrows(NullPointerException.class, () -> instance.andThen((ObjShortConsumer) null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> instance.andThen((ObjShortConsumer) null));
     }
 }

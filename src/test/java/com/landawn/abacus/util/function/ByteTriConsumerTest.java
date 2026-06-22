@@ -112,6 +112,6 @@ public class ByteTriConsumerTest extends TestBase {
     public void testAndThenNullThrowsImmediately() {
         ByteTriConsumer instance = (a, b, c) -> {
         };
-        org.junit.jupiter.api.Assertions.assertThrows(NullPointerException.class, () -> instance.andThen((ByteTriConsumer) null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> instance.andThen((ByteTriConsumer) null));
     }
 }

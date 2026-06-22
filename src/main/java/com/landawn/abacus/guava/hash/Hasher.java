@@ -50,9 +50,9 @@ import com.google.common.hash.HashCode;
  * <ul>
  *   <li><b>Single use:</b> Each Hasher instance should be used for exactly one hash computation</li>
  *   <li><b>Order matters:</b> Data must be added in a consistent order for reproducible results</li>
- *   <li><b>No delimiters:</b> Consecutive put operations are not delimited. {@code putBytes(new byte[] {1, 2})}
- *       followed by {@code putBytes(new byte[] {3, 4})} produces the same result as
- *       {@code putBytes(new byte[] {1, 2, 3, 4})}</li>
+ *   <li><b>No delimiters:</b> Consecutive put operations are not delimited. {@code put(new byte[] {1, 2})}
+ *       followed by {@code put(new byte[] {3, 4})} produces the same result as
+ *       {@code put(new byte[] {1, 2, 3, 4})}</li>
  *   <li><b>Multibyte values:</b> All multibyte values (int, long, etc.) are interpreted in
  *       little-endian order</li>
  * </ul>

@@ -111,7 +111,9 @@ public class NamingPolicyTest extends AbstractParserTest {
     @Test
     public void test_upperCamelCase_convert_singleWord() {
         assertEquals("User", NamingPolicy.UPPER_CAMEL_CASE.convert("user"));
-        assertEquals("USER", NamingPolicy.UPPER_CAMEL_CASE.convert("USER"));
+        // an all-caps single word is treated as one word: first letter kept upper, the rest lowered,
+        // consistent with CAMEL_CASE.convert("USER") -> "user"
+        assertEquals("User", NamingPolicy.UPPER_CAMEL_CASE.convert("USER"));
     }
 
     @Test
@@ -130,14 +132,16 @@ public class NamingPolicyTest extends AbstractParserTest {
 
     @Test
     public void test_snakeCase_convert_withHyphens() {
-        assertEquals("user-name", NamingPolicy.SNAKE_CASE.convert("user-name"));
-        assertEquals("user-id", NamingPolicy.SNAKE_CASE.convert("user-id"));
+        // toSnakeCase normalizes existing hyphen word-separators to underscores
+        assertEquals("user_name", NamingPolicy.SNAKE_CASE.convert("user-name"));
+        assertEquals("user_id", NamingPolicy.SNAKE_CASE.convert("user-id"));
     }
 
     @Test
     public void test_snakeCase_convert_withSpaces() {
-        assertEquals("user name", NamingPolicy.SNAKE_CASE.convert("user name"));
-        assertEquals("user id", NamingPolicy.SNAKE_CASE.convert("user id"));
+        // toSnakeCase normalizes whitespace word-separators to underscores
+        assertEquals("user_name", NamingPolicy.SNAKE_CASE.convert("user name"));
+        assertEquals("user_id", NamingPolicy.SNAKE_CASE.convert("user id"));
     }
 
     @Test
@@ -179,14 +183,16 @@ public class NamingPolicyTest extends AbstractParserTest {
 
     @Test
     public void test_screamingSnakeCase_convert_withHyphens() {
-        assertEquals("USER-NAME", NamingPolicy.SCREAMING_SNAKE_CASE.convert("user-name"));
-        assertEquals("USER-ID", NamingPolicy.SCREAMING_SNAKE_CASE.convert("user-id"));
+        // toScreamingSnakeCase normalizes existing hyphen word-separators to underscores
+        assertEquals("USER_NAME", NamingPolicy.SCREAMING_SNAKE_CASE.convert("user-name"));
+        assertEquals("USER_ID", NamingPolicy.SCREAMING_SNAKE_CASE.convert("user-id"));
     }
 
     @Test
     public void test_screamingSnakeCase_convert_withSpaces() {
-        assertEquals("USER NAME", NamingPolicy.SCREAMING_SNAKE_CASE.convert("user name"));
-        assertEquals("USER ID", NamingPolicy.SCREAMING_SNAKE_CASE.convert("user id"));
+        // toScreamingSnakeCase normalizes whitespace word-separators to underscores
+        assertEquals("USER_NAME", NamingPolicy.SCREAMING_SNAKE_CASE.convert("user name"));
+        assertEquals("USER_ID", NamingPolicy.SCREAMING_SNAKE_CASE.convert("user id"));
     }
 
     @Test
@@ -248,8 +254,9 @@ public class NamingPolicyTest extends AbstractParserTest {
 
     @Test
     public void test_kebabCase_convert_withSnakeCase() {
-        assertEquals("user_name", NamingPolicy.KEBAB_CASE.convert("user_name"));
-        assertEquals("user_id", NamingPolicy.KEBAB_CASE.convert("user_id"));
+        // toKebabCase normalizes existing underscore word-separators to hyphens
+        assertEquals("user-name", NamingPolicy.KEBAB_CASE.convert("user_name"));
+        assertEquals("user-id", NamingPolicy.KEBAB_CASE.convert("user_id"));
     }
 
     @Test
@@ -278,7 +285,8 @@ public class NamingPolicyTest extends AbstractParserTest {
     @Test
     public void test_convert_withMultipleConsecutiveHyphens() {
         assertEquals("userName", NamingPolicy.CAMEL_CASE.convert("user--name"));
-        assertEquals("user--name", NamingPolicy.SNAKE_CASE.convert("user--name"));
+        // consecutive hyphen separators are normalized and collapsed to a single underscore
+        assertEquals("user_name", NamingPolicy.SNAKE_CASE.convert("user--name"));
     }
 
     @Test

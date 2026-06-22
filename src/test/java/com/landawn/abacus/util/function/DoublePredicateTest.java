@@ -240,7 +240,7 @@ public class DoublePredicateTest extends TestBase {
     @Test
     public void testAndNullThrowsImmediately() {
         DoublePredicate instance = a -> false;
-        org.junit.jupiter.api.Assertions.assertThrows(NullPointerException.class, () -> instance.and((java.util.function.DoublePredicate) null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> instance.and((java.util.function.DoublePredicate) null));
     }
 
     @Test

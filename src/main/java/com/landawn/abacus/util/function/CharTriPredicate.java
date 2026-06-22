@@ -13,9 +13,9 @@
  */
 package com.landawn.abacus.util.function;
 
-import java.util.Objects;
-
 import com.landawn.abacus.util.Throwables;
+import com.landawn.abacus.util.N;
+import com.landawn.abacus.util.cs;
 
 /**
  * Represents a predicate (boolean-valued function) of three char-valued arguments.
@@ -100,10 +100,10 @@ public interface CharTriPredicate extends Throwables.CharTriPredicate<RuntimeExc
      * @param other a predicate that will be logically-ANDed with this predicate. Must not be {@code null}.
      * @return a composed predicate that represents the short-circuiting logical AND of this predicate
      *         and the {@code other} predicate
-     * @throws NullPointerException if {@code other} is null
+     * @throws IllegalArgumentException if {@code other} is null
      */
     default CharTriPredicate and(final CharTriPredicate other) {
-        Objects.requireNonNull(other);
+        N.checkArgNotNull(other, cs.other);
         return (a, b, c) -> test(a, b, c) && other.test(a, b, c);
     }
 
@@ -126,10 +126,24 @@ public interface CharTriPredicate extends Throwables.CharTriPredicate<RuntimeExc
      * @param other a predicate that will be logically-ORed with this predicate. Must not be {@code null}.
      * @return a composed predicate that represents the short-circuiting logical OR of this predicate
      *         and the {@code other} predicate
-     * @throws NullPointerException if {@code other} is null
+     * @throws IllegalArgumentException if {@code other} is null
      */
     default CharTriPredicate or(final CharTriPredicate other) {
-        Objects.requireNonNull(other);
+        N.checkArgNotNull(other, cs.other);
         return (a, b, c) -> test(a, b, c) || other.test(a, b, c);
+    }
+
+    /**
+     * Returns this object as a {@link Throwables.CharTriPredicate} view.
+     *
+     * <p>The returned object has the same behavior as this one. This method does not translate
+     * exceptions or make the original implementation capable of throwing new checked exceptions; the
+     * exception type parameter is for target-type compatibility with APIs that accept {@code Throwables.CharTriPredicate}.
+     *
+     * @param <E> the target exception type for compatibility with {@code Throwables.CharTriPredicate}
+     * @return a {@link Throwables.CharTriPredicate} view of this object
+     */
+    default <E extends Throwable> Throwables.CharTriPredicate<E> toThrowable() {
+        return (Throwables.CharTriPredicate<E>) this;
     }
 }

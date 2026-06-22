@@ -528,13 +528,6 @@ public class HttpRequestTest extends TestBase {
     }
 
     @Test
-    public void testAuthenticatorWithConnectTimeout() {
-        Authenticator auth = mock(Authenticator.class);
-        HttpRequest request = HttpRequest.url(testUrl).connectTimeout(Duration.ofSeconds(5)).authenticator(auth);
-        assertNotNull(request);
-    }
-
-    @Test
     public void testAuthenticatorThenConnectTimeout() {
         Authenticator auth = mock(Authenticator.class);
         HttpRequest request = HttpRequest.url(testUrl).authenticator(auth).connectTimeout(Duration.ofSeconds(5));
@@ -595,6 +588,36 @@ public class HttpRequestTest extends TestBase {
         String auth = built.headers().firstValue("Authorization").orElseThrow();
         String expected = "Basic " + java.util.Base64.getEncoder().encodeToString("user:pass".getBytes(java.nio.charset.StandardCharsets.UTF_8));
         assertEquals(expected, auth);
+    }
+
+    @Test
+    public void testBasicAuthStringOverload() throws Exception {
+        // M15: basicAuth(String, String) parity overload encodes the same as the Object form.
+        HttpRequest request = HttpRequest.url(testUrl).basicAuth("user", "pass");
+
+        java.lang.reflect.Field f = HttpRequest.class.getDeclaredField("requestBuilder");
+        f.setAccessible(true);
+        java.net.http.HttpRequest.Builder builder = (java.net.http.HttpRequest.Builder) f.get(request);
+        java.net.http.HttpRequest built = builder.uri(URI.create(testUrl)).GET().build();
+
+        String auth = built.headers().firstValue("Authorization").orElseThrow();
+        String expected = "Basic " + java.util.Base64.getEncoder().encodeToString("user:pass".getBytes(java.nio.charset.StandardCharsets.UTF_8));
+        assertEquals(expected, auth);
+    }
+
+    @Test
+    public void testConnectTimeoutLongMillisOverload() {
+        // M15: long-millis instance overloads for parity with the other builders.
+        HttpRequest request = HttpRequest.url(testUrl);
+        assertSame(request, request.connectTimeout(5000L));
+        assertSame(request, request.connectTimeout(0L)); // 0 is a no-op, still chainable
+    }
+
+    @Test
+    public void testReadTimeoutLongMillisOverload() {
+        HttpRequest request = HttpRequest.url(testUrl);
+        assertSame(request, request.readTimeout(60_000L));
+        assertSame(request, request.readTimeout(0L));
     }
 
     @Test
@@ -1227,24 +1250,32 @@ public class HttpRequestTest extends TestBase {
     // ==================== get() ====================
 
     @Test
-    public void test_get() {
+    public void test_get() throws Exception {
+        final HttpServer server = startLocalServer("get body");
+
         try {
-            HttpResponse<String> response = HttpRequest.url(TEST_URL).get();
+            HttpResponse<String> response = HttpRequest.url(localUrl(server), 1_000L, 5_000L).get();
             assertNotNull(response);
             assertEquals(200, response.statusCode());
-        } catch (Exception e) {
+            assertEquals("get body", response.body());
+        } finally {
+            server.stop(0);
         }
     }
 
     // ==================== get(BodyHandler) ====================
 
     @Test
-    public void test_get_withBodyHandler() {
+    public void test_get_withBodyHandler() throws Exception {
+        final HttpServer server = startLocalServer("handler body");
+
         try {
-            HttpResponse<String> response = HttpRequest.url(TEST_URL).get(BodyHandlers.ofString());
+            HttpResponse<String> response = HttpRequest.url(localUrl(server), 1_000L, 5_000L).get(BodyHandlers.ofString());
             assertNotNull(response);
             assertEquals(200, response.statusCode());
-        } catch (Exception e) {
+            assertEquals("handler body", response.body());
+        } finally {
+            server.stop(0);
         }
     }
 
@@ -2088,6 +2119,27 @@ public class HttpRequestTest extends TestBase {
     }
 
     @Test
+    public void testExecuteInputStreamPreservesPreviousResponseAfterRedirect() throws Exception {
+        final HttpServer server = startRedirectServer("redirect body");
+
+        try {
+            final HttpClient client = HttpClient.newBuilder().followRedirects(HttpClient.Redirect.ALWAYS).build();
+            final String url = "http://127.0.0.1:" + server.getAddress().getPort() + "/redirect";
+            final HttpResponse<InputStream> response = HttpRequest.create(URI.create(url), client).execute(HttpMethod.GET, BodyHandlers.ofInputStream());
+
+            assertEquals(200, response.statusCode());
+            assertEquals(true, response.previousResponse().isPresent());
+            assertEquals(302, response.previousResponse().get().statusCode());
+
+            try (InputStream inputStream = response.body()) {
+                assertEquals("redirect body", new String(inputStream.readAllBytes(), StandardCharsets.UTF_8));
+            }
+        } finally {
+            server.stop(0);
+        }
+    }
+
+    @Test
     public void testAsyncExecuteInputStreamFutureCompletesBeforeBodyRead() throws Exception {
         final HttpServer server = startLocalServer("async stream body");
 
@@ -2110,6 +2162,28 @@ public class HttpRequestTest extends TestBase {
         final HttpServer server = HttpServer.create(new InetSocketAddress("127.0.0.1", 0), 0);
 
         server.createContext("/", exchange -> {
+            final byte[] bytes = body.getBytes(StandardCharsets.UTF_8);
+            exchange.sendResponseHeaders(200, bytes.length);
+
+            try (OutputStream outputStream = exchange.getResponseBody()) {
+                outputStream.write(bytes);
+            }
+        });
+
+        server.start();
+        return server;
+    }
+
+    private static HttpServer startRedirectServer(final String body) throws Exception {
+        final HttpServer server = HttpServer.create(new InetSocketAddress("127.0.0.1", 0), 0);
+
+        server.createContext("/redirect", exchange -> {
+            exchange.getResponseHeaders().add("Location", "/target");
+            exchange.sendResponseHeaders(302, -1);
+            exchange.close();
+        });
+
+        server.createContext("/target", exchange -> {
             final byte[] bytes = body.getBytes(StandardCharsets.UTF_8);
             exchange.sendResponseHeaders(200, bytes.length);
 

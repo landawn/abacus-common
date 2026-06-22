@@ -1040,6 +1040,34 @@ public class ObserverTest extends TestBase {
     }
 
     @Test
+    public void testLimitZeroDoesNotConsumeUpstreamElement() throws InterruptedException {
+        AtomicInteger nextCalls = new AtomicInteger();
+        Iterator<Integer> iterator = new Iterator<>() {
+            private int next = 1;
+
+            @Override
+            public boolean hasNext() {
+                return next <= 3;
+            }
+
+            @Override
+            public Integer next() {
+                nextCalls.incrementAndGet();
+                return next++;
+            }
+        };
+
+        List<Integer> results = new ArrayList<>();
+        CountDownLatch latch = new CountDownLatch(1);
+
+        Observer.of(iterator).limit(0).observe(results::add, e -> Assertions.fail("Unexpected error: " + e), latch::countDown);
+
+        Assertions.assertTrue(latch.await(5, TimeUnit.SECONDS));
+        Assertions.assertTrue(results.isEmpty());
+        Assertions.assertEquals(0, nextCalls.get());
+    }
+
+    @Test
     public void testLimit_InvalidArgs() {
         Observer<String> observer = Observer.of(Arrays.asList("test"));
         Assertions.assertThrows(IllegalArgumentException.class, () -> observer.limit(-1));
@@ -1073,6 +1101,34 @@ public class ObserverTest extends TestBase {
         boolean completed = latch.await(5, TimeUnit.SECONDS);
         Assertions.assertTrue(completed);
         Assertions.assertEquals(Arrays.asList("first"), results);
+    }
+
+    @Test
+    public void testLimitDoesNotConsumeElementAfterLimit() throws InterruptedException {
+        AtomicInteger nextCalls = new AtomicInteger();
+        Iterator<Integer> iterator = new Iterator<>() {
+            private int next = 1;
+
+            @Override
+            public boolean hasNext() {
+                return next <= 5;
+            }
+
+            @Override
+            public Integer next() {
+                nextCalls.incrementAndGet();
+                return next++;
+            }
+        };
+
+        List<Integer> results = new ArrayList<>();
+        CountDownLatch latch = new CountDownLatch(1);
+
+        Observer.of(iterator).limit(3).observe(results::add, e -> Assertions.fail("Unexpected error: " + e), latch::countDown);
+
+        Assertions.assertTrue(latch.await(5, TimeUnit.SECONDS));
+        Assertions.assertEquals(Arrays.asList(1, 2, 3), results);
+        Assertions.assertEquals(3, nextCalls.get());
     }
 
     // ==================== distinct() ====================

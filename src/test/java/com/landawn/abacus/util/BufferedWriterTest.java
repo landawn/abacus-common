@@ -1,8 +1,10 @@
 package com.landawn.abacus.util;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -487,9 +489,11 @@ public class BufferedWriterTest extends TestBase {
 
     @Test
     public void testClose_AlreadyClosed() throws IOException {
-        BufferedWriter writer = new BufferedWriter();
-        writer.close();
-        writer.close(); // Should not throw
+        assertDoesNotThrow(() -> {
+            BufferedWriter writer = new BufferedWriter();
+            writer.close();
+            writer.close(); // Should not throw
+        });
     }
 
     @Test
@@ -498,6 +502,23 @@ public class BufferedWriterTest extends TestBase {
         BufferedWriter writer = new BufferedWriter(sw);
         writer.write("data");
         writer.close();
+        assertThrows(IOException.class, () -> writer.write("more"));
+    }
+
+    @Test
+    public void testClosePreservesFlushFailureWhenUnderlyingCloseAlsoFails() throws IOException {
+        IOException flushFailure = new IOException("flush failed");
+        IOException closeFailure = new IOException("close failed");
+        FailingFlushAndCloseWriter out = new FailingFlushAndCloseWriter(flushFailure, closeFailure);
+        BufferedWriter writer = new BufferedWriter(out);
+
+        writer.write("data");
+        IOException thrown = assertThrows(IOException.class, writer::close);
+
+        assertSame(flushFailure, thrown);
+        assertEquals(1, thrown.getSuppressed().length);
+        assertSame(closeFailure, thrown.getSuppressed()[0]);
+        assertTrue(out.closed);
         assertThrows(IOException.class, () -> writer.write("more"));
     }
 
@@ -530,6 +551,33 @@ public class BufferedWriterTest extends TestBase {
         writer.write("test");
         String result = writer.toString();
         assertEquals("test", result);
+    }
+
+    private static final class FailingFlushAndCloseWriter extends Writer {
+        private final IOException flushFailure;
+        private final IOException closeFailure;
+        private boolean closed;
+
+        FailingFlushAndCloseWriter(final IOException flushFailure, final IOException closeFailure) {
+            this.flushFailure = flushFailure;
+            this.closeFailure = closeFailure;
+        }
+
+        @Override
+        public void write(final char[] cbuf, final int off, final int len) throws IOException {
+            // Accept buffered data so close() reaches the flush and close failures.
+        }
+
+        @Override
+        public void flush() throws IOException {
+            throw flushFailure;
+        }
+
+        @Override
+        public void close() throws IOException {
+            closed = true;
+            throw closeFailure;
+        }
     }
 
     // === Class structure ===

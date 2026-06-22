@@ -33,7 +33,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.DisabledOnOs;
@@ -41,7 +40,7 @@ import org.junit.jupiter.api.condition.OS;
 import org.junit.jupiter.api.io.TempDir;
 
 import com.google.common.base.Predicate;
-import com.google.common.graph.Traverser;
+import com.landawn.abacus.guava.Traverser;
 import com.google.common.io.ByteSink;
 import com.google.common.io.ByteSource;
 import com.google.common.io.CharSink;
@@ -522,9 +521,7 @@ public class GuavaFilesTest extends TestBase {
 
         Traverser<File> traverser = Files.fileTraverser();
         List<String> visitedNames = new ArrayList<>();
-        List<File> traversedFiles = StreamSupport.stream(traverser.depthFirstPreOrder(base).spliterator(), false)
-                .sorted(Comparator.comparing(File::getAbsolutePath))
-                .collect(Collectors.toList());
+        List<File> traversedFiles = traverser.depthFirstPreOrder(base).sorted(Comparator.comparing(File::getAbsolutePath)).toList();
 
         for (File f : traversedFiles) {
             visitedNames.add(f.getName());
@@ -539,8 +536,7 @@ public class GuavaFilesTest extends TestBase {
         assertTrue(visitedNames.contains("f1.txt"));
         assertTrue(visitedNames.contains("f2.txt"));
 
-        Iterable<File> singleFileIterable = traverser.depthFirstPreOrder(f1);
-        Iterator<File> iterator = singleFileIterable.iterator();
+        Iterator<File> iterator = traverser.depthFirstPreOrder(f1).iterator();
         assertEquals(f1, iterator.next());
         assertFalse(iterator.hasNext());
     }
@@ -553,7 +549,7 @@ public class GuavaFilesTest extends TestBase {
         Path pf2 = java.nio.file.Files.createFile(pd1.resolve("pf2.txt"));
 
         Traverser<Path> traverser = Files.pathTraverser();
-        List<Path> traversedPaths = StreamSupport.stream(traverser.depthFirstPreOrder(basePath).spliterator(), false).sorted().collect(Collectors.toList());
+        List<Path> traversedPaths = traverser.depthFirstPreOrder(basePath).sorted().toList();
 
         assertEquals(4, traversedPaths.size());
         assertTrue(traversedPaths.contains(basePath));

@@ -229,12 +229,10 @@ public class JdkOptionalType<T> extends AbstractOptionalType<Optional<T>> {
     /**
      * Appends the string representation of an Optional to an Appendable.
      * Empty optionals are written as "null".
-     * Present values are serialized using their runtime type for accuracy.
+     * Present values are appended by the runtime type handler for the contained value.
      * <p>
-     * <b>appendTo vs. serializeTo:</b> {@code appendTo} produces a plain, {@code toString()}-style rendering with no
-     * JSON/XML quoting or escaping (for general text output), whereas {@code serializeTo} produces the JSON/XML
-     * serialized form (applying string quotation and character escaping per the serialization config) and is used by the
-     * JSON/XML serializers.
+     * <b>appendTo vs. serializeTo:</b> {@code appendTo} delegates to the contained value's plain append contract,
+     * whereas {@code serializeTo} delegates to the contained value's serialization contract.
      *
      * @param appendable the Appendable to write to
      * @param x the Optional to append
@@ -260,18 +258,15 @@ public class JdkOptionalType<T> extends AbstractOptionalType<Optional<T>> {
     }
 
     /**
-     * Writes the character representation of an Optional to a CharacterWriter.
-     * Empty optionals are written as {@code null}.
-     * Present values are serialized using their runtime type for accuracy.
+     * Writes the serialized representation of an {@link Optional} to a {@link CharacterWriter}.
+     * Empty optionals are written as {@code null}. Present values are serialized by the runtime
+     * type handler for the contained value.
      * <p>
-     * This method is specifically designed for JSON/XML serialization: it writes the serialized form of {@code x} to the
-     * {@code CharacterWriter}, applying string quotation and character escaping according to the supplied serialization
-     * config (a {@code null} config means no surrounding quotation). It is the streaming counterpart of {@code stringOf}
-     * and is invoked by the JSON/XML serializers.
+     * Any string quotation or character escaping is performed by the delegated value type handler according to the
+     * supplied serialization config.
      * <p>
-     * <b>serializeTo vs. appendTo:</b> {@code serializeTo} produces machine-readable JSON/XML (quoted and escaped),
-     * whereas {@code appendTo} produces a plain, human-readable {@code toString()}-style rendering without JSON/XML
-     * quoting or escaping.
+     * <b>serializeTo vs. appendTo:</b> {@code serializeTo} delegates to the contained value's serialization contract,
+     * whereas {@code appendTo} delegates to the contained value's plain append contract.
      *
      * @param writer the CharacterWriter to write to
      * @param x the Optional to write

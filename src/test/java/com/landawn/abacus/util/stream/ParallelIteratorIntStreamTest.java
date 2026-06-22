@@ -1065,4 +1065,24 @@ public class ParallelIteratorIntStreamTest extends TestBase {
         same.close();
     }
 
+    @Test
+    public void testToMapAndGroupTo_SequentialFallback() {
+        final Map<Integer, Integer> merged = IntStream.of(1, 2, 1)
+                .map(i -> i + 0)
+                .parallel(PS.create(Splitor.ITERATOR).maxThreadNum(1))
+                .toMap(i -> i, i -> i * 10, Integer::sum, java.util.LinkedHashMap::new);
+
+        assertEquals(2, merged.size());
+        assertEquals(20, merged.get(1));
+        assertEquals(20, merged.get(2));
+
+        final Map<Boolean, List<Integer>> grouped = IntStream.of(1, 2, 3, 4)
+                .map(i -> i + 0)
+                .parallel(PS.create(Splitor.ITERATOR).maxThreadNum(1))
+                .groupTo(i -> i % 2 == 0, Collectors.toList(), java.util.LinkedHashMap::new);
+
+        assertEquals(Arrays.asList(1, 3), grouped.get(false));
+        assertEquals(Arrays.asList(2, 4), grouped.get(true));
+    }
+
 }

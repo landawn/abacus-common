@@ -85,7 +85,7 @@ import java.lang.annotation.Target;
  * @see Column
  */
 @Documented
-@Target(value = { FIELD /* METHOD, */ })
+@Target(value = { FIELD })
 @Retention(RUNTIME)
 public @interface NonUpdatable {
 

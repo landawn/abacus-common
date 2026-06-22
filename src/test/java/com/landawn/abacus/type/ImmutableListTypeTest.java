@@ -2,6 +2,7 @@ package com.landawn.abacus.type;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
@@ -82,10 +83,18 @@ public class ImmutableListTypeTest extends TestBase {
 
     @Test
     public void testStringOf() {
+        ImmutableList<String> values = ImmutableList.of("a", "b");
+
+        assertEquals("[\"a\", \"b\"]", immutableListType.stringOf(values));
+        assertNull(immutableListType.stringOf(null));
     }
 
     @Test
     public void testValueOf() {
+        ImmutableList<String> values = immutableListType.valueOf("[\"a\", \"b\"]");
+
+        assertNotNull(values);
+        assertEquals(ImmutableList.of("a", "b"), values);
     }
 
     @Test

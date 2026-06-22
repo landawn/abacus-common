@@ -211,24 +211,29 @@ public abstract class AbstractType<T> implements Type<T> {
     }
 
     /**
-     * Extracts all parameters from a type name.
+     * Extracts the constructor parameters (the values enclosed in parentheses) from a type name.
      * <p>
-     * This includes both type parameters and other attributes.
+     * These are the parameters in the trailing {@code (...)} of a type name, not the generic
+     * type parameters in {@code <...>} (use {@link #getTypeParameters(String)} for those).
      * </p>
      *
      * <p>Usage Examples:</p>
      * <pre>{@code
-     * // Extract all parameters from a type name
-     * String[] params = getParameters("Map<String, Integer>");
-     * // params: ["String", "Integer"]
+     * // Constructor parameters in parentheses
+     * String[] params = getParameters("StringBuilder(100)");
+     * // params: ["100"]
      *
-     * // Complex type with nested parameters
-     * String[] params2 = getParameters("List<Map<String, Object>>");
-     * // Returns all extracted parameters
+     * // Multiple constructor parameters
+     * String[] params2 = getParameters("HashMap(16, 0.75f)");
+     * // params2: ["16", "0.75f"]
+     *
+     * // No constructor parameters (generic type parameters are NOT returned here)
+     * String[] params3 = getParameters("Map<String, Integer>");
+     * // params3: [] (empty array)
      * }</pre>
      *
      * @param typeName the type name to parse
-     * @return array of parameter names
+     * @return array of constructor parameter strings
      */
     protected static String[] getParameters(final String typeName) {
         return TypeAttrParser.parse(typeName).getParameters();
@@ -611,8 +616,9 @@ public abstract class AbstractType<T> implements Type<T> {
     }
 
     /**
-     * Checks if this is a generic type.
-     * A type is considered generic if it has type parameters.
+     * Checks if this type is a parameterized type (a generic type with actual type arguments,
+     * e.g. {@code List<String>}).
+     * A type is considered parameterized if it has type parameters.
      *
      * @return {@code true} if this type has type parameters, {@code false} otherwise
      */
@@ -632,27 +638,9 @@ public abstract class AbstractType<T> implements Type<T> {
         return false;
     }
 
-    /**
-     * Checks if this type is comparable.
-     * Default implementation returns {@code false}.
-     *
-     * @return {@code true} if values of this type can be compared, {@code false} otherwise
-     */
-    @Override
-    public boolean isComparable() {
-        return false;
-    }
-
-    /**
-     * Checks if this type is serializable.
-     * Default implementation returns {@code true}.
-     *
-     * @return {@code true} if values of this type can be serialized, {@code false} otherwise
-     */
-    @Override
-    public boolean isSerializable() {
-        return true;
-    }
+    // isComparable() intentionally NOT overridden here: it inherits Type's default, which derives
+    // the answer from javaType() implementing Comparable (so a comparable scalar type is reported
+    // comparable without an explicit override). See Type#isComparable().
 
     /**
      * Returns the serialization type for this type.
@@ -1261,7 +1249,7 @@ public abstract class AbstractType<T> implements Type<T> {
      * @param len the number of characters in the region to inspect
      * @return {@code true} if the character region could represent a millisecond timestamp
      */
-    protected static boolean isPossibleLong(final char[] cbuf, final int offset, final int len) {
+    protected static boolean isPossibleMillis(final char[] cbuf, final int offset, final int len) {
         if (len > 4) {
             char ch = cbuf[offset + 2];
 
@@ -1440,7 +1428,7 @@ public abstract class AbstractType<T> implements Type<T> {
      * @throws NullPointerException if {@code str} is {@code null}
      * @see Boolean#valueOf(String)
      */
-    protected Boolean parseBoolean(final String str) {
+    protected static Boolean parseBoolean(final String str) {
         if (str.length() == 1) {
             final char ch = str.charAt(0);
             return ch == 'Y' || ch == 'y' || ch == '1';
@@ -1535,5 +1523,28 @@ public abstract class AbstractType<T> implements Type<T> {
         }
 
         return len > Integer.MAX_VALUE / elementPlusDelimiterLen ? Integer.MAX_VALUE : len * elementPlusDelimiterLen;
+    }
+
+    /**
+     * Converts a raw element produced by an untyped first-pass JSON parse into the declared element type
+     * of a tuple slot ({@code Pair}, {@code Triple}, {@code Tuple1..9}).
+     *
+     * @param raw the raw element value from the untyped parse, may be {@code null}
+     * @param type the declared type of the tuple slot
+     * @return the element converted to the declared type, or {@code null} if {@code raw} is {@code null}
+     */
+    protected static Object convertTupleElement(final Object raw, final Type<?> type) {
+        if (raw == null) {
+            return null;
+        }
+
+        // A parameterized slot must be re-deserialized with its declared element types: the
+        // untyped first-pass parse produced parser defaults (Integer, LinkedHashMap, ...), and
+        // both the raw-assignability shortcut and N.convert would keep them unconverted.
+        if (type.isParameterizedType() && !(raw instanceof CharSequence)) {
+            return type.valueOf(Utils.jsonParser.serialize(raw));
+        }
+
+        return type.javaType().isAssignableFrom(raw.getClass()) ? raw : N.convert(raw, type);
     }
 }

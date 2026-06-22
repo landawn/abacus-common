@@ -126,7 +126,7 @@ import java.lang.annotation.Target;
  * @see Id
  */
 @Documented
-@Target(value = { FIELD /*, METHOD */ })
+@Target(value = { FIELD })
 @Retention(RUNTIME)
 public @interface JoinedBy {
 

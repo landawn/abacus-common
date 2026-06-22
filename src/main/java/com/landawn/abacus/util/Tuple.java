@@ -22,6 +22,16 @@ import java.util.List;
 import java.util.Map;
 
 import com.landawn.abacus.annotation.Beta;
+import com.landawn.abacus.util.Tuple.Tuple0;
+import com.landawn.abacus.util.Tuple.Tuple1;
+import com.landawn.abacus.util.Tuple.Tuple2;
+import com.landawn.abacus.util.Tuple.Tuple3;
+import com.landawn.abacus.util.Tuple.Tuple4;
+import com.landawn.abacus.util.Tuple.Tuple5;
+import com.landawn.abacus.util.Tuple.Tuple6;
+import com.landawn.abacus.util.Tuple.Tuple7;
+import com.landawn.abacus.util.Tuple.Tuple8;
+import com.landawn.abacus.util.Tuple.Tuple9;
 import com.landawn.abacus.util.u.Optional;
 
 /**
@@ -71,7 +81,7 @@ import com.landawn.abacus.util.u.Optional;
  *   <li><b>{@link Tuple2}:</b> Two-element tuple, similar to {@link Pair} but with numbered access</li>
  *   <li><b>{@link Tuple3}:</b> Three-element tuple, similar to {@link Triple} but with numbered access</li>
  *   <li><b>{@link Tuple4} - {@link Tuple7}:</b> Standard multi-element tuples for common use cases</li>
- *   <li><b>{@link Tuple8} - {@link Tuple9}:</b> Large tuples marked as deprecated, consider using custom classes</li>
+ *   <li><b>{@link Tuple8} - {@link Tuple9}:</b> Large tuples whose factory methods are deprecated, consider using custom classes</li>
  * </ul>
  *
  * <p><b>Generic Type Parameter:</b>
@@ -232,7 +242,7 @@ import com.landawn.abacus.util.u.Optional;
  * <ul>
  *   <li><b>Tuples 0-3:</b> Generally acceptable for most use cases</li>
  *   <li><b>Tuples 4-7:</b> Consider whether a custom class would be more appropriate</li>
- *   <li><b>Tuples 8-9:</b> Deprecated - strongly consider using custom classes or records</li>
+ *   <li><b>Tuples 8-9:</b> Factory methods deprecated - strongly consider using custom classes or records</li>
  *   <li><b>Large Tuples:</b> Become difficult to understand and maintain without field names</li>
  * </ul>
  *
@@ -278,7 +288,7 @@ import com.landawn.abacus.util.u.Optional;
  */
 @com.landawn.abacus.annotation.Immutable
 @SuppressWarnings({ "java:S116", "java:S117" })
-public abstract class Tuple<TP> implements Immutable {
+public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tuple1, Tuple2, Tuple3, Tuple4, Tuple5, Tuple6, Tuple7, Tuple8, Tuple9 {
 
     Tuple() {
     }
@@ -418,6 +428,7 @@ public abstract class Tuple<TP> implements Immutable {
      *
      * @param <E> the type of exception that the consumer may throw.
      * @param consumer the action to be performed for each element, must not be {@code null}.
+     * @throws IllegalArgumentException if {@code consumer} is {@code null}.
      * @throws E if the consumer throws an exception.
      */
     public abstract <E extends Exception> void forEach(Throwables.Consumer<?, E> consumer) throws E;
@@ -862,7 +873,7 @@ public abstract class Tuple<TP> implements Immutable {
                 break;
 
             default:
-                throw new IllegalArgumentException("Too many elements((" + a.length + ") to fill in Tuple.");
+                throw new IllegalArgumentException("Too many elements (" + a.length + ") to fill in Tuple.");
         }
 
         return (TP) result;
@@ -938,7 +949,7 @@ public abstract class Tuple<TP> implements Immutable {
                 break;
 
             default:
-                throw new IllegalArgumentException("Too many elements((" + c.size() + ") to fill in Tuple.");
+                throw new IllegalArgumentException("Too many elements (" + c.size() + ") to fill in Tuple.");
         }
 
         return (TP) result;
@@ -1707,7 +1718,7 @@ public abstract class Tuple<TP> implements Immutable {
      *     <td>Rich: {@link #accept accept(BiConsumer)}, {@link #map map(BiFunction)},
      *         {@link #filter filter(BiPredicate)}, {@link #reverse()},
      *         {@link #toArray()}, {@code Tuple.toList(t)}, plus the shared {@link Tuple} hierarchy</td>
-     *     <td>Minimal: {@code map}, {@code filter}, {@code accept} on the pair as a whole</td>
+     *     <td>Minimal: {@code map}, {@code filter}, {@code accept}, {@code forEach} (overloads accept either the two elements or the pair as a whole)</td>
      *   </tr>
      *   <tr>
      *     <td>Hash/equals stability</td>
@@ -2158,7 +2169,7 @@ public abstract class Tuple<TP> implements Immutable {
      *     <td>Rich: {@link #accept accept(TriConsumer)}, {@link #map map(TriFunction)},
      *         {@link #filter filter(TriPredicate)}, {@link #reverse()},
      *         {@link #toArray()}, {@code Tuple.toList(t)}, plus the shared {@link Tuple} hierarchy</td>
-     *     <td>Minimal: {@code map}, {@code filter}, {@code accept} on the triple as a whole</td>
+     *     <td>Minimal: {@code map}, {@code filter}, {@code accept}, {@code forEach} (overloads accept either the three elements or the triple as a whole)</td>
      *   </tr>
      *   <tr>
      *     <td>Hash/equals stability</td>

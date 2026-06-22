@@ -52,4 +52,18 @@ public interface DoubleSupplier extends Throwables.DoubleSupplier<RuntimeExcepti
      */
     @Override
     double getAsDouble();
+
+    /**
+     * Returns this object as a {@link Throwables.DoubleSupplier} view.
+     *
+     * <p>The returned object has the same behavior as this one. This method does not translate
+     * exceptions or make the original implementation capable of throwing new checked exceptions; the
+     * exception type parameter is for target-type compatibility with APIs that accept {@code Throwables.DoubleSupplier}.
+     *
+     * @param <E> the target exception type for compatibility with {@code Throwables.DoubleSupplier}
+     * @return a {@link Throwables.DoubleSupplier} view of this object
+     */
+    default <E extends Throwable> Throwables.DoubleSupplier<E> toThrowable() {
+        return (Throwables.DoubleSupplier<E>) this;
+    }
 }

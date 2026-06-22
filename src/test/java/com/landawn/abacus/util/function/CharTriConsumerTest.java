@@ -112,6 +112,6 @@ public class CharTriConsumerTest extends TestBase {
     public void testAndThenNullThrowsImmediately() {
         CharTriConsumer instance = (a, b, c) -> {
         };
-        org.junit.jupiter.api.Assertions.assertThrows(NullPointerException.class, () -> instance.andThen((CharTriConsumer) null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> instance.andThen((CharTriConsumer) null));
     }
 }

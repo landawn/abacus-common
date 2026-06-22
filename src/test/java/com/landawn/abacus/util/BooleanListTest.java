@@ -1785,14 +1785,6 @@ public class BooleanListTest extends TestBase {
     }
 
     @Test
-    public void testSymmetricDifference_BooleanList_noOverlap() {
-        BooleanList a = BooleanList.of(true, true);
-        BooleanList b = BooleanList.of(false, false);
-        BooleanList result = a.symmetricDifference(b);
-        assertEquals(4, result.size());
-    }
-
-    @Test
     public void testSymmetricDifference_BooleanList_noOverlap_newTest() {
         BooleanList a = BooleanList.of(true, true);
         BooleanList b = BooleanList.of(false, false);
@@ -2411,6 +2403,12 @@ public class BooleanListTest extends TestBase {
         BooleanList list = BooleanList.of(true, false, true, false);
         list.shuffle(new Random(123));
         assertEquals(4, list.size());
+    }
+
+    @Test
+    public void testShuffleNullRandomRejectedForSmallLists() {
+        assertThrows(IllegalArgumentException.class, () -> new BooleanList().shuffle(null));
+        assertThrows(IllegalArgumentException.class, () -> BooleanList.of(true).shuffle(null));
     }
 
     @Test

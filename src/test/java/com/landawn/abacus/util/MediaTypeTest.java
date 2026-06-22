@@ -3,6 +3,7 @@ package com.landawn.abacus.util;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
 import org.junit.jupiter.api.Test;
 
@@ -42,14 +43,16 @@ public class MediaTypeTest extends TestBase {
 
     @Test
     public void testIntValue_uniqueness() {
-        MediaType[] types = MediaType.values();
-        for (int i = 0; i < types.length; i++) {
-            for (int j = i + 1; j < types.length; j++) {
-                if (types[i].intValue() == types[j].intValue()) {
-                    throw new AssertionError("Duplicate int value: " + types[i] + " and " + types[j]);
+        assertDoesNotThrow(() -> {
+            MediaType[] types = MediaType.values();
+            for (int i = 0; i < types.length; i++) {
+                for (int j = i + 1; j < types.length; j++) {
+                    if (types[i].intValue() == types[j].intValue()) {
+                        throw new AssertionError("Duplicate int value: " + types[i] + " and " + types[j]);
+                    }
                 }
             }
-        }
+        });
     }
 
     @Test

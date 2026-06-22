@@ -362,7 +362,7 @@ public final class Indexed<T> extends AbstractIndexed {
      * Indexed<String> idx3 = Indexed.of("World", 5);
      *
      * idx1.hashCode() == idx2.hashCode();   // returns true (same index and value)
-     * idx1.hashCode() == idx3.hashCode();   // returns likely false (different values)
+     * idx1.hashCode() == idx3.hashCode();   // likely returns false (different values)
      *
      * // Using in HashSet
      * Set<Indexed<String>> set = new HashSet<>();

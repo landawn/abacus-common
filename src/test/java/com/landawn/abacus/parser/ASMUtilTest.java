@@ -1,5 +1,6 @@
 package com.landawn.abacus.parser;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -31,28 +32,30 @@ public class ASMUtilTest extends TestBase {
 
     @Test
     public void test_performance() {
-        XBean xbean = Beans.newRandomBean(XBean.class);
+        assertDoesNotThrow(() -> {
+            XBean xbean = Beans.newRandomBean(XBean.class);
 
-        {
-            BeanInfo beanInfo = ParserUtil.getBeanInfo(XBean.class, false);
+            {
+                BeanInfo beanInfo = ParserUtil.getBeanInfo(XBean.class, false);
 
-            Profiler.run(1, 100000, 3, "jdk", () -> {
+                Profiler.run(1, 100000, 3, "jdk", () -> {
 
-                for (PropInfo propInfo : beanInfo.propInfoList) {
-                    propInfo.getPropValue(xbean);
-                }
-            }).printResult();
-        }
+                    for (PropInfo propInfo : beanInfo.propInfoList) {
+                        propInfo.getPropValue(xbean);
+                    }
+                }).printResult();
+            }
 
-        {
-            BeanInfo beanInfo = ParserUtil.getBeanInfo(XBean.class, true);
+            {
+                BeanInfo beanInfo = ParserUtil.getBeanInfo(XBean.class, true);
 
-            Profiler.run(1, 100000, 3, "asm", () -> {
+                Profiler.run(1, 100000, 3, "asm", () -> {
 
-                for (PropInfo propInfo : beanInfo.propInfoList) {
-                    propInfo.getPropValue(xbean);
-                }
-            }).printResult();
-        }
+                    for (PropInfo propInfo : beanInfo.propInfoList) {
+                        propInfo.getPropValue(xbean);
+                    }
+                }).printResult();
+            }
+        });
     }
 }

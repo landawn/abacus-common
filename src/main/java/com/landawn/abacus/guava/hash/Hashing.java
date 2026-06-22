@@ -141,8 +141,8 @@ public final class Hashing {
      * }</pre>
      *
      * @param minimumBits a positive integer specifying the minimum number of bits the
-     *                    hash code should have (the actual number of bits may be higher,
-     *                    typically rounded up to a multiple of 32 or 64)
+     *                    hash code should have (the actual number of bits may be higher;
+     *                    currently 32 bits, or the next multiple of 128 bits)
      * @return a hash function that produces hash codes of length {@code minimumBits} or greater
      * @throws IllegalArgumentException if {@code minimumBits} is not positive
      * @see #murmur3_128()
@@ -162,8 +162,9 @@ public final class Hashing {
      * <p>The implementation corresponds to the MurmurHash3_x86_32 function (Murmur3A) from
      * the original C++ implementation. This is the little-endian variant.
      *
-     * <p>This method returns the fixed version that corrects a bug in the original
-     * implementation, hence the internal name {@code murmur3_32_fixed}.
+     * <p>This method returns the fixed version that corrects a bug in Guava's earlier
+     * {@code murmur3_32} implementation (which produced incorrect results for strings
+     * containing non-Latin-1 characters), hence the internal name {@code murmur3_32_fixed}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -184,6 +185,10 @@ public final class Hashing {
      *
      * <p>This is a convenient method for when you don't need a specific seed value.
      * The zero seed is commonly used as a default.
+     *
+     * <p>Like {@link #murmur3_32(int)}, this method returns the fixed version that corrects a bug in
+     * Guava's earlier {@code murmur3_32} implementation (incorrect results for strings containing
+     * non-Latin-1 characters); if you relied on the old hash values, migration is required.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -393,7 +398,8 @@ public final class Hashing {
      * @param key the secret key for HMAC computation
      * @return a hash function implementing HMAC-MD5 with the given key
      * @throws IllegalArgumentException if the given key is inappropriate for initializing
-     *                                  this MAC (e.g., wrong algorithm or {@code null} key)
+     *                                  this MAC (e.g., wrong algorithm)
+     * @throws NullPointerException if {@code key} is {@code null}
      */
     public static HashFunction hmacMd5(final Key key) {
         return GuavaHashFunction.wrap(com.google.common.hash.Hashing.hmacMd5(key));
@@ -413,7 +419,8 @@ public final class Hashing {
      *
      * @param key the key material for the secret key as a byte array
      * @return a hash function implementing HMAC-MD5 with a key created from the given bytes
-     * @throws IllegalArgumentException if {@code key} is empty or null
+     * @throws IllegalArgumentException if {@code key} is empty
+     * @throws NullPointerException if {@code key} is {@code null}
      */
     public static HashFunction hmacMd5(final byte[] key) {
         return GuavaHashFunction.wrap(com.google.common.hash.Hashing.hmacMd5(key));
@@ -450,7 +457,8 @@ public final class Hashing {
      *
      * @param key the key material for the secret key as a byte array
      * @return a hash function implementing HMAC-SHA1 with a key created from the given bytes
-     * @throws IllegalArgumentException if {@code key} is empty or null
+     * @throws IllegalArgumentException if {@code key} is empty
+     * @throws NullPointerException if {@code key} is {@code null}
      */
     public static HashFunction hmacSha1(final byte[] key) {
         return GuavaHashFunction.wrap(com.google.common.hash.Hashing.hmacSha1(key));
@@ -489,7 +497,8 @@ public final class Hashing {
      *
      * @param key the key material for the secret key as a byte array
      * @return a hash function implementing HMAC-SHA256 with a key created from the given bytes
-     * @throws IllegalArgumentException if {@code key} is empty or null
+     * @throws IllegalArgumentException if {@code key} is empty
+     * @throws NullPointerException if {@code key} is {@code null}
      */
     public static HashFunction hmacSha256(final byte[] key) {
         return GuavaHashFunction.wrap(com.google.common.hash.Hashing.hmacSha256(key));
@@ -529,7 +538,8 @@ public final class Hashing {
      *
      * @param key the key material for the secret key as a byte array
      * @return a hash function implementing HMAC-SHA512 with a key created from the given bytes
-     * @throws IllegalArgumentException if {@code key} is empty or null
+     * @throws IllegalArgumentException if {@code key} is empty
+     * @throws NullPointerException if {@code key} is {@code null}
      */
     public static HashFunction hmacSha512(final byte[] key) {
         return GuavaHashFunction.wrap(com.google.common.hash.Hashing.hmacSha512(key));

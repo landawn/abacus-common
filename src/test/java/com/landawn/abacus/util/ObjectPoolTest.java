@@ -60,6 +60,61 @@ public class ObjectPoolTest extends TestBase {
     }
 
     @Test
+    public void testPutIfAbsent() {
+        ObjectPool<String, Integer> pool = new ObjectPool<>(10);
+
+        // First insertion: no prior mapping -> returns null and stores the value.
+        Integer prior = pool.putIfAbsent("key", 100);
+        Assertions.assertNull(prior);
+        Assertions.assertEquals(100, pool.get("key"));
+
+        // Second insertion for the same key: returns the existing value and does NOT overwrite.
+        Integer prior2 = pool.putIfAbsent("key", 200);
+        Assertions.assertEquals(100, prior2);
+        Assertions.assertEquals(100, pool.get("key"));
+    }
+
+    @Test
+    public void testPutIfAbsentIsAtomicUnderConcurrency() throws InterruptedException {
+        // Many threads racing to register the SAME key; exactly one must "win" (get null back).
+        final int threadCount = 16;
+        final ObjectPool<String, Integer> pool = new ObjectPool<>(16);
+        final java.util.concurrent.atomic.AtomicInteger winners = new java.util.concurrent.atomic.AtomicInteger();
+        final java.util.concurrent.CountDownLatch start = new java.util.concurrent.CountDownLatch(1);
+        final java.util.concurrent.CountDownLatch done = new java.util.concurrent.CountDownLatch(threadCount);
+        final Thread[] threads = new Thread[threadCount];
+
+        for (int i = 0; i < threadCount; i++) {
+            final int value = i;
+            threads[i] = new Thread(() -> {
+                try {
+                    start.await();
+                    if (pool.putIfAbsent("race", value) == null) {
+                        winners.incrementAndGet();
+                    }
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                } finally {
+                    done.countDown();
+                }
+            });
+            threads[i].start();
+        }
+
+        start.countDown();
+        done.await();
+
+        Assertions.assertEquals(1, winners.get(), "exactly one putIfAbsent should observe an absent key");
+        Assertions.assertTrue(pool.containsKey("race"));
+    }
+
+    @Test
+    public void testPutIfAbsentNullKey() {
+        ObjectPool<String, Integer> pool = new ObjectPool<>(10);
+        Assertions.assertThrows(NullPointerException.class, () -> pool.putIfAbsent(null, 100));
+    }
+
+    @Test
     public void testPutNullKey() {
         ObjectPool<String, Integer> pool = new ObjectPool<>(10);
         Assertions.assertThrows(NullPointerException.class, () -> pool.put(null, 100));

@@ -40,6 +40,11 @@ public interface DoubleToLongFunction extends Throwables.DoubleToLongFunction<Ru
      * A default implementation that converts a double value to long by casting.
      * The conversion truncates the decimal portion of the double value.
      * For example: 3.14 becomes 3, -2.99 becomes -2.
+     *
+     * <p>Note: For double values outside the long range [-2^63, 2^63-1], the result is clamped to
+     * {@code Long.MAX_VALUE} or {@code Long.MIN_VALUE}. Special double values are converted as
+     * follows: NaN becomes 0, while positive and negative infinity become {@code Long.MAX_VALUE}
+     * and {@code Long.MIN_VALUE} respectively.</p>
      */
     DoubleToLongFunction DEFAULT = value -> (long) value;
 
@@ -68,4 +73,18 @@ public interface DoubleToLongFunction extends Throwables.DoubleToLongFunction<Ru
      */
     @Override
     long applyAsLong(double value);
+
+    /**
+     * Returns this object as a {@link Throwables.DoubleToLongFunction} view.
+     *
+     * <p>The returned object has the same behavior as this one. This method does not translate
+     * exceptions or make the original implementation capable of throwing new checked exceptions; the
+     * exception type parameter is for target-type compatibility with APIs that accept {@code Throwables.DoubleToLongFunction}.
+     *
+     * @param <E> the target exception type for compatibility with {@code Throwables.DoubleToLongFunction}
+     * @return a {@link Throwables.DoubleToLongFunction} view of this object
+     */
+    default <E extends Throwable> Throwables.DoubleToLongFunction<E> toThrowable() {
+        return (Throwables.DoubleToLongFunction<E>) this;
+    }
 }

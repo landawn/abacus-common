@@ -29,6 +29,7 @@ import java.util.concurrent.TimeUnit;
 
 import com.landawn.abacus.annotation.Beta;
 import com.landawn.abacus.annotation.SuppressFBWarnings;
+import com.landawn.abacus.exception.UncheckedIOException;
 import com.landawn.abacus.parser.KryoParser;
 import com.landawn.abacus.parser.ParserFactory;
 import com.landawn.abacus.parser.ParserUtil;
@@ -155,6 +156,7 @@ public final class OkHttpRequest {
      * @param url the URL object for the request
      * @param httpClient the OkHttpClient to use for executing the request
      * @return a new OkHttpRequest instance
+     * @throws IllegalArgumentException if the scheme of {@code url} is not {@code http} or {@code https}
      */
     public static OkHttpRequest create(final URL url, final OkHttpClient httpClient) {
         return new OkHttpRequest(null, HttpUrl.get(url), httpClient);
@@ -580,8 +582,11 @@ public final class OkHttpRequest {
     }
 
     /**
-     * Sets HTTP headers specified by the key/value entries from the provided Map.
-     * If this request already has any headers with that name, they are all replaced.
+     * Merges the given header entries into the headers already on this settings object.
+     * For each entry in the map, a header with the same name is overwritten with the new value,
+     * while any existing headers whose names are <i>not</i> present in the map are kept unchanged.
+     * This is a merge, not a replace-all: use {@link #setHeaders(HttpHeaders)} if you want to
+     * discard all prior headers and install a fresh set.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -596,6 +601,7 @@ public final class OkHttpRequest {
      *
      * @param headers A map containing header names and values
      * @return This OkHttpRequest instance for method chaining
+     * @see #setHeaders(Headers)
      * @see Request.Builder#header(String, String)
      * @see HttpHeaders
      */
@@ -610,8 +616,7 @@ public final class OkHttpRequest {
     }
 
     /**
-     * Removes all headers on this request and adds the specified headers.
-     * This method replaces all existing headers with the provided Headers instance.
+     * Resets the headers by removing all existing headers first and then adds the specified headers (replace-all).
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -627,17 +632,17 @@ public final class OkHttpRequest {
      *
      * @param headers the Headers object containing all headers to set
      * @return this OkHttpRequest instance for method chaining
+     * @see #header(String, Object)
      * @see Request.Builder#headers(Headers)
      * @see HttpHeaders
      */
-    public OkHttpRequest headers(final Headers headers) {
+    public OkHttpRequest setHeaders(final Headers headers) {
         requestBuilder.headers(headers);
         return this;
     }
 
     /**
-     * Removes all headers on this request and adds the specified headers.
-     * This method replaces all existing headers with the provided HttpHeaders instance.
+     * Resets the headers by removing all existing headers first and then adds the specified headers (replace-all).
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -654,7 +659,7 @@ public final class OkHttpRequest {
      * @see Request.Builder#headers(Headers)
      * @see HttpHeaders
      */
-    public OkHttpRequest headers(final HttpHeaders headers) {
+    public OkHttpRequest setHeaders(final HttpHeaders headers) {
         final Map<String, String> map = new HashMap<>();
 
         if (headers != null && !headers.isEmpty()) {
@@ -665,7 +670,7 @@ public final class OkHttpRequest {
 
         final Headers newHeaders = Headers.of(map);
 
-        return headers(newHeaders);
+        return setHeaders(newHeaders);
     }
 
     /**
@@ -1107,9 +1112,9 @@ public final class OkHttpRequest {
      * }</pre>
      *
      * @return The HTTP response
-     * @throws IOException if the request could not be executed
+     * @throws UncheckedIOException if the request could not be executed
      */
-    public Response get() throws IOException {
+    public Response get() throws UncheckedIOException {
         return execute(HttpMethod.GET);
     }
 
@@ -1125,9 +1130,9 @@ public final class OkHttpRequest {
      * @param <T> The type of the response object
      * @param resultClass The class of the expected response object
      * @return The deserialized response body
-     * @throws IOException if the request could not be executed or the response indicates an error
+     * @throws UncheckedIOException if the request could not be executed or the response indicates an error
      */
-    public <T> T get(final Class<T> resultClass) throws IOException {
+    public <T> T get(final Class<T> resultClass) throws UncheckedIOException {
         return execute(HttpMethod.GET, resultClass);
     }
 
@@ -1144,9 +1149,9 @@ public final class OkHttpRequest {
      * }</pre>
      *
      * @return The HTTP response
-     * @throws IOException if the request could not be executed
+     * @throws UncheckedIOException if the request could not be executed
      */
-    public Response post() throws IOException {
+    public Response post() throws UncheckedIOException {
         return execute(HttpMethod.POST);
     }
 
@@ -1165,9 +1170,9 @@ public final class OkHttpRequest {
      * @param <T> The type of the response object
      * @param resultClass The class of the expected response object
      * @return The deserialized response body
-     * @throws IOException if the request could not be executed or the response indicates an error
+     * @throws UncheckedIOException if the request could not be executed or the response indicates an error
      */
-    public <T> T post(final Class<T> resultClass) throws IOException {
+    public <T> T post(final Class<T> resultClass) throws UncheckedIOException {
         return execute(HttpMethod.POST, resultClass);
     }
 
@@ -1184,9 +1189,9 @@ public final class OkHttpRequest {
      * }</pre>
      *
      * @return The HTTP response
-     * @throws IOException if the request could not be executed
+     * @throws UncheckedIOException if the request could not be executed
      */
-    public Response put() throws IOException {
+    public Response put() throws UncheckedIOException {
         return execute(HttpMethod.PUT);
     }
 
@@ -1205,9 +1210,9 @@ public final class OkHttpRequest {
      * @param <T> The type of the response object
      * @param resultClass The class of the expected response object
      * @return The deserialized response body
-     * @throws IOException if the request could not be executed or the response indicates an error
+     * @throws UncheckedIOException if the request could not be executed or the response indicates an error
      */
-    public <T> T put(final Class<T> resultClass) throws IOException {
+    public <T> T put(final Class<T> resultClass) throws UncheckedIOException {
         return execute(HttpMethod.PUT, resultClass);
     }
 
@@ -1224,9 +1229,9 @@ public final class OkHttpRequest {
      * }</pre>
      *
      * @return The HTTP response
-     * @throws IOException if the request could not be executed
+     * @throws UncheckedIOException if the request could not be executed
      */
-    public Response patch() throws IOException {
+    public Response patch() throws UncheckedIOException {
         return execute(HttpMethod.PATCH);
     }
 
@@ -1245,9 +1250,9 @@ public final class OkHttpRequest {
      * @param <T> The type of the response object
      * @param resultClass The class of the expected response object
      * @return The deserialized response body
-     * @throws IOException if the request could not be executed or the response indicates an error
+     * @throws UncheckedIOException if the request could not be executed or the response indicates an error
      */
-    public <T> T patch(final Class<T> resultClass) throws IOException {
+    public <T> T patch(final Class<T> resultClass) throws UncheckedIOException {
         return execute(HttpMethod.PATCH, resultClass);
     }
 
@@ -1262,9 +1267,9 @@ public final class OkHttpRequest {
      * }</pre>
      *
      * @return The HTTP response
-     * @throws IOException if the request could not be executed
+     * @throws UncheckedIOException if the request could not be executed
      */
-    public Response delete() throws IOException {
+    public Response delete() throws UncheckedIOException {
         return execute(HttpMethod.DELETE);
     }
 
@@ -1281,9 +1286,9 @@ public final class OkHttpRequest {
      * @param <T> The type of the response object
      * @param resultClass The class of the expected response object
      * @return The deserialized response body
-     * @throws IOException if the request could not be executed or the response indicates an error
+     * @throws UncheckedIOException if the request could not be executed or the response indicates an error
      */
-    public <T> T delete(final Class<T> resultClass) throws IOException {
+    public <T> T delete(final Class<T> resultClass) throws UncheckedIOException {
         return execute(HttpMethod.DELETE, resultClass);
     }
 
@@ -1301,9 +1306,9 @@ public final class OkHttpRequest {
      * }</pre>
      *
      * @return The HTTP response (with no body)
-     * @throws IOException if the request could not be executed
+     * @throws UncheckedIOException if the request could not be executed
      */
-    public Response head() throws IOException {
+    public Response head() throws UncheckedIOException {
         return execute(HttpMethod.HEAD);
     }
 
@@ -1319,10 +1324,10 @@ public final class OkHttpRequest {
      *
      * @param httpMethod The HTTP method to use (GET, POST, PUT, PATCH, DELETE, HEAD)
      * @return The HTTP response
-     * @throws IOException if the request could not be executed
+     * @throws UncheckedIOException if the request could not be executed
      */
     @Beta
-    public Response execute(final HttpMethod httpMethod) throws IOException {
+    public Response execute(final HttpMethod httpMethod) throws UncheckedIOException {
         return execute(httpMethod, Response.class);
     }
 
@@ -1343,10 +1348,10 @@ public final class OkHttpRequest {
      * @return The deserialized response body
      * @throws IllegalArgumentException if {@code httpMethod} or {@code resultClass} is {@code null}, or {@code resultClass} is the abacus
      *                                  {@link HttpResponse} type (use OkHttp's {@code Response} class directly instead)
-     * @throws IOException if the request could not be executed or the response indicates a non-2xx status
+     * @throws UncheckedIOException if the request could not be executed or the response indicates a non-2xx status
      */
     @Beta
-    public <T> T execute(final HttpMethod httpMethod, final Class<T> resultClass) throws IllegalArgumentException, IOException {
+    public <T> T execute(final HttpMethod httpMethod, final Class<T> resultClass) throws IllegalArgumentException, UncheckedIOException {
         N.checkArgNotNull(httpMethod, "httpMethod");
         N.checkArgNotNull(resultClass, cs.resultClass);
         N.checkArgument(!HttpResponse.class.equals(resultClass), "Return type cannot be HttpResponse");
@@ -1411,6 +1416,11 @@ public final class OkHttpRequest {
                     IOUtil.closeQuietly(is);
                 }
             }
+        } catch (final IOException e) {
+            // Parity with com.landawn.abacus.http.HttpRequest and http.v2.HttpRequest: surface
+            // I/O failures (including non-2xx responses) as an unchecked UncheckedIOException so
+            // callers are not forced into try/catch on the fluent API.
+            throw new UncheckedIOException(e);
         } finally {
             try {
                 if (!returningResponse && resp != null) {
@@ -1526,9 +1536,11 @@ public final class OkHttpRequest {
             }
         } else {
             if (httpUrl == null) {
-                requestBuilder.url(HttpUrl.get(URLEncodedUtil.encode(url, query)));
+                // Explicit UTF-8: the 2-arg overload uses the PLATFORM default charset,
+                // mis-encoding non-ASCII query values on non-UTF-8 JVMs.
+                requestBuilder.url(HttpUrl.get(URLEncodedUtil.encode(url, query, HttpUtil.DEFAULT_CHARSET)));
             } else {
-                requestBuilder.url(HttpUrl.get(URLEncodedUtil.encode(httpUrl.toString(), query)));
+                requestBuilder.url(HttpUrl.get(URLEncodedUtil.encode(httpUrl.toString(), query, HttpUtil.DEFAULT_CHARSET)));
             }
         }
 

@@ -77,4 +77,18 @@ public interface LongBinaryOperator extends Throwables.LongBinaryOperator<Runtim
      */
     @Override
     long applyAsLong(long a, long b);
+
+    /**
+     * Returns this object as a {@link Throwables.LongBinaryOperator} view.
+     *
+     * <p>The returned object has the same behavior as this one. This method does not translate
+     * exceptions or make the original implementation capable of throwing new checked exceptions; the
+     * exception type parameter is for target-type compatibility with APIs that accept {@code Throwables.LongBinaryOperator}.
+     *
+     * @param <E> the target exception type for compatibility with {@code Throwables.LongBinaryOperator}
+     * @return a {@link Throwables.LongBinaryOperator} view of this object
+     */
+    default <E extends Throwable> Throwables.LongBinaryOperator<E> toThrowable() {
+        return (Throwables.LongBinaryOperator<E>) this;
+    }
 }

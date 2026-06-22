@@ -13,9 +13,9 @@
  */
 package com.landawn.abacus.util.function;
 
-import java.util.Objects;
-
 import com.landawn.abacus.util.Throwables;
+import com.landawn.abacus.util.N;
+import com.landawn.abacus.util.cs;
 
 /**
  * A functional interface that represents a predicate (boolean-valued function) of an
@@ -108,10 +108,10 @@ public interface ObjIntPredicate<T> extends Throwables.ObjIntPredicate<T, Runtim
      * @param other a predicate that will be logically-ANDed with this predicate. Must not be {@code null}.
      * @return a composed predicate that represents the short-circuiting logical
      *         AND of this predicate and the {@code other} predicate
-     * @throws NullPointerException if {@code other} is null
+     * @throws IllegalArgumentException if {@code other} is null
      */
-    default ObjIntPredicate<T> and(final ObjIntPredicate<T> other) {
-        Objects.requireNonNull(other);
+    default ObjIntPredicate<T> and(final ObjIntPredicate<? super T> other) {
+        N.checkArgNotNull(other, cs.other);
         return (t, u) -> test(t, u) && other.test(t, u);
     }
 
@@ -139,10 +139,24 @@ public interface ObjIntPredicate<T> extends Throwables.ObjIntPredicate<T, Runtim
      * @param other a predicate that will be logically-ORed with this predicate. Must not be {@code null}.
      * @return a composed predicate that represents the short-circuiting logical
      *         OR of this predicate and the {@code other} predicate
-     * @throws NullPointerException if {@code other} is null
+     * @throws IllegalArgumentException if {@code other} is null
      */
-    default ObjIntPredicate<T> or(final ObjIntPredicate<T> other) {
-        Objects.requireNonNull(other);
+    default ObjIntPredicate<T> or(final ObjIntPredicate<? super T> other) {
+        N.checkArgNotNull(other, cs.other);
         return (t, u) -> test(t, u) || other.test(t, u);
+    }
+
+    /**
+     * Returns this object as a {@link Throwables.ObjIntPredicate} view.
+     *
+     * <p>The returned object has the same behavior as this one. This method does not translate
+     * exceptions or make the original implementation capable of throwing new checked exceptions; the
+     * exception type parameter is for target-type compatibility with APIs that accept {@code Throwables.ObjIntPredicate}.
+     *
+     * @param <E> the target exception type for compatibility with {@code Throwables.ObjIntPredicate}
+     * @return a {@link Throwables.ObjIntPredicate} view of this object
+     */
+    default <E extends Throwable> Throwables.ObjIntPredicate<T, E> toThrowable() {
+        return (Throwables.ObjIntPredicate<T, E>) this;
     }
 }

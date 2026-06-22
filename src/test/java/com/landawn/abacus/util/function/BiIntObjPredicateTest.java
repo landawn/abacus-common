@@ -135,6 +135,19 @@ public class BiIntObjPredicateTest extends TestBase {
     }
 
     @Test
+    public void testAndOrAcceptSuperTypePredicate() {
+        BiIntObjPredicate<String> notEmpty = (i, j, s) -> s != null && !s.isEmpty();
+        BiIntObjPredicate<CharSequence> expectedLength = (i, j, s) -> s != null && s.length() == i + j;
+
+        BiIntObjPredicate<String> and = notEmpty.and(expectedLength);
+        BiIntObjPredicate<String> or = notEmpty.or(expectedLength);
+
+        assertTrue(and.test(2, 3, "hello"));
+        assertFalse(and.test(2, 3, "hi"));
+        assertTrue(or.test(2, 3, "hi"));
+    }
+
+    @Test
     public void testAndShortCircuit() {
         BiIntObjPredicate<String> firstFalse = (i, j, s) -> false;
         BiIntObjPredicate<String> shouldNotExecute = (i, j, s) -> {
@@ -173,6 +186,6 @@ public class BiIntObjPredicateTest extends TestBase {
     @Test
     public void testAndNullThrowsImmediately() {
         BiIntObjPredicate<String> instance = (a, b, c) -> false;
-        org.junit.jupiter.api.Assertions.assertThrows(NullPointerException.class, () -> instance.and((BiIntObjPredicate) null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> instance.and((BiIntObjPredicate) null));
     }
 }

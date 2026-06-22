@@ -51,20 +51,16 @@ import com.landawn.abacus.util.stream.CharStream;
 public abstract class CharIterator extends ImmutableIterator<Character> {
 
     /**
-     * Constructs a new CharIterator.
-     *
-     * <p>This constructor is {@code protected} to allow subclasses to create custom
-     * implementations of {@code CharIterator}. Subclasses should override the abstract
-     * {@link #nextChar()} method and typically also override {@link #hasNext()}.</p>
+     * Constructs a new {@code CharIterator}.
+     * Intended for use by subclasses only.
      */
     protected CharIterator() {
     }
 
     /**
      * A singleton empty {@code CharIterator} instance that contains no elements.
-     *
-     * <p>This iterator's {@link #hasNext()} always returns {@code false}, and {@link #nextChar()}
-     * always throws {@link NoSuchElementException}.</p>
+     * This iterator's {@code hasNext()} always returns {@code false}, and {@code nextChar()}
+     * always throws {@link NoSuchElementException}.
      *
      * @see #empty()
      */
@@ -137,7 +133,7 @@ public abstract class CharIterator extends ImmutableIterator<Character> {
      * @param a the char array (may be {@code null})
      * @param fromIndex the starting index (inclusive)
      * @param toIndex the ending index (exclusive)
-     * @return a new {@code CharIterator} over the specified range, or an empty iterator if the array is {@code null} or the range is empty
+     * @return a new {@code CharIterator} over the specified range, or an empty iterator if the array is {@code null} or {@code fromIndex == toIndex}
      * @throws IndexOutOfBoundsException if {@code fromIndex < 0} or {@code toIndex > a.length} or {@code fromIndex > toIndex}
      */
     public static CharIterator of(final char[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
@@ -201,13 +197,14 @@ public abstract class CharIterator extends ImmutableIterator<Character> {
      * @param iteratorSupplier a Supplier that provides the CharIterator when needed, must not be {@code null}
      * @return a {@code CharIterator} that is initialized on first use
      * @throws IllegalArgumentException if {@code iteratorSupplier} is {@code null}
+     * @throws IllegalStateException if the supplier returns {@code null} when invoked
      */
     public static CharIterator defer(final Supplier<? extends CharIterator> iteratorSupplier) throws IllegalArgumentException {
         N.checkArgNotNull(iteratorSupplier, cs.iteratorSupplier);
 
         return new CharIterator() {
             private CharIterator iter = null;
-            private boolean isInitialized = false;
+            private volatile boolean isInitialized = false;
 
             @Override
             public boolean hasNext() {
@@ -227,10 +224,13 @@ public abstract class CharIterator extends ImmutableIterator<Character> {
                 return iter.nextChar();
             }
 
-            private void init() {
+            private synchronized void init() {
                 if (!isInitialized) {
                     isInitialized = true;
                     iter = iteratorSupplier.get();
+                    if (iter == null) {
+                        throw new IllegalStateException("Iterator supplier returned null");
+                    }
                 }
             }
         };
@@ -251,7 +251,7 @@ public abstract class CharIterator extends ImmutableIterator<Character> {
      * CharIterator iter = CharIterator.generate(() -> 'X');
      * // Infinite iterator that always returns 'X'
      * for (int i = 0; i < 5 && iter.hasNext(); i++) {
-     *     System.out.print(iter.nextChar());   // returns XXXXX
+     *     System.out.print(iter.nextChar());   // prints: XXXXX
      * }
      * }</pre>
      *
@@ -376,7 +376,8 @@ public abstract class CharIterator extends ImmutableIterator<Character> {
      * }</pre>
      *
      * @param n the number of elements to skip, must be non-negative
-     * @return this iterator if {@code n} is 0, otherwise a new {@code CharIterator} with the first {@code n} elements skipped
+     * @return this iterator unchanged if {@code n == 0}, otherwise a new {@code CharIterator}
+     *         with the first {@code n} elements skipped
      * @throws IllegalArgumentException if {@code n} is negative
      */
     public CharIterator skip(final long n) throws IllegalArgumentException {
@@ -435,7 +436,8 @@ public abstract class CharIterator extends ImmutableIterator<Character> {
      * }</pre>
      *
      * @param count the maximum number of elements to return, must be non-negative
-     * @return an empty iterator if {@code count} is 0, otherwise a new {@code CharIterator} limited to {@code count} elements
+     * @return an empty iterator if {@code count == 0}, otherwise a new {@code CharIterator}
+     *         limited to at most {@code count} elements
      * @throws IllegalArgumentException if {@code count} is negative
      */
     public CharIterator limit(final long count) throws IllegalArgumentException {
@@ -538,7 +540,7 @@ public abstract class CharIterator extends ImmutableIterator<Character> {
      * char[] empty = CharIterator.empty().toArray();   // returns empty.length == 0
      * }</pre>
      *
-     * @return a char array containing all remaining elements
+     * @return a {@code char} array containing all remaining elements; an empty array if there are none
      */
     @SuppressWarnings("deprecation")
     public char[] toArray() {
@@ -561,7 +563,7 @@ public abstract class CharIterator extends ImmutableIterator<Character> {
      * CharList empty = CharIterator.empty().toList();   // returns empty.size() == 0
      * }</pre>
      *
-     * @return a CharList containing all remaining elements
+     * @return a {@link CharList} containing all remaining elements; an empty list if there are none
      */
     public CharList toList() {
         final CharList list = new CharList();
@@ -698,7 +700,7 @@ public abstract class CharIterator extends ImmutableIterator<Character> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * CharIterator iter = CharIterator.of('a', 'b', 'c');
-     * iter.foreachRemaining(ch -> System.out.print(ch));   // returns abc
+     * iter.foreachRemaining(ch -> System.out.print(ch));   // prints: abc
      * }</pre>
      *
      * @param <E> the type of exception the action may throw

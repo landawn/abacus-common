@@ -13,9 +13,11 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.TimeZone;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -41,6 +43,8 @@ import com.landawn.abacus.parser.entity.ImmutableEntity5;
 import com.landawn.abacus.parser.entity.ImmutableEntity6;
 import com.landawn.abacus.parser.entity.RecordB;
 import com.landawn.abacus.util.Beans;
+import com.landawn.abacus.util.Maps;
+import com.landawn.abacus.util.EnumType;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.NamingPolicy;
 
@@ -48,6 +52,39 @@ import lombok.Value;
 import lombok.experimental.Accessors;
 
 public class ParserUtilTest extends AbstractTest {
+
+    public static class LongFormatLdtBean {
+        @JsonXmlField(dateFormat = "long", timeZone = "GMT+08:00")
+        private LocalDateTime ts;
+
+        public LocalDateTime getTs() {
+            return ts;
+        }
+
+        public void setTs(final LocalDateTime ts) {
+            this.ts = ts;
+        }
+    }
+
+    @Test
+    public void testLocalDateTimeLongFormatRoundTripsWithConfiguredZone() {
+        // read() used Timestamp.toLocalDateTime() (JVM-default zone) while write() used the configured
+        // propInfo.zoneId, so a non-default field timeZone broke the epoch-millis round-trip.
+        final TimeZone original = TimeZone.getDefault();
+        try {
+            TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
+
+            final LongFormatLdtBean bean = new LongFormatLdtBean();
+            bean.setTs(LocalDateTime.of(2020, 1, 1, 0, 0, 0));
+
+            final String json = N.toJson(bean);
+            final LongFormatLdtBean back = N.fromJson(json, LongFormatLdtBean.class);
+
+            assertEquals(bean.getTs(), back.getTs());
+        } finally {
+            TimeZone.setDefault(original);
+        }
+    }
 
     @Value
     public static class ImmutableEntity7 {
@@ -2063,13 +2100,13 @@ public class ParserUtilTest extends AbstractTest {
 
         Map<String, Object> props = Beans.beanToMap(account);
 
-        Beans.replaceKeysWithSnakeCase(props);
+        Maps.replaceKeysWithSnakeCase(props);
 
         N.println(props);
 
         props = Beans.beanToMap(account);
 
-        Beans.replaceKeysWithScreamingSnakeCase(props);
+        Maps.replaceKeysWithScreamingSnakeCase(props);
 
         N.println(props);
         assertNotNull(props);
@@ -2258,6 +2295,93 @@ public class ParserUtilTest extends AbstractTest {
             // tied to whatever locale is active when they run.
             ParserUtil.refreshBeanPropInfo(NumberFormatBean.class);
         }
+    }
+
+    public static class LongDateFormatBean {
+        @JsonXmlField(dateFormat = "long")
+        private Date createdOn;
+
+        public Date getCreatedOn() {
+            return createdOn;
+        }
+
+        public void setCreatedOn(Date createdOn) {
+            this.createdOn = createdOn;
+        }
+    }
+
+    @Test
+    public void test_getBeanInfo_longDateFormat() {
+        // getBeanInfo used to throw IllegalArgumentException("Unknown pattern letter: l") because
+        // DateTimeFormatter.ofPattern("long") was invoked before isLongDateFormat was computed.
+        BeanInfo beanInfo = ParserUtil.getBeanInfo(LongDateFormatBean.class);
+        PropInfo propInfo = beanInfo.getPropInfo("createdOn");
+
+        assertTrue(propInfo.isLongDateFormat);
+        assertNull(propInfo.dateTimeFormatter);
+
+        // the epoch-millis machinery is alive: reads a long string as a Date
+        Date d = (Date) propInfo.readPropValue("1700000000000");
+        assertEquals(1700000000000L, d.getTime());
+    }
+
+    @JsonXmlConfig(enumerated = EnumType.ORDINAL)
+    public static class OrdinalEnumBean {
+        public enum Status {
+            ACTIVE, INACTIVE
+        }
+
+        @JsonXmlField(name = "st")
+        private Status status;
+
+        public Status getStatus() {
+            return status;
+        }
+
+        public void setStatus(Status status) {
+            this.status = status;
+        }
+    }
+
+    @Test
+    public void test_getEnumerated_fieldAnnotationWithoutEnumerated_inheritsClassConfig() throws Exception {
+        // A field annotated with @JsonXmlField for an unrelated attribute (name) used to always
+        // report the NAME default, silently overriding the class-level enumerated = ORDINAL config.
+        Field field = OrdinalEnumBean.class.getDeclaredField("status");
+        JsonXmlConfig config = OrdinalEnumBean.class.getAnnotation(JsonXmlConfig.class);
+
+        assertEquals(EnumType.ORDINAL, ParserUtil.getEnumerated(field, config));
+    }
+
+    // --- regression tests for 2026-06-11 deep-review fixes ---
+
+    public static class SelfAliasBean {
+        @com.landawn.abacus.annotation.JsonXmlField(aliases = { "first_name" })
+        public String firstName;
+    }
+
+    @Test
+    public void test_getBeanInfo_aliasRestatingOwnNamingPolicyTagIsAccepted() {
+        // regression: the alias-collision check fired on the property's OWN naming-policy tag
+        // (first_name for firstName), making the whole bean class unusable
+        ParserUtil.BeanInfo bi = ParserUtil.getBeanInfo(SelfAliasBean.class);
+
+        assertEquals("firstName", bi.getPropInfo("first_name").name);
+    }
+
+    public static class FieldOnlyBean {
+        public String firstName;
+    }
+
+    @Test
+    public void test_getPropInfo_negativeCacheDoesNotPoisonFuzzyMatch() {
+        // regression: cached misses (Optional.empty) participated in the fuzzy-match loop and
+        // could shadow the real property, permanently caching a wrong null
+        ParserUtil.BeanInfo bi = ParserUtil.getBeanInfo(FieldOnlyBean.class);
+
+        assertEquals(null, bi.getPropInfo("GETFIRSTNAME")); // caches a miss
+        org.junit.jupiter.api.Assertions.assertNotNull(bi.getPropInfo("getFirstName"));
+        assertEquals("firstName", bi.getPropInfo("getFirstName").name);
     }
 
 }

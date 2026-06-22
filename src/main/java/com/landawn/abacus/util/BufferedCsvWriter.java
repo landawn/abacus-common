@@ -25,7 +25,9 @@ import java.io.Writer;
  * <p>The writer handles the following CSV escaping rules:</p>
  * <ul>
  *   <li>Double quotes ({@code "}) are escaped as {@code ""} or {@code \"} depending on configuration</li>
- *   <li>Backslashes ({@code \}), tabs, newlines, carriage returns, backspaces, and form-feeds are passed
+ *   <li>Backslashes ({@code \}) are passed through literally in the default (RFC 4180) mode; in
+ *       backslash-escape mode they are escaped as {@code \\} (the backslash is the escape character there)</li>
+ *   <li>Tabs, newlines, carriage returns, backspaces, and form-feeds are passed
  *       through literally (they are part of the quoted field's value per RFC 4180)</li>
  *   <li>Control characters (U+0000 through U+001F, except those listed above, plus U+007F) are escaped as
  *       <code>&#92;uXXXX</code> Unicode escapes (e.g. {@code \u0000})</li>
@@ -65,13 +67,6 @@ public final class BufferedCsvWriter extends CharacterWriter {
      * the specific language governing permissions and limitations under the License.
      */
 
-    /*
-     * From RFC 4627, "All Unicode characters may be placed within the quotation marks except for the characters that
-     * must be escaped: quotation mark, reverse solidus, and the control characters (U+0000 through U+001F)."
-     *
-     * We also escape '\u2028' and '\u2029', which JavaScript interprets as newline characters. This prevents eval()
-     * from failing with a syntax error. http://code.google.com/p/google-gson/issues/detail?id=341
-     */
     /**
      * Standard CSV character replacement mappings (RFC 4180 double-quote escaping).
      * Double quotes are escaped as {@code ""}, while backslashes, tabs, newlines, carriage returns,
@@ -83,7 +78,9 @@ public final class BufferedCsvWriter extends CharacterWriter {
 
     /**
      * CSV character replacement mappings using backslash escaping.
-     * Double quotes are escaped as {@code \"} instead of the RFC 4180 {@code ""} form.
+     * Double quotes are escaped as {@code \"} instead of the RFC 4180 {@code ""} form,
+     * and literal backslashes are escaped as {@code \\} (since the backslash is the
+     * escape character in this mode).
      */
     static final char[][] REPLACEMENT_CHARS_BACK_SLASH;
 
@@ -119,6 +116,11 @@ public final class BufferedCsvWriter extends CharacterWriter {
 
         REPLACEMENT_CHARS_BACK_SLASH = REPLACEMENT_CHARS.clone();
         REPLACEMENT_CHARS_BACK_SLASH['"'] = BACK_SLASH_CHAR_ARRAY;
+        // In backslash-escape mode the backslash IS the escape character, so a literal
+        // backslash in the data must itself be escaped as \\. Leaving it unescaped corrupts
+        // round-trips: "a\\b" would be read back as "a\b", and a literal backslash right
+        // before a quote would merge with the \" escape and break the field structure.
+        REPLACEMENT_CHARS_BACK_SLASH['\\'] = "\\\\".toCharArray();
 
     }
 
@@ -133,6 +135,9 @@ public final class BufferedCsvWriter extends CharacterWriter {
      * Creates a new BufferedCsvWriter with an internal buffer.
      * The escape mode (double quote vs backslash) is determined by the
      * current CsvUtil configuration.
+     *
+     * <p>This constructor is package-private. Outside this package, obtain an instance
+     * from the pool via {@link Objectory#createBufferedCsvWriter()}.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code

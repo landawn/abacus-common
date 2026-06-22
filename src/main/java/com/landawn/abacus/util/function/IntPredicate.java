@@ -13,9 +13,9 @@
  */
 package com.landawn.abacus.util.function;
 
-import java.util.Objects;
-
 import com.landawn.abacus.util.Throwables;
+import com.landawn.abacus.util.N;
+import com.landawn.abacus.util.cs;
 
 /**
  * Represents a predicate (boolean-valued function) of one {@code int}-valued argument.
@@ -124,11 +124,11 @@ public interface IntPredicate extends Throwables.IntPredicate<RuntimeException>,
      * @param other a predicate that will be logically-ANDed with this predicate. Must not be {@code null}.
      * @return a composed predicate that represents the short-circuiting logical AND of this predicate and
      *         the {@code other} predicate
-     * @throws NullPointerException if {@code other} is null
+     * @throws IllegalArgumentException if {@code other} is null
      */
     @Override
     default IntPredicate and(final java.util.function.IntPredicate other) {
-        Objects.requireNonNull(other);
+        N.checkArgNotNull(other, cs.other);
         return value -> test(value) && other.test(value);
     }
 
@@ -153,11 +153,11 @@ public interface IntPredicate extends Throwables.IntPredicate<RuntimeException>,
      * @param other a predicate that will be logically-ORed with this predicate. Must not be {@code null}.
      * @return a composed predicate that represents the short-circuiting logical OR of this predicate and
      *         the {@code other} predicate
-     * @throws NullPointerException if {@code other} is null
+     * @throws IllegalArgumentException if {@code other} is null
      */
     @Override
     default IntPredicate or(final java.util.function.IntPredicate other) {
-        Objects.requireNonNull(other);
+        N.checkArgNotNull(other, cs.other);
         return value -> test(value) || other.test(value);
     }
 
@@ -290,5 +290,19 @@ public interface IntPredicate extends Throwables.IntPredicate<RuntimeException>,
      */
     static IntPredicate between(final int minValue, final int maxValue) {
         return value -> value > minValue && value < maxValue;
+    }
+
+    /**
+     * Returns this object as a {@link Throwables.IntPredicate} view.
+     *
+     * <p>The returned object has the same behavior as this one. This method does not translate
+     * exceptions or make the original implementation capable of throwing new checked exceptions; the
+     * exception type parameter is for target-type compatibility with APIs that accept {@code Throwables.IntPredicate}.
+     *
+     * @param <E> the target exception type for compatibility with {@code Throwables.IntPredicate}
+     * @return a {@link Throwables.IntPredicate} view of this object
+     */
+    default <E extends Throwable> Throwables.IntPredicate<E> toThrowable() {
+        return (Throwables.IntPredicate<E>) this;
     }
 }

@@ -183,6 +183,6 @@ public class BiObjIntPredicateTest extends TestBase {
     @Test
     public void testAndNullThrowsImmediately() {
         BiObjIntPredicate<String, String> instance = (a, b, c) -> false;
-        org.junit.jupiter.api.Assertions.assertThrows(NullPointerException.class, () -> instance.and((BiObjIntPredicate) null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> instance.and((BiObjIntPredicate) null));
     }
 }

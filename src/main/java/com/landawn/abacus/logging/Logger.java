@@ -52,6 +52,18 @@ import java.util.function.Supplier;
  * If there are more arguments than placeholders, the extra arguments are appended to the formatted
  * message in square brackets. Concrete formatting is performed by {@link AbstractLogger}.</p>
  *
+ * <p><b>Throwable-first template arity cap:</b> The plain template family
+ * ({@code xxx(String, Object ...)}) offers fixed-arity overloads up to seven arguments
+ * (plus a deprecated varargs overload). The exception-first template family
+ * ({@code xxx(Throwable, String, Object ...)}), by contrast, is intentionally capped at
+ * <b>three</b> template arguments and has no varargs counterpart. When you need to log an
+ * exception together with more than three formatted arguments, do one of the following:</p>
+ * <ul>
+ *   <li>Use the {@link Supplier}-based exception overload {@code xxx(Throwable, Supplier<String>)}
+ *       and build the message inside the supplier (lazily, only when the level is enabled); or</li>
+ *   <li>Pre-format the message and call {@code xxx(String, Throwable)}.</li>
+ * </ul>
+ *
  * <p><b>Typical usage pattern:</b></p>
  * <pre>{@code
  * public class Wombat {
@@ -248,13 +260,13 @@ public interface Logger {
     /**
      * Logs a message at the {@code TRACE} level with variable number of arguments.
      *
-     * <p>This form avoids superfluous object creation when the logger is disabled
-     * for the {@code TRACE} level. However, the {@link Supplier}-based methods are preferred for
-     * expensive message construction.</p>
+     * <p>This form avoids message formatting when the logger is disabled for the {@code TRACE}
+     * level, but the varargs array is still allocated at the call site. Prefer fixed-arity overloads
+     * or {@link Supplier}-based methods for allocation-sensitive paths.</p>
      *
      * @param template the template string
      * @param args an array of arguments
-     * @deprecated Prefer {@link #trace(Supplier)} for lazy evaluation to avoid object creation
+     * @deprecated Prefer fixed-arity overloads or {@link #trace(Supplier)} for allocation-sensitive lazy evaluation
      */
     @Deprecated
     void trace(String template, Object... args);
@@ -314,6 +326,12 @@ public interface Logger {
      * <pre>{@code
      * logger.trace(exception, "Failed to load {} from {} at {}", resource, location, timestamp);
      * }</pre>
+     *
+     * <p><b>Arity cap:</b> Three is the maximum number of template arguments supported by the
+     * exception-first template family (there is no four-or-more-arg overload, and no
+     * {@code trace(Throwable, String, Object...)} varargs form). For an exception plus more than
+     * three formatted arguments, use {@link #trace(Throwable, Supplier)} and build the message
+     * inside the supplier, or pre-format and call {@link #trace(String, Throwable)}.</p>
      *
      * @param t the exception or error to log
      * @param template the message template
@@ -490,12 +508,13 @@ public interface Logger {
     /**
      * Logs a message at the {@code DEBUG} level with variable number of arguments.
      *
-     * <p>This form avoids superfluous object creation when the logger is disabled
-     * for the {@code DEBUG} level.</p>
+     * <p>This form avoids message formatting when the logger is disabled for the {@code DEBUG}
+     * level, but the varargs array is still allocated at the call site. Prefer fixed-arity overloads
+     * or {@link Supplier}-based methods for allocation-sensitive paths.</p>
      *
      * @param template the template string
      * @param args an array of arguments
-     * @deprecated Prefer {@link #debug(Supplier)} for lazy evaluation to avoid object creation
+     * @deprecated Prefer fixed-arity overloads or {@link #debug(Supplier)} for allocation-sensitive lazy evaluation
      */
     @Deprecated
     void debug(String template, Object... args);
@@ -555,6 +574,12 @@ public interface Logger {
      * <pre>{@code
      * logger.debug(exception, "Failed to execute {} on {} with params {}", operation, target, params);
      * }</pre>
+     *
+     * <p><b>Arity cap:</b> Three is the maximum number of template arguments supported by the
+     * exception-first template family (there is no four-or-more-arg overload, and no
+     * {@code debug(Throwable, String, Object...)} varargs form). For an exception plus more than
+     * three formatted arguments, use {@link #debug(Throwable, Supplier)} and build the message
+     * inside the supplier, or pre-format and call {@link #debug(String, Throwable)}.</p>
      *
      * @param t the exception or error to log
      * @param template the message template
@@ -732,12 +757,13 @@ public interface Logger {
     /**
      * Logs a message at the {@code INFO} level with variable number of arguments.
      *
-     * <p>This form avoids superfluous object creation when the logger is disabled
-     * for the {@code INFO} level.</p>
+     * <p>This form avoids message formatting when the logger is disabled for the {@code INFO}
+     * level, but the varargs array is still allocated at the call site. Prefer fixed-arity overloads
+     * or {@link Supplier}-based methods for allocation-sensitive paths.</p>
      *
      * @param template the template string
      * @param args an array of arguments
-     * @deprecated Prefer {@link #info(Supplier)} for lazy evaluation to avoid object creation
+     * @deprecated Prefer fixed-arity overloads or {@link #info(Supplier)} for allocation-sensitive lazy evaluation
      */
     @Deprecated
     void info(String template, Object... args);
@@ -797,6 +823,12 @@ public interface Logger {
      * <pre>{@code
      * logger.info(exception, "Switched to backup {} from {} with latency {}ms", backup, primary, latency);
      * }</pre>
+     *
+     * <p><b>Arity cap:</b> Three is the maximum number of template arguments supported by the
+     * exception-first template family (there is no four-or-more-arg overload, and no
+     * {@code info(Throwable, String, Object...)} varargs form). For an exception plus more than
+     * three formatted arguments, use {@link #info(Throwable, Supplier)} and build the message
+     * inside the supplier, or pre-format and call {@link #info(String, Throwable)}.</p>
      *
      * @param t the exception or error to log
      * @param template the message template
@@ -974,12 +1006,13 @@ public interface Logger {
     /**
      * Logs a message at the {@code WARN} level with variable number of arguments.
      *
-     * <p>This form avoids superfluous object creation when the logger is disabled
-     * for the {@code WARN} level.</p>
+     * <p>This form avoids message formatting when the logger is disabled for the {@code WARN}
+     * level, but the varargs array is still allocated at the call site. Prefer fixed-arity overloads
+     * or {@link Supplier}-based methods for allocation-sensitive paths.</p>
      *
      * @param template the template string
      * @param args an array of arguments
-     * @deprecated Prefer {@link #warn(Supplier)} for lazy evaluation to avoid object creation
+     * @deprecated Prefer fixed-arity overloads or {@link #warn(Supplier)} for allocation-sensitive lazy evaluation
      */
     @Deprecated
     void warn(String template, Object... args);
@@ -1039,6 +1072,12 @@ public interface Logger {
      * <pre>{@code
      * logger.warn(exception, "Timeout accessing {} on {} after {}ms", resource, server, timeout);
      * }</pre>
+     *
+     * <p><b>Arity cap:</b> Three is the maximum number of template arguments supported by the
+     * exception-first template family (there is no four-or-more-arg overload, and no
+     * {@code warn(Throwable, String, Object...)} varargs form). For an exception plus more than
+     * three formatted arguments, use {@link #warn(Throwable, Supplier)} and build the message
+     * inside the supplier, or pre-format and call {@link #warn(String, Throwable)}.</p>
      *
      * @param t the exception or error to log
      * @param template the message template
@@ -1216,12 +1255,13 @@ public interface Logger {
     /**
      * Logs a message at the {@code ERROR} level with variable number of arguments.
      *
-     * <p>This form avoids superfluous object creation when the logger is disabled
-     * for the {@code ERROR} level.</p>
+     * <p>This form avoids message formatting when the logger is disabled for the {@code ERROR}
+     * level, but the varargs array is still allocated at the call site. Prefer fixed-arity overloads
+     * or {@link Supplier}-based methods for allocation-sensitive paths.</p>
      *
      * @param template the template string
      * @param args an array of arguments
-     * @deprecated Prefer {@link #error(Supplier)} for lazy evaluation to avoid object creation
+     * @deprecated Prefer fixed-arity overloads or {@link #error(Supplier)} for allocation-sensitive lazy evaluation
      */
     @Deprecated
     void error(String template, Object... args);
@@ -1290,6 +1330,12 @@ public interface Logger {
      * <pre>{@code
      * logger.error(exception, "Data corruption in {} table: {} records affected at {}", tableName, count, timestamp);
      * }</pre>
+     *
+     * <p><b>Arity cap:</b> Three is the maximum number of template arguments supported by the
+     * exception-first template family (there is no four-or-more-arg overload, and no
+     * {@code error(Throwable, String, Object...)} varargs form). For an exception plus more than
+     * three formatted arguments, use {@link #error(Throwable, Supplier)} and build the message
+     * inside the supplier, or pre-format and call {@link #error(String, Throwable)}.</p>
      *
      * @param t the exception or error to log
      * @param template the message template

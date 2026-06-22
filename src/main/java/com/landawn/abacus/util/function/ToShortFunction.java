@@ -93,4 +93,18 @@ public interface ToShortFunction<T> extends Throwables.ToShortFunction<T, Runtim
      */
     @Override
     short applyAsShort(T value);
+
+    /**
+     * Returns this object as a {@link Throwables.ToShortFunction} view.
+     *
+     * <p>The returned object has the same behavior as this one. This method does not translate
+     * exceptions or make the original implementation capable of throwing new checked exceptions; the
+     * exception type parameter is for target-type compatibility with APIs that accept {@code Throwables.ToShortFunction}.
+     *
+     * @param <E> the target exception type for compatibility with {@code Throwables.ToShortFunction}
+     * @return a {@link Throwables.ToShortFunction} view of this object
+     */
+    default <E extends Throwable> Throwables.ToShortFunction<T, E> toThrowable() {
+        return (Throwables.ToShortFunction<T, E>) this;
+    }
 }

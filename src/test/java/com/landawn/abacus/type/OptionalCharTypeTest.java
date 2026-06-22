@@ -48,6 +48,12 @@ public class OptionalCharTypeTest extends TestBase {
         assertTrue(optionalCharType.isComparable());
     }
 
+    // Family consistency: OptionalChar must require CSV quoting (a char may be ',' or '"').
+    @Test
+    public void testIsCsvQuoteRequired() {
+        assertTrue(optionalCharType.isCsvQuoteRequired());
+    }
+
     @Test
     public void testStringOfWithValue() {
         OptionalChar opt = OptionalChar.of('A');

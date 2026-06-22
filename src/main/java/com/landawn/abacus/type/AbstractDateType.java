@@ -188,7 +188,7 @@ public abstract class AbstractDateType<T extends Date> extends AbstractType<T> {
                         break;
 
                     default:
-                        throw new RuntimeException("Unsupported operation");
+                        throw new RuntimeException("Unsupported DateTimeFormat: " + config.getDateTimeFormat());
                 }
             }
 

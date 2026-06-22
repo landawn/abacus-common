@@ -101,6 +101,6 @@ public class CharUnaryOperatorTest extends TestBase {
     @Test
     public void testComposeNullThrowsImmediately() {
         CharUnaryOperator instance = a -> 'a';
-        org.junit.jupiter.api.Assertions.assertThrows(NullPointerException.class, () -> instance.compose((CharUnaryOperator) null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> instance.compose((CharUnaryOperator) null));
     }
 }

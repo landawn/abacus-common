@@ -12,6 +12,24 @@ import com.landawn.abacus.TestBase;
 
 public class RateLimiterTest extends TestBase {
 
+    private static final class FakeSleepingStopwatch extends RateLimiter.SleepingStopwatch {
+        private long micros;
+
+        @Override
+        protected long readMicros() {
+            return micros;
+        }
+
+        @Override
+        protected void sleepMicrosUninterruptibly(final long micros) {
+            this.micros += micros;
+        }
+
+        void advanceMicros(final long micros) {
+            this.micros += micros;
+        }
+    }
+
     @Test
     public void testRateChange_affectsSubsequentAcquires() {
         RateLimiter limiter = RateLimiter.create(5.0);
@@ -72,6 +90,19 @@ public class RateLimiterTest extends TestBase {
 
         RateLimiter limiterMinutes = RateLimiter.create(10.0, 1, TimeUnit.MINUTES);
         Assertions.assertNotNull(limiterMinutes);
+    }
+
+    @Test
+    public void testCreateWithZeroWarmupDoesNotCorruptPermitsAfterIdle() {
+        FakeSleepingStopwatch stopwatch = new FakeSleepingStopwatch();
+        RateLimiter limiter = RateLimiter.create(1.0, 0, TimeUnit.SECONDS, 3.0, stopwatch);
+
+        Assertions.assertTrue(limiter.tryAcquire());
+        stopwatch.advanceMicros(2_000_000L);
+
+        Assertions.assertTrue(limiter.tryAcquire());
+        Assertions.assertTrue(limiter.tryAcquire());
+        Assertions.assertFalse(limiter.tryAcquire());
     }
 
     @Test

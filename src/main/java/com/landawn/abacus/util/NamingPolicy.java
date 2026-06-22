@@ -239,9 +239,11 @@ public enum NamingPolicy {
      *   <li>Underscores (_)</li>
      *   <li>Hyphens (-)</li>
      *   <li>Whitespace</li>
+     *   <li>Case transitions (a lower-case letter or digit followed by an upper-case letter)</li>
      * </ul>
-     * <p>The camel-case policies do not split on case transitions, so an input that is already in
-     * camelCase or UpperCamelCase form (with no separators) is returned unchanged.</p>
+     * <p>Because the camel-case policies also split on case transitions, the remainder of each detected
+     * word is lower-cased. For example {@code CAMEL_CASE.convert("helloWorldAPI")} yields
+     * {@code "helloWorldApi"} and {@code UPPER_CAMEL_CASE.convert("XMLParser")} yields {@code "XmlParser"}.</p>
      * <p>The {@link #SNAKE_CASE}, {@link #SCREAMING_SNAKE_CASE}, and {@link #KEBAB_CASE} policies
      * insert their separator only at case transitions and preserve any existing underscores, hyphens,
      * or spaces in the input. The {@link #NO_CHANGE} policy performs no transformation at all.</p>
@@ -288,8 +290,9 @@ public enum NamingPolicy {
      * }</pre>
      *
      * @return the function that performs the string transformation for this policy
-     * @deprecated Use {@link #convert(String)} directly instead. This method exposes an internal
-     *             implementation detail and may be removed in a future release.
+     * @deprecated Use {@link #convert(String)} directly, or the method reference {@code policy::convert}
+     *             where a {@link Function} is required (e.g. in {@code stream().map(...)}). This method
+     *             may be removed in a future release.
      */
     @Deprecated
     @Beta

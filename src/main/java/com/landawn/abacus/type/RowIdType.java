@@ -251,16 +251,16 @@ public class RowIdType extends AbstractType<RowId> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<RowId> type = TypeFactory.getType(RowId.class);
-     * CharacterWriter writer = new CharacterWriter();
-     * type.serializeTo(writer, rowId, config);   // Writes RowId to character stream
+     * BufferedJsonWriter writer = new BufferedJsonWriter();
+     * type.serializeTo(writer, rowId, null);   // Writes RowId to character stream
      * }</pre>
      * <p>
      * This method is specifically designed for JSON/XML serialization: it writes the serialized form of {@code x} to the
-     * {@code CharacterWriter}, applying string quotation and character escaping according to the supplied serialization
-     * config (a {@code null} config means no surrounding quotation). It is the streaming counterpart of {@code stringOf}
+     * {@code CharacterWriter}. The value is written unquoted and unescaped; the supplied serialization config is
+     * currently not applied for RowId values. It is the streaming counterpart of {@code stringOf}
      * and is invoked by the JSON/XML serializers.
      * <p>
-     * <b>serializeTo vs. appendTo:</b> {@code serializeTo} produces machine-readable JSON/XML (quoted and escaped),
+     * <b>serializeTo vs. appendTo:</b> {@code serializeTo} produces unquoted machine-readable JSON/XML output,
      * whereas {@code appendTo} produces a plain, human-readable {@code toString()}-style rendering without JSON/XML
      * quoting or escaping.
      *

@@ -120,6 +120,30 @@ public class ISO8601UtilTest extends TestBase {
         assertEquals("2023-12-25T10:30:45.500Z", formatted);
     }
 
+    @Test
+    public void testFormat_LocaleIndependentDigits() {
+        // ISO 8601 output must always use ASCII digits, even when the default
+        // FORMAT locale uses a non-Latin digit system (e.g. Arabic-Indic digits).
+        Calendar cal = new GregorianCalendar(ISO8601Util.TIMEZONE_Z);
+        cal.clear();
+        cal.set(2023, Calendar.DECEMBER, 25, 10, 30, 45);
+        cal.set(Calendar.MILLISECOND, 123);
+        Date date = cal.getTime();
+
+        Locale savedFormatLocale = Locale.getDefault(Locale.Category.FORMAT);
+        try {
+            Locale.setDefault(Locale.Category.FORMAT, Locale.forLanguageTag("ar-SA"));
+
+            assertEquals("2023-12-25T10:30:45.123Z", ISO8601Util.format(date, true));
+            assertEquals("2023-12-25T16:00:45+05:30", ISO8601Util.format(date, false, TimeZone.getTimeZone("GMT+05:30")));
+
+            // Round-trip must keep working under such a locale.
+            assertEquals(date.getTime(), ISO8601Util.parse(ISO8601Util.format(date, true)).getTime());
+        } finally {
+            Locale.setDefault(Locale.Category.FORMAT, savedFormatLocale);
+        }
+    }
+
     // ===== Round-trip tests =====
 
     @Test

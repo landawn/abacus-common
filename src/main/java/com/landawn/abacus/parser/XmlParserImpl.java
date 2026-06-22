@@ -326,50 +326,59 @@ final class XmlParserImpl extends AbstractXmlParser {
         final Class<?> cls = obj.getClass();
         final Type<Object> type = Type.of(cls);
 
-        switch (type.serializationType()) {
-            case SERIALIZABLE:
-                if (type.isObjectArray()) {
+        try {
+            switch (type.serializationType()) {
+                case SERIALIZABLE:
+                    if (type.isObjectArray()) {
+                        writeArray(obj, configToUse, indentation, serializedObjects, type, bw);
+                    } else if (type.isCollection()) {
+                        writeCollection((Collection<?>) obj, configToUse, indentation, serializedObjects, type, bw);
+                    } else {
+                        type.serializeTo(bw, obj, configToUse);
+                    }
+
+                    break;
+
+                case ENTITY:
+                    writeBean(obj, configToUse, indentation, serializedObjects, type, bw);
+
+                    break;
+
+                case MAP:
+                    writeMap((Map<?, ?>) obj, configToUse, indentation, serializedObjects, type, bw);
+
+                    break;
+
+                case MAP_ENTITY:
+                    writeMapEntity((MapEntity) obj, configToUse, indentation, serializedObjects, type, bw);
+
+                    break;
+
+                case ARRAY:
                     writeArray(obj, configToUse, indentation, serializedObjects, type, bw);
-                } else if (type.isCollection()) {
+
+                    break;
+
+                case COLLECTION:
                     writeCollection((Collection<?>) obj, configToUse, indentation, serializedObjects, type, bw);
-                } else {
-                    type.serializeTo(bw, obj, configToUse);
-                }
 
-                break;
+                    break;
 
-            case ENTITY:
-                writeBean(obj, configToUse, indentation, serializedObjects, type, bw);
-
-                break;
-
-            case MAP:
-                writeMap((Map<?, ?>) obj, configToUse, indentation, serializedObjects, type, bw);
-
-                break;
-
-            case MAP_ENTITY:
-                writeMapEntity((MapEntity) obj, configToUse, indentation, serializedObjects, type, bw);
-
-                break;
-
-            case ARRAY:
-                writeArray(obj, configToUse, indentation, serializedObjects, type, bw);
-
-                break;
-
-            case COLLECTION:
-                writeCollection((Collection<?>) obj, configToUse, indentation, serializedObjects, type, bw);
-
-                break;
-
-            default:
-                if (config == null || config.isFailOnEmptyBean()) {
-                    throw new ParsingException("Unsupported class: " + ClassUtil.getCanonicalClassName(cls)
-                            + ". Only Array/List/Map and Bean class with getter/setter methods are supported");
-                } else {
-                    // ignore bw.write("");
-                }
+                default:
+                    if (config == null || config.isFailOnEmptyBean()) {
+                        throw new ParsingException("Unsupported class: " + ClassUtil.getCanonicalClassName(cls)
+                                + ". Only Array/List/Map and Bean class with getter/setter methods are supported");
+                    } else {
+                        // ignore bw.write("");
+                    }
+            }
+        } finally {
+            // Path-based cycle detection (like JsonParserImpl.write): without removing the object
+            // after it is fully written, two sibling references to the SAME object (a DAG, not a
+            // cycle) would be misidentified as circular and silently emitted as empty elements.
+            if (serializedObjects != null) {
+                serializedObjects.remove(obj);
+            }
         }
 
         if (flush) {
@@ -1851,6 +1860,11 @@ final class XmlParserImpl extends AbstractXmlParser {
                                 propInfo = beanInfo.getPropInfo(propName);
 
                                 if (propName != null && ignoredClassPropNames != null && ignoredClassPropNames.contains(propName)) {
+                                    // Clear propInfo so the ignored property's content is skipped the same way as an
+                                    // unmatched property; otherwise the CHARACTERS handler would call valueOf on the
+                                    // unresolved (null or stale) propType.
+                                    propInfo = null;
+
                                     continue;
                                 }
 
@@ -1952,11 +1966,12 @@ final class XmlParserImpl extends AbstractXmlParser {
                             break;
                         }
 
+                        case XMLStreamConstants.CDATA:
                         case XMLStreamConstants.CHARACTERS: {
                             if (propInfo != null) {
                                 text = xmlReader.getText();
 
-                                if (text != null && (event = xmlReader.next()) == XMLStreamConstants.CHARACTERS) {
+                                if (text != null && isTextEvent(event = xmlReader.next())) {
                                     do {
                                         if (sb == null) {
                                             sb = new StringBuilder(text.length() * 2);
@@ -1966,7 +1981,7 @@ final class XmlParserImpl extends AbstractXmlParser {
                                         }
 
                                         sb.append(xmlReader.getText());
-                                    } while ((event = xmlReader.next()) == XMLStreamConstants.CHARACTERS);
+                                    } while (isTextEvent(event = xmlReader.next()));
 
                                     if (sb != null && sb.length() > text.length()) {
                                         text = sb.toString();
@@ -2142,10 +2157,17 @@ final class XmlParserImpl extends AbstractXmlParser {
                             break;
                         }
 
+                        case XMLStreamConstants.CDATA:
                         case XMLStreamConstants.CHARACTERS: {
+                            if (propName == null) {
+                                // Stray text outside any entry (hand-written or mixed-content XML): skip it and let the
+                                // enclosing END_ELEMENT return the entries parsed so far, matching the DOM parser.
+                                break;
+                            }
+
                             text = xmlReader.getText();
 
-                            if (text != null && (event = xmlReader.next()) == XMLStreamConstants.CHARACTERS) {
+                            if (text != null && isTextEvent(event = xmlReader.next())) {
                                 do {
                                     if (sb == null) {
                                         sb = new StringBuilder(text.length() * 2);
@@ -2155,7 +2177,7 @@ final class XmlParserImpl extends AbstractXmlParser {
                                     }
 
                                     sb.append(xmlReader.getText());
-                                } while ((event = xmlReader.next()) == XMLStreamConstants.CHARACTERS);
+                                } while (isTextEvent(event = xmlReader.next()));
 
                                 if (sb != null && sb.length() > text.length()) {
                                     text = sb.toString();
@@ -2166,7 +2188,7 @@ final class XmlParserImpl extends AbstractXmlParser {
                             propValue = propType.valueOf(text);
 
                             if (event == XMLStreamConstants.END_ELEMENT) {
-                                if (propName != null && ignoredClassPropNames != null && ignoredClassPropNames.contains(propName)) {
+                                if (ignoredClassPropNames != null && ignoredClassPropNames.contains(propName)) {
                                     // ignore;
                                 } else {
                                     map.put(isStringKey ? propName : keyType.valueOf(propName), propValue == null ? propType.defaultValue() : propValue);
@@ -2312,10 +2334,17 @@ final class XmlParserImpl extends AbstractXmlParser {
                             break;
                         }
 
+                        case XMLStreamConstants.CDATA:
                         case XMLStreamConstants.CHARACTERS: {
+                            if (propName == null) {
+                                // Stray text outside any entry (hand-written or mixed-content XML): skip it and let the
+                                // enclosing END_ELEMENT return the entries parsed so far, matching the DOM parser.
+                                break;
+                            }
+
                             text = xmlReader.getText();
 
-                            if (text != null && (event = xmlReader.next()) == XMLStreamConstants.CHARACTERS) {
+                            if (text != null && isTextEvent(event = xmlReader.next())) {
                                 do {
                                     if (sb == null) {
                                         sb = new StringBuilder(text.length() * 2);
@@ -2325,7 +2354,7 @@ final class XmlParserImpl extends AbstractXmlParser {
                                     }
 
                                     sb.append(xmlReader.getText());
-                                } while ((event = xmlReader.next()) == XMLStreamConstants.CHARACTERS);
+                                } while (isTextEvent(event = xmlReader.next()));
 
                                 if (sb != null && sb.length() > text.length()) {
                                     text = sb.toString();
@@ -2336,15 +2365,10 @@ final class XmlParserImpl extends AbstractXmlParser {
                             propValue = propType.valueOf(text);
 
                             if (event == XMLStreamConstants.END_ELEMENT) {
-                                if (propName != null) {
-                                    if (ignoredClassPropNames != null && ignoredClassPropNames.contains(propName)) {
-                                        // ignore;
-                                    } else {
-                                        mapEntity.set(propName, propValue == null ? propType.defaultValue() : propValue);
-                                    }
+                                if (ignoredClassPropNames != null && ignoredClassPropNames.contains(propName)) {
+                                    // ignore;
                                 } else {
-                                    // should never happen.
-                                    throw new RuntimeException("Unexpected error");
+                                    mapEntity.set(propName, propValue == null ? propType.defaultValue() : propValue);
                                 }
 
                                 propName = null;
@@ -2400,6 +2424,10 @@ final class XmlParserImpl extends AbstractXmlParser {
                             case XMLStreamConstants.START_ELEMENT: {
                                 if (xmlReader.getAttributeCount() > 0 && TRUE.equals(xmlReader.getAttributeValue(null, XmlConstants.IS_NULL))) {
                                     list.add(null);
+
+                                    // consume the null element's END_ELEMENT so the loop update doesn't mistake it
+                                    // for the enclosing array's end and truncate the remaining elements.
+                                    xmlReader.next();
                                 } else if (String.class == eleType.javaType() || Object.class == eleType.javaType()) {
                                     list.add(readByStreamParser(xmlReader, configToUse, null, eleType, mapType));
                                 } else {
@@ -2411,10 +2439,11 @@ final class XmlParserImpl extends AbstractXmlParser {
 
                             // simple array with sample format <array>[1, 2,
                             // 3...]</array>
+                            case XMLStreamConstants.CDATA:
                             case XMLStreamConstants.CHARACTERS: {
                                 text = xmlReader.getText();
 
-                                if (text != null && (event = xmlReader.next()) == XMLStreamConstants.CHARACTERS) {
+                                if (text != null && isTextEvent(event = xmlReader.next())) {
                                     do {
                                         if (sb == null) {
                                             sb = new StringBuilder(text.length() * 2);
@@ -2424,7 +2453,7 @@ final class XmlParserImpl extends AbstractXmlParser {
                                         }
 
                                         sb.append(xmlReader.getText());
-                                    } while ((event = xmlReader.next()) == XMLStreamConstants.CHARACTERS);
+                                    } while (isTextEvent(event = xmlReader.next()));
 
                                     if (sb != null && sb.length() > text.length()) {
                                         text = sb.toString();
@@ -2491,6 +2520,10 @@ final class XmlParserImpl extends AbstractXmlParser {
                         case XMLStreamConstants.START_ELEMENT: {
                             if (xmlReader.getAttributeCount() > 0 && TRUE.equals(xmlReader.getAttributeValue(null, XmlConstants.IS_NULL))) {
                                 result.add(null);
+
+                                // consume the null element's END_ELEMENT so the loop update doesn't mistake it
+                                // for the enclosing collection's end and truncate the remaining elements.
+                                xmlReader.next();
                             } else if (String.class == eleType.javaType() || Object.class == eleType.javaType()) {
                                 result.add(readByStreamParser(xmlReader, configToUse, null, eleType, mapType));
                             } else {
@@ -2501,10 +2534,11 @@ final class XmlParserImpl extends AbstractXmlParser {
                         }
 
                         // simple list with sample format <list>[1, 2, 3...]</list>
+                        case XMLStreamConstants.CDATA:
                         case XMLStreamConstants.CHARACTERS: {
                             text = xmlReader.getText();
 
-                            if (text != null && (event = xmlReader.next()) == XMLStreamConstants.CHARACTERS) {
+                            if (text != null && isTextEvent(event = xmlReader.next())) {
                                 do {
                                     if (sb == null) {
                                         sb = new StringBuilder(text.length() * 2);
@@ -2514,7 +2548,7 @@ final class XmlParserImpl extends AbstractXmlParser {
                                     }
 
                                     sb.append(xmlReader.getText());
-                                } while ((event = xmlReader.next()) == XMLStreamConstants.CHARACTERS);
+                                } while (isTextEvent(event = xmlReader.next()));
 
                                 if (sb != null && sb.length() > text.length()) {
                                     text = sb.toString();
@@ -2559,6 +2593,18 @@ final class XmlParserImpl extends AbstractXmlParser {
                 throw new ParsingException("Unsupported class type: " + ClassUtil.getCanonicalClassName(targetClass)
                         + ". Only object array, collection, map and bean types are supported");
         }
+    }
+
+    /**
+     * Checks whether the given StAX event carries element text. Non-coalescing StAX providers
+     * (e.g. Woodstox) report CDATA sections as {@code CDATA} events rather than {@code CHARACTERS},
+     * so both must be treated as text or CDATA content would be silently dropped.
+     *
+     * @param event the StAX event type
+     * @return {@code true} if the event is {@code CHARACTERS} or {@code CDATA}
+     */
+    private static boolean isTextEvent(final int event) {
+        return event == XMLStreamConstants.CHARACTERS || event == XMLStreamConstants.CDATA;
     }
 
     /**

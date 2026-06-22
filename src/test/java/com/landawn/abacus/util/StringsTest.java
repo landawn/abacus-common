@@ -3,6 +3,7 @@ package com.landawn.abacus.util;
 import static com.landawn.abacus.util.Strings.base64Encode;
 import static com.landawn.abacus.util.Strings.base64EncodeString;
 import static com.landawn.abacus.util.Strings.concat;
+import static com.landawn.abacus.util.Strings.concatNullToEmpty;
 import static com.landawn.abacus.util.Strings.extractFirstDouble;
 import static com.landawn.abacus.util.Strings.isBase64;
 import static com.landawn.abacus.util.Strings.join;
@@ -51,6 +52,7 @@ import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 import java.util.function.Function;
+import java.util.function.IntUnaryOperator;
 import java.util.function.Supplier;
 import java.util.regex.MatchResult;
 import java.util.stream.Collectors;
@@ -298,41 +300,41 @@ public class StringsTest extends AbstractTest {
     }
 
     @Test
-    @DisplayName("Test isKeyword() with Java keywords")
+    @DisplayName("Test isJavaKeyword() with Java keywords")
     public void testIsKeyword_Valid() {
-        assertTrue(Strings.isKeyword("class"));
-        assertTrue(Strings.isKeyword("public"));
-        assertTrue(Strings.isKeyword("if"));
-        assertTrue(Strings.isKeyword("return"));
-        assertTrue(Strings.isKeyword("void"));
-        assertTrue(Strings.isKeyword("abstract"));
+        assertTrue(Strings.isJavaKeyword("class"));
+        assertTrue(Strings.isJavaKeyword("public"));
+        assertTrue(Strings.isJavaKeyword("if"));
+        assertTrue(Strings.isJavaKeyword("return"));
+        assertTrue(Strings.isJavaKeyword("void"));
+        assertTrue(Strings.isJavaKeyword("abstract"));
     }
 
     @Test
     public void testIsKeyword() {
-        assertTrue(Strings.isKeyword("int"));
-        assertTrue(Strings.isKeyword("for"));
-        assertFalse(Strings.isKeyword("myVar"));
-        assertFalse(Strings.isKeyword(null));
-        assertFalse(Strings.isKeyword(""));
+        assertTrue(Strings.isJavaKeyword("int"));
+        assertTrue(Strings.isJavaKeyword("for"));
+        assertFalse(Strings.isJavaKeyword("myVar"));
+        assertFalse(Strings.isJavaKeyword(null));
+        assertFalse(Strings.isJavaKeyword(""));
     }
 
     @Test
-    @DisplayName("Test isKeyword() with non-keywords")
+    @DisplayName("Test isJavaKeyword() with non-keywords")
     public void testIsKeyword_Invalid() {
-        assertFalse(Strings.isKeyword("Class"));
-        assertFalse(Strings.isKeyword("hello"));
-        assertFalse(Strings.isKeyword("myVariable"));
-        assertFalse(Strings.isKeyword(null));
-        assertFalse(Strings.isKeyword(""));
+        assertFalse(Strings.isJavaKeyword("Class"));
+        assertFalse(Strings.isJavaKeyword("hello"));
+        assertFalse(Strings.isJavaKeyword("myVariable"));
+        assertFalse(Strings.isJavaKeyword(null));
+        assertFalse(Strings.isJavaKeyword(""));
     }
 
     @Test
     public void test_findEmail() {
         final String str = "*** test@gmail.orgg&&^ test2@gmail.cn ((& ";
         N.println(Strings.isValidEmailAddress("test@gmail.com"));
-        N.println(Strings.findFirstEmailAddress(str));
-        N.println(Strings.findAllEmailAddresses(str));
+        N.println(Strings.extractEmailAddress(str));
+        N.println(Strings.extractAllEmailAddresses(str));
         assertNotNull(str);
     }
 
@@ -1079,8 +1081,8 @@ public class StringsTest extends AbstractTest {
         assertEquals("hello", Strings.firstNonEmpty("hello", "world"));
         assertEquals("world", Strings.firstNonEmpty("", "world"));
         assertEquals("world", Strings.firstNonEmpty(null, "world"));
-        assertEquals("", Strings.firstNonEmpty("", ""));
-        assertEquals("", Strings.firstNonEmpty(null, null));
+        assertNull(Strings.firstNonEmpty("", ""));
+        assertNull(Strings.firstNonEmpty(null, null));
     }
 
     @Test
@@ -1090,16 +1092,16 @@ public class StringsTest extends AbstractTest {
         assertEquals("world", Strings.firstNonEmpty("", "world", "!"));
         assertEquals("!", Strings.firstNonEmpty("", "", "!"));
         assertEquals("!", Strings.firstNonEmpty(null, null, "!"));
-        assertEquals("", Strings.firstNonEmpty("", "", ""));
-        assertEquals("", Strings.firstNonEmpty(null, null, null));
+        assertNull(Strings.firstNonEmpty("", "", ""));
+        assertNull(Strings.firstNonEmpty(null, null, null));
     }
 
     @Test
     @DisplayName("Test firstNonEmpty() with varargs")
     public void testFirstNonEmpty_VarArgs() {
-        assertEquals("", Strings.firstNonEmpty());
-        assertEquals("", Strings.firstNonEmpty((String[]) null));
-        assertEquals("", Strings.firstNonEmpty(null, null, null));
+        assertNull(Strings.firstNonEmpty());
+        assertNull(Strings.firstNonEmpty((String[]) null));
+        assertNull(Strings.firstNonEmpty(null, null, null));
         assertEquals(" ", Strings.firstNonEmpty(null, "", " "));
         assertEquals("abc", Strings.firstNonEmpty("abc"));
         assertEquals("xyz", Strings.firstNonEmpty(null, "xyz"));
@@ -1110,33 +1112,33 @@ public class StringsTest extends AbstractTest {
     @Test
     @DisplayName("Test firstNonEmpty() with Iterable")
     public void testFirstNonEmpty_Iterable() {
-        assertEquals("", Strings.firstNonEmpty((Iterable<String>) null));
-        assertEquals("", Strings.firstNonEmpty(new ArrayList<>()));
+        assertNull(Strings.firstNonEmpty((Iterable<String>) null));
+        assertNull(Strings.firstNonEmpty(new ArrayList<>()));
         assertEquals("hello", Strings.firstNonEmpty(Arrays.asList("", null, "hello")));
-        assertEquals("", Strings.firstNonEmpty(Arrays.asList("", null, "")));
+        assertNull(Strings.firstNonEmpty(Arrays.asList("", null, "")));
     }
 
     @Test
     public void testFirstNonEmptyVarArgs() {
         assertEquals("a", Strings.firstNonEmpty(null, "", "a", "b"));
-        assertEquals("", Strings.firstNonEmpty(null, ""));
-        assertEquals("", Strings.firstNonEmpty());
+        assertNull(Strings.firstNonEmpty(null, ""));
+        assertNull(Strings.firstNonEmpty());
     }
 
     @Test
     public void testFirstNonEmptyIterable() {
         assertEquals("a", Strings.firstNonEmpty(list(null, "", "a", "b")));
-        assertEquals("", Strings.firstNonEmpty(list(null, "")));
-        assertEquals("", Strings.firstNonEmpty(new ArrayList<>()));
-        assertEquals("", Strings.firstNonEmpty((Iterable<String>) null));
+        assertNull(Strings.firstNonEmpty(list(null, "")));
+        assertNull(Strings.firstNonEmpty(new ArrayList<>()));
+        assertNull(Strings.firstNonEmpty((Iterable<String>) null));
     }
 
     @Test
     public void testFirstNonEmpty() {
         assertEquals("test", Strings.firstNonEmpty("", "test", "another"));
         assertEquals("first", Strings.firstNonEmpty("first", "second"));
-        assertEquals("", Strings.firstNonEmpty("", "", null));
-        assertEquals("", Strings.firstNonEmpty());
+        assertNull(Strings.firstNonEmpty("", "", null));
+        assertNull(Strings.firstNonEmpty());
     }
 
     @Test
@@ -1145,9 +1147,9 @@ public class StringsTest extends AbstractTest {
         assertEquals("hello", Strings.firstNonBlank("hello", "world"));
         assertEquals("world", Strings.firstNonBlank("   ", "world"));
         assertEquals("world", Strings.firstNonBlank(null, "world"));
-        assertEquals("", Strings.firstNonBlank("", ""));
-        assertEquals("", Strings.firstNonBlank(null, null));
-        assertEquals("", Strings.firstNonBlank("  ", "  "));
+        assertNull(Strings.firstNonBlank("", ""));
+        assertNull(Strings.firstNonBlank(null, null));
+        assertNull(Strings.firstNonBlank("  ", "  "));
     }
 
     @Test
@@ -1157,62 +1159,62 @@ public class StringsTest extends AbstractTest {
         assertEquals("world", Strings.firstNonBlank("   ", "world", "!"));
         assertEquals("!", Strings.firstNonBlank("  ", "", "!"));
         assertEquals("!", Strings.firstNonBlank(null, null, "!"));
-        assertEquals("", Strings.firstNonBlank("", "", ""));
+        assertNull(Strings.firstNonBlank("", "", ""));
     }
 
     @Test
     @DisplayName("Test firstNonBlank() with varargs")
     public void testFirstNonBlank_VarArgs() {
-        assertEquals("", Strings.firstNonBlank());
-        assertEquals("", Strings.firstNonBlank((String[]) null));
+        assertNull(Strings.firstNonBlank());
+        assertNull(Strings.firstNonBlank((String[]) null));
         assertEquals("abc", Strings.firstNonBlank(null, "  ", "abc"));
-        assertEquals("", Strings.firstNonBlank(null, "", "   "));
+        assertNull(Strings.firstNonBlank(null, "", "   "));
     }
 
     @Test
     @DisplayName("Test firstNonBlank() with Iterable")
     public void testFirstNonBlank_Iterable() {
-        assertEquals("", Strings.firstNonBlank((Iterable<String>) null));
-        assertEquals("", Strings.firstNonBlank(new ArrayList<>()));
+        assertNull(Strings.firstNonBlank((Iterable<String>) null));
+        assertNull(Strings.firstNonBlank(new ArrayList<>()));
         assertEquals("hello", Strings.firstNonBlank(Arrays.asList("   ", null, "hello")));
-        assertEquals("", Strings.firstNonBlank(Arrays.asList("  ", null, "")));
+        assertNull(Strings.firstNonBlank(Arrays.asList("  ", null, "")));
     }
 
     @Test
     public void testFirstNonBlankVarArgs() {
         assertEquals("a", Strings.firstNonBlank(null, " ", "\t", "a", "b"));
-        assertEquals("", Strings.firstNonBlank(null, " ", "\t"));
-        assertEquals("", Strings.firstNonBlank());
+        assertNull(Strings.firstNonBlank(null, " ", "\t"));
+        assertNull(Strings.firstNonBlank());
     }
 
     @Test
     public void testFirstNonBlankIterable() {
         assertEquals("a", Strings.firstNonBlank(list(null, " ", "\t", "a", "b")));
-        assertEquals("", Strings.firstNonBlank(list(null, " ", "\t")));
-        assertEquals("", Strings.firstNonBlank(new ArrayList<>()));
-        assertEquals("", Strings.firstNonBlank((Iterable<String>) null));
+        assertNull(Strings.firstNonBlank(list(null, " ", "\t")));
+        assertNull(Strings.firstNonBlank(new ArrayList<>()));
+        assertNull(Strings.firstNonBlank((Iterable<String>) null));
     }
 
     @Test
     public void testFirstNonBlank() {
         assertEquals("test", Strings.firstNonBlank("", " ", "test"));
         assertEquals("first", Strings.firstNonBlank("first", "second"));
-        assertEquals("", Strings.firstNonBlank("", " ", null));
-        assertEquals("", Strings.firstNonBlank());
+        assertNull(Strings.firstNonBlank("", " ", null));
+        assertNull(Strings.firstNonBlank());
     }
 
     // firstNonEmpty/firstNonBlank varargs path (4+ args all null/empty)
     @Test
     public void testFirstNonEmpty_VarargsAllEmpty() {
-        assertEquals("", Strings.firstNonEmpty(null, null, null, null));
-        assertEquals("", Strings.firstNonEmpty("", null, "", null));
+        assertNull(Strings.firstNonEmpty(null, null, null, null));
+        assertNull(Strings.firstNonEmpty("", null, "", null));
         assertEquals("x", Strings.firstNonEmpty(null, "", "x", "y"));
     }
 
     @Test
     public void testFirstNonBlank_VarargsAllBlank() {
-        assertEquals("", Strings.firstNonBlank(null, "  ", "  ", null));
-        assertEquals("", Strings.firstNonBlank("", " ", "\t", null));
+        assertNull(Strings.firstNonBlank(null, "  ", "  ", null));
+        assertNull(Strings.firstNonBlank("", " ", "\t", null));
         assertEquals("x", Strings.firstNonBlank(null, "  ", "x", "y"));
     }
 
@@ -1577,8 +1579,8 @@ public class StringsTest extends AbstractTest {
 
     @Test
     public void testPadEnd_NullOrEmptyPadStr() {
-        assertThrows(IllegalArgumentException.class, () -> Strings.padEnd("abc", 5, null));
-        assertThrows(IllegalArgumentException.class, () -> Strings.padEnd("abc", 5, ""));
+        assertEquals("abc  ", Strings.padEnd("abc", 5, null));
+        assertEquals("abc  ", Strings.padEnd("abc", 5, ""));
     }
 
     @Test
@@ -1675,13 +1677,15 @@ public class StringsTest extends AbstractTest {
 
     @Test
     public void test_repeat_2() {
-        for (int n = 0; n < 10; n++) {
-            N.println("==================================" + n);
+        assertDoesNotThrow(() -> {
+            for (int n = 0; n < 10; n++) {
+                N.println("==================================" + n);
 
-            N.println(Strings.repeat("ab", n, ", ", null, ")"));
-            N.println(Strings.repeat("ab", n, ", ", "(", null));
-            N.println(Strings.repeat("ab", n, ", ", "(", ")"));
-        }
+                N.println(Strings.repeat("ab", n, ", ", null, ")"));
+                N.println(Strings.repeat("ab", n, ", ", "(", null));
+                N.println(Strings.repeat("ab", n, ", ", "(", ")"));
+            }
+        });
     }
 
     @Test
@@ -2098,7 +2102,7 @@ public class StringsTest extends AbstractTest {
 
     @Test
     public void testToPascalCase() {
-        // toPascalCase is deprecated and delegates to toUpperCamelCase
+        // toPascalCase is a supported alias for toUpperCamelCase
         assertNull(Strings.toPascalCase(null));
         assertEquals("", Strings.toPascalCase(""));
         assertEquals("HelloWorld", Strings.toPascalCase("hello_world"));
@@ -2116,6 +2120,19 @@ public class StringsTest extends AbstractTest {
         assertEquals("", Strings.toPascalCase(""));
         assertEquals("HelloWorld", Strings.toPascalCase("hello_world"));
         assertEquals("HelloWorld", Strings.toPascalCase("HELLO_WORLD"));
+    }
+
+    @Test
+    public void testCaseConverters_splitOnCaseBoundaries() {
+        // The camelCase converters are the consistent inverse of toSnakeCase: words split at case
+        // boundaries as well as at '_'/'-'/whitespace delimiters (see Strings.txt report NC-3/NC-4).
+        assertEquals("xmlParser", Strings.toCamelCase("XMLParser"));
+        assertEquals("XmlParser", Strings.toUpperCamelCase("XMLParser"));
+        assertEquals("helloWorldApi", Strings.toCamelCase("helloWorldAPI"));
+        assertEquals("fooBarBaz", Strings.toCamelCase("foo_barBaz"));
+        // An all-caps single word: the first letter is cased per camel/upper-camel, the rest lowercased.
+        assertEquals("user", Strings.toCamelCase("USER"));
+        assertEquals("User", Strings.toUpperCamelCase("USER"));
     }
 
     @Test
@@ -2181,6 +2198,16 @@ public class StringsTest extends AbstractTest {
         assertEquals("HELLO_WORLD", Strings.toScreamingSnakeCase("helloWorld"));
         assertEquals("ABC", Strings.toScreamingSnakeCase("ABC"));
         assertNull(Strings.toScreamingSnakeCase(null));
+
+        // NF-1: an existing hyphen is normalized to an underscore (mirrors toSnakeCase)
+        assertEquals("FIRST_NAME", Strings.toScreamingSnakeCase("first-name"));
+        assertEquals("A_B", Strings.toScreamingSnakeCase("a-b"));
+
+        // NF-1: (String, char) split overload, consistent with toCamelCase(String, char)
+        assertEquals("FIRST_NAME", Strings.toScreamingSnakeCase("first.name", '.'));
+        assertEquals("A_B_C", Strings.toScreamingSnakeCase("a#b#c", '#'));
+        assertNull(Strings.toScreamingSnakeCase(null, '.'));
+        assertEquals("", Strings.toScreamingSnakeCase("", '.'));
     }
 
     @Test
@@ -2648,7 +2675,7 @@ public class StringsTest extends AbstractTest {
 
         assertEquals("no sci numbers here", Strings.replaceFirstDouble("no sci numbers here", "XXX", true));
         assertEquals("", Strings.replaceFirstDouble("", "XXX", true));
-        assertEquals("", Strings.replaceFirstDouble(null, "XXX", true));
+        assertNull(Strings.replaceFirstDouble(null, "XXX", true));
         assertEquals("XXX", Strings.replaceFirstDouble("123.45", "XXX", true));
 
         assertEquals("firstXXXsecond4.56e-5", Strings.replaceFirstDouble("first1.23e10second4.56e-5", "XXX", true));
@@ -2688,9 +2715,9 @@ public class StringsTest extends AbstractTest {
         Assertions.assertEquals("abzde", Strings.replaceOnce("abcde", 0, "c", "z"));
         Assertions.assertEquals("abcde", Strings.replaceOnce("abcde", 3, "c", "z"));
 
-        Assertions.assertThrows(IndexOutOfBoundsException.class, () -> Strings.replaceOnce("abcde", -1, "a", "z"));
+        Assertions.assertEquals("zbcde", Strings.replaceOnce("abcde", -1, "a", "z"));
 
-        Assertions.assertThrows(IndexOutOfBoundsException.class, () -> Strings.replaceOnce("abcde", 10, "a", "z"));
+        Assertions.assertEquals("abcde", Strings.replaceOnce("abcde", 10, "a", "z"));
     }
 
     @Test
@@ -3823,13 +3850,6 @@ public class StringsTest extends AbstractTest {
     }
 
     @Test
-    @DisplayName("Test stripStart() with custom chars")
-    public void testStripStart_WithChars() {
-        assertEquals("abcxx", Strings.stripStart("xxabcxx", "x"));
-        assertNull(Strings.stripStart((String) null, "x"));
-    }
-
-    @Test
     public void testStripStartArray() {
         String[] arr = { "xxabc", "xydef", "xyz", null };
         Strings.stripStart(arr, "xyz");
@@ -4367,15 +4387,6 @@ public class StringsTest extends AbstractTest {
     }
 
     @Test
-    @DisplayName("Test isAsciiLowerCase()")
-    public void testIsAsciiLowerCase() {
-        assertTrue(Strings.isAsciiLowerCase('a'));
-        assertTrue(Strings.isAsciiLowerCase('z'));
-        assertFalse(Strings.isAsciiLowerCase('A'));
-        assertFalse(Strings.isAsciiLowerCase('1'));
-    }
-
-    @Test
     public void testIsAsciiLowerCase_EdgeCases() {
         assertTrue(Strings.isAsciiLowerCase('a'));
         assertTrue(Strings.isAsciiLowerCase('z'));
@@ -4397,15 +4408,6 @@ public class StringsTest extends AbstractTest {
         assertTrue(Strings.isUpperCase('A'));
         assertFalse(Strings.isUpperCase('a'));
         assertFalse(Strings.isUpperCase('1'));
-    }
-
-    @Test
-    @DisplayName("Test isAsciiUpperCase()")
-    public void testIsAsciiUpperCase() {
-        assertTrue(Strings.isAsciiUpperCase('A'));
-        assertTrue(Strings.isAsciiUpperCase('Z'));
-        assertFalse(Strings.isAsciiUpperCase('a'));
-        assertFalse(Strings.isAsciiUpperCase('1'));
     }
 
     @Test
@@ -4576,7 +4578,7 @@ public class StringsTest extends AbstractTest {
         assertFalse(Strings.isAsciiPrintable("abc\t123"));
         assertTrue(Strings.isAsciiPrintable("abc123"));
         assertTrue(Strings.isAsciiPrintable("abc 123"));
-        assertTrue(Strings.isAsciiPrintable(""));
+        assertFalse(Strings.isAsciiPrintable(""));
     }
 
     @Test
@@ -4611,7 +4613,7 @@ public class StringsTest extends AbstractTest {
         assertTrue(Strings.isAsciiPrintable("abc 123"));
         assertFalse(Strings.isAsciiPrintable("abc\n"));
         assertFalse(Strings.isAsciiPrintable(null));
-        assertTrue(Strings.isAsciiPrintable(""));
+        assertFalse(Strings.isAsciiPrintable(""));
     }
 
     @Test
@@ -4652,16 +4654,6 @@ public class StringsTest extends AbstractTest {
     }
 
     @Test
-    @DisplayName("Test isAsciiAlpha() with string")
-    public void testIsAsciiAlpha_String() {
-        assertTrue(Strings.isAsciiAlpha("abc"));
-        assertTrue(Strings.isAsciiAlpha("ABC"));
-        assertFalse(Strings.isAsciiAlpha("abc123"));
-        assertFalse(Strings.isAsciiAlpha(null));
-        assertFalse(Strings.isAsciiAlpha(""));
-    }
-
-    @Test
     public void testIsAsciiAlpha_CharEdgeCases() {
         assertTrue(Strings.isAsciiAlpha('a'));
         assertTrue(Strings.isAsciiAlpha('Z'));
@@ -4679,15 +4671,6 @@ public class StringsTest extends AbstractTest {
     }
 
     @Test
-    @DisplayName("Test isAsciiAlphaUpper()")
-    public void testIsAsciiAlphaUpper() {
-        assertTrue(Strings.isAsciiAlphaUpper('A'));
-        assertTrue(Strings.isAsciiAlphaUpper('Z'));
-        assertFalse(Strings.isAsciiAlphaUpper('a'));
-        assertFalse(Strings.isAsciiAlphaUpper('1'));
-    }
-
-    @Test
     public void testIsAsciiAlphaUpper_EdgeCases() {
         assertTrue(Strings.isAsciiAlphaUpper('A'));
         assertTrue(Strings.isAsciiAlphaUpper('Z'));
@@ -4696,29 +4679,11 @@ public class StringsTest extends AbstractTest {
     }
 
     @Test
-    @DisplayName("Test isAsciiAlphaLower()")
-    public void testIsAsciiAlphaLower() {
-        assertTrue(Strings.isAsciiAlphaLower('a'));
-        assertTrue(Strings.isAsciiAlphaLower('z'));
-        assertFalse(Strings.isAsciiAlphaLower('A'));
-        assertFalse(Strings.isAsciiAlphaLower('1'));
-    }
-
-    @Test
     public void testIsAsciiAlphaLower_EdgeCases() {
         assertTrue(Strings.isAsciiAlphaLower('a'));
         assertTrue(Strings.isAsciiAlphaLower('z'));
         assertFalse(Strings.isAsciiAlphaLower('A'));
         assertFalse(Strings.isAsciiAlphaLower('1'));
-    }
-
-    @Test
-    @DisplayName("Test isAsciiNumeric() with char")
-    public void testIsAsciiNumeric_Char() {
-        assertTrue(Strings.isAsciiNumeric('0'));
-        assertTrue(Strings.isAsciiNumeric('9'));
-        assertFalse(Strings.isAsciiNumeric('a'));
-        assertFalse(Strings.isAsciiNumeric(' '));
     }
 
     @Test
@@ -4808,7 +4773,7 @@ public class StringsTest extends AbstractTest {
     @Test
     @DisplayName("Test isAsciiAlphaSpace()")
     public void testIsAsciiAlphaSpace() {
-        assertTrue(Strings.isAsciiAlphaSpace(""));
+        assertFalse(Strings.isAsciiAlphaSpace(""));
         assertTrue(Strings.isAsciiAlphaSpace("abc"));
         assertTrue(Strings.isAsciiAlphaSpace("abc def"));
         assertFalse(Strings.isAsciiAlphaSpace("abc123"));
@@ -4821,7 +4786,7 @@ public class StringsTest extends AbstractTest {
         assertTrue(Strings.isAsciiAlphaSpace("abc"));
         assertFalse(Strings.isAsciiAlphaSpace("abc123"));
         assertFalse(Strings.isAsciiAlphaSpace(null));
-        assertTrue(Strings.isAsciiAlphaSpace(""));
+        assertFalse(Strings.isAsciiAlphaSpace(""));
     }
 
     @Test
@@ -4831,7 +4796,7 @@ public class StringsTest extends AbstractTest {
         assertTrue(Strings.isAsciiAlphanumericSpace("abc 123"));
         assertFalse(Strings.isAsciiAlphanumericSpace("abc!123"));
         assertFalse(Strings.isAsciiAlphanumericSpace(null));
-        assertTrue(Strings.isAsciiAlphanumericSpace(""));
+        assertFalse(Strings.isAsciiAlphanumericSpace(""));
     }
 
     @Test
@@ -4839,7 +4804,7 @@ public class StringsTest extends AbstractTest {
         assertTrue(Strings.isAsciiAlphanumericSpace("abc 123"));
         assertFalse(Strings.isAsciiAlphanumericSpace("abc@123"));
         assertFalse(Strings.isAsciiAlphanumericSpace(null));
-        assertTrue(Strings.isAsciiAlphanumericSpace(""));
+        assertFalse(Strings.isAsciiAlphanumericSpace(""));
     }
 
     @Test
@@ -4864,22 +4829,12 @@ public class StringsTest extends AbstractTest {
     }
 
     @Test
-    @DisplayName("Test isAlphaSpace()")
-    public void testIsAlphaSpace() {
-        assertTrue(Strings.isAlphaSpace("abc"));
-        assertTrue(Strings.isAlphaSpace("abc def"));
-        assertFalse(Strings.isAlphaSpace("abc123"));
-        assertFalse(Strings.isAlphaSpace(null));
-        assertTrue(Strings.isAlphaSpace(""));
-    }
-
-    @Test
     public void testIsAlphaSpace_EdgeCases() {
         assertTrue(Strings.isAlphaSpace("abc"));
         assertTrue(Strings.isAlphaSpace("abc def"));
         assertFalse(Strings.isAlphaSpace("abc123"));
         assertFalse(Strings.isAlphaSpace(null));
-        assertTrue(Strings.isAlphaSpace(""));
+        assertFalse(Strings.isAlphaSpace(""));
     }
 
     @Test
@@ -4905,7 +4860,7 @@ public class StringsTest extends AbstractTest {
     @Test
     @DisplayName("Test isAlphanumericSpace()")
     public void testIsAlphanumericSpace() {
-        assertTrue(Strings.isAlphanumericSpace(""));
+        assertFalse(Strings.isAlphanumericSpace(""));
         assertTrue(Strings.isAlphanumericSpace("abc123"));
         assertTrue(Strings.isAlphanumericSpace("abc 123"));
         assertTrue(Strings.isAlphanumericSpace("你好 123"));
@@ -4920,7 +4875,7 @@ public class StringsTest extends AbstractTest {
         assertTrue(Strings.isAlphanumericSpace("abc123"));
         assertFalse(Strings.isAlphanumericSpace("abc@123"));
         assertFalse(Strings.isAlphanumericSpace(null));
-        assertTrue(Strings.isAlphanumericSpace(""));
+        assertFalse(Strings.isAlphanumericSpace(""));
     }
 
     @Test
@@ -4947,7 +4902,7 @@ public class StringsTest extends AbstractTest {
     @Test
     @DisplayName("Test isNumericSpace()")
     public void testIsNumericSpace() {
-        assertTrue(Strings.isNumericSpace(""));
+        assertFalse(Strings.isNumericSpace(""));
         assertTrue(Strings.isNumericSpace("123"));
         assertTrue(Strings.isNumericSpace("1 2 3"));
         assertFalse(Strings.isNumericSpace("12.3"));
@@ -4960,13 +4915,13 @@ public class StringsTest extends AbstractTest {
         assertTrue(Strings.isNumericSpace("123 456"));
         assertFalse(Strings.isNumericSpace("12.3"));
         assertFalse(Strings.isNumericSpace(null));
-        assertTrue(Strings.isNumericSpace(""));
+        assertFalse(Strings.isNumericSpace(""));
     }
 
     @Test
     @DisplayName("Test isWhitespace()")
     public void testIsWhitespace() {
-        assertTrue(Strings.isWhitespace(""));
+        assertFalse(Strings.isWhitespace(""));
         assertTrue(Strings.isWhitespace("   "));
         assertTrue(Strings.isWhitespace("\t\n\r"));
         assertTrue(Strings.isWhitespace(" "));
@@ -4982,7 +4937,7 @@ public class StringsTest extends AbstractTest {
         assertFalse(Strings.isWhitespace("abc"));
         assertFalse(Strings.isWhitespace(" abc "));
         assertFalse(Strings.isWhitespace(null));
-        assertTrue(Strings.isWhitespace(""));
+        assertFalse(Strings.isWhitespace(""));
     }
 
     @Test
@@ -5097,8 +5052,8 @@ public class StringsTest extends AbstractTest {
     // indexOf with delimiter: value at end of string (no trailing delimiter)
     @Test
     public void testIndexOf_WithDelimiter_ValueAtEnd() {
-        assertEquals(8, Strings.indexOf("one,two,three", "three", ",", 0));
-        assertEquals(-1, Strings.indexOf("one,two,three", "four", ",", 0));
+        assertEquals(8, StrUtil.indexOf("one,two,three", "three", ",", 0));
+        assertEquals(-1, StrUtil.indexOf("one,two,three", "four", ",", 0));
     }
 
     @Test
@@ -5178,47 +5133,53 @@ public class StringsTest extends AbstractTest {
     @Test
     public void testIndexOf_WithDelimiter() {
         // indexOf with delimiter searches for valueToFind as a whole token separated by delimiter
-        int result = Strings.indexOf("a,b,c", "b", ",");
+        int result = StrUtil.indexOf("a,b,c", "b", ",");
         assertTrue(result >= 0);
 
-        assertEquals(-1, Strings.indexOf(null, "b", ","));
-        assertEquals(-1, Strings.indexOf("a,b,c", null, ","));
+        assertEquals(-1, StrUtil.indexOf(null, "b", ","));
+        assertEquals(-1, StrUtil.indexOf("a,b,c", null, ","));
     }
 
     @Test
     public void testIndexOf_WithDelimiterAndFromIndex() {
-        int result = Strings.indexOf("a,b,c,b", "b", ",", 3);
+        int result = StrUtil.indexOf("a,b,c,b", "b", ",", 3);
         assertTrue(result >= 0);
 
-        assertEquals(-1, Strings.indexOf(null, "b", ",", 0));
+        assertEquals(-1, StrUtil.indexOf(null, "b", ",", 0));
     }
 
     @Test
     public void testIndexOf_WithDelimiterAndFromIndex_ExtendedCoverage() {
         // empty delimiter falls back to simple indexOf
-        assertEquals(2, Strings.indexOf("a,b,c", "b", "", 0));
+        assertEquals(2, StrUtil.indexOf("a,b,c", "b", "", 0));
 
         // with delimiter, value found at start boundary
-        assertEquals(2, Strings.indexOf("a,b,c", "b", ",", 0));
+        assertEquals(2, StrUtil.indexOf("a,b,c", "b", ",", 0));
 
         // value at end boundary
-        assertEquals(4, Strings.indexOf("a,b,c", "c", ",", 0));
+        assertEquals(4, StrUtil.indexOf("a,b,c", "c", ",", 0));
 
         // value not found
-        assertEquals(-1, Strings.indexOf("a,b,c", "d", ",", 0));
+        assertEquals(-1, StrUtil.indexOf("a,b,c", "d", ",", 0));
 
         // null str
-        assertEquals(-1, Strings.indexOf(null, "b", ",", 0));
+        assertEquals(-1, StrUtil.indexOf(null, "b", ",", 0));
 
         // null valueToFind
-        assertEquals(-1, Strings.indexOf("a,b,c", null, ",", 0));
+        assertEquals(-1, StrUtil.indexOf("a,b,c", null, ",", 0));
     }
 
-    // indexOfAny with empty element in varargs (skip empty strings and find first non-empty match)
+    // R-9: an empty element is no longer skipped — it matches at the search start index; only null is skipped.
     @Test
     public void testIndexOfAny_WithEmptyElementInVarargs() {
-        assertEquals(6, Strings.indexOfAny("hello world", 0, "", "world"));
-        assertEquals(-1, Strings.indexOfAny("hello world", 0, "", "xyz"));
+        // "" is tried first (per-needle order) and matches at fromIndex
+        assertEquals(0, Strings.indexOfAny("hello world", 0, "", "world"));
+        assertEquals(0, Strings.indexOfAny("hello world", 0, "", "xyz"));
+        // a null element is still skipped, so "world" is found at 6
+        assertEquals(6, Strings.indexOfAny("hello world", 0, null, "world"));
+        // lastIndexOfAny: "" matches at the (clamped) start index; null is skipped
+        assertEquals(10, Strings.lastIndexOfAny("hello world", 10, "", "world"));
+        assertEquals(6, Strings.lastIndexOfAny("hello world", 10, null, "world"));
     }
 
     @Test
@@ -5233,14 +5194,14 @@ public class StringsTest extends AbstractTest {
         assertEquals(0, "abc".indexOf(""));
         assertEquals(3, "abc".lastIndexOf(""));
 
-        assertEquals(4, Strings.indexOf("abc,,", "", ","));
-        assertEquals(0, Strings.indexOf(",,abc", "", ","));
-        assertEquals(1, Strings.indexOf(",,abc", "", ",", 1));
-        assertEquals(-1, Strings.indexOf("abc,abc", "", ","));
+        assertEquals(4, StrUtil.indexOf("abc,,", "", ","));
+        assertEquals(0, StrUtil.indexOf(",,abc", "", ","));
+        assertEquals(1, StrUtil.indexOf(",,abc", "", ",", 1));
+        assertEquals(-1, StrUtil.indexOf("abc,abc", "", ","));
 
-        assertEquals(5, Strings.lastIndexOf("abc, aa, aa", "aa", ", ", 6));
-        assertEquals(7, Strings.lastIndexOf("abc,aa,aa", "aa", ","));
-        assertEquals(-1, Strings.lastIndexOf("aaaa", "aa", ",", 3));
+        assertEquals(5, StrUtil.lastIndexOf("abc, aa, aa", "aa", ", ", 6));
+        assertEquals(7, StrUtil.lastIndexOf("abc,aa,aa", "aa", ","));
+        assertEquals(-1, StrUtil.lastIndexOf("aaaa", "aa", ",", 3));
 
         assertEquals(0, Strings.indexOf("abc,,", ""));
         assertEquals(1, Strings.indexOf("abc,,", "", 1));
@@ -5403,38 +5364,38 @@ public class StringsTest extends AbstractTest {
 
     @Test
     public void testIndexOfIgnoreCaseWithDelimiter() {
-        Assertions.assertEquals(0, Strings.indexOfIgnoreCase("apple,APPLE,banana", "apple", ","));
-        Assertions.assertEquals(0, Strings.indexOfIgnoreCase("apple,APPLE,banana", "APPLE", ","));
-        Assertions.assertEquals(10, Strings.indexOfIgnoreCase("pineapple,apple", "apple", ","));
-        Assertions.assertEquals(0, Strings.indexOfIgnoreCase("test", "test", ","));
+        Assertions.assertEquals(0, StrUtil.indexOfIgnoreCase("apple,APPLE,banana", "apple", ","));
+        Assertions.assertEquals(0, StrUtil.indexOfIgnoreCase("apple,APPLE,banana", "APPLE", ","));
+        Assertions.assertEquals(10, StrUtil.indexOfIgnoreCase("pineapple,apple", "apple", ","));
+        Assertions.assertEquals(0, StrUtil.indexOfIgnoreCase("test", "test", ","));
 
-        Assertions.assertEquals(-1, Strings.indexOfIgnoreCase(null, "test", ","));
-        Assertions.assertEquals(-1, Strings.indexOfIgnoreCase("test", null, ","));
+        Assertions.assertEquals(-1, StrUtil.indexOfIgnoreCase(null, "test", ","));
+        Assertions.assertEquals(-1, StrUtil.indexOfIgnoreCase("test", null, ","));
 
-        Assertions.assertEquals(0, Strings.indexOfIgnoreCase("test", "test", ""));
+        Assertions.assertEquals(0, StrUtil.indexOfIgnoreCase("test", "test", ""));
 
-        Assertions.assertEquals(-1, Strings.indexOfIgnoreCase("apple banana", "apple", ","));
+        Assertions.assertEquals(-1, StrUtil.indexOfIgnoreCase("apple banana", "apple", ","));
     }
 
     @Test
     public void testIndexOfIgnoreCaseWithDelimiterAndFromIndex() {
-        Assertions.assertEquals(0, Strings.indexOfIgnoreCase("apple,APPLE,banana", "apple", ",", 0));
-        Assertions.assertEquals(6, Strings.indexOfIgnoreCase("apple,APPLE,banana", "apple", ",", 5));
-        Assertions.assertEquals(10, Strings.indexOfIgnoreCase("pineapple,apple", "apple", ",", 0));
-        Assertions.assertEquals(11, Strings.indexOfIgnoreCase("test value test", "test", " ", 5));
+        Assertions.assertEquals(0, StrUtil.indexOfIgnoreCase("apple,APPLE,banana", "apple", ",", 0));
+        Assertions.assertEquals(6, StrUtil.indexOfIgnoreCase("apple,APPLE,banana", "apple", ",", 5));
+        Assertions.assertEquals(10, StrUtil.indexOfIgnoreCase("pineapple,apple", "apple", ",", 0));
+        Assertions.assertEquals(11, StrUtil.indexOfIgnoreCase("test value test", "test", " ", 5));
 
-        Assertions.assertEquals(0, Strings.indexOfIgnoreCase("apple,banana", "apple", ",", -5));
+        Assertions.assertEquals(0, StrUtil.indexOfIgnoreCase("apple,banana", "apple", ",", -5));
 
-        Assertions.assertEquals(-1, Strings.indexOfIgnoreCase("apple", "apple", ",", 10));
+        Assertions.assertEquals(-1, StrUtil.indexOfIgnoreCase("apple", "apple", ",", 10));
     }
 
     @Test
     public void testIndexOfIgnoreCaseComplexScenarios() {
-        Assertions.assertEquals(7, Strings.indexOfIgnoreCase("apple, APPLE, banana", "apple", ", ", 1));
+        Assertions.assertEquals(7, StrUtil.indexOfIgnoreCase("apple, APPLE, banana", "apple", ", ", 1));
 
-        Assertions.assertEquals(-1, Strings.indexOfIgnoreCase("test,value", "st,va", ","));
+        Assertions.assertEquals(-1, StrUtil.indexOfIgnoreCase("test,value", "st,va", ","));
 
-        Assertions.assertEquals(1, Strings.indexOfIgnoreCase(",apple,", "apple", ","));
+        Assertions.assertEquals(1, StrUtil.indexOfIgnoreCase(",apple,", "apple", ","));
     }
 
     @Test
@@ -5448,18 +5409,18 @@ public class StringsTest extends AbstractTest {
 
     @Test
     public void testIndexOfIgnoreCase_WithDelimiter() {
-        int result = Strings.indexOfIgnoreCase("a,B,c", "b", ",");
+        int result = StrUtil.indexOfIgnoreCase("a,B,c", "b", ",");
         assertTrue(result >= 0);
 
-        assertEquals(-1, Strings.indexOfIgnoreCase(null, "b", ","));
+        assertEquals(-1, StrUtil.indexOfIgnoreCase(null, "b", ","));
     }
 
     @Test
     public void testIndexOfIgnoreCase_WithDelimiterAndFromIndex() {
-        int result = Strings.indexOfIgnoreCase("a,B,c,b", "b", ",", 3);
+        int result = StrUtil.indexOfIgnoreCase("a,B,c,b", "b", ",", 3);
         assertTrue(result >= 0);
 
-        assertEquals(-1, Strings.indexOfIgnoreCase(null, "b", ",", 0));
+        assertEquals(-1, StrUtil.indexOfIgnoreCase(null, "b", ",", 0));
     }
 
     @Test
@@ -5485,31 +5446,31 @@ public class StringsTest extends AbstractTest {
     @Test
     public void testIndexOfIgnoreCase_WithDelimiterAndFromIndex_FullCoverage() {
         // null delimiter (delegates to no-delimiter version)
-        assertEquals(0, Strings.indexOfIgnoreCase("apple,APPLE,banana", "APPLE", (String) null, 0));
+        assertEquals(0, StrUtil.indexOfIgnoreCase("apple,APPLE,banana", "APPLE", (String) null, 0));
 
         // empty delimiter
-        assertEquals(0, Strings.indexOfIgnoreCase("apple,APPLE,banana", "APPLE", "", 0));
+        assertEquals(0, StrUtil.indexOfIgnoreCase("apple,APPLE,banana", "APPLE", "", 0));
 
         // with delimiter, found at start
-        assertEquals(0, Strings.indexOfIgnoreCase("apple,APPLE,banana", "apple", ",", 0));
+        assertEquals(0, StrUtil.indexOfIgnoreCase("apple,APPLE,banana", "apple", ",", 0));
 
         // with delimiter, found at end
-        assertEquals(10, Strings.indexOfIgnoreCase("pineapple,apple", "apple", ",", 0));
+        assertEquals(10, StrUtil.indexOfIgnoreCase("pineapple,apple", "apple", ",", 0));
 
         // null source
-        assertEquals(-1, Strings.indexOfIgnoreCase(null, "apple", ",", 0));
+        assertEquals(-1, StrUtil.indexOfIgnoreCase(null, "apple", ",", 0));
 
         // null valueToFind
-        assertEquals(-1, Strings.indexOfIgnoreCase("apple", null, ",", 0));
+        assertEquals(-1, StrUtil.indexOfIgnoreCase("apple", null, ",", 0));
 
         // not found
-        assertEquals(-1, Strings.indexOfIgnoreCase("hello world", "test", ",", 0));
+        assertEquals(-1, StrUtil.indexOfIgnoreCase("hello world", "test", ",", 0));
 
         // with fromIndex
-        assertEquals(6, Strings.indexOfIgnoreCase("apple,APPLE,banana", "apple", ",", 3));
+        assertEquals(6, StrUtil.indexOfIgnoreCase("apple,APPLE,banana", "apple", ",", 3));
 
         // targetLen < substrLen
-        assertEquals(-1, Strings.indexOfIgnoreCase("ab", "longer-string", ",", 0));
+        assertEquals(-1, StrUtil.indexOfIgnoreCase("ab", "longer-string", ",", 0));
     }
 
     @Test
@@ -5592,18 +5553,18 @@ public class StringsTest extends AbstractTest {
 
     @Test
     public void testLastIndexOf_WithDelimiter() {
-        int result = Strings.lastIndexOf("a,b,c,b", "b", ",");
+        int result = StrUtil.lastIndexOf("a,b,c,b", "b", ",");
         assertTrue(result >= 0);
 
-        assertEquals(-1, Strings.lastIndexOf(null, "b", ","));
+        assertEquals(-1, StrUtil.lastIndexOf(null, "b", ","));
     }
 
     @Test
     public void testLastIndexOf_WithDelimiterAndFromBack() {
-        int result = Strings.lastIndexOf("a,b,c,b", "b", ",", 10);
+        int result = StrUtil.lastIndexOf("a,b,c,b", "b", ",", 10);
         assertTrue(result >= 0);
 
-        assertEquals(-1, Strings.lastIndexOf(null, "b", ",", 0));
+        assertEquals(-1, StrUtil.lastIndexOf(null, "b", ",", 0));
     }
 
     /**
@@ -5617,18 +5578,18 @@ public class StringsTest extends AbstractTest {
     @Test
     public void testLastIndexOf_WithDelimiter_doesNotExceedStartIndexFromBack() {
         // Documented example from Javadoc.
-        assertEquals(0, Strings.lastIndexOf("test value test", "test", " ", 10));
+        assertEquals(0, StrUtil.lastIndexOf("test value test", "test", " ", 10));
 
         // The trailing "hello" at position 6 is the right answer when bounded at 10,
         // not the trailing "hello" at position 12.
-        assertEquals(6, Strings.lastIndexOf("hello hello hello", "hello", " ", 10));
+        assertEquals(6, StrUtil.lastIndexOf("hello hello hello", "hello", " ", 10));
 
         // Multi-char delimiter case: the trailing token must respect the bound.
-        assertEquals(0, Strings.lastIndexOf("abc :: xyz :: abc", "abc", " :: ", 10));
+        assertEquals(0, StrUtil.lastIndexOf("abc :: xyz :: abc", "abc", " :: ", 10));
 
         // Within-bounds matches still resolve correctly.
-        assertEquals(13, Strings.lastIndexOf("apple,banana,apple", "apple", ",", 20));
-        assertEquals(0, Strings.lastIndexOf("apple,banana,apple", "apple", ",", 10));
+        assertEquals(13, StrUtil.lastIndexOf("apple,banana,apple", "apple", ",", 20));
+        assertEquals(0, StrUtil.lastIndexOf("apple,banana,apple", "apple", ",", 10));
     }
 
     @Test
@@ -5649,18 +5610,18 @@ public class StringsTest extends AbstractTest {
 
     @Test
     public void testLastIndexOfIgnoreCase_WithDelimiter() {
-        int result = Strings.lastIndexOfIgnoreCase("a,B,c,b", "b", ",");
+        int result = StrUtil.lastIndexOfIgnoreCase("a,B,c,b", "b", ",");
         assertTrue(result >= 0);
 
-        assertEquals(-1, Strings.lastIndexOfIgnoreCase(null, "b", ","));
+        assertEquals(-1, StrUtil.lastIndexOfIgnoreCase(null, "b", ","));
     }
 
     @Test
     public void testLastIndexOfIgnoreCase_WithDelimiterAndFromBack() {
-        int result = Strings.lastIndexOfIgnoreCase("a,B,c,b", "b", ",", 10);
+        int result = StrUtil.lastIndexOfIgnoreCase("a,B,c,b", "b", ",", 10);
         assertTrue(result >= 0);
 
-        assertEquals(-1, Strings.lastIndexOfIgnoreCase(null, "b", ",", 0));
+        assertEquals(-1, StrUtil.lastIndexOfIgnoreCase(null, "b", ",", 0));
     }
 
     @Test
@@ -5668,43 +5629,43 @@ public class StringsTest extends AbstractTest {
         // Regression: the VALUE's position (not the leading delimiter's) must not exceed startIndexFromBack,
         // matching the case-sensitive lastIndexOf(String,String,String,int) twin. The IgnoreCase variant
         // previously omitted the "- delimiterLen" start-bound adjustment and wrongly returned a positive index.
-        assertEquals(-1, Strings.lastIndexOfIgnoreCase(",a", "a", ",", 0)); // "a" is at index 1, beyond bound 0
-        assertEquals(-1, Strings.lastIndexOfIgnoreCase("xy,z", "z", ",", 2)); // "z" is at index 3, beyond bound 2
+        assertEquals(-1, StrUtil.lastIndexOfIgnoreCase(",a", "a", ",", 0)); // "a" is at index 1, beyond bound 0
+        assertEquals(-1, StrUtil.lastIndexOfIgnoreCase("xy,z", "z", ",", 2)); // "z" is at index 3, beyond bound 2
 
         // Parity with the case-sensitive twin for the same inputs.
-        assertEquals(Strings.lastIndexOf(",a", "a", ",", 0), Strings.lastIndexOfIgnoreCase(",a", "a", ",", 0));
-        assertEquals(Strings.lastIndexOf("xy,z", "z", ",", 2), Strings.lastIndexOfIgnoreCase("xy,z", "z", ",", 2));
+        assertEquals(StrUtil.lastIndexOf(",a", "a", ",", 0), StrUtil.lastIndexOfIgnoreCase(",a", "a", ",", 0));
+        assertEquals(StrUtil.lastIndexOf("xy,z", "z", ",", 2), StrUtil.lastIndexOfIgnoreCase("xy,z", "z", ",", 2));
 
         // When the bound includes the value's position, the (case-insensitive) match is found.
-        assertEquals(1, Strings.lastIndexOfIgnoreCase(",A", "a", ",", 1));
+        assertEquals(1, StrUtil.lastIndexOfIgnoreCase(",A", "a", ",", 1));
     }
 
     @Test
     public void testLastIndexOfIgnoreCase_DelimiterSkipsEmbeddedToken() {
-        assertEquals(10, Strings.lastIndexOfIgnoreCase("pineapple,APPLE", "apple", ","));
-        assertEquals(0, Strings.lastIndexOfIgnoreCase("apple,pineapple", "apple", ",", 8));
-        assertEquals(-1, Strings.lastIndexOfIgnoreCase("pineapple", "apple", ","));
+        assertEquals(10, StrUtil.lastIndexOfIgnoreCase("pineapple,APPLE", "apple", ","));
+        assertEquals(0, StrUtil.lastIndexOfIgnoreCase("apple,pineapple", "apple", ",", 8));
+        assertEquals(-1, StrUtil.lastIndexOfIgnoreCase("pineapple", "apple", ","));
     }
 
     @Test
     public void testLastIndexOfIgnoreCase_WithDelimiterAndStartIndex() {
         // empty delimiter: falls back to lastIndexOfIgnoreCase without delimiter
-        assertTrue(Strings.lastIndexOfIgnoreCase("hello world", "WORLD", "", 20) >= 0);
+        assertTrue(StrUtil.lastIndexOfIgnoreCase("hello world", "WORLD", "", 20) >= 0);
 
         // null str returns -1
-        assertEquals(-1, Strings.lastIndexOfIgnoreCase(null, "world", ",", 20));
+        assertEquals(-1, StrUtil.lastIndexOfIgnoreCase(null, "world", ",", 20));
 
         // null valueToFind returns -1
-        assertEquals(-1, Strings.lastIndexOfIgnoreCase("hello world", null, ",", 20));
+        assertEquals(-1, StrUtil.lastIndexOfIgnoreCase("hello world", null, ",", 20));
 
         // negative startIndex returns -1
-        assertEquals(-1, Strings.lastIndexOfIgnoreCase("hello world", "world", ",", -1));
+        assertEquals(-1, StrUtil.lastIndexOfIgnoreCase("hello world", "world", ",", -1));
 
         // value found at end boundary (no trailing delimiter)
-        assertEquals(6, Strings.lastIndexOfIgnoreCase("hello,world", "WORLD", ",", 20));
+        assertEquals(6, StrUtil.lastIndexOfIgnoreCase("hello,world", "WORLD", ",", 20));
 
         // value not present
-        assertEquals(-1, Strings.lastIndexOfIgnoreCase("hello,world", "xyz", ",", 20));
+        assertEquals(-1, StrUtil.lastIndexOfIgnoreCase("hello,world", "xyz", ",", 20));
     }
 
     @Test
@@ -6157,10 +6118,10 @@ public class StringsTest extends AbstractTest {
     @Test
     @DisplayName("Test delimiter-based methods")
     public void testDelimiterMethods() {
-        assertTrue(Strings.contains("a,b,c", "b", ","));
-        assertFalse(Strings.contains("abc", "b", ","));
-        assertEquals(2, Strings.indexOf("a,b,c", "b", ","));
-        assertEquals(-1, Strings.indexOf("abc", "b", ","));
+        assertTrue(StrUtil.contains("a,b,c", "b", ","));
+        assertFalse(StrUtil.contains("abc", "b", ","));
+        assertEquals(2, StrUtil.indexOf("a,b,c", "b", ","));
+        assertEquals(-1, StrUtil.indexOf("abc", "b", ","));
     }
 
     @Test
@@ -6213,9 +6174,9 @@ public class StringsTest extends AbstractTest {
 
     @Test
     public void testContains_WithDelimiter() {
-        assertTrue(Strings.contains("a,b,c", "b", ","));
-        assertFalse(Strings.contains("a,b,c", "d", ","));
-        assertFalse(Strings.contains(null, "b", ","));
+        assertTrue(StrUtil.contains("a,b,c", "b", ","));
+        assertFalse(StrUtil.contains("a,b,c", "d", ","));
+        assertFalse(StrUtil.contains(null, "b", ","));
     }
 
     @Test
@@ -6245,21 +6206,21 @@ public class StringsTest extends AbstractTest {
 
     @Test
     public void testContainsIgnoreCaseWithDelimiter() {
-        Assertions.assertTrue(Strings.containsIgnoreCase("Apple,Banana,Orange", "banana", ","));
-        Assertions.assertTrue(Strings.containsIgnoreCase("ONE TWO THREE", "two", " "));
-        Assertions.assertTrue(Strings.containsIgnoreCase("One-Two-Three", "TWO", "-"));
+        Assertions.assertTrue(StrUtil.containsIgnoreCase("Apple,Banana,Orange", "banana", ","));
+        Assertions.assertTrue(StrUtil.containsIgnoreCase("ONE TWO THREE", "two", " "));
+        Assertions.assertTrue(StrUtil.containsIgnoreCase("One-Two-Three", "TWO", "-"));
 
-        Assertions.assertFalse(Strings.containsIgnoreCase("Apple,Banana,Orange", "BAN", ","));
+        Assertions.assertFalse(StrUtil.containsIgnoreCase("Apple,Banana,Orange", "BAN", ","));
 
-        Assertions.assertFalse(Strings.containsIgnoreCase(null, "test", ","));
-        Assertions.assertFalse(Strings.containsIgnoreCase("test", null, ","));
+        Assertions.assertFalse(StrUtil.containsIgnoreCase(null, "test", ","));
+        Assertions.assertFalse(StrUtil.containsIgnoreCase("test", null, ","));
     }
 
     @Test
     public void testContainsIgnoreCase_WithDelimiter() {
-        assertTrue(Strings.containsIgnoreCase("a,B,c", "b", ","));
-        assertFalse(Strings.containsIgnoreCase("a,b,c", "d", ","));
-        assertFalse(Strings.containsIgnoreCase(null, "b", ","));
+        assertTrue(StrUtil.containsIgnoreCase("a,B,c", "b", ","));
+        assertFalse(StrUtil.containsIgnoreCase("a,b,c", "d", ","));
+        assertFalse(StrUtil.containsIgnoreCase(null, "b", ","));
     }
 
     @Test
@@ -7418,7 +7379,7 @@ public class StringsTest extends AbstractTest {
     public void testCommonPrefix() {
         assertEquals("abc", Strings.commonPrefix("abcdef", "abcxyz"));
         assertEquals("", Strings.commonPrefix("abc", "xyz"));
-        assertEquals("", Strings.commonPrefix(null, "abc"));
+        assertNull(Strings.commonPrefix(null, "abc"));
     }
 
     @Test
@@ -7431,7 +7392,7 @@ public class StringsTest extends AbstractTest {
     @Test
     @DisplayName("Test commonPrefix(CharSequence, CharSequence)")
     public void testCommonPrefixTwoArgs() {
-        assertEquals("", Strings.commonPrefix(null, null));
+        assertNull(Strings.commonPrefix(null, null));
         assertEquals("", Strings.commonPrefix("", "abc"));
         assertEquals("", Strings.commonPrefix("abc", ""));
         assertEquals("abc", Strings.commonPrefix("abc", "abc"));
@@ -7442,8 +7403,8 @@ public class StringsTest extends AbstractTest {
     @Test
     @DisplayName("Test commonPrefix(CharSequence...)")
     public void testCommonPrefixVarArgs() {
-        assertEquals("", Strings.commonPrefix());
-        assertEquals("", Strings.commonPrefix((CharSequence[]) null));
+        assertNull(Strings.commonPrefix());
+        assertNull(Strings.commonPrefix((CharSequence[]) null));
         assertEquals("abc", Strings.commonPrefix("abc"));
         assertEquals("a", Strings.commonPrefix("abc", "axy", "aijk"));
         assertEquals("", Strings.commonPrefix("abc", "xyz", "123"));
@@ -7451,9 +7412,9 @@ public class StringsTest extends AbstractTest {
 
     @Test
     public void testCommonPrefix_EdgeCases() {
-        assertEquals("", Strings.commonPrefix(null, null));
-        assertEquals("", Strings.commonPrefix(null, "abc"));
-        assertEquals("", Strings.commonPrefix("abc", null));
+        assertNull(Strings.commonPrefix(null, null));
+        assertNull(Strings.commonPrefix(null, "abc"));
+        assertNull(Strings.commonPrefix("abc", null));
         assertEquals("abc", Strings.commonPrefix("abc", "abcdef"));
         assertEquals("", Strings.commonPrefix("abc", "xyz"));
         assertEquals("ab", Strings.commonPrefix("abc", "abx"));
@@ -7463,18 +7424,18 @@ public class StringsTest extends AbstractTest {
     public void testCommonPrefix_VarArgs_EdgeCases() {
         assertEquals("ab", Strings.commonPrefix("abc", "abd", "abe"));
         assertEquals("", Strings.commonPrefix("abc", "xyz"));
-        assertEquals("", Strings.commonPrefix((CharSequence[]) null));
+        assertNull(Strings.commonPrefix((CharSequence[]) null));
     }
 
     @Test
     public void testCommonPrefix_VarArgs_FullCoverage() {
         // empty array
-        assertEquals("", Strings.commonPrefix(new CharSequence[0]));
+        assertNull(Strings.commonPrefix(new CharSequence[0]));
 
         // single element
         assertEquals("prefix", Strings.commonPrefix(new CharSequence[] { "prefix" }));
         assertEquals("", Strings.commonPrefix(new CharSequence[] { "" }));
-        assertEquals("", Strings.commonPrefix(new CharSequence[] { null }));
+        assertNull(Strings.commonPrefix(new CharSequence[] { null }));
 
         // any empty
         assertEquals("", Strings.commonPrefix(new CharSequence[] { "hello", "", "help" }));
@@ -7494,7 +7455,7 @@ public class StringsTest extends AbstractTest {
     public void testCommonSuffix() {
         assertEquals("xyz", Strings.commonSuffix("abcxyz", "defxyz"));
         assertEquals("", Strings.commonSuffix("abc", "xyz"));
-        assertEquals("", Strings.commonSuffix(null, "abc"));
+        assertNull(Strings.commonSuffix(null, "abc"));
     }
 
     @Test
@@ -7507,7 +7468,7 @@ public class StringsTest extends AbstractTest {
     @Test
     @DisplayName("Test commonSuffix(CharSequence, CharSequence)")
     public void testCommonSuffixTwoArgs() {
-        assertEquals("", Strings.commonSuffix(null, null));
+        assertNull(Strings.commonSuffix(null, null));
         assertEquals("", Strings.commonSuffix("", "abc"));
         assertEquals("", Strings.commonSuffix("abc", ""));
         assertEquals("abc", Strings.commonSuffix("abc", "abc"));
@@ -7518,8 +7479,8 @@ public class StringsTest extends AbstractTest {
     @Test
     @DisplayName("Test commonSuffix(CharSequence...)")
     public void testCommonSuffixVarArgs() {
-        assertEquals("", Strings.commonSuffix());
-        assertEquals("", Strings.commonSuffix((CharSequence[]) null));
+        assertNull(Strings.commonSuffix());
+        assertNull(Strings.commonSuffix((CharSequence[]) null));
         assertEquals("abc", Strings.commonSuffix("abc"));
         assertEquals("c", Strings.commonSuffix("abc", "xyc", "ijkc"));
         assertEquals("", Strings.commonSuffix("abc", "xyz", "123"));
@@ -7527,9 +7488,9 @@ public class StringsTest extends AbstractTest {
 
     @Test
     public void testCommonSuffix_EdgeCases() {
-        assertEquals("", Strings.commonSuffix(null, null));
-        assertEquals("", Strings.commonSuffix(null, "abc"));
-        assertEquals("", Strings.commonSuffix("abc", null));
+        assertNull(Strings.commonSuffix(null, null));
+        assertNull(Strings.commonSuffix(null, "abc"));
+        assertNull(Strings.commonSuffix("abc", null));
         assertEquals("abc", Strings.commonSuffix("abc", "xyzabc"));
         assertEquals("", Strings.commonSuffix("abc", "xyz"));
         assertEquals("bc", Strings.commonSuffix("abc", "xbc"));
@@ -7539,18 +7500,18 @@ public class StringsTest extends AbstractTest {
     public void testCommonSuffix_VarArgs_EdgeCases() {
         assertEquals("bc", Strings.commonSuffix("abc", "xbc", "ybc"));
         assertEquals("", Strings.commonSuffix("abc", "xyz"));
-        assertEquals("", Strings.commonSuffix((CharSequence[]) null));
+        assertNull(Strings.commonSuffix((CharSequence[]) null));
     }
 
     @Test
     public void testCommonSuffix_VarArgs_FullCoverage() {
         // empty array
-        assertEquals("", Strings.commonSuffix(new CharSequence[0]));
+        assertNull(Strings.commonSuffix(new CharSequence[0]));
 
         // single element
         assertEquals("suffix", Strings.commonSuffix(new CharSequence[] { "suffix" }));
         assertEquals("", Strings.commonSuffix(new CharSequence[] { "" }));
-        assertEquals("", Strings.commonSuffix(new CharSequence[] { null }));
+        assertNull(Strings.commonSuffix(new CharSequence[] { null }));
 
         // any empty
         assertEquals("", Strings.commonSuffix(new CharSequence[] { "testing", "", "eating" }));
@@ -7608,7 +7569,7 @@ public class StringsTest extends AbstractTest {
     public void testLongestCommonSubstring() {
         assertEquals("abc", Strings.longestCommonSubstring("xabcy", "zabc123"));
         assertEquals("", Strings.longestCommonSubstring("abc", "xyz"));
-        assertEquals("", Strings.longestCommonSubstring(null, "abc"));
+        assertNull(Strings.longestCommonSubstring(null, "abc"));
     }
 
     @Test
@@ -7651,7 +7612,8 @@ public class StringsTest extends AbstractTest {
     public void testFirstChars() {
         assertEquals("ab", Strings.firstChars("abcdef", 2));
         assertEquals("abcdef", Strings.firstChars("abcdef", 10));
-        assertEquals("", Strings.firstChars(null, 2));
+        assertEquals("", Strings.firstChars("", 5));
+        assertNull(Strings.firstChars(null, 2));
         assertThrows(IllegalArgumentException.class, () -> Strings.firstChars("abc", -1));
     }
 
@@ -7660,8 +7622,18 @@ public class StringsTest extends AbstractTest {
     public void testLastChars() {
         assertEquals("ef", Strings.lastChars("abcdef", 2));
         assertEquals("abcdef", Strings.lastChars("abcdef", 10));
-        assertEquals("", Strings.lastChars(null, 2));
+        assertEquals("", Strings.lastChars("", 5));
+        assertNull(Strings.lastChars(null, 2));
         assertThrows(IllegalArgumentException.class, () -> Strings.lastChars("abc", -1));
+    }
+
+    @Test
+    public void testPadEndByDisplayWidth() {
+        assertEquals("ab   ", Strings.padEndByDisplayWidth("ab", 5));
+        assertEquals("abcde", Strings.padEndByDisplayWidth("abcde", 3));
+        assertEquals("   ", Strings.padEndByDisplayWidth(null, 3));
+        // R-16: a negative minDisplayWidth is now rejected (was silently accepted before)
+        assertThrows(IllegalArgumentException.class, () -> Strings.padEndByDisplayWidth("ab", -1));
     }
 
     @Test
@@ -7758,7 +7730,7 @@ public class StringsTest extends AbstractTest {
     @Test
     public void testSubstringOrElse_FuncBegin() {
         // substringOrElse(str, funcOfInclusiveBeginIndex, exclusiveEndIndex, defaultStr)
-        String result = Strings.StrUtil.substringOrElse("hello", len -> 0, 5, "default");
+        String result = StrUtil.substringOrElse("hello", len -> 0, 5, "default");
         assertEquals("hello", result);
     }
 
@@ -7975,7 +7947,7 @@ public class StringsTest extends AbstractTest {
     @Test
     public void testSubstringOrElseItself_FuncBegin() {
         // substringOrElseItself(str, funcOfInclusiveBeginIndex, exclusiveEndIndex)
-        String result = Strings.StrUtil.substringOrElseItself("hello", len -> 0, 5);
+        String result = StrUtil.substringOrElseItself("hello", len -> 0, 5);
         assertEquals("hello", result);
     }
 
@@ -8092,13 +8064,13 @@ public class StringsTest extends AbstractTest {
 
     @Test
     public void testSubstringAfterOrElseItself_CharDelimiter() {
-        assertEquals("world", Strings.StrUtil.substringAfterOrElseItself("hello world", ' '));
-        assertEquals("hello", Strings.StrUtil.substringAfterOrElseItself("hello", ' '));
+        assertEquals("world", StrUtil.substringAfterOrElseItself("hello world", ' '));
+        assertEquals("hello", StrUtil.substringAfterOrElseItself("hello", ' '));
     }
 
     @Test
     public void testSubstringAfterOrElseItself_WithEndIndex() {
-        assertEquals("ell", Strings.StrUtil.substringAfterOrElseItself("hello", "h", 4));
+        assertEquals("ell", StrUtil.substringAfterOrElseItself("hello", "h", 4));
     }
 
     @Test
@@ -8208,13 +8180,13 @@ public class StringsTest extends AbstractTest {
 
     @Test
     public void testSubstringAfterLastOrElseItself_CharDelimiter() {
-        assertEquals("c", Strings.StrUtil.substringAfterLastOrElseItself("a.b.c", '.'));
-        assertEquals("hello", Strings.StrUtil.substringAfterLastOrElseItself("hello", '.'));
+        assertEquals("c", StrUtil.substringAfterLastOrElseItself("a.b.c", '.'));
+        assertEquals("hello", StrUtil.substringAfterLastOrElseItself("hello", '.'));
     }
 
     @Test
     public void testSubstringAfterLastOrElseItself_WithEndIndex() {
-        assertEquals("ell", Strings.StrUtil.substringAfterLastOrElseItself("hello", "h", 4));
+        assertEquals("ell", StrUtil.substringAfterLastOrElseItself("hello", "h", 4));
     }
 
     @Test
@@ -8354,13 +8326,13 @@ public class StringsTest extends AbstractTest {
 
     @Test
     public void testSubstringBeforeOrElseItself_CharDelimiter() {
-        assertEquals("hello", Strings.StrUtil.substringBeforeOrElseItself("hello world", ' '));
-        assertEquals("hello", Strings.StrUtil.substringBeforeOrElseItself("hello", ' '));
+        assertEquals("hello", StrUtil.substringBeforeOrElseItself("hello world", ' '));
+        assertEquals("hello", StrUtil.substringBeforeOrElseItself("hello", ' '));
     }
 
     @Test
     public void testSubstringBeforeOrElseItself_WithBeginIndex() {
-        assertEquals("ello", Strings.StrUtil.substringBeforeOrElseItself("hello world", 1, " "));
+        assertEquals("ello", StrUtil.substringBeforeOrElseItself("hello world", 1, " "));
     }
 
     @Test
@@ -8447,13 +8419,13 @@ public class StringsTest extends AbstractTest {
 
     @Test
     public void testSubstringBeforeLastOrElseItself_CharDelimiter() {
-        assertEquals("a.b", Strings.StrUtil.substringBeforeLastOrElseItself("a.b.c", '.'));
-        assertEquals("hello", Strings.StrUtil.substringBeforeLastOrElseItself("hello", '.'));
+        assertEquals("a.b", StrUtil.substringBeforeLastOrElseItself("a.b.c", '.'));
+        assertEquals("hello", StrUtil.substringBeforeLastOrElseItself("hello", '.'));
     }
 
     @Test
     public void testSubstringBeforeLastOrElseItself_WithEndIndex() {
-        assertEquals("ello", Strings.StrUtil.substringBeforeLastOrElseItself("hello world", 1, " "));
+        assertEquals("ello", StrUtil.substringBeforeLastOrElseItself("hello world", 1, " "));
     }
 
     @Test
@@ -8542,6 +8514,16 @@ public class StringsTest extends AbstractTest {
     public void testStrUtilSubstringBetween() {
         assertEquals("abc", StrUtil.substringBetween("(abc)", "(", ")").get());
         assertFalse(StrUtil.substringBetween("abc", "[", "]").isPresent());
+        // R-7a: the (IntUnaryOperator, String) overload anchors on the FIRST occurrence of the delimiter (delegates to Strings)
+        assertEquals("a", StrUtil.substringBetween("a=b=c", i -> -1, "=").get());
+    }
+
+    @Test
+    public void testStrUtilSubstringBetweenNullFunctionsReturnEmpty() {
+        assertFalse(StrUtil.substringBetween("hello", 0, (IntUnaryOperator) null).isPresent());
+        assertFalse(StrUtil.substringBetween("hello", (IntUnaryOperator) null, 5).isPresent());
+        assertFalse(StrUtil.substringBetween("hello", "h", (IntUnaryOperator) null).isPresent());
+        assertFalse(StrUtil.substringBetween("hello", (IntUnaryOperator) null, "o").isPresent());
     }
 
     @Test
@@ -8847,6 +8829,7 @@ public class StringsTest extends AbstractTest {
         assertEquals("Hello", Strings.substringBetween("Hello World", i -> -1, 5));
         assertNull(Strings.substringBetween(null, i -> 0, 5));
         assertNull(Strings.substringBetween("Hello", i -> 0, 0)); // end <= 0
+        assertNull(Strings.substringBetween("abc", i -> i - 2, 10));
     }
 
     @Test
@@ -8855,6 +8838,8 @@ public class StringsTest extends AbstractTest {
         assertEquals("World", Strings.substringBetween("Hello:World", ":", i -> i + 5));
         assertNull(Strings.substringBetween(null, ":", i -> 5));
         assertNull(Strings.substringBetween("Hello", "x", i -> 5)); // delimiter not found
+        // R-7b: a delimiter whose length equals the string length is accepted (only > length is rejected)
+        assertEquals("", Strings.substringBetween("Hello", "Hello", i -> 10));
     }
 
     @Test
@@ -8863,6 +8848,10 @@ public class StringsTest extends AbstractTest {
         assertEquals("Hello", Strings.substringBetween("Hello:World", i -> -1, ":"));
         assertNull(Strings.substringBetween(null, i -> 0, ":"));
         assertNull(Strings.substringBetween("Hello", i -> 0, "x")); // delimiter not found
+        // R-7a: anchors on the FIRST occurrence of the end delimiter (not the last)
+        assertEquals("a", Strings.substringBetween("a=b=c", i -> -1, "="));
+        // R-7b: a delimiter whose length equals the string length is no longer rejected by the length guard
+        assertNull(Strings.substringBetween("Hello", i -> 0, "Hello")); // calculated begin index >= end index
     }
 
     @Test
@@ -9296,6 +9285,37 @@ public class StringsTest extends AbstractTest {
     }
 
     @Test
+    public void test_substringIndicesBetween_maxCount() {
+        final String str = "3[a2[c]]2[a]";
+
+        // DEFAULT: maxCount simply limits sequential matches.
+        assertEquals("[[2, 6]]", N.stringOf(Strings.substringIndicesBetween(str, 0, str.length(), "[", "]", ExtractStrategy.DEFAULT, 1)));
+        assertEquals("[[2, 6], [10, 11]]", N.stringOf(Strings.substringIndicesBetween(str, 0, str.length(), "[", "]", ExtractStrategy.DEFAULT, 2)));
+
+        // STACK_BASED: matches are reported inner-first, so maxCount limits in that discovery order.
+        assertEquals("[[5, 6]]", N.stringOf(Strings.substringIndicesBetween(str, 0, str.length(), "[", "]", ExtractStrategy.STACK_BASED, 1)));
+        assertEquals("[[5, 6], [2, 7]]", N.stringOf(Strings.substringIndicesBetween(str, 0, str.length(), "[", "]", ExtractStrategy.STACK_BASED, 2)));
+
+        // IGNORE_NESTED: nested matches must never be returned, even when maxCount stops the scan early.
+        // Before the fix, maxCount=1 returned [[5, 6]] ("c"), a nested match that the strategy promises to ignore.
+        assertEquals("[[2, 7]]", N.stringOf(Strings.substringIndicesBetween(str, 0, str.length(), "[", "]", ExtractStrategy.IGNORE_NESTED, 1)));
+        assertEquals("[[2, 7], [10, 11]]", N.stringOf(Strings.substringIndicesBetween(str, 0, str.length(), "[", "]", ExtractStrategy.IGNORE_NESTED, 2)));
+        assertEquals("[[2, 7], [10, 11]]", N.stringOf(Strings.substringIndicesBetween(str, 0, str.length(), "[", "]", ExtractStrategy.IGNORE_NESTED, 10)));
+
+        // Value-returning variant goes through the same code path.
+        assertEquals(N.toList("a2[c]"), Strings.substringsBetween(str, 0, str.length(), "[", "]", ExtractStrategy.IGNORE_NESTED, 1));
+
+        // Unclosed outer delimiter: pending matches stay, but the result must still honor maxCount.
+        final String unclosed = "[a[b]c[d]";
+        assertEquals("[[3, 4], [7, 8]]",
+                N.stringOf(Strings.substringIndicesBetween(unclosed, 0, unclosed.length(), "[", "]", ExtractStrategy.IGNORE_NESTED, 10)));
+        assertEquals("[[3, 4]]", N.stringOf(Strings.substringIndicesBetween(unclosed, 0, unclosed.length(), "[", "]", ExtractStrategy.IGNORE_NESTED, 1)));
+
+        // maxCount == 0 returns an empty list.
+        assertTrue(Strings.substringIndicesBetween(str, 0, str.length(), "[", "]", ExtractStrategy.IGNORE_NESTED, 0).isEmpty());
+    }
+
+    @Test
     public void test_findAllIndicesBetween() {
         N.println(Strings.substringIndicesBetween("3[a2[c]]2[a]", '[', ']'));
         N.println(Strings.substringsBetween("3[a2[c]]2[a]", '[', ']'));
@@ -9401,6 +9421,10 @@ public class StringsTest extends AbstractTest {
     public void testJoin_CharArrayWithPrefixSuffix() {
         assertEquals("[a, b]", join(new char[] { 'a', 'b' }, 0, 2, ", ", "[", "]"));
         assertEquals("<a-b-c>", join(new char[] { 'a', 'b', 'c' }, 0, 3, "-", "<", ">"));
+        assertEquals("[a, b, c]", join(new char[] { 'a', 'b', 'c' }, ", ", "[", "]"));
+        assertEquals("<abc>", join(new char[] { 'a', 'b', 'c' }, "", "<", ">"));
+        assertEquals("[]", join(new char[] {}, ", ", "[", "]"));
+        assertEquals("[]", join((char[]) null, ", ", "[", "]"));
     }
 
     @Test
@@ -9414,6 +9438,10 @@ public class StringsTest extends AbstractTest {
     public void testJoin_ByteArrayWithPrefixSuffix() {
         assertEquals("[1, 2]", join(new byte[] { 1, 2 }, 0, 2, ", ", "[", "]"));
         assertEquals("{1-2-3}", join(new byte[] { 1, 2, 3 }, 0, 3, "-", "{", "}"));
+        assertEquals("[1, 2, 3]", join(new byte[] { 1, 2, 3 }, ", ", "[", "]"));
+        assertEquals("{1-2-3}", join(new byte[] { 1, 2, 3 }, "-", "{", "}"));
+        assertEquals("[]", join(new byte[] {}, ", ", "[", "]"));
+        assertEquals("[]", join((byte[]) null, ", ", "[", "]"));
     }
 
     @Test
@@ -9425,6 +9453,10 @@ public class StringsTest extends AbstractTest {
     @Test
     public void testJoin_ShortArrayWithPrefixSuffix() {
         assertEquals("[1, 2]", join(new short[] { 1, 2 }, 0, 2, ", ", "[", "]"));
+        assertEquals("[1, 2, 3]", join(new short[] { 1, 2, 3 }, ", ", "[", "]"));
+        assertEquals("{1-2-3}", join(new short[] { 1, 2, 3 }, "-", "{", "}"));
+        assertEquals("[]", join(new short[] {}, ", ", "[", "]"));
+        assertEquals("[]", join((short[]) null, ", ", "[", "]"));
     }
 
     @Test
@@ -9437,6 +9469,10 @@ public class StringsTest extends AbstractTest {
     public void testJoin_IntArrayWithPrefixSuffix() {
         assertEquals("[1, 2]", join(new int[] { 1, 2 }, 0, 2, ", ", "[", "]"));
         assertEquals("START:100:200:END", join(new int[] { 100, 200 }, 0, 2, ":", "START:", ":END"));
+        assertEquals("[1, 2, 3]", join(new int[] { 1, 2, 3 }, ", ", "[", "]"));
+        assertEquals("START:100:200:END", join(new int[] { 100, 200 }, ":", "START:", ":END"));
+        assertEquals("[]", join(new int[] {}, ", ", "[", "]"));
+        assertEquals("[]", join((int[]) null, ", ", "[", "]"));
     }
 
     @Test
@@ -9448,6 +9484,10 @@ public class StringsTest extends AbstractTest {
     @Test
     public void testJoin_LongArrayWithPrefixSuffix() {
         assertEquals("[1, 2]", join(new long[] { 1L, 2L }, 0, 2, ", ", "[", "]"));
+        assertEquals("[1, 2, 3]", join(new long[] { 1L, 2L, 3L }, ", ", "[", "]"));
+        assertEquals("{1-2-3}", join(new long[] { 1L, 2L, 3L }, "-", "{", "}"));
+        assertEquals("[]", join(new long[] {}, ", ", "[", "]"));
+        assertEquals("[]", join((long[]) null, ", ", "[", "]"));
     }
 
     @Test
@@ -9459,6 +9499,10 @@ public class StringsTest extends AbstractTest {
     @Test
     public void testJoin_FloatArrayWithPrefixSuffix() {
         assertEquals("[1.0, 2.0]", join(new float[] { 1.0f, 2.0f }, 0, 2, ", ", "[", "]"));
+        assertEquals("[1.0, 2.0, 3.0]", join(new float[] { 1.0f, 2.0f, 3.0f }, ", ", "[", "]"));
+        assertEquals("{1.0-2.0-3.0}", join(new float[] { 1.0f, 2.0f, 3.0f }, "-", "{", "}"));
+        assertEquals("[]", join(new float[] {}, ", ", "[", "]"));
+        assertEquals("[]", join((float[]) null, ", ", "[", "]"));
     }
 
     @Test
@@ -9470,6 +9514,10 @@ public class StringsTest extends AbstractTest {
     @Test
     public void testJoin_DoubleArrayWithPrefixSuffix() {
         assertEquals("[1.0, 2.0]", join(new double[] { 1.0, 2.0 }, 0, 2, ", ", "[", "]"));
+        assertEquals("[1.0, 2.0, 3.0]", join(new double[] { 1.0, 2.0, 3.0 }, ", ", "[", "]"));
+        assertEquals("{1.0-2.0-3.0}", join(new double[] { 1.0, 2.0, 3.0 }, "-", "{", "}"));
+        assertEquals("[]", join(new double[] {}, ", ", "[", "]"));
+        assertEquals("[]", join((double[]) null, ", ", "[", "]"));
     }
 
     @Test
@@ -9639,8 +9687,12 @@ public class StringsTest extends AbstractTest {
     @Test
     public void testJoin_BooleanArrayWithPrefixSuffix() {
         assertEquals("[true, false]", join(new boolean[] { true, false }, 0, 2, ", ", "[", "]"));
+        assertEquals("[true, false]", join(new boolean[] { true, false }, ", ", "[", "]"));
         assertEquals("true", join(new boolean[] { true }, 0, 1, ", ", "", ""));
+        assertEquals("true", join(new boolean[] { true }, ", ", "", ""));
         assertEquals("[]", join(new boolean[] {}, 0, 0, ", ", "[", "]"));
+        assertEquals("[]", join(new boolean[] {}, ", ", "[", "]"));
+        assertEquals("[]", join((boolean[]) null, ", ", "[", "]"));
         assertEquals("prefix", join(new boolean[] {}, 0, 0, ", ", "prefix", null));
         assertEquals("suffix", join(new boolean[] {}, 0, 0, ", ", null, "suffix"));
     }
@@ -10408,36 +10460,36 @@ public class StringsTest extends AbstractTest {
 
     @Test
     public void testConcatPerformanceOptimization() {
-        Assertions.assertEquals("", Strings.concat());
+        Assertions.assertEquals("", Strings.concatNullToEmpty());
 
-        Assertions.assertEquals("A", Strings.concat("A"));
+        Assertions.assertEquals("A", Strings.concatNullToEmpty("A"));
 
         for (int i = 2; i <= 7; i++) {
             String[] arr = new String[i];
             Arrays.fill(arr, "X");
             String expected = "X".repeat(i);
-            Assertions.assertEquals(expected, Strings.concat(arr));
+            Assertions.assertEquals(expected, Strings.concatNullToEmpty(arr));
         }
 
         String[] arr = new String[10];
         Arrays.fill(arr, "Y");
-        Assertions.assertEquals("Y".repeat(10), Strings.concat(arr));
+        Assertions.assertEquals("Y".repeat(10), Strings.concatNullToEmpty(arr));
     }
 
     @Test
     @DisplayName("Test concat() with multiple strings")
     public void testConcat() {
         assertEquals("abcdef", Strings.concat("abc", "def"));
-        assertEquals("abc", Strings.concat("abc", null));
-        assertEquals("def", Strings.concat(null, "def"));
-        assertEquals("", Strings.concat((String[]) null));
+        assertEquals("abc", Strings.concatNullToEmpty("abc", null));
+        assertEquals("def", Strings.concatNullToEmpty(null, "def"));
+        assertEquals("", Strings.concatNullToEmpty((String[]) null));
     }
 
     @Test
     public void testConcatStrings() {
         assertEquals("abc", Strings.concat("a", "b", "c"));
-        assertEquals("a", Strings.concat("a", null, ""));
-        assertEquals("", Strings.concat(null, null));
+        assertEquals("a", Strings.concatNullToEmpty("a", null, ""));
+        assertEquals("", Strings.concatNullToEmpty(null, null));
     }
 
     @Test
@@ -10445,8 +10497,8 @@ public class StringsTest extends AbstractTest {
         Assertions.assertEquals("Hello World!!", Strings.concat("Hello", " ", "World", "!", "!"));
         Assertions.assertEquals("ABCDE", Strings.concat("A", "B", "C", "D", "E"));
 
-        Assertions.assertEquals("123", Strings.concat("1", null, "2", null, "3"));
-        Assertions.assertEquals("", Strings.concat(null, null, null, null, null));
+        Assertions.assertEquals("123", Strings.concatNullToEmpty("1", null, "2", null, "3"));
+        Assertions.assertEquals("", Strings.concatNullToEmpty(null, null, null, null, null));
 
         Assertions.assertEquals("AC", Strings.concat("A", "", "", "", "C"));
     }
@@ -10457,24 +10509,24 @@ public class StringsTest extends AbstractTest {
         Assertions.assertEquals("123456", Strings.concat("1", "2", "3", "4", "5", "6"));
         Assertions.assertEquals("Hello!", Strings.concat("H", "e", "l", "l", "o", "!"));
 
-        Assertions.assertEquals("", Strings.concat(null, null, null, null, null, null));
+        Assertions.assertEquals("", Strings.concatNullToEmpty(null, null, null, null, null, null));
     }
 
     @Test
     public void testConcatStringArray() {
-        Assertions.assertEquals("Hello World", Strings.concat(new String[] { "Hello", " ", "World" }));
-        Assertions.assertEquals("ABCD", Strings.concat(new String[] { "A", "B", "C", "D" }));
+        Assertions.assertEquals("Hello World", Strings.concatNullToEmpty(new String[] { "Hello", " ", "World" }));
+        Assertions.assertEquals("ABCD", Strings.concatNullToEmpty(new String[] { "A", "B", "C", "D" }));
 
-        Assertions.assertEquals("HelloWorld", Strings.concat(new String[] { "Hello", null, "World" }));
-        Assertions.assertEquals("", Strings.concat(new String[] { null, null }));
+        Assertions.assertEquals("HelloWorld", Strings.concatNullToEmpty(new String[] { "Hello", null, "World" }));
+        Assertions.assertEquals("", Strings.concatNullToEmpty(new String[] { null, null }));
 
-        Assertions.assertEquals("", Strings.concat(new String[0]));
+        Assertions.assertEquals("", Strings.concatNullToEmpty(new String[0]));
 
-        Assertions.assertEquals("", Strings.concat((String[]) null));
+        Assertions.assertEquals("", Strings.concatNullToEmpty((String[]) null));
 
-        Assertions.assertEquals("A", Strings.concat(new String[] { "A" }));
-        Assertions.assertEquals("AB", Strings.concat(new String[] { "A", "B" }));
-        Assertions.assertEquals("ABC", Strings.concat(new String[] { "A", "B", "C" }));
+        Assertions.assertEquals("A", Strings.concatNullToEmpty(new String[] { "A" }));
+        Assertions.assertEquals("AB", Strings.concatNullToEmpty(new String[] { "A", "B" }));
+        Assertions.assertEquals("ABC", Strings.concatNullToEmpty(new String[] { "A", "B", "C" }));
     }
 
     @Test
@@ -10482,9 +10534,9 @@ public class StringsTest extends AbstractTest {
         Assertions.assertEquals("Hello123", Strings.concat("Hello", 123));
         Assertions.assertEquals("42 is the answer", Strings.concat(42, " is the answer"));
 
-        Assertions.assertEquals("World", Strings.concat(null, "World"));
-        Assertions.assertEquals("Hello", Strings.concat("Hello", null));
-        Assertions.assertEquals("", Strings.concat(null, null));
+        Assertions.assertEquals("World", Strings.concatNullToEmpty(null, "World"));
+        Assertions.assertEquals("Hello", Strings.concatNullToEmpty("Hello", null));
+        Assertions.assertEquals("", Strings.concatNullToEmpty(null, null));
 
         Assertions.assertEquals("3.14true", Strings.concat(3.14, true));
     }
@@ -10495,7 +10547,7 @@ public class StringsTest extends AbstractTest {
         Assertions.assertEquals("123", Strings.concat(1, 2, 3));
         Assertions.assertEquals("Value: 42!", Strings.concat("Value: ", 42, "!"));
 
-        Assertions.assertEquals("", Strings.concat(null, null, null));
+        Assertions.assertEquals("", Strings.concatNullToEmpty(null, null, null));
     }
 
     @Test
@@ -10504,7 +10556,7 @@ public class StringsTest extends AbstractTest {
         Assertions.assertEquals("1+2=3", Strings.concat(1, "+", 2, "=3"));
         Assertions.assertEquals("Result: 10 out of 20", Strings.concat("Result: ", 10, " out of ", 20));
 
-        Assertions.assertEquals("", Strings.concat(null, null, null, null));
+        Assertions.assertEquals("", Strings.concatNullToEmpty(null, null, null, null));
     }
 
     @Test
@@ -10513,16 +10565,16 @@ public class StringsTest extends AbstractTest {
         Assertions.assertEquals("1 2 3", Strings.concat(1, " ", 2, " ", 3));
         Assertions.assertEquals("Sum of 1+2=3", Strings.concat("Sum of ", 1, "+", 2, "=3"));
 
-        Assertions.assertEquals("", Strings.concat(null, null, null, null, null));
+        Assertions.assertEquals("", Strings.concatNullToEmpty(null, null, null, null, null));
     }
 
     @Test
     public void testConcatWithLargeArrays() {
         String[] largeArray = { "A", "B", "C", "D", "E", "F", "G", "H", "I", "J" };
-        Assertions.assertEquals("ABCDEFGHIJ", Strings.concat(largeArray));
+        Assertions.assertEquals("ABCDEFGHIJ", Strings.concatNullToEmpty(largeArray));
 
         String[] mixedArray = { "A", null, "B", null, "C", "D", "E", "F", "G", "H" };
-        Assertions.assertEquals("ABCDEFGH", Strings.concat(mixedArray));
+        Assertions.assertEquals("ABCDEFGH", Strings.concatNullToEmpty(mixedArray));
     }
 
     @Test
@@ -10531,9 +10583,9 @@ public class StringsTest extends AbstractTest {
         assertEquals("Hello", concat("Hello", ""));
         assertEquals("World", concat("", "World"));
         assertEquals("", concat("", ""));
-        assertEquals("Hello", concat("Hello", null));
-        assertEquals("World", concat(null, "World"));
-        assertEquals("", concat(null, null));
+        assertEquals("Hello", concatNullToEmpty("Hello", null));
+        assertEquals("World", concatNullToEmpty(null, "World"));
+        assertEquals("", concatNullToEmpty(null, null));
     }
 
     @Test
@@ -10541,17 +10593,17 @@ public class StringsTest extends AbstractTest {
         assertEquals("HelloWorldTest", concat("Hello", "World", "Test"));
         assertEquals("HelloWorld", concat("Hello", "World", ""));
         assertEquals("HelloTest", concat("Hello", "", "Test"));
-        assertEquals("Hello", concat("Hello", null, null));
-        assertEquals("", concat(null, null, null));
+        assertEquals("Hello", concatNullToEmpty("Hello", null, null));
+        assertEquals("", concatNullToEmpty(null, null, null));
     }
 
     @Test
     public void testConcat_MultipleStrings() {
         assertEquals("abcde", concat("a", "b", "c", "d", "e"));
         assertEquals("abcdefghi", concat("a", "b", "c", "d", "e", "f", "g", "h", "i"));
-        assertEquals("abc", concat("a", null, "b", null, "c"));
-        assertEquals("", concat(new String[] {}));
-        assertEquals("", concat((String[]) null));
+        assertEquals("abc", concatNullToEmpty("a", null, "b", null, "c"));
+        assertEquals("", concatNullToEmpty(new String[] {}));
+        assertEquals("", concatNullToEmpty((String[]) null));
     }
 
     @Test
@@ -10560,7 +10612,7 @@ public class StringsTest extends AbstractTest {
         assertEquals("123", concat(1, 2, 3));
         assertEquals("1null3", concat(1, null, 3));
         assertEquals("true42", concat(true, 42));
-        assertEquals("", concat(null, null));
+        assertEquals("", concatNullToEmpty(null, null));
     }
 
     @Test
@@ -10568,7 +10620,7 @@ public class StringsTest extends AbstractTest {
         assertEquals("ab", concat("a", "b"));
         assertEquals("a", concat("a", ""));
         assertEquals("b", concat("", "b"));
-        assertEquals("b", concat(null, "b"));
+        assertEquals("b", concatNullToEmpty(null, "b"));
     }
 
     @Test
@@ -11199,27 +11251,27 @@ public class StringsTest extends AbstractTest {
         Map<String, String> params = new LinkedHashMap<>();
         params.put("name", "John Doe");
         params.put("city", "New York");
-        String encoded = Strings.urlEncode(params);
+        String encoded = Strings.encodeUrlQuery(params);
         assertEquals("name=John+Doe&city=New+York", encoded);
 
-        Map<String, String> decoded = Strings.urlDecode(encoded);
+        Map<String, String> decoded = Strings.parseUrlQuery(encoded);
         assertEquals("John Doe", decoded.get("name"));
         assertEquals("New York", decoded.get("city"));
     }
 
     @Test
-    @DisplayName("Test urlEncode()")
+    @DisplayName("Test encodeUrlQuery()")
     public void testUrlEncode() {
-        String encoded = Strings.urlEncode("Hello World");
+        String encoded = Strings.encodeUrlQuery("Hello World");
         assertEquals("Hello+World", encoded);
-        String encoded2 = Strings.urlEncode("a=b&c=d");
+        String encoded2 = Strings.encodeUrlQuery("a=b&c=d");
         assertEquals("a=b&c=d", encoded2);
-        assertEquals("", Strings.urlEncode(null));
+        assertEquals("", Strings.encodeUrlQuery(null));
     }
 
     @Test
     public void testUrlEncode_WithCharset() {
-        String encoded = Strings.urlEncode("hello world", java.nio.charset.StandardCharsets.UTF_8);
+        String encoded = Strings.encodeUrlQuery("hello world", java.nio.charset.StandardCharsets.UTF_8);
         assertNotNull(encoded);
         assertTrue(encoded.contains("hello"));
     }
@@ -11228,34 +11280,34 @@ public class StringsTest extends AbstractTest {
     public void testUrlEncodeDecode_EdgeCases() {
         Map<String, String> params = new LinkedHashMap<>();
         params.put("hello world", "foo=bar");
-        String encoded = Strings.urlEncode(params);
+        String encoded = Strings.encodeUrlQuery(params);
         assertNotNull(encoded);
         assertTrue(encoded.contains("hello"));
         // Round-trip test
-        Map<String, String> decoded = Strings.urlDecode("a=1&b=2");
+        Map<String, String> decoded = Strings.parseUrlQuery("a=1&b=2");
         assertEquals("1", decoded.get("a"));
         assertEquals("2", decoded.get("b"));
     }
 
     @Test
-    @DisplayName("Test urlDecode()")
+    @DisplayName("Test parseUrlQuery()")
     public void testUrlDecode() {
-        Map<String, String> decoded = Strings.urlDecode(Strings.urlEncode("a=b&c=d"));
+        Map<String, String> decoded = Strings.parseUrlQuery(Strings.encodeUrlQuery("a=b&c=d"));
         assertEquals(Map.of("a", "b", "c", "d"), decoded);
-        assertEquals(Map.of(), Strings.urlDecode(null));
+        assertEquals(Map.of(), Strings.parseUrlQuery(null));
     }
 
     @Test
     public void testUrlDecode_WithCharset() {
-        Map<String, String> result = Strings.urlDecode("name=test+data", java.nio.charset.StandardCharsets.UTF_8);
+        Map<String, String> result = Strings.parseUrlQuery("name=test+data", java.nio.charset.StandardCharsets.UTF_8);
         assertNotNull(result);
         assertEquals("test data", result.get("name"));
     }
 
-    // urlDecode(String, Class) decodes URL query to an object of the given type
+    // parseUrlQuery(String, Class) decodes URL query to an object of the given type
     @Test
     public void testUrlDecode_WithClass() {
-        java.util.Map<String, String> result = Strings.urlDecode("a=1&b=2", java.util.Map.class);
+        java.util.Map<String, String> result = Strings.parseUrlQuery("a=1&b=2", java.util.Map.class);
         assertNotNull(result);
         assertEquals("1", result.get("a"));
         assertEquals("2", result.get("b"));
@@ -11263,21 +11315,21 @@ public class StringsTest extends AbstractTest {
 
     @Test
     public void testUrlDecode_WithClass_Null() {
-        java.util.Map<String, String> result = Strings.urlDecode((String) null, java.util.Map.class);
+        java.util.Map<String, String> result = Strings.parseUrlQuery((String) null, java.util.Map.class);
         assertNotNull(result);
         assertTrue(result.isEmpty());
     }
 
     @Test
     public void testUrlDecode_WithCharsetAndClass() {
-        java.util.Map<String, String> result = Strings.urlDecode("a=1&b=2", java.nio.charset.StandardCharsets.UTF_8, java.util.Map.class);
+        java.util.Map<String, String> result = Strings.parseUrlQuery("a=1&b=2", java.nio.charset.StandardCharsets.UTF_8, java.util.Map.class);
         assertNotNull(result);
         assertEquals("1", result.get("a"));
     }
 
     @Test
     public void testUrlDecode_WithCharsetAndClass_Null() {
-        java.util.Map<String, String> result = Strings.urlDecode((String) null, java.nio.charset.StandardCharsets.UTF_8, java.util.Map.class);
+        java.util.Map<String, String> result = Strings.parseUrlQuery((String) null, java.nio.charset.StandardCharsets.UTF_8, java.util.Map.class);
         assertNotNull(result);
         assertTrue(result.isEmpty());
     }
@@ -11375,25 +11427,25 @@ public class StringsTest extends AbstractTest {
     }
 
     @Test
-    @DisplayName("Test findFirstEmailAddress()")
+    @DisplayName("Test extractEmailAddress()")
     public void testFindFirstEmailAddress() {
-        assertEquals("test@example.com", Strings.findFirstEmailAddress("Contact: test@example.com"));
-        assertNull(Strings.findFirstEmailAddress("No email here"));
-        assertNull(Strings.findFirstEmailAddress(null));
+        assertEquals("test@example.com", Strings.extractEmailAddress("Contact: test@example.com"));
+        assertNull(Strings.extractEmailAddress("No email here"));
+        assertNull(Strings.extractEmailAddress(null));
     }
 
     @Test
     public void testFindFirstEmailAddress_EdgeCases() {
-        assertEquals("test@gmail.com", Strings.findFirstEmailAddress("contact test@gmail.com for info"));
-        assertNull(Strings.findFirstEmailAddress("no email here"));
-        assertNull(Strings.findFirstEmailAddress(null));
-        assertNull(Strings.findFirstEmailAddress(""));
+        assertEquals("test@gmail.com", Strings.extractEmailAddress("contact test@gmail.com for info"));
+        assertNull(Strings.extractEmailAddress("no email here"));
+        assertNull(Strings.extractEmailAddress(null));
+        assertNull(Strings.extractEmailAddress(""));
     }
 
     @Test
-    @DisplayName("Test findAllEmailAddresses()")
+    @DisplayName("Test extractAllEmailAddresses()")
     public void testFindAllEmailAddresses() {
-        List<String> emails = Strings.findAllEmailAddresses("Contact: test@example.com and admin@test.org");
+        List<String> emails = Strings.extractAllEmailAddresses("Contact: test@example.com and admin@test.org");
         assertEquals(2, emails.size());
         assertTrue(emails.contains("test@example.com"));
         assertTrue(emails.contains("admin@test.org"));
@@ -11401,10 +11453,10 @@ public class StringsTest extends AbstractTest {
 
     @Test
     public void testFindAllEmailAddresses_EdgeCases() {
-        List<String> emails = Strings.findAllEmailAddresses("a@b.com and c@d.com");
+        List<String> emails = Strings.extractAllEmailAddresses("a@b.com and c@d.com");
         assertEquals(2, emails.size());
-        assertEquals(0, Strings.findAllEmailAddresses("no email").size());
-        assertEquals(0, Strings.findAllEmailAddresses(null).size());
+        assertEquals(0, Strings.extractAllEmailAddresses("no email").size());
+        assertEquals(0, Strings.extractAllEmailAddresses(null).size());
     }
 
     @Test
@@ -11507,18 +11559,13 @@ public class StringsTest extends AbstractTest {
     }
 
     @Test
-    @DisplayName("Test replaceFirstInteger()")
-    public void testReplaceFirstInteger() {
-        assertEquals("abcXYZdef", Strings.replaceFirstInteger("abc123def", "XYZ"));
-        assertEquals("abc", Strings.replaceFirstInteger("abc", "XYZ"));
-        assertEquals("", Strings.replaceFirstInteger(null, "XYZ"));
-    }
-
-    @Test
     public void testReplaceFirstInteger_EdgeCases() {
         assertEquals("abcXYZdef", Strings.replaceFirstInteger("abc123def", "XYZ"));
         assertEquals("abc", Strings.replaceFirstInteger("abc", "XYZ"));
-        assertEquals("", Strings.replaceFirstInteger(null, "XYZ"));
+        assertNull(Strings.replaceFirstInteger(null, "XYZ"));
+        // R-6: replacement is literal text ('$' and '\' have no special regex meaning; "$5"/"$0" previously threw or were group refs)
+        assertEquals("price $5", Strings.replaceFirstInteger("price 5", "$5"));
+        assertEquals("a$0b", Strings.replaceFirstInteger("a5b", "$0"));
     }
 
     @Test
@@ -11526,7 +11573,9 @@ public class StringsTest extends AbstractTest {
     public void testReplaceFirstDouble() {
         assertEquals("abcXYZdef", Strings.replaceFirstDouble("abc123.45def", "XYZ"));
         assertEquals("abc", Strings.replaceFirstDouble("abc", "XYZ"));
-        assertEquals("", Strings.replaceFirstDouble(null, "XYZ"));
+        assertNull(Strings.replaceFirstDouble(null, "XYZ"));
+        // R-6: replacement is literal text ('$' and '\' have no special regex meaning)
+        assertEquals("price $9", Strings.replaceFirstDouble("price 9.5", "$9"));
     }
 
     @Test
@@ -11536,14 +11585,14 @@ public class StringsTest extends AbstractTest {
         assertEquals("abc[NUM]def", replaceFirstDouble("abc123.45def", "[NUM]", true));
         assertEquals("no numbers", replaceFirstDouble("no numbers", "XXX", true));
         assertEquals("", replaceFirstDouble("", "XXX", true));
-        assertEquals("", replaceFirstDouble(null, "XXX", true));
+        assertNull(replaceFirstDouble(null, "XXX", true));
     }
 
     @Test
     public void testReplaceFirstDouble_EdgeCases() {
         assertEquals("abcXYZdef", replaceFirstDouble("abc12.34def", "XYZ"));
         assertEquals("abc", replaceFirstDouble("abc", "XYZ"));
-        assertEquals("", replaceFirstDouble(null, "XYZ"));
+        assertNull(replaceFirstDouble(null, "XYZ"));
     }
 
     @Test
@@ -11590,13 +11639,15 @@ public class StringsTest extends AbstractTest {
 
     @Test
     public void test_surrogate() {
-        for (int i = Character.MIN_LOW_SURROGATE; i < Character.MAX_LOW_SURROGATE; i++) {
-            N.println((char) i);
-        }
+        assertDoesNotThrow(() -> {
+            for (int i = Character.MIN_LOW_SURROGATE; i < Character.MAX_LOW_SURROGATE; i++) {
+                N.println((char) i);
+            }
 
-        for (int i = Character.MIN_HIGH_SURROGATE; i < Character.MAX_HIGH_SURROGATE; i++) {
-            N.println((char) i);
-        }
+            for (int i = Character.MIN_HIGH_SURROGATE; i < Character.MAX_HIGH_SURROGATE; i++) {
+                N.println((char) i);
+            }
+        });
     }
 
     @Test
@@ -12088,6 +12139,396 @@ public class StringsTest extends AbstractTest {
 
         // Trim variant: spurious empty should not appear after trimming either.
         assertArrayEquals(new String[] { "a", "b..c" }, Strings.splitPreserveAllTokens(" a .. b..c ", "..", 2, true));
+    }
+
+    // --- regression tests for 2026-06-10 deep-review fixes ---
+
+    @Test
+    public void testReplaceIgnoreCase_lengthChangingCaseMapping() {
+        // regression: lowercasing the whole string shifted match indices for U+0130 (which lowercases to
+        // "i" + combining dot), causing IndexOutOfBoundsException or replacement at the wrong position
+        assertEquals("İc", Strings.replaceAllIgnoreCase("İb", "b", "c"));
+        assertEquals("İXa", Strings.replaceAllIgnoreCase("İaba", "ab", "X"));
+        assertEquals("İstanbul X", Strings.replaceAllIgnoreCase("İstanbul city", "CITY", "X"));
+        // unchanged for plain text
+        assertEquals("xYx", Strings.replaceAllIgnoreCase("aYa", "A", "x"));
+        assertEquals("xYa", Strings.replaceFirstIgnoreCase("aYa", "A", "x"));
+    }
+
+    @Test
+    public void testIndexOfWithDelimiter_terminalTokenAfterNonTerminalOccurrence() {
+        // regression: only the FIRST "delimiter + value" occurrence was tested against end-of-string,
+        // so a valid terminal token shadowed by an earlier non-terminal one was missed
+        assertEquals(8, StrUtil.indexOf("xab,abx,ab", "ab", ","));
+        assertEquals(8, StrUtil.indexOfIgnoreCase("xab,abx,ab", "AB", ","));
+        assertTrue(StrUtil.contains("xab,abx,ab", "ab", ","));
+        assertTrue(StrUtil.containsIgnoreCase("xab,abx,ab", "AB", ","));
+
+        // unchanged behavior
+        assertEquals(8, StrUtil.indexOf("xbanana,banana", "banana", ","));
+        assertEquals(-1, StrUtil.indexOf("xab,abx", "ab", ","));
+    }
+
+    @Test
+    public void testLastIndexOfWithDelimiter_tokenAtStartShadowedByLaterOccurrence() {
+        // regression: the start-of-string fallback only tested the LAST plain occurrence, so a valid
+        // token at index 0 shadowed by a later non-delimited occurrence was missed
+        assertEquals(0, StrUtil.lastIndexOf("ab,abx", "ab", ","));
+        assertEquals(0, StrUtil.lastIndexOfIgnoreCase("ab,abx", "AB", ","));
+
+        // unchanged behavior
+        assertEquals(3, StrUtil.lastIndexOf("ab,ab", "ab", ","));
+        assertEquals(-1, StrUtil.lastIndexOf("xab,abx", "ab", ","));
+    }
+
+    @Test
+    public void testContainsAnyEqualsAnyIgnoreCase_consistentAcrossArity() {
+        // regression: the >= 3 element paths used whole-string toLowerCase + skip-empty, disagreeing
+        // with the 1/2-element fast paths that use containsIgnoreCase/equalsIgnoreCase
+        assertTrue(Strings.containsAnyIgnoreCase("test", "", "zz"));
+        assertTrue(Strings.containsAnyIgnoreCase("test", "", "zz", "qq")); // was false
+        assertFalse(Strings.containsAnyIgnoreCase("test", "x", "y", "z"));
+        assertTrue(Strings.containsAnyIgnoreCase("test", "x", "y", "ES"));
+
+        assertTrue(Strings.equalsAnyIgnoreCase("ſ", "x", "S"));
+        assertTrue(Strings.equalsAnyIgnoreCase("ſ", "x", "y", "S")); // was false
+        assertTrue(Strings.equalsAnyIgnoreCase(null, "x", "y", null));
+        assertFalse(Strings.equalsAnyIgnoreCase(null, "x", "y", "z"));
+    }
+
+    @Test
+    public void testIndicesOf_negativeFromIndexAndEmptyTargetBounds() {
+        // regression: a negative fromIndex threw IllegalArgumentException (siblings clamp to 0), and an
+        // empty valueToFind with fromIndex >= length emitted an out-of-range index
+        assertArrayEquals(new int[] { 0, 3 }, Strings.indicesOf("abcabc", "a", -1).toArray());
+        assertArrayEquals(new int[] { 0, 3 }, Strings.indicesOfIgnoreCase("abcAbc", "a", -2).toArray());
+        assertEquals(0, Strings.indicesOf("abc", "", 3).count());
+        assertEquals(0, Strings.indicesOf("abc", "", 4).count());
+
+        // documented behavior unchanged
+        assertArrayEquals(new int[] { 2, 3 }, Strings.indicesOf("abcA", "", 2).toArray());
+        assertArrayEquals(new int[] { 3 }, Strings.indicesOf("abcabc", "a", 2).toArray());
+    }
+
+    @Test
+    public void testSubstringsBetweenStackBased_honorsToIndex() {
+        // regression: the STACK_BASED branch ignored toIndex, returning matches partially or entirely
+        // outside the requested range
+        assertTrue(Strings.substringsBetween("a[b]c", 0, 3, "[", "]", ExtractStrategy.STACK_BASED, Integer.MAX_VALUE).isEmpty());
+        assertTrue(Strings.substringsBetween("a[bcdefg]h", 0, 3, "[", "]", ExtractStrategy.STACK_BASED, Integer.MAX_VALUE).isEmpty());
+        assertEquals(N.asList("a"), Strings.substringsBetween("[a]x[b]", 0, 4, "[", "]", ExtractStrategy.STACK_BASED, Integer.MAX_VALUE));
+
+        // full-range behavior unchanged
+        assertEquals(N.asList("b"), Strings.substringsBetween("a[b]c", 0, 5, "[", "]", ExtractStrategy.STACK_BASED, Integer.MAX_VALUE));
+    }
+
+    @Test
+    public void testToCamelCaseSplitChar_stripsLeadingTrailingDelimiters() {
+        // regression: the single-token branch ran on the original string (delimiters still attached)
+        // instead of the split token
+        assertEquals("name", Strings.toCamelCase("-name", '-'));
+        assertEquals("Name", Strings.toUpperCamelCase("-name", '-'));
+        assertEquals("name", Strings.toCamelCase("-NAME", '-'));
+        assertEquals("firstName", Strings.toCamelCase(".firstName", '.'));
+
+        // unchanged behavior
+        assertEquals("firstName", Strings.toCamelCase("firstName", '.'));
+        assertEquals("FirstName", Strings.toUpperCamelCase("first.name", '.'));
+    }
+
+    @Test
+    public void testJoinEntries_nullDelimitersTreatedAsEmpty() {
+        // regression: a null entry/key-value delimiter was appended as the literal "null", unlike every
+        // join sibling which treats a null delimiter as empty
+        final java.util.Map<String, Integer> m = new LinkedHashMap<>();
+        m.put("a", 1);
+        m.put("b", 2);
+
+        assertEquals("a=1b=2", Strings.joinEntries(m, (String) null));
+        assertEquals("a1, b2", Strings.joinEntries(m, ", ", (String) null));
+
+        // unchanged behavior
+        assertEquals("a=1, b=2", Strings.joinEntries(m, ", "));
+    }
+
+    @Test
+    public void testIsLikelyWideCodePoint_RangeBoundaries() {
+        assertFalse(Strings.isLikelyWideCodePoint('A'));
+        assertFalse(Strings.isLikelyWideCodePoint(0x0301));
+        assertFalse(Strings.isLikelyWideCodePoint(0x303F));
+        assertTrue(Strings.isLikelyWideCodePoint(0x1100));
+        assertTrue(Strings.isLikelyWideCodePoint(0x2329));
+        assertTrue(Strings.isLikelyWideCodePoint(0x2E80));
+        assertTrue(Strings.isLikelyWideCodePoint(0x1F600));
+    }
+
+    // ----- G-5: compare(String, String) -----
+
+    @Test
+    public void testCompare() {
+        // normal
+        assertEquals(0, Strings.compare("abc", "abc"));
+        assertTrue(Strings.compare("abc", "def") < 0);
+        assertTrue(Strings.compare("def", "abc") > 0);
+        // case-sensitive: lowercase > uppercase
+        assertTrue(Strings.compare("abc", "ABC") > 0);
+        assertNotEquals(0, Strings.compare("abc", "ABC"));
+        // null/empty edge
+        assertEquals(-1, Strings.compare(null, "abc"));
+        assertEquals(1, Strings.compare("abc", null));
+        assertEquals(0, Strings.compare(null, null));
+        assertTrue(Strings.compare("", "a") < 0);
+        assertEquals(0, Strings.compare("", ""));
+        // consistency with String.compareTo
+        assertEquals("abc".compareTo("abd"), Strings.compare("abc", "abd"));
+    }
+
+    // ----- G-6: padStartByDisplayWidth(String, int) -----
+
+    @Test
+    public void testPadStartByDisplayWidth() {
+        // normal
+        assertEquals("   ab", Strings.padStartByDisplayWidth("ab", 5));
+        // wide CJK characters count as 2 each (display width 4 -> 1 space)
+        assertEquals(" 中文", Strings.padStartByDisplayWidth("中文", 5));
+        // already wide enough
+        assertEquals("abcde", Strings.padStartByDisplayWidth("abcde", 3));
+        assertEquals("abc", Strings.padStartByDisplayWidth("abc", 3));
+        // null treated as empty
+        assertEquals("   ", Strings.padStartByDisplayWidth(null, 3));
+        assertEquals("", Strings.padStartByDisplayWidth(null, 0));
+        // empty input
+        assertEquals("  ", Strings.padStartByDisplayWidth("", 2));
+        // negative width throws
+        assertThrows(IllegalArgumentException.class, () -> Strings.padStartByDisplayWidth("ab", -1));
+    }
+
+    // ----- G-10: countMatchesIgnoreCase(String, String) -----
+
+    @Test
+    public void testCountMatchesIgnoreCase() {
+        // normal (same-case)
+        assertEquals(3, Strings.countMatchesIgnoreCase("abcabcabc", "abc"));
+        // case-insensitive match
+        assertEquals(3, Strings.countMatchesIgnoreCase("abcABCabc", "abc"));
+        assertEquals(2, Strings.countMatchesIgnoreCase("Hello HELLO", "hello"));
+        // non-overlapping
+        assertEquals(2, Strings.countMatchesIgnoreCase("aAaA", "aa"));
+        // not found
+        assertEquals(0, Strings.countMatchesIgnoreCase("test", "xyz"));
+        // null/empty
+        assertEquals(0, Strings.countMatchesIgnoreCase(null, "test"));
+        assertEquals(0, Strings.countMatchesIgnoreCase("test", null));
+        assertEquals(0, Strings.countMatchesIgnoreCase("", "a"));
+        assertEquals(0, Strings.countMatchesIgnoreCase("test", ""));
+    }
+
+    // ----- G-1: removeAllIgnoreCase -----
+
+    @Test
+    public void testRemoveAllIgnoreCase() {
+        // normal / case-insensitive
+        assertEquals("qd", Strings.removeAllIgnoreCase("queued", "UE"));
+        assertEquals("bB", Strings.removeAllIgnoreCase("aAbBaA", "a"));
+        assertEquals("", Strings.removeAllIgnoreCase("abcABC", "abc"));
+        // not found
+        assertEquals("queued", Strings.removeAllIgnoreCase("queued", "zz"));
+        // null/empty
+        assertNull(Strings.removeAllIgnoreCase(null, "*"));
+        assertEquals("", Strings.removeAllIgnoreCase("", "*"));
+        assertEquals("abc", Strings.removeAllIgnoreCase("abc", null));
+        assertEquals("abc", Strings.removeAllIgnoreCase("abc", ""));
+    }
+
+    @Test
+    public void testRemoveAllIgnoreCase_FromIndex() {
+        // normal / case-insensitive with fromIndex
+        assertEquals("", Strings.removeAllIgnoreCase("ABCabcABC", 0, "abc"));
+        assertEquals("ABC", Strings.removeAllIgnoreCase("ABCabcABC", 3, "abc"));
+        assertEquals("hell WRLD", Strings.removeAllIgnoreCase("hello WORLD", 0, "O"));
+        // no match at or after index
+        assertEquals("test", Strings.removeAllIgnoreCase("test", 4, "es"));
+        // negative fromIndex treated as 0
+        assertEquals("bB", Strings.removeAllIgnoreCase("aAbBaA", -5, "a"));
+        // null/empty
+        assertNull(Strings.removeAllIgnoreCase(null, 0, "abc"));
+        assertEquals("", Strings.removeAllIgnoreCase("", 0, "abc"));
+        assertEquals("abc", Strings.removeAllIgnoreCase("abc", 0, null));
+    }
+
+    // ----- G-2: replaceLastIgnoreCase -----
+
+    @Test
+    public void testReplaceLastIgnoreCase() {
+        // normal / case-insensitive
+        assertEquals("aBz", Strings.replaceLastIgnoreCase("aBa", "A", "z"));
+        assertEquals("Hello Hi", Strings.replaceLastIgnoreCase("Hello HELLO", "hello", "Hi"));
+        assertEquals("abz", Strings.replaceLastIgnoreCase("aba", "a", "z"));
+        // not found
+        assertEquals("any", Strings.replaceLastIgnoreCase("any", "xyz", "z"));
+        // null/empty
+        assertNull(Strings.replaceLastIgnoreCase(null, "a", "z"));
+        assertEquals("", Strings.replaceLastIgnoreCase("", "a", "z"));
+        assertEquals("any", Strings.replaceLastIgnoreCase("any", null, "z"));
+        assertEquals("any", Strings.replaceLastIgnoreCase("any", "", "z"));
+    }
+
+    @Test
+    public void testReplaceLastIgnoreCase_StartIndex() {
+        // normal / case-insensitive with startIndexFromBack
+        assertEquals("aBaCaDzE", Strings.replaceLastIgnoreCase("aBaCaDaE", 8, "a", "z"));
+        assertEquals("aBaCzDaE", Strings.replaceLastIgnoreCase("aBaCaDaE", 5, "a", "z"));
+        assertEquals("Hello HELLO Hi", Strings.replaceLastIgnoreCase("Hello HELLO hello", 16, "hello", "Hi"));
+        // negative index -> unchanged
+        assertEquals("aBaCaDaE", Strings.replaceLastIgnoreCase("aBaCaDaE", -1, "a", "z"));
+        // null/empty
+        assertNull(Strings.replaceLastIgnoreCase(null, 5, "a", "z"));
+        assertEquals("", Strings.replaceLastIgnoreCase("", 0, "a", "z"));
+        assertEquals("any", Strings.replaceLastIgnoreCase("any", 3, null, "z"));
+    }
+
+    // ----- G-15: substringAfterIgnoreCase / substringBeforeIgnoreCase -----
+
+    @Test
+    public void testSubstringAfterIgnoreCase_StringDelimiter() {
+        // normal / case-insensitive
+        assertEquals("Example.com", Strings.substringAfterIgnoreCase("www.Example.com", "WWW."));
+        assertEquals("World", Strings.substringAfterIgnoreCase("Hello::World", "::"));
+        // not found
+        assertNull(Strings.substringAfterIgnoreCase("NoDelimiter", "xyz"));
+        // empty delimiter -> whole string
+        assertEquals("test", Strings.substringAfterIgnoreCase("test", ""));
+        // null
+        assertNull(Strings.substringAfterIgnoreCase(null, "test"));
+        assertNull(Strings.substringAfterIgnoreCase("test", null));
+    }
+
+    @Test
+    public void testSubstringBeforeIgnoreCase_StringDelimiter() {
+        // normal / case-insensitive
+        assertEquals("user", Strings.substringBeforeIgnoreCase("user@Example.com", "@"));
+        assertEquals("Hello", Strings.substringBeforeIgnoreCase("Hello World Java", " world"));
+        // not found
+        assertNull(Strings.substringBeforeIgnoreCase("no-delimiter", "@"));
+        // leading delimiter -> empty
+        assertEquals("", Strings.substringBeforeIgnoreCase("@leading", "@"));
+        // empty delimiter -> empty
+        assertEquals("", Strings.substringBeforeIgnoreCase("test", ""));
+        // null
+        assertNull(Strings.substringBeforeIgnoreCase(null, "@"));
+        assertNull(Strings.substringBeforeIgnoreCase("test", null));
+    }
+
+    // ----- G-4: toSnakeCase / toKebabCase delimiter normalization + (String, char) overloads -----
+
+    @Test
+    public void testToSnakeCase_NormalizesHyphen() {
+        // hyphen normalized to underscore (behavior change)
+        assertEquals("a_b", Strings.toSnakeCase("a-b"));
+        assertEquals("first_name", Strings.toSnakeCase("first-name"));
+        // existing underscores pass through unchanged
+        assertEquals("first_name", Strings.toSnakeCase("first_name"));
+        // case boundaries still convert
+        assertEquals("hello_world", Strings.toSnakeCase("helloWorld"));
+        // no duplicate underscores when hyphen sits at a case boundary
+        assertEquals("a_b", Strings.toSnakeCase("a-B"));
+    }
+
+    @Test
+    public void testToKebabCase_NormalizesUnderscore() {
+        // underscore normalized to hyphen (behavior change)
+        assertEquals("a-b", Strings.toKebabCase("a_b"));
+        assertEquals("first-name", Strings.toKebabCase("first_name"));
+        // existing hyphens pass through unchanged
+        assertEquals("first-name", Strings.toKebabCase("first-name"));
+        // case boundaries still convert
+        assertEquals("hello-world", Strings.toKebabCase("helloWorld"));
+        // no duplicate hyphens when underscore sits at a case boundary
+        assertEquals("a-b", Strings.toKebabCase("a_B"));
+    }
+
+    @Test
+    public void testToSnakeCase_SplitChar() {
+        // custom split char normalized to underscore
+        assertEquals("a_b", Strings.toSnakeCase("a.b", '.'));
+        assertEquals("first_name", Strings.toSnakeCase("first.name", '.'));
+        assertEquals("first_name", Strings.toSnakeCase("firstName", '.'));
+        // '-' split char also works (base method normalizes hyphens)
+        assertEquals("a_b", Strings.toSnakeCase("a-b", '-'));
+        // null/empty
+        assertNull(Strings.toSnakeCase(null, '.'));
+        assertEquals("", Strings.toSnakeCase("", '.'));
+    }
+
+    @Test
+    public void testToKebabCase_SplitChar() {
+        // custom split char normalized to hyphen
+        assertEquals("a-b", Strings.toKebabCase("a.b", '.'));
+        assertEquals("first-name", Strings.toKebabCase("first.name", '.'));
+        assertEquals("first-name", Strings.toKebabCase("firstName", '.'));
+        // '_' split char also works (base method normalizes underscores)
+        assertEquals("a-b", Strings.toKebabCase("a_b", '_'));
+        // null/empty
+        assertNull(Strings.toKebabCase(null, '.'));
+        assertEquals("", Strings.toKebabCase("", '.'));
+    }
+
+    // ----- NR-2: whitespace is a word delimiter across ALL five case converters -----
+
+    @Test
+    public void testCaseConverters_WhitespaceIsDelimiter() {
+        // camel/upperCamel already split on whitespace (via regex); now snake/kebab/screaming do too
+        assertEquals("firstName", Strings.toCamelCase("first name"));
+        assertEquals("FirstName", Strings.toUpperCamelCase("first name"));
+        assertEquals("first_name", Strings.toSnakeCase("first name"));
+        assertEquals("first-name", Strings.toKebabCase("first name"));
+        assertEquals("FIRST_NAME", Strings.toScreamingSnakeCase("first name"));
+
+        // capitalized words separated by a space
+        assertEquals("hello_world", Strings.toSnakeCase("Hello World"));
+        assertEquals("hello-world", Strings.toKebabCase("Hello World"));
+        assertEquals("HELLO_WORLD", Strings.toScreamingSnakeCase("Hello World"));
+
+        // consecutive whitespace collapses to a single separator (no duplicate separators)
+        assertEquals("hello_world", Strings.toSnakeCase("hello  world"));
+        assertEquals("hello-world", Strings.toKebabCase("hello  world"));
+        assertEquals("HELLO_WORLD", Strings.toScreamingSnakeCase("hello  world"));
+
+        // tab counts as whitespace
+        assertEquals("a_b", Strings.toSnakeCase("a\tb"));
+        assertEquals("a-b", Strings.toKebabCase("a\tb"));
+
+        // leading whitespace does not produce a leading separator
+        assertEquals("hello", Strings.toSnakeCase(" hello"));
+        assertEquals("hello", Strings.toKebabCase(" hello"));
+
+        // mixed whitespace + existing delimiter, still single separator
+        assertEquals("a_b_c", Strings.toSnakeCase("a-b c"));
+        assertEquals("a-b-c", Strings.toKebabCase("a_b c"));
+
+        // char overloads also handle whitespace (via delegation to the no-arg form)
+        assertEquals("a_b_c", Strings.toSnakeCase("a.b c", '.'));
+        assertEquals("a-b-c", Strings.toKebabCase("a.b c", '.'));
+        assertEquals("A_B_C", Strings.toScreamingSnakeCase("a.b c", '.'));
+    }
+
+    // ----- NR-1: substringBetween family note correctness (first-occurrence anchor; equal-length delimiter -> "") -----
+
+    @Test
+    public void testSubstringBetween_FamilyNoteFacts() {
+        // equal-length delimiter is accepted and yields "" (NOT null) for both the int and the func overload
+        assertEquals("", Strings.substringBetween("ab", "ab", 2));
+        assertEquals("", Strings.substringBetween("ab", "ab", i -> 2));
+        // (String begin-func, String end) anchors on the FIRST occurrence of the end delimiter
+        assertEquals("a", Strings.substringBetween("a=b=c", i -> -1, "="));
+    }
+
+    // ----- NR-6: indexOfDifference(String...) varargs example uses 3+ args -----
+
+    @Test
+    public void testIndexOfDifference_Varargs() {
+        assertEquals(7, Strings.indexOfDifference("i am a machine", "i am a robot", "i am a maniac"));
+        assertEquals(1, Strings.indexOfDifference("abc", "abc", "a"));
     }
 
 }

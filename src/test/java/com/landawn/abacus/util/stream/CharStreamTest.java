@@ -878,21 +878,7 @@ public class CharStreamTest extends TestBase {
     }
 
     @Test
-    public void testFindFirst_NoPredicate() {
-        CharStream stream = createCharStream('a', 'b', 'c');
-        OptionalChar result = stream.findFirst();
-        assertTrue(result.isPresent());
-        assertEquals('a', result.get());
-    }
-
-    @Test
     public void testFindFirstNoPredicate_EmptyStream() {
-        OptionalChar result = CharStream.empty().findFirst();
-        assertFalse(result.isPresent());
-    }
-
-    @Test
-    public void testFindFirst_NoPredicate_Empty() {
         OptionalChar result = CharStream.empty().findFirst();
         assertFalse(result.isPresent());
     }
@@ -929,20 +915,7 @@ public class CharStreamTest extends TestBase {
     }
 
     @Test
-    public void testFindAny_NoPredicate() {
-        CharStream stream = createCharStream('a', 'b', 'c');
-        OptionalChar result = stream.findAny();
-        assertTrue(result.isPresent());
-    }
-
-    @Test
     public void testFindAnyNoPredicate_EmptyStream() {
-        OptionalChar result = CharStream.empty().findAny();
-        assertFalse(result.isPresent());
-    }
-
-    @Test
-    public void testFindAny_NoPredicate_Empty() {
         OptionalChar result = CharStream.empty().findAny();
         assertFalse(result.isPresent());
     }
@@ -1251,13 +1224,6 @@ public class CharStreamTest extends TestBase {
     }
 
     @Test
-    public void testDebounce_EmptyStream() {
-        char[] result = CharStream.empty().debounce(5, com.landawn.abacus.util.Duration.ofSeconds(1)).toArray();
-
-        assertEquals(0, result.length);
-    }
-
-    @Test
     public void testStreamCreatedByEmpty() {
         assertEquals(0, CharStream.empty().count());
         assertEquals(0, CharStream.empty().skip(1).count());
@@ -1438,11 +1404,6 @@ public class CharStreamTest extends TestBase {
     }
 
     @Test
-    public void testDeferNullSupplier() {
-        assertThrows(IllegalArgumentException.class, () -> CharStream.defer(null));
-    }
-
-    @Test
     public void testOfNullable_Present() {
         CharStream stream = CharStream.ofNullable('a');
         assertArrayEquals(new char[] { 'a' }, stream.toArray());
@@ -1551,55 +1512,6 @@ public class CharStreamTest extends TestBase {
     }
 
     // ==================== debounce tests ====================
-
-    @Test
-    public void testDebounce_BasicFunctionality() {
-        // Allow 3 elements per 1 second window
-        char[] result = CharStream.of('a', 'b', 'c', 'd', 'e').debounce(3, com.landawn.abacus.util.Duration.ofSeconds(1)).toArray();
-
-        // Only first 3 elements should pass through within the window
-        assertEquals(3, result.length);
-        assertEquals('a', result[0]);
-        assertEquals('b', result[1]);
-        assertEquals('c', result[2]);
-    }
-
-    @Test
-    public void testDebounce_AllElementsPassWhenWithinLimit() {
-        // Allow 10 elements per window, but only 5 elements in stream
-        char[] result = CharStream.of('a', 'b', 'c', 'd', 'e').debounce(10, com.landawn.abacus.util.Duration.ofSeconds(1)).toArray();
-
-        // All elements should pass
-        assertEquals(5, result.length);
-    }
-
-    @Test
-    public void testDebounce_PreservesOrder() {
-        char[] result = CharStream.of('x', 'y', 'z', 'a', 'b').debounce(3, com.landawn.abacus.util.Duration.ofSeconds(1)).toArray();
-
-        assertEquals('x', result[0]);
-        assertEquals('y', result[1]);
-        assertEquals('z', result[2]);
-    }
-
-    @Test
-    public void testDebounce_WithSpecialCharacters() {
-        char[] result = CharStream.of('\n', '\t', ' ', 'a', 'b').debounce(3, com.landawn.abacus.util.Duration.ofSeconds(1)).toArray();
-
-        assertEquals(3, result.length);
-        assertEquals('\n', result[0]);
-        assertEquals('\t', result[1]);
-        assertEquals(' ', result[2]);
-    }
-
-    @Test
-    public void testDebounce_FromString() {
-        char[] result = CharStream.of("Hello World!").debounce(5, com.landawn.abacus.util.Duration.ofSeconds(1)).toArray();
-
-        assertEquals(5, result.length);
-        assertEquals("Hello", new String(result));
-    }
-
     @Test
     public void testStreamCreatedAfterFilter() {
         assertEquals(3, CharStream.of((char) 1, (char) 2, (char) 3, (char) 4, (char) 5).filter(i -> i > 2).count());
@@ -3295,46 +3207,6 @@ public class CharStreamTest extends TestBase {
     }
 
     @Test
-    public void testDebounce_SingleElement() {
-        char[] result = CharStream.of('z').debounce(1, com.landawn.abacus.util.Duration.ofMillis(100)).toArray();
-
-        assertEquals(1, result.length);
-        assertEquals('z', result[0]);
-    }
-
-    @Test
-    public void testDebounce_MaxWindowSizeOne() {
-        // Only 1 element allowed per window
-        char[] result = CharStream.of('a', 'b', 'c', 'd', 'e').debounce(1, com.landawn.abacus.util.Duration.ofSeconds(1)).toArray();
-
-        assertEquals(1, result.length);
-        assertEquals('a', result[0]);
-    }
-
-    @Test
-    public void testDebounce_WithLargeMaxWindowSize() {
-        char[] input = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ".toCharArray();
-
-        char[] result = CharStream.of(input).debounce(26, com.landawn.abacus.util.Duration.ofSeconds(10)).toArray();
-
-        assertEquals(26, result.length);
-    }
-
-    @Test
-    public void testDebounce_ChainedWithOtherOperations() {
-        char[] result = CharStream.of('a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j')
-                .filter(c -> c >= 'b' && c <= 'f') // b, c, d, e, f
-                .debounce(3, com.landawn.abacus.util.Duration.ofSeconds(1)) // b, c, d
-                .map(c -> Character.toUpperCase(c)) // B, C, D
-                .toArray();
-
-        assertEquals(3, result.length);
-        assertEquals('B', result[0]);
-        assertEquals('C', result[1]);
-        assertEquals('D', result[2]);
-    }
-
-    @Test
     public void testOfCharArray() {
         CharStream stream1 = createCharStream('a', 'b', 'c');
         assertEquals(Arrays.asList('a', 'b', 'c'), stream1.boxed().toList());
@@ -3618,28 +3490,6 @@ public class CharStreamTest extends TestBase {
         CharStream stream = CharStream.of(tempFile);
         assertNotNull(stream);
         assertArrayEquals(new char[] { 't', 'e', 's', 't' }, stream.toArray());
-    }
-
-    @Test
-    public void testDebounce_ThrowsExceptionForNonPositiveMaxWindowSize() {
-        assertThrows(IllegalArgumentException.class, () -> {
-            CharStream.of('a', 'b', 'c').debounce(0, com.landawn.abacus.util.Duration.ofSeconds(1)).toArray();
-        });
-
-        assertThrows(IllegalArgumentException.class, () -> {
-            CharStream.of('a', 'b', 'c').debounce(-1, com.landawn.abacus.util.Duration.ofSeconds(1)).toArray();
-        });
-    }
-
-    @Test
-    public void testDebounce_ThrowsExceptionForNonPositiveDuration() {
-        assertThrows(IllegalArgumentException.class, () -> {
-            CharStream.of('a', 'b', 'c').debounce(5, com.landawn.abacus.util.Duration.ofMillis(0)).toArray();
-        });
-
-        assertThrows(IllegalArgumentException.class, () -> {
-            CharStream.of('a', 'b', 'c').debounce(5, com.landawn.abacus.util.Duration.ofMillis(-100)).toArray();
-        });
     }
 
     @Test
@@ -4336,11 +4186,6 @@ public class CharStreamTest extends TestBase {
     }
 
     @Test
-    public void testGenerateNullSupplier() {
-        assertThrows(IllegalArgumentException.class, () -> CharStream.generate(null));
-    }
-
-    @Test
     public void testConcat_VarArgsArrays() {
         char[] a1 = { 'a', 'b' };
         char[] a2 = { 'c', 'd' };
@@ -4951,13 +4796,6 @@ public class CharStreamTest extends TestBase {
     }
 
     @Test
-    public void testStep_One() {
-        CharStream stream = createCharStream('a', 'b', 'c');
-        char[] result = stream.step(1).toArray();
-        assertArrayEquals(new char[] { 'a', 'b', 'c' }, result);
-    }
-
-    @Test
     public void testStep_InvalidStep() {
         assertThrows(IllegalArgumentException.class, () -> {
             createCharStream('a').step(0);
@@ -5540,4 +5378,43 @@ public class CharStreamTest extends TestBase {
         assertThrows(IllegalStateException.class, () -> stream.toArray());
     }
 
+    @Test
+    public void testDebounce_emptyEmitsNothing() {
+        org.junit.jupiter.api.Assertions.assertEquals(0, CharStream.empty().debounce(com.landawn.abacus.util.Duration.ofSeconds(1)).toArray().length);
+    }
+
+    @Test
+    public void testDebounce_singleElementSurvives() {
+        org.junit.jupiter.api.Assertions.assertArrayEquals(new char[] { (char) 42 },
+                CharStream.of((char) 42).debounce(com.landawn.abacus.util.Duration.ofSeconds(1)).toArray());
+    }
+
+    @Test
+    public void testDebounce_coldStreamEmitsOnlyLastElement() {
+        // A cold in-memory stream yields all elements with ~0 inter-arrival gap, so every element
+        // except the last is superseded within the quiet window; only the final element survives.
+        org.junit.jupiter.api.Assertions.assertArrayEquals(new char[] { (char) 5 },
+                CharStream.of((char) 1, (char) 2, (char) 3, (char) 4, (char) 5).debounce(com.landawn.abacus.util.Duration.ofSeconds(1)).toArray());
+    }
+
+    @Test
+    public void testDebounce_slowSourceAllSurviveWhenGapAtLeastDuration() {
+        // delay() makes each element arrive >= 60ms after the previous; with a 20ms quiet window
+        // every element clears the window and survives.
+        org.junit.jupiter.api.Assertions.assertArrayEquals(new char[] { (char) 1, (char) 2, (char) 3 },
+                CharStream.of((char) 1, (char) 2, (char) 3)
+                        .delay(com.landawn.abacus.util.Duration.ofMillis(60))
+                        .debounce(com.landawn.abacus.util.Duration.ofMillis(20))
+                        .toArray());
+    }
+
+    @Test
+    public void testDebounce_invalidDurationThrows() {
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class,
+                () -> CharStream.of((char) 1, (char) 2, (char) 3).debounce((com.landawn.abacus.util.Duration) null).toArray());
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class,
+                () -> CharStream.of((char) 1, (char) 2, (char) 3).debounce(com.landawn.abacus.util.Duration.ofMillis(0)).toArray());
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class,
+                () -> CharStream.of((char) 1, (char) 2, (char) 3).debounce(com.landawn.abacus.util.Duration.ofMillis(-100)).toArray());
+    }
 }

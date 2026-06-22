@@ -21,6 +21,14 @@ package com.landawn.abacus.http;
  * <p>This enum is used to define how data should be serialized/deserialized
  * and compressed/decompressed during HTTP communication.</p>
  *
+ * <p><b>Matrix coverage (intentional limitations):</b> Compression variants
+ * ({@code _LZ4}/{@code _SNAPPY}/{@code _GZIP}/{@code _BR}) are provided only for the
+ * {@code JSON} and {@code XML} serialization formats. {@link #FORM_URL_ENCODED} and
+ * {@link #KRYO} intentionally expose only their base (uncompressed) members; combine them
+ * with the compression-only members if needed. Brotli ({@code _BR}/{@link #BR}) is supported
+ * on the <i>decode</i> (response) path only — see {@link HttpUtil#wrapOutputStream}, which
+ * rejects Brotli on the encode (request) path because there is no bundled Brotli encoder.</p>
+ *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * ContentFormat format = ContentFormat.JSON_GZIP;

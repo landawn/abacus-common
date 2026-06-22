@@ -144,4 +144,17 @@ public class GuavaMultisetTypeTest extends TestBase {
         assertNotNull(typeName);
         assertTrue(typeName.contains("Multiset"));
     }
+
+    // --- regression tests for 2026-06-10 deep-review fixes ---
+
+    @Test
+    public void testValueOfImmutableMultisetTarget() {
+        // regression: immutable targets are abstract, so valueOf returned a mutable HashMultiset
+        // -> ClassCastException when assigned to the declared ImmutableMultiset
+        final Type<com.google.common.collect.ImmutableMultiset<String>> t = TypeFactory.getType("com.google.common.collect.ImmutableMultiset<String>");
+        final com.google.common.collect.ImmutableMultiset<String> ms = t.valueOf("{\"apple\":2,\"pear\":1}");
+
+        org.junit.jupiter.api.Assertions.assertEquals(2, ms.count("apple"));
+        org.junit.jupiter.api.Assertions.assertEquals(1, ms.count("pear"));
+    }
 }

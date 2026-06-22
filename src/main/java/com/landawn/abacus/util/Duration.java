@@ -465,6 +465,7 @@ public final class Duration implements Comparable<Duration>, Immutable {
      * @return a {@link Duration} representing the time difference from {@code start} to {@code end},
      *         positive if {@code end} is after {@code start}, negative if {@code end} is before {@code start}.
      * @throws IllegalArgumentException if either date is {@code null}.
+     * @throws ArithmeticException if the millisecond difference between the two dates overflows a {@code long}.
      * @see #between(java.util.Calendar, java.util.Calendar)
      * @see #between(java.time.temporal.Temporal, java.time.temporal.Temporal)
      * @see java.time.Duration#between(java.time.temporal.Temporal, java.time.temporal.Temporal)
@@ -473,7 +474,7 @@ public final class Duration implements Comparable<Duration>, Immutable {
         N.checkArgNotNull(start, "Start Date cannot be null");
         N.checkArgNotNull(end, "End Date cannot be null");
 
-        return Duration.ofMillis(end.getTime() - start.getTime());
+        return Duration.ofMillis(Numbers.subtractExact(end.getTime(), start.getTime()));
     }
 
     /**
@@ -518,6 +519,7 @@ public final class Duration implements Comparable<Duration>, Immutable {
      * @return a {@link Duration} representing the time difference from {@code start} to {@code end},
      *         positive if {@code end} is after {@code start}, negative if {@code end} is before {@code start}.
      * @throws IllegalArgumentException if either calendar is {@code null}.
+     * @throws ArithmeticException if the millisecond difference between the two calendars overflows a {@code long}.
      * @see #between(java.util.Date, java.util.Date)
      * @see #between(java.time.temporal.Temporal, java.time.temporal.Temporal)
      * @see java.time.Duration#between(java.time.temporal.Temporal, java.time.temporal.Temporal)
@@ -526,7 +528,7 @@ public final class Duration implements Comparable<Duration>, Immutable {
         N.checkArgNotNull(start, "Start Calendar cannot be null");
         N.checkArgNotNull(end, "End Calendar cannot be null");
 
-        return Duration.ofMillis(end.getTimeInMillis() - start.getTimeInMillis());
+        return Duration.ofMillis(Numbers.subtractExact(end.getTimeInMillis(), start.getTimeInMillis()));
     }
 
     /**
@@ -1016,6 +1018,10 @@ public final class Duration implements Comparable<Duration>, Immutable {
             throw new ArithmeticException("Cannot divide by zero");
         } else if (divisor == 1) {
             return this;
+        } else if (divisor == -1) {
+            // Long.MIN_VALUE / -1 overflows silently (JLS 15.17.2); negated() routes through
+            // checked multiplication and throws ArithmeticException per the class contract.
+            return negated();
         }
 
         return create(milliseconds / divisor);
@@ -1208,6 +1214,107 @@ public final class Duration implements Comparable<Duration>, Immutable {
     }
 
     /**
+     * Gets the number of days in this duration (whole days component).
+     * <p>
+     * This is identical to {@link #toDays()} and is provided for naming symmetry with the part-based accessors
+     * {@link #toHoursPart()}, {@link #toMinutesPart()}, {@link #toSecondsPart()}, and {@link #toMillisPart()}.
+     * Days are the largest unit handled by this class, so there is no enclosing unit to take a remainder against.
+     * </p>
+     *
+     * @return the number of whole days in the duration, may be negative.
+     * @see #toDays()
+     * @see java.time.Duration#toDaysPart()
+     */
+    public long toDaysPart() {
+        return milliseconds / MILLIS_PER_DAY;
+    }
+
+    /**
+     * Gets the number of hours within a day in this duration (the part of the hour count that does not form a whole day).
+     * <p>
+     * The returned value is in the range -23 to 23 (inclusive). For example, a duration of 25 hours returns 1.
+     * This mirrors {@code java.time.Duration.toHoursPart()} (Java 9+) and is useful when formatting a duration
+     * into day/hour/minute/second components.
+     * </p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Duration d = Duration.ofDays(1).plusHours(2);
+     * long hoursPart = d.toHoursPart();  // returns 2 (not 26)
+     * }</pre>
+     *
+     * @return the hours-of-day part of the duration, from -23 to 23.
+     * @see #toHours()
+     * @see java.time.Duration#toHoursPart()
+     */
+    public int toHoursPart() {
+        return (int) (toHours() % 24);
+    }
+
+    /**
+     * Gets the number of minutes within an hour in this duration (the part of the minute count that does not form a whole hour).
+     * <p>
+     * The returned value is in the range -59 to 59 (inclusive). This mirrors {@code java.time.Duration.toMinutesPart()}
+     * (Java 9+) and is useful when formatting a duration into hour/minute/second components.
+     * </p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Duration d = Duration.ofHours(1).plusMinutes(30);
+     * long minutesPart = d.toMinutesPart();  // returns 30 (not 90)
+     * }</pre>
+     *
+     * @return the minutes-of-hour part of the duration, from -59 to 59.
+     * @see #toMinutes()
+     * @see java.time.Duration#toMinutesPart()
+     */
+    public int toMinutesPart() {
+        return (int) (toMinutes() % 60);
+    }
+
+    /**
+     * Gets the number of seconds within a minute in this duration (the part of the second count that does not form a whole minute).
+     * <p>
+     * The returned value is in the range -59 to 59 (inclusive). This mirrors {@code java.time.Duration.toSecondsPart()}
+     * (Java 9+) and is useful when formatting a duration into minute/second components.
+     * </p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Duration d = Duration.ofMinutes(1).plusSeconds(15);
+     * long secondsPart = d.toSecondsPart();  // returns 15 (not 75)
+     * }</pre>
+     *
+     * @return the seconds-of-minute part of the duration, from -59 to 59.
+     * @see #toSeconds()
+     * @see java.time.Duration#toSecondsPart()
+     */
+    public int toSecondsPart() {
+        return (int) (toSeconds() % 60);
+    }
+
+    /**
+     * Gets the number of milliseconds within a second in this duration (the part of the millisecond count that does not form a whole second).
+     * <p>
+     * The returned value is in the range -999 to 999 (inclusive). This mirrors {@code java.time.Duration.toMillisPart()}
+     * (Java 9+) and is useful when formatting a duration into second/millisecond components.
+     * </p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Duration d = Duration.ofSeconds(1).plusMillis(500);
+     * long millisPart = d.toMillisPart();  // returns 500 (not 1500)
+     * }</pre>
+     *
+     * @return the milliseconds-of-second part of the duration, from -999 to 999.
+     * @see #toMillis()
+     * @see java.time.Duration#toMillisPart()
+     */
+    public int toMillisPart() {
+        return (int) (milliseconds % MILLIS_PER_SECOND);
+    }
+
+    /**
      * Converts this {@code Duration} to a {@code java.time.Duration}.
      * <p>
      * This method creates a new {@code java.time.Duration} instance representing the same amount of time
@@ -1231,8 +1338,8 @@ public final class Duration implements Comparable<Duration>, Immutable {
      * Compares this duration to another duration based on their length.
      * <p>
      * The comparison is based on the total length of the durations in milliseconds.
-     * A duration is considered less than another if it represents a shorter amount of time,
-     * regardless of whether the durations are positive or negative.
+     * The comparison uses the signed millisecond values: any negative duration compares
+     * less than any positive duration.
      * </p>
      *
      * <p><b>Usage Examples:</b></p>

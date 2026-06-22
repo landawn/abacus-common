@@ -252,7 +252,7 @@ final class ReflectASM<T> {
 
     /**
      * Retrieves the value of a field from the target object.
-     * The field must be public and non-static.
+     * The field must be non-private and non-static.
      *
      * <p>This method uses bytecode-generated accessors for high-performance field access.
      * The returned value is cast to the specified type parameter.</p>
@@ -298,7 +298,7 @@ final class ReflectASM<T> {
 
     /**
      * Sets the value of a field on the target object.
-     * The field must be public, non-static, and non-final.
+     * The field must be non-private, non-static, and non-final.
      *
      * <p>This method returns the same ReflectASM instance, allowing for method chaining
      * to set multiple fields in a fluent manner.</p>
@@ -349,7 +349,7 @@ final class ReflectASM<T> {
 
     /**
      * Invokes a method on the target object and returns the result.
-     * The method must be public and the correct number and types of arguments must be provided.
+     * The method must be non-private and the correct number and types of arguments must be provided.
      *
      * <p>This method uses bytecode generation for high-performance method invocation.
      * If the method returns void, {@code null} is returned. Otherwise, the return value is
@@ -390,7 +390,7 @@ final class ReflectASM<T> {
      * @param methodName the name of the method to invoke; must not be {@code null}
      * @param args the arguments to pass to the method; may be omitted for no-argument methods
      * @return the return value of the method cast to {@code V}, or {@code null} for {@code void} methods
-     * @throws RuntimeException if the method does not exist, is not public, or throws an exception
+     * @throws RuntimeException if the method does not exist, is private, or throws an exception
      *         during invocation
      * @throws ClassCastException if the actual return type cannot be cast to {@code V}
      */
@@ -442,13 +442,85 @@ final class ReflectASM<T> {
      * @param methodName the name of the method to invoke; must not be {@code null}
      * @param args the arguments to pass to the method; may be omitted for no-argument methods
      * @return this {@code ReflectASM} instance for method chaining
-     * @throws RuntimeException if the method does not exist, is not public, or throws an exception
+     * @throws RuntimeException if the method does not exist, is private, or throws an exception
      *         during invocation
      */
     public ReflectASM<T> call(final String methodName, final Object... args) {
         invoke(methodName, args);
 
         return this;
+    }
+
+    /**
+     * Checks whether ReflectASM can resolve a method with the specified name and the specified
+     * number of arguments. Only non-private methods declared in the class or its superclasses
+     * (excluding {@code java.lang.Object}) are visible to ReflectASM, and {@link MethodAccess}
+     * resolves the convenience {@code invoke(Object, String, Object...)} call by method name and
+     * argument count.
+     *
+     * <p>This performs the same resolution check without invoking anything, so callers can fall
+     * back to standard reflection safely; catching the resolution exception around an actual
+     * invocation would be unsafe because the invoked method itself may throw
+     * {@code IllegalArgumentException} after side effects have already happened.</p>
+     *
+     * @param methodName the name of the method to look up
+     * @param args the arguments the method would be invoked with; both the count and the runtime
+     *        types are used to make sure ReflectASM would dispatch to the same overload that
+     *        standard, type-aware reflection would
+     * @return {@code true} if exactly one visible method matches the name and argument count and its
+     *         parameter types are compatible with the given arguments, {@code false} otherwise
+     */
+    boolean canInvoke(final String methodName, final Object... args) {
+        try {
+            final MethodAccess methodAccess = getMethodAccess(cls);
+            final int argCount = args == null ? 0 : args.length;
+            final String[] methodNames = methodAccess.getMethodNames();
+            final Class<?>[][] parameterTypes = methodAccess.getParameterTypes();
+
+            int matchCount = 0;
+            int matchIndex = -1;
+
+            for (int i = 0, n = methodNames.length; i < n; i++) {
+                if (methodNames[i].equals(methodName) && parameterTypes[i].length == argCount) {
+                    matchCount++;
+                    matchIndex = i;
+                }
+            }
+
+            // MethodAccess resolves the convenience invoke(Object, String, Object...) by method name
+            // and argument count only - it ignores the argument types. So it is only safe to use the
+            // ReflectASM fast path when there is exactly one visible method with that name and count
+            // AND its parameter types are compatible with the provided arguments. When more than one
+            // overload matches the name+count (e.g. f(int) vs f(String)), or the single visible match
+            // is not type-compatible (e.g. a private/inherited overload is the real target), the
+            // caller must fall back to the type-aware standard-reflection path to pick the right one.
+            return matchCount == 1 && parametersAssignable(parameterTypes[matchIndex], args);
+        } catch (final RuntimeException e) {
+            // MethodAccess generation failed for this class; let the caller use standard reflection.
+            return false;
+        }
+    }
+
+    private static boolean parametersAssignable(final Class<?>[] paramTypes, final Object[] args) {
+        for (int i = 0, len = paramTypes.length; i < len; i++) {
+            final Object arg = args[i];
+
+            if (arg == null) {
+                // A null argument fits any reference parameter; a primitive parameter cannot accept
+                // null, so defer to standard reflection in that case.
+                if (paramTypes[i].isPrimitive()) {
+                    return false;
+                }
+            } else if (!wrap(paramTypes[i]).isAssignableFrom(arg.getClass())) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    private static Class<?> wrap(final Class<?> cls) {
+        return ClassUtil.isPrimitiveType(cls) ? ClassUtil.wrap(cls) : cls;
     }
 
     private FieldAccess getFieldAccess() {

@@ -1293,4 +1293,14 @@ public class SuppliersTest extends TestBase {
         Assertions.assertNotSame(e1, e2);
         Assertions.assertTrue(e1 instanceof NoSuchElementException);
     }
+
+    // --- regression tests for 2026-06-10 deep-review fixes ---
+
+    @Test
+    public void testOfCollectionConcurrentSkipListSetKeepsType() {
+        // regression: the SortedSet branch caught ConcurrentSkipListSet and silently downgraded it
+        // to a non-thread-safe TreeSet
+        Assertions.assertEquals(java.util.concurrent.ConcurrentSkipListSet.class,
+                Suppliers.ofCollection(java.util.concurrent.ConcurrentSkipListSet.class).get().getClass());
+    }
 }

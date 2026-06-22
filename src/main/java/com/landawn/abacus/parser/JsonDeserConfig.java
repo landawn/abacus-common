@@ -101,6 +101,8 @@ public class JsonDeserConfig extends DeserializationConfig<JsonDeserConfig> {
      * Sets whether {@code null} or empty values encountered in the JSON source should be ignored
      * during deserialization. When {@code true}, a JSON {@code null} or empty string will not
      * overwrite the corresponding property on the target bean, leaving it at its existing value.
+     * It also applies to Map and Collection targets: entries/elements whose value is {@code null}
+     * or empty (CharSequence/Array/Collection/Map) are skipped.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -235,11 +237,12 @@ public class JsonDeserConfig extends DeserializationConfig<JsonDeserConfig> {
      *
      * <p>The handler receives two parameters:</p>
      * <ol>
-     *   <li>The collection (or Map) being populated</li>
-     *   <li>The current element (or Map.Entry) to be added</li>
+     *   <li>The collection being populated</li>
+     *   <li>The current element to be added</li>
      * </ol>
      *
-     * <p>Property names support dot notation for nested properties.</p>
+     * <p>The handler is looked up by the immediate property or map-key name under which the JSON
+     * array appears; dotted paths are not resolved.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -250,14 +253,14 @@ public class JsonDeserConfig extends DeserializationConfig<JsonDeserConfig> {
      *     }
      * });
      *
-     * // For nested properties
-     * config.setPropHandler("account.devices.model", (collection, model) -> {
+     * // Matched by the local property name, at any nesting depth
+     * config.setPropHandler("model", (collection, model) -> {
      *     collection.add(model.toString().toUpperCase());
      * });
      * }</pre>
      *
-     * @param propName the property name (supports nested properties like "account.devices.model")
-     * @param handler the handler to process collection values (first parameter is Collection or Map, second is current element/entry)
+     * @param propName the local property or map-key name under which the JSON array appears (dotted paths are not resolved)
+     * @param handler the handler invoked for each element of a JSON array property (first parameter is the Collection being populated, second is the current element)
      * @return {@code this} instance for method chaining
      * @throws IllegalArgumentException if {@code propName} is empty or {@code handler} is {@code null}
      */

@@ -599,6 +599,10 @@ public final class Comparators {
      * Null values are considered less than {@code non-null} values (nulls first).
      * This method is equivalent to {@link #nullsFirst()}.
      *
+     * <p><b>Note:</b> Unlike {@link java.util.Comparator#naturalOrder()}, which throws a
+     * {@link NullPointerException} when either argument is {@code null}, this comparator is
+     * null-safe and treats {@code null} as less than any {@code non-null} value.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<String> list = Arrays.asList("banana", null, "apple", "cherry");
@@ -1438,6 +1442,10 @@ public final class Comparators {
      * Returns a comparator for {@link Map.Entry} objects that compares entries by their keys
      * using the keys' natural ordering. Keys must implement {@link Comparable}.
      *
+     * <p><b>Note:</b> The returned comparator throws a {@link NullPointerException} if either
+     * entry being compared is {@code null} (a {@code null} key compares as less than a
+     * {@code non-null} key, but a {@code null} entry is not tolerated).</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Map<String, Integer> scores = N.asMap("Bob", 80, "Alice", 95);
@@ -1459,6 +1467,10 @@ public final class Comparators {
      * Returns a comparator for {@link Map.Entry} objects that compares entries by their values
      * using the values' natural ordering. Values must implement {@link Comparable}.
      *
+     * <p><b>Note:</b> The returned comparator throws a {@link NullPointerException} if either
+     * entry being compared is {@code null} (a {@code null} value compares as less than a
+     * {@code non-null} value, but a {@code null} entry is not tolerated).</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Map<String, Integer> scores = N.asMap("Bob", 80, "Alice", 95);
@@ -1479,6 +1491,10 @@ public final class Comparators {
     /**
      * Returns a comparator for {@link Map.Entry} objects that compares entries by their keys
      * using the specified comparator.
+     *
+     * <p><b>Note:</b> The returned comparator throws a {@link NullPointerException} if either
+     * entry being compared is {@code null} (null-key handling is delegated to the supplied
+     * comparator, but a {@code null} entry is not tolerated).</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1504,6 +1520,10 @@ public final class Comparators {
     /**
      * Returns a comparator for {@link Map.Entry} objects that compares entries by their values
      * using the specified comparator.
+     *
+     * <p><b>Note:</b> The returned comparator throws a {@link NullPointerException} if either
+     * entry being compared is {@code null} (null-value handling is delegated to the supplied
+     * comparator, but a {@code null} entry is not tolerated).</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1552,6 +1572,11 @@ public final class Comparators {
      * Returns a comparator that compares arrays by their length.
      * This works with any array type (primitive or object arrays).
      * Null arrays are treated as having length 0.
+     *
+     * <p><b>Note:</b> The type parameter {@code <T>} is unbounded, so this method does not
+     * enforce an array type at compile time. If a {@code non-null}, non-array object is
+     * compared, the returned comparator throws an {@link IllegalArgumentException} at
+     * compare time.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1653,7 +1678,8 @@ public final class Comparators {
      * natural ordering. The arrays are compared lexicographically, with shorter arrays
      * considered less than longer arrays when all compared elements are equal.
      *
-     * <p>This method is equivalent to calling {@code comparingArray(Comparator.naturalOrder())}
+     * <p>This method is equivalent to calling {@code comparingArray(Comparators.naturalOrder())}
+     * (null elements are treated as the minimum value)
      * but is type-safe for arrays of Comparable elements.</p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -2009,8 +2035,13 @@ public final class Comparators {
      * Comparator<Map<String, Integer>> cmp = Comparators.comparingMapByKey(
      *     String.CASE_INSENSITIVE_ORDER
      * );
-     * Map<String, Integer> map1 = Map.of("apple", 1, "BANANA", 2);
-     * Map<String, Integer> map2 = Map.of("APPLE", 1, "banana", 2, "cherry", 3);
+     * Map<String, Integer> map1 = new LinkedHashMap<>();
+     * map1.put("apple", 1);
+     * map1.put("BANANA", 2);
+     * Map<String, Integer> map2 = new LinkedHashMap<>();
+     * map2.put("APPLE", 1);
+     * map2.put("banana", 2);
+     * map2.put("cherry", 3);
      * int result = cmp.compare(map1, map2);   // returns negative (smaller size)
      * }</pre>
      *
@@ -2162,7 +2193,7 @@ public final class Comparators {
     public static <T> Comparator<T> comparingBeanByProps(final Collection<String> propNamesToCompare) throws IllegalArgumentException {
         N.checkArgNotNull(propNamesToCompare, cs.propNamesToCompare);
 
-        return (a, b) -> Beans.compareByProps(a, b, propNamesToCompare);
+        return (a, b) -> N.compareByProps(a, b, propNamesToCompare);
     }
 
     /**
@@ -2472,6 +2503,37 @@ public final class Comparators {
         N.checkArgNotNull(keyExtractor);
 
         return (a, b) -> REVERSED_ORDER.compare(keyExtractor.apply(a), keyExtractor.apply(b));
+    }
+
+    /**
+     * Returns a comparator that compares objects by extracting a key using the provided function
+     * and comparing the keys with the specified comparator in reverse order. This is the reversed
+     * twin of {@link #comparingBy(Function, Comparator)}: it is equivalent to
+     * {@code comparingBy(keyExtractor, keyComparator).reversed()} but documents the reversed intent
+     * directly.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<Person> people = getPeople();
+     * // Sort people by name length, longest first
+     * people.sort(Comparators.reversedComparingBy(Person::getName,
+     *     Comparator.comparingInt(String::length)));
+     * }</pre>
+     *
+     * @param <T> the type of objects to compare
+     * @param <U> the type of the keys extracted for comparison
+     * @param keyExtractor the function to extract keys from objects; must not be {@code null}
+     * @param keyComparator the comparator used to compare extracted keys; must not be {@code null}
+     * @return a comparator that compares by extracted keys in reverse order
+     * @throws IllegalArgumentException if {@code keyExtractor} or {@code keyComparator} is {@code null}
+     * @see #comparingBy(Function, Comparator)
+     */
+    public static <T, U> Comparator<T> reversedComparingBy(final Function<? super T, ? extends U> keyExtractor, final Comparator<? super U> keyComparator)
+            throws IllegalArgumentException {
+        N.checkArgNotNull(keyExtractor);
+        N.checkArgNotNull(keyComparator);
+
+        return (a, b) -> keyComparator.compare(keyExtractor.apply(b), keyExtractor.apply(a));
     }
 
     /**

@@ -15,9 +15,9 @@
  */
 package com.landawn.abacus.util.function;
 
-import java.util.Objects;
-
 import com.landawn.abacus.util.Throwables;
+import com.landawn.abacus.util.N;
+import com.landawn.abacus.util.cs;
 
 /**
  * A functional interface that represents a function that accepts four arguments and
@@ -46,13 +46,12 @@ public interface QuadFunction<A, B, C, D, R> extends Throwables.QuadFunction<A, 
      * Applies this function to the given arguments.
      *
      * <p>This method takes four arguments of types A, B, C, and D as input and
-     * produces a result of type R. The function should be deterministic, meaning
-     * that for the same inputs, it should always produce the same output.
+     * produces a result of type R.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * QuadFunction<Integer, Integer, Integer, Integer, Integer> sum4 =
-     *     (a, b, c, d) -> a + b + c + d;
+     *     (a, b, c, d) -> Math.addExact(Math.addExact(a, b), Math.addExact(c, d));
      *
      * QuadFunction<String, String, String, String, Address> createAddress =
      *     (street, city, state, zip) -> new Address(street, city, state, zip);
@@ -86,7 +85,7 @@ public interface QuadFunction<A, B, C, D, R> extends Throwables.QuadFunction<A, 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * QuadFunction<Integer, Integer, Integer, Integer, Integer> sum4 =
-     *     (a, b, c, d) -> a + b + c + d;
+     *     (a, b, c, d) -> Math.addExact(Math.addExact(a, b), Math.addExact(c, d));
      * Function<Integer, String> intToString =
      *     num -> "Total: " + num;
      *
@@ -111,27 +110,26 @@ public interface QuadFunction<A, B, C, D, R> extends Throwables.QuadFunction<A, 
      * @param after the function to apply after this function is applied. Must not be {@code null}.
      * @return a composed function that first applies this function and then
      *         applies the {@code after} function
-     * @throws NullPointerException if {@code after} is null
+     * @throws IllegalArgumentException if {@code after} is null
      */
     default <V> QuadFunction<A, B, C, D, V> andThen(final java.util.function.Function<? super R, ? extends V> after) {
-        Objects.requireNonNull(after);
+        N.checkArgNotNull(after, cs.after);
         return (a, b, c, d) -> after.apply(apply(a, b, c, d));
     }
 
     /**
-     * Converts this QuadFunction to a Throwables.QuadFunction that can throw checked exceptions.
-     * This method is useful when you need to use this function in a context that expects
-     * a Throwables.QuadFunction with a specific exception type.
+     * Returns this function as a {@link Throwables.QuadFunction} view.
+     * This method does not translate exceptions or make the original implementation capable of
+     * throwing new checked exceptions; the exception type parameter is for target-type compatibility.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * QuadFunction<String, Integer, Boolean, Date, String> function = (s, i, b, d) -> { ... };
-     * var throwableFunction =
-     *     function.toThrowable();
+     * QuadFunction<String, Integer, Boolean, Long, String> function = (s, i, b, id) -> s + i + b + id;
+     * Throwables.QuadFunction<String, Integer, Boolean, Long, String, RuntimeException> throwableFunction = function.toThrowable();
      * }</pre>
      *
-     * @param <E> the type of exception that the returned function may throw
-     * @return a Throwables.QuadFunction that wraps this function
+     * @param <E> the target exception type for compatibility with {@code Throwables.QuadFunction}
+     * @return this function viewed as a {@code Throwables.QuadFunction} by unchecked cast
      */
     default <E extends Throwable> Throwables.QuadFunction<A, B, C, D, R, E> toThrowable() {
         return (Throwables.QuadFunction<A, B, C, D, R, E>) this;

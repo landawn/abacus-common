@@ -926,10 +926,20 @@ public class ImmutableListTest extends TestBase {
         Assertions.assertTrue(reversed.equals(reversed));
         Assertions.assertFalse(reversed.equals("not a list"));
 
-        // NOTE: ImmutableCollection.equals(other) on a *forward* list still compares
-        // raw backing stores as a fast path, so forwardList.equals(reversedView) is
-        // a pre-existing asymmetry that is intentionally NOT addressed here (changing
-        // the shared base class broke the general ImmutableCollection contract).
+        // The forward-side asymmetry is now fixed by the isReorderedView() hook: the raw
+        // backing-store fast path is skipped when the ARGUMENT is a reordered view, so the
+        // general ImmutableCollection unwrap contract for plain instances is untouched.
+        Assertions.assertFalse(forward.equals(reversed));
+        Assertions.assertTrue(ImmutableList.of(3, 2, 1).equals(reversed));
+    }
+
+    // --- regression tests for 2026-06-10 deep-review fixes ---
+
+    @Test
+    public void testReversedToStringReflectsIterationOrder() {
+        // regression: ReverseImmutableList inherited toString() from the (forward-ordered)
+        // backing collection and printed "[1, 2, 3]"
+        Assertions.assertEquals("[3, 2, 1]", ImmutableList.of(1, 2, 3).reversed().toString());
     }
 
 }

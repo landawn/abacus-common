@@ -103,8 +103,8 @@ public interface Parser<SC extends SerializationConfig<?>, DC extends Deserializ
      * Serializes an object to a file.
      *
      * <p>This method uses default serialization settings. The file will be created
-     * if it doesn't exist, or overwritten if it does. Parent directories must exist
-     * or an exception will be thrown.</p>
+     * if it doesn't exist, or overwritten if it does. Missing parent directories
+     * are created automatically.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -113,7 +113,7 @@ public interface Parser<SC extends SerializationConfig<?>, DC extends Deserializ
      *
      * @param obj the object to serialize (may be {@code null})
      * @param output the output file to write to (must not be {@code null})
-     * @throws UncheckedIOException if an I/O error occurs during file writing, or if parent directories don't exist
+     * @throws UncheckedIOException if an I/O error occurs during file writing
      */
     void serialize(Object obj, File output) throws UncheckedIOException;
 
@@ -121,7 +121,7 @@ public interface Parser<SC extends SerializationConfig<?>, DC extends Deserializ
      * Serializes an object to a file using custom configuration.
      *
      * <p>The file will be created if it doesn't exist, or overwritten if it does.
-     * Parent directories must exist or an exception will be thrown. The configuration
+     * Missing parent directories are created automatically. The configuration
      * parameter controls serialization behavior and output formatting.</p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -133,7 +133,7 @@ public interface Parser<SC extends SerializationConfig<?>, DC extends Deserializ
      * @param obj the object to serialize (may be {@code null})
      * @param config the serialization configuration to use (may be {@code null} for default behavior)
      * @param output the output file to write to (must not be {@code null})
-     * @throws UncheckedIOException if an I/O error occurs during file writing, or if parent directories don't exist
+     * @throws UncheckedIOException if an I/O error occurs during file writing
      */
     void serialize(Object obj, SC config, File output) throws UncheckedIOException;
 
@@ -237,10 +237,10 @@ public interface Parser<SC extends SerializationConfig<?>, DC extends Deserializ
      * }</pre>
      *
      * @param <T> the target type
-     * @param source the source string to deserialize from (must not be {@code null})
+     * @param source the source string to deserialize from; a {@code null} source typically yields the target type's default value
      * @param targetType the type of the object to create (must not be {@code null})
      * @return the deserialized object instance, or {@code null}/the type's default value if the source is empty
-     * @throws IllegalArgumentException if {@code source} or {@code targetType} is {@code null}
+     * @throws NullPointerException if {@code targetType} is {@code null}
      */
     <T> T deserialize(String source, Type<? extends T> targetType);
 
@@ -258,10 +258,10 @@ public interface Parser<SC extends SerializationConfig<?>, DC extends Deserializ
      * }</pre>
      *
      * @param <T> the target type
-     * @param source the source string to deserialize from (must not be {@code null})
+     * @param source the source string to deserialize from; a {@code null} source typically yields the target type's default value
      * @param targetType the class of the object to create (must not be {@code null})
      * @return the deserialized object instance, or {@code null}/the type's default value if the source is empty
-     * @throws IllegalArgumentException if {@code source} or {@code targetType} is {@code null}
+     * @throws NullPointerException if {@code targetType} is {@code null}
      */
     <T> T deserialize(String source, Class<? extends T> targetType);
 
@@ -281,11 +281,11 @@ public interface Parser<SC extends SerializationConfig<?>, DC extends Deserializ
      * }</pre>
      *
      * @param <T> the target type
-     * @param source the source string to deserialize from (must not be {@code null})
+     * @param source the source string to deserialize from; a {@code null} source typically yields the target type's default value
      * @param config the deserialization configuration to use (may be {@code null} for default behavior)
      * @param targetType the type of the object to create (must not be {@code null})
      * @return the deserialized object instance, or {@code null}/the type's default value if the source is empty
-     * @throws IllegalArgumentException if {@code source} or {@code targetType} is {@code null}
+     * @throws NullPointerException if {@code targetType} is {@code null}
      */
     <T> T deserialize(String source, DC config, Type<? extends T> targetType);
 
@@ -305,11 +305,11 @@ public interface Parser<SC extends SerializationConfig<?>, DC extends Deserializ
      * }</pre>
      *
      * @param <T> the target type
-     * @param source the source string to deserialize from (must not be {@code null})
+     * @param source the source string to deserialize from; a {@code null} source typically yields the target type's default value
      * @param config the deserialization configuration to use (may be {@code null} for default behavior)
      * @param targetType the class of the object to create (must not be {@code null})
      * @return the deserialized object instance, or {@code null}/the type's default value if the source is empty
-     * @throws IllegalArgumentException if {@code source} or {@code targetType} is {@code null}
+     * @throws NullPointerException if {@code targetType} is {@code null}
      */
     <T> T deserialize(String source, DC config, Class<? extends T> targetType);
 
@@ -330,7 +330,7 @@ public interface Parser<SC extends SerializationConfig<?>, DC extends Deserializ
      * @param source the source file to read from (must not be {@code null} and must exist)
      * @param targetType the type of the object to create (must not be {@code null})
      * @return the deserialized object instance, or {@code null}/the type's default value if the source is empty
-     * @throws IllegalArgumentException if {@code source} or {@code targetType} is {@code null}
+     * @throws NullPointerException if {@code source} or {@code targetType} is {@code null}
      * @throws UncheckedIOException if an I/O error occurs or the file doesn't exist
      */
     <T> T deserialize(File source, Type<? extends T> targetType) throws UncheckedIOException;
@@ -351,7 +351,7 @@ public interface Parser<SC extends SerializationConfig<?>, DC extends Deserializ
      * @param source the source file to read from (must not be {@code null} and must exist)
      * @param targetType the class of the object to create (must not be {@code null})
      * @return the deserialized object instance, or {@code null}/the type's default value if the source is empty
-     * @throws IllegalArgumentException if {@code source} or {@code targetType} is {@code null}
+     * @throws NullPointerException if {@code source} or {@code targetType} is {@code null}
      * @throws UncheckedIOException if an I/O error occurs or the file doesn't exist
      */
     <T> T deserialize(File source, Class<? extends T> targetType) throws UncheckedIOException;
@@ -360,14 +360,14 @@ public interface Parser<SC extends SerializationConfig<?>, DC extends Deserializ
      * Deserializes an object from a file using custom configuration.
      *
      * <p>This method allows fine-grained control over the deserialization process.
-     * The configuration parameter can specify date formats, type mappings, property
-     * handling, and other parser-specific options. The source file must exist and be
+     * The configuration parameter can specify type mappings, property handling, null handling,
+     * and other parser-specific options. The source file must exist and be
      * readable, otherwise an {@link UncheckedIOException} will be thrown.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * JsonDeserConfig config = new JsonDeserConfig()
-     *     .setDateTimeFormat(DateTimeFormat.LONG);
+     *     .setIgnoreUnmatchedProperty(true);
      * MyClass obj = parser.deserialize(new File("input.json"), config, Type.of(MyClass.class));
      * }</pre>
      *
@@ -376,7 +376,7 @@ public interface Parser<SC extends SerializationConfig<?>, DC extends Deserializ
      * @param config the deserialization configuration to use (may be {@code null} for default behavior)
      * @param targetType the type of the object to create (must not be {@code null})
      * @return the deserialized object instance, or {@code null}/the type's default value if the source is empty
-     * @throws IllegalArgumentException if {@code source} or {@code targetType} is {@code null}
+     * @throws NullPointerException if {@code source} or {@code targetType} is {@code null}
      * @throws UncheckedIOException if an I/O error occurs during file reading, or if the file doesn't exist
      */
     <T> T deserialize(File source, DC config, Type<? extends T> targetType) throws UncheckedIOException;
@@ -385,14 +385,14 @@ public interface Parser<SC extends SerializationConfig<?>, DC extends Deserializ
      * Deserializes an object from a file using custom configuration.
      *
      * <p>This method allows fine-grained control over the deserialization process.
-     * The configuration parameter can specify date formats, type mappings, property
-     * handling, and other parser-specific options. The source file must exist and be
+     * The configuration parameter can specify type mappings, property handling, null handling,
+     * and other parser-specific options. The source file must exist and be
      * readable, otherwise an {@link UncheckedIOException} will be thrown.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * JsonDeserConfig config = new JsonDeserConfig()
-     *     .setDateTimeFormat(DateTimeFormat.LONG);
+     *     .setIgnoreUnmatchedProperty(true);
      * MyClass obj = parser.deserialize(new File("input.json"), config, MyClass.class);
      * }</pre>
      *
@@ -401,7 +401,7 @@ public interface Parser<SC extends SerializationConfig<?>, DC extends Deserializ
      * @param config the deserialization configuration to use (may be {@code null} for default behavior)
      * @param targetType the class of the object to create (must not be {@code null})
      * @return the deserialized object instance, or {@code null}/the type's default value if the source is empty
-     * @throws IllegalArgumentException if {@code source} or {@code targetType} is {@code null}
+     * @throws NullPointerException if {@code source} or {@code targetType} is {@code null}
      * @throws UncheckedIOException if an I/O error occurs during file reading, or if the file doesn't exist
      */
     <T> T deserialize(File source, DC config, Class<? extends T> targetType) throws UncheckedIOException;
@@ -424,7 +424,7 @@ public interface Parser<SC extends SerializationConfig<?>, DC extends Deserializ
      * @param source the input stream to read from (must not be {@code null})
      * @param targetType the type of the object to create (must not be {@code null})
      * @return the deserialized object instance, or {@code null}/the type's default value if the source is empty
-     * @throws IllegalArgumentException if {@code source} or {@code targetType} is {@code null}
+     * @throws NullPointerException if {@code source} or {@code targetType} is {@code null}
      * @throws UncheckedIOException if an I/O error occurs during stream reading
      */
     <T> T deserialize(InputStream source, Type<? extends T> targetType) throws UncheckedIOException;
@@ -447,7 +447,7 @@ public interface Parser<SC extends SerializationConfig<?>, DC extends Deserializ
      * @param source the input stream to read from (must not be {@code null})
      * @param targetType the class of the object to create (must not be {@code null})
      * @return the deserialized object instance, or {@code null}/the type's default value if the source is empty
-     * @throws IllegalArgumentException if {@code source} or {@code targetType} is {@code null}
+     * @throws NullPointerException if {@code source} or {@code targetType} is {@code null}
      * @throws UncheckedIOException if an I/O error occurs during stream reading
      */
     <T> T deserialize(InputStream source, Class<? extends T> targetType) throws UncheckedIOException;
@@ -472,7 +472,7 @@ public interface Parser<SC extends SerializationConfig<?>, DC extends Deserializ
      * @param config the deserialization configuration to use (may be {@code null} for default behavior)
      * @param targetType the type of the object to create (must not be {@code null})
      * @return the deserialized object instance, or {@code null}/the type's default value if the source is empty
-     * @throws IllegalArgumentException if {@code source} or {@code targetType} is {@code null}
+     * @throws NullPointerException if {@code source} or {@code targetType} is {@code null}
      * @throws UncheckedIOException if an I/O error occurs during stream reading
      */
     <T> T deserialize(InputStream source, DC config, Type<? extends T> targetType) throws UncheckedIOException;
@@ -497,7 +497,7 @@ public interface Parser<SC extends SerializationConfig<?>, DC extends Deserializ
      * @param config the deserialization configuration to use (may be {@code null} for default behavior)
      * @param targetType the class of the object to create (must not be {@code null})
      * @return the deserialized object instance, or {@code null}/the type's default value if the source is empty
-     * @throws IllegalArgumentException if {@code source} or {@code targetType} is {@code null}
+     * @throws NullPointerException if {@code source} or {@code targetType} is {@code null}
      * @throws UncheckedIOException if an I/O error occurs during stream reading
      */
     <T> T deserialize(InputStream source, DC config, Class<? extends T> targetType) throws UncheckedIOException;
@@ -520,7 +520,7 @@ public interface Parser<SC extends SerializationConfig<?>, DC extends Deserializ
      * @param source the reader to read from (must not be {@code null})
      * @param targetType the type of the object to create (must not be {@code null})
      * @return the deserialized object instance, or {@code null}/the type's default value if the source is empty
-     * @throws IllegalArgumentException if {@code source} or {@code targetType} is {@code null}
+     * @throws NullPointerException if {@code source} or {@code targetType} is {@code null}
      * @throws UncheckedIOException if an I/O error occurs during reading
      */
     <T> T deserialize(Reader source, Type<? extends T> targetType) throws UncheckedIOException;
@@ -543,7 +543,7 @@ public interface Parser<SC extends SerializationConfig<?>, DC extends Deserializ
      * @param source the reader to read from (must not be {@code null})
      * @param targetType the class of the object to create (must not be {@code null})
      * @return the deserialized object instance, or {@code null}/the type's default value if the source is empty
-     * @throws IllegalArgumentException if {@code source} or {@code targetType} is {@code null}
+     * @throws NullPointerException if {@code source} or {@code targetType} is {@code null}
      * @throws UncheckedIOException if an I/O error occurs during reading
      */
     <T> T deserialize(Reader source, Class<? extends T> targetType) throws UncheckedIOException;
@@ -571,7 +571,7 @@ public interface Parser<SC extends SerializationConfig<?>, DC extends Deserializ
      * @param config the deserialization configuration to use (may be {@code null} for default behavior)
      * @param targetType the type of the object to create (must not be {@code null})
      * @return the deserialized object instance, or {@code null}/the type's default value if the source is empty
-     * @throws IllegalArgumentException if {@code source} or {@code targetType} is {@code null}
+     * @throws NullPointerException if {@code source} or {@code targetType} is {@code null}
      * @throws UncheckedIOException if an I/O error occurs during reading
      */
     <T> T deserialize(Reader source, DC config, Type<? extends T> targetType) throws UncheckedIOException;
@@ -599,7 +599,7 @@ public interface Parser<SC extends SerializationConfig<?>, DC extends Deserializ
      * @param config the deserialization configuration to use (may be {@code null} for default behavior)
      * @param targetType the class of the object to create (must not be {@code null})
      * @return the deserialized object instance, or {@code null}/the type's default value if the source is empty
-     * @throws IllegalArgumentException if {@code source} or {@code targetType} is {@code null}
+     * @throws NullPointerException if {@code source} or {@code targetType} is {@code null}
      * @throws UncheckedIOException if an I/O error occurs during reading
      */
     <T> T deserialize(Reader source, DC config, Class<? extends T> targetType) throws UncheckedIOException;

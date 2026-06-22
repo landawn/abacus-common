@@ -192,6 +192,6 @@ public class LongBiPredicateTest extends TestBase {
     @Test
     public void testAndNullThrowsImmediately() {
         LongBiPredicate instance = (a, b) -> false;
-        org.junit.jupiter.api.Assertions.assertThrows(NullPointerException.class, () -> instance.and((LongBiPredicate) null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> instance.and((LongBiPredicate) null));
     }
 }

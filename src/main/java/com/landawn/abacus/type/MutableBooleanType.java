@@ -81,7 +81,9 @@ public class MutableBooleanType extends AbstractType<MutableBoolean> {
     }
 
     /**
-     * Parses a string to create a {@link MutableBoolean} object using standard boolean parsing rules.
+     * Parses a string to create a {@link MutableBoolean} object. Single-character inputs {@code "Y"}, {@code "y"}
+     * and {@code "1"} are parsed as {@code true}; other inputs follow {@link Boolean#valueOf(String)} semantics,
+     * consistent with the other boolean type handlers.
      *
      * <p>This method is the inverse of {@code stringOf} and round-trips with it: it parses the string produced by
      * {@code stringOf} back into a value of this type. Strings produced by {@link Object#toString()} are not
@@ -95,7 +97,7 @@ public class MutableBooleanType extends AbstractType<MutableBoolean> {
      */
     @Override
     public MutableBoolean valueOf(final String str) {
-        return Strings.isEmpty(str) ? null : MutableBoolean.of(Strings.parseBoolean(str));
+        return Strings.isEmpty(str) ? null : MutableBoolean.of(parseBoolean(str));
     }
 
     /**
@@ -177,9 +179,8 @@ public class MutableBooleanType extends AbstractType<MutableBoolean> {
      * Writes {@code "true"}, {@code "false"}, or {@code "null"} (when {@code x} is {@code null}).
      * <p>
      * <b>appendTo vs. serializeTo:</b> {@code appendTo} produces a plain, {@code toString()}-style rendering with no
-     * JSON/XML quoting or escaping (for general text output), whereas {@code serializeTo} produces the JSON/XML
-     * serialized form (applying string quotation and character escaping per the serialization config) and is used by the
-     * JSON/XML serializers.
+     * JSON/XML quoting or escaping (for general text output), whereas {@code serializeTo} writes this type's JSON/XML
+     * literal form and ignores string quotation/escaping config.
      *
      * @param appendable the target to write to
      * @param x the {@code MutableBoolean} to append, may be {@code null}
@@ -204,12 +205,10 @@ public class MutableBooleanType extends AbstractType<MutableBoolean> {
      * Writes the pre-allocated {@code TRUE_CHAR_ARRAY}, {@code FALSE_CHAR_ARRAY}, or {@code NULL_CHAR_ARRAY}.
      * The {@code config} parameter is not used for boolean values.
      * <p>
-     * This method is specifically designed for JSON/XML serialization: it writes the serialized form of {@code x} to the
-     * {@code CharacterWriter}, applying string quotation and character escaping according to the supplied serialization
-     * config (a {@code null} config means no surrounding quotation). It is the streaming counterpart of {@code stringOf}
-     * and is invoked by the JSON/XML serializers.
+     * This method is specifically designed for JSON/XML serialization: it writes this type's literal form to the
+     * {@code CharacterWriter}. String quotation/escaping config is ignored.
      * <p>
-     * <b>serializeTo vs. appendTo:</b> {@code serializeTo} produces machine-readable JSON/XML (quoted and escaped),
+     * <b>serializeTo vs. appendTo:</b> {@code serializeTo} produces machine-readable JSON/XML literal output,
      * whereas {@code appendTo} produces a plain, human-readable {@code toString()}-style rendering without JSON/XML
      * quoting or escaping.
      *
@@ -220,6 +219,10 @@ public class MutableBooleanType extends AbstractType<MutableBoolean> {
      */
     @Override
     public void serializeTo(final CharacterWriter writer, final MutableBoolean x, final JsonXmlSerConfig<?> config) throws IOException {
-        writer.write((x == null) ? NULL_CHAR_ARRAY : (x.value() ? TRUE_CHAR_ARRAY : FALSE_CHAR_ARRAY));
+        if (x == null) {
+            writer.write(config != null && config.isWriteNullBooleanAsFalse() ? FALSE_CHAR_ARRAY : NULL_CHAR_ARRAY);
+        } else {
+            writer.write(x.value() ? TRUE_CHAR_ARRAY : FALSE_CHAR_ARRAY);
+        }
     }
 }

@@ -22,9 +22,9 @@ import java.lang.annotation.Target;
 
 /**
  * Indicates that the annotated method or type supports parallel execution within an abacus
- * pipeline. In the {@code com.landawn.abacus.util.Seq} and {@code *Stream} APIs, an operation
+ * pipeline. In the {@code com.landawn.abacus.util.stream} APIs, an operation
  * marked {@code @ParallelSupported} can be applied to a parallelized pipeline (e.g., one created
- * via {@code Seq.parallel(...)} or {@code Stream.parallel()}) and will produce the correct result
+ * via {@code Stream.parallel()}) and will produce the correct result
  * regardless of how the runtime partitions the work.
  *
  * <p>For methods, this means the implementation has no shared mutable state of its own and any

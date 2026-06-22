@@ -87,8 +87,8 @@ public class DateUtilTest extends AbstractTest {
         N.println(DTF.ISO_8601_TIMESTAMP.format(LocalDateTime.now()));
         N.println(DTF.RFC_1123_DATE_TIME.format(ZonedDateTime.now()));
         N.println(Dates.format(Dates.currentDate(), Dates.RFC_1123_DATE_TIME_FORMAT));
-        N.println(Dates.formatLocalDate());
-        N.println(Dates.formatLocalDateTime());
+        N.println(Dates.formatCurrentLocalDate());
+        N.println(Dates.formatCurrentLocalDateTime());
 
         N.println(DTF.ISO_8601_TIMESTAMP.parseToLocalDate(DTF.ISO_8601_TIMESTAMP.format(OffsetDateTime.now())));
         N.println(DTF.ISO_8601_TIMESTAMP.parseToLocalTime(DTF.ISO_8601_TIMESTAMP.format(OffsetDateTime.now())));
@@ -148,17 +148,17 @@ public class DateUtilTest extends AbstractTest {
     }
 
     @Test
-    public void test_isLastDateOfMonth() {
-        assertTrue(Dates.isLastDateOfMonth(Dates.parseDate("2023-02-28", "yyyy-MM-dd")));
-        assertTrue(Dates.isLastDateOfMonth(Dates.parseDate("2023-03-31", "yyyy-MM-dd")));
-        assertTrue(Dates.isLastDateOfMonth(Dates.parseDate("2023-06-30", "yyyy-MM-dd")));
-        assertTrue(Dates.isLastDateOfYear(Dates.parseDate("2023-12-31", "yyyy-MM-dd")));
+    public void test_isLastDayOfMonth() {
+        assertTrue(Dates.isLastDayOfMonth(Dates.parseDate("2023-02-28", "yyyy-MM-dd")));
+        assertTrue(Dates.isLastDayOfMonth(Dates.parseDate("2023-03-31", "yyyy-MM-dd")));
+        assertTrue(Dates.isLastDayOfMonth(Dates.parseDate("2023-06-30", "yyyy-MM-dd")));
+        assertTrue(Dates.isLastDayOfYear(Dates.parseDate("2023-12-31", "yyyy-MM-dd")));
 
-        assertFalse(Dates.isLastDateOfMonth(Dates.parseDate("2023-02-01", "yyyy-MM-dd")));
-        assertFalse(Dates.isLastDateOfMonth(Dates.parseDate("2023-02-29", "yyyy-MM-dd")));
-        assertFalse(Dates.isLastDateOfMonth(Dates.parseDate("2023-03-30", "yyyy-MM-dd")));
-        assertFalse(Dates.isLastDateOfMonth(Dates.parseDate("2023-03-32", "yyyy-MM-dd")));
-        assertFalse(Dates.isLastDateOfYear(Dates.parseDate("2023-03-32", "yyyy-MM-dd")));
+        assertFalse(Dates.isLastDayOfMonth(Dates.parseDate("2023-02-01", "yyyy-MM-dd")));
+        assertFalse(Dates.isLastDayOfMonth(Dates.parseDate("2023-02-29", "yyyy-MM-dd")));
+        assertFalse(Dates.isLastDayOfMonth(Dates.parseDate("2023-03-30", "yyyy-MM-dd")));
+        assertFalse(Dates.isLastDayOfMonth(Dates.parseDate("2023-03-32", "yyyy-MM-dd")));
+        assertFalse(Dates.isLastDayOfYear(Dates.parseDate("2023-03-32", "yyyy-MM-dd")));
 
         assertTrue(Dates.isSameYear(Dates.parseDate("2023-06-30", "yyyy-MM-dd"), Dates.parseDate("2023-01-30", "yyyy-MM-dd")));
         assertTrue(Dates.isSameMonth(Dates.parseDate("2023-06-30", "yyyy-MM-dd"), Dates.parseDate("2023-06-01", "yyyy-MM-dd")));

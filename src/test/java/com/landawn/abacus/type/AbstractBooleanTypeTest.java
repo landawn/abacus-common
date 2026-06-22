@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
 import java.io.IOException;
 import java.sql.CallableStatement;
@@ -262,28 +263,38 @@ public class AbstractBooleanTypeTest extends TestBase {
 
     @Test
     public void testSerializeTo_Null_NoConfig() throws IOException {
-        type.serializeTo(characterWriter, null, null);
+        assertDoesNotThrow(() -> {
+            type.serializeTo(characterWriter, null, null);
+        });
     }
 
     @Test
     public void testSerializeTo_True_NoConfig() throws IOException {
-        type.serializeTo(characterWriter, Boolean.TRUE, null);
+        assertDoesNotThrow(() -> {
+            type.serializeTo(characterWriter, Boolean.TRUE, null);
+        });
     }
 
     @Test
     public void testSerializeTo_False_NoConfig() throws IOException {
-        type.serializeTo(characterWriter, Boolean.FALSE, null);
+        assertDoesNotThrow(() -> {
+            type.serializeTo(characterWriter, Boolean.FALSE, null);
+        });
     }
 
     @Test
     public void testSerializeTo_Null_WithWriteNullBooleanAsFalse() throws IOException {
-        when(config.isWriteNullBooleanAsFalse()).thenReturn(true);
-        type.serializeTo(characterWriter, null, config);
+        assertDoesNotThrow(() -> {
+            when(config.isWriteNullBooleanAsFalse()).thenReturn(true);
+            type.serializeTo(characterWriter, null, config);
+        });
     }
 
     @Test
     public void testSerializeTo_Null_WithoutWriteNullBooleanAsFalse() throws IOException {
-        when(config.isWriteNullBooleanAsFalse()).thenReturn(false);
-        type.serializeTo(characterWriter, null, config);
+        assertDoesNotThrow(() -> {
+            when(config.isWriteNullBooleanAsFalse()).thenReturn(false);
+            type.serializeTo(characterWriter, null, config);
+        });
     }
 }

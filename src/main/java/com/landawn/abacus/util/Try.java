@@ -282,7 +282,7 @@ public final class Try<T extends AutoCloseable> {
      * @throws RuntimeException if an exception occurs during the execution of the {@code cmd}.
      * @see Throwables#call(Throwables.Callable)
      */
-    public static <R> R call(final java.util.concurrent.Callable<R> cmd) {
+    public static <R> R call(final java.util.concurrent.Callable<? extends R> cmd) {
         N.checkArgNotNull(cmd, cs.cmd);
 
         try {
@@ -320,7 +320,7 @@ public final class Try<T extends AutoCloseable> {
      * @throws IllegalArgumentException if {@code cmd} or {@code actionOnError} is {@code null}.
      * @see Throwables#call(Throwables.Callable, Function)
      */
-    public static <R> R call(final java.util.concurrent.Callable<R> cmd, final Function<? super Exception, ? extends R> actionOnError) {
+    public static <R> R call(final java.util.concurrent.Callable<? extends R> cmd, final Function<? super Exception, ? extends R> actionOnError) {
         N.checkArgNotNull(cmd, cs.cmd);
         N.checkArgNotNull(actionOnError, cs.actionOnError);
 
@@ -359,7 +359,7 @@ public final class Try<T extends AutoCloseable> {
      * @throws IllegalArgumentException if {@code cmd} or {@code supplier} is {@code null}.
      * @see Throwables#call(Throwables.Callable, Supplier)
      */
-    public static <R> R call(final java.util.concurrent.Callable<R> cmd, final Supplier<R> supplier) {
+    public static <R> R call(final java.util.concurrent.Callable<? extends R> cmd, final Supplier<R> supplier) {
         N.checkArgNotNull(cmd, cs.cmd);
         N.checkArgNotNull(supplier, cs.supplier);
 
@@ -395,7 +395,7 @@ public final class Try<T extends AutoCloseable> {
      * @throws IllegalArgumentException if {@code cmd} is {@code null}.
      * @see #call(java.util.concurrent.Callable, Supplier)
      */
-    public static <R extends Comparable<? super R>> R call(final java.util.concurrent.Callable<R> cmd, final R defaultValue) {
+    public static <R extends Comparable<? super R>> R call(final java.util.concurrent.Callable<? extends R> cmd, final R defaultValue) {
         // <R extends Comparable<? super R>> avoids ambiguous overloads involving Comparable<R>.
         N.checkArgNotNull(cmd, cs.cmd);
 
@@ -438,9 +438,9 @@ public final class Try<T extends AutoCloseable> {
      * @throws RuntimeException if an exception occurs and the {@code predicate} returns {@code false}.
      * @see Throwables#call(Throwables.Callable, Predicate, Supplier)
      */
-    public static <R> R call(final java.util.concurrent.Callable<R> cmd, final Predicate<? super Exception> predicate, final Supplier<R> supplier) {
+    public static <R> R call(final java.util.concurrent.Callable<? extends R> cmd, final Predicate<? super Exception> predicate, final Supplier<R> supplier) {
         N.checkArgNotNull(cmd, cs.cmd);
-        N.checkArgNotNull(predicate, cs.Predicate);
+        N.checkArgNotNull(predicate, cs.predicate);
         N.checkArgNotNull(supplier, cs.supplier);
 
         try {
@@ -486,11 +486,11 @@ public final class Try<T extends AutoCloseable> {
      * @throws RuntimeException if an exception occurs and the {@code predicate} returns {@code false}.
      * @see #call(java.util.concurrent.Callable, Predicate, Supplier)
      */
-    public static <R extends Comparable<? super R>> R call(final java.util.concurrent.Callable<R> cmd, final Predicate<? super Exception> predicate,
+    public static <R extends Comparable<? super R>> R call(final java.util.concurrent.Callable<? extends R> cmd, final Predicate<? super Exception> predicate,
             final R defaultValue) {
         // <R extends Comparable<? super R>> avoids ambiguous overloads involving Comparable<R>.
         N.checkArgNotNull(cmd, cs.cmd);
-        N.checkArgNotNull(predicate, cs.Predicate);
+        N.checkArgNotNull(predicate, cs.predicate);
 
         try {
             return cmd.call();
@@ -554,7 +554,7 @@ public final class Try<T extends AutoCloseable> {
      *
      * @param cmd the consumer that operates on the managed resource; must not be {@code null}
      * @param actionOnError the error handler invoked with any exception thrown while creating the
-     *                      resource or executing the {@code cmd}; must not be {@code null}
+     *                      resource, executing the {@code cmd}, or closing the resource; must not be {@code null}
      */
     public void run(final Throwables.Consumer<? super T, ? extends Exception> cmd, final Consumer<? super Exception> actionOnError) {
         try (final T closeable = targetResource == null ? (targetResourceSupplier == null ? null : targetResourceSupplier.get()) : targetResource) {

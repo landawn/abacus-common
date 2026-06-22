@@ -98,13 +98,13 @@ import com.landawn.abacus.util.stream.Stream;
  *     Fnn.c2f(message -> logger.info(message));
  *
  * // Exception-safe predicates for filtering
- * Stream<String> validData = dataStream
+ * Seq<String, Exception> validData = dataSeq
  *     .filter(Fnn.notNull())
  *     .filter(Fnn.pp(data -> validateData(data)));
  *
  * // Rate-limited operations
  * Throwables.Consumer<ApiRequest, IOException> rateLimitedApi =
- *     Fnn.rateLimiter(10.0);   // returns 10 requests per second
+ *     Fnn.rateLimiter(10.0);   // limits to 10 requests per second
  *
  * // Map entry manipulation
  * Map<String, Integer> scores = entryStream
@@ -124,6 +124,7 @@ import com.landawn.abacus.util.stream.Stream;
  * <ul>
  *   <li><b>Memoization:</b> {@code memoize(Supplier)}, {@code memoize(Function)}, {@code memoizeWithExpiration()}</li>
  *   <li><b>Standard Functional:</b> {@code identity()}, {@code alwaysTrue()}, {@code alwaysFalse()}</li>
+ *   <li><b>Identity Casts:</b> {@code p()}, {@code c()}, {@code f()}, {@code s()}, {@code o()} return the given Predicate/Consumer/Function/Supplier/Operator unchanged (the {@code c()} and {@code cc()} families also have a Callable sense)</li>
  *   <li><b>Interface Conversion:</b> {@code pp()}, {@code cc()}, {@code ff()} for Predicate/Consumer/Function</li>
  *   <li><b>Synchronization:</b> {@code sp()}, {@code sc()}, {@code sf()} for synchronized variants</li>
  *   <li><b>Type Conversion:</b> {@code c2f()}, {@code f2c()}, {@code r2c()}, {@code c2r()}</li>
@@ -138,7 +139,6 @@ import com.landawn.abacus.util.stream.Stream;
  *   <li><b>Simple Memoization:</b> Cache single result with lazy initialization</li>
  *   <li><b>Expiration Support:</b> Time-based cache invalidation with configurable duration</li>
  *   <li><b>Key-Based Caching:</b> Function result caching based on input parameters</li>
- *   <li><b>Size Limits:</b> LRU eviction for memory-bounded caches</li>
  *   <li><b>Thread Safety:</b> Concurrent access protection for memoized operations</li>
  * </ul>
  *
@@ -556,14 +556,12 @@ public final class Fnn {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Extract keys from map entries
-     * Map<String, Integer> map = N.asMap("a", 1, "b", 2);
-     * List<String> keys = map.entrySet().stream()
-     *     .map(Fnn.key())
-     *     .collect(Collectors.toList());
+     * Seq<Map.Entry<String, Integer>, Exception> entries = Seq.of(N.asMap("a", 1, "b", 2));
+     * Seq<String, Exception> keys = entries.map(Fnn.key());
      *
      * // Use in exception-throwing context
-     * Seq<Map.Entry<String, Integer>, IOException> entries = Seq.of(new java.util.AbstractMap.SimpleEntry<>("a", 1));
-     * Seq<String, IOException> entryKeys = entries.map(Fnn.key());
+     * Seq<Map.Entry<String, Integer>, IOException> ioEntries = Seq.of(new java.util.AbstractMap.SimpleEntry<>("a", 1));
+     * Seq<String, IOException> entryKeys = ioEntries.map(Fnn.key());
      * }</pre>
      *
      * @param <K> the type of keys in the entry
@@ -586,14 +584,12 @@ public final class Fnn {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Extract values from map entries
-     * Map<String, Integer> map = N.asMap("a", 1, "b", 2);
-     * List<Integer> values = map.entrySet().stream()
-     *     .map(Fnn.value())
-     *     .collect(Collectors.toList());
+     * Seq<Map.Entry<String, Integer>, Exception> entries = Seq.of(N.asMap("a", 1, "b", 2));
+     * Seq<Integer, Exception> values = entries.map(Fnn.value());
      *
      * // Use in exception-throwing context
-     * Seq<Map.Entry<String, Integer>, IOException> entries = Seq.of(new java.util.AbstractMap.SimpleEntry<>("a", 1));
-     * Seq<Integer, IOException> entryValues = entries.map(Fnn.value());
+     * Seq<Map.Entry<String, Integer>, IOException> ioEntries = Seq.of(new java.util.AbstractMap.SimpleEntry<>("a", 1));
+     * Seq<Integer, IOException> entryValues = ioEntries.map(Fnn.value());
      * }</pre>
      *
      * @param <K> the type of keys in the entry
@@ -618,9 +614,9 @@ public final class Fnn {
      * <pre>{@code
      * // Create inverted map
      * Map<String, Integer> original = N.asMap("a", 1, "b", 2);
-     * Map<Integer, String> inverted = original.entrySet().stream()
+     * Map<Integer, String> inverted = Seq.<String, Integer, Exception> of(original)
      *     .map(Fnn.invert())
-     *     .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+     *     .toMap(Map.Entry::getKey, Map.Entry::getValue);
      *
      * // Reverse lookup
      * Seq<Entry<Integer, String>, Exception> entries = Seq.of(new java.util.AbstractMap.SimpleEntry<>(1, "Alice"));
@@ -740,7 +736,7 @@ public final class Fnn {
      * <pre>{@code
      * // Wrap values in Tuple1
      * List<Tuple1<String>> tuples = Stream.of("a", "b", "c")
-     *     .map(Fnn.<String, RuntimeException>tuple1())
+     *     .map(s -> Fnn.<String, RuntimeException>tuple1().apply(s))
      *     .collect(Collectors.toList());
      * }</pre>
      *
@@ -1131,11 +1127,8 @@ public final class Fnn {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * // Print map entries as "key=value"
-     * map.forEach(Fnn.println("="));
-     *
-     * // Print pairs as "key: value"
-     * map.forEach(Fnn.println(": "));
+     * // Print map entries as "key=value" (Map.forEach itself requires a JDK BiConsumer; use Fn.println for plain maps)
+     * Seq.of(map).forEach(entry -> Fnn.<String, Integer, Exception> println("=").accept(entry.getKey(), entry.getValue()));
      * }</pre>
      *
      * @param <T> the type of the first input to the consumer
@@ -1158,7 +1151,7 @@ public final class Fnn {
      * stream.filter(Fnn.isNull());
      *
      * // Compose with other predicates
-     * Throwables.Predicate<String, Exception> isNullOrEmpty = Fnn.<String, Exception>isNull().or(Fnn.isEmpty());
+     * Throwables.Predicate<String, Exception> isNullOrEmpty = t -> t == null || t.isEmpty();
      * }</pre>
      *
      * @param <T> the type of the input to the predicate
@@ -1683,11 +1676,14 @@ public final class Fnn {
 
     /** The Constant MIN. */
     @SuppressWarnings({ "rawtypes" })
-    private static final Throwables.BinaryOperator<Comparable, Throwable> MIN = (t, u) -> N.compare(t, u) <= 0 ? t : u;
+    private static final Throwables.BinaryOperator<Comparable, Throwable> MIN = (t, u) -> Comparators.NULL_LAST_COMPARATOR.compare(t, u) <= 0 ? t : u;
 
     /**
      * Returns a BinaryOperator that returns the minimum of two Comparable values.
      * The comparison is performed using the natural ordering of the Comparable type.
+     *
+     * <p>Null values are considered greater than {@code non-null} values, so a non-null value
+     * will always be chosen over null when comparing.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1733,6 +1729,9 @@ public final class Fnn {
      * Returns a BinaryOperator that returns the minimum of two values by comparing the results of applying a key extractor function.
      * The key extractor function is applied to both operands and the resulting Comparable values are compared.
      *
+     * <p>Null keys are considered greater than {@code non-null} keys, so the operand with a non-null
+     * key will always be chosen over one with a null key.
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Fnn.<String, Exception>minBy(String::length).apply("hi", "hello"); // returns "hi"
@@ -1752,17 +1751,22 @@ public final class Fnn {
             final java.util.function.Function<? super T, ? extends Comparable> keyExtractor) throws IllegalArgumentException {
         N.checkArgNotNull(keyExtractor);
 
-        return (t, u) -> N.compare(keyExtractor.apply(t), keyExtractor.apply(u)) <= 0 ? t : u;
+        final Comparator<? super T> comparator = Comparators.nullsLastBy(keyExtractor);
+
+        return (t, u) -> comparator.compare(t, u) <= 0 ? t : u;
     }
 
     /** The Constant MIN_BY_KEY. */
     @SuppressWarnings("rawtypes")
-    private static final Throwables.BinaryOperator<Map.Entry<Comparable, Object>, Throwable> MIN_BY_KEY = (t, u) -> N.compare(t.getKey(), u.getKey()) <= 0 ? t
-            : u;
+    private static final Throwables.BinaryOperator<Map.Entry<Comparable, Object>, Throwable> MIN_BY_KEY = (t,
+            u) -> Comparators.NULL_LAST_COMPARATOR.compare(t.getKey(), u.getKey()) <= 0 ? t : u;
 
     /**
      * Returns a BinaryOperator that returns the minimum of two Map.Entry objects by comparing their keys.
      * The keys must be Comparable and are compared using their natural ordering.
+     *
+     * <p>Null keys are considered greater than {@code non-null} keys, so the entry with a non-null
+     * key will always be chosen over one with a null key.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1786,11 +1790,14 @@ public final class Fnn {
     /** The Constant MIN_BY_VALUE. */
     @SuppressWarnings("rawtypes")
     private static final Throwables.BinaryOperator<Map.Entry<Object, Comparable>, Throwable> MIN_BY_VALUE = (t,
-            u) -> N.compare(t.getValue(), u.getValue()) <= 0 ? t : u;
+            u) -> Comparators.NULL_LAST_COMPARATOR.compare(t.getValue(), u.getValue()) <= 0 ? t : u;
 
     /**
      * Returns a BinaryOperator that returns the minimum of two Map.Entry objects by comparing their values.
      * The values must be Comparable and are compared using their natural ordering.
+     *
+     * <p>Null values are considered greater than {@code non-null} values, so the entry with a non-null
+     * value will always be chosen over one with a null value.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1818,6 +1825,9 @@ public final class Fnn {
     /**
      * Returns a BinaryOperator that returns the maximum of two Comparable values.
      * The comparison is performed using the natural ordering of the Comparable type.
+     *
+     * <p>Null values are considered less than {@code non-null} values, so a non-null value
+     * will always be chosen over null when comparing.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1863,6 +1873,9 @@ public final class Fnn {
      * Returns a BinaryOperator that returns the maximum of two values by comparing the results of applying a key extractor function.
      * The key extractor function is applied to both operands and the resulting Comparable values are compared.
      *
+     * <p>Null keys are considered less than {@code non-null} keys, so the operand with a non-null
+     * key will always be chosen over one with a null key.
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Fnn.<String, Exception>maxBy(String::length).apply("hi", "hello"); // returns "hello"
@@ -1894,6 +1907,9 @@ public final class Fnn {
      * Returns a BinaryOperator that returns the maximum of two Map.Entry objects by comparing their keys.
      * The keys must be Comparable and are compared using their natural ordering.
      *
+     * <p>Null keys are considered less than {@code non-null} keys, so the entry with a non-null
+     * key will always be chosen over one with a null key.
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Fnn.<String, Integer, Exception>maxByKey().apply(Map.entry("a", 1), Map.entry("b", 2)); // returns Entry("b",2)
@@ -1920,6 +1936,9 @@ public final class Fnn {
     /**
      * Returns a BinaryOperator that returns the maximum of two Map.Entry objects by comparing their values.
      * The values must be Comparable and are compared using their natural ordering.
+     *
+     * <p>Null values are considered less than {@code non-null} values, so the entry with a non-null
+     * value will always be chosen over one with a null value.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -2361,7 +2380,7 @@ public final class Fnn {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Throwables.BiPredicate<String, Integer, IOException> biPred = (prefix, len) -> checkLength(prefix, len);
-     * Throwables.Predicate<Integer, IOException> pred = Fnn.p("test", biPred); // returns Fixed prefix "test"
+     * Throwables.Predicate<Integer, IOException> pred = Fnn.p("test", biPred); // predicate with first argument fixed to "test"
      * }</pre>
      *
      * @param <A> the type of the fixed first argument
@@ -2510,7 +2529,7 @@ public final class Fnn {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Throwables.BiConsumer<String, Integer, IOException> biCons = (prefix, num) -> write(prefix, num);
-     * Throwables.Consumer<Integer, IOException> cons = Fnn.c("Log:", biCons); // returns Fixed prefix
+     * Throwables.Consumer<Integer, IOException> cons = Fnn.c("Log:", biCons); // consumer with first argument fixed to "Log:"
      * }</pre>
      *
      * @param <A> the type of the fixed first argument
@@ -4005,10 +4024,10 @@ public final class Fnn {
      * @return the same Throwables.Callable that was provided
      * @throws IllegalArgumentException if callable is null
      */
-    public static <R, E extends Throwable> Throwables.Callable<R, E> c(final Throwables.Callable<R, E> callable) throws IllegalArgumentException {
+    public static <R, E extends Throwable> Throwables.Callable<R, E> c(final Throwables.Callable<? extends R, E> callable) throws IllegalArgumentException {
         N.checkArgNotNull(callable);
 
-        return callable;
+        return (Throwables.Callable<R, E>) callable;
     }
 
     /**
@@ -4081,26 +4100,26 @@ public final class Fnn {
      * @return a Throwables.Runnable that executes the callable and ignores its result
      * @throws IllegalArgumentException if callable is null
      */
-    public static <R, E extends Throwable> Throwables.Runnable<E> c2r(final Throwables.Callable<R, E> callable) throws IllegalArgumentException {
+    public static <R, E extends Throwable> Throwables.Runnable<E> c2r(final Throwables.Callable<? extends R, E> callable) throws IllegalArgumentException {
         N.checkArgNotNull(callable);
 
         return callable::call;
     }
 
     /**
-     * Casts a standard {@link Runnable} to a {@code Throwables.Runnable} that can throw checked exceptions.
-     * This method performs an unchecked cast; since a standard {@code Runnable} will never actually throw
-     * a checked exception, the cast is safe at runtime. Use {@link #jr2r(java.lang.Runnable)} for a safe
-     * wrapper that does not rely on the cast.
+     * Casts an abacus functional {@link Runnable} (which is already a {@code Throwables.Runnable<RuntimeException>})
+     * to a {@code Throwables.Runnable} with a wider exception type. This method performs an unchecked cast;
+     * since the runnable will never actually throw a checked exception, the cast is safe at runtime.
+     * Use {@link #jr2r(java.lang.Runnable)} to wrap a plain {@code java.lang.Runnable} without a cast.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Runnable javaRunnable = () -> System.out.println("Hello");
-     * Throwables.Runnable<IOException> throwableRunnable = Fnn.rr(javaRunnable);
+     * com.landawn.abacus.util.function.Runnable runnable = () -> System.out.println("Hello");
+     * Throwables.Runnable<IOException> throwableRunnable = Fnn.rr(runnable);
      * }</pre>
      *
      * @param <E> the type of the checked exception that the returned runnable may throw
-     * @param runnable the standard Runnable to cast; may be {@code null}
+     * @param runnable the abacus functional Runnable to cast; may be {@code null}
      * @return the {@code runnable} cast to {@code Throwables.Runnable}
      * @see #jr2r(java.lang.Runnable)
      */
@@ -4109,24 +4128,24 @@ public final class Fnn {
     }
 
     /**
-     * Casts a standard {@link java.util.concurrent.Callable} to a {@code Throwables.Callable} that can
-     * throw checked exceptions. This method performs an unchecked cast; since a standard
-     * {@code java.util.concurrent.Callable} can already throw {@code Exception}, the cast is safe at
-     * runtime. Use {@link #jc2c(java.util.concurrent.Callable)} for a safe wrapper that avoids the cast.
+     * Casts an abacus functional {@link com.landawn.abacus.util.function.Callable} (which is already a
+     * {@code Throwables.Callable<R, RuntimeException>}) to a {@code Throwables.Callable} with a wider
+     * exception type. This method performs an unchecked cast that is safe at runtime.
+     * Use {@link #jc2c(java.util.concurrent.Callable)} to wrap a plain {@code java.util.concurrent.Callable} without a cast.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Callable<String> javaCallable = () -> "result";
-     * Throwables.Callable<String, IOException> throwableCallable = Fnn.cc(javaCallable);
+     * com.landawn.abacus.util.function.Callable<String> callable = () -> "result";
+     * Throwables.Callable<String, IOException> throwableCallable = Fnn.cc(callable);
      * }</pre>
      *
      * @param <R> the type of the result of the callable
      * @param <E> the type of the checked exception that the returned callable may throw
-     * @param callable the standard {@code java.util.concurrent.Callable} to cast; may be {@code null}
+     * @param callable the abacus functional {@code Callable} to cast; may be {@code null}
      * @return the {@code callable} cast to {@code Throwables.Callable}
      * @see #jc2c(java.util.concurrent.Callable)
      */
-    public static <R, E extends Throwable> Throwables.Callable<R, E> cc(final Callable<R> callable) {
+    public static <R, E extends Throwable> Throwables.Callable<R, E> cc(final Callable<? extends R> callable) {
         return (Throwables.Callable<R, E>) callable;
     }
 
@@ -4213,7 +4232,7 @@ public final class Fnn {
      * @throws IllegalArgumentException if callable is null
      * @see #c2jc(Throwables.Callable)
      */
-    public static <R> Throwables.Callable<R, Exception> jc2c(final java.util.concurrent.Callable<R> callable) throws IllegalArgumentException {
+    public static <R> Throwables.Callable<R, Exception> jc2c(final java.util.concurrent.Callable<? extends R> callable) throws IllegalArgumentException {
         N.checkArgNotNull(callable);
 
         if (callable instanceof Throwables.Callable) {
@@ -4242,7 +4261,8 @@ public final class Fnn {
      * @throws IllegalArgumentException if callable is null
      * @see #jc2c(java.util.concurrent.Callable)
      */
-    public static <R> java.util.concurrent.Callable<R> c2jc(final Throwables.Callable<R, ? extends Exception> callable) throws IllegalArgumentException {
+    public static <R> java.util.concurrent.Callable<R> c2jc(final Throwables.Callable<? extends R, ? extends Exception> callable)
+            throws IllegalArgumentException {
         N.checkArgNotNull(callable);
 
         if (callable instanceof java.util.concurrent.Callable) {

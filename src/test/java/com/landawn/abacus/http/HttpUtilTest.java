@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -190,8 +191,10 @@ public class HttpUtilTest extends TestBase {
         assertEquals("value", HttpUtil.readHttpHeaderValue("value"));
         assertEquals("123", HttpUtil.readHttpHeaderValue(123));
 
+        // M1: readHttpHeaderValue now delegates to HttpHeaders.valueOf so the join separator
+        // is single-sourced as ", " (RFC 7230 §3.2.2), matching the write path.
         List<String> list = Arrays.asList("val1", "val2", "val3");
-        assertEquals("val1,val2,val3", HttpUtil.readHttpHeaderValue(list));
+        assertEquals("val1, val2, val3", HttpUtil.readHttpHeaderValue(list));
 
         List<String> emptyList = Arrays.asList();
         assertEquals("", HttpUtil.readHttpHeaderValue(emptyList));
@@ -203,10 +206,28 @@ public class HttpUtilTest extends TestBase {
     @Test
     public void testReadHttpHeadValueWithMultipleValues() {
         List<Integer> numbers = Arrays.asList(1, 2, 3);
-        assertEquals("1,2,3", HttpUtil.readHttpHeaderValue(numbers));
+        assertEquals("1, 2, 3", HttpUtil.readHttpHeaderValue(numbers));
 
         List<Object> mixed = Arrays.asList("str", 123, true);
-        assertEquals("str,123,true", HttpUtil.readHttpHeaderValue(mixed));
+        assertEquals("str, 123, true", HttpUtil.readHttpHeaderValue(mixed));
+    }
+
+    @Test
+    public void testReadHttpHeaderValueConsistentWithHttpHeadersValueOf() {
+        // M1: the only difference between the two stringifiers is the null contract.
+        assertNull(HttpUtil.readHttpHeaderValue(null));
+        assertEquals("", HttpHeaders.valueOf(null));
+
+        // Date/Instant are now HTTP-date formatted on the read path too (single-sourced).
+        java.util.Date date = new java.util.Date(0L);
+        assertEquals(HttpHeaders.valueOf(date), HttpUtil.readHttpHeaderValue(date));
+
+        java.time.Instant instant = java.time.Instant.ofEpochMilli(0L);
+        assertEquals(HttpHeaders.valueOf(instant), HttpUtil.readHttpHeaderValue(instant));
+
+        // Multi-value join is identical.
+        List<String> values = Arrays.asList("gzip", "deflate");
+        assertEquals(HttpHeaders.valueOf(values), HttpUtil.readHttpHeaderValue(values));
     }
 
     @Test
@@ -270,6 +291,9 @@ public class HttpUtilTest extends TestBase {
         assertEquals("application/xml", HttpUtil.getContentType(ContentFormat.XML));
         assertEquals("application/xml", HttpUtil.getContentType(ContentFormat.XML_LZ4));
         assertEquals("application/x-www-form-urlencoded", HttpUtil.getContentType(ContentFormat.FORM_URL_ENCODED));
+        // KRYO.contentType() is "" by design (per owner); getContentType(ContentFormat) returns the enum's
+        // contentType(), so getContentType(KRYO) is "". The "application/kryo" wire type lives only in
+        // HttpUtil.contentFormat2Type. See M3 RESOLVED — WON'T-FIX (by design).
         assertEquals("", HttpUtil.getContentType(ContentFormat.KRYO));
     }
 
@@ -382,6 +406,10 @@ public class HttpUtilTest extends TestBase {
 
         headers.setAccept("application/xml");
         assertEquals("application/xml", HttpUtil.getAccept(headers));
+
+        headers.clear();
+        headers.set("ACCEPT", "application/json");
+        assertEquals("application/json", HttpUtil.getAccept(headers));
     }
 
     @Test
@@ -425,6 +453,10 @@ public class HttpUtilTest extends TestBase {
 
         headers.setAcceptEncoding("gzip");
         assertEquals("gzip", HttpUtil.getAcceptEncoding(headers));
+
+        headers.clear();
+        headers.set("ACCEPT-ENCODING", "br");
+        assertEquals("br", HttpUtil.getAcceptEncoding(headers));
     }
 
     @Test
@@ -468,6 +500,10 @@ public class HttpUtilTest extends TestBase {
 
         headers.setAcceptCharset("utf-16");
         assertEquals("utf-16", HttpUtil.getAcceptCharset(headers));
+
+        headers.clear();
+        headers.set("ACCEPT-CHARSET", "utf-8");
+        assertEquals("utf-8", HttpUtil.getAcceptCharset(headers));
     }
 
     @Test
@@ -882,9 +918,11 @@ public class HttpUtilTest extends TestBase {
 
     @Test
     public void testTurnOffCertificateValidation() {
-        // This test can only verify that the method doesn't throw an exception
-        // Actually testing the certificate validation would require HTTPS connections
-        HttpUtil.disableCertificateValidation();
+        assertDoesNotThrow(() -> {
+            // This test can only verify that the method doesn't throw an exception
+            // Actually testing the certificate validation would require HTTPS connections
+            HttpUtil.disableCertificateValidation();
+        });
     }
 
     @Test

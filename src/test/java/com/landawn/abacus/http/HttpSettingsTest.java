@@ -377,6 +377,29 @@ public class HttpSettingsTest extends TestBase {
         assertNull(settings.getContentType());
     }
 
+    // M4: getContentType()/getContentEncoding() are pure — deriving from contentFormat must NOT
+    // write the derived value back into the headers bag.
+
+    @Test
+    public void testGetContentTypeDoesNotMutateHeaders() {
+        HttpSettings settings = HttpSettings.create().setContentFormat(ContentFormat.JSON);
+
+        // Derives from the content format...
+        assertEquals("application/json", settings.getContentType());
+        // ...but does not materialize a Content-Type header as a side effect.
+        assertNull(settings.headers().get(HttpHeaders.Names.CONTENT_TYPE));
+        assertTrue(settings.headers().isEmpty());
+    }
+
+    @Test
+    public void testGetContentEncodingDoesNotMutateHeaders() {
+        HttpSettings settings = HttpSettings.create().setContentFormat(ContentFormat.JSON_GZIP);
+
+        assertEquals("gzip", settings.getContentEncoding());
+        assertNull(settings.headers().get(HttpHeaders.Names.CONTENT_ENCODING));
+        assertTrue(settings.headers().isEmpty());
+    }
+
     @Test
     public void testSetContentType() {
         HttpSettings settings = HttpSettings.create();
@@ -521,6 +544,52 @@ public class HttpSettingsTest extends TestBase {
         assertEquals("value1", settings.headers().get("Header1"));
         assertEquals("value2", settings.headers().get("Header2"));
         assertEquals(settings, result);
+    }
+
+    // M2: setHeaders(HttpHeaders) is the clearly-named replace-all variant; headers(Map) merges.
+
+    @Test
+    public void testSetHeadersReplacesAll() {
+        HttpSettings settings = HttpSettings.create().header("Old", "value");
+        HttpHeaders headers = HttpHeaders.create().set("Accept", "application/json");
+
+        HttpSettings result = settings.setHeaders(headers);
+        assertSame(settings, result);
+        assertEquals("application/json", settings.headers().get("Accept"));
+        assertNull(settings.headers().get("Old")); // replace-all cleared the prior header
+    }
+
+    @Test
+    public void testSetHeadersNullClearsAll() {
+        HttpSettings settings = HttpSettings.create().header("Old", "value");
+
+        settings.setHeaders((HttpHeaders) null);
+        assertNull(settings.headers().get("Old"));
+        assertTrue(settings.headers().isEmpty());
+    }
+
+    @Test
+    public void testHeadersMapMergesWhileSetHeadersReplaces() {
+        // headers(Map) merges with existing headers...
+        HttpSettings merge = HttpSettings.create().header("Existing", "keep");
+        merge.headers(Map.of("Added", "v"));
+        assertEquals("keep", merge.headers().get("Existing"));
+        assertEquals("v", merge.headers().get("Added"));
+
+        // ...setHeaders(HttpHeaders) replaces all of them.
+        HttpSettings replace = HttpSettings.create().header("Existing", "keep");
+        replace.setHeaders(HttpHeaders.create().set("Added", "v"));
+        assertNull(replace.headers().get("Existing"));
+        assertEquals("v", replace.headers().get("Added"));
+    }
+
+    @Test
+    @SuppressWarnings("deprecation")
+    public void testDeprecatedHeadersHttpHeadersDelegatesToSetHeaders() {
+        HttpSettings settings = HttpSettings.create().header("Old", "value");
+        settings.headers(HttpHeaders.create().set("Accept", "application/json"));
+        assertEquals("application/json", settings.headers().get("Accept"));
+        assertNull(settings.headers().get("Old"));
     }
 
     // --- headers(String, Object, String, Object) ---
@@ -782,6 +851,24 @@ public class HttpSettingsTest extends TestBase {
         assertTrue(settings.doOutput());
         assertFalse(settings.isOneWayRequest());
         assertEquals(ContentFormat.JSON, settings.getContentFormat());
+    }
+
+    // --- regression tests for 2026-06-11 deep-review fixes ---
+
+    @org.junit.jupiter.api.Test
+    public void testHttpRequestSettingsMergeDoesNotMutateSharedSettings() {
+        // regression: HttpRequest.settings() used Beans.mergeInto, which ALIASED the caller's live
+        // HttpHeaders into the request (per-request basicAuth credentials leaked back into the
+        // shared template) and injected null-valued Content-Type/Content-Encoding header entries
+        final HttpSettings shared = HttpSettings.create().header("Accept", "application/json").setConnectTimeout(1234);
+
+        HttpRequest.url("http://localhost:1/never-connected").settings(shared).basicAuth("alice", "secretA");
+
+        assertEquals(1, shared.headers().toMap().size());
+        assertEquals("application/json", shared.headers().toMap().get("Accept"));
+        assertFalse(shared.headers().toMap().containsKey("Authorization"));
+        assertFalse(shared.headers().toMap().containsKey("Content-Type"));
+        assertEquals(1234L, shared.getConnectTimeout()); // scalar settings still merged from, untouched
     }
 
 }

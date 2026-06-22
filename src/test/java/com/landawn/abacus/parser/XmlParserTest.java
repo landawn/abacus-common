@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -846,45 +847,47 @@ public class XmlParserTest extends AbstractXmlParserTest {
 
     @Test
     public void testSerialize_simple_type() throws Exception {
-        {
-            final String xml = xmlParser.serialize(new Object[] {});
+        assertDoesNotThrow(() -> {
+            {
+                final String xml = xmlParser.serialize(new Object[] {});
 
-            N.println(xml);
+                N.println(xml);
 
-            final String[] a = xmlParser.deserialize(xml, String[].class);
+                final String[] a = xmlParser.deserialize(xml, String[].class);
 
-            N.println(N.stringOf(a));
-        }
+                N.println(N.stringOf(a));
+            }
 
-        {
-            final String xml = xmlParser.serialize(N.asArray("abc", "123"));
+            {
+                final String xml = xmlParser.serialize(N.asArray("abc", "123"));
 
-            N.println(xml);
+                N.println(xml);
 
-            final String[] a = xmlParser.deserialize(xml, String[].class);
+                final String[] a = xmlParser.deserialize(xml, String[].class);
 
-            N.println(N.stringOf(a));
-        }
+                N.println(N.stringOf(a));
+            }
 
-        {
-            final String xml = xmlParser.serialize(new ArrayList<>());
+            {
+                final String xml = xmlParser.serialize(new ArrayList<>());
 
-            N.println(xml);
+                N.println(xml);
 
-            final List<?> a = xmlParser.deserialize(xml, List.class);
+                final List<?> a = xmlParser.deserialize(xml, List.class);
 
-            N.println(N.stringOf(a));
-        }
+                N.println(N.stringOf(a));
+            }
 
-        {
-            final String xml = xmlParser.serialize(N.toList("abc", "123"));
+            {
+                final String xml = xmlParser.serialize(N.toList("abc", "123"));
 
-            N.println(xml);
+                N.println(xml);
 
-            final List<?> a = xmlParser.deserialize(xml, List.class);
+                final List<?> a = xmlParser.deserialize(xml, List.class);
 
-            N.println(N.stringOf(a));
-        }
+                N.println(N.stringOf(a));
+            }
+        });
     }
 
     @Test

@@ -107,7 +107,6 @@ import com.landawn.abacus.annotation.SuppressFBWarnings;
 import com.landawn.abacus.exception.UncheckedIOException;
 import com.landawn.abacus.logging.Logger;
 import com.landawn.abacus.logging.LoggerFactory;
-import com.landawn.abacus.type.ObjectType;
 import com.landawn.abacus.type.Type;
 import com.landawn.abacus.util.Tuple.Tuple1;
 import com.landawn.abacus.util.Tuple.Tuple2;
@@ -139,7 +138,7 @@ import com.landawn.abacus.util.u.OptionalShort;
  * <p><b>Key Features and Capabilities:</b>
  * <ul>
  *   <li><b>Advanced Reflection Operations:</b> High-performance class loading, instantiation, and metadata access</li>
- *   <li><b>Bean Property Introspection:</b> Comprehensive JavaBean property discovery and manipulation</li>
+ *   <li><b>Bean Property Introspection:</b> Comprehensive JavaBean property discovery and manipulation (delegated to {@link Beans})</li>
  *   <li><b>Type Conversion System:</b> Sophisticated type conversion between primitives, wrappers, and objects</li>
  *   <li><b>Method Handle Support:</b> Modern method handle creation for improved reflection performance</li>
  *   <li><b>Package Scanning:</b> Efficient class discovery and classpath scanning capabilities</li>
@@ -842,15 +841,20 @@ public final class ClassUtil {
                                     }
                                 } else {
                                     try {
-                                        final Type<?> componentType = Type.of(componentTypeName);
-
-                                        if (componentType.isObject() && !componentType.name().equals(ObjectType.OBJECT)) {
-                                            throw new IllegalArgumentException("No Class found by name: " + clsName);
-                                        }
-
-                                        cls = Class.forName(prefixOfArray + "L" + componentType.javaType().getCanonicalName() + ";"); // NOSONAR
+                                        // Try the literal binary name first ($-spelled nested classes, plain classes).
+                                        cls = Class.forName(prefixOfArray + "L" + componentTypeName + ";"); // NOSONAR
                                     } catch (final ClassNotFoundException e3) {
-                                        // ignore.
+                                        try {
+                                            // Resolve the component name like any other class name ("String",
+                                            // dot-spelled nested classes, ...) and build the array from its binary
+                                            // name. Type.of-based reconstruction is lossy (e.g. SimpleEntry's Type
+                                            // normalizes to Map.Entry), so resolve the actual class instead.
+                                            final Class<?> componentClass = forName(componentTypeName, cacheResult);
+
+                                            cls = Class.forName(prefixOfArray + "L" + componentClass.getName() + ";"); // NOSONAR
+                                        } catch (final ClassNotFoundException | IllegalArgumentException e4) {
+                                            // ignore.
+                                        }
                                     }
                                 }
                             }
@@ -1224,7 +1228,7 @@ public final class ClassUtil {
      * @return a list containing all classes found in the specified package that satisfy the predicate filter.
      *         Returns an empty list if no matching classes are found. The list is modifiable and preserves
      *         discovery order; duplicate classes may appear if multiple resources overlap.
-     * @throws IllegalArgumentException if {@code pkgName} is null, empty, or if no classpath resources are found
+     * @throws IllegalArgumentException if no classpath resources are found
      *                                  for the specified package (e.g., package does not exist, typo in package name,
      *                                  or attempting to scan JDK packages which are not supported).
      * @throws UncheckedIOException if an I/O error occurs during classpath scanning, JAR file reading, or
@@ -1250,7 +1254,7 @@ public final class ClassUtil {
         final List<URL> resourceList = getResources(pkgName);
 
         if (N.isEmpty(resourceList)) {
-            throw new IllegalArgumentException("No resource found by package " + pkgName);
+            throw new IllegalArgumentException("No resource found for package: " + pkgName);
         }
 
         final List<Class<?>> classes = new ArrayList<>();
@@ -1319,7 +1323,9 @@ public final class ClassUtil {
 
                         if (entryName.startsWith(pkgPath)) {
                             if (entryName.endsWith(CLASS_POSTFIX) && (entryName.indexOf("/", pkgPath.length()) < 0)) {
-                                final String className = filePathToPackageName(entryName).replace(CLASS_POSTFIX, "");
+                                // Strip the ".class" suffix BEFORE converting '/' to '.': replace on the converted
+                                // name would also hit package segments named "class*" (e.g. com.example.classes).
+                                final String className = filePathToPackageName(entryName.substring(0, entryName.length() - CLASS_POSTFIX.length()));
 
                                 try { //NOSONAR
                                     final Class<?> clazz = ClassUtil.forName(className, false);
@@ -1331,7 +1337,7 @@ public final class ClassUtil {
                                     }
                                 } catch (final Throwable e) {
                                     if (logger.isWarnEnabled()) {
-                                        logger.warn("ClassNotFoundException loading " + className);
+                                        logger.warn("ClassNotFoundException loading " + className, e);
                                     }
 
                                     if (!skipClassLoadingException) {
@@ -1640,6 +1646,9 @@ public final class ClassUtil {
      * Returns the method declared in the specified class with the given method name and parameter types.
      * Returns {@code null} if no method is found with the specified name and parameter types.
      *
+     * <p>If no declared method matches the name exactly, a case-insensitive match on the method
+     * name (with the same parameter types) is attempted as a fallback.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Method method = ClassUtil.getDeclaredMethod(String.class, "substring", int.class, int.class);
@@ -1815,7 +1824,7 @@ public final class ClassUtil {
      *   <li><b>Built-in Type Mapping:</b> Removes "java.lang." from jdk built-in types</li>
      *   <li><b>Prefix Removal:</b> Removes "class " and "interface " prefixes from type names</li>
      *   <li><b>Array Type Handling:</b> Transforms array notation from internal format to readable format</li>
-     *   <li><b>Inner Class Notation:</b> Converts '$' notation to '.' for nested class readability</li>
+     *   <li><b>Duplicated Owner Cleanup:</b> Collapses duplicated owner-type prefixes preceding '$' (the '$' separator itself is preserved)</li>
      *   <li><b>Generic Type Cleanup:</b> Normalizes generic type parameter representations</li>
      *   <li><b>Package Path Optimization:</b> Handles fully qualified names with appropriate formatting</li>
      * </ul>
@@ -1844,9 +1853,9 @@ public final class ClassUtil {
      *     <td>Array notation conversion</td>
      *   </tr>
      *   <tr>
-     *     <td>com.example.Outer$Inner</td>
-     *     <td>com.example.Outer.Inner</td>
-     *     <td>Inner class notation</td>
+     *     <td>com.x.Outer.com.x.Outer$Inner</td>
+     *     <td>com.x.Outer$Inner</td>
+     *     <td>Duplicated owner prefix cleanup</td>
      *   </tr>
      *   <tr>
      *     <td>java.util.List&lt;java.lang.String&gt;</td>
@@ -1891,7 +1900,7 @@ public final class ClassUtil {
      *
      * <p><b>Inner Class and Nested Type Processing:</b>
      * <ul>
-     *   <li><b>Dollar Sign Conversion:</b> Transforms '$' to '.' for improved readability</li>
+     *   <li><b>Duplicated Owner Cleanup:</b> Collapses duplicated owner-type name segments around '$'; the '$' separator is kept in the result</li>
      * </ul>
      *
      * <p><b>Comparison and Compatibility:</b>
@@ -1932,7 +1941,7 @@ public final class ClassUtil {
      *                              notation, generic type parameters, and inner class '$' notation.
      *                              Null values are handled gracefully.
      * @return a formatted, human-readable type name with prefixes removed, array notation normalized,
-     *         inner class notation converted to dot notation (when applicable), and built-in type mappings applied.
+     *         duplicated owner-type prefixes around '$' collapsed, and built-in type mappings applied.
      *         Returns the input unchanged if it is {@code null} or empty.
      *
      * @see Class#getTypeName()
@@ -1962,7 +1971,9 @@ public final class ClassUtil {
             res = res.substring("interface [L".length(), res.length() - 1) + "[]";
         }
 
-        res = res.replace("java.lang.", "").replace("class ", "").replace("interface ", ""); //NOSONAR
+        // Strip "java.lang." only when a class name follows (uppercase): subpackages such as
+        // java.lang.reflect must keep their full name or the result is unresolvable.
+        res = res.replaceAll("java\\.lang\\.(?=[A-Z])", "").replace("class ", "").replace("interface ", ""); //NOSONAR
 
         final int idx = res.lastIndexOf('$');
 

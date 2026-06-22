@@ -13,9 +13,9 @@
  */
 package com.landawn.abacus.util.function;
 
-import java.util.Objects;
-
 import com.landawn.abacus.util.Throwables;
+import com.landawn.abacus.util.N;
+import com.landawn.abacus.util.cs;
 
 /**
  * Represents a function that accepts two {@code int}-valued arguments and a single object-valued
@@ -63,10 +63,24 @@ public interface BiIntObjFunction<T, R> extends Throwables.BiIntObjFunction<T, R
      * @param <V> the type of output of the {@code after} function, and of the composed function
      * @param after the function to apply after this function is applied. Must not be {@code null}.
      * @return a composed function that first applies this function and then applies the {@code after} function
-     * @throws NullPointerException if {@code after} is null
+     * @throws IllegalArgumentException if {@code after} is null
      */
     default <V> BiIntObjFunction<T, V> andThen(final java.util.function.Function<? super R, ? extends V> after) {
-        Objects.requireNonNull(after);
+        N.checkArgNotNull(after, cs.after);
         return (i, j, t) -> after.apply(apply(i, j, t));
+    }
+
+    /**
+     * Returns this object as a {@link Throwables.BiIntObjFunction} view.
+     *
+     * <p>The returned object has the same behavior as this one. This method does not translate
+     * exceptions or make the original implementation capable of throwing new checked exceptions; the
+     * exception type parameter is for target-type compatibility with APIs that accept {@code Throwables.BiIntObjFunction}.
+     *
+     * @param <E> the target exception type for compatibility with {@code Throwables.BiIntObjFunction}
+     * @return a {@link Throwables.BiIntObjFunction} view of this object
+     */
+    default <E extends Throwable> Throwables.BiIntObjFunction<T, R, E> toThrowable() {
+        return (Throwables.BiIntObjFunction<T, R, E>) this;
     }
 }

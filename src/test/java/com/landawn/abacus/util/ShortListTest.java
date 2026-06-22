@@ -2471,6 +2471,12 @@ public class ShortListTest extends TestBase {
     }
 
     @Test
+    public void testShuffleNullRandomRejectedForSmallLists() {
+        assertThrows(IllegalArgumentException.class, () -> new ShortList().shuffle(null));
+        assertThrows(IllegalArgumentException.class, () -> ShortList.of((short) 1).shuffle(null));
+    }
+
+    @Test
     public void testShuffle_withRandom_short() {
         ShortList sl = ShortList.of((short) 1, (short) 2, (short) 3, (short) 4, (short) 5);
         Random rnd = new Random(42);

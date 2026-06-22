@@ -147,6 +147,17 @@ public class URIType extends AbstractType<URI> {
     }
 
     /**
+     * Indicates whether {@link URI} values are comparable.
+     * {@link URI} implements {@link Comparable}, so this returns {@code true}.
+     *
+     * @return {@code true}, always, because {@link URI} is {@link Comparable}
+     */
+    @Override
+    public boolean isComparable() {
+        return true;
+    }
+
+    /**
      * Retrieves a URI value from a ResultSet at the specified column index.
      * <p>
      * This method reads a string value from the ResultSet and converts it to a URI

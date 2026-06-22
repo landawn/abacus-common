@@ -272,9 +272,8 @@ public abstract class AbstractLongType extends NumberType<Number> {
      * Writes {@code "null"} if the value is {@code null}, otherwise writes the numeric value.
      * <p>
      * <b>appendTo vs. serializeTo:</b> {@code appendTo} produces a plain, {@code toString()}-style rendering with no
-     * JSON/XML quoting or escaping (for general text output), whereas {@code serializeTo} produces the JSON/XML
-     * serialized form (applying string quotation and character escaping per the serialization config) and is used by the
-     * JSON/XML serializers.
+     * JSON/XML quoting or escaping (for general text output), whereas {@code serializeTo} writes the configured JSON/XML
+     * numeric form. Only {@code writeLongAsString} with a non-zero quotation character writes quoted output.
      *
      * @param appendable the {@code Appendable} to write to
      * @param x the {@code Number} value to append as {@code long}
@@ -307,14 +306,13 @@ public abstract class AbstractLongType extends NumberType<Number> {
      * configured quotation character; otherwise the long is written unquoted.
      * </p>
      * <p>
-     * This method is specifically designed for JSON/XML serialization: it writes the serialized form of {@code x} to the
-     * {@code CharacterWriter}, applying string quotation and character escaping according to the supplied serialization
-     * config (a {@code null} config means no surrounding quotation). It is the streaming counterpart of {@code stringOf}
-     * and is invoked by the JSON/XML serializers.
+     * This method is specifically designed for JSON/XML serialization: it writes the numeric literal form to the
+     * {@code CharacterWriter}, except that {@code writeLongAsString} with a non-zero quotation character writes the
+     * long value as a quoted JSON/XML string.
      * <p>
-     * <b>serializeTo vs. appendTo:</b> {@code serializeTo} produces machine-readable JSON/XML (quoted and escaped),
-     * whereas {@code appendTo} produces a plain, human-readable {@code toString()}-style rendering without JSON/XML
-     * quoting or escaping.
+     * <b>serializeTo vs. appendTo:</b> {@code serializeTo} produces machine-readable JSON/XML using the configured
+     * long-number representation, whereas {@code appendTo} produces a plain, human-readable {@code toString()}-style
+     * rendering.
      *
      * @param writer the {@code CharacterWriter} to write to
      * @param x the {@code Number} value to write as {@code long}

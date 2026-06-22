@@ -613,7 +613,7 @@ public class AsyncExecutorTest extends TestBase {
         future.get();
 
         executor.shutdown();
-        Assertions.assertTrue(executor.isTerminated());
+        awaitTerminated(executor);
         Assertions.assertEquals(1, counter.get());
     }
 
@@ -636,12 +636,37 @@ public class AsyncExecutorTest extends TestBase {
     }
 
     @Test
-    public void testIsTerminated() {
+    public void testIsTerminated() throws Exception {
         AsyncExecutor executor = new AsyncExecutor();
-        executor.execute(() -> System.out.println("Running task"));
+        ContinuableFuture<Void> future = executor.execute(() -> System.out.println("Running task"));
         Assertions.assertFalse(executor.isTerminated());
         executor.shutdown();
-        Assertions.assertTrue(executor.isTerminated());
+        future.get(2, TimeUnit.SECONDS);
+        awaitTerminated(executor);
+    }
+
+    @Test
+    public void testShutdownDoesNotReportTerminatedWhileTaskRunning() throws Exception {
+        AsyncExecutor executor = new AsyncExecutor(1, 1, 60L, TimeUnit.SECONDS);
+        CountDownLatch started = new CountDownLatch(1);
+        CountDownLatch release = new CountDownLatch(1);
+
+        ContinuableFuture<Void> future = executor.execute((Throwables.Runnable<Exception>) () -> {
+            started.countDown();
+            release.await(5, TimeUnit.SECONDS);
+        });
+
+        Assertions.assertTrue(started.await(1, TimeUnit.SECONDS));
+
+        try {
+            executor.shutdown();
+            Assertions.assertFalse(executor.isTerminated());
+        } finally {
+            release.countDown();
+        }
+
+        future.get(2, TimeUnit.SECONDS);
+        awaitTerminated(executor);
     }
 
     @Test
@@ -715,6 +740,16 @@ public class AsyncExecutorTest extends TestBase {
         Assertions.assertTrue(str.contains("maxThreadPoolSize: 4"));
         Assertions.assertTrue(str.contains("keepAliveTime: 60000ms"));
         executor.shutdown();
+    }
+
+    private static void awaitTerminated(final AsyncExecutor executor) throws InterruptedException {
+        final long deadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(2);
+
+        while (!executor.isTerminated() && System.nanoTime() < deadline) {
+            Thread.sleep(10);
+        }
+
+        Assertions.assertTrue(executor.isTerminated());
     }
 
 }

@@ -101,7 +101,7 @@ import com.landawn.abacus.util.stream.Stream;
  *   <li>Auto-closeable - automatically closes resources when terminal operations complete</li>
  *   <li>Transformation-oriented API - intermediate operations return new sequence instances</li>
  *   <li>Sequential processing only (not parallel)</li>
- *   <li>Easy transformation to standard Java {@link Stream} via {@code stream()} method</li>
+ *   <li>Easy transformation to {@link Stream} (abacus Stream) via the {@code stream()} method</li>
  * </ul>
  *
  * <p><b>Usage Examples:</b></p>
@@ -116,7 +116,7 @@ import com.landawn.abacus.util.stream.Stream;
  *     .map(id -> userDao.findById(id))
  *     .filter(user -> user.isActive());
  *
- * // Conversion to standard Stream
+ * // Conversion to abacus Stream
  * Stream<String> stream = Seq.of("a", "b", "c").stream();
  * }</pre>
  *
@@ -215,7 +215,7 @@ import com.landawn.abacus.util.stream.Stream;
  * @see com.landawn.abacus.util.CsvUtil
  * @see java.util.stream.Stream
  *
- * @see <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/stream/package-summary.html">Java Stream API</a>
+ * @see <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/stream/package-summary.html">Java Stream API</a>
  * @see <a href="https://gee.cs.oswego.edu/dl/html/StreamParallelGuidance.html">When to use parallel streams</a>
  */
 @Beta
@@ -579,6 +579,10 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
 
             @Override
             public Boolean next() throws E {
+                if (position >= len) {
+                    throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
+                }
+
                 return a[position++];
             }
 
@@ -636,6 +640,10 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
 
             @Override
             public Character next() throws E {
+                if (position >= len) {
+                    throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
+                }
+
                 return a[position++];
             }
 
@@ -693,6 +701,10 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
 
             @Override
             public Byte next() throws E {
+                if (position >= len) {
+                    throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
+                }
+
                 return a[position++];
             }
 
@@ -750,6 +762,10 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
 
             @Override
             public Short next() throws E {
+                if (position >= len) {
+                    throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
+                }
+
                 return a[position++];
             }
 
@@ -807,6 +823,10 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
 
             @Override
             public Integer next() throws E {
+                if (position >= len) {
+                    throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
+                }
+
                 return a[position++];
             }
 
@@ -864,6 +884,10 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
 
             @Override
             public Long next() throws E {
+                if (position >= len) {
+                    throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
+                }
+
                 return a[position++];
             }
 
@@ -921,6 +945,10 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
 
             @Override
             public Float next() throws E {
+                if (position >= len) {
+                    throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
+                }
+
                 return a[position++];
             }
 
@@ -978,6 +1006,10 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
 
             @Override
             public Double next() throws E {
+                if (position >= len) {
+                    throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
+                }
+
                 return a[position++];
             }
 
@@ -1590,6 +1622,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * @param endExclusive the ending value (exclusive).
      * @param by the increment value. Can be negative for descending ranges, but must not be zero.
      * @return a {@code Seq<Integer, E>} containing the range of integers with the specified step.
+     * @throws IllegalArgumentException if {@code by} is zero.
      * @see #range(int, int)
      * @see #rangeClosed(int, int, int)
      */
@@ -1643,6 +1676,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * @param endInclusive the ending value (inclusive).
      * @param by the increment value. Can be negative for descending ranges, but must not be zero.
      * @return a {@code Seq<Integer, E>} containing the range of integers from start to end inclusive with the specified step.
+     * @throws IllegalArgumentException if {@code by} is zero.
      * @see #rangeClosed(int, int)
      * @see #range(int, int, int)
      */
@@ -1654,7 +1688,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
 
     /**
      * Splits the given character sequence into a sequence of strings based on the specified delimiter character.
-     * If the string is {@code null} or empty, an empty sequence is returned.
+     * If the string is {@code null}, an empty sequence is returned. Splitting an empty string yields a sequence containing a single empty string.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1665,7 +1699,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * @param <E> the type of exception that the sequence operations can throw.
      * @param str the character sequence to split.
      * @param delimiter the delimiter character to use for splitting.
-     * @return a {@code Seq<String, E>} containing the split strings, or an empty sequence if the string is {@code null} or empty.
+     * @return a {@code Seq<String, E>} containing the split strings (an empty sequence if the string is {@code null}).
      * @see #split(CharSequence, CharSequence)
      * @see #split(CharSequence, Pattern)
      * @see #splitToLines(String)
@@ -1676,7 +1710,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
 
     /**
      * Splits the given character sequence into a sequence of strings based on the specified delimiter string.
-     * If the string is {@code null} or empty, an empty sequence is returned.
+     * If the string is {@code null}, an empty sequence is returned. Splitting an empty string yields a sequence containing a single empty string.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1687,7 +1721,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * @param <E> the type of exception that the sequence operations can throw.
      * @param str the character sequence to split.
      * @param delimiter the delimiter string to use for splitting.
-     * @return a {@code Seq<String, E>} containing the split strings, or an empty sequence if the string is {@code null} or empty.
+     * @return a {@code Seq<String, E>} containing the split strings (an empty sequence if the string is {@code null}).
      * @see #split(CharSequence, char)
      * @see #split(CharSequence, Pattern)
      * @see #splitToLines(String)
@@ -1698,7 +1732,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
 
     /**
      * Splits the given character sequence into a sequence of strings based on the specified pattern.
-     * If the string is {@code null} or empty, an empty sequence is returned.
+     * If the string is {@code null}, an empty sequence is returned. Splitting an empty string yields a sequence containing a single empty string.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1710,7 +1744,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * @param <E> the type of exception that the sequence operations can throw.
      * @param str the character sequence to split.
      * @param pattern the regex pattern to use for splitting. Must not be {@code null}.
-     * @return a {@code Seq<String, E>} containing the split strings, or an empty sequence if the string is {@code null} or empty.
+     * @return a {@code Seq<String, E>} containing the split strings (an empty sequence if the string is {@code null}).
      * @see #split(CharSequence, char)
      * @see #split(CharSequence, CharSequence)
      * @see #splitToLines(String)
@@ -1728,7 +1762,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * Splits the given string into a sequence of lines.
      * Line terminators recognized are line feed "\n" (LF), carriage return "\r" (CR),
      * and carriage return followed immediately by a line feed "\r\n" (CRLF).
-     * If the string is {@code null} or empty, an empty sequence is returned.
+     * If the string is {@code null}, an empty sequence is returned. An empty string yields a sequence containing a single empty line.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1739,7 +1773,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      *
      * @param <E> the type of exception that the sequence operations can throw.
      * @param str the string to split into lines.
-     * @return a {@code Seq<String, E>} containing the lines, or an empty sequence if the string is {@code null} or empty.
+     * @return a {@code Seq<String, E>} containing the lines (an empty sequence if the string is {@code null}).
      * @see #splitToLines(String, boolean, boolean)
      * @see #ofLines(File)
      */
@@ -1751,7 +1785,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * Splits the given string into a sequence of lines with optional trimming and omission of empty lines.
      * Line terminators recognized are line feed "\n" (LF), carriage return "\r" (CR),
      * and carriage return followed immediately by a line feed "\r\n" (CRLF).
-     * If the string is {@code null} or empty, an empty sequence is returned.
+     * If the string is {@code null}, an empty sequence is returned. An empty string yields a single empty line unless {@code omitEmptyLines} is {@code true}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1767,7 +1801,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * @param str the string to split into lines.
      * @param trim if {@code true}, trims whitespace from the beginning and end of each line.
      * @param omitEmptyLines if {@code true}, omits empty lines (or whitespace-only lines if trim is {@code true}) from the result.
-     * @return a {@code Seq<String, E>} containing the processed lines, or an empty sequence if the string is {@code null} or empty.
+     * @return a {@code Seq<String, E>} containing the processed lines (an empty sequence if the string is {@code null}).
      * @see #splitToLines(String)
      * @see #ofLines(File)
      */
@@ -1952,7 +1986,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * @see #splitToLines(String)
      */
     public static Seq<String, IOException> ofLines(final File file) {
-        return ofLines(file, Charsets.DEFAULT);
+        return ofLines(file, IOUtil.DEFAULT_CHARSET);
     }
 
     /**
@@ -1969,7 +2003,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * }</pre>
      *
      * @param file the file to read lines from. Must not be {@code null}.
-     * @param charset the charset to use for decoding the file. Must not be {@code null}.
+     * @param charset the charset to use for decoding the file; if {@code null}, the default charset is used.
      * @return a {@code Seq<String, IOException>} containing the lines of the file.
      * @throws IllegalArgumentException if {@code file} is {@code null}.
      * @see #ofLines(File)
@@ -2003,7 +2037,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * @see #ofLines(File)
      */
     public static Seq<String, IOException> ofLines(final Path path) {
-        return ofLines(path, Charsets.DEFAULT);
+        return ofLines(path, IOUtil.DEFAULT_CHARSET);
     }
 
     /**
@@ -2020,7 +2054,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * }</pre>
      *
      * @param path the path to read lines from. Must not be {@code null}.
-     * @param charset the charset to use for decoding the file. Must not be {@code null}.
+     * @param charset the charset to use for decoding the file; if {@code null}, the default charset is used.
      * @return a {@code Seq<String, IOException>} containing the lines of the file.
      * @throws IllegalArgumentException if {@code path} is {@code null}.
      * @see #ofLines(Path)
@@ -2086,7 +2120,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
     public static Seq<String, IOException> ofLines(final Reader reader, final boolean closeReaderWhenStreamIsClosed) throws IllegalArgumentException {
         N.checkArgNotNull(reader);
 
-        final Throwables.Iterator<String, IOException> iter = createLazyLineIterator(null, null, Charsets.DEFAULT, reader, closeReaderWhenStreamIsClosed);
+        final Throwables.Iterator<String, IOException> iter = createLazyLineIterator(null, null, IOUtil.DEFAULT_CHARSET, reader, closeReaderWhenStreamIsClosed);
 
         if (closeReaderWhenStreamIsClosed) {
             return of(iter).onClose(iter::close); //NOSONAR
@@ -2127,7 +2161,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * Lists all files in the specified parent directory with optional recursive traversal.
      * If recursively is {@code false}, only immediate children files are listed.
      * If recursively is {@code true}, all descendant files are listed.
-     * Directories are included in the results when recursively is {@code true}.
+     * Directories are included in the results in both modes; when {@code recursively} is {@code true}, subdirectories are also traversed.
      * The method uses a breadth-first traversal when recursive listing is enabled.
      *
      * <p><b>Usage Examples:</b></p>
@@ -2253,9 +2287,9 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
                             if (reader != null) {
                                 bufferedReader = reader instanceof BufferedReader ? ((BufferedReader) reader) : new BufferedReader(reader);
                             } else if (file != null) {
-                                bufferedReader = IOUtil.newBufferedReader(file, charset == null ? Charsets.DEFAULT : charset);
+                                bufferedReader = IOUtil.newBufferedReader(file, charset == null ? IOUtil.DEFAULT_CHARSET : charset);
                             } else {
-                                bufferedReader = IOUtil.newBufferedReader(path, charset == null ? Charsets.DEFAULT : charset);
+                                bufferedReader = IOUtil.newBufferedReader(path, charset == null ? IOUtil.DEFAULT_CHARSET : charset);
                             }
                         }
 
@@ -3353,7 +3387,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * @param a the first array to merge
      * @param b the second array to merge
      * @param nextSelector a function that takes two elements (one from each array) and returns MergeResult.TAKE_FIRST
-     *                     to select the first element, or any other value to select the second element
+     *                     to select the first element, or MergeResult.TAKE_SECOND to select the second element
      * @return a sequence containing all elements from both arrays in the order determined by the next selector.
      *         If either array is {@code null} or empty, returns a sequence containing the other array's elements
      * @see N#merge(Object[], Object[], java.util.function.BiFunction)
@@ -3421,7 +3455,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * @param b the second array to merge
      * @param c the third array to merge
      * @param nextSelector a function that takes two elements and returns MergeResult.TAKE_FIRST
-     *                     to select the first element, or any other value to select the second element
+     *                     to select the first element, or MergeResult.TAKE_SECOND to select the second element
      * @return a sequence containing all elements from all three arrays in the order determined by the next selector
      * @see N#merge(Object[], Object[], java.util.function.BiFunction)
      */
@@ -3452,7 +3486,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * @param a the first iterable to merge
      * @param b the second iterable to merge
      * @param nextSelector a function that takes two elements (one from each iterable) and returns MergeResult.TAKE_FIRST
-     *                     to select the first element, or any other value to select the second element
+     *                     to select the first element, or MergeResult.TAKE_SECOND to select the second element
      * @return a sequence containing all elements from both iterables in the order determined by the next selector
      * @see N#merge(Iterable, Iterable, java.util.function.BiFunction)
      */
@@ -3480,7 +3514,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * @param b the second iterable to merge
      * @param c the third iterable to merge
      * @param nextSelector a function that takes two elements and returns MergeResult.TAKE_FIRST
-     *                     to select the first element, or any other value to select the second element
+     *                     to select the first element, or MergeResult.TAKE_SECOND to select the second element
      * @return a sequence containing all elements from all three iterables in the order determined by the next selector
      * @see N#merge(Iterable, Iterable, java.util.function.BiFunction)
      */
@@ -3510,7 +3544,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * @param a the first iterator to merge
      * @param b the second iterator to merge
      * @param nextSelector a function that takes two elements (one from each iterator) and returns MergeResult.TAKE_FIRST
-     *                     to select the first element, or any other value to select the second element
+     *                     to select the first element, or MergeResult.TAKE_SECOND to select the second element
      * @return a sequence containing all elements from both iterators in the order determined by the next selector
      * @see N#merge(Iterable, Iterable, java.util.function.BiFunction)
      */
@@ -3540,7 +3574,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * @param b the second iterator to merge
      * @param c the third iterator to merge
      * @param nextSelector a function that takes two elements and returns MergeResult.TAKE_FIRST
-     *                     to select the first element, or any other value to select the second element
+     *                     to select the first element, or MergeResult.TAKE_SECOND to select the second element
      * @return a sequence containing all elements from all three iterators in the order determined by the next selector
      * @see N#merge(Iterable, Iterable, java.util.function.BiFunction)
      */
@@ -3572,7 +3606,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * @param a the first sequence to merge
      * @param b the second sequence to merge
      * @param nextSelector a function that takes two elements (one from each sequence) and returns MergeResult.TAKE_FIRST
-     *                     to select the first element, or any other value to select the second element
+     *                     to select the first element, or MergeResult.TAKE_SECOND to select the second element
      * @return a sequence containing all elements from both sequences in the order determined by the next selector
      * @see N#merge(Iterable, Iterable, java.util.function.BiFunction)
      */
@@ -3603,7 +3637,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * @param b the second sequence to merge
      * @param c the third sequence to merge
      * @param nextSelector a function that takes two elements and returns MergeResult.TAKE_FIRST
-     *                     to select the first element, or any other value to select the second element
+     *                     to select the first element, or MergeResult.TAKE_SECOND to select the second element
      * @return a sequence containing all elements from all three sequences in the order determined by the next selector
      * @see N#merge(Iterable, Iterable, java.util.function.BiFunction)
      */
@@ -3990,7 +4024,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * <p>This is an intermediate operation that triggers terminal evaluation. All elements will be
      * loaded into memory to perform the distinct operation.</p>
      *
-     * <p>This method is equivalent to: {@code groupBy(Fnn.identity(), Fnn.identity(), mergeFunction).map(Fnn.value())}.</p>
+     * <p>This method is equivalent to: {@code groupBy(Fnn.identity(), Fnn.identity(), mergeFunction, Suppliers.ofLinkedHashMap()).map(Fnn.value())}.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -4057,7 +4091,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * <p>This is an intermediate operation that triggers terminal evaluation. All elements will be
      * loaded into memory to perform the distinct operation.</p>
      *
-     * <p>This method is equivalent to: {@code groupBy(keyMapper, Fnn.identity(), mergeFunction).map(Fnn.value())}.</p>
+     * <p>This method is equivalent to: {@code groupBy(keyMapper, Fnn.identity(), mergeFunction, Suppliers.ofLinkedHashMap()).map(Fnn.value())}.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -4833,6 +4867,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * @throws IllegalStateException if the sequence is already closed
      * @throws IllegalArgumentException if {@code mapper} is {@code null}
      */
+    @IntermediateOp
     public <R> Seq<R, E> mapMulti(final Throwables.BiConsumer<? super T, ? super Consumer<R>, ? extends E> mapper) throws IllegalStateException {
         assertNotClosed();
         checkArgNotNull(mapper, cs.mapper);
@@ -6845,7 +6880,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Seq<Integer, Exception> seq = Seq.of(1, 2, 3, 4, 5, 6, 7);
-     * Seq<List<Integer>> chunks = seq.split(3);
+     * Seq<List<Integer>, Exception> chunks = seq.split(3);
      * // chunks contains: [[1, 2, 3], [4, 5, 6], [7]]
      * }</pre>
      *
@@ -6868,7 +6903,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Seq<String, Exception> seq = Seq.of("a", "b", "c", "d", "e");
-     * Seq<Set<String>> chunks = seq.split(2, HashSet::new);
+     * Seq<Set<String>, Exception> chunks = seq.split(2, HashSet::new);
      * // chunks contains: [{"a", "b"}, {"c", "d"}, {"e"}]
      * }</pre>
      *
@@ -7005,12 +7040,12 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Seq<Integer, Exception> seq = Seq.of(1, 3, 5, 2, 4, 6, 7, 9);
-     * Seq<List<Integer>> groups = seq.split(n -> n % 2 == 0);
+     * Seq<List<Integer>, Exception> groups = seq.split(n -> n % 2 == 0);
      * // groups contains: [[1, 3, 5], [2, 4, 6], [7, 9]]
      * }</pre>
      *
      * @param predicate the predicate to determine the boundaries of the subsequences
-     * @return a new Seq where each element is a List of elements that satisfy the predicate
+     * @return a new Seq where each element is a List of consecutive elements having the same predicate result
      * @throws IllegalStateException if the sequence is already closed
      * @throws IllegalArgumentException if predicate is null
      */
@@ -7031,14 +7066,14 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Seq<String, Exception> seq = Seq.of("a", "ab", "abc", "d", "de");
-     * Seq<Set<String>> groups = seq.split(s -> s.length() > 1, HashSet::new);
+     * Seq<Set<String>, Exception> groups = seq.split(s -> s.length() > 1, HashSet::new);
      * // groups contains: [{"a"}, {"ab", "abc"}, {"d"}, {"de"}]
      * }</pre>
      *
      * @param <C> the type of the Collection to collect the subsequences
      * @param predicate the predicate to determine the boundaries of the subsequences
      * @param collectionSupplier the supplier to provide the Collection to collect the subsequences
-     * @return a new Seq where each element is a Collection of elements that satisfy the predicate
+     * @return a new Seq where each element is a Collection of consecutive elements having the same predicate result
      * @throws IllegalStateException if the sequence is already closed
      * @throws IllegalArgumentException if predicate or collectionSupplier is null
      */
@@ -7176,7 +7211,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Seq<Integer, Exception> seq = Seq.of(1, 2, 3, 4, 5);
-     * Seq<Seq<Integer, E>, E> split = seq.splitAt(3);
+     * Seq<Seq<Integer, Exception>, Exception> split = seq.splitAt(3);
      * // split contains two sequences:
      * // First sequence: [1, 2, 3]
      * // Second sequence: [4, 5]
@@ -7263,7 +7298,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Seq<Integer, Exception> seq = Seq.of(1, 2, 3, 4, 5);
-     * Seq<Seq<Integer, E>, E> split = seq.splitAt(n -> n > 3);
+     * Seq<Seq<Integer, Exception>, Exception> split = seq.splitAt(n -> n > 3);
      * // split contains two sequences:
      * // First sequence: [1, 2, 3]
      * // Second sequence: [4, 5]
@@ -7277,6 +7312,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
     @IntermediateOp
     public Seq<Seq<T, E>, E> splitAt(final Throwables.Predicate<? super T, ? extends E> where) throws IllegalStateException {
         assertNotClosed();
+        checkArgNotNull(where, cs.where);
 
         final Throwables.Iterator<T, E> iter = elements;
 
@@ -7416,7 +7452,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Seq<Integer, Exception> seq = Seq.of(1, 2, 3, 4, 5);
-     * Seq<List<Integer>> windows = seq.sliding(3);
+     * Seq<List<Integer>, Exception> windows = seq.sliding(3);
      * // windows contains: [[1, 2, 3], [2, 3, 4], [3, 4, 5]]
      * }</pre>
      *
@@ -7440,7 +7476,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Seq<String, Exception> seq = Seq.of("a", "b", "c", "d");
-     * Seq<Set<String>> windows = seq.sliding(2, HashSet::new);
+     * Seq<Set<String>, Exception> windows = seq.sliding(2, HashSet::new);
      * // windows contains: [{"a", "b"}, {"b", "c"}, {"c", "d"}]
      * }</pre>
      *
@@ -7629,6 +7665,9 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
 
                 if (len == prevSize) {
                     return 0;
+                } else if (increment >= windowSize) {
+                    // Gap elements between windows must not be counted as starting an extra window.
+                    return len / increment + (len % increment > 0 ? 1 : 0);
                 } else if (len <= windowSize) {
                     return 1;
                 } else {
@@ -7795,6 +7834,9 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
 
                 if (len == prevSize) {
                     return 0;
+                } else if (increment >= windowSize) {
+                    // Gap elements between windows must not be counted as starting an extra window.
+                    return len / increment + (len % increment > 0 ? 1 : 0);
                 } else if (len <= windowSize) {
                     return 1;
                 } else {
@@ -7936,6 +7978,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * @throws IllegalArgumentException if <i>n</i> is negative or onSkip is null
      * @see #skip(long)
      */
+    @IntermediateOp
     public Seq<T, E> skip(final long n, final Throwables.Consumer<? super T, ? extends E> onSkip) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
         checkArgNotNegative(n, cs.n);
@@ -8721,15 +8764,17 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * // empty.count() returns 0
      * }</pre>
      *
-     * @param rnd the random number generator to use for shuffling the elements
+     * @param rnd the random number generator to use for shuffling the elements. Must not be {@code null}.
      * @return a new {@code Seq} with the elements shuffled
      * @throws IllegalStateException if the sequence is already closed
+     * @throws IllegalArgumentException if {@code rnd} is {@code null}
      * @see #shuffled()
      */
     @IntermediateOp
     @TerminalOpTriggered
-    public Seq<T, E> shuffled(final Random rnd) throws IllegalStateException {
+    public Seq<T, E> shuffled(final Random rnd) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
+        checkArgNotNull(rnd, cs.rnd);
 
         return lazyLoad(a -> {
             N.shuffle(a, rnd);
@@ -9008,7 +9053,6 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
 
     /**
      * Returns a new {@code Seq} with the elements sorted in reverse order according to integer values extracted by the provided key extractor function.
-     * Nulls are considered bigger than {@code non-null} values in reverse order.
      *
      * <p>This is an intermediate operation that triggers terminal evaluation. All elements will be
      * loaded into memory to perform the sort.</p>
@@ -9039,7 +9083,6 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
 
     /**
      * Returns a new {@code Seq} with the elements sorted in reverse order according to long values extracted by the provided key extractor function.
-     * Nulls are considered bigger than {@code non-null} values in reverse order.
      *
      * <p>This is an intermediate operation that triggers terminal evaluation. All elements will be
      * loaded into memory to perform the sort.</p>
@@ -9067,7 +9110,6 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
 
     /**
      * Returns a new {@code Seq} with the elements sorted in reverse order according to double values extracted by the provided key extractor function.
-     * Nulls are considered bigger than {@code non-null} values in reverse order.
      *
      * <p>This is an intermediate operation that triggers terminal evaluation. All elements will be
      * loaded into memory to perform the sort.</p>
@@ -9389,12 +9431,41 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * // empty.count() returns 0
      * }</pre>
      *
+     * <p><b>How it compares to the other time-based intermediate operators:</b></p>
+     * <table border="1">
+     *   <caption>{@code delay} vs. {@code rateLimited} vs. {@code debounce}</caption>
+     *   <tr><th>Operator</th><th>Effect</th><th>Emits every element?</th><th>Drops elements?</th><th>Typical use</th></tr>
+     *   <tr>
+     *     <td>{@link #delay(Duration)}</td>
+     *     <td>Sleeps a fixed {@code duration} before each element except the first (constant spacing between elements)</td>
+     *     <td>Yes</td>
+     *     <td>No</td>
+     *     <td>Pace a sequence with a fixed gap between elements</td>
+     *   </tr>
+     *   <tr>
+     *     <td>{@link #rateLimited(double)} / {@link #rateLimited(RateLimiter)}</td>
+     *     <td>Blocks until a permit is available so throughput stays at or below a target rate (permits per second)</td>
+     *     <td>Yes</td>
+     *     <td>No</td>
+     *     <td>Cap throughput against a rate-limited resource</td>
+     *   </tr>
+     *   <tr>
+     *     <td>{@link #debounce(Duration)}</td>
+     *     <td>Keeps the latest element in a burst; emits it when a later pull observes a quiet gap, or when upstream ends</td>
+     *     <td>No</td>
+     *     <td>Yes (superseded elements)</td>
+     *     <td>Collapse rapid bursts into a single trailing value</td>
+     *   </tr>
+     * </table>
+     *
      * @param permitsPerSecond the number of permits per second to allow, must be positive
      * @return a new {@code Seq} that is rate-limited to the specified number of permits per second
      * @throws IllegalStateException if the sequence is already closed
      * @throws IllegalArgumentException if permitsPerSecond is not positive
-     * @see RateLimiter
+     * @see #delay(Duration)
+     * @see #debounce(Duration)
      * @see #rateLimited(RateLimiter)
+     * @see RateLimiter
      */
     @IntermediateOp
     public Seq<T, E> rateLimited(final double permitsPerSecond) throws IllegalStateException {
@@ -9421,12 +9492,40 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * // empty.count() returns 0
      * }</pre>
      *
+     * <p><b>How it compares to the other time-based intermediate operators:</b></p>
+     * <table border="1">
+     *   <caption>{@code delay} vs. {@code rateLimited} vs. {@code debounce}</caption>
+     *   <tr><th>Operator</th><th>Effect</th><th>Emits every element?</th><th>Drops elements?</th><th>Typical use</th></tr>
+     *   <tr>
+     *     <td>{@link #delay(Duration)}</td>
+     *     <td>Sleeps a fixed {@code duration} before each element except the first (constant spacing between elements)</td>
+     *     <td>Yes</td>
+     *     <td>No</td>
+     *     <td>Pace a sequence with a fixed gap between elements</td>
+     *   </tr>
+     *   <tr>
+     *     <td>{@link #rateLimited(double)} / {@link #rateLimited(RateLimiter)}</td>
+     *     <td>Blocks until a permit is available so throughput stays at or below a target rate (permits per second)</td>
+     *     <td>Yes</td>
+     *     <td>No</td>
+     *     <td>Cap throughput against a rate-limited resource</td>
+     *   </tr>
+     *   <tr>
+     *     <td>{@link #debounce(Duration)}</td>
+     *     <td>Keeps the latest element in a burst; emits it when a later pull observes a quiet gap, or when upstream ends</td>
+     *     <td>No</td>
+     *     <td>Yes (superseded elements)</td>
+     *     <td>Collapse rapid bursts into a single trailing value</td>
+     *   </tr>
+     * </table>
+     *
      * @param rateLimiter the rate limiter to use
      * @return a new {@code Seq} that is rate-limited to the specified rate limiter
      * @throws IllegalStateException if the sequence is already closed
      * @throws IllegalArgumentException if the rate limiter is null
-     * @see #rateLimited(double)
      * @see #delay(Duration)
+     * @see #debounce(Duration)
+     * @see #rateLimited(double)
      */
     @IntermediateOp
     public Seq<T, E> rateLimited(final RateLimiter rateLimiter) throws IllegalStateException, IllegalArgumentException {
@@ -9456,16 +9555,45 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * // empty.count() returns 0
      * }</pre>
      *
+     * <p><b>How it compares to the other time-based intermediate operators:</b></p>
+     * <table border="1">
+     *   <caption>{@code delay} vs. {@code rateLimited} vs. {@code debounce}</caption>
+     *   <tr><th>Operator</th><th>Effect</th><th>Emits every element?</th><th>Drops elements?</th><th>Typical use</th></tr>
+     *   <tr>
+     *     <td>{@link #delay(Duration)}</td>
+     *     <td>Sleeps a fixed {@code duration} before each element except the first (constant spacing between elements)</td>
+     *     <td>Yes</td>
+     *     <td>No</td>
+     *     <td>Pace a sequence with a fixed gap between elements</td>
+     *   </tr>
+     *   <tr>
+     *     <td>{@link #rateLimited(double)} / {@link #rateLimited(RateLimiter)}</td>
+     *     <td>Blocks until a permit is available so throughput stays at or below a target rate (permits per second)</td>
+     *     <td>Yes</td>
+     *     <td>No</td>
+     *     <td>Cap throughput against a rate-limited resource</td>
+     *   </tr>
+     *   <tr>
+     *     <td>{@link #debounce(Duration)}</td>
+     *     <td>Keeps the latest element in a burst; emits it when a later pull observes a quiet gap, or when upstream ends</td>
+     *     <td>No</td>
+     *     <td>Yes (superseded elements)</td>
+     *     <td>Collapse rapid bursts into a single trailing value</td>
+     *   </tr>
+     * </table>
+     *
      * @param duration the duration to delay each element
      * @return a new {@code Seq} with each element delayed by the specified duration
      * @throws IllegalStateException if the sequence is already closed
      * @throws IllegalArgumentException if the duration is null
+     * @see #debounce(Duration)
      * @see #rateLimited(double)
+     * @see #rateLimited(RateLimiter)
      */
     @IntermediateOp
     public Seq<T, E> delay(final Duration duration) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
-        checkArgNotNull(duration, cs.delay);
+        checkArgNotNull(duration, cs.duration);
 
         final long millis = duration.toMillis();
         final Throwables.Consumer<T, E> action = new Throwables.Consumer<>() {
@@ -9489,6 +9617,9 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * The delay is applied before emitting each element after the first one.
      * This method is useful for simulating time-based processing or avoiding overwhelming downstream systems.
      *
+     * <p><b>Note:</b> the {@link java.time.Duration} is converted to milliseconds (via
+     * {@link java.time.Duration#toMillis()}); any sub-millisecond precision is silently truncated.</p>
+     *
      * <br />
      * This is an intermediate operation and will not close the sequence.
      *
@@ -9499,109 +9630,194 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * // delayed.forEach(System.out::println); // prints each element with 500ms delay
      * }</pre>
      *
+     * <p><b>How it compares to the other time-based intermediate operators:</b></p>
+     * <table border="1">
+     *   <caption>{@code delay} vs. {@code rateLimited} vs. {@code debounce}</caption>
+     *   <tr><th>Operator</th><th>Effect</th><th>Emits every element?</th><th>Drops elements?</th><th>Typical use</th></tr>
+     *   <tr>
+     *     <td>{@link #delay(Duration)}</td>
+     *     <td>Sleeps a fixed {@code duration} before each element except the first (constant spacing between elements)</td>
+     *     <td>Yes</td>
+     *     <td>No</td>
+     *     <td>Pace a sequence with a fixed gap between elements</td>
+     *   </tr>
+     *   <tr>
+     *     <td>{@link #rateLimited(double)} / {@link #rateLimited(RateLimiter)}</td>
+     *     <td>Blocks until a permit is available so throughput stays at or below a target rate (permits per second)</td>
+     *     <td>Yes</td>
+     *     <td>No</td>
+     *     <td>Cap throughput against a rate-limited resource</td>
+     *   </tr>
+     *   <tr>
+     *     <td>{@link #debounce(Duration)}</td>
+     *     <td>Keeps the latest element in a burst; emits it when a later pull observes a quiet gap, or when upstream ends</td>
+     *     <td>No</td>
+     *     <td>Yes (superseded elements)</td>
+     *     <td>Collapse rapid bursts into a single trailing value</td>
+     *   </tr>
+     * </table>
+     *
      * @param duration the duration to delay each element
      * @return a new {@code Seq} with each element delayed by the specified duration
      * @throws IllegalStateException if the sequence is already closed
+     * @throws IllegalArgumentException if the duration is null
+     * @see #debounce(Duration)
      * @see #rateLimited(double)
+     * @see #rateLimited(RateLimiter)
      */
     @IntermediateOp
     public Seq<T, E> delay(final java.time.Duration duration) throws IllegalStateException, IllegalArgumentException {
-        return delay(Duration.ofMillis(duration.toMillis()));
+        final Duration durationToUse = duration == null ? null : Duration.ofMillis(duration.toMillis()); // to throw the same exception as the other overload for a null duration.
+
+        return delay(durationToUse);
     }
 
     /**
-     * Returns a new {@code Seq} that limits elements to at most {@code maxWindowSize} within each
-     * time window of the specified {@code duration}. Elements exceeding the limit within a window
-     * are filtered out (dropped) until the window advances.
+     * Returns a new {@code Seq} that performs pull-based trailing debouncing: it keeps the latest pulled
+     * element and emits it when a later upstream pull shows that no newer element arrived for at least the
+     * specified {@code duration}, or when the upstream is exhausted.
      *
-     * <p>The returned sequence will allow at most {@code maxWindowSize} elements to pass through within
-     * each time window of the specified {@code duration}. Once the limit is reached for the current window,
-     * subsequent elements are filtered out until the time window advances. When the elapsed time exceeds
-     * the duration, the window slides forward and the element counter resets, allowing a new burst of elements.
+     * <p>When elements are pulled rapidly &mdash; a "burst" in which each element arrives less than
+     * {@code duration} after the previous one &mdash; all but the most recent element of the burst are
+     * discarded; the most recent element survives. It is emitted when a later pull observes a gap of at least
+     * {@code duration}, or when the upstream is exhausted. The final element of the sequence is always emitted
+     * without waiting for an additional timer. Arrival time is measured with {@link System#currentTimeMillis()}
+     * at the moment each element is pulled from the upstream, so this operator is only meaningful for sequences
+     * whose upstream produces elements over time. For a sequence that produces all of its elements immediately
+     * (e.g. one over an in-memory collection), every gap is effectively zero, so only the single last element
+     * is emitted.
      *
-     * <p>This differs from {@link #rateLimited(double)} which spreads permits evenly over time. The {@code debounce}
-     * method allows bursting at the start of each window, making it suitable for scenarios where you want to
-     * limit the total number of operations within a time period rather than enforcing a steady rate.
+     * <p>This differs from {@link #rateLimited(double)}, which spreads permits evenly over time. It is also
+     * not a scheduler-based debounce: it does not start a background timer, and pending elements are emitted
+     * only while downstream iteration pulls from this sequence.
      *
      * <br />
      * This is an intermediate operation and will not close the sequence.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * // Allow at most 5 elements per second
-     * Seq.of(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)
-     *     .debounce(5, Duration.ofSeconds(1))
-     *     .forEach(Fn.println());   // Only first 5 elements pass through immediately
-     *
-     * // Throttle log messages to at most 10 per minute
-     * Seq.of(logMessages)
-     *     .debounce(10, Duration.ofMinutes(1))
-     *     .forEach(msg -> logger.info(msg));
-     *
-     * // Limit API requests to 100 per hour
-     * Seq.of(requests)
-     *     .debounce(100, Duration.ofHours(1))
-     *     .forEach(this::processRequest);
+     * // Collapse rapid bursts: keep the latest value and emit it when iteration observes a 300ms quiet gap.
+     * Seq.of(keystrokes)
+     *     .debounce(Duration.ofMillis(300))
+     *     .forEach(text -> performSearch(text));
      * }</pre>
      *
      * <p><b>Behavior Details:</b></p>
      * <ul>
-     *   <li>The time window starts when the first element is processed</li>
-     *   <li>Elements within the limit are emitted immediately without delay</li>
-     *   <li>Elements exceeding the limit within the window are silently dropped (filtered out)</li>
-     *   <li>When the current time exceeds the window duration, the window advances and the counter resets</li>
-     *   <li>The implementation uses {@link System#currentTimeMillis()} for time tracking</li>
+     *   <li>An element is emitted only when a later pull observes that the next element arrived at least
+     *       {@code duration} later, or when it is the final pending element of the sequence.</li>
+     *   <li>Within a burst (consecutive elements less than {@code duration} apart), only the most recent
+     *       element survives; the earlier ones are silently discarded.</li>
+     *   <li>The relative order of the surviving elements is preserved.</li>
+     *   <li>Arrival time is tracked with {@link System#currentTimeMillis()} at pull time.</li>
      * </ul>
      *
-     * <p><b>Comparison with {@code rateLimited}:</b></p>
-     * <pre>{@code
-     * // debounce: allows bursting, then blocks until next window
-     * // Timeline: [e1,e2,e3,e4,e5]----gap----[e6,e7,e8,e9,e10]...
-     * seq.debounce(5, Duration.ofSeconds(1));
+     * <p><b>How it compares to the other time-based intermediate operators:</b></p>
+     * <table border="1">
+     *   <caption>{@code delay} vs. {@code rateLimited} vs. {@code debounce}</caption>
+     *   <tr><th>Operator</th><th>Effect</th><th>Emits every element?</th><th>Drops elements?</th><th>Typical use</th></tr>
+     *   <tr>
+     *     <td>{@link #delay(Duration)}</td>
+     *     <td>Sleeps a fixed {@code duration} before each element except the first (constant spacing between elements)</td>
+     *     <td>Yes</td>
+     *     <td>No</td>
+     *     <td>Pace a sequence with a fixed gap between elements</td>
+     *   </tr>
+     *   <tr>
+     *     <td>{@link #rateLimited(double)} / {@link #rateLimited(RateLimiter)}</td>
+     *     <td>Blocks until a permit is available so throughput stays at or below a target rate (permits per second)</td>
+     *     <td>Yes</td>
+     *     <td>No</td>
+     *     <td>Cap throughput against a rate-limited resource</td>
+     *   </tr>
+     *   <tr>
+     *     <td>{@link #debounce(Duration)}</td>
+     *     <td>Keeps the latest element in a burst; emits it when a later pull observes a quiet gap, or when upstream ends</td>
+     *     <td>No</td>
+     *     <td>Yes (superseded elements)</td>
+     *     <td>Collapse rapid bursts into a single trailing value</td>
+     *   </tr>
+     * </table>
      *
-     * // rateLimited: spreads elements evenly over time
-     * // Timeline: e1--e2--e3--e4--e5--e6--e7--e8--e9--e10...
-     * seq.rateLimited(5.0);  // 5 per second = one every 200ms
-     * }</pre>
-     *
-     * @param maxWindowSize the maximum number of elements to allow within each time window. Must be positive.
-     * @param duration the length of each time window. Must not be {@code null} and must have a positive
-     *                 millisecond value.
-     * @return a new {@code Seq} that limits elements to {@code maxWindowSize} per {@code duration} window
-     * @throws IllegalArgumentException if {@code maxWindowSize} is not positive, or if {@code duration}
-     *         has a non-positive millisecond value
+     * @param duration the quiet period used to decide whether a pending element has been superseded.
+     *                 Must not be {@code null} and must have a positive millisecond value.
+     * @return a new {@code Seq} that emits the most recent element of each burst when a later pull observes
+     *         a quiet gap, and always emits the final pending element
+     * @throws IllegalStateException if the sequence is already closed
+     * @throws IllegalArgumentException if {@code duration} is {@code null} or has a non-positive
+     *         millisecond value
      * @see #rateLimited(double)
      * @see #rateLimited(RateLimiter)
      * @see #delay(Duration)
-     * @see #filter(Throwables.Predicate)
+     * @see <a href="http://reactivex.io/documentation/operators/debounce.html">ReactiveX#debounce</a>
      */
     @IntermediateOp
-    public Seq<T, E> debounce(final int maxWindowSize, final Duration duration) {
-        checkArgPositive(maxWindowSize, cs.maxWindowSize);
+    public Seq<T, E> debounce(final Duration duration) throws IllegalStateException {
+        assertNotClosed();
         checkArgNotNull(duration, cs.duration);
         checkArgPositive(duration.toMillis(), cs.duration);
 
-        final Throwables.Predicate<T, E> p = new Throwables.Predicate<>() {
+        return create(new Throwables.Iterator<>() {
+            private final Throwables.Iterator<T, E> iter = iteratorEx();
             private final long durationMillis = duration.toMillis();
-            private long cnt = 0;
-            private long startTime = 0;
+            private T prev = null; // the most recent element of the current burst, awaiting a quiet gap
+            private boolean hasPrev = false;
+            private long prevTime = 0;
+            private T next = null;
+            private boolean hasNext = false;
 
             @Override
-            public boolean test(final T e) {
-                final long now = System.currentTimeMillis();
-
-                if (startTime == 0) {
-                    startTime = now;
-                } else if (now - startTime > durationMillis) {
-                    startTime = startTime + (now - startTime) / durationMillis * durationMillis;
-                    cnt = 0;
+            public boolean hasNext() throws E {
+                if (hasNext) {
+                    return true;
                 }
 
-                return cnt++ < maxWindowSize;
-            }
-        };
+                while (iter.hasNext()) {
+                    final T val = iter.next();
+                    final long now = System.currentTimeMillis();
 
-        return filter(p);
+                    if (!hasPrev) {
+                        prev = val;
+                        prevTime = now;
+                        hasPrev = true;
+                    } else if (now - prevTime >= durationMillis) {
+                        // prev was followed by a quiet gap >= duration -> emit it; val starts the next burst.
+                        next = prev;
+                        hasNext = true;
+                        prev = val;
+                        prevTime = now;
+                        return true;
+                    } else {
+                        // val arrived within the quiet window -> it supersedes prev.
+                        prev = val;
+                        prevTime = now;
+                    }
+                }
+
+                // Source exhausted: the most recent pending element is always emitted.
+                if (hasPrev) {
+                    next = prev;
+                    hasNext = true;
+                    hasPrev = false;
+                    prev = null;
+                    return true;
+                }
+
+                return false;
+            }
+
+            @Override
+            public T next() throws E {
+                if (!hasNext()) {
+                    throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
+                }
+
+                hasNext = false;
+                final T res = next;
+                next = null;
+                return res;
+            }
+        }, closeHandlers);
     }
 
     /**
@@ -9824,7 +10040,8 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
         //noinspection resource
         return Seq.<Supplier<Throwables.Iterator<T, E>>, E> just(supplier) //
                 .map(Supplier::get)
-                .flatMap(iter -> create(iter, sorted, cmp, mergeCloseHandlers(iter::close, closeHandlers, true)));
+                .flatMap(iter -> create(iter, sorted, cmp, mergeCloseHandlers(iter::close, closeHandlers, true)))
+                .onClose(this::close); // the source's close handlers must also run when the result is closed before any element is pulled
     }
 
     /**
@@ -10481,6 +10698,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
     public <E2 extends Exception> void forEachUntil(final Throwables.BiConsumer<? super T, MutableBoolean, E2> action)
             throws IllegalStateException, IllegalArgumentException, E, E2 {
         assertNotClosed();
+        checkArgNotNull(action, cs.action);
 
         final MutableBoolean flagToBreak = MutableBoolean.of(false);
         final Throwables.Consumer<? super T, E2> tmp = t -> action.accept(t, flagToBreak);
@@ -10511,7 +10729,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * @param flagToBreak a MutableBoolean flag to control iteration. Set to {@code true} to stop.
      * @param action a Consumer to be applied to each element while the flag is {@code false}
      * @throws IllegalStateException if the sequence is already closed
-     * @throws IllegalArgumentException if the action is null
+     * @throws IllegalArgumentException if {@code flagToBreak} or {@code action} is {@code null}
      * @throws E if an exception occurs during iteration
      * @throws E2 if the action throws an exception
      * @see #forEachUntil(Throwables.BiConsumer)
@@ -10521,6 +10739,8 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
     public <E2 extends Exception> void forEachUntil(final MutableBoolean flagToBreak, final Throwables.Consumer<? super T, E2> action)
             throws IllegalStateException, IllegalArgumentException, E, E2 {
         assertNotClosed();
+        checkArgNotNull(flagToBreak, "flagToBreak");
+        checkArgNotNull(action, cs.action);
 
         //noinspection resource
         takeWhile(value -> flagToBreak.isFalse()).forEach(action);
@@ -10573,6 +10793,9 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * <li>Pairs processed: (a,b), (b,c), (c,d), (d,e), (e,f)</li>
      * </ul>
      *
+     * <p>If a pair extends past the end of the sequence (i.e. the second element of the last pair is
+     * missing), the missing trailing element is passed as {@code null}.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Process non-overlapping pairs
@@ -10594,9 +10817,10 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
     public <E2 extends Exception> void forEachPair(final int increment, final Throwables.BiConsumer<? super T, ? super T, E2> action)
             throws IllegalStateException, IllegalArgumentException, E, E2 {
         assertNotClosed();
+        checkArgPositive(increment, cs.increment);
+        checkArgNotNull(action, cs.action);
 
         final int windowSize = 2;
-        checkArgPositive(increment, cs.increment);
 
         try {
             boolean isFirst = true;
@@ -10675,6 +10899,9 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * <li>Triples processed: (a,b,c), (b,c,d), (c,d,e), (d,e,f), (e,f,g), (f,g,h), (g,h,i)</li>
      * </ul>
      *
+     * <p>If a triple extends past the end of the sequence (i.e. the last triple has fewer than three
+     * elements available), the missing trailing elements are passed as {@code null}.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Process non-overlapping triples
@@ -10696,9 +10923,10 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
     public <E2 extends Exception> void forEachTriple(final int increment, final Throwables.TriConsumer<? super T, ? super T, ? super T, E2> action)
             throws IllegalStateException, IllegalArgumentException, E, E2 {
         assertNotClosed();
+        checkArgPositive(increment, cs.increment);
+        checkArgNotNull(action, cs.action);
 
         final int windowSize = 3;
-        checkArgPositive(increment, cs.increment);
 
         try {
             boolean isFirst = true;
@@ -11143,7 +11371,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * Optional<Integer> firstEven = seq.findAny(n -> n % 2 == 0);
      * // firstEven.get() == 2
      *
-     * Optional<Integer> notFound = seq.findAny(n -> n > 100);
+     * Optional<Integer> notFound = Seq.<Integer, Exception>of(1, 3, 5, 2, 7).findAny(n -> n > 100);
      * // notFound.isEmpty() == true
      * }</pre>
      *
@@ -11595,7 +11823,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * Seq<Integer, Exception> seq = Seq.of(1, 2, 3, 4, 5, 6, 7, 8, 9, 10);
      * Optional<Map<Percentage, Integer>> percentiles = seq.percentiles();
      * // percentiles.get() contains mappings like:
-     * // {0%=1, 25%=3, 50%=6, 75%=8, 99%=10}
+     * // {0.0001%=1, 25%=3, 50%=6, 75%=8, 99%=10}
      * }</pre>
      *
      * @return an {@code Optional} containing a map where keys are {@code Percentage} values and values are the
@@ -11604,6 +11832,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * @throws E if an exception occurs during iteration
      * @see N#percentilesOfSorted(Object[])
      */
+    @TerminalOp
     public Optional<Map<Percentage, T>> percentiles() throws IllegalStateException, E {
         assertNotClosed();
 
@@ -11789,7 +12018,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Seq<String, Exception> seq1 = Seq.of("single");
-     * Optional<String> only1 = seq1.onlyOne();   // returns only1.get() == "single"
+     * Optional<String> only1 = seq1.onlyOne();   // only1.get() == "single"
      *
      * Seq<String, Exception> seq2 = Seq.of("first", "second");
      * seq2.onlyOne();   // throws TooManyElementsException
@@ -12926,6 +13155,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
     @TerminalOp
     public <E2 extends Exception> Map<Boolean, List<T>> partitionTo(final Throwables.Predicate<? super T, E2> predicate) throws IllegalStateException, E, E2 {
         assertNotClosed();
+        checkArgNotNull(predicate, cs.predicate);
 
         return partitionTo(predicate, Collectors.toList());
     }
@@ -12961,6 +13191,8 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
     public <D, E2 extends Exception> Map<Boolean, D> partitionTo(final Throwables.Predicate<? super T, E2> predicate,
             final Collector<? super T, ?, D> downstream) throws IllegalStateException, E, E2 {
         assertNotClosed();
+        checkArgNotNull(predicate, cs.predicate);
+        checkArgNotNull(downstream, cs.downstream);
 
         final Function<Object, D> downstreamFinisher = (Function<Object, D>) downstream.finisher();
 
@@ -13902,7 +14134,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * // Reuse a Joiner
      * Joiner joiner = Joiner.with(", ", "[", "]");
      * Seq.of("a", "b", "c").joinTo(joiner);
-     * String result = joiner.toString();   // returns "[a, b, c]"
+     * String result = joiner.toString();   // result == "[a, b, c]"
      * }</pre>
      *
      * @param joiner the Joiner to append the elements to
@@ -14168,6 +14400,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
     @IntermediateOp
     public <R> Seq<R, E> sps(final Function<? super Stream<T>, ? extends Stream<? extends R>> ops) throws IllegalStateException {
         assertNotClosed();
+        checkArgNotNull(ops, cs.ops);
 
         return create(ops.apply(this.stream().parallel()), true);
     }
@@ -14215,6 +14448,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
     public <R> Seq<R, E> sps(final int maxThreadNum, final Function<? super Stream<T>, ? extends Stream<? extends R>> ops) throws IllegalStateException {
         assertNotClosed();
         checkArgPositive(maxThreadNum, cs.maxThreadNum);
+        checkArgNotNull(ops, cs.ops);
 
         return create(ops.apply(this.stream().parallel(maxThreadNum)), true);
     }
@@ -14269,6 +14503,8 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
             throws IllegalStateException {
         assertNotClosed();
         checkArgPositive(maxThreadNum, cs.maxThreadNum);
+        checkArgNotNull(executor, cs.executor);
+        checkArgNotNull(ops, cs.ops);
 
         return create(ops.apply(this.stream().parallel(maxThreadNum, executor)), true);
     }
@@ -14308,7 +14544,13 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
         assertNotClosed();
         checkArgNotNull(terminalAction, cs.terminalAction);
 
-        return ContinuableFuture.run(() -> terminalAction.accept(Seq.this));
+        return ContinuableFuture.run(() -> {
+            try {
+                terminalAction.accept(Seq.this);
+            } finally {
+                Seq.this.close();
+            }
+        });
     }
 
     /**
@@ -14356,7 +14598,13 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
         checkArgNotNull(terminalAction, cs.terminalAction);
         checkArgNotNull(executor, cs.executor);
 
-        return ContinuableFuture.run(() -> terminalAction.accept(Seq.this), executor);
+        return ContinuableFuture.run(() -> {
+            try {
+                terminalAction.accept(Seq.this);
+            } finally {
+                Seq.this.close();
+            }
+        }, executor);
     }
 
     /**
@@ -14402,7 +14650,13 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
         assertNotClosed();
         checkArgNotNull(terminalAction, cs.terminalAction);
 
-        return ContinuableFuture.call(() -> terminalAction.apply(Seq.this));
+        return ContinuableFuture.call(() -> {
+            try {
+                return terminalAction.apply(Seq.this);
+            } finally {
+                Seq.this.close();
+            }
+        });
     }
 
     /**
@@ -14422,7 +14676,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * ExecutorService ioExecutor = Executors.newCachedThreadPool();
      * ContinuableFuture<Map<String, List<Item>>> future = seq.asyncCall(s ->
      *     s.filter(item -> item.isActive())
-     *      .groupBy(Item::getCategory),
+     *      .groupTo(Item::getCategory),
      *     ioExecutor
      * );
      *
@@ -14454,7 +14708,13 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
         checkArgNotNull(terminalAction, cs.terminalAction);
         checkArgNotNull(executor, cs.executor);
 
-        return ContinuableFuture.call(() -> terminalAction.apply(Seq.this), executor);
+        return ContinuableFuture.call(() -> {
+            try {
+                return terminalAction.apply(Seq.this);
+            } finally {
+                Seq.this.close();
+            }
+        }, executor);
     }
 
     /**
@@ -15028,7 +15288,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
 
     private void assertNotClosed() {
         if (isClosed) {
-            throw new IllegalStateException("This stream is already terminated.");
+            throw new IllegalStateException("This sequence is already closed.");
         }
     }
 
@@ -15208,7 +15468,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
                 }
 
                 if (eHolder.value() != null) {
-                    setStopFlagAndThrowException(eHolder, onGoing);
+                    Seq.<E> setStopFlagAndThrowException(eHolder, onGoing);
                 }
 
                 return next != null;
@@ -15406,13 +15666,21 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
         onGoing.setFalse();
     }
 
-    private static void setStopFlagAndThrowException(final Holder<Throwable> errorHolder, final MutableBoolean onGoing) {
+    private static <E extends Exception> void setStopFlagAndThrowException(final Holder<Throwable> errorHolder, final MutableBoolean onGoing) throws E {
         onGoing.setFalse();
 
         //noinspection SynchronizationOnLocalVariableOrMethodParameter
         synchronized (errorHolder) { //NOSONAR
             if (errorHolder.value() != null) {
-                throw toRuntimeException(errorHolder.getAndSet(null), false);
+                final Throwable cause = errorHolder.getAndSet(null);
+
+                if (cause instanceof Exception) {
+                    // Restore the source's checked exception so the declared "throws E" contract holds
+                    // across the async boundary (mirrors the create(Stream, true) wrapper used by sps).
+                    throw (E) ExceptionUtil.tryToGetOriginalCheckedException((Exception) cause);
+                }
+
+                throw toRuntimeException(cause, false);
             }
         }
     }

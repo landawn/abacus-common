@@ -282,6 +282,45 @@ public class JsonMappersTest extends TestBase {
     }
 
     @Test
+    public void testToJson_OutputStream_closedByDefaultAutoClose() {
+        final boolean[] closed = { false };
+        ByteArrayOutputStream baos = new ByteArrayOutputStream() {
+            @Override
+            public void close() throws IOException {
+                closed[0] = true;
+                super.close();
+            }
+        };
+
+        JsonMappers.toJson(new Person("AutoClose", 1), baos);
+
+        // Jackson's JsonGenerator.Feature.AUTO_CLOSE_TARGET is enabled by default,
+        // so the stream is closed after writing (as documented).
+        Assertions.assertTrue(closed[0]);
+        Assertions.assertTrue(baos.toString().contains("AutoClose"));
+    }
+
+    @Test
+    public void testFromJson_InputStream_closedByDefaultAutoClose() {
+        final boolean[] closed = { false };
+        byte[] bytes = "{\"name\":\"AutoClose\",\"age\":2}".getBytes(StandardCharsets.UTF_8);
+        ByteArrayInputStream bais = new ByteArrayInputStream(bytes) {
+            @Override
+            public void close() throws IOException {
+                closed[0] = true;
+                super.close();
+            }
+        };
+
+        Person person = JsonMappers.fromJson(bais, Person.class);
+
+        // Jackson's JsonParser.Feature.AUTO_CLOSE_SOURCE is enabled by default,
+        // so the source stream is closed after reading (as documented).
+        Assertions.assertTrue(closed[0]);
+        Assertions.assertEquals("AutoClose", person.name);
+    }
+
+    @Test
     public void testToJson_ObjectToWriter() throws IOException {
         Person person = new Person("Grace", 29);
         StringWriter writer = new StringWriter();

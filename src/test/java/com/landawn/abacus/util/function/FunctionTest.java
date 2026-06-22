@@ -44,7 +44,7 @@ public class FunctionTest extends TestBase {
     @Test
     public void testComposeRejectsNullFunctionImmediately() {
         Function<Integer, String> toString = n -> String.valueOf(n);
-        assertThrows(NullPointerException.class, () -> toString.compose(null));
+        assertThrows(IllegalArgumentException.class, () -> toString.compose(null));
     }
 
     @Test
@@ -73,7 +73,7 @@ public class FunctionTest extends TestBase {
     @Test
     public void testAndThenRejectsNullFunctionImmediately() {
         Function<String, Integer> length = String::length;
-        assertThrows(NullPointerException.class, () -> length.andThen(null));
+        assertThrows(IllegalArgumentException.class, () -> length.andThen(null));
     }
 
     @Test

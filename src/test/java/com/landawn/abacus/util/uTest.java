@@ -3534,7 +3534,7 @@ public class uTest extends TestBase {
     }
 
     @Test
-    @DisplayName("Optional.of(null) throws NPE; Nullable.of(null) is present and null-valued")
+    @DisplayName("Optional.of(null) throws IllegalArgumentException; Nullable.of(null) is present and null-valued")
     public void testNullSemantics_OfFactories() {
         assertThrows(NullPointerException.class, () -> Optional.of((Object) null));
         Nullable<String> n = Nullable.of((String) null);
@@ -3838,8 +3838,10 @@ public class uTest extends TestBase {
         assertThrows(NullPointerException.class, () -> Optional.of("v").flatMap(s -> null));
         assertThrows(NullPointerException.class, () -> OptionalInt.of(1).flatMap(i -> null));
         assertThrows(NullPointerException.class, () -> OptionalLong.of(1L).flatMap(i -> null));
+        assertThrows(NullPointerException.class, () -> OptionalFloat.of(1f).flatMap(i -> null));
         assertThrows(NullPointerException.class, () -> OptionalDouble.of(1d).flatMap(i -> null));
         assertThrows(NullPointerException.class, () -> Nullable.of("v").flatMap(s -> null));
+        assertThrows(NullPointerException.class, () -> Nullable.of("v").flatMapIfNotNull(s -> null));
     }
 
     @Test
@@ -3848,7 +3850,13 @@ public class uTest extends TestBase {
         assertThrows(NullPointerException.class, () -> Optional.empty().or(() -> null));
         assertThrows(NullPointerException.class, () -> OptionalInt.empty().or(() -> null));
         assertThrows(NullPointerException.class, () -> OptionalLong.empty().or(() -> null));
+        assertThrows(NullPointerException.class, () -> OptionalFloat.empty().or(() -> null));
+        assertThrows(NullPointerException.class, () -> OptionalDouble.empty().or(() -> null));
         assertThrows(NullPointerException.class, () -> Nullable.empty().or(() -> null));
+
+        // null supplier on an empty container throws NPE (not IllegalArgumentException), per the documented contract.
+        assertThrows(NullPointerException.class, () -> Optional.empty().or(null));
+        assertThrows(NullPointerException.class, () -> Nullable.empty().or(null));
     }
 
     @Test

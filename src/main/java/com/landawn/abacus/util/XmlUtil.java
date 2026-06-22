@@ -210,11 +210,7 @@ public final class XmlUtil {
         } catch (Exception e) { // NOSONAR
             // FEATURE_SECURE_PROCESSING is the umbrella that defaults ACCESS_EXTERNAL_*; if it
             // can't be set, the TransformerFactory may still permit `document(...)` etc.
-            logger.warn("Failed to enable FEATURE_SECURE_PROCESSING on TransformerFactory; XSLT may " + "permit external resource access (SSRF risk): "
-                    + e.getMessage());
-            if (logger.isDebugEnabled()) {
-                logger.debug("Failed to enable secure processing for TransformerFactory: " + e.getMessage());
-            }
+            logger.warn(e, "Failed to enable FEATURE_SECURE_PROCESSING on TransformerFactory; XSLT may permit external resource access (SSRF risk)");
         }
 
         setTransformerFactoryAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, "");
@@ -257,10 +253,10 @@ public final class XmlUtil {
         // For critical XXE flags, fail-open is dangerous: the application keeps running with
         // unrestricted DTD/external-entity processing. Log at WARN so operators notice.
         if (CRITICAL_SECURITY_NAMES.contains(name)) {
-            logger.warn("Failed to apply critical XML security setting '" + name + "' on " + factory
-                    + ". Application may be vulnerable to XXE/external-entity attacks: " + e.getMessage());
+            logger.warn(e, "Failed to apply critical XML security setting '{}' on {}. Application may be vulnerable to XXE/external-entity attacks", name,
+                    factory);
         } else if (logger.isDebugEnabled()) {
-            logger.debug("Failed to set " + factory + " '" + name + "': " + e.getMessage());
+            logger.debug(e, "Failed to set {} '{}'", factory, name);
         }
     }
 
@@ -378,7 +374,10 @@ public final class XmlUtil {
             marshaller.marshal(jaxbBean, writer);
             writer.flush();
 
-            return writer.toString();
+            // JAXB's default output encoding for an OutputStream is UTF-8 (and the emitted XML
+            // declaration says so); decode the bytes as UTF-8 rather than the platform default
+            // charset, which would corrupt non-ASCII content on non-UTF-8 JVMs.
+            return writer.toString(Charsets.UTF_8);
         } catch (final JAXBException e) {
             throw ExceptionUtil.toRuntimeException(e, true);
         } catch (final IOException e) {
@@ -718,7 +717,7 @@ public final class XmlUtil {
      * }
      * }</pre>
      *
-     * @return A new instance of {@code SAXParser}
+     * @return A {@code SAXParser} instance from the pool, or a newly created one if the pool is empty
      * @throws RuntimeException if the parser cannot be created
      * @throws ParsingException if SAX parsing configuration fails
      * @see SAXParserFactory#newSAXParser()
@@ -793,7 +792,7 @@ public final class XmlUtil {
         try {
             return xmlInputFactory.createXMLStreamReader(source);
         } catch (final XMLStreamException e) {
-            throw ExceptionUtil.toRuntimeException(e, true);
+            throw toRuntimeException(e);
         }
     }
 
@@ -817,7 +816,7 @@ public final class XmlUtil {
         try {
             return xmlInputFactory.createXMLStreamReader(source);
         } catch (final XMLStreamException e) {
-            throw ExceptionUtil.toRuntimeException(e, true);
+            throw toRuntimeException(e);
         }
     }
 
@@ -841,8 +840,24 @@ public final class XmlUtil {
         try {
             return xmlInputFactory.createXMLStreamReader(source, encoding);
         } catch (final XMLStreamException e) {
-            throw ExceptionUtil.toRuntimeException(e, true);
+            throw toRuntimeException(e);
         }
+    }
+
+    private static RuntimeException toRuntimeException(final XMLStreamException e) {
+        for (Throwable cause = e.getCause(); cause != null; cause = cause.getCause()) {
+            if (cause instanceof IOException) {
+                return new UncheckedIOException((IOException) cause);
+            }
+        }
+
+        final Throwable nested = e.getNestedException();
+
+        if (nested instanceof IOException) {
+            return new UncheckedIOException((IOException) nested);
+        }
+
+        return ExceptionUtil.toRuntimeException(e, true);
     }
 
     /**
@@ -987,6 +1002,9 @@ public final class XmlUtil {
      * XmlUtil.transform(doc, new File("output.xml"));
      * }</pre>
      *
+     * <p>The file content is encoded by the transformer itself (UTF-8 by default), so the bytes
+     * on disk match the encoding declared in the XML header.</p>
+     *
      * @param source The XML Document to be transformed (must not be {@code null})
      * @param output The output file where the transformed XML will be written
      * @throws UncheckedIOException if an I/O error occurs while creating or writing the file
@@ -996,20 +1014,24 @@ public final class XmlUtil {
     public static void transform(final Document source, File output) {
         output = PropertiesUtil.formatPath(output);
 
-        Writer writer = null;
+        // Write through an OutputStream so the Transformer performs the character encoding
+        // (UTF-8 by default, matching the encoding="UTF-8" it writes in the XML declaration).
+        // A platform-default-charset FileWriter would produce bytes that contradict the
+        // declaration for non-ASCII content on non-UTF-8 JVMs.
+        OutputStream os = null;
 
         try {
             IOUtil.createNewFileIfNotExists(output);
 
-            writer = IOUtil.newFileWriter(output);
+            os = IOUtil.newFileOutputStream(output);
 
-            transform(source, writer);
+            transform(source, os);
 
-            writer.flush();
+            os.flush();
         } catch (final IOException e) {
             throw new UncheckedIOException(e);
         } finally {
-            IOUtil.close(writer);
+            IOUtil.close(os);
         }
     }
 
@@ -1019,7 +1041,7 @@ public final class XmlUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Document doc = createDocument();
+     * Document doc = XmlUtil.createDOMParser().newDocument();
      * ByteArrayOutputStream baos = new ByteArrayOutputStream();
      * XmlUtil.transform(doc, baos);
      * String xmlString = baos.toString("UTF-8");
@@ -1049,7 +1071,7 @@ public final class XmlUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Document doc = createDocument();
+     * Document doc = XmlUtil.createDOMParser().newDocument();
      * StringWriter writer = new StringWriter();
      * XmlUtil.transform(doc, writer);
      * String xmlString = writer.toString();
@@ -1124,7 +1146,10 @@ public final class XmlUtil {
             xmlEncoder.flush();
         }
 
-        final String result = os.toString();
+        // XMLEncoder always writes UTF-8 (its declaration claims UTF-8), and xmlDecode reads the
+        // string back via getBytes(UTF_8) — decode with UTF-8 so non-ASCII content round-trips
+        // on JVMs whose default charset is not UTF-8.
+        final String result = os.toString(Charsets.UTF_8);
         Objectory.recycle(os);
 
         return result;
@@ -1940,7 +1965,7 @@ public final class XmlUtil {
         // primitives + java.*/javax.* types.
         if (!ALLOW_TYPE_ATTR_CLASS_FORNAME && !isJdkTypeName(typeAttr)) {
             if (logger.isDebugEnabled()) {
-                logger.debug("Refusing to resolve non-JDK type attribute '" + typeAttr + "'. Set -Dabacus.xml.allowTypeAttrClassForName=true to opt in.");
+                logger.debug("Refusing to resolve non-JDK type attribute '{}'. Set -Dabacus.xml.allowTypeAttrClassForName=true to opt in.", typeAttr);
             }
             return null;
         }
@@ -1955,7 +1980,7 @@ public final class XmlUtil {
             return ClassUtil.forName(typeAttr);
         } catch (final RuntimeException e) {
             if (logger.isDebugEnabled()) {
-                logger.debug("Failed to load type attribute class: " + typeAttr, e);
+                logger.debug(e, "Failed to load type attribute class: {}", typeAttr);
             }
 
             return null;

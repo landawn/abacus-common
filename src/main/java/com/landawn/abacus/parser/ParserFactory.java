@@ -18,6 +18,7 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicLong;
 
 import com.esotericsoftware.kryo.Serializer;
 import com.landawn.abacus.util.N;
@@ -79,6 +80,9 @@ public final class ParserFactory {
 
     /** Whether the Kryo parser is available. */
     private static final boolean isKryoParserAvailable;
+
+    /** Whether the JAXB parser is available. */
+    private static final boolean isJaxbParserAvailable;
 
     static {
         // initialize N to avoid below error if 'ParserFactory' is called before N initialized.
@@ -151,6 +155,36 @@ public final class ParserFactory {
 
             isKryoParserAvailable = isAvailable;
         }
+
+        {
+            boolean isAvailable = false;
+
+            try {
+                // JaxbParser relies on the Jakarta XML Binding API (jakarta.xml.bind.*) AND a runtime
+                // implementation of it. Probe both: load the API class, then create a JAXBContext for a
+                // trivial type, which fails (NoClassDefFoundError/JAXBException/etc.) when no provider is present.
+                Class.forName("jakarta.xml.bind.JAXBContext");
+                jakarta.xml.bind.JAXBContext.newInstance(JaxbAvailabilityProbe.class);
+                isAvailable = true;
+            } catch (final Throwable e) {
+                // ignore;
+            }
+
+            isJaxbParserAvailable = isAvailable;
+        }
+    }
+
+    /**
+     * Minimal JAXB-annotated type used only to probe JAXB runtime availability in the static initializer.
+     * Declared {@code public} with a public no-arg constructor so that any JAXB runtime implementation can
+     * build a {@code JAXBContext} for it without accessibility issues (which would otherwise cause a
+     * false-negative availability result).
+     */
+    @jakarta.xml.bind.annotation.XmlRootElement
+    public static final class JaxbAvailabilityProbe {
+        /** Public no-arg constructor required by JAXB. */
+        public JaxbAvailabilityProbe() {
+        }
     }
 
     /** Set of classes registered for Kryo serialization. */
@@ -164,6 +198,9 @@ public final class ParserFactory {
 
     /** Map of custom serializers and IDs registered for Kryo serialization. */
     static final Map<Class<?>, Tuple2<Serializer<?>, Integer>> _kryoClassSerializerIdMap = new ConcurrentHashMap<>();
+
+    /** Incremented after each global Kryo registration so existing parser pools can refresh. */
+    static final AtomicLong _kryoRegistrationVersion = new AtomicLong();
 
     /**
      * Private constructor to prevent instantiation of this utility class.
@@ -241,6 +278,24 @@ public final class ParserFactory {
     }
 
     /**
+     * Checks if the JAXB (Jakarta XML Binding) parser is available.
+     * JAXB provides annotation-based mapping between Java objects and XML representations.
+     * It requires both the {@code jakarta.xml.bind} API and a runtime implementation on the classpath.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * if (ParserFactory.isJaxbParserAvailable()) {
+     *     XmlParser parser = ParserFactory.createJaxbParser();
+     * }
+     * }</pre>
+     *
+     * @return {@code true} if the JAXB parser is available, {@code false} otherwise
+     */
+    public static boolean isJaxbParserAvailable() {
+        return isJaxbParserAvailable;
+    }
+
+    /**
      * Creates a new {@code AvroParser} instance.
      * Avro provides schema evolution and is particularly useful for data interchange.
      *
@@ -267,7 +322,7 @@ public final class ParserFactory {
      * <pre>{@code
      * if (ParserFactory.isKryoParserAvailable()) {
      *     KryoParser parser = ParserFactory.createKryoParser();
-     *     byte[] data = parser.serialize(myObject);
+     *     String data = parser.serialize(myObject);   // Base64-encoded
      * }
      * }</pre>
      *
@@ -467,17 +522,20 @@ public final class ParserFactory {
 
     /**
      * Creates a new JAXB parser instance with specified configurations.
-     * JAXB (Java Architecture for XML Binding) provides annotation-based XML binding with customizable behavior.
+     * JAXB (Jakarta XML Binding) provides annotation-based XML binding.
+     *
+     * <p><b>&#9888; Note:</b> the JAXB parser marshals/unmarshals through the underlying JAXB runtime and
+     * does <i>not</i> apply {@code XmlSerConfig}/{@code XmlDeserConfig} settings such as
+     * {@code prettyFormat}. The only configuration honored is a non-empty {@code ignoredPropNames}, which
+     * is rejected with a {@code ParsingException}.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * XmlSerConfig xsc = new XmlSerConfig().setPrettyFormat(true);
-     * XmlDeserConfig xdc = new XmlDeserConfig();
-     * XmlParser parser = ParserFactory.createJaxbParser(xsc, xdc);
+     * XmlParser parser = ParserFactory.createJaxbParser(new XmlSerConfig(), new XmlDeserConfig());
      * }</pre>
      *
-     * @param xsc the XML serialization configuration (may be {@code null} for default behavior)
-     * @param xdc the XML deserialization configuration (may be {@code null} for default behavior)
+     * @param xsc the XML serialization configuration (may be {@code null}); JAXB-specific settings are not applied
+     * @param xdc the XML deserialization configuration (may be {@code null}); JAXB-specific settings are not applied
      * @return a new JAXB {@code XmlParser} instance with the specified configurations
      * @throws NoClassDefFoundError if JAXB implementation is not available
      */
@@ -503,6 +561,7 @@ public final class ParserFactory {
         N.checkArgNotNull(type, cs.type);
 
         _kryoClassSet.add(type);
+        _kryoRegistrationVersion.incrementAndGet();
     }
 
     /**
@@ -525,6 +584,7 @@ public final class ParserFactory {
         N.checkArgNotNull(type, cs.type);
 
         _kryoClassIdMap.put(type, id);
+        _kryoRegistrationVersion.incrementAndGet();
     }
 
     /**
@@ -547,6 +607,7 @@ public final class ParserFactory {
         N.checkArgNotNull(serializer, cs.serializer);
 
         _kryoClassSerializerMap.put(type, serializer);
+        _kryoRegistrationVersion.incrementAndGet();
     }
 
     /**
@@ -570,5 +631,6 @@ public final class ParserFactory {
         N.checkArgNotNull(serializer, cs.serializer);
 
         _kryoClassSerializerIdMap.put(type, Tuple.of(serializer, id));
+        _kryoRegistrationVersion.incrementAndGet();
     }
 }

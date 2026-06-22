@@ -295,20 +295,38 @@ public sealed class AppendableWriter extends Writer permits StringWriter {
             // in a finally block so resources are released even if flush throws.
             closed = true;
 
+            Throwable exception = null;
+
             try {
                 if (flushable) {
                     ((Flushable) appendable).flush();
                 }
-            } finally {
+            } catch (final Throwable e) {
+                exception = e;
+            }
+
+            try {
                 if (appendable instanceof AutoCloseable) {
-                    try {
-                        ((AutoCloseable) appendable).close();
-                    } catch (final IOException e) {
-                        throw e;
-                    } catch (final Exception e) {
-                        throw ExceptionUtil.toRuntimeException(e, true);
-                    }
+                    ((AutoCloseable) appendable).close();
                 }
+            } catch (final Throwable e) {
+                if (exception == null) {
+                    exception = e;
+                } else {
+                    exception.addSuppressed(e);
+                }
+            }
+
+            if (exception instanceof IOException) {
+                throw (IOException) exception;
+            } else if (exception instanceof RuntimeException) {
+                throw (RuntimeException) exception;
+            } else if (exception instanceof Error) {
+                throw (Error) exception;
+            } else if (exception instanceof Exception) {
+                throw ExceptionUtil.toRuntimeException((Exception) exception, true);
+            } else if (exception != null) {
+                throw new RuntimeException(exception);
             }
         }
     }

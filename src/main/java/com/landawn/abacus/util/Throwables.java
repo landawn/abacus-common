@@ -76,12 +76,12 @@ import com.landawn.abacus.util.u.Nullable;
  * <pre>{@code
  * // File processing with IOException handling
  * List<String> fileContents = filePaths.stream()
- *     .map((Throwables.Function<Path, String, IOException>) Files::readString)
+ *     .map(((Throwables.Function<Path, String, IOException>) Files::readString).unchecked())
  *     .collect(Collectors.toList());
  *
  * // Database operations with SQLException handling
  * List<User> users = userIds.stream()
- *     .map((Throwables.Function<Integer, User, SQLException>) this::findUserById)
+ *     .map(((Throwables.Function<Integer, User, SQLException>) this::findUserById).unchecked())
  *     .collect(Collectors.toList());
  *
  * // Safe execution with exception handling
@@ -257,7 +257,8 @@ public final class Throwables {
 
     /**
      * Executes the specified runnable command that may throw a checked exception.
-     * If the command throws an exception, it will be wrapped in a RuntimeException and rethrown.
+     * If the command throws a checked exception, it will be wrapped in a RuntimeException and rethrown;
+     * a runtime exception is rethrown as-is.
      *
      * <p>This method is useful for executing exception-throwing code in contexts where
      * checked exceptions are not allowed, such as within lambda expressions passed to
@@ -276,7 +277,7 @@ public final class Throwables {
      * }</pre>
      *
      * @param cmd the runnable command to execute that may throw a checked exception
-     * @throws RuntimeException if the command throws any exception, the original exception will be wrapped in a RuntimeException
+     * @throws RuntimeException if the command throws an exception; a checked exception (or an {@link Error}) is wrapped in a RuntimeException, while a runtime exception is rethrown as-is
      * @throws IllegalArgumentException if cmd is null
      * @see Try#run(Throwables.Runnable)
      */
@@ -333,7 +334,8 @@ public final class Throwables {
 
     /**
      * Executes the specified callable command that may throw a checked exception and returns its result.
-     * If the command throws an exception, it will be wrapped in a RuntimeException and rethrown.
+     * If the command throws a checked exception, it will be wrapped in a RuntimeException and rethrown;
+     * a runtime exception is rethrown as-is.
      *
      * <p>This method allows using exception-throwing code in functional contexts that require
      * a return value, such as map operations in streams or Optional transformations.</p>
@@ -355,12 +357,12 @@ public final class Throwables {
      * @param <R> the type of the result returned by the callable
      * @param cmd the callable command to execute that may throw a checked exception
      * @return the result returned by the callable command
-     * @throws RuntimeException if the command throws any exception, the original exception will be wrapped in a RuntimeException
+     * @throws RuntimeException if the command throws an exception; a checked exception is wrapped in a RuntimeException, while a runtime exception is rethrown as-is
      * @throws IllegalArgumentException if cmd is null
      * @see Try#call(java.util.concurrent.Callable)
      */
     @Beta
-    public static <R> R call(final Throwables.Callable<R, ? extends Throwable> cmd) {
+    public static <R> R call(final Throwables.Callable<? extends R, ? extends Throwable> cmd) {
         N.checkArgNotNull(cmd, "cmd");
 
         try {
@@ -401,7 +403,7 @@ public final class Throwables {
      * @see Try#call(java.util.concurrent.Callable, java.util.function.Function)
      */
     @Beta
-    public static <R> R call(final Throwables.Callable<R, ? extends Throwable> cmd,
+    public static <R> R call(final Throwables.Callable<? extends R, ? extends Throwable> cmd,
             final java.util.function.Function<? super Throwable, ? extends R> actionOnError) {
         N.checkArgNotNull(cmd, "cmd");
         N.checkArgNotNull(actionOnError, "actionOnError");
@@ -434,7 +436,7 @@ public final class Throwables {
      * @see Try#call(java.util.concurrent.Callable, java.util.function.Supplier)
      */
     @Beta
-    public static <R> R call(final Throwables.Callable<R, ? extends Throwable> cmd, final java.util.function.Supplier<R> supplier) {
+    public static <R> R call(final Throwables.Callable<? extends R, ? extends Throwable> cmd, final java.util.function.Supplier<R> supplier) {
         N.checkArgNotNull(cmd, "cmd");
         N.checkArgNotNull(supplier, "supplier");
 
@@ -450,6 +452,11 @@ public final class Throwables {
      * If the command throws an exception, the specified default value will be returned instead.
      *
      * <p>This is the simplest form of error handling with a known fallback value.</p>
+     *
+     * <p><b>Note:</b> The result type {@code <R>} is bound to {@code Comparable<? super R>} solely
+     * to avoid an ambiguous overload with {@link #call(Throwables.Callable, java.util.function.Supplier)}.
+     * If the fallback value's type is not {@link Comparable}, use the {@code Supplier} overload
+     * (e.g. {@code Throwables.call(cmd, () -> myDefault)}) instead.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -471,7 +478,7 @@ public final class Throwables {
      * @see #call(Throwables.Callable, java.util.function.Supplier)
      */
     @Beta
-    public static <R extends Comparable<? super R>> R call(final Throwables.Callable<R, ? extends Throwable> cmd, final R defaultValue) {
+    public static <R extends Comparable<? super R>> R call(final Throwables.Callable<? extends R, ? extends Throwable> cmd, final R defaultValue) {
         // <R extends Comparable<? super R>> avoids ambiguous overloads involving Comparable<R>.
         N.checkArgNotNull(cmd, "cmd");
 
@@ -486,7 +493,7 @@ public final class Throwables {
      * Executes the specified callable command that may throw a checked exception and returns its result.
      * If the command throws an exception and the predicate returns {@code true} for that exception,
      * the result from the supplier will be returned. If the predicate returns {@code false},
-     * the exception will be wrapped in a RuntimeException and rethrown.
+     * the exception will be rethrown, wrapped in a RuntimeException if it is a checked exception.
      *
      * <p>This method enables selective exception handling based on exception type or properties.</p>
      *
@@ -517,7 +524,7 @@ public final class Throwables {
      * @see Try#call(java.util.concurrent.Callable, java.util.function.Predicate, java.util.function.Supplier)
      */
     @Beta
-    public static <R> R call(final Throwables.Callable<R, ? extends Throwable> cmd, final java.util.function.Predicate<? super Throwable> predicate,
+    public static <R> R call(final Throwables.Callable<? extends R, ? extends Throwable> cmd, final java.util.function.Predicate<? super Throwable> predicate,
             final java.util.function.Supplier<R> supplier) {
         N.checkArgNotNull(cmd, "cmd");
         N.checkArgNotNull(predicate, "predicate");
@@ -538,9 +545,14 @@ public final class Throwables {
      * Executes the specified callable command that may throw a checked exception and returns its result.
      * If the command throws an exception and the predicate returns {@code true} for that exception,
      * the specified default value will be returned. If the predicate returns {@code false},
-     * the exception will be wrapped in a RuntimeException and rethrown.
+     * the exception will be rethrown, wrapped in a RuntimeException if it is a checked exception.
      *
      * <p>Combines predicate-based exception filtering with a simple default value.</p>
+     *
+     * <p><b>Note:</b> The result type {@code <R>} is bound to {@code Comparable<? super R>} solely
+     * to avoid an ambiguous overload with
+     * {@link #call(Throwables.Callable, java.util.function.Predicate, java.util.function.Supplier)}.
+     * If the fallback value's type is not {@link Comparable}, use the {@code Supplier} overload instead.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -569,7 +581,7 @@ public final class Throwables {
      * @see #call(Throwables.Callable, java.util.function.Predicate, java.util.function.Supplier)
      */
     @Beta
-    public static <R extends Comparable<? super R>> R call(final Throwables.Callable<R, ? extends Throwable> cmd,
+    public static <R extends Comparable<? super R>> R call(final Throwables.Callable<? extends R, ? extends Throwable> cmd,
             final java.util.function.Predicate<? super Throwable> predicate, final R defaultValue) {
         // <R extends Comparable<? super R>> avoids ambiguous overloads involving Comparable<R>.
         N.checkArgNotNull(cmd, "cmd");
@@ -623,7 +635,7 @@ public final class Throwables {
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * Iterator<String, IOException> empty = Iterator.empty();
-         * assert !empty.hasNext();  // returns always false
+         * assert !empty.hasNext();  // always returns false
          *
          * Iterator<Integer, RuntimeException> noItems = Iterator.empty();
          * }</pre>
@@ -643,7 +655,7 @@ public final class Throwables {
          * <pre>{@code
          * Iterator<String, IOException> single = Iterator.just("hello");
          * String value = single.next(); // returns "hello"
-         * assert !single.hasNext();     // returns exhausted
+         * assert !single.hasNext();     // returns false (iterator exhausted)
          *
          * Iterator<Integer, RuntimeException> one = Iterator.just(42);
          * }</pre>
@@ -1202,8 +1214,8 @@ public final class Throwables {
          * }</pre>
          *
          * @param predicate the predicate to test each element
-         * @return a new iterator containing only elements that satisfy the predicate
-         * @throws E if an exception occurs while iterating or evaluating the predicate
+         * @return a new iterator containing only elements that satisfy the predicate; exceptions thrown
+         *         by the predicate propagate from the returned iterator's {@code hasNext()}/{@code next()} calls
          */
         public Throwables.Iterator<T, E> filter(final Throwables.Predicate<? super T, E> predicate) {
             final Throwables.Iterator<T, E> iter = this;
@@ -1255,8 +1267,8 @@ public final class Throwables {
          *
          * @param <U> the type of elements returned by the new iterator
          * @param mapper the function to apply to each element
-         * @return a new iterator with the mapping function applied to each element
-         * @throws E if an exception occurs while iterating or applying the mapping function
+         * @return a new iterator with the mapping function applied to each element; exceptions thrown
+         *         by the mapper propagate from the returned iterator's {@code next()} calls
          */
         public <U> Throwables.Iterator<U, E> map(final Throwables.Function<? super T, U, E> mapper) {
             final Throwables.Iterator<T, E> iter = this;
@@ -1507,10 +1519,10 @@ public final class Throwables {
         void run() throws E;
 
         /**
-         * Returns a java.util.function.Runnable that wraps this Throwables.Runnable.
+         * Returns a {@code com.landawn.abacus.util.function.Runnable} (a {@code java.lang.Runnable}) that wraps this Throwables.Runnable.
          * Any checked exceptions thrown by this runnable will be wrapped in a RuntimeException.
          *
-         * @return a java.util.function.Runnable that executes this runnable and wraps any checked exceptions
+         * @return a {@code com.landawn.abacus.util.function.Runnable} that executes this runnable and wraps any checked exceptions
          */
         @Beta
         default com.landawn.abacus.util.function.Runnable unchecked() {
@@ -1544,10 +1556,10 @@ public final class Throwables {
         R call() throws E;
 
         /**
-         * Returns a java.util.function.Callable that wraps this Throwables.Callable.
+         * Returns a {@code com.landawn.abacus.util.function.Callable} (a {@code java.util.concurrent.Callable}) that wraps this Throwables.Callable.
          * Any checked exceptions thrown by this callable will be wrapped in a RuntimeException.
          *
-         * @return a java.util.function.Callable that executes this callable and wraps any checked exceptions
+         * @return a {@code com.landawn.abacus.util.function.Callable} that executes this callable and wraps any checked exceptions
          */
         @Beta
         default com.landawn.abacus.util.function.Callable<R> unchecked() {
@@ -6491,7 +6503,7 @@ public final class Throwables {
 
     /**
      * A thread-safe lazy initializer that defers the creation of the underlying value until first access.
-     * The value is computed exactly once using the provided supplier, and subsequent calls return the cached value.
+     * The value is computed using the provided supplier; once initialization succeeds, subsequent calls return the cached value (a failed initialization is retried on the next call).
      *
      * @param <T> the type of the value to be lazily initialized
      * @param <E> the type of exception that may be thrown during initialization
@@ -6511,8 +6523,9 @@ public final class Throwables {
          * Creates a new LazyInitializer with the specified supplier.
          * If the supplier is already a LazyInitializer, it is returned as-is to avoid double-wrapping.
          *
-         * <p>The returned LazyInitializer will call the supplier exactly once on the first invocation of {@code get()},
-         * and cache the result for all subsequent calls. The initialization is thread-safe using double-checked locking.
+         * <p>The returned LazyInitializer calls the supplier on the first invocation of {@code get()}; once it
+         * succeeds the result is cached and the supplier is never called again (a failed initialization is retried
+         * on the next call). The initialization is thread-safe using double-checked locking.
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code

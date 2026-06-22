@@ -52,7 +52,8 @@ import com.landawn.abacus.util.stream.IntStream;
 public abstract class IntIterator extends ImmutableIterator<Integer> {
 
     /**
-     * Protected constructor for subclasses.
+     * Constructs a new {@code IntIterator}.
+     * Intended for use by subclasses only.
      */
     protected IntIterator() {
     }
@@ -121,7 +122,8 @@ public abstract class IntIterator extends ImmutableIterator<Integer> {
      *
      * <p>The iterator will iterate over elements from {@code fromIndex} (inclusive) to
      * {@code toIndex} (exclusive). If {@code fromIndex} equals {@code toIndex}, an empty
-     * iterator is returned.</p>
+     * iterator is returned. A {@code null} array is treated as length 0 for range validation,
+     * so only {@code fromIndex == toIndex == 0} is valid.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -132,8 +134,8 @@ public abstract class IntIterator extends ImmutableIterator<Integer> {
      * @param a the int array (may be {@code null})
      * @param fromIndex the starting index (inclusive)
      * @param toIndex the ending index (exclusive)
-     * @return a new {@code IntIterator} over the specified range, or an empty iterator if the array is {@code null} or {@code fromIndex == toIndex}
-     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code toIndex > a.length}, or {@code fromIndex > toIndex}
+     * @return a new {@code IntIterator} over the specified range, or an empty iterator if the validated range is empty
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code toIndex > (a == null ? 0 : a.length)}, or {@code fromIndex > toIndex}
      */
     public static IntIterator of(final int[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
@@ -191,13 +193,14 @@ public abstract class IntIterator extends ImmutableIterator<Integer> {
      * @param iteratorSupplier a {@code Supplier} that provides the {@code IntIterator} when needed
      * @return a lazily initialized {@code IntIterator}
      * @throws IllegalArgumentException if {@code iteratorSupplier} is {@code null}
+     * @throws IllegalStateException if the supplier returns {@code null} when invoked
      */
     public static IntIterator defer(final Supplier<? extends IntIterator> iteratorSupplier) throws IllegalArgumentException {
         N.checkArgNotNull(iteratorSupplier, cs.iteratorSupplier);
 
         return new IntIterator() {
             private IntIterator iter = null;
-            private boolean isInitialized = false;
+            private volatile boolean isInitialized = false;
 
             @Override
             public boolean hasNext() {
@@ -217,10 +220,13 @@ public abstract class IntIterator extends ImmutableIterator<Integer> {
                 return iter.nextInt();
             }
 
-            private void init() {
+            private synchronized void init() {
                 if (!isInitialized) {
                     isInitialized = true;
                     iter = iteratorSupplier.get();
+                    if (iter == null) {
+                        throw new IllegalStateException("Iterator supplier returned null");
+                    }
                 }
             }
         };
@@ -261,6 +267,10 @@ public abstract class IntIterator extends ImmutableIterator<Integer> {
 
     /**
      * Creates an IntIterator that generates values while a condition is {@code true}.
+     *
+     * <p>Note: The {@code hasNext} supplier may be called multiple times for the same element
+     * (once by the user, once internally for validation), so it should be idempotent or
+     * designed to handle multiple calls.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -354,9 +364,10 @@ public abstract class IntIterator extends ImmutableIterator<Integer> {
      * iter2.skip(10).hasNext();   // returns false
      * }</pre>
      *
-     * @param n the number of elements to skip, must be non-negative
-     * @return this iterator if n is 0, otherwise a new IntIterator with n elements skipped
-     * @throws IllegalArgumentException if n is negative
+     * @param n the number of elements to skip; must be non-negative
+     * @return this iterator unchanged if {@code n == 0}, otherwise a new {@code IntIterator}
+     *         with the first {@code n} elements skipped
+     * @throws IllegalArgumentException if {@code n} is negative
      */
     public IntIterator skip(final long n) throws IllegalArgumentException {
         N.checkArgNotNegative(n, cs.n);
@@ -417,9 +428,10 @@ public abstract class IntIterator extends ImmutableIterator<Integer> {
      * IntIterator.of(1, 2, 3).limit(0).hasNext();   // returns false
      * }</pre>
      *
-     * @param count the maximum number of elements to return, must be non-negative
-     * @return an empty iterator if count is 0, otherwise a new IntIterator limited to count elements
-     * @throws IllegalArgumentException if count is negative
+     * @param count the maximum number of elements to return; must be non-negative
+     * @return an empty iterator if {@code count == 0}, otherwise a new {@code IntIterator}
+     *         limited to at most {@code count} elements
+     * @throws IllegalArgumentException if {@code count} is negative
      */
     public IntIterator limit(final long count) throws IllegalArgumentException {
         N.checkArgNotNegative(count, cs.count);

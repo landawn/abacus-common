@@ -13,9 +13,9 @@
  */
 package com.landawn.abacus.util.function;
 
-import java.util.Objects;
-
 import com.landawn.abacus.util.Throwables;
+import com.landawn.abacus.util.N;
+import com.landawn.abacus.util.cs;
 
 /**
  * A functional interface that represents an operation that accepts an object-valued argument
@@ -75,13 +75,27 @@ public interface ObjDoubleConsumer<T> extends Throwables.ObjDoubleConsumer<T, Ru
      * @param after the operation to perform after this operation. Must not be {@code null}.
      * @return a composed {@code ObjDoubleConsumer} that performs in sequence this
      *         operation followed by the {@code after} operation
-     * @throws NullPointerException if {@code after} is null
+     * @throws IllegalArgumentException if {@code after} is null
      */
     default ObjDoubleConsumer<T> andThen(final ObjDoubleConsumer<? super T> after) {
-        Objects.requireNonNull(after);
+        N.checkArgNotNull(after, cs.after);
         return (t, value) -> {
             accept(t, value);
             after.accept(t, value);
         };
+    }
+
+    /**
+     * Returns this object as a {@link Throwables.ObjDoubleConsumer} view.
+     *
+     * <p>The returned object has the same behavior as this one. This method does not translate
+     * exceptions or make the original implementation capable of throwing new checked exceptions; the
+     * exception type parameter is for target-type compatibility with APIs that accept {@code Throwables.ObjDoubleConsumer}.
+     *
+     * @param <E> the target exception type for compatibility with {@code Throwables.ObjDoubleConsumer}
+     * @return a {@link Throwables.ObjDoubleConsumer} view of this object
+     */
+    default <E extends Throwable> Throwables.ObjDoubleConsumer<T, E> toThrowable() {
+        return (Throwables.ObjDoubleConsumer<T, E>) this;
     }
 }

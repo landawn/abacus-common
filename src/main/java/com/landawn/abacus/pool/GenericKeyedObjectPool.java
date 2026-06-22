@@ -54,12 +54,14 @@ import com.landawn.abacus.util.Objectory;
  *   <li>LAST_ACCESS_TIME - Evicts least recently accessed entries</li>
  *   <li>ACCESS_COUNT - Evicts least frequently accessed entries</li>
  *   <li>EXPIRATION_TIME - Evicts entries closest to expiration</li>
+ *   <li>CREATED_TIME - Evicts the oldest-created entries first</li>
+ *   <li>FIFO - Evicts in insertion order (oldest-added first)</li>
  * </ul>
  *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * // Create a keyed pool for database connections by schema
- * GenericKeyedObjectPool<String, DBConnection> pool = new GenericKeyedObjectPool<>(
+ * KeyedObjectPool<String, DBConnection> pool = PoolFactory.createKeyedObjectPool(
  *     100, 300000, EvictionPolicy.LAST_ACCESS_TIME
  * );
  *
@@ -181,8 +183,18 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
             case EXPIRATION_TIME:
                 return Comparator.comparingLong(o -> o.getValue().activityPrint().getExpirationTime());
 
+            case CREATED_TIME:
+            case FIFO:
+                // FIFO == CREATED_TIME for pool entries: the ActivityPrint is created when the object
+                // enters the pool, so creation order equals insertion order. Earliest-created evicts first.
+                return Comparator.comparingLong(o -> o.getValue().activityPrint().getCreatedTime());
+
             default:
-                throw new RuntimeException("Unsupported eviction policy: " + evictionPolicy.name());
+                // Defensive guard: unreachable today since the switch exhaustively covers every
+                // EvictionPolicy constant. It exists so that adding a new constant without updating
+                // this switch fails loudly at runtime with a clear, specific message.
+                throw new IllegalStateException(
+                        "No eviction comparator defined for EvictionPolicy." + evictionPolicy.name() + " (createComparator must be updated for new policies)");
         }
     }
 
@@ -198,7 +210,7 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
             } catch (final Exception e) {
                 // ignore
                 if (logger.isWarnEnabled()) {
-                    logger.warn(ExceptionUtil.getErrorMessage(e, true));
+                    logger.warn("Error removing expired pooled entries", e);
                 }
             }
         };
@@ -211,7 +223,9 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
      * If the pool previously contained a mapping for the key, the old element is removed and
      * destroyed with {@link Caller#REMOVE_REPLACE_CLEAR} <em>before</em> the new value is
      * inserted; this happens even when the subsequent insertion fails (so a failing {@code put}
-     * can still evict the previous mapping for {@code key}).
+     * can still evict the previous mapping for {@code key}). The old element is <em>not</em>
+     * destroyed when it is the same instance as {@code value} (re-pooling the same instance
+     * simply re-inserts it).
      *
      * <p>The put operation will fail if:</p>
      * <ul>
@@ -258,8 +272,31 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
             // Use pool.remove() directly to avoid double memory subtraction (remove() subtracts memory, and destroy() also subtracts).
             E oldValue = pool.remove(key);
 
-            if (oldValue != null) {
+            // Identity guard: get() does not remove the mapping, so the documented "put it back"
+            // pattern re-puts the SAME instance - destroying it would close a live resource and
+            // re-pool the corpse.
+            final boolean rePoolingSameInstance = oldValue != null && oldValue == value;
+
+            if (oldValue != null && oldValue != value) {
                 destroy(key, oldValue, Caller.REMOVE_REPLACE_CLEAR);
+            } else if (rePoolingSameInstance && memoryMeasure != null) {
+                // The old mapping's memory is still counted in totalDataSize (pool.remove() above
+                // does not adjust it, and destroy() was skipped for the same instance). The success
+                // path below re-adds the freshly-measured size, so subtract the previously-counted
+                // size here to avoid double-counting when re-pooling the same instance.
+                try {
+                    final long oldMemorySize = memoryMeasure.sizeOf(key, oldValue);
+
+                    if (oldMemorySize >= 0) {
+                        totalDataSize.addAndGet(-oldMemorySize); //NOSONAR
+                    } else {
+                        logger.warn("Memory measure returned negative size for key/value: " + oldMemorySize);
+                    }
+                } catch (final Exception ex) {
+                    if (logger.isWarnEnabled()) {
+                        logger.warn("Error measuring memory size during put (same-instance re-pool): " + ExceptionUtil.getErrorMessage(ex, true));
+                    }
+                }
             }
 
             if (pool.size() >= capacity) {
@@ -305,7 +342,7 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
 
                 oldValue = pool.put(key, value);
 
-                if (oldValue != null) {
+                if (oldValue != null && oldValue != value) {
                     destroy(key, oldValue, Caller.REMOVE_REPLACE_CLEAR);
                 }
 
@@ -313,14 +350,19 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
             } else {
                 oldValue = pool.put(key, value);
 
-                if (oldValue != null) {
+                if (oldValue != null && oldValue != value) {
                     destroy(key, oldValue, Caller.REMOVE_REPLACE_CLEAR);
                 }
             }
 
             putCount.incrementAndGet();
 
-            notEmpty.signal();
+            // signalAll (not signal): waiters in get(K, timeout, unit) park on notEmpty for a
+            // SPECIFIC key. Waking only one waiter could wake a get(B) waiter for this put of A;
+            // it would re-check, still miss B, and re-await — consuming the signal — leaving a
+            // concurrent get(A) to spuriously time out. signalAll wakes every key-waiter so each
+            // re-checks its own key.
+            notEmpty.signalAll();
 
             return true;
         } finally {
@@ -349,6 +391,192 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
 
         try {
             success = put(key, value);
+        } finally {
+            if (autoDestroyOnFailedToPut && !success && value != null) {
+                value.destroy(Caller.PUT_ADD_FAILURE);
+            }
+        }
+
+        return success;
+    }
+
+    /**
+     * Attempts to associate the value with the key, waiting up to the given timeout for a capacity
+     * slot when the pool is full. Mirrors {@link GenericObjectPool#add(Poolable, long, TimeUnit)}:
+     * a maxSpins (10,000) safety limit guards against pathological wakeup loops; under normal
+     * operation the timeout triggers first.
+     *
+     * @param key the key, must not be {@code null}
+     * @param value the value, must not be {@code null}
+     * @param timeout the maximum time to wait for a slot
+     * @param unit the time unit of the timeout
+     * @return {@code true} if the value was added, {@code false} otherwise
+     * @throws IllegalArgumentException if the key or value is null
+     * @throws IllegalStateException if the pool has been closed
+     * @throws InterruptedException if interrupted while waiting
+     */
+    @Override
+    public boolean put(final K key, final E value, final long timeout, final TimeUnit unit) throws IllegalStateException, InterruptedException {
+        assertNotClosed();
+
+        if (key == null || value == null) {
+            throw new IllegalArgumentException("Key and value cannot be null");
+        }
+
+        if (value.activityPrint().isExpired()) {
+            return false;
+        }
+
+        long nanos = unit.toNanos(timeout);
+
+        // Hoisted so the finally can tell whether a same-key slot was freed up-front (oldValue != null)
+        // but the new value was never stored (valueStored == false) — in which case a notFull waiter
+        // must be woken (see the finally block).
+        E oldValue = null;
+        boolean valueStored = false;
+
+        lock.lock();
+
+        try {
+            // Re-check closed-state inside the lock; a concurrent close() between an unlocked
+            // check and lock acquisition would otherwise leak this entry.
+            assertNotClosed();
+
+            // Make sure the old value is removed regardless of whether the new value will be put
+            // successfully or not (mirrors the non-timed put). Use pool.remove() directly to avoid
+            // double memory subtraction (remove() subtracts memory, and destroy() also subtracts).
+            oldValue = pool.remove(key);
+
+            // Identity guard: get() does not remove the mapping, so the documented "put it back"
+            // pattern re-puts the SAME instance - destroying it would close a live resource.
+            final boolean rePoolingSameInstance = oldValue != null && oldValue == value;
+
+            if (oldValue != null && oldValue != value) {
+                destroy(key, oldValue, Caller.REMOVE_REPLACE_CLEAR);
+            } else if (rePoolingSameInstance && memoryMeasure != null) {
+                // The old mapping's memory is still counted in totalDataSize; the success path below
+                // re-adds the freshly-measured size, so subtract the previously-counted size here to
+                // avoid double-counting when re-pooling the same instance.
+                try {
+                    final long oldMemorySize = memoryMeasure.sizeOf(key, oldValue);
+
+                    if (oldMemorySize >= 0) {
+                        totalDataSize.addAndGet(-oldMemorySize); //NOSONAR
+                    } else {
+                        logger.warn("Memory measure returned negative size for key/value: " + oldMemorySize);
+                    }
+                } catch (final Exception ex) {
+                    if (logger.isWarnEnabled()) {
+                        logger.warn("Error measuring memory size during put (same-instance re-pool): " + ExceptionUtil.getErrorMessage(ex, true));
+                    }
+                }
+            }
+
+            if ((pool.size() >= capacity) && autoBalance) {
+                evict();
+            }
+
+            int maxSpins = 10000;
+
+            while (maxSpins-- > 0) {
+                // Re-check inside the loop: a concurrent close()/removeAll() (which signals
+                // notFull) emptied the pool; without this check the awakened thread would push
+                // the value into the newly-closed pool, leaking it.
+                assertNotClosed();
+
+                if (pool.size() < capacity) {
+                    // Re-check expiry: the value may have expired during the awaitNanos wait below.
+                    if (value.activityPrint().isExpired()) {
+                        return false;
+                    }
+
+                    if (memoryMeasure != null) {
+                        final long keyValueMemorySize;
+
+                        try {
+                            keyValueMemorySize = memoryMeasure.sizeOf(key, value);
+                        } catch (final Exception ex) {
+                            logger.warn("Error measuring memory size of entry", ex);
+                            return false;
+                        }
+
+                        if (keyValueMemorySize < 0) {
+                            logger.warn("Memory measure returned negative size for key/value: {}", keyValueMemorySize);
+                            return false;
+                        }
+
+                        if (maxMemorySize > 0 && keyValueMemorySize > maxMemorySize - totalDataSize.get()) {
+                            if (autoBalance) {
+                                evict();
+
+                                if (maxMemorySize > 0 && keyValueMemorySize > maxMemorySize - totalDataSize.get()) {
+                                    // ignore.
+                                    return false;
+                                }
+                            } else {
+                                // ignore.
+                                return false;
+                            }
+                        }
+
+                        pool.put(key, value);
+
+                        totalDataSize.addAndGet(keyValueMemorySize); //NOSONAR
+                    } else {
+                        pool.put(key, value);
+                    }
+
+                    putCount.incrementAndGet();
+                    valueStored = true;
+                    // signalAll (not signal): waiters in get(K, timeout, unit) park on notEmpty
+                    // for a SPECIFIC key, so wake all key-waiters to let each re-check its own key
+                    // (see the matching note in put(K, E)).
+                    notEmpty.signalAll();
+
+                    return true;
+                }
+
+                if (nanos <= 0) {
+                    return false;
+                }
+
+                nanos = notFull.awaitNanos(nanos);
+            }
+
+            return false; // Safety timeout after max spins
+        } finally {
+            // If an existing same-key mapping was removed up-front (freeing a slot) but the new value
+            // was never stored (early bail, timeout, or exception), the net effect is a freed slot.
+            // Wake a put(...) waiter parked on notFull so the slot is not silently withheld. Signalled
+            // under the still-held lock, before unlock. (The success path leaves the slot count net-zero
+            // and instead signals notEmpty.)
+            if (oldValue != null && !valueStored) {
+                notFull.signalAll();
+            }
+
+            lock.unlock();
+        }
+    }
+
+    /**
+     * Attempts to associate the value with the key within the timeout, with optional automatic
+     * destruction on failure.
+     *
+     * @param key the key, must not be {@code null}
+     * @param value the value, must not be {@code null}
+     * @param timeout the maximum time to wait for a slot
+     * @param unit the time unit of the timeout
+     * @param autoDestroyOnFailedToPut if {@code true}, calls value.destroy(PUT_ADD_FAILURE) if put fails
+     * @return {@code true} if the value was added, {@code false} otherwise
+     * @throws InterruptedException if interrupted while waiting
+     */
+    @Override
+    public boolean put(final K key, final E value, final long timeout, final TimeUnit unit, final boolean autoDestroyOnFailedToPut)
+            throws InterruptedException {
+        boolean success = false;
+
+        try {
+            success = put(key, value, timeout, unit);
         } finally {
             if (autoDestroyOnFailedToPut && !success && value != null) {
                 value.destroy(Caller.PUT_ADD_FAILURE);
@@ -425,6 +653,77 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
         // Only account hit/miss on a normal completion. If the body threw (e.g. a
         // concurrent close() made assertNotClosed() raise IllegalStateException), the
         // call neither hit nor missed the pool and must not skew the statistics.
+        if (element != null) {
+            hitCount.incrementAndGet();
+        } else {
+            missCount.incrementAndGet();
+        }
+
+        return element;
+    }
+
+    /**
+     * Returns the element associated with the specified key, waiting up to the given timeout for a
+     * non-expired mapping for that key to become available. Mirrors
+     * {@link GenericObjectPool#take(long, TimeUnit)} but keyed: it blocks on {@code notEmpty} until
+     * the specific {@code key} is populated (by another thread's put), an expired mapping for the key
+     * is skipped (removed+destroyed), or the timeout expires. On success the element stays in the
+     * pool (it is not removed) and its activity print is updated.
+     *
+     * @param key the key whose associated element is to be returned
+     * @param timeout the maximum time to wait for a valid mapping for the key
+     * @param unit the time unit of the timeout
+     * @return the element associated with the key, or {@code null} if the timeout elapsed
+     * @throws IllegalStateException if the pool has been closed
+     * @throws InterruptedException if interrupted while waiting
+     */
+    @MayReturnNull
+    @Override
+    public E get(final K key, final long timeout, final TimeUnit unit) throws IllegalStateException, InterruptedException {
+        assertNotClosed();
+
+        E element = null;
+        long nanos = unit.toNanos(timeout);
+
+        lock.lock();
+
+        try {
+            getLoop: while (true) {
+                // Re-check on every iteration: a concurrent close()/removeAll() now signals
+                // notEmpty.signalAll(), so a waiter parked on awaitNanos wakes up and must
+                // notice the closed state instead of looping back to wait again.
+                assertNotClosed();
+
+                element = pool.get(key);
+
+                if (element != null) {
+                    final ActivityPrint activityPrint = element.activityPrint();
+
+                    if (activityPrint.isExpired()) {
+                        // Expired mapping for the key: remove+destroy and keep waiting for a
+                        // fresh one until the timeout.
+                        pool.remove(key);
+                        destroy(key, element, Caller.EVICT);
+                        element = null;
+                        notFull.signal();
+                    } else {
+                        activityPrint.updateLastAccessTime();
+                        activityPrint.updateAccessCount();
+                        break getLoop;
+                    }
+                }
+
+                if (nanos <= 0) {
+                    break getLoop;
+                }
+
+                nanos = notEmpty.awaitNanos(nanos);
+            }
+        } finally {
+            lock.unlock();
+        }
+
+        // Only account hit/miss on a normal completion (see get(K)).
         if (element != null) {
             hitCount.incrementAndGet();
         } else {
@@ -718,7 +1017,7 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
         lock.lock();
 
         try {
-            evict(numberToAutoBalance()); // NOSONAR
+            vacate(numberToAutoBalance()); // NOSONAR
 
             notFull.signalAll();
         } finally {
@@ -815,12 +1114,15 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
     }
 
     /**
-     * Removes the specified number of entries from the pool based on the eviction policy.
+     * Removes (vacates) the specified number of entries from the pool based on the eviction policy.
+     * This is the sized counterpart to the public no-arg {@link #evict()} (which removes a
+     * balance-factor fraction); it removes <em>exactly</em> {@code numberToEvict} entries, choosing
+     * victims via the configured {@link EvictionPolicy}. Destroyed entries use {@link Caller#VACATE}.
      * This method is called internally during eviction operations.
      *
      * @param numberToEvict the number of entries to remove
      */
-    protected void evict(final int numberToEvict) {
+    protected void vacate(final int numberToEvict) {
         final int size = pool.size();
 
         if (numberToEvict >= size) {
@@ -915,7 +1217,7 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
 
         if (value != null) {
             if (logger.isDebugEnabled()) {
-                logger.debug("Destroying cached object " + ClassUtil.getSimpleClassName(value.getClass()) + " with activity print: " + value.activityPrint());
+                logger.debug("Destroying cached object {} with activity print: {}", ClassUtil.getSimpleClassName(value.getClass()), value.activityPrint());
             }
 
             if (memoryMeasure != null) {
@@ -965,7 +1267,13 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
         try {
             doomed = new HashMap<>(pool);
             pool.clear();
+            // Wake BOTH condition queues: notFull for parked put(...) waiters AND notEmpty for
+            // parked timed get(key, timeout) waiters. The timed-get loop re-checks assertNotClosed()
+            // only when woken, so without notEmpty.signalAll() a get(key, longTimeout) thread would
+            // block until its full timeout after close()/clear() instead of failing fast. Mirrors
+            // GenericObjectPool.removeAll(), which signals both conditions for the same reason.
             notFull.signalAll();
+            notEmpty.signalAll();
         } finally {
             lock.unlock();
         }
@@ -1007,5 +1315,10 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
         notFull = newCondition(lock);
         cmp = createComparator();
         scheduleEvictionTask();
+
+        if (!isClosed) {
+            initShutdownHook();
+            registerShutdownHook();
+        }
     }
 }

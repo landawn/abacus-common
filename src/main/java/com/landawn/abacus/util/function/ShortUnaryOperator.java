@@ -13,9 +13,9 @@
  */
 package com.landawn.abacus.util.function;
 
-import java.util.Objects;
-
 import com.landawn.abacus.util.Throwables;
+import com.landawn.abacus.util.N;
+import com.landawn.abacus.util.cs;
 
 /**
  * Represents an operation on a single short-valued operand that produces a short-valued result.
@@ -68,12 +68,12 @@ public interface ShortUnaryOperator extends Throwables.ShortUnaryOperator<Runtim
      *
      * @param before the operator to apply before this operator is applied
      * @return a composed operator that first applies the {@code before} operator and then applies this operator
-     * @throws NullPointerException if {@code before} is null
+     * @throws IllegalArgumentException if {@code before} is null
      *
      * @see #andThen(ShortUnaryOperator)
      */
     default ShortUnaryOperator compose(final ShortUnaryOperator before) {
-        Objects.requireNonNull(before);
+        N.checkArgNotNull(before, cs.before);
         return v -> applyAsShort(before.applyAsShort(v));
     }
 
@@ -92,12 +92,12 @@ public interface ShortUnaryOperator extends Throwables.ShortUnaryOperator<Runtim
      *
      * @param after the operator to apply after this operator is applied
      * @return a composed operator that first applies this operator and then applies the {@code after} operator
-     * @throws NullPointerException if {@code after} is null
+     * @throws IllegalArgumentException if {@code after} is null
      *
      * @see #compose(ShortUnaryOperator)
      */
     default ShortUnaryOperator andThen(final ShortUnaryOperator after) {
-        Objects.requireNonNull(after);
+        N.checkArgNotNull(after, cs.after);
         return t -> after.applyAsShort(applyAsShort(t));
     }
 
@@ -117,5 +117,19 @@ public interface ShortUnaryOperator extends Throwables.ShortUnaryOperator<Runtim
      */
     static ShortUnaryOperator identity() {
         return t -> t;
+    }
+
+    /**
+     * Returns this object as a {@link Throwables.ShortUnaryOperator} view.
+     *
+     * <p>The returned object has the same behavior as this one. This method does not translate
+     * exceptions or make the original implementation capable of throwing new checked exceptions; the
+     * exception type parameter is for target-type compatibility with APIs that accept {@code Throwables.ShortUnaryOperator}.
+     *
+     * @param <E> the target exception type for compatibility with {@code Throwables.ShortUnaryOperator}
+     * @return a {@link Throwables.ShortUnaryOperator} view of this object
+     */
+    default <E extends Throwable> Throwables.ShortUnaryOperator<E> toThrowable() {
+        return (Throwables.ShortUnaryOperator<E>) this;
     }
 }

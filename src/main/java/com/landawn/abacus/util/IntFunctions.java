@@ -50,6 +50,9 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.ConcurrentNavigableMap;
+import java.util.concurrent.ConcurrentSkipListMap;
+import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.LinkedBlockingQueue;
 
@@ -1391,6 +1394,10 @@ public final class IntFunctions {
                 ret = ofSet();
             } else if (LinkedHashSet.class.equals(targetType)) {
                 ret = ofLinkedHashSet();
+            } else if (ConcurrentSkipListSet.class.equals(targetType)) {
+                // Must precede the SortedSet branch (like Suppliers.ofCollection):
+                // downgrading to TreeSet would silently lose thread-safety.
+                ret = size -> new ConcurrentSkipListSet<>();
             } else if (SortedSet.class.isAssignableFrom(targetType)) {
                 ret = ofSortedSet();
             } else if (Queue.class.equals(targetType) || AbstractQueue.class.equals(targetType) || Deque.class.equals(targetType)) {
@@ -1458,7 +1465,12 @@ public final class IntFunctions {
                 }
             }
 
-            collectionCreatorPool.put(targetType, ret);
+            // putIfAbsent so a concurrent registerForCollection cannot be silently overwritten.
+            final IntFunction existing = collectionCreatorPool.putIfAbsent(targetType, ret);
+
+            if (existing != null) {
+                ret = existing;
+            }
         }
 
         return ret;
@@ -1505,6 +1517,10 @@ public final class IntFunctions {
                 ret = ofMap();
             } else if (LinkedHashMap.class.equals(targetType)) {
                 ret = ofLinkedHashMap();
+            } else if (ConcurrentNavigableMap.class.equals(targetType) || ConcurrentSkipListMap.class.equals(targetType)) {
+                // Must precede the SortedMap branch (like Suppliers.ofMap):
+                // downgrading to TreeMap would silently lose thread-safety.
+                ret = size -> new ConcurrentSkipListMap<>();
             } else if (SortedMap.class.isAssignableFrom(targetType)) {
                 ret = ofSortedMap();
             } else if (IdentityHashMap.class.isAssignableFrom(targetType)) {
@@ -1562,7 +1578,12 @@ public final class IntFunctions {
                 }
             }
 
-            mapCreatorPool.put(targetType, ret);
+            // putIfAbsent so a concurrent registerForMap cannot be silently overwritten.
+            final IntFunction existing = mapCreatorPool.putIfAbsent(targetType, ret);
+
+            if (existing != null) {
+                ret = existing;
+            }
         }
 
         return ret;
@@ -1600,11 +1621,9 @@ public final class IntFunctions {
             throw new IllegalArgumentException("Can't register IntFunction with built-in class: " + ClassUtil.getCanonicalClassName(targetClass));
         }
 
-        if (collectionCreatorPool.containsKey(targetClass)) {
-            return false;
-        }
-
-        return collectionCreatorPool.put(targetClass, Fn.from(creator)) == null;
+        // putIfAbsent: a check-then-put pair could overwrite a concurrent registration while still
+        // reporting failure. Matches the hardened Suppliers.registerForCollection.
+        return collectionCreatorPool.putIfAbsent(targetClass, Fn.from(creator)) == null;
     }
 
     /**
@@ -1639,12 +1658,9 @@ public final class IntFunctions {
             throw new IllegalArgumentException("Can't register IntFunction with built-in class: " + ClassUtil.getCanonicalClassName(targetClass));
         }
 
-        if (mapCreatorPool.containsKey(targetClass)) {
-            return false;
-        }
-
-        return mapCreatorPool.put(targetClass, Fn.from(creator)) == null;
-
+        // putIfAbsent: a check-then-put pair could overwrite a concurrent registration while still
+        // reporting failure. Matches the hardened Suppliers.registerForMap.
+        return mapCreatorPool.putIfAbsent(targetClass, Fn.from(creator)) == null;
     }
 
     /**

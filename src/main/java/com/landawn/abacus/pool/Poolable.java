@@ -200,6 +200,11 @@ public interface Poolable {
         /**
          * Returns the numeric value associated with this caller reason.
          *
+         * <p>This is a stable, explicitly-assigned identifier (independent of declaration order)
+         * provided for external use such as logging, metrics, or persistence, where a fixed code is
+         * preferable to {@link #ordinal()} (which would shift if constants were reordered). The pool
+         * implementation itself dispatches on the enum constants, not on this value.</p>
+         *
          * @return the numeric identifier for this caller type
          */
         public int value() {

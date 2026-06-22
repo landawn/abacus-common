@@ -3,6 +3,7 @@ package com.landawn.abacus.util;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -116,14 +117,16 @@ public class WeekDayTest extends TestBase {
 
     @Test
     public void testIntValue_uniqueness() {
-        WeekDay[] days = WeekDay.values();
-        for (int i = 0; i < days.length; i++) {
-            for (int j = i + 1; j < days.length; j++) {
-                if (days[i].intValue() == days[j].intValue()) {
-                    throw new AssertionError("Duplicate int value: " + days[i] + " and " + days[j]);
+        assertDoesNotThrow(() -> {
+            WeekDay[] days = WeekDay.values();
+            for (int i = 0; i < days.length; i++) {
+                for (int j = i + 1; j < days.length; j++) {
+                    if (days[i].intValue() == days[j].intValue()) {
+                        throw new AssertionError("Duplicate int value: " + days[i] + " and " + days[j]);
+                    }
                 }
             }
-        }
+        });
     }
 
     @Test

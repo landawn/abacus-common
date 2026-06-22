@@ -26,6 +26,6 @@ public class DoubleTriFunctionTest extends TestBase {
     @Test
     public void testAndThenNullThrowsImmediately() {
         DoubleTriFunction<String> instance = (a, b, c) -> null;
-        org.junit.jupiter.api.Assertions.assertThrows(NullPointerException.class, () -> instance.andThen((java.util.function.Function) null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> instance.andThen((java.util.function.Function) null));
     }
 }

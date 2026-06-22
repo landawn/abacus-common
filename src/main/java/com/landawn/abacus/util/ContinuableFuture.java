@@ -304,17 +304,17 @@ public class ContinuableFuture<T> implements Future<T> {
 
     static final Logger logger = LoggerFactory.getLogger(ContinuableFuture.class);
 
-    final Future<T> future;
+    final Future<? extends T> future;
 
     final List<ContinuableFuture<?>> upFutures;
 
     final Executor asyncExecutor;
 
-    ContinuableFuture(final Future<T> future) {
+    ContinuableFuture(final Future<? extends T> future) {
         this(future, null, null);
     }
 
-    ContinuableFuture(final Future<T> future, final List<ContinuableFuture<?>> upFutures, final Executor asyncExecutor) {
+    ContinuableFuture(final Future<? extends T> future, final List<ContinuableFuture<?>> upFutures, final Executor asyncExecutor) {
         this.future = future;
         this.upFutures = upFutures;
         this.asyncExecutor = asyncExecutor == null ? N.ASYNC_EXECUTOR.getExecutor() : asyncExecutor;
@@ -396,7 +396,7 @@ public class ContinuableFuture<T> implements Future<T> {
      * @return a {@code ContinuableFuture<T>} representing the pending result of the action.
      * @see N#asyncExecute(Callable)
      */
-    public static <T> ContinuableFuture<T> call(final Callable<T> action) {
+    public static <T> ContinuableFuture<T> call(final Callable<? extends T> action) {
         return call(action, N.ASYNC_EXECUTOR.getExecutor());
     }
 
@@ -420,8 +420,8 @@ public class ContinuableFuture<T> implements Future<T> {
      * @param executor the executor to use for running the action; must not be {@code null}.
      * @return a {@code ContinuableFuture<T>} representing the pending result of the action.
      */
-    public static <T> ContinuableFuture<T> call(final Callable<T> action, final Executor executor) {
-        final FutureTask<T> futureTask = new FutureTask<>(action);
+    public static <T> ContinuableFuture<T> call(final Callable<? extends T> action, final Executor executor) {
+        final FutureTask<? extends T> futureTask = new FutureTask<>(action);
 
         executor.execute(futureTask);
 
@@ -485,6 +485,7 @@ public class ContinuableFuture<T> implements Future<T> {
 
             @Override
             public T get(final long timeout, final TimeUnit unit) {
+                N.requireNonNull(unit, cs.unit);
                 return result;
             }
         }, null, N.ASYNC_EXECUTOR.getExecutor());
@@ -516,7 +517,7 @@ public class ContinuableFuture<T> implements Future<T> {
      * @param future the future to wrap; must not be {@code null}.
      * @return a {@code ContinuableFuture} that wraps the provided future.
      */
-    public static <T> ContinuableFuture<T> wrap(final Future<T> future) {
+    public static <T> ContinuableFuture<T> wrap(final Future<? extends T> future) {
         return new ContinuableFuture<>(future);
     }
 
@@ -1333,7 +1334,7 @@ public class ContinuableFuture<T> implements Future<T> {
      * @param action the callable to execute after this future completes.
      * @return a new {@code ContinuableFuture<R>} with the result of the callable.
      */
-    public <R> ContinuableFuture<R> thenCallAsync(final Callable<R> action) {
+    public <R> ContinuableFuture<R> thenCallAsync(final Callable<? extends R> action) {
         return execute(() -> {
             get();
             return action.call();
@@ -1477,7 +1478,7 @@ public class ContinuableFuture<T> implements Future<T> {
      * <ul>
      *   <li>result1/exception1 are from this future</li>
      *   <li>result2/exception2 are from the other future</li>
-     *   <li>If a future succeeds, its result is non-null and exception is null</li>
+     *   <li>If a future succeeds, its exception is null and its result is the (possibly null) computed value</li>
      *   <li>If a future fails, its result is {@code null} and exception is non-null</li>
      * </ul>
      *
@@ -1578,7 +1579,7 @@ public class ContinuableFuture<T> implements Future<T> {
      * @param action the callable to execute after both futures complete; must not be null.
      * @return a new {@code ContinuableFuture<R>} that completes with the result of the callable.
      */
-    public <R> ContinuableFuture<R> callAsyncAfterBoth(final ContinuableFuture<?> other, final Callable<R> action) {
+    public <R> ContinuableFuture<R> callAsyncAfterBoth(final ContinuableFuture<?> other, final Callable<? extends R> action) {
         return execute(() -> {
             get();
             other.get();
@@ -2201,15 +2202,15 @@ public class ContinuableFuture<T> implements Future<T> {
         }, other);
     }
 
-    private <R> ContinuableFuture<R> execute(final Callable<R> command) {
+    private <R> ContinuableFuture<R> execute(final Callable<? extends R> command) {
         return execute(command, null);
     }
 
-    private <R> ContinuableFuture<R> execute(final Callable<R> command, final ContinuableFuture<?> other) {
+    private <R> ContinuableFuture<R> execute(final Callable<? extends R> command, final ContinuableFuture<?> other) {
         return execute(new FutureTask<>(command), other);
     }
 
-    private <U> ContinuableFuture<U> execute(final FutureTask<U> futureTask, final ContinuableFuture<?> other) {
+    private <R> ContinuableFuture<R> execute(final FutureTask<? extends R> futureTask, final ContinuableFuture<?> other) {
         asyncExecutor.execute(futureTask);
 
         @SuppressWarnings("rawtypes")
@@ -2233,7 +2234,7 @@ public class ContinuableFuture<T> implements Future<T> {
      *     .thenRunAsync(() -> processResults());
      * }</pre>
      *
-     * @param delay the delay duration before the next action is executed; must be non-negative.
+     * @param delay the delay duration before the next action is executed; values &lt;= 0 mean no delay.
      * @param unit the time unit of the delay parameter; must not be null.
      * @return a new ContinuableFuture configured with the specified delay if delay &gt; 0, or this future if delay &lt;= 0.
      */
@@ -2328,6 +2329,13 @@ public class ContinuableFuture<T> implements Future<T> {
                 final long timeoutMillis = TimeUnit.NANOSECONDS.toMillis(timeoutNanos);
                 delay(timeoutMillis);
 
+                if (!isDelayed) {
+                    // The configured delay was only partially served (the timeout - possibly
+                    // truncated to 0 ms for sub-millisecond values - is shorter than the remaining
+                    // delay): the value must not become visible before the delay fully elapses.
+                    throw new TimeoutException("Timeout after delay");
+                }
+
                 final long elapsedNanos = System.nanoTime() - startNanos;
                 final long remainingNanos = timeoutNanos - elapsedNanos;
 
@@ -2365,13 +2373,15 @@ public class ContinuableFuture<T> implements Future<T> {
             }
         }, null, executor) {
             @Override
-            public boolean cancelAll(final boolean mayInterruptIfRunning) { //NOSONAR
-                return super.cancelAll(mayInterruptIfRunning);
+            public boolean cancelAll(final boolean mayInterruptIfRunning) {
+                // Delegate to the enclosing future (like map()): this wrapper's upFutures is null,
+                // so a super-call would silently sever cancellation from the upstream chain.
+                return ContinuableFuture.this.cancelAll(mayInterruptIfRunning);
             }
 
             @Override
-            public boolean isAllCancelled() { //NOSONAR
-                return super.isAllCancelled();
+            public boolean isAllCancelled() {
+                return ContinuableFuture.this.isAllCancelled();
             }
         };
     }

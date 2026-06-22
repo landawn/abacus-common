@@ -23,8 +23,7 @@ import java.lang.annotation.Target;
 /**
  * Designates the static factory method that should be invoked when an object is reconstructed from
  * a single serialized value (JSON, XML, or persistence). This is the abacus counterpart of
- * Jackson's {@code @JsonCreator}. The annotation may also target a constructor, but see the
- * placement rules below for how each target is actually consumed.
+ * Jackson's {@code @JsonCreator}.
  *
  * <p>It pairs with {@link JsonXmlValue}: a class that exposes one "wrapped" value via
  * {@code @JsonXmlValue} (on a field or no-arg method) also needs a way to be rebuilt from that
@@ -40,10 +39,7 @@ import java.lang.annotation.Target;
  *   <li>On a {@link ElementType#METHOD}: the method is used as a factory by
  *       {@code SingleValueType}; it must be {@code static}, take exactly one parameter
  *       (assignable from the {@code @JsonXmlValue} type), and return an instance of the enclosing
- *       class. This is the form recognized by {@code abacus-core}.</li>
- *   <li>On a {@link ElementType#CONSTRUCTOR}: the constructor target is permitted (for tooling and
- *       compatibility), but {@code SingleValueType} does not read {@code @JsonXmlCreator} from
- *       constructors — it only honors a {@code static} factory method.</li>
+ *       class. This is the only form recognized by {@code abacus-core}.</li>
  *   <li>At most one creator should be marked per class.</li>
  * </ul>
  *
@@ -93,7 +89,7 @@ import java.lang.annotation.Target;
  * @see com.landawn.abacus.type.SingleValueType
  */
 @Documented
-@Target({ ElementType.METHOD, ElementType.CONSTRUCTOR })
+@Target({ ElementType.METHOD })
 @Retention(RetentionPolicy.RUNTIME)
 public @interface JsonXmlCreator {
 

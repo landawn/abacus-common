@@ -198,9 +198,10 @@ final class JsonParserImpl extends AbstractJsonParser {
      * @param source the JSON string to parse; may be {@code null} or empty
      * @param config the deserialization configuration to use; may be {@code null} to use default configuration
      * @param targetType the type of the target object to deserialize into; must not be {@code null}
-     * @return the deserialized object of type {@code T}; if the source is {@code null} the target type's
-     *         default value is returned, and if the source is empty an empty value (or the default value)
-     *         is returned depending on the target type and the {@code readNullToEmpty} configuration
+     * @return the deserialized object of type {@code T}; if the source is empty, an empty value (or the
+     *         default value, depending on the target type) is returned; if the source is {@code null}, the
+     *         same empty value is returned when {@code readNullToEmpty} is enabled, otherwise the
+     *         target type's default value
      * @throws UncheckedIOException if an I/O error occurs during parsing
      * @throws ParsingException if the JSON structure is invalid or doesn't match the target type
      */
@@ -246,9 +247,10 @@ final class JsonParserImpl extends AbstractJsonParser {
      * @param source the JSON string to parse; may be {@code null} or empty
      * @param config the deserialization configuration to use; may be {@code null} to use default configuration
      * @param targetClass the class of the target object to deserialize into; must not be {@code null}
-     * @return the deserialized object of type {@code T}; if the source is {@code null} the target type's
-     *         default value is returned, and if the source is empty an empty value (or the default value)
-     *         is returned depending on the target type and the {@code readNullToEmpty} configuration
+     * @return the deserialized object of type {@code T}; if the source is empty, an empty value (or the
+     *         default value, depending on the target type) is returned; if the source is {@code null}, the
+     *         same empty value is returned when {@code readNullToEmpty} is enabled, otherwise the
+     *         target type's default value
      * @throws UncheckedIOException if an I/O error occurs during parsing
      * @throws ParsingException if the JSON structure is invalid or doesn't match the target class
      */
@@ -272,7 +274,7 @@ final class JsonParserImpl extends AbstractJsonParser {
      * // numbers array is now filled: [1, 2, 3, 4, 5]
      * }</pre>
      *
-     * @param source the JSON array string to parse; may be {@code null} (in which case no action is taken)
+     * @param source the JSON array string to parse; may be {@code null} or empty (in which case no action is taken)
      * @param config the deserialization configuration to use; may be {@code null} to use default configuration
      * @param output the pre-allocated array to populate with parsed values; must not be {@code null}
      * @throws UncheckedIOException if an I/O error occurs during parsing
@@ -283,11 +285,9 @@ final class JsonParserImpl extends AbstractJsonParser {
     public void parse(final String source, final JsonDeserConfig config, final Object[] output) {
         final JsonDeserConfig configToUse = check(config);
 
-        //    if (N.isEmpty(str)) { // TODO ?
-        //        return;
-        //    }
-
-        if (source == null) {
+        // Empty-source guard like the Map overload: an empty source would otherwise reach the
+        // EOF readValue path and fabricate a spurious "" element.
+        if (Strings.isEmpty(source)) {
             return;
         }
 
@@ -319,7 +319,7 @@ final class JsonParserImpl extends AbstractJsonParser {
      * // fruits now contains: ["apple", "banana", "orange"]
      * }</pre>
      *
-     * @param source the JSON array string to parse; may be {@code null} (in which case no action is taken)
+     * @param source the JSON array string to parse; may be {@code null} or empty (in which case no action is taken)
      * @param config the deserialization configuration to use; may be {@code null} to use default configuration
      * @param output the collection to populate with parsed elements; must not be {@code null}
      * @throws UncheckedIOException if an I/O error occurs during parsing
@@ -330,11 +330,9 @@ final class JsonParserImpl extends AbstractJsonParser {
     public void parse(final String source, final JsonDeserConfig config, final Collection<?> output) {
         final JsonDeserConfig configToUse = check(config);
 
-        //    if (N.isEmpty(str)) { // TODO ?
-        //        return;
-        //    }
-
-        if (source == null) {
+        // Empty-source guard like the Map overload: an empty source would otherwise reach the
+        // EOF readValue path and add a spurious "" element to the output collection.
+        if (Strings.isEmpty(source)) {
             return;
         }
 
@@ -750,6 +748,10 @@ final class JsonParserImpl extends AbstractJsonParser {
     protected void write(final Object obj, final JsonSerConfig config, final boolean isFirstCall, final String indentation,
             final IdentityHashSet<Object> serializedObjects, final BufferedJsonWriter bw) throws IOException {
         if (hasCircularReference(obj, serializedObjects, config, bw)) {
+            // Write a null placeholder: the caller has already emitted the name/comma for this
+            // value position, so returning silently would produce malformed JSON ("name": }).
+            bw.write(NULL_CHAR_ARRAY);
+
             return;
         }
 
@@ -846,6 +848,14 @@ final class JsonParserImpl extends AbstractJsonParser {
                 writeArray(obj, config, true, null, serializedObjects, type, bw);
             } else {
                 write(obj, config, true, null, serializedObjects, type, bw, flush);
+
+                return;
+            }
+
+            // The writeArray/writeCollection overloads above don't flush; flush here so output reaches
+            // the underlying stream/writer (matching the flushing path taken when bracketRootValue=true).
+            if (flush) {
+                bw.flush();
             }
         }
     }
@@ -1327,10 +1337,12 @@ final class JsonParserImpl extends AbstractJsonParser {
 
         if (quotePropName) {
             bw.write(_DOUBLE_QUOTE);
-            bw.write(mapEntity.entityName());
+            // writeCharacter (not write): names containing '"' or '\' must be escaped.
+            // But generally, entityName/propName/columnName should not contain '"' or '\'.
+            bw.writeCharacter(mapEntity.entityName());
             bw.write(_DOUBLE_QUOTE);
         } else {
-            bw.write(mapEntity.entityName());
+            bw.writeCharacter(mapEntity.entityName());
         }
 
         bw.write(COLON_SPACE_CHAR_ARRAY);
@@ -1359,15 +1371,23 @@ final class JsonParserImpl extends AbstractJsonParser {
 
                 if (quotePropName) {
                     bw.write(_DOUBLE_QUOTE);
-                    bw.write(jsonXmlNamingPolicy == null ? propName : jsonXmlNamingPolicy.convert(propName));
+                    // writeCharacter (not write): names containing '"' or '\' must be escaped.
+                    // But generally, entityName/propName/columnName should not contain '"' or '\'.
+                    bw.writeCharacter(jsonXmlNamingPolicy == null ? propName : jsonXmlNamingPolicy.convert(propName));
                     bw.write(_DOUBLE_QUOTE);
                 } else {
-                    bw.write(jsonXmlNamingPolicy == null ? propName : jsonXmlNamingPolicy.convert(propName));
+                    bw.writeCharacter(jsonXmlNamingPolicy == null ? propName : jsonXmlNamingPolicy.convert(propName));
                 }
 
                 bw.write(COLON_SPACE_CHAR_ARRAY);
 
-                write(mapEntity.get(propName), config, false, nextIndentation, serializedObjects, bw);
+                final Object propValue = mapEntity.get(propName);
+
+                if (propValue == null) {
+                    bw.write(NULL_CHAR_ARRAY);
+                } else {
+                    write(propValue, config, false, nextIndentation, serializedObjects, bw);
+                }
             }
         }
 
@@ -1439,10 +1459,12 @@ final class JsonParserImpl extends AbstractJsonParser {
 
         if (quotePropName) {
             bw.write(_DOUBLE_QUOTE);
-            bw.write(entityId.entityName());
+            // writeCharacter (not write): names containing '"' or '\' must be escaped.
+            // But generally, entityName/propName/columnName should not contain '"' or '\'.
+            bw.writeCharacter(entityId.entityName());
             bw.write(_DOUBLE_QUOTE);
         } else {
-            bw.write(entityId.entityName());
+            bw.writeCharacter(entityId.entityName());
         }
 
         bw.write(COLON_SPACE_CHAR_ARRAY);
@@ -1471,15 +1493,23 @@ final class JsonParserImpl extends AbstractJsonParser {
 
                 if (quotePropName) {
                     bw.write(_DOUBLE_QUOTE);
-                    bw.write(jsonXmlNamingPolicy == null ? propName : jsonXmlNamingPolicy.convert(propName));
+                    // writeCharacter (not write): names containing '"' or '\' must be escaped.
+                    // But generally, entityName/propName/columnName should not contain '"' or '\'.
+                    bw.writeCharacter(jsonXmlNamingPolicy == null ? propName : jsonXmlNamingPolicy.convert(propName));
                     bw.write(_DOUBLE_QUOTE);
                 } else {
-                    bw.write(jsonXmlNamingPolicy == null ? propName : jsonXmlNamingPolicy.convert(propName));
+                    bw.writeCharacter(jsonXmlNamingPolicy == null ? propName : jsonXmlNamingPolicy.convert(propName));
                 }
 
                 bw.write(COLON_SPACE_CHAR_ARRAY);
 
-                write(entityId.get(propName), config, false, nextIndentation, serializedObjects, bw);
+                final Object propValue = entityId.get(propName);
+
+                if (propValue == null) {
+                    bw.write(NULL_CHAR_ARRAY);
+                } else {
+                    write(propValue, config, false, nextIndentation, serializedObjects, bw);
+                }
             }
         }
 
@@ -1512,7 +1542,7 @@ final class JsonParserImpl extends AbstractJsonParser {
 
     /**
      * Writes a {@link Dataset} to JSON, by columns or by rows depending on
-     * {@code config.isWriteDatasetByRow()}, optionally including column type information.
+     * {@code config.isWriteDatasetAsRows()}, optionally including column type information.
      *
      * @param ds the dataset to write
      * @param config the serialization configuration
@@ -1530,7 +1560,7 @@ final class JsonParserImpl extends AbstractJsonParser {
         //        return;
         //    }
 
-        if (config.isWriteDatasetByRow()) {
+        if (config.isWriteDatasetAsRows()) {
             writeCollection(ds.toList(LinkedHashMap.class), config, isFirstCall, indentation, serializedObjects, type, bw);
             return;
         }
@@ -1735,10 +1765,13 @@ final class JsonParserImpl extends AbstractJsonParser {
 
                 if (quotePropName) {
                     bw.write(_DOUBLE_QUOTE);
-                    bw.write(columnName);
+                    // writeCharacter (not write): a raw name containing '"' or '\' would produce
+                    // an invalid JSON key (ordinary map keys already escape via writeCharacter).
+                    // But generally, entityName/propName/columnName should not contain '"' or '\'.
+                    bw.writeCharacter(columnName);
                     bw.write(_DOUBLE_QUOTE);
                 } else {
-                    bw.write(columnName);
+                    bw.writeCharacter(columnName);
                 }
 
                 bw.write(COLON_SPACE_CHAR_ARRAY);
@@ -1877,6 +1910,38 @@ final class JsonParserImpl extends AbstractJsonParser {
             } else {
                 bw.write(NULL_CHAR_ARRAY);
             }
+
+            if (isPrettyFormat) {
+                bw.write(_COMMA);
+            } else {
+                bw.write(COMMA_SPACE_CHAR_ARRAY);
+            }
+        }
+
+        if (sheet.isFrozen()) {
+            {
+                if (isPrettyFormat) {
+                    bw.write(IOUtil.LINE_SEPARATOR_UNIX);
+
+                    if (indentation != null) {
+                        bw.write(indentation);
+                    }
+
+                    bw.write(config.getIndentation());
+                }
+            }
+
+            if (quotePropName) {
+                bw.write(_DOUBLE_QUOTE);
+                bw.write(IS_FROZEN);
+                bw.write(_DOUBLE_QUOTE);
+            } else {
+                bw.write(IS_FROZEN);
+            }
+
+            bw.write(COLON_SPACE_CHAR_ARRAY);
+
+            bw.write(sheet.isFrozen());
 
             if (isPrettyFormat) {
                 bw.write(_COMMA);
@@ -2039,10 +2104,13 @@ final class JsonParserImpl extends AbstractJsonParser {
 
                 if (quotePropName) {
                     bw.write(_DOUBLE_QUOTE);
-                    bw.write(columnName);
+                    // writeCharacter (not write): a raw name containing '"' or '\' would produce
+                    // an invalid JSON key (ordinary map keys already escape via writeCharacter).
+                    // But generally, entityName/propName/columnName should not contain '"' or '\'.
+                    bw.writeCharacter(columnName);
                     bw.write(_DOUBLE_QUOTE);
                 } else {
-                    bw.write(columnName);
+                    bw.writeCharacter(columnName);
                 }
 
                 bw.write(COLON_SPACE_CHAR_ARRAY);
@@ -2124,9 +2192,10 @@ final class JsonParserImpl extends AbstractJsonParser {
      * @param source the JSON string to deserialize; may be {@code null} or empty
      * @param config the deserialization configuration to use; may be {@code null} to use default configuration
      * @param targetType the type of the target object to deserialize into; must not be {@code null}
-     * @return the deserialized object of type {@code T}; if the source is {@code null} the target type's
-     *         default value is returned, and if the source is empty an empty value (or the default value)
-     *         is returned depending on the target type and the {@code readNullToEmpty} configuration
+     * @return the deserialized object of type {@code T}; if the source is empty, an empty value (or the
+     *         default value, depending on the target type) is returned; if the source is {@code null}, the
+     *         same empty value is returned when {@code readNullToEmpty} is enabled, otherwise the
+     *         target type's default value
      * @throws UncheckedIOException if an I/O error occurs during deserialization
      * @throws ParsingException if the JSON structure is invalid or doesn't match the target type
      */
@@ -2170,9 +2239,10 @@ final class JsonParserImpl extends AbstractJsonParser {
      * @param source the JSON string to deserialize; may be {@code null} or empty
      * @param config the deserialization configuration to use; may be {@code null} to use default configuration
      * @param targetClass the class of the target object to deserialize into; must not be {@code null}
-     * @return the deserialized object of type {@code T}; if the source is {@code null} the target type's
-     *         default value is returned, and if the source is empty an empty value (or the default value)
-     *         is returned depending on the target type and the {@code readNullToEmpty} configuration
+     * @return the deserialized object of type {@code T}; if the source is empty, an empty value (or the
+     *         default value, depending on the target type) is returned; if the source is {@code null}, the
+     *         same empty value is returned when {@code readNullToEmpty} is enabled, otherwise the
+     *         target type's default value
      * @throws UncheckedIOException if an I/O error occurs during deserialization
      * @throws ParsingException if the JSON structure is invalid or doesn't match the target class
      */
@@ -2202,9 +2272,10 @@ final class JsonParserImpl extends AbstractJsonParser {
      * @param toIndex the ending index (exclusive) of the JSON content
      * @param config the deserialization configuration to use; may be {@code null} to use default configuration
      * @param targetType the type of the target object to deserialize into; must not be {@code null}
-     * @return the deserialized object of type {@code T}; if the source is {@code null} the target type's
-     *         default value is returned, and if the selected range is empty an empty value (or the default
-     *         value) is returned depending on the target type and the {@code readNullToEmpty} configuration
+     * @return the deserialized object of type {@code T}; if the selected range is empty, an empty value (or
+     *         the default value, depending on the target type) is returned; if the source is {@code null},
+     *         the same empty value is returned when {@code readNullToEmpty} is enabled, otherwise the
+     *         target type's default value
      * @throws IndexOutOfBoundsException if the indices are out of bounds or fromIndex &gt; toIndex
      * @throws UncheckedIOException if an I/O error occurs during deserialization
      * @throws ParsingException if the JSON structure is invalid or doesn't match the target type
@@ -2245,7 +2316,7 @@ final class JsonParserImpl extends AbstractJsonParser {
      * <pre>{@code
      * String json = "prefix{\"name\":\"John\"}suffix";
      * JsonDeserConfig config = new JsonDeserConfig();
-     * User user = parser.deserialize(json, 6, 23, config, User.class);
+     * User user = parser.deserialize(json, 6, 21, config, User.class);
      * }</pre>
      *
      * @param <T> the type of the target class
@@ -2254,9 +2325,10 @@ final class JsonParserImpl extends AbstractJsonParser {
      * @param toIndex the ending index (exclusive) of the JSON content
      * @param config the deserialization configuration to use; may be {@code null} to use default configuration
      * @param targetClass the class of the target object to deserialize into; must not be {@code null}
-     * @return the deserialized object of type {@code T}; if the source is {@code null} the target type's
-     *         default value is returned, and if the selected range is empty an empty value (or the default
-     *         value) is returned depending on the target type and the {@code readNullToEmpty} configuration
+     * @return the deserialized object of type {@code T}; if the selected range is empty, an empty value (or
+     *         the default value, depending on the target type) is returned; if the source is {@code null},
+     *         the same empty value is returned when {@code readNullToEmpty} is enabled, otherwise the
+     *         target type's default value
      * @throws IndexOutOfBoundsException if the indices are out of bounds or fromIndex &gt; toIndex
      * @throws UncheckedIOException if an I/O error occurs during deserialization
      * @throws ParsingException if the JSON structure is invalid or doesn't match the target class
@@ -2501,7 +2573,7 @@ final class JsonParserImpl extends AbstractJsonParser {
      * @param <T> the type of the target object
      * @param source the original JSON source, used for scalar fallback conversion
      * @param jr the JSON reader to read tokens from
-     * @param lastToken the token already consumed by the caller, or {@link #UNDEFINED} if none
+     * @param lastToken the token already consumed by the caller, or {@link JsonReader#UNDEFINED} if none
      * @param config the deserialization configuration
      * @param isFirstCall whether this is the top-level (root) read call
      * @param targetClass the class of the object to create
@@ -2607,8 +2679,7 @@ final class JsonParserImpl extends AbstractJsonParser {
 
         // for (int token = firstToken == START_BRACE ? jr.nextToken() :
         // firstToken;; token = isPropName ? jr.nextNameToken() :
-        // jr.nextToken()) { // TODO .Why it's even slower by jr.nextNameToken
-        // which has less comparison. Fuck???!!!...
+        // jr.nextToken()) { // TODO: Investigate why jr.nextNameToken is slower despite fewer comparisons.
         for (int token = firstToken == START_BRACE ? jr.nextToken() : firstToken;; token = jr.nextToken(propInfo == null ? strType : propInfo.jsonXmlType)) {
             switch (token) {
                 case START_DOUBLE_QUOTE, START_SINGLE_QUOTE:
@@ -3117,6 +3188,10 @@ final class JsonParserImpl extends AbstractJsonParser {
         final int firstToken = isFirstCall ? jr.nextToken() : START_BRACKET;
 
         if (firstToken == EOF) {
+            if (!jr.hasText()) {
+                return emptyOrDefault(targetType);
+            }
+
             //    if (isFirstCall && N.notEmpty(jr.getText())) {
             //        throw new ParseException("Can't parse: " + jr.getText());
             //    }
@@ -3334,6 +3409,10 @@ final class JsonParserImpl extends AbstractJsonParser {
         final int firstToken = isFirstCall ? jr.nextToken() : START_BRACKET;
 
         if (firstToken == EOF) {
+            if (!jr.hasText()) {
+                return emptyOrDefault(targetType);
+            }
+
             //    if (isFirstCall && N.notEmpty(jr.getText())) {
             //        throw new ParseException("Can't parse: " + jr.getText());
             //    }
@@ -3574,7 +3653,7 @@ final class JsonParserImpl extends AbstractJsonParser {
      *
      * @param <T> the type of the target object
      * @param jr the JSON reader positioned at (or before) the opening brace
-     * @param lastToken the token already consumed by the caller, or {@link #UNDEFINED} if none
+     * @param lastToken the token already consumed by the caller, or {@link JsonReader#UNDEFINED} if none
      * @param config the deserialization configuration
      * @param isFirstCall whether this is the top-level (root) read call
      * @param targetClass the target class to create
@@ -3725,21 +3804,28 @@ final class JsonParserImpl extends AbstractJsonParser {
                                 }
                             }
 
-                            final int maxValueSize = Stream.of(result.values()).mapToInt(List::size).max().orElse(0);
+                            valueCount++;
 
+                            // Pad every column to the ROW COUNT (not the max column size): a row
+                            // that omitted a column - or an empty {} row, even a trailing one -
+                            // contributes null in that column (addDatasetColumnValue pads new
+                            // columns to valueCount on creation for the same reason).
                             for (final List<Object> vc : result.values()) {
-                                if (vc.size() < maxValueSize) {
+                                while (vc.size() < valueCount) {
                                     vc.add(null);
                                 }
                             }
-
-                            valueCount++;
 
                             do {
                                 token = jr.nextToken();
                             } while (token == COMMA);
 
                             isKey = true;
+                            // Reset the stale key from the previous row: the END_BRACE guard above
+                            // distinguishes an empty row ({}) from a dangling key by key == null,
+                            // so a stale key made empty rows throw depending on their position.
+                            key = null;
+                            value = null;
                             isBraceEnded = true;
 
                             break;
@@ -4019,7 +4105,7 @@ final class JsonParserImpl extends AbstractJsonParser {
      *
      * @param <T> the type of the target object
      * @param jr the JSON reader positioned at (or before) the opening brace
-     * @param lastToken the token already consumed by the caller, or {@link #UNDEFINED} if none
+     * @param lastToken the token already consumed by the caller, or {@link JsonReader#UNDEFINED} if none
      * @param config the deserialization configuration
      * @param isFirstCall whether this is the top-level (root) read call
      * @param targetClass the target class to create
@@ -4056,6 +4142,7 @@ final class JsonParserImpl extends AbstractJsonParser {
         String columnName = null;
         Type<?> valueType = defaultValueType;
         boolean isKey = true;
+        boolean isFrozen = false;
 
         for (int token = firstToken == START_BRACE ? jr.nextToken() : firstToken;; token = jr.nextToken()) {
             switch (token) {
@@ -4074,6 +4161,10 @@ final class JsonParserImpl extends AbstractJsonParser {
                         }
 
                         switch (order) { //NOSONAR
+                            case 6:
+                                isFrozen = jr.readValue(boolType);
+                                break;
+
                             case 10:
                                 rowKeyType = jr.readValue(strType);
                                 break;
@@ -4117,6 +4208,10 @@ final class JsonParserImpl extends AbstractJsonParser {
                             }
 
                             switch (order) { //NOSONAR
+                                case 6:
+                                    isFrozen = jr.readValue(boolType);
+                                    break;
+
                                 case 10:
                                     rowKeyType = jr.readValue(strType);
                                     break;
@@ -4288,6 +4383,10 @@ final class JsonParserImpl extends AbstractJsonParser {
                     }
 
                     sheet = Sheet.columns(rowKeyList, columnKeyList, columnList);
+
+                    if (isFrozen) {
+                        sheet.freeze();
+                    }
 
                     return (T) sheet;
 
@@ -4707,7 +4806,11 @@ final class JsonParserImpl extends AbstractJsonParser {
                     result = read(source, jr, tokenHolder.value(), configToUse, false, elementClass, elementType);
                 }
 
-                tokenHolder.setAndGet(jr.lastToken());
+                // Neutral value, NOT jr.lastToken(): after an element whose parse consumed exactly
+                // one token (e.g. inner "[1]" or "[]"), lastToken() is the inner START_BRACKET,
+                // which hasNext treats as the "positioned at array start" sentinel and then
+                // mistakes the separator COMMA for an element - injecting spurious nulls.
+                tokenHolder.setAndGet(UNDEFINED);
 
                 return result;
             } catch (final IOException e) {

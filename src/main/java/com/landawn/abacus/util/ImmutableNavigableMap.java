@@ -958,8 +958,8 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
      * unless {@code fromInclusive} and {@code toInclusive} are both {@code true}. The returned map is
      * backed by this map. Since this map is immutable, the returned view is also immutable.
      *
-     * <p>The returned map will throw an {@code IllegalArgumentException} if the starting key is greater
-     * than the ending key considering the order of this map's comparator.
+     * <p>This method throws an {@code IllegalArgumentException} if the starting key is greater
+     * than the ending key according to this map's ordering.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code

@@ -150,7 +150,7 @@ public final class AddrUtil {
             final int lastColonIndex = addressString.lastIndexOf(':');
 
             if (lastColonIndex == -1) {
-                throw new IllegalArgumentException("Invalid server '" + addressString + "' in list:  " + servers);
+                throw new IllegalArgumentException("Invalid server '" + addressString + "' in list: " + servers);
             }
 
             String hostPart = addressString.substring(0, lastColonIndex);
@@ -159,16 +159,16 @@ public final class AddrUtil {
             if (hostPart.startsWith("[")) {
                 if (!hostPart.endsWith("]")) {
                     throw new IllegalArgumentException(
-                            "Invalid server '" + addressString + "' in list:  " + servers + ". IPv6 host has opening '[' but no matching closing ']'");
+                            "Invalid server '" + addressString + "' in list: " + servers + ". IPv6 host has opening '[' but no matching closing ']'");
                 }
                 hostPart = hostPart.substring(1, hostPart.length() - 1);
             } else if (hostPart.endsWith("]")) {
                 throw new IllegalArgumentException(
-                        "Invalid server '" + addressString + "' in list:  " + servers + ". IPv6 host has closing ']' but no matching opening '['");
+                        "Invalid server '" + addressString + "' in list: " + servers + ". IPv6 host has closing ']' but no matching opening '['");
             }
 
             if (hostPart.isEmpty() || portNum.isEmpty()) {
-                throw new IllegalArgumentException("Invalid server '" + addressString + "' in list:  " + servers);
+                throw new IllegalArgumentException("Invalid server '" + addressString + "' in list: " + servers);
             }
 
             try {
@@ -222,11 +222,15 @@ public final class AddrUtil {
         final List<InetSocketAddress> addrs = new ArrayList<>(servers.size());
 
         for (final String url : servers) {
+            if (url == null) {
+                throw new IllegalArgumentException("Invalid server 'null' in list: " + servers);
+            }
+
             // Handle IPv6 addresses properly
             final int lastColonIndex = url.lastIndexOf(':');
 
             if (lastColonIndex == -1) {
-                throw new IllegalArgumentException("Invalid server '" + url + "' in list:  " + servers);
+                throw new IllegalArgumentException("Invalid server '" + url + "' in list: " + servers);
             }
 
             String hostPart = url.substring(0, lastColonIndex);
@@ -235,16 +239,16 @@ public final class AddrUtil {
             if (hostPart.startsWith("[")) {
                 if (!hostPart.endsWith("]")) {
                     throw new IllegalArgumentException(
-                            "Invalid server '" + url + "' in list:  " + servers + ". IPv6 host has opening '[' but no matching closing ']'");
+                            "Invalid server '" + url + "' in list: " + servers + ". IPv6 host has opening '[' but no matching closing ']'");
                 }
                 hostPart = hostPart.substring(1, hostPart.length() - 1);
             } else if (hostPart.endsWith("]")) {
                 throw new IllegalArgumentException(
-                        "Invalid server '" + url + "' in list:  " + servers + ". IPv6 host has closing ']' but no matching opening '['");
+                        "Invalid server '" + url + "' in list: " + servers + ". IPv6 host has closing ']' but no matching opening '['");
             }
 
             if (hostPart.isEmpty() || portNum.isEmpty()) {
-                throw new IllegalArgumentException("Invalid server '" + url + "' in list:  " + servers);
+                throw new IllegalArgumentException("Invalid server '" + url + "' in list: " + servers);
             }
 
             try {

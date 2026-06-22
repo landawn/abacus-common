@@ -3720,4 +3720,59 @@ public class JoinerTest extends AbstractTest {
         assertEquals(0, result.length);
         assertEquals("", Hex.encodeToString(new byte[0]));
     }
+
+    // --- regression tests for 2026-06-10 deep-review fixes ---
+
+    @Test
+    public void testReuseBufferObserversAfterToString() {
+        // regression: after a reuse-mode toString() recycled the buffer, the observers reported
+        // empty/zero even though appending continued correctly from the retained content
+        final Joiner j = Joiner.with(",").reuseBuffer();
+        j.append("a").append("b");
+
+        assertEquals("a,b", j.toString());
+        assertEquals("a,b", j.toString()); // stable on repeated calls
+        assertEquals(3, j.length());
+        assertTrue(j.mapIfNotEmpty(String::length).isPresent());
+
+        final StringBuilder sb = new StringBuilder();
+        try {
+            j.appendTo(sb);
+        } catch (final java.io.IOException e) {
+            throw new RuntimeException(e);
+        }
+        assertEquals("a,b", sb.toString());
+
+        // appending still continues from the retained content
+        j.append("c");
+        assertEquals("a,b,c", j.toString());
+    }
+
+    @Test
+    public void testMergeFromReusedJoinerKeepsContent() {
+        // regression: merging a Joiner whose buffer was recycled by a reuse-mode toString()
+        // silently merged nothing
+        final Joiner other = Joiner.with(",").reuseBuffer();
+        other.append("x").append("y");
+        assertEquals("x,y", other.toString());
+
+        final Joiner j = Joiner.with(";");
+        j.append("a").merge(other);
+
+        assertEquals("a;x,y", j.toString());
+    }
+
+    @Test
+    public void testRepeatFastPathDoesNotReTrimJoinedBlock() {
+        // regression: the n >= 10 fast path re-applied trimBeforeAppend to the whole joined block,
+        // eating whitespace separators (diverging from the n < 10 per-element path)
+        final String slow = Joiner.with(" ").trimBeforeAppend().repeat(" ", 9).toString();
+        final String fast = Joiner.with(" ").trimBeforeAppend().repeat(" ", 10).toString();
+
+        assertEquals(8, slow.length()); // 9 empty elements joined by 8 single-space separators
+        assertEquals(9, fast.length()); // 10 empty elements joined by 9 single-space separators
+
+        // normal repeats unchanged
+        assertEquals("x,x,x,x,x,x,x,x,x,x", Joiner.with(",").repeat("x", 10).toString());
+    }
 }

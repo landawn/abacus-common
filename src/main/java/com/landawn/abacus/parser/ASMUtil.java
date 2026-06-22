@@ -73,9 +73,10 @@ final class ASMUtil {
             asmAvailable = Objects.equals(fieldAccess.get(bean, fieldAccessIndex), getMethodAccess.invoke(bean, getMethodAccessIndex));
 
         } catch (final Throwable e) { // NOSONAR
-            // ignore.
-
-            logger.warn("ASM is not available by com.esotericsoftware.reflectasm due to exception: {}", e.getClass().getName());
+            // ignore: reflectasm is an optional dependency. The availability is reported via the info log below.
+            if (logger.isDebugEnabled()) {
+                logger.debug("ASM is not available by com.esotericsoftware.reflectasm due to exception: {}", e.getClass().getName());
+            }
         }
 
         isASMAvailable = asmAvailable;

@@ -91,7 +91,7 @@ public class GregorianCalendarType extends AbstractCalendarType<GregorianCalenda
      * Parses a string representation into a {@code GregorianCalendar} instance.
      * The method handles:
      * <ul>
-     *   <li>{@code null} or empty strings: returns {@code null}</li>
+     *   <li>{@code null}, empty, or the literal {@code "null"} strings: returns {@code null}</li>
      *   <li>{@code "sysTime"}: returns current time as {@code GregorianCalendar}</li>
      *   <li>Numeric strings: interpreted as milliseconds since the epoch</li>
      *   <li>Date/time strings: parsed according to standard date formats</li>
@@ -129,7 +129,7 @@ public class GregorianCalendarType extends AbstractCalendarType<GregorianCalenda
             return null; // NOSONAR
         }
 
-        if (isPossibleLong(cbuf, offset, len)) {
+        if (isPossibleMillis(cbuf, offset, len)) {
             try {
                 return Dates.createGregorianCalendar(parseLong(cbuf, offset, len));
             } catch (final NumberFormatException e) {

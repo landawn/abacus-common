@@ -187,8 +187,9 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
     /**
      * Returns an {@code ObjIterator} over a portion of the specified array.
      * The iterator traverses elements from {@code fromIndex} (inclusive) to
-     * {@code toIndex} (exclusive). If the array is {@code null}/empty or the
-     * range is empty, an empty iterator is returned.
+     * {@code toIndex} (exclusive). If the array is empty or the range is empty,
+     * an empty iterator is returned. A {@code null} array is treated as length 0
+     * for range validation, so only {@code fromIndex == toIndex == 0} is valid.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -202,8 +203,8 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
      * @param fromIndex the index of the first element to iterate (inclusive)
      * @param toIndex the index after the last element to iterate (exclusive)
      * @return an {@code ObjIterator} over the specified range of array elements
-     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code toIndex > a.length},
-     *         or {@code fromIndex > toIndex}
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0},
+     *         {@code toIndex > (a == null ? 0 : a.length)}, or {@code fromIndex > toIndex}
      */
     public static <T> ObjIterator<T> of(final T[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
@@ -547,8 +548,10 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
      * @param <T> the type of elements returned by this iterator
      * @param <U> the type of the state/seed value
      * @param init the initial state value (may be {@code null})
-     * @param hasNext a {@code BiPredicate} that tests the state and previously generated value
-     * @param supplier a {@code BiFunction} that generates the next element from the state and previous value
+     * @param hasNext a {@code BiPredicate} that tests the state and previously generated value;
+     *                its second argument is {@code null} before the first element has been generated
+     * @param supplier a {@code BiFunction} that generates the next element from the state and previous value;
+     *                 its second argument is {@code null} before the first element has been generated
      * @return an {@code ObjIterator} that generates elements based on state and previous values
      * @throws IllegalArgumentException if {@code hasNext} or {@code supplier} is {@code null}
      */
@@ -865,6 +868,11 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
      * Converts the remaining elements of this iterator to an {@code Object[]}.
      * This is a terminal operation that consumes all remaining elements.
      * An empty array is returned if no elements remain.
+     *
+     * <p><b>Note:</b> the return type is {@code Object[]} rather than {@code T[]}
+     * because this iterator carries no {@code Class<T>} token at runtime to allocate
+     * a typed array. Use {@link #toArray(Object[])} when a {@code T[]} of a specific
+     * runtime component type is required.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code

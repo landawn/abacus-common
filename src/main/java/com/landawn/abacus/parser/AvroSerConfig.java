@@ -24,6 +24,13 @@ import com.landawn.abacus.util.N;
  * This class extends {@link SerializationConfig} and adds Avro-specific configuration options,
  * particularly the Avro schema required for serialization.
  *
+ * <p><b>Design note:</b> The {@link #getSchema()}/{@link #setSchema(Schema)} pair is intentionally
+ * duplicated between this class and {@link AvroDeserConfig}. A shared {@code AvroConfig} base is not
+ * possible because the two classes have different (and unrelated) supertypes —
+ * {@code AvroSerConfig extends SerializationConfig} while {@code AvroDeserConfig extends DeserializationConfig} —
+ * so the schema accessors (and their {@code equals}/{@code hashCode}/{@code toString} contributions) are
+ * declared independently on each.</p>
+ *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * Schema schema = new Schema.Parser().parse(schemaString);

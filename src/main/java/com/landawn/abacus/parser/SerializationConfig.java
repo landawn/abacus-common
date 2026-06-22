@@ -14,7 +14,6 @@
 
 package com.landawn.abacus.parser;
 
-import com.landawn.abacus.util.DateTimeFormat;
 import com.landawn.abacus.util.N;
 
 /**
@@ -50,9 +49,6 @@ public abstract class SerializationConfig<C extends SerializationConfig<C>> exte
      * prevent bean-level annotations from being honored.
      */
     protected static final Exclusion defaultExclusion = null; // Keep it null for default behavior. Do not set it to Exclusion.NULL or Exclusion.DEFAULT.
-
-    /** Default date/time serialization format ({@link DateTimeFormat#LONG} — epoch milliseconds). */
-    protected static final DateTimeFormat defaultDateTimeFormat = DateTimeFormat.LONG;
 
     /** Default value for {@link #isSkipTransientField()} ({@code true}). */
     protected static final boolean defaultSkipTransientField = true;

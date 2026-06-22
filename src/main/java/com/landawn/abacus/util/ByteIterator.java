@@ -56,16 +56,16 @@ public abstract class ByteIterator extends ImmutableIterator<Byte> {
     private OptionalByte cachedLast = null;
 
     /**
-     * Constructs a new ByteIterator.
+     * Constructs a new {@code ByteIterator}.
+     * Intended for use by subclasses only.
      */
     protected ByteIterator() {
     }
 
     /**
      * A singleton empty {@code ByteIterator} instance that contains no elements.
-     *
-     * <p>This iterator's {@code hasNext()} always returns {@code false}, and {@code nextByte()}
-     * always throws {@code NoSuchElementException}.</p>
+     * This iterator's {@code hasNext()} always returns {@code false}, and {@code nextByte()}
+     * always throws {@link NoSuchElementException}.
      *
      * @see #empty()
      */
@@ -138,8 +138,8 @@ public abstract class ByteIterator extends ImmutableIterator<Byte> {
      * @param a the byte array (may be {@code null})
      * @param fromIndex the starting index (inclusive)
      * @param toIndex the ending index (exclusive)
-     * @return a new {@code ByteIterator} over the specified range, or an empty iterator if the array is {@code null} or fromIndex equals toIndex
-     * @throws IndexOutOfBoundsException if the indices are out of range
+     * @return a new {@code ByteIterator} over the specified range, or an empty iterator if the array is {@code null} or {@code fromIndex == toIndex}
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code toIndex > a.length}, or {@code fromIndex > toIndex}
      */
     public static ByteIterator of(final byte[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
@@ -199,13 +199,14 @@ public abstract class ByteIterator extends ImmutableIterator<Byte> {
      * @param iteratorSupplier A Supplier that provides the ByteIterator when needed
      * @return A ByteIterator that is initialized on first use
      * @throws IllegalArgumentException if iteratorSupplier is {@code null}
+     * @throws IllegalStateException if the supplier returns {@code null} when invoked
      */
     public static ByteIterator defer(final Supplier<? extends ByteIterator> iteratorSupplier) throws IllegalArgumentException {
         N.checkArgNotNull(iteratorSupplier, cs.iteratorSupplier);
 
         return new ByteIterator() {
             private ByteIterator iter = null;
-            private boolean isInitialized = false;
+            private volatile boolean isInitialized = false;
 
             @Override
             public boolean hasNext() {
@@ -225,10 +226,13 @@ public abstract class ByteIterator extends ImmutableIterator<Byte> {
                 return iter.nextByte();
             }
 
-            private void init() {
+            private synchronized void init() {
                 if (!isInitialized) {
                     isInitialized = true;
                     iter = iteratorSupplier.get();
+                    if (iter == null) {
+                        throw new IllegalStateException("Iterator supplier returned null");
+                    }
                 }
             }
         };
@@ -242,7 +246,7 @@ public abstract class ByteIterator extends ImmutableIterator<Byte> {
      * ByteIterator iter = ByteIterator.generate(() -> (byte)42);
      * // Infinite iterator that always returns 42
      * for (int i = 0; i < 5 && iter.hasNext(); i++) {
-     *     System.out.print(iter.nextByte() + " ");   // returns 42 42 42 42 42
+     *     System.out.print(iter.nextByte() + " ");   // prints: 42 42 42 42 42
      * }
      * }</pre>
      *
@@ -269,6 +273,10 @@ public abstract class ByteIterator extends ImmutableIterator<Byte> {
     /**
      * Returns a {@code ByteIterator} that generates values using the provided supplier
      * while the hasNext condition returns {@code true}.
+     *
+     * <p>Note: The {@code hasNext} supplier may be called multiple times for the same element
+     * (once by the user, once internally for validation), so it should be idempotent or
+     * designed to handle multiple calls.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -316,8 +324,8 @@ public abstract class ByteIterator extends ImmutableIterator<Byte> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ByteIterator iter = ByteIterator.of((byte)1, (byte)2);
-     * Byte boxed = iter.next();           // returns Byte.valueOf((byte)1) - avoid this
-     * byte primitive = iter.nextByte();   // returns (byte)2 - prefer this
+     * Byte boxed = iter.next();           // returns Byte.valueOf((byte)1) — avoid this
+     * byte primitive = iter.nextByte();   // returns (byte)2 — prefer this
      * }</pre>
      *
      * @return the next byte value as a Byte object
@@ -362,14 +370,15 @@ public abstract class ByteIterator extends ImmutableIterator<Byte> {
      * byte first = skipped.nextByte();   // returns 3
      * }</pre>
      *
-     * @param n the number of elements to skip (must be non-negative)
-     * @return a new ByteIterator that skips the first n elements
-     * @throws IllegalArgumentException if n is negative
+     * @param n the number of elements to skip; must be non-negative
+     * @return this iterator unchanged if {@code n == 0}, otherwise a new {@code ByteIterator}
+     *         with the first {@code n} elements skipped
+     * @throws IllegalArgumentException if {@code n} is negative
      */
     public ByteIterator skip(final long n) throws IllegalArgumentException {
         N.checkArgNotNegative(n, cs.n);
 
-        if (n <= 0) {
+        if (n == 0) {
             return this;
         }
 
@@ -422,9 +431,10 @@ public abstract class ByteIterator extends ImmutableIterator<Byte> {
      * byte[] result = limited.toArray();   // returns [1, 2, 3]
      * }</pre>
      *
-     * @param count the maximum number of elements to iterate (must be non-negative)
-     * @return a new ByteIterator limited to at most count elements
-     * @throws IllegalArgumentException if count is negative
+     * @param count the maximum number of elements to iterate; must be non-negative
+     * @return an empty iterator if {@code count == 0}, otherwise a new {@code ByteIterator}
+     *         limited to at most {@code count} elements
+     * @throws IllegalArgumentException if {@code count} is negative
      */
     public ByteIterator limit(final long count) throws IllegalArgumentException {
         N.checkArgNotNegative(count, cs.count);
@@ -524,7 +534,7 @@ public abstract class ByteIterator extends ImmutableIterator<Byte> {
      * <pre>{@code
      * ByteIterator iter = ByteIterator.of((byte)1, (byte)2, (byte)3);
      * OptionalByte first = iter.first();   // returns OptionalByte.of(1)
-     * byte second = iter.nextByte();       // returns 2 - iterator advanced past first element
+     * byte second = iter.nextByte();       // returns 2 — iterator advanced past first element
      * }</pre>
      *
      * @return an {@code OptionalByte} containing the first element if present, otherwise empty
@@ -549,14 +559,17 @@ public abstract class ByteIterator extends ImmutableIterator<Byte> {
      * return {@code false}). If the iterator is empty when this method is called, an empty
      * {@code OptionalByte} is returned.</p>
      *
-     * <p>The result is cached after the first call; subsequent invocations return the same
-     * cached value regardless of the iterator's current state.</p>
+     * <p>The result is cached after the first call; subsequent invocations are idempotent and
+     * return the same cached value regardless of the iterator's current state. In particular,
+     * calling {@code last()} again on the now-exhausted iterator returns the cached element
+     * rather than an empty {@code OptionalByte}.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ByteIterator iter = ByteIterator.of((byte)1, (byte)2, (byte)3);
      * OptionalByte last = iter.last();    // returns OptionalByte.of(3)
      * boolean hasMore = iter.hasNext();   // returns false - iterator exhausted
+     * OptionalByte again = iter.last();   // returns OptionalByte.of(3) again - cached, not empty
      * }</pre>
      *
      * @return an {@code OptionalByte} containing the last element if present, otherwise empty
@@ -596,7 +609,7 @@ public abstract class ByteIterator extends ImmutableIterator<Byte> {
      * byte[] empty = ByteIterator.empty().toArray();   // returns empty.length == 0
      * }</pre>
      *
-     * @return a byte array containing all remaining elements
+     * @return a {@code byte} array containing all remaining elements; an empty array if there are none
      */
     @SuppressWarnings("deprecation")
     public byte[] toArray() {
@@ -619,7 +632,7 @@ public abstract class ByteIterator extends ImmutableIterator<Byte> {
      * ByteList empty = ByteIterator.empty().toList();   // returns empty.size() == 0
      * }</pre>
      *
-     * @return a ByteList containing all remaining elements
+     * @return a {@link ByteList} containing all remaining elements; an empty list if there are none
      */
     public ByteList toList() {
         final ByteList list = new ByteList();

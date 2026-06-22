@@ -1198,4 +1198,16 @@ public class IntFunctionsTest extends TestBase {
         });
     }
 
+    // --- regression tests for 2026-06-10 deep-review fixes ---
+
+    @Test
+    public void testOfCollectionAndMapConcurrentSkipListTypesKeepType() {
+        // regression: the SortedSet/SortedMap branches caught the concurrent skip-list types and
+        // silently downgraded them to non-thread-safe TreeSet/TreeMap
+        Assertions.assertEquals(java.util.concurrent.ConcurrentSkipListSet.class,
+                IntFunctions.ofCollection(java.util.concurrent.ConcurrentSkipListSet.class).apply(8).getClass());
+        Assertions.assertEquals(java.util.concurrent.ConcurrentSkipListMap.class,
+                IntFunctions.ofMap(java.util.concurrent.ConcurrentSkipListMap.class).apply(8).getClass());
+    }
+
 }

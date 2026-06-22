@@ -98,5 +98,40 @@ public enum EvictionPolicy {
      * <p>Objects with the lowest {@link ActivityPrint#getAccessCount()} are evicted first.
      * Note that this policy may keep old but frequently accessed objects indefinitely.
      */
-    ACCESS_COUNT
+    ACCESS_COUNT,
+
+    /**
+     * Creation-time eviction policy.
+     * Objects are evicted based on their creation time, with the oldest-created objects
+     * being evicted first (regardless of how recently or how often they were accessed).
+     *
+     * <p>This policy is ideal for:
+     * <ul>
+     *   <li>Pools where freshness matters and long-lived objects should be recycled</li>
+     *   <li>Scenarios where you want to bound how long any object can stay pooled</li>
+     *   <li>Mitigating slow resource drift/leaks by periodically rotating old objects out</li>
+     * </ul>
+     *
+     * <p>Objects with the earliest {@link ActivityPrint#getCreatedTime()} are evicted first.
+     */
+    CREATED_TIME,
+
+    /**
+     * First-In-First-Out (FIFO) eviction policy.
+     * Objects are evicted in the order they entered the pool — the earliest-added object is
+     * evicted first, independent of access recency or frequency.
+     *
+     * <p>This policy is ideal for:
+     * <ul>
+     *   <li>Fair, predictable round-robin recycling of pooled objects</li>
+     *   <li>Workloads with no useful temporal/frequency locality</li>
+     *   <li>Cases where every object should get a roughly equal lifetime in the pool</li>
+     * </ul>
+     *
+     * <p>Implemented using {@link ActivityPrint#getCreatedTime()} (the {@code ActivityPrint} is
+     * created when the object enters the pool, so creation order equals insertion order); objects
+     * with the earliest creation time are evicted first. It therefore selects the same victims as
+     * {@link #CREATED_TIME}, but is provided as a distinct, intent-revealing name.
+     */
+    FIFO
 }

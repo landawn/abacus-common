@@ -1158,15 +1158,17 @@ public class TypeTest extends AbstractTest {
 
     @Test
     public void test_char() {
-        {
-            char[] a = { 'a', 'b', 'c' };
-            N.println(Arrays.toString(a));
-        }
+        assertDoesNotThrow(() -> {
+            {
+                char[] a = { 'a', 'b', 'c' };
+                N.println(Arrays.toString(a));
+            }
 
-        {
-            List<?> list = N.toList('a', 'b', 'c');
-            N.println(list.toString());
-        }
+            {
+                List<?> list = N.toList('a', 'b', 'c');
+                N.println(list.toString());
+            }
+        });
     }
 
     @Test

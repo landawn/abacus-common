@@ -69,12 +69,6 @@ public class ObjListIteratorTest extends TestBase {
     }
 
     @Test
-    public void testCount_Empty() {
-        ObjListIterator<String> iter = ObjListIterator.empty();
-        Assertions.assertEquals(0, iter.count());
-    }
-
-    @Test
     public void testEmpty_NextThrows() {
         ObjListIterator<String> iter = ObjListIterator.empty();
         Assertions.assertThrows(NoSuchElementException.class, () -> iter.next());

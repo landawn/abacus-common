@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -45,6 +46,28 @@ public class PropertiesUtilTest extends TestBase {
     public static class CustomProperties extends Properties<String, Object> {
         public CustomProperties() {
             super();
+        }
+    }
+
+    public static class TypedProperties extends Properties<String, Object> {
+
+        public NestedProperties getNested() {
+            return (NestedProperties) super.get("nested");
+        }
+
+        public void setNested(final NestedProperties nested) {
+            super.put("nested", nested);
+        }
+    }
+
+    public static class NestedProperties extends Properties<String, Object> {
+
+        public String getName() {
+            return (String) super.get("name");
+        }
+
+        public void setName(final String name) {
+            super.put("name", name);
         }
     }
 
@@ -217,10 +240,12 @@ public class PropertiesUtilTest extends TestBase {
 
     @Test
     public void testFindFile_WithPathSeparators() {
-        // Test with path separators in the filename
-        File result = PropertiesUtil.findFile("com/landawn/abacus/util/PropertiesUtil.java");
-        // May or may not find it depending on the environment
-        // Just ensure it doesn't throw
+        assertDoesNotThrow(() -> {
+            // Test with path separators in the filename
+            File result = PropertiesUtil.findFile("com/landawn/abacus/util/PropertiesUtil.java");
+            // May or may not find it depending on the environment
+            // Just ensure it doesn't throw
+        });
     }
 
     // ==================== findFile/findDir edge cases ====================
@@ -1010,6 +1035,17 @@ public class PropertiesUtilTest extends TestBase {
         assertEquals("localhost", props.get("host"));
         assertEquals(8080, props.get("port"));
         assertEquals(true, props.get("ssl"));
+    }
+
+    @Test
+    public void testLoadFromXml_WithPropertiesSubclassSetterForNestedProperty() throws IOException {
+        final String xml = "<?xml version=\"1.0\"?><config><nested><name>alpha</name></nested></config>";
+
+        final TypedProperties props = PropertiesUtil.loadFromXml(new StringReader(xml), TypedProperties.class);
+
+        assertNotNull(props.getNested());
+        assertEquals(NestedProperties.class, props.getNested().getClass());
+        assertEquals("alpha", props.getNested().getName());
     }
 
     // ==================== store(Properties, String, File) ====================
@@ -1946,6 +1982,84 @@ public class PropertiesUtilTest extends TestBase {
         // StringIndexOutOfBoundsException on the empty folder prefix (#45/#46).
         org.junit.jupiter.api.Assertions
                 .assertDoesNotThrow(() -> PropertiesUtil.findFileInDir("/nonexistent_abacus_test.properties", new java.io.File("."), false));
+    }
+
+    // --- regression tests for 2026-06-11 deep-review fixes ---
+
+    @Test
+    public void testStoreToXmlWithTypeInfoForParameterizedTypeIsWellFormed() {
+        // regression: the type attribute contained raw '<'/'>' from parameterized declaring names
+        // (type="List<Object>"), producing XML that no parser could read back
+        final Properties<String, Object> props = new Properties<>();
+        props.put("port", 8080);
+        props.put("serverList", new java.util.ArrayList<>(java.util.List.of("s1", "s2")));
+
+        final java.io.StringWriter w = new java.io.StringWriter();
+        PropertiesUtil.storeToXml(props, "config", true, w);
+
+        final String xml = w.toString();
+        org.junit.jupiter.api.Assertions.assertTrue(xml.contains("&lt;") && !xml.matches(".*type=\"[^\"]*<.*"), xml);
+
+        final Properties<String, Object> reloaded = PropertiesUtil.loadFromXml(new java.io.StringReader(xml)); // must parse
+        org.junit.jupiter.api.Assertions.assertEquals(8080, reloaded.get("port"));
+    }
+
+    // --- regression tests for 2026-06-12 deep-review fixes ---
+
+    @Test
+    public void testXmlToJava_compactNestedSingleChild_generatesNestedClass() throws IOException {
+        // Bug fix: an element whose ONLY child is a single element (no whitespace text nodes — exactly
+        // the shape storeToXml emits and the xmlToJava javadoc example uses) was classified as a String
+        // property because the old heuristic was getChildNodes().getLength() > 1, while loadFromXml
+        // (XmlUtil.isTextElement) loads it as a nested Properties. The generated accessor type was wrong.
+        String xml = "<?xml version=\"1.0\"?><config><database><url>jdbc:mysql://localhost</url></database></config>";
+
+        String srcPath = tempDir.resolve("src-compact-nested").toFile().getAbsolutePath();
+        new File(srcPath).mkdirs();
+
+        PropertiesUtil.xmlToJava(xml, srcPath, "com.compact", "CompactConfig", false);
+
+        File generatedFile = new File(srcPath + File.separator + "com" + File.separator + "compact", "CompactConfig.java");
+        assertTrue(generatedFile.exists());
+        String content = Files.readString(generatedFile.toPath());
+        assertTrue(content.contains("public Database getDatabase()"), content);
+        assertTrue(content.contains("public static class Database extends Properties<String, Object>"), content);
+        assertFalse(content.contains("public String getDatabase()"), content);
+        // The leaf inside the nested class is still a plain String property
+        assertTrue(content.contains("public String getUrl()"), content);
+    }
+
+    @Test
+    public void testXmlToJava_textElementWithCdata_staysStringProperty() throws IOException {
+        // Bug fix: a text-only element with two non-element children (text node + CDATA node — the DOM
+        // parser does not coalesce them) was misclassified as a complex/nested type by the old
+        // getChildNodes().getLength() > 1 heuristic, generating a bogus empty nested class and a getter
+        // whose type disagrees with the String value loadFromXml produces for the same document.
+        String xml = "<?xml version=\"1.0\"?><config><name>foo<![CDATA[bar]]></name></config>";
+
+        String srcPath = tempDir.resolve("src-text-cdata").toFile().getAbsolutePath();
+        new File(srcPath).mkdirs();
+
+        PropertiesUtil.xmlToJava(xml, srcPath, "com.textcdata", "TextCdataConfig", false);
+
+        File generatedFile = new File(srcPath + File.separator + "com" + File.separator + "textcdata", "TextCdataConfig.java");
+        assertTrue(generatedFile.exists());
+        String content = Files.readString(generatedFile.toPath());
+        assertTrue(content.contains("public String getName()"), content);
+        assertFalse(content.contains("class Name"), content);
+    }
+
+    @Test
+    public void testXmlToJava_compactDeepDuplicates_rejected() {
+        // Bug fix: duplicated sibling names nested below a single-child chain in compact XML escaped
+        // hasDuplicatedPropName (old getLength() > 1 recursion guard), so xmlToJava generated code
+        // referencing undeclared xxxList fields instead of rejecting the document like loadFromXml does.
+        String xml = "<?xml version=\"1.0\"?><root><wrapper><a><item>1</item><item>2</item></a></wrapper></root>";
+
+        String srcPath = tempDir.resolve("src-deep-dup").toFile().getAbsolutePath();
+        new File(srcPath).mkdirs();
+
+        assertThrows(RuntimeException.class, () -> PropertiesUtil.xmlToJava(xml, srcPath, "com.deepdup", "DeepDupConfig", false));
     }
 
 }

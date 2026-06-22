@@ -517,11 +517,13 @@ public final class Objectory {
     }
 
     /**
-     * Creates or retrieves a {@link StringBuilder} with at least the specified
+     * Creates or retrieves a {@link StringBuilder} suitable for the specified
      * initial capacity. If {@code initCapacity} exceeds the internal default
      * buffer size, a new {@code StringBuilder} of that capacity is allocated
-     * (and is not pooled). Otherwise a pooled {@code StringBuilder} is returned
-     * whose capacity is the default buffer size.
+     * (and is not pooled). Otherwise a pooled {@code StringBuilder} is returned,
+     * whose capacity is typically the default buffer size but may be smaller if
+     * a smaller builder was recycled into the pool (it grows automatically as
+     * needed).
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -536,8 +538,10 @@ public final class Objectory {
      * }
      * }</pre>
      *
-     * @param initCapacity the minimum desired initial capacity
-     * @return a {@code StringBuilder} with at least the specified initial capacity
+     * @param initCapacity the desired initial capacity
+     * @return an empty {@code StringBuilder}; freshly allocated with capacity
+     *         {@code initCapacity} when that exceeds the default buffer size,
+     *         otherwise obtained from the pool
      */
     public static StringBuilder createStringBuilder(final int initCapacity) {
         if (initCapacity > BUFFER_SIZE) {
@@ -581,11 +585,11 @@ public final class Objectory {
     }
 
     /**
-     * Creates or retrieves a {@link ByteArrayOutputStream} with at least the
+     * Creates or retrieves a {@link ByteArrayOutputStream} suitable for the
      * specified initial capacity. If {@code initCapacity} exceeds the internal
      * default buffer size, a new stream of that capacity is allocated (and is
-     * not pooled). Otherwise a pooled stream is returned whose initial capacity
-     * is the default buffer size.
+     * not pooled). Otherwise a pooled stream is returned, whose capacity is
+     * typically the default buffer size (it grows automatically as needed).
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -598,8 +602,10 @@ public final class Objectory {
      * }
      * }</pre>
      *
-     * @param initCapacity the minimum desired initial capacity
-     * @return a {@code ByteArrayOutputStream} with at least the specified initial capacity
+     * @param initCapacity the desired initial capacity
+     * @return an empty {@code ByteArrayOutputStream}; freshly allocated with capacity
+     *         {@code initCapacity} when that exceeds the default buffer size,
+     *         otherwise obtained from the pool
      */
     public static ByteArrayOutputStream createByteArrayOutputStream(final int initCapacity) {
         if (initCapacity > BUFFER_SIZE) {
@@ -620,23 +626,20 @@ public final class Objectory {
     }
 
     /**
-     * Creates or retrieves a {@link BufferedWriter} with no underlying target
-     * writer. The writer must be re-initialized with a target before it can be
-     * used for output.
+     * Creates or retrieves a {@link BufferedWriter} in internal buffer mode
+     * (no underlying target writer). Written content is accumulated in memory
+     * and can be retrieved via {@code toString()}.
      *
      * <p>After use, the writer should be recycled using {@link #recycle(java.io.BufferedWriter)}.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * try (OutputStream os = new FileOutputStream("output.txt")) {
-     *     java.io.BufferedWriter bw = Objectory.createBufferedWriter();
-     *     bw.reinit(os);
-     *     try {
-     *         bw.write("Hello World");
-     *         bw.newLine();
-     *     } finally {
-     *         Objectory.recycle(bw);
-     *     }
+     * java.io.BufferedWriter bw = Objectory.createBufferedWriter();
+     * try {
+     *     bw.write("Hello World");
+     *     String result = bw.toString();
+     * } finally {
+     *     Objectory.recycle(bw);
      * }
      * }</pre>
      *
@@ -736,9 +739,9 @@ public final class Objectory {
     }
 
     /**
-     * Creates or retrieves a {@link BufferedXmlWriter} with no underlying target
-     * writer. The writer must be re-initialized with a target before it can be
-     * used for output.
+     * Creates or retrieves a {@link BufferedXmlWriter} in internal buffer mode
+     * (no underlying target writer). Written content is accumulated in memory
+     * and can be retrieved via {@code toString()}.
      *
      * <p>After use, the writer should be recycled using {@link #recycle(BufferedXmlWriter)}.</p>
      *
@@ -746,10 +749,10 @@ public final class Objectory {
      * <pre>{@code
      * BufferedXmlWriter writer = Objectory.createBufferedXmlWriter();
      * try {
-     *     writer.reinit(outputStream);
      *     writer.write("<root>");
-     *     writer.write("Hello");
+     *     writer.writeCharacter("Hello");
      *     writer.write("</root>");
+     *     String xml = writer.toString();
      * } finally {
      *     Objectory.recycle(writer);
      * }
@@ -841,9 +844,9 @@ public final class Objectory {
     }
 
     /**
-     * Creates or retrieves a {@link BufferedJsonWriter} with no underlying
-     * target writer. The writer must be re-initialized with a target before it
-     * can be used for output.
+     * Creates or retrieves a {@link BufferedJsonWriter} in internal buffer mode
+     * (no underlying target writer). Written content is accumulated in memory
+     * and can be retrieved via {@code toString()}.
      *
      * <p>After use, the writer should be recycled using {@link #recycle(BufferedJsonWriter)}.</p>
      *
@@ -851,8 +854,8 @@ public final class Objectory {
      * <pre>{@code
      * BufferedJsonWriter writer = Objectory.createBufferedJsonWriter();
      * try {
-     *     writer.reinit(outputStream);
      *     writer.write("{\"name\": \"Hello\"}");
+     *     String json = writer.toString();
      * } finally {
      *     Objectory.recycle(writer);
      * }
@@ -944,11 +947,11 @@ public final class Objectory {
     }
 
     /**
-     * Creates or retrieves a {@link BufferedCsvWriter} with no underlying target
-     * writer. The writer must be re-initialized with a target before it can be
-     * used for output. The pooled instance is drawn from either the
-     * backslash-escape pool or the default pool depending on the current
-     * {@code CsvUtil} backslash-escape setting.
+     * Creates or retrieves a {@link BufferedCsvWriter} in internal buffer mode
+     * (no underlying target writer). Written content is accumulated in memory
+     * and can be retrieved via {@code toString()}. The pooled instance is drawn
+     * from either the backslash-escape pool or the default pool depending on
+     * the current {@code CsvUtil} backslash-escape setting.
      *
      * <p>After use, the writer should be recycled using {@link #recycle(BufferedCsvWriter)}.</p>
      *
@@ -956,8 +959,8 @@ public final class Objectory {
      * <pre>{@code
      * BufferedCsvWriter writer = Objectory.createBufferedCsvWriter();
      * try {
-     *     writer.reinit(outputStream);
      *     writer.write("Hello");
+     *     String csv = writer.toString();
      * } finally {
      *     Objectory.recycle(writer);
      * }

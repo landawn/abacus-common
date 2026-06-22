@@ -65,10 +65,10 @@ public class PatternType extends AbstractType<Pattern> {
      * Returns the pattern string by calling toString() on the Pattern object.
      * Returns {@code null} if the input Pattern is {@code null}.
      *
-     * <p>The returned string is a serializable representation designed to be parsed back into an equivalent value
-     * via {@link #valueOf(String)}; {@code stringOf} and {@code valueOf} are inverse operations that round-trip. This
-     * is the key distinction from {@link Object#toString()}, whose result is not guaranteed to be convertible back
-     * into the original value.</p>
+     * <p>The returned string is a serializable representation designed to be parsed by {@link #valueOf(String)}.
+     * <p><b>&#9888;</b> Pattern flags are not included in this representation. A pattern compiled with flags such as
+     * {@link Pattern#CASE_INSENSITIVE} will be parsed back with default flags unless the flags are embedded directly
+     * in the pattern text (for example, {@code "(?i)abc"}).</p>
      *
      * @param x the Pattern object to convert
      * @return the pattern string, or {@code null} if the input is null
@@ -85,12 +85,12 @@ public class PatternType extends AbstractType<Pattern> {
      * Compiles the string into a Pattern using Pattern.compile().
      * Returns {@code null} if the input string is {@code null} or empty.
      *
-     * <p>This method is the inverse of {@code stringOf} and round-trips with it: it parses the string produced by
-     * {@code stringOf} back into a value of this type. Strings produced by {@link Object#toString()} are not
-     * guaranteed to be parseable in this way.</p>
+     * <p>This method parses the pattern text produced by {@code stringOf}. Flags are only preserved when represented
+     * in the pattern text itself, such as inline flags.</p>
      *
      * @param str the regular expression string to compile
      * @return a compiled Pattern object, or {@code null} if the input is {@code null} or empty
+     * @throws java.util.regex.PatternSyntaxException if {@code str} is not a valid regular expression
      * @see #valueOf(Object)
      * @see #stringOf(Pattern)
      */

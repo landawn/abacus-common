@@ -107,43 +107,45 @@ public class MoreStreamTest extends TestBase {
 
     @Test
     public void test_index() {
-        {
-            final int[] source = { 1, 2, 3, 1, 5, 1 };
-            IntStream.ofIndices(source, (a, fromIndex) -> N.indexOf(a, 1, fromIndex)).println();
-            IntStream.ofIndices(source, 1, (a, fromIndex) -> N.indexOf(a, 1, fromIndex)).println();
+        assertDoesNotThrow(() -> {
+            {
+                final int[] source = { 1, 2, 3, 1, 5, 1 };
+                IntStream.ofIndices(source, (a, fromIndex) -> N.indexOf(a, 1, fromIndex)).println();
+                IntStream.ofIndices(source, 1, (a, fromIndex) -> N.indexOf(a, 1, fromIndex)).println();
 
-            IntStream.ofIndices(source, 5, -1, (a, fromIndex) -> N.lastIndexOf(a, 1, fromIndex)).println();
-            IntStream.ofIndices(source, 4, -1, (a, fromIndex) -> N.lastIndexOf(a, 1, fromIndex)).println();
-        }
+                IntStream.ofIndices(source, 5, -1, (a, fromIndex) -> N.lastIndexOf(a, 1, fromIndex)).println();
+                IntStream.ofIndices(source, 4, -1, (a, fromIndex) -> N.lastIndexOf(a, 1, fromIndex)).println();
+            }
 
-        N.println("==================================");
+            N.println("==================================");
 
-        {
-            final int[] source = { 1, 2, 3, 1, 2, 1 };
-            final int[] targetSubArray = { 1, 2 };
+            {
+                final int[] source = { 1, 2, 3, 1, 2, 1 };
+                final int[] targetSubArray = { 1, 2 };
 
-            N.println(N.lastIndexOfSubList(N.toList(1, 2, 3, 1, 2, 1), N.toList(1, 2)));
-            N.println(Collections.lastIndexOfSubList(N.toList(1, 2, 3, 1, 2, 1), N.toList(1, 2)));
-            N.println("aabba".lastIndexOf("ab", 5));
-            IntStream.ofIndices(source, (a, fromIndex) -> Index.ofSubArray(a, fromIndex, targetSubArray, 0, targetSubArray.length).orElse(-1)).println();
+                N.println(N.lastIndexOfSubList(N.toList(1, 2, 3, 1, 2, 1), N.toList(1, 2)));
+                N.println(Collections.lastIndexOfSubList(N.toList(1, 2, 3, 1, 2, 1), N.toList(1, 2)));
+                N.println("aabba".lastIndexOf("ab", 5));
+                IntStream.ofIndices(source, (a, fromIndex) -> Index.ofSubArray(a, fromIndex, targetSubArray, 0, targetSubArray.length).orElse(-1)).println();
 
-            IntStream.ofIndices(source, 5, -1, (a, fromIndex) -> Index.lastOfSubArray(a, fromIndex, targetSubArray, 0, targetSubArray.length).orElse(-1))
-                    .println();
-        }
+                IntStream.ofIndices(source, 5, -1, (a, fromIndex) -> Index.lastOfSubArray(a, fromIndex, targetSubArray, 0, targetSubArray.length).orElse(-1))
+                        .println();
+            }
 
-        N.println("==================================");
+            N.println("==================================");
 
-        {
-            IntStream.ofIndices(5).println();
-            IntStream.ofIndices(5, 1).println();
-            IntStream.ofIndices(5, 2).println();
-            IntStream.ofIndices(5, -1).println();
-            IntStream.ofIndices(5, -2).println();
-            IntStream.ofIndices(0).println();
-            IntStream.ofIndices(0, 1).println();
-            IntStream.ofIndices(0, -1).println();
-            IntStream.ofIndices(0, -2).println();
-        }
+            {
+                IntStream.ofIndices(5).println();
+                IntStream.ofIndices(5, 1).println();
+                IntStream.ofIndices(5, 2).println();
+                IntStream.ofIndices(5, -1).println();
+                IntStream.ofIndices(5, -2).println();
+                IntStream.ofIndices(0).println();
+                IntStream.ofIndices(0, 1).println();
+                IntStream.ofIndices(0, -1).println();
+                IntStream.ofIndices(0, -2).println();
+            }
+        });
     }
 
     @Test
@@ -1338,16 +1340,18 @@ public class MoreStreamTest extends TestBase {
 
     @Test
     public void test_find() {
-        final Random rand = new Random();
+        assertDoesNotThrow(() -> {
+            final Random rand = new Random();
 
-        for (int k = 0; k < 103; k++) {
-            final int[] a = IntStream.random().limit(rand.nextInt(10001) + 1).toArray();
-            final int mid = a[a.length / 2];
+            for (int k = 0; k < 103; k++) {
+                final int[] a = IntStream.random().limit(rand.nextInt(10001) + 1).toArray();
+                final int mid = a[a.length / 2];
 
-            IntStream.of(a).findFirst(i -> i >= mid).get();
-            IntStream.of(a).findLast(i -> i <= mid).get();
+                IntStream.of(a).findFirst(i -> i >= mid).get();
+                IntStream.of(a).findLast(i -> i <= mid).get();
 
-        }
+            }
+        });
     }
 
     @Test

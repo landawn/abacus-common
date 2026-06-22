@@ -79,9 +79,8 @@ public interface Runnable extends java.lang.Runnable, Throwables.Runnable<Runtim
      * Converts this {@code Runnable} to a {@code Callable<Void>}.
      *
      * <p>This method wraps the runnable in a callable that executes the runnable's
-     * {@code run} method and returns {@code null}. This is useful when you need to
-     * submit a runnable task to an {@link java.util.concurrent.ExecutorService} that
-     * only accepts {@link Callable} tasks, or when you need to obtain a
+     * {@code run} method and returns {@code null}. This is useful where a
+     * {@link Callable} is specifically required, or when you need to obtain a
      * {@link java.util.concurrent.Future} for a task that doesn't produce a result.
      *
      * <p><b>Usage Examples:</b></p>
@@ -105,29 +104,22 @@ public interface Runnable extends java.lang.Runnable, Throwables.Runnable<Runtim
     }
 
     /**
-     * Converts this runnable to a {@link Throwables.Runnable} that can throw
-     * checked exceptions.
+     * Returns this runnable as a {@link Throwables.Runnable} view.
      *
-     * <p>This method allows the runnable to be used in contexts where checked
-     * exceptions need to be handled. The returned runnable will have the same
-     * behavior as this runnable but with the ability to throw the specified
-     * exception type.
+     * <p>The returned runnable has the same behavior as this runnable. This method does not translate
+     * exceptions or make the original implementation capable of throwing new checked exceptions; the
+     * exception type parameter is for target-type compatibility with APIs that accept
+     * {@code Throwables.Runnable}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Runnable task = () -> System.out.println("Task executed");
-     * var throwableTask = task.toThrowable();
-     *
-     * // Can now be used in contexts that handle IOException
-     * try {
-     *     throwableTask.run();
-     * } catch (IOException e) {
-     *     // Handle the exception
-     * }
+     * Throwables.Runnable<RuntimeException> throwableTask = task.toThrowable();
+     * throwableTask.run();
      * }</pre>
      *
-     * @param <E> the type of exception that the returned runnable can throw
-     * @return a {@link Throwables.Runnable} version of this runnable
+     * @param <E> the target exception type for compatibility with {@code Throwables.Runnable}
+     * @return a {@link Throwables.Runnable} view of this runnable
      */
     default <E extends Throwable> Throwables.Runnable<E> toThrowable() {
         return (Throwables.Runnable<E>) this;

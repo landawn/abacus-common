@@ -161,7 +161,7 @@ public enum DayOfWeek {
                 return SATURDAY;
 
             default:
-                throw new IllegalArgumentException("No mapping instance found by int value: " + intValue);
+                throw new IllegalArgumentException("No DayOfWeek for int value: " + intValue + ". Expected range: 0-6");
         }
     }
 }

@@ -465,6 +465,10 @@ public final class EscapeUtil {
      *
      * <p>Unrecognized entities are left unchanged in the output string.</p>
      *
+     * <p><b>&#9888; Note:</b> Numeric character references that parse to an integer above
+     * Unicode's maximum code point ({@code 0x10FFFF}) throw {@link IllegalArgumentException}
+     * during code point conversion; non-numeric or overflowing numeric references are left unchanged.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * EscapeUtil.unescapeHtml4("&lt;p&gt;Hello&lt;/p&gt;")   = "<p>Hello</p>"
@@ -476,6 +480,7 @@ public final class EscapeUtil {
      *
      * @param input the string to unescape, which may be null
      * @return the unescaped string, or {@code null} if {@code null} input
+     * @throws IllegalArgumentException if a numeric character reference parses above Unicode's maximum code point
      * @see #escapeHtml4(String)
      */
     public static String unescapeHtml4(final String input) {
@@ -490,6 +495,10 @@ public final class EscapeUtil {
      * It supports only HTML 3.0 entities (basic entities and ISO-8859-1 entities) and
      * numeric character references. For extended HTML 4.0 entities, use {@link #unescapeHtml4(String)}.</p>
      *
+     * <p><b>&#9888; Note:</b> Numeric character references that parse to an integer above
+     * Unicode's maximum code point ({@code 0x10FFFF}) throw {@link IllegalArgumentException}
+     * during code point conversion; non-numeric or overflowing numeric references are left unchanged.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * EscapeUtil.unescapeHtml3("&lt;div&gt;")   = "<div>"
@@ -499,6 +508,7 @@ public final class EscapeUtil {
      *
      * @param input the string to unescape, which may be null
      * @return the unescaped string, or {@code null} if {@code null} input
+     * @throws IllegalArgumentException if a numeric character reference parses above Unicode's maximum code point
      * @see #escapeHtml3(String)
      * @see #unescapeHtml4(String)
      */
@@ -586,6 +596,10 @@ public final class EscapeUtil {
      *
      * <p>Note: This method does not support DTDs or external entities for security reasons.</p>
      *
+     * <p><b>&#9888; Note:</b> Numeric character references that parse to an integer above
+     * Unicode's maximum code point ({@code 0x10FFFF}) throw {@link IllegalArgumentException}
+     * during code point conversion; non-numeric or overflowing numeric references are left unchanged.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * EscapeUtil.unescapeXml("&lt;root&gt;")         = "<root>"
@@ -597,6 +611,7 @@ public final class EscapeUtil {
      *
      * @param input the string to unescape, which may be null
      * @return the unescaped string, or {@code null} if {@code null} input
+     * @throws IllegalArgumentException if a numeric character reference parses above Unicode's maximum code point
      * @see #escapeXml10(String)
      * @see #escapeXml11(String)
      */
@@ -1285,7 +1300,7 @@ public final class EscapeUtil {
      * <p>For example, {@code "\45"} should go back to being the specific value (a {@code %}).</p>
      *
      * <p>Note that this currently only supports the viable range of octal for Java; namely
-     * 1 to 377. This is because parsing Java is the main use case.</p>
+     * 0 to 377. This is because parsing Java is the main use case.</p>
      */
     static class OctalUnescaper extends CharSequenceTranslator {
 
@@ -1451,7 +1466,7 @@ public final class EscapeUtil {
                     if (isSet(OPTION.semiColonRequired)) {
                         return 0;
                     } else if (isSet(OPTION.errorIfNoSemiColon)) {
-                        throw new IllegalArgumentException("Semicolon required at end of numeric bean");
+                        throw new IllegalArgumentException("Semicolon required at end of numeric entity");
                     }
                 }
 
@@ -1693,7 +1708,9 @@ public final class EscapeUtil {
                 throw new IllegalStateException("CsvUnescaper should never reach the [1] index");
             }
 
-            if (input.charAt(0) != CSV_QUOTE || input.charAt(input.length() - 1) != CSV_QUOTE) {
+            // length < 2: a single '"' satisfies both charAt checks (same character), but it is
+            // not an enclosed-in-quotes value and subSequence(1, 0) would throw.
+            if (input.length() < 2 || input.charAt(0) != CSV_QUOTE || input.charAt(input.length() - 1) != CSV_QUOTE) {
                 out.write(input.toString());
                 return Character.codePointCount(input, 0, input.length());
             }

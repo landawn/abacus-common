@@ -47,7 +47,7 @@ public interface FloatToDoubleFunction extends Throwables.FloatToDoubleFunction<
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * FloatToDoubleFunction toDouble = value -> value;
-     * double result = toDouble.applyAsDouble(3.14f); // Returns 3.14 as double
+     * double result = toDouble.applyAsDouble(3.5f); // Returns 3.5 as double
      *
      * FloatToDoubleFunction squared = value -> value * value;
      * double square = squared.applyAsDouble(5.0f); // Returns 25.0
@@ -58,4 +58,18 @@ public interface FloatToDoubleFunction extends Throwables.FloatToDoubleFunction<
      */
     @Override
     double applyAsDouble(float value);
+
+    /**
+     * Returns this object as a {@link Throwables.FloatToDoubleFunction} view.
+     *
+     * <p>The returned object has the same behavior as this one. This method does not translate
+     * exceptions or make the original implementation capable of throwing new checked exceptions; the
+     * exception type parameter is for target-type compatibility with APIs that accept {@code Throwables.FloatToDoubleFunction}.
+     *
+     * @param <E> the target exception type for compatibility with {@code Throwables.FloatToDoubleFunction}
+     * @return a {@link Throwables.FloatToDoubleFunction} view of this object
+     */
+    default <E extends Throwable> Throwables.FloatToDoubleFunction<E> toThrowable() {
+        return (Throwables.FloatToDoubleFunction<E>) this;
+    }
 }

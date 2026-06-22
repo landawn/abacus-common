@@ -129,6 +129,6 @@ public class CharTriPredicateTest extends TestBase {
     @Test
     public void testAndNullThrowsImmediately() {
         CharTriPredicate instance = (a, b, c) -> false;
-        org.junit.jupiter.api.Assertions.assertThrows(NullPointerException.class, () -> instance.and((CharTriPredicate) null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> instance.and((CharTriPredicate) null));
     }
 }

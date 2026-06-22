@@ -62,7 +62,8 @@ public final class ShortType extends AbstractShortType {
 
     /**
      * Retrieves a Short value from a ResultSet at the specified column index.
-     * This method handles various numeric types in the database and converts them to Short.
+     * The value is read via {@link ResultSet#getShort(int)}; SQL NULL is distinguished from the
+     * value zero by checking {@link ResultSet#wasNull()} after the read, returning {@code null} for SQL NULL.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -85,7 +86,8 @@ public final class ShortType extends AbstractShortType {
 
     /**
      * Retrieves a Short value from a ResultSet using the specified column label.
-     * This method handles various numeric types in the database and converts them to Short.
+     * The value is read via {@link ResultSet#getShort(String)}; SQL NULL is distinguished from the
+     * value zero by checking {@link ResultSet#wasNull()} after the read, returning {@code null} for SQL NULL.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code

@@ -43,8 +43,8 @@ import com.landawn.abacus.logging.LoggerFactory;
  * and the maximum pool size is the maximum of 16 and twice the number of available processors.
  * The default keep-alive time is 180 seconds.</p>
  *
- * <p>The executor automatically registers a shutdown hook to ensure proper cleanup
- * when the JVM exits.</p>
+ * <p>When the internal thread pool is lazily created, a shutdown hook is automatically registered
+ * to ensure proper cleanup when the JVM exits. No hook is registered for an externally supplied {@code Executor}.</p>
  *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
@@ -93,6 +93,8 @@ public class AsyncExecutor {
 
     private volatile Executor executor; //NOSONAR
 
+    private volatile ExecutorService shutdownExecutorService;
+
     private volatile boolean isShutdown = false;
 
     /**
@@ -126,7 +128,7 @@ public class AsyncExecutor {
      * }</pre>
      *
      * @param coreThreadPoolSize the number of threads to keep in the pool, even if they are idle
-     * @param maxThreadPoolSize the maximum number of threads to allow in the pool
+     * @param maxThreadPoolSize the maximum number of threads to allow in the pool; if less than {@code coreThreadPoolSize}, it is raised to {@code coreThreadPoolSize}
      * @param keepAliveTime when the number of threads is greater than the core, this is the maximum time that excess idle threads will wait for new tasks before terminating
      * @param unit the time unit for the keepAliveTime argument
      * @throws IllegalArgumentException if {@code coreThreadPoolSize} is negative, if {@code maxThreadPoolSize} is negative,
@@ -296,7 +298,7 @@ public class AsyncExecutor {
      * @param command the Callable command to be executed asynchronously; may throw exceptions
      * @return a ContinuableFuture representing the pending result of this computation
      */
-    public <R> ContinuableFuture<R> execute(final Callable<R> command) {
+    public <R> ContinuableFuture<R> execute(final Callable<? extends R> command) {
         return execute(new FutureTask<>(command));
     }
 
@@ -320,7 +322,7 @@ public class AsyncExecutor {
      * @param finallyAction the Runnable to be executed after the command completes (in a finally block)
      * @return a ContinuableFuture representing the pending result of this computation
      */
-    public <R> ContinuableFuture<R> execute(final Callable<R> command, final java.lang.Runnable finallyAction) {
+    public <R> ContinuableFuture<R> execute(final Callable<? extends R> command, final java.lang.Runnable finallyAction) {
         return execute(new FutureTask<>(() -> {
             try {
                 return command.call();
@@ -357,14 +359,14 @@ public class AsyncExecutor {
      * @return a list of ContinuableFutures representing the pending result of this computation for each command;
      *         returns an empty list if commands is {@code null} or empty
      */
-    public <R> List<ContinuableFuture<R>> execute(final Collection<? extends Callable<R>> commands) {
+    public <R> List<ContinuableFuture<R>> execute(final Collection<? extends Callable<? extends R>> commands) {
         if (N.isEmpty(commands)) {
             return new ArrayList<>();
         }
 
         final List<ContinuableFuture<R>> results = new ArrayList<>(commands.size());
 
-        for (final Callable<R> cmd : commands) {
+        for (final Callable<? extends R> cmd : commands) {
             results.add(execute(cmd));
         }
 
@@ -442,7 +444,7 @@ public class AsyncExecutor {
      *                       receives (result, exception) where one may be {@code null}, returns {@code true} to retry, {@code false} to complete
      * @return a ContinuableFuture representing the pending result of this computation (including retries)
      */
-    public <R> ContinuableFuture<R> executeWithRetry(final Callable<R> command, final int retryTimes, final long retryIntervalInMillis,
+    public <R> ContinuableFuture<R> executeWithRetry(final Callable<? extends R> command, final int retryTimes, final long retryIntervalInMillis,
             final BiPredicate<? super R, ? super Exception> retryCondition) {
         return execute(() -> {
             final Retry<R> retry = Retry.withFixedDelay(retryTimes, retryIntervalInMillis, retryCondition);
@@ -456,7 +458,7 @@ public class AsyncExecutor {
     //     * @deprecated Use {@link #executeWithRetry(Callable, int, long, BiPredicate)} instead for clearer semantics.
     //     */
     //    @Deprecated
-    //    public <R> ContinuableFuture<R> execute(final Callable<R> command, final int retryTimes, final long retryIntervalInMillis,
+    //    public <R> ContinuableFuture<R> execute(final Callable<? extends R> command, final int retryTimes, final long retryIntervalInMillis,
     //            final BiPredicate<? super R, ? super Exception> retryCondition) {
     //        return executeWithRetry(command, retryTimes, retryIntervalInMillis, retryCondition);
     //    }
@@ -472,7 +474,7 @@ public class AsyncExecutor {
      * @param futureTask the FutureTask to be executed asynchronously
      * @return a ContinuableFuture representing the pending result of this computation
      */
-    protected <R> ContinuableFuture<R> execute(final FutureTask<R> futureTask) {
+    protected <R> ContinuableFuture<R> execute(final FutureTask<? extends R> futureTask) {
         final Executor executor = getExecutor(); //NOSONAR
 
         executor.execute(futureTask);
@@ -589,13 +591,15 @@ public class AsyncExecutor {
         if (executor == null || !(executor instanceof ExecutorService executorService)) {
             isShutdown = true; // Mark as shutdown even if executor is null
             executor = null;
+            shutdownExecutorService = null;
             return;
         }
 
-        logger.warn("Starting AsyncExecutor shutdown");
+        logger.info("Starting AsyncExecutor shutdown");
 
         try {
             isShutdown = true; // Mark as shutdown before actually shutting down to prevent new tasks
+            shutdownExecutorService = executorService;
             executorService.shutdown();
 
             if (terminationTimeout > 0 && !executorService.isTerminated()) {
@@ -607,7 +611,10 @@ public class AsyncExecutor {
             logger.warn("Not all AsyncExecutor tasks completed successfully before shutdown");
         } finally {
             executor = null;
-            logger.warn("AsyncExecutor shutdown completed");
+            if (executorService.isTerminated()) {
+                shutdownExecutorService = null;
+            }
+            logger.info("AsyncExecutor shutdown completed");
         }
     }
 
@@ -633,7 +640,19 @@ public class AsyncExecutor {
      * @return {@code true} if all tasks have completed following shutdown, {@code false} otherwise.
      */
     public boolean isTerminated() {
-        return executor == null || !(executor instanceof ExecutorService executorService) || executorService.isTerminated();
+        final ExecutorService executorService = shutdownExecutorService;
+
+        if (executorService != null) {
+            if (executorService.isTerminated()) {
+                shutdownExecutorService = null;
+                return true;
+            }
+
+            return false;
+        }
+
+        final Executor currentExecutor = executor;
+        return currentExecutor == null || !(currentExecutor instanceof ExecutorService currentExecutorService) || currentExecutorService.isTerminated();
     }
 
     /**

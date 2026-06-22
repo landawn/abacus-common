@@ -69,7 +69,8 @@ public class TimestampType extends AbstractDateType<Timestamp> {
      * Conversion rules:
      * <ul>
      *   <li>If obj is a Number, creates a Timestamp using the long value as milliseconds since epoch</li>
-     *   <li>If obj is a java.util.Date, creates a Timestamp from the date's time value</li>
+     *   <li>If obj is already a Timestamp, returns a copy preserving its nanosecond precision</li>
+     *   <li>If obj is another java.util.Date, creates a Timestamp from the date's time value</li>
      *   <li>If obj is {@code null}, returns null</li>
      *   <li>Otherwise, converts obj to string and parses it as a Timestamp</li>
      * </ul>
@@ -150,7 +151,7 @@ public class TimestampType extends AbstractDateType<Timestamp> {
             return null; // NOSONAR
         }
 
-        if (isPossibleLong(cbuf, offset, len)) {
+        if (isPossibleMillis(cbuf, offset, len)) {
             try {
                 return Dates.createTimestamp(parseLong(cbuf, offset, len));
             } catch (final NumberFormatException e) {

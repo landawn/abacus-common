@@ -50,4 +50,18 @@ public interface CharTernaryOperator extends Throwables.CharTernaryOperator<Runt
      */
     @Override
     char applyAsChar(char a, char b, char c);
+
+    /**
+     * Returns this object as a {@link Throwables.CharTernaryOperator} view.
+     *
+     * <p>The returned object has the same behavior as this one. This method does not translate
+     * exceptions or make the original implementation capable of throwing new checked exceptions; the
+     * exception type parameter is for target-type compatibility with APIs that accept {@code Throwables.CharTernaryOperator}.
+     *
+     * @param <E> the target exception type for compatibility with {@code Throwables.CharTernaryOperator}
+     * @return a {@link Throwables.CharTernaryOperator} view of this object
+     */
+    default <E extends Throwable> Throwables.CharTernaryOperator<E> toThrowable() {
+        return (Throwables.CharTernaryOperator<E>) this;
+    }
 }

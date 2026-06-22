@@ -63,6 +63,13 @@ package com.landawn.abacus.pool;
  * @param maxMemory the maximum memory size in bytes (-1 if no memory limit)
  * @param dataSize the current total size of data in bytes (-1 if memory tracking is disabled)
  *
+ * <p><b>Accessor naming:</b> Because {@code PoolStats} is a {@code record}, its accessors are the
+ * compiler-generated bare-noun methods ({@code capacity()}, {@code size()}, {@code hitCount()}, …)
+ * — record syntax forces this convention; {@code getXxx} accessors are not available. This
+ * intentionally differs from {@link ActivityPrint}, a hand-written mutable class in the same package
+ * that uses JavaBean {@code getXxx} accessors. The split is by design (record-forced vs. JavaBean),
+ * not an oversight; the bare-noun and {@code getXxx} forms are kept as-is rather than mass-renamed.</p>
+ *
  * @see Pool#stats()
  * @see ObjectPool
  * @see KeyedObjectPool
@@ -70,4 +77,44 @@ package com.landawn.abacus.pool;
 public record PoolStats(int capacity, int size, long putCount, long getCount, long hitCount, long missCount, long evictionCount, long maxMemory,
         long dataSize) {
 
+    /**
+     * Returns the cache hit rate as a fraction in {@code [0.0, 1.0]}: {@code hitCount / getCount}.
+     * This is a pure computed value (no state is read or modified).
+     *
+     * <p>Returns {@code 0.0} when {@link #getCount()} is {@code 0} (no get/take operations have
+     * been performed), avoiding the division-by-zero guard callers would otherwise write.</p>
+     *
+     * @return the fraction of get/take operations that found an object, or {@code 0.0} if there
+     *         have been no get/take operations
+     */
+    public double hitRate() {
+        return getCount <= 0 ? 0.0 : (double) hitCount / getCount;
+    }
+
+    /**
+     * Returns the cache miss rate as a fraction in {@code [0.0, 1.0]}: {@code missCount / getCount}.
+     * This is a pure computed value (no state is read or modified).
+     *
+     * <p>Returns {@code 0.0} when {@link #getCount()} is {@code 0} (no get/take operations have
+     * been performed). Note {@code hitRate() + missRate() == 1.0} whenever {@code getCount > 0}.</p>
+     *
+     * @return the fraction of get/take operations that did not find an object, or {@code 0.0} if
+     *         there have been no get/take operations
+     */
+    public double missRate() {
+        return getCount <= 0 ? 0.0 : (double) missCount / getCount;
+    }
+
+    /**
+     * Returns the pool utilization as a fraction in {@code [0.0, 1.0]}: {@code size / capacity}.
+     * This is a pure computed value (no state is read or modified).
+     *
+     * <p>Returns {@code 0.0} when {@link #capacity()} is {@code 0} (an unbounded/zero-capacity pool
+     * configuration), avoiding the division-by-zero guard callers would otherwise write.</p>
+     *
+     * @return the fraction of capacity currently occupied, or {@code 0.0} if capacity is {@code 0}
+     */
+    public double utilization() {
+        return capacity <= 0 ? 0.0 : (double) size / capacity;
+    }
 }

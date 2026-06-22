@@ -424,7 +424,7 @@ public class FnTest extends TestBase {
 
     @Test
     public void testRun() {
-        // Tests the anonymous Runnable.run() methods in close/closeAll/closeQuietly/closeAllQuietly/shutDown
+        // Tests the anonymous Runnable.run() methods in close/closeAll/closeQuietly/closeAllQuietly/shutdown
         // close(AutoCloseable) run()
         MyCloseable c1 = new MyCloseable();
         Runnable closeRunnable = Fn.close(c1);
@@ -475,17 +475,17 @@ public class FnTest extends TestBase {
         closeAllQColl.run();
         assertEquals(1, c7.getCloseCount());
 
-        // shutDown(ExecutorService) run()
+        // shutdown(ExecutorService) run()
         ExecutorService es1 = Executors.newSingleThreadExecutor();
-        Runnable shutdownRun = Fn.shutDown(es1);
+        Runnable shutdownRun = Fn.shutdown(es1);
         shutdownRun.run();
         assertTrue(es1.isShutdown());
         shutdownRun.run(); // no-op
         assertTrue(es1.isShutdown());
 
-        // shutDown(ExecutorService, long, TimeUnit) run()
+        // shutdown(ExecutorService, long, TimeUnit) run()
         ExecutorService es2 = Executors.newSingleThreadExecutor();
-        Runnable shutdownTimeoutRun = Fn.shutDown(es2, 100, TimeUnit.MILLISECONDS);
+        Runnable shutdownTimeoutRun = Fn.shutdown(es2, 100, TimeUnit.MILLISECONDS);
         shutdownTimeoutRun.run();
         assertTrue(es2.isShutdown());
         shutdownTimeoutRun.run(); // no-op
@@ -650,7 +650,7 @@ public class FnTest extends TestBase {
                 super.shutdown();
             }
         };
-        Runnable shutdown = Fn.shutDown(mockService);
+        Runnable shutdown = Fn.shutdown(mockService);
         assertFalse(mockService.isShutdown());
         shutdown.run();
         assertTrue(mockService.isShutdown());
@@ -660,7 +660,7 @@ public class FnTest extends TestBase {
     @Test
     public void testShutDownWithTimeout() throws InterruptedException {
         ExecutorService service = Executors.newSingleThreadExecutor();
-        Runnable shutdown = Fn.shutDown(service, 100, TimeUnit.MILLISECONDS);
+        Runnable shutdown = Fn.shutdown(service, 100, TimeUnit.MILLISECONDS);
         assertFalse(service.isShutdown());
         shutdown.run();
         assertTrue(service.isShutdown());
@@ -5256,6 +5256,48 @@ public class FnTest extends TestBase {
     }
 
     @Test
+    public void testFnnMinMaxNullHandlingConsistentWithFn() {
+        // regression: Fnn.min()/minBy()/minByKey()/minByValue() must prefer non-null over null
+        // (null is considered greater for min, less for max), consistent with the Fn analogues.
+        // They previously compared with N.compare (nulls-first), so min(null, x) returned null.
+        Throwables.BinaryOperator<String, RuntimeException> min = Fnn.min();
+        Throwables.BinaryOperator<String, RuntimeException> max = Fnn.max();
+
+        Assertions.assertEquals("test", min.apply("test", null));
+        Assertions.assertEquals("test", min.apply(null, "test"));
+        Assertions.assertNull(min.apply(null, null));
+
+        Assertions.assertEquals("test", max.apply("test", null));
+        Assertions.assertEquals("test", max.apply(null, "test"));
+        Assertions.assertNull(max.apply(null, null));
+
+        // minBy/maxBy: operands whose extracted key is null lose to operands with non-null keys
+        Map<String, Integer> rank = N.asMap("a", 1);
+        Throwables.BinaryOperator<String, RuntimeException> minBy = Fnn.minBy(rank::get);
+        Throwables.BinaryOperator<String, RuntimeException> maxBy = Fnn.maxBy(rank::get);
+        Assertions.assertEquals("a", minBy.apply("a", "unknown")); // rank of "unknown" is null
+        Assertions.assertEquals("a", minBy.apply("unknown", "a"));
+        Assertions.assertEquals("a", maxBy.apply("a", "unknown"));
+        Assertions.assertEquals("a", maxBy.apply("unknown", "a"));
+
+        // minByKey/maxByKey: entries with null keys lose to entries with non-null keys
+        Map.Entry<Integer, String> nullKeyEntry = N.newImmutableEntry(null, "n");
+        Map.Entry<Integer, String> fiveKeyEntry = N.newImmutableEntry(5, "five");
+        Assertions.assertEquals(fiveKeyEntry, Fnn.<Integer, String, RuntimeException> minByKey().apply(nullKeyEntry, fiveKeyEntry));
+        Assertions.assertEquals(fiveKeyEntry, Fnn.<Integer, String, RuntimeException> minByKey().apply(fiveKeyEntry, nullKeyEntry));
+        Assertions.assertEquals(fiveKeyEntry, Fnn.<Integer, String, RuntimeException> maxByKey().apply(nullKeyEntry, fiveKeyEntry));
+        Assertions.assertEquals(fiveKeyEntry, Fnn.<Integer, String, RuntimeException> maxByKey().apply(fiveKeyEntry, nullKeyEntry));
+
+        // minByValue/maxByValue: entries with null values lose to entries with non-null values
+        Map.Entry<String, Integer> nullValueEntry = N.newImmutableEntry("n", null);
+        Map.Entry<String, Integer> fiveValueEntry = N.newImmutableEntry("five", 5);
+        Assertions.assertEquals(fiveValueEntry, Fnn.<String, Integer, RuntimeException> minByValue().apply(nullValueEntry, fiveValueEntry));
+        Assertions.assertEquals(fiveValueEntry, Fnn.<String, Integer, RuntimeException> minByValue().apply(fiveValueEntry, nullValueEntry));
+        Assertions.assertEquals(fiveValueEntry, Fnn.<String, Integer, RuntimeException> maxByValue().apply(nullValueEntry, fiveValueEntry));
+        Assertions.assertEquals(fiveValueEntry, Fnn.<String, Integer, RuntimeException> maxByValue().apply(fiveValueEntry, nullValueEntry));
+    }
+
+    @Test
     public void testCompareTo() {
         Function<Integer, Integer> compareToFive = Fn.compareTo(5);
 
@@ -9800,5 +9842,24 @@ public class FnTest extends TestBase {
         assertEquals(Arrays.asList('a', 'b'), chars);
 
         assertThrows(IllegalArgumentException.class, () -> Fn.mc(null));
+    }
+
+    // --- regression tests for 2026-06-10 deep-review fixes ---
+
+    @Test
+    public void testPrintlnSeparatorDefaultBranchUsesNToString() {
+        // regression: the default branch used raw string concatenation, printing array identity
+        // hashes instead of the element-wise rendering the special-cased separators use
+        final java.io.ByteArrayOutputStream out = new java.io.ByteArrayOutputStream();
+        final java.io.PrintStream original = System.out;
+        System.setOut(new java.io.PrintStream(out));
+
+        try {
+            Fn.println(" -> ").accept(new int[] { 1, 2 }, "x");
+        } finally {
+            System.setOut(original);
+        }
+
+        assertEquals("[1, 2] -> x", out.toString().trim());
     }
 }

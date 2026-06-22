@@ -268,7 +268,8 @@ final class GuavaHasher implements Hasher {
      * @param off the start offset in the array
      * @param len the number of characters to add
      * @return this hasher instance
-     * @throws IndexOutOfBoundsException if {@code off} or {@code len} is out of bounds for the array
+     * @throws IllegalArgumentException if {@code len} is negative
+     * @throws IndexOutOfBoundsException if {@code off} is negative, or if {@code off + len > chars.length}
      */
     @Override
     public Hasher put(final char[] chars, final int off, final int len) throws IndexOutOfBoundsException {

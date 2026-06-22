@@ -89,12 +89,14 @@ public class AbstractPoolTest extends TestBase {
 
     @Test
     public void testRemoveShutdownHook() {
-        TestAbstractPool hookPool = new TestAbstractPool(10, 0, EvictionPolicy.LAST_ACCESS_TIME, false, 0.2f, 0);
-        // removeShutdownHook should not throw when called
-        hookPool.removeShutdownHook();
-        // calling it again after already removed should also not throw
-        hookPool.removeShutdownHook();
-        hookPool.close();
+        assertDoesNotThrow(() -> {
+            TestAbstractPool hookPool = new TestAbstractPool(10, 0, EvictionPolicy.LAST_ACCESS_TIME, false, 0.2f, 0);
+            // removeShutdownHook should not throw when called
+            hookPool.removeShutdownHook();
+            // calling it again after already removed should also not throw
+            hookPool.removeShutdownHook();
+            hookPool.close();
+        });
     }
 
     @Test

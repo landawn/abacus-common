@@ -13,9 +13,9 @@
  */
 package com.landawn.abacus.util.function;
 
-import java.util.Objects;
-
 import com.landawn.abacus.util.Throwables;
+import com.landawn.abacus.util.N;
+import com.landawn.abacus.util.cs;
 
 /**
  * Represents an operation on a single float-valued operand that produces a float-valued result.
@@ -64,12 +64,12 @@ public interface FloatUnaryOperator extends Throwables.FloatUnaryOperator<Runtim
      * @param before the operator to apply before this operator is applied
      * @return a composed operator that first applies the {@code before}
      *         operator and then applies this operator
-     * @throws NullPointerException if {@code before} is null
+     * @throws IllegalArgumentException if {@code before} is null
      *
      * @see #andThen(FloatUnaryOperator)
      */
     default FloatUnaryOperator compose(final FloatUnaryOperator before) {
-        Objects.requireNonNull(before);
+        N.checkArgNotNull(before, cs.before);
         return v -> applyAsFloat(before.applyAsFloat(v));
     }
 
@@ -82,12 +82,12 @@ public interface FloatUnaryOperator extends Throwables.FloatUnaryOperator<Runtim
      * @param after the operator to apply after this operator is applied
      * @return a composed operator that first applies this operator and then
      *         applies the {@code after} operator
-     * @throws NullPointerException if {@code after} is null
+     * @throws IllegalArgumentException if {@code after} is null
      *
      * @see #compose(FloatUnaryOperator)
      */
     default FloatUnaryOperator andThen(final FloatUnaryOperator after) {
-        Objects.requireNonNull(after);
+        N.checkArgNotNull(after, cs.after);
         return t -> after.applyAsFloat(applyAsFloat(t));
     }
 
@@ -98,5 +98,19 @@ public interface FloatUnaryOperator extends Throwables.FloatUnaryOperator<Runtim
      */
     static FloatUnaryOperator identity() {
         return t -> t;
+    }
+
+    /**
+     * Returns this object as a {@link Throwables.FloatUnaryOperator} view.
+     *
+     * <p>The returned object has the same behavior as this one. This method does not translate
+     * exceptions or make the original implementation capable of throwing new checked exceptions; the
+     * exception type parameter is for target-type compatibility with APIs that accept {@code Throwables.FloatUnaryOperator}.
+     *
+     * @param <E> the target exception type for compatibility with {@code Throwables.FloatUnaryOperator}
+     * @return a {@link Throwables.FloatUnaryOperator} view of this object
+     */
+    default <E extends Throwable> Throwables.FloatUnaryOperator<E> toThrowable() {
+        return (Throwables.FloatUnaryOperator<E>) this;
     }
 }

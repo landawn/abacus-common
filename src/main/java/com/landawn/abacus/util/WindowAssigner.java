@@ -29,8 +29,8 @@ package com.landawn.abacus.util;
  *   <li>Session windows (e.g., grouped by activity with gaps)</li>
  * </ul>
  *
- * <p>This is an internal class used by the Stream API's windowing operations. Concrete
- * windowing strategies subclass it and implement {@link #process(ObjIterator)}.</p>
+ * <p>This is a base class for windowing strategies intended for stream windowing operations.
+ * Concrete windowing strategies subclass it and implement {@link #process(ObjIterator)}.</p>
  */
 public abstract class WindowAssigner {
 
@@ -45,7 +45,7 @@ public abstract class WindowAssigner {
     /**
      * Processes the input iterator and returns a new iterator whose elements have been
      * assigned to windows according to this assigner's strategy.
-     * This method is called internally by the Stream API to apply windowing logic.
+     * Implementations define how elements from the input iterator are grouped into windows.
      *
      * <p>Implementations should define how elements from the input iterator are assigned
      * to windows and exposed through the returned iterator. Both the input and the returned

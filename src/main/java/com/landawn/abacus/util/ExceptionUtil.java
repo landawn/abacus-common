@@ -112,6 +112,11 @@ public final class ExceptionUtil {
 
     private static final Function<Throwable, RuntimeException> CHECKED_FUNC = UncheckedException::new;
 
+    // Resolution cache for converters derived via the superclass scan. Kept SEPARATE from the
+    // registration map: caching derived results there would block registerRuntimeExceptionMapper
+    // ("already registered") and let stale derived entries out-rank later-registered mappers.
+    private static final Map<Class<? extends Throwable>, Function<Throwable, RuntimeException>> resolvedToRuntimeExceptionFuncCache = new ConcurrentHashMap<>();
+
     private static final String UncheckedSQLExceptionClassName = UncheckedSQLException.class.getSimpleName();
 
     private static final String UncheckedIOExceptionClassName = UncheckedIOException.class.getSimpleName();
@@ -180,6 +185,9 @@ public final class ExceptionUtil {
         }
 
         toRuntimeExceptionFuncMap.put(exceptionClass, (Function) runtimeExceptionMapper);
+
+        // Invalidate derived resolutions the new mapper may now apply to.
+        resolvedToRuntimeExceptionFuncCache.keySet().removeIf(exceptionClass::isAssignableFrom);
     }
 
     /**
@@ -295,7 +303,22 @@ public final class ExceptionUtil {
      * @throws Error if {@code e} is an {@code Error} and {@code throwIfItIsError} is {@code true}
      * @throws NullPointerException if {@code e} is {@code null}
      */
-    public static RuntimeException toRuntimeException(final Throwable e, final boolean callInterrupt, final boolean throwIfItIsError) {
+    public static RuntimeException toRuntimeException(Throwable e, final boolean callInterrupt, final boolean throwIfItIsError) {
+        // Unwrap wrapper exceptions first (depth-bounded for cyclic cause chains) so that the
+        // callInterrupt/throwIfItIsError flags are applied to the unwrapped cause as well.
+        int unwrapDepth = 0;
+
+        while ((e instanceof ExecutionException || e instanceof InvocationTargetException || e instanceof UndeclaredThrowableException) && e.getCause() != null
+                && unwrapDepth++ < MAX_DEPTH_FOR_LOOP_CAUSE) {
+            e = e.getCause();
+        }
+
+        if ((e instanceof ExecutionException || e instanceof InvocationTargetException || e instanceof UndeclaredThrowableException) && e.getCause() != null) {
+            // Cyclic cause chain exhausted the depth budget: wrap directly instead of dispatching
+            // to the recursive wrapper converters (avoids StackOverflowError).
+            return new UncheckedException(e);
+        }
+
         if (throwIfItIsError && e instanceof Error) {
             throw (Error) e;
         }
@@ -306,6 +329,10 @@ public final class ExceptionUtil {
 
         final Class<Throwable> cls = (Class<Throwable>) e.getClass();
         Function<Throwable, RuntimeException> func = toRuntimeExceptionFuncMap.get(cls);
+
+        if (func == null) {
+            func = resolvedToRuntimeExceptionFuncCache.get(cls);
+        }
 
         Map.Entry<Class<? extends Throwable>, Function<Throwable, RuntimeException>> candidate = null;
 
@@ -326,7 +353,7 @@ public final class ExceptionUtil {
                 func = candidate.getValue();
             }
 
-            toRuntimeExceptionFuncMap.put(cls, func);
+            resolvedToRuntimeExceptionFuncCache.put(cls, func);
         }
 
         return func.apply(e);
@@ -336,7 +363,7 @@ public final class ExceptionUtil {
     static final Map<Class<? extends Throwable>, Class<? extends Throwable>> runtimeToCheckedExceptionClassMap = new ConcurrentHashMap<>();
 
     /**
-     * Attempts to extract the original checked exception from a runtime exception wrapper.
+     * Attempts to extract the original checked exception from a wrapper exception.
      * This is useful when dealing with wrapped exceptions from reflection or concurrent operations.
      *
      * <p><b>Usage Examples:</b></p>
@@ -349,10 +376,11 @@ public final class ExceptionUtil {
      * }
      * }</pre>
      *
-     * @param e the exception to unwrap, which may be {@code null}
-     * @return the unwrapped cause if {@code e} is a recognized unchecked wrapper (e.g. {@link com.landawn.abacus.exception.UncheckedException},
-     *         {@link java.util.concurrent.ExecutionException}, or {@link java.lang.reflect.InvocationTargetException});
-     *         otherwise returns {@code e} itself. Returns {@code null} if {@code e} is {@code null}.
+     * @param e the exception to unwrap; must not be {@code null}
+     * @return the unwrapped cause if {@code e} is a recognized wrapper (e.g. {@link com.landawn.abacus.exception.UncheckedException},
+     *         {@link java.util.concurrent.ExecutionException}, or {@link java.lang.reflect.InvocationTargetException})
+     *         whose cause is a checked (non-runtime) exception; otherwise returns {@code e} itself.
+     * @throws NullPointerException if {@code e} is {@code null}
      */
     public static Exception tryToGetOriginalCheckedException(final Exception e) {
         return tryToGetOriginalCheckedException(e, MAX_DEPTH_FOR_LOOP_CAUSE);

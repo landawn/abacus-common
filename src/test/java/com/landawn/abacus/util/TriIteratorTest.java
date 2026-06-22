@@ -62,6 +62,16 @@ public class TriIteratorTest extends TestBase {
     }
 
     @Test
+    public void testEmptyRejectsNullTypedActions() {
+        TriIterator<String, Integer, Double> empty = TriIterator.empty();
+
+        assertThrows(IllegalArgumentException.class,
+                () -> empty.forEachRemaining((com.landawn.abacus.util.function.TriConsumer<? super String, ? super Integer, ? super Double>) null));
+        assertThrows(IllegalArgumentException.class,
+                () -> empty.foreachRemaining((Throwables.TriConsumer<? super String, ? super Integer, ? super Double, RuntimeException>) null));
+    }
+
+    @Test
     public void testEmpty_foreachRemainingDoesNothing() {
         TriIterator<String, Integer, Boolean> iter = TriIterator.empty();
         iter.foreachRemaining((a, b, c) -> {
@@ -881,10 +891,34 @@ public class TriIteratorTest extends TestBase {
     }
 
     @Test
+    public void testUnzipIterableWithSeparateSuppliers() {
+        List<String> records = Arrays.asList("a=1=true", "b=2=false", "a=3=true");
+
+        Triple<LinkedHashSet<String>, ArrayList<Integer>, LinkedList<Boolean>> result = TriIterator.unzip(records, (record, triple) -> {
+            String[] parts = record.split("=");
+            triple.set(parts[0], Integer.parseInt(parts[1]), Boolean.parseBoolean(parts[2]));
+        }, LinkedHashSet::new, ArrayList::new, size -> new LinkedList<>());
+
+        assertTrue(result.left() instanceof LinkedHashSet);
+        assertTrue(result.middle() instanceof ArrayList);
+        assertTrue(result.right() instanceof LinkedList);
+        assertEquals(new LinkedHashSet<>(Arrays.asList("a", "b")), result.left());
+        assertEquals(Arrays.asList(1, 2, 3), result.middle());
+        assertEquals(Arrays.asList(true, false, true), result.right());
+    }
+
+    @Test
     public void testUnzipIterable_null() {
         TriIterator<Integer, String, Boolean> iter = TriIterator.unzip((Iterable<String>) null, (item, triple) -> {
         });
         assertFalse(iter.hasNext());
+    }
+
+    @Test
+    public void testUnzipIterable_nullFunction() {
+        assertThrows(IllegalArgumentException.class, () -> TriIterator.unzip(Arrays.asList("a"), null));
+        // The unzip function is validated even when the iterable is null.
+        assertThrows(IllegalArgumentException.class, () -> TriIterator.unzip((Iterable<String>) null, null));
     }
 
     @Test
@@ -918,10 +952,34 @@ public class TriIteratorTest extends TestBase {
     }
 
     @Test
+    public void testUnzipIteratorWithSeparateSuppliers() {
+        Iterator<String> iterator = Arrays.asList("a=1=true", "b=2=false", "a=3=true").iterator();
+
+        Triple<LinkedHashSet<String>, ArrayList<Integer>, LinkedList<Boolean>> result = TriIterator.unzip(iterator, (record, triple) -> {
+            String[] parts = record.split("=");
+            triple.set(parts[0], Integer.parseInt(parts[1]), Boolean.parseBoolean(parts[2]));
+        }, LinkedHashSet::new, ArrayList::new, size -> new LinkedList<>());
+
+        assertTrue(result.left() instanceof LinkedHashSet);
+        assertTrue(result.middle() instanceof ArrayList);
+        assertTrue(result.right() instanceof LinkedList);
+        assertEquals(new LinkedHashSet<>(Arrays.asList("a", "b")), result.left());
+        assertEquals(Arrays.asList(1, 2, 3), result.middle());
+        assertEquals(Arrays.asList(true, false, true), result.right());
+    }
+
+    @Test
     public void testUnzipIterator_null() {
         TriIterator<Integer, String, Boolean> iter = TriIterator.unzip((Iterator<String>) null, (item, triple) -> {
         });
         assertFalse(iter.hasNext());
+    }
+
+    @Test
+    public void testUnzipIterator_nullFunction() {
+        assertThrows(IllegalArgumentException.class, () -> TriIterator.unzip(Arrays.asList("a").iterator(), null));
+        // The unzip function is validated even when the iterator is null.
+        assertThrows(IllegalArgumentException.class, () -> TriIterator.unzip((Iterator<String>) null, null));
     }
 
     @Test
@@ -1524,18 +1582,18 @@ public class TriIteratorTest extends TestBase {
     }
 
     // =====================================================================
-    // toMultiList(Supplier)
+    // unzipToLists(Supplier)
     // =====================================================================
 
     @Test
-    public void testToMultiList() {
+    public void testUnzipToLists() {
         String[] names = { "Alice", "Bob", "Charlie" };
         Integer[] ages = { 25, 30, 35 };
         Boolean[] active = { true, false, true };
 
         TriIterator<String, Integer, Boolean> iter = TriIterator.zip(names, ages, active);
 
-        Triple<List<String>, List<Integer>, List<Boolean>> result = iter.toMultiList(ArrayList::new);
+        Triple<List<String>, List<Integer>, List<Boolean>> result = iter.unzipToLists(ArrayList::new);
 
         assertEquals(3, result.left().size());
         assertEquals(3, result.middle().size());
@@ -1547,9 +1605,9 @@ public class TriIteratorTest extends TestBase {
     }
 
     @Test
-    public void testToMultiList_customImpl() {
+    public void testUnzipToLists_customImpl() {
         TriIterator<Integer, String, Double> iter = TriIterator.zip(Arrays.asList(1, 2), Arrays.asList("a", "b"), Arrays.asList(1.1, 2.2));
-        Triple<List<Integer>, List<String>, List<Double>> result = iter.toMultiList(LinkedList::new);
+        Triple<List<Integer>, List<String>, List<Double>> result = iter.unzipToLists(LinkedList::new);
 
         assertTrue(result.left() instanceof LinkedList);
         assertTrue(result.middle() instanceof LinkedList);
@@ -1560,9 +1618,9 @@ public class TriIteratorTest extends TestBase {
     }
 
     @Test
-    public void testToMultiList_empty() {
+    public void testUnzipToLists_empty() {
         TriIterator<String, Integer, Boolean> iter = TriIterator.empty();
-        Triple<List<String>, List<Integer>, List<Boolean>> result = iter.toMultiList(ArrayList::new);
+        Triple<List<String>, List<Integer>, List<Boolean>> result = iter.unzipToLists(ArrayList::new);
 
         assertTrue(result.left().isEmpty());
         assertTrue(result.middle().isEmpty());
@@ -1570,18 +1628,18 @@ public class TriIteratorTest extends TestBase {
     }
 
     // =====================================================================
-    // toMultiSet(Supplier)
+    // unzipToSets(Supplier)
     // =====================================================================
 
     @Test
-    public void testToMultiSet() {
+    public void testUnzipToSets() {
         String[] names = { "Alice", "Bob", "Alice" };
         Integer[] ages = { 25, 30, 25 };
         Boolean[] active = { true, false, true };
 
         TriIterator<String, Integer, Boolean> iter = TriIterator.zip(names, ages, active);
 
-        Triple<Set<String>, Set<Integer>, Set<Boolean>> result = iter.toMultiSet(HashSet::new);
+        Triple<Set<String>, Set<Integer>, Set<Boolean>> result = iter.unzipToSets(HashSet::new);
 
         assertEquals(2, result.left().size());
         assertEquals(2, result.middle().size());
@@ -1592,9 +1650,9 @@ public class TriIteratorTest extends TestBase {
     }
 
     @Test
-    public void testToMultiSet_duplicates() {
+    public void testUnzipToSets_duplicates() {
         TriIterator<Integer, String, String> iter = TriIterator.zip(Arrays.asList(1, 1), Arrays.asList("a", "b"), Arrays.asList("x", "x"));
-        Triple<Set<Integer>, Set<String>, Set<String>> result = iter.toMultiSet(HashSet::new);
+        Triple<Set<Integer>, Set<String>, Set<String>> result = iter.unzipToSets(HashSet::new);
 
         assertEquals(new HashSet<>(Arrays.asList(1)), result.left());
         assertEquals(new HashSet<>(Arrays.asList("a", "b")), result.middle());
@@ -1602,10 +1660,10 @@ public class TriIteratorTest extends TestBase {
     }
 
     @Test
-    public void testToMultiSet_linkedHashSet() {
+    public void testUnzipToSets_linkedHashSet() {
         TriIterator<Integer, String, Boolean> iter = TriIterator.zip(new Integer[] { 1, 2, 3 }, new String[] { "a", "b", "c" },
                 new Boolean[] { true, false, true });
-        Triple<Set<Integer>, Set<String>, Set<Boolean>> result = iter.toMultiSet(LinkedHashSet::new);
+        Triple<Set<Integer>, Set<String>, Set<Boolean>> result = iter.unzipToSets(LinkedHashSet::new);
 
         assertTrue(result.left() instanceof LinkedHashSet);
         assertTrue(result.middle() instanceof LinkedHashSet);
@@ -1613,9 +1671,9 @@ public class TriIteratorTest extends TestBase {
     }
 
     @Test
-    public void testToMultiSet_empty() {
+    public void testUnzipToSets_empty() {
         TriIterator<String, Integer, Boolean> iter = TriIterator.empty();
-        Triple<Set<String>, Set<Integer>, Set<Boolean>> result = iter.toMultiSet(HashSet::new);
+        Triple<Set<String>, Set<Integer>, Set<Boolean>> result = iter.unzipToSets(HashSet::new);
 
         assertTrue(result.left().isEmpty());
         assertTrue(result.middle().isEmpty());

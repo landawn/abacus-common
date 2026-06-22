@@ -31,6 +31,6 @@ public class LongNConsumerTest extends TestBase {
     public void testAndThenNullThrowsImmediately() {
         LongNConsumer instance = a -> {
         };
-        org.junit.jupiter.api.Assertions.assertThrows(NullPointerException.class, () -> instance.andThen((LongNConsumer) null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> instance.andThen((LongNConsumer) null));
     }
 }

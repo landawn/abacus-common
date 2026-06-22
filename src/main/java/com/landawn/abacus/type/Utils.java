@@ -36,7 +36,8 @@ import com.landawn.abacus.parser.XmlParser;
  */
 final class Utils {
 
-    // lazy initialization to avoid: NoClassDefFoundError: Could not initialize class com.landawn.abacus.parser.JsonParserImpl
+    // Parsers are created eagerly via ParserFactory. xmlParser is guarded by isXmlParserAvailable() so a
+    // missing XML library yields null instead of a NoClassDefFoundError when this class initializes.
     /**
      * Shared JSON parser instance for use throughout the type system.
      */

@@ -13,15 +13,20 @@
  */
 package com.landawn.abacus.util.function;
 
-import java.util.Objects;
-
 import com.landawn.abacus.util.Throwables;
+import com.landawn.abacus.util.N;
+import com.landawn.abacus.util.cs;
 
 /**
  * Represents a predicate (boolean-valued function) of two double-valued arguments.
  * This is the two-arity specialization of {@link java.util.function.Predicate}.
  *
  * <p>This is a functional interface whose functional method is {@link #test(double, double)}.
+ *
+ * <p>The predefined comparison constants use the total ordering of
+ * {@link Double#compare(double, double)}, not primitive relational-operator semantics. For example,
+ * NaN compares equal to itself and greater than all other {@code double} values, and {@code 0.0d}
+ * and {@code -0.0d} are distinct.</p>
  *
  *
  * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
@@ -95,7 +100,7 @@ public interface DoubleBiPredicate extends Throwables.DoubleBiPredicate<RuntimeE
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * DoubleBiPredicate areEqual = EQUAL;
+     * DoubleBiPredicate areEqual = DoubleBiPredicate.EQUAL;
      * DoubleBiPredicate areNotEqual = areEqual.negate();
      * boolean result = areNotEqual.test(1.5, 2.5);   // Returns true
      * }</pre>
@@ -120,10 +125,10 @@ public interface DoubleBiPredicate extends Throwables.DoubleBiPredicate<RuntimeE
      *
      * @param other a predicate that will be logically-ANDed with this predicate. Must not be {@code null}.
      * @return a composed predicate that represents the short-circuiting logical AND of this predicate and the {@code other} predicate
-     * @throws NullPointerException if {@code other} is null
+     * @throws IllegalArgumentException if {@code other} is null
      */
     default DoubleBiPredicate and(final DoubleBiPredicate other) {
-        Objects.requireNonNull(other);
+        N.checkArgNotNull(other, cs.other);
         return (a, b) -> test(a, b) && other.test(a, b);
     }
 
@@ -133,7 +138,7 @@ public interface DoubleBiPredicate extends Throwables.DoubleBiPredicate<RuntimeE
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * DoubleBiPredicate areEqual = EQUAL;
+     * DoubleBiPredicate areEqual = DoubleBiPredicate.EQUAL;
      * DoubleBiPredicate firstIsZero = (d1, d2) -> d1 == 0.0;
      * DoubleBiPredicate combined = areEqual.or(firstIsZero);
      * boolean result = combined.test(0.0, 5.0);   // Returns true (first is zero)
@@ -141,10 +146,24 @@ public interface DoubleBiPredicate extends Throwables.DoubleBiPredicate<RuntimeE
      *
      * @param other a predicate that will be logically-ORed with this predicate. Must not be {@code null}.
      * @return a composed predicate that represents the short-circuiting logical OR of this predicate and the {@code other} predicate
-     * @throws NullPointerException if {@code other} is null
+     * @throws IllegalArgumentException if {@code other} is null
      */
     default DoubleBiPredicate or(final DoubleBiPredicate other) {
-        Objects.requireNonNull(other);
+        N.checkArgNotNull(other, cs.other);
         return (a, b) -> test(a, b) || other.test(a, b);
+    }
+
+    /**
+     * Returns this object as a {@link Throwables.DoubleBiPredicate} view.
+     *
+     * <p>The returned object has the same behavior as this one. This method does not translate
+     * exceptions or make the original implementation capable of throwing new checked exceptions; the
+     * exception type parameter is for target-type compatibility with APIs that accept {@code Throwables.DoubleBiPredicate}.
+     *
+     * @param <E> the target exception type for compatibility with {@code Throwables.DoubleBiPredicate}
+     * @return a {@link Throwables.DoubleBiPredicate} view of this object
+     */
+    default <E extends Throwable> Throwables.DoubleBiPredicate<E> toThrowable() {
+        return (Throwables.DoubleBiPredicate<E>) this;
     }
 }

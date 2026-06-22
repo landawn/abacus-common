@@ -162,22 +162,21 @@ public final class PrimitiveCharArrayType extends AbstractPrimitiveArrayType<cha
         final int len = strs.length;
         final char[] a = new char[len];
 
-        if (len > 0) {
-            final boolean isQuoted = (strs[0].length() > 1) && ((strs[0].charAt(0) == SK._SINGLE_QUOTE) || (strs[0].charAt(0) == SK._DOUBLE_QUOTE));
+        // Detect quoting per element (mirroring CharacterArrayType): a single isQuoted flag derived
+        // from strs[0] mis-parses mixed-quoting input such as "[a, 'b']".
+        for (int i = 0; i < len; i++) {
+            final String element = strs[i];
 
-            if (isQuoted) {
-                for (int i = 0; i < len; i++) {
-                    if (strs[i].length() >= 2) {
-                        a[i] = elementType.valueOf(strs[i].substring(1, strs[i].length() - 1));
-                    } else {
-                        a[i] = elementType.valueOf(strs[i]);
-                    }
-                }
-            } else {
-                for (int i = 0; i < len; i++) {
-                    a[i] = elementType.valueOf(strs[i]);
+            if (element.length() >= 2) {
+                final char quoteChar = element.charAt(0);
+
+                if ((quoteChar == SK._SINGLE_QUOTE || quoteChar == SK._DOUBLE_QUOTE) && element.charAt(element.length() - 1) == quoteChar) {
+                    a[i] = elementType.valueOf(element.substring(1, element.length() - 1));
+                    continue;
                 }
             }
+
+            a[i] = elementType.valueOf(element);
         }
 
         return a;

@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
 import java.util.Collection;
 import java.util.List;
@@ -29,13 +30,6 @@ public class TypeFactoryTest extends TestBase {
         Type<?> type = TypeFactory.getType(t);
         assertNotNull(type);
         assertEquals(Integer.class, type.javaType());
-    }
-
-    @Test
-    public void testGetTypeWithClass() {
-        Type<String> type = TypeFactory.getType(String.class);
-        assertNotNull(type);
-        assertEquals(String.class, type.javaType());
     }
 
     @Test
@@ -461,6 +455,66 @@ public class TypeFactoryTest extends TestBase {
         });
     }
 
+    // M18: getType(java.lang.reflect.Type) must reject null for contract parity with getType(Class)/getType(String).
+    @Test
+    public void testGetTypeWithReflectTypeNull() {
+        assertThrows(IllegalArgumentException.class, () -> {
+            TypeFactory.getType((java.lang.reflect.Type) null);
+        });
+    }
+
+    // M16: concurrent registration of the SAME name must not silently overwrite; exactly one wins, others throw IAE.
+    @Test
+    public void testRegisterType_ConcurrentSameNameIsAtomic() throws InterruptedException {
+        final int threadCount = 12;
+        final String typeName = "M16_AtomicRegisterTest_" + System.nanoTime();
+        final java.util.concurrent.atomic.AtomicInteger successes = new java.util.concurrent.atomic.AtomicInteger();
+        final java.util.concurrent.atomic.AtomicInteger failures = new java.util.concurrent.atomic.AtomicInteger();
+        final java.util.concurrent.CountDownLatch start = new java.util.concurrent.CountDownLatch(1);
+        final java.util.concurrent.CountDownLatch done = new java.util.concurrent.CountDownLatch(threadCount);
+        final Thread[] threads = new Thread[threadCount];
+
+        for (int i = 0; i < threadCount; i++) {
+            threads[i] = new Thread(() -> {
+                final Type<Object> t = new AbstractType<>(typeName) {
+                    @Override
+                    public Class<Object> javaType() {
+                        return Object.class;
+                    }
+
+                    @Override
+                    public String stringOf(Object x) {
+                        return x == null ? null : x.toString();
+                    }
+
+                    @Override
+                    public Object valueOf(String str) {
+                        return str;
+                    }
+                };
+                try {
+                    start.await();
+                    TypeFactory.registerType(t);
+                    successes.incrementAndGet();
+                } catch (IllegalArgumentException e) {
+                    failures.incrementAndGet();
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                } finally {
+                    done.countDown();
+                }
+            });
+            threads[i].start();
+        }
+
+        start.countDown();
+        done.await();
+
+        assertEquals(1, successes.get(), "exactly one concurrent registration should succeed");
+        assertEquals(threadCount - 1, failures.get(), "all other concurrent registrations should throw IAE");
+        assertNotNull(TypeFactory.getType(typeName));
+    }
+
     @Test
     public void testGetType_ClazzRejectsMultipleTypeParameters() {
         assertThrows(IllegalArgumentException.class, () -> TypeFactory.getType("Clazz<String, Integer>"));
@@ -694,66 +748,74 @@ public class TypeFactoryTest extends TestBase {
 
     @Test
     public void testRegisterTypeWithClassAndBiFunctions() {
-        class CustomClass {
-            String value = "test";
-        }
+        assertDoesNotThrow(() -> {
+            class CustomClass {
+                String value = "test";
+            }
 
-        BiFunction<CustomClass, JsonParser, String> toStringFunc = (obj, parser) -> obj.value;
-        BiFunction<String, JsonParser, CustomClass> fromStringFunc = (str, parser) -> {
-            CustomClass obj = new CustomClass();
-            obj.value = str;
-            return obj;
-        };
+            BiFunction<CustomClass, JsonParser, String> toStringFunc = (obj, parser) -> obj.value;
+            BiFunction<String, JsonParser, CustomClass> fromStringFunc = (str, parser) -> {
+                CustomClass obj = new CustomClass();
+                obj.value = str;
+                return obj;
+            };
 
-        TypeFactory.registerType(CustomClass.class, toStringFunc, fromStringFunc);
+            TypeFactory.registerType(CustomClass.class, toStringFunc, fromStringFunc);
+        });
     }
 
     @Test
     public void testRegisterTypeWithClassAndFunctions() {
-        class CustomClass2 {
-            String value = "test";
-        }
+        assertDoesNotThrow(() -> {
+            class CustomClass2 {
+                String value = "test";
+            }
 
-        Function<CustomClass2, String> toStringFunc = obj -> obj.value;
-        Function<String, CustomClass2> fromStringFunc = str -> {
-            CustomClass2 obj = new CustomClass2();
-            obj.value = str;
-            return obj;
-        };
+            Function<CustomClass2, String> toStringFunc = obj -> obj.value;
+            Function<String, CustomClass2> fromStringFunc = str -> {
+                CustomClass2 obj = new CustomClass2();
+                obj.value = str;
+                return obj;
+            };
 
-        TypeFactory.registerType(CustomClass2.class, toStringFunc, fromStringFunc);
+            TypeFactory.registerType(CustomClass2.class, toStringFunc, fromStringFunc);
+        });
     }
 
     @Test
     public void testRegisterTypeWithStringAndClassAndBiFunctions() {
-        class CustomClass4 {
-            String value = "test";
-        }
+        assertDoesNotThrow(() -> {
+            class CustomClass4 {
+                String value = "test";
+            }
 
-        BiFunction<CustomClass4, JsonParser, String> toStringFunc = (obj, parser) -> obj.value;
-        BiFunction<String, JsonParser, CustomClass4> fromStringFunc = (str, parser) -> {
-            CustomClass4 obj = new CustomClass4();
-            obj.value = str;
-            return obj;
-        };
+            BiFunction<CustomClass4, JsonParser, String> toStringFunc = (obj, parser) -> obj.value;
+            BiFunction<String, JsonParser, CustomClass4> fromStringFunc = (str, parser) -> {
+                CustomClass4 obj = new CustomClass4();
+                obj.value = str;
+                return obj;
+            };
 
-        TypeFactory.registerType("CustomType4", CustomClass4.class, toStringFunc, fromStringFunc);
+            TypeFactory.registerType("CustomType4", CustomClass4.class, toStringFunc, fromStringFunc);
+        });
     }
 
     @Test
     public void testRegisterTypeWithStringAndClassAndFunctions() {
-        class CustomClass5 {
-            String value = "test";
-        }
+        assertDoesNotThrow(() -> {
+            class CustomClass5 {
+                String value = "test";
+            }
 
-        Function<CustomClass5, String> toStringFunc = obj -> obj.value;
-        Function<String, CustomClass5> fromStringFunc = str -> {
-            CustomClass5 obj = new CustomClass5();
-            obj.value = str;
-            return obj;
-        };
+            Function<CustomClass5, String> toStringFunc = obj -> obj.value;
+            Function<String, CustomClass5> fromStringFunc = str -> {
+                CustomClass5 obj = new CustomClass5();
+                obj.value = str;
+                return obj;
+            };
 
-        TypeFactory.registerType("CustomType5", CustomClass5.class, toStringFunc, fromStringFunc);
+            TypeFactory.registerType("CustomType5", CustomClass5.class, toStringFunc, fromStringFunc);
+        });
     }
 
     // Covers L1383/L1388: registerType(Class, BiFunction, BiFunction) lambda body execution
@@ -833,632 +895,636 @@ public class TypeFactoryTest extends TestBase {
 
     @Test
     public void testRegisterTypeWithClassAndType() {
-        class CustomClass3 {
-        }
-        Type<CustomClass3> customType = new AbstractType<>("CustomClass3") {
-            @Override
-            public String name() {
-                return "CustomClass3";
+        assertDoesNotThrow(() -> {
+            class CustomClass3 {
             }
+            Type<CustomClass3> customType = new AbstractType<>("CustomClass3") {
+                @Override
+                public String name() {
+                    return "CustomClass3";
+                }
 
-            @Override
-            public String declaringName() {
-                return "CustomClass3";
-            }
+                @Override
+                public String declaringName() {
+                    return "CustomClass3";
+                }
 
-            @Override
-            public String xmlName() {
-                return "CustomClass3";
-            }
+                @Override
+                public String xmlName() {
+                    return "CustomClass3";
+                }
 
-            @Override
-            public Class<CustomClass3> javaType() {
-                return CustomClass3.class;
-            }
+                @Override
+                public Class<CustomClass3> javaType() {
+                    return CustomClass3.class;
+                }
 
-            @Override
-            public boolean isPrimitive() {
-                return false;
-            }
+                @Override
+                public boolean isPrimitive() {
+                    return false;
+                }
 
-            @Override
-            public boolean isPrimitiveWrapper() {
-                return false;
-            }
+                @Override
+                public boolean isPrimitiveWrapper() {
+                    return false;
+                }
 
-            @Override
-            public boolean isPrimitiveList() {
-                return false;
-            }
+                @Override
+                public boolean isPrimitiveList() {
+                    return false;
+                }
 
-            @Override
-            public boolean isBoolean() {
-                return false;
-            }
+                @Override
+                public boolean isBoolean() {
+                    return false;
+                }
 
-            @Override
-            public boolean isNumber() {
-                return false;
-            }
+                @Override
+                public boolean isNumber() {
+                    return false;
+                }
 
-            @Override
-            public boolean isString() {
-                return false;
-            }
+                @Override
+                public boolean isString() {
+                    return false;
+                }
 
-            @Override
-            public boolean isCharSequence() {
-                return false;
-            }
+                @Override
+                public boolean isCharSequence() {
+                    return false;
+                }
 
-            @Override
-            public boolean isDate() {
-                return false;
-            }
+                @Override
+                public boolean isDate() {
+                    return false;
+                }
 
-            @Override
-            public boolean isCalendar() {
-                return false;
-            }
+                @Override
+                public boolean isCalendar() {
+                    return false;
+                }
 
-            @Override
-            public boolean isJodaDateTime() {
-                return false;
-            }
+                @Override
+                public boolean isJodaDateTime() {
+                    return false;
+                }
 
-            @Override
-            public boolean isPrimitiveArray() {
-                return false;
-            }
+                @Override
+                public boolean isPrimitiveArray() {
+                    return false;
+                }
 
-            @Override
-            public boolean isPrimitiveByteArray() {
-                return false;
-            }
+                @Override
+                public boolean isPrimitiveByteArray() {
+                    return false;
+                }
 
-            @Override
-            public boolean isObjectArray() {
-                return false;
-            }
+                @Override
+                public boolean isObjectArray() {
+                    return false;
+                }
 
-            @Override
-            public boolean isArray() {
-                return false;
-            }
+                @Override
+                public boolean isArray() {
+                    return false;
+                }
 
-            @Override
-            public boolean isList() {
-                return false;
-            }
+                @Override
+                public boolean isList() {
+                    return false;
+                }
 
-            @Override
-            public boolean isSet() {
-                return false;
-            }
+                @Override
+                public boolean isSet() {
+                    return false;
+                }
 
-            @Override
-            public boolean isCollection() {
-                return false;
-            }
+                @Override
+                public boolean isCollection() {
+                    return false;
+                }
 
-            @Override
-            public boolean isMap() {
-                return false;
-            }
+                @Override
+                public boolean isMap() {
+                    return false;
+                }
 
-            @Override
-            public boolean isBean() {
-                return false;
-            }
+                @Override
+                public boolean isBean() {
+                    return false;
+                }
 
-            @Override
-            public boolean isMapEntity() {
-                return false;
-            }
+                @Override
+                public boolean isMapEntity() {
+                    return false;
+                }
 
-            @Override
-            public boolean isEntityId() {
-                return false;
-            }
+                @Override
+                public boolean isEntityId() {
+                    return false;
+                }
 
-            @Override
-            public boolean isDataset() {
-                return false;
-            }
+                @Override
+                public boolean isDataset() {
+                    return false;
+                }
 
-            @Override
-            public boolean isInputStream() {
-                return false;
-            }
+                @Override
+                public boolean isInputStream() {
+                    return false;
+                }
 
-            @Override
-            public boolean isReader() {
-                return false;
-            }
+                @Override
+                public boolean isReader() {
+                    return false;
+                }
 
-            @Override
-            public boolean isByteBuffer() {
-                return false;
-            }
+                @Override
+                public boolean isByteBuffer() {
+                    return false;
+                }
 
-            @Override
-            public boolean isParameterizedType() {
-                return false;
-            }
+                @Override
+                public boolean isParameterizedType() {
+                    return false;
+                }
 
-            @Override
-            public boolean isImmutable() {
-                return true;
-            }
+                @Override
+                public boolean isImmutable() {
+                    return true;
+                }
 
-            @Override
-            public boolean isComparable() {
-                return false;
-            }
+                @Override
+                public boolean isComparable() {
+                    return false;
+                }
 
-            @Override
-            public boolean isSerializable() {
-                return true;
-            }
+                @Override
+                public boolean isSerializable() {
+                    return true;
+                }
 
-            @Override
-            public boolean isObject() {
-                return false;
-            }
+                @Override
+                public boolean isObject() {
+                    return false;
+                }
 
-            @Override
-            public boolean isOptionalOrNullable() {
-                return false;
-            }
+                @Override
+                public boolean isOptionalOrNullable() {
+                    return false;
+                }
 
-            @Override
-            public SerializationType serializationType() {
-                return SerializationType.ENTITY;
-            }
+                @Override
+                public SerializationType serializationType() {
+                    return SerializationType.ENTITY;
+                }
 
-            @Override
-            public Type<?> elementType() {
-                return null;
-            }
+                @Override
+                public Type<?> elementType() {
+                    return null;
+                }
 
-            @Override
-            public List<Type<?>> parameterTypes() {
-                return java.util.Collections.emptyList();
-            }
+                @Override
+                public List<Type<?>> parameterTypes() {
+                    return java.util.Collections.emptyList();
+                }
 
-            @Override
-            public CustomClass3 defaultValue() {
-                return null;
-            }
+                @Override
+                public CustomClass3 defaultValue() {
+                    return null;
+                }
 
-            @Override
-            public boolean isDefaultValue(CustomClass3 value) {
-                return value == null;
-            }
+                @Override
+                public boolean isDefaultValue(CustomClass3 value) {
+                    return value == null;
+                }
 
-            @Override
-            public int compare(CustomClass3 x, CustomClass3 y) {
-                throw new UnsupportedOperationException();
-            }
+                @Override
+                public int compare(CustomClass3 x, CustomClass3 y) {
+                    throw new UnsupportedOperationException();
+                }
 
-            @Override
-            public String stringOf(CustomClass3 x) {
-                return x == null ? null : x.toString();
-            }
+                @Override
+                public String stringOf(CustomClass3 x) {
+                    return x == null ? null : x.toString();
+                }
 
-            @Override
-            public CustomClass3 valueOf(String str) {
-                return null;
-            }
+                @Override
+                public CustomClass3 valueOf(String str) {
+                    return null;
+                }
 
-            @Override
-            public CustomClass3 valueOf(Object obj) {
-                return (CustomClass3) obj;
-            }
+                @Override
+                public CustomClass3 valueOf(Object obj) {
+                    return (CustomClass3) obj;
+                }
 
-            @Override
-            public CustomClass3 valueOf(char[] cbuf, int offset, int len) {
-                return null;
-            }
+                @Override
+                public CustomClass3 valueOf(char[] cbuf, int offset, int len) {
+                    return null;
+                }
 
-            @Override
-            public CustomClass3 get(java.sql.ResultSet rs, int columnIndex) {
-                return null;
-            }
+                @Override
+                public CustomClass3 get(java.sql.ResultSet rs, int columnIndex) {
+                    return null;
+                }
 
-            @Override
-            public CustomClass3 get(java.sql.ResultSet rs, String columnLabel) {
-                return null;
-            }
+                @Override
+                public CustomClass3 get(java.sql.ResultSet rs, String columnLabel) {
+                    return null;
+                }
 
-            @Override
-            public void set(java.sql.PreparedStatement stmt, int columnIndex, CustomClass3 x) {
-            }
+                @Override
+                public void set(java.sql.PreparedStatement stmt, int columnIndex, CustomClass3 x) {
+                }
 
-            @Override
-            public void set(java.sql.CallableStatement stmt, String parameterName, CustomClass3 x) {
-            }
+                @Override
+                public void set(java.sql.CallableStatement stmt, String parameterName, CustomClass3 x) {
+                }
 
-            @Override
-            public void set(java.sql.PreparedStatement stmt, int columnIndex, CustomClass3 x, int sqlTypeOrLength) {
-            }
+                @Override
+                public void set(java.sql.PreparedStatement stmt, int columnIndex, CustomClass3 x, int sqlTypeOrLength) {
+                }
 
-            @Override
-            public void set(java.sql.CallableStatement stmt, String parameterName, CustomClass3 x, int sqlTypeOrLength) {
-            }
+                @Override
+                public void set(java.sql.CallableStatement stmt, String parameterName, CustomClass3 x, int sqlTypeOrLength) {
+                }
 
-            @Override
-            public void appendTo(Appendable appendable, CustomClass3 x) {
-            }
+                @Override
+                public void appendTo(Appendable appendable, CustomClass3 x) {
+                }
 
-            @Override
-            public void serializeTo(com.landawn.abacus.util.CharacterWriter writer, CustomClass3 x, com.landawn.abacus.parser.JsonXmlSerConfig<?> config) {
-            }
+                @Override
+                public void serializeTo(com.landawn.abacus.util.CharacterWriter writer, CustomClass3 x, com.landawn.abacus.parser.JsonXmlSerConfig<?> config) {
+                }
 
-            @Override
-            public CustomClass3 collectionToArray(Collection<?> c) {
-                throw new UnsupportedOperationException();
-            }
+                @Override
+                public CustomClass3 collectionToArray(Collection<?> c) {
+                    throw new UnsupportedOperationException();
+                }
 
-            @Override
-            public <E> Collection<E> arrayToCollection(CustomClass3 x, Class<?> collClass) {
-                throw new UnsupportedOperationException();
-            }
+                @Override
+                public <E> Collection<E> arrayToCollection(CustomClass3 x, Class<?> collClass) {
+                    throw new UnsupportedOperationException();
+                }
 
-            @Override
-            public <E> void arrayToCollection(CustomClass3 x, Collection<E> output) {
-                throw new UnsupportedOperationException();
-            }
+                @Override
+                public <E> void arrayToCollection(CustomClass3 x, Collection<E> output) {
+                    throw new UnsupportedOperationException();
+                }
 
-            @Override
-            public int hashCode(CustomClass3 x) {
-                return x == null ? 0 : x.hashCode();
-            }
+                @Override
+                public int hashCode(CustomClass3 x) {
+                    return x == null ? 0 : x.hashCode();
+                }
 
-            @Override
-            public int deepHashCode(CustomClass3 x) {
-                return hashCode(x);
-            }
+                @Override
+                public int deepHashCode(CustomClass3 x) {
+                    return hashCode(x);
+                }
 
-            @Override
-            public boolean equals(CustomClass3 x, CustomClass3 y) {
-                return x == y || (x != null && x.equals(y));
-            }
+                @Override
+                public boolean equals(CustomClass3 x, CustomClass3 y) {
+                    return x == y || (x != null && x.equals(y));
+                }
 
-            @Override
-            public boolean deepEquals(CustomClass3 x, CustomClass3 y) {
-                return equals(x, y);
-            }
+                @Override
+                public boolean deepEquals(CustomClass3 x, CustomClass3 y) {
+                    return equals(x, y);
+                }
 
-            @Override
-            public String toString(CustomClass3 x) {
-                return stringOf(x);
-            }
+                @Override
+                public String toString(CustomClass3 x) {
+                    return stringOf(x);
+                }
 
-            @Override
-            public String deepToString(CustomClass3 x) {
-                return toString(x);
-            }
-        };
+                @Override
+                public String deepToString(CustomClass3 x) {
+                    return toString(x);
+                }
+            };
 
-        TypeFactory.registerType(CustomClass3.class, customType);
+            TypeFactory.registerType(CustomClass3.class, customType);
+        });
     }
 
     @Test
     public void testRegisterType() {
-        Type<?> customType = new AbstractType<>("UniqueTypeName456") {
-            @Override
-            public String name() {
-                return "UniqueTypeName456";
-            }
-
-            @Override
-            public String declaringName() {
-                return "UniqueTypeName456";
-            }
-
-            @Override
-            public String xmlName() {
-                return "UniqueTypeName456";
-            }
-
-            @Override
-            public Class<Object> javaType() {
-                return Object.class;
-            }
-
-            @Override
-            public boolean isPrimitive() {
-                return false;
-            }
-
-            @Override
-            public boolean isPrimitiveWrapper() {
-                return false;
-            }
-
-            @Override
-            public boolean isPrimitiveList() {
-                return false;
-            }
-
-            @Override
-            public boolean isBoolean() {
-                return false;
-            }
-
-            @Override
-            public boolean isNumber() {
-                return false;
-            }
-
-            @Override
-            public boolean isString() {
-                return false;
-            }
-
-            @Override
-            public boolean isCharSequence() {
-                return false;
-            }
-
-            @Override
-            public boolean isDate() {
-                return false;
-            }
-
-            @Override
-            public boolean isCalendar() {
-                return false;
-            }
-
-            @Override
-            public boolean isJodaDateTime() {
-                return false;
-            }
-
-            @Override
-            public boolean isPrimitiveArray() {
-                return false;
-            }
-
-            @Override
-            public boolean isPrimitiveByteArray() {
-                return false;
-            }
-
-            @Override
-            public boolean isObjectArray() {
-                return false;
-            }
-
-            @Override
-            public boolean isArray() {
-                return false;
-            }
-
-            @Override
-            public boolean isList() {
-                return false;
-            }
-
-            @Override
-            public boolean isSet() {
-                return false;
-            }
-
-            @Override
-            public boolean isCollection() {
-                return false;
-            }
-
-            @Override
-            public boolean isMap() {
-                return false;
-            }
-
-            @Override
-            public boolean isBean() {
-                return false;
-            }
-
-            @Override
-            public boolean isMapEntity() {
-                return false;
-            }
-
-            @Override
-            public boolean isEntityId() {
-                return false;
-            }
-
-            @Override
-            public boolean isDataset() {
-                return false;
-            }
-
-            @Override
-            public boolean isInputStream() {
-                return false;
-            }
-
-            @Override
-            public boolean isReader() {
-                return false;
-            }
-
-            @Override
-            public boolean isByteBuffer() {
-                return false;
-            }
-
-            @Override
-            public boolean isParameterizedType() {
-                return false;
-            }
-
-            @Override
-            public boolean isImmutable() {
-                return false;
-            }
-
-            @Override
-            public boolean isComparable() {
-                return false;
-            }
-
-            @Override
-            public boolean isSerializable() {
-                return true;
-            }
-
-            @Override
-            public boolean isObject() {
-                return true;
-            }
-
-            @Override
-            public boolean isOptionalOrNullable() {
-                return false;
-            }
-
-            @Override
-            public SerializationType serializationType() {
-                return SerializationType.UNKNOWN;
-            }
-
-            @Override
-            public Type<?> elementType() {
-                return null;
-            }
-
-            @Override
-            public List<Type<?>> parameterTypes() {
-                return java.util.Collections.emptyList();
-            }
-
-            @Override
-            public Object defaultValue() {
-                return null;
-            }
-
-            @Override
-            public boolean isDefaultValue(Object value) {
-                return value == null;
-            }
-
-            @Override
-            public int compare(Object x, Object y) {
-                throw new UnsupportedOperationException();
-            }
-
-            @Override
-            public String stringOf(Object x) {
-                return x == null ? null : x.toString();
-            }
-
-            @Override
-            public Object valueOf(String str) {
-                return str;
-            }
-
-            @Override
-            public Object valueOf(Object obj) {
-                return obj;
-            }
-
-            @Override
-            public Object valueOf(char[] cbuf, int offset, int len) {
-                N.checkFromIndexSize(offset, N.len(cbuf), len);
-
-                if (N.isEmpty(cbuf) || len == 0) {
-                    return Strings.EMPTY;
+        assertDoesNotThrow(() -> {
+            Type<?> customType = new AbstractType<>("UniqueTypeName456") {
+                @Override
+                public String name() {
+                    return "UniqueTypeName456";
                 }
 
-                return new String(cbuf, offset, len);
-            }
+                @Override
+                public String declaringName() {
+                    return "UniqueTypeName456";
+                }
 
-            @Override
-            public Object get(java.sql.ResultSet rs, int columnIndex) {
-                return null;
-            }
+                @Override
+                public String xmlName() {
+                    return "UniqueTypeName456";
+                }
 
-            @Override
-            public Object get(java.sql.ResultSet rs, String columnLabel) {
-                return null;
-            }
+                @Override
+                public Class<Object> javaType() {
+                    return Object.class;
+                }
 
-            @Override
-            public void set(java.sql.PreparedStatement stmt, int columnIndex, Object x) {
-            }
+                @Override
+                public boolean isPrimitive() {
+                    return false;
+                }
 
-            @Override
-            public void set(java.sql.CallableStatement stmt, String parameterName, Object x) {
-            }
+                @Override
+                public boolean isPrimitiveWrapper() {
+                    return false;
+                }
 
-            @Override
-            public void set(java.sql.PreparedStatement stmt, int columnIndex, Object x, int sqlTypeOrLength) {
-            }
+                @Override
+                public boolean isPrimitiveList() {
+                    return false;
+                }
 
-            @Override
-            public void set(java.sql.CallableStatement stmt, String parameterName, Object x, int sqlTypeOrLength) {
-            }
+                @Override
+                public boolean isBoolean() {
+                    return false;
+                }
 
-            @Override
-            public void appendTo(Appendable appendable, Object x) {
-            }
+                @Override
+                public boolean isNumber() {
+                    return false;
+                }
 
-            @Override
-            public void serializeTo(com.landawn.abacus.util.CharacterWriter writer, Object x, com.landawn.abacus.parser.JsonXmlSerConfig<?> config) {
-            }
+                @Override
+                public boolean isString() {
+                    return false;
+                }
 
-            @Override
-            public Object collectionToArray(Collection<?> c) {
-                throw new UnsupportedOperationException();
-            }
+                @Override
+                public boolean isCharSequence() {
+                    return false;
+                }
 
-            @Override
-            public <E> Collection<E> arrayToCollection(Object x, Class<?> collClass) {
-                throw new UnsupportedOperationException();
-            }
+                @Override
+                public boolean isDate() {
+                    return false;
+                }
 
-            @Override
-            public <E> void arrayToCollection(Object x, Collection<E> output) {
-                throw new UnsupportedOperationException();
-            }
+                @Override
+                public boolean isCalendar() {
+                    return false;
+                }
 
-            @Override
-            public int hashCode(Object x) {
-                return x == null ? 0 : x.hashCode();
-            }
+                @Override
+                public boolean isJodaDateTime() {
+                    return false;
+                }
 
-            @Override
-            public int deepHashCode(Object x) {
-                return hashCode(x);
-            }
+                @Override
+                public boolean isPrimitiveArray() {
+                    return false;
+                }
 
-            @Override
-            public boolean equals(Object x, Object y) {
-                return x == y || (x != null && x.equals(y));
-            }
+                @Override
+                public boolean isPrimitiveByteArray() {
+                    return false;
+                }
 
-            @Override
-            public boolean deepEquals(Object x, Object y) {
-                return equals(x, y);
-            }
+                @Override
+                public boolean isObjectArray() {
+                    return false;
+                }
 
-            @Override
-            public String toString(Object x) {
-                return stringOf(x);
-            }
+                @Override
+                public boolean isArray() {
+                    return false;
+                }
 
-            @Override
-            public String deepToString(Object x) {
-                return toString(x);
-            }
-        };
+                @Override
+                public boolean isList() {
+                    return false;
+                }
 
-        TypeFactory.registerType(customType);
+                @Override
+                public boolean isSet() {
+                    return false;
+                }
+
+                @Override
+                public boolean isCollection() {
+                    return false;
+                }
+
+                @Override
+                public boolean isMap() {
+                    return false;
+                }
+
+                @Override
+                public boolean isBean() {
+                    return false;
+                }
+
+                @Override
+                public boolean isMapEntity() {
+                    return false;
+                }
+
+                @Override
+                public boolean isEntityId() {
+                    return false;
+                }
+
+                @Override
+                public boolean isDataset() {
+                    return false;
+                }
+
+                @Override
+                public boolean isInputStream() {
+                    return false;
+                }
+
+                @Override
+                public boolean isReader() {
+                    return false;
+                }
+
+                @Override
+                public boolean isByteBuffer() {
+                    return false;
+                }
+
+                @Override
+                public boolean isParameterizedType() {
+                    return false;
+                }
+
+                @Override
+                public boolean isImmutable() {
+                    return false;
+                }
+
+                @Override
+                public boolean isComparable() {
+                    return false;
+                }
+
+                @Override
+                public boolean isSerializable() {
+                    return true;
+                }
+
+                @Override
+                public boolean isObject() {
+                    return true;
+                }
+
+                @Override
+                public boolean isOptionalOrNullable() {
+                    return false;
+                }
+
+                @Override
+                public SerializationType serializationType() {
+                    return SerializationType.UNKNOWN;
+                }
+
+                @Override
+                public Type<?> elementType() {
+                    return null;
+                }
+
+                @Override
+                public List<Type<?>> parameterTypes() {
+                    return java.util.Collections.emptyList();
+                }
+
+                @Override
+                public Object defaultValue() {
+                    return null;
+                }
+
+                @Override
+                public boolean isDefaultValue(Object value) {
+                    return value == null;
+                }
+
+                @Override
+                public int compare(Object x, Object y) {
+                    throw new UnsupportedOperationException();
+                }
+
+                @Override
+                public String stringOf(Object x) {
+                    return x == null ? null : x.toString();
+                }
+
+                @Override
+                public Object valueOf(String str) {
+                    return str;
+                }
+
+                @Override
+                public Object valueOf(Object obj) {
+                    return obj;
+                }
+
+                @Override
+                public Object valueOf(char[] cbuf, int offset, int len) {
+                    N.checkFromIndexSize(offset, N.len(cbuf), len);
+
+                    if (N.isEmpty(cbuf) || len == 0) {
+                        return Strings.EMPTY;
+                    }
+
+                    return new String(cbuf, offset, len);
+                }
+
+                @Override
+                public Object get(java.sql.ResultSet rs, int columnIndex) {
+                    return null;
+                }
+
+                @Override
+                public Object get(java.sql.ResultSet rs, String columnLabel) {
+                    return null;
+                }
+
+                @Override
+                public void set(java.sql.PreparedStatement stmt, int columnIndex, Object x) {
+                }
+
+                @Override
+                public void set(java.sql.CallableStatement stmt, String parameterName, Object x) {
+                }
+
+                @Override
+                public void set(java.sql.PreparedStatement stmt, int columnIndex, Object x, int sqlTypeOrLength) {
+                }
+
+                @Override
+                public void set(java.sql.CallableStatement stmt, String parameterName, Object x, int sqlTypeOrLength) {
+                }
+
+                @Override
+                public void appendTo(Appendable appendable, Object x) {
+                }
+
+                @Override
+                public void serializeTo(com.landawn.abacus.util.CharacterWriter writer, Object x, com.landawn.abacus.parser.JsonXmlSerConfig<?> config) {
+                }
+
+                @Override
+                public Object collectionToArray(Collection<?> c) {
+                    throw new UnsupportedOperationException();
+                }
+
+                @Override
+                public <E> Collection<E> arrayToCollection(Object x, Class<?> collClass) {
+                    throw new UnsupportedOperationException();
+                }
+
+                @Override
+                public <E> void arrayToCollection(Object x, Collection<E> output) {
+                    throw new UnsupportedOperationException();
+                }
+
+                @Override
+                public int hashCode(Object x) {
+                    return x == null ? 0 : x.hashCode();
+                }
+
+                @Override
+                public int deepHashCode(Object x) {
+                    return hashCode(x);
+                }
+
+                @Override
+                public boolean equals(Object x, Object y) {
+                    return x == y || (x != null && x.equals(y));
+                }
+
+                @Override
+                public boolean deepEquals(Object x, Object y) {
+                    return equals(x, y);
+                }
+
+                @Override
+                public String toString(Object x) {
+                    return stringOf(x);
+                }
+
+                @Override
+                public String deepToString(Object x) {
+                    return toString(x);
+                }
+            };
+
+            TypeFactory.registerType(customType);
+        });
     }
 
     // Covers L1472: registerType(Class, Type) throws when class already registered
@@ -1482,6 +1548,32 @@ public class TypeFactoryTest extends TestBase {
     public void testGetType_SheetWithParameters_Throws() {
         // Regression: Sheet type must reject constructor-style parameters like its siblings (#18).
         org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> TypeFactory.getType("Sheet<String, Integer, Long>(foo)"));
+    }
+
+    // --- regression tests for 2026-06-10 deep-review fixes ---
+
+    @Test
+    public void testGetType_SimpleNameArray() {
+        // regression: "UUID[]" produced a self-inconsistent type named "UUID[][]" with Object
+        // (String-deserialized) elements because the fallback never consulted the type pool
+        // for the COMPONENT name
+        final Type<java.util.UUID[]> arrayType = TypeFactory.getType("UUID[]");
+
+        org.junit.jupiter.api.Assertions.assertEquals("UUID[]", arrayType.name());
+
+        final java.util.UUID uuid = java.util.UUID.randomUUID();
+        final Object[] parsed = (Object[]) arrayType.valueOf("[\"" + uuid + "\"]");
+
+        org.junit.jupiter.api.Assertions.assertEquals(uuid, parsed[0]);
+    }
+
+    @Test
+    public void testGetType_JsonWrappedSimpleName() {
+        // regression: "JSON<UUID>" threw "No class found by name: UUID" because the constructor
+        // re-resolved the class via ClassUtil.forName instead of the TypeFactory
+        final Type<?> jsonType = TypeFactory.getType("JSON<UUID>");
+
+        org.junit.jupiter.api.Assertions.assertEquals(java.util.UUID.class, jsonType.javaType());
     }
 
 }

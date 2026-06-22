@@ -21,7 +21,9 @@ import java.util.Set;
 import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.ClassUtil;
+import com.landawn.abacus.util.ImmutableNavigableSet;
 import com.landawn.abacus.util.ImmutableSet;
+import com.landawn.abacus.util.ImmutableSortedSet;
 import com.landawn.abacus.util.SK;
 
 /**
@@ -50,12 +52,24 @@ public class ImmutableSetType<E> extends AbstractType<ImmutableSet<E>> {
      *
      * @param parameterTypeName the name of the element type parameter
      */
-    @SuppressWarnings("rawtypes")
     ImmutableSetType(final String parameterTypeName) {
-        super(getTypeName(ImmutableSet.class, parameterTypeName, false));
+        this(ImmutableSet.class, parameterTypeName);
+    }
 
-        typeClass = (Class) ImmutableSet.class;
-        declaringName = getTypeName(ImmutableSet.class, parameterTypeName, true);
+    /**
+     * Package-private constructor for ImmutableSetType with an explicit target class.
+     * Sorted/navigable subclasses are routed here by the TypeFactory and must produce the declared
+     * subtype from {@link #valueOf(String)}.
+     *
+     * @param typeClass the concrete ImmutableSet (sub)class this handler produces
+     * @param parameterTypeName the name of the element type parameter
+     */
+    @SuppressWarnings("rawtypes")
+    ImmutableSetType(final Class<?> typeClass, final String parameterTypeName) {
+        super(getTypeName(typeClass, parameterTypeName, false));
+
+        this.typeClass = (Class) typeClass;
+        declaringName = getTypeName(typeClass, parameterTypeName, true);
         elementType = TypeFactory.getType(parameterTypeName);
         parameterTypes = List.of(elementType);
         setType = TypeFactory.getType("Set<" + parameterTypeName + ">");
@@ -197,7 +211,19 @@ public class ImmutableSetType<E> extends AbstractType<ImmutableSet<E>> {
     public ImmutableSet<E> valueOf(final String str) {
         final Set<E> set = setType.valueOf(str);
 
-        return set == null ? null : ImmutableSet.wrap(set);
+        if (set == null) {
+            return null;
+        }
+
+        // Sorted/navigable subclasses route here too (TypeFactory dispatches on assignability):
+        // produce the declared subtype instead of a plain ImmutableSet (ClassCastException).
+        if (ImmutableNavigableSet.class.isAssignableFrom(typeClass)) {
+            return ImmutableNavigableSet.copyOf(set);
+        } else if (ImmutableSortedSet.class.isAssignableFrom(typeClass)) {
+            return ImmutableSortedSet.copyOf(set);
+        }
+
+        return ImmutableSet.wrap(set);
     }
 
     /**

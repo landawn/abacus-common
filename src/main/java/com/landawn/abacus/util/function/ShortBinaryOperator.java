@@ -65,4 +65,18 @@ public interface ShortBinaryOperator extends Throwables.ShortBinaryOperator<Runt
      */
     @Override
     short applyAsShort(short a, short b);
+
+    /**
+     * Returns this object as a {@link Throwables.ShortBinaryOperator} view.
+     *
+     * <p>The returned object has the same behavior as this one. This method does not translate
+     * exceptions or make the original implementation capable of throwing new checked exceptions; the
+     * exception type parameter is for target-type compatibility with APIs that accept {@code Throwables.ShortBinaryOperator}.
+     *
+     * @param <E> the target exception type for compatibility with {@code Throwables.ShortBinaryOperator}
+     * @return a {@link Throwables.ShortBinaryOperator} view of this object
+     */
+    default <E extends Throwable> Throwables.ShortBinaryOperator<E> toThrowable() {
+        return (Throwables.ShortBinaryOperator<E>) this;
+    }
 }

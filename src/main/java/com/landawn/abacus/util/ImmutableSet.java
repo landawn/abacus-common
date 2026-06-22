@@ -17,7 +17,6 @@ package com.landawn.abacus.util;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -45,6 +44,10 @@ import com.landawn.abacus.annotation.Beta;
  *
  * <p>The implementation maintains the iteration order when created from a List, LinkedHashSet,
  * or SortedSet, otherwise no specific iteration order is guaranteed.
+ *
+ * <p><b>Note:</b> the {@code of(...)} factory methods and the no-arg {@link #builder()} both preserve
+ * the order in which the elements are supplied (they are backed by a {@code LinkedHashSet}). To use a
+ * different backing set type, pass it explicitly to {@link #builder(Set)}.</p>
  *
  * <p>Null elements are supported if the underlying set implementation supports them.
  *
@@ -511,7 +514,9 @@ public class ImmutableSet<E> extends ImmutableCollection<E> implements Set<E> {
      * Creates a new Builder for constructing an ImmutableSet.
      * The builder allows adding elements one by one and then creating an immutable set.
      * This is useful when the number of elements is not known at compile time.
-     * The builder uses a HashSet internally, so duplicate elements are automatically removed.
+     * The builder uses a {@code LinkedHashSet} internally, so duplicate elements are automatically
+     * removed and insertion order is preserved. To use a different backing set type, supply it
+     * via {@link #builder(Set)}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -527,7 +532,7 @@ public class ImmutableSet<E> extends ImmutableCollection<E> implements Set<E> {
      * @return a new Builder instance for creating an ImmutableSet.
      */
     public static <E> Builder<E> builder() {
-        return new Builder<>(new HashSet<>());
+        return new Builder<>(new LinkedHashSet<>());
     }
 
     /**
@@ -546,11 +551,13 @@ public class ImmutableSet<E> extends ImmutableCollection<E> implements Set<E> {
      * }</pre>
      *
      * @param <E> the type of elements to be maintained by the set.
-     * @param holder the set to be used as the backing storage for the Builder; should not be {@code null},
-     *        otherwise subsequent {@code add}/{@code addAll}/{@code build} calls will fail with a {@link NullPointerException}
+     * @param holder the set to be used as the backing storage for the Builder; must not be {@code null}.
      * @return a new Builder instance that will use the provided set.
+     * @throws IllegalArgumentException if holder is null.
      */
-    public static <E> Builder<E> builder(final Set<E> holder) {
+    public static <E> Builder<E> builder(final Set<E> holder) throws IllegalArgumentException {
+        N.checkArgNotNull(holder);
+
         return new Builder<>(holder);
     }
 

@@ -131,6 +131,6 @@ public class BooleanTriPredicateTest extends TestBase {
     @Test
     public void testAndNullThrowsImmediately() {
         BooleanTriPredicate instance = (a, b, c) -> false;
-        org.junit.jupiter.api.Assertions.assertThrows(NullPointerException.class, () -> instance.and((BooleanTriPredicate) null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> instance.and((BooleanTriPredicate) null));
     }
 }

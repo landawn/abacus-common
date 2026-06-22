@@ -285,6 +285,15 @@ public final class DataSourceUtil {
         }
     }
 
+    private static SQLException addCloseException(final SQLException firstException, final SQLException closeException) {
+        if (firstException == null) {
+            return closeException;
+        }
+
+        firstException.addSuppressed(closeException);
+        return firstException;
+    }
+
     /**
      * Closes a ResultSet and Statement in the proper order.
      * The ResultSet is closed first, followed by the Statement. The Statement is closed
@@ -303,23 +312,30 @@ public final class DataSourceUtil {
      *
      * @param rs the ResultSet to close; may be {@code null}
      * @param stmt the Statement to close; may be {@code null}
-     * @throws UncheckedSQLException if a database access error occurs while closing either resource
+     * @throws UncheckedSQLException if a database access error occurs while closing either resource; if both
+     *         closes fail, the ResultSet's exception is thrown with the Statement's failure added as a suppressed exception
      */
     public static void close(final ResultSet rs, final Statement stmt) throws UncheckedSQLException {
+        SQLException closeException = null;
+
         try {
             if (rs != null) {
                 rs.close();
             }
         } catch (final SQLException e) {
-            throw new UncheckedSQLException(e);
-        } finally {
-            try {
-                if (stmt != null) {
-                    stmt.close();
-                }
-            } catch (final SQLException e) {
-                throw new UncheckedSQLException(e); //NOSONAR
+            closeException = e;
+        }
+
+        try {
+            if (stmt != null) {
+                stmt.close();
             }
+        } catch (final SQLException e) {
+            closeException = addCloseException(closeException, e);
+        }
+
+        if (closeException != null) {
+            throw new UncheckedSQLException(closeException);
         }
     }
 
@@ -341,30 +357,38 @@ public final class DataSourceUtil {
      *
      * @param stmt the Statement to close; may be {@code null}
      * @param conn the Connection to close; may be {@code null}
-     * @throws UncheckedSQLException if a database access error occurs while closing either resource
+     * @throws UncheckedSQLException if a database access error occurs while closing either resource; if both
+     *         closes fail, the Statement's exception is thrown with the Connection's failure added as a suppressed exception
      */
     public static void close(final Statement stmt, final Connection conn) throws UncheckedSQLException {
+        SQLException closeException = null;
+
         try {
             if (stmt != null) {
                 stmt.close();
             }
         } catch (final SQLException e) {
-            throw new UncheckedSQLException(e);
-        } finally {
-            try {
-                if (conn != null) {
-                    conn.close();
-                }
-            } catch (final SQLException e) {
-                throw new UncheckedSQLException(e); //NOSONAR
+            closeException = e;
+        }
+
+        try {
+            if (conn != null) {
+                conn.close();
             }
+        } catch (final SQLException e) {
+            closeException = addCloseException(closeException, e);
+        }
+
+        if (closeException != null) {
+            throw new UncheckedSQLException(closeException);
         }
     }
 
     /**
      * Closes a ResultSet, Statement, and Connection in the proper order.
      * Resources are closed in reverse order of creation: ResultSet -&gt; Statement -&gt; Connection.
-     * If any close operation fails, the exception is thrown after attempting to close remaining resources.
+     * If any close operation fails, the first exception is thrown after attempting to close remaining resources,
+     * with later close failures added as suppressed exceptions.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -384,28 +408,34 @@ public final class DataSourceUtil {
      * @throws UncheckedSQLException if a database access error occurs while closing any of the resources
      */
     public static void close(final ResultSet rs, final Statement stmt, final Connection conn) throws UncheckedSQLException {
+        SQLException closeException = null;
+
         try {
             if (rs != null) {
                 rs.close();
             }
         } catch (final SQLException e) {
-            throw new UncheckedSQLException(e);
-        } finally {
-            try {
-                if (stmt != null) {
-                    stmt.close();
-                }
-            } catch (final SQLException e) {
-                throw new UncheckedSQLException(e); //NOSONAR
-            } finally {
-                try {
-                    if (conn != null) {
-                        conn.close();
-                    }
-                } catch (final SQLException e) {
-                    throw new UncheckedSQLException(e); //NOSONAR
-                }
+            closeException = e;
+        }
+
+        try {
+            if (stmt != null) {
+                stmt.close();
             }
+        } catch (final SQLException e) {
+            closeException = addCloseException(closeException, e);
+        }
+
+        try {
+            if (conn != null) {
+                conn.close();
+            }
+        } catch (final SQLException e) {
+            closeException = addCloseException(closeException, e);
+        }
+
+        if (closeException != null) {
+            throw new UncheckedSQLException(closeException);
         }
     }
 

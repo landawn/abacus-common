@@ -332,6 +332,25 @@ public final class HttpRequest {
         return this;
     }
 
+    /**
+     * Sets the connection timeout for this request, in milliseconds.
+     * This is a convenience overload of {@link #connectTimeout(Duration)} that provides parity with
+     * the {@code com.landawn.abacus.http.HttpRequest} and {@code OkHttpRequest} builders.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * HttpRequest.url("http://localhost:18080/data")
+     *     .connectTimeout(10_000L)
+     *     .get();
+     * }</pre>
+     *
+     * @param connectTimeoutInMillis the connection timeout in milliseconds (0 or negative leaves it unset)
+     * @return this HttpRequest instance for method chaining
+     */
+    public HttpRequest connectTimeout(final long connectTimeoutInMillis) {
+        return connectTimeout(connectTimeoutInMillis > 0 ? Duration.ofMillis(connectTimeoutInMillis) : null);
+    }
+
     private void initClientBuilder() {
         if (clientBuilder == null) {
             clientBuilder = HttpClient.newBuilder();
@@ -384,6 +403,25 @@ public final class HttpRequest {
         }
 
         return this;
+    }
+
+    /**
+     * Sets the read timeout for this request, in milliseconds.
+     * This is a convenience overload of {@link #readTimeout(Duration)} that provides parity with
+     * the {@code com.landawn.abacus.http.HttpRequest} and {@code OkHttpRequest} builders.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * HttpRequest.url("http://localhost:18080/slow-endpoint")
+     *     .readTimeout(60_000L)
+     *     .get();
+     * }</pre>
+     *
+     * @param readTimeoutInMillis the read timeout in milliseconds (0 or negative leaves it unset)
+     * @return this HttpRequest instance for method chaining
+     */
+    public HttpRequest readTimeout(final long readTimeoutInMillis) {
+        return readTimeout(readTimeoutInMillis > 0 ? Duration.ofMillis(readTimeoutInMillis) : null);
     }
 
     private static HttpClient.Builder withConnectTimeout(final HttpClient.Builder builder, final long connectTimeoutInMillis) {
@@ -456,6 +494,29 @@ public final class HttpRequest {
         header(HttpHeaders.Names.AUTHORIZATION, "Basic " + Strings.base64Encode((username + ":" + pwd).getBytes(Charsets.UTF_8)));
 
         return this;
+    }
+
+    /**
+     * Sets the {@code Authorization} header using HTTP Basic authentication.
+     * This is the {@link String}-typed overload that provides cross-builder signature parity with
+     * the {@code com.landawn.abacus.http.HttpRequest} and {@code OkHttpRequest} builders (which both
+     * expose {@code basicAuth(String, String)}); the {@link #basicAuth(String, Object)} overload is
+     * retained for {@code char[]} passwords.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * HttpRequest.url("http://localhost:18080/secure")
+     *     .basicAuth("username", "password")
+     *     .get();
+     * }</pre>
+     *
+     * @param username the username for authentication
+     * @param password the password for authentication
+     * @return this HttpRequest instance for method chaining
+     * @see HttpHeaders
+     */
+    public HttpRequest basicAuth(final String username, final String password) {
+        return basicAuth(username, (Object) password);
     }
 
     /**
@@ -542,8 +603,11 @@ public final class HttpRequest {
     }
 
     /**
-     * Sets HTTP headers specified by the key/value entries from the provided Map.
-     * If this HttpRequest already has any headers with those names, they are all replaced.
+     * Merges the given header entries into the headers already on this settings object.
+     * For each entry in the map, a header with the same name is overwritten with the new value,
+     * while any existing headers whose names are <i>not</i> present in the map are kept unchanged.
+     * This is a merge, not a replace-all: headers not present in the map remain unchanged.
+     * Create a new request when you need to discard all prior headers and install a fresh set.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -901,7 +965,7 @@ public final class HttpRequest {
      * @return the HTTP response with String body
      * @throws UncheckedIOException if the request could not be executed
      */
-    public HttpResponse<String> post() {
+    public HttpResponse<String> post() throws UncheckedIOException {
         return post(BodyHandlers.ofString());
     }
 
@@ -1277,9 +1341,11 @@ public final class HttpRequest {
             }
         } else {
             if (uri == null) {
-                requestBuilder.uri(URI.create(URLEncodedUtil.encode(url, query)));
+                // Explicit UTF-8: the 2-arg overload uses the PLATFORM default charset,
+                // mis-encoding non-ASCII query values on non-UTF-8 JVMs.
+                requestBuilder.uri(URI.create(URLEncodedUtil.encode(url, query, HttpUtil.DEFAULT_CHARSET)));
             } else {
-                requestBuilder.uri(URI.create(URLEncodedUtil.encode(uri.toString(), query)));
+                requestBuilder.uri(URI.create(URLEncodedUtil.encode(uri.toString(), query, HttpUtil.DEFAULT_CHARSET)));
             }
         }
 
@@ -1996,10 +2062,10 @@ public final class HttpRequest {
     }
 
     private static final class DelegatingHttpResponse<T> implements HttpResponse<T> {
-        private final HttpResponse<?> response;
+        private final HttpResponse<T> response;
         private final T body;
 
-        private DelegatingHttpResponse(final HttpResponse<?> response, final T body) {
+        private DelegatingHttpResponse(final HttpResponse<T> response, final T body) {
             this.response = response;
             this.body = body;
         }
@@ -2016,7 +2082,7 @@ public final class HttpRequest {
 
         @Override
         public Optional<HttpResponse<T>> previousResponse() {
-            return Optional.empty();
+            return response.previousResponse();
         }
 
         @Override
@@ -2139,6 +2205,21 @@ public final class HttpRequest {
             return null; // refer to isOneWayRequest.
         }
 
-        return N.convert(httpResponse.body(), resultClass);
+        final Object body = httpResponse.body();
+
+        // Dispatch on the response Content-Type (the documented behavior, mirroring the
+        // HttpClient/OkHttpRequest siblings): an XML response was previously force-parsed
+        // through the JSON-shaped N.convert and threw.
+        if (body instanceof String bodyStr && !String.class.equals(resultClass)) {
+            final String contentType = httpResponse.headers().firstValue(HttpHeaders.Names.CONTENT_TYPE).orElse(null);
+            final String contentEncoding = httpResponse.headers().firstValue(HttpHeaders.Names.CONTENT_ENCODING).orElse(null);
+            final com.landawn.abacus.http.ContentFormat responseContentFormat = HttpUtil.getContentFormat(contentType, contentEncoding);
+
+            if (responseContentFormat != null && responseContentFormat != com.landawn.abacus.http.ContentFormat.NONE) {
+                return HttpUtil.getParser(responseContentFormat).deserialize(bodyStr, resultClass);
+            }
+        }
+
+        return N.convert(body, resultClass);
     }
 }

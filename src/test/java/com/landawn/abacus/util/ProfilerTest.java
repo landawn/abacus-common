@@ -375,6 +375,24 @@ public class ProfilerTest extends AbstractTest {
         assertNotNull(stats);
     }
 
+    @Test
+    public void testRunWithRunnableAndLabel_NullLabel_ResultIsQueryableAndPrintable() {
+        // A null label is normalized to the string "null" so statistics queries and
+        // report rendering must work without NullPointerException.
+        Profiler.MultiLoopsStatistics stats = Profiler.run(1, 3, 1, (String) null, () -> {
+        });
+        assertNotNull(stats);
+        assertEquals(1, stats.getMethodNameList().size());
+        assertEquals("null", stats.getMethodNameList().get(0));
+        assertEquals(3, stats.getMethodSize("null"));
+
+        StringWriter sw = new StringWriter();
+        stats.writeResult(sw);
+        String output = sw.toString();
+        assertTrue(output.contains("null"));
+        assertTrue(output.contains("threadNum=1"));
+    }
+
     // ============================================================
     // Tests for Profiler.run(int, long, int, long, int, String, Runnable) — source line ~480
     // ============================================================
@@ -2003,6 +2021,19 @@ public class ProfilerTest extends AbstractTest {
         org.junit.jupiter.api.Assertions.assertTrue(output.contains("<_0.01>"));
         org.junit.jupiter.api.Assertions.assertTrue(output.contains("<_0.1>"));
         org.junit.jupiter.api.Assertions.assertTrue(output.contains("<_0.2>"));
+    }
+
+    @Test
+    public void testWriteHtmlResult_IncludesMethodStatistics() {
+        final Profiler.MultiLoopsStatistics stats = Profiler.run(1, 5, 1, "htmlResultTest", () -> {
+        });
+        final java.io.StringWriter sw = new java.io.StringWriter();
+
+        stats.writeHtmlResult(sw);
+
+        final String output = sw.toString();
+        assertTrue(output.contains("<table"));
+        assertEquals("htmlResultTest", stats.getMethodNameList().get(0));
     }
 
 }

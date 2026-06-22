@@ -613,6 +613,47 @@ public class CodeGenerationUtilTest extends TestBase {
     }
 
     @Test
+    public void test_generatePropNameTableClasses_config_keywordPropName_inClassPropNameList() {
+        // Regression: a converted property name that is a Java keyword is declared with a leading
+        // underscore (e.g. "String _default = \"default\";"). The generated per-class
+        // List.of(...) must reference the same "_"-prefixed identifier, otherwise the generated
+        // source would not compile.
+        final PropNameTableCodeConfig config = PropNameTableCodeConfig.builder()
+                .entityClasses(Arrays.asList(User.class))
+                .className("s")
+                .propNameConverter((cls, propName) -> propName.equals("name") ? "default" : propName)
+                .generateClassPropNameList(true)
+                .generateSnakeCase(true)
+                .build();
+
+        final String code = CodeGenerationUtil.generatePropNameTableClasses(config);
+
+        assertNotNull(code);
+        assertTrue(code.contains("String _default = \"default\";"));
+
+        int fromIndex = 0;
+        int listCount = 0;
+
+        while (true) {
+            final int listIdx = code.indexOf("userPropNameList = List.of(", fromIndex);
+
+            if (listIdx < 0) {
+                break;
+            }
+
+            final String listSegment = code.substring(listIdx, code.indexOf(");", listIdx));
+            assertTrue(listSegment.contains("_default"), "List.of(...) should reference _default: " + listSegment);
+            assertFalse(listSegment.contains("(default") || listSegment.contains(" default"),
+                    "List.of(...) must not reference the bare keyword identifier: " + listSegment);
+
+            listCount++;
+            fromIndex = listIdx + 1;
+        }
+
+        assertEquals(2, listCount); // one list in the top-level interface, one in the snake_case interface
+    }
+
+    @Test
     public void test_MIN_FUNC_withComparable() {
         final String result = CodeGenerationUtil.MIN_FUNC.apply(User.class, Integer.class, "age");
         assertEquals("min(age)", result);

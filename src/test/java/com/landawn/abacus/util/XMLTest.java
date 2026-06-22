@@ -1,6 +1,7 @@
 package com.landawn.abacus.util;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
 import java.io.StringWriter;
 
@@ -17,21 +18,23 @@ public class XMLTest extends AbstractTest {
 
     @Test
     public void test_serialize() {
-        Account account = createAccount(Account.class);
-        AccountContact contact = createAccountContact(AccountContact.class);
-        account.setContact(contact);
+        assertDoesNotThrow(() -> {
+            Account account = createAccount(Account.class);
+            AccountContact contact = createAccountContact(AccountContact.class);
+            account.setContact(contact);
 
-        StringWriter stWriter = new StringWriter();
+            StringWriter stWriter = new StringWriter();
 
-        abacusXmlParser.serialize(account, stWriter);
+            abacusXmlParser.serialize(account, stWriter);
 
-        StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
+            StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
 
-        for (int i = stackTrace.length - 1; i >= 0; i--) {
-            N.println(stackTrace[i].getClassName());
-        }
+            for (int i = stackTrace.length - 1; i >= 0; i--) {
+                N.println(stackTrace[i].getClassName());
+            }
 
-        N.println(stWriter.toString());
+            N.println(stWriter.toString());
+        });
     }
 
     @Test

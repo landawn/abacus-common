@@ -170,6 +170,6 @@ public class ShortNFunctionTest extends TestBase {
     @Test
     public void testAndThenNullThrowsImmediately() {
         ShortNFunction<String> instance = a -> null;
-        org.junit.jupiter.api.Assertions.assertThrows(NullPointerException.class, () -> instance.andThen((java.util.function.Function) null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> instance.andThen((java.util.function.Function) null));
     }
 }

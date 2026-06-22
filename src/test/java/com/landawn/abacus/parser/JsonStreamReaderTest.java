@@ -574,6 +574,39 @@ public class JsonStreamReaderTest extends TestBase {
         assertEquals(JsonReader.COMMA, token);
     }
 
+    // A "false" literal split across a buffer boundary (tiny rbuf) must still be recognized,
+    // with the immediately-following '}' returned as END_BRACE. The stream reader has no
+    // length guard like the string reader; it relies on nextChar()/refill instead.
+    @Test
+    public void testReadFalseLiteral_SplitAcrossBufferBoundary_AdjacentBrace() {
+        StringReader sr = new StringReader("{\"a\":false}");
+        JsonStreamReader reader = new JsonStreamReader(sr, new char[2], new char[64]);
+
+        assertEquals(JsonReader.START_BRACE, reader.nextToken());
+        reader.nextToken(); // START_DOUBLE_QUOTE
+        reader.nextToken(); // END_DOUBLE_QUOTE
+        assertEquals("a", reader.getText());
+        assertEquals(JsonReader.COLON, reader.nextToken());
+
+        assertEquals(JsonReader.END_BRACE, reader.nextToken());
+        assertEquals("false", reader.getText());
+        assertEquals(Boolean.FALSE, reader.readValue(N.typeOf(Boolean.class)));
+    }
+
+    // A surrogate pair (emoji U+1F600) whose two unicode escapes straddle a buffer boundary
+    // must reconstruct the supplementary code point.
+    @Test
+    public void testReadUnicodeEscape_SurrogatePair_SpanningBufferBoundary() {
+        StringReader sr = new StringReader("\"\\uD83D\\uDE00\"");
+        JsonStreamReader reader = new JsonStreamReader(sr, new char[3], new char[64]);
+
+        assertEquals(JsonReader.START_DOUBLE_QUOTE, reader.nextToken());
+        assertEquals(JsonReader.END_DOUBLE_QUOTE, reader.nextToken());
+        String text = reader.getText();
+        assertEquals(2, text.length());
+        assertEquals(0x1F600, text.codePointAt(0));
+    }
+
     // IOException from Reader.close() wrapped as UncheckedIOException (L458)
     @Test
     public void testRefill_ReaderThrowsIOException_WrapsAsUncheckedIOException() {

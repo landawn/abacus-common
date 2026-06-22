@@ -13,9 +13,9 @@
  */
 package com.landawn.abacus.util.function;
 
-import java.util.Objects;
-
 import com.landawn.abacus.util.Throwables;
+import com.landawn.abacus.util.N;
+import com.landawn.abacus.util.cs;
 
 /**
  * Represents a predicate (boolean-valued function) of three arguments. This is
@@ -42,7 +42,7 @@ public interface TriPredicate<A, B, C> extends Throwables.TriPredicate<A, B, C, 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * TriPredicate<Integer, Integer, Integer> isValidTriangle =
-     *     (a, b, c) -> a + b > c && a + c > b && b + c > a;
+     *     (a, b, c) -> (long) a + b > c && (long) a + c > b && (long) b + c > a;
      * boolean valid = isValidTriangle.test(3, 4, 5);     // returns true
      * boolean invalid = isValidTriangle.test(1, 2, 5);   // returns false
      *
@@ -65,7 +65,7 @@ public interface TriPredicate<A, B, C> extends Throwables.TriPredicate<A, B, C, 
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * TriPredicate<Integer, Integer, Integer> isSum = (a, b, c) -> a + b == c;
+     * TriPredicate<Integer, Integer, Integer> isSum = (a, b, c) -> (long) a + b == c;
      * TriPredicate<Integer, Integer, Integer> isNotSum = isSum.negate();
      *
      * boolean test1 = isSum.test(2, 3, 5);      // returns true
@@ -90,7 +90,7 @@ public interface TriPredicate<A, B, C> extends Throwables.TriPredicate<A, B, C, 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * TriPredicate<Integer, Integer, Integer> isPositive = (a, b, c) -> a > 0 && b > 0 && c > 0;
-     * TriPredicate<Integer, Integer, Integer> sumGreaterThan10 = (a, b, c) -> a + b + c > 10;
+     * TriPredicate<Integer, Integer, Integer> sumGreaterThan10 = (a, b, c) -> (long) a + b + c > 10;
      *
      * TriPredicate<Integer, Integer, Integer> combined = isPositive.and(sumGreaterThan10);
      * boolean test1 = combined.test(3, 4, 5);    // returns true (all positive AND sum=12>10)
@@ -101,10 +101,10 @@ public interface TriPredicate<A, B, C> extends Throwables.TriPredicate<A, B, C, 
      * @param other a predicate that will be logically-ANDed with this predicate. Must not be {@code null}.
      * @return a composed predicate that represents the short-circuiting logical AND of this
      *         predicate and the other predicate
-     * @throws NullPointerException if {@code other} is null
+     * @throws IllegalArgumentException if {@code other} is null
      */
     default TriPredicate<A, B, C> and(final TriPredicate<? super A, ? super B, ? super C> other) {
-        Objects.requireNonNull(other);
+        N.checkArgNotNull(other, cs.other);
         return (a, b, c) -> test(a, b, c) && other.test(a, b, c);
     }
 
@@ -132,27 +132,26 @@ public interface TriPredicate<A, B, C> extends Throwables.TriPredicate<A, B, C, 
      * @param other a predicate that will be logically-ORed with this predicate. Must not be {@code null}.
      * @return a composed predicate that represents the short-circuiting logical OR of this
      *         predicate and the other predicate
-     * @throws NullPointerException if {@code other} is null
+     * @throws IllegalArgumentException if {@code other} is null
      */
     default TriPredicate<A, B, C> or(final TriPredicate<? super A, ? super B, ? super C> other) {
-        Objects.requireNonNull(other);
+        N.checkArgNotNull(other, cs.other);
         return (a, b, c) -> test(a, b, c) || other.test(a, b, c);
     }
 
     /**
-     * Converts this TriPredicate to a Throwables.TriPredicate that can throw checked exceptions.
-     * This method is useful when you need to use this predicate in a context that expects
-     * a Throwables.TriPredicate with a specific exception type.
+     * Returns this predicate as a {@link Throwables.TriPredicate} view.
+     * This method does not translate exceptions or make the original implementation capable of
+     * throwing new checked exceptions; the exception type parameter is for target-type compatibility.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * TriPredicate<String, Integer, Boolean> predicate = (s, i, b) -> { ... };
-     * var throwablePredicate =
-     *     predicate.toThrowable();
+     * TriPredicate<String, Integer, Boolean> predicate = (s, i, b) -> s.length() == i && b;
+     * Throwables.TriPredicate<String, Integer, Boolean, RuntimeException> throwablePredicate = predicate.toThrowable();
      * }</pre>
      *
-     * @param <E> the type of exception that the returned predicate may throw
-     * @return a Throwables.TriPredicate that wraps this predicate
+     * @param <E> the target exception type for compatibility with {@code Throwables.TriPredicate}
+     * @return this predicate viewed as a {@code Throwables.TriPredicate} by unchecked cast
      */
     default <E extends Throwable> Throwables.TriPredicate<A, B, C, E> toThrowable() {
         return (Throwables.TriPredicate<A, B, C, E>) this;

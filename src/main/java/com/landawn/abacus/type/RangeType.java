@@ -22,6 +22,7 @@ import com.landawn.abacus.exception.UncheckedIOException;
 import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.BufferedJsonWriter;
 import com.landawn.abacus.util.CharacterWriter;
+import com.landawn.abacus.util.ClassUtil;
 import com.landawn.abacus.util.Objectory;
 import com.landawn.abacus.util.Range;
 import com.landawn.abacus.util.Range.BoundType;
@@ -234,16 +235,20 @@ public class RangeType<T extends Comparable<? super T>> extends AbstractType<Ran
             throw new IllegalArgumentException("Invalid Range format. Expected format like '[lower, upper]' but got: " + str);
         }
 
-        final T[] tmp = (T[]) Utils.jsonParser.deserialize(str, 1, str.length() - 1, Utils.jdc, Array.newInstance(elementType.javaType(), 0).getClass());
+        final Class<?> endpointClass = ClassUtil.wrap(elementType.javaType());
+        final Object endpoints = Utils.jsonParser.deserialize(str, 1, str.length() - 1, Utils.jdc, Array.newInstance(endpointClass, 0).getClass());
 
-        if ((tmp == null) || (tmp.length != 2)) {
+        if ((endpoints == null) || (Array.getLength(endpoints) != 2)) {
             throw new IllegalArgumentException("Invalid Range format. Expected exactly 2 endpoints but got: " + str);
         }
 
+        final T lowerEndpoint = (T) Array.get(endpoints, 0);
+        final T upperEndpoint = (T) Array.get(endpoints, 1);
+
         if ("(".equals(prefix)) {
-            return ")".equals(postfix) ? Range.open(tmp[0], tmp[1]) : Range.openClosed(tmp[0], tmp[1]);
+            return ")".equals(postfix) ? Range.open(lowerEndpoint, upperEndpoint) : Range.openClosed(lowerEndpoint, upperEndpoint);
         } else {
-            return ")".equals(postfix) ? Range.closedOpen(tmp[0], tmp[1]) : Range.closed(tmp[0], tmp[1]);
+            return ")".equals(postfix) ? Range.closedOpen(lowerEndpoint, upperEndpoint) : Range.closed(lowerEndpoint, upperEndpoint);
         }
     }
 

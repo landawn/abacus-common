@@ -93,9 +93,9 @@ public abstract class AbstractTemporalType<T extends Temporal> extends AbstractT
     /**
      * Indicates whether values of this type are comparable.
      * <p>
-     * All {@link java.time.temporal.Temporal} subtypes (e.g., {@code Instant}, {@code LocalDate},
-     * {@code LocalDateTime}, {@code OffsetDateTime}, {@code ZonedDateTime}) implement
-     * {@link Comparable}, so values of this type are naturally orderable.
+     * The temporal implementations supported by this hierarchy (e.g., {@code Instant}, {@code LocalDate},
+     * {@code LocalDateTime}, {@code OffsetDateTime}, {@code ZonedDateTime}) implement {@link Comparable},
+     * so values of this type are naturally orderable.
      * </p>
      *
      * @return {@code true}, as temporal values implement {@link Comparable}

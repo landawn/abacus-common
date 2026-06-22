@@ -3,6 +3,7 @@ package com.landawn.abacus.pool;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -354,6 +355,19 @@ public class ActivityPrintTest extends TestBase {
         assertEquals(original.getCreatedTime(), cloned.getCreatedTime());
         assertEquals(original.getLastAccessTime(), cloned.getLastAccessTime());
         assertEquals(original.getAccessCount(), cloned.getAccessCount());
+    }
+
+    @Test
+    public void testCloneCovariantReturnTypeAndNeverNull() {
+        ActivityPrint original = new ActivityPrint(10000, 5000);
+
+        // Covariant return: clone() now returns ActivityPrint directly, no cast needed.
+        ActivityPrint cloned = original.clone();
+
+        // clone() must never return null (an impossible CloneNotSupportedException becomes AssertionError).
+        assertNotNull(cloned);
+        assertNotSame(original, cloned);
+        assertEquals(original, cloned);
     }
 
     @Test

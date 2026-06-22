@@ -28,7 +28,7 @@ import com.landawn.abacus.util.u.Nullable;
  * distinct states. SQL {@code NULL} columns are mapped here to a present {@code Nullable}
  * holding {@code null}, not to {@link Nullable#empty()}.
  * <p>
- * This type handler supports generic type parameters of the form {@code NullableType<T>}
+ * This type handler supports generic type parameters of the form {@code Nullable<T>}
  * and delegates element serialization/deserialization to the appropriate element type handler.
  *
  * @param <T> the type of value wrapped by the {@code Nullable}
@@ -129,10 +129,12 @@ public class NullableType<T> extends AbstractOptionalType<Nullable<T>> {
      * delegates to {@link com.landawn.abacus.util.N#stringOf(Object)}, which selects
      * a converter based on the runtime class of the contained value.
      *
-     * <p>The returned string is a serializable representation designed to be parsed back into an equivalent value
-     * via {@link #valueOf(String)}; {@code stringOf} and {@code valueOf} are inverse operations that round-trip. This
-     * is the key distinction from {@link Object#toString()}, whose result is not guaranteed to be convertible back
-     * into the original value.</p>
+     * <p>For non-null contained values, the returned string is a serializable representation designed to be parsed
+     * back into an equivalent value via {@link #valueOf(String)}. This is the key distinction from
+     * {@link Object#toString()}, whose result is not guaranteed to be convertible back into the original value.</p>
+     * <p><b>&#9888;</b> Serializing {@code Nullable.of(null)} and {@code Nullable.empty()} both returns {@code null};
+     * {@link #valueOf(String) valueOf(null)} returns {@code Nullable.empty()}, so a present {@code null} value does
+     * not round-trip through the string form.</p>
      *
      * @param x the {@code Nullable} object to convert
      * @return the string representation of the contained value, or {@code null} if empty or null-valued
@@ -149,9 +151,8 @@ public class NullableType<T> extends AbstractOptionalType<Nullable<T>> {
      * If the string is {@code null}, returns an empty {@code Nullable}. Otherwise,
      * delegates to the element type's valueOf method and wraps the result.
      *
-     * <p>This method is the inverse of {@code stringOf} and round-trips with it: it parses the string produced by
-     * {@code stringOf} back into a value of this type. Strings produced by {@link Object#toString()} are not
-     * guaranteed to be parseable in this way.</p>
+     * <p>This method round-trips non-null values written by {@code stringOf}. Strings produced by
+     * {@link Object#toString()} are not guaranteed to be parseable in this way.</p>
      *
      * @param str the string to convert
      * @return a {@code Nullable} containing the parsed value, or empty {@code Nullable} if input is null
@@ -231,9 +232,8 @@ public class NullableType<T> extends AbstractOptionalType<Nullable<T>> {
      * otherwise delegates to the runtime type handler of the contained value.
      * <p>
      * <b>appendTo vs. serializeTo:</b> {@code appendTo} produces a plain, {@code toString()}-style rendering with no
-     * JSON/XML quoting or escaping (for general text output), whereas {@code serializeTo} produces the JSON/XML
-     * serialized form (applying string quotation and character escaping per the serialization config) and is used by the
-     * JSON/XML serializers.
+     * JSON/XML quoting or escaping (for general text output), whereas {@code serializeTo} writes the JSON/XML
+     * serialized form by delegating to the contained value's runtime type handler with the supplied config.
      *
      * @param appendable the target to write to
      * @param x the {@code Nullable} value to append, may be {@code null}
@@ -263,14 +263,11 @@ public class NullableType<T> extends AbstractOptionalType<Nullable<T>> {
      * Writes {@code NULL_CHAR_ARRAY} if {@code x} is {@code null} or wraps a {@code null} value;
      * otherwise delegates to the runtime type handler of the contained value.
      * <p>
-     * This method is specifically designed for JSON/XML serialization: it writes the serialized form of {@code x} to the
-     * {@code CharacterWriter}, applying string quotation and character escaping according to the supplied serialization
-     * config (a {@code null} config means no surrounding quotation). It is the streaming counterpart of {@code stringOf}
-     * and is invoked by the JSON/XML serializers.
+     * This method is specifically designed for JSON/XML serialization: it writes {@code null} for an empty or null-valued
+     * nullable, or delegates the contained value to its runtime type handler with the supplied serialization config.
      * <p>
-     * <b>serializeTo vs. appendTo:</b> {@code serializeTo} produces machine-readable JSON/XML (quoted and escaped),
-     * whereas {@code appendTo} produces a plain, human-readable {@code toString()}-style rendering without JSON/XML
-     * quoting or escaping.
+     * <b>serializeTo vs. appendTo:</b> {@code serializeTo} produces machine-readable JSON/XML using the contained
+     * value's serializer, whereas {@code appendTo} produces a plain, human-readable {@code toString()}-style rendering.
      *
      * @param writer the {@code CharacterWriter} to write to
      * @param x the {@code Nullable} value to write, may be {@code null}

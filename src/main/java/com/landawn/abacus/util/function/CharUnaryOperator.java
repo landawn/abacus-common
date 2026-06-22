@@ -13,9 +13,9 @@
  */
 package com.landawn.abacus.util.function;
 
-import java.util.Objects;
-
 import com.landawn.abacus.util.Throwables;
+import com.landawn.abacus.util.N;
+import com.landawn.abacus.util.cs;
 
 /**
  * Represents an operation on a single char-valued operand that produces a char-valued result.
@@ -65,12 +65,12 @@ public interface CharUnaryOperator extends Throwables.CharUnaryOperator<RuntimeE
      * @param before the operator to apply before this operator is applied. Must not be {@code null}.
      * @return a composed operator that first applies the {@code before} operator and then
      *         applies this operator
-     * @throws NullPointerException if {@code before} is null
+     * @throws IllegalArgumentException if {@code before} is null
      *
      * @see #andThen(CharUnaryOperator)
      */
     default CharUnaryOperator compose(final CharUnaryOperator before) {
-        Objects.requireNonNull(before);
+        N.checkArgNotNull(before, cs.before);
         return v -> applyAsChar(before.applyAsChar(v));
     }
 
@@ -90,12 +90,12 @@ public interface CharUnaryOperator extends Throwables.CharUnaryOperator<RuntimeE
      * @param after the operator to apply after this operator is applied. Must not be {@code null}.
      * @return a composed operator that first applies this operator and then applies the
      *         {@code after} operator
-     * @throws NullPointerException if {@code after} is null
+     * @throws IllegalArgumentException if {@code after} is null
      *
      * @see #compose(CharUnaryOperator)
      */
     default CharUnaryOperator andThen(final CharUnaryOperator after) {
-        Objects.requireNonNull(after);
+        N.checkArgNotNull(after, cs.after);
         return t -> after.applyAsChar(applyAsChar(t));
     }
 
@@ -113,5 +113,19 @@ public interface CharUnaryOperator extends Throwables.CharUnaryOperator<RuntimeE
      */
     static CharUnaryOperator identity() {
         return t -> t;
+    }
+
+    /**
+     * Returns this object as a {@link Throwables.CharUnaryOperator} view.
+     *
+     * <p>The returned object has the same behavior as this one. This method does not translate
+     * exceptions or make the original implementation capable of throwing new checked exceptions; the
+     * exception type parameter is for target-type compatibility with APIs that accept {@code Throwables.CharUnaryOperator}.
+     *
+     * @param <E> the target exception type for compatibility with {@code Throwables.CharUnaryOperator}
+     * @return a {@link Throwables.CharUnaryOperator} view of this object
+     */
+    default <E extends Throwable> Throwables.CharUnaryOperator<E> toThrowable() {
+        return (Throwables.CharUnaryOperator<E>) this;
     }
 }

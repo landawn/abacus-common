@@ -13,9 +13,9 @@
  */
 package com.landawn.abacus.util.function;
 
-import java.util.Objects;
-
 import com.landawn.abacus.util.Throwables;
+import com.landawn.abacus.util.N;
+import com.landawn.abacus.util.cs;
 
 /**
  * A functional interface that represents a predicate (boolean-valued function) of one argument.
@@ -99,11 +99,11 @@ public interface Predicate<T> extends Throwables.Predicate<T, RuntimeException>,
      * @param other a predicate that will be logically-ANDed with this predicate. Must not be {@code null}.
      * @return a composed {@code Predicate} that represents the short-circuiting logical
      *         AND of this predicate and the {@code other} predicate
-     * @throws NullPointerException if {@code other} is null
+     * @throws IllegalArgumentException if {@code other} is null
      */
     @Override
     default Predicate<T> and(final java.util.function.Predicate<? super T> other) {
-        Objects.requireNonNull(other);
+        N.checkArgNotNull(other, cs.other);
         return t -> test(t) && other.test(t);
     }
 
@@ -130,34 +130,31 @@ public interface Predicate<T> extends Throwables.Predicate<T, RuntimeException>,
      * @param other a predicate that will be logically-ORed with this predicate. Must not be {@code null}.
      * @return a composed {@code Predicate} that represents the short-circuiting logical
      *         OR of this predicate and the {@code other} predicate
-     * @throws NullPointerException if {@code other} is null
+     * @throws IllegalArgumentException if {@code other} is null
      */
     @Override
     default Predicate<T> or(final java.util.function.Predicate<? super T> other) {
-        Objects.requireNonNull(other);
+        N.checkArgNotNull(other, cs.other);
         return t -> test(t) || other.test(t);
     }
 
     /**
-     * Converts this predicate to a {@link Throwables.Predicate} that can throw
-     * checked exceptions.
+     * Returns this predicate as a {@link Throwables.Predicate} view.
      *
-     * <p>This method allows the predicate to be used in contexts where checked
-     * exceptions need to be handled. The returned predicate will have the same
-     * behavior as this predicate but with the ability to throw the specified
-     * exception type.
+     * <p>The returned predicate has the same behavior as this predicate. This method does not translate
+     * exceptions or make the original implementation capable of throwing new checked exceptions; the
+     * exception type parameter is for target-type compatibility with APIs that accept
+     * {@code Throwables.Predicate}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Predicate<String> validator = str -> str.matches("[A-Z]+");
-     * var throwableValidator =
-     *     validator.toThrowable();
-     *
-     * // Can now be used in contexts that handle IOException
+     * Throwables.Predicate<String, RuntimeException> throwableValidator = validator.toThrowable();
+     * boolean valid = throwableValidator.test("ABC");
      * }</pre>
      *
-     * @param <E> the type of exception that the returned predicate can throw
-     * @return a {@link Throwables.Predicate} version of this predicate
+     * @param <E> the target exception type for compatibility with {@code Throwables.Predicate}
+     * @return a {@link Throwables.Predicate} view of this predicate
      */
     default <E extends Throwable> Throwables.Predicate<T, E> toThrowable() {
         return (Throwables.Predicate<T, E>) this;

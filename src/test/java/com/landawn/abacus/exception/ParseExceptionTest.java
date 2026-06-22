@@ -42,6 +42,18 @@ public class ParseExceptionTest extends TestBase {
     }
 
     @Test
+    public void testMessageTokenAndCauseConstructor() {
+        String message = "Parse error at token";
+        int token = 42;
+        Throwable cause = new RuntimeException("Underlying cause");
+        ParsingException exception = new ParsingException(message, token, cause);
+        assertNotNull(exception);
+        assertEquals(message, exception.getMessage());
+        assertEquals(cause, exception.getCause());
+        assertEquals(token, exception.getErrorToken());
+    }
+
+    @Test
     public void testMessageAndCauseConstructor() {
         String message = "Parse error";
         Throwable cause = new RuntimeException("Underlying cause");

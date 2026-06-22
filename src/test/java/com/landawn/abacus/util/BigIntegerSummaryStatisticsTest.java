@@ -82,6 +82,18 @@ public class BigIntegerSummaryStatisticsTest extends TestBase {
     }
 
     @Test
+    public void testAcceptNullDoesNotMutateCount() {
+        BigIntegerSummaryStatistics stats = new BigIntegerSummaryStatistics();
+
+        Assertions.assertThrows(IllegalArgumentException.class, () -> stats.accept(null));
+
+        assertEquals(0L, stats.getCount());
+        assertEquals(BigInteger.ZERO, stats.getSum());
+        assertNull(stats.getMin());
+        assertNull(stats.getMax());
+    }
+
+    @Test
     public void testAcceptMultipleValues() {
         BigIntegerSummaryStatistics stats = new BigIntegerSummaryStatistics();
         stats.accept(new BigInteger("10"));

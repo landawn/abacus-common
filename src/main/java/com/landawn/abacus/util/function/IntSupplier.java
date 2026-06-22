@@ -56,4 +56,18 @@ public interface IntSupplier extends Throwables.IntSupplier<RuntimeException>, j
      */
     @Override
     int getAsInt();
+
+    /**
+     * Returns this object as a {@link Throwables.IntSupplier} view.
+     *
+     * <p>The returned object has the same behavior as this one. This method does not translate
+     * exceptions or make the original implementation capable of throwing new checked exceptions; the
+     * exception type parameter is for target-type compatibility with APIs that accept {@code Throwables.IntSupplier}.
+     *
+     * @param <E> the target exception type for compatibility with {@code Throwables.IntSupplier}
+     * @return a {@link Throwables.IntSupplier} view of this object
+     */
+    default <E extends Throwable> Throwables.IntSupplier<E> toThrowable() {
+        return (Throwables.IntSupplier<E>) this;
+    }
 }

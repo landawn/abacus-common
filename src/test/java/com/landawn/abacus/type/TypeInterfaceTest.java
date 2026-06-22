@@ -9,6 +9,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
 import java.io.IOException;
 import java.sql.CallableStatement;
@@ -578,6 +579,21 @@ public class TypeInterfaceTest extends TestBase {
         assertTrue(stringType.isSerializable());
     }
 
+    // M20: after flipping the interface default to true and dropping the AbstractType override,
+    // scalar/value types still report true and structured types still report false (behavior unchanged).
+    @Test
+    @DisplayName("Test isSerializable() interface default agrees with AbstractType (M20)")
+    public void testIsSerializable_DefaultAgreementM20() {
+        // The interface default is now true; AbstractType no longer overrides it.
+        assertTrue(createType(Integer.class).isSerializable());
+        assertTrue(createType(Boolean.class).isSerializable());
+        assertTrue(createType(java.math.BigDecimal.class).isSerializable());
+
+        // Structured types explicitly override to false and are unaffected by the default change.
+        assertFalse(createType("Map<String, Integer>").isSerializable());
+        assertFalse(createType(com.landawn.abacus.util.Dataset.class).isSerializable());
+    }
+
     @Test
     @DisplayName("Test isObject()")
     public void testIsObject() {
@@ -765,16 +781,18 @@ public class TypeInterfaceTest extends TestBase {
     @Test
     @DisplayName("Test serializeTo()")
     public void testSerializeTo() throws IOException {
-        CharacterWriter writer = createCharacterWriter();
-        JsonXmlSerConfig<?> config = null;
+        assertDoesNotThrow(() -> {
+            CharacterWriter writer = createCharacterWriter();
+            JsonXmlSerConfig<?> config = null;
 
-        stringType.serializeTo(writer, "test", config);
+            stringType.serializeTo(writer, "test", config);
 
-        stringType.serializeTo(writer, null, config);
+            stringType.serializeTo(writer, null, config);
 
-        config = mock(JsonXmlSerConfig.class);
-        when(config.getStringQuotation()).thenReturn('"');
-        stringType.serializeTo(writer, "test", config);
+            config = mock(JsonXmlSerConfig.class);
+            when(config.getStringQuotation()).thenReturn('"');
+            stringType.serializeTo(writer, "test", config);
+        });
     }
 
     @Test

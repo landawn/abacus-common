@@ -327,4 +327,21 @@ public class ImmutableMapTypeTest extends TestBase {
         immutableMapType.appendTo(sb, map);
         org.junit.jupiter.api.Assertions.assertNotEquals(sb.toString(), json);
     }
+
+    // --- regression tests for 2026-06-10 deep-review fixes ---
+
+    @Test
+    public void testValueOfSortedSubtype() {
+        // regression: sorted/navigable subclasses routed to this handler, but valueOf always
+        // produced a plain ImmutableMap -> ClassCastException (and lost sort order)
+        final Type<com.landawn.abacus.util.ImmutableSortedMap<String, Integer>> t = TypeFactory
+                .getType("com.landawn.abacus.util.ImmutableSortedMap<String, Integer>");
+        final com.landawn.abacus.util.ImmutableSortedMap<String, Integer> m = t.valueOf("{\"b\":2,\"a\":1}");
+
+        org.junit.jupiter.api.Assertions.assertEquals(java.util.Arrays.asList("a", "b"), new java.util.ArrayList<>(m.keySet()));
+        org.junit.jupiter.api.Assertions.assertEquals(Integer.valueOf(2), m.get("b"));
+
+        // and the empty form keeps the declared subtype too
+        org.junit.jupiter.api.Assertions.assertTrue(t.valueOf("{}") instanceof com.landawn.abacus.util.ImmutableSortedMap);
+    }
 }

@@ -12,6 +12,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
@@ -677,7 +678,7 @@ public class GenericObjectPoolTest extends TestBase {
         pool.add(p2);
         pool.add(p3);
 
-        pool.evict(2);
+        pool.vacate(2);
 
         int destroyedCount = (p1.isDestroyed() ? 1 : 0) + (p2.isDestroyed() ? 1 : 0) + (p3.isDestroyed() ? 1 : 0);
         assertEquals(1, pool.size());
@@ -747,6 +748,59 @@ public class GenericObjectPoolTest extends TestBase {
     }
 
     @Test
+    public void testEvictWithCreatedTimePolicy() throws InterruptedException {
+        GenericObjectPool<TestPoolable> createdPool = new GenericObjectPool<>(10, 0, EvictionPolicy.CREATED_TIME, true, 0.5f);
+
+        // Distinct creation times (ActivityPrint.createdTime is set at construction).
+        TestPoolable p1 = new TestPoolable("p1");
+        Thread.sleep(10);
+        TestPoolable p2 = new TestPoolable("p2");
+        Thread.sleep(10);
+        TestPoolable p3 = new TestPoolable("p3");
+
+        createdPool.add(p1);
+        createdPool.add(p2);
+        createdPool.add(p3);
+
+        // CREATED_TIME evicts the oldest-created first: vacate(2) drops p1 and p2, keeps p3.
+        createdPool.vacate(2);
+
+        assertEquals(1, createdPool.size());
+        assertTrue(createdPool.contains(p3));
+        assertFalse(createdPool.contains(p1));
+        assertFalse(createdPool.contains(p2));
+        assertTrue(p1.isDestroyed());
+        assertTrue(p2.isDestroyed());
+
+        createdPool.close();
+    }
+
+    @Test
+    public void testEvictWithFifoPolicy() throws InterruptedException {
+        GenericObjectPool<TestPoolable> fifoPool = new GenericObjectPool<>(10, 0, EvictionPolicy.FIFO, true, 0.5f);
+
+        TestPoolable p1 = new TestPoolable("p1");
+        Thread.sleep(10);
+        TestPoolable p2 = new TestPoolable("p2");
+        Thread.sleep(10);
+        TestPoolable p3 = new TestPoolable("p3");
+
+        fifoPool.add(p1);
+        fifoPool.add(p2);
+        fifoPool.add(p3);
+
+        // FIFO evicts in insertion (creation) order: the first-added p1 goes first.
+        fifoPool.vacate(1);
+
+        assertEquals(2, fifoPool.size());
+        assertFalse(fifoPool.contains(p1));
+        assertTrue(fifoPool.contains(p2));
+        assertTrue(fifoPool.contains(p3));
+
+        fifoPool.close();
+    }
+
+    @Test
     public void testClear() {
         List<TestPoolable> poolables = new ArrayList<>();
         for (int i = 0; i < 5; i++) {
@@ -810,6 +864,26 @@ public class GenericObjectPoolTest extends TestBase {
 
         evictPool.close();
         deserialized.close();
+    }
+
+    @Test
+    public void testSerializationWithEvictionEnabledRestoresShutdownHook() throws Exception {
+        GenericObjectPool<TestPoolable> evictPool = new GenericObjectPool<>(10, 100, EvictionPolicy.LAST_ACCESS_TIME);
+
+        GenericObjectPool<TestPoolable> deserialized = deserialize(serialize(evictPool));
+
+        try {
+            assertNotNull(shutdownHookOf(deserialized));
+        } finally {
+            evictPool.close();
+            deserialized.close();
+        }
+    }
+
+    private static Object shutdownHookOf(final Object pool) throws Exception {
+        final Field field = AbstractPool.class.getDeclaredField("shutdownHook");
+        field.setAccessible(true);
+        return field.get(pool);
     }
 
     @Test
@@ -1362,5 +1436,28 @@ public class GenericObjectPoolTest extends TestBase {
         assertTrue(gotIllegalState.get(), "Taker must receive IllegalStateException on close");
         assertEquals(0, pool.missCount.get(), "Closed-pool abort must not be counted as a miss");
         assertEquals(0, pool.hitCount.get(), "Closed-pool abort must not be counted as a hit");
+    }
+
+    // --- regression tests for 2026-06-10 deep-review fixes ---
+
+    @Test
+    public void testAddReChecksExpiryInsideLock() {
+        // regression: time spent in sizeOf() inside the lock could expire the element, which was
+        // then pushed anyway (the timed add variant already re-checked expiry in the lock)
+        GenericObjectPool<TestPoolable> memPool = new GenericObjectPool<>(10, 0, EvictionPolicy.LAST_ACCESS_TIME, 0, e -> {
+            try {
+                Thread.sleep(50);
+            } catch (InterruptedException ie) {
+                Thread.currentThread().interrupt();
+            }
+            return 1L;
+        });
+
+        TestPoolable shortLived = new TestPoolable("x", 10, 10); // expires while sizeOf sleeps
+
+        assertFalse(memPool.add(shortLived));
+        assertEquals(0, memPool.size(), "an element that expired inside the lock must not be pooled");
+
+        memPool.close();
     }
 }

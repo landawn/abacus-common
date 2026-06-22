@@ -179,7 +179,7 @@ import com.landawn.abacus.util.u.OptionalShort;
  *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
- * KryoParser parser = new KryoParser();
+ * KryoParser parser = ParserFactory.createKryoParser();
  *
  * // Serialize to Base64 string
  * MyObject obj = new MyObject();
@@ -223,6 +223,8 @@ public final class KryoParser extends AbstractParser<KryoSerConfig, KryoDeserCon
 
     private final List<Kryo> kryoPool = new ArrayList<>(POOL_SIZE);
 
+    private long globalKryoRegistrationVersion = -1;
+
     /**
      * Package-private constructor. Use {@link ParserFactory#createKryoParser()} to obtain instances.
      */
@@ -263,7 +265,7 @@ public final class KryoParser extends AbstractParser<KryoSerConfig, KryoDeserCon
      * Serializes an object to a file with raw binary content (NOT Base64 encoded).
      *
      * <p>The file will be created if it doesn't exist, or overwritten if it does.
-     * Parent directories must exist or an exception will be thrown. The content
+     * Missing parent directories are created automatically. The content
      * is written in raw binary format without Base64 encoding for optimal performance.</p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -363,10 +365,10 @@ public final class KryoParser extends AbstractParser<KryoSerConfig, KryoDeserCon
      * This is the core serialization method that handles binary output.
      * The method creates and manages a Kryo {@code Output} instance from the pool.
      *
-     * <p><b>Note:</b> This is a protected method intended for internal use and subclass extension.
+     * <p><b>Note:</b> This is a protected method intended for internal use.
      * External callers should use the public {@link #serialize} methods instead.</p>
      *
-     * <p><b>Usage Examples (for subclasses):</b></p>
+     * <p><b>Usage Examples (internal):</b></p>
      * <pre>{@code
      * ByteArrayOutputStream baos = new ByteArrayOutputStream();
      * write(myObject, null, baos);
@@ -377,7 +379,7 @@ public final class KryoParser extends AbstractParser<KryoSerConfig, KryoDeserCon
      * @param config the serialization configuration (may be {@code null} for defaults)
      * @param output the output stream to write to
      */
-    protected void write(final Object obj, final KryoSerConfig config, final OutputStream output) {
+    private void write(final Object obj, final KryoSerConfig config, final OutputStream output) {
         final Output kryoOutput = createOutput();
 
         try {
@@ -398,10 +400,10 @@ public final class KryoParser extends AbstractParser<KryoSerConfig, KryoDeserCon
      * {@code null} or when {@code config} is not {@code null} and {@code config.isWriteClass()} returns {@code true}; otherwise only the object is
      * written (via {@code writeObject}).</p>
      *
-     * <p><b>Note:</b> This is a protected method intended for internal use and subclass extension.
+     * <p><b>Note:</b> This is a protected method intended for internal use.
      * External callers should use the public {@link #serialize} methods instead.</p>
      *
-     * <p><b>Usage Examples (for subclasses):</b></p>
+     * <p><b>Usage Examples (internal):</b></p>
      * <pre>{@code
      * Output out = new Output(new ByteArrayOutputStream());
      * KryoSerConfig config = KryoSerConfig.create().setWriteClass(true);
@@ -412,7 +414,7 @@ public final class KryoParser extends AbstractParser<KryoSerConfig, KryoDeserCon
      * @param config the serialization configuration (may be {@code null} for defaults)
      * @param output the Kryo output to write to
      */
-    protected void write(final Object obj, final KryoSerConfig config, final Output output) {
+    private void write(final Object obj, final KryoSerConfig config, final Output output) {
         check(config);
 
         final Kryo kryo = createKryo();
@@ -661,7 +663,7 @@ public final class KryoParser extends AbstractParser<KryoSerConfig, KryoDeserCon
      * @param targetClass the target class to deserialize to (may be {@code null} if class info is in stream)
      * @return the deserialized object
      */
-    protected <T> T read(final InputStream source, final KryoDeserConfig config, final Class<? extends T> targetClass) {
+    private <T> T read(final InputStream source, final KryoDeserConfig config, final Class<? extends T> targetClass) {
         final Input input = createInput();
 
         try {
@@ -692,7 +694,7 @@ public final class KryoParser extends AbstractParser<KryoSerConfig, KryoDeserCon
      * @return the deserialized object
      */
     @SuppressWarnings("unchecked")
-    protected <T> T read(final Input source, final KryoDeserConfig config, final Class<? extends T> targetClass) {
+    private <T> T read(final Input source, final KryoDeserConfig config, final Class<? extends T> targetClass) {
         check(config);
 
         final Kryo kryo = createKryo();
@@ -1229,6 +1231,14 @@ public final class KryoParser extends AbstractParser<KryoSerConfig, KryoDeserCon
      */
     protected Kryo createKryo() {
         synchronized (kryoPool) {
+            final long currentGlobalRegistrationVersion = ParserFactory._kryoRegistrationVersion.get();
+
+            if (globalKryoRegistrationVersion != currentGlobalRegistrationVersion) {
+                xPool.clear();
+                kryoPool.clear();
+                globalKryoRegistrationVersion = currentGlobalRegistrationVersion;
+            }
+
             if (kryoPool.size() > 0) {
                 return kryoPool.remove(kryoPool.size() - 1);
             }

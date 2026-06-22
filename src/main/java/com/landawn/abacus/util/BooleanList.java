@@ -88,11 +88,11 @@ import com.landawn.abacus.util.stream.Stream;
  * int falseCount = flags.frequency(false);   // Count false values
  * boolean hasTrue = flags.contains(true);    // Check for true values
  *
- * // Set operations for boolean logic
+ * // Multiset-style occurrence operations
  * BooleanList set1 = BooleanList.of(true, false, true);
  * BooleanList set2 = BooleanList.of(false, true, true);
- * BooleanList and = set1.intersection(set2);          // Logical AND operation
- * BooleanList xor = set1.symmetricDifference(set2);   // Logical XOR operation
+ * BooleanList common = set1.intersection(set2);       // multiset intersection (NOT element-wise AND)
+ * BooleanList diff = set1.symmetricDifference(set2);  // multiset symmetric difference (NOT element-wise XOR)
  *
  * // Bulk operations
  * boolean[] array = {true, true, false, true};
@@ -126,16 +126,15 @@ import com.landawn.abacus.util.stream.Stream;
  * <ul>
  *   <li><b>Value Counting:</b> {@code frequency(boolean)} for true/false frequency</li>
  *   <li><b>Value Replacement:</b> {@code replaceAll(boolean, boolean)} for bulk updates</li>
- *   <li><b>Logical Operations:</b> Set operations simulate boolean logic on collections</li>
+ *   <li><b>Occurrence Operations:</b> Set operations work on matched occurrences, not element-wise boolean logic</li>
  *   <li><b>Filtering:</b> {@code removeIf(BooleanPredicate)} for conditional removal</li>
  * </ul>
  *
- * <p><b>Set Operations as Boolean Logic:</b>
+ * <p><b>Multiset-Style Set Operations</b> (these pair up occurrences; they are NOT element-wise boolean logic):
  * <ul>
- *   <li><b>AND Operation:</b> {@code intersection()} finds common true values</li>
- *   <li><b>OR Operation:</b> Union combines all true values from both sets</li>
- *   <li><b>XOR Operation:</b> {@code symmetricDifference()} finds values in either but not both</li>
- *   <li><b>NOT Operation:</b> {@code difference()} finds values in first but not second</li>
+ *   <li><b>{@code intersection()}:</b> occurrences present in both lists</li>
+ *   <li><b>{@code symmetricDifference()}:</b> occurrences present in either list but not matched in the other</li>
+ *   <li><b>{@code difference()}:</b> occurrences in the first list not matched in the second</li>
  * </ul>
  *
  * <p><b>Factory Methods:</b>
@@ -174,7 +173,7 @@ import com.landawn.abacus.util.stream.Stream;
  * <ul>
  *   <li><b>Initial Capacity:</b> Default capacity of 10 elements</li>
  *   <li><b>Growth Strategy:</b> 1.75x expansion when capacity exceeded</li>
- *   <li><b>Manual Control:</b> {@code ensureCapacity()} for performance optimization</li>
+ *   <li><b>Manual Control:</b> specify the initial capacity via the {@code BooleanList(int)} constructor</li>
  *   <li><b>Trimming:</b> {@code trimToSize()} to reduce memory footprint</li>
  * </ul>
  *
@@ -206,7 +205,7 @@ import com.landawn.abacus.util.stream.Stream;
  * <ul>
  *   <li><b>vs List&lt;Boolean&gt;:</b> 16x less memory, significantly faster operations</li>
  *   <li><b>vs boolean[]:</b> Dynamic sizing, rich API, set operations</li>
- *   <li><b>vs BitSet:</b> Similar memory usage, but different API focus and use cases</li>
+ *   <li><b>vs BitSet:</b> {@link java.util.BitSet} is more compact for large bit vectors; {@code BooleanList} focuses on list-style ordering and primitive-list APIs</li>
  *   <li><b>vs Collection&lt;Boolean&gt;:</b> Type safety, performance, boolean-specific operations</li>
  * </ul>
  *
@@ -214,14 +213,14 @@ import com.landawn.abacus.util.stream.Stream;
  * <ul>
  *   <li>Use {@code BooleanList} when working primarily with boolean primitives</li>
  *   <li>Specify initial capacity for known data sizes to avoid resizing</li>
- *   <li>Use set operations for boolean logic rather than manual iteration</li>
+ *   <li>Use set operations for multiset-style occurrence logic; use explicit index-wise loops for element-wise boolean algebra</li>
  *   <li>Convert to boxed collections only when required for API compatibility</li>
  *   <li>Consider {@code BitSet} for very large boolean collections with sparse data</li>
  * </ul>
  *
  * <p><b>Performance Tips:</b>
  * <ul>
- *   <li>Pre-size lists with known capacity using constructor or {@code ensureCapacity()}</li>
+ *   <li>Pre-size lists with known capacity using the {@code BooleanList(int)} constructor</li>
  *   <li>Use bulk operations ({@code addAll}, {@code removeAll}) instead of loops</li>
  *   <li>Prefer {@code contains()} over {@code indexOf() >= 0} for existence checks</li>
  *   <li>Use {@code frequency()} instead of manual counting loops</li>
@@ -245,7 +244,7 @@ import com.landawn.abacus.util.stream.Stream;
  *
  * <p><b>Usage Examples: Boolean Logic Operations</b>
  * <pre>{@code
- * // Simulate logical operations on boolean vectors
+ * // Multiset-style operations on boolean values
  * BooleanList a = BooleanList.of(true, false, true, false);
  * BooleanList b = BooleanList.of(false, true, true, false);
  *
@@ -321,6 +320,7 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      *
      * @param initialCapacity the initial capacity of the list. Must be non-negative.
      * @throws IllegalArgumentException if the specified initial capacity is negative
+     * @throws OutOfMemoryError if the requested array size exceeds the maximum array size
      */
     public BooleanList(final int initialCapacity) {
         N.checkArgNotNegative(initialCapacity, cs.initialCapacity);
@@ -370,6 +370,7 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      *
      * @param a the array to be used as the element array for this list; must not be {@code null}
      * @param size the number of elements in the list. Must be between 0 and the array length (inclusive).
+     * @throws NullPointerException if the specified array is {@code null}
      * @throws IndexOutOfBoundsException if {@code size} is negative or greater than the array length
      */
     public BooleanList(final boolean[] a, final int size) throws IndexOutOfBoundsException {
@@ -538,7 +539,6 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * @deprecated This method exposes the internal array representation and breaks encapsulation.
      *             Use {@code toArray()} instead to get a safe copy of the elements. Direct access to
      *             the internal array can lead to unintended modifications and inconsistent state.
-     *             This method will be removed in a future version.
      */
     @Beta
     @Deprecated
@@ -711,7 +711,7 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
 
         final int numNew = c.size();
 
-        ensureCapacity(size + numNew); // Increments modCount
+        ensureCapacity(size + numNew);
 
         final int numMoved = size - index;
 
@@ -764,7 +764,7 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
 
         final int numNew = a.length;
 
-        ensureCapacity(size + numNew); // Increments modCount
+        ensureCapacity(size + numNew);
 
         final int numMoved = size - index;
 
@@ -920,6 +920,7 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      *
      * @param p the predicate which returns {@code true} for elements to be removed; must not be {@code null}
      * @return {@code true} if any elements were removed; {@code false} otherwise
+     * @throws NullPointerException if {@code p} is {@code null}
      */
     public boolean removeIf(final BooleanPredicate p) {
         N.requireNonNull(p, cs.predicate);
@@ -1252,6 +1253,7 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * @param replacement the BooleanList whose elements will replace the specified range
      * @throws IndexOutOfBoundsException if {@code fromIndex < 0} or {@code toIndex > size()}
      *                                   or {@code fromIndex > toIndex}
+     * @throws OutOfMemoryError if the resulting size would exceed the maximum supported array size
      */
     @Override
     public void replaceRange(final int fromIndex, final int toIndex, final BooleanList replacement) throws IndexOutOfBoundsException {
@@ -1300,6 +1302,7 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * @param replacement the array whose elements will replace the specified range
      * @throws IndexOutOfBoundsException if {@code fromIndex < 0} or {@code toIndex > size()}
      *                                   or {@code fromIndex > toIndex}
+     * @throws OutOfMemoryError if the resulting size would exceed the maximum supported array size
      */
     @Override
     public void replaceRange(final int fromIndex, final int toIndex, final boolean[] replacement) throws IndexOutOfBoundsException {
@@ -1410,6 +1413,7 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * @param predicate the predicate to test each element; must not be {@code null}
      * @param newValue the value to replace matching elements with
      * @return {@code true} if at least one element was replaced; {@code false} otherwise
+     * @throws NullPointerException if {@code predicate} is {@code null}
      */
     public boolean replaceIf(final BooleanPredicate predicate, final boolean newValue) {
         N.requireNonNull(predicate, cs.predicate);
@@ -1716,7 +1720,7 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * <pre>{@code
      * BooleanList list1 = BooleanList.of(true, true, false, true);
      * BooleanList list2 = BooleanList.of(true, false);
-     * BooleanList result = list1.difference(list2);   // returns result is [true, true]
+     * BooleanList result = list1.difference(list2);   // result is [true, true]
      * }</pre>
      *
      * @param b the BooleanList whose elements will be subtracted from this list
@@ -2005,6 +2009,7 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * }</pre>
      *
      * @param action the action to be performed for each element; must not be {@code null}
+     * @throws NullPointerException if {@code action} is {@code null}
      */
     public void forEach(final BooleanConsumer action) {
         N.requireNonNull(action, cs.action);
@@ -2034,7 +2039,7 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      *
      * @param fromIndex the starting index (inclusive) of the range to process
      * @param toIndex the ending index (exclusive) of the range to process, or {@code -1} to process
-     *                from {@code fromIndex} down to index 0 (exclusive) when {@code fromIndex > toIndex}
+     *                from {@code fromIndex} down to and including index 0
      * @param action the action to be performed for each element; must not be {@code null}
      * @throws IndexOutOfBoundsException if the effective range is out of bounds for this list
      *         (i.e., {@code min(fromIndex, max(toIndex,0)) < 0} or
@@ -2266,6 +2271,8 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      */
     @Override
     public void shuffle(final Random rnd) {
+        N.checkArgNotNull(rnd, cs.rnd);
+
         if (size() > 1) {
             N.shuffle(elementData, 0, size, rnd);
         }
@@ -2338,7 +2345,9 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
     public BooleanList copy(final int fromIndex, final int toIndex, final int step) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), Math.max(fromIndex, toIndex));
 
-        return new BooleanList(N.copyOfRange(elementData, fromIndex, toIndex, step));
+        // Clamp a descending start against the logical size (like forEach): N.copyOfRange clamps
+        // against the backing array's length, which may exceed size and expose phantom elements.
+        return new BooleanList(N.copyOfRange(elementData, fromIndex > toIndex ? N.min(size - 1, fromIndex) : fromIndex, toIndex, step));
     }
 
     /**

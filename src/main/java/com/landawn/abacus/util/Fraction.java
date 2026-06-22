@@ -37,7 +37,7 @@ import java.math.BigInteger;
  *   <li><b>Exact Precision:</b> No rounding errors or precision loss in fractional arithmetic</li>
  *   <li><b>Immutable Design:</b> All instances are immutable, ensuring thread safety and preventing accidental modification</li>
  *   <li><b>Integer-Based Storage:</b> Uses {@code int} numerator and denominator for optimal performance</li>
- *   <li><b>Automatic Reduction:</b> Fractions are automatically reduced to lowest terms for canonical representation</li>
+ *   <li><b>Optional Reduction:</b> Factory methods document whether they reduce the fraction; {@link #of(int, int)} preserves the supplied terms</li>
  *   <li><b>Number Integration:</b> Extends {@code Number} for seamless integration with Java's numeric hierarchy</li>
  *   <li><b>Comprehensive Arithmetic:</b> Full support for addition, subtraction, multiplication, and division</li>
  *   <li><b>Multiple Representations:</b> Support for proper fractions, improper fractions, and mixed numbers</li>
@@ -65,7 +65,7 @@ import java.math.BigInteger;
  *   <li><b>Precision Over Performance:</b> Exact fractional representation prioritized over floating-point speed</li>
  *   <li><b>Simplicity Over Complexity:</b> Integer-based implementation for optimal performance in common cases</li>
  *   <li><b>Immutability Over Mutability:</b> Ensures predictable behavior and thread safety</li>
- *   <li><b>Canonical Form:</b> Automatic reduction ensures unique representation for equivalent fractions</li>
+ *   <li><b>Explicit Form:</b> Reduced and unreduced fractions are both supported; use {@link #reduce()} when canonical terms are required</li>
  *   <li><b>Interoperability:</b> Seamless integration with existing Java numeric APIs</li>
  * </ul>
  *
@@ -73,7 +73,7 @@ import java.math.BigInteger;
  * <ul>
  *   <li><b>Numerator:</b> {@code int} representing the fraction's numerator (top number)</li>
  *   <li><b>Denominator:</b> {@code int} representing the fraction's denominator (bottom number), always positive</li>
- *   <li><b>Canonical Form:</b> Fractions are automatically reduced to lowest terms using GCD</li>
+ *   <li><b>Reduction:</b> Fractions may be stored in reduced or unreduced form depending on the factory method or operation used</li>
  *   <li><b>Sign Convention:</b> Negative fractions have negative numerator, positive denominator</li>
  * </ul>
  *
@@ -115,14 +115,14 @@ import java.math.BigInteger;
  * <p><b>Advanced Usage Examples:</b></p>
  * <pre>{@code
  * // Complex fraction arithmetic
- * Fraction recipe = Fraction.of(2, 3);                          // returns 2/3 cup flour
- * Fraction scalingFactor = Fraction.of(3, 2);                   // returns 1.5x recipe
- * Fraction scaledAmount = recipe.multipliedBy(scalingFactor);   // returns 1 cup flour
+ * Fraction recipe = Fraction.of(2, 3);                          // 2/3 cup flour
+ * Fraction scalingFactor = Fraction.of(3, 2);                   // 1.5x scaling factor
+ * Fraction scaledAmount = recipe.multipliedBy(scalingFactor);   // 1 cup flour
  *
  * // Financial calculations (avoiding floating-point errors)
- * Fraction interestRate = Fraction.of(3, 100);                // returns 3% as exact fraction
- * Fraction principal = Fraction.of(1000, 1);                  // returns $1000
- * Fraction interest = principal.multipliedBy(interestRate);   // returns 30/1 (exactly $30)
+ * Fraction interestRate = Fraction.of(3, 100);                // 3% as exact fraction
+ * Fraction principal = Fraction.of(1000, 1);                  // $1000
+ * Fraction interest = principal.multipliedBy(interestRate);   // 30/1 (exactly $30)
  *
  * // Mathematical operations
  * Fraction negative = half.negate();                      // returns -1/2
@@ -134,7 +134,7 @@ import java.math.BigInteger;
  * // Comparisons and ordering
  * int comparison = half.compareTo(twoThirds);   // returns negative (1/2 < 2/3)
  * List<Fraction> fractions = Arrays.asList(half, twoThirds, Fraction.ONE_QUARTER);
- * Collections.sort(fractions);   // returns [1/4, 1/2, 2/3]
+ * Collections.sort(fractions);   // fractions is now [1/4, 1/2, 2/3]
  *
  * // String representations
  * String simple = half.toString();                // returns "1/2"
@@ -143,7 +143,7 @@ import java.math.BigInteger;
  *
  * <p><b>Fraction Creation Methods:</b>
  * <ul>
- *   <li><b>{@code of(int, int)}:</b> Creates fraction from numerator and denominator with automatic reduction</li>
+ *   <li><b>{@code of(int, int)}:</b> Creates fraction from numerator and denominator without reducing (use {@link #reduce()} or {@link #of(int, int, boolean)} for the reduced form)</li>
  *   <li><b>{@code of(int, int, boolean)}:</b> Creates fraction with optional reduction control</li>
  *   <li><b>{@code of(int, int, int)}:</b> Creates fraction from whole number, numerator, and denominator</li>
  *   <li><b>{@code of(double)}:</b> Converts decimal value to closest fraction representation</li>
@@ -191,12 +191,12 @@ import java.math.BigInteger;
  *   <li><b>{@code doubleValue()}:</b> Returns double-precision approximation</li>
  * </ul>
  *
- * <p><b>Canonical Representation:</b>
+ * <p><b>Representation:</b>
  * <ul>
- *   <li><b>Automatic Reduction:</b> All fractions are reduced to lowest terms using GCD</li>
+ *   <li><b>Reduction:</b> {@link #of(int, int)} preserves supplied terms; {@link #of(int, int, boolean)} and {@link #reduce()} can be used when reduced terms are required</li>
  *   <li><b>Positive Denominator:</b> Negative sign is always carried by the numerator</li>
- *   <li><b>Unique Representation:</b> Equivalent fractions have identical internal representation</li>
- *   <li><b>Efficient Comparison:</b> Canonical form enables fast equality testing</li>
+ *   <li><b>Equality Representation:</b> {@link #equals(Object)} compares stored numerator and denominator, so unreduced equivalent fractions are not equal</li>
+ *   <li><b>Efficient Comparison:</b> {@link #compareTo(Fraction)} compares numeric values without requiring both fractions to be reduced</li>
  * </ul>
  *
  * <p><b>Error Handling:</b>
@@ -265,8 +265,8 @@ import java.math.BigInteger;
  *     }
  *
  *     public static void main(String[] args) {
- *         Fraction principal = Fraction.of(1000, 1);   // returns $1000
- *         Fraction rate = Fraction.of(5, 100);   // returns 5% as exact fraction
+ *         Fraction principal = Fraction.of(1000, 1);   // $1000
+ *         Fraction rate = Fraction.of(5, 100);   // 5% as exact fraction
  *         int years = 3;
  *
  *         Fraction finalAmount = calculateCompoundInterest(principal, rate, years);
@@ -1326,7 +1326,7 @@ public final class Fraction extends Number implements Comparable<Fraction>, Immu
     }
 
     /**
-     * Adds this fraction to another fraction and returns the result in reduced form.
+     * Adds this fraction to another fraction and returns the result; the result is in reduced form provided both operands are in reduced form.
      * The algorithm follows Knuth 4.5.1 for efficient computation.
      *
      * <p>The addition is performed using the standard formula: a/b + c/d = (ad + bc) / bd,
@@ -1359,7 +1359,7 @@ public final class Fraction extends Number implements Comparable<Fraction>, Immu
     }
 
     /**
-     * Subtracts another fraction from this fraction and returns the result in reduced form.
+     * Subtracts another fraction from this fraction and returns the result; the result is in reduced form provided both operands are in reduced form.
      *
      * <p>The subtraction is performed using the standard formula: a/b - c/d = (ad - bc) / bd,
      * but optimized to prevent unnecessary overflow and to maintain the result in
@@ -1393,7 +1393,7 @@ public final class Fraction extends Number implements Comparable<Fraction>, Immu
     /**
      * Implement add and subtract using algorithm described in Knuth 4.5.1.
      *
-     * @param fraction the fraction to subtract, must not be {@code null}
+     * @param fraction the fraction to add or subtract, must not be {@code null}
      * @param isAdd {@code true} to add, {@code false} to subtract
      * @return a {@code Fraction} instance with the resulting values
      * @throws IllegalArgumentException if {@code fraction} is {@code null}

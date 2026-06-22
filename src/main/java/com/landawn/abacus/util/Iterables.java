@@ -47,7 +47,6 @@ import java.util.function.ToLongFunction;
 import java.util.function.UnaryOperator;
 
 import com.landawn.abacus.annotation.Beta;
-import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.annotation.SuppressFBWarnings;
 import com.landawn.abacus.util.Range.BoundType;
 import com.landawn.abacus.util.u.Nullable;
@@ -65,12 +64,17 @@ import com.landawn.abacus.util.u.OptionalShort;
  * aggregations, searches, and set/collection manipulations. This class complements {@link com.landawn.abacus.util.N}
  * in the Abacus library, offering null-safe operations with a focus on {@code Optional}/{@code Nullable}-based
  * return types for statistical and searching operations.
+ * A significant number of functions in {@code Iterables} return {@code Optional}, {@code OptionalInt},
+ * related variants, or {@code Nullable}. These functions supplement or extend the functions in {@link N}.
  *
  * <p>The {@code Iterables} class is a final utility class that provides aggregation (min, max, sum,
  * average, median, k-th largest), searching (indexOf, findFirstOrLast, findFirstAndLast), set views
  * (union, intersection, difference, symmetric difference), and combinatorial helpers (power set,
  * permutations, cartesian product). All methods are static, stateless, and thread-safe, and are
  * designed to handle {@code null} and empty inputs gracefully.</p>
+ *
+ * <p>Direct null-selection helpers such as {@link Nulls#firstNonNull(Object...)} and
+ * {@link Nulls#lastNonNull(Object...)} are provided by {@link Nulls}.</p>
  *
  * <p><b>Key Features:</b>
  * <ul>
@@ -86,18 +90,19 @@ import com.landawn.abacus.util.u.OptionalShort;
  * <p><b>Core Categories:</b>
  * <ul>
  *   <li><b>Aggregation:</b> {@code min}, {@code max}, {@code minBy}, {@code maxBy}, {@code minInt}/{@code minLong}/{@code minDouble}
- *       (and {@code max*}), {@code minMax}, {@code median}, {@code kthLargest} for arrays, iterables, and iterators</li>
+ *       (and {@code max*}), {@code minMax} for arrays, iterables, and iterators; {@code median} and {@code kthLargest}
+ *       for arrays and collections only (they need the size up front — use {@code Stream}/{@code Seq} for iterator inputs)</li>
  *   <li><b>Numeric Sums/Averages:</b> {@code sumInt}, {@code sumIntToLong}, {@code sumLong}, {@code sumDouble},
  *       {@code sumBigInteger}, {@code sumBigDecimal}, and corresponding {@code averageInt}/{@code averageLong}/{@code averageDouble}/
- *       {@code averageBigInteger}/{@code averageBigDecimal}</li>
+ *       {@code averageBigInteger}/{@code averageBigDecimal} (no {@code Iterator} overloads — wrap an {@code Iterator}
+ *       in a {@code Stream} for those inputs)</li>
  *   <li><b>Search:</b> {@code indexOf}, {@code lastIndexOf}, {@code findFirstOrLast}, {@code findFirstAndLast},
  *       {@code findFirstOrLastIndex}, {@code findFirstAndLastIndex}</li>
  *   <li><b>Set Operations:</b> {@code union}, {@code intersection}, {@code difference},
  *       {@code symmetricDifference}, {@code subSet}, {@code powerSet}</li>
  *   <li><b>Combinatorial:</b> {@code rollup}, {@code permutations}, {@code orderedPermutations},
  *       {@code cartesianProduct}</li>
- *   <li><b>Mutation Helpers:</b> {@code fill}, {@code copyInto}, {@code copyRange}, {@code asReversed}</li>
- *   <li><b>Null Selection:</b> {@code firstNonNull}, {@code lastNonNull}</li>
+ *   <li><b>Mutation Helpers:</b> {@code fill}, {@code copyInto}, {@code asReversed}</li>
  * </ul>
  *
  * <p><b>Design Philosophy:</b>
@@ -106,8 +111,8 @@ import com.landawn.abacus.util.u.OptionalShort;
  *       over element types to handle empty results gracefully and avoid null pointer exceptions</li>
  *   <li><b>Null Safety:</b> Methods handle {@code null} inputs gracefully, typically returning
  *       an empty {@code Optional}/{@code Nullable} or {@code null} rather than throwing exceptions</li>
- *   <li><b>Read-Only by Default:</b> Most methods only read input parameters; the {@code fill},
- *       {@code copyInto}, and {@code copyRange} methods mutate the supplied destination/array as documented</li>
+ *   <li><b>Read-Only by Default:</b> Most methods only read input parameters; the {@code fill}
+ *       and {@code copyInto} methods mutate the supplied destination/array as documented</li>
  *   <li><b>Exception Minimization:</b> Exceptions are thrown only when method contracts are violated
  *       (e.g., invalid index ranges), not for edge cases like empty collections</li>
  * </ul>
@@ -282,7 +287,8 @@ import com.landawn.abacus.util.u.OptionalShort;
  *
  * <p><b>{@code Iterables} vs. related APIs:</b> {@code Iterables} eagerly computes a result <em>from</em> an
  * existing collection; pick a sibling when you need lazy iteration or a multi-step pipeline instead.</p>
- * <table border="1" summary="When to use Iterables versus Iterators, N, and Stream">
+ * <table border="1">
+ *   <caption>When to use Iterables versus Iterators, N, and Stream</caption>
  *   <tr>
  *     <th>API</th>
  *     <th>Operates on</th>
@@ -299,9 +305,9 @@ import com.landawn.abacus.util.u.OptionalShort;
  *   <tr>
  *     <td>{@link Iterators}</td>
  *     <td>{@link java.util.Iterator}s</td>
- *     <td>new {@code Iterator}s (lazy)</td>
+ *     <td>new {@code Iterator}s (lazy); also a small set of Guava-style eager iterator helpers</td>
  *     <td>you want to compose or adapt iteration ({@code concat}/{@code skip}/{@code limit}/{@code filter}/{@code map})
- *         without materializing</td>
+ *         without materializing — or need a Guava-style eager iterator utility ({@code elementAt}/{@code frequency}/{@code count}/{@code indexOf})</td>
  *   </tr>
  *   <tr>
  *     <td>{@link N}</td>
@@ -334,330 +340,6 @@ public final class Iterables {
 
     private Iterables() {
         // Utility class.
-    }
-
-    // Not sure if it is needed. and also, it is not consistent with the other methods which mostly return Optional.
-    // Moved from Class CommonUtil/N to Iterables to avoid ambiguity with N.copy(Object, Collection<String>).
-    /**
-     * Returns the first {@code non-null} element from the provided two elements.
-     * If both are {@code null}, it returns {@code null}.
-     *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * String result = Iterables.firstNonNull("hello", "world");   // returns "hello"
-     * String result2 = Iterables.firstNonNull(null, "world");     // returns "world"
-     * String result3 = Iterables.firstNonNull(null, null);        // returns null
-     * }</pre>
-     *
-     * @param <T> the type of the elements.
-     * @param a the first element to evaluate.
-     * @param b the second element to evaluate.
-     * @return the first {@code non-null} element, or {@code null} if both are {@code null}.
-     * @see N#firstNonNull(Object, Object)
-     */
-    @MayReturnNull
-    @Beta
-    public static <T> T firstNonNull(final T a, final T b) {
-        return a != null ? a : b;
-    }
-
-    /**
-     * Returns the first {@code non-null} element from the provided three elements.
-     * If all are {@code null}, it returns {@code null}.
-     *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * String result = Iterables.firstNonNull("hello", "world", "test");   // returns "hello"
-     * String result2 = Iterables.firstNonNull(null, "world", "test");     // returns "world"
-     * String result3 = Iterables.firstNonNull(null, null, "test");        // returns "test"
-     * String result4 = Iterables.firstNonNull(null, null, null);          // returns null
-     * }</pre>
-     *
-     * @param <T> the type of the elements.
-     * @param a the first element to evaluate.
-     * @param b the second element to evaluate.
-     * @param c the third element to evaluate.
-     * @return the first {@code non-null} element, or {@code null} if all are {@code null}.
-     * @see N#firstNonNull(Object, Object, Object)
-     */
-    @MayReturnNull
-    @Beta
-    public static <T> T firstNonNull(final T a, final T b, final T c) {
-        return a != null ? a : (b != null ? b : c);
-    }
-
-    /**
-     * Returns the first {@code non-null} element from the provided array of elements.
-     * If the array is {@code null} or empty, or all elements are {@code null}, it returns {@code null}.
-     *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * String result = Iterables.firstNonNull("a", "b", "c");           // returns "a"
-     * String result2 = Iterables.firstNonNull(null, null, "c", "d");   // returns "c"
-     * String result3 = Iterables.firstNonNull(null, null, null);       // returns null
-     * }</pre>
-     *
-     * @param <T> the type of the elements.
-     * @param a the array of elements to evaluate.
-     * @return the first {@code non-null} element, or {@code null} if the array is {@code null} or empty.
-     * @see N#firstNonNull(Object[])
-     */
-    @MayReturnNull
-    @Beta
-    @SafeVarargs
-    public static <T> T firstNonNull(final T... a) {
-        if (N.isEmpty(a)) {
-            return null;
-        }
-
-        for (final T e : a) {
-            if (e != null) {
-                return e;
-            }
-        }
-
-        return null;
-    }
-
-    /**
-     * Returns the first {@code non-null} element from the provided iterable.
-     * If the iterable is {@code null} or empty, or all elements are {@code null}, it returns {@code null}.
-     *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * List<String> list = Arrays.asList(null, null, "first", "second");
-     * String result = Iterables.firstNonNull(list);
-     * // result => "first"
-     *
-     * List<Integer> allNulls = Arrays.asList(null, null, null);
-     * Integer result2 = Iterables.firstNonNull(allNulls);
-     * // result2 => null
-     * }</pre>
-     *
-     * @param <T> the type of the elements.
-     * @param c the iterable of elements to evaluate.
-     * @return the first {@code non-null} element, or {@code null} if the iterable is {@code null} or empty.
-     * @see N#firstNonNull(Iterable)
-     * @see CommonUtil#firstNonNullOrDefault(Iterable, Object)
-     */
-    @MayReturnNull
-    @Beta
-    public static <T> T firstNonNull(final Iterable<? extends T> c) {
-        if (N.isEmpty(c)) {
-            return null;
-        }
-
-        for (final T e : c) {
-            if (e != null) {
-                return e;
-            }
-        }
-
-        return null;
-    }
-
-    /**
-     * Returns the first {@code non-null} element from the provided iterator.
-     * If the iterator is {@code null} or empty, or all elements are {@code null}, it returns {@code null}.
-     *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * List<String> list = Arrays.asList(null, "first", "second");
-     * String result = Iterables.firstNonNull(list.iterator());   // returns "first"
-     * }</pre>
-     *
-     * @param <T> the type of the elements.
-     * @param iter the iterator of elements to evaluate.
-     * @return the first {@code non-null} element, or {@code null} if the iterator is {@code null} or empty.
-     * @see N#firstNonNull(Iterator)
-     * @see CommonUtil#firstNonNullOrDefault(Iterator, Object)
-     */
-    @MayReturnNull
-    @Beta
-    public static <T> T firstNonNull(final Iterator<? extends T> iter) {
-        if (iter == null) {
-            return null;
-        }
-
-        T e = null;
-
-        while (iter.hasNext()) {
-            if ((e = iter.next()) != null) {
-                return e;
-            }
-        }
-
-        return null;
-    }
-
-    /**
-     * Returns the last {@code non-null} element from the provided two elements.
-     * If both are {@code null}, it returns {@code null}.
-     *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * String result = Iterables.lastNonNull("hello", "world");   // returns "world"
-     * String result2 = Iterables.lastNonNull("hello", null);     // returns "hello"
-     * String result3 = Iterables.lastNonNull(null, null);        // returns null
-     * }</pre>
-     *
-     * @param <T> the type of the elements.
-     * @param a the first element to evaluate.
-     * @param b the second element to evaluate.
-     * @return the last {@code non-null} element, or {@code null} if both are {@code null}.
-     * @see N#lastNonNull(Object, Object)
-     */
-    @MayReturnNull
-    @Beta
-    public static <T> T lastNonNull(final T a, final T b) {
-        return b != null ? b : a;
-    }
-
-    /**
-     * Returns the last {@code non-null} element from the provided three elements.
-     * If all are {@code null}, it returns {@code null}.
-     *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * String result = Iterables.lastNonNull("hello", "world", "test");   // returns "test"
-     * String result2 = Iterables.lastNonNull("hello", "world", null);    // returns "world"
-     * String result3 = Iterables.lastNonNull("hello", null, null);       // returns "hello"
-     * String result4 = Iterables.lastNonNull(null, null, null);          // returns null
-     * }</pre>
-     *
-     * @param <T> the type of the elements.
-     * @param a the first element to evaluate.
-     * @param b the second element to evaluate.
-     * @param c the third element to evaluate.
-     * @return the last {@code non-null} element, or {@code null} if all are {@code null}.
-     * @see N#lastNonNull(Object, Object, Object)
-     */
-    @MayReturnNull
-    @Beta
-    public static <T> T lastNonNull(final T a, final T b, final T c) {
-        return c != null ? c : (b != null ? b : a);
-    }
-
-    /**
-     * Returns the last {@code non-null} element from the provided array of elements.
-     * If the array is {@code null} or empty, or all elements are {@code null}, it returns {@code null}.
-     *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * String result = Iterables.lastNonNull("a", "b", "c");       // returns "c"
-     * String result2 = Iterables.lastNonNull("a", "b", null);     // returns "b"
-     * String result3 = Iterables.lastNonNull(null, null, null);   // returns null
-     * }</pre>
-     *
-     * @param <T> the type of the elements.
-     * @param a the array of elements to evaluate.
-     * @return the last {@code non-null} element, or {@code null} if the array is {@code null} or empty.
-     * @see N#lastNonNull(Object[])
-     */
-    @MayReturnNull
-    @Beta
-    @SafeVarargs
-    public static <T> T lastNonNull(final T... a) {
-        if (N.isEmpty(a)) {
-            return null;
-        }
-
-        for (int i = a.length - 1; i >= 0; i--) {
-            if (a[i] != null) {
-                return a[i];
-            }
-        }
-
-        return null;
-    }
-
-    /**
-     * Returns the last {@code non-null} element from the provided iterable.
-     * If the iterable is {@code null} or empty, or all elements are {@code null}, it returns {@code null}.
-     *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * List<String> list = Arrays.asList("first", "second", null);
-     * String result = Iterables.lastNonNull(list);   // returns "second"
-     * List<Integer> allNulls = Arrays.asList(null, null, null);
-     * Integer result2 = Iterables.lastNonNull(allNulls);   // returns null
-     * }</pre>
-     *
-     * @param <T> the type of the elements.
-     * @param c the iterable of elements to evaluate.
-     * @return the last {@code non-null} element, or {@code null} if the iterable is {@code null} or empty.
-     * @see N#lastNonNull(Iterable)
-     * @see CommonUtil#lastNonNullOrDefault(Iterable, Object)
-     */
-    @MayReturnNull
-    @Beta
-    public static <T> T lastNonNull(final Iterable<? extends T> c) {
-        if (N.isEmpty(c)) {
-            return null;
-        }
-
-        if (c instanceof List && c instanceof RandomAccess) {
-            final List<T> list = (List<T>) c;
-
-            for (int i = list.size() - 1; i >= 0; i--) {
-                if (list.get(i) != null) {
-                    return list.get(i);
-                }
-            }
-
-            return null;
-        }
-
-        final Iterator<T> descendingIterator = N.getDescendingIteratorIfPossible(c);
-
-        if (descendingIterator != null) {
-            T next = null;
-
-            while (descendingIterator.hasNext()) {
-                if ((next = descendingIterator.next()) != null) {
-                    return next;
-                }
-            }
-
-            return null;
-        }
-
-        return lastNonNull(c.iterator());
-    }
-
-    /**
-     * Returns the last {@code non-null} element from the provided iterator.
-     * If the iterator is {@code null} or empty, or all elements are {@code null}, it returns {@code null}.
-     *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * List<String> list = Arrays.asList("first", "second", null);
-     * String result = Iterables.lastNonNull(list.iterator());   // returns "second"
-     * }</pre>
-     *
-     * @param <T> the type of the elements.
-     * @param iter the iterator of elements to evaluate.
-     * @return the last {@code non-null} element, or {@code null} if the iterator is {@code null} or empty.
-     * @see N#lastNonNull(Iterator)
-     * @see CommonUtil#lastNonNullOrDefault(Iterator, Object)
-     */
-    @MayReturnNull
-    @Beta
-    public static <T> T lastNonNull(final Iterator<? extends T> iter) {
-        if (iter == null) {
-            return null;
-        }
-
-        T e = null;
-        T lastNonNull = null;
-
-        while (iter.hasNext()) {
-            if ((e = iter.next()) != null) {
-                lastNonNull = e;
-            }
-        }
-
-        return lastNonNull;
     }
 
     /**
@@ -944,7 +626,7 @@ public final class Iterables {
 
     /**
      * Returns the minimum value from the provided array of elements according to the key extracted by the {@code keyExtractor} function.
-     * Null values are considered to be maximum value.
+     * Elements whose extracted key is {@code null} are treated as the maximum; a {@code null} element is passed to {@code keyExtractor} as-is (which may throw).
      * If the array is {@code null} or empty, it returns an empty {@code Nullable}.
      *
      * <p><b>Usage Examples:</b></p>
@@ -966,7 +648,7 @@ public final class Iterables {
 
     /**
      * Returns the minimum value from the provided iterable of elements according to the key extracted by the {@code keyExtractor} function.
-     * Null values are considered to be maximum value.
+     * Elements whose extracted key is {@code null} are treated as the maximum; a {@code null} element is passed to {@code keyExtractor} as-is (which may throw).
      * If the iterable is {@code null} or empty, it returns an empty {@code Nullable}.
      *
      * <p><b>Usage Examples:</b></p>
@@ -988,7 +670,7 @@ public final class Iterables {
 
     /**
      * Returns the minimum value from the provided iterator of elements according to the key extracted by the {@code keyExtractor} function.
-     * Null values are considered to be maximum value.
+     * Elements whose extracted key is {@code null} are treated as the maximum; a {@code null} element is passed to {@code keyExtractor} as-is (which may throw).
      * If the iterator is {@code null} or empty, it returns an empty {@code Nullable}.
      *
      * <p><b>Usage Examples:</b></p>
@@ -1010,6 +692,7 @@ public final class Iterables {
 
     /**
      * Returns the minimum integer value extracted from the elements in the provided array by the input {@code valueExtractor} function.
+     * Elements are passed to {@code valueExtractor} as-is; a {@code null} element is not filtered and may cause a {@code NullPointerException}.
      * If the array is {@code null} or empty, it returns an empty {@code OptionalInt}.
      *
      * <p><b>Usage Examples:</b></p>
@@ -1046,6 +729,7 @@ public final class Iterables {
 
     /**
      * Returns the minimum integer value extracted from the elements in the provided iterable by the input {@code valueExtractor} function.
+     * Elements are passed to {@code valueExtractor} as-is; a {@code null} element is not filtered and may cause a {@code NullPointerException}.
      * If the iterable is {@code null} or empty, it returns an empty {@code OptionalInt}.
      *
      * <p><b>Usage Examples:</b></p>
@@ -1071,6 +755,7 @@ public final class Iterables {
 
     /**
      * Returns the minimum integer value extracted from the elements in the provided iterator by the input {@code valueExtractor} function.
+     * Elements are passed to {@code valueExtractor} as-is; a {@code null} element is not filtered and may cause a {@code NullPointerException}.
      * If the iterator is {@code null} or empty, it returns an empty {@code OptionalInt}.
      *
      * <p><b>Usage Examples:</b></p>
@@ -1107,6 +792,7 @@ public final class Iterables {
 
     /**
      * Returns the minimum long value extracted from the elements in the provided array by the input {@code valueExtractor} function.
+     * Elements are passed to {@code valueExtractor} as-is; a {@code null} element is not filtered and may cause a {@code NullPointerException}.
      * If the array is {@code null} or empty, it returns an empty {@code OptionalLong}.
      *
      * <p><b>Usage Examples:</b></p>
@@ -1143,6 +829,7 @@ public final class Iterables {
 
     /**
      * Returns the minimum long value extracted from the elements in the provided iterable by the input {@code valueExtractor} function.
+     * Elements are passed to {@code valueExtractor} as-is; a {@code null} element is not filtered and may cause a {@code NullPointerException}.
      * If the iterable is {@code null} or empty, it returns an empty {@code OptionalLong}.
      *
      * <p><b>Usage Examples:</b></p>
@@ -1168,6 +855,7 @@ public final class Iterables {
 
     /**
      * Returns the minimum long value extracted from the elements in the provided iterator by the input {@code valueExtractor} function.
+     * Elements are passed to {@code valueExtractor} as-is; a {@code null} element is not filtered and may cause a {@code NullPointerException}.
      * If the iterator is {@code null} or empty, it returns an empty {@code OptionalLong}.
      *
      * <p><b>Usage Examples:</b></p>
@@ -1204,6 +892,7 @@ public final class Iterables {
 
     /**
      * Returns the minimum double value extracted from the elements in the provided array by the input {@code valueExtractor} function.
+     * Elements are passed to {@code valueExtractor} as-is; a {@code null} element is not filtered and may cause a {@code NullPointerException}.
      * If the array is {@code null} or empty, it returns an empty {@code OptionalDouble}.
      *
      * <p><b>Usage Examples:</b></p>
@@ -1240,6 +929,7 @@ public final class Iterables {
 
     /**
      * Returns the minimum double value extracted from the elements in the provided iterable by the input {@code valueExtractor} function.
+     * Elements are passed to {@code valueExtractor} as-is; a {@code null} element is not filtered and may cause a {@code NullPointerException}.
      * If the iterable is {@code null} or empty, it returns an empty {@code OptionalDouble}.
      *
      * <p><b>Usage Examples:</b></p>
@@ -1265,6 +955,7 @@ public final class Iterables {
 
     /**
      * Returns the minimum double value extracted from the elements in the provided iterator by the input {@code valueExtractor} function.
+     * Elements are passed to {@code valueExtractor} as-is; a {@code null} element is not filtered and may cause a {@code NullPointerException}.
      * If the iterator is {@code null} or empty, it returns an empty {@code OptionalDouble}.
      *
      * <p><b>Usage Examples:</b></p>
@@ -1583,7 +1274,7 @@ public final class Iterables {
 
     /**
      * Returns the maximum value from the provided array of elements according to the key extracted by the {@code keyExtractor} function.
-     * Null values are considered to be minimum value.
+     * Elements whose extracted key is {@code null} are treated as the minimum; a {@code null} element is passed to {@code keyExtractor} as-is (which may throw).
      * If the array is {@code null} or empty, it returns an empty {@code Nullable}.
      *
      * <p><b>Usage Examples:</b></p>
@@ -1605,7 +1296,7 @@ public final class Iterables {
 
     /**
      * Returns the maximum value from the provided iterable of elements according to the key extracted by the {@code keyExtractor} function.
-     * Null values are considered to be minimum value.
+     * Elements whose extracted key is {@code null} are treated as the minimum; a {@code null} element is passed to {@code keyExtractor} as-is (which may throw).
      * If the iterable is {@code null} or empty, it returns an empty {@code Nullable}.
      *
      * <p><b>Usage Examples:</b></p>
@@ -1627,7 +1318,7 @@ public final class Iterables {
 
     /**
      * Returns the maximum value from the provided iterator of elements according to the key extracted by the {@code keyExtractor} function.
-     * Null values are considered to be minimum value.
+     * Elements whose extracted key is {@code null} are treated as the minimum; a {@code null} element is passed to {@code keyExtractor} as-is (which may throw).
      * If the iterator is {@code null} or empty, it returns an empty {@code Nullable}.
      *
      * <p><b>Usage Examples:</b></p>
@@ -1649,6 +1340,7 @@ public final class Iterables {
 
     /**
      * Returns the maximum integer value extracted from the elements in the provided array by the input {@code valueExtractor} function.
+     * Elements are passed to {@code valueExtractor} as-is; a {@code null} element is not filtered and may cause a {@code NullPointerException}.
      * If the array is {@code null} or empty, it returns an empty {@code OptionalInt}.
      *
      * <p><b>Usage Examples:</b></p>
@@ -1685,6 +1377,7 @@ public final class Iterables {
 
     /**
      * Returns the maximum integer value extracted from the elements in the provided iterable by the input {@code valueExtractor} function.
+     * Elements are passed to {@code valueExtractor} as-is; a {@code null} element is not filtered and may cause a {@code NullPointerException}.
      * If the iterable is {@code null} or empty, it returns an empty {@code OptionalInt}.
      *
      * <p><b>Usage Examples:</b></p>
@@ -1710,6 +1403,7 @@ public final class Iterables {
 
     /**
      * Returns the maximum integer value extracted from the elements in the provided iterator by the input {@code valueExtractor} function.
+     * Elements are passed to {@code valueExtractor} as-is; a {@code null} element is not filtered and may cause a {@code NullPointerException}.
      * If the iterator is {@code null} or empty, it returns an empty {@code OptionalInt}.
      *
      * <p><b>Usage Examples:</b></p>
@@ -1746,6 +1440,7 @@ public final class Iterables {
 
     /**
      * Returns the maximum long value extracted from the elements in the provided array by the input {@code valueExtractor} function.
+     * Elements are passed to {@code valueExtractor} as-is; a {@code null} element is not filtered and may cause a {@code NullPointerException}.
      * If the array is {@code null} or empty, it returns an empty {@code OptionalLong}.
      *
      * <p><b>Usage Examples:</b></p>
@@ -1782,6 +1477,7 @@ public final class Iterables {
 
     /**
      * Returns the maximum long value extracted from the elements in the provided iterable by the input {@code valueExtractor} function.
+     * Elements are passed to {@code valueExtractor} as-is; a {@code null} element is not filtered and may cause a {@code NullPointerException}.
      * If the iterable is {@code null} or empty, it returns an empty {@code OptionalLong}.
      *
      * <p><b>Usage Examples:</b></p>
@@ -1807,6 +1503,7 @@ public final class Iterables {
 
     /**
      * Returns the maximum long value extracted from the elements in the provided iterator by the input {@code valueExtractor} function.
+     * Elements are passed to {@code valueExtractor} as-is; a {@code null} element is not filtered and may cause a {@code NullPointerException}.
      * If the iterator is {@code null} or empty, it returns an empty {@code OptionalLong}.
      *
      * <p><b>Usage Examples:</b></p>
@@ -1843,6 +1540,7 @@ public final class Iterables {
 
     /**
      * Returns the maximum double value extracted from the elements in the provided array by the input {@code valueExtractor} function.
+     * Elements are passed to {@code valueExtractor} as-is; a {@code null} element is not filtered and may cause a {@code NullPointerException}.
      * If the array is {@code null} or empty, it returns an empty {@code OptionalDouble}.
      *
      * <p><b>Usage Examples:</b></p>
@@ -1879,6 +1577,7 @@ public final class Iterables {
 
     /**
      * Returns the maximum double value extracted from the elements in the provided iterable by the input {@code valueExtractor} function.
+     * Elements are passed to {@code valueExtractor} as-is; a {@code null} element is not filtered and may cause a {@code NullPointerException}.
      * If the iterable is {@code null} or empty, it returns an empty {@code OptionalDouble}.
      *
      * <p><b>Usage Examples:</b></p>
@@ -1904,6 +1603,7 @@ public final class Iterables {
 
     /**
      * Returns the maximum double value extracted from the elements in the provided iterator by the input {@code valueExtractor} function.
+     * Elements are passed to {@code valueExtractor} as-is; a {@code null} element is not filtered and may cause a {@code NullPointerException}.
      * If the iterator is {@code null} or empty, it returns an empty {@code OptionalDouble}.
      *
      * <p><b>Usage Examples:</b></p>
@@ -1942,6 +1642,9 @@ public final class Iterables {
      * Returns the minimum and maximum values from the provided array of elements based on their natural ordering.
      * The result is wrapped in an Optional Pair, where the first element is the minimum and the second is the maximum.
      * If the array is {@code null} or empty, it returns an empty Optional.
+     *
+     * <p>Null values are ignored if the array contains any non-null element. If all elements are {@code null},
+     * both values in the returned pair are {@code null}.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1983,6 +1686,9 @@ public final class Iterables {
      * Returns the minimum and maximum values from the provided iterable of elements based on their natural ordering.
      * The result is wrapped in an Optional Pair, where the first element is the minimum and the second is the maximum.
      * If the iterable is {@code null} or empty, it returns an empty Optional.
+     *
+     * <p>Null values are ignored if the iterable contains any non-null element. If all elements are {@code null},
+     * both values in the returned pair are {@code null}.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -2029,6 +1735,9 @@ public final class Iterables {
      * The result is wrapped in an Optional Pair, where the first element is the minimum and the second is the maximum.
      * If the iterator is {@code null} or empty, it returns an empty Optional.
      *
+     * <p>Null values are ignored if the iterator contains any non-null element. If all elements are {@code null},
+     * both values in the returned pair are {@code null}.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Iterator<Integer> iter = Arrays.asList(5, 2, 8, 1, 9).iterator();
@@ -2072,6 +1781,9 @@ public final class Iterables {
      * an odd number of elements, this is the exact middle element. For an array with an even number of
      * elements, this method returns the lower of the two middle elements (not the average).</p>
      *
+     * <p>Only array and {@code Collection} inputs are supported because the element count is needed up front;
+     * for an {@code Iterable}/{@code Iterator}, wrap it in a {@code Stream}/{@code Seq} instead.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Integer[] oddArray = {1, 5, 2, 8, 3};
@@ -2098,6 +1810,9 @@ public final class Iterables {
      * <p>The median is the middle value when the elements are sorted in ascending order. For an array with
      * an odd number of elements, this is the exact middle element. For an array with an even number of
      * elements, this method returns the lower of the two middle elements (not the average).</p>
+     *
+     * <p>Only array and {@code Collection} inputs are supported because the element count is needed up front;
+     * for an {@code Iterable}/{@code Iterator}, wrap it in a {@code Stream}/{@code Seq} instead.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -2127,6 +1842,9 @@ public final class Iterables {
      * an odd number of elements, this is the exact middle element. For a collection with an even number of
      * elements, this method returns the lower of the two middle elements (not the average).</p>
      *
+     * <p>Only array and {@code Collection} inputs are supported because the element count is needed up front;
+     * for an {@code Iterable}/{@code Iterator}, wrap it in a {@code Stream}/{@code Seq} instead.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<Integer> oddList = Arrays.asList(1, 5, 2, 8, 3);
@@ -2154,6 +1872,9 @@ public final class Iterables {
      * an odd number of elements, this is the exact middle element. For a collection with an even number of
      * elements, this method returns the lower of the two middle elements (not the average).</p>
      *
+     * <p>Only array and {@code Collection} inputs are supported because the element count is needed up front;
+     * for an {@code Iterable}/{@code Iterator}, wrap it in a {@code Stream}/{@code Seq} instead.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<Integer> oddList = Arrays.asList(1, 5, 2, 8, 3);
@@ -2179,6 +1900,9 @@ public final class Iterables {
      * Returns the <i>k-th</i> largest element from the provided array based on their natural ordering.
      * If the array is {@code null}, empty, or its length is less than {@code k}, it returns an empty {@code Nullable}.
      *
+     * <p>Only array and {@code Collection} inputs are supported because the element count is needed up front;
+     * for an {@code Iterable}/{@code Iterator}, wrap it in a {@code Stream}/{@code Seq} instead.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Integer[] array = {3, 1, 4, 1, 5, 9, 2, 6};
@@ -2199,6 +1923,9 @@ public final class Iterables {
     /**
      * Returns the <i>k-th</i> largest element from the provided array according to the provided comparator.
      * If the array is {@code null}, empty, or its length is less than {@code k}, it returns an empty {@code Nullable}.
+     *
+     * <p>Only array and {@code Collection} inputs are supported because the element count is needed up front;
+     * for an {@code Iterable}/{@code Iterator}, wrap it in a {@code Stream}/{@code Seq} instead.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -2222,6 +1949,9 @@ public final class Iterables {
      * Returns the <i>k-th</i> largest element from the provided collection based on their natural ordering.
      * If the collection is {@code null}, empty, or its size is less than {@code k}, it returns an empty {@code Nullable}.
      *
+     * <p>Only array and {@code Collection} inputs are supported because the element count is needed up front;
+     * for an {@code Iterable}/{@code Iterator}, wrap it in a {@code Stream}/{@code Seq} instead.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<Integer> list = Arrays.asList(3, 1, 4, 1, 5, 9, 2, 6);
@@ -2243,6 +1973,9 @@ public final class Iterables {
      * Returns the <i>k-th</i> largest element from the provided collection based on the provided comparator.
      * If the collection is {@code null}, empty, or its size is less than k, a {@code Nullable}.empty() is returned.
      *
+     * <p>Only array and {@code Collection} inputs are supported because the element count is needed up front;
+     * for an {@code Iterable}/{@code Iterator}, wrap it in a {@code Stream}/{@code Seq} instead.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<Integer> list = Arrays.asList(3, 1, 4, 1, 5, 9, 2, 6);
@@ -2263,8 +1996,10 @@ public final class Iterables {
 
     /**
      * Returns the sum of the integer values of the provided numbers as an {@code OptionalInt}.
-     * Each element's value is extracted via {@link Number#intValue()}.
+     * Each element's value is extracted via {@link Number#intValue()}; a {@code null} element is treated as {@code 0}.
      * If the iterable is {@code null} or empty, it returns an empty {@code OptionalInt}.
+     * The sum is accumulated as a {@code long} but must fit in an {@code int};
+     * use {@link #sumIntToLong(Iterable)} if the total may exceed the {@code int} range.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -2275,6 +2010,8 @@ public final class Iterables {
      * @param <T> the type of the elements, which must extend {@code Number}.
      * @param c the iterable of elements to evaluate.
      * @return an {@code OptionalInt} containing the sum if the iterable is not {@code null} or empty, otherwise an empty {@code OptionalInt}.
+     * @throws ArithmeticException if the sum overflows an {@code int}.
+     * @see #sumIntToLong(Iterable)
      * @see N#sumInt(Iterable)
      */
     public static <T extends Number> OptionalInt sumInt(final Iterable<? extends T> c) {
@@ -2284,6 +2021,8 @@ public final class Iterables {
     /**
      * Returns the sum of the integer values extracted from the elements in the provided iterable by the input {@code func} function.
      * If the iterable is {@code null} or empty, it returns an empty {@code OptionalInt}.
+     * The sum is accumulated as a {@code long} but must fit in an {@code int};
+     * use {@link #sumIntToLong(Iterable, ToIntFunction)} if the total may exceed the {@code int} range.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -2295,6 +2034,8 @@ public final class Iterables {
      * @param c the iterable of elements to evaluate.
      * @param func the function to extract an integer value from each element.
      * @return an {@code OptionalInt} containing the sum if the iterable is not {@code null} or empty, otherwise an empty {@code OptionalInt}.
+     * @throws ArithmeticException if the sum overflows an {@code int}.
+     * @see #sumIntToLong(Iterable, ToIntFunction)
      * @see N#sumInt(Iterable, ToIntFunction)
      */
     public static <T> OptionalInt sumInt(final Iterable<? extends T> c, final ToIntFunction<? super T> func) {
@@ -2305,18 +2046,19 @@ public final class Iterables {
         }
 
         // Iterate the same iterator we already advanced; calling c.iterator() again breaks
-        // single-use iterables (e.g., stream::iterator).
-        int sum = 0;
+        // single-use iterables (e.g., stream::iterator). Accumulate in long and check overflow
+        // like N.sumInt: a silent int wrap-around returns a value wrong in sign and magnitude.
+        long sum = 0;
         do {
             sum += func.applyAsInt(iter.next());
         } while (iter.hasNext());
-        return OptionalInt.of(sum);
+        return OptionalInt.of(Numbers.toIntExact(sum));
     }
 
     /**
      * Returns the sum of the integer values of the provided numbers as an {@code OptionalLong},
      * accumulating the result as a {@code long} to avoid overflow when summing many large {@code int} values.
-     * Each element's value is extracted via {@link Number#intValue()}.
+     * Each element's value is extracted via {@link Number#intValue()}; a {@code null} element is treated as {@code 0}.
      * If the iterable is {@code null} or empty, it returns an empty {@code OptionalLong}.
      *
      * <p><b>Usage Examples:</b></p>
@@ -2367,7 +2109,7 @@ public final class Iterables {
 
     /**
      * Returns the sum of the long values of the provided numbers as an {@code OptionalLong}.
-     * Each element's value is extracted via {@link Number#longValue()}.
+     * Each element's value is extracted via {@link Number#longValue()}; a {@code null} element is treated as {@code 0}.
      * If the iterable is {@code null} or empty, it returns an empty {@code OptionalLong}.
      *
      * <p><b>Usage Examples:</b></p>
@@ -2417,7 +2159,7 @@ public final class Iterables {
 
     /**
      * Returns the sum of the double values of the provided numbers as an {@code OptionalDouble}.
-     * Each element's value is extracted via {@link Number#doubleValue()}.
+     * Each element's value is extracted via {@link Number#doubleValue()}; a {@code null} element is treated as {@code 0}.
      * If the iterable is {@code null} or empty, it returns an empty {@code OptionalDouble}.
      *
      * <p><b>Usage Examples:</b></p>
@@ -2458,15 +2200,20 @@ public final class Iterables {
             return OptionalDouble.empty();
         }
 
-        double sum = 0d;
+        // Kahan compensated summation, matching N.sumDouble and this class's own averageDouble
+        // (naive accumulation would make sumDouble disagree with averageDouble * count).
+        final KahanSummation summation = new KahanSummation();
+
         do {
-            sum += func.applyAsDouble(iter.next());
+            summation.add(func.applyAsDouble(iter.next()));
         } while (iter.hasNext());
-        return OptionalDouble.of(sum);
+
+        return OptionalDouble.of(summation.sum());
     }
 
     /**
      * Returns the sum of the BigInteger values in the provided iterable.
+     * {@code null} elements are skipped (treated as zero), the same effective behavior as the {@code sumInt}/{@code sumLong}/{@code sumDouble} variants, which treat a {@code null} element as {@code 0}.
      * If the iterable is {@code null} or empty, it returns an empty {@code Optional<BigInteger>}.
      *
      * <p><b>Usage Examples:</b></p>
@@ -2519,6 +2266,7 @@ public final class Iterables {
 
     /**
      * Returns the sum of the BigDecimal values in the provided iterable.
+     * {@code null} elements are skipped (treated as zero), the same effective behavior as the {@code sumInt}/{@code sumLong}/{@code sumDouble} variants, which treat a {@code null} element as {@code 0}.
      * If the iterable is {@code null} or empty, it returns an empty {@code Optional<BigDecimal>}.
      *
      * <p><b>Usage Examples:</b></p>
@@ -2571,7 +2319,7 @@ public final class Iterables {
 
     /**
      * Returns the average of the integer values of the provided numbers as an {@code OptionalDouble}.
-     * Each element's value is extracted via {@link Number#intValue()}.
+     * Each element's value is extracted via {@link Number#intValue()}; a {@code null} element is treated as {@code 0}.
      * If the array is {@code null} or empty, it returns an empty {@code OptionalDouble}.
      *
      * <p><b>Usage Examples:</b></p>
@@ -2591,6 +2339,7 @@ public final class Iterables {
 
     /**
      * Returns the average of the integer values of the provided numbers in the specified range as an {@code OptionalDouble}.
+     * A {@code null} element is treated as {@code 0} and counted toward the average.
      * If the specified range is empty ({@code fromIndex == toIndex}), it returns an empty {@code OptionalDouble}.
      *
      * <p><b>Usage Examples:</b></p>
@@ -2672,7 +2421,7 @@ public final class Iterables {
 
     /**
      * Returns the average of the integer values of the provided numbers in the specified range as an {@code OptionalDouble}.
-     * Each element's value is extracted via {@link Number#intValue()}.
+     * Each element's value is extracted via {@link Number#intValue()}; a {@code null} element is treated as {@code 0}.
      * If the specified range is empty ({@code fromIndex == toIndex}), it returns an empty {@code OptionalDouble}.
      *
      * <p><b>Usage Examples:</b></p>
@@ -2730,6 +2479,8 @@ public final class Iterables {
 
     /**
      * Returns the average of the integer values of the provided numbers as an {@code OptionalDouble}.
+     * A {@code null} element is treated as {@code 0} and counted toward the average (unlike the
+     * {@code averageBigInteger}/{@code averageBigDecimal} variants, which skip {@code null} values).
      * If the iterable is {@code null} or empty, it returns an empty {@code OptionalDouble}.
      *
      * <p><b>Usage Examples:</b></p>
@@ -2793,6 +2544,7 @@ public final class Iterables {
 
     /**
      * Returns the average of the long values of the provided numbers as an {@code OptionalDouble}.
+     * A {@code null} element is treated as {@code 0} and counted toward the average.
      * If the array is {@code null} or empty, it returns an empty {@code OptionalDouble}.
      *
      * <p><b>Usage Examples:</b></p>
@@ -2814,6 +2566,7 @@ public final class Iterables {
 
     /**
      * Returns the average of the long values of the provided numbers in the specified range as an {@code OptionalDouble}.
+     * A {@code null} element is treated as {@code 0} and counted toward the average.
      * If the specified range is empty ({@code fromIndex == toIndex}), it returns an empty {@code OptionalDouble}.
      *
      * <p><b>Usage Examples:</b></p>
@@ -2894,6 +2647,7 @@ public final class Iterables {
 
     /**
      * Returns the average of the long values of the provided numbers in the specified range as an {@code OptionalDouble}.
+     * A {@code null} element is treated as {@code 0} and counted toward the average.
      * If the specified range is empty ({@code fromIndex == toIndex}), it returns an empty {@code OptionalDouble}.
      *
      * <p><b>Usage Examples:</b></p>
@@ -2950,6 +2704,8 @@ public final class Iterables {
 
     /**
      * Returns the average of the long values of the provided numbers as an {@code OptionalDouble}.
+     * A {@code null} element is treated as {@code 0} and counted toward the average (unlike the
+     * {@code averageBigInteger}/{@code averageBigDecimal} variants, which skip {@code null} values).
      * If the iterable is {@code null} or empty, it returns an empty {@code OptionalDouble}.
      *
      * <p><b>Usage Examples:</b></p>
@@ -2998,18 +2754,19 @@ public final class Iterables {
 
         // Iterate the same iterator we already advanced; calling c.iterator() again breaks
         // single-use iterables (e.g., stream::iterator).
-        long sum = 0;
+        double avg = 0;
         long count = 0;
         do {
-            sum += func.applyAsLong(iter.next());
             count++;
+            avg += (func.applyAsLong(iter.next()) - avg) / count;
         } while (iter.hasNext());
 
-        return OptionalDouble.of(((double) sum) / count);
+        return OptionalDouble.of(avg);
     }
 
     /**
      * Returns the average of the double values of the provided numbers as an {@code OptionalDouble}.
+     * A {@code null} element is treated as {@code 0} and counted toward the average.
      * If the array is {@code null} or empty, it returns an empty {@code OptionalDouble}.
      *
      * <p><b>Usage Examples:</b></p>
@@ -3031,6 +2788,7 @@ public final class Iterables {
 
     /**
      * Returns the average of the double values of the provided numbers in the specified range as an {@code OptionalDouble}.
+     * A {@code null} element is treated as {@code 0} and counted toward the average.
      * If the specified range is empty ({@code fromIndex == toIndex}), it returns an empty {@code OptionalDouble}.
      *
      * <p><b>Usage Examples:</b></p>
@@ -3118,6 +2876,7 @@ public final class Iterables {
 
     /**
      * Returns the average of the double values of the provided numbers in the specified range as an {@code OptionalDouble}.
+     * A {@code null} element is treated as {@code 0} and counted toward the average.
      * If the specified range is empty ({@code fromIndex == toIndex}), it returns an empty {@code OptionalDouble}.
      *
      * <p><b>Usage Examples:</b></p>
@@ -3199,6 +2958,8 @@ public final class Iterables {
 
     /**
      * Returns the average of the double values of the provided numbers as an {@code OptionalDouble}.
+     * A {@code null} element is treated as {@code 0} and counted toward the average (unlike the
+     * {@code averageBigInteger}/{@code averageBigDecimal} variants, which skip {@code null} values).
      * If the iterable is {@code null} or empty, it returns an empty {@code OptionalDouble}.
      *
      * <p><b>Usage Examples:</b></p>
@@ -3207,7 +2968,7 @@ public final class Iterables {
      * OptionalDouble avg = Iterables.averageDouble(numbers);   // OptionalDouble[3.0]
      *
      * List<Float> floats = Arrays.asList(1.1f, 2.2f, 3.3f);
-     * OptionalDouble avg2 = Iterables.averageDouble(floats);   // OptionalDouble[2.1999999999999997] (float->double widening)
+     * OptionalDouble avg2 = Iterables.averageDouble(floats);   // OptionalDouble[2.200000007947286]
      * }</pre>
      *
      * @param <T> the type of the elements, which must extend {@code Number}.
@@ -3256,8 +3017,9 @@ public final class Iterables {
      * Returns the average of the BigInteger values of the provided numbers as an {@code Optional<BigDecimal>}.
      * The average is computed with {@link java.math.MathContext#DECIMAL128} precision.
      * {@code null} elements returned by the extractor are skipped and not counted in the divisor.
-     * If all elements yield {@code null}, returns {@code Optional[0]}.
-     * If the iterable is {@code null} or empty, it returns an empty {@code Optional<BigDecimal>}.
+     * <p>The two "no values to average" cases are encoded differently: a {@code null} or empty iterable
+     * yields {@code Optional.empty()}, whereas a non-empty iterable whose values are all {@code null}
+     * (so the divisor would be {@code 0}) yields {@code Optional[0]}.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -3279,8 +3041,9 @@ public final class Iterables {
      * Returns the average of the BigInteger values extracted from the elements in the provided iterable by the input {@code func} function as an {@code Optional<BigDecimal>}.
      * The average is computed with {@link java.math.MathContext#DECIMAL128} precision.
      * {@code null} values returned by the extractor are skipped and not counted in the divisor.
-     * If all elements yield {@code null}, returns {@code Optional[0]}.
-     * If the iterable is {@code null} or empty, it returns an empty {@code Optional<BigDecimal>}.
+     * <p>The two "no values to average" cases are encoded differently: a {@code null} or empty iterable
+     * yields {@code Optional.empty()}, whereas a non-empty iterable whose values are all {@code null}
+     * (so the divisor would be {@code 0}) yields {@code Optional[0]}.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -3322,8 +3085,9 @@ public final class Iterables {
      * Returns the average of the BigDecimal values of the provided numbers as an {@code Optional<BigDecimal>}.
      * The average is computed with {@link java.math.MathContext#DECIMAL128} precision.
      * {@code null} elements are skipped and not counted in the divisor.
-     * If all elements are {@code null}, returns {@code Optional[0]}.
-     * If the iterable is {@code null} or empty, it returns an empty {@code Optional<BigDecimal>}.
+     * <p>The two "no values to average" cases are encoded differently: a {@code null} or empty iterable
+     * yields {@code Optional.empty()}, whereas a non-empty iterable whose values are all {@code null}
+     * (so the divisor would be {@code 0}) yields {@code Optional[0]}.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -3345,8 +3109,9 @@ public final class Iterables {
      * Returns the average of the BigDecimal values extracted from the elements in the provided iterable by the input {@code func} function as an {@code Optional<BigDecimal>}.
      * The average is computed with {@link java.math.MathContext#DECIMAL128} precision.
      * {@code null} values returned by the extractor are skipped and not counted in the divisor.
-     * If all elements yield {@code null}, returns {@code Optional[0]}.
-     * If the iterable is {@code null} or empty, it returns an empty {@code Optional<BigDecimal>}.
+     * <p>The two "no values to average" cases are encoded differently: a {@code null} or empty iterable
+     * yields {@code Optional.empty()}, whereas a non-empty iterable whose values are all {@code null}
+     * (so the divisor would be {@code 0}) yields {@code Optional[0]}.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -3387,6 +3152,11 @@ public final class Iterables {
      * Returns the index of the first occurrence of the specified value in the provided array as an {@code OptionalInt}.
      * If the array is {@code null} or doesn't contain the specified value, it returns an empty {@code OptionalInt}.
      *
+     * <p>Note: this is a convenience delegate to {@link Index#of(Object[], Object)}; {@link Index} is the canonical home of
+     * index-search operations and also offers {@code fromIndex}, primitive-array and {@code Iterator} variants.
+     * The same-named {@link N#indexOf(Object[], Object)} returns a primitive {@code int} with {@code -1} as the not-found
+     * sentinel, and {@link Iterators#indexOf(Iterator, Object)} returns a {@code long} sentinel.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String[] array = {"apple", "banana", "cherry", "banana"};
@@ -3401,6 +3171,7 @@ public final class Iterables {
      * @param valueToFind the value to find in the array.
      * @return an {@code OptionalInt} containing the index of the first occurrence of the specified value if found, otherwise an empty {@code OptionalInt}.
      * @see N#indexOf(Object[], Object)
+     * @see Iterators#indexOf(Iterator, Object)
      * @see Index#of(Object[], Object)
      */
     public static OptionalInt indexOf(final Object[] a, final Object valueToFind) {
@@ -3410,6 +3181,11 @@ public final class Iterables {
     /**
      * Returns the index of the first occurrence of the specified value in the provided collection as an {@code OptionalInt}.
      * If the collection is {@code null} or doesn't contain the specified value, it returns an empty {@code OptionalInt}.
+     *
+     * <p>Note: this is a convenience delegate to {@link Index#of(Collection, Object)}; {@link Index} is the canonical home of
+     * index-search operations and also offers {@code fromIndex}, primitive-array and {@code Iterator} variants.
+     * The same-named {@link N#indexOf(Collection, Object)} returns a primitive {@code int} with {@code -1} as the not-found
+     * sentinel, and {@link Iterators#indexOf(Iterator, Object)} returns a {@code long} sentinel.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -3425,6 +3201,7 @@ public final class Iterables {
      * @param valueToFind the value to find in the collection.
      * @return an {@code OptionalInt} containing the index of the first occurrence of the specified value if found, otherwise an empty {@code OptionalInt}.
      * @see N#indexOf(Collection, Object)
+     * @see Iterators#indexOf(Iterator, Object)
      * @see Index#of(Collection, Object)
      */
     public static OptionalInt indexOf(final Collection<?> c, final Object valueToFind) {
@@ -3434,6 +3211,10 @@ public final class Iterables {
     /**
      * Returns the index of the last occurrence of the specified value in the provided array as an {@code OptionalInt}.
      * If the array is {@code null} or doesn't contain the specified value, it returns an empty {@code OptionalInt}.
+     *
+     * <p>Note: this is a convenience delegate to {@link Index#last(Object[], Object)}; {@link Index} is the canonical home of
+     * index-search operations and also offers {@code startIndexFromBack} and primitive-array variants. The same-named
+     * {@link N#lastIndexOf(Object[], Object)} returns a primitive {@code int} with {@code -1} as the not-found sentinel.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -3458,6 +3239,10 @@ public final class Iterables {
     /**
      * Returns the index of the last occurrence of the specified value in the provided collection as an {@code OptionalInt}.
      * If the collection is {@code null} or doesn't contain the specified value, it returns an empty {@code OptionalInt}.
+     *
+     * <p>Note: this is a convenience delegate to {@link Index#last(Collection, Object)}; {@link Index} is the canonical home of
+     * index-search operations and also offers {@code startIndexFromBack} and primitive-array variants. The same-named
+     * {@link N#lastIndexOf(Collection, Object)} returns a primitive {@code int} with {@code -1} as the not-found sentinel.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -3861,6 +3646,9 @@ public final class Iterables {
      * Fills every slot of the specified array with values provided by the specified supplier.
      * If the array is {@code null} or empty, this method does nothing.
      *
+     * <p>Note: these array-filling overloads live in {@code Iterables} rather than {@code N} because adding them to {@code N}
+     * would make calls ambiguous with {@link N#fill(Object[], Object)} whenever the element type is itself a {@code Supplier}.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String[] a = new String[3];
@@ -3961,7 +3749,7 @@ public final class Iterables {
      * @see N#setAll(List, java.util.function.IntFunction)
      * @see N#replaceAll(List, java.util.function.UnaryOperator)
      * @see N#padLeft(List, int, Object)
-     * @see N#padRight(Collection, int, Object)
+     * @see N#padRight(List, int, Object)
      * @see Fn#s(com.landawn.abacus.util.function.Supplier)
      * @see Fn#s(Object, com.landawn.abacus.util.function.Function)
      * @see Suppliers#of(com.landawn.abacus.util.function.Supplier)
@@ -3977,6 +3765,8 @@ public final class Iterables {
     /**
      * Fills the specified list with values provided by the specified supplier from the specified start index to the specified end index.
      * The list will be extended automatically if the size of the list is less than the specified toIndex.
+     * Only the slots in {@code [fromIndex, toIndex)} are populated from the supplier; when {@code fromIndex > list.size()}
+     * the gap between the current size and {@code fromIndex} is padded with {@code null}, consistent with {@link N#fill(List, int, int, Object)}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -3986,7 +3776,11 @@ public final class Iterables {
      *
      * List<Integer> numbers = new ArrayList<>(Arrays.asList(0, 0, 0));
      * Iterables.fill(numbers, 2, 5, () -> 99);
-     * // numbers => [0, 0, 99, 99, 99] (list extended automatically)
+     * // numbers => [0, 0, 99, 99, 99] (index 2 overwritten, then list extended to toIndex)
+     *
+     * List<Integer> withGap = new ArrayList<>(Arrays.asList(1, 2));
+     * Iterables.fill(withGap, 3, 5, () -> 9);
+     * // withGap => [1, 2, null, 9, 9] (gap [2, 3) padded with null)
      * }</pre>
      *
      * @param <T> the type of elements in the list.
@@ -4001,7 +3795,7 @@ public final class Iterables {
      * @see N#setAll(List, java.util.function.IntFunction)
      * @see N#replaceAll(List, java.util.function.UnaryOperator)
      * @see N#padLeft(List, int, Object)
-     * @see N#padRight(Collection, int, Object)
+     * @see N#padRight(List, int, Object)
      * @see Fn#s(com.landawn.abacus.util.function.Supplier)
      * @see Fn#s(Object, com.landawn.abacus.util.function.Function)
      * @see Suppliers#of(com.landawn.abacus.util.function.Supplier)
@@ -4021,11 +3815,10 @@ public final class Iterables {
                     list.set(i, supplier.get());
                 }
             } else {
-                // Pad the [size, fromIndex) gap with supplier values too. Inserting hard-coded
-                // nulls for that range silently corrupts collections that don't tolerate null,
-                // and surprises callers expecting "all newly-extended slots come from supplier".
+                // Pad the [size, fromIndex) gap with null to align with N.fill(List, int, int, Object);
+                // only the [fromIndex, toIndex) slots are populated from the supplier.
                 for (int i = size; i < fromIndex; i++) {
-                    list.add(supplier.get());
+                    list.add(null);
                 }
             }
 
@@ -4058,6 +3851,10 @@ public final class Iterables {
      *
      * <p>This method runs in linear time.</p>
      *
+     * <p><b>Note on argument order:</b> unlike {@link java.util.Collections#copy(List, List)},
+     * which takes the destination first ({@code copy(dest, src)}), this method takes the
+     * <i>source</i> first ({@code copyInto(src, dest)}), matching the "copy src into dest" reading.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<String> src = Arrays.asList("a", "b", "c");
@@ -4075,9 +3872,10 @@ public final class Iterables {
      *
      * @param <T> the type of the elements.
      * @param src the source list from which elements are to be copied. May be {@code null} or empty; in that case the method does nothing.
-     * @param dest the destination list into which elements are to be copied.
+     * @param dest the destination list into which elements are to be copied. Must not be {@code null} unless {@code src} is {@code null} or empty (in which case it is never accessed).
+     * @throws NullPointerException if {@code dest} is {@code null} and {@code src} is non-empty.
      * @throws IndexOutOfBoundsException if {@code dest.size() < src.size()} (the source does not fit in the destination).
-     * @see #copyRange(List, int, List, int, int)
+     * @see #copyInto(List, int, List, int, int)
      * @see java.util.Collections#copy(List, List)
      * @see N#copy(Object[], int, Object[], int, int)
      */
@@ -4102,12 +3900,12 @@ public final class Iterables {
      * <pre>{@code
      * List<String> src = Arrays.asList("a", "b", "c", "d", "e");
      * List<String> dest = new ArrayList<>(Arrays.asList("x", "y", "z", "w", "v"));
-     * Iterables.copyRange(src, 1, dest, 2, 3);
+     * Iterables.copyInto(src, 1, dest, 2, 3);
      * // dest => ["x", "y", "b", "c", "d"]
      *
      * List<Integer> numbers = Arrays.asList(10, 20, 30, 40);
      * List<Integer> target = new ArrayList<>(Arrays.asList(0, 0, 0, 0, 0));
-     * Iterables.copyRange(numbers, 0, target, 1, 2);
+     * Iterables.copyInto(numbers, 0, target, 1, 2);
      * // target => [0, 10, 20, 0, 0]
      * }</pre>
      *
@@ -4122,7 +3920,7 @@ public final class Iterables {
      * @see N#copy(Object[], int, Object[], int, int)
      * @see Collections#copy(List, List)
      */
-    public static <T> void copyRange(final List<? extends T> src, final int srcPos, final List<? super T> dest, final int destPos, final int length)
+    public static <T> void copyInto(final List<? extends T> src, final int srcPos, final List<? super T> dest, final int destPos, final int length)
             throws IndexOutOfBoundsException {
         N.checkFromToIndex(srcPos, srcPos + length, N.size(src));
         N.checkFromToIndex(destPos, destPos + length, N.size(dest));
@@ -4362,10 +4160,10 @@ public final class Iterables {
 
     /**
      * An abstract immutable set view that provides additional utility methods.
-     * @param <E> the type of the elements.
+     * @param <T> the type of the elements.
      */
-    public abstract static class SetView<E> extends ImmutableSet<E> {
-        SetView(final Set<? extends E> set) {
+    public abstract static class SetView<T> extends ImmutableSet<T> {
+        SetView(final Set<? extends T> set) {
             super(set);
         }
 
@@ -4385,7 +4183,7 @@ public final class Iterables {
          * @param set the set to copy elements into.
          * @return the set after copying elements into it.
          */
-        public <S extends Set<? super E>> S copyInto(final S set) {
+        public <S extends Set<? super T>> S copyInto(final S set) {
             set.addAll(this);
             return set;
         }
@@ -4414,16 +4212,16 @@ public final class Iterables {
      * // allWords contains: ["hello", "world", "java"]
      * }</pre>
      *
-     * @param <E> the type of the elements.
+     * @param <T> the type of the elements.
      * @param set1 the first set. May be {@code null} or empty.
      * @param set2 the second set. May be {@code null} or empty.
      * @return an unmodifiable {@code SetView} containing all elements from both sets; never {@code null}.
      */
-    public static <E> SetView<E> union(final Set<? extends E> set1, final Set<? extends E> set2) {
+    public static <T> SetView<T> union(final Set<? extends T> set1, final Set<? extends T> set2) {
         // N.checkArgNotNull(set1, "set1");
         // N.checkArgNotNull(set2, "set2");
 
-        Set<? extends E> tmp = null;
+        Set<? extends T> tmp = null;
 
         if (N.isEmpty(set1)) {
             tmp = N.isEmpty(set2) ? N.emptySet() : set2;
@@ -4432,13 +4230,13 @@ public final class Iterables {
         } else {
             tmp = new AbstractSet<>() {
                 @Override
-                public ObjIterator<E> iterator() {
+                public ObjIterator<T> iterator() {
                     return new ObjIterator<>() {
-                        private final Iterator<? extends E> iter1 = set1.iterator();
-                        private final Iterator<? extends E> iter2 = set2.iterator();
-                        private final E NONE = (E) N.NULL_SENTINEL; //NOSONAR
-                        private E next = NONE;
-                        private E tmp = null;
+                        private final Iterator<? extends T> iter1 = set1.iterator();
+                        private final Iterator<? extends T> iter2 = set2.iterator();
+                        private final T NONE = (T) N.NULL_SENTINEL; //NOSONAR
+                        private T next = NONE;
+                        private T tmp = null;
 
                         @Override
                         public boolean hasNext() {
@@ -4460,7 +4258,7 @@ public final class Iterables {
                         }
 
                         @Override
-                        public E next() {
+                        public T next() {
                             if (!hasNext()) {
                                 throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                             }
@@ -4485,7 +4283,7 @@ public final class Iterables {
                 public int size() {
                     int size = set1.size();
 
-                    for (final E e : set2) {
+                    for (final T e : set2) {
                         if (!set1.contains(e)) {
                             size++;
                         }
@@ -4503,9 +4301,16 @@ public final class Iterables {
 
         return new SetView<>(tmp) {
             @Override
-            public <S extends Set<? super E>> S copyInto(final S set) {
-                set.addAll(set1);
-                set.addAll(set2);
+            public <S extends Set<? super T>> S copyInto(final S set) {
+                // Both inputs are documented as "may be null".
+                if (N.notEmpty(set1)) {
+                    set.addAll(set1);
+                }
+
+                if (N.notEmpty(set2)) {
+                    set.addAll(set2);
+                }
+
                 return set;
             }
         };
@@ -4543,7 +4348,7 @@ public final class Iterables {
      * Iterables.intersection((Set<Integer>) null, set2).size();      // 0 (null set1)
      * }</pre>
      *
-     * @param <E> the type of the elements.
+     * @param <T> the type of the elements.
      * @param set1 the first set, whose iteration order determines the iteration order of the view. May be {@code null} or empty.
      * @param set2 the second set used to filter elements of {@code set1}. May be {@code null} or empty.
      * @return an unmodifiable {@code SetView} containing elements common to both sets; never {@code null}.
@@ -4551,24 +4356,25 @@ public final class Iterables {
      * @see N#intersection(Collection, Collection)
      * @see N#commonSet(Collection, Collection)
      * @see Collection#retainAll(Collection)
+     * @see Maps#intersection(Map, Map)
      */
-    public static <E> SetView<E> intersection(final Set<E> set1, final Set<?> set2) {
+    public static <T> SetView<T> intersection(final Set<T> set1, final Set<?> set2) {
         // N.checkArgNotNull(set1, "set1");
         // N.checkArgNotNull(set2, "set2");
 
-        Set<E> tmp = null;
+        Set<T> tmp = null;
 
         if (N.isEmpty(set1) || N.isEmpty(set2)) {
             tmp = N.emptySet();
         } else {
             tmp = new AbstractSet<>() {
                 @Override
-                public ObjIterator<E> iterator() {
+                public ObjIterator<T> iterator() {
                     return new ObjIterator<>() {
-                        private final Iterator<E> iter1 = set1.iterator();
-                        private final E NONE = (E) N.NULL_SENTINEL; //NOSONAR
-                        private E next = NONE;
-                        private E tmp = null;
+                        private final Iterator<T> iter1 = set1.iterator();
+                        private final T NONE = (T) N.NULL_SENTINEL; //NOSONAR
+                        private T next = NONE;
+                        private T tmp = null;
 
                         @Override
                         public boolean hasNext() {
@@ -4590,7 +4396,7 @@ public final class Iterables {
                         }
 
                         @Override
-                        public E next() {
+                        public T next() {
                             if (!hasNext()) {
                                 throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                             }
@@ -4616,7 +4422,7 @@ public final class Iterables {
                 public int size() {
                     int size = 0;
 
-                    for (final E e : set1) {
+                    for (final T e : set1) {
                         if (set2.contains(e)) {
                             size++;
                         }
@@ -4666,7 +4472,7 @@ public final class Iterables {
      * equivalence relations (as {@link HashSet}, {@link TreeSet}, and the keySet of an
      * {@code IdentityHashMap} all are).
      *
-     * @param <E> the type of the elements.
+     * @param <T> the type of the elements.
      * @param set1 the base set whose elements may be included in the result. May be {@code null} or empty.
      * @param set2 the set containing elements to be excluded from the result. May be {@code null} or empty.
      * @return an unmodifiable {@code SetView} containing elements present in {@code set1} but not in {@code set2}; never {@code null}.
@@ -4678,12 +4484,13 @@ public final class Iterables {
      * @see N#intersection(Collection, Collection)
      * @see N#commonSet(Collection, Collection)
      * @see Difference#of(Collection, Collection)
+     * @see Maps#difference(Map, Map)
      */
-    public static <E> SetView<E> difference(final Set<E> set1, final Set<?> set2) {
+    public static <T> SetView<T> difference(final Set<T> set1, final Set<?> set2) {
         // N.checkArgNotNull(set1, "set1");
         // N.checkArgNotNull(set2, "set2");
 
-        Set<E> tmp = null;
+        Set<T> tmp = null;
 
         if (N.isEmpty(set1)) {
             tmp = N.emptySet();
@@ -4692,12 +4499,12 @@ public final class Iterables {
         } else {
             tmp = new AbstractSet<>() {
                 @Override
-                public ObjIterator<E> iterator() {
+                public ObjIterator<T> iterator() {
                     return new ObjIterator<>() {
-                        private final Iterator<E> iter1 = set1.iterator();
-                        private final E NONE = (E) N.NULL_SENTINEL; //NOSONAR
-                        private E next = NONE;
-                        private E tmp = null;
+                        private final Iterator<T> iter1 = set1.iterator();
+                        private final T NONE = (T) N.NULL_SENTINEL; //NOSONAR
+                        private T next = NONE;
+                        private T tmp = null;
 
                         @Override
                         public boolean hasNext() {
@@ -4719,7 +4526,7 @@ public final class Iterables {
                         }
 
                         @Override
-                        public E next() {
+                        public T next() {
                             if (!hasNext()) {
                                 throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                             }
@@ -4740,7 +4547,7 @@ public final class Iterables {
                 public int size() {
                     int size = 0;
 
-                    for (final E e : set1) {
+                    for (final T e : set1) {
                         if (!set2.contains(e)) {
                             size++;
                         }
@@ -4784,7 +4591,7 @@ public final class Iterables {
      * equivalence relations (as {@link HashSet}, {@link TreeSet}, and the keySet of an
      * {@code IdentityHashMap} all are).
      *
-     * @param <E> the type of the elements.
+     * @param <T> the type of the elements.
      * @param set1 the first set. May be {@code null} or empty.
      * @param set2 the second set. May be {@code null} or empty.
      * @return an unmodifiable {@code SetView} containing elements present in either set but not in both; never {@code null}.
@@ -4794,12 +4601,13 @@ public final class Iterables {
      * @see #difference(Set, Set)
      * @see #intersection(Set, Set)
      * @see #union(Set, Set)
+     * @see Maps#symmetricDifference(Map, Map)
      */
-    public static <E> SetView<E> symmetricDifference(final Set<? extends E> set1, final Set<? extends E> set2) {
+    public static <T> SetView<T> symmetricDifference(final Set<? extends T> set1, final Set<? extends T> set2) {
         // N.checkArgNotNull(set1, "set1");
         // N.checkArgNotNull(set2, "set2");
 
-        Set<? extends E> tmp = null;
+        Set<? extends T> tmp = null;
 
         if (N.isEmpty(set1)) {
             tmp = N.isEmpty(set2) ? N.emptySet() : set2;
@@ -4808,13 +4616,13 @@ public final class Iterables {
         } else {
             tmp = new AbstractSet<>() {
                 @Override
-                public ObjIterator<E> iterator() {
+                public ObjIterator<T> iterator() {
                     return new ObjIterator<>() {
-                        private final Iterator<? extends E> iter1 = set1.iterator();
-                        private final Iterator<? extends E> iter2 = set2.iterator();
-                        private final E NONE = (E) N.NULL_SENTINEL; //NOSONAR
-                        private E next = NONE;
-                        private E tmp = null;
+                        private final Iterator<? extends T> iter1 = set1.iterator();
+                        private final Iterator<? extends T> iter2 = set2.iterator();
+                        private final T NONE = (T) N.NULL_SENTINEL; //NOSONAR
+                        private T next = NONE;
+                        private T tmp = null;
 
                         @Override
                         public boolean hasNext() {
@@ -4844,7 +4652,7 @@ public final class Iterables {
                         }
 
                         @Override
-                        public E next() {
+                        public T next() {
                             if (!hasNext()) {
                                 throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                             }
@@ -4865,13 +4673,13 @@ public final class Iterables {
                 public int size() {
                     int size = 0;
 
-                    for (final E e : set1) {
+                    for (final T e : set1) {
                         if (!set2.contains(e)) {
                             size++;
                         }
                     }
 
-                    for (final E e : set2) {
+                    for (final T e : set2) {
                         if (!set1.contains(e)) {
                             size++;
                         }
@@ -4907,13 +4715,13 @@ public final class Iterables {
      * Iterables.subSet((NavigableSet<Integer>) null, Range.closed(2, 4));   // [] (null set)
      * }</pre>
      *
-     * @param <K> the type of the elements, which must implement {@link Comparable}.
+     * @param <T> the type of the elements, which must implement {@link Comparable}.
      * @param set the original {@code NavigableSet} from which to derive the subset. May be {@code null} or empty.
      * @param range the {@code Range} that defines the lower and upper bounds of the subset (inclusive/exclusive per bound type).
      * @return a {@code NavigableSet} view of the elements within the specified range; an empty {@code NavigableSet} if {@code set} is {@code null} or empty.
      * @throws IllegalArgumentException if the set uses a custom comparator inconsistent with the natural ordering and {@code range.lowerEndpoint()} compares greater than {@code range.upperEndpoint()} under that comparator.
      */
-    public static <K extends Comparable<? super K>> NavigableSet<K> subSet(final NavigableSet<K> set, final Range<K> range) throws IllegalArgumentException {
+    public static <T extends Comparable<? super T>> NavigableSet<T> subSet(final NavigableSet<T> set, final Range<T> range) throws IllegalArgumentException {
         if (N.isEmpty(set)) {
             return N.emptyNavigableSet();
         }
@@ -4963,13 +4771,13 @@ public final class Iterables {
      * Iterables.powerSet(three).size();                          // 8 (2^3)
      * }</pre>
      *
-     * @param <E> the type of the elements.
+     * @param <T> the type of the elements.
      * @param set the set of elements to construct a power set from.
      * @return a {@code Set} containing all {@code 2^n} possible subsets of the input set.
      * @throws IllegalArgumentException if {@code set} has more than 30 elements (the implementation limits the input size so the subset bitmask fits in an {@code int})
      * @see <a href="http://en.wikipedia.org/wiki/Power_set">Power set article at Wikipedia</a>
      */
-    public static <E> Set<Set<E>> powerSet(final Set<E> set) {
+    public static <T> Set<Set<T>> powerSet(final Set<T> set) {
         return new PowerSet<>(N.nullToEmpty(set));
     }
 
@@ -5024,6 +4832,9 @@ public final class Iterables {
      *
      * <p>An empty collection has only one permutation, which is an empty list.
      *
+     * <p>Like {@link #powerSet(Set)}, {@link #rollup(Collection)} and {@link #cartesianProduct(Collection)},
+     * a {@code null} input is treated as an empty collection (yielding the single empty permutation).</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Collection<List<Integer>> perms = Iterables.permutations(Arrays.asList(1, 2, 3));
@@ -5031,17 +4842,15 @@ public final class Iterables {
      *
      * Iterables.permutations(new ArrayList<Integer>()).size();   // 1 (the single empty permutation)
      * Iterables.permutations(Arrays.asList(1, 1)).size();        // 2 (equal elements still permuted)
+     * Iterables.permutations((Collection<Integer>) null).size(); // 1 ({@code null} treated as empty)
      * }</pre>
      *
-     * @param <E> the type of the elements.
-     * @param elements the original collection whose elements have to be permuted.
+     * @param <T> the type of the elements.
+     * @param elements the original collection whose elements have to be permuted. A {@code null} collection is treated as empty.
      * @return an unmodifiable {@code Collection} of all permutations of the original collection.
-     * @throws IllegalArgumentException if {@code elements} is {@code null}.
      */
-    public static <E> Collection<List<E>> permutations(final Collection<E> elements) throws IllegalArgumentException {
-        N.checkArgNotNull(elements, cs.collection);
-
-        return new PermutationCollection<>(elements);
+    public static <T> Collection<List<T>> permutations(final Collection<T> elements) {
+        return new PermutationCollection<>(N.nullToEmpty(elements));
     }
 
     /**
@@ -5066,6 +4875,9 @@ public final class Iterables {
      * <p>This method is equivalent to
      * {@code Collections2.orderedPermutations(list, Ordering.natural())}.
      *
+     * <p>Like {@link #powerSet(Set)}, {@link #rollup(Collection)} and {@link #cartesianProduct(Collection)},
+     * a {@code null} input is treated as an empty collection (yielding the single empty permutation).</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Collection<List<Integer>> perms = Iterables.orderedPermutations(Arrays.asList(3, 1, 2));
@@ -5075,14 +4887,11 @@ public final class Iterables {
      * Iterables.orderedPermutations(new ArrayList<Integer>()).size(); // 1 (the single empty permutation)
      * }</pre>
      *
-     * @param <E> the type of the elements.
-     * @param elements the original collection whose elements have to be permuted.
+     * @param <T> the type of the elements.
+     * @param elements the original collection whose elements have to be permuted. A {@code null} collection is treated as empty.
      * @return an unmodifiable {@code Collection} of ordered permutations of the original collection, in lexicographic order.
-     * @throws IllegalArgumentException if {@code elements} is {@code null}.
      */
-    public static <E extends Comparable<? super E>> Collection<List<E>> orderedPermutations(final Collection<E> elements) throws IllegalArgumentException {
-        N.checkArgNotNull(elements, cs.collection);
-
+    public static <T extends Comparable<? super T>> Collection<List<T>> orderedPermutations(final Collection<T> elements) {
         return orderedPermutations(N.nullToEmpty(elements), N.NATURAL_COMPARATOR);
     }
 
@@ -5128,16 +4937,16 @@ public final class Iterables {
      *
      * <p>An empty iterable has only one permutation, which is an empty list.
      *
-     * @param <E> the type of elements in the collection.
-     * @param elements the original collection whose elements have to be permuted.
-     * @param comparator the comparator that establishes the lexicographic ordering for the permutations.
+     * <p>Like {@link #powerSet(Set)}, {@link #rollup(Collection)} and {@link #cartesianProduct(Collection)},
+     * a {@code null} input is treated as an empty collection (yielding the single empty permutation).</p>
+     *
+     * @param <T> the type of elements in the collection.
+     * @param elements the original collection whose elements have to be permuted. A {@code null} collection is treated as empty.
+     * @param comparator the comparator that establishes the lexicographic ordering for the permutations. Must not be {@code null}.
      * @return an unmodifiable {@code Collection} containing all distinct permutations of the original collection, in lexicographic order as defined by {@code comparator}.
-     * @throws IllegalArgumentException if {@code elements} is {@code null}.
+     * @throws NullPointerException if {@code comparator} is {@code null} and {@code elements} contains more than one element.
      */
-    public static <E> Collection<List<E>> orderedPermutations(final Collection<E> elements, final Comparator<? super E> comparator)
-            throws IllegalArgumentException {
-        N.checkArgNotNull(elements, cs.collection);
-
+    public static <T> Collection<List<T>> orderedPermutations(final Collection<T> elements, final Comparator<? super T> comparator) {
         return new OrderedPermutationCollection<>(N.nullToEmpty(elements), comparator);
     }
 
@@ -5193,16 +5002,17 @@ public final class Iterables {
      * input lists are merely copied. Only as the resulting list is iterated are
      * the individual lists created, and these are not retained after iteration.
      *
-     * @param <E> any common base class shared by all axes (often just {@link Object})
+     * @param <T> any common base class shared by all axes (often just {@link Object})
      * @param cs the collections to choose elements from, in the order that
      *     the elements chosen from those collections should appear in each resulting list.
+     *     A {@code null} collection (axis) is treated as an empty collection, which collapses the whole product to empty.
      * @return a list containing every possible list that can be formed by choosing one element from each of the given collections in order;
-     *     an empty list if any input collection is empty;
+     *     an empty list if any input collection is empty (including any {@code null} axis);
      *     a single-element list containing the empty list if no input collections are provided.
      * @throws IllegalArgumentException if the size of the Cartesian product would exceed {@link Integer#MAX_VALUE}.
      */
     @SafeVarargs
-    public static <E> List<List<E>> cartesianProduct(final Collection<? extends E>... cs) {
+    public static <T> List<List<T>> cartesianProduct(final Collection<? extends T>... cs) {
         return cartesianProduct(Array.asList(cs));
     }
 
@@ -5257,7 +5067,7 @@ public final class Iterables {
      * input lists are merely copied. Only as the resulting list is iterated are
      * the individual lists created, and these are not retained after iteration.
      *
-     * @param <E> any common base class shared by all axes (often just {@link Object})
+     * @param <T> any common base class shared by all axes (often just {@link Object})
      * @param cs the collections to choose elements from, in the order that
      *     the elements chosen from those collections should appear in each resulting list.
      *     A {@code null} value is treated as an empty collection.
@@ -5266,7 +5076,7 @@ public final class Iterables {
      *     a single-element list containing the empty list if {@code cs} is {@code null} or empty.
      * @throws IllegalArgumentException if the size of the Cartesian product would exceed {@link Integer#MAX_VALUE}.
      */
-    public static <E> List<List<E>> cartesianProduct(final Collection<? extends Collection<? extends E>> cs) {
+    public static <T> List<List<T>> cartesianProduct(final Collection<? extends Collection<? extends T>> cs) {
         return new CartesianList<>(N.nullToEmpty(cs));
     }
 
@@ -5288,14 +5098,14 @@ public final class Iterables {
     /**
      * The Class PowerSet.
      *
-     * @param <E> the element type in the source set
+     * @param <T> the element type in the source set
      */
-    private static final class PowerSet<E> extends AbstractSet<Set<E>> {
+    private static final class PowerSet<T> extends AbstractSet<Set<T>> {
 
         /** The input set. */
-        final ImmutableMap<E, Integer> inputSet;
+        final ImmutableMap<T, Integer> inputSet;
 
-        PowerSet(final Set<E> input) {
+        PowerSet(final Set<T> input) {
             inputSet = indexMap(input);
             N.checkArgument(inputSet.size() <= 30, "Too many elements to create power set: %s > 30", inputSet.size());
         }
@@ -5311,7 +5121,7 @@ public final class Iterables {
         }
 
         @Override
-        public Iterator<Set<E>> iterator() {
+        public Iterator<Set<T>> iterator() {
             return new Iterator<>() {
                 private final int size = size();
                 private int position;
@@ -5322,7 +5132,7 @@ public final class Iterables {
                 }
 
                 @Override
-                public Set<E> next() {
+                public Set<T> next() {
                     if (!hasNext()) {
                         throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                     }
@@ -5349,7 +5159,9 @@ public final class Iterables {
         @Override
         public boolean equals(final Object obj) {
             if (obj instanceof final PowerSet<?> that) {
-                return inputSet.equals(that.inputSet);
+                // Compare element sets only: inputSet maps element -> iteration index, and comparing
+                // the index values would make equal power sets unequal (Set.equals transitivity).
+                return inputSet.keySet().equals(that.inputSet.keySet());
             }
             return super.equals(obj);
         }
@@ -5369,12 +5181,12 @@ public final class Iterables {
             return "powerSet(" + inputSet + ")";
         }
 
-        private static <E> ImmutableMap<E, Integer> indexMap(final Collection<E> c) {
-            final Map<E, Integer> map = new LinkedHashMap<>();
+        private static <T> ImmutableMap<T, Integer> indexMap(final Collection<T> c) {
+            final Map<T, Integer> map = new LinkedHashMap<>();
 
             int i = 0;
 
-            for (final E e : c) {
+            for (final T e : c) {
                 map.put(e, i++);
             }
 
@@ -5385,27 +5197,27 @@ public final class Iterables {
     /**
      * The Class SubSet.
      *
-     * @param <E> the element type in each subset view
+     * @param <T> the element type in each subset view
      */
-    private static final class SubSet<E> extends AbstractSet<E> { //NOSONAR
+    private static final class SubSet<T> extends AbstractSet<T> { //NOSONAR
 
         /** The input set. */
-        private final ImmutableMap<E, Integer> inputSet;
+        private final ImmutableMap<T, Integer> inputSet;
 
         /** The elements. */
-        private final ImmutableList<E> elements;
+        private final ImmutableList<T> elements;
 
         /** The mask. */
         private final int mask;
 
-        SubSet(final ImmutableMap<E, Integer> inputSet, final int mask) {
+        SubSet(final ImmutableMap<T, Integer> inputSet, final int mask) {
             this.inputSet = inputSet;
             elements = ImmutableList.copyOf(inputSet.keySet());
             this.mask = mask;
         }
 
         @Override
-        public Iterator<E> iterator() {
+        public Iterator<T> iterator() {
             return new Iterator<>() {
                 int remainingSetBits = mask;
 
@@ -5415,7 +5227,7 @@ public final class Iterables {
                 }
 
                 @Override
-                public E next() {
+                public T next() {
                     final int index = Integer.numberOfTrailingZeros(remainingSetBits);
                     if (index == 32) {
                         throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
@@ -5447,14 +5259,14 @@ public final class Iterables {
     /**
      * The Class PermutationCollection.
      *
-     * @param <E> the element type in each generated permutation
+     * @param <T> the element type in each generated permutation
      */
-    private static final class PermutationCollection<E> extends AbstractCollection<List<E>> {
+    private static final class PermutationCollection<T> extends AbstractCollection<List<T>> {
 
         /** The input list. */
-        final List<E> inputList;
+        final List<T> inputList;
 
-        PermutationCollection(final Collection<E> input) {
+        PermutationCollection(final Collection<T> input) {
             inputList = ImmutableList.copyOf(input);
         }
 
@@ -5469,7 +5281,7 @@ public final class Iterables {
         }
 
         @Override
-        public Iterator<List<E>> iterator() {
+        public Iterator<List<T>> iterator() {
             return PermutationIterator.of(inputList);
         }
 
@@ -5491,20 +5303,20 @@ public final class Iterables {
     /**
      * The Class OrderedPermutationCollection.
      *
-     * @param <E> the element type in each ordered permutation
+     * @param <T> the element type in each ordered permutation
      */
-    private static final class OrderedPermutationCollection<E> extends AbstractCollection<List<E>> {
+    private static final class OrderedPermutationCollection<T> extends AbstractCollection<List<T>> {
 
         /** The input list. */
-        final List<E> inputList;
+        final List<T> inputList;
 
         /** The comparator. */
-        final Comparator<? super E> comparator;
+        final Comparator<? super T> comparator;
 
         /** The size. */
         final int size;
 
-        OrderedPermutationCollection(final Collection<E> input, final Comparator<? super E> comparator) {
+        OrderedPermutationCollection(final Collection<T> input, final Comparator<? super T> comparator) {
             inputList = new ArrayList<>(input);
             N.sort(inputList, comparator);
             this.comparator = comparator;
@@ -5522,7 +5334,7 @@ public final class Iterables {
         }
 
         @Override
-        public Iterator<List<E>> iterator() {
+        public Iterator<List<T>> iterator() {
             return PermutationIterator.ordered(inputList, comparator);
         }
 
@@ -5548,12 +5360,12 @@ public final class Iterables {
          * permutations is increased by a factor of (n choose r).</li>
          * </ul>
          *
-         * @param <E> the type of the elements.
+         * @param <T> the type of the elements.
          * @param sortedInputList the sorted input list.
          * @param comparator the comparator to determine the order of the elements.
          * @return the number of permutations, or {@code Integer.MAX_VALUE} if the number is too large.
          */
-        private static <E> int calculateSize(final List<E> sortedInputList, final Comparator<? super E> comparator) {
+        private static <T> int calculateSize(final List<T> sortedInputList, final Comparator<? super T> comparator) {
             long permutations = 1;
             int n = 1;
             int r = 1;
@@ -5590,9 +5402,9 @@ public final class Iterables {
     /**
      * The Class CartesianList.
      *
-     * @param <E> the element type along each axis of the cartesian product
+     * @param <T> the element type along each axis of the cartesian product
      */
-    private static final class CartesianList<E> extends AbstractList<List<E>> implements RandomAccess { //NOSONAR
+    private static final class CartesianList<T> extends AbstractList<List<T>> implements RandomAccess { //NOSONAR
 
         /** The axes. */
         private final transient Object[][] axes; //NOSONAR
@@ -5600,12 +5412,13 @@ public final class Iterables {
         /** The axes size product. */
         private final transient int[] axesSizeProduct; //NOSONAR
 
-        CartesianList(final Collection<? extends Collection<? extends E>> cs) {
-            final Iterator<? extends Collection<? extends E>> iter = cs.iterator();
+        CartesianList(final Collection<? extends Collection<? extends T>> cs) {
+            final Iterator<? extends Collection<? extends T>> iter = cs.iterator();
             axes = new Object[cs.size()][];
 
             for (int i = 0, len = axes.length; i < len; i++) {
-                axes[i] = iter.next().toArray();
+                final Collection<? extends T> axis = iter.next();
+                axes[i] = axis == null ? new Object[0] : axis.toArray();
             }
 
             axesSizeProduct = new int[axes.length + 1];
@@ -5628,13 +5441,13 @@ public final class Iterables {
          * @throws IndexOutOfBoundsException if {@code index} is out of range ({@code index < 0 || index >= size()}).
          */
         @Override
-        public List<E> get(final int index) throws IndexOutOfBoundsException {
+        public List<T> get(final int index) throws IndexOutOfBoundsException {
             N.checkElementIndex(index, size());
 
-            final List<E> result = new ArrayList<>(axes.length);
+            final List<T> result = new ArrayList<>(axes.length);
 
             for (int k = 0, len = axes.length; k < len; k++) {
-                result.add((E) axes[k][getAxisIndexForProductIndex(index, k)]);
+                result.add((T) axes[k][getAxisIndexForProductIndex(index, k)]);
             }
 
             return result;

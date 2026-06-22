@@ -13,9 +13,9 @@
  */
 package com.landawn.abacus.util.function;
 
-import java.util.Objects;
-
 import com.landawn.abacus.util.Throwables;
+import com.landawn.abacus.util.N;
+import com.landawn.abacus.util.cs;
 
 /**
  * Represents an operation that accepts a {@code long}-valued and an object-valued
@@ -103,13 +103,27 @@ public interface LongObjConsumer<T> extends Throwables.LongObjConsumer<T, Runtim
      * @param after the operation to perform after this operation. Must not be {@code null}.
      * @return a composed {@code LongObjConsumer} that performs in sequence this
      *         operation followed by the {@code after} operation
-     * @throws NullPointerException if {@code after} is null
+     * @throws IllegalArgumentException if {@code after} is null
      */
     default LongObjConsumer<T> andThen(final LongObjConsumer<? super T> after) {
-        Objects.requireNonNull(after);
+        N.checkArgNotNull(after, cs.after);
         return (t, u) -> {
             accept(t, u);
             after.accept(t, u);
         };
+    }
+
+    /**
+     * Returns this object as a {@link Throwables.LongObjConsumer} view.
+     *
+     * <p>The returned object has the same behavior as this one. This method does not translate
+     * exceptions or make the original implementation capable of throwing new checked exceptions; the
+     * exception type parameter is for target-type compatibility with APIs that accept {@code Throwables.LongObjConsumer}.
+     *
+     * @param <E> the target exception type for compatibility with {@code Throwables.LongObjConsumer}
+     * @return a {@link Throwables.LongObjConsumer} view of this object
+     */
+    default <E extends Throwable> Throwables.LongObjConsumer<T, E> toThrowable() {
+        return (Throwables.LongObjConsumer<T, E>) this;
     }
 }

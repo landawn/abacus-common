@@ -36,6 +36,7 @@ import com.landawn.abacus.util.ListMultimap;
 import com.landawn.abacus.util.Multiset;
 import com.landawn.abacus.util.MutableBoolean;
 import com.landawn.abacus.util.N;
+import com.landawn.abacus.util.Throwables;
 import com.landawn.abacus.util.Wrapper;
 import com.landawn.abacus.util.stream.BaseStream.ParallelSettings;
 import com.landawn.abacus.util.stream.BaseStream.ParallelSettings.PS;
@@ -249,6 +250,14 @@ public class StreamBaseTest extends TestBase {
     }
 
     @Test
+    public void testApplyIfNotEmptyRejectsNullFunction() {
+        Assertions.assertThrows(IllegalArgumentException.class,
+                () -> this.<Integer> createStream().applyIfNotEmpty((Throwables.Function<Stream<Integer>, List<Integer>, RuntimeException>) null));
+        Assertions.assertThrows(IllegalArgumentException.class,
+                () -> createStream(1).applyIfNotEmpty((Throwables.Function<Stream<Integer>, List<Integer>, RuntimeException>) null));
+    }
+
+    @Test
     public void testAcceptIfNotEmpty() {
         List<Integer> collected = new ArrayList<>();
         Stream<Integer> stream1 = createStream(1, 2, 3);
@@ -264,6 +273,14 @@ public class StreamBaseTest extends TestBase {
         Stream<Integer> stream3 = createStream(1, 2, 3);
         stream3.acceptIfNotEmpty(s -> s.toList());
         Assertions.assertThrows(IllegalStateException.class, () -> stream3.toList());
+    }
+
+    @Test
+    public void testAcceptIfNotEmptyRejectsNullAction() {
+        Assertions.assertThrows(IllegalArgumentException.class,
+                () -> this.<Integer> createStream().acceptIfNotEmpty((Throwables.Consumer<Stream<Integer>, RuntimeException>) null));
+        Assertions.assertThrows(IllegalArgumentException.class,
+                () -> createStream(1).acceptIfNotEmpty((Throwables.Consumer<Stream<Integer>, RuntimeException>) null));
     }
 
     @Test
@@ -637,6 +654,15 @@ public class StreamBaseTest extends TestBase {
             List<Integer> result = Stream.of(1, 2, 3, 4, 5).skip(0).limit(3).toList();
             Assertions.assertEquals(3, result.size());
         });
+    }
+
+    @Test
+    public void testCheckIndex_InvalidClosesStream() {
+        final Stream<Integer> stream = Stream.of(1, 2, 3);
+        final StreamBase<Integer, ?, ?, ?, ?, ?, ?, ?> base = stream;
+
+        Assertions.assertThrows(RuntimeException.class, () -> base.checkIndex(3, 3));
+        Assertions.assertThrows(IllegalStateException.class, () -> stream.count());
     }
 
     @Test

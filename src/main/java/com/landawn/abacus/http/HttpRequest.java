@@ -28,7 +28,6 @@ import javax.net.ssl.SSLSocketFactory;
 
 import com.landawn.abacus.annotation.Beta;
 import com.landawn.abacus.exception.UncheckedIOException;
-import com.landawn.abacus.util.Beans;
 import com.landawn.abacus.util.ContinuableFuture;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Strings;
@@ -185,6 +184,7 @@ public final class HttpRequest {
      * @param connectTimeoutInMillis Connection timeout in milliseconds
      * @param readTimeoutInMillis Read timeout in milliseconds
      * @return a new HttpRequest instance
+     * @throws IllegalArgumentException if the scheme of {@code url} is not {@code http} or {@code https}.
      */
     public static HttpRequest url(final URL url, final long connectTimeoutInMillis, final long readTimeoutInMillis) {
         return new HttpRequest(HttpClient.create(url, 1, connectTimeoutInMillis, readTimeoutInMillis)).closeHttpClientAfterExecution(true);
@@ -198,8 +198,10 @@ public final class HttpRequest {
 
     /**
      * Merges the provided HTTP settings with existing settings on this request.
-     * This method allows you to apply pre-configured settings to a request. If the same setting
-     * is defined in both existing and provided settings, the provided settings take precedence.
+     * This method allows you to apply pre-configured settings to a request. All scalar settings
+     * (timeouts, SSL factory, proxy, flags, content format) are overwritten with the provided
+     * settings' current values — including their defaults — while headers are merged, with
+     * same-named provided headers replacing existing ones.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -220,7 +222,21 @@ public final class HttpRequest {
         checkSettings();
 
         if (httpSettings != null) {
-            Beans.copyInto(httpSettings, settings);
+            // Explicit merge, NOT Beans.mergeInto: the bean copy aliased the caller's live
+            // HttpHeaders instance into this request (later per-request headers such as basicAuth
+            // credentials leaked back into the shared settings object) and injected null-valued
+            // Content-Type/Content-Encoding header entries via the synthetic bean properties.
+            settings.setConnectTimeout(httpSettings.getConnectTimeout())
+                    .setReadTimeout(httpSettings.getReadTimeout())
+                    .setSSLSocketFactory(httpSettings.getSSLSocketFactory())
+                    .setProxy(httpSettings.getProxy())
+                    .useCaches(httpSettings.useCaches())
+                    .doInput(httpSettings.doInput())
+                    .doOutput(httpSettings.doOutput())
+                    .setOneWayRequest(httpSettings.isOneWayRequest())
+                    .setContentFormat(httpSettings.getContentFormat());
+
+            settings.headers().setAll(httpSettings.headers().toMap());
         }
 
         return this;
@@ -342,8 +358,11 @@ public final class HttpRequest {
     }
 
     /**
-     * Sets HTTP headers from the specified map.
-     * If this request already has any headers with the same names, they are all replaced.
+     * Merges the given header entries into the headers already on this request.
+     * For each entry in the map, a header with the same name is overwritten with the new value,
+     * while any existing headers whose names are <i>not</i> present in the map are kept unchanged.
+     * This is a merge, not a replace-all: use {@link #setHeaders(HttpHeaders)} if you want to
+     * discard all prior headers and install a fresh set.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -371,7 +390,7 @@ public final class HttpRequest {
     }
 
     /**
-     * Removes all headers on this request and adds the specified headers.
+     * Resets all headers on this request with the specified headers.
      * This method replaces all existing headers with the provided HttpHeaders instance.
      *
      * <p><b>Usage Examples:</b></p>
@@ -390,10 +409,10 @@ public final class HttpRequest {
      * @see HttpHeaders.Names
      * @see HttpHeaders.Values
      */
-    public HttpRequest headers(final HttpHeaders headers) {
+    public HttpRequest setHeaders(final HttpHeaders headers) {
         checkSettings();
 
-        settings.headers(headers);
+        settings.setHeaders(headers);
 
         return this;
     }
@@ -928,6 +947,44 @@ public final class HttpRequest {
     }
 
     /**
+     * Executes a PATCH request and returns the response as an HttpResponse.
+     * PATCH requests typically apply a partial update to a resource on the server.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * HttpResponse response = HttpRequest.url("http://localhost:18080/users/123")
+     *     .jsonBody(partialUpdate)
+     *     .patch();
+     * }</pre>
+     *
+     * @return The HttpResponse object containing status code, headers, and response body
+     * @throws UncheckedIOException if an I/O error occurs during the request
+     */
+    public HttpResponse patch() throws UncheckedIOException {
+        return patch(HttpResponse.class);
+    }
+
+    /**
+     * Executes a PATCH request and deserializes the response to the specified type.
+     * PATCH requests typically apply a partial update to a resource on the server.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * User updatedUser = HttpRequest.url("http://localhost:18080/users/123")
+     *     .jsonBody(partialUpdate)
+     *     .patch(User.class);
+     * }</pre>
+     *
+     * @param <T> The type of the response object
+     * @param resultClass The class of the expected response object. Must not be {@code null}.
+     * @return The deserialized response object
+     * @throws UncheckedIOException if an I/O error occurs during the request
+     */
+    public <T> T patch(final Class<T> resultClass) throws UncheckedIOException {
+        return execute(HttpMethod.PATCH, resultClass);
+    }
+
+    /**
      * Executes a HEAD request and returns the response as an HttpResponse.
      * HEAD requests retrieve only the headers (metadata) without the response body,
      * useful for checking resource existence or getting metadata without downloading the full content.
@@ -955,7 +1012,7 @@ public final class HttpRequest {
      * @return The response object — populated when {@code resultClass} is {@link HttpResponse}, otherwise typically {@code null}
      * @throws UncheckedIOException if an I/O error occurs
      */
-    <T> T head(final Class<T> resultClass) throws UncheckedIOException {
+    public <T> T head(final Class<T> resultClass) throws UncheckedIOException {
         return execute(HttpMethod.HEAD, resultClass);
     }
 
@@ -1023,6 +1080,9 @@ public final class HttpRequest {
      * @param httpMethod The HTTP method to use (GET, POST, PUT, DELETE, HEAD, etc.). Must not be {@code null}.
      * @param output The file to write the response body to. Must not be {@code null}.
      * @throws IllegalArgumentException if {@code httpMethod} is {@code null}
+     * @throws IllegalStateException if {@link #query(String)} was set but the method is not {@code GET}/{@code DELETE},
+     *         or {@link #body(Object)}/{@code jsonBody}/{@code xmlBody}/{@code formBody} was set but the method is not
+     *         {@code POST}/{@code PUT}/{@code PATCH}
      * @throws UncheckedIOException if an I/O error occurs during the request or file writing
      */
     @Beta
@@ -1051,6 +1111,9 @@ public final class HttpRequest {
      * @param httpMethod The HTTP method to use (GET, POST, PUT, DELETE, HEAD, etc.). Must not be {@code null}.
      * @param output The output stream to write the response body to. Must not be {@code null}.
      * @throws IllegalArgumentException if {@code httpMethod} is {@code null}
+     * @throws IllegalStateException if {@link #query(String)} was set but the method is not {@code GET}/{@code DELETE},
+     *         or {@link #body(Object)}/{@code jsonBody}/{@code xmlBody}/{@code formBody} was set but the method is not
+     *         {@code POST}/{@code PUT}/{@code PATCH}
      * @throws UncheckedIOException if an I/O error occurs during the request or stream writing
      */
     @Beta
@@ -1079,6 +1142,9 @@ public final class HttpRequest {
      * @param httpMethod The HTTP method to use (GET, POST, PUT, DELETE, HEAD, etc.). Must not be {@code null}.
      * @param output The writer to write the response body to. Must not be {@code null}.
      * @throws IllegalArgumentException if {@code httpMethod} is {@code null}
+     * @throws IllegalStateException if {@link #query(String)} was set but the method is not {@code GET}/{@code DELETE},
+     *         or {@link #body(Object)}/{@code jsonBody}/{@code xmlBody}/{@code formBody} was set but the method is not
+     *         {@code POST}/{@code PUT}/{@code PATCH}
      * @throws UncheckedIOException if an I/O error occurs during the request or writing
      */
     @Beta
@@ -1429,6 +1495,83 @@ public final class HttpRequest {
     }
 
     /**
+     * Executes an asynchronous PATCH request and returns a ContinuableFuture with the HttpResponse.
+     * PATCH requests typically apply a partial update to a resource on the server.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * HttpRequest.url("http://localhost:18080/users/123")
+     *     .jsonBody(partialUpdate)
+     *     .asyncPatch()
+     *     .getThenAccept(response -> System.out.println("Status: " + response.statusCode()));
+     * }</pre>
+     *
+     * @return A ContinuableFuture that will complete with the HttpResponse
+     */
+    public ContinuableFuture<HttpResponse> asyncPatch() {
+        return asyncPatch(HttpResponse.class);
+    }
+
+    /**
+     * Executes an asynchronous PATCH request with a custom executor and returns a ContinuableFuture with the HttpResponse.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * ExecutorService executor = Executors.newFixedThreadPool(4);
+     * HttpRequest.url("http://localhost:18080/users/123")
+     *     .jsonBody(partialUpdate)
+     *     .asyncPatch(executor)
+     *     .getThenAccept(response -> System.out.println("Status: " + response.statusCode()));
+     * }</pre>
+     *
+     * @param executor The executor to use for the asynchronous operation. Must not be {@code null}.
+     * @return A ContinuableFuture that will complete with the HttpResponse
+     */
+    public ContinuableFuture<HttpResponse> asyncPatch(final Executor executor) {
+        return asyncPatch(HttpResponse.class, executor);
+    }
+
+    /**
+     * Executes an asynchronous PATCH request and deserializes the response to the specified type.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * HttpRequest.url("http://localhost:18080/users/123")
+     *     .jsonBody(partialUpdate)
+     *     .asyncPatch(User.class)
+     *     .getThenAccept(user -> System.out.println("Updated: " + user));
+     * }</pre>
+     *
+     * @param <T> The type of the response object
+     * @param resultClass The class of the expected response object. Must not be {@code null}.
+     * @return A ContinuableFuture that will complete with the deserialized response
+     */
+    public <T> ContinuableFuture<T> asyncPatch(final Class<T> resultClass) {
+        return asyncExecute(HttpMethod.PATCH, resultClass);
+    }
+
+    /**
+     * Executes an asynchronous PATCH request with a custom executor and deserializes the response to the specified type.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * ExecutorService executor = Executors.newFixedThreadPool(4);
+     * HttpRequest.url("http://localhost:18080/users/123")
+     *     .jsonBody(partialUpdate)
+     *     .asyncPatch(User.class, executor)
+     *     .getThenAccept(user -> System.out.println("Updated: " + user));
+     * }</pre>
+     *
+     * @param <T> The type of the response object
+     * @param resultClass The class of the expected response object. Must not be {@code null}.
+     * @param executor The executor to use for the asynchronous operation. Must not be {@code null}.
+     * @return A ContinuableFuture that will complete with the deserialized response
+     */
+    public <T> ContinuableFuture<T> asyncPatch(final Class<T> resultClass, final Executor executor) {
+        return asyncExecute(HttpMethod.PATCH, resultClass, executor);
+    }
+
+    /**
      * Executes an asynchronous HEAD request and returns a ContinuableFuture with the HttpResponse.
      * HEAD requests retrieve only the headers (metadata) without the response body.
      *
@@ -1472,7 +1615,7 @@ public final class HttpRequest {
      * @param resultClass The class of the expected response object
      * @return A ContinuableFuture that will complete with the response
      */
-    <T> ContinuableFuture<T> asyncHead(final Class<T> resultClass) {
+    public <T> ContinuableFuture<T> asyncHead(final Class<T> resultClass) {
         return asyncExecute(HttpMethod.HEAD, resultClass);
     }
 
@@ -1767,7 +1910,7 @@ public final class HttpRequest {
      * @param executor The executor to use
      * @return A ContinuableFuture that will complete with the result of the callable
      */
-    <R> ContinuableFuture<R> execute(final Callable<R> cmd, final Executor executor) {
+    <R> ContinuableFuture<R> execute(final Callable<? extends R> cmd, final Executor executor) {
         N.checkArgNotNull(executor, cs.executor);
 
         return N.asyncExecute(cmd, executor);

@@ -165,7 +165,13 @@ import com.landawn.abacus.util.stream.Stream;
  *       (e.g., adding to a {@code null} array). Safe operations (e.g., reversing a {@code null} String)
  *       return the input unchanged.</li>
  *   <li><b>Index Conventions:</b> Methods use {@code fromIndex} and {@code toIndex}
- *       parameters (half-open ranges [fromIndex, toIndex)), NOT {@code offset/count} parameters.</li>
+ *       parameters (half-open ranges [fromIndex, toIndex)), NOT {@code offset/count} parameters. A range with
+ *       {@code fromIndex > toIndex} is rejected with {@code IndexOutOfBoundsException} by every range method
+ *       <i>except</i> {@code forEach}/{@code forEachIndexed}, where it is a deliberate request for reverse-order
+ *       iteration (see those methods for the {@code toIndex == -1} sentinel that includes element 0). For range-indexed
+ *       {@code Collection} overloads (e.g. {@code sum}/{@code min}/{@code max}/{@code average} with {@code fromIndex}/{@code toIndex}),
+ *       the range follows the collection's <i>iteration order</i>; it is therefore only meaningful for ordered collections
+ *       such as {@link java.util.List}.</li>
  *   <li><b>Performance First:</b> Optimized for performance with minimal overhead and object allocation.</li>
  * </ul>
  *
@@ -308,7 +314,8 @@ import com.landawn.abacus.util.stream.Stream;
  * <p><b>Choosing between {@code N} and a specialized utility:</b> {@code N} is the broad, general-purpose
  * entry point (and extends {@link CommonUtil}). For a specific domain, the focused companion below is
  * usually clearer:</p>
- * <table border="1" summary="When to use N versus a specialized utility class">
+ * <table border="1">
+ *   <caption>When to use N versus a specialized utility class</caption>
  *   <tr>
  *     <th>Utility</th>
  *     <th>Domain / best for</th>
@@ -323,7 +330,10 @@ import com.landawn.abacus.util.stream.Stream;
  *   <tr>
  *     <td>{@link Strings}</td>
  *     <td>{@code CharSequence}/{@code String}: split, join, pad, substring, case, validation</td>
- *     <td>separate facade — {@code N} does not duplicate it</td>
+ *     <td>separate facade — {@code N} largely does not duplicate it, except for a few grid-completing
+ *         {@code String} overloads (e.g. {@code frequency}, {@code insert}, {@code removeRange}/{@code replaceRange}/
+ *         {@code moveRange}) that exist for symmetry with the array/collection cells and mostly delegate to
+ *         {@code Strings}</td>
  *   </tr>
  *   <tr>
  *     <td>{@link Numbers}</td>
@@ -394,6 +404,13 @@ import com.landawn.abacus.util.stream.Stream;
  * List<Integer> large = partitioned.get(true);    // large is [3]
  * List<Integer> small = partitioned.get(false);   // small is [1, 2]
  * }</pre>
+ *
+ * <p><b>Validator Messages ({@code argNameOrErrorMsg}):</b>
+ * The {@code checkArg*} validators accepting a {@code String argNameOrErrorMsg} parameter decide how to render it
+ * heuristically: the string is treated as an <i>argument name</i> (producing a message like
+ * {@code "'arg' cannot be null"}) unless it is longer than 9 characters <i>and</i> contains a space,
+ * in which case it is used verbatim as the error message. Short custom messages without a space
+ * (e.g., {@code "Required!"}) are therefore rendered as if they were argument names.
  *
  * <p><b>Attribution:</b>
  * This class includes code adapted from Apache Commons Lang, Google Guava, and other
@@ -756,7 +773,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws ArithmeticException if the number of occurrences exceeds Integer.MAX_VALUE
      * @see #frequency(Iterator, Object)
      */
-    public static int frequency(final Iterable<?> c, final Object valueToFind) {
+    public static int frequency(final Iterable<?> c, final Object valueToFind) throws ArithmeticException {
         if (isEmptyCollection(c)) {
             return 0;
         }
@@ -983,7 +1000,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param iter the iterator to count occurrences from
      * @param mapSupplier the supplier for the map to use (e.g., TreeMap::new for sorted keys)
      * @return the map with elements as keys and occurrence counts as values
-     * @throws ArithmeticException if any occurrence count exceeds Integer.MAX_VALUE
+     * @throws ArithmeticException if any occurrence count exceeds Integer.MAX_VALUE (in practice unreachable, as {@link Multiset} counts are {@code int})
      */
     public static <T> Map<T, Integer> frequencyMap(final Iterator<? extends T> iter, final Supplier<Map<T, Integer>> mapSupplier) {
         if (iter == null) {
@@ -1229,7 +1246,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     /**
      * Returns {@code true} if the iterator contains the specified value.
      *
-     * <p>Note: This method consumes the iterator completely.</p>
+     * <p>Note: This method consumes the iterator up to and including the first matching element, or completely if the value is not found.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1271,6 +1288,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return {@code true} if collection contains all values ({@code true} if valuesToFind is {@code null}/empty; {@code false} if collection is {@code null}/empty)
      * @see Collection#containsAll(Collection)
      * @see #containsAll(Collection, Object...)
+     * @see #containsAll(Collection, Set)
+     * @see #containsAll(Iterable, Collection)
+     * @see #containsAll(Iterator, Collection)
      */
     public static boolean containsAll(final Collection<?> c, final Collection<?> valuesToFind) {
         if (isEmpty(valuesToFind)) {
@@ -1306,6 +1326,40 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
         //noinspection SuspiciousMethodCalls
         return c.containsAll(Array.asList(valuesToFind));
+    }
+
+    /**
+     * Returns {@code true} if the collection contains all the specified values.
+     *
+     * <p>Note: This overload was added (2026-06-11) together with {@link #containsAny(Collection, Set)} and
+     * {@link #containsNone(Collection, Set)}, which resolve an overload-resolution ambiguity for calls like
+     * {@code N.containsAny(list, set)}. For {@code containsAll} such a call already resolved to
+     * {@link #containsAll(Collection, Collection)}; this overload exists for family symmetry and binds
+     * {@code (Collection, Set)} calls the same way across all three families. Behavior is identical to
+     * {@link #containsAll(Collection, Collection)}.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<String> colors = Arrays.asList("red", "green", "blue", "yellow");
+     * Set<String> primary = Set.of("red", "blue", "yellow");
+     * boolean result = N.containsAll(colors, primary);   // returns true
+     * }</pre>
+     *
+     * @param c the Collection to search in
+     * @param valuesToFind the Set of values to check for
+     * @return {@code true} if collection contains all values ({@code true} if valuesToFind is {@code null}/empty; {@code false} if collection is {@code null}/empty)
+     * @see #containsAll(Collection, Collection)
+     * @see #containsAll(Iterable, Collection)
+     */
+    public static boolean containsAll(final Collection<?> c, final Set<?> valuesToFind) {
+        if (isEmpty(valuesToFind)) {
+            return true;
+        } else if (isEmpty(c)) {
+            return false;
+        }
+
+        //noinspection SuspiciousMethodCalls
+        return c.containsAll(valuesToFind);
     }
 
     /**
@@ -1391,6 +1445,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return {@code true} if collection contains any value ({@code false} if either collection is {@code null} or empty)
      * @see #disjoint(Collection, Collection)
      * @see #containsAll(Collection, Collection)
+     * @see #containsAny(Collection, Set)
+     * @see #containsAny(Iterable, Set)
+     * @see #containsAny(Iterator, Set)
      */
     public static boolean containsAny(final Collection<?> c, final Collection<?> valuesToFind) {
         if (isEmpty(c) || isEmpty(valuesToFind)) {
@@ -1420,6 +1477,36 @@ public final class N extends CommonUtil { // public final class N extends π imp
         }
 
         return !disjoint(c, Array.asList(valuesToFind));
+    }
+
+    /**
+     * Returns {@code true} if the collection contains any of the specified values.
+     *
+     * <p>Note: This overload was added (2026-06-11) to resolve an overload-resolution ambiguity: without it,
+     * a call like {@code N.containsAny(list, set)} was ambiguous between
+     * {@link #containsAny(Collection, Collection)} and {@link #containsAny(Iterable, Set)} (neither is more
+     * specific than the other) and did not compile. This overload is more specific than both, so such calls
+     * now compile and behave identically to {@link #containsAny(Collection, Collection)}.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<String> colors = Arrays.asList("red", "green", "blue");
+     * Set<String> warm = Set.of("red", "orange", "yellow");
+     * boolean result = N.containsAny(colors, warm);   // returns true (found "red")
+     * }</pre>
+     *
+     * @param c the Collection to search in
+     * @param valuesToFind the Set of values to check for
+     * @return {@code true} if collection contains any value ({@code false} if either parameter is {@code null} or empty)
+     * @see #containsAny(Collection, Collection)
+     * @see #containsAny(Iterable, Set)
+     */
+    public static boolean containsAny(final Collection<?> c, final Set<?> valuesToFind) {
+        if (isEmpty(c) || isEmpty(valuesToFind)) {
+            return false;
+        }
+
+        return !disjoint(c, valuesToFind);
     }
 
     /**
@@ -1454,7 +1541,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     /**
      * Returns {@code true} if the iterator contains any of the specified values.
      *
-     * <p>Note: This method consumes the iterator completely.</p>
+     * <p>Note: This method consumes the iterator until a match is found, or completely if no value matches.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1497,6 +1584,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param valuesToFind the values to check for absence
      * @return {@code true} if the collection contains none of the specified values, {@code false} otherwise
      * @see #containsAny(Collection, Collection)
+     * @see #containsNone(Collection, Set)
+     * @see #containsNone(Iterable, Set)
+     * @see #containsNone(Iterator, Set)
      */
     public static boolean containsNone(final Collection<?> c, final Collection<?> valuesToFind) {
         if (isEmpty(c) || isEmpty(valuesToFind)) {
@@ -1523,6 +1613,38 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see #containsNone(Collection, Collection)
      */
     public static boolean containsNone(final Collection<?> c, final Object... valuesToFind) {
+        if (isEmpty(c) || isEmpty(valuesToFind)) {
+            return true;
+        }
+
+        return !containsAny(c, valuesToFind);
+    }
+
+    /**
+     * Returns {@code true} if the collection contains none of the specified values.
+     * Returns {@code true} if either parameter is {@code null} or empty.
+     *
+     * <p>Note: This overload was added (2026-06-11) to resolve an overload-resolution ambiguity: without it,
+     * a call like {@code N.containsNone(list, set)} was ambiguous between
+     * {@link #containsNone(Collection, Collection)} and {@link #containsNone(Iterable, Set)} (neither is more
+     * specific than the other) and did not compile. This overload is more specific than both, so such calls
+     * now compile and behave identically to {@link #containsNone(Collection, Collection)}.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<String> allowedColors = Arrays.asList("red", "green", "blue");
+     * Set<String> invalidColors = Set.of("yellow", "purple");
+     * boolean result = N.containsNone(allowedColors, invalidColors);   // returns true
+     * }</pre>
+     *
+     * @param c the Collection to check
+     * @param valuesToFind the Set of values to check for absence
+     * @return {@code true} if the collection contains none of the specified values, {@code false} otherwise
+     * @see #containsNone(Collection, Collection)
+     * @see #containsNone(Iterable, Set)
+     * @see #containsAny(Collection, Set)
+     */
+    public static boolean containsNone(final Collection<?> c, final Set<?> valuesToFind) {
         if (isEmpty(c) || isEmpty(valuesToFind)) {
             return true;
         }
@@ -1558,7 +1680,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * Returns {@code true} if the iterator contains none of the specified values.
      * Returns {@code true} if either parameter is {@code null} or empty.
      *
-     * <p>Note: This method consumes the iterator completely.</p>
+     * <p>Note: This method consumes the iterator until a matching value is found, or completely if none of the values are present.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1608,7 +1730,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         final int len = a.length;
         final List<boolean[]> res = new ArrayList<>(len % chunkSize == 0 ? len / chunkSize : (len / chunkSize) + 1);
 
-        for (int fromIndex = 0, toIndex = a.length; fromIndex < toIndex; fromIndex += chunkSize) {
+        for (int fromIndex = 0, toIndex = a.length; fromIndex < toIndex; fromIndex = fromIndex <= toIndex - chunkSize ? fromIndex + chunkSize : toIndex) {
             res.add(copyOfRange(a, fromIndex, fromIndex <= toIndex - chunkSize ? fromIndex + chunkSize : toIndex));
         }
 
@@ -1683,7 +1805,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         final int len = a.length;
         final List<char[]> res = new ArrayList<>(len % chunkSize == 0 ? len / chunkSize : (len / chunkSize) + 1);
 
-        for (int fromIndex = 0, toIndex = a.length; fromIndex < toIndex; fromIndex += chunkSize) {
+        for (int fromIndex = 0, toIndex = a.length; fromIndex < toIndex; fromIndex = fromIndex <= toIndex - chunkSize ? fromIndex + chunkSize : toIndex) {
             res.add(copyOfRange(a, fromIndex, fromIndex <= toIndex - chunkSize ? fromIndex + chunkSize : toIndex));
         }
 
@@ -1758,7 +1880,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         final int len = a.length;
         final List<byte[]> res = new ArrayList<>(len % chunkSize == 0 ? len / chunkSize : (len / chunkSize) + 1);
 
-        for (int fromIndex = 0, toIndex = a.length; fromIndex < toIndex; fromIndex += chunkSize) {
+        for (int fromIndex = 0, toIndex = a.length; fromIndex < toIndex; fromIndex = fromIndex <= toIndex - chunkSize ? fromIndex + chunkSize : toIndex) {
             res.add(copyOfRange(a, fromIndex, fromIndex <= toIndex - chunkSize ? fromIndex + chunkSize : toIndex));
         }
 
@@ -1833,7 +1955,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         final int len = a.length;
         final List<short[]> res = new ArrayList<>(len % chunkSize == 0 ? len / chunkSize : (len / chunkSize) + 1);
 
-        for (int fromIndex = 0, toIndex = a.length; fromIndex < toIndex; fromIndex += chunkSize) {
+        for (int fromIndex = 0, toIndex = a.length; fromIndex < toIndex; fromIndex = fromIndex <= toIndex - chunkSize ? fromIndex + chunkSize : toIndex) {
             res.add(copyOfRange(a, fromIndex, fromIndex <= toIndex - chunkSize ? fromIndex + chunkSize : toIndex));
         }
 
@@ -1908,7 +2030,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         final int len = a.length;
         final List<int[]> res = new ArrayList<>(len % chunkSize == 0 ? len / chunkSize : (len / chunkSize) + 1);
 
-        for (int fromIndex = 0, toIndex = a.length; fromIndex < toIndex; fromIndex += chunkSize) {
+        for (int fromIndex = 0, toIndex = a.length; fromIndex < toIndex; fromIndex = fromIndex <= toIndex - chunkSize ? fromIndex + chunkSize : toIndex) {
             res.add(copyOfRange(a, fromIndex, fromIndex <= toIndex - chunkSize ? fromIndex + chunkSize : toIndex));
         }
 
@@ -1983,7 +2105,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         final int len = a.length;
         final List<long[]> res = new ArrayList<>(len % chunkSize == 0 ? len / chunkSize : (len / chunkSize) + 1);
 
-        for (int fromIndex = 0, toIndex = a.length; fromIndex < toIndex; fromIndex += chunkSize) {
+        for (int fromIndex = 0, toIndex = a.length; fromIndex < toIndex; fromIndex = fromIndex <= toIndex - chunkSize ? fromIndex + chunkSize : toIndex) {
             res.add(copyOfRange(a, fromIndex, fromIndex <= toIndex - chunkSize ? fromIndex + chunkSize : toIndex));
         }
 
@@ -2058,7 +2180,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         final int len = a.length;
         final List<float[]> res = new ArrayList<>(len % chunkSize == 0 ? len / chunkSize : (len / chunkSize) + 1);
 
-        for (int fromIndex = 0, toIndex = a.length; fromIndex < toIndex; fromIndex += chunkSize) {
+        for (int fromIndex = 0, toIndex = a.length; fromIndex < toIndex; fromIndex = fromIndex <= toIndex - chunkSize ? fromIndex + chunkSize : toIndex) {
             res.add(copyOfRange(a, fromIndex, fromIndex <= toIndex - chunkSize ? fromIndex + chunkSize : toIndex));
         }
 
@@ -2133,7 +2255,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         final int len = a.length;
         final List<double[]> res = new ArrayList<>(len % chunkSize == 0 ? len / chunkSize : (len / chunkSize) + 1);
 
-        for (int fromIndex = 0, toIndex = a.length; fromIndex < toIndex; fromIndex += chunkSize) {
+        for (int fromIndex = 0, toIndex = a.length; fromIndex < toIndex; fromIndex = fromIndex <= toIndex - chunkSize ? fromIndex + chunkSize : toIndex) {
             res.add(copyOfRange(a, fromIndex, fromIndex <= toIndex - chunkSize ? fromIndex + chunkSize : toIndex));
         }
 
@@ -2209,7 +2331,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         final int len = a.length;
         final List<T[]> res = new ArrayList<>(len % chunkSize == 0 ? len / chunkSize : (len / chunkSize) + 1);
 
-        for (int fromIndex = 0, toIndex = a.length; fromIndex < toIndex; fromIndex += chunkSize) {
+        for (int fromIndex = 0, toIndex = a.length; fromIndex < toIndex; fromIndex = fromIndex <= toIndex - chunkSize ? fromIndex + chunkSize : toIndex) {
             res.add(copyOfRange(a, fromIndex, fromIndex <= toIndex - chunkSize ? fromIndex + chunkSize : toIndex));
         }
 
@@ -2261,7 +2383,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * Returns a list of sub-collections by splitting the collection into chunks of the specified size.
      * Returns an empty list if the collection is {@code null} or empty.
      * The last chunk may be smaller if the collection size is not evenly divisible.
-     * For List collections, returns views (subLists) with O(1) per chunk; for other collections, creates new ArrayLists.
+     * Each returned chunk is an independent new {@code ArrayList} (a copy); later mutations of the source collection do
+     * not affect the returned chunks.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -2291,7 +2414,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * Returns a list of sub-collections by splitting a range of the collection into chunks of the specified size.
      * Returns an empty list if the collection is {@code null} or empty, or if fromIndex equals toIndex.
      * The last chunk may be smaller if the range length is not evenly divisible.
-     * For List collections, returns views (subLists); for other collections, creates new ArrayLists.
+     * Each returned chunk is an independent new {@code ArrayList} (a copy); later mutations of the source collection do
+     * not affect the returned chunks.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -2327,7 +2451,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
             for (int i = fromIndex; i < toIndex;) {
                 final int end = i <= toIndex - chunkSize ? i + chunkSize : toIndex;
-                res.add(list.subList(i, end));
+                res.add(new ArrayList<>(list.subList(i, end)));
                 i = end;
             }
         } else {
@@ -2432,7 +2556,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
                     throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
-                final List<T> next = new ArrayList<>(chunkSize);
+                final List<T> next = new ArrayList<>(min(chunkSize, 8192));
 
                 for (int i = 0; i < chunkSize && iterator.hasNext(); i++) {
                     next.add(iterator.next());
@@ -2473,7 +2597,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      * Returns a list of substrings by splitting a range of the string into chunks of the specified size.
-     * Returns an empty list if the string is {@code null} or empty.
+     * Returns an empty list if the string is {@code null} or empty, or if fromIndex equals toIndex.
      * The last chunk may be smaller if the range length is not evenly divisible.
      *
      * <p><b>Usage Examples:</b></p>
@@ -2487,7 +2611,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param fromIndex the start index (inclusive)
      * @param toIndex the end index (exclusive)
      * @param chunkSize the size of each chunk
-     * @return a list of string chunks, or an empty list if the string is {@code null} or empty
+     * @return a list of string chunks, or an empty list if the string is {@code null}/empty or fromIndex equals toIndex
      * @throws IllegalArgumentException if chunkSize is not positive
      * @throws IndexOutOfBoundsException if the range is invalid
      * @see #split(CharSequence, int)
@@ -2796,7 +2920,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * // Handles null/empty arrays gracefully
      * char[] withNull = N.concat(a, null, b);   // returns {'a', 'b', 'c', 'd', 'e'}
-     * char[] allNull = N.concat(null, null);    // returns empty array
+     * char[] allNull = N.concat((char[]) null, (char[]) null);   // returns empty array
      *
      * // Single array returns a clone
      * char[] single = N.concat(a);              // returns {'a', 'b', 'c'}
@@ -3404,7 +3528,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      * Returns a new array containing all elements from both input arrays.
-     * Returns {@code null} if both arrays are {@code null}.
+     * Returns {@code null} only when <i>both</i> {@code a} and {@code b} are {@code null}; if either array is non-{@code null}
+     * (even if empty), a non-{@code null} array of its component type is returned (e.g. {@code concat(null, new String[0])}
+     * returns an empty {@code String[]}).
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -3424,10 +3550,16 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     @MayReturnNull
     public static <T> T[] concat(final T[] a, final T[] b) {
-        if (isEmpty(a)) {
-            return isEmpty(b) ? (a == null ? null : a.clone()) : b.clone();
-        } else if (isEmpty(b)) {
-            return a.clone();
+        if (a == null && b == null) {
+            return null;
+        }
+
+        final Class<?> componentType = a != null ? a.getClass().getComponentType() : b.getClass().getComponentType();
+
+        if (N.isEmpty(a)) {
+            return b == null ? newArray(componentType, 0) : clone(b);
+        } else if (N.isEmpty(b)) {
+            return a == null ? newArray(componentType, 0) : clone(a);
         }
 
         if (a.length > Integer.MAX_VALUE - b.length) {
@@ -3466,7 +3598,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     @MayReturnNull
     @SafeVarargs
     public static <T> T[] concat(final T[]... aa) { // throws IllegalArgumentException {
-        // checkArgNotNull(aa, cs.arrays);   // if aa can't be null, what's about method: concat(final T[] a, final T[] b)? a and b can't be null too?
+        // checkArgNotNull(aa, cs.arrays);   // if aa can't be null, what about the method: concat(final T[] a, final T[] b)? a and b can't be null too?
 
         if (aa == null) {
             return null; // NOSONAR
@@ -3524,6 +3656,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return a new list containing elements from both iterables
      * @see #concat(Iterable[])
      * @see #merge(Iterable, Iterable, BiFunction)
+     * @see Iterators#concat(Iterator...)
      */
     public static <T> List<T> concat(final Iterable<? extends T> a, final Iterable<? extends T> b) {
         return concat(Arrays.asList(a, b));
@@ -3547,6 +3680,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return a new list containing all elements from all iterables
      * @see #concat(Collection)
      * @see #merge(Collection, BiFunction)
+     * @see Iterators#concat(Iterator...)
      */
     @SafeVarargs
     public static <T> List<T> concat(final Iterable<? extends T>... a) {
@@ -3705,6 +3839,10 @@ public final class N extends CommonUtil { // public final class N extends π imp
         int count = 0;
 
         for (final boolean[] element : a) {
+            if (element != null && element.length > Integer.MAX_VALUE - count) {
+                throw new IllegalArgumentException("Combined array length exceeds maximum array size");
+            }
+
             count += (element == null ? 0 : element.length);
         }
 
@@ -3741,7 +3879,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * char[] result = N.flatten(withNull);   // returns {'a', 'b', 'c'}
      *
      * // Empty or null input
-     * char[] empty = N.flatten(null);   // returns empty array
+     * char[] empty = N.flatten((char[][]) null);   // returns empty array
      * }</pre>
      *
      * @param a the two-dimensional char array to be flattened, may be {@code null} or empty
@@ -3757,6 +3895,10 @@ public final class N extends CommonUtil { // public final class N extends π imp
         int count = 0;
 
         for (final char[] element : a) {
+            if (element != null && element.length > Integer.MAX_VALUE - count) {
+                throw new IllegalArgumentException("Combined array length exceeds maximum array size");
+            }
+
             count += (element == null ? 0 : element.length);
         }
 
@@ -3806,6 +3948,10 @@ public final class N extends CommonUtil { // public final class N extends π imp
         int count = 0;
 
         for (final byte[] element : a) {
+            if (element != null && element.length > Integer.MAX_VALUE - count) {
+                throw new IllegalArgumentException("Combined array length exceeds maximum array size");
+            }
+
             count += (element == null ? 0 : element.length);
         }
 
@@ -3847,6 +3993,10 @@ public final class N extends CommonUtil { // public final class N extends π imp
         int count = 0;
 
         for (final short[] element : a) {
+            if (element != null && element.length > Integer.MAX_VALUE - count) {
+                throw new IllegalArgumentException("Combined array length exceeds maximum array size");
+            }
+
             count += (element == null ? 0 : element.length);
         }
 
@@ -3888,6 +4038,10 @@ public final class N extends CommonUtil { // public final class N extends π imp
         int count = 0;
 
         for (final int[] element : a) {
+            if (element != null && element.length > Integer.MAX_VALUE - count) {
+                throw new IllegalArgumentException("Combined array length exceeds maximum array size");
+            }
+
             count += (element == null ? 0 : element.length);
         }
 
@@ -3929,6 +4083,10 @@ public final class N extends CommonUtil { // public final class N extends π imp
         int count = 0;
 
         for (final long[] element : a) {
+            if (element != null && element.length > Integer.MAX_VALUE - count) {
+                throw new IllegalArgumentException("Combined array length exceeds maximum array size");
+            }
+
             count += (element == null ? 0 : element.length);
         }
 
@@ -3970,6 +4128,10 @@ public final class N extends CommonUtil { // public final class N extends π imp
         int count = 0;
 
         for (final float[] element : a) {
+            if (element != null && element.length > Integer.MAX_VALUE - count) {
+                throw new IllegalArgumentException("Combined array length exceeds maximum array size");
+            }
+
             count += (element == null ? 0 : element.length);
         }
 
@@ -4011,6 +4173,10 @@ public final class N extends CommonUtil { // public final class N extends π imp
         int count = 0;
 
         for (final double[] element : a) {
+            if (element != null && element.length > Integer.MAX_VALUE - count) {
+                throw new IllegalArgumentException("Combined array length exceeds maximum array size");
+            }
+
             count += (element == null ? 0 : element.length);
         }
 
@@ -4064,7 +4230,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param a the two-dimensional array to be flattened, may be {@code null} or empty
      * @param componentType the class object representing the component type of the new array, must not be {@code null}
      * @return a one-dimensional array containing all elements in the input array.
-     *         Returns an empty array if the input array is {@code null}.
+     *         Returns an empty array if the input array is {@code null} or empty.
      * @see #flatten(Object[][])
      */
     public static <T> T[] flatten(final T[][] a, final Class<T> componentType) {
@@ -4075,6 +4241,10 @@ public final class N extends CommonUtil { // public final class N extends π imp
         int count = 0;
 
         for (final T[] element : a) {
+            if (element != null && element.length > Integer.MAX_VALUE - count) {
+                throw new IllegalArgumentException("Combined array length exceeds maximum array size");
+            }
+
             count += (element == null ? 0 : element.length);
         }
 
@@ -4135,7 +4305,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     @SuppressWarnings("rawtypes")
     public static <T, C extends Collection<T>> C flatten(final Iterable<? extends Iterable<? extends T>> c, final IntFunction<? extends C> supplier) {
-        if (isEmpty(c)) {
+        if (isEmptyCollection(c)) {
             return supplier.apply(0);
         }
 
@@ -4537,6 +4707,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
     /**
      * Returns the elements that are present in both of the specified arrays.
      * For elements that appear multiple times, the intersection contains the lesser number of occurrences.
+     * <br />
+     * Note: unlike the primitive overloads (e.g. {@link #intersection(int[], int[])}), which return an array,
+     * this overload returns a {@code List}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -4557,6 +4730,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *         Returns an empty list if either input array is {@code null} or empty.
      * @see #commonSet(Collection, Collection)
      * @see #intersection(int[], int[])
+     * @see Maps#intersection(Map, Map)
      */
     public static <T> List<T> intersection(final T[] a, final Object[] b) {
         if (isEmpty(a) || isEmpty(b)) {
@@ -4600,6 +4774,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see #commonSet(Collection, Collection)
      * @see #intersection(Object[], Object[])
      * @see #intersection(int[], int[])
+     * @see Maps#intersection(Map, Map)
      */
     public static <T> List<T> intersection(final Collection<? extends T> a, final Collection<?> b) {
         if (isEmpty(a) || isEmpty(b)) {
@@ -4864,6 +5039,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         return removeOccurrences(a, b, keyColumnNames, requiresSameColumns, true);
     }
 
+    @SuppressWarnings("deprecation")
     private static Dataset removeOccurrences(final Dataset a, final Dataset b, final Collection<String> keyColumnNames, final boolean requiresSameColumns,
             final boolean retain) {
         N.checkArgNotNull(a, "The first specified Dataset is null");
@@ -5367,6 +5543,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
     /**
      * Returns the elements in the first array that are not present in the second array,
      * considering the number of occurrences of each element.
+     * <br />
+     * Note: unlike the primitive overloads (e.g. {@link #difference(int[], int[])}), which return an array,
+     * this overload returns a {@code List}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -5389,6 +5568,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see #excludeAllToSet(Collection, Collection)
      * @see #removeAll(Collection, Iterable)
      * @see Iterables#difference(Set, Set)
+     * @see Maps#difference(Map, Map)
      */
     public static <T> List<T> difference(final T[] a, final Object[] b) {
         if (isEmpty(a)) {
@@ -5432,6 +5612,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see #excludeAllToSet(Collection, Collection)
      * @see #intersection(Collection, Collection)
      * @see #difference(int[], int[])
+     * @see Maps#difference(Map, Map)
      */
     public static <T> List<T> difference(final Collection<? extends T> a, final Collection<?> b) {
         if (isEmpty(a)) {
@@ -5888,6 +6069,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * Returns the elements present in either array but not in both, considering occurrence counts.
      * Returns an empty list if both arrays are {@code null} or empty.
      * Returns a list of all elements from the non-empty array if the other is {@code null} or empty.
+     * <br />
+     * Note: unlike the primitive overloads (e.g. {@link #symmetricDifference(int[], int[])}), which return an array,
+     * this overload returns a {@code List}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -5904,6 +6088,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see #symmetricDifference(Collection, Collection)
      * @see #difference(Object[], Object[])
      * @see #intersection(Object[], Object[])
+     * @see Maps#symmetricDifference(Map, Map)
      */
     public static <T> List<T> symmetricDifference(final T[] a, final T[] b) {
         if (isEmpty(a)) {
@@ -5955,6 +6140,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see #symmetricDifference(Object[], Object[])
      * @see #difference(Collection, Collection)
      * @see #intersection(Collection, Collection)
+     * @see Maps#symmetricDifference(Map, Map)
      */
     public static <T> List<T> symmetricDifference(final Collection<? extends T> a, final Collection<? extends T> b) {
         if (isEmpty(a)) {
@@ -6364,7 +6550,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      * Returns a new {@code List} containing all the elements from the specified collection except all occurrences of elements in the specified <i>objsToExclude</i>.
-     * That's to say no more value from <i>objsToExclude</i> will present in the returned {@code List}.
+     * That is to say, no value from <i>objsToExclude</i> will be present in the returned {@code List}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -6406,7 +6592,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      * Returns a new {@code Set} containing all the elements from the specified collection except all occurrences of elements in the specified <i>objsToExclude</i>.
-     * That's to say no more value from <i>objsToExclude</i> will present in the returned {@code Set}.
+     * That is to say, no value from <i>objsToExclude</i> will be present in the returned {@code Set}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -6510,7 +6696,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * </p>
      * <ul>
      *    <li>{@code subColl.size()} and {@code coll.size()} represent the
-     *    total cardinality of <i>a</i> and <i>b</i>, resp. </li>
+     *    total cardinality of <i>subColl</i> and <i>coll</i>, resp. </li>
      *    <li>{@code subColl.size() < Integer.MAX_VALUE}</li>
      * </ul>
      *
@@ -6549,6 +6735,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *   <li>They are both empty or null</li>
      *   <li>They contain exactly the same elements with the same frequencies in any order</li>
      * </ul>
+     *
+     * <p>This is an alias of the inherited {@link #containsSameElements(Collection, Collection)}, kept for familiarity
+     * alongside {@link #isSubCollection(Collection, Collection)} / {@link #isProperSubCollection(Collection, Collection)}
+     * (Apache Commons {@code CollectionUtils} naming). Providing one behavior under two names here is consistent with the
+     * dual-name conveniences offered for other types in this class.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -7369,9 +7560,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * boolean[] flags = {true, false, true};
+     * N.replaceAll(flags, b -> !b);
      * // flags is now {false, true, false} (all values negated)
-     * N.replaceAll(flags, b -> !b);   // flags is [false, true, false]
-     *
      * }</pre>
      *
      * @param a the array to modify
@@ -7397,9 +7587,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * char[] letters = {'a', 'b', 'c'};
+     * N.replaceAll(letters, c -> Character.toUpperCase(c));
      * // letters is now {'A', 'B', 'C'}
-     * N.replaceAll(letters, c -> Character.toUpperCase(c));   // letters is ['A', 'B', 'C']
-     *
      * }</pre>
      *
      * @param a the array to modify
@@ -7425,9 +7614,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * byte[] data = {1, 2, 3};
+     * N.replaceAll(data, b -> (byte) (b * 10));
      * // data is now {10, 20, 30}
-     * N.replaceAll(data, b -> (byte) (b * 10));   // data is [10, 20, 30]
-     *
      * }</pre>
      *
      * @param a the array to modify
@@ -7453,9 +7641,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * short[] numbers = {10, 20, 30};
+     * N.replaceAll(numbers, s -> (short) (s * 2));
      * // numbers is now {20, 40, 60}
-     * N.replaceAll(numbers, s -> (short) (s * 2));   // numbers is [20, 40, 60]
-     *
      * }</pre>
      *
      * @param a the array to modify
@@ -7481,9 +7668,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * int[] numbers = {1, 2, 3, 4};
+     * N.replaceAll(numbers, n -> n * n);
      * // numbers is now {1, 4, 9, 16}
-     * N.replaceAll(numbers, n -> n * n);   // numbers is [1, 4, 9, 16]
-     *
      * }</pre>
      *
      * @param a the array to modify
@@ -7511,9 +7697,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * long[] numbers = {100L, 200L, 300L};
+     * N.replaceAll(numbers, n -> n / 10);
      * // numbers is now {10L, 20L, 30L}
-     * N.replaceAll(numbers, n -> n / 10);   // numbers is [10, 20, 30]
-     *
      * }</pre>
      *
      * @param a the array to modify
@@ -7541,9 +7726,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * float[] values = {1.5f, 2.5f, 3.5f};
+     * N.replaceAll(values, f -> f * 2);
      * // values is now {3.0f, 5.0f, 7.0f}
-     * N.replaceAll(values, f -> f * 2);   // values is [3.0f, 5.0f, 7.0f]
-     *
      * }</pre>
      *
      * @param a the array to modify
@@ -7569,9 +7753,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * double[] values = {1.5, 2.5, 3.5};
+     * N.replaceAll(values, d -> d * 2);
      * // values is now {3.0, 5.0, 7.0}
-     * N.replaceAll(values, d -> d * 2);   // values is [3.0, 5.0, 7.0]
-     *
      * }</pre>
      *
      * @param a the array to modify
@@ -7599,9 +7782,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String[] words = {"apple", "banana", "cherry"};
+     * N.replaceAll(words, String::toUpperCase);
      * // words is now {"APPLE", "BANANA", "CHERRY"}
-     * N.replaceAll(words, String::toUpperCase);   // words is ["APPLE", "BANANA", "CHERRY"]
-     *
      * }</pre>
      *
      * @param <T> the type of elements in the array
@@ -7631,9 +7813,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<String> words = new ArrayList<>(Arrays.asList("apple", "banana", "cherry"));
+     * N.replaceAll(words, String::toUpperCase);
      * // words is now ["APPLE", "BANANA", "CHERRY"]
-     * N.replaceAll(words, String::toUpperCase);   // words is [APPLE, BANANA, CHERRY]
-     *
      * }</pre>
      *
      * @param <T> the type of elements in the list
@@ -7666,6 +7847,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
     /**
      * Replaces all elements in the given array using the specified {@code UnaryOperator}.
      * If the input array is empty or {@code null}, no replacements are made.
+     *
+     * <p>This is the same operation as {@link #replaceAll(Object[], UnaryOperator)}; the two differ only in the operator
+     * type. {@code updateAll} takes a {@link Throwables.UnaryOperator} (whose {@code apply} may throw a checked exception),
+     * whereas {@code replaceAll} takes a plain {@link UnaryOperator}. The names differ rather than overloading a single name
+     * because the two operator types would make lambda call sites ambiguous.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -7738,8 +7924,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * A placeholder/unsupported method defined to remind users to use {@code replaceAll}
-     * when searching for {@code update/updateAll/updateIf}.
+     * A placeholder/unsupported method defined to remind users searching for {@code update/updateAll}
+     * that the standard (unchecked-operator) operation is named {@code replaceAll} in this class.
+     * Note that {@link #updateAll(Object[], Throwables.UnaryOperator)} and
+     * {@link #updateAll(List, Throwables.UnaryOperator)} do exist: they are the same operation as
+     * {@code replaceAll}, differing only in accepting an operator that may throw a checked exception.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -7749,8 +7938,10 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws UnsupportedOperationException always thrown to indicate this method is not supported
      * @see #replaceAll(Object[], UnaryOperator)
      * @see #replaceAll(Object[], Object, Object)
+     * @see #updateAll(Object[], Throwables.UnaryOperator)
      * @deprecated Use {@link #replaceAll(Object[], UnaryOperator)} or
-     *             {@link #replaceAll(Object[], Object, Object)} instead.
+     *             {@link #replaceAll(Object[], Object, Object)} instead; if the operator throws a
+     *             checked exception, use {@link #updateAll(Object[], Throwables.UnaryOperator)}.
      */
     @Deprecated
     public static void updateAllUsingReplaceAllInstead() throws UnsupportedOperationException {
@@ -7758,8 +7949,10 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * A placeholder/unsupported method defined to remind users to use {@code replaceIf}
-     * when searching for {@code update/updateAll/updateIf}.
+     * A placeholder/unsupported method defined to remind users searching for {@code update/updateIf}
+     * that the conditional-replacement operation is named {@code replaceIf} in this class
+     * (there is no {@code updateIf} method). Note that checked-exception {@code updateAll} overloads
+     * do exist - see {@link #updateAll(Object[], Throwables.UnaryOperator)}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -7768,6 +7961,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * @throws UnsupportedOperationException always thrown to indicate this method is not supported
      * @see #replaceIf(Object[], Predicate, Object)
+     * @see #updateAll(Object[], Throwables.UnaryOperator)
      * @deprecated Use {@link #replaceIf(Object[], Predicate, Object)} instead.
      */
     @Deprecated
@@ -7782,9 +7976,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * boolean[] flags = new boolean[5];
+     * N.setAll(flags, i -> i % 2 == 0);
      * // flags is now {true, false, true, false, true}
-     * N.setAll(flags, i -> i % 2 == 0);   // flags is [true, false, true, false, true]
-     *
      * }</pre>
      *
      * @param array the array to be modified
@@ -7810,9 +8003,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * char[] letters = new char[5];
+     * N.setAll(letters, i -> (char) ('a' + i));
      * // letters is now {'a', 'b', 'c', 'd', 'e'}
-     * N.setAll(letters, i -> (char) ('a' + i));   // letters is ['a', 'b', 'c', 'd', 'e']
-     *
      * }</pre>
      *
      * @param array the array to be modified
@@ -7838,9 +8030,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * byte[] data = new byte[5];
+     * N.setAll(data, i -> (byte) (i * 10));
      * // data is now {0, 10, 20, 30, 40}
-     * N.setAll(data, i -> (byte) (i * 10));   // data is [0, 10, 20, 30, 40]
-     *
      * }</pre>
      *
      * @param array the array to be modified
@@ -7866,9 +8057,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * short[] values = new short[5];
+     * N.setAll(values, i -> (short) (i * 100));
      * // values is now {0, 100, 200, 300, 400}
-     * N.setAll(values, i -> (short) (i * 100));   // values is [0, 100, 200, 300, 400]
-     *
      * }</pre>
      *
      * @param array the array to be modified
@@ -7894,9 +8084,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * int[] numbers = new int[5];
+     * N.setAll(numbers, i -> i * i);
      * // numbers is now {0, 1, 4, 9, 16}
-     * N.setAll(numbers, i -> i * i);   // numbers is [0, 1, 4, 9, 16]
-     *
      * }</pre>
      *
      * @param array the array to be modified
@@ -7920,9 +8109,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * long[] numbers = new long[5];
+     * N.setAll(numbers, i -> (long) i * 1000);
      * // numbers is now {0L, 1000L, 2000L, 3000L, 4000L}
-     * N.setAll(numbers, i -> (long) i * 1000);   // numbers is [0, 1000, 2000, 3000, 4000]
-     *
      * }</pre>
      *
      * @param array the array to be modified
@@ -7946,16 +8134,13 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * float[] values = new float[5];
+     * N.setAll(values, i -> i * 1.5f);
      * // values is now {0.0f, 1.5f, 3.0f, 4.5f, 6.0f}
-     * N.setAll(values, i -> i * 1.5f);   // values is [0.0f, 1.5f, 3.0f, 4.5f, 6.0f]
-     *
      * }</pre>
      *
      * @param array the array to be modified
      * @param generator the function used to generate new values for the array elements
      * @see #replaceAll(float[], FloatUnaryOperator)
-     * @see Arrays#setAll(double[], IntToDoubleFunction)
-     * @see Arrays#parallelSetAll(double[], IntToDoubleFunction)
      */
     public static void setAll(final float[] array, final IntToFloatFunction generator) {
         if (isEmpty(array)) {
@@ -7974,9 +8159,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * double[] values = new double[5];
+     * N.setAll(values, i -> i * 2.5);
      * // values is now {0.0, 2.5, 5.0, 7.5, 10.0}
-     * N.setAll(values, i -> i * 2.5);   // values is [0.0, 2.5, 5.0, 7.5, 10.0]
-     *
      * }</pre>
      *
      * @param array the array to be modified
@@ -8000,9 +8184,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String[] words = new String[5];
+     * N.setAll(words, i -> "Item " + i);
      * // words is now ["Item 0", "Item 1", "Item 2", "Item 3", "Item 4"]
-     * N.setAll(words, i -> "Item " + i);   // words is ["Item 0", "Item 1", "Item 2", "Item 3", "Item 4"]
-     *
      * }</pre>
      *
      * @param <T> the type of elements in the input array
@@ -8028,9 +8211,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<String> words = new ArrayList<>(Arrays.asList("", "", "", ""));
+     * N.setAll(words, i -> "Item " + i);
      * // words is now ["Item 0", "Item 1", "Item 2", "Item 3"]
-     * N.setAll(words, i -> "Item " + i);   // words is [Item 0, Item 1, Item 2, Item 3]
-     *
      * }</pre>
      *
      * @param <T> the type of elements in the list
@@ -8139,6 +8321,15 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * If the specified array is {@code null}, returns {@code null}.
      * If the specified array is empty, returns an empty clone of the array.
      *
+     * <p><b>Family:</b> {@code copyThenSetAll}/{@code copyThenReplaceAll}/{@code copyThenUpdateAll} all clone the array and
+     * then transform the clone in place, leaving the original unchanged. They differ only in the functional argument:</p>
+     * <ul>
+     *   <li>{@link #copyThenSetAll(Object[], IntFunction)} - generates each value from the <i>index</i> only ({@code i -> value});</li>
+     *   <li>{@link #copyThenSetAll(Object[], Throwables.IntObjFunction)} - maps from the <i>index and original element</i> ({@code (i, old) -> value});</li>
+     *   <li>{@link #copyThenReplaceAll(Object[], UnaryOperator)} - maps from the <i>element</i> with an unchecked operator;</li>
+     *   <li>{@link #copyThenUpdateAll(Object[], Throwables.UnaryOperator)} - same as {@code copyThenReplaceAll} but the operator may throw a checked exception.</li>
+     * </ul>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String[] original = {"a", "b", "c"};
@@ -8176,6 +8367,15 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * Creates a copy of the given array and sets all elements in the copy using the provided converter function.
      * If the specified array is {@code null}, returns {@code null}.
      * If the specified array is empty, returns an empty clone of the array.
+     *
+     * <p><b>Family:</b> {@code copyThenSetAll}/{@code copyThenReplaceAll}/{@code copyThenUpdateAll} all clone the array and
+     * then transform the clone in place, leaving the original unchanged. They differ only in the functional argument:</p>
+     * <ul>
+     *   <li>{@link #copyThenSetAll(Object[], IntFunction)} - generates each value from the <i>index</i> only ({@code i -> value});</li>
+     *   <li>{@link #copyThenSetAll(Object[], Throwables.IntObjFunction)} - maps from the <i>index and original element</i> ({@code (i, old) -> value});</li>
+     *   <li>{@link #copyThenReplaceAll(Object[], UnaryOperator)} - maps from the <i>element</i> with an unchecked operator;</li>
+     *   <li>{@link #copyThenUpdateAll(Object[], Throwables.UnaryOperator)} - same as {@code copyThenReplaceAll} but the operator may throw a checked exception.</li>
+     * </ul>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -8217,6 +8417,15 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * If the specified array is {@code null}, returns {@code null}.
      * If the specified array is empty, returns an empty clone of the array.
      *
+     * <p><b>Family:</b> {@code copyThenSetAll}/{@code copyThenReplaceAll}/{@code copyThenUpdateAll} all clone the array and
+     * then transform the clone in place, leaving the original unchanged. They differ only in the functional argument:</p>
+     * <ul>
+     *   <li>{@link #copyThenSetAll(Object[], IntFunction)} - generates each value from the <i>index</i> only ({@code i -> value});</li>
+     *   <li>{@link #copyThenSetAll(Object[], Throwables.IntObjFunction)} - maps from the <i>index and original element</i> ({@code (i, old) -> value});</li>
+     *   <li>{@link #copyThenReplaceAll(Object[], UnaryOperator)} - maps from the <i>element</i> with an unchecked operator;</li>
+     *   <li>{@link #copyThenUpdateAll(Object[], Throwables.UnaryOperator)} - same as {@code copyThenReplaceAll} but the operator may throw a checked exception.</li>
+     * </ul>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String[] original = {"alice", "bob", "charlie"};
@@ -8255,15 +8464,24 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * If the specified array is {@code null}, returns {@code null}.
      * If the specified array is empty, returns an empty clone of the array.
      *
+     * <p><b>Family:</b> {@code copyThenSetAll}/{@code copyThenReplaceAll}/{@code copyThenUpdateAll} all clone the array and
+     * then transform the clone in place, leaving the original unchanged. They differ only in the functional argument:</p>
+     * <ul>
+     *   <li>{@link #copyThenSetAll(Object[], IntFunction)} - generates each value from the <i>index</i> only ({@code i -> value});</li>
+     *   <li>{@link #copyThenSetAll(Object[], Throwables.IntObjFunction)} - maps from the <i>index and original element</i> ({@code (i, old) -> value});</li>
+     *   <li>{@link #copyThenReplaceAll(Object[], UnaryOperator)} - maps from the <i>element</i> with an unchecked operator;</li>
+     *   <li>{@link #copyThenUpdateAll(Object[], Throwables.UnaryOperator)} - same as {@code copyThenReplaceAll} but the operator may throw a checked exception.</li>
+     * </ul>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String[] original = {"alice", "bob", "charlie"};
      * String[] copy = N.copyThenUpdateAll(original, s -> {
-     *     if (s.length() > 3) throw new IllegalArgumentException("Name too long");
+     *     if (s.isEmpty()) throw new IllegalArgumentException("Name is empty");
      *     return s.toUpperCase();
      * });
      * // original is still ["alice", "bob", "charlie"]
-     * // copy is ["ALICE", "BOB", "CHARLIE"] or exception thrown
+     * // copy is ["ALICE", "BOB", "CHARLIE"]
      * }</pre>
      *
      * @param <T> the type of elements in the array
@@ -8916,7 +9134,14 @@ public final class N extends CommonUtil { // public final class N extends π imp
         checkArgNotNull(a, cs.a);
 
         if (isEmpty(a)) {
-            return elementsToAdd == null ? a.clone() : elementsToAdd.clone();
+            if (isEmpty(elementsToAdd)) {
+                return a.clone();
+            }
+
+            // Build the result from a's component type (not elementsToAdd's) to preserve array type fidelity.
+            final T[] ret = Array.newInstance(a.getClass().getComponentType(), elementsToAdd.length);
+            copy(elementsToAdd, 0, ret, 0, elementsToAdd.length);
+            return ret;
         } else if (isEmpty(elementsToAdd)) {
             return a.clone();
         }
@@ -9433,6 +9658,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <br />
      * The original String remains unchanged.
      *
+     * <p><b>Null handling:</b> a {@code null} {@code str} or {@code strToInsert} is treated as an empty string (the result
+     * never contains the literal text {@code "null"}). Note this differs from the {@code Strings} facade convention of
+     * preserving {@code null} (e.g. {@code Strings.trim(null)} returns {@code null}), and from this class's general
+     * "null-safe operations return the input unchanged" note.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String text = "Hello World";
@@ -9443,7 +9673,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param str the original string
      * @param index the position in the string where the new string should be inserted
      * @param strToInsert the string to be inserted into the original string
-     * @return a new string with the original characters and the inserted string
+     * @return a new string with the original characters and the inserted string ({@code null} inputs treated as {@code ""})
      * @throws IndexOutOfBoundsException if the index is out of range (index &lt; 0 || index &gt; str.length())
      */
     public static String insert(final String str, final int index, final String strToInsert) throws IndexOutOfBoundsException {
@@ -9454,9 +9684,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
         } else if (Strings.isEmpty(str)) {
             return Strings.nullToEmpty(strToInsert);
         } else if (index == 0) {
-            return Strings.concat(strToInsert + str);
+            return Strings.concatNullToEmpty(strToInsert + str);
         } else if (index == str.length()) {
-            return Strings.concat(str + strToInsert);
+            return Strings.concatNullToEmpty(str + strToInsert);
         } else {
             return Strings.concat(str.substring(0, index), strToInsert, str.substring(index));
         }
@@ -9471,10 +9701,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <pre>{@code
      * boolean[] flags = {true, false, true};
      * boolean[] result = N.insertAll(flags, 1, false, false);
-     *
-     * // original flags array remains {true, false, true}
      * // returns {true, false, false, false, true}
-     *
+     * // original flags array remains {true, false, true}
      * }</pre>
      *
      * @param a the original array
@@ -9860,7 +10088,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param index the position in the array where the new elements should be inserted
      * @param elementsToInsert the elements to be inserted into the array
      * @return a new array with the original elements and the inserted elements
-     * @throws IllegalArgumentException if the specified {@code array} is {@code null}.
+     * @throws IllegalArgumentException if the original array {@code a} is {@code null}.
      * @throws IndexOutOfBoundsException if the specified index is out of range
      */
     @SafeVarargs
@@ -9977,12 +10205,14 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param a the original boolean array
      * @param index the position of the element to be removed
      * @return a new boolean array containing the existing elements except the element at the specified index
-     * @throws IndexOutOfBoundsException if the specified index is out of range (index &lt; 0 || index &gt;= a.length)
+     * @throws IllegalArgumentException if the specified array is {@code null}
+     * @throws IndexOutOfBoundsException if the specified index is out of range (index &lt; 0 || index &gt;= a.length);
+     *         a non-{@code null} empty array always throws this exception as it contains no valid index
      * @see #remove(boolean[], boolean)
      * @see #removeAt(boolean[], int...)
      */
     public static boolean[] removeAt(@NotNull final boolean[] a, final int index) throws IllegalArgumentException, IndexOutOfBoundsException {
-        // checkArgNotNull(a, cs.a);
+        checkArgNotNull(a, cs.a);
         checkElementIndex(index, len(a));
 
         if (isEmpty(a)) {
@@ -10023,12 +10253,14 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param a the original char array
      * @param index the position of the element to be removed
      * @return a new char array containing the existing elements except the element at the specified index
-     * @throws IndexOutOfBoundsException if the specified index is out of range (index &lt; 0 || index &gt;= a.length)
+     * @throws IllegalArgumentException if the specified array is {@code null}
+     * @throws IndexOutOfBoundsException if the specified index is out of range (index &lt; 0 || index &gt;= a.length);
+     *         a non-{@code null} empty array always throws this exception as it contains no valid index
      * @see #remove(char[], char)
      * @see #removeAt(char[], int...)
      */
     public static char[] removeAt(@NotNull final char[] a, final int index) throws IllegalArgumentException, IndexOutOfBoundsException {
-        // checkArgNotNull(a, cs.a);
+        checkArgNotNull(a, cs.a);
         checkElementIndex(index, len(a));
 
         if (isEmpty(a)) {
@@ -10069,12 +10301,14 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param a the original byte array
      * @param index the position of the element to be removed
      * @return a new byte array containing the existing elements except the element at the specified index
-     * @throws IndexOutOfBoundsException if the specified index is out of range (index &lt; 0 || index &gt;= a.length)
+     * @throws IllegalArgumentException if the specified array is {@code null}
+     * @throws IndexOutOfBoundsException if the specified index is out of range (index &lt; 0 || index &gt;= a.length);
+     *         a non-{@code null} empty array always throws this exception as it contains no valid index
      * @see #remove(byte[], byte)
      * @see #removeAt(byte[], int...)
      */
     public static byte[] removeAt(@NotNull final byte[] a, final int index) throws IllegalArgumentException, IndexOutOfBoundsException {
-        // checkArgNotNull(a, cs.a);
+        checkArgNotNull(a, cs.a);
         checkElementIndex(index, len(a));
 
         if (isEmpty(a)) {
@@ -10115,12 +10349,14 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param a the original short array
      * @param index the position of the element to be removed
      * @return a new short array containing the existing elements except the element at the specified index
-     * @throws IndexOutOfBoundsException if the specified index is out of range (index &lt; 0 || index &gt;= a.length)
+     * @throws IllegalArgumentException if the specified array is {@code null}
+     * @throws IndexOutOfBoundsException if the specified index is out of range (index &lt; 0 || index &gt;= a.length);
+     *         a non-{@code null} empty array always throws this exception as it contains no valid index
      * @see #remove(short[], short)
      * @see #removeAt(short[], int...)
      */
     public static short[] removeAt(@NotNull final short[] a, final int index) throws IllegalArgumentException, IndexOutOfBoundsException {
-        // checkArgNotNull(a, cs.a);
+        checkArgNotNull(a, cs.a);
         checkElementIndex(index, len(a));
 
         if (isEmpty(a)) {
@@ -10161,13 +10397,14 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param a the original int array
      * @param index the position of the element to be removed
      * @return a new int array containing the existing elements except the element at the specified index
-     * @throws IllegalArgumentException if one of the arguments violates the method contract
-     * @throws IndexOutOfBoundsException if the specified index is out of range
+     * @throws IllegalArgumentException if the specified array is {@code null}
+     * @throws IndexOutOfBoundsException if the specified index is out of range;
+     *         a non-{@code null} empty array always throws this exception as it contains no valid index
      * @see #remove(int[], int)
      * @see #removeAt(int[], int...)
      */
     public static int[] removeAt(@NotNull final int[] a, final int index) throws IllegalArgumentException, IndexOutOfBoundsException {
-        // checkArgNotNull(a, cs.a);
+        checkArgNotNull(a, cs.a);
         checkElementIndex(index, len(a));
 
         if (isEmpty(a)) {
@@ -10202,11 +10439,12 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param a the original long array
      * @param index the position of the element to be removed
      * @return a new long array containing the existing elements except the element at the specified index
-     * @throws IllegalArgumentException if one of the arguments violates the method contract
-     * @throws IndexOutOfBoundsException if the specified index is out of range
+     * @throws IllegalArgumentException if the specified array is {@code null}
+     * @throws IndexOutOfBoundsException if the specified index is out of range;
+     *         a non-{@code null} empty array always throws this exception as it contains no valid index
      */
     public static long[] removeAt(@NotNull final long[] a, final int index) throws IllegalArgumentException, IndexOutOfBoundsException {
-        // checkArgNotNull(a, cs.a);
+        checkArgNotNull(a, cs.a);
         checkElementIndex(index, len(a));
 
         if (isEmpty(a)) {
@@ -10241,11 +10479,12 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param a the original float array
      * @param index the position of the element to be removed
      * @return a new float array containing the existing elements except the element at the specified index
-     * @throws IllegalArgumentException if one of the arguments violates the method contract
-     * @throws IndexOutOfBoundsException if the specified index is out of range
+     * @throws IllegalArgumentException if the specified array is {@code null}
+     * @throws IndexOutOfBoundsException if the specified index is out of range;
+     *         a non-{@code null} empty array always throws this exception as it contains no valid index
      */
     public static float[] removeAt(@NotNull final float[] a, final int index) throws IllegalArgumentException, IndexOutOfBoundsException {
-        // checkArgNotNull(a, cs.a);
+        checkArgNotNull(a, cs.a);
         checkElementIndex(index, len(a));
 
         if (isEmpty(a)) {
@@ -10280,11 +10519,12 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param a the original double array
      * @param index the position of the element to be removed
      * @return a new double array containing the existing elements except the element at the specified index
-     * @throws IllegalArgumentException if one of the arguments violates the method contract
-     * @throws IndexOutOfBoundsException if the specified index is out of range
+     * @throws IllegalArgumentException if the specified array is {@code null}
+     * @throws IndexOutOfBoundsException if the specified index is out of range;
+     *         a non-{@code null} empty array always throws this exception as it contains no valid index
      */
     public static double[] removeAt(@NotNull final double[] a, final int index) throws IllegalArgumentException, IndexOutOfBoundsException {
-        // checkArgNotNull(a, cs.a);
+        checkArgNotNull(a, cs.a);
         checkElementIndex(index, len(a));
 
         if (isEmpty(a)) {
@@ -10317,19 +10557,18 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * }</pre>
      *
      * @param <T> the type of elements in the array
-     * @param a the original array
+     * @param a the original array, must not be {@code null}
      * @param index the position of the element to be removed
      * @return a new array containing the existing elements except the element at the specified index
-     * @throws IllegalArgumentException if one of the arguments violates the method contract
-     * @throws IndexOutOfBoundsException if the specified index is out of range
+     * @throws IllegalArgumentException if the specified array is {@code null}. Note the {@link #removeAt(String[], int...)}
+     *         varargs overload instead returns an empty array for a {@code null} array, because a {@code String[]} component
+     *         type is known and can be fabricated; this generic overload cannot.
+     * @throws IndexOutOfBoundsException if the specified index is out of range (a non-{@code null} empty array always throws
+     *         this exception as it contains no valid index)
      */
     public static <T> T[] removeAt(@NotNull final T[] a, final int index) throws IllegalArgumentException, IndexOutOfBoundsException {
-        // checkArgNotNull(a, cs.a);
-        checkElementIndex(index, len(a));
-
-        if (isEmpty(a)) {
-            return a;
-        }
+        checkArgNotNull(a, cs.a);
+        checkElementIndex(index, a.length);
 
         final T[] result = newArray(a.getClass().getComponentType(), a.length - 1);
 
@@ -10358,17 +10597,21 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * @param a the input boolean array from which elements are to be removed
      * @param indices the positions of the elements to be removed
-     * @return a new boolean array containing the remaining elements after removal
-     * @throws IndexOutOfBoundsException if any index is out of the array's range
+     * @return a new boolean array containing the remaining elements after removal. If {@code indices} is empty, a copy of
+     *         the specified array is returned (an empty array if the specified array is {@code null})
+     * @throws IndexOutOfBoundsException if any index is out of the array's range; a {@code null} or empty array with one or
+     *         more indices always throws this exception, as it has no valid index to remove
      * @see #removeAt(boolean[], int)
      * @see #removeRange(boolean[], int, int)
      */
     public static boolean[] removeAt(final boolean[] a, final int... indices) throws IndexOutOfBoundsException {
-        final int countOfIndex = indices.length;
-
         if (isEmpty(indices)) {
             return a == null ? EMPTY_BOOLEAN_ARRAY : a.clone();
-        } else if (countOfIndex == 1) {
+        }
+
+        final int countOfIndex = indices.length;
+
+        if (countOfIndex == 1) {
             return removeAt(a, indices[0]);
         }
 
@@ -10376,7 +10619,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         sort(indexes);
 
         final int lastIndex = indexes[countOfIndex - 1];
-        final int arrayLen = a.length;
+        final int arrayLen = len(a);
 
         if (indexes[0] < 0 || lastIndex >= arrayLen) {
             throw new IndexOutOfBoundsException("The specified indexes are from: " + indexes[0] + " to: " + lastIndex); //NOSONAR
@@ -10424,15 +10667,19 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * @param a the input char array from which elements are to be removed
      * @param indices the positions of the elements to be removed
-     * @return a new char array containing the remaining elements after removal
-     * @throws IndexOutOfBoundsException if any index is out of the array's range
+     * @return a new char array containing the remaining elements after removal. If {@code indices} is empty, a copy of
+     *         the specified array is returned (an empty array if the specified array is {@code null})
+     * @throws IndexOutOfBoundsException if any index is out of the array's range; a {@code null} or empty array with one or
+     *         more indices always throws this exception, as it has no valid index to remove
      */
     public static char[] removeAt(final char[] a, final int... indices) throws IndexOutOfBoundsException {
-        final int countOfIndex = indices.length;
-
         if (isEmpty(indices)) {
             return a == null ? EMPTY_CHAR_ARRAY : a.clone();
-        } else if (countOfIndex == 1) {
+        }
+
+        final int countOfIndex = indices.length;
+
+        if (countOfIndex == 1) {
             return removeAt(a, indices[0]);
         }
 
@@ -10440,7 +10687,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         sort(indexes);
 
         final int lastIndex = indexes[countOfIndex - 1];
-        final int arrayLen = a.length;
+        final int arrayLen = len(a);
 
         if (indexes[0] < 0 || lastIndex >= arrayLen) {
             throw new IndexOutOfBoundsException("The specified indexes are from: " + indexes[0] + " to: " + lastIndex); //NOSONAR
@@ -10488,15 +10735,19 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * @param a the input byte array from which elements are to be removed
      * @param indices the positions of the elements to be removed
-     * @return a new byte array containing the remaining elements after removal
-     * @throws IndexOutOfBoundsException if any index is out of the array's range
+     * @return a new byte array containing the remaining elements after removal. If {@code indices} is empty, a copy of
+     *         the specified array is returned (an empty array if the specified array is {@code null})
+     * @throws IndexOutOfBoundsException if any index is out of the array's range; a {@code null} or empty array with one or
+     *         more indices always throws this exception, as it has no valid index to remove
      */
     public static byte[] removeAt(final byte[] a, final int... indices) throws IndexOutOfBoundsException {
-        final int countOfIndex = indices.length;
-
         if (isEmpty(indices)) {
             return a == null ? EMPTY_BYTE_ARRAY : a.clone();
-        } else if (countOfIndex == 1) {
+        }
+
+        final int countOfIndex = indices.length;
+
+        if (countOfIndex == 1) {
             return removeAt(a, indices[0]);
         }
 
@@ -10504,7 +10755,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         sort(indexes);
 
         final int lastIndex = indexes[countOfIndex - 1];
-        final int arrayLen = a.length;
+        final int arrayLen = len(a);
 
         if (indexes[0] < 0 || lastIndex >= arrayLen) {
             throw new IndexOutOfBoundsException("The specified indexes are from: " + indexes[0] + " to: " + lastIndex); //NOSONAR
@@ -10552,15 +10803,19 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * @param a the input short array from which elements are to be removed
      * @param indices the positions of the elements to be removed
-     * @return a new short array containing the remaining elements after removal
-     * @throws IndexOutOfBoundsException if any index is out of the array's range
+     * @return a new short array containing the remaining elements after removal. If {@code indices} is empty, a copy of
+     *         the specified array is returned (an empty array if the specified array is {@code null})
+     * @throws IndexOutOfBoundsException if any index is out of the array's range; a {@code null} or empty array with one or
+     *         more indices always throws this exception, as it has no valid index to remove
      */
     public static short[] removeAt(final short[] a, final int... indices) throws IndexOutOfBoundsException {
-        final int countOfIndex = indices.length;
-
         if (isEmpty(indices)) {
             return a == null ? EMPTY_SHORT_ARRAY : a.clone();
-        } else if (countOfIndex == 1) {
+        }
+
+        final int countOfIndex = indices.length;
+
+        if (countOfIndex == 1) {
             return removeAt(a, indices[0]);
         }
 
@@ -10568,7 +10823,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         sort(indexes);
 
         final int lastIndex = indexes[countOfIndex - 1];
-        final int arrayLen = a.length;
+        final int arrayLen = len(a);
 
         if (indexes[0] < 0 || lastIndex >= arrayLen) {
             throw new IndexOutOfBoundsException("The specified indexes are from: " + indexes[0] + " to: " + lastIndex); //NOSONAR
@@ -10616,17 +10871,21 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * @param a the input int array from which elements are to be removed
      * @param indices the positions of the elements to be removed
-     * @return a new int array containing the remaining elements after removal
-     * @throws IndexOutOfBoundsException if any index is out of the array's range
+     * @return a new int array containing the remaining elements after removal. If {@code indices} is empty, a copy of
+     *         the specified array is returned (an empty array if the specified array is {@code null})
+     * @throws IndexOutOfBoundsException if any index is out of the array's range; a {@code null} or empty array with one or
+     *         more indices always throws this exception, as it has no valid index to remove
      * @see #removeAt(int[], int)
      * @see #removeRange(int[], int, int)
      */
     public static int[] removeAt(final int[] a, final int... indices) throws IndexOutOfBoundsException {
-        final int countOfIndex = indices.length;
-
         if (isEmpty(indices)) {
             return a == null ? EMPTY_INT_ARRAY : a.clone();
-        } else if (countOfIndex == 1) {
+        }
+
+        final int countOfIndex = indices.length;
+
+        if (countOfIndex == 1) {
             return removeAt(a, indices[0]);
         }
 
@@ -10634,7 +10893,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         sort(indexes);
 
         final int lastIndex = indexes[countOfIndex - 1];
-        final int arrayLen = a.length;
+        final int arrayLen = len(a);
 
         if (indexes[0] < 0 || lastIndex >= arrayLen) {
             throw new IndexOutOfBoundsException("The specified indexes are from: " + indexes[0] + " to: " + lastIndex); //NOSONAR
@@ -10682,15 +10941,19 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * @param a the input long array from which elements are to be removed
      * @param indices the positions of the elements to be removed
-     * @return a new long array containing the remaining elements after removal
-     * @throws IndexOutOfBoundsException if any index is out of the array's range
+     * @return a new long array containing the remaining elements after removal. If {@code indices} is empty, a copy of
+     *         the specified array is returned (an empty array if the specified array is {@code null})
+     * @throws IndexOutOfBoundsException if any index is out of the array's range; a {@code null} or empty array with one or
+     *         more indices always throws this exception, as it has no valid index to remove
      */
     public static long[] removeAt(final long[] a, final int... indices) throws IndexOutOfBoundsException {
-        final int countOfIndex = indices.length;
-
         if (isEmpty(indices)) {
             return a == null ? EMPTY_LONG_ARRAY : a.clone();
-        } else if (countOfIndex == 1) {
+        }
+
+        final int countOfIndex = indices.length;
+
+        if (countOfIndex == 1) {
             return removeAt(a, indices[0]);
         }
 
@@ -10698,7 +10961,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         sort(indexes);
 
         final int lastIndex = indexes[countOfIndex - 1];
-        final int arrayLen = a.length;
+        final int arrayLen = len(a);
 
         if (indexes[0] < 0 || lastIndex >= arrayLen) {
             throw new IndexOutOfBoundsException("The specified indexes are from: " + indexes[0] + " to: " + lastIndex); //NOSONAR
@@ -10746,15 +11009,19 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * @param a the input float array from which elements are to be removed
      * @param indices the positions of the elements to be removed
-     * @return a new float array containing the remaining elements after removal
-     * @throws IndexOutOfBoundsException if any index is out of the array's range
+     * @return a new float array containing the remaining elements after removal. If {@code indices} is empty, a copy of
+     *         the specified array is returned (an empty array if the specified array is {@code null})
+     * @throws IndexOutOfBoundsException if any index is out of the array's range; a {@code null} or empty array with one or
+     *         more indices always throws this exception, as it has no valid index to remove
      */
     public static float[] removeAt(final float[] a, int... indices) throws IndexOutOfBoundsException {
-        final int countOfIndex = indices.length;
-
         if (isEmpty(indices)) {
             return a == null ? EMPTY_FLOAT_ARRAY : a.clone();
-        } else if (countOfIndex == 1) {
+        }
+
+        final int countOfIndex = indices.length;
+
+        if (countOfIndex == 1) {
             return removeAt(a, indices[0]);
         }
 
@@ -10762,7 +11029,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         sort(indexes);
 
         final int lastIndex = indexes[countOfIndex - 1];
-        final int arrayLen = a.length;
+        final int arrayLen = len(a);
 
         if (indexes[0] < 0 || lastIndex >= arrayLen) {
             throw new IndexOutOfBoundsException("The specified indexes are from: " + indexes[0] + " to: " + lastIndex); //NOSONAR
@@ -10810,15 +11077,19 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * @param a the input double array from which elements are to be removed
      * @param indices the positions of the elements to be removed
-     * @return a new double array containing the remaining elements after removal
-     * @throws IndexOutOfBoundsException if any index is out of the array's range
+     * @return a new double array containing the remaining elements after removal. If {@code indices} is empty, a copy of
+     *         the specified array is returned (an empty array if the specified array is {@code null})
+     * @throws IndexOutOfBoundsException if any index is out of the array's range; a {@code null} or empty array with one or
+     *         more indices always throws this exception, as it has no valid index to remove
      */
     public static double[] removeAt(final double[] a, final int... indices) throws IndexOutOfBoundsException {
-        final int countOfIndex = indices.length;
-
         if (isEmpty(indices)) {
             return a == null ? EMPTY_DOUBLE_ARRAY : a.clone();
-        } else if (countOfIndex == 1) {
+        }
+
+        final int countOfIndex = indices.length;
+
+        if (countOfIndex == 1) {
             return removeAt(a, indices[0]);
         }
 
@@ -10826,7 +11097,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         sort(indexes);
 
         final int lastIndex = indexes[countOfIndex - 1];
-        final int arrayLen = a.length;
+        final int arrayLen = len(a);
 
         if (indexes[0] < 0 || lastIndex >= arrayLen) {
             throw new IndexOutOfBoundsException("The specified indexes are from: " + indexes[0] + " to: " + lastIndex); //NOSONAR
@@ -10874,14 +11145,14 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * @param a the input String array from which elements are to be removed
      * @param indices the positions of the elements to be removed
-     * @return a new String array containing the remaining elements after removal
-     * @throws IndexOutOfBoundsException if any index is out of the array's range
+     * @return a new String array containing the remaining elements after removal. If {@code indices} is empty, a copy of
+     *         the specified array is returned (an empty array if the specified array is {@code null})
+     * @throws IndexOutOfBoundsException if any index is out of the array's range; a {@code null} or empty array with one or
+     *         more indices always throws this exception, as it has no valid index to remove
      */
     public static String[] removeAt(final String[] a, final int... indices) throws IndexOutOfBoundsException {
         if (isEmpty(indices)) {
             return a == null ? EMPTY_STRING_ARRAY : a.clone();
-        } else if (indices.length == 1) {
-            return removeAt(a, indices[0]);
         }
 
         final int[] indexes = indices.clone();
@@ -10903,17 +11174,21 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * }</pre>
      *
      * @param <T> the type of elements in the input array
-     * @param a the input array from which elements are to be removed
+     * @param a the input array from which elements are to be removed, must not be {@code null}
      * @param indices the positions of the elements to be removed
-     * @return a new array containing the remaining elements after removal
-     * @throws IllegalArgumentException if one of the arguments violates the method contract
+     * @return a new array containing the remaining elements after removal. If {@code indices} is empty, a copy of the
+     *         specified array is returned
+     * @throws IllegalArgumentException if the specified array is {@code null}. Note the {@link #removeAt(String[], int...)}
+     *         overload instead returns an empty array for a {@code null} array, because a {@code String[]} component type
+     *         is known and can be fabricated; this generic overload cannot.
      * @throws IndexOutOfBoundsException if any index is out of the array's range
      */
+    @MayReturnNull
     public static <T> T[] removeAt(@NotNull final T[] a, final int... indices) throws IllegalArgumentException, IndexOutOfBoundsException {
-        // checkArgNotNull(a, cs.a);
+        checkArgNotNull(a, cs.a);
 
         if (isEmpty(indices)) {
-            return isEmpty(a) ? a : a.clone();
+            return a.clone();
         } else if (indices.length == 1) {
             return removeAt(a, indices[0]);
         }
@@ -10928,7 +11203,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         final int countOfIndex = indices.length;
         final int lastIndex = indices[countOfIndex - 1];
 
-        final int arrayLen = a.length;
+        final int arrayLen = len(a);
 
         if (indices[0] < 0 || lastIndex >= arrayLen) {
             throw new IndexOutOfBoundsException("The specified indices are from: " + indices[0] + " to: " + lastIndex);
@@ -10980,7 +11255,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     @SuppressWarnings("rawtypes")
     public static boolean removeAt(@NotNull final List<?> list, final int... indices) throws IllegalArgumentException {
-        checkArgNotNull(list);
+        checkArgNotNull(list, cs.list);
 
         if (isEmpty(indices)) {
             return false;
@@ -11299,13 +11574,14 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param <T> the type of elements in the array
      * @param a the array from which to remove the value
      * @param valueToRemove the value to remove
-     * @return a new array with the first occurrence removed; a clone of the array if the value is not found; or the input array itself if it is {@code null} or empty
-     * @throws IllegalArgumentException if an illegal argument is provided
+     * @return a new array with the first occurrence removed; a clone of the array if the value is not found; or the input
+     *         array itself - possibly {@code null} - if it is {@code null} or empty (unlike the
+     *         {@link #remove(String[], String)} overload, which returns an empty array for a {@code null} array)
      * @see #removeAll(Object[], Object...)
      * @see #removeAt(Object[], int)
      */
     @MayReturnNull
-    public static <T> T[] remove(final T[] a, final T valueToRemove) throws IllegalArgumentException {
+    public static <T> T[] remove(final T[] a, final T valueToRemove) {
         if (isEmpty(a)) {
             return a;
         }
@@ -11676,7 +11952,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param <T> the type of elements in the array
      * @param a the array from which the values should be removed.
      * @param valuesToRemove the values to be removed from the array.
-     * @return a new array with all occurrences of the specified values removed. The input array itself is returned if the specified array is {@code null} or empty.
+     * @return a new array with all occurrences of the specified values removed. The input array itself - possibly
+     *         {@code null} - is returned if the specified array is {@code null} or empty (unlike the
+     *         {@link #removeAll(String[], String...)} overload, which returns an empty array for a {@code null} array).
      * @see N#difference(int[], int[])
      */
     @MayReturnNull
@@ -12149,8 +12427,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param <T> the type of elements in the array
      * @param a the array from which the value should be removed.
      * @param valueToRemove the value to be removed from the array.
-     * @return a new array with all occurrences of the specified value removed. The input array itself is returned if the specified array is {@code null} or empty.
+     * @return a new array with all occurrences of the specified value removed. The input array itself - possibly
+     *         {@code null} - is returned if the specified array is {@code null} or empty (unlike the
+     *         {@link #removeAllOccurrences(String[], String)} overload, which returns an empty array for a {@code null} array).
      */
+    @MayReturnNull
     public static <T> T[] removeAllOccurrences(final T[] a, final T valueToRemove) {
         if (isEmpty(a)) {
             return a;
@@ -12270,8 +12551,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * @param a the array from which duplicates should be removed.
      * @return a new array with all duplicates removed. An empty array is returned if the specified array is {@code null} or empty.
-     * @deprecated Use {@link #distinct(char[])} instead for clearer naming that follows Java Stream API conventions.
-     *             This method will be maintained for backward compatibility but new code should use the distinct variant.
+     * @deprecated Use {@link #distinct(char[])} instead.
      */
     @Deprecated
     public static char[] removeDuplicates(final char[] a) {
@@ -13432,7 +13712,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param a the input array from which a range of elements are to be deleted
      * @param fromIndex the initial index of the range to be deleted, inclusive
      * @param toIndex the final index of the range to be deleted, exclusive
-     * @return a new array with the specified range of elements removed. An empty array is returned if the specified array is {@code null} or empty.
+     * @return a new array with the specified range of elements removed. For a {@code null} or empty array, an empty array is
+     *         returned only when the range is also empty ({@code fromIndex == toIndex == 0}); any other range throws {@code IndexOutOfBoundsException}.
      *
      * @throws IndexOutOfBoundsException if the range is out of the array bounds
      */
@@ -13472,7 +13753,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param a the input array from which a range of elements are to be deleted
      * @param fromIndex the initial index of the range to be deleted, inclusive
      * @param toIndex the final index of the range to be deleted, exclusive
-     * @return a new array with the specified range of elements removed. An empty array is returned if the specified array is {@code null} or empty.
+     * @return a new array with the specified range of elements removed. For a {@code null} or empty array, an empty array is
+     *         returned only when the range is also empty ({@code fromIndex == toIndex == 0}); any other range throws {@code IndexOutOfBoundsException}.
      *
      * @throws IndexOutOfBoundsException if the range is out of the array bounds
      */
@@ -13512,7 +13794,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param a the input array from which a range of elements are to be deleted
      * @param fromIndex the initial index of the range to be deleted, inclusive
      * @param toIndex the final index of the range to be deleted, exclusive
-     * @return a new array with the specified range of elements removed. An empty array is returned if the specified array is {@code null} or empty.
+     * @return a new array with the specified range of elements removed. For a {@code null} or empty array, an empty array is
+     *         returned only when the range is also empty ({@code fromIndex == toIndex == 0}); any other range throws {@code IndexOutOfBoundsException}.
      *
      * @throws IndexOutOfBoundsException if the range is out of the array bounds
      */
@@ -13552,7 +13835,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param a the input array from which a range of elements are to be deleted
      * @param fromIndex the initial index of the range to be deleted, inclusive
      * @param toIndex the final index of the range to be deleted, exclusive
-     * @return a new array with the specified range of elements removed. An empty array is returned if the specified array is {@code null} or empty.
+     * @return a new array with the specified range of elements removed. For a {@code null} or empty array, an empty array is
+     *         returned only when the range is also empty ({@code fromIndex == toIndex == 0}); any other range throws {@code IndexOutOfBoundsException}.
      *
      * @throws IndexOutOfBoundsException if the range is out of the array bounds
      */
@@ -13592,7 +13876,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param a the input array from which a range of elements are to be deleted
      * @param fromIndex the initial index of the range to be deleted, inclusive
      * @param toIndex the final index of the range to be deleted, exclusive
-     * @return a new array with the specified range of elements removed. An empty array is returned if the specified array is {@code null} or empty.
+     * @return a new array with the specified range of elements removed. For a {@code null} or empty array, an empty array is
+     *         returned only when the range is also empty ({@code fromIndex == toIndex == 0}); any other range throws {@code IndexOutOfBoundsException}.
      *
      * @throws IndexOutOfBoundsException if the range is out of the array bounds
      */
@@ -13632,7 +13917,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param a the input array from which a range of elements are to be deleted
      * @param fromIndex the initial index of the range to be deleted, inclusive
      * @param toIndex the final index of the range to be deleted, exclusive
-     * @return a new array with the specified range of elements removed. An empty array is returned if the specified array is {@code null} or empty.
+     * @return a new array with the specified range of elements removed. For a {@code null} or empty array, an empty array is
+     *         returned only when the range is also empty ({@code fromIndex == toIndex == 0}); any other range throws {@code IndexOutOfBoundsException}.
      *
      * @throws IndexOutOfBoundsException if the range is out of the array bounds
      */
@@ -13672,7 +13958,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param a the input array from which a range of elements are to be deleted
      * @param fromIndex the initial index of the range to be deleted, inclusive
      * @param toIndex the final index of the range to be deleted, exclusive
-     * @return a new array with the specified range of elements removed. An empty array is returned if the specified array is {@code null} or empty.
+     * @return a new array with the specified range of elements removed. For a {@code null} or empty array, an empty array is
+     *         returned only when the range is also empty ({@code fromIndex == toIndex == 0}); any other range throws {@code IndexOutOfBoundsException}.
      *
      * @throws IndexOutOfBoundsException if the range is out of the array bounds
      */
@@ -13712,7 +13999,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param a the input array from which a range of elements are to be deleted
      * @param fromIndex the initial index of the range to be deleted, inclusive
      * @param toIndex the final index of the range to be deleted, exclusive
-     * @return a new array with the specified range of elements removed. An empty array is returned if the specified array is {@code null} or empty.
+     * @return a new array with the specified range of elements removed. For a {@code null} or empty array, an empty array is
+     *         returned only when the range is also empty ({@code fromIndex == toIndex == 0}); any other range throws {@code IndexOutOfBoundsException}.
      *
      * @throws IndexOutOfBoundsException if the range is out of the array bounds
      */
@@ -13753,10 +14041,12 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param a the input array from which a range of elements are to be deleted
      * @param fromIndex the initial index of the range to be deleted, inclusive
      * @param toIndex the final index of the range to be deleted, exclusive
-     * @return a new array with the specified range of elements removed. An empty array is returned if the specified array is {@code null} or empty.
+     * @return a new array with the specified range of elements removed. For a {@code null} or empty array, an empty array
+     *         is returned only when the range is also empty ({@code fromIndex == toIndex == 0}); any other range throws
+     *         {@code IndexOutOfBoundsException}.
      * @throws IndexOutOfBoundsException if the range is out of the array bounds
      */
-    public static String[] removeRange(final String[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException, IllegalArgumentException {
+    public static String[] removeRange(final String[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
 
         if (fromIndex == toIndex) {
@@ -13789,18 +14079,46 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * // returns: ["A", "D", "E"] - removed indices 1 and 2
      * }</pre>
      *
+     * <p><b>Naming:</b> for arrays {@code removeRange} and {@link #skipRange(Object[], int, int) skipRange} are exact
+     * synonyms (both return a new array). {@code removeRange} is the preferred name, completing the primitive
+     * {@code removeRange} grid. For collections the two names diverge in semantics:
+     * {@link #removeRange(List, int, int)} mutates the input list in place, whereas
+     * {@link #skipRange(Collection, int, int)} returns a new list and leaves the input unchanged.</p>
+     *
      * @param <T> the type of elements in the array
-     * @param a the input array from which a range of elements are to be deleted
+     * @param a the input array from which a range of elements are to be deleted, must not be {@code null}
      * @param fromIndex the initial index of the range to be deleted, inclusive
      * @param toIndex the final index of the range to be deleted, exclusive
-     * @return a new array with the specified range of elements removed. {@code null} is returned if the specified array is {@code null}.
+     * @return a new array with the specified range of elements removed
+     * @throws IllegalArgumentException if the specified array is {@code null}. Note the {@link #removeRange(String[], int, int)}
+     *         overload instead returns an empty array for a {@code null} array, because a {@code String[]} component type
+     *         is known and can be fabricated; this generic overload cannot.
      * @throws IndexOutOfBoundsException if the range is out of the array bounds
+     * @see #removeRange(String[], int, int)
+     * @see #removeRange(List, int, int)
      * @see #skipRange(Object[], int, int)
+     * @see #skipRange(Collection, int, int)
      */
     public static <T> T[] removeRange(@NotNull final T[] a, final int fromIndex, final int toIndex) throws IllegalArgumentException, IndexOutOfBoundsException {
-        // checkArgNotNull(a, cs.a);
+        checkArgNotNull(a, cs.a);
+        checkFromToIndex(fromIndex, toIndex, a.length);
 
-        return skipRange(a, fromIndex, toIndex);
+        if (fromIndex == toIndex) {
+            return a.clone();
+        }
+
+        final int len = a.length;
+        final T[] ret = N.newArray(a.getClass().getComponentType(), len - (toIndex - fromIndex));
+
+        if (fromIndex > 0) {
+            N.copy(a, 0, ret, 0, fromIndex);
+        }
+
+        if (toIndex < len) {
+            N.copy(a, toIndex, ret, fromIndex, len - toIndex);
+        }
+
+        return ret;
     }
 
     /**
@@ -13869,6 +14187,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IndexOutOfBoundsException if {@code fromIndex < 0} or {@code fromIndex > toIndex} or {@code toIndex > str.length()} (where {@code null} is treated as length 0)
      * @see Strings#removeRange(String, int, int)
      */
+    @Beta
     public static String removeRange(final String str, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         return Strings.removeRange(str, fromIndex, toIndex);
     }
@@ -14310,17 +14629,19 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * }</pre>
      *
      * @param <T> the type of elements in the array
-     * @param a the original array
+     * @param a the original array, must not be {@code null}
      * @param fromIndex the initial index of the range to be replaced, inclusive
      * @param toIndex the final index of the range to be replaced, exclusive
      * @param replacement the array to replace the specified range in the original array
-     * @return a new array with the specified range replaced by the replacement array
-     *
+     * @return a new array with the specified range replaced by the replacement array. If the specified array is empty (the
+     *         range must then be {@code fromIndex == toIndex == 0}), a clone of {@code replacement} is returned, or the empty
+     *         input array itself when {@code replacement} is {@code null} or empty.
+     * @throws IllegalArgumentException if the specified array is {@code null}
      * @throws IndexOutOfBoundsException if the range is out of the array bounds
      */
     public static <T> T[] replaceRange(@NotNull final T[] a, final int fromIndex, final int toIndex, final T[] replacement)
             throws IllegalArgumentException, IndexOutOfBoundsException {
-        // checkArgNotNull(a, cs.a);
+        checkArgNotNull(a, cs.a);
 
         final int len = len(a);
 
@@ -14418,6 +14739,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IndexOutOfBoundsException if the range is out of the string bounds
      * @see Strings#replaceRange(String, int, int, String)
      */
+    @Beta
     public static String replaceRange(final String str, final int fromIndex, final int toIndex, final String replacement) throws IndexOutOfBoundsException {
         return Strings.replaceRange(str, fromIndex, toIndex, replacement);
     }
@@ -14759,8 +15081,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String[] arr = {"A", "B", "C", "D", "E"};
-     * // Result: ["A", "D", "E", "B", "C"]
-     * N.moveRange(arr, 1, 3, 3);   // arr is ["A", "D", "E", "B", "C"]
+     * N.moveRange(arr, 1, 3, 3);   // arr is now ["A", "D", "E", "B", "C"]
      * }</pre>
      *
      * @param <T> the type of elements in the array
@@ -14872,6 +15193,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *         newPositionAfterMove would cause elements to be moved outside the string
      * @see Strings#moveRange(String, int, int, int)
      */
+    @Beta
     public static String moveRange(final String str, final int fromIndex, final int toIndex, final int newPositionAfterMove) throws IndexOutOfBoundsException {
         return Strings.moveRange(str, fromIndex, toIndex, newPositionAfterMove);
     }
@@ -14889,10 +15211,10 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      * Returns a new array with the specified range skipped, effectively excluding elements
-     * from the given start index (inclusive) to the end index (exclusive).
+     * from {@code fromIndex} (inclusive) to {@code toIndex} (exclusive).
      *
-     * <p>The original array remains unchanged. If the input array is {@code null}, returns {@code null}.
-     * If the range is empty (startInclusive == endExclusive), returns a clone of the original array.
+     * <p>The original array remains unchanged. If the range is empty ({@code fromIndex == toIndex}),
+     * a clone of the original array is returned.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -14905,36 +15227,23 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * }</pre>
      *
      * @param <T> the type of elements in the input array
-     * @param a the original array; may be {@code null}
-     * @param startInclusive the initial index of the range to be skipped, inclusive
-     * @param endExclusive the final index of the range to be skipped, exclusive
-     * @return a new array with the specified range skipped; {@code null} if the input array is {@code null}.
+     * @param a the original array, must not be {@code null}
+     * @param fromIndex the initial index of the range to be skipped, inclusive
+     * @param toIndex the final index of the range to be skipped, exclusive
+     * @return a new array with the specified range skipped
+     * @throws IllegalArgumentException if the specified array is {@code null}
      * @throws IndexOutOfBoundsException if the range is out of the array bounds
+     * @deprecated for arrays this is an exact synonym of {@link #removeRange(Object[], int, int)} (it simply delegates);
+     *             use {@code removeRange} to stay consistent with the primitive {@code removeRange} grid.
+     *             Note {@link #skipRange(Collection, int, int)} is NOT deprecated - for collections it carries the distinct
+     *             copy-not-mutate semantics (vs {@link #removeRange(List, int, int)}, which mutates the list in place).
      * @see #removeRange(Object[], int, int)
+     * @see #removeRange(List, int, int)
+     * @see #skipRange(Collection, int, int)
      */
-    @MayReturnNull
-    public static <T> T[] skipRange(final T[] a, final int startInclusive, final int endExclusive) throws IndexOutOfBoundsException {
-        final int len = len(a);
-
-        checkFromToIndex(startInclusive, endExclusive, len);
-
-        if (a == null) {
-            return null;
-        } else if (startInclusive == endExclusive) {
-            return a.clone();
-        }
-
-        final T[] ret = N.newArray(a.getClass().getComponentType(), len - (endExclusive - startInclusive));
-
-        if (startInclusive > 0) {
-            N.copy(a, 0, ret, 0, startInclusive);
-        }
-
-        if (endExclusive < len) {
-            N.copy(a, endExclusive, ret, startInclusive, len - endExclusive);
-        }
-
-        return ret;
+    @Deprecated
+    public static <T> T[] skipRange(final T[] a, final int fromIndex, final int toIndex) throws IllegalArgumentException, IndexOutOfBoundsException {
+        return removeRange(a, fromIndex, toIndex);
     }
 
     /**
@@ -14961,6 +15270,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return a new list with the specified range skipped.
      * @throws IndexOutOfBoundsException if the range is out of the collection bounds
      * @see #skipRange(Collection, int, int, IntFunction)
+     * @see #removeRange(List, int, int)
      */
     public static <T> List<T> skipRange(final Collection<? extends T> c, final int startInclusive, final int endExclusive) throws IndexOutOfBoundsException {
         return skipRange(c, startInclusive, endExclusive, IntFunctions.ofList());
@@ -14999,7 +15309,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see #skipRange(Collection, int, int)
      */
     public static <T, C extends Collection<T>> C skipRange(final Collection<? extends T> c, final int startInclusive, final int endExclusive,
-            final IntFunction<C> supplier) throws IndexOutOfBoundsException {
+            final IntFunction<? extends C> supplier) throws IndexOutOfBoundsException {
         final int size = size(c);
 
         checkFromToIndex(startInclusive, endExclusive, size);
@@ -15818,6 +16128,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
     /**
      * Retains only the elements in the specified collection that are present in the specified collection of elements to keep.
      * In other words, removes from the first collection all of its elements that are not contained in the second collection.
+     * <br />
+     * Note: if {@code objsToKeep} is {@code null} or empty ("keep nothing"), a non-empty input collection is cleared and
+     * {@code true} is returned.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -15855,6 +16168,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
     /**
      * Returns the sum of all elements in the specified char array or varargs.
      * Returns 0 if the array is {@code null} or empty.
+     * <br />
+     * Note: the sum is accumulated in an {@code int} with no overflow check; it can silently overflow for very large arrays.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -15880,6 +16195,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
     /**
      * Returns the sum of elements within the specified range of the char array.
      * Returns 0 if the array is {@code null} or empty.
+     * <br />
+     * Note: the sum is accumulated in an {@code int} with no overflow check; it can silently overflow for very large ranges.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -15914,6 +16231,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
     /**
      * Returns the sum of all elements in the specified byte array or varargs.
      * Returns 0 if the array is {@code null} or empty.
+     * <br />
+     * Note: the sum is accumulated in an {@code int} with no overflow check; it can silently overflow for very large arrays.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -15939,6 +16258,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
     /**
      * Returns the sum of elements within the specified range of the byte array.
      * Returns 0 if the array is {@code null} or empty.
+     * <br />
+     * Note: the sum is accumulated in an {@code int} with no overflow check; it can silently overflow for very large ranges.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -15973,6 +16294,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
     /**
      * Returns the sum of all elements in the specified short array or varargs.
      * Returns 0 if the array is {@code null} or empty.
+     * <br />
+     * Note: the sum is accumulated in an {@code int} with no overflow check; it can silently overflow for very large arrays.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -15998,6 +16321,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
     /**
      * Returns the sum of elements within the specified range of the short array.
      * Returns 0 if the array is {@code null} or empty.
+     * <br />
+     * Note: the sum is accumulated in an {@code int} with no overflow check; it can silently overflow for very large ranges.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -16144,6 +16469,10 @@ public final class N extends CommonUtil { // public final class N extends π imp
     /**
      * Returns the sum of all elements in the specified long array or varargs.
      * Returns 0 if the array is {@code null} or empty.
+     * <br />
+     * Note: unlike {@link #sum(int...)}, which throws {@code ArithmeticException} on overflow, this method performs no
+     * overflow check - the sum silently wraps around on {@code long} overflow. Use {@link #sumToBigInteger(long...)} for an
+     * overflow-proof result.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -16169,6 +16498,10 @@ public final class N extends CommonUtil { // public final class N extends π imp
     /**
      * Returns the sum of elements within the specified range of the long array.
      * Returns 0 if the array is {@code null} or empty.
+     * <br />
+     * Note: unlike {@link #sum(int[], int, int)}, which throws {@code ArithmeticException} on overflow, this method performs
+     * no overflow check - the sum silently wraps around on {@code long} overflow. Use {@link #sumToBigInteger(long[], int, int)}
+     * for an overflow-proof result.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -16182,6 +16515,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return the sum of elements within the specified range, or 0 if the array is {@code null} or empty
      * @throws IndexOutOfBoundsException if the range is out of bounds
      * @see #sum(long...)
+     * @see #sumToBigInteger(long[], int, int)
      * @see #average(long[], int, int)
      */
     public static long sum(final long[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
@@ -16195,6 +16529,61 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
         for (int i = fromIndex; i < toIndex; i++) {
             sum += a[i];
+        }
+
+        return sum;
+    }
+
+    /**
+     * Returns the sum of all elements in the specified long array or varargs as a {@code BigInteger}.
+     * Returns {@link BigInteger#ZERO} if the array is {@code null} or empty.
+     * <br />
+     * Unlike {@link #sum(long...)}, which silently wraps around on {@code long} overflow, this method accumulates into a
+     * {@code BigInteger} and therefore can never overflow.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * long[] numbers = {Long.MAX_VALUE, Long.MAX_VALUE};
+     * BigInteger sum = N.sumToBigInteger(numbers);   // returns 2 * Long.MAX_VALUE (no overflow)
+     * }</pre>
+     *
+     * @param a the array or varargs of long values
+     * @return the sum of all elements as a {@code BigInteger}, or {@link BigInteger#ZERO} if the array is {@code null} or empty
+     * @see #sum(long...)
+     * @see #sumToBigInteger(long[], int, int)
+     */
+    public static BigInteger sumToBigInteger(final long... a) {
+        if (isEmpty(a)) {
+            return BigInteger.ZERO;
+        }
+
+        return sumToBigInteger(a, 0, a.length);
+    }
+
+    /**
+     * Returns the sum of elements within the specified range of the long array as a {@code BigInteger}.
+     * Returns {@link BigInteger#ZERO} if the array is {@code null} or empty, or if {@code fromIndex == toIndex}.
+     * This method accumulates into a {@code BigInteger} and therefore can never overflow.
+     *
+     * @param a the array of long values
+     * @param fromIndex the starting index (inclusive) of the range
+     * @param toIndex the ending index (exclusive) of the range
+     * @return the sum of elements within the specified range as a {@code BigInteger}
+     * @throws IndexOutOfBoundsException if the range is out of bounds
+     * @see #sumToBigInteger(long...)
+     * @see #sum(long[], int, int)
+     */
+    public static BigInteger sumToBigInteger(final long[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
+
+        if (isEmpty(a) || fromIndex == toIndex) {
+            return BigInteger.ZERO;
+        }
+
+        BigInteger sum = BigInteger.ZERO;
+
+        for (int i = fromIndex; i < toIndex; i++) {
+            sum = sum.add(BigInteger.valueOf(a[i]));
         }
 
         return sum;
@@ -16433,7 +16822,13 @@ public final class N extends CommonUtil { // public final class N extends π imp
             return 0d;
         }
 
-        return ((double) sum(a, fromIndex, toIndex)) / (toIndex - fromIndex);
+        long sum = 0;
+
+        for (int i = fromIndex; i < toIndex; i++) {
+            sum += a[i];
+        }
+
+        return ((double) sum) / (toIndex - fromIndex);
     }
 
     /**
@@ -16486,7 +16881,13 @@ public final class N extends CommonUtil { // public final class N extends π imp
             return 0d;
         }
 
-        return ((double) sum(a, fromIndex, toIndex)) / (toIndex - fromIndex);
+        long sum = 0;
+
+        for (int i = fromIndex; i < toIndex; i++) {
+            sum += a[i];
+        }
+
+        return ((double) sum) / (toIndex - fromIndex);
     }
 
     /**
@@ -16539,7 +16940,13 @@ public final class N extends CommonUtil { // public final class N extends π imp
             return 0d;
         }
 
-        return ((double) sum(a, fromIndex, toIndex)) / (toIndex - fromIndex);
+        long sum = 0;
+
+        for (int i = fromIndex; i < toIndex; i++) {
+            sum += a[i];
+        }
+
+        return ((double) sum) / (toIndex - fromIndex);
     }
 
     /**
@@ -16554,10 +16961,14 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * double avg2 = N.average(numbers);   // returns 100.0
      * }</pre>
      *
+     * <p><b>Note:</b> this method returns {@code 0d} for a {@code null} or empty array, whereas
+     * {@link Numbers#mean(int...)} throws an {@code IllegalArgumentException} on empty input.</p>
+     *
      * @param a the array or varargs of int values
      * @return the average of all elements, or 0.0d if the array is {@code null} or empty
      * @see #average(int[], int, int)
      * @see #sum(int...)
+     * @see Numbers#mean(int...)
      */
     public static double average(final int... a) {
         if (isEmpty(a)) {
@@ -16604,6 +17015,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
     /**
      * Returns the average of all elements in the specified long array or varargs.
      * Returns 0.0d if the array is {@code null} or empty.
+     * <br />
+     * Note: the underlying sum is accumulated in a {@code long} with no overflow check; if it wraps around on overflow,
+     * the returned average is silently incorrect.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -16613,10 +17027,14 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * double avg2 = N.average(numbers);   // returns 1000.0
      * }</pre>
      *
+     * <p><b>Note:</b> this method returns {@code 0d} for a {@code null} or empty array, whereas
+     * {@link Numbers#mean(long...)} throws an {@code IllegalArgumentException} on empty input.</p>
+     *
      * @param a the array or varargs of long values
      * @return the average of all elements, or 0.0d if the array is {@code null} or empty
      * @see #average(long[], int, int)
      * @see #sum(long...)
+     * @see Numbers#mean(long...)
      */
     public static double average(final long... a) {
         if (isEmpty(a)) {
@@ -16629,6 +17047,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
     /**
      * Returns the average of elements within the specified range of the long array.
      * Returns 0.0d if the array is {@code null} or empty.
+     * <br />
+     * Note: the underlying sum is accumulated in a {@code long} with no overflow check; if it wraps around on overflow,
+     * the returned average is silently incorrect.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -16728,10 +17149,15 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * double avg2 = N.average(numbers);   // returns approximately 10.5
      * }</pre>
      *
+     * <p><b>Note:</b> this method returns {@code 0d} for a {@code null} or empty array and does not
+     * reject non-finite values, whereas {@link Numbers#mean(double...)} throws an
+     * {@code IllegalArgumentException} on empty input or any non-finite value.</p>
+     *
      * @param a the array or varargs of double values
      * @return the average of all elements, or 0.0d if the array is {@code null} or empty
      * @see #average(double[], int, int)
      * @see #sum(double...)
+     * @see Numbers#mean(double...)
      */
     public static double average(final double... a) {
         if (isEmpty(a)) {
@@ -16837,7 +17263,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws ArithmeticException if the result overflows an {@code int}
      * @see Iterables#sumInt(Iterable, ToIntFunction)
      */
-    public static <T> int sumInt(final T[] a, final ToIntFunction<? super T> func) throws IndexOutOfBoundsException {
+    public static <T> int sumInt(final T[] a, final ToIntFunction<? super T> func) {
         if (isEmpty(a)) {
             return 0;
         }
@@ -17105,7 +17531,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return the sum of all elements in the array as a long.
      * @see Iterables#sumLong(Iterable, ToLongFunction)
      */
-    public static <T> long sumLong(final T[] a, final ToLongFunction<? super T> func) throws IndexOutOfBoundsException {
+    public static <T> long sumLong(final T[] a, final ToLongFunction<? super T> func) {
         if (isEmpty(a)) {
             return 0L;
         }
@@ -17501,6 +17927,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      * Sums all elements in the given iterable of BigInteger and returns the result as a BigInteger.
+     * <br />
+     * Note: {@code null} elements are silently skipped (treated as absent).
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -17522,6 +17950,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      * Sums all elements in the given iterable using the provided function to convert each element to a BigInteger.
+     * <br />
+     * Note: {@code null} values returned by {@code func} are silently skipped (treated as absent).
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -17558,6 +17988,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      * Sums all elements in the given iterable of BigDecimal and returns the result as a BigDecimal.
+     * <br />
+     * Note: {@code null} elements are silently skipped (treated as absent).
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -17579,6 +18011,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      * Sums all elements in the given iterable using the provided function to convert each element to a BigDecimal.
+     * <br />
+     * Note: {@code null} values returned by {@code func} are silently skipped (treated as absent).
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -18226,6 +18660,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      * Calculates the average of the elements in the given iterable of BigInteger.
+     * <br />
+     * Note: {@code null} elements are silently skipped and are not counted in the divisor; if all elements are
+     * {@code null}, {@code BigDecimal.ZERO} is returned.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -18247,6 +18684,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      * Calculates the average of the elements in the given iterable using the provided function to convert each element to a BigInteger.
+     * <br />
+     * Note: {@code null} values returned by {@code func} are silently skipped and are not counted in the divisor; if all
+     * extracted values are {@code null}, {@code BigDecimal.ZERO} is returned.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -18285,6 +18725,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      * Calculates the average of the elements in the given iterable of BigDecimal.
+     * <br />
+     * Note: {@code null} elements are silently skipped and are not counted in the divisor; if all elements are
+     * {@code null}, {@code BigDecimal.ZERO} is returned.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -18306,6 +18749,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      * Calculates the average of the elements in the given iterable using the provided function to convert each element to a BigDecimal.
+     * <br />
+     * Note: {@code null} values returned by {@code func} are silently skipped and are not counted in the divisor; if all
+     * extracted values are {@code null}, {@code BigDecimal.ZERO} is returned.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -18812,6 +19258,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param toIndex the ending index (exclusive) of the range
      * @return the smallest char value within the specified range
      * @throws IllegalArgumentException if the array is {@code null} or the range is empty
+     * @throws IndexOutOfBoundsException if the range is out of the array bounds; the range check runs first, so a {@code null}
+     *         array with a range other than {@code [0, 0)} throws this exception rather than {@code IllegalArgumentException}
      * @see #min(char...)
      * @see #max(char[], int, int)
      */
@@ -18819,7 +19267,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         checkFromToIndex(fromIndex, toIndex, len(a));
 
         if (isEmpty(a) || toIndex - fromIndex < 1) {
-            throw new IllegalArgumentException("The specified array cannot be null or empty");
+            throw new IllegalArgumentException("The specified array or range cannot be empty");
         }
 
         char min = a[fromIndex];
@@ -18873,6 +19321,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param toIndex the ending index (exclusive) of the range
      * @return the smallest byte value within the specified range
      * @throws IllegalArgumentException if the array is {@code null} or the range is empty
+     * @throws IndexOutOfBoundsException if the range is out of the array bounds; the range check runs first, so a {@code null}
+     *         array with a range other than {@code [0, 0)} throws this exception rather than {@code IllegalArgumentException}
      * @see #min(byte...)
      * @see #max(byte[], int, int)
      */
@@ -18880,7 +19330,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         checkFromToIndex(fromIndex, toIndex, len(a));
 
         if (isEmpty(a) || toIndex - fromIndex < 1) {
-            throw new IllegalArgumentException("The specified array cannot be null or empty");
+            throw new IllegalArgumentException("The specified array or range cannot be empty");
         }
         byte min = a[fromIndex];
         for (int i = fromIndex + 1; i < toIndex; i++) {
@@ -18933,6 +19383,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param toIndex the ending index (exclusive) of the range
      * @return the smallest short value within the specified range
      * @throws IllegalArgumentException if the array is {@code null} or the range is empty
+     * @throws IndexOutOfBoundsException if the range is out of the array bounds; the range check runs first, so a {@code null}
+     *         array with a range other than {@code [0, 0)} throws this exception rather than {@code IllegalArgumentException}
      * @see #min(short...)
      * @see #max(short[], int, int)
      */
@@ -18940,7 +19392,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         checkFromToIndex(fromIndex, toIndex, len(a));
 
         if (isEmpty(a) || toIndex - fromIndex < 1) {
-            throw new IllegalArgumentException("The specified array cannot be null or empty");
+            throw new IllegalArgumentException("The specified array or range cannot be empty");
         }
 
         short min = a[fromIndex];
@@ -18995,6 +19447,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param toIndex the ending index (exclusive) of the range
      * @return the smallest int value within the specified range
      * @throws IllegalArgumentException if the array is {@code null} or the range is empty
+     * @throws IndexOutOfBoundsException if the range is out of the array bounds; the range check runs first, so a {@code null}
+     *         array with a range other than {@code [0, 0)} throws this exception rather than {@code IllegalArgumentException}
      * @see #min(int...)
      * @see #max(int[], int, int)
      */
@@ -19002,7 +19456,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         checkFromToIndex(fromIndex, toIndex, len(a));
 
         if (isEmpty(a) || toIndex - fromIndex < 1) {
-            throw new IllegalArgumentException("The specified array cannot be null or empty");
+            throw new IllegalArgumentException("The specified array or range cannot be empty");
         }
 
         int min = a[fromIndex];
@@ -19056,6 +19510,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param toIndex the ending index (exclusive) of the range
      * @return the smallest long value within the specified range
      * @throws IllegalArgumentException if the array is {@code null} or the range is empty
+     * @throws IndexOutOfBoundsException if the range is out of the array bounds; the range check runs first, so a {@code null}
+     *         array with a range other than {@code [0, 0)} throws this exception rather than {@code IllegalArgumentException}
      * @see #min(long...)
      * @see #max(long[], int, int)
      */
@@ -19063,7 +19519,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         checkFromToIndex(fromIndex, toIndex, len(a));
 
         if (isEmpty(a) || toIndex - fromIndex < 1) {
-            throw new IllegalArgumentException("The specified array cannot be null or empty");
+            throw new IllegalArgumentException("The specified array or range cannot be empty");
         }
 
         long min = a[fromIndex];
@@ -19126,6 +19582,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param toIndex the ending index (exclusive) of the range
      * @return the smallest float value within the specified range; NaN if any value in the range is NaN
      * @throws IllegalArgumentException if the array is {@code null} or the range is empty
+     * @throws IndexOutOfBoundsException if the range is out of the array bounds; the range check runs first, so a {@code null}
+     *         array with a range other than {@code [0, 0)} throws this exception rather than {@code IllegalArgumentException}
      * @see #min(float...)
      * @see #max(float[], int, int)
      * @see Math#min(float, float)
@@ -19135,7 +19593,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         checkFromToIndex(fromIndex, toIndex, len(a));
 
         if (isEmpty(a) || toIndex - fromIndex < 1) {
-            throw new IllegalArgumentException("The specified array cannot be null or empty");
+            throw new IllegalArgumentException("The specified array or range cannot be empty");
         }
 
         float min = a[fromIndex];
@@ -19198,6 +19656,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param toIndex the ending index (exclusive) of the range
      * @return the smallest double value within the specified range; NaN if any value in the range is NaN
      * @throws IllegalArgumentException if the array is {@code null} or the range is empty
+     * @throws IndexOutOfBoundsException if the range is out of the array bounds; the range check runs first, so a {@code null}
+     *         array with a range other than {@code [0, 0)} throws this exception rather than {@code IllegalArgumentException}
      * @see #min(double...)
      * @see #max(double[], int, int)
      * @see Math#min(double, double)
@@ -19207,7 +19667,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         checkFromToIndex(fromIndex, toIndex, len(a));
 
         if (isEmpty(a) || toIndex - fromIndex < 1) {
-            throw new IllegalArgumentException("The specified array cannot be null or empty");
+            throw new IllegalArgumentException("The specified array or range cannot be empty");
         }
 
         double min = a[fromIndex];
@@ -19264,6 +19724,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param fromIndex the starting index (inclusive) of the range
      * @param toIndex the ending index (exclusive) of the range
      * @return the smallest value within the specified range based on natural ordering
+     * @throws IndexOutOfBoundsException if the specified range is out of bounds
      * @throws IllegalArgumentException if the array is {@code null} or the range is empty
      * @see #min(Comparable[])
      * @see #min(Object[], int, int, Comparator)
@@ -19336,7 +19797,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         checkFromToIndex(fromIndex, toIndex, len(a));
 
         if (isEmpty(a) || toIndex - fromIndex < 1) {
-            throw new IllegalArgumentException("The specified array cannot be null or empty");
+            throw new IllegalArgumentException("The specified array or range cannot be empty");
         }
 
         cmp = cmp == null ? (Comparator<T>) NULL_MAX_COMPARATOR : cmp;
@@ -19417,8 +19878,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
             throws IllegalArgumentException {
         checkFromToIndex(fromIndex, toIndex, size(c));
 
-        if (isEmpty(c) || toIndex - fromIndex < 1 || fromIndex >= c.size()) {
-            throw new IllegalArgumentException("The size of collection cannot be null or empty");
+        if (isEmpty(c) || toIndex - fromIndex < 1) {
+            throw new IllegalArgumentException("The specified collection or range cannot be empty");
         }
 
         cmp = cmp == null ? (Comparator<T>) NULL_MAX_COMPARATOR : cmp;
@@ -19719,7 +20180,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * @param <T> the type of elements in the array.
      * @param a the array to fetch the smallest elements.
-     * @param cmp the comparator to be used to compare the elements
+     * @param cmp the comparator to be used to compare the elements; if {@code null}, natural ordering with nulls last is used
      * @return a list containing the smallest elements in the array. If the array is {@code null} or empty, an empty list is returned.
      */
     public static <T> List<T> minAll(final T[] a, Comparator<? super T> cmp) {
@@ -19785,7 +20246,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * @param <T> the type of elements in the input iterable.
      * @param c the iterable to fetch the smallest elements.
-     * @param cmp the comparator to be used to compare the elements
+     * @param cmp the comparator to be used to compare the elements; if {@code null}, natural ordering with nulls last is used
      * @return a list containing the smallest elements in the iterable. If the iterable is {@code null} or empty, an empty list is returned.
      */
     public static <T> List<T> minAll(final Iterable<? extends T> c, final Comparator<? super T> cmp) {
@@ -19832,7 +20293,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * @param <T> the type of elements in the input iterator.
      * @param iter the iterator to fetch the smallest elements.
-     * @param cmp the comparator to be used to compare the elements
+     * @param cmp the comparator to be used to compare the elements; if {@code null}, natural ordering with nulls last is used
      * @return a list containing the smallest elements in the iterator. If the iterator is {@code null} or empty, an empty list is returned.
      */
     public static <T> List<T> minAll(final Iterator<? extends T> iter, Comparator<? super T> cmp) {
@@ -19867,27 +20328,33 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      * Returns the minimum value extracted from the specified array or a default value if the array is {@code null} or empty. Null values are considered to be maximum here.
+     * <br />
+     * Note: this method returns the minimum <i>extracted value</i> (an {@code R}), not the element it was extracted from -
+     * see {@link #minBy(Object[], Function)} for the element-returning variant. {@code defaultValue} is returned both
+     * when the array is {@code null} or empty <i>and</i> when the array is non-empty but every extracted value is
+     * {@code null} (an all-{@code null} extraction is treated as "empty").
      *
      * <p><b>Note:</b> This method is marked as {@code @Beta} and its API may change in future versions.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String[] people = {"Alice:30", "Bob:25"};
-     * int minAge = N.minOrDefaultIfEmpty(people, s -> Integer.parseInt(s.substring(s.indexOf(':') + 1)), 0);   // returns 25
+     * int minAge = N.minValueOrDefaultIfEmpty(people, s -> Integer.parseInt(s.substring(s.indexOf(':') + 1)), 0);   // returns 25
      *
      * String[] empty = {};
-     * int defaultAge = N.minOrDefaultIfEmpty(empty, s -> Integer.parseInt(s.substring(s.indexOf(':') + 1)), 18);   // returns 18
+     * int defaultAge = N.minValueOrDefaultIfEmpty(empty, s -> Integer.parseInt(s.substring(s.indexOf(':') + 1)), 18);   // returns 18
      * }</pre>
      *
      * @param <T> the type of elements in the input array.
      * @param <R> the type of the extracted value, which must be comparable.
      * @param a the array to extract the minimum value from.
      * @param valueExtractor the function to extract values from the array elements for comparison.
-     * @param defaultValue the default value to return if the array is {@code null} or empty.
-     * @return the minimum extracted value or the default value if the array is {@code null} or empty.
+     * @param defaultValue the default value to return if the array is {@code null}/empty or all extracted values are {@code null}.
+     * @return the minimum extracted value, or the default value if the array is {@code null}/empty or every extracted value is {@code null}.
+     * @see #minBy(Object[], Function)
      */
     @Beta
-    public static <T, R extends Comparable<? super R>> R minOrDefaultIfEmpty(final T[] a, final Function<? super T, ? extends R> valueExtractor,
+    public static <T, R extends Comparable<? super R>> R minValueOrDefaultIfEmpty(final T[] a, final Function<? super T, ? extends R> valueExtractor,
             final R defaultValue) {
         if (isEmpty(a)) {
             return defaultValue;
@@ -19904,57 +20371,71 @@ public final class N extends CommonUtil { // public final class N extends π imp
             }
         }
 
-        return candidate;
+        return candidate == null ? defaultValue : candidate;
     }
 
     /**
      * Returns the minimum value extracted from the specified iterable or a default value if the iterable is {@code null} or empty. Null values are considered to be maximum here.
+     * <br />
+     * Note: this method returns the minimum <i>extracted value</i> (an {@code R}), not the element it was extracted from -
+     * see {@link #minBy(Iterable, Function)} for the element-returning variant. {@code defaultValue} is returned both
+     * when the iterable is {@code null} or empty <i>and</i> when the iterable is non-empty but every extracted value is
+     * {@code null} (an all-{@code null} extraction is treated as "empty").
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<String> people = Arrays.asList("Alice:30", "Bob:25");
-     * int minAge = N.minOrDefaultIfEmpty(people, s -> Integer.parseInt(s.substring(s.indexOf(':') + 1)), 0);   // returns 25
+     * int minAge = N.minValueOrDefaultIfEmpty(people, s -> Integer.parseInt(s.substring(s.indexOf(':') + 1)), 0);   // returns 25
      *
      * List<String> empty = new ArrayList<>();
-     * int defaultAge = N.minOrDefaultIfEmpty(empty, s -> Integer.parseInt(s.substring(s.indexOf(':') + 1)), 18);   // returns 18
+     * int defaultAge = N.minValueOrDefaultIfEmpty(empty, s -> Integer.parseInt(s.substring(s.indexOf(':') + 1)), 18);   // returns 18
      * }</pre>
      *
      * @param <T> the type of elements in the input iterable.
      * @param <R> the type of the extracted value, which must be comparable.
      * @param c the iterable to extract the minimum value from.
      * @param valueExtractor the function to extract values from the iterable elements for comparison.
-     * @param defaultValue the default value to return if the iterable is {@code null} or empty.
-     * @return the minimum extracted value or the default value if the iterable is {@code null} or empty.
+     * @param defaultValue the default value to return if the iterable is {@code null}/empty or all extracted values are {@code null}.
+     * @return the minimum extracted value, or the default value if the iterable is {@code null}/empty or every extracted value is {@code null}.
+     * @see #minBy(Iterable, Function)
      */
-    public static <T, R extends Comparable<? super R>> R minOrDefaultIfEmpty(final Iterable<? extends T> c,
+    @Beta
+    public static <T, R extends Comparable<? super R>> R minValueOrDefaultIfEmpty(final Iterable<? extends T> c,
             final Function<? super T, ? extends R> valueExtractor, final R defaultValue) {
         if (isEmptyCollection(c)) {
             return defaultValue;
         }
 
-        return minOrDefaultIfEmpty(c.iterator(), valueExtractor, defaultValue);
+        return minValueOrDefaultIfEmpty(c.iterator(), valueExtractor, defaultValue);
     }
 
     /**
      * Returns the minimum value extracted from the specified iterator or a default value if the iterator is {@code null} or empty. Null values are considered to be maximum here.
+     * <br />
+     * Note: this method returns the minimum <i>extracted value</i> (an {@code R}), not the element it was extracted from -
+     * see {@link #minBy(Iterator, Function)} for the element-returning variant. {@code defaultValue} is returned both
+     * when the iterator is {@code null} or empty <i>and</i> when the iterator is non-empty but every extracted value is
+     * {@code null} (an all-{@code null} extraction is treated as "empty").
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Iterator<String> people = Arrays.asList("Alice:30", "Bob:25").iterator();
-     * int minAge = N.minOrDefaultIfEmpty(people, s -> Integer.parseInt(s.substring(s.indexOf(':') + 1)), 0);   // returns 25
+     * int minAge = N.minValueOrDefaultIfEmpty(people, s -> Integer.parseInt(s.substring(s.indexOf(':') + 1)), 0);   // returns 25
      *
      * Iterator<String> empty = Collections.emptyIterator();
-     * int defaultAge = N.minOrDefaultIfEmpty(empty, s -> Integer.parseInt(s.substring(s.indexOf(':') + 1)), 18);   // returns 18
+     * int defaultAge = N.minValueOrDefaultIfEmpty(empty, s -> Integer.parseInt(s.substring(s.indexOf(':') + 1)), 18);   // returns 18
      * }</pre>
      *
      * @param <T> the type of elements in the input iterator.
      * @param <R> the type of the extracted value, which must be comparable.
      * @param iter the iterator to extract the minimum value from.
      * @param valueExtractor the function to extract values from the iterator elements for comparison.
-     * @param defaultValue the default value to return if the iterator is {@code null} or empty.
-     * @return the minimum extracted value or the default value if the iterator is {@code null} or empty.
+     * @param defaultValue the default value to return if the iterator is {@code null}/empty or all extracted values are {@code null}.
+     * @return the minimum extracted value, or the default value if the iterator is {@code null}/empty or every extracted value is {@code null}.
+     * @see #minBy(Iterator, Function)
      */
-    public static <T, R extends Comparable<? super R>> R minOrDefaultIfEmpty(final Iterator<? extends T> iter,
+    @Beta
+    public static <T, R extends Comparable<? super R>> R minValueOrDefaultIfEmpty(final Iterator<? extends T> iter,
             final Function<? super T, ? extends R> valueExtractor, final R defaultValue) {
         if (iter == null || !iter.hasNext()) {
             return defaultValue;
@@ -19971,7 +20452,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
             }
         }
 
-        return candidate;
+        return candidate == null ? defaultValue : candidate;
     }
 
     /**
@@ -20265,17 +20746,18 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Returns a Pair object containing the minimum and maximum values in the specified array based on their natural ordering. Null values are considered to be minimum here.
+     * Returns a Pair object containing the minimum and maximum values in the specified array based on their natural ordering.
+     * Null values are ignored if the array contains any non-null element. If all elements are {@code null}, both values in
+     * the returned pair are {@code null}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Integer[] numbers = {5, 2, 8, 1, 9};
-     * // result.left is 1, result.right is 9
      * Pair<Integer, Integer> result = N.minMax(numbers);
+     * // result.left is 1, result.right is 9
      *
      * String[] words = {"apple", "zebra", "mango"};
      * Pair<String, String> minMaxWords = N.minMax(words);
-     *
      * // minMaxWords.left is "apple", minMaxWords.right is "zebra"
      * }</pre>
      *
@@ -20286,7 +20768,35 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see Iterables#minMax(Comparable[])
      */
     public static <T extends Comparable<? super T>> Pair<T, T> minMax(final T[] a) throws IllegalArgumentException {
-        return minMax(a, NATURAL_COMPARATOR);
+        checkArgNotEmpty(a, "The specified array cannot be null or empty");
+
+        T min = null;
+        T max = null;
+        T e = null;
+        int cp = 0;
+
+        for (int i = 0, len = a.length; i < len; i++) {
+            e = a[i];
+
+            if (e == null) {
+                continue;
+            }
+
+            if (min == null) {
+                min = e;
+                max = e;
+            } else {
+                cp = e.compareTo(min);
+
+                if (cp < 0) {
+                    min = e;
+                } else if (e.compareTo(max) > 0) {
+                    max = e;
+                }
+            }
+        }
+
+        return Pair.of(min, max);
     }
 
     /**
@@ -20295,19 +20805,18 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String[] words = {"apple", "pie", "zoo", "at"};
-     * // result.left is "at" (shortest), result.right is "apple" (longest)
      * Pair<String, String> result = N.minMax(words, Comparator.comparing(String::length));
+     * // result.left is "at" (shortest), result.right is "apple" (longest)
      *
      * // Case insensitive comparison
      * String[] words2 = {"Apple", "BANANA", "cherry"};
      * Pair<String, String> caseInsensitive = N.minMax(words2, String.CASE_INSENSITIVE_ORDER);
-     *
      * // caseInsensitive.left is "Apple", caseInsensitive.right is "cherry"
      * }</pre>
      *
      * @param <T> the type of elements in the input array.
      * @param a the array to find the minimum and maximum values from.
-     * @param cmp the comparator to be used to compare the elements
+     * @param cmp the comparator to be used to compare the elements; if {@code null}, natural ordering with nulls first is used
      * @return a Pair object where the first element is the minimum value and the second element is the maximum value in the specified array.
      * @throws IllegalArgumentException if the array is {@code null} or empty.
      * @see Iterables#minMax(Object[], Comparator)
@@ -20339,17 +20848,18 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Returns a Pair object containing the minimum and maximum values in the specified iterable based on their natural ordering. Null values are considered to be minimum here.
+     * Returns a Pair object containing the minimum and maximum values in the specified iterable based on their natural ordering.
+     * Null values are ignored if the iterable contains any non-null element. If all elements are {@code null}, both values in
+     * the returned pair are {@code null}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<Integer> numbers = Arrays.asList(5, 2, 8, 1, 9);
-     * // result.left is 1, result.right is 9
      * Pair<Integer, Integer> result = N.minMax(numbers);
+     * // result.left is 1, result.right is 9
      *
      * List<String> words = Arrays.asList("apple", "zebra", "mango");
      * Pair<String, String> minMaxWords = N.minMax(words);
-     *
      * // minMaxWords.left is "apple", minMaxWords.right is "zebra"
      * }</pre>
      *
@@ -20360,7 +20870,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see Iterables#minMax(Iterable)
      */
     public static <T extends Comparable<? super T>> Pair<T, T> minMax(final Iterable<? extends T> c) throws IllegalArgumentException {
-        return minMax(c, NATURAL_COMPARATOR);
+        checkArgNotNull(c, "The specified iterable cannot be null or empty");
+
+        return minMax(c.iterator());
     }
 
     /**
@@ -20369,19 +20881,18 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<String> words = Arrays.asList("apple", "pie", "zoo", "at");
-     * // result.left is "at" (shortest), result.right is "apple" (longest)
      * Pair<String, String> result = N.minMax(words, Comparator.comparing(String::length));
+     * // result.left is "at" (shortest), result.right is "apple" (longest)
      *
      * // Case insensitive comparison
      * List<String> words2 = Arrays.asList("Apple", "BANANA", "cherry");
      * Pair<String, String> caseInsensitive = N.minMax(words2, String.CASE_INSENSITIVE_ORDER);
-     *
      * // caseInsensitive.left is "Apple", caseInsensitive.right is "cherry"
      * }</pre>
      *
      * @param <T> the type of elements in the input iterable.
      * @param c the iterable to find the minimum and maximum values from.
-     * @param cmp the comparator to be used to compare the elements
+     * @param cmp the comparator to be used to compare the elements; if {@code null}, natural ordering with nulls first is used
      * @return a Pair object where the first element is the minimum value and the second element is the maximum value in the specified iterable.
      * @throws IllegalArgumentException if the iterable is {@code null} or empty.
      * @see Iterables#minMax(Iterable, Comparator)
@@ -20393,7 +20904,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Returns a Pair object containing the minimum and maximum values in the specified iterator based on their natural ordering. Null values are considered to be minimum here.
+     * Returns a Pair object containing the minimum and maximum values in the specified iterator based on their natural ordering.
+     * Null values are ignored if the iterator contains any non-null element. If all elements are {@code null}, both values in
+     * the returned pair are {@code null}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -20409,7 +20922,35 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see Iterables#minMax(Iterator)
      */
     public static <T extends Comparable<? super T>> Pair<T, T> minMax(final Iterator<? extends T> iter) throws IllegalArgumentException {
-        return minMax(iter, NATURAL_COMPARATOR);
+        checkArgument(iter != null && iter.hasNext(), "The specified iterator cannot be null or empty");
+
+        T min = null;
+        T max = null;
+        T next = null;
+        int cp = 0;
+
+        while (iter.hasNext()) {
+            next = iter.next();
+
+            if (next == null) {
+                continue;
+            }
+
+            if (min == null) {
+                min = next;
+                max = next;
+            } else {
+                cp = next.compareTo(min);
+
+                if (cp < 0) {
+                    min = next;
+                } else if (next.compareTo(max) > 0) {
+                    max = next;
+                }
+            }
+        }
+
+        return Pair.of(min, max);
     }
 
     /**
@@ -20425,7 +20966,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * @param <T> the type of elements in the input iterator.
      * @param iter the iterator to find the minimum and maximum values from.
-     * @param cmp the comparator to be used to compare the elements
+     * @param cmp the comparator to be used to compare the elements; if {@code null}, natural ordering with nulls first is used
      * @return a Pair object where the first element is the minimum value and the second element is the maximum value in the specified iterator.
      * @throws IllegalArgumentException if the iterator is {@code null} or empty.
      * @see Iterables#minMax(Iterator, Comparator)
@@ -20914,6 +21455,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param toIndex the ending index (exclusive) of the range
      * @return the largest value within the specified range
      * @throws IllegalArgumentException if the array is {@code null} or the range is empty
+     * @throws IndexOutOfBoundsException if the range is out of the array bounds; the range check runs first, so a {@code null}
+     *         array with a range other than {@code [0, 0)} throws this exception rather than {@code IllegalArgumentException}
      * @see #max(char...)
      * @see #min(char[], int, int)
      */
@@ -20921,7 +21464,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         checkFromToIndex(fromIndex, toIndex, len(a));
 
         if (isEmpty(a) || toIndex - fromIndex < 1) {
-            throw new IllegalArgumentException("The specified array cannot be null or empty");
+            throw new IllegalArgumentException("The specified array or range cannot be empty");
         }
 
         char max = a[fromIndex];
@@ -20974,6 +21517,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param toIndex the ending index (exclusive) of the range
      * @return the largest value within the specified range
      * @throws IllegalArgumentException if the array is {@code null} or the range is empty
+     * @throws IndexOutOfBoundsException if the range is out of the array bounds; the range check runs first, so a {@code null}
+     *         array with a range other than {@code [0, 0)} throws this exception rather than {@code IllegalArgumentException}
      * @see #max(byte...)
      * @see #min(byte[], int, int)
      */
@@ -20981,7 +21526,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         checkFromToIndex(fromIndex, toIndex, len(a));
 
         if (isEmpty(a) || toIndex - fromIndex < 1) {
-            throw new IllegalArgumentException("The specified array cannot be null or empty");
+            throw new IllegalArgumentException("The specified array or range cannot be empty");
         }
 
         byte max = a[fromIndex];
@@ -21034,6 +21579,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param toIndex the ending index (exclusive) of the range
      * @return the largest value within the specified range
      * @throws IllegalArgumentException if the array is {@code null} or the range is empty
+     * @throws IndexOutOfBoundsException if the range is out of the array bounds; the range check runs first, so a {@code null}
+     *         array with a range other than {@code [0, 0)} throws this exception rather than {@code IllegalArgumentException}
      * @see #max(short...)
      * @see #min(short[], int, int)
      */
@@ -21041,7 +21588,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         checkFromToIndex(fromIndex, toIndex, len(a));
 
         if (isEmpty(a) || toIndex - fromIndex < 1) {
-            throw new IllegalArgumentException("The specified array cannot be null or empty");
+            throw new IllegalArgumentException("The specified array or range cannot be empty");
         }
 
         short max = a[fromIndex];
@@ -21094,6 +21641,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param toIndex the ending index (exclusive) of the range
      * @return the largest value within the specified range
      * @throws IllegalArgumentException if the array is {@code null} or the range is empty
+     * @throws IndexOutOfBoundsException if the range is out of the array bounds; the range check runs first, so a {@code null}
+     *         array with a range other than {@code [0, 0)} throws this exception rather than {@code IllegalArgumentException}
      * @see #max(int...)
      * @see #min(int[], int, int)
      */
@@ -21101,7 +21650,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         checkFromToIndex(fromIndex, toIndex, len(a));
 
         if (isEmpty(a) || toIndex - fromIndex < 1) {
-            throw new IllegalArgumentException("The specified array cannot be null or empty");
+            throw new IllegalArgumentException("The specified array or range cannot be empty");
         }
 
         int max = a[fromIndex];
@@ -21154,6 +21703,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param toIndex the ending index (exclusive) of the range
      * @return the largest value within the specified range
      * @throws IllegalArgumentException if the array is {@code null} or the range is empty
+     * @throws IndexOutOfBoundsException if the range is out of the array bounds; the range check runs first, so a {@code null}
+     *         array with a range other than {@code [0, 0)} throws this exception rather than {@code IllegalArgumentException}
      * @see #max(long...)
      * @see #min(long[], int, int)
      */
@@ -21161,7 +21712,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         checkFromToIndex(fromIndex, toIndex, len(a));
 
         if (isEmpty(a) || toIndex - fromIndex < 1) {
-            throw new IllegalArgumentException("The specified array cannot be null or empty");
+            throw new IllegalArgumentException("The specified array or range cannot be empty");
         }
 
         long max = a[fromIndex];
@@ -21226,6 +21777,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param toIndex the ending index (exclusive) of the range
      * @return the largest value in the specified range; NaN if any value in the range is NaN
      * @throws IllegalArgumentException if the array is {@code null} or the range is empty
+     * @throws IndexOutOfBoundsException if the range is out of the array bounds; the range check runs first, so a {@code null}
+     *         array with a range other than {@code [0, 0)} throws this exception rather than {@code IllegalArgumentException}
      * @see #max(float...)
      * @see #min(float[], int, int)
      * @see Math#max(float, float)
@@ -21235,7 +21788,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         checkFromToIndex(fromIndex, toIndex, len(a));
 
         if (isEmpty(a) || toIndex - fromIndex < 1) {
-            throw new IllegalArgumentException("The specified array cannot be null or empty");
+            throw new IllegalArgumentException("The specified array or range cannot be empty");
         }
 
         float max = a[fromIndex];
@@ -21300,6 +21853,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param toIndex the ending index (exclusive) of the range
      * @return the largest value in the specified range; NaN if any value in the range is NaN
      * @throws IllegalArgumentException if the array is {@code null} or the range is empty
+     * @throws IndexOutOfBoundsException if the range is out of the array bounds; the range check runs first, so a {@code null}
+     *         array with a range other than {@code [0, 0)} throws this exception rather than {@code IllegalArgumentException}
      * @see #max(double...)
      * @see #min(double[], int, int)
      * @see Math#max(double, double)
@@ -21309,7 +21864,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         checkFromToIndex(fromIndex, toIndex, len(a));
 
         if (isEmpty(a) || toIndex - fromIndex < 1) {
-            throw new IllegalArgumentException("The specified array cannot be null or empty");
+            throw new IllegalArgumentException("The specified array or range cannot be empty");
         }
 
         double max = a[fromIndex];
@@ -21368,6 +21923,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param fromIndex the starting index (inclusive) of the range
      * @param toIndex the ending index (exclusive) of the range
      * @return the largest element within the specified range based on natural ordering
+     * @throws IndexOutOfBoundsException if the specified range is out of bounds
      * @throws IllegalArgumentException if the array is {@code null} or the range is empty
      * @see #max(Comparable[])
      * @see #max(Object[], int, int, Comparator)
@@ -21440,7 +21996,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         checkFromToIndex(fromIndex, toIndex, len(a));
 
         if (isEmpty(a) || toIndex - fromIndex < 1) {
-            throw new IllegalArgumentException("The specified array cannot be null or empty");
+            throw new IllegalArgumentException("The specified array or range cannot be empty");
         }
 
         cmp = cmp == null ? (Comparator<T>) NULL_MIN_COMPARATOR : cmp;
@@ -21478,6 +22034,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param fromIndex the starting index (inclusive) of the range
      * @param toIndex the ending index (exclusive) of the range
      * @return the largest element within the specified range based on natural ordering
+     * @throws IndexOutOfBoundsException if the specified range is out of bounds
      * @throws IllegalArgumentException if the collection is {@code null} or the range is empty
      * @see #max(Collection, int, int, Comparator)
      * @see #min(Collection, int, int)
@@ -21509,6 +22066,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param toIndex the ending index (exclusive) of the range
      * @param cmp the Comparator to compare elements; if {@code null}, natural ordering with nulls first is used
      * @return the largest element within the specified range according to the comparator
+     * @throws IndexOutOfBoundsException if the specified range is out of bounds
      * @throws IllegalArgumentException if the collection is {@code null} or the range is empty
      * @see #max(Collection, int, int)
      * @see #min(Collection, int, int, Comparator)
@@ -21519,8 +22077,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
             throws IllegalArgumentException {
         checkFromToIndex(fromIndex, toIndex, size(c));
 
-        if (isEmpty(c) || toIndex - fromIndex < 1 || fromIndex >= c.size()) {
-            throw new IllegalArgumentException("The size of collection cannot be null or empty");
+        if (isEmpty(c) || toIndex - fromIndex < 1) {
+            throw new IllegalArgumentException("The specified collection or range cannot be empty");
         }
 
         cmp = cmp == null ? (Comparator<T>) NULL_MIN_COMPARATOR : cmp;
@@ -21821,7 +22379,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * @param <T> the type of elements in the input array.
      * @param a the array to fetch the biggest elements from.
-     * @param cmp the comparator to be used to compare the elements
+     * @param cmp the comparator to be used to compare the elements; if {@code null}, natural ordering with nulls first is used
      * @return a list containing all biggest elements in the array. If the array is {@code null} or empty, an empty list is returned.
      */
     public static <T> List<T> maxAll(final T[] a, Comparator<? super T> cmp) {
@@ -21887,7 +22445,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * @param <T> the type of elements in the input iterable.
      * @param c the iterable to fetch the biggest elements from.
-     * @param cmp the comparator to be used to compare the elements
+     * @param cmp the comparator to be used to compare the elements; if {@code null}, natural ordering with nulls first is used
      * @return a list containing all biggest elements in the iterable. If the iterable is {@code null} or empty, an empty list is returned.
      */
     public static <T> List<T> maxAll(final Iterable<? extends T> c, final Comparator<? super T> cmp) {
@@ -21933,7 +22491,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * @param <T> the type of elements in the input iterator.
      * @param iter the iterator to fetch the biggest elements from.
-     * @param cmp the comparator to be used to compare the elements
+     * @param cmp the comparator to be used to compare the elements; if {@code null}, natural ordering with nulls first is used
      * @return a list containing all biggest elements in the iterator. If the iterator is {@code null} or empty, an empty list is returned.
      */
     public static <T> List<T> maxAll(final Iterator<? extends T> iter, Comparator<? super T> cmp) {
@@ -21968,25 +22526,31 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      * Returns the maximum value extracted from the specified array or a default value if the array is {@code null} or empty. Null values are considered to be minimum here.
+     * <br />
+     * Note: this method returns the maximum <i>extracted value</i> (an {@code R}), not the element it was extracted from -
+     * see {@link #maxBy(Object[], Function)} for the element-returning variant. {@code defaultValue} is returned both
+     * when the array is {@code null} or empty <i>and</i> when the array is non-empty but every extracted value is
+     * {@code null} (an all-{@code null} extraction is treated as "empty").
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String[] people = {"Alice:30", "Bob:25"};
-     * int maxAge = N.maxOrDefaultIfEmpty(people, s -> Integer.parseInt(s.substring(s.indexOf(':') + 1)), 0);   // returns 30
+     * int maxAge = N.maxValueOrDefaultIfEmpty(people, s -> Integer.parseInt(s.substring(s.indexOf(':') + 1)), 0);   // returns 30
      *
      * String[] empty = {};
-     * int defaultAge = N.maxOrDefaultIfEmpty(empty, s -> Integer.parseInt(s.substring(s.indexOf(':') + 1)), 100);   // returns 100
+     * int defaultAge = N.maxValueOrDefaultIfEmpty(empty, s -> Integer.parseInt(s.substring(s.indexOf(':') + 1)), 100);   // returns 100
      * }</pre>
      *
      * @param <T> the type of elements in the input array.
      * @param <R> the type of the extracted value, which must be comparable.
      * @param a the array to extract the maximum value from.
      * @param valueExtractor the function to extract values from the array elements for comparison.
-     * @param defaultValue the default value to return if the array is {@code null} or empty.
-     * @return the maximum extracted value or the default value if the array is {@code null} or empty.
+     * @param defaultValue the default value to return if the array is {@code null}/empty or all extracted values are {@code null}.
+     * @return the maximum extracted value, or the default value if the array is {@code null}/empty or every extracted value is {@code null}.
+     * @see #maxBy(Object[], Function)
      */
     @Beta
-    public static <T, R extends Comparable<? super R>> R maxOrDefaultIfEmpty(final T[] a, final Function<? super T, ? extends R> valueExtractor,
+    public static <T, R extends Comparable<? super R>> R maxValueOrDefaultIfEmpty(final T[] a, final Function<? super T, ? extends R> valueExtractor,
             final R defaultValue) {
         if (isEmpty(a)) {
             return defaultValue;
@@ -22003,58 +22567,72 @@ public final class N extends CommonUtil { // public final class N extends π imp
             }
         }
 
-        return candidate;
+        return candidate == null ? defaultValue : candidate;
     }
 
     /**
      * Returns the maximum value extracted from the specified iterable or a default value if the iterable is {@code null} or empty. Null values are considered to be minimum here.
+     * <br />
+     * Note: this method returns the maximum <i>extracted value</i> (an {@code R}), not the element it was extracted from -
+     * see {@link #maxBy(Iterable, Function)} for the element-returning variant. {@code defaultValue} is returned both
+     * when the iterable is {@code null} or empty <i>and</i> when the iterable is non-empty but every extracted value is
+     * {@code null} (an all-{@code null} extraction is treated as "empty").
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<String> people = Arrays.asList("Alice:30", "Bob:25");
-     * int maxAge = N.maxOrDefaultIfEmpty(people, s -> Integer.parseInt(s.substring(s.indexOf(':') + 1)), 0);   // returns 30
+     * int maxAge = N.maxValueOrDefaultIfEmpty(people, s -> Integer.parseInt(s.substring(s.indexOf(':') + 1)), 0);   // returns 30
      *
      * List<String> empty = Collections.emptyList();
-     * int defaultAge = N.maxOrDefaultIfEmpty(empty, s -> Integer.parseInt(s.substring(s.indexOf(':') + 1)), 100);   // returns 100
+     * int defaultAge = N.maxValueOrDefaultIfEmpty(empty, s -> Integer.parseInt(s.substring(s.indexOf(':') + 1)), 100);   // returns 100
      * }</pre>
      *
      * @param <T> the type of elements in the input iterable.
      * @param <R> the type of the extracted value, which must be comparable.
      * @param c the iterable to extract the maximum value from.
      * @param valueExtractor the function to extract values from the iterable elements for comparison.
-     * @param defaultValue the default value to return if the iterable is {@code null} or empty.
-     * @return the maximum extracted value or the default value if the iterable is {@code null} or empty.
+     * @param defaultValue the default value to return if the iterable is {@code null}/empty or all extracted values are {@code null}.
+     * @return the maximum extracted value, or the default value if the iterable is {@code null}/empty or every extracted value is {@code null}.
+     * @see #maxBy(Iterable, Function)
      */
-    public static <T, R extends Comparable<? super R>> R maxOrDefaultIfEmpty(final Iterable<? extends T> c,
+    @Beta
+    public static <T, R extends Comparable<? super R>> R maxValueOrDefaultIfEmpty(final Iterable<? extends T> c,
             final Function<? super T, ? extends R> valueExtractor, final R defaultValue) {
         if (isEmptyCollection(c)) {
             return defaultValue;
         }
 
-        return maxOrDefaultIfEmpty(c.iterator(), valueExtractor, defaultValue);
+        return maxValueOrDefaultIfEmpty(c.iterator(), valueExtractor, defaultValue);
     }
 
     /**
      * Returns the maximum value extracted from the specified iterator or a default value if the iterator is {@code null} or empty. Null values are considered to be minimum here.
+     * <br />
+     * Note: this method returns the maximum <i>extracted value</i> (an {@code R}), not the element it was extracted from -
+     * see {@link #maxBy(Iterator, Function)} for the element-returning variant. {@code defaultValue} is returned both
+     * when the iterator is {@code null} or empty <i>and</i> when the iterator is non-empty but every extracted value is
+     * {@code null} (an all-{@code null} extraction is treated as "empty").
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<String> people = Arrays.asList("Alice:30", "Bob:25");
      * Iterator<String> iter = people.iterator();
-     * int maxAge = N.maxOrDefaultIfEmpty(iter, s -> Integer.parseInt(s.substring(s.indexOf(':') + 1)), 0);   // returns 30
+     * int maxAge = N.maxValueOrDefaultIfEmpty(iter, s -> Integer.parseInt(s.substring(s.indexOf(':') + 1)), 0);   // returns 30
      *
      * Iterator<String> emptyIter = Collections.emptyIterator();
-     * int defaultAge = N.maxOrDefaultIfEmpty(emptyIter, s -> Integer.parseInt(s.substring(s.indexOf(':') + 1)), 100);   // returns 100
+     * int defaultAge = N.maxValueOrDefaultIfEmpty(emptyIter, s -> Integer.parseInt(s.substring(s.indexOf(':') + 1)), 100);   // returns 100
      * }</pre>
      *
      * @param <T> the type of elements in the input iterator.
      * @param <R> the type of the extracted value, which must be comparable.
      * @param iter the iterator to extract the maximum value from.
      * @param valueExtractor the function to extract values from the iterator elements for comparison.
-     * @param defaultValue the default value to return if the iterator is {@code null} or empty.
-     * @return the maximum extracted value or the default value if the iterator is {@code null} or empty.
+     * @param defaultValue the default value to return if the iterator is {@code null}/empty or all extracted values are {@code null}.
+     * @return the maximum extracted value, or the default value if the iterator is {@code null}/empty or every extracted value is {@code null}.
+     * @see #maxBy(Iterator, Function)
      */
-    public static <T, R extends Comparable<? super R>> R maxOrDefaultIfEmpty(final Iterator<? extends T> iter,
+    @Beta
+    public static <T, R extends Comparable<? super R>> R maxValueOrDefaultIfEmpty(final Iterator<? extends T> iter,
             final Function<? super T, ? extends R> valueExtractor, final R defaultValue) {
         if (iter == null || !iter.hasNext()) {
             return defaultValue;
@@ -22071,7 +22649,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
             }
         }
 
-        return candidate;
+        return candidate == null ? defaultValue : candidate;
     }
 
     /**
@@ -22532,7 +23110,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     /**
      * Returns the median of three float values.
      * The median is the middle value when sorted in ascending order.
-     * Handles NaN values according to IEEE 754 comparison rules.
+     * NaN is treated as the largest value, per the total ordering of {@link Float#compare(float, float)}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -22565,7 +23143,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     /**
      * Returns the median of three double values.
      * The median is the middle value when sorted in ascending order.
-     * Handles NaN values according to IEEE 754 comparison rules.
+     * NaN is treated as the largest value, per the total ordering of {@link Double#compare(double, double)}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -22633,7 +23211,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param a the first value
      * @param b the second value
      * @param c the third value
-     * @param cmp the Comparator to compare values; if {@code null}, natural ordering is used
+     * @param cmp the Comparator to compare values; if {@code null}, natural ordering with nulls first is used
      * @return the median of the three values
      * @see #median(Comparable, Comparable, Comparable)
      * @see #median(Object[], Comparator)
@@ -22710,11 +23288,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see Median#of(char[], int, int)
      */
     public static char median(final char[] a, final int fromIndex, final int toIndex) throws IllegalArgumentException, IndexOutOfBoundsException {
-        if (isEmpty(a) || toIndex - fromIndex < 1) {
-            throw new IllegalArgumentException("The specified array cannot be null or empty");
-        }
-
         checkFromToIndex(fromIndex, toIndex, len(a));
+
+        if (isEmpty(a) || toIndex - fromIndex < 1) {
+            throw new IllegalArgumentException("The specified array or range cannot be empty");
+        }
 
         final int len = toIndex - fromIndex;
 
@@ -22776,11 +23354,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see Median#of(byte[], int, int)
      */
     public static byte median(final byte[] a, final int fromIndex, final int toIndex) throws IllegalArgumentException, IndexOutOfBoundsException {
-        if (isEmpty(a) || toIndex - fromIndex < 1) {
-            throw new IllegalArgumentException("The specified array cannot be null or empty");
-        }
-
         checkFromToIndex(fromIndex, toIndex, len(a));
+
+        if (isEmpty(a) || toIndex - fromIndex < 1) {
+            throw new IllegalArgumentException("The specified array or range cannot be empty");
+        }
 
         final int len = toIndex - fromIndex;
 
@@ -22842,11 +23420,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see Median#of(short[], int, int)
      */
     public static short median(final short[] a, final int fromIndex, final int toIndex) throws IllegalArgumentException, IndexOutOfBoundsException {
-        if (isEmpty(a) || toIndex - fromIndex < 1) {
-            throw new IllegalArgumentException("The specified array cannot be null or empty");
-        }
-
         checkFromToIndex(fromIndex, toIndex, len(a));
+
+        if (isEmpty(a) || toIndex - fromIndex < 1) {
+            throw new IllegalArgumentException("The specified array or range cannot be empty");
+        }
 
         final int len = toIndex - fromIndex;
 
@@ -22909,11 +23487,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see Median#of(int[], int, int)
      */
     public static int median(final int[] a, final int fromIndex, final int toIndex) throws IllegalArgumentException, IndexOutOfBoundsException {
-        if (isEmpty(a) || toIndex - fromIndex < 1) {
-            throw new IllegalArgumentException("The specified array cannot be null or empty");
-        }
-
         checkFromToIndex(fromIndex, toIndex, len(a));
+
+        if (isEmpty(a) || toIndex - fromIndex < 1) {
+            throw new IllegalArgumentException("The specified array or range cannot be empty");
+        }
 
         final int len = toIndex - fromIndex;
 
@@ -22975,11 +23553,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see Median#of(long[], int, int)
      */
     public static long median(final long[] a, final int fromIndex, final int toIndex) throws IllegalArgumentException, IndexOutOfBoundsException {
-        if (isEmpty(a) || toIndex - fromIndex < 1) {
-            throw new IllegalArgumentException("The specified array cannot be null or empty");
-        }
-
         checkFromToIndex(fromIndex, toIndex, len(a));
+
+        if (isEmpty(a) || toIndex - fromIndex < 1) {
+            throw new IllegalArgumentException("The specified array or range cannot be empty");
+        }
 
         final int len = toIndex - fromIndex;
 
@@ -22998,6 +23576,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * Returns the median value in the specified float array or varargs.
      * The median is the middle value when sorted in ascending order.
      * For arrays with an even number of elements, returns the lower of the two middle elements.
+     * <br />
+     * Note: NaN values are compared using total ordering (as by {@code Float.compare}), in which NaN is greater than
+     * any other value - NaN elements are therefore treated as the largest values when determining the middle element.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -23024,6 +23605,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * Returns the median value within the specified range of the float array.
      * The median is the middle value when sorted in ascending order.
      * For ranges with an even number of elements, returns the lower of the two middle elements.
+     * <br />
+     * Note: NaN values are compared using total ordering (as by {@code Float.compare}), in which NaN is greater than
+     * any other value - NaN elements are therefore treated as the largest values when determining the middle element.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -23041,18 +23625,18 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see Median#of(float[], int, int)
      */
     public static float median(final float[] a, final int fromIndex, final int toIndex) throws IllegalArgumentException, IndexOutOfBoundsException {
-        if (isEmpty(a) || toIndex - fromIndex < 1) {
-            throw new IllegalArgumentException("The specified array cannot be null or empty");
-        }
-
         checkFromToIndex(fromIndex, toIndex, len(a));
+
+        if (isEmpty(a) || toIndex - fromIndex < 1) {
+            throw new IllegalArgumentException("The specified array or range cannot be empty");
+        }
 
         final int len = toIndex - fromIndex;
 
         if (len == 1) {
             return a[fromIndex];
         } else if (len == 2) {
-            return min(a[fromIndex], a[fromIndex + 1]);
+            return Float.compare(a[fromIndex], a[fromIndex + 1]) <= 0 ? a[fromIndex] : a[fromIndex + 1];
         } else if (len == 3) {
             return median(a[fromIndex], a[fromIndex + 1], a[fromIndex + 2]);
         } else {
@@ -23064,6 +23648,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * Returns the median value in the specified double array or varargs.
      * The median is the middle value when sorted in ascending order.
      * For arrays with an even number of elements, returns the lower of the two middle elements.
+     * <br />
+     * Note: NaN values are compared using total ordering (as by {@code Double.compare}), in which NaN is greater than
+     * any other value - NaN elements are therefore treated as the largest values when determining the middle element.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -23090,6 +23677,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * Returns the median value within the specified range of the double array.
      * The median is the middle value when sorted in ascending order.
      * For ranges with an even number of elements, returns the lower of the two middle elements.
+     * <br />
+     * Note: NaN values are compared using total ordering (as by {@code Double.compare}), in which NaN is greater than
+     * any other value - NaN elements are therefore treated as the largest values when determining the middle element.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -23107,18 +23697,18 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see Median#of(double[], int, int)
      */
     public static double median(final double[] a, final int fromIndex, final int toIndex) throws IllegalArgumentException, IndexOutOfBoundsException {
-        if (isEmpty(a) || toIndex - fromIndex < 1) {
-            throw new IllegalArgumentException("The specified array cannot be null or empty");
-        }
-
         checkFromToIndex(fromIndex, toIndex, len(a));
+
+        if (isEmpty(a) || toIndex - fromIndex < 1) {
+            throw new IllegalArgumentException("The specified array or range cannot be empty");
+        }
 
         final int len = toIndex - fromIndex;
 
         if (len == 1) {
             return a[fromIndex];
         } else if (len == 2) {
-            return min(a[fromIndex], a[fromIndex + 1]);
+            return Double.compare(a[fromIndex], a[fromIndex + 1]) <= 0 ? a[fromIndex] : a[fromIndex + 1];
         } else if (len == 3) {
             return median(a[fromIndex], a[fromIndex + 1], a[fromIndex + 2]);
         } else {
@@ -23181,7 +23771,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     public static <T extends Comparable<? super T>> T median(final T[] a, final int fromIndex, final int toIndex)
             throws IllegalArgumentException, IndexOutOfBoundsException {
         if (isEmpty(a) || toIndex - fromIndex < 1) {
-            throw new IllegalArgumentException("The specified array cannot be null or empty");
+            throw new IllegalArgumentException("The specified array or range cannot be empty");
         }
 
         return (T) median(a, fromIndex, toIndex, NATURAL_COMPARATOR);
@@ -23251,11 +23841,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     public static <T> T median(final T[] a, final int fromIndex, final int toIndex, Comparator<? super T> cmp)
             throws IllegalArgumentException, IndexOutOfBoundsException {
-        if (isEmpty(a) || toIndex - fromIndex < 1) {
-            throw new IllegalArgumentException("The specified array cannot be null or empty");
-        }
-
         checkFromToIndex(fromIndex, toIndex, len(a));
+
+        if (isEmpty(a) || toIndex - fromIndex < 1) {
+            throw new IllegalArgumentException("The specified array or range cannot be empty");
+        }
 
         cmp = checkComparator(cmp);
 
@@ -23361,7 +23951,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see Median#of(Collection, Comparator)
      * @see Median#of(Collection, int, int, Comparator)
      */
-    public static <T> T median(final Collection<? extends T> c, final Comparator<? super T> cmp) throws IndexOutOfBoundsException, IllegalArgumentException {
+    public static <T> T median(final Collection<? extends T> c, final Comparator<? super T> cmp) throws IllegalArgumentException {
         checkArgNotEmpty(c, "The specified collection cannot be null or empty");
 
         return median(c, 0, c.size(), cmp);
@@ -23399,11 +23989,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     public static <T> T median(final Collection<? extends T> c, final int fromIndex, final int toIndex, Comparator<? super T> cmp)
             throws IllegalArgumentException, IndexOutOfBoundsException {
-        if (isEmpty(c) || toIndex - fromIndex < 1) {
-            throw new IllegalArgumentException("The collection cannot be null or empty"); //NOSONAR
-        }
+        checkFromToIndex(fromIndex, toIndex, size(c));
 
-        checkFromToIndex(fromIndex, toIndex, c.size());
+        if (isEmpty(c) || toIndex - fromIndex < 1) {
+            throw new IllegalArgumentException("The specified collection or range cannot be empty"); //NOSONAR
+        }
 
         cmp = checkComparator(cmp);
 
@@ -23461,12 +24051,12 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see #kthLargest(char[], int)
      */
     public static char kthLargest(final char[] a, final int fromIndex, final int toIndex, int k) throws IllegalArgumentException, IndexOutOfBoundsException {
-        if (isEmpty(a) || toIndex - fromIndex < 1) {
-            throw new IllegalArgumentException("The specified array cannot be null or empty");
-        }
-
         checkFromToIndex(fromIndex, toIndex, len(a));
-        checkArgument(k > 0 && k <= toIndex - fromIndex, "'k' (%s) is out of range %s", k, toIndex - fromIndex); //NOSONAR
+
+        if (isEmpty(a) || toIndex - fromIndex < 1) {
+            throw new IllegalArgumentException("The specified array or range cannot be empty");
+        }
+        checkArgument(k > 0 && k <= toIndex - fromIndex, "'k' (%s) is out of range [1, %s]", k, toIndex - fromIndex); //NOSONAR
 
         final int len = toIndex - fromIndex;
 
@@ -23555,12 +24145,12 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see #kthLargest(byte[], int)
      */
     public static byte kthLargest(final byte[] a, final int fromIndex, final int toIndex, int k) throws IllegalArgumentException, IndexOutOfBoundsException {
-        if (isEmpty(a) || toIndex - fromIndex < 1) {
-            throw new IllegalArgumentException("The specified array cannot be null or empty");
-        }
-
         checkFromToIndex(fromIndex, toIndex, len(a));
-        checkArgument(k > 0 && k <= toIndex - fromIndex, "'k' (%s) is out of range %s", k, toIndex - fromIndex);
+
+        if (isEmpty(a) || toIndex - fromIndex < 1) {
+            throw new IllegalArgumentException("The specified array or range cannot be empty");
+        }
+        checkArgument(k > 0 && k <= toIndex - fromIndex, "'k' (%s) is out of range [1, %s]", k, toIndex - fromIndex);
 
         final int len = toIndex - fromIndex;
 
@@ -23649,12 +24239,12 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see #kthLargest(short[], int)
      */
     public static short kthLargest(final short[] a, final int fromIndex, final int toIndex, int k) throws IllegalArgumentException, IndexOutOfBoundsException {
-        if (isEmpty(a) || toIndex - fromIndex < 1) {
-            throw new IllegalArgumentException("The specified array cannot be null or empty");
-        }
-
         checkFromToIndex(fromIndex, toIndex, len(a));
-        checkArgument(k > 0 && k <= toIndex - fromIndex, "'k' (%s) is out of range %s", k, toIndex - fromIndex);
+
+        if (isEmpty(a) || toIndex - fromIndex < 1) {
+            throw new IllegalArgumentException("The specified array or range cannot be empty");
+        }
+        checkArgument(k > 0 && k <= toIndex - fromIndex, "'k' (%s) is out of range [1, %s]", k, toIndex - fromIndex);
 
         final int len = toIndex - fromIndex;
 
@@ -23743,12 +24333,12 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see #kthLargest(int[], int)
      */
     public static int kthLargest(final int[] a, final int fromIndex, final int toIndex, int k) throws IllegalArgumentException, IndexOutOfBoundsException {
-        if (isEmpty(a) || toIndex - fromIndex < 1) {
-            throw new IllegalArgumentException("The specified array cannot be null or empty");
-        }
-
         checkFromToIndex(fromIndex, toIndex, len(a));
-        checkArgument(k > 0 && k <= toIndex - fromIndex, "'k' (%s) is out of range %s", k, toIndex - fromIndex);
+
+        if (isEmpty(a) || toIndex - fromIndex < 1) {
+            throw new IllegalArgumentException("The specified array or range cannot be empty");
+        }
+        checkArgument(k > 0 && k <= toIndex - fromIndex, "'k' (%s) is out of range [1, %s]", k, toIndex - fromIndex);
 
         final int len = toIndex - fromIndex;
 
@@ -23837,12 +24427,12 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see #kthLargest(long[], int)
      */
     public static long kthLargest(final long[] a, final int fromIndex, final int toIndex, int k) throws IllegalArgumentException, IndexOutOfBoundsException {
-        if (isEmpty(a) || toIndex - fromIndex < 1) {
-            throw new IllegalArgumentException("The specified array cannot be null or empty");
-        }
-
         checkFromToIndex(fromIndex, toIndex, len(a));
-        checkArgument(k > 0 && k <= toIndex - fromIndex, "'k' (%s) is out of range %s", k, toIndex - fromIndex);
+
+        if (isEmpty(a) || toIndex - fromIndex < 1) {
+            throw new IllegalArgumentException("The specified array or range cannot be empty");
+        }
+        checkArgument(k > 0 && k <= toIndex - fromIndex, "'k' (%s) is out of range [1, %s]", k, toIndex - fromIndex);
 
         final int len = toIndex - fromIndex;
 
@@ -23891,6 +24481,10 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      * Returns the k-th largest element in the array (k=1 returns the largest, k=2 the second largest, etc).
+     * <br />
+     * Note: NaN values are compared using total ordering (as by {@code Float.compare}), in which NaN is greater than any
+     * other value. Consequently, for an array containing NaN, {@code kthLargest(a, a.length)} may differ from
+     * {@code N.min(a)}, which propagates NaN.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -23913,6 +24507,10 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      * Returns the k-th largest element within the specified range (k=1 returns the largest, k=2 the second largest, etc).
+     * <br />
+     * Note: NaN values are compared using total ordering (as by {@code Float.compare}), in which NaN is greater than any
+     * other value. Consequently, for a range containing NaN, the result for {@code k == toIndex - fromIndex} may differ
+     * from {@code N.min(a, fromIndex, toIndex)}, which propagates NaN.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -23931,19 +24529,27 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see #kthLargest(float[], int)
      */
     public static float kthLargest(final float[] a, final int fromIndex, final int toIndex, int k) throws IllegalArgumentException, IndexOutOfBoundsException {
-        if (isEmpty(a) || toIndex - fromIndex < 1) {
-            throw new IllegalArgumentException("The specified array cannot be null or empty");
-        }
-
         checkFromToIndex(fromIndex, toIndex, len(a));
-        checkArgument(k > 0 && k <= toIndex - fromIndex, "'k' (%s) is out of range %s", k, toIndex - fromIndex);
+
+        if (isEmpty(a) || toIndex - fromIndex < 1) {
+            throw new IllegalArgumentException("The specified array or range cannot be empty");
+        }
+        checkArgument(k > 0 && k <= toIndex - fromIndex, "'k' (%s) is out of range [1, %s]", k, toIndex - fromIndex);
 
         final int len = toIndex - fromIndex;
 
         if (k == 1) {
             return max(a, fromIndex, toIndex);
         } else if (k == len) {
-            return min(a, fromIndex, toIndex);
+            float min = a[fromIndex];
+
+            for (int i = fromIndex + 1; i < toIndex; i++) {
+                if (Float.compare(a[i], min) < 0) {
+                    min = a[i];
+                }
+            }
+
+            return min;
         }
 
         Queue<Float> queue = null;
@@ -23985,6 +24591,10 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      * Returns the k-th largest element in the array (k=1 returns the largest, k=2 the second largest, etc).
+     * <br />
+     * Note: NaN values are compared using total ordering (as by {@code Double.compare}), in which NaN is greater than any
+     * other value. Consequently, for an array containing NaN, {@code kthLargest(a, a.length)} may differ from
+     * {@code N.min(a)}, which propagates NaN.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -24007,6 +24617,10 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      * Returns the k-th largest element within the specified range (k=1 returns the largest, k=2 the second largest, etc).
+     * <br />
+     * Note: NaN values are compared using total ordering (as by {@code Double.compare}), in which NaN is greater than any
+     * other value. Consequently, for a range containing NaN, the result for {@code k == toIndex - fromIndex} may differ
+     * from {@code N.min(a, fromIndex, toIndex)}, which propagates NaN.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -24026,19 +24640,27 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     public static double kthLargest(final double[] a, final int fromIndex, final int toIndex, int k)
             throws IllegalArgumentException, IndexOutOfBoundsException {
-        if (isEmpty(a) || toIndex - fromIndex < 1) {
-            throw new IllegalArgumentException("The specified array cannot be null or empty");
-        }
-
         checkFromToIndex(fromIndex, toIndex, len(a));
-        checkArgument(k > 0 && k <= toIndex - fromIndex, "'k' (%s) is out of range %s", k, toIndex - fromIndex);
+
+        if (isEmpty(a) || toIndex - fromIndex < 1) {
+            throw new IllegalArgumentException("The specified array or range cannot be empty");
+        }
+        checkArgument(k > 0 && k <= toIndex - fromIndex, "'k' (%s) is out of range [1, %s]", k, toIndex - fromIndex);
 
         final int len = toIndex - fromIndex;
 
         if (k == 1) {
             return max(a, fromIndex, toIndex);
         } else if (k == len) {
-            return min(a, fromIndex, toIndex);
+            double min = a[fromIndex];
+
+            for (int i = fromIndex + 1; i < toIndex; i++) {
+                if (Double.compare(a[i], min) < 0) {
+                    min = a[i];
+                }
+            }
+
+            return min;
         }
 
         Queue<Double> queue = null;
@@ -24124,7 +24746,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     public static <T extends Comparable<? super T>> T kthLargest(final T[] a, final int fromIndex, final int toIndex, final int k)
             throws IllegalArgumentException, IndexOutOfBoundsException {
         if (isEmpty(a) || toIndex - fromIndex < 1) {
-            throw new IllegalArgumentException("The specified array cannot be null or empty");
+            throw new IllegalArgumentException("The specified array or range cannot be empty");
         }
 
         return kthLargest(a, fromIndex, toIndex, k, (Comparator<T>) NULL_MIN_COMPARATOR);
@@ -24177,12 +24799,12 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     public static <T> T kthLargest(final T[] a, final int fromIndex, final int toIndex, int k, final Comparator<? super T> cmp)
             throws IllegalArgumentException, IndexOutOfBoundsException {
-        if (isEmpty(a) || toIndex - fromIndex < 1) {
-            throw new IllegalArgumentException("The specified array cannot be null or empty");
-        }
-
         checkFromToIndex(fromIndex, toIndex, len(a));
-        checkArgument(k > 0 && k <= toIndex - fromIndex, "'k' (%s) is out of range %s", k, toIndex - fromIndex);
+
+        if (isEmpty(a) || toIndex - fromIndex < 1) {
+            throw new IllegalArgumentException("The specified array or range cannot be empty");
+        }
+        checkArgument(k > 0 && k <= toIndex - fromIndex, "'k' (%s) is out of range [1, %s]", k, toIndex - fromIndex);
 
         return kthLargest(Arrays.asList(a), fromIndex, toIndex, k, cmp);
     }
@@ -24232,10 +24854,6 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     public static <T extends Comparable<? super T>> T kthLargest(final Collection<? extends T> c, final int fromIndex, final int toIndex, final int k)
             throws IllegalArgumentException, IndexOutOfBoundsException {
-        if (isEmpty(c) || toIndex - fromIndex < 1) {
-            throw new IllegalArgumentException("The collection cannot be null or empty");
-        }
-
         return kthLargest(c, fromIndex, toIndex, k, (Comparator<T>) NULL_MIN_COMPARATOR);
     }
 
@@ -24286,12 +24904,13 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     public static <T> T kthLargest(final Collection<? extends T> c, final int fromIndex, final int toIndex, final int k, final Comparator<? super T> cmp)
             throws IllegalArgumentException, IndexOutOfBoundsException {
+        checkFromToIndex(fromIndex, toIndex, size(c));
+
         if (isEmpty(c) || toIndex - fromIndex < 1) {
-            throw new IllegalArgumentException("The collection cannot be null or empty");
+            throw new IllegalArgumentException("The specified collection or range cannot be empty");
         }
 
-        checkFromToIndex(fromIndex, toIndex, size(c));
-        checkArgument(k > 0 && k <= toIndex - fromIndex, "'k' (%s) is out of range %s", k, toIndex - fromIndex);
+        checkArgument(k > 0 && k <= toIndex - fromIndex, "'k' (%s) is out of range [1, %s]", k, toIndex - fromIndex);
 
         final Comparator<? super T> comparator = cmp == null ? NULL_MIN_COMPARATOR : cmp;
         final int len = toIndex - fromIndex;
@@ -24976,6 +25595,10 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      * Returns the top n largest elements from the array (order not guaranteed, {@code null} values treated as smallest).
+     *
+     * <p>The survivors are returned in raw heap order, not sorted. If you need them sorted, sort the returned list, use a
+     * {@code keepEncounterOrder} overload to preserve input order, or build a {@code Stream.of(a).top(n)...sorted()}
+     * pipeline (see {@code com.landawn.abacus.util.stream.Stream}).</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -25747,13 +26370,21 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *                     8%=9
      *                     9%=10
      *                     10%=11
+     *                     15%=16
      *                     20%=21
+     *                     25%=26
      *                     30%=31
+     *                     35%=36
      *                     40%=41
+     *                     45%=46
      *                     50%=51
+     *                     55%=56
      *                     60%=61
+     *                     65%=66
      *                     70%=71
+     *                     75%=76
      *                     80%=81
+     *                     85%=86
      *                     90%=91
      *                     91%=92
      *                     92%=93
@@ -26589,6 +27220,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param filter the predicate to test each element
      * @return a new list containing matching elements (empty if array is {@code null}/empty)
      * @see #filter(Object[], int, int, Predicate)
+     * @see Maps#filter(Map, BiPredicate)
+     * @see Iterators#filter(Iterator, Predicate)
      */
     public static <T> List<T> filter(final T[] a, final Predicate<? super T> filter) {
         if (isEmpty(a)) {
@@ -26616,7 +27249,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return a new collection containing matching elements (empty if array is {@code null}/empty)
      * @see #filter(Object[], int, int, Predicate, IntFunction)
      */
-    public static <T, C extends Collection<T>> C filter(final T[] a, final Predicate<? super T> filter, final IntFunction<C> supplier) {
+    public static <T, C extends Collection<T>> C filter(final T[] a, final Predicate<? super T> filter, final IntFunction<? extends C> supplier) {
         if (isEmpty(a)) {
             return supplier.apply(0);
         }
@@ -26669,7 +27302,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see #filter(Object[], Predicate, IntFunction)
      */
     public static <T, C extends Collection<T>> C filter(final T[] a, final int fromIndex, final int toIndex, final Predicate<? super T> filter,
-            final IntFunction<C> supplier) throws IndexOutOfBoundsException {
+            final IntFunction<? extends C> supplier) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
 
         if (isEmpty(a) || fromIndex == toIndex) {
@@ -26733,7 +27366,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see #filter(Collection, int, int, Predicate)
      */
     public static <T, C extends Collection<T>> C filter(final Collection<? extends T> c, final int fromIndex, final int toIndex,
-            final Predicate<? super T> filter, final IntFunction<C> supplier) throws IndexOutOfBoundsException {
+            final Predicate<? super T> filter, final IntFunction<? extends C> supplier) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, size(c)); // NOSONAR
 
         if (isEmpty(c) || fromIndex == toIndex) {
@@ -26791,6 +27424,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param filter the predicate to test each element
      * @return a new list containing matching elements (empty if iterable is {@code null}/empty)
      * @see #filter(Iterable, Predicate, IntFunction)
+     * @see Maps#filter(Map, BiPredicate)
+     * @see Iterators#filter(Iterator, Predicate)
      */
     public static <T> List<T> filter(final Iterable<? extends T> c, final Predicate<? super T> filter) {
         return filter(c, filter, IntFunctions.ofList());
@@ -26814,7 +27449,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return a new collection containing matching elements (empty if iterable is {@code null}/empty)
      * @see #filter(Iterable, Predicate)
      */
-    public static <T, C extends Collection<T>> C filter(final Iterable<? extends T> c, final Predicate<? super T> filter, final IntFunction<C> supplier) {
+    public static <T, C extends Collection<T>> C filter(final Iterable<? extends T> c, final Predicate<? super T> filter,
+            final IntFunction<? extends C> supplier) {
         if (isEmptyCollection(c)) {
             return supplier.apply(0);
         }
@@ -26845,6 +27481,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param filter the predicate to test each element
      * @return a new list containing matching elements (empty if iterator is {@code null} or has no elements)
      * @see #filter(Iterator, Predicate, IntFunction)
+     * @see Maps#filter(Map, BiPredicate)
+     * @see Iterators#filter(Iterator, Predicate)
      */
     public static <T> List<T> filter(final Iterator<? extends T> iter, final Predicate<? super T> filter) {
         return filter(iter, filter, IntFunctions.ofList());
@@ -26868,7 +27506,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return a new collection containing matching elements (empty if iterator is {@code null} or has no elements)
      * @see #filter(Iterator, Predicate)
      */
-    public static <T, C extends Collection<T>> C filter(final Iterator<? extends T> iter, final Predicate<? super T> filter, final IntFunction<C> supplier) {
+    public static <T, C extends Collection<T>> C filter(final Iterator<? extends T> iter, final Predicate<? super T> filter,
+            final IntFunction<? extends C> supplier) {
         if (iter == null) {
             return supplier.apply(0);
         }
@@ -29544,11 +30183,16 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * // returns ["apricot", "cherry"]
      * }</pre>
      *
+     * <p><b>Note:</b> {@code skipUntil(a, filter)} is exactly equivalent to {@code dropWhile(a, filter.negate())};
+     * it drops the leading run of elements that do <i>not</i> match {@code filter} and keeps everything from the
+     * first matching element onward.
+     *
      * @param <T> the type of elements in the array
      * @param a the array of values
      * @param filter the predicate to test each element
      * @return a new list containing elements starting from the first element that matches the predicate
      * @see #dropWhile(Object[], Predicate)
+     * @see #takeWhile(Object[], Predicate)
      */
     @Beta
     public static <T> List<T> skipUntil(final T[] a, final Predicate<? super T> filter) {
@@ -29583,11 +30227,16 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * // returns [8, 10, 12]
      * }</pre>
      *
+     * <p><b>Note:</b> {@code skipUntil(c, filter)} is exactly equivalent to {@code dropWhile(c, filter.negate())};
+     * it drops the leading run of elements that do <i>not</i> match {@code filter} and keeps everything from the
+     * first matching element onward.
+     *
      * @param <T> the type of elements in the iterable
      * @param c the iterable of values
      * @param filter the predicate to test each element
      * @return a new list containing elements starting from the first element that matches the predicate
      * @see #dropWhile(Iterable, Predicate)
+     * @see #takeWhile(Iterable, Predicate)
      */
     @Beta
     public static <T> List<T> skipUntil(final Iterable<? extends T> c, final Predicate<? super T> filter) {
@@ -29595,7 +30244,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
             return new ArrayList<>(0);
         }
 
-        return skipUtil(c.iterator(), filter, new ArrayList<>(min(9, getSizeOrDefault(c, 0))));
+        return skipUntil(c.iterator(), filter, new ArrayList<>(min(9, getSizeOrDefault(c, 0))));
     }
 
     /**
@@ -29611,11 +30260,16 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * // returns ["Hello", "Welcome"]
      * }</pre>
      *
+     * <p><b>Note:</b> {@code skipUntil(iter, filter)} is exactly equivalent to {@code dropWhile(iter, filter.negate())};
+     * it drops the leading run of elements that do <i>not</i> match {@code filter} and keeps everything from the
+     * first matching element onward.
+     *
      * @param <T> the type of elements in the iterator
      * @param iter the iterator of values
      * @param filter the predicate to test each element
      * @return a new list containing elements starting from the first element that matches the predicate
      * @see #dropWhile(Iterator, Predicate)
+     * @see #takeWhile(Iterator, Predicate)
      */
     @Beta
     public static <T> List<T> skipUntil(final Iterator<? extends T> iter, final Predicate<? super T> filter) {
@@ -29623,10 +30277,10 @@ public final class N extends CommonUtil { // public final class N extends π imp
             return new ArrayList<>(0);
         }
 
-        return skipUtil(iter, filter, new ArrayList<>(9));
+        return skipUntil(iter, filter, new ArrayList<>(9));
     }
 
-    private static <T> List<T> skipUtil(final Iterator<? extends T> iter, final Predicate<? super T> filter, final List<T> result) {
+    private static <T> List<T> skipUntil(final Iterator<? extends T> iter, final Predicate<? super T> filter, final List<T> result) {
         T e = null;
 
         while (iter.hasNext()) {
@@ -29772,7 +30426,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     @Beta
     public static <T, R, C extends Collection<R>> C filterAndMap(final Iterable<? extends T> c, final Predicate<? super T> filter,
-            final Function<? super T, ? extends R> mapper, final IntFunction<C> supplier) {
+            final Function<? super T, ? extends R> mapper, final IntFunction<? extends C> supplier) {
         if (isEmptyCollection(c)) {
             return supplier.apply(0);
         }
@@ -29931,7 +30585,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     @Beta
     public static <T, R, C extends Collection<R>> C filterAndFlatMap(final Iterable<? extends T> c, final Predicate<? super T> filter,
-            final Function<? super T, ? extends Collection<? extends R>> mapper, final IntFunction<C> supplier) {
+            final Function<? super T, ? extends Collection<? extends R>> mapper, final IntFunction<? extends C> supplier) {
         if (isEmptyCollection(c)) {
             return supplier.apply(0);
         }
@@ -30282,6 +30936,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      * Returns a new list containing only unique elements, removing all duplicates (preserves order of first occurrence).
+     * <br />
+     * Note: uniqueness is determined by {@code hashCode()}/{@code equals()}, except that array-typed elements are
+     * compared by deep content - two arrays with equal contents count as duplicates.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -30306,6 +30963,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      * Returns a new list containing only unique elements from the specified range, removing all duplicates (preserves order of first occurrence).
+     * <br />
+     * Note: uniqueness is determined by {@code hashCode()}/{@code equals()}, except that array-typed elements are
+     * compared by deep content - two arrays with equal contents count as duplicates.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -30345,6 +31005,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      * Returns a new list containing only unique elements from the specified range, removing all duplicates (preserves order of first occurrence).
+     * <br />
+     * Note: uniqueness is determined by {@code hashCode()}/{@code equals()}, except that array-typed elements are
+     * compared by deep content - two arrays with equal contents count as duplicates.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -30404,6 +31067,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      * Returns a new list containing only unique elements, removing all duplicates (preserves order of first occurrence).
+     * <br />
+     * Note: uniqueness is determined by {@code hashCode()}/{@code equals()}, except that array-typed elements are
+     * compared by deep content - two arrays with equal contents count as duplicates.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -30440,6 +31106,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      * Returns a new list containing only unique elements, removing all duplicates (preserves order of first occurrence).
+     * <br />
+     * Note: uniqueness is determined by {@code hashCode()}/{@code equals()}, except that array-typed elements are
+     * compared by deep content - two arrays with equal contents count as duplicates.
      *
      * <p>Note: The iterator will be fully consumed by this operation.</p>
      *
@@ -30462,6 +31131,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      * Returns a new list containing only elements with unique keys extracted by the given function (preserves order of first occurrence).
+     * <br />
+     * Note: key uniqueness is determined by {@code hashCode()}/{@code equals()}, except that array-typed keys are
+     * compared by deep content - two key arrays with equal contents count as the same key.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -30487,6 +31159,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      * Returns a new list containing only elements from the specified range with unique keys extracted by the given function (preserves order of first occurrence).
+     * <br />
+     * Note: key uniqueness is determined by {@code hashCode()}/{@code equals()}, except that array-typed keys are
+     * compared by deep content - two key arrays with equal contents count as the same key.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -30539,16 +31214,16 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param <C> the type of the collection to return
      * @param a the array
      * @param keyExtractor the function to extract the comparison key from each element
-     * @param supplier the supplier function to create the result collection
+     * @param supplier the function that creates the result collection (it is passed the source size as a sizing hint)
      * @return a new collection containing elements with unique keys (empty if array is {@code null}/empty)
      * @see #distinctBy(Object[], Function)
      */
-    public static <T, C extends Collection<T>> C distinctBy(final T[] a, final Function<? super T, ?> keyExtractor, final Supplier<C> supplier) {
+    public static <T, C extends Collection<T>> C distinctBy(final T[] a, final Function<? super T, ?> keyExtractor, final IntFunction<? extends C> supplier) {
         if (isEmpty(a)) {
-            return supplier.get();
+            return supplier.apply(0);
         }
 
-        final C result = supplier.get();
+        final C result = supplier.apply(len(a));
         final Set<Object> set = newHashSet(len(a) / 2 + 1);
 
         for (final T e : a) {
@@ -30562,6 +31237,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      * Returns a new list containing only elements from the specified range with unique keys extracted by the given function (preserves order of first occurrence).
+     * <br />
+     * Note: key uniqueness is determined by {@code hashCode()}/{@code equals()}, except that array-typed keys are
+     * compared by deep content - two key arrays with equal contents count as the same key.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -30623,6 +31301,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      * Returns a new list containing only elements with unique keys extracted by the given function (preserves order of first occurrence).
+     * <br />
+     * Note: key uniqueness is determined by {@code hashCode()}/{@code equals()}, except that array-typed keys are
+     * compared by deep content - two key arrays with equal contents count as the same key.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -30636,10 +31317,10 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param keyExtractor the function to extract the comparison key from each element
      * @return a new list containing elements with unique keys (empty if iterable is {@code null}/empty)
      * @see #distinct(Iterable)
-     * @see #distinctBy(Iterable, Function, Supplier)
+     * @see #distinctBy(Iterable, Function, IntFunction)
      */
     public static <T> List<T> distinctBy(final Iterable<? extends T> c, final Function<? super T, ?> keyExtractor) {
-        return distinctBy(c, keyExtractor, Suppliers.ofList());
+        return distinctBy(c, keyExtractor, IntFunctions.ofList());
     }
 
     /**
@@ -30656,18 +31337,19 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param <C> the type of the collection to return
      * @param c the iterable
      * @param keyExtractor the function to extract the comparison key from each element
-     * @param supplier the supplier function to create the result collection
+     * @param supplier the function that creates the result collection (it is passed the source size as a sizing hint)
      * @return a new collection containing elements with unique keys (empty if iterable is {@code null}/empty)
      * @see #distinctBy(Iterable, Function)
      */
     public static <T, C extends Collection<T>> C distinctBy(final Iterable<? extends T> c, final Function<? super T, ?> keyExtractor,
-            final Supplier<C> supplier) {
+            final IntFunction<? extends C> supplier) {
         if (isEmptyCollection(c)) {
-            return supplier.get();
+            return supplier.apply(0);
         }
 
-        final C result = supplier.get();
-        final Set<Object> set = newHashSet(c instanceof Collection ? ((Collection<T>) c).size() / 2 + 1 : 0);
+        final int size = c instanceof Collection ? ((Collection<T>) c).size() : 0;
+        final C result = supplier.apply(size);
+        final Set<Object> set = newHashSet(size / 2 + 1);
 
         for (final T e : c) {
             if (set.add(hashKey(keyExtractor.apply(e)))) {
@@ -30680,6 +31362,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      * Returns a new list containing only elements with unique keys extracted by the given function (preserves order of first occurrence).
+     * <br />
+     * Note: key uniqueness is determined by {@code hashCode()}/{@code equals()}, except that array-typed keys are
+     * compared by deep content - two key arrays with equal contents count as the same key.
      *
      * <p>Note: The iterator will be fully consumed by this operation.</p>
      *
@@ -30695,10 +31380,10 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param keyExtractor the function to extract the comparison key from each element
      * @return a new list containing elements with unique keys (empty if iterator is {@code null} or has no elements)
      * @see #distinct(Iterator)
-     * @see #distinctBy(Iterator, Function, Supplier)
+     * @see #distinctBy(Iterator, Function, IntFunction)
      */
     public static <T> List<T> distinctBy(final Iterator<? extends T> iter, final Function<? super T, ?> keyExtractor) {
-        return distinctBy(iter, keyExtractor, Suppliers.ofList());
+        return distinctBy(iter, keyExtractor, IntFunctions.ofList());
     }
 
     /**
@@ -30717,17 +31402,17 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param <C> the type of the collection to return
      * @param iter the iterator
      * @param keyExtractor the function to extract the comparison key from each element
-     * @param supplier the supplier function to create the result collection
+     * @param supplier the function that creates the result collection (it is passed {@code 0} as a sizing hint, since an iterator has no known size)
      * @return a new collection containing elements with unique keys (empty if iterator is {@code null} or has no elements)
      * @see #distinctBy(Iterator, Function)
      */
     public static <T, C extends Collection<T>> C distinctBy(final Iterator<? extends T> iter, final Function<? super T, ?> keyExtractor,
-            final Supplier<C> supplier) {
+            final IntFunction<? extends C> supplier) {
         if (iter == null) {
-            return supplier.get();
+            return supplier.apply(0);
         }
 
-        final C result = supplier.get();
+        final C result = supplier.apply(0);
         final Set<Object> set = new HashSet<>();
 
         T next = null;
@@ -31049,8 +31734,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see #count(Object[], Predicate)
      */
     public static <T> boolean isMatchCountBetween(final T[] a, final int atLeast, final int atMost, final Predicate<? super T> filter) {
-        checkArgNotNegative(atLeast, "atLeast"); //NOSONAR
-        checkArgNotNegative(atMost, "atMost"); //NOSONAR
+        checkArgNotNegative(atLeast, cs.atLeast); //NOSONAR
+        checkArgNotNegative(atMost, cs.atMost); //NOSONAR
         checkArgument(atLeast <= atMost, "'atLeast' must be <= 'atMost'"); //NOSONAR
 
         if (isEmpty(a)) {
@@ -31862,6 +32547,37 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
+     * Returns the total number of elements in the iterable.
+     *
+     * <p>For a {@link Collection} this returns {@link Collection#size()} directly; for any other {@link Iterable} the
+     * elements are fully traversed to count them.</p>
+     *
+     * <p><b>&#9888; Overflow:</b> this method narrows the count to {@code int} and throws {@code ArithmeticException} if a
+     * non-{@code Collection} iterable yields more than {@code Integer.MAX_VALUE} (2<sup>31</sup>-1) elements.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<Integer> numbers = Arrays.asList(1, 2, 3, 4, 5);
+     * int result = N.count(numbers);   // returns 5
+     * }</pre>
+     *
+     * @param c the iterable
+     * @return the total number of elements (0 if the iterable is {@code null} or empty)
+     * @throws ArithmeticException if the count overflows an {@code int}
+     * @see #count(Iterable, Predicate)
+     * @see #count(Iterator)
+     */
+    public static int count(final Iterable<?> c) throws ArithmeticException {
+        if (c == null) {
+            return 0;
+        } else if (c instanceof Collection) {
+            return ((Collection<?>) c).size();
+        }
+
+        return count(c.iterator());
+    }
+
+    /**
      * Returns the number of elements that match the given predicate.
      *
      * <p><b>Usage Examples:</b></p>
@@ -31871,17 +32587,24 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * // returns 3
      * }</pre>
      *
+     * <p><b>&#9888; Overflow:</b> this method narrows the matching count to {@code int} and throws {@code ArithmeticException}
+     * if more than {@code Integer.MAX_VALUE} (2<sup>31</sup>-1) elements match. For potentially larger sources use
+     * {@link Iterators#count(Iterator, Predicate)}, which returns a {@code long}.</p>
+     *
      * @param <T> the type of elements in the iterable
      * @param c the iterable
      * @param filter the predicate to test each element
      * @return the number of elements that match the predicate (0 if iterable is {@code null}/empty)
+     * @throws ArithmeticException if the matching count overflows an {@code int}
+     * @see #count(Iterable)
+     * @see Iterators#count(Iterator, Predicate)
      */
-    public static <T> int count(final Iterable<? extends T> c, final Predicate<? super T> filter) {
+    public static <T> int count(final Iterable<? extends T> c, final Predicate<? super T> filter) throws ArithmeticException {
         if (isEmptyCollection(c)) {
             return 0;
         }
 
-        int count = 0;
+        long count = 0;
 
         for (final T e : c) {
             if (filter.test(e)) {
@@ -31889,13 +32612,17 @@ public final class N extends CommonUtil { // public final class N extends π imp
             }
         }
 
-        return count;
+        return Numbers.toIntExact(count);
     }
 
     /**
      * Returns the total number of elements.
      *
      * <p>Note: The iterator will be fully consumed by this operation.</p>
+     *
+     * <p><b>&#9888; Overflow:</b> this method narrows the count to {@code int} and throws {@code ArithmeticException} if the
+     * iterator yields more than {@code Integer.MAX_VALUE} (2<sup>31</sup>-1) elements. For potentially larger sources use
+     * the domain sibling {@link Iterators#count(Iterator)}, which returns a {@code long}.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -31906,8 +32633,10 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * @param iter the iterator (will be consumed)
      * @return the total number of elements (0 if iterator is {@code null} or has no elements)
-     * @throws ArithmeticException if the count overflows an {@code int}
+     * @throws ArithmeticException if the count overflows an {@code int}; for iterators that may yield more than
+     *         {@code Integer.MAX_VALUE} elements, use {@link Iterators#count(Iterator)}, which returns a {@code long}
      * @see #count(Iterator, Predicate)
+     * @see Iterators#count(Iterator)
      */
     public static int count(final Iterator<?> iter) throws ArithmeticException {
         if (iter == null) {
@@ -31933,8 +32662,10 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param iter the iterator (will be consumed)
      * @param filter the predicate to test each element
      * @return the number of elements that match the predicate (0 if iterator is {@code null} or has no elements)
-     * @throws ArithmeticException if the count overflows an {@code int}
+     * @throws ArithmeticException if the count overflows an {@code int}; for iterators that may yield more than
+     *         {@code Integer.MAX_VALUE} matching elements, use {@link Iterators#count(Iterator, Predicate)}, which returns a {@code long}
      * @see #count(Iterator)
+     * @see Iterators#count(Iterator, Predicate)
      */
     public static <T> int count(final Iterator<? extends T> iter, final Predicate<? super T> filter) throws ArithmeticException {
         if (iter == null) {
@@ -32003,6 +32734,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param nextSelector a function that determines the next element to add to the result list
      * @return a list containing the merged elements from both iterables. An empty list is returned if both iterables are {@code null} or empty.
      * @see #concat(Iterable, Iterable)
+     * @see Iterators#merge(Iterator, Iterator, BiFunction)
+     * @see Maps#merge(Map, Object, Object, BiFunction)
      */
     public static <T> List<T> merge(final Iterable<? extends T> a, final Iterable<? extends T> b,
             final BiFunction<? super T, ? super T, MergeResult> nextSelector) {
@@ -32019,12 +32752,19 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * N.merge(N.<Iterable<Integer>> emptyList(), (x, y) -> MergeResult.TAKE_FIRST);      // returns [] (empty list)
      * }</pre>
      *
+     * <p><b>Note:</b> For three or more iterables this is a left-fold (pairwise reduction): the first two iterables
+     * are merged, that running result is then merged with the third, then with the fourth, and so on. Each
+     * {@code nextSelector} comparison therefore sees an element from the accumulated result on the left and an
+     * element from the next iterable on the right; this is not an n-way merge that compares all heads
+     * simultaneously. The distinction matters when {@code nextSelector} is not a total order.
+     *
      * @param <T> the type of elements in the iterables
      * @param c the collection of iterables to merge
      * @param nextSelector a function that determines the next element to add to the result list
      * @return a list containing the merged elements from all iterables. An empty list is returned if all iterables are {@code null} or empty.
      * @see #concat(Collection)
      * @see #concat(Collection, IntFunction)
+     * @see Iterators#merge(Iterator, Iterator, BiFunction)
      */
     public static <T> List<T> merge(final Collection<? extends Iterable<? extends T>> c, final BiFunction<? super T, ? super T, MergeResult> nextSelector) {
         return merge(c, nextSelector, IntFunctions.ofList());
@@ -32042,6 +32782,12 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * N.merge(N.<Iterable<Integer>> emptyList(), (x, y) -> MergeResult.TAKE_FIRST, size -> new ArrayList<>(size));
      * // returns [] (empty list created by the supplier)
      * }</pre>
+     *
+     * <p><b>Note:</b> For three or more iterables this is a left-fold (pairwise reduction): the first two iterables
+     * are merged, that running result is then merged with the third, then with the fourth, and so on. Each
+     * {@code nextSelector} comparison therefore sees an element from the accumulated result on the left and an
+     * element from the next iterable on the right; this is not an n-way merge that compares all heads
+     * simultaneously. The distinction matters when {@code nextSelector} is not a total order.
      *
      * @param <T> the type of elements in the iterables
      * @param <C> the type of the resulting collection
@@ -32232,6 +32978,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return a list containing the zipped elements (an empty list is returned if any input array is {@code null} or empty)
      * @see Fn#pair()
      * @see Fn#tuple2()
+     * @see Maps#zip(Iterable, Iterable)
+     * @see Iterators#zip(Iterator, Iterator, BiFunction)
      */
     public static <A, B, R> List<R> zip(final A[] a, final B[] b, final BiFunction<? super A, ? super B, ? extends R> zipFunction) {
         if (isEmpty(a) || isEmpty(b)) {
@@ -32269,14 +33017,17 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return a list containing the zipped elements (an empty list is returned if any input iterable is {@code null} or empty)
      * @see Fn#pair()
      * @see Fn#tuple2()
+     * @see Maps#zip(Iterable, Iterable)
+     * @see Iterators#zip(Iterator, Iterator, BiFunction)
      */
-    public static <A, B, R> List<R> zip(final Iterable<A> a, final Iterable<B> b, final BiFunction<? super A, ? super B, ? extends R> zipFunction) {
+    public static <A, B, R> List<R> zip(final Iterable<? extends A> a, final Iterable<? extends B> b,
+            final BiFunction<? super A, ? super B, ? extends R> zipFunction) {
         if (isEmptyCollection(a) || isEmptyCollection(b)) {
             return new ArrayList<>();
         }
 
-        final Iterator<A> iterA = a.iterator();
-        final Iterator<B> iterB = b.iterator();
+        final Iterator<? extends A> iterA = a.iterator();
+        final Iterator<? extends B> iterB = b.iterator();
         final int minLen = min(getSizeOrDefault(a, 0), getSizeOrDefault(b, 0));
         final List<R> result = new ArrayList<>(minLen);
 
@@ -32352,15 +33103,15 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see Fn#triple()
      * @see Fn#tuple3()
      */
-    public static <A, B, C, R> List<R> zip(final Iterable<A> a, final Iterable<B> b, final Iterable<C> c,
+    public static <A, B, C, R> List<R> zip(final Iterable<? extends A> a, final Iterable<? extends B> b, final Iterable<? extends C> c,
             final TriFunction<? super A, ? super B, ? super C, ? extends R> zipFunction) {
         if (isEmptyCollection(a) || isEmptyCollection(b) || isEmptyCollection(c)) {
             return new ArrayList<>();
         }
 
-        final Iterator<A> iterA = a.iterator();
-        final Iterator<B> iterB = b.iterator();
-        final Iterator<C> iterC = c.iterator();
+        final Iterator<? extends A> iterA = a.iterator();
+        final Iterator<? extends B> iterB = b.iterator();
+        final Iterator<? extends C> iterC = c.iterator();
         final int minLen = min(getSizeOrDefault(a, 0), getSizeOrDefault(b, 0), getSizeOrDefault(c, 0));
         final List<R> result = new ArrayList<>(minLen);
 
@@ -32438,10 +33189,10 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see Fn#pair()
      * @see Fn#tuple2()
      */
-    public static <A, B, R> List<R> zip(final Iterable<A> a, final Iterable<B> b, final A valueForNoneA, final B valueForNoneB,
+    public static <A, B, R> List<R> zip(final Iterable<? extends A> a, final Iterable<? extends B> b, final A valueForNoneA, final B valueForNoneB,
             final BiFunction<? super A, ? super B, ? extends R> zipFunction) {
-        final Iterator<A> iterA = a == null ? ObjIterator.empty() : a.iterator();
-        final Iterator<B> iterB = b == null ? ObjIterator.empty() : b.iterator();
+        final Iterator<? extends A> iterA = a == null ? ObjIterator.empty() : a.iterator();
+        final Iterator<? extends B> iterB = b == null ? ObjIterator.empty() : b.iterator();
         final int lenA = getSizeOrDefault(a, 0);
         final int lenB = getSizeOrDefault(b, 0);
         final int maxLen = max(lenA, lenB);
@@ -32544,11 +33295,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see Fn#triple()
      * @see Fn#tuple3()
      */
-    public static <A, B, C, R> List<R> zip(final Iterable<A> a, final Iterable<B> b, final Iterable<C> c, final A valueForNoneA, final B valueForNoneB,
-            final C valueForNoneC, final TriFunction<? super A, ? super B, ? super C, ? extends R> zipFunction) {
-        final Iterator<A> iterA = isEmptyCollection(a) ? ObjIterator.empty() : a.iterator();
-        final Iterator<B> iterB = isEmptyCollection(b) ? ObjIterator.empty() : b.iterator();
-        final Iterator<C> iterC = isEmptyCollection(c) ? ObjIterator.empty() : c.iterator();
+    public static <A, B, C, R> List<R> zip(final Iterable<? extends A> a, final Iterable<? extends B> b, final Iterable<? extends C> c, final A valueForNoneA,
+            final B valueForNoneB, final C valueForNoneC, final TriFunction<? super A, ? super B, ? super C, ? extends R> zipFunction) {
+        final Iterator<? extends A> iterA = isEmptyCollection(a) ? ObjIterator.empty() : a.iterator();
+        final Iterator<? extends B> iterB = isEmptyCollection(b) ? ObjIterator.empty() : b.iterator();
+        final Iterator<? extends C> iterC = isEmptyCollection(c) ? ObjIterator.empty() : c.iterator();
         final int lenA = getSizeOrDefault(a, 0);
         final int lenB = getSizeOrDefault(b, 0);
         final int lenC = getSizeOrDefault(c, 0);
@@ -32808,13 +33559,35 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param c the input iterable to unzip
      * @param unzip a function that takes an element from the input iterable and a pair, and populates the pair with the unzipped values
      * @return a pair of lists, where the first list contains the first elements and the second list contains the second elements
+     * @see BiIterator#unzip(Iterable, BiConsumer, IntFunction, IntFunction)
+     * @see Iterators#unzip(Iterator, BiConsumer)
      */
     public static <T, A, B> Pair<List<A>, List<B>> unzip(final Iterable<? extends T> c, final BiConsumer<? super T, Pair<A, B>> unzip) {
-        return unzip(c, unzip, IntFunctions.ofList());
+        return BiIterator.unzip(c, unzip, IntFunctions.<A> ofList(), IntFunctions.<B> ofList());
+    }
+
+    /**
+     * Unzips an iterator into two separate lists using the provided unzip function.
+     *
+     * @param <T> the type of elements in the input iterator
+     * @param <A> the type of elements in the first output list
+     * @param <B> the type of elements in the second output list
+     * @param iter the input iterator to unzip
+     * @param unzip a function that takes an element from the input iterator and a pair, and populates the pair with the unzipped values
+     * @return a pair of lists, where the first list contains the first elements and the second list contains the second elements
+     * @see BiIterator#unzip(Iterator, BiConsumer, IntFunction, IntFunction)
+     * @see Iterators#unzip(Iterator, BiConsumer)
+     */
+    public static <T, A, B> Pair<List<A>, List<B>> unzip(final Iterator<? extends T> iter, final BiConsumer<? super T, Pair<A, B>> unzip) {
+        return BiIterator.unzip(iter, unzip, IntFunctions.<A> ofList(), IntFunctions.<B> ofList());
     }
 
     /**
      * Unzips an iterable into two separate collections using the provided unzip function.
+     * <br />
+     * This overload uses the same supplier type for both output collections, so it cannot safely express different
+     * left/right collection implementations. Prefer
+     * {@link #unzip(Iterable, BiConsumer, IntFunction, IntFunction)} when supplying output collection factories.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -32835,25 +33608,86 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param unzip a function that takes an element from the input iterable and a pair, and populates the pair with the unzipped values
      * @param supplier a function that provides new instances of the output collections
      * @return a pair of collections, where the first collection contains the first elements and the second collection contains the second elements
+     * @see #unzip(Iterable, BiConsumer, IntFunction, IntFunction)
      */
+    @SuppressWarnings("unchecked")
     public static <T, A, B, LC extends Collection<A>, RC extends Collection<B>> Pair<LC, RC> unzip(final Iterable<? extends T> c,
             final BiConsumer<? super T, Pair<A, B>> unzip, final IntFunction<? extends Collection<?>> supplier) {
-        final int len = getSizeOrDefault(c, 0);
+        return BiIterator.unzip(c, unzip, len -> (LC) supplier.apply(len), len -> (RC) supplier.apply(len));
+    }
 
-        final LC leftCollection = (LC) supplier.apply(len);
-        final RC rightCollection = (RC) supplier.apply(len);
-        final Pair<A, B> pair = new Pair<>();
+    /**
+     * Unzips an iterator into two separate collections using the provided unzip function.
+     * <br />
+     * This overload uses the same supplier type for both output collections, so it cannot safely express different
+     * left/right collection implementations. Prefer
+     * {@link #unzip(Iterator, BiConsumer, IntFunction, IntFunction)} when supplying output collection factories.
+     *
+     * @param <T> the type of elements in the input iterator
+     * @param <A> the type of elements in the first output collection
+     * @param <B> the type of elements in the second output collection
+     * @param <LC> the type of the first output collection
+     * @param <RC> the type of the second output collection
+     * @param iter the input iterator to unzip
+     * @param unzip a function that takes an element from the input iterator and a pair, and populates the pair with the unzipped values
+     * @param supplier a function that provides new instances of the output collections
+     * @return a pair of collections, where the first collection contains the first elements and the second collection contains the second elements
+     * @see #unzip(Iterator, BiConsumer, IntFunction, IntFunction)
+     */
+    @SuppressWarnings("unchecked")
+    public static <T, A, B, LC extends Collection<A>, RC extends Collection<B>> Pair<LC, RC> unzip(final Iterator<? extends T> iter,
+            final BiConsumer<? super T, Pair<A, B>> unzip, final IntFunction<? extends Collection<?>> supplier) {
+        return BiIterator.unzip(iter, unzip, len -> (LC) supplier.apply(len), len -> (RC) supplier.apply(len));
+    }
 
-        if (c != null) {
-            for (final T element : c) {
-                unzip.accept(element, pair);
+    /**
+     * Unzips an iterable into two separate collections using the provided unzip function and independent collection suppliers.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<String> pairs = Arrays.asList("a=1", "b=2", "a=3");
+     * Pair<Set<String>, List<String>> p = N.unzip(pairs, (s, out) -> {
+     *     String[] parts = s.split("=");
+     *     out.set(parts[0], parts[1]);
+     * }, size -> new LinkedHashSet<>(), size -> new ArrayList<>(size));
+     * // p.left() is {a, b}, p.right() is [1, 2, 3]
+     * }</pre>
+     *
+     * @param <T> the type of elements in the input iterable
+     * @param <A> the type of elements in the first output collection
+     * @param <B> the type of elements in the second output collection
+     * @param <LC> the type of the first output collection
+     * @param <RC> the type of the second output collection
+     * @param c the input iterable to unzip
+     * @param unzip a function that takes an element from the input iterable and a pair, and populates the pair with the unzipped values
+     * @param leftSupplier a function that provides the first output collection
+     * @param rightSupplier a function that provides the second output collection
+     * @return a pair of collections, where the first collection contains the first elements and the second collection contains the second elements
+     * @see BiIterator#unzip(Iterable, BiConsumer, IntFunction, IntFunction)
+     */
+    public static <T, A, B, LC extends Collection<A>, RC extends Collection<B>> Pair<LC, RC> unzip(final Iterable<? extends T> c,
+            final BiConsumer<? super T, Pair<A, B>> unzip, final IntFunction<? extends LC> leftSupplier, final IntFunction<? extends RC> rightSupplier) {
+        return BiIterator.unzip(c, unzip, leftSupplier, rightSupplier);
+    }
 
-                leftCollection.add(pair.left());
-                rightCollection.add(pair.right());
-            }
-        }
-
-        return Pair.of(leftCollection, rightCollection);
+    /**
+     * Unzips an iterator into two separate collections using the provided unzip function and independent collection suppliers.
+     *
+     * @param <T> the type of elements in the input iterator
+     * @param <A> the type of elements in the first output collection
+     * @param <B> the type of elements in the second output collection
+     * @param <LC> the type of the first output collection
+     * @param <RC> the type of the second output collection
+     * @param iter the input iterator to unzip
+     * @param unzip a function that takes an element from the input iterator and a pair, and populates the pair with the unzipped values
+     * @param leftSupplier a function that provides the first output collection
+     * @param rightSupplier a function that provides the second output collection
+     * @return a pair of collections, where the first collection contains the first elements and the second collection contains the second elements
+     * @see BiIterator#unzip(Iterator, BiConsumer, IntFunction, IntFunction)
+     */
+    public static <T, A, B, LC extends Collection<A>, RC extends Collection<B>> Pair<LC, RC> unzip(final Iterator<? extends T> iter,
+            final BiConsumer<? super T, Pair<A, B>> unzip, final IntFunction<? extends LC> leftSupplier, final IntFunction<? extends RC> rightSupplier) {
+        return BiIterator.unzip(iter, unzip, leftSupplier, rightSupplier);
     }
 
     /**
@@ -32877,17 +33711,39 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param unzip a function that takes an element from the input iterable and a triple, and populates the triple with the unzipped values
      * @return a triple of lists, where the first list contains the first elements, the second list contains the second elements and the third list contains the third elements
      * @see TriIterator#unzip(Iterable, BiConsumer)
-     * @see TriIterator#toMultiList(Supplier)
-     * @see TriIterator#toMultiSet(Supplier)
-     * @deprecated Use {@link TriIterator#unzip(Iterable, BiConsumer)} instead.
+     * @see TriIterator#unzip(Iterable, BiConsumer, IntFunction, IntFunction, IntFunction)
+     * @see TriIterator#unzipToLists(Supplier)
+     * @see TriIterator#unzipToSets(Supplier)
      */
-    @Deprecated
+    @Beta
     public static <T, A, B, C> Triple<List<A>, List<B>, List<C>> unzip3(final Iterable<? extends T> c, final BiConsumer<? super T, Triple<A, B, C>> unzip) {
-        return unzip3(c, unzip, IntFunctions.ofList());
+        return TriIterator.unzip(c, unzip, IntFunctions.<A> ofList(), IntFunctions.<B> ofList(), IntFunctions.<C> ofList());
+    }
+
+    /**
+     * Unzips an iterator into three separate lists using the provided unzip function.
+     *
+     * @param <T> the type of elements in the input iterator
+     * @param <A> the type of elements in the first output list
+     * @param <B> the type of elements in the second output list
+     * @param <C> the type of elements in the third output list
+     * @param iter the input iterator to unzip
+     * @param unzip a function that takes an element from the input iterator and a triple, and populates the triple with the unzipped values
+     * @return a triple of lists, where the first list contains the first elements, the second list contains the second elements and the third list contains the third elements
+     * @see TriIterator#unzip(Iterator, BiConsumer, IntFunction, IntFunction, IntFunction)
+     */
+    @Beta
+    public static <T, A, B, C> Triple<List<A>, List<B>, List<C>> unzip3(final Iterator<? extends T> iter, final BiConsumer<? super T, Triple<A, B, C>> unzip) {
+        return TriIterator.unzip(iter, unzip, IntFunctions.<A> ofList(), IntFunctions.<B> ofList(), IntFunctions.<C> ofList());
     }
 
     /**
      * Unzips an iterable into three separate collections using the provided unzip function.
+     * <br />
+     * This overload uses the same supplier type for all output collections, so it cannot safely express different
+     * left/middle/right collection implementations. Prefer
+     * {@link #unzip3(Iterable, BiConsumer, IntFunction, IntFunction, IntFunction)} when supplying output collection
+     * factories.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -32911,35 +33767,116 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param supplier a function that provides new instances of the output collections
      * @return a triple of collections, where the first collection contains the first elements, the second collection contains the second elements and the third collection contains the third elements
      * @see TriIterator#unzip(Iterable, BiConsumer)
-     * @see TriIterator#toMultiList(Supplier)
-     * @see TriIterator#toMultiSet(Supplier)
-     * @deprecated Use {@link TriIterator#unzip(Iterable, BiConsumer)} instead.
+     * @see TriIterator#unzip(Iterable, BiConsumer, IntFunction, IntFunction, IntFunction)
+     * @see TriIterator#unzipToLists(Supplier)
+     * @see TriIterator#unzipToSets(Supplier)
+     * @see #unzip3(Iterable, BiConsumer, IntFunction, IntFunction, IntFunction)
      */
-    @Deprecated
+    @Beta
+    @SuppressWarnings("unchecked")
     public static <T, A, B, C, LC extends Collection<A>, MC extends Collection<B>, RC extends Collection<C>> Triple<LC, MC, RC> unzip3(
             final Iterable<? extends T> c, final BiConsumer<? super T, Triple<A, B, C>> unzip, final IntFunction<? extends Collection<?>> supplier) {
-        final int len = getSizeOrDefault(c, 0);
+        return TriIterator.unzip(c, unzip, len -> (LC) supplier.apply(len), len -> (MC) supplier.apply(len), len -> (RC) supplier.apply(len));
+    }
 
-        final LC leftCollection = (LC) supplier.apply(len);
-        final MC middleCollection = (MC) supplier.apply(len);
-        final RC rightCollection = (RC) supplier.apply(len);
-        final Triple<A, B, C> triple = new Triple<>();
+    /**
+     * Unzips an iterator into three separate collections using the provided unzip function.
+     * <br />
+     * This overload uses the same supplier type for all output collections, so it cannot safely express different
+     * left/middle/right collection implementations. Prefer
+     * {@link #unzip3(Iterator, BiConsumer, IntFunction, IntFunction, IntFunction)} when supplying output collection
+     * factories.
+     *
+     * @param <T> the type of elements in the input iterator
+     * @param <A> the type of elements in the first output collection
+     * @param <B> the type of elements in the second output collection
+     * @param <C> the type of elements in the third output collection
+     * @param <LC> the type of the first output collection
+     * @param <MC> the type of the second output collection
+     * @param <RC> the type of the third output collection
+     * @param iter the input iterator to unzip
+     * @param unzip a function that takes an element from the input iterator and a triple, and populates the triple with the unzipped values
+     * @param supplier a function that provides new instances of the output collections
+     * @return a triple of collections, where the first collection contains the first elements, the second collection contains the second elements and the third collection contains the third elements
+     * @see TriIterator#unzip(Iterator, BiConsumer, IntFunction, IntFunction, IntFunction)
+     * @see #unzip3(Iterator, BiConsumer, IntFunction, IntFunction, IntFunction)
+     */
+    @Beta
+    @SuppressWarnings("unchecked")
+    public static <T, A, B, C, LC extends Collection<A>, MC extends Collection<B>, RC extends Collection<C>> Triple<LC, MC, RC> unzip3(
+            final Iterator<? extends T> iter, final BiConsumer<? super T, Triple<A, B, C>> unzip, final IntFunction<? extends Collection<?>> supplier) {
+        return TriIterator.unzip(iter, unzip, len -> (LC) supplier.apply(len), len -> (MC) supplier.apply(len), len -> (RC) supplier.apply(len));
+    }
 
-        if (c != null) {
-            for (final T element : c) {
-                unzip.accept(element, triple);
+    /**
+     * Unzips an iterable into three separate collections using the provided unzip function and independent collection suppliers.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<String> rows = Arrays.asList("a-1-x", "b-2-y");
+     * Triple<Set<String>, List<String>, Queue<String>> t = N.unzip3(rows, (s, out) -> {
+     *     String[] parts = s.split("-");
+     *     out.set(parts[0], parts[1], parts[2]);
+     * }, size -> new LinkedHashSet<>(), size -> new ArrayList<>(size), size -> new ArrayDeque<>(size));
+     * }</pre>
+     *
+     * @param <T> the type of elements in the input iterable
+     * @param <A> the type of elements in the first output collection
+     * @param <B> the type of elements in the second output collection
+     * @param <C> the type of elements in the third output collection
+     * @param <LC> the type of the first output collection
+     * @param <MC> the type of the second output collection
+     * @param <RC> the type of the third output collection
+     * @param c the input iterable to unzip
+     * @param unzip a function that takes an element from the input iterable and a triple, and populates the triple with the unzipped values
+     * @param leftSupplier a function that provides the first output collection
+     * @param middleSupplier a function that provides the second output collection
+     * @param rightSupplier a function that provides the third output collection
+     * @return a triple of collections, where the first collection contains the first elements, the second collection contains the second elements and the third collection contains the third elements
+     * @see TriIterator#unzip(Iterable, BiConsumer)
+     * @see TriIterator#unzip(Iterable, BiConsumer, IntFunction, IntFunction, IntFunction)
+     * @see TriIterator#unzipToLists(Supplier)
+     * @see TriIterator#unzipToSets(Supplier)
+     */
+    @Beta
+    public static <T, A, B, C, LC extends Collection<A>, MC extends Collection<B>, RC extends Collection<C>> Triple<LC, MC, RC> unzip3(
+            final Iterable<? extends T> c, final BiConsumer<? super T, Triple<A, B, C>> unzip, final IntFunction<? extends LC> leftSupplier,
+            final IntFunction<? extends MC> middleSupplier, final IntFunction<? extends RC> rightSupplier) {
+        return TriIterator.unzip(c, unzip, leftSupplier, middleSupplier, rightSupplier);
+    }
 
-                leftCollection.add(triple.left());
-                middleCollection.add(triple.middle());
-                rightCollection.add(triple.right());
-            }
-        }
-
-        return Triple.of(leftCollection, middleCollection, rightCollection);
+    /**
+     * Unzips an iterator into three separate collections using the provided unzip function and independent collection suppliers.
+     *
+     * @param <T> the type of elements in the input iterator
+     * @param <A> the type of elements in the first output collection
+     * @param <B> the type of elements in the second output collection
+     * @param <C> the type of elements in the third output collection
+     * @param <LC> the type of the first output collection
+     * @param <MC> the type of the second output collection
+     * @param <RC> the type of the third output collection
+     * @param iter the input iterator to unzip
+     * @param unzip a function that takes an element from the input iterator and a triple, and populates the triple with the unzipped values
+     * @param leftSupplier a function that provides the first output collection
+     * @param middleSupplier a function that provides the second output collection
+     * @param rightSupplier a function that provides the third output collection
+     * @return a triple of collections, where the first collection contains the first elements, the second collection contains the second elements and the third collection contains the third elements
+     * @see TriIterator#unzip(Iterator, BiConsumer, IntFunction, IntFunction, IntFunction)
+     */
+    @Beta
+    public static <T, A, B, C, LC extends Collection<A>, MC extends Collection<B>, RC extends Collection<C>> Triple<LC, MC, RC> unzip3(
+            final Iterator<? extends T> iter, final BiConsumer<? super T, Triple<A, B, C>> unzip, final IntFunction<? extends LC> leftSupplier,
+            final IntFunction<? extends MC> middleSupplier, final IntFunction<? extends RC> rightSupplier) {
+        return TriIterator.unzip(iter, unzip, leftSupplier, middleSupplier, rightSupplier);
     }
 
     /**
      * Returns a map grouping elements by keys extracted from each element.
+     *
+     * <p><b>Note:</b> the array {@code groupBy} overloads provide only the key-extractor (and {@code mapSupplier}) forms.
+     * For the downstream {@code keyExtractor + valueExtractor} or {@code Collector} forms (which exist only for
+     * {@code Iterable}/{@code Iterator}), convert the array first, e.g.
+     * {@code N.groupBy(Arrays.asList(a), keyExtractor, valueExtractor)}.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -33517,8 +34454,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * // returns {'a': 2, 'b': 1}
      * }</pre>
      *
-     * @param <K> the type of keys
      * @param <T> the type of elements in the iterator
+     * @param <K> the type of keys
      * @param <R> the type of aggregated values
      * @param iter the iterator (will be consumed)
      * @param keyExtractor the function to extract grouping keys
@@ -33528,7 +34465,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see java.util.stream.Collectors
      */
     @Beta
-    public static <K, T, R> Map<K, R> groupBy(final Iterator<? extends T> iter, final Function<? super T, ? extends K> keyExtractor,
+    public static <T, K, R> Map<K, R> groupBy(final Iterator<? extends T> iter, final Function<? super T, ? extends K> keyExtractor,
             final Collector<? super T, ?, R> collector) {
         return groupBy(iter, keyExtractor, collector, Suppliers.ofMap());
     }
@@ -33545,8 +34482,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * // returns a TreeMap with sorted keys
      * }</pre>
      *
-     * @param <K> the type of keys
      * @param <T> the type of elements in the iterator
+     * @param <K> the type of keys
      * @param <R> the type of aggregated values
      * @param <M> the type of map to return
      * @param iter the iterator (will be consumed)
@@ -33558,7 +34495,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see java.util.stream.Collectors
      */
     @Beta
-    public static <K, T, R, M extends Map<K, R>> M groupBy(final Iterator<? extends T> iter, final Function<? super T, ? extends K> keyExtractor,
+    public static <T, K, R, M extends Map<K, R>> M groupBy(final Iterator<? extends T> iter, final Function<? super T, ? extends K> keyExtractor,
             final Collector<? super T, ?, R> collector, final Supplier<M> mapSupplier) {
         final M ret = mapSupplier.get();
 
@@ -33792,7 +34729,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see ObjIterator#of(Object[], int, int)
      */
     @Beta
-    public static <T> Iterator<T> iterate(final T[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
+    public static <T> ObjIterator<T> iterate(final T[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         return ObjIterator.of(a, fromIndex, toIndex);
     }
 
@@ -33814,8 +34751,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see Map#entrySet()
      */
     @Beta
-    public static <K, V> Iterator<Map.Entry<K, V>> iterate(final Map<K, V> map) {
-        return map == null ? ObjIterator.empty() : map.entrySet().iterator();
+    public static <K, V> ObjIterator<Map.Entry<K, V>> iterate(final Map<K, V> map) {
+        return map == null ? ObjIterator.empty() : ObjIterator.of(map.entrySet().iterator());
     }
 
     /**
@@ -33836,8 +34773,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see ObjIterator#of(Iterable)
      */
     @Beta
-    public static <T> Iterator<T> iterate(final Iterable<? extends T> c) {
-        return c == null ? ObjIterator.empty() : (Iterator<T>) c.iterator();
+    public static <T> ObjIterator<T> iterate(final Iterable<? extends T> c) {
+        return c == null ? ObjIterator.empty() : ObjIterator.of(c);
     }
 
     /**
@@ -33857,8 +34794,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see #iterate(Iterable)
      */
     @Beta
-    public static <T> List<Iterator<T>> iterateEach(final Collection<? extends Iterable<? extends T>> iterables) {
-        final List<Iterator<T>> iterators = new ArrayList<>(size(iterables));
+    public static <T> List<ObjIterator<T>> iterateEach(final Collection<? extends Iterable<? extends T>> iterables) {
+        final List<ObjIterator<T>> iterators = new ArrayList<>(size(iterables));
 
         if (iterables != null) {
             for (final Iterable<? extends T> iterable : iterables) {
@@ -33983,7 +34920,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <pre>{@code
      * Map<String, Integer> data = Map.of("age", 25, "score", 90);
      * String result = N.toJson(data, true);
-     * // returns formatted: {"age": 25, "score": 90}
+     * // returns pretty-formatted JSON with line breaks and indentation
      * }</pre>
      *
      * @param obj the object to serialize
@@ -34001,9 +34938,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * JsonSerConfig config = new JsonSerConfig().setDateFormat("yyyy-MM-dd");
+     * JsonSerConfig config = new JsonSerConfig().setPrettyFormat(true);
      * String result = N.toJson(person, config);
-     * // returns JSON with custom date formatting
+     * // returns pretty-formatted JSON
      * }</pre>
      *
      * @param obj the object to serialize
@@ -34068,9 +35005,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <pre>{@code
      * Map<String, Integer> data = Map.of("age", 25, "score", 90);
      * try (OutputStream out = new FileOutputStream("data.json")) {
-     *     N.toJson(data, out);   // invokes JSON serialization
-     *
-     * // Writes {"age":25,"score":90} to the stream
+     *     N.toJson(data, out);   // writes {"age":25,"score":90} to the stream
      * }
      * }</pre>
      *
@@ -34092,9 +35027,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * JsonSerConfig config = new JsonSerConfig().setPrettyFormat(true);
      * Map<String, Integer> data = Map.of("age", 25, "score", 90);
      * try (OutputStream out = new FileOutputStream("data.json")) {
-     *     N.toJson(data, config, out);   // invokes formatted JSON serialization
-     *
-     * // Writes formatted JSON to the stream
+     *     N.toJson(data, config, out);   // writes pretty-formatted JSON to the stream
      * }
      * }</pre>
      *
@@ -34116,9 +35049,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <pre>{@code
      * Map<String, Integer> data = Map.of("age", 25, "score", 90);
      * try (Writer writer = new FileWriter("data.json")) {
-     *     N.toJson(data, writer);   // invokes JSON serialization
-     *
-     * // Writes {"age":25,"score":90} to the writer
+     *     N.toJson(data, writer);   // writes {"age":25,"score":90} to the writer
      * }
      * }</pre>
      *
@@ -34140,9 +35071,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * JsonSerConfig config = new JsonSerConfig().setPrettyFormat(true);
      * Map<String, Integer> data = Map.of("age", 25, "score", 90);
      * try (Writer writer = new FileWriter("data.json")) {
-     *     N.toJson(data, config, writer);   // invokes formatted JSON serialization
-     *
-     * // Writes formatted JSON to the writer
+     *     N.toJson(data, config, writer);   // writes pretty-formatted JSON to the writer
      * }
      * }</pre>
      *
@@ -34201,12 +35130,16 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      * Returns an object deserialized from the JSON string, or a default value if the result is {@code null}.
+     * <br />
+     * Note: do not confuse this overload with {@link #fromJson(String, JsonDeserConfig, Class)} - the second argument here
+     * is the default <i>result</i> value, not a configuration. A {@code null} literal second argument makes the call
+     * ambiguous between the two overloads and requires an explicit cast to compile.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * String json = "null";
+     * String json = null;
      * Map<String, Integer> result = N.fromJson(json, new HashMap<>(), Map.class);
-     * // returns the empty HashMap (default value)
+     * // returns the supplied default HashMap since the input is null
      * }</pre>
      *
      * @param <T> the type of the returned object
@@ -34226,12 +35159,16 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      * Returns an object deserialized from the JSON string using the specified Type, or a default value if the result is {@code null}.
+     * <br />
+     * Note: do not confuse this overload with {@link #fromJson(String, JsonDeserConfig, Type)} - the second argument here
+     * is the default <i>result</i> value, not a configuration. A {@code null} literal second argument makes the call
+     * ambiguous between the two overloads and requires an explicit cast to compile.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * String json = "null";
+     * String json = null;
      * List<String> result = N.fromJson(json, Collections.emptyList(), new TypeReference<List<String>>(){}.type());
-     * // returns the empty list (default value)
+     * // returns the supplied default empty list since the input is null
      * }</pre>
      *
      * @param <T> the type of the returned object
@@ -34251,12 +35188,16 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      * Returns an object deserialized from the JSON string using the specified configuration.
+     * <br />
+     * Note: do not confuse this overload with {@link #fromJson(String, Object, Class)} - the second argument here is a
+     * deserialization configuration, not a default result value. A {@code null} literal second argument makes the call
+     * ambiguous between the two overloads and requires an explicit cast to compile.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * JsonDeserConfig config = new JsonDeserConfig().setDateFormat("yyyy-MM-dd");
+     * JsonDeserConfig config = new JsonDeserConfig().setIgnoreUnmatchedProperty(true);
      * Person result = N.fromJson(jsonString, config, Person.class);
-     * // returns Person with custom date parsing
+     * // returns Person (unmatched JSON properties are ignored)
      * }</pre>
      *
      * @param <T> the type of the returned object
@@ -34274,12 +35215,16 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      * Returns an object deserialized from the JSON string using the specified Type and configuration.
+     * <br />
+     * Note: do not confuse this overload with {@link #fromJson(String, Object, Type)} - the second argument here is a
+     * deserialization configuration, not a default result value. A {@code null} literal second argument makes the call
+     * ambiguous between the two overloads and requires an explicit cast to compile.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * JsonDeserConfig config = new JsonDeserConfig().setDateFormat("yyyy-MM-dd");
+     * JsonDeserConfig config = new JsonDeserConfig().setIgnoreUnmatchedProperty(true);
      * List<Person> result = N.fromJson(jsonString, config, new TypeReference<List<Person>>(){}.type());
-     * // returns List with custom date parsing
+     * // returns List (unmatched JSON properties are ignored)
      * }</pre>
      *
      * @param <T> the type of the returned object
@@ -34308,7 +35253,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param <T> the type of the returned object
      * @param json the file to read JSON from
      * @param targetType the target class type
-     * @return the deserialized object ({@code null} if file contains {@code "null"})
+     * @return the deserialized object ({@code null} if deserialization yields {@code null})
      * @throws IllegalArgumentException if targetType is {@code null}
      * @see #fromJson(File, Type)
      * @see #toJson(Object, File)
@@ -34330,7 +35275,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param <T> the type of the returned object
      * @param json the file to read JSON from
      * @param targetType the target Type (supports generics like {@code List<String>})
-     * @return the deserialized object ({@code null} if file contains {@code "null"})
+     * @return the deserialized object ({@code null} if deserialization yields {@code null})
      * @throws IllegalArgumentException if targetType is {@code null}
      * @see #fromJson(File, Class)
      * @see TypeReference
@@ -34344,17 +35289,17 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * JsonDeserConfig config = new JsonDeserConfig().setDateFormat("yyyy-MM-dd");
+     * JsonDeserConfig config = new JsonDeserConfig().setIgnoreUnmatchedProperty(true);
      * File file = new File("person.json");
      * Person result = N.fromJson(file, config, Person.class);
-     * // returns Person with custom date parsing
+     * // returns Person (unmatched JSON properties are ignored)
      * }</pre>
      *
      * @param <T> the type of the returned object
      * @param json the file to read JSON from
      * @param config the deserialization configuration
      * @param targetType the target class type
-     * @return the deserialized object ({@code null} if file contains {@code "null"})
+     * @return the deserialized object ({@code null} if deserialization yields {@code null})
      * @throws IllegalArgumentException if targetType is {@code null}
      * @see #fromJson(File, JsonDeserConfig, Type)
      * @see #fromJson(File, Class)
@@ -34368,17 +35313,17 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * JsonDeserConfig config = new JsonDeserConfig().setDateFormat("yyyy-MM-dd");
+     * JsonDeserConfig config = new JsonDeserConfig().setIgnoreUnmatchedProperty(true);
      * File file = new File("people.json");
      * List<Person> result = N.fromJson(file, config, new TypeReference<List<Person>>(){}.type());
-     * // returns List with custom date parsing
+     * // returns List (unmatched JSON properties are ignored)
      * }</pre>
      *
      * @param <T> the type of the returned object
      * @param json the file to read JSON from
      * @param config the deserialization configuration
      * @param targetType the target Type (supports generics like {@code List<String>})
-     * @return the deserialized object ({@code null} if file contains {@code "null"})
+     * @return the deserialized object ({@code null} if deserialization yields {@code null})
      * @throws IllegalArgumentException if targetType is {@code null}
      * @see #fromJson(File, JsonDeserConfig, Class)
      * @see #fromJson(File, Type)
@@ -34403,7 +35348,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param <T> the type of the returned object
      * @param json the input stream to read JSON from
      * @param targetType the target class type
-     * @return the deserialized object ({@code null} if stream contains {@code "null"})
+     * @return the deserialized object ({@code null} if deserialization yields {@code null})
      * @throws IllegalArgumentException if targetType is {@code null}
      * @see #fromJson(InputStream, Type)
      * @see #toJson(Object, OutputStream)
@@ -34428,7 +35373,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param <T> the type of the returned object
      * @param json the input stream to read JSON from
      * @param targetType the target Type (supports generics like {@code List<String>})
-     * @return the deserialized object ({@code null} if stream contains {@code "null"})
+     * @return the deserialized object ({@code null} if deserialization yields {@code null})
      * @throws IllegalArgumentException if targetType is {@code null}
      * @see #fromJson(InputStream, Class)
      * @see TypeReference
@@ -34444,18 +35389,18 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * JsonDeserConfig config = new JsonDeserConfig().setDateFormat("yyyy-MM-dd");
+     * JsonDeserConfig config = new JsonDeserConfig().setIgnoreUnmatchedProperty(true);
      * try (InputStream in = new FileInputStream("person.json")) {
      *     Person result = N.fromJson(in, config, Person.class);
      * }
-     * // returns Person with custom date parsing
+     * // returns Person (unmatched JSON properties are ignored)
      * }</pre>
      *
      * @param <T> the type of the returned object
      * @param json the input stream to read JSON from
      * @param config the deserialization configuration
      * @param targetType the target class type
-     * @return the deserialized object ({@code null} if stream contains {@code "null"})
+     * @return the deserialized object ({@code null} if deserialization yields {@code null})
      * @throws IllegalArgumentException if targetType is {@code null}
      * @see #fromJson(InputStream, JsonDeserConfig, Type)
      * @see #fromJson(InputStream, Class)
@@ -34471,18 +35416,18 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * JsonDeserConfig config = new JsonDeserConfig().setDateFormat("yyyy-MM-dd");
+     * JsonDeserConfig config = new JsonDeserConfig().setIgnoreUnmatchedProperty(true);
      * try (InputStream in = new FileInputStream("people.json")) {
      *     List<Person> result = N.fromJson(in, config, new TypeReference<List<Person>>(){}.type());
      * }
-     * // returns List with custom date parsing
+     * // returns List (unmatched JSON properties are ignored)
      * }</pre>
      *
      * @param <T> the type of the returned object
      * @param json the input stream to read JSON from
      * @param config the deserialization configuration
      * @param targetType the target Type (supports generics like {@code List<String>})
-     * @return the deserialized object ({@code null} if stream contains {@code "null"})
+     * @return the deserialized object ({@code null} if deserialization yields {@code null})
      * @throws IllegalArgumentException if targetType is {@code null}
      * @see #fromJson(InputStream, JsonDeserConfig, Class)
      * @see #fromJson(InputStream, Type)
@@ -34507,7 +35452,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param <T> the type of the returned object
      * @param json the reader to read JSON from
      * @param targetType the target class type
-     * @return the deserialized object ({@code null} if reader contains {@code "null"})
+     * @return the deserialized object ({@code null} if deserialization yields {@code null})
      * @throws IllegalArgumentException if targetType is {@code null}
      * @see #fromJson(Reader, Type)
      * @see #toJson(Object, Writer)
@@ -34532,7 +35477,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param <T> the type of the returned object
      * @param json the reader to read JSON from
      * @param targetType the target Type (supports generics like {@code List<String>})
-     * @return the deserialized object ({@code null} if reader contains {@code "null"})
+     * @return the deserialized object ({@code null} if deserialization yields {@code null})
      * @throws IllegalArgumentException if targetType is {@code null}
      * @see #fromJson(Reader, Class)
      * @see TypeReference
@@ -34548,18 +35493,18 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * JsonDeserConfig config = new JsonDeserConfig().setDateFormat("yyyy-MM-dd");
+     * JsonDeserConfig config = new JsonDeserConfig().setIgnoreUnmatchedProperty(true);
      * try (Reader reader = new FileReader("person.json")) {
      *     Person result = N.fromJson(reader, config, Person.class);
      * }
-     * // returns Person with custom date parsing
+     * // returns Person (unmatched JSON properties are ignored)
      * }</pre>
      *
      * @param <T> the type of the returned object
      * @param json the reader to read JSON from
      * @param config the deserialization configuration
      * @param targetType the target class type
-     * @return the deserialized object ({@code null} if reader contains {@code "null"})
+     * @return the deserialized object ({@code null} if deserialization yields {@code null})
      * @throws IllegalArgumentException if targetType is {@code null}
      * @see #fromJson(Reader, JsonDeserConfig, Type)
      * @see #fromJson(Reader, Class)
@@ -34575,18 +35520,18 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * JsonDeserConfig config = new JsonDeserConfig().setDateFormat("yyyy-MM-dd");
+     * JsonDeserConfig config = new JsonDeserConfig().setIgnoreUnmatchedProperty(true);
      * try (Reader reader = new FileReader("people.json")) {
      *     List<Person> result = N.fromJson(reader, config, new TypeReference<List<Person>>(){}.type());
      * }
-     * // returns List with custom date parsing
+     * // returns List (unmatched JSON properties are ignored)
      * }</pre>
      *
      * @param <T> the type of the returned object
      * @param json the reader to read JSON from
      * @param config the deserialization configuration
      * @param targetType the target Type (supports generics like {@code List<String>})
-     * @return the deserialized object ({@code null} if reader contains {@code "null"})
+     * @return the deserialized object ({@code null} if deserialization yields {@code null})
      * @throws IllegalArgumentException if targetType is {@code null}
      * @see #fromJson(Reader, JsonDeserConfig, Class)
      * @see #fromJson(Reader, Type)
@@ -34601,7 +35546,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String json = "prefix{\"age\":25,\"score\":90}suffix";
-     * Map<String, Integer> result = N.fromJson(json, 6, 29, Map.class);
+     * Map<String, Integer> result = N.fromJson(json, 6, 27, Map.class);
      * // returns a Map with the deserialized data
      * }</pre>
      *
@@ -34610,7 +35555,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param fromIndex the starting index (inclusive)
      * @param toIndex the ending index (exclusive)
      * @param targetType the target class type
-     * @return the deserialized object ({@code null} if substring is {@code "null"})
+     * @return the deserialized object ({@code null} if deserialization yields {@code null})
      * @throws IllegalArgumentException if targetType is {@code null}
      * @throws IndexOutOfBoundsException if {@code fromIndex < 0 || toIndex > json.length() || fromIndex > toIndex}
      * @see #fromJson(String, int, int, Type)
@@ -34627,7 +35572,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String json = "prefix[{\"name\":\"Alice\"}]suffix";
-     * List<Person> result = N.fromJson(json, 6, 22, new TypeReference<List<Person>>(){}.type());
+     * List<Person> result = N.fromJson(json, 6, 24, new TypeReference<List<Person>>(){}.type());
      * // returns a List of Person objects
      * }</pre>
      *
@@ -34636,7 +35581,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param fromIndex the starting index (inclusive)
      * @param toIndex the ending index (exclusive)
      * @param targetType the target Type (supports generics like {@code List<String>})
-     * @return the deserialized object ({@code null} if substring is {@code "null"})
+     * @return the deserialized object ({@code null} if deserialization yields {@code null})
      * @throws IllegalArgumentException if targetType is {@code null}
      * @throws IndexOutOfBoundsException if {@code fromIndex < 0 || toIndex > json.length() || fromIndex > toIndex}
      * @see #fromJson(String, int, int, Class)
@@ -34652,10 +35597,10 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * JsonDeserConfig config = new JsonDeserConfig().setDateFormat("yyyy-MM-dd");
+     * JsonDeserConfig config = new JsonDeserConfig().setIgnoreUnmatchedProperty(true);
      * String json = "prefix{\"name\":\"Alice\",\"birth\":\"2000-01-01\"}suffix";
-     * Person result = N.fromJson(json, 6, 45, config, Person.class);
-     * // returns Person with custom date parsing
+     * Person result = N.fromJson(json, 6, 43, config, Person.class);
+     * // returns Person (unmatched JSON properties are ignored)
      * }</pre>
      *
      * @param <T> the type of the returned object
@@ -34664,7 +35609,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param toIndex the ending index (exclusive)
      * @param config the deserialization configuration
      * @param targetType the target class type
-     * @return the deserialized object ({@code null} if substring is {@code "null"})
+     * @return the deserialized object ({@code null} if deserialization yields {@code null})
      * @throws IllegalArgumentException if targetType is {@code null}
      * @throws IndexOutOfBoundsException if {@code fromIndex < 0 || toIndex > json.length() || fromIndex > toIndex}
      * @see #fromJson(String, int, int, JsonDeserConfig, Type)
@@ -34679,10 +35624,10 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * JsonDeserConfig config = new JsonDeserConfig().setDateFormat("yyyy-MM-dd");
+     * JsonDeserConfig config = new JsonDeserConfig().setIgnoreUnmatchedProperty(true);
      * String json = "prefix[{\"name\":\"Alice\",\"birth\":\"2000-01-01\"}]suffix";
-     * List<Person> result = N.fromJson(json, 6, 49, config, new TypeReference<List<Person>>(){}.type());
-     * // returns List with custom date parsing
+     * List<Person> result = N.fromJson(json, 6, 45, config, new TypeReference<List<Person>>(){}.type());
+     * // returns List (unmatched JSON properties are ignored)
      * }</pre>
      *
      * @param <T> the type of the returned object
@@ -34691,7 +35636,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param toIndex the ending index (exclusive)
      * @param config the deserialization configuration
      * @param targetType the target Type (supports generics like {@code List<String>})
-     * @return the deserialized object ({@code null} if substring is {@code "null"})
+     * @return the deserialized object ({@code null} if deserialization yields {@code null})
      * @throws IllegalArgumentException if targetType is {@code null}
      * @throws IndexOutOfBoundsException if {@code fromIndex < 0 || toIndex > json.length() || fromIndex > toIndex}
      * @see #fromJson(String, int, int, JsonDeserConfig, Class)
@@ -34730,11 +35675,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * JsonDeserConfig config = new JsonDeserConfig().setDateFormat("yyyy-MM-dd");
+     * JsonDeserConfig config = new JsonDeserConfig().setIgnoreUnmatchedProperty(true);
      * String json = "[{\"name\":\"Alice\",\"birth\":\"2000-01-01\"}]";
      * Stream<Person> result = N.streamJson(json, config, new TypeReference<Person>(){}.type());
      *
-     * // Streams Person objects with custom date parsing
+     * // Streams Person objects (unmatched JSON properties are ignored)
      * }</pre>
      *
      * @param <T> the type of stream elements
@@ -34763,7 +35708,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param <T> the type of stream elements
      * @param jsonArray the JSON array file
      * @param elementType the target element Type
-     * @return a stream of deserialized elements (empty if file is {@code null}/nonexistent or contains empty array)
+     * @return a stream of deserialized elements (empty if the file contains an empty JSON array)
      * @throws IllegalArgumentException if elementType is {@code null}
      * @see #streamJson(File, JsonDeserConfig, Type)
      * @see #fromJson(File, Type)
@@ -34777,18 +35722,18 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * JsonDeserConfig config = new JsonDeserConfig().setDateFormat("yyyy-MM-dd");
+     * JsonDeserConfig config = new JsonDeserConfig().setIgnoreUnmatchedProperty(true);
      * File file = new File("people.json");
      * Stream<Person> result = N.streamJson(file, config, new TypeReference<Person>(){}.type());
      *
-     * // Streams Person objects with custom date parsing
+     * // Streams Person objects (unmatched JSON properties are ignored)
      * }</pre>
      *
      * @param <T> the type of stream elements
      * @param jsonArray the JSON array file
      * @param config the deserialization configuration
      * @param elementType the target element Type
-     * @return a stream of deserialized elements (empty if file is {@code null}/nonexistent or contains empty array)
+     * @return a stream of deserialized elements (empty if the file contains an empty JSON array)
      * @throws IllegalArgumentException if elementType is {@code null}
      * @see #streamJson(File, Type)
      */
@@ -34812,7 +35757,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param <T> the type of stream elements
      * @param jsonArray the JSON array input stream
      * @param elementType the target element Type
-     * @return a stream of deserialized elements (empty if stream is {@code null} or contains empty array)
+     * @return a stream of deserialized elements (empty if the stream contains an empty JSON array)
      * @throws IllegalArgumentException if elementType is {@code null}
      * @see #streamJson(InputStream, boolean, Type)
      * @see #fromJson(InputStream, Type)
@@ -34835,7 +35780,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param jsonArray the JSON array input stream
      * @param closeInputStreamWhenStreamIsClosed {@code true} to close input stream with the stream
      * @param elementType the target element Type
-     * @return a stream of deserialized elements (empty if stream is {@code null} or contains empty array)
+     * @return a stream of deserialized elements (empty if the stream contains an empty JSON array)
      * @throws IllegalArgumentException if elementType is {@code null}
      * @see #streamJson(InputStream, JsonDeserConfig, boolean, Type)
      */
@@ -34848,11 +35793,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * JsonDeserConfig config = new JsonDeserConfig().setDateFormat("yyyy-MM-dd");
+     * JsonDeserConfig config = new JsonDeserConfig().setIgnoreUnmatchedProperty(true);
      * InputStream in = new FileInputStream("people.json");
      * Stream<Person> result = N.streamJson(in, config, true, new TypeReference<Person>(){}.type());
      *
-     * // Streams Person objects with custom date parsing
+     * // Streams Person objects (unmatched JSON properties are ignored)
      * }</pre>
      *
      * @param <T> the type of stream elements
@@ -34860,7 +35805,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param config the deserialization configuration
      * @param closeInputStreamWhenStreamIsClosed {@code true} to close input stream with the stream
      * @param elementType the target element Type
-     * @return a stream of deserialized elements (empty if stream is {@code null} or contains empty array)
+     * @return a stream of deserialized elements (empty if the stream contains an empty JSON array)
      * @throws IllegalArgumentException if elementType is {@code null}
      * @see #streamJson(InputStream, boolean, Type)
      */
@@ -34885,7 +35830,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param <T> the type of stream elements
      * @param jsonArray the JSON array reader
      * @param elementType the target element Type
-     * @return a stream of deserialized elements (empty if reader is {@code null} or contains empty array)
+     * @return a stream of deserialized elements (empty if the reader contains an empty JSON array)
      * @throws IllegalArgumentException if elementType is {@code null}
      * @see #streamJson(Reader, boolean, Type)
      * @see #fromJson(Reader, Type)
@@ -34908,7 +35853,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param jsonArray the JSON array reader
      * @param closeReaderWhenStreamIsClosed {@code true} to close reader with the stream
      * @param elementType the target element Type
-     * @return a stream of deserialized elements (empty if reader is {@code null} or contains empty array)
+     * @return a stream of deserialized elements (empty if the reader contains an empty JSON array)
      * @throws IllegalArgumentException if elementType is {@code null}
      * @see #streamJson(Reader, JsonDeserConfig, boolean, Type)
      */
@@ -34921,11 +35866,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * JsonDeserConfig config = new JsonDeserConfig().setDateFormat("yyyy-MM-dd");
+     * JsonDeserConfig config = new JsonDeserConfig().setIgnoreUnmatchedProperty(true);
      * Reader reader = new FileReader("people.json");
      * Stream<Person> result = N.streamJson(reader, config, true, new TypeReference<Person>(){}.type());
      *
-     * // Streams Person objects with custom date parsing
+     * // Streams Person objects (unmatched JSON properties are ignored)
      * }</pre>
      *
      * @param <T> the type of stream elements
@@ -34933,7 +35878,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param config the deserialization configuration
      * @param closeReaderWhenStreamIsClosed {@code true} to close reader with the stream
      * @param elementType the target element Type
-     * @return a stream of deserialized elements (empty if reader is {@code null} or contains empty array)
+     * @return a stream of deserialized elements (empty if the reader contains an empty JSON array)
      * @throws IllegalArgumentException if elementType is {@code null}
      * @see #streamJson(Reader, boolean, Type)
      */
@@ -34943,6 +35888,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     private static JsonDeserConfig setElementType(final JsonDeserConfig config, final Type<?> elementType) {
+        checkArgNotNull(elementType, "elementType");
+
         final JsonDeserConfig configToReturn = config == null ? JsonDeserConfig.create() : config.copy();
 
         configToReturn.setElementType(elementType);
@@ -34951,6 +35898,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     private static <C extends DeserializationConfig<C>> C setConfig(final Type<?> targetType, final C config, final boolean isJSON) {
+        checkArgNotNull(targetType, cs.targetType);
+
         C configToReturn = config;
 
         if (targetType.isCollection() || targetType.isArray()) {
@@ -35171,7 +36120,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * Map<String, Object> person = Map.of("name", "Alice", "age", 25);
      * File outputFile = new File("person.xml");
      *
-     * // Writes <Person><name>Alice</name><age>25</age></Person> to file
+     * // Writes <map><name>Alice</name><age>25</age></map> to file
      * N.toXml(person, outputFile);   // outputFile contains XML for person
      * }</pre>
      *
@@ -35216,7 +36165,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <pre>{@code
      * Map<String, Object> person = Map.of("name", "Alice", "age", 25);
      * try (OutputStream out = new FileOutputStream("person.xml")) {
-     *     // Writes <Person><name>Alice</name><age>25</age></Person> to stream
+     *     // Writes <map><name>Alice</name><age>25</age></map> to stream
      *     N.toXml(person, out);   // invokes XML serialization
      * }
      * }</pre>
@@ -35264,7 +36213,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <pre>{@code
      * Map<String, Object> person = Map.of("name", "Alice", "age", 25);
      * try (Writer writer = new FileWriter("person.xml")) {
-     *     // Writes <Person><name>Alice</name><age>25</age></Person> to writer
+     *     // Writes <map><name>Alice</name><age>25</age></map> to writer
      *     N.toXml(person, writer);   // invokes XML serialization
      * }
      * }</pre>
@@ -35344,7 +36293,65 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see TypeReference
      */
     public static <T> T fromXml(final String xml, final Type<? extends T> targetType) {
-        return fromXml(xml, null, targetType);
+        return fromXml(xml, (XmlDeserConfig) null, targetType);
+    }
+
+    /**
+     * Returns an object deserialized from the XML string, or a default value if the result is {@code null}.
+     * <br />
+     * Note: do not confuse this overload with {@link #fromXml(String, XmlDeserConfig, Class)} - the second argument here is
+     * the default <i>result</i> value, not a configuration. A {@code null} literal second argument makes the call ambiguous
+     * between the two overloads and requires an explicit cast to compile.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * String xml = null;
+     * Person result = N.fromXml(xml, new Person(), Person.class);
+     * // returns the supplied default Person since the input is null
+     * }</pre>
+     *
+     * @param <T> the type of the returned object
+     * @param xml the XML string to deserialize
+     * @param defaultIfNull the value to return if deserialization produces {@code null}
+     * @param targetType the target class type
+     * @return the deserialized object or the default value
+     * @throws IllegalArgumentException if targetType is {@code null}
+     * @see #fromXml(String, Object, Type)
+     * @see #fromXml(String, Class)
+     */
+    public static <T> T fromXml(final String xml, final T defaultIfNull, final Class<? extends T> targetType) {
+        final T ret = fromXml(xml, targetType);
+
+        return ret == null ? defaultIfNull : ret;
+    }
+
+    /**
+     * Returns an object deserialized from the XML string using the specified Type, or a default value if the result is {@code null}.
+     * <br />
+     * Note: do not confuse this overload with {@link #fromXml(String, XmlDeserConfig, Type)} - the second argument here is
+     * the default <i>result</i> value, not a configuration. A {@code null} literal second argument makes the call ambiguous
+     * between the two overloads and requires an explicit cast to compile.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * String xml = null;
+     * List<String> result = N.fromXml(xml, Collections.emptyList(), new TypeReference<List<String>>(){}.type());
+     * // returns the supplied default empty list since the input is null
+     * }</pre>
+     *
+     * @param <T> the type of the returned object
+     * @param xml the XML string to deserialize
+     * @param defaultIfNull the value to return if deserialization produces {@code null}
+     * @param targetType the target Type (supports generics like {@code List<String>})
+     * @return the deserialized object or the default value
+     * @throws IllegalArgumentException if targetType is {@code null}
+     * @see #fromXml(String, Object, Class)
+     * @see #fromXml(String, Type)
+     */
+    public static <T> T fromXml(final String xml, final T defaultIfNull, final Type<? extends T> targetType) {
+        final T ret = fromXml(xml, targetType);
+
+        return ret == null ? defaultIfNull : ret;
     }
 
     /**
@@ -35352,7 +36359,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * XmlDeserConfig config = new XmlDeserConfig().setIgnoreUnknownProperty(true);
+     * XmlDeserConfig config = new XmlDeserConfig().setIgnoreUnmatchedProperty(true);
      * String xml = "<Person><name>Alice</name><age>25</age></Person>";
      * Person result = N.fromXml(xml, config, Person.class);
      * // returns a Person object with deserialization according to config
@@ -35376,7 +36383,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * XmlDeserConfig config = new XmlDeserConfig().setIgnoreUnknownProperty(true);
+     * XmlDeserConfig config = new XmlDeserConfig().setIgnoreUnmatchedProperty(true);
      * String xml = "<list><item>Alice</item><item>Bob</item></list>";
      * List<String> result = N.fromXml(xml, config, new TypeReference<List<String>>(){}.type());
      * // returns a List<String> with deserialization according to config
@@ -35444,7 +36451,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * XmlDeserConfig config = new XmlDeserConfig().setIgnoreUnknownProperty(true);
+     * XmlDeserConfig config = new XmlDeserConfig().setIgnoreUnmatchedProperty(true);
      * File xmlFile = new File("person.xml");
      * Person result = N.fromXml(xmlFile, config, Person.class);
      * // returns a Person object with deserialization according to config
@@ -35468,7 +36475,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * XmlDeserConfig config = new XmlDeserConfig().setIgnoreUnknownProperty(true);
+     * XmlDeserConfig config = new XmlDeserConfig().setIgnoreUnmatchedProperty(true);
      * File xmlFile = new File("names.xml");
      * List<String> result = N.fromXml(xmlFile, config, new TypeReference<List<String>>(){}.type());
      * // returns a List<String> with deserialization according to config
@@ -35544,7 +36551,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * XmlDeserConfig config = new XmlDeserConfig().setIgnoreUnknownProperty(true);
+     * XmlDeserConfig config = new XmlDeserConfig().setIgnoreUnmatchedProperty(true);
      * try (InputStream in = new FileInputStream("person.xml")) {
      *     Person result = N.fromXml(in, config, Person.class);
      *     // returns a Person object with deserialization according to config
@@ -35571,7 +36578,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * XmlDeserConfig config = new XmlDeserConfig().setIgnoreUnknownProperty(true);
+     * XmlDeserConfig config = new XmlDeserConfig().setIgnoreUnmatchedProperty(true);
      * try (InputStream in = new FileInputStream("names.xml")) {
      *     List<String> result = N.fromXml(in, config, new TypeReference<List<String>>(){}.type());
      *     // returns a List<String> with deserialization according to config
@@ -35648,7 +36655,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * XmlDeserConfig config = new XmlDeserConfig().setIgnoreUnknownProperty(true);
+     * XmlDeserConfig config = new XmlDeserConfig().setIgnoreUnmatchedProperty(true);
      * try (Reader reader = new FileReader("person.xml")) {
      *     Person result = N.fromXml(reader, config, Person.class);
      *     // returns a Person object with deserialization according to config
@@ -35675,7 +36682,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * XmlDeserConfig config = new XmlDeserConfig().setIgnoreUnknownProperty(true);
+     * XmlDeserConfig config = new XmlDeserConfig().setIgnoreUnmatchedProperty(true);
      * try (Reader reader = new FileReader("names.xml")) {
      *     List<String> result = N.fromXml(reader, config, new TypeReference<List<String>>(){}.type());
      *     // returns a List<String> with deserialization according to config
@@ -35830,7 +36837,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <pre>{@code
      * String xml = "<person><name>Alice</name><age>25</age></person>";
      * String result = N.xmlToJson(xml);
-     * // returns {"name":"Alice","age":25}
+     * // returns {"name": "Alice", "age": "25"} (values are strings since XML carries no type info)
      * }</pre>
      *
      * @param xml the XML string to convert
@@ -35869,7 +36876,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <pre>{@code
      * String json = "{\"name\":\"Alice\",\"age\":25}";
      * String result = N.jsonToXml(json);
-     * // returns <name>Alice</name><age>25</age>
+     * // returns <map><name>Alice</name><age>25</age></map>
      * }</pre>
      *
      * @param json the JSON string to convert
@@ -36015,8 +37022,6 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * StringBuilder sb = new StringBuilder();
-     *
-     * // sb contains "0 1 2 "
      * N.forEach(0, 3, sb, (i, builder) -> builder.append(i).append(" "));   // sb is "0 1 2 "
      * }</pre>
      *
@@ -36040,8 +37045,6 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * StringBuilder sb = new StringBuilder();
-     *
-     * // sb contains "0 2 4 "
      * N.forEach(0, 6, 2, sb, (i, builder) -> builder.append(i).append(" "));   // sb is "0 2 4 "
      * }</pre>
      *
@@ -36106,9 +37109,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String[] names = {"Alice", "Bob", "Charlie", "Diana"};
+     * N.forEach(names, 1, 3, name -> System.out.println(name));   // prints Bob, Charlie
      *
      * // Reverse iteration
-     * N.forEach(names, 1, 3, name -> System.out.println(name));   // prints Bob, Charlie
      * N.forEach(names, 3, 1, name -> System.out.println(name));   // prints Diana, Charlie
      * }</pre>
      *
@@ -36116,7 +37119,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param <E> the type of exception that the action may throw
      * @param a the array to iterate
      * @param fromIndex the start index (inclusive)
-     * @param toIndex the end index (exclusive); if {@code fromIndex > toIndex}, the elements are iterated in reverse order
+     * @param toIndex the end index (exclusive); if {@code fromIndex > toIndex}, the elements are iterated in reverse order,
+     *        from {@code fromIndex} (capped to the last index) down to, but excluding, {@code toIndex}. In reverse mode
+     *        {@code toIndex} may be {@code -1}; passing {@code -1} is the only way to include element 0 in a reverse iteration
      * @param action the action to execute for each element
      * @throws IndexOutOfBoundsException if the range is out of bounds
      * @throws E if the action throws an exception
@@ -36199,9 +37204,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<String> names = Arrays.asList("Alice", "Bob", "Charlie", "Diana");
+     * N.forEach(names, 1, 3, name -> System.out.println(name));   // prints Bob, Charlie
      *
      * // Reverse iteration
-     * N.forEach(names, 1, 3, name -> System.out.println(name));   // prints Bob, Charlie
      * N.forEach(names, 3, 1, name -> System.out.println(name));   // prints Diana, Charlie
      * }</pre>
      *
@@ -36211,7 +37216,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param <E> the type of exception that the action may throw
      * @param c the collection to iterate
      * @param fromIndex the start index (inclusive)
-     * @param toIndex the end index (exclusive); if {@code fromIndex > toIndex}, the elements are iterated in reverse order
+     * @param toIndex the end index (exclusive); if {@code fromIndex > toIndex}, the elements are iterated in reverse order,
+     *        from {@code fromIndex} (capped to the last index) down to, but excluding, {@code toIndex}. In reverse mode
+     *        {@code toIndex} may be {@code -1}; passing {@code -1} is the only way to include element 0 in a reverse iteration
      * @param action the action to execute for each element
      * @throws IndexOutOfBoundsException if the range is out of bounds
      * @throws E if the action throws an exception
@@ -36220,7 +37227,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     public static <T, E extends Exception> void forEach(final Collection<? extends T> c, int fromIndex, final int toIndex,
             final Throwables.Consumer<? super T, E> action) throws IndexOutOfBoundsException, E {
         checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), Math.max(fromIndex, toIndex), size(c));
-        if ((isEmpty(c) && fromIndex == 0 && toIndex == 0) || fromIndex == toIndex) {
+        if (isEmpty(c) || fromIndex == toIndex) {
             return;
         }
 
@@ -36349,149 +37356,6 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
         for (final Map.Entry<K, V> entry : map.entrySet()) {
             action.accept(entry.getKey(), entry.getValue());
-        }
-    }
-
-    /**
-     * Executes the action for each element in the iterable using parallel processing.
-     *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * List<String> urls = Arrays.asList("http://a.com", "http://b.com");
-     *
-     * // Processes URLs in parallel using 2 threads
-     * N.forEach(urls, url -> System.out.println(url), 2);   // prints URLs in parallel
-     * }</pre>
-     *
-     * @param <T> the type of elements in the iterable
-     * @param <E> the type of exception that the consumer may throw
-     * @param c the iterable to iterate
-     * @param elementConsumer the action to execute for each element
-     * @param processThreadNum the number of threads for parallel processing
-     * @throws RuntimeException if an error occurs during parallel execution
-     * @see #forEach(Iterable, Throwables.Consumer, int, Executor)
-     */
-    public static <T, E extends Exception> void forEach(final Iterable<? extends T> c, final Throwables.Consumer<? super T, E> elementConsumer,
-            final int processThreadNum) {
-        forEach(c, elementConsumer, processThreadNum, N.ASYNC_EXECUTOR.getExecutor());
-    }
-
-    /**
-     * Executes the action for each element in the iterable using parallel processing with a custom executor.
-     *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * List<String> urls = Arrays.asList("http://a.com", "http://b.com");
-     * Executor executor = Executors.newFixedThreadPool(2);
-     *
-     * // Processes URLs in parallel using custom executor
-     * N.forEach(urls, url -> System.out.println(url), 2, executor);   // prints URLs in parallel
-     * }</pre>
-     *
-     * @param <T> the type of elements in the iterable
-     * @param <E> the type of exception that the consumer may throw
-     * @param c the iterable to iterate
-     * @param elementConsumer the action to execute for each element
-     * @param processThreadNum the number of threads for parallel processing
-     * @param executor the executor for thread management
-     * @throws RuntimeException if an error occurs during parallel execution
-     * @see #forEach(Iterable, Throwables.Consumer, int)
-     */
-    public static <T, E extends Exception> void forEach(final Iterable<? extends T> c, final Throwables.Consumer<? super T, E> elementConsumer,
-            final int processThreadNum, final Executor executor) {
-        final int size = c instanceof Collection ? ((Collection<T>) c).size() : Integer.MAX_VALUE;
-
-        forEach(isEmptyCollection(c) ? ObjIterator.<T> empty() : c.iterator(), elementConsumer, N.min(size, processThreadNum), executor);
-    }
-
-    /**
-     * Executes the action for each element in the iterator using parallel processing.
-     *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * // Processes iterator elements in parallel using 2 threads
-     * Iterator<String> iter = Arrays.asList("http://a.com", "http://b.com").iterator();
-     * N.forEach(iter, url -> System.out.println(url), 2);   // prints iterator elements in parallel
-     * }</pre>
-     *
-     * @param <T> the type of elements in the iterator
-     * @param <E> the type of exception that the consumer may throw
-     * @param iter the iterator to iterate
-     * @param elementConsumer the action to execute for each element
-     * @param processThreadNum the number of threads for parallel processing
-     * @throws RuntimeException if an error occurs during parallel execution
-     * @see #forEach(Iterator, Throwables.Consumer, int, Executor)
-     */
-    public static <T, E extends Exception> void forEach(final Iterator<? extends T> iter, final Throwables.Consumer<? super T, E> elementConsumer,
-            final int processThreadNum) {
-        forEach(iter, elementConsumer, processThreadNum, N.ASYNC_EXECUTOR.getExecutor());
-    }
-
-    /**
-     * Executes the action for each element in the iterator using parallel processing with a custom executor.
-     *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Iterator<String> iter = Arrays.asList("http://a.com", "http://b.com").iterator();
-     * Executor executor = Executors.newFixedThreadPool(2);
-     *
-     * // Processes iterator elements in parallel using custom executor
-     * N.forEach(iter, url -> System.out.println(url), 2, executor);   // prints iterator elements in parallel
-     * }</pre>
-     *
-     * @param <T> the type of elements in the iterator
-     * @param <E> the type of exception that the consumer may throw
-     * @param iter the iterator to iterate
-     * @param elementConsumer the action to execute for each element
-     * @param processThreadNum the number of threads for parallel processing
-     * @param executor the executor for thread management
-     * @throws RuntimeException if an error occurs during parallel execution
-     * @see #forEach(Iterator, Throwables.Consumer, int)
-     */
-    public static <T, E extends Exception> void forEach(final Iterator<? extends T> iter, final Throwables.Consumer<? super T, E> elementConsumer,
-            final int processThreadNum, final Executor executor) {
-        final Iterator<? extends T> iteratorII = iter == null ? ObjIterator.empty() : iter;
-        final CountDownLatch countDownLatch = new CountDownLatch(processThreadNum);
-        final Holder<Exception> errorHolder = new Holder<>();
-
-        for (int i = 0; i < processThreadNum; i++) {
-            executor.execute(() -> {
-                T element = null;
-
-                try {
-                    while (errorHolder.value() == null) {
-                        synchronized (iteratorII) {
-                            if (iteratorII.hasNext()) {
-                                element = iteratorII.next();
-                            } else {
-                                break;
-                            }
-                        }
-
-                        elementConsumer.accept(element);
-                    }
-                } catch (final Exception e) {
-                    synchronized (errorHolder) {
-                        if (errorHolder.value() == null) {
-                            errorHolder.setValue(e);
-                        } else {
-                            errorHolder.value().addSuppressed(e);
-                        }
-                    }
-                } finally {
-                    countDownLatch.countDown();
-                }
-            });
-        }
-
-        try {
-            countDownLatch.await();
-        } catch (final InterruptedException e) {
-            throw ExceptionUtil.toRuntimeException(e, true);
-        }
-
-        if (errorHolder.value() != null) {
-            throw ExceptionUtil.toRuntimeException(errorHolder.value(), true);
         }
     }
 
@@ -36802,7 +37666,6 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * // Note: Charlie is skipped as ages array is shorter
      * // prints Alice is 25 years old, Bob is 30 years old
-     *
      * }</pre>
      *
      * @param <A> the type of the elements in the first array
@@ -36837,7 +37700,6 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * // Note: Charlie is skipped as ages list is shorter
      * // prints Alice is 25 years old, Bob is 30 years old
-     *
      * }</pre>
      *
      * @param <A> the type of the elements in the first iterable
@@ -36850,14 +37712,14 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see #forEach(Object[], Object[], Throwables.BiConsumer)
      * @see #forEach(Iterator, Iterator, Throwables.BiConsumer)
      */
-    public static <A, B, E extends Exception> void forEach(final Iterable<A> a, final Iterable<B> b,
+    public static <A, B, E extends Exception> void forEach(final Iterable<? extends A> a, final Iterable<? extends B> b,
             final Throwables.BiConsumer<? super A, ? super B, E> action) throws E {
         if (isEmptyCollection(a) || isEmptyCollection(b)) {
             return;
         }
 
-        final Iterator<A> iterA = a.iterator();
-        final Iterator<B> iterB = b.iterator();
+        final Iterator<? extends A> iterA = a.iterator();
+        final Iterator<? extends B> iterB = b.iterator();
 
         forEach(iterA, iterB, action);
     }
@@ -36874,7 +37736,6 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * // Note: Charlie is skipped as ages iterator is shorter
      * // prints Alice is 25 years old, Bob is 30 years old
-     *
      * }</pre>
      *
      * @param <A> the type of the elements in the first iterator
@@ -36887,7 +37748,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see #forEach(Iterable, Iterable, Throwables.BiConsumer)
      * @see #forEach(Object[], Object[], Throwables.BiConsumer)
      */
-    public static <A, B, E extends Exception> void forEach(final Iterator<A> a, final Iterator<B> b,
+    public static <A, B, E extends Exception> void forEach(final Iterator<? extends A> a, final Iterator<? extends B> b,
             final Throwables.BiConsumer<? super A, ? super B, E> action) throws E {
         if (a == null || b == null) {
             return;
@@ -36911,7 +37772,6 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * // Note: Only 2 elements processed (shortest array length)
      * // prints Alice, 25, NY\nBob, 30, LA
-     *
      * }</pre>
      *
      * @param <A> the type of the elements in the first array
@@ -36950,7 +37810,6 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * // Note: Only 2 elements processed (shortest list length)
      * // prints Alice, 25, NY\nBob, 30, LA
-     *
      * }</pre>
      *
      * @param <A> the type of the elements in the first iterable
@@ -36965,15 +37824,15 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see #forEach(Object[], Object[], Object[], Throwables.TriConsumer)
      * @see #forEach(Iterator, Iterator, Iterator, Throwables.TriConsumer)
      */
-    public static <A, B, C, E extends Exception> void forEach(final Iterable<A> a, final Iterable<B> b, final Iterable<C> c,
+    public static <A, B, C, E extends Exception> void forEach(final Iterable<? extends A> a, final Iterable<? extends B> b, final Iterable<? extends C> c,
             final Throwables.TriConsumer<? super A, ? super B, ? super C, E> action) throws E {
         if (isEmptyCollection(a) || isEmptyCollection(b) || isEmptyCollection(c)) {
             return;
         }
 
-        final Iterator<A> iterA = a.iterator();
-        final Iterator<B> iterB = b.iterator();
-        final Iterator<C> iterC = c.iterator();
+        final Iterator<? extends A> iterA = a.iterator();
+        final Iterator<? extends B> iterB = b.iterator();
+        final Iterator<? extends C> iterC = c.iterator();
 
         forEach(iterA, iterB, iterC, action);
     }
@@ -36991,7 +37850,6 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * // Note: Only 2 elements processed (shortest iterator length)
      * // prints Alice, 25, NY\nBob, 30, LA
-     *
      * }</pre>
      *
      * @param <A> the type of the elements in the first iterator
@@ -37006,7 +37864,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see #forEach(Iterable, Iterable, Iterable, Throwables.TriConsumer)
      * @see #forEach(Object[], Object[], Object[], Throwables.TriConsumer)
      */
-    public static <A, B, C, E extends Exception> void forEach(final Iterator<A> a, final Iterator<B> b, final Iterator<C> c,
+    public static <A, B, C, E extends Exception> void forEach(final Iterator<? extends A> a, final Iterator<? extends B> b, final Iterator<? extends C> c,
             final Throwables.TriConsumer<? super A, ? super B, ? super C, E> action) throws E {
         if (a == null || b == null || c == null) {
             return;
@@ -37071,10 +37929,10 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param action the action to be performed for each pair of elements from the iterables
      * @throws E if the action throws an exception
      */
-    public static <A, B, E extends Exception> void forEach(final Iterable<A> a, final Iterable<B> b, final A valueForNoneA, final B valueForNoneB,
-            final Throwables.BiConsumer<? super A, ? super B, E> action) throws E {
-        final Iterator<A> iterA = isEmptyCollection(a) ? ObjIterator.empty() : a.iterator();
-        final Iterator<B> iterB = isEmptyCollection(b) ? ObjIterator.empty() : b.iterator();
+    public static <A, B, E extends Exception> void forEach(final Iterable<? extends A> a, final Iterable<? extends B> b, final A valueForNoneA,
+            final B valueForNoneB, final Throwables.BiConsumer<? super A, ? super B, E> action) throws E {
+        final Iterator<? extends A> iterA = isEmptyCollection(a) ? ObjIterator.empty() : a.iterator();
+        final Iterator<? extends B> iterB = isEmptyCollection(b) ? ObjIterator.empty() : b.iterator();
 
         forEach(iterA, iterB, valueForNoneA, valueForNoneB, action);
     }
@@ -37100,10 +37958,10 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param action the action to be performed for each pair of elements from the iterators
      * @throws E if the action throws an exception
      */
-    public static <A, B, E extends Exception> void forEach(final Iterator<A> a, final Iterator<B> b, final A valueForNoneA, final B valueForNoneB,
-            final Throwables.BiConsumer<? super A, ? super B, E> action) throws E {
-        final Iterator<A> iterA = a == null ? ObjIterator.empty() : a;
-        final Iterator<B> iterB = b == null ? ObjIterator.empty() : b;
+    public static <A, B, E extends Exception> void forEach(final Iterator<? extends A> a, final Iterator<? extends B> b, final A valueForNoneA,
+            final B valueForNoneB, final Throwables.BiConsumer<? super A, ? super B, E> action) throws E {
+        final Iterator<? extends A> iterA = a == null ? ObjIterator.empty() : a;
+        final Iterator<? extends B> iterB = b == null ? ObjIterator.empty() : b;
 
         A nextA = null;
         B nextB = null;
@@ -37179,11 +38037,12 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param action the action to be performed for each triple of elements from the iterables
      * @throws E if the action throws an exception
      */
-    public static <A, B, C, E extends Exception> void forEach(final Iterable<A> a, final Iterable<B> b, final Iterable<C> c, final A valueForNoneA,
-            final B valueForNoneB, final C valueForNoneC, final Throwables.TriConsumer<? super A, ? super B, ? super C, E> action) throws E {
-        final Iterator<A> iterA = isEmptyCollection(a) ? ObjIterator.empty() : a.iterator();
-        final Iterator<B> iterB = isEmptyCollection(b) ? ObjIterator.empty() : b.iterator();
-        final Iterator<C> iterC = isEmptyCollection(c) ? ObjIterator.empty() : c.iterator();
+    public static <A, B, C, E extends Exception> void forEach(final Iterable<? extends A> a, final Iterable<? extends B> b, final Iterable<? extends C> c,
+            final A valueForNoneA, final B valueForNoneB, final C valueForNoneC, final Throwables.TriConsumer<? super A, ? super B, ? super C, E> action)
+            throws E {
+        final Iterator<? extends A> iterA = isEmptyCollection(a) ? ObjIterator.empty() : a.iterator();
+        final Iterator<? extends B> iterB = isEmptyCollection(b) ? ObjIterator.empty() : b.iterator();
+        final Iterator<? extends C> iterC = isEmptyCollection(c) ? ObjIterator.empty() : c.iterator();
 
         forEach(iterA, iterB, iterC, valueForNoneA, valueForNoneB, valueForNoneC, action);
     }
@@ -37212,11 +38071,12 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param action the action to be performed for each triple of elements from the iterators
      * @throws E if the action throws an exception
      */
-    public static <A, B, C, E extends Exception> void forEach(final Iterator<A> a, final Iterator<B> b, final Iterator<C> c, final A valueForNoneA,
-            final B valueForNoneB, final C valueForNoneC, final Throwables.TriConsumer<? super A, ? super B, ? super C, E> action) throws E {
-        final Iterator<A> iterA = a == null ? ObjIterator.empty() : a;
-        final Iterator<B> iterB = b == null ? ObjIterator.empty() : b;
-        final Iterator<C> iterC = c == null ? ObjIterator.empty() : c;
+    public static <A, B, C, E extends Exception> void forEach(final Iterator<? extends A> a, final Iterator<? extends B> b, final Iterator<? extends C> c,
+            final A valueForNoneA, final B valueForNoneB, final C valueForNoneC, final Throwables.TriConsumer<? super A, ? super B, ? super C, E> action)
+            throws E {
+        final Iterator<? extends A> iterA = a == null ? ObjIterator.empty() : a;
+        final Iterator<? extends B> iterB = b == null ? ObjIterator.empty() : b;
+        final Iterator<? extends C> iterC = c == null ? ObjIterator.empty() : c;
 
         A nextA = null;
         B nextB = null;
@@ -37464,14 +38324,12 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
+     * // Processes each non-null (category, product, review) triple
      * String[] categories = {"Electronics", null};
      * N.forEachNonNull(categories,
-     *
-     * // Processes each non-null (category, product, review) triple
      *     cat -> Arrays.asList(cat + "-phone", null),
      *     product -> Arrays.asList(product + "-review"),
      *     (cat, product, review) -> System.out.println(cat + ": " + product + ": " + review));
-     *
      * }</pre>
      *
      * @param <T> the type of elements in the array
@@ -37527,14 +38385,12 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
+     * // Processes each non-null (category, product, review) triple
      * List<String> categories = Arrays.asList("Electronics", null);
      * N.forEachNonNull(categories,
-     *
-     * // Processes each non-null (category, product, review) triple
      *     cat -> Arrays.asList(cat + "-phone", null),
      *     product -> Arrays.asList(product + "-review"),
      *     (cat, product, review) -> System.out.println(cat + ": " + product + ": " + review));
-     *
      * }</pre>
      *
      * @param <T> the type of elements in the iterable
@@ -37590,14 +38446,12 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
+     * // Processes each non-null (category, product, review) triple
      * Iterator<String> categories = Arrays.asList("Electronics", null).iterator();
      * N.forEachNonNull(categories,
-     *
-     * // Processes each non-null (category, product, review) triple
      *     cat -> Arrays.asList(cat + "-phone", null),
      *     product -> Arrays.asList(product + "-review"),
      *     (cat, product, review) -> System.out.println(cat + ": " + product + ": " + review));
-     *
      * }</pre>
      *
      * @param <T> the type of elements in the iterator
@@ -37699,7 +38553,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param <E> the type of exception that the action may throw
      * @param a the array to iterate
      * @param fromIndex the starting index (inclusive) of the range
-     * @param toIndex the ending index (exclusive) of the range (if fromIndex &gt; toIndex, iterates in reverse)
+     * @param toIndex the ending index (exclusive) of the range; if {@code fromIndex > toIndex}, iterates in reverse order,
+     *        from {@code fromIndex} (capped to the last index) down to, but excluding, {@code toIndex}. In reverse mode
+     *        {@code toIndex} may be {@code -1}; passing {@code -1} is the only way to include element 0 in a reverse iteration
      * @param action the action to execute, receiving index and element
      * @throws IndexOutOfBoundsException if the range is out of bounds
      * @throws E if the action throws an exception
@@ -37746,7 +38602,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param <E> the type of exception that the action may throw
      * @param c the collection to iterate
      * @param fromIndex the starting index (inclusive) of the range
-     * @param toIndex the ending index (exclusive) of the range (if fromIndex &gt; toIndex, iterates in reverse)
+     * @param toIndex the ending index (exclusive) of the range; if {@code fromIndex > toIndex}, iterates in reverse order,
+     *        from {@code fromIndex} (capped to the last index) down to, but excluding, {@code toIndex}. In reverse mode
+     *        {@code toIndex} may be {@code -1}; passing {@code -1} is the only way to include element 0 in a reverse iteration
      * @param action the action to execute, receiving index and element
      * @throws IndexOutOfBoundsException if the range is out of bounds
      * @throws E if the action throws an exception
@@ -37756,7 +38614,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     public static <T, E extends Exception> void forEachIndexed(final Collection<? extends T> c, int fromIndex, final int toIndex,
             final Throwables.IntObjConsumer<? super T, E> action) throws IndexOutOfBoundsException, E {
         checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), Math.max(fromIndex, toIndex), size(c));
-        if ((isEmpty(c) && fromIndex == 0 && toIndex == 0) || fromIndex == toIndex) {
+        if (isEmpty(c) || fromIndex == toIndex) {
             return;
         }
 
@@ -37854,7 +38712,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws E if the action throws an exception
      * @see #forEachIndexed(Object[], Throwables.IntObjConsumer)
      * @see #forEachIndexed(Iterator, Throwables.IntObjConsumer)
-     * @see #forEachIndexed(Iterable, Throwables.IntObjConsumer, int)
+     * @see #forEachIndexedInParallel(Iterable, Throwables.IntObjConsumer, int)
      */
     public static <T, E extends Exception> void forEachIndexed(final Iterable<? extends T> c, final Throwables.IntObjConsumer<? super T, E> action) throws E {
         if (c == null) {
@@ -37885,7 +38743,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param action the action to execute, receiving index and element
      * @throws E if the action throws an exception
      * @see #forEachIndexed(Iterable, Throwables.IntObjConsumer)
-     * @see #forEachIndexed(Iterator, Throwables.IntObjConsumer, int)
+     * @see #forEachIndexedInParallel(Iterator, Throwables.IntObjConsumer, int)
      */
     public static <T, E extends Exception> void forEachIndexed(final Iterator<? extends T> iter, final Throwables.IntObjConsumer<? super T, E> action)
             throws E {
@@ -37908,7 +38766,6 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * Map<String, Integer> ages = Map.of("Alice", 25, "Bob", 30);
      * N.forEachIndexed(ages, (idx, entry) ->
      *     System.out.println(idx + ": " + entry.getKey() + "=" + entry.getValue()));
-     *
      * }</pre>
      *
      * @param <K> the type of map keys
@@ -37934,7 +38791,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Map<String, Integer> ages = Map.of("Alice", 25, "Bob", 30);
+     * Map<String, Integer> ages = new LinkedHashMap<>();
+     * ages.put("Alice", 25);
+     * ages.put("Bob", 30);
      * N.forEachIndexed(ages, (idx, name, age) ->
      *     System.out.println(idx + ": " + name + " is " + age));
      * // prints 0: Alice is 25, 1: Bob is 30
@@ -37959,160 +38818,6 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
         for (final Map.Entry<K, V> entry : map.entrySet()) {
             action.accept(idx++, entry.getKey(), entry.getValue());
-        }
-    }
-
-    /**
-     * Executes the action for each element in the iterable with its index using parallel processing.
-     *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * // Processes URLs in parallel using 2 threads with indices
-     * List<String> urls = Arrays.asList("http://a.com", "http://b.com", "http://c.com");
-     * N.forEachIndexed(urls, (idx, url) ->
-     *     System.out.println(idx + ": " + url), 2);
-     * }</pre>
-     *
-     * @param <T> the type of elements in the iterable
-     * @param <E> the type of exception that the action may throw
-     * @param c the iterable to iterate
-     * @param action the action to execute, receiving index and element
-     * @param processThreadNum the number of threads for parallel processing
-     * @throws RuntimeException if an error occurs during parallel execution
-     * @see #forEachIndexed(Iterable, Throwables.IntObjConsumer, int, Executor)
-     * @see #forEachIndexed(Iterable, Throwables.IntObjConsumer)
-     * @see #forEach(Iterable, Throwables.Consumer, int)
-     */
-    public static <T, E extends Exception> void forEachIndexed(final Iterable<? extends T> c, final Throwables.IntObjConsumer<? super T, E> action,
-            final int processThreadNum) {
-        forEachIndexed(c, action, processThreadNum, N.ASYNC_EXECUTOR.getExecutor());
-    }
-
-    /**
-     * Executes the action for each element in the iterable with its index using parallel processing.
-     *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * // Processes URLs in parallel using custom executor with indices
-     * List<String> urls = Arrays.asList("http://a.com", "http://b.com", "http://c.com");
-     * ExecutorService executor = Executors.newFixedThreadPool(2);
-     * N.forEachIndexed(urls, (idx, url) ->
-     *     System.out.println(idx + ": " + url), 2, executor);
-     * }</pre>
-     *
-     * @param <T> the type of elements in the iterable
-     * @param <E> the type of exception that the action may throw
-     * @param c the iterable to iterate
-     * @param action the action to execute, receiving index and element
-     * @param processThreadNum the number of threads for parallel processing
-     * @param executor the executor to use for parallel processing
-     * @throws RuntimeException if an error occurs during parallel execution
-     * @see #forEachIndexed(Iterable, Throwables.IntObjConsumer, int)
-     * @see #forEachIndexed(Iterator, Throwables.IntObjConsumer, int, Executor)
-     */
-    public static <T, E extends Exception> void forEachIndexed(final Iterable<? extends T> c, final Throwables.IntObjConsumer<? super T, E> action,
-            final int processThreadNum, final Executor executor) {
-        final int size = c instanceof Collection ? ((Collection<T>) c).size() : Integer.MAX_VALUE;
-
-        forEachIndexed(c == null ? ObjIterator.<T> empty() : c.iterator(), action, N.min(size, processThreadNum), executor);
-    }
-
-    /**
-     * Executes the action for each element in the iterator with its index using parallel processing.
-     *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * // Processes iterator elements in parallel using 2 threads with indices
-     * Iterator<String> iter = Arrays.asList("http://a.com", "http://b.com", "http://c.com").iterator();
-     * N.forEachIndexed(iter, (idx, url) ->
-     *     System.out.println(idx + ": " + url), 2);
-     * }</pre>
-     *
-     * @param <T> the type of elements in the iterator
-     * @param <E> the type of exception that the action may throw
-     * @param iter the iterator to iterate
-     * @param elementConsumer the action to execute, receiving index and element
-     * @param processThreadNum the number of threads for parallel processing
-     * @throws RuntimeException if an error occurs during parallel execution
-     * @see #forEachIndexed(Iterator, Throwables.IntObjConsumer, int, Executor)
-     * @see #forEachIndexed(Iterator, Throwables.IntObjConsumer)
-     */
-    public static <T, E extends Exception> void forEachIndexed(final Iterator<? extends T> iter, final Throwables.IntObjConsumer<? super T, E> elementConsumer,
-            final int processThreadNum) {
-        forEachIndexed(iter, elementConsumer, processThreadNum, N.ASYNC_EXECUTOR.getExecutor());
-    }
-
-    /**
-     * Executes the action for each element in the iterator with its index using parallel processing.
-     *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * // Processes iterator elements in parallel using custom executor with indices
-     * Iterator<String> iter = Arrays.asList("http://a.com", "http://b.com", "http://c.com").iterator();
-     * ExecutorService executor = Executors.newFixedThreadPool(2);
-     * N.forEachIndexed(iter, (idx, url) ->
-     *     System.out.println(idx + ": " + url), 2, executor);
-     * }</pre>
-     *
-     * <p>Note: Indices are assigned atomically in the order elements are retrieved from the iterator.
-     *
-     * @param <T> the type of elements in the iterator
-     * @param <E> the type of exception that the action may throw
-     * @param iter the iterator to iterate
-     * @param elementConsumer the action to execute, receiving index and element
-     * @param processThreadNum the number of threads for parallel processing
-     * @param executor the executor to use for parallel processing
-     * @throws IllegalArgumentException if processThreadNum is invalid
-     * @see #forEachIndexed(Iterator, Throwables.IntObjConsumer, int)
-     * @see #forEachIndexed(Iterable, Throwables.IntObjConsumer, int, Executor)
-     */
-    public static <T, E extends Exception> void forEachIndexed(final Iterator<? extends T> iter, final Throwables.IntObjConsumer<? super T, E> elementConsumer,
-            final int processThreadNum, final Executor executor) throws IllegalArgumentException {
-        final Iterator<? extends T> iteratorII = iter == null ? ObjIterator.empty() : iter;
-        final CountDownLatch countDownLatch = new CountDownLatch(processThreadNum);
-        final AtomicInteger index = new AtomicInteger(0);
-        final Holder<Exception> errorHolder = new Holder<>();
-
-        for (int i = 0; i < processThreadNum; i++) {
-            executor.execute(() -> {
-                int idx = 0;
-                T element = null;
-
-                try {
-                    while (errorHolder.value() == null) {
-                        synchronized (iteratorII) {
-                            if (iteratorII.hasNext()) {
-                                idx = index.getAndIncrement();
-                                element = iteratorII.next();
-                            } else {
-                                break;
-                            }
-                        }
-
-                        elementConsumer.accept(idx, element);
-                    }
-                } catch (final Exception e) {
-                    synchronized (errorHolder) {
-                        if (errorHolder.value() == null) {
-                            errorHolder.setValue(e);
-                        } else {
-                            errorHolder.value().addSuppressed(e);
-                        }
-                    }
-                } finally {
-                    countDownLatch.countDown();
-                }
-            });
-        }
-
-        try {
-            countDownLatch.await();
-        } catch (final InterruptedException e) {
-            throw ExceptionUtil.toRuntimeException(e, true);
-        }
-
-        if (errorHolder.value() != null) {
-            throw ExceptionUtil.toRuntimeException(errorHolder.value(), true);
         }
     }
 
@@ -38523,6 +39228,330 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
+     * Executes the action for each element in the iterable using parallel processing.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<String> urls = Arrays.asList("http://a.com", "http://b.com");
+     *
+     * // Processes URLs in parallel using 2 threads
+     * N.forEachInParallel(urls, url -> System.out.println(url), 2);   // prints URLs in parallel
+     * }</pre>
+     *
+     * @param <T> the type of elements in the iterable
+     * @param <E> the type of exception that the consumer may throw
+     * @param c the iterable to iterate
+     * @param elementConsumer the action to execute for each element
+     * @param processThreadNum the number of threads for parallel processing
+     * @throws IllegalArgumentException if {@code processThreadNum} is not positive
+     * @throws RuntimeException if an error occurs during parallel execution
+     * @see #forEachInParallel(Iterable, Throwables.Consumer, int, Executor)
+     */
+    public static <T, E extends Exception> void forEachInParallel(final Iterable<? extends T> c, final Throwables.Consumer<? super T, E> elementConsumer,
+            final int processThreadNum) {
+        forEachInParallel(c, elementConsumer, processThreadNum, N.ASYNC_EXECUTOR.getExecutor());
+    }
+
+    /**
+     * Executes the action for each element in the iterable using parallel processing with a custom executor.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * List<String> urls = Arrays.asList("http://a.com", "http://b.com");
+     * Executor executor = Executors.newFixedThreadPool(2);
+     *
+     * // Processes URLs in parallel using custom executor
+     * N.forEachInParallel(urls, url -> System.out.println(url), 2, executor);   // prints URLs in parallel
+     * }</pre>
+     *
+     * @param <T> the type of elements in the iterable
+     * @param <E> the type of exception that the consumer may throw
+     * @param c the iterable to iterate
+     * @param elementConsumer the action to execute for each element
+     * @param processThreadNum the number of threads for parallel processing
+     * @param executor the executor for thread management
+     * @throws IllegalArgumentException if {@code processThreadNum} is not positive
+     * @throws RuntimeException if an error occurs during parallel execution
+     * @see #forEachInParallel(Iterable, Throwables.Consumer, int)
+     */
+    public static <T, E extends Exception> void forEachInParallel(final Iterable<? extends T> c, final Throwables.Consumer<? super T, E> elementConsumer,
+            final int processThreadNum, final Executor executor) throws IllegalArgumentException {
+        checkArgPositive(processThreadNum, cs.processThreadNum);
+
+        if (isEmptyCollection(c)) {
+            return;
+        }
+
+        final int size = c instanceof Collection ? ((Collection<T>) c).size() : Integer.MAX_VALUE;
+
+        forEachInParallel(c.iterator(), elementConsumer, N.min(size, processThreadNum), executor);
+    }
+
+    /**
+     * Executes the action for each element in the iterator using parallel processing.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * // Processes iterator elements in parallel using 2 threads
+     * Iterator<String> iter = Arrays.asList("http://a.com", "http://b.com").iterator();
+     * N.forEachInParallel(iter, url -> System.out.println(url), 2);   // prints iterator elements in parallel
+     * }</pre>
+     *
+     * @param <T> the type of elements in the iterator
+     * @param <E> the type of exception that the consumer may throw
+     * @param iter the iterator to iterate
+     * @param elementConsumer the action to execute for each element
+     * @param processThreadNum the number of threads for parallel processing
+     * @throws IllegalArgumentException if {@code processThreadNum} is not positive
+     * @throws RuntimeException if an error occurs during parallel execution
+     * @see #forEachInParallel(Iterator, Throwables.Consumer, int, Executor)
+     * @see Iterators#forEach(Iterator, long, long, int, int, Throwables.Consumer)
+     */
+    public static <T, E extends Exception> void forEachInParallel(final Iterator<? extends T> iter, final Throwables.Consumer<? super T, E> elementConsumer,
+            final int processThreadNum) {
+        forEachInParallel(iter, elementConsumer, processThreadNum, N.ASYNC_EXECUTOR.getExecutor());
+    }
+
+    /**
+     * Executes the action for each element in the iterator using parallel processing with a custom executor.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Iterator<String> iter = Arrays.asList("http://a.com", "http://b.com").iterator();
+     * Executor executor = Executors.newFixedThreadPool(2);
+     *
+     * // Processes iterator elements in parallel using custom executor
+     * N.forEachInParallel(iter, url -> System.out.println(url), 2, executor);   // prints iterator elements in parallel
+     * }</pre>
+     *
+     * @param <T> the type of elements in the iterator
+     * @param <E> the type of exception that the consumer may throw
+     * @param iter the iterator to iterate
+     * @param elementConsumer the action to execute for each element
+     * @param processThreadNum the number of threads for parallel processing
+     * @param executor the executor for thread management
+     * @throws IllegalArgumentException if {@code processThreadNum} is not positive
+     * @throws RuntimeException if an error occurs during parallel execution
+     * @see #forEachInParallel(Iterator, Throwables.Consumer, int)
+     * @see Iterators#forEach(Iterator, long, long, int, int, Throwables.Consumer)
+     */
+    public static <T, E extends Exception> void forEachInParallel(final Iterator<? extends T> iter, final Throwables.Consumer<? super T, E> elementConsumer,
+            final int processThreadNum, final Executor executor) throws IllegalArgumentException {
+        checkArgPositive(processThreadNum, cs.processThreadNum);
+
+        final Iterator<? extends T> iteratorII = iter == null ? ObjIterator.empty() : iter;
+        final CountDownLatch countDownLatch = new CountDownLatch(processThreadNum);
+        final Holder<Exception> errorHolder = new Holder<>();
+
+        for (int i = 0; i < processThreadNum; i++) {
+            executor.execute(() -> {
+                T element = null;
+
+                try {
+                    while (errorHolder.value() == null) {
+                        synchronized (iteratorII) {
+                            if (iteratorII.hasNext()) {
+                                element = iteratorII.next();
+                            } else {
+                                break;
+                            }
+                        }
+
+                        elementConsumer.accept(element);
+                    }
+                } catch (final Exception e) {
+                    synchronized (errorHolder) {
+                        if (errorHolder.value() == null) {
+                            errorHolder.setValue(e);
+                        } else {
+                            errorHolder.value().addSuppressed(e);
+                        }
+                    }
+                } finally {
+                    countDownLatch.countDown();
+                }
+            });
+        }
+
+        try {
+            countDownLatch.await();
+        } catch (final InterruptedException e) {
+            throw ExceptionUtil.toRuntimeException(e, true);
+        }
+
+        if (errorHolder.value() != null) {
+            throw ExceptionUtil.toRuntimeException(errorHolder.value(), true);
+        }
+    }
+
+    /**
+     * Executes the action for each element in the iterable with its index using parallel processing.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * // Processes URLs in parallel using 2 threads with indices
+     * List<String> urls = Arrays.asList("http://a.com", "http://b.com", "http://c.com");
+     * N.forEachIndexedInParallel(urls, (idx, url) ->
+     *     System.out.println(idx + ": " + url), 2);
+     * }</pre>
+     *
+     * @param <T> the type of elements in the iterable
+     * @param <E> the type of exception that the action may throw
+     * @param c the iterable to iterate
+     * @param elementConsumer the action to execute, receiving index and element
+     * @param processThreadNum the number of threads for parallel processing (must be positive)
+     * @throws IllegalArgumentException if {@code processThreadNum} is not positive
+     * @throws RuntimeException if an error occurs during parallel execution
+     * @see #forEachIndexedInParallel(Iterable, Throwables.IntObjConsumer, int, Executor)
+     * @see #forEachIndexed(Iterable, Throwables.IntObjConsumer)
+     * @see #forEachInParallel(Iterable, Throwables.Consumer, int)
+     */
+    public static <T, E extends Exception> void forEachIndexedInParallel(final Iterable<? extends T> c,
+            final Throwables.IntObjConsumer<? super T, E> elementConsumer, final int processThreadNum) {
+        forEachIndexedInParallel(c, elementConsumer, processThreadNum, N.ASYNC_EXECUTOR.getExecutor());
+    }
+
+    /**
+     * Executes the action for each element in the iterable with its index using parallel processing.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * // Processes URLs in parallel using custom executor with indices
+     * List<String> urls = Arrays.asList("http://a.com", "http://b.com", "http://c.com");
+     * ExecutorService executor = Executors.newFixedThreadPool(2);
+     * N.forEachIndexedInParallel(urls, (idx, url) ->
+     *     System.out.println(idx + ": " + url), 2, executor);
+     * }</pre>
+     *
+     * @param <T> the type of elements in the iterable
+     * @param <E> the type of exception that the action may throw
+     * @param c the iterable to iterate
+     * @param elementConsumer the action to execute, receiving index and element
+     * @param processThreadNum the number of threads for parallel processing (must be positive)
+     * @param executor the executor to use for parallel processing
+     * @throws IllegalArgumentException if {@code processThreadNum} is not positive
+     * @throws RuntimeException if an error occurs during parallel execution
+     * @see #forEachIndexedInParallel(Iterable, Throwables.IntObjConsumer, int)
+     * @see #forEachIndexedInParallel(Iterator, Throwables.IntObjConsumer, int, Executor)
+     */
+    public static <T, E extends Exception> void forEachIndexedInParallel(final Iterable<? extends T> c,
+            final Throwables.IntObjConsumer<? super T, E> elementConsumer, final int processThreadNum, final Executor executor)
+            throws IllegalArgumentException {
+        checkArgPositive(processThreadNum, cs.processThreadNum);
+
+        if (isEmptyCollection(c)) {
+            return;
+        }
+
+        final int size = c instanceof Collection ? ((Collection<T>) c).size() : Integer.MAX_VALUE;
+
+        forEachIndexedInParallel(c.iterator(), elementConsumer, N.min(size, processThreadNum), executor);
+    }
+
+    /**
+     * Executes the action for each element in the iterator with its index using parallel processing.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * // Processes iterator elements in parallel using 2 threads with indices
+     * Iterator<String> iter = Arrays.asList("http://a.com", "http://b.com", "http://c.com").iterator();
+     * N.forEachIndexedInParallel(iter, (idx, url) ->
+     *     System.out.println(idx + ": " + url), 2);
+     * }</pre>
+     *
+     * @param <T> the type of elements in the iterator
+     * @param <E> the type of exception that the action may throw
+     * @param iter the iterator to iterate
+     * @param elementConsumer the action to execute, receiving index and element
+     * @param processThreadNum the number of threads for parallel processing
+     * @throws IllegalArgumentException if {@code processThreadNum} is not positive
+     * @throws RuntimeException if an error occurs during parallel execution
+     * @see #forEachIndexedInParallel(Iterator, Throwables.IntObjConsumer, int, Executor)
+     * @see #forEachIndexed(Iterator, Throwables.IntObjConsumer)
+     */
+    public static <T, E extends Exception> void forEachIndexedInParallel(final Iterator<? extends T> iter,
+            final Throwables.IntObjConsumer<? super T, E> elementConsumer, final int processThreadNum) {
+        forEachIndexedInParallel(iter, elementConsumer, processThreadNum, N.ASYNC_EXECUTOR.getExecutor());
+    }
+
+    /**
+     * Executes the action for each element in the iterator with its index using parallel processing.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * // Processes iterator elements in parallel using custom executor with indices
+     * Iterator<String> iter = Arrays.asList("http://a.com", "http://b.com", "http://c.com").iterator();
+     * ExecutorService executor = Executors.newFixedThreadPool(2);
+     * N.forEachIndexedInParallel(iter, (idx, url) ->
+     *     System.out.println(idx + ": " + url), 2, executor);
+     * }</pre>
+     *
+     * <p>Note: Indices are assigned atomically in the order elements are retrieved from the iterator.
+     *
+     * @param <T> the type of elements in the iterator
+     * @param <E> the type of exception that the action may throw
+     * @param iter the iterator to iterate
+     * @param elementConsumer the action to execute, receiving index and element
+     * @param processThreadNum the number of threads for parallel processing
+     * @param executor the executor to use for parallel processing
+     * @throws IllegalArgumentException if {@code processThreadNum} is not positive
+     * @see #forEachIndexedInParallel(Iterator, Throwables.IntObjConsumer, int)
+     * @see #forEachIndexedInParallel(Iterable, Throwables.IntObjConsumer, int, Executor)
+     */
+    public static <T, E extends Exception> void forEachIndexedInParallel(final Iterator<? extends T> iter,
+            final Throwables.IntObjConsumer<? super T, E> elementConsumer, final int processThreadNum, final Executor executor)
+            throws IllegalArgumentException {
+        checkArgPositive(processThreadNum, cs.processThreadNum);
+
+        final Iterator<? extends T> iteratorII = iter == null ? ObjIterator.empty() : iter;
+        final CountDownLatch countDownLatch = new CountDownLatch(processThreadNum);
+        final AtomicInteger index = new AtomicInteger(0);
+        final Holder<Exception> errorHolder = new Holder<>();
+
+        for (int i = 0; i < processThreadNum; i++) {
+            executor.execute(() -> {
+                int idx = 0;
+                T element = null;
+
+                try {
+                    while (errorHolder.value() == null) {
+                        synchronized (iteratorII) {
+                            if (iteratorII.hasNext()) {
+                                idx = index.getAndIncrement();
+                                element = iteratorII.next();
+                            } else {
+                                break;
+                            }
+                        }
+
+                        elementConsumer.accept(idx, element);
+                    }
+                } catch (final Exception e) {
+                    synchronized (errorHolder) {
+                        if (errorHolder.value() == null) {
+                            errorHolder.setValue(e);
+                        } else {
+                            errorHolder.value().addSuppressed(e);
+                        }
+                    }
+                } finally {
+                    countDownLatch.countDown();
+                }
+            });
+        }
+
+        try {
+            countDownLatch.await();
+        } catch (final InterruptedException e) {
+            throw ExceptionUtil.toRuntimeException(e, true);
+        }
+
+        if (errorHolder.value() != null) {
+            throw ExceptionUtil.toRuntimeException(errorHolder.value(), true);
+        }
+    }
+
+    /**
      * Executes the command asynchronously using the default executor.
      * Returns immediately with a future that completes when the command finishes.
      *
@@ -38608,7 +39637,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see #asyncExecute(Throwables.Runnable)
      * @see #callWithRetry(Callable, int, long, BiPredicate)
      */
-    public static <R> ContinuableFuture<R> asyncExecute(final Callable<R> command) {
+    public static <R> ContinuableFuture<R> asyncExecute(final Callable<? extends R> command) {
         return ASYNC_EXECUTOR.execute(command);
     }
 
@@ -38631,7 +39660,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see #asyncExecute(Callable)
      * @see #asyncExecute(Throwables.Runnable, Executor)
      */
-    public static <R> ContinuableFuture<R> asyncExecute(final Callable<R> command, final Executor executor) {
+    public static <R> ContinuableFuture<R> asyncExecute(final Callable<? extends R> command, final Executor executor) {
         return ContinuableFuture.call(command, executor);
     }
 
@@ -38654,7 +39683,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see #asyncExecute(Callable)
      * @see #asyncExecute(Throwables.Runnable, long)
      */
-    public static <R> ContinuableFuture<R> asyncExecute(final Callable<R> command, final long delayInMillis) {
+    public static <R> ContinuableFuture<R> asyncExecute(final Callable<? extends R> command, final long delayInMillis) {
         return new ContinuableFuture<>(SCHEDULED_EXECUTOR.schedule(command, delayInMillis, TimeUnit.MILLISECONDS));
     }
 
@@ -38720,7 +39749,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see #callWithRetry(Callable, int, long, BiPredicate)
      * @see #asyncExecute(Throwables.Runnable, int, long, Predicate)
      */
-    public static <R> ContinuableFuture<R> asyncExecute(final Callable<R> cmd, final int retryTimes, final long retryIntervalInMillis,
+    public static <R> ContinuableFuture<R> asyncExecute(final Callable<? extends R> cmd, final int retryTimes, final long retryIntervalInMillis,
             final BiPredicate<? super R, ? super Exception> retryCondition) {
         return ASYNC_EXECUTOR.execute(() -> {
             final Retry<R> retry = Retry.withFixedDelay(retryTimes, retryIntervalInMillis, retryCondition);
@@ -38732,6 +39761,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * Executes a list of commands asynchronously using the default executor.
      * Returns immediately with a list of futures that complete as each command finishes.
      * Each command runs independently and can complete at different times.
+     * <br />
+     * Note: this overload accepts a {@code List} (not a {@code Collection}) because a {@code Collection} overload would
+     * clash with {@link #asyncExecute(Collection)} (the {@code Callable} variant) after type erasure; callers holding a
+     * non-List collection of runnables must copy it to a {@code List} first. The returned futures are in submission
+     * (encounter) order; for completion-order iteration, see {@link #asyncRun(Collection)}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -38757,6 +39791,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * Executes a list of commands asynchronously using the specified executor.
      * Returns immediately with a list of futures that complete as each command finishes.
      * Each command runs independently and can complete at different times.
+     * <br />
+     * Note: this overload accepts a {@code List} (not a {@code Collection}) because a {@code Collection} overload would
+     * clash with {@link #asyncExecute(Collection, Executor)} (the {@code Callable} variant) after type erasure; callers
+     * holding a non-List collection of runnables must copy it to a {@code List} first. The returned futures are in
+     * submission (encounter) order; for completion-order iteration, see {@link #asyncRun(Collection, Executor)}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -38791,9 +39830,84 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
+     * Executes a collection of commands asynchronously using the default executor.
+     * Returns immediately with a list of futures that complete as each command finishes.
+     * Each command runs independently and can complete at different times.
+     * <br />
+     * This method is the collection-friendly counterpart to {@link #asyncExecute(List)}. It uses a distinct method name
+     * because {@code asyncExecute(Collection<? extends Runnable>)} would clash with {@link #asyncExecute(Collection)}
+     * (the {@code Callable} variant) after type erasure. The returned futures are in submission (encounter) order; for
+     * completion-order iteration, see {@link #asyncRun(Collection)}.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Collection<Throwables.Runnable<Exception>> tasks = new LinkedHashSet<>();
+     * tasks.add(() -> System.out.println("file1"));
+     * tasks.add(() -> System.out.println("file2"));
+     *
+     * List<ContinuableFuture<Void>> futures = N.asyncExecuteAll(tasks);
+     * }</pre>
+     *
+     * @param commands the collection of commands to execute asynchronously
+     * @return a list of futures representing the pending completion of each command
+     * @see #asyncExecuteAll(Collection, Executor)
+     * @see #asyncExecute(List)
+     * @see #asyncRun(Collection)
+     */
+    public static List<ContinuableFuture<Void>> asyncExecuteAll(final Collection<? extends Throwables.Runnable<? extends Exception>> commands) {
+        return asyncExecuteAll(commands, ASYNC_EXECUTOR.getExecutor());
+    }
+
+    /**
+     * Executes a collection of commands asynchronously using the specified executor.
+     * Returns immediately with a list of futures that complete as each command finishes.
+     * Each command runs independently and can complete at different times.
+     * <br />
+     * This method is the collection-friendly counterpart to {@link #asyncExecute(List, Executor)}. It uses a distinct
+     * method name because {@code asyncExecute(Collection<? extends Runnable>, Executor)} would clash with
+     * {@link #asyncExecute(Collection, Executor)} (the {@code Callable} variant) after type erasure. The returned futures
+     * are in submission (encounter) order; for completion-order iteration, see {@link #asyncRun(Collection, Executor)}.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * ExecutorService executor = Executors.newFixedThreadPool(3);
+     * Collection<Throwables.Runnable<Exception>> tasks = new LinkedHashSet<>();
+     * tasks.add(() -> System.out.println("file1"));
+     * tasks.add(() -> System.out.println("file2"));
+     *
+     * List<ContinuableFuture<Void>> futures = N.asyncExecuteAll(tasks, executor);
+     * }</pre>
+     *
+     * @param commands the collection of commands to execute asynchronously
+     * @param executor the executor to use for execution
+     * @return a list of futures representing the pending completion of each command
+     * @see #asyncExecuteAll(Collection)
+     * @see #asyncExecute(List, Executor)
+     * @see #asyncRun(Collection, Executor)
+     */
+    public static List<ContinuableFuture<Void>> asyncExecuteAll(final Collection<? extends Throwables.Runnable<? extends Exception>> commands,
+            final Executor executor) {
+        if (isEmpty(commands)) {
+            return new ArrayList<>();
+        }
+
+        final List<ContinuableFuture<Void>> results = new ArrayList<>(commands.size());
+
+        for (final Throwables.Runnable<? extends Exception> cmd : commands) {
+            results.add(asyncExecute(cmd, executor));
+        }
+
+        return results;
+    }
+
+    /**
      * Executes a collection of commands asynchronously using the default executor and returns results.
      * Returns immediately with a list of futures that complete with each command's result.
      * Each command runs independently and can complete at different times.
+     * <br />
+     * Note: the {@code Runnable} counterpart of this method ({@link #asyncExecute(List)}) accepts a {@code List} instead
+     * of a {@code Collection} because the two overloads would otherwise clash after type erasure. The returned futures
+     * are in submission (encounter) order; for results yielded lazily in completion order, see {@link #asyncCall(Collection)}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -38812,7 +39926,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see #asyncExecute(Collection, Executor)
      * @see #asyncExecute(Callable)
      */
-    public static <R> List<ContinuableFuture<R>> asyncExecute(final Collection<? extends Callable<R>> commands) {
+    public static <R> List<ContinuableFuture<R>> asyncExecute(final Collection<? extends Callable<? extends R>> commands) {
         return ASYNC_EXECUTOR.execute(commands);
     }
 
@@ -38820,6 +39934,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * Executes a collection of commands asynchronously using the specified executor and returns results.
      * Returns immediately with a list of futures that complete with each command's result.
      * Each command runs independently and can complete at different times.
+     * <br />
+     * Note: the {@code Runnable} counterpart of this method ({@link #asyncExecute(List, Executor)}) accepts a {@code List}
+     * instead of a {@code Collection} because the two overloads would otherwise clash after type erasure. The returned
+     * futures are in submission (encounter) order; for results yielded lazily in completion order, see
+     * {@link #asyncCall(Collection, Executor)}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -38840,14 +39959,14 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see #asyncExecute(Collection)
      * @see #asyncExecute(Callable, Executor)
      */
-    public static <R> List<ContinuableFuture<R>> asyncExecute(final Collection<? extends Callable<R>> commands, final Executor executor) {
+    public static <R> List<ContinuableFuture<R>> asyncExecute(final Collection<? extends Callable<? extends R>> commands, final Executor executor) {
         if (isEmpty(commands)) {
             return new ArrayList<>();
         }
 
         final List<ContinuableFuture<R>> results = new ArrayList<>(commands.size());
 
-        for (final Callable<R> cmd : commands) {
+        for (final Callable<? extends R> cmd : commands) {
             results.add(ContinuableFuture.call(cmd, executor));
         }
 
@@ -38875,8 +39994,16 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * }
      * }</pre>
      *
+     * <p><b>Note:</b> The returned iterator drives completion by polling: {@code hasNext()} spins, sleeping ~1ms
+     * between checks, until the next command finishes, so there is a ~1ms latency floor per yielded element.
+     * A command's failure is only re-thrown when iteration reaches it; if the iterator is not fully exhausted,
+     * failures of not-yet-observed commands are never surfaced. Commands that have already started are not
+     * canceled when iteration stops early.
+     *
      * @param commands the collection of commands to execute asynchronously
-     * @return an iterator yielding results in completion order
+     * @return an iterator that yields one {@code null} per completed command, in completion order. The caller
+     *         should fully exhaust the iterator: advancing it is what drives completion handling and surfaces
+     *         any command failure (see the note above).
      * @see #asyncRun(Collection, Executor)
      * @see #asyncCall(Collection)
      * @see #asyncExecute(List)
@@ -38907,9 +40034,17 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * }
      * }</pre>
      *
+     * <p><b>Note:</b> The returned iterator drives completion by polling: {@code hasNext()} spins, sleeping ~1ms
+     * between checks, until the next command finishes, so there is a ~1ms latency floor per yielded element.
+     * A command's failure is only re-thrown when iteration reaches it; if the iterator is not fully exhausted,
+     * failures of not-yet-observed commands are never surfaced. Commands that have already started are not
+     * canceled when iteration stops early.
+     *
      * @param commands the collection of commands to execute asynchronously
      * @param executor the executor to use for execution
-     * @return an iterator yielding results in completion order
+     * @return an iterator that yields one {@code null} per completed command, in completion order. The caller
+     *         should fully exhaust the iterator: advancing it is what drives completion handling and surfaces
+     *         any command failure (see the note above).
      * @see #asyncRun(Collection)
      * @see #asyncCall(Collection, Executor)
      */
@@ -39059,7 +40194,6 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param commands the collection of commands to execute asynchronously
      * @param executor the executor to use for execution
      * @return an iterator yielding results in completion order
-     * @throws IllegalArgumentException if the executor is invalid
      * @see #asyncCall(Collection)
      * @see #asyncRun(Collection, Executor)
      */
@@ -39212,7 +40346,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see #asyncExecute(Callable, int, long, BiPredicate)
      * @see Retry#withFixedDelay(int, long, BiPredicate)
      */
-    public static <R> R callWithRetry(final Callable<R> cmd, final int retryTimes, final long retryIntervalInMillis,
+    public static <R> R callWithRetry(final Callable<? extends R> cmd, final int retryTimes, final long retryIntervalInMillis,
             final BiPredicate<? super R, ? super Exception> retryCondition) {
         try {
             final Retry<R> retry = Retry.withFixedDelay(retryTimes, retryIntervalInMillis, retryCondition);
@@ -39545,7 +40679,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see #callInParallel(Callable, Callable, Callable)
      * @see #runInParallel(Throwables.Runnable, Throwables.Runnable)
      */
-    public static <R, R2> Tuple2<R, R2> callInParallel(final Callable<R> command, final Callable<R2> command2) {
+    public static <R, R2> Tuple2<R, R2> callInParallel(final Callable<? extends R> command, final Callable<? extends R2> command2) {
         final ContinuableFuture<R2> f2 = asyncExecute(command2);
         boolean hasException = true;
 
@@ -39595,7 +40729,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see #callInParallel(Callable, Callable)
      * @see #callInParallel(Callable, Callable, Callable, Callable)
      */
-    public static <R, R2, R3> Tuple3<R, R2, R3> callInParallel(final Callable<R> command, final Callable<R2> command2, final Callable<R3> command3) {
+    public static <R, R2, R3> Tuple3<R, R2, R3> callInParallel(final Callable<? extends R> command, final Callable<? extends R2> command2,
+            final Callable<? extends R3> command3) {
         final ContinuableFuture<R2> f2 = asyncExecute(command2);
         final ContinuableFuture<R3> f3 = asyncExecute(command3);
         boolean hasException = true;
@@ -39657,8 +40792,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see #callInParallel(Callable, Callable, Callable)
      * @see #callInParallel(Callable, Callable, Callable, Callable, Callable)
      */
-    public static <R, R2, R3, R4> Tuple4<R, R2, R3, R4> callInParallel(final Callable<R> command, final Callable<R2> command2, final Callable<R3> command3,
-            final Callable<R4> command4) {
+    public static <R, R2, R3, R4> Tuple4<R, R2, R3, R4> callInParallel(final Callable<? extends R> command, final Callable<? extends R2> command2,
+            final Callable<? extends R3> command3, final Callable<? extends R4> command4) {
         final ContinuableFuture<R2> f2 = asyncExecute(command2);
         final ContinuableFuture<R3> f3 = asyncExecute(command3);
         final ContinuableFuture<R4> f4 = asyncExecute(command4);
@@ -39726,8 +40861,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see #callInParallel(Callable, Callable, Callable, Callable)
      * @see #callInParallel(Collection)
      */
-    public static <R, R2, R3, R4, R5> Tuple5<R, R2, R3, R4, R5> callInParallel(final Callable<R> command, final Callable<R2> command2,
-            final Callable<R3> command3, final Callable<R4> command4, final Callable<R5> command5) {
+    public static <R, R2, R3, R4, R5> Tuple5<R, R2, R3, R4, R5> callInParallel(final Callable<? extends R> command, final Callable<? extends R2> command2,
+            final Callable<? extends R3> command3, final Callable<? extends R4> command4, final Callable<? extends R5> command5) {
         final ContinuableFuture<R2> f2 = asyncExecute(command2);
         final ContinuableFuture<R3> f3 = asyncExecute(command3);
         final ContinuableFuture<R4> f4 = asyncExecute(command4);
@@ -39818,7 +40953,6 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param commands the collection of commands to execute in parallel
      * @param executor the executor to use for parallel execution
      * @return a list containing the results of all commands in the same order
-     * @throws IllegalArgumentException if the executor is invalid
      * @see #callInParallel(Collection)
      * @see #runInParallel(Collection, Executor)
      */
@@ -39919,7 +41053,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * @param <T> the type of elements in the iterable
      * @param <E> the type of exception that the action may throw
-     * @param iter the iterable to process in batches
+     * @param c the iterable to process in batches
      * @param batchSize the number of elements in each batch (must be positive)
      * @param batchAction the action to execute on each batch (must not modify or cache the batch)
      * @throws IllegalArgumentException if batchSize is not positive
@@ -39927,16 +41061,16 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see #runByBatch(Object[], int, Throwables.Consumer)
      * @see #callByBatch(Iterable, int, Throwables.Function)
      */
-    public static <T, E extends Exception> void runByBatch(final Iterable<? extends T> iter, final int batchSize,
+    public static <T, E extends Exception> void runByBatch(final Iterable<? extends T> c, final int batchSize,
             final Throwables.Consumer<? super List<T>, E> batchAction) throws IllegalArgumentException, E {
         checkArgPositive(batchSize, cs.batchSize);
 
-        if (N.isEmpty(iter)) {
+        if (isEmptyCollection(c)) {
             return;
         }
 
-        if (iter instanceof List) {
-            final List<T> list = (List<T>) iter;
+        if (c instanceof List) {
+            final List<T> list = (List<T>) c;
             final int totalSize = list.size();
 
             if (totalSize <= batchSize) {
@@ -39947,7 +41081,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
                 }
             }
         } else {
-            runByBatch(iter.iterator(), batchSize, batchAction);
+            runByBatch(c.iterator(), batchSize, batchAction);
         }
     }
 
@@ -40062,7 +41196,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param <T> the type of elements in the iterable
      * @param <E> the type of exception that the element consumer may throw
      * @param <E2> the type of exception that the batch action may throw
-     * @param iter the iterable to process in batches
+     * @param c the iterable to process in batches
      * @param batchSize the number of elements in each batch (must be positive)
      * @param elementConsumer the action to apply to each element with its index
      * @param batchAction the action to execute after each batch is prepared
@@ -40073,15 +41207,15 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see #runByBatch(Object[], int, Throwables.IntObjConsumer, Throwables.Runnable)
      * @see #runByBatch(Iterable, int, Throwables.Consumer)
      */
-    public static <T, E extends Exception, E2 extends Exception> void runByBatch(final Iterable<? extends T> iter, final int batchSize,
+    public static <T, E extends Exception, E2 extends Exception> void runByBatch(final Iterable<? extends T> c, final int batchSize,
             final Throwables.IntObjConsumer<? super T, E> elementConsumer, final Throwables.Runnable<E2> batchAction) throws IllegalArgumentException, E, E2 {
         checkArgPositive(batchSize, cs.batchSize);
 
-        if (N.isEmpty(iter)) {
+        if (isEmptyCollection(c)) {
             return;
         }
 
-        runByBatch(iter.iterator(), batchSize, elementConsumer, batchAction);
+        runByBatch(c.iterator(), batchSize, elementConsumer, batchAction);
     }
 
     /**
@@ -40194,7 +41328,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param <T> the type of elements in the iterable
      * @param <R> the type of result returned by the batch function
      * @param <E> the type of exception that the batch function may throw
-     * @param iter the iterable to process in batches
+     * @param c the iterable to process in batches
      * @param batchSize the number of elements in each batch (must be positive)
      * @param batchAction the function to apply to each batch (must not modify or cache the batch)
      * @return a list containing the results from applying the function to each batch
@@ -40204,16 +41338,16 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see #callByBatch(Object[], int, Throwables.Function)
      * @see #runByBatch(Iterable, int, Throwables.Consumer)
      */
-    public static <T, R, E extends Exception> List<R> callByBatch(final Iterable<? extends T> iter, final int batchSize,
+    public static <T, R, E extends Exception> List<R> callByBatch(final Iterable<? extends T> c, final int batchSize,
             final Throwables.Function<? super List<T>, R, E> batchAction) throws IllegalArgumentException, E {
         checkArgPositive(batchSize, cs.batchSize);
 
-        if (N.isEmpty(iter)) {
+        if (isEmptyCollection(c)) {
             return new ArrayList<>();
         }
 
-        if (iter instanceof List) {
-            final List<T> list = (List<T>) iter;
+        if (c instanceof List) {
+            final List<T> list = (List<T>) c;
             final int totalSize = list.size();
             final List<R> result = new ArrayList<>(totalSize % batchSize == 0 ? totalSize / batchSize : totalSize / batchSize + 1);
 
@@ -40227,7 +41361,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
             return result;
         } else {
-            return callByBatch(iter.iterator(), batchSize, batchAction);
+            return callByBatch(c.iterator(), batchSize, batchAction);
         }
     }
 
@@ -40349,7 +41483,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param <R> the type of result returned by the batch action
      * @param <E> the type of exception that the element consumer may throw
      * @param <E2> the type of exception that the batch action may throw
-     * @param iter the iterable to process in batches
+     * @param c the iterable to process in batches
      * @param batchSize the number of elements in each batch (must be positive)
      * @param elementConsumer the action to apply to each element with its index
      * @param batchAction the action to call after each batch is prepared
@@ -40361,16 +41495,16 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see #callByBatch(Object[], int, Throwables.IntObjConsumer, Throwables.Callable)
      * @see #runByBatch(Iterable, int, Throwables.IntObjConsumer, Throwables.Runnable)
      */
-    public static <T, R, E extends Exception, E2 extends Exception> List<R> callByBatch(final Iterable<? extends T> iter, final int batchSize,
+    public static <T, R, E extends Exception, E2 extends Exception> List<R> callByBatch(final Iterable<? extends T> c, final int batchSize,
             final Throwables.IntObjConsumer<? super T, E> elementConsumer, final Throwables.Callable<? extends R, E2> batchAction)
             throws IllegalArgumentException, E, E2 {
         checkArgPositive(batchSize, cs.batchSize);
 
-        if (N.isEmpty(iter)) {
+        if (isEmptyCollection(c)) {
             return new ArrayList<>();
         }
 
-        return callByBatch(iter.iterator(), batchSize, elementConsumer, batchAction);
+        return callByBatch(c.iterator(), batchSize, elementConsumer, batchAction);
     }
 
     /**
@@ -40453,6 +41587,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see #runUninterruptibly(Throwables.LongConsumer, long)
      */
     public static void runUninterruptibly(final Throwables.Runnable<InterruptedException> cmd) throws IllegalArgumentException {
+        checkArgNotNull(cmd, cs.cmd);
+
         boolean interrupted = false;
 
         try {
@@ -40495,6 +41631,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see #runUninterruptibly(Throwables.Runnable)
      */
     public static void runUninterruptibly(final Throwables.LongConsumer<InterruptedException> cmd, final long timeoutInMillis) throws IllegalArgumentException {
+        checkArgNotNull(cmd, cs.cmd);
+
         boolean interrupted = false;
 
         try {
@@ -40547,14 +41685,14 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     public static void runUninterruptibly(@NotNull final Throwables.BiConsumer<Long, TimeUnit, InterruptedException> cmd, final long timeout,
             @NotNull final TimeUnit unit) throws IllegalArgumentException {
+        checkArgNotNull(cmd, cs.cmd);
         checkArgNotNull(unit, cs.unit);
 
         boolean interrupted = false;
 
         try {
             long remainingNanos = unit.toNanos(timeout);
-            final long sysNanos = System.nanoTime();
-            final long end = remainingNanos >= Long.MAX_VALUE - sysNanos ? Long.MAX_VALUE : sysNanos + remainingNanos;
+            final long end = System.nanoTime() + remainingNanos;
 
             while (true) {
                 try {
@@ -40588,13 +41726,15 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * // returns result even if interrupted, interrupted status restored after
      * }</pre>
      *
-     * @param <T> the type of result returned by the command
+     * @param <R> the type of result returned by the command
      * @param cmd the command to call uninterruptibly
      * @return the result of the command
      * @see #callUninterruptibly(Throwables.LongFunction, long)
      * @see #runUninterruptibly(Throwables.Runnable)
      */
-    public static <T> T callUninterruptibly(final Throwables.Callable<T, InterruptedException> cmd) throws IllegalArgumentException {
+    public static <R> R callUninterruptibly(final Throwables.Callable<? extends R, InterruptedException> cmd) throws IllegalArgumentException {
+        checkArgNotNull(cmd, cs.cmd);
+
         boolean interrupted = false;
         try {
             while (true) {
@@ -40640,6 +41780,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     public static <T> T callUninterruptibly(final Throwables.LongFunction<? extends T, InterruptedException> cmd, final long timeoutInMillis)
             throws IllegalArgumentException {
+        checkArgNotNull(cmd, cs.cmd);
+
         boolean interrupted = false;
 
         try {
@@ -40694,14 +41836,14 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     public static <T> T callUninterruptibly(@NotNull final Throwables.BiFunction<Long, TimeUnit, T, InterruptedException> cmd, final long timeout,
             @NotNull final TimeUnit unit) throws IllegalArgumentException {
+        checkArgNotNull(cmd, cs.cmd);
         checkArgNotNull(unit, cs.unit);
 
         boolean interrupted = false;
 
         try {
             long remainingNanos = unit.toNanos(timeout);
-            final long sysNanos = System.nanoTime();
-            final long end = remainingNanos >= Long.MAX_VALUE - sysNanos ? Long.MAX_VALUE : sysNanos + remainingNanos;
+            final long end = System.nanoTime() + remainingNanos;
 
             while (true) {
                 try {
@@ -40722,6 +41864,10 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * Executes the callable and returns the result wrapped in a {@code Nullable}.
      * Returns an empty {@code Nullable} if an exception occurs during execution.
      * This provides a safe way to execute operations that may throw exceptions without explicit try-catch blocks.
+     * <br />
+     * Note: any {@code Exception} thrown by the execution is caught and discarded; if it is an
+     * {@code InterruptedException}, the thread's interrupt status is restored before returning.
+     * For finer control over which exceptions to swallow, prefer the {@link Try} family (e.g. {@code Try.call(...)}).
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -40739,10 +41885,14 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see Try#call(Callable)
      */
     @Beta
-    public static <R> Nullable<R> tryOrEmptyIfExceptionOccurred(final Callable<R> cmd) {
+    public static <R> Nullable<R> tryOrEmptyIfExceptionOccurred(final Callable<? extends R> cmd) {
         try {
             return Nullable.of(cmd.call());
         } catch (final Exception e) {
+            if (e instanceof InterruptedException) {
+                Thread.currentThread().interrupt();
+            }
+
             return Nullable.empty();
         }
     }
@@ -40751,6 +41901,10 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * Applies the function to the initial value and returns the result wrapped in a {@code Nullable}.
      * Returns an empty {@code Nullable} if an exception occurs during execution.
      * This provides a safe way to execute operations that may throw exceptions without explicit try-catch blocks.
+     * <br />
+     * Note: any {@code Exception} thrown by the execution is caught and discarded; if it is an
+     * {@code InterruptedException}, the thread's interrupt status is restored before returning.
+     * For finer control over which exceptions to swallow, prefer the {@link Try} family (e.g. {@code Try.call(...)}).
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -40775,6 +41929,10 @@ public final class N extends CommonUtil { // public final class N extends π imp
         try {
             return Nullable.of(func.apply(init));
         } catch (final Exception e) {
+            if (e instanceof InterruptedException) {
+                Thread.currentThread().interrupt();
+            }
+
             return Nullable.empty();
         }
     }
@@ -40783,6 +41941,10 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * Executes the callable and returns the result.
      * Returns the result from the supplier if an exception occurs during execution.
      * This provides a safe way to execute operations with a fallback value without explicit try-catch blocks.
+     * <br />
+     * Note: any {@code Exception} thrown by the execution is caught and discarded; if it is an
+     * {@code InterruptedException}, the thread's interrupt status is restored before returning.
+     * For finer control over which exceptions to swallow, prefer the {@link Try} family (e.g. {@code Try.call(...)}).
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -40802,10 +41964,14 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see Try#call(Callable, Supplier)
      */
     @Beta
-    public static <R> R tryOrDefaultIfExceptionOccurred(final Callable<R> cmd, final Supplier<R> supplierForDefaultIfExceptionOccurred) {
+    public static <R> R tryOrDefaultIfExceptionOccurred(final Callable<? extends R> cmd, final Supplier<R> supplierForDefaultIfExceptionOccurred) {
         try {
             return cmd.call();
         } catch (final Exception e) {
+            if (e instanceof InterruptedException) {
+                Thread.currentThread().interrupt();
+            }
+
             return supplierForDefaultIfExceptionOccurred.get();
         }
     }
@@ -40814,6 +41980,10 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * Executes the callable and returns the result.
      * Returns the provided default value if an exception occurs during execution.
      * This provides a safe way to execute operations with a fallback value without explicit try-catch blocks.
+     * <br />
+     * Note: any {@code Exception} thrown by the execution is caught and discarded; if it is an
+     * {@code InterruptedException}, the thread's interrupt status is restored before returning.
+     * For finer control over which exceptions to swallow, prefer the {@link Try} family (e.g. {@code Try.call(...)}).
      *
      * <p><b>Note:</b> The type bound uses {@code Comparable<? super R>} to avoid ambiguous method resolution with
      * {@code Comparable<R>}; {@code Comparable} is a common super interface for many types.</p>
@@ -40836,10 +42006,14 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see Try#call(Callable, Comparable)
      */
     @Beta
-    public static <R extends Comparable<? super R>> R tryOrDefaultIfExceptionOccurred(final Callable<R> cmd, final R defaultIfExceptionOccurred) {
+    public static <R extends Comparable<? super R>> R tryOrDefaultIfExceptionOccurred(final Callable<? extends R> cmd, final R defaultIfExceptionOccurred) {
         try {
             return cmd.call();
         } catch (final Exception e) {
+            if (e instanceof InterruptedException) {
+                Thread.currentThread().interrupt();
+            }
+
             return defaultIfExceptionOccurred;
         }
     }
@@ -40848,6 +42022,10 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * Applies the function to the initial value and returns the result.
      * Returns the result from the supplier if an exception occurs during execution.
      * This provides a safe way to execute operations with a fallback value without explicit try-catch blocks.
+     * <br />
+     * Note: any {@code Exception} thrown by the execution is caught and discarded; if it is an
+     * {@code InterruptedException}, the thread's interrupt status is restored before returning.
+     * For finer control over which exceptions to swallow, prefer the {@link Try} family (e.g. {@code Try.call(...)}).
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -40876,6 +42054,10 @@ public final class N extends CommonUtil { // public final class N extends π imp
         try {
             return func.apply(init);
         } catch (final Exception e) {
+            if (e instanceof InterruptedException) {
+                Thread.currentThread().interrupt();
+            }
+
             return supplierForDefaultIfExceptionOccurred.get();
         }
     }
@@ -40884,6 +42066,10 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * Applies the function to the initial value and returns the result.
      * Returns the provided default value if an exception occurs during execution.
      * This provides a safe way to execute operations with a fallback value without explicit try-catch blocks.
+     * <br />
+     * Note: any {@code Exception} thrown by the execution is caught and discarded; if it is an
+     * {@code InterruptedException}, the thread's interrupt status is restored before returning.
+     * For finer control over which exceptions to swallow, prefer the {@link Try} family (e.g. {@code Try.call(...)}).
      *
      * <p><b>Note:</b> The type bound uses {@code Comparable<? super R>} to avoid ambiguous method resolution with
      * {@code Comparable<R>}; {@code Comparable} is a common super interface for many types.</p>
@@ -40915,6 +42101,10 @@ public final class N extends CommonUtil { // public final class N extends π imp
         try {
             return func.apply(init);
         } catch (final Exception e) {
+            if (e instanceof InterruptedException) {
+                Thread.currentThread().interrupt();
+            }
+
             return defaultIfExceptionOccurred;
         }
     }
@@ -40946,8 +42136,6 @@ public final class N extends CommonUtil { // public final class N extends π imp
             return Nullable.empty();
         }
     }
-
-    // Maybe misused: N.ifOrElse(user != null, user.getFirstName(), firstName -> N.println(firstName));
 
     /**
      * Executes one of two actions based on the boolean condition.
@@ -41067,9 +42255,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see #ifNotEmpty(Map, Throwables.Consumer)
      * @see #ifNotEmpty(CharSequence, Throwables.Consumer)
      */
-    @SuppressWarnings("rawtypes")
     @Beta
-    public static <C extends Collection, E extends Exception> void ifNotEmpty(final C c, final Throwables.Consumer<? super C, E> cmd) throws E {
+    public static <C extends Collection<?>, E extends Exception> void ifNotEmpty(final C c, final Throwables.Consumer<? super C, E> cmd) throws E {
         if (notEmpty(c)) {
             cmd.accept(c);
         }
@@ -41097,9 +42284,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see #ifNotEmpty(Collection, Throwables.Consumer)
      * @see #ifNotNull(Object, Throwables.Consumer)
      */
-    @SuppressWarnings("rawtypes")
     @Beta
-    public static <M extends Map, E extends Exception> void ifNotEmpty(final M m, final Throwables.Consumer<? super M, E> cmd) throws E {
+    public static <M extends Map<?, ?>, E extends Exception> void ifNotEmpty(final M m, final Throwables.Consumer<? super M, E> cmd) throws E {
         if (notEmpty(m)) {
             cmd.accept(m);
         }
@@ -41215,8 +42401,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
         try {
             long remainingNanos = TimeUnit.MILLISECONDS.toNanos(timeoutInMillis);
-            final long sysNanos = System.nanoTime();
-            final long end = remainingNanos >= Long.MAX_VALUE - sysNanos ? Long.MAX_VALUE : sysNanos + remainingNanos;
+            final long end = System.nanoTime() + remainingNanos;
 
             while (true) {
                 try {
@@ -41279,8 +42464,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
         try {
             long remainingNanos = unit.toNanos(timeout);
-            final long sysNanos = System.nanoTime();
-            final long end = remainingNanos >= Long.MAX_VALUE - sysNanos ? Long.MAX_VALUE : sysNanos + remainingNanos;
+            final long end = System.nanoTime() + remainingNanos;
 
             while (true) {
                 try {
@@ -41331,11 +42515,15 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <p><strong>Performance:</strong> After the first call, subsequent calls have minimal overhead as they
      * simply return the cached value without any synchronization.</p>
      *
+     * <p><b>Naming:</b> this method takes an unchecked {@link Supplier}; for a supplier that may throw a checked
+     * exception use {@link #lazyInitChecked(Throwables.Supplier)}. The two cannot share a single overloaded name
+     * because {@code Supplier} and {@code Throwables.Supplier} would make lambda call sites ambiguous.</p>
+     *
      * @param <T> the type of results supplied by this supplier
      * @param supplier the supplier to be lazily initialized, must not be null
      * @return a thread-safe lazy-initialized supplier that caches the result of the first call
      * @see LazyInitializer#of(Supplier)
-     * @see #lazyInitialize(Throwables.Supplier)
+     * @see #lazyInitChecked(Throwables.Supplier)
      */
     @Beta
     public static <T> com.landawn.abacus.util.function.Supplier<T> lazyInit(final Supplier<T> supplier) {
@@ -41351,16 +42539,19 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <p>This is particularly useful for expensive computations or resource initialization that may throw
      * checked exceptions and should only happen if and when the value is actually needed.</p>
      *
+     * <p><b>Naming:</b> this is the checked-exception counterpart of {@link #lazyInit(Supplier)} — same lazy,
+     * thread-safe, memoizing behavior, differing only in that the supplied {@link Throwables.Supplier} may throw a
+     * checked exception. The two cannot share a single overloaded name because {@code Supplier} and
+     * {@code Throwables.Supplier} would make lambda call sites ambiguous.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Database connection with exception handling
-     * Throwables.Supplier<String, IOException> lazyText = N.lazyInitialize(() -> "loaded");
+     * Throwables.Supplier<String, IOException> lazyText = N.lazyInitChecked(() -> "loaded");
      *
      * // File reading with lazy initialization
      * String text1 = lazyText.get();   // returns "loaded"
      * String text2 = lazyText.get();   // returns cached "loaded"
-     *
-     *     // Handle connection error
      * }</pre>
      *
      * <p><strong>Thread safety:</strong> The returned supplier is thread-safe. Concurrent calls to {@code get()}
@@ -41378,8 +42569,24 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see #lazyInit(Supplier)
      */
     @Beta
-    public static <T, E extends Exception> Throwables.Supplier<T, E> lazyInitialize(final Throwables.Supplier<T, E> supplier) {
+    public static <T, E extends Exception> Throwables.Supplier<T, E> lazyInitChecked(final Throwables.Supplier<T, E> supplier) {
         return Throwables.LazyInitializer.of(supplier);
+    }
+
+    /**
+     * Creates a lazy-initialized supplier from the provided exception-throwing supplier that defers computation until first access.
+     *
+     * @param <T> the type of results supplied by this supplier
+     * @param <E> the type of exception that may be thrown by the supplier
+     * @param supplier the exception-throwing supplier to be lazily initialized, must not be null
+     * @return a thread-safe lazy-initialized supplier that caches the result of the first successful call
+     * @deprecated unguessable name; use the self-describing {@link #lazyInitChecked(Throwables.Supplier)} instead
+     *             (the checked-exception counterpart of {@link #lazyInit(Supplier)}).
+     */
+    @Deprecated
+    @Beta
+    public static <T, E extends Exception> Throwables.Supplier<T, E> lazyInitialize(final Throwables.Supplier<T, E> supplier) {
+        return lazyInitChecked(supplier);
     }
 
     /**
@@ -41462,7 +42669,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Handling any Throwable in a catch block
-     *     // Can handle both Exceptions and Errors
+     * // Can handle both Exceptions and Errors
      * try {
      *     riskyOperation();
      * } catch (Throwable t) {
@@ -41494,7 +42701,36 @@ public final class N extends CommonUtil { // public final class N extends π imp
         return ExceptionUtil.toRuntimeException(e);
     }
 
-    //    /**
+    /**
+     * Converts the specified {@code Throwable} to a {@code RuntimeException}, optionally restoring the thread's interrupt status.
+     *
+     * <p>This is the {@code Throwable} counterpart of {@link #toRuntimeException(Exception, boolean)}: it additionally
+     * handles {@code Error} instances (wrapping them in a {@code RuntimeException} rather than throwing them directly).
+     * When {@code callInterrupt} is {@code true} and {@code e} is an {@code InterruptedException}, the current thread's
+     * interrupt status is restored via {@code Thread.currentThread().interrupt()}.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * try {
+     *     someBlockingCall();
+     * } catch (Throwable t) {
+     *     throw N.toRuntimeException(t, true);
+     *     // wraps t; if t is an InterruptedException, also re-interrupts the thread
+     * }
+     * }</pre>
+     *
+     * @param e the throwable to be converted to a runtime exception.
+     * @param callInterrupt whether to call {@code Thread.currentThread().interrupt()} if the throwable is an InterruptedException
+     * @return a RuntimeException that represents the provided throwable.
+     * @see #toRuntimeException(Throwable)
+     * @see #toRuntimeException(Exception, boolean)
+     * @see ExceptionUtil#toRuntimeException(Throwable, boolean)
+     * @see ExceptionUtil#registerRuntimeExceptionMapper(Class, Function)
+     */
+    @Beta
+    public static RuntimeException toRuntimeException(final Throwable e, final boolean callInterrupt) {
+        return ExceptionUtil.toRuntimeException(e, callInterrupt);
+    }
 
     /**
      * Prints the given object's string representation to the standard output stream (System.out) and returns the object.
@@ -41506,7 +42742,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <li><strong>Collections:</strong> Formatted as [element1, element2, element3] with comma-space separators</li>
      * <li><strong>Object arrays:</strong> Formatted as [element1, element2, element3] with comma-space separators</li>
      * <li><strong>Maps:</strong> Formatted as {key1=value1, key2=value2} with comma-space separators</li>
-     * <li><strong>Other objects:</strong> Uses {@code N.toString(Object)} for string representation</li>
+     * <li><strong>Other objects:</strong> Uses {@code N.toString(Object)} for string representation. Note that
+     *     <i>primitive</i> arrays ({@code int[]}, {@code char[]}, etc.) are not special-cased here and are formatted via
+     *     {@code N.toString(Object)} (which does render their contents)</li>
      * </ul>
      *
      * <p><b>Usage Examples:</b></p>
@@ -41564,6 +42802,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * This method provides convenient formatted printing using printf-style format strings,
      * combining the functionality of {@link String#format(String, Object...)} with automatic newline addition.
      *
+     * <p>The {@code "fprintln"} name reads as <i>printf</i> + <i>line</i> (a {@code printf} that appends a newline);
+     * it is the formatted counterpart of {@link #println(Object)}.</p>
+     *
      * <p>The format string uses the same syntax as {@link String#format(String, Object...)}, supporting
      * various format specifiers such as %s (string), %d (decimal), %f (floating point), %x (hexadecimal), etc.</p>
      *
@@ -41575,7 +42816,6 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * // Multiple arguments with different types
      * N.fprintln("User %s (ID: %d) has %.2f credits", "Alice", 123, 45.67);   // prints User Alice (ID: 123) has 45.67 credits
      *
-     * // Date/time formatting
      * // Debugging with formatted output
      * int current = 2;
      * int total = 5;
@@ -41592,9 +42832,10 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *             If there are more arguments than format specifiers, the extra arguments are ignored.
      *             The number of arguments is variable and may be zero
      * @throws IllegalFormatException if the format string is invalid or contains illegal format specifiers
-     * @see String#format(String, Object...)
-     * @see java.io.PrintStream#printf(String, Object...)
      * @see #println(Object)
+     * @see java.io.PrintStream#printf(String, Object...)
+     * @see java.io.PrintStream#println()
+     * @see String#format(String, Object...)
      * @see java.util.Formatter
      */
     public static void fprintln(final String format, final Object... args) {

@@ -56,7 +56,7 @@ public class EmailUtilTest extends TestBase {
                     "Test plain text content for multiple recipients", "username", "password", props);
         });
         assertTrue(exception.getMessage().contains("Failed to send email"));
-        assertTrue(exception.getMessage().contains("test1@example.com"));
+        assertTrue(exception.getMessage().contains("3 recipient(s)"));
     }
 
     @Test

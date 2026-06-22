@@ -182,9 +182,8 @@ public class AtomicIntegerType extends AbstractAtomicType<AtomicInteger> {
      * the contained integer value (equivalent to {@link java.util.concurrent.atomic.AtomicInteger#toString()}).
      * <p>
      * <b>appendTo vs. serializeTo:</b> {@code appendTo} produces a plain, {@code toString()}-style rendering with no
-     * JSON/XML quoting or escaping (for general text output), whereas {@code serializeTo} produces the JSON/XML
-     * serialized form (applying string quotation and character escaping per the serialization config) and is used by the
-     * JSON/XML serializers.
+     * JSON/XML quoting or escaping (for general text output), whereas {@code serializeTo} writes this type's JSON/XML
+     * literal form and ignores string quotation/escaping config.
      *
      * @param appendable the target {@code Appendable}
      * @param x the {@code AtomicInteger} value to append; may be {@code null}
@@ -210,28 +209,30 @@ public class AtomicIntegerType extends AbstractAtomicType<AtomicInteger> {
 
     /**
      * Writes an {@link java.util.concurrent.atomic.AtomicInteger} value to a {@link CharacterWriter}.
-     * Writes the literal {@code "null"} character array if {@code x} is {@code null}; otherwise
-     * uses the writer's optimized {@code writeInt} method with the contained integer value.
-     * {@code config} is not used.
+     * If the configuration specifies {@code writeNullNumberAsZero} and {@code x} is {@code null},
+     * writes {@code 0}; otherwise writes {@code null} for a null value or uses the writer's optimized
+     * {@code writeInt} method with the contained integer value.
      * <p>
-     * This method is specifically designed for JSON/XML serialization: it writes the serialized form of {@code x} to the
-     * {@code CharacterWriter}, applying string quotation and character escaping according to the supplied serialization
-     * config (a {@code null} config means no surrounding quotation). It is the streaming counterpart of {@code stringOf}
-     * and is invoked by the JSON/XML serializers.
+     * This method is specifically designed for JSON/XML serialization: it writes this type's literal form to the
+     * {@code CharacterWriter}. String quotation/escaping config is ignored.
      * <p>
-     * <b>serializeTo vs. appendTo:</b> {@code serializeTo} produces machine-readable JSON/XML (quoted and escaped),
+     * <b>serializeTo vs. appendTo:</b> {@code serializeTo} produces machine-readable JSON/XML literal output,
      * whereas {@code appendTo} produces a plain, human-readable {@code toString()}-style rendering without JSON/XML
      * quoting or escaping.
      *
      * @param writer the {@code CharacterWriter} to write to
      * @param x the {@code AtomicInteger} value to write; may be {@code null}
-     * @param config the serialization configuration (unused for integer values); may be {@code null}
+     * @param config the serialization configuration; may be {@code null}
      * @throws IOException if an I/O error occurs during writing
      */
     @Override
     public void serializeTo(final CharacterWriter writer, final AtomicInteger x, final JsonXmlSerConfig<?> config) throws IOException {
         if (x == null) {
-            writer.write(NULL_CHAR_ARRAY);
+            if (config != null && config.isWriteNullNumberAsZero()) {
+                writer.writeInt(0);
+            } else {
+                writer.write(NULL_CHAR_ARRAY);
+            }
         } else {
             writer.writeInt(x.get());
         }

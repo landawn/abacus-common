@@ -578,6 +578,41 @@ public class PropInfoTest extends TestBase {
         }
     }
 
+    public static class NestedRootForPropInfo {
+        private NestedChildForPropInfo child;
+
+        public NestedChildForPropInfo getChild() {
+            return child;
+        }
+
+        public void setChild(final NestedChildForPropInfo child) {
+            this.child = child;
+        }
+    }
+
+    public static class NestedChildForPropInfo {
+        private String name;
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(final String name) {
+            this.name = name;
+        }
+    }
+
+    @Test
+    public void testBeanInfoSetPropValue_NestedCreatesIntermediate() {
+        final ParserUtil.BeanInfo info = ParserUtil.getBeanInfo(NestedRootForPropInfo.class);
+        final NestedRootForPropInfo root = new NestedRootForPropInfo();
+
+        Assertions.assertTrue(info.setPropValue(root, "child.name", "created", false));
+
+        Assertions.assertNotNull(root.getChild());
+        Assertions.assertEquals("created", root.getChild().getName());
+    }
+
     public enum Status {
         ACTIVE, INACTIVE
     }

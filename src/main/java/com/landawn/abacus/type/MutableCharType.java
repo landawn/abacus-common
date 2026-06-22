@@ -98,6 +98,7 @@ public class MutableCharType extends AbstractType<MutableChar> {
      * @see #valueOf(Object)
      * @see #stringOf(MutableChar)
      */
+    @SuppressWarnings("deprecation")
     @Override
     public MutableChar valueOf(final String str) {
         return Strings.isEmpty(str) ? null : MutableChar.of(Strings.parseChar(str));

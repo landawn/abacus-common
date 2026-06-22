@@ -21,6 +21,13 @@ package com.landawn.abacus.parser;
  * deserialization options. It inherits all configuration options from its parent
  * class without adding XML-specific settings.</p>
  *
+ * <p><b>Note — intentional omission of the JSON-only deser knobs:</b> the
+ * {@code setMapInstanceType} / {@code setReadNullToEmpty} / {@code setIgnoreNullOrEmpty}
+ * options live on {@link JsonDeserConfig} on purpose: they are read only by the JSON
+ * deserializer ({@code JsonParserImpl}). The XML deserializers ({@code XmlParserImpl} /
+ * {@code AbacusXmlParserImpl}) do not consume them, so exposing them here would create
+ * dead configuration. They are therefore deliberately NOT provided on {@code XmlDeserConfig}.</p>
+ *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * XmlDeserConfig config = new XmlDeserConfig()

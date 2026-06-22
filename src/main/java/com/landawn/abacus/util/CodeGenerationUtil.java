@@ -545,7 +545,7 @@ public final class CodeGenerationUtil {
                         .append(" */")
                         .append(LINE_SEPARATOR)
                         .append("    String ")
-                        .append(Strings.isKeyword(propName) ? "_" : "")
+                        .append(Strings.isJavaKeyword(propName) ? "_" : "")
                         .append(propName)
                         .append(" = \"")
                         .append(propName)
@@ -567,7 +567,7 @@ public final class CodeGenerationUtil {
                             .append(propNameMap.containsKey(fieldNameForPropNameList) ? "_" : "")
                             .append(fieldNameForPropNameList)
                             .append(" = List.of(")
-                            .append(Stream.of(classPropNameListEntry.getValue()).sorted().join(", "))
+                            .append(Stream.of(classPropNameListEntry.getValue()).sorted().map(it -> Strings.isJavaKeyword(it) ? "_" + it : it).join(", "))
                             .append(");")
                             .append(LINE_SEPARATOR);
                 }
@@ -649,7 +649,7 @@ public final class CodeGenerationUtil {
                             .append(LINE_SEPARATOR)
                             .append(INDENTATION)
                             .append("    String ")
-                            .append(Strings.isKeyword(propNameTP._1) ? "_" : "")
+                            .append(Strings.isJavaKeyword(propNameTP._1) ? "_" : "")
                             .append(propNameTP._1)
                             .append(" = \"")
                             .append(propNameTP._2)
@@ -673,7 +673,7 @@ public final class CodeGenerationUtil {
                                 .append(propNames.contains(fieldNameForPropNameList) ? "_" : "")
                                 .append(fieldNameForPropNameList)
                                 .append(" = List.of(")
-                                .append(Stream.of(classPropNameListEntry.getValue()).sorted().join(", "))
+                                .append(Stream.of(classPropNameListEntry.getValue()).sorted().map(it -> Strings.isJavaKeyword(it) ? "_" + it : it).join(", "))
                                 .append(");")
                                 .append(LINE_SEPARATOR);
                     }
@@ -759,7 +759,7 @@ public final class CodeGenerationUtil {
                             .append(LINE_SEPARATOR)
                             .append(INDENTATION)
                             .append("    String ")
-                            .append(Strings.isKeyword(propNameTP._1) ? "_" : "")
+                            .append(Strings.isJavaKeyword(propNameTP._1) ? "_" : "")
                             .append(propNameTP._1)
                             .append(" = \"")
                             .append(propNameTP._2)
@@ -783,7 +783,7 @@ public final class CodeGenerationUtil {
                                 .append(propNames.contains(fieldNameForPropNameList) ? "_" : "")
                                 .append(fieldNameForPropNameList)
                                 .append(" = List.of(")
-                                .append(Stream.of(classPropNameListEntry.getValue()).sorted().join(", "))
+                                .append(Stream.of(classPropNameListEntry.getValue()).sorted().map(it -> Strings.isJavaKeyword(it) ? "_" + it : it).join(", "))
                                 .append(");")
                                 .append(LINE_SEPARATOR);
                     }
@@ -974,7 +974,12 @@ public final class CodeGenerationUtil {
          */
         private BiFunction<Class<?>, String, String> propNameConverter;
 
-        /** Whether to generate a {@code List<String>} constant per entity class. Default is {@code false}. */
+        /**
+         * Whether to generate a {@code List<String>} constant per entity class. Default is {@code false}.
+         *
+         * <p><b>Note:</b> The property names in each generated {@code xxxPropNameList} constant are emitted in
+         * alphabetically sorted order, not bean-declaration order.
+         */
         private boolean generateClassPropNameList;
 
         /** Whether to generate a snake_case nested interface. Default is {@code false}. */
@@ -1022,8 +1027,8 @@ public final class CodeGenerationUtil {
          * Default constructor for framework/tooling compatibility.
          *
          * <p>Creates a config with all fields at their defaults (object fields are {@code null};
-         * boolean flags are {@code false}). Prefer the Lombok builder via
-         * {@link #builder()}; this no-arg constructor exists mainly to be populated through the
+         * boolean flags are {@code false}). Prefer the Lombok-generated {@code builder()} method;
+         * this no-arg constructor exists mainly to be populated through the
          * chainable setters (note {@code @Accessors(chain = true)}).</p>
          *
          * <p><b>Usage Examples:</b></p>

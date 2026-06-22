@@ -77,6 +77,36 @@ public class ByteIteratorExTest extends TestBase {
         Assertions.assertFalse(iter.hasNext());
     }
 
+    @Test
+    public void testOfByteIteratorCloseResourceDelegatesToAutoCloseable() {
+        final boolean[] closed = { false };
+
+        class CloseableByteIterator extends ByteIterator implements AutoCloseable {
+            private int index = 0;
+            private final byte[] data = { 10 };
+
+            @Override
+            public boolean hasNext() {
+                return index < data.length;
+            }
+
+            @Override
+            public byte nextByte() {
+                return data[index++];
+            }
+
+            @Override
+            public void close() {
+                closed[0] = true;
+            }
+        }
+
+        final ByteIteratorEx iter = ByteIteratorEx.of(new CloseableByteIterator());
+        iter.closeResource();
+
+        Assertions.assertTrue(closed[0]);
+    }
+
     // ---- next() (boxed) ----
 
     @Test

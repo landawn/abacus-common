@@ -46,8 +46,7 @@ public final class PrimitiveByteListType extends AbstractPrimitiveListType<ByteL
 
     /**
      * Constructs a new PrimitiveByteListType instance.
-     * This constructor is protected to allow subclassing while maintaining controlled instantiation
-     * through the TypeFactory.
+     * This constructor is protected to keep instantiation controlled by the TypeFactory.
      */
     protected PrimitiveByteListType() {
         super(BYTE_LIST);

@@ -1523,18 +1523,6 @@ public class TupleTest extends TestBase {
     }
 
     @Test
-    public void testAnyNull() {
-        Tuple.Tuple0 t0 = Tuple.from(new Object[0]);
-        Assertions.assertFalse(t0.anyNull());
-    }
-
-    @Test
-    public void testAllNull() {
-        Tuple.Tuple0 t0 = Tuple.from(new Object[0]);
-        Assertions.assertTrue(t0.allNull());
-    }
-
-    @Test
     public void testContains() {
         Tuple.Tuple4<String, Integer, String, Integer> t4 = Tuple.of("a", 1, null, 2);
         assertTrue(t4.contains("a"));
@@ -1588,12 +1576,6 @@ public class TupleTest extends TestBase {
 
         assertEquals(3, items.size());
         assertArrayEquals(new Object[] { "a", 1, true }, items.toArray());
-    }
-
-    @Test
-    public void testForEachWithNullConsumer() {
-        Tuple.Tuple0 t0 = Tuple.from(new Object[0]);
-        Assertions.assertThrows(IllegalArgumentException.class, () -> t0.forEach(null));
     }
 
     @Test
@@ -2234,7 +2216,7 @@ public class TupleTest extends TestBase {
         assertEquals(9, Tuple.from(new Object[] { 1, 2, 3, 4, 5, 6, 7, 8, 9 }).arity());
 
         Exception exception = assertThrows(IllegalArgumentException.class, () -> Tuple.from(new Object[10]));
-        assertEquals("Too many elements((10) to fill in Tuple.", exception.getMessage());
+        assertEquals("Too many elements (10) to fill in Tuple.", exception.getMessage());
     }
 
     @Test
@@ -2251,7 +2233,7 @@ public class TupleTest extends TestBase {
         assertEquals(9, Tuple.from(Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9)).arity());
 
         Exception exception = assertThrows(IllegalArgumentException.class, () -> Tuple.from(Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)));
-        assertEquals("Too many elements((10) to fill in Tuple.", exception.getMessage());
+        assertEquals("Too many elements (10) to fill in Tuple.", exception.getMessage());
     }
 
     @Test

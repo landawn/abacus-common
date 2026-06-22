@@ -78,6 +78,7 @@ public final class DoubleType extends AbstractDoubleType {
      * @return the {@link Double} value at the specified column,
      *         or {@code null} if the column value is SQL {@code NULL}
      * @throws SQLException if a database access error occurs
+     * @throws NumberFormatException if a non-numeric value cannot be converted to {@code double}
      */
     @Override
     public Double get(final ResultSet rs, final int columnIndex) throws SQLException {
@@ -103,6 +104,7 @@ public final class DoubleType extends AbstractDoubleType {
      * @return the {@link Double} value in the specified column,
      *         or {@code null} if the column value is SQL {@code NULL}
      * @throws SQLException if a database access error occurs
+     * @throws NumberFormatException if a non-numeric value cannot be converted to {@code double}
      */
     @Override
     public Double get(final ResultSet rs, final String columnName) throws SQLException {

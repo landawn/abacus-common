@@ -192,4 +192,32 @@ public class PoolStatsTest extends TestBase {
         assertEquals(0.75, memoryUtilization, 0.001);
     }
 
+    @Test
+    public void testDerivedHitRate() {
+        PoolStats stats = new PoolStats(100, 50, 1000, 800, 600, 200, 100, -1, -1);
+        assertEquals(0.75, stats.hitRate(), 0.001);
+        assertEquals(0.25, stats.missRate(), 0.001);
+        // hitRate + missRate == 1.0 whenever getCount > 0
+        assertEquals(1.0, stats.hitRate() + stats.missRate(), 0.001);
+    }
+
+    @Test
+    public void testDerivedHitRateZeroGetCount() {
+        PoolStats stats = new PoolStats(100, 0, 0, 0, 0, 0, 0, -1, -1);
+        assertEquals(0.0, stats.hitRate(), 0.001);
+        assertEquals(0.0, stats.missRate(), 0.001);
+    }
+
+    @Test
+    public void testDerivedUtilization() {
+        PoolStats stats = new PoolStats(100, 75, 1000, 800, 600, 200, 100, -1, -1);
+        assertEquals(0.75, stats.utilization(), 0.001);
+    }
+
+    @Test
+    public void testDerivedUtilizationZeroCapacity() {
+        PoolStats stats = new PoolStats(0, 0, 0, 0, 0, 0, 0, -1, -1);
+        assertEquals(0.0, stats.utilization(), 0.001);
+    }
+
 }

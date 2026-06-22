@@ -128,7 +128,7 @@ public interface XmlParser extends Parser<XmlSerConfig, XmlDeserConfig> {
      *
      * <p>This method provides fine-grained control over the deserialization process through the configuration
      * parameter. The configuration can specify options such as ignoring unknown properties, handling {@code null} values,
-     * date/time formats, and other deserialization behaviors.
+     * and other deserialization behaviors.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -159,7 +159,7 @@ public interface XmlParser extends Parser<XmlSerConfig, XmlDeserConfig> {
      *
      * <p>This method provides fine-grained control over the deserialization process through the configuration
      * parameter. The configuration can specify options such as ignoring unknown properties, handling {@code null} values,
-     * date/time formats, and other deserialization behaviors.
+     * and other deserialization behaviors.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -188,9 +188,14 @@ public interface XmlParser extends Parser<XmlSerConfig, XmlDeserConfig> {
      * Deserializes XML from a file using node class mappings for dynamic type resolution.
      *
      * <p>This method enables polymorphic deserialization by mapping XML element names to types.
-     * When the parser encounters an XML element, it looks up the element name in the nodeTypes map
-     * to determine which class to instantiate. This is particularly useful for deserializing heterogeneous
-     * collections or when the target type cannot be determined statically.
+     * The root element's name is looked up in the nodeTypes map to determine which class to
+     * instantiate (nested elements are not resolved through the map). This is useful when the
+     * target type cannot be determined statically.
+     *
+     * <p><b>Note on the return type:</b> although the signature declares {@code <T> T}, the concrete runtime
+     * type is selected from {@code nodeTypes} at parse time (there is no {@code Class<T>}/{@code Type<T>}
+     * argument to drive the inference). The {@code <T>} merely saves the caller an explicit cast; callers
+     * should treat the result as {@code Object} and only narrow it once the actual element type is known.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -216,9 +221,14 @@ public interface XmlParser extends Parser<XmlSerConfig, XmlDeserConfig> {
      * Deserializes XML from an input stream using node class mappings for dynamic type resolution.
      *
      * <p>This method enables polymorphic deserialization by mapping XML element names to types.
-     * When the parser encounters an XML element, it looks up the element name in the nodeTypes map
-     * to determine which class to instantiate. This is particularly useful for deserializing heterogeneous
-     * collections or when the target type cannot be determined statically.
+     * The root element's name is looked up in the nodeTypes map to determine which class to
+     * instantiate (nested elements are not resolved through the map). This is useful when the
+     * target type cannot be determined statically.
+     *
+     * <p><b>Note on the return type:</b> although the signature declares {@code <T> T}, the concrete runtime
+     * type is selected from {@code nodeTypes} at parse time (there is no {@code Class<T>}/{@code Type<T>}
+     * argument to drive the inference). The {@code <T>} merely saves the caller an explicit cast; callers
+     * should treat the result as {@code Object} and only narrow it once the actual element type is known.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -244,9 +254,14 @@ public interface XmlParser extends Parser<XmlSerConfig, XmlDeserConfig> {
      * Deserializes XML from a reader using node class mappings for dynamic type resolution.
      *
      * <p>This method enables polymorphic deserialization by mapping XML element names to types.
-     * When the parser encounters an XML element, it looks up the element name in the nodeTypes map
-     * to determine which class to instantiate. This is particularly useful for deserializing heterogeneous
-     * collections or when the target type cannot be determined statically.
+     * The root element's name is looked up in the nodeTypes map to determine which class to
+     * instantiate (nested elements are not resolved through the map). This is useful when the
+     * target type cannot be determined statically.
+     *
+     * <p><b>Note on the return type:</b> although the signature declares {@code <T> T}, the concrete runtime
+     * type is selected from {@code nodeTypes} at parse time (there is no {@code Class<T>}/{@code Type<T>}
+     * argument to drive the inference). The {@code <T>} merely saves the caller an explicit cast; callers
+     * should treat the result as {@code Object} and only narrow it once the actual element type is known.</p>
      *
      * <p>The reader-based approach allows for character encoding control and is suitable for text-based
      * XML sources where character encoding has already been handled by the Reader implementation.
@@ -282,6 +297,11 @@ public interface XmlParser extends Parser<XmlSerConfig, XmlDeserConfig> {
      * <p>The parser first attempts to match the node's <i>name</i> attribute against the {@code nodeTypes} map.
      * If the node has no <i>name</i> attribute (or it is empty), it falls back to matching the node's tag name.
      * This provides flexibility in XML structure design.
+     *
+     * <p><b>Note on the return type:</b> although the signature declares {@code <T> T}, the concrete runtime
+     * type is selected from {@code nodeTypes} at parse time (there is no {@code Class<T>}/{@code Type<T>}
+     * argument to drive the inference). The {@code <T>} merely saves the caller an explicit cast; callers
+     * should treat the result as {@code Object} and only narrow it once the actual element type is known.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code

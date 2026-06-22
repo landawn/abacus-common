@@ -1,5 +1,6 @@
 package com.landawn.abacus.util;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 
@@ -87,10 +88,12 @@ public class BrotliInputStreamTest extends TestBase {
 
     @Test
     public void testMarkIsNoOpWhenNotSupported() throws IOException {
-        try (BrotliInputStream bis = new BrotliInputStream(new ByteArrayInputStream(new byte[0]))) {
-            // Should be a no-op since markSupported() returns false (per InputStream contract)
-            bis.mark(1024);
-        }
+        assertDoesNotThrow(() -> {
+            try (BrotliInputStream bis = new BrotliInputStream(new ByteArrayInputStream(new byte[0]))) {
+                // Should be a no-op since markSupported() returns false (per InputStream contract)
+                bis.mark(1024);
+            }
+        });
     }
 
     @Test
@@ -102,8 +105,10 @@ public class BrotliInputStreamTest extends TestBase {
 
     @Test
     public void testCloseIdempotent() throws IOException {
-        final BrotliInputStream bis = new BrotliInputStream(new ByteArrayInputStream(new byte[0]));
-        bis.close();
-        bis.close(); // Should not throw
+        assertDoesNotThrow(() -> {
+            final BrotliInputStream bis = new BrotliInputStream(new ByteArrayInputStream(new byte[0]));
+            bis.close();
+            bis.close(); // Should not throw
+        });
     }
 }

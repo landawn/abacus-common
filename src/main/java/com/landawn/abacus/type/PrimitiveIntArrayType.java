@@ -257,7 +257,7 @@ public final class PrimitiveIntArrayType extends AbstractPrimitiveArrayType<int[
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<int[]> type = TypeFactory.getType(int[].class);
-     * CharacterWriter writer = new CharacterWriter();
+     * BufferedJsonWriter writer = new BufferedJsonWriter();
      * int[] arr = {5, 10, 15};
      * type.serializeTo(writer, arr, null);
      * // Writes: [5, 10, 15]

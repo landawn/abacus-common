@@ -197,6 +197,23 @@ public class TypeAttrParserTest extends TestBase {
     }
 
     @Test
+    public void testParseRejectsUnclosedGenericSection() {
+        Assertions.assertThrows(IllegalArgumentException.class, () -> TypeAttrParser.parse("Map<String"));
+    }
+
+    @Test
+    public void testParseRejectsExtraClosingGenericBracket() {
+        Assertions.assertThrows(IllegalArgumentException.class, () -> TypeAttrParser.parse("Map<String>>"));
+    }
+
+    @Test
+    public void testParseRejectsTrailingText() {
+        Assertions.assertThrows(IllegalArgumentException.class, () -> TypeAttrParser.parse("Map<String>junk"));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> TypeAttrParser.parse("Map<String>(16)junk"));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> TypeAttrParser.parse("String(1)junk"));
+    }
+
+    @Test
     public void testParseMultipleConstructorParameters() {
         TypeAttrParser parser = TypeAttrParser.parse("HashMap(16, 0.75f)");
 

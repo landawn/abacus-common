@@ -13,9 +13,9 @@
  */
 package com.landawn.abacus.util.function;
 
-import java.util.Objects;
-
 import com.landawn.abacus.util.Throwables;
+import com.landawn.abacus.util.N;
+import com.landawn.abacus.util.cs;
 
 /**
  * Represents an operation that accepts an object-valued argument and two int-valued arguments,
@@ -33,9 +33,9 @@ import com.landawn.abacus.util.Throwables;
  *     System.out.println(str.substring(start, end));
  * printSubstring.accept("Hello World", 0, 5);   // prints "Hello"
  *
- * ObjBiIntConsumer<int[]> setRange = (array, start, value) -> {
- *     for (int i = start; i < array.length && i < start + value; i++) {
- *         array[i] = value;
+ * ObjBiIntConsumer<int[]> fillRange = (array, from, to) -> {
+ *     for (int i = from; i < to && i < array.length; i++) {
+ *         array[i] = -1;
  *     }
  * };
  * }</pre>
@@ -105,13 +105,27 @@ public interface ObjBiIntConsumer<T> extends Throwables.ObjBiIntConsumer<T, Runt
      * @param after the operation to perform after this operation. Must not be {@code null}.
      * @return a composed {@code ObjBiIntConsumer} that performs in sequence this
      *         operation followed by the {@code after} operation
-     * @throws NullPointerException if {@code after} is null
+     * @throws IllegalArgumentException if {@code after} is null
      */
     default ObjBiIntConsumer<T> andThen(final ObjBiIntConsumer<? super T> after) {
-        Objects.requireNonNull(after);
+        N.checkArgNotNull(after, cs.after);
         return (t, i, j) -> {
             accept(t, i, j);
             after.accept(t, i, j);
         };
+    }
+
+    /**
+     * Returns this object as a {@link Throwables.ObjBiIntConsumer} view.
+     *
+     * <p>The returned object has the same behavior as this one. This method does not translate
+     * exceptions or make the original implementation capable of throwing new checked exceptions; the
+     * exception type parameter is for target-type compatibility with APIs that accept {@code Throwables.ObjBiIntConsumer}.
+     *
+     * @param <E> the target exception type for compatibility with {@code Throwables.ObjBiIntConsumer}
+     * @return a {@link Throwables.ObjBiIntConsumer} view of this object
+     */
+    default <E extends Throwable> Throwables.ObjBiIntConsumer<T, E> toThrowable() {
+        return (Throwables.ObjBiIntConsumer<T, E>) this;
     }
 }

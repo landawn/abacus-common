@@ -117,7 +117,7 @@ public class OptionalByteTypeTest extends TestBase {
     @Test
     public void testValueOfWithInvalidString() {
         assertThrows(NumberFormatException.class, () -> optionalByteType.valueOf("abc"));
-        assertThrows(NumberFormatException.class, () -> optionalByteType.valueOf("256"));
+        assertThrows(ArithmeticException.class, () -> optionalByteType.valueOf("256"));
     }
 
     @Test

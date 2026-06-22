@@ -138,7 +138,7 @@ public class DateType extends AbstractDateType<Date> {
             return null; // NOSONAR
         }
 
-        if (isPossibleLong(cbuf, offset, len)) {
+        if (isPossibleMillis(cbuf, offset, len)) {
             try {
                 return Dates.createDate(parseLong(cbuf, offset, len));
             } catch (final NumberFormatException e) {

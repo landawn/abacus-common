@@ -13,9 +13,9 @@
  */
 package com.landawn.abacus.util.function;
 
-import java.util.Objects;
-
 import com.landawn.abacus.util.Throwables;
+import com.landawn.abacus.util.N;
+import com.landawn.abacus.util.cs;
 
 /**
  * Represents an operation that accepts one {@code int}-valued argument and two object-valued arguments,
@@ -73,13 +73,27 @@ public interface IntBiObjConsumer<T, U> extends Throwables.IntBiObjConsumer<T, U
      * @param after the operation to perform after this operation. Must not be {@code null}.
      * @return a composed {@code IntBiObjConsumer} that performs in sequence this operation followed by
      *         the {@code after} operation
-     * @throws NullPointerException if {@code after} is null
+     * @throws IllegalArgumentException if {@code after} is null
      */
     default IntBiObjConsumer<T, U> andThen(final IntBiObjConsumer<? super T, ? super U> after) {
-        Objects.requireNonNull(after);
+        N.checkArgNotNull(after, cs.after);
         return (i, t, u) -> {
             accept(i, t, u);
             after.accept(i, t, u);
         };
+    }
+
+    /**
+     * Returns this object as a {@link Throwables.IntBiObjConsumer} view.
+     *
+     * <p>The returned object has the same behavior as this one. This method does not translate
+     * exceptions or make the original implementation capable of throwing new checked exceptions; the
+     * exception type parameter is for target-type compatibility with APIs that accept {@code Throwables.IntBiObjConsumer}.
+     *
+     * @param <E> the target exception type for compatibility with {@code Throwables.IntBiObjConsumer}
+     * @return a {@link Throwables.IntBiObjConsumer} view of this object
+     */
+    default <E extends Throwable> Throwables.IntBiObjConsumer<T, U, E> toThrowable() {
+        return (Throwables.IntBiObjConsumer<T, U, E>) this;
     }
 }

@@ -17,7 +17,10 @@ package com.landawn.abacus.spring;
 import java.io.Reader;
 import java.io.Writer;
 import java.lang.reflect.Type;
+import java.util.Arrays;
+import java.util.List;
 
+import org.springframework.http.MediaType;
 import org.springframework.http.converter.json.AbstractJsonHttpMessageConverter;
 
 import com.landawn.abacus.parser.JsonDeserConfig;
@@ -67,6 +70,17 @@ import com.landawn.abacus.util.N;
  *   <li>Automatic content type handling for JSON media types</li>
  *   <li>Thread-safe implementation suitable for singleton usage</li>
  * </ul>
+ *
+ * <p><b>Supported media types:</b> by default the converter handles the media types inherited from
+ * {@link AbstractJsonHttpMessageConverter} (typically {@code application/json} and
+ * {@code application/*+json}). To register additional media types (e.g. a vendor {@code +json} type
+ * or {@code text/json}) at construction time, use one of the constructors that accept
+ * {@link MediaType} values. The supported media types may also be changed after construction via the
+ * inherited {@code setSupportedMediaTypes(List)} method.</p>
+ *
+ * <p><b>Note on naming:</b> the class is intentionally named {@code JsonHttpMessageConverter} (without
+ * an {@code Abacus} prefix) for backward compatibility. There is currently no sibling Spring
+ * converter for other formats in this package, so the unprefixed name is unambiguous in practice.</p>
  *
  * @see AbstractJsonHttpMessageConverter
  * @see N#fromJson(Reader, JsonDeserConfig, com.landawn.abacus.type.Type)
@@ -153,6 +167,99 @@ public class JsonHttpMessageConverter extends AbstractJsonHttpMessageConverter {
     }
 
     /**
+     * Constructs a new JsonHttpMessageConverter with default JSON configurations and the specified
+     * supported media types.
+     * This constructor is a convenience for setting the supported media types at construction time
+     * instead of calling the inherited {@code setSupportedMediaTypes(List)} afterwards. It is useful
+     * when the converter must advertise additional or non-standard JSON media types (for example a
+     * vendor {@code +json} type such as {@code application/vnd.api+json}, or {@code text/json}).
+     *
+     * <p>If no media types are supplied (an empty {@code supportedMediaTypes} argument), the parent's
+     * default media types are retained.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * JsonHttpMessageConverter converter = new JsonHttpMessageConverter(
+     *     MediaType.APPLICATION_JSON,
+     *     new MediaType("application", "vnd.api+json"));
+     * }</pre>
+     *
+     * @param supportedMediaTypes the media types this converter should support. If none are supplied,
+     *                            the inherited default media types are kept unchanged.
+     * @see #JsonHttpMessageConverter(JsonSerConfig, JsonDeserConfig, MediaType...)
+     */
+    public JsonHttpMessageConverter(final MediaType... supportedMediaTypes) {
+        this(new JsonSerConfig(), new JsonDeserConfig(), supportedMediaTypes);
+    }
+
+    /**
+     * Constructs a new JsonHttpMessageConverter with custom serialization and deserialization
+     * configurations and the specified supported media types.
+     * This constructor combines full control over JSON processing behavior with control over the
+     * media types the converter advertises, all at construction time.
+     *
+     * <p>If no media types are supplied (an empty {@code supportedMediaTypes} argument), the parent's
+     * default media types are retained.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * JsonSerConfig serConfig = new JsonSerConfig().setExclusion(Exclusion.NULL);
+     * JsonDeserConfig deserConfig = new JsonDeserConfig().setIgnoreUnmatchedProperty(true);
+     *
+     * JsonHttpMessageConverter converter = new JsonHttpMessageConverter(
+     *     serConfig, deserConfig,
+     *     MediaType.APPLICATION_JSON,
+     *     new MediaType("application", "vnd.api+json"));
+     * }</pre>
+     *
+     * @param jsc the serialization configuration controlling how Java objects are converted to JSON. Must not be {@code null}.
+     * @param jdc the deserialization configuration controlling how JSON is converted to Java objects. Must not be {@code null}.
+     * @param supportedMediaTypes the media types this converter should support. If none are supplied,
+     *                            the inherited default media types are kept unchanged.
+     * @see JsonSerConfig
+     * @see JsonDeserConfig
+     */
+    public JsonHttpMessageConverter(final JsonSerConfig jsc, final JsonDeserConfig jdc, final MediaType... supportedMediaTypes) {
+        N.checkArgNotNull(jsc, "jsc");
+        N.checkArgNotNull(jdc, "jdc");
+
+        this.jsc = jsc;
+        this.jdc = jdc;
+
+        if (supportedMediaTypes != null && supportedMediaTypes.length > 0) {
+            setSupportedMediaTypes(Arrays.asList(supportedMediaTypes));
+        }
+    }
+
+    /**
+     * Constructs a new JsonHttpMessageConverter with custom serialization and deserialization
+     * configurations and the specified supported media types.
+     * This {@link List}-based overload behaves identically to
+     * {@link #JsonHttpMessageConverter(JsonSerConfig, JsonDeserConfig, MediaType...)}.
+     *
+     * <p>If {@code supportedMediaTypes} is {@code null} or empty, the parent's default media types
+     * are retained.</p>
+     *
+     * @param jsc the serialization configuration controlling how Java objects are converted to JSON. Must not be {@code null}.
+     * @param jdc the deserialization configuration controlling how JSON is converted to Java objects. Must not be {@code null}.
+     * @param supportedMediaTypes the media types this converter should support. If {@code null} or empty,
+     *                            the inherited default media types are kept unchanged.
+     * @see JsonSerConfig
+     * @see JsonDeserConfig
+     */
+    public JsonHttpMessageConverter(final JsonSerConfig jsc, final JsonDeserConfig jdc, final List<MediaType> supportedMediaTypes) {
+        N.checkArgNotNull(jsc, "jsc");
+        N.checkArgNotNull(jdc, "jdc");
+
+        this.jsc = jsc;
+        this.jdc = jdc;
+
+        if (N.notEmpty(supportedMediaTypes)) {
+            setSupportedMediaTypes(supportedMediaTypes);
+        }
+    }
+
+    /**
      * Reads JSON content from the provided Reader and deserializes it into an object of the specified type.
      * This method is called by Spring's HTTP message conversion framework when processing incoming JSON requests.
      *
@@ -194,7 +301,7 @@ public class JsonHttpMessageConverter extends AbstractJsonHttpMessageConverter {
      *                     This is the actual runtime type resolved from the method signature or type parameter.
      * @param reader the Reader containing the JSON content to be deserialized. The Reader is managed by
      *               Spring's framework and will be closed automatically after this method returns.
-     * @return the deserialized object of the specified type; {@code null} if the JSON content is {@code "null"}
+     * @return the deserialized object of the specified type
      * @throws com.landawn.abacus.exception.UncheckedIOException if an I/O error occurs while reading from the Reader
      * @throws IllegalArgumentException if the JSON content cannot be mapped to the target type due to type mismatch
      * @throws RuntimeException if JSON parsing fails due to malformed JSON or other parsing errors
@@ -222,9 +329,9 @@ public class JsonHttpMessageConverter extends AbstractJsonHttpMessageConverter {
      * <p><b>Serialization Features:</b></p>
      * <ul>
      *   <li>Automatic conversion of JavaBean properties to JSON fields</li>
-     *   <li>Null value handling (by default, {@code null} fields are included as {@code "null"})</li>
+     *   <li>Null value handling (by default, {@code null} fields are omitted from the output; use {@code JsonSerConfig.setExclusion(Exclusion.NONE)} to include them)</li>
      *   <li>Support for collections, maps, and arrays</li>
-     *   <li>Automatic date/time formatting to ISO-8601 or custom formats</li>
+     *   <li>Date/time serialization as epoch milliseconds by default, or ISO-8601/custom formats via {@code JsonSerConfig.setDateTimeFormat}</li>
      *   <li>Handling of enums (serialized as their name by default)</li>
      *   <li>Support for nested and complex object graphs</li>
      * </ul>
@@ -260,7 +367,7 @@ public class JsonHttpMessageConverter extends AbstractJsonHttpMessageConverter {
      * }
      * }</pre>
      *
-     * @param obj the object to serialize to JSON. Can be {@code null}, in which case the JSON output will be {@code "null"}.
+     * @param obj the object to serialize to JSON. Can be {@code null}, in which case nothing is written to the output.
      *            Can be any Java object including primitives, collections, maps, POJOs, or complex nested structures.
      * @param type the declared return type from the controller method, provided by Spring's framework.
      *             <b>Currently unused</b> by this implementation as Abacus can infer types from the object.

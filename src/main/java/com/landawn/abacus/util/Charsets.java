@@ -200,8 +200,7 @@ public final class Charsets {
      * @param charsetName the name of the requested charset; may be either a canonical name
      *                    (e.g., {@code "UTF-8"}) or an alias (e.g., {@code "utf8"}); must not be {@code null}
      * @return a charset object for the named charset, either from cache or newly created
-     * @throws IllegalArgumentException if {@code charsetName} is {@code null} (as thrown by
-     *         {@link Charset#forName(String)})
+     * @throws NullPointerException if {@code charsetName} is {@code null}
      * @throws IllegalCharsetNameException if the given charset name is illegal (as defined by
      *         {@link Charset#forName(String)})
      * @throws UnsupportedCharsetException if no support for the named charset is available

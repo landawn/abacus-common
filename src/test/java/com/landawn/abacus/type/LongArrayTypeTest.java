@@ -14,8 +14,11 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
+import com.landawn.abacus.parser.JsonSerConfig;
 import com.landawn.abacus.parser.JsonXmlSerConfig;
+import com.landawn.abacus.util.BufferedJsonWriter;
 import com.landawn.abacus.util.CharacterWriter;
+import com.landawn.abacus.util.Objectory;
 
 public class LongArrayTypeTest extends TestBase {
 
@@ -217,5 +220,17 @@ public class LongArrayTypeTest extends TestBase {
         verify(characterWriter).write(2L);
         verify(characterWriter).write(3L);
         verify(characterWriter).write(']');
+    }
+
+    @Test
+    public void testSerializeToHonorsWriteLongAsString() throws IOException {
+        BufferedJsonWriter writer = Objectory.createBufferedJsonWriter();
+
+        try {
+            longArrayType.serializeTo(writer, new Long[] { 9007199254740993L }, JsonSerConfig.create().setWriteLongAsString(true));
+            assertEquals("[\"9007199254740993\"]", writer.toString());
+        } finally {
+            Objectory.recycle(writer);
+        }
     }
 }

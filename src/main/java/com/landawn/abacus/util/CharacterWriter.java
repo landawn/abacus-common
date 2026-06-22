@@ -313,13 +313,13 @@ public abstract sealed class CharacterWriter extends BufferedWriter permits Buff
      * The returned text is the escape sequence itself, not the character it represents.</p>
      *
      * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * String unicode = getCharNum('\u2028');      // returns "\u2028"
-     * String ctrl    = getCharNum((char) 0x01);   // returns "\u0001"
-     * }</pre>
+     * <pre><code>
+     * String unicode = getCharNum((char) 0x2028);   // returns "&#92;u2028"
+     * String ctrl    = getCharNum((char) 0x01);     // returns "&#92;u0001"
+     * </code></pre>
      *
      * @param ch the character to convert
-     * @return the JSON Unicode escape sequence (e.g., {@code \u2028})
+     * @return the JSON Unicode escape sequence (e.g., <code>&#92;u2028</code>)
      */
     static String getCharNum(final char ch) {
         return String.format("\\u%04x", (int) ch);

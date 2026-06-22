@@ -141,6 +141,26 @@ public class SingleValueTypeTest extends TestBase {
         }
     }
 
+    public static class BroaderConstructorValue {
+        public String value;
+
+        public BroaderConstructorValue(final CharSequence value) {
+            this.value = value.toString();
+        }
+    }
+
+    public static class BroaderFactoryValue {
+        public String value;
+
+        private BroaderFactoryValue(final String value) {
+            this.value = value;
+        }
+
+        public static BroaderFactoryValue of(final CharSequence value) {
+            return new BroaderFactoryValue(value.toString());
+        }
+    }
+
     // Enum-backed type (not object type, but an enum itself)
     public enum TestEnum {
         A, B, C
@@ -424,5 +444,35 @@ public class SingleValueTypeTest extends TestBase {
         PublicFieldValue value = tuple._2.apply("field-value");
 
         assertEquals("field-value", tuple._3.apply(value));
+    }
+
+    @Test
+    public void testGetCreatorAndValueExtractor_ConstructorAcceptsValueSupertype() {
+        com.landawn.abacus.util.Tuple.Tuple3<Type<Object>, java.util.function.Function<String, BroaderConstructorValue>, java.util.function.Function<BroaderConstructorValue, Object>> tuple = SingleValueType
+                .getCreatorAndValueExtractor(BroaderConstructorValue.class);
+
+        assertNotNull(tuple._1);
+        assertNotNull(tuple._2);
+        assertNotNull(tuple._3);
+        assertEquals(String.class, tuple._1.javaType());
+
+        BroaderConstructorValue value = tuple._2.apply("ctor-value");
+
+        assertEquals("ctor-value", tuple._3.apply(value));
+    }
+
+    @Test
+    public void testGetCreatorAndValueExtractor_FactoryAcceptsValueSupertype() {
+        com.landawn.abacus.util.Tuple.Tuple3<Type<Object>, java.util.function.Function<String, BroaderFactoryValue>, java.util.function.Function<BroaderFactoryValue, Object>> tuple = SingleValueType
+                .getCreatorAndValueExtractor(BroaderFactoryValue.class);
+
+        assertNotNull(tuple._1);
+        assertNotNull(tuple._2);
+        assertNotNull(tuple._3);
+        assertEquals(String.class, tuple._1.javaType());
+
+        BroaderFactoryValue value = tuple._2.apply("factory-value");
+
+        assertEquals("factory-value", tuple._3.apply(value));
     }
 }

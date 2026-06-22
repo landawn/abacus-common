@@ -38,7 +38,7 @@ import com.landawn.abacus.util.N;
  *   <li>bracketRootValue: {@code true} - Root values are bracketed by default</li>
  *   <li>wrapRootValue: {@code false} - Root values are not wrapped with type name by default</li>
  *   <li>writeNullToEmpty: {@code false} - {@code null} values remain {@code null} by default</li>
- *   <li>writeDatasetByRow: {@code false} - Datasets are written by columns by default</li>
+ *   <li>writeDatasetAsRows: {@code false} - Datasets are written by columns by default</li>
  *   <li>writeRowColumnKeyType: {@code false} - Sheet row/column key types are not written by default</li>
  *   <li>writeColumnType: {@code false} - Dataset/Sheet column types are not written by default</li>
  * </ul>
@@ -61,7 +61,7 @@ public class JsonSerConfig extends JsonXmlSerConfig<JsonSerConfig> {
     protected static final boolean defaultWrapRootValue = false;
 
     private boolean writeNullToEmpty = false;
-    private boolean writeDatasetByRow = false;
+    private boolean writeDatasetAsRows = false;
     private boolean writeRowColumnKeyType = false; // for Sheet;
     private boolean writeColumnType = false; // for Dataset and Sheet
 
@@ -83,7 +83,7 @@ public class JsonSerConfig extends JsonXmlSerConfig<JsonSerConfig> {
      *   <li>bracketRootValue: true</li>
      *   <li>wrapRootValue: false</li>
      *   <li>writeNullToEmpty: false</li>
-     *   <li>writeDatasetByRow: false</li>
+     *   <li>writeDatasetAsRows: false</li>
      * </ul>
      *
      * <p><b>Usage Examples:</b></p>
@@ -134,38 +134,38 @@ public class JsonSerConfig extends JsonXmlSerConfig<JsonSerConfig> {
     }
 
     /**
-     * Checks if Dataset should be written row by row.
+     * Checks if Dataset should be written as rows.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * JsonSerConfig config = new JsonSerConfig();
-     * config.isWriteDatasetByRow();                 // returns false (default, writes by columns)
-     * config.setWriteDatasetByRow(true);
-     * config.isWriteDatasetByRow();                 // returns true
+     * config.isWriteDatasetAsRows();                // returns false (default, writes by columns)
+     * config.setWriteDatasetAsRows(true);
+     * config.isWriteDatasetAsRows();                // returns true
      * }</pre>
      *
      * @return {@code true} if Dataset is written by rows, {@code false} if by columns
      */
-    public boolean isWriteDatasetByRow() {
-        return writeDatasetByRow;
+    public boolean isWriteDatasetAsRows() {
+        return writeDatasetAsRows;
     }
 
     /**
-     * Sets whether Dataset should be serialized row by row.
+     * Sets whether Dataset should be serialized as rows.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * JsonSerConfig config = new JsonSerConfig().setWriteDatasetByRow(true);
-     * config.isWriteDatasetByRow();                 // returns true
-     * config.setWriteDatasetByRow(false);
-     * config.isWriteDatasetByRow();                 // returns false
+     * JsonSerConfig config = new JsonSerConfig().setWriteDatasetAsRows(true);
+     * config.isWriteDatasetAsRows();                // returns true
+     * config.setWriteDatasetAsRows(false);
+     * config.isWriteDatasetAsRows();                // returns false
      * }</pre>
      *
-     * @param writeDatasetByRow {@code true} to write by rows, {@code false} to write by columns
+     * @param writeDatasetAsRows {@code true} to write as rows, {@code false} to write by columns
      * @return {@code this} instance for method chaining
      */
-    public JsonSerConfig setWriteDatasetByRow(final boolean writeDatasetByRow) {
-        this.writeDatasetByRow = writeDatasetByRow;
+    public JsonSerConfig setWriteDatasetAsRows(final boolean writeDatasetAsRows) {
+        this.writeDatasetAsRows = writeDatasetAsRows;
 
         return this;
     }
@@ -503,7 +503,7 @@ public class JsonSerConfig extends JsonXmlSerConfig<JsonSerConfig> {
         h = 31 * h + N.hashCode(writeNullNumberAsZero);
         h = 31 * h + N.hashCode(writeNullBooleanAsFalse);
         h = 31 * h + N.hashCode(writeNullToEmpty);
-        h = 31 * h + N.hashCode(writeDatasetByRow);
+        h = 31 * h + N.hashCode(writeDatasetAsRows);
         h = 31 * h + N.hashCode(writeRowColumnKeyType);
         h = 31 * h + N.hashCode(writeColumnType);
         h = 31 * h + N.hashCode(isWriteBigDecimalAsPlain());
@@ -541,7 +541,7 @@ public class JsonSerConfig extends JsonXmlSerConfig<JsonSerConfig> {
                     && N.equals(isWriteBigDecimalAsPlain(), other.isWriteBigDecimalAsPlain()) && N.equals(isFailOnEmptyBean(), other.isFailOnEmptyBean())
                     && N.equals(isSupportCircularReference(), other.isSupportCircularReference()) && N.equals(getIndentation(), other.getIndentation())
                     && N.equals(getPropNamingPolicy(), other.getPropNamingPolicy()) && N.equals(writeNullToEmpty, other.writeNullToEmpty)
-                    && N.equals(writeDatasetByRow, other.writeDatasetByRow) && N.equals(writeRowColumnKeyType, other.writeRowColumnKeyType)
+                    && N.equals(writeDatasetAsRows, other.writeDatasetAsRows) && N.equals(writeRowColumnKeyType, other.writeRowColumnKeyType)
                     && N.equals(writeColumnType, other.writeColumnType) && N.equals(quotePropName, other.quotePropName)
                     && N.equals(quoteMapKey, other.quoteMapKey) && N.equals(bracketRootValue, other.bracketRootValue)
                     && N.equals(wrapRootValue, other.wrapRootValue);
@@ -560,15 +560,15 @@ public class JsonSerConfig extends JsonXmlSerConfig<JsonSerConfig> {
     public String toString() {
         return "{ignoredPropNames=" + N.toString(getIgnoredPropNames()) + ", charQuotation=" + N.toString(getCharQuotation()) + ", stringQuotation="
                 + N.toString(getStringQuotation()) + ", dateTimeFormat=" + N.toString(getDateTimeFormat()) + ", exclusion=" + N.toString(getExclusion())
-                + ", skipTransientField=" + N.toString(isSkipTransientField()) + ", prettyFormat=" + N.toString(isPrettyFormat()) + ", writeNullStringAsEmpty="
-                + N.toString(writeNullStringAsEmpty) + ", writeNullNumberAsZero=" + N.toString(writeNullNumberAsZero) + ", writeNullBooleanAsFalse="
-                + N.toString(writeNullBooleanAsFalse) + ", writeNullToEmpty=" + N.toString(writeNullToEmpty) + ", writeDatasetByRow="
-                + N.toString(writeDatasetByRow) + ", writeRowColumnKeyType=" + N.toString(writeRowColumnKeyType) + ", writeColumnType="
-                + N.toString(writeColumnType) + ", writeBigDecimalAsPlain=" + N.toString(isWriteBigDecimalAsPlain()) + ", failOnEmptyBean="
-                + N.toString(isFailOnEmptyBean()) + ", supportCircularReference=" + N.toString(isSupportCircularReference()) + ", indentation="
-                + N.toString(getIndentation()) + ", propNamingPolicy=" + N.toString(getPropNamingPolicy()) + ", quotePropName=" + N.toString(quotePropName)
-                + ", quoteMapKey=" + N.toString(quoteMapKey) + ", bracketRootValue=" + N.toString(bracketRootValue) + ", wrapRootValue="
-                + N.toString(wrapRootValue) + "}";
+                + ", skipTransientField=" + N.toString(isSkipTransientField()) + ", prettyFormat=" + N.toString(isPrettyFormat()) + ", writeLongAsString="
+                + N.toString(isWriteLongAsString()) + ", writeNullStringAsEmpty=" + N.toString(writeNullStringAsEmpty) + ", writeNullNumberAsZero="
+                + N.toString(writeNullNumberAsZero) + ", writeNullBooleanAsFalse=" + N.toString(writeNullBooleanAsFalse) + ", writeNullToEmpty="
+                + N.toString(writeNullToEmpty) + ", writeDatasetAsRows=" + N.toString(writeDatasetAsRows) + ", writeRowColumnKeyType="
+                + N.toString(writeRowColumnKeyType) + ", writeColumnType=" + N.toString(writeColumnType) + ", writeBigDecimalAsPlain="
+                + N.toString(isWriteBigDecimalAsPlain()) + ", failOnEmptyBean=" + N.toString(isFailOnEmptyBean()) + ", supportCircularReference="
+                + N.toString(isSupportCircularReference()) + ", indentation=" + N.toString(getIndentation()) + ", propNamingPolicy="
+                + N.toString(getPropNamingPolicy()) + ", quotePropName=" + N.toString(quotePropName) + ", quoteMapKey=" + N.toString(quoteMapKey)
+                + ", bracketRootValue=" + N.toString(bracketRootValue) + ", wrapRootValue=" + N.toString(wrapRootValue) + "}";
     }
 
     /**

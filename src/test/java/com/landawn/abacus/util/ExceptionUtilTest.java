@@ -848,4 +848,34 @@ public class ExceptionUtilTest extends TestBase {
         Assertions.assertTrue(trace.contains("root"));
         Assertions.assertTrue(trace.contains("Caused by"));
     }
+
+    // --- regression tests for 2026-06-10 deep-review fixes ---
+
+    public static class CyclicExecutionException2026 extends ExecutionException {
+        public CyclicExecutionException2026() {
+        }
+    }
+
+    @Test
+    public void testFlagsApplyAcrossExecutionExceptionUnwrap() {
+        // regression: callInterrupt/throwIfItIsError were silently dropped when the wrapper
+        // converters unwrapped ExecutionException/InvocationTargetException causes
+        Thread.interrupted(); // clear the flag first
+        ExceptionUtil.toRuntimeException(new ExecutionException(new InterruptedException()), true);
+        Assertions.assertTrue(Thread.interrupted()); // flag was set (and is cleared again here)
+
+        Assertions.assertThrows(OutOfMemoryError.class,
+                () -> ExceptionUtil.toRuntimeException(new ExecutionException(new OutOfMemoryError("fake")), false, true));
+    }
+
+    @Test
+    public void testCyclicExecutionExceptionCauseChainTerminates() {
+        // regression: mutual recursion between the wrapper converters and toRuntimeException
+        // overflowed the stack on cyclic cause chains
+        final CyclicExecutionException2026 e1 = new CyclicExecutionException2026();
+        final ExecutionException e2 = new ExecutionException(e1);
+        e1.initCause(e2);
+
+        Assertions.assertNotNull(ExceptionUtil.toRuntimeException(e1));
+    }
 }

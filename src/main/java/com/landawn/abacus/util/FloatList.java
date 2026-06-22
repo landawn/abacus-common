@@ -56,7 +56,6 @@ import com.landawn.abacus.util.stream.FloatStream;
  *   <li><b>High Performance:</b> Optimized algorithms for floating-point specific operations</li>
  *   <li><b>Rich Mathematical API:</b> Statistical operations like min, max, median, sum</li>
  *   <li><b>Set Operations:</b> Efficient intersection, union, and difference operations</li>
- *   <li><b>Range Generation:</b> Built-in support for arithmetic progressions and sequences</li>
  *   <li><b>Random Access:</b> O(1) element access and modification by index</li>
  *   <li><b>Dynamic Sizing:</b> Automatic capacity management with intelligent growth</li>
  *   <li><b>Type Conversions:</b> Seamless conversion to other numeric primitive lists</li>
@@ -91,7 +90,7 @@ import com.landawn.abacus.util.stream.FloatStream;
  * OptionalFloat min = coordinates.min();         // find minimum value
  * OptionalFloat max = coordinates.max();         // find maximum value
  * OptionalFloat median = coordinates.median();   // calculate median value
- * double sum = coordinates.stream().sum();       // calculate sum
+ * double sum = coordinates.stream().sum();       // calculate sum (each element widened to double; convert to DoubleList for higher-precision accumulation)
  *
  * // Set operations for data analysis
  * FloatList set1 = FloatList.of(1.0f, 2.0f, 3.0f, 4.0f);
@@ -188,7 +187,7 @@ import com.landawn.abacus.util.stream.FloatStream;
  * <ul>
  *   <li><b>Initial Capacity:</b> Default capacity of 10 elements</li>
  *   <li><b>Growth Strategy:</b> 1.75x expansion when capacity exceeded</li>
- *   <li><b>Manual Control:</b> {@code ensureCapacity()} for performance optimization</li>
+ *   <li><b>Manual Control:</b> specify the initial capacity via the {@code FloatList(int)} constructor</li>
  *   <li><b>Trimming:</b> {@code trimToSize()} to reduce memory footprint</li>
  * </ul>
  *
@@ -244,7 +243,7 @@ import com.landawn.abacus.util.stream.FloatStream;
  *
  * <p><b>Performance Tips:</b>
  * <ul>
- *   <li>Pre-size lists with known capacity using constructor or {@code ensureCapacity()}</li>
+ *   <li>Pre-size lists with known capacity using the {@code FloatList(int)} constructor</li>
  *   <li>Use {@code addLast()} instead of {@code addFirst()} for better performance</li>
  *   <li>Sort data before using {@code binarySearch()} for O(log n) lookups</li>
  *   <li>Use {@code parallelSort()} for large datasets to leverage multi-core processors</li>
@@ -381,6 +380,7 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
      * }</pre>
      *
      * @param a the array to be used as the backing array for this list. Must not be {@code null}.
+     * @throws NullPointerException if the specified array is {@code null}
      */
     public FloatList(final float[] a) {
         this(N.requireNonNull(a), a.length);
@@ -742,7 +742,7 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
 
         final int numNew = c.size();
 
-        ensureCapacity(size + numNew); // Increments modCount
+        ensureCapacity(size + numNew);
 
         final int numMoved = size - index;
 
@@ -789,7 +789,7 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
 
         final int numNew = a.length;
 
-        ensureCapacity(size + numNew); // Increments modCount
+        ensureCapacity(size + numNew);
 
         final int numMoved = size - index;
 
@@ -1611,12 +1611,12 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
      * <pre>{@code
      * FloatList list1 = FloatList.of(1.0f, 1.0f, 2.0f, 3.0f);
      * FloatList list2 = FloatList.of(1.0f, 2.0f, 2.0f, 4.0f);
-     * FloatList result = list1.intersection(list2);   // returns result will be [1.0f, 2.0f]
+     * FloatList result = list1.intersection(list2);   // result will be [1.0f, 2.0f]
      * // One occurrence of '1.0f' (minimum count in both lists) and one occurrence of '2.0f'
      *
      * FloatList list3 = FloatList.of(5.0f, 5.0f, 6.0f);
      * FloatList list4 = FloatList.of(5.0f, 7.0f);
-     * FloatList result2 = list3.intersection(list4);   // returns result will be [5.0f]
+     * FloatList result2 = list3.intersection(list4);   // result will be [5.0f]
      * // One occurrence of '5.0f' (minimum count in both lists)
      * }</pre>
      *
@@ -1656,12 +1656,12 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
      * <pre>{@code
      * FloatList list1 = FloatList.of(1.0f, 1.0f, 2.0f, 3.0f);
      * float[] array = new float[] {1.0f, 2.0f, 2.0f, 4.0f};
-     * FloatList result = list1.intersection(array);   // returns result will be [1.0f, 2.0f]
+     * FloatList result = list1.intersection(array);   // result will be [1.0f, 2.0f]
      * // One occurrence of '1.0f' (minimum count in both sources) and one occurrence of '2.0f'
      *
      * FloatList list2 = FloatList.of(5.0f, 5.0f, 6.0f);
      * float[] array2 = new float[] {5.0f, 7.0f};
-     * FloatList result2 = list2.intersection(array2);   // returns result will be [5.0f]
+     * FloatList result2 = list2.intersection(array2);   // result will be [5.0f]
      * // One occurrence of '5.0f' (minimum count in both sources)
      * }</pre>
      *
@@ -1691,12 +1691,12 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
      * <pre>{@code
      * FloatList list1 = FloatList.of(1.0f, 1.0f, 2.0f, 3.0f);
      * FloatList list2 = FloatList.of(1.0f, 4.0f);
-     * FloatList result = list1.difference(list2);   // returns result will be [1.0f, 2.0f, 3.0f]
+     * FloatList result = list1.difference(list2);   // result will be [1.0f, 2.0f, 3.0f]
      * // One '1.0f' remains because list1 has two occurrences and list2 has one
      *
      * FloatList list3 = FloatList.of(5.0f, 6.0f);
      * FloatList list4 = FloatList.of(5.0f, 5.0f, 6.0f);
-     * FloatList result2 = list3.difference(list4);   // returns result will be [] (empty)
+     * FloatList result2 = list3.difference(list4);   // result will be [] (empty)
      * // No elements remain because list4 has at least as many occurrences of each value as list3
      * }</pre>
      *
@@ -1736,12 +1736,12 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
      * <pre>{@code
      * FloatList list1 = FloatList.of(1.0f, 1.0f, 2.0f, 3.0f);
      * float[] array = new float[] {1.0f, 4.0f};
-     * FloatList result = list1.difference(array);   // returns result will be [1.0f, 2.0f, 3.0f]
+     * FloatList result = list1.difference(array);   // result will be [1.0f, 2.0f, 3.0f]
      * // One '1.0f' remains because list1 has two occurrences and array has one
      *
      * FloatList list2 = FloatList.of(5.0f, 6.0f);
      * float[] array2 = new float[] {5.0f, 5.0f, 6.0f};
-     * FloatList result2 = list2.difference(array2);   // returns result will be [] (empty)
+     * FloatList result2 = list2.difference(array2);   // result will be [] (empty)
      * // No elements remain because array2 has at least as many occurrences of each value as list2
      * }</pre>
      *
@@ -2006,8 +2006,8 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
 
     /**
      * Returns the minimum element in this list wrapped in an OptionalFloat.
-     * If the list is empty, returns an empty OptionalFloat. NaN values are handled
-     * according to Float.compare() semantics.
+     * If the list is empty, returns an empty OptionalFloat. If any element is NaN,
+     * the result is NaN (NaN propagates per {@link Math#min(float, float)}).
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -2026,7 +2026,7 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
     /**
      * Returns the minimum element in the specified range of this list wrapped in an OptionalFloat.
      * If the range is empty (fromIndex == toIndex), returns an empty OptionalFloat.
-     * NaN values are handled according to Float.compare() semantics.
+     * If any element in the range is NaN, the result is NaN (NaN propagates per {@link Math#min(float, float)}).
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -2049,6 +2049,8 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
 
     /**
      * Returns the maximum value in this list as an OptionalFloat.
+     * If the list is empty, returns an empty OptionalFloat. If any element is NaN,
+     * the result is NaN (NaN propagates per {@link Math#max(float, float)}).
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -2066,6 +2068,8 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
 
     /**
      * Returns the maximum value in the specified range of this list as an OptionalFloat.
+     * If the range is empty (fromIndex == toIndex), returns an empty OptionalFloat.
+     * If any element in the range is NaN, the result is NaN (NaN propagates per {@link Math#max(float, float)}).
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -2093,6 +2097,9 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
      * an odd number of elements, this is the exact middle element. For lists with an even number of
      * elements, this method returns the lower of the two middle elements (not the average).</p>
      *
+     * <p><b>Note:</b> NaN values are sorted to the end of the list, so the result is NaN only when NaN
+     * occupies the median position after sorting (i.e. when NaN values reach the middle of the list).</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * FloatList odd = FloatList.of(3f, 1f, 2f);
@@ -2115,6 +2122,9 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
      * <p>The median is computed for elements from {@code fromIndex} (inclusive) to {@code toIndex} (exclusive).
      * For ranges with an odd number of elements, this returns the exact middle element when sorted.
      * For ranges with an even number of elements, this returns the lower of the two middle elements.</p>
+     *
+     * <p><b>Note:</b> NaN values are sorted to the end of the range, so the result is NaN only when NaN
+     * occupies the median position after sorting (i.e. when NaN values reach the middle of the range).</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -2444,6 +2454,8 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
      */
     @Override
     public void shuffle(final Random rnd) {
+        N.checkArgNotNull(rnd, cs.rnd);
+
         if (size() > 1) {
             N.shuffle(elementData, 0, size, rnd);
         }
@@ -2504,7 +2516,7 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
      * </ul>
      *
      * @param fromIndex the index of the first element (inclusive) to copy. Can be greater than toIndex for reverse iteration
-     * @param toIndex the index of the last element (exclusive) to copy. If -1 and fromIndex &gt; toIndex, it's treated as 0
+     * @param toIndex the index of the last element (exclusive) to copy; use {@code -1} for backward iteration down to and including index 0 ({@code -1} is substituted with 0 only for bounds checking)
      * @param step the step size for selecting elements. Must not be zero
      * @return a new FloatList containing a copy of the selected elements
      * @throws IndexOutOfBoundsException if the indices are out of range
@@ -2515,7 +2527,9 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
     public FloatList copy(final int fromIndex, final int toIndex, final int step) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), Math.max(fromIndex, toIndex));
 
-        return new FloatList(N.copyOfRange(elementData, fromIndex, toIndex, step));
+        // Clamp a descending start against the logical size (like forEach): N.copyOfRange clamps
+        // against the backing array's length, which may exceed size and expose phantom elements.
+        return new FloatList(N.copyOfRange(elementData, fromIndex > toIndex ? N.min(size - 1, fromIndex) : fromIndex, toIndex, step));
     }
 
     /**
@@ -2892,7 +2906,9 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
      * Compares the specified object with this list for equality.
      * Returns {@code true} if and only if the specified object is also a FloatList,
      * both lists have the same size, and all corresponding pairs of elements in
-     * the two lists are equal.
+     * the two lists are equal. Two float values are compared using {@code Float.compare}
+     * (which means that {@code NaN} equals {@code NaN} and {@code -0.0f} does not equal
+     * {@code 0.0f} for this method).
      *
      * @param obj the object to be compared for equality with this list
      * @return {@code true} if the specified object is equal to this list, {@code false} otherwise

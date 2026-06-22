@@ -86,24 +86,6 @@ public class AbstractCharStreamTest extends TestBase {
     }
 
     @Test
-    public void testDebounce() {
-        char[] result = createCharStream(new char[] { 'a', 'b', 'c', 'd' }).debounce(2, Duration.ofHours(1)).toArray();
-        assertArrayEquals(new char[] { 'a', 'b' }, result);
-    }
-
-    @Test
-    public void testDebounce_EmptyInput() {
-        char[] result = createCharStream(new char[] {}).debounce(2, Duration.ofHours(1)).toArray();
-        assertArrayEquals(new char[] {}, result);
-    }
-
-    @Test
-    public void testDebounce_ErrorPath() {
-        assertThrows(IllegalArgumentException.class, () -> createCharStream(new char[] { 'a' }).debounce(0, Duration.ofHours(1)).toArray());
-        assertThrows(IllegalArgumentException.class, () -> createCharStream(new char[] { 'a' }).debounce(1, Duration.ofMillis(0)).toArray());
-    }
-
-    @Test
     public void testSkipUntil() {
         char[] data = { 'a', 'b', 'c', 'd', 'e' };
         CharStream s = createCharStream(data);
@@ -1369,4 +1351,44 @@ public class AbstractCharStreamTest extends TestBase {
         assertFalse(revIter2.hasNext());
     }
 
+    @Test
+    public void testDebounce_emptyEmitsNothing() {
+        org.junit.jupiter.api.Assertions.assertEquals(0,
+                createCharStream(new char[] {}).debounce(com.landawn.abacus.util.Duration.ofSeconds(1)).toArray().length);
+    }
+
+    @Test
+    public void testDebounce_singleElementSurvives() {
+        org.junit.jupiter.api.Assertions.assertArrayEquals(new char[] { (char) 42 },
+                createCharStream(new char[] { (char) 42 }).debounce(com.landawn.abacus.util.Duration.ofSeconds(1)).toArray());
+    }
+
+    @Test
+    public void testDebounce_coldStreamEmitsOnlyLastElement() {
+        // A cold in-memory stream yields all elements with ~0 inter-arrival gap, so every element
+        // except the last is superseded within the quiet window; only the final element survives.
+        org.junit.jupiter.api.Assertions.assertArrayEquals(new char[] { (char) 5 },
+                createCharStream(new char[] { (char) 1, (char) 2, (char) 3, (char) 4, (char) 5 }).debounce(com.landawn.abacus.util.Duration.ofSeconds(1))
+                        .toArray());
+    }
+
+    @Test
+    public void testDebounce_slowSourceAllSurviveWhenGapAtLeastDuration() {
+        // delay() makes each element arrive >= 60ms after the previous; with a 20ms quiet window
+        // every element clears the window and survives.
+        org.junit.jupiter.api.Assertions.assertArrayEquals(new char[] { (char) 1, (char) 2, (char) 3 },
+                createCharStream(new char[] { (char) 1, (char) 2, (char) 3 }).delay(com.landawn.abacus.util.Duration.ofMillis(60))
+                        .debounce(com.landawn.abacus.util.Duration.ofMillis(20))
+                        .toArray());
+    }
+
+    @Test
+    public void testDebounce_invalidDurationThrows() {
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class,
+                () -> createCharStream(new char[] { (char) 1, (char) 2, (char) 3 }).debounce((com.landawn.abacus.util.Duration) null).toArray());
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class,
+                () -> createCharStream(new char[] { (char) 1, (char) 2, (char) 3 }).debounce(com.landawn.abacus.util.Duration.ofMillis(0)).toArray());
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class,
+                () -> createCharStream(new char[] { (char) 1, (char) 2, (char) 3 }).debounce(com.landawn.abacus.util.Duration.ofMillis(-100)).toArray());
+    }
 }

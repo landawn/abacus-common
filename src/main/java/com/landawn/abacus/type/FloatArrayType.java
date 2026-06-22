@@ -125,10 +125,8 @@ public final class FloatArrayType extends ObjectArrayType<Float> {
      * Null elements are written as {@code null}; non-null values use {@link Float#toString()}.
      * If {@code x} is {@code null}, the literal {@code null} is appended.
      * <p>
-     * <b>appendTo vs. serializeTo:</b> {@code appendTo} produces a plain, {@code toString()}-style rendering with no
-     * JSON/XML quoting or escaping (for general text output), whereas {@code serializeTo} produces the JSON/XML
-     * serialized form (applying string quotation and character escaping per the serialization config) and is used by the
-     * JSON/XML serializers.
+     * <b>appendTo vs. serializeTo:</b> both methods use the same bracket-enclosed scalar-element syntax for
+     * {@code Float[]} values; {@code serializeTo} writes to a {@code CharacterWriter} for serializer pipelines.
      *
      * @param appendable the {@link Appendable} to write to
      * @param x          the {@code Float[]} to append; may be {@code null}
@@ -172,14 +170,12 @@ public final class FloatArrayType extends ObjectArrayType<Float> {
      * Null elements are written as {@code null}; non-null values use the writer's optimized
      * float-write method. If {@code x} is {@code null}, the literal {@code null} is written.
      * <p>
-     * This method is specifically designed for JSON/XML serialization: it writes the serialized form of {@code x} to the
-     * {@code CharacterWriter}, applying string quotation and character escaping according to the supplied serialization
-     * config (a {@code null} config means no surrounding quotation). It is the streaming counterpart of {@code stringOf}
-     * and is invoked by the JSON/XML serializers.
+     * This method is specifically designed for JSON/XML serialization: it writes numeric literals and {@code null}
+     * elements directly to the {@code CharacterWriter}. The supplied serialization config is not used by this
+     * implementation.
      * <p>
-     * <b>serializeTo vs. appendTo:</b> {@code serializeTo} produces machine-readable JSON/XML (quoted and escaped),
-     * whereas {@code appendTo} produces a plain, human-readable {@code toString()}-style rendering without JSON/XML
-     * quoting or escaping.
+     * <b>serializeTo vs. appendTo:</b> both methods use the same bracket-enclosed scalar-element syntax for
+     * {@code Float[]} values; {@code serializeTo} writes to a {@code CharacterWriter} for serializer pipelines.
      *
      * @param writer the {@link CharacterWriter} to write to
      * @param x      the {@code Float[]} to write; may be {@code null}

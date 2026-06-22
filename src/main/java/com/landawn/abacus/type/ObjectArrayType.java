@@ -51,7 +51,7 @@ import com.landawn.abacus.util.Strings;
  * // Serialize array to string
  * String[] names = {"Alice", "Bob", "Charlie"};
  * String json = stringArrayType.stringOf(names);
- * // Result: ["Alice","Bob","Charlie"]
+ * // Result: ["Alice", "Bob", "Charlie"]
  *
  * // Deserialize string to array
  * String jsonInput = "[\"David\",\"Eve\",\"Frank\"]";
@@ -399,7 +399,8 @@ public class ObjectArrayType<T> extends AbstractArrayType<T[]> { //NOSONAR
 
     /**
      * Computes a hash code for the given array.
-     * This method computes a shallow hash code based on array elements.
+     * This method delegates to {@link N#hashCode(Object[])}, which hashes elements by content
+     * (recursively for nested arrays), consistent with {@link #equals(Object[], Object[])}.
      *
      * @param x the array to hash
      * @return the computed hash code
@@ -423,7 +424,8 @@ public class ObjectArrayType<T> extends AbstractArrayType<T[]> { //NOSONAR
 
     /**
      * Compares two arrays for equality.
-     * This method performs a shallow equality check on array elements.
+     * This method delegates to {@link N#equals(Object[], Object[])}, which compares elements by content
+     * (recursively for nested arrays).
      *
      * @param x the first array
      * @param y the second array

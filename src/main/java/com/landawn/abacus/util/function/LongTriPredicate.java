@@ -13,9 +13,9 @@
  */
 package com.landawn.abacus.util.function;
 
-import java.util.Objects;
-
 import com.landawn.abacus.util.Throwables;
+import com.landawn.abacus.util.N;
+import com.landawn.abacus.util.cs;
 
 /**
  * Represents a predicate (boolean-valued function) of three long-valued arguments.
@@ -29,11 +29,12 @@ import com.landawn.abacus.util.Throwables;
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * LongTriPredicate isTriangle = (a, b, c) ->
- *     a + b > c && a + c > b && b + c > a;
+ *     Math.addExact(a, b) > c && Math.addExact(a, c) > b && Math.addExact(b, c) > a;
  * boolean result = isTriangle.test(3L, 4L, 5L);   // returns true
  *
  * LongTriPredicate allPositive = (a, b, c) -> a > 0 && b > 0 && c > 0;
- * LongTriPredicate sumGreaterThan100 = (a, b, c) -> a + b + c > 100;
+ * LongTriPredicate sumGreaterThan100 = (a, b, c) ->
+ *     Math.addExact(Math.addExact(a, b), c) > 100;
  * LongTriPredicate combined = allPositive.and(sumGreaterThan100);
  * }</pre>
  *
@@ -128,7 +129,8 @@ public interface LongTriPredicate extends Throwables.LongTriPredicate<RuntimeExc
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * LongTriPredicate allPositive = (a, b, c) -> a > 0 && b > 0 && c > 0;
-     * LongTriPredicate sumLessThan100 = (a, b, c) -> a + b + c < 100;
+     * LongTriPredicate sumLessThan100 = (a, b, c) ->
+     *     Math.addExact(Math.addExact(a, b), c) < 100;
      * LongTriPredicate combined = allPositive.and(sumLessThan100);
      * combined.test(10L, 20L, 30L);   // returns true (all positive AND sum < 100)
      * }</pre>
@@ -136,10 +138,10 @@ public interface LongTriPredicate extends Throwables.LongTriPredicate<RuntimeExc
      * @param other a predicate that will be logically-ANDed with this predicate. Must not be {@code null}.
      * @return a composed predicate that represents the short-circuiting logical
      *         AND of this predicate and the {@code other} predicate
-     * @throws NullPointerException if {@code other} is null
+     * @throws IllegalArgumentException if {@code other} is null
      */
     default LongTriPredicate and(final LongTriPredicate other) {
-        Objects.requireNonNull(other);
+        N.checkArgNotNull(other, cs.other);
         return (a, b, c) -> test(a, b, c) && other.test(a, b, c);
     }
 
@@ -157,7 +159,8 @@ public interface LongTriPredicate extends Throwables.LongTriPredicate<RuntimeExc
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * LongTriPredicate anyZero = (a, b, c) -> a == 0 || b == 0 || c == 0;
-     * LongTriPredicate sumGreaterThan1000 = (a, b, c) -> a + b + c > 1000;
+     * LongTriPredicate sumGreaterThan1000 = (a, b, c) ->
+     *     Math.addExact(Math.addExact(a, b), c) > 1000;
      * LongTriPredicate combined = anyZero.or(sumGreaterThan1000);
      * combined.test(0L, 50L, 50L);   // returns true (first value is zero)
      * }</pre>
@@ -165,10 +168,24 @@ public interface LongTriPredicate extends Throwables.LongTriPredicate<RuntimeExc
      * @param other a predicate that will be logically-ORed with this predicate. Must not be {@code null}.
      * @return a composed predicate that represents the short-circuiting logical
      *         OR of this predicate and the {@code other} predicate
-     * @throws NullPointerException if {@code other} is null
+     * @throws IllegalArgumentException if {@code other} is null
      */
     default LongTriPredicate or(final LongTriPredicate other) {
-        Objects.requireNonNull(other);
+        N.checkArgNotNull(other, cs.other);
         return (a, b, c) -> test(a, b, c) || other.test(a, b, c);
+    }
+
+    /**
+     * Returns this object as a {@link Throwables.LongTriPredicate} view.
+     *
+     * <p>The returned object has the same behavior as this one. This method does not translate
+     * exceptions or make the original implementation capable of throwing new checked exceptions; the
+     * exception type parameter is for target-type compatibility with APIs that accept {@code Throwables.LongTriPredicate}.
+     *
+     * @param <E> the target exception type for compatibility with {@code Throwables.LongTriPredicate}
+     * @return a {@link Throwables.LongTriPredicate} view of this object
+     */
+    default <E extends Throwable> Throwables.LongTriPredicate<E> toThrowable() {
+        return (Throwables.LongTriPredicate<E>) this;
     }
 }

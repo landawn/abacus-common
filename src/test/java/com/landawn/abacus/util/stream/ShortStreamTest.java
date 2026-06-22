@@ -1009,12 +1009,6 @@ public class ShortStreamTest extends TestBase {
     }
 
     @Test
-    public void testFindFirstEmpty() {
-        OptionalShort result = ShortStream.empty().findFirst();
-        assertFalse(result.isPresent());
-    }
-
-    @Test
     public void testFindFirstWithPredicateNone() {
         OptionalShort result = ShortStream.of((short) 1, (short) 2, (short) 3).findFirst(n -> n > 5);
         assertFalse(result.isPresent());
@@ -1052,12 +1046,6 @@ public class ShortStreamTest extends TestBase {
     }
 
     @Test
-    public void testFindAnyEmpty() {
-        OptionalShort result = ShortStream.empty().findAny();
-        assertFalse(result.isPresent());
-    }
-
-    @Test
     public void testFindAnyNoPredicate_EmptyStream() {
         OptionalShort result = ShortStream.empty().findAny();
         assertFalse(result.isPresent());
@@ -1081,12 +1069,6 @@ public class ShortStreamTest extends TestBase {
         OptionalShort result = ShortStream.of((short) 1, (short) 2, (short) 3, (short) 4, (short) 2).findLast(n -> n == 2);
         assertTrue(result.isPresent());
         assertEquals(2, result.get());
-    }
-
-    @Test
-    public void testFindLastEmpty() {
-        OptionalShort result = ShortStream.empty().last();
-        assertFalse(result.isPresent());
     }
 
     @Test
@@ -1411,13 +1393,6 @@ public class ShortStreamTest extends TestBase {
     }
 
     @Test
-    public void testSummarizeEmpty() {
-        ShortSummaryStatistics stats = ShortStream.empty().summaryStatistics();
-        assertNotNull(stats);
-        assertEquals(0, stats.getCount());
-    }
-
-    @Test
     public void testIteratorEmpty() {
         ShortIterator iterator = ShortStream.empty().iterator();
         assertFalse(iterator.hasNext());
@@ -1428,13 +1403,6 @@ public class ShortStreamTest extends TestBase {
         ShortStream stream = ShortStream.empty().filter(n -> true).map(n -> (short) (n * 2)).sorted().distinct();
 
         assertEquals(0, stream.count());
-    }
-
-    @Test
-    public void testDebounce_EmptyStream() {
-        short[] result = ShortStream.empty().debounce(5, com.landawn.abacus.util.Duration.ofSeconds(1)).toArray();
-
-        assertEquals(0, result.length);
     }
 
     @Test
@@ -1520,12 +1488,6 @@ public class ShortStreamTest extends TestBase {
 
     @Test
     public void testDefaultIfEmptyOnEmpty() {
-        short[] result = ShortStream.empty().defaultIfEmpty(() -> ShortStream.of((short) 99)).toArray();
-        assertArrayEquals(new short[] { 99 }, result);
-    }
-
-    @Test
-    public void testDefaultIfEmptyMethod() {
         short[] result = ShortStream.empty().defaultIfEmpty(() -> ShortStream.of((short) 99)).toArray();
         assertArrayEquals(new short[] { 99 }, result);
     }
@@ -1681,11 +1643,6 @@ public class ShortStreamTest extends TestBase {
 
         assertArrayEquals(new short[] { 1, 2, 3 }, stream.toArray());
         assertEquals(1, counter.get());
-    }
-
-    @Test
-    public void testDeferNullSupplier() {
-        assertThrows(IllegalArgumentException.class, () -> ShortStream.defer(null));
     }
 
     @Test
@@ -1915,57 +1872,6 @@ public class ShortStreamTest extends TestBase {
     }
 
     // ==================== debounce tests ====================
-
-    @Test
-    public void testDebounce_BasicFunctionality() {
-        // Allow 3 elements per 1 second window
-        short[] result = ShortStream.of((short) 1, (short) 2, (short) 3, (short) 4, (short) 5)
-                .debounce(3, com.landawn.abacus.util.Duration.ofSeconds(1))
-                .toArray();
-
-        // Only first 3 elements should pass through within the window
-        assertEquals(3, result.length);
-        assertEquals((short) 1, result[0]);
-        assertEquals((short) 2, result[1]);
-        assertEquals((short) 3, result[2]);
-    }
-
-    @Test
-    public void testDebounce_AllElementsPassWhenWithinLimit() {
-        // Allow 10 elements per window, but only 5 elements in stream
-        short[] result = ShortStream.of((short) 1, (short) 2, (short) 3, (short) 4, (short) 5)
-                .debounce(10, com.landawn.abacus.util.Duration.ofSeconds(1))
-                .toArray();
-
-        // All elements should pass
-        assertEquals(5, result.length);
-    }
-
-    @Test
-    public void testDebounce_PreservesOrder() {
-        short[] result = ShortStream.of((short) 10, (short) 20, (short) 30, (short) 40, (short) 50)
-                .debounce(3, com.landawn.abacus.util.Duration.ofSeconds(1))
-                .toArray();
-
-        assertEquals((short) 10, result[0]);
-        assertEquals((short) 20, result[1]);
-        assertEquals((short) 30, result[2]);
-    }
-
-    @Test
-    public void testDebounce_ChainedWithOtherOperations() {
-        short[] result = ShortStream.of((short) 1, (short) 2, (short) 3, (short) 4, (short) 5, (short) 6, (short) 7, (short) 8, (short) 9, (short) 10)
-                .filter(n -> n % 2 == 0) // 2, 4, 6, 8, 10
-                .debounce(3, com.landawn.abacus.util.Duration.ofSeconds(1)) // 2, 4, 6
-                .map(n -> (short) (n * 10)) // 20, 40, 60
-                .toArray();
-
-        assertEquals(3, result.length);
-        assertEquals((short) 20, result[0]);
-        assertEquals((short) 40, result[1]);
-        assertEquals((short) 60, result[2]);
-    }
-
     @Test
     public void testOfVarargs() {
         assertEquals(0, createShortStream().count());
@@ -2868,49 +2774,6 @@ public class ShortStreamTest extends TestBase {
     }
 
     @Test
-    public void testDebounce_SingleElement() {
-        short[] result = ShortStream.of((short) 42).debounce(1, com.landawn.abacus.util.Duration.ofMillis(100)).toArray();
-
-        assertEquals(1, result.length);
-        assertEquals((short) 42, result[0]);
-    }
-
-    @Test
-    public void testDebounce_MaxWindowSizeOne() {
-        // Only 1 element allowed per window
-        short[] result = ShortStream.of((short) 1, (short) 2, (short) 3, (short) 4, (short) 5)
-                .debounce(1, com.landawn.abacus.util.Duration.ofSeconds(1))
-                .toArray();
-
-        assertEquals(1, result.length);
-        assertEquals((short) 1, result[0]);
-    }
-
-    @Test
-    public void testDebounce_WithLargeMaxWindowSize() {
-        short[] input = new short[1000];
-        for (int i = 0; i < 1000; i++) {
-            input[i] = (short) i;
-        }
-
-        short[] result = ShortStream.of(input).debounce(500, com.landawn.abacus.util.Duration.ofSeconds(10)).toArray();
-
-        assertEquals(500, result.length);
-    }
-
-    @Test
-    public void testDebounce_WithMinMaxValues() {
-        short[] result = ShortStream.of(Short.MIN_VALUE, (short) 0, Short.MAX_VALUE, (short) 1, (short) 2)
-                .debounce(3, com.landawn.abacus.util.Duration.ofSeconds(1))
-                .toArray();
-
-        assertEquals(3, result.length);
-        assertEquals(Short.MIN_VALUE, result[0]);
-        assertEquals((short) 0, result[1]);
-        assertEquals(Short.MAX_VALUE, result[2]);
-    }
-
-    @Test
     public void testStreamCreatedAfterMapPartial() {
         assertEquals(3,
                 ShortStream.of((short) 1, (short) 2, (short) 3, (short) 4, (short) 5)
@@ -3006,12 +2869,6 @@ public class ShortStreamTest extends TestBase {
     }
 
     @Test
-    public void testDefaultIfEmptyOnNonEmpty() {
-        short[] result = createShortStream((short) 1, (short) 2).defaultIfEmpty(() -> ShortStream.of((short) 99)).toArray();
-        assertArrayEquals(new short[] { 1, 2 }, result);
-    }
-
-    @Test
     public void testDefaultIfEmpty_NonEmpty() {
         short[] result = createShortStream((short) 1, (short) 2).defaultIfEmpty(() -> ShortStream.of((short) 99)).toArray();
         assertArrayEquals(new short[] { 1, 2 }, result);
@@ -3022,28 +2879,6 @@ public class ShortStreamTest extends TestBase {
         ShortIterator iterator = ShortStream.of((short) 1).iterator();
         iterator.nextShort();
         assertThrows(NoSuchElementException.class, iterator::nextShort);
-    }
-
-    @Test
-    public void testDebounce_ThrowsExceptionForNonPositiveMaxWindowSize() {
-        assertThrows(IllegalArgumentException.class, () -> {
-            ShortStream.of((short) 1, (short) 2, (short) 3).debounce(0, com.landawn.abacus.util.Duration.ofSeconds(1)).toArray();
-        });
-
-        assertThrows(IllegalArgumentException.class, () -> {
-            ShortStream.of((short) 1, (short) 2, (short) 3).debounce(-1, com.landawn.abacus.util.Duration.ofSeconds(1)).toArray();
-        });
-    }
-
-    @Test
-    public void testDebounce_ThrowsExceptionForNonPositiveDuration() {
-        assertThrows(IllegalArgumentException.class, () -> {
-            ShortStream.of((short) 1, (short) 2, (short) 3).debounce(5, com.landawn.abacus.util.Duration.ofMillis(0)).toArray();
-        });
-
-        assertThrows(IllegalArgumentException.class, () -> {
-            ShortStream.of((short) 1, (short) 2, (short) 3).debounce(5, com.landawn.abacus.util.Duration.ofMillis(-100)).toArray();
-        });
     }
 
     @Test
@@ -3361,11 +3196,6 @@ public class ShortStreamTest extends TestBase {
         final short[] value = { 0 };
         ShortStream stream = ShortStream.generate(() -> value[0]++).limit(3);
         assertArrayEquals(new short[] { 0, 1, 2 }, stream.toArray());
-    }
-
-    @Test
-    public void testGenerateNullSupplier() {
-        assertThrows(IllegalArgumentException.class, () -> ShortStream.generate(null));
     }
 
     @Test
@@ -3792,6 +3622,15 @@ public class ShortStreamTest extends TestBase {
     }
 
     @Test
+    @DisplayName("Test step() iterator count() consumes the iterator")
+    public void testStepIteratorCountConsumes() {
+        // Regression: the step() iterator's count() must exhaust the iterator per the IteratorEx.count contract.
+        ShortIterator iter = createShortStream((short) 1, (short) 2, (short) 3, (short) 4, (short) 5, (short) 6).step(2).iterator();
+        assertEquals(3, iter.count());
+        assertFalse(iter.hasNext());
+    }
+
+    @Test
     @DisplayName("Test onEach() / peek() method")
     public void testOnEach() {
         List<Short> peeked = new ArrayList<>();
@@ -3848,12 +3687,6 @@ public class ShortStreamTest extends TestBase {
         Joiner joiner = Joiner.with(",", "[", "]");
         stream.joinTo(joiner);
         assertEquals("[1,2,3,4,5]", joiner.toString());
-    }
-
-    @Test
-    @DisplayName("Test println() method")
-    public void testPrintln() {
-        assertDoesNotThrow(() -> createShortStream((short) 1, (short) 2, (short) 3).println());
     }
 
     @Test
@@ -4022,12 +3855,6 @@ public class ShortStreamTest extends TestBase {
     @Test
     public void testOnlyOneWithMultipleElements() {
         assertThrows(TooManyElementsException.class, () -> createShortStream((short) 1, (short) 2).onlyOne());
-    }
-
-    @Test
-    public void testJoinWithPrefixSuffix() {
-        String result = createShortStream((short) 1, (short) 2, (short) 3).join(", ", "[", "]");
-        assertEquals("[1, 2, 3]", result);
     }
 
     @Test
@@ -4333,4 +4160,52 @@ public class ShortStreamTest extends TestBase {
         org.junit.jupiter.api.Assertions.assertEquals(32767.0, com.landawn.abacus.util.stream.ShortStream.of(arr).average().getAsDouble(), 0.0001);
     }
 
+    @Test
+    public void testRangeIteratorFailedNextDoesNotReduceRemainingCount() {
+        final ShortIterator iter = ShortStream.range((short) 0, (short) 1).iterator();
+
+        assertEquals((short) 0, iter.nextShort());
+        assertThrows(NoSuchElementException.class, iter::nextShort);
+        assertEquals(0L, iter.count());
+    }
+
+    @Test
+    public void testDebounce_emptyEmitsNothing() {
+        org.junit.jupiter.api.Assertions.assertEquals(0, ShortStream.empty().debounce(com.landawn.abacus.util.Duration.ofSeconds(1)).toArray().length);
+    }
+
+    @Test
+    public void testDebounce_singleElementSurvives() {
+        org.junit.jupiter.api.Assertions.assertArrayEquals(new short[] { (short) 42 },
+                ShortStream.of((short) 42).debounce(com.landawn.abacus.util.Duration.ofSeconds(1)).toArray());
+    }
+
+    @Test
+    public void testDebounce_coldStreamEmitsOnlyLastElement() {
+        // A cold in-memory stream yields all elements with ~0 inter-arrival gap, so every element
+        // except the last is superseded within the quiet window; only the final element survives.
+        org.junit.jupiter.api.Assertions.assertArrayEquals(new short[] { (short) 5 },
+                ShortStream.of((short) 1, (short) 2, (short) 3, (short) 4, (short) 5).debounce(com.landawn.abacus.util.Duration.ofSeconds(1)).toArray());
+    }
+
+    @Test
+    public void testDebounce_slowSourceAllSurviveWhenGapAtLeastDuration() {
+        // delay() makes each element arrive >= 60ms after the previous; with a 20ms quiet window
+        // every element clears the window and survives.
+        org.junit.jupiter.api.Assertions.assertArrayEquals(new short[] { (short) 1, (short) 2, (short) 3 },
+                ShortStream.of((short) 1, (short) 2, (short) 3)
+                        .delay(com.landawn.abacus.util.Duration.ofMillis(60))
+                        .debounce(com.landawn.abacus.util.Duration.ofMillis(20))
+                        .toArray());
+    }
+
+    @Test
+    public void testDebounce_invalidDurationThrows() {
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class,
+                () -> ShortStream.of((short) 1, (short) 2, (short) 3).debounce((com.landawn.abacus.util.Duration) null).toArray());
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class,
+                () -> ShortStream.of((short) 1, (short) 2, (short) 3).debounce(com.landawn.abacus.util.Duration.ofMillis(0)).toArray());
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class,
+                () -> ShortStream.of((short) 1, (short) 2, (short) 3).debounce(com.landawn.abacus.util.Duration.ofMillis(-100)).toArray());
+    }
 }

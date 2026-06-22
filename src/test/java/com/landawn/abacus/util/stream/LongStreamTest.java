@@ -1498,13 +1498,6 @@ public class LongStreamTest extends TestBase {
     }
 
     @Test
-    public void testDebounce_EmptyStream() {
-        long[] result = LongStream.empty().debounce(5, com.landawn.abacus.util.Duration.ofSeconds(1)).toArray();
-
-        assertEquals(0, result.length);
-    }
-
-    @Test
     public void testDefaultIfEmpty() {
         assertArrayEquals(new long[] { 1L, 2L, 3L }, createLongStream(1L, 2L, 3L).defaultIfEmpty(() -> createLongStream(10L, 20L)).toArray());
         assertArrayEquals(new long[] { 10L, 20L }, LongStream.empty().defaultIfEmpty(() -> createLongStream(10L, 20L)).toArray());
@@ -2058,46 +2051,6 @@ public class LongStreamTest extends TestBase {
     }
 
     // ==================== debounce tests ====================
-
-    @Test
-    public void testDebounce_BasicFunctionality() {
-        // Allow 3 elements per 1 second window
-        long[] result = LongStream.of(1L, 2L, 3L, 4L, 5L).debounce(3, com.landawn.abacus.util.Duration.ofSeconds(1)).toArray();
-
-        // Only first 3 elements should pass through within the window
-        assertEquals(3, result.length);
-        assertArrayEquals(new long[] { 1L, 2L, 3L }, result);
-    }
-
-    @Test
-    public void testDebounce_AllElementsPassWhenWithinLimit() {
-        // Allow 10 elements per window, but only 5 elements in stream
-        long[] result = LongStream.of(1L, 2L, 3L, 4L, 5L).debounce(10, com.landawn.abacus.util.Duration.ofSeconds(1)).toArray();
-
-        // All elements should pass
-        assertEquals(5, result.length);
-        assertArrayEquals(new long[] { 1L, 2L, 3L, 4L, 5L }, result);
-    }
-
-    @Test
-    public void testDebounce_PreservesOrder() {
-        long[] result = LongStream.of(10L, 20L, 30L, 40L, 50L).debounce(3, com.landawn.abacus.util.Duration.ofSeconds(1)).toArray();
-
-        assertArrayEquals(new long[] { 10L, 20L, 30L }, result);
-    }
-
-    @Test
-    public void testDebounce_ChainedWithOtherOperations() {
-        long[] result = LongStream.of(1L, 2L, 3L, 4L, 5L, 6L, 7L, 8L, 9L, 10L)
-                .filter(n -> n % 2 == 0) // 2, 4, 6, 8, 10
-                .debounce(3, com.landawn.abacus.util.Duration.ofSeconds(1)) // 2, 4, 6
-                .map(n -> n * 10) // 20, 40, 60
-                .toArray();
-
-        assertEquals(3, result.length);
-        assertArrayEquals(new long[] { 20L, 40L, 60L }, result);
-    }
-
     @Test
     public void testOfArray() {
         long[] arr = { 1, 2, 3 };
@@ -2690,35 +2643,6 @@ public class LongStreamTest extends TestBase {
     }
 
     @Test
-    public void testDebounce_SingleElement() {
-        long[] result = LongStream.of(42L).debounce(1, com.landawn.abacus.util.Duration.ofMillis(100)).toArray();
-
-        assertEquals(1, result.length);
-        assertEquals(42L, result[0]);
-    }
-
-    @Test
-    public void testDebounce_MaxWindowSizeOne() {
-        // Only 1 element allowed per window
-        long[] result = LongStream.of(1L, 2L, 3L, 4L, 5L).debounce(1, com.landawn.abacus.util.Duration.ofSeconds(1)).toArray();
-
-        assertEquals(1, result.length);
-        assertEquals(1L, result[0]);
-    }
-
-    @Test
-    public void testDebounce_WithLargeMaxWindowSize() {
-        long[] input = new long[1000];
-        for (int i = 0; i < 1000; i++) {
-            input[i] = i;
-        }
-
-        long[] result = LongStream.of(input).debounce(500, com.landawn.abacus.util.Duration.ofSeconds(10)).toArray();
-
-        assertEquals(500, result.length);
-    }
-
-    @Test
     public void testOfEmpty() {
         assertEquals(0, LongStream.of().count());
     }
@@ -2828,28 +2752,6 @@ public class LongStreamTest extends TestBase {
     public void testPrintln() {
         assertDoesNotThrow(() -> {
             LongStream.of(1L, 2L, 3L).println();
-        });
-    }
-
-    @Test
-    public void testDebounce_ThrowsExceptionForNonPositiveMaxWindowSize() {
-        assertThrows(IllegalArgumentException.class, () -> {
-            LongStream.of(1L, 2L, 3L).debounce(0, com.landawn.abacus.util.Duration.ofSeconds(1)).toArray();
-        });
-
-        assertThrows(IllegalArgumentException.class, () -> {
-            LongStream.of(1L, 2L, 3L).debounce(-1, com.landawn.abacus.util.Duration.ofSeconds(1)).toArray();
-        });
-    }
-
-    @Test
-    public void testDebounce_ThrowsExceptionForNonPositiveDuration() {
-        assertThrows(IllegalArgumentException.class, () -> {
-            LongStream.of(1L, 2L, 3L).debounce(5, com.landawn.abacus.util.Duration.ofMillis(0)).toArray();
-        });
-
-        assertThrows(IllegalArgumentException.class, () -> {
-            LongStream.of(1L, 2L, 3L).debounce(5, com.landawn.abacus.util.Duration.ofMillis(-100)).toArray();
         });
     }
 
@@ -3126,16 +3028,6 @@ public class LongStreamTest extends TestBase {
     }
 
     @Test
-    public void testDebounce_WithRange() {
-        long[] result = LongStream.range(0, 100).debounce(10, com.landawn.abacus.util.Duration.ofSeconds(1)).toArray();
-
-        assertEquals(10, result.length);
-        for (int i = 0; i < 10; i++) {
-            assertEquals(i, result[i]);
-        }
-    }
-
-    @Test
     public void testParallelMapSum() {
         long expectedSum = LongStream.range(0, 100).map(i -> i * 2).sum();
         long actualSum = LongStream.range(0, 100).parallel().map(i -> i * 2).sum();
@@ -3232,11 +3124,6 @@ public class LongStreamTest extends TestBase {
     public void testRange_Empty_WhenStartGeEnd() {
         assertEquals(0L, LongStream.range(5L, 5L).count());
         assertEquals(0L, LongStream.range(6L, 5L).count());
-    }
-
-    @Test
-    public void testRangeWithZeroStep() {
-        assertThrows(IllegalArgumentException.class, () -> LongStream.range(0L, 10L, 0L));
     }
 
     @Test
@@ -4452,6 +4339,31 @@ public class LongStreamTest extends TestBase {
     }
 
     @Test
+    public void testRangeDescendingHugeSpanStaysOnStepGrid() {
+        // Regression: the overflow-split path used `m + m % by` for descending ranges (negative m),
+        // which is not a multiple of `by`, so the concatenated sub-ranges drifted off the
+        // arithmetic-progression grid and emitted wrong elements.
+        final long by = -(1L << 62);
+        final long[] expected = { Long.MAX_VALUE, 4611686018427387903L, -1L, -4611686018427387905L };
+
+        assertArrayEquals(expected, LongStream.range(Long.MAX_VALUE, Long.MIN_VALUE, by).toArray());
+        assertArrayEquals(expected, LongStream.rangeClosed(Long.MAX_VALUE, Long.MIN_VALUE, by).toArray());
+
+        // Ascending mirror case (was already correct; guards against symmetric regressions).
+        final long[] expectedAsc = { Long.MIN_VALUE, -4611686018427387904L, 0L, 4611686018427387904L };
+        assertArrayEquals(expectedAsc, LongStream.range(Long.MIN_VALUE, Long.MAX_VALUE, 1L << 62).toArray());
+        assertArrayEquals(expectedAsc, LongStream.rangeClosed(Long.MIN_VALUE, Long.MAX_VALUE, 1L << 62).toArray());
+    }
+
+    @Test
+    public void testOfBoxedNullElementsUnboxToZero() {
+        // Matches ToLongFunction.UNBOX semantics: null -> 0L (no NullPointerException).
+        assertArrayEquals(new long[] { 1L, 0L, 3L }, LongStream.of(new Long[] { 1L, null, 3L }).toArray());
+        assertArrayEquals(new long[] { 0L, 2L }, LongStream.of(new Long[] { 9L, null, 2L }, 1, 3).toArray());
+        assertArrayEquals(new long[] { 1L, 0L }, LongStream.of(Arrays.asList(1L, (Long) null)).toArray());
+    }
+
+    @Test
     public void testOnlyOneWithMultipleElements() {
         assertThrows(TooManyElementsException.class, () -> createLongStream(1L, 2L).onlyOne());
     }
@@ -4471,4 +4383,77 @@ public class LongStreamTest extends TestBase {
         assertEquals(1, closed.get());
     }
 
+    @Test
+    public void testFromJdkStreamIteratorCountConsumes() {
+        try (LongStream stream = LongStream.from(java.util.stream.LongStream.of(1L, 2L))) {
+            final LongIterator iter = stream.iterator();
+
+            assertEquals(2, iter.count());
+            assertFalse(iter.hasNext());
+            assertEquals(0, iter.count());
+            assertArrayEquals(new long[0], iter.toArray());
+            assertThrows(NoSuchElementException.class, iter::nextLong);
+        }
+    }
+
+    @Test
+    public void testFromJdkStreamIteratorToArrayConsumes() {
+        try (LongStream stream = LongStream.from(java.util.stream.LongStream.of(1L, 2L))) {
+            final LongIterator iter = stream.iterator();
+
+            assertArrayEquals(new long[] { 1L, 2L }, iter.toArray());
+            assertFalse(iter.hasNext());
+            assertEquals(0, iter.count());
+            assertThrows(NoSuchElementException.class, iter::nextLong);
+        }
+    }
+
+    @Test
+    public void testRangeIteratorFailedNextDoesNotReduceRemainingCount() {
+        final LongIterator iter = LongStream.range(0L, 1L).iterator();
+
+        assertEquals(0L, iter.nextLong());
+        assertThrows(NoSuchElementException.class, iter::nextLong);
+        assertEquals(0L, iter.count());
+    }
+
+    @Test
+    public void testDebounce_emptyEmitsNothing() {
+        org.junit.jupiter.api.Assertions.assertEquals(0, LongStream.empty().debounce(com.landawn.abacus.util.Duration.ofSeconds(1)).toArray().length);
+    }
+
+    @Test
+    public void testDebounce_singleElementSurvives() {
+        org.junit.jupiter.api.Assertions.assertArrayEquals(new long[] { 42L },
+                LongStream.of(42L).debounce(com.landawn.abacus.util.Duration.ofSeconds(1)).toArray());
+    }
+
+    @Test
+    public void testDebounce_coldStreamEmitsOnlyLastElement() {
+        // A cold in-memory stream yields all elements with ~0 inter-arrival gap, so every element
+        // except the last is superseded within the quiet window; only the final element survives.
+        org.junit.jupiter.api.Assertions.assertArrayEquals(new long[] { 5L },
+                LongStream.of(1L, 2L, 3L, 4L, 5L).debounce(com.landawn.abacus.util.Duration.ofSeconds(1)).toArray());
+    }
+
+    @Test
+    public void testDebounce_slowSourceAllSurviveWhenGapAtLeastDuration() {
+        // delay() makes each element arrive >= 60ms after the previous; with a 20ms quiet window
+        // every element clears the window and survives.
+        org.junit.jupiter.api.Assertions.assertArrayEquals(new long[] { 1L, 2L, 3L },
+                LongStream.of(1L, 2L, 3L)
+                        .delay(com.landawn.abacus.util.Duration.ofMillis(60))
+                        .debounce(com.landawn.abacus.util.Duration.ofMillis(20))
+                        .toArray());
+    }
+
+    @Test
+    public void testDebounce_invalidDurationThrows() {
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class,
+                () -> LongStream.of(1L, 2L, 3L).debounce((com.landawn.abacus.util.Duration) null).toArray());
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class,
+                () -> LongStream.of(1L, 2L, 3L).debounce(com.landawn.abacus.util.Duration.ofMillis(0)).toArray());
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class,
+                () -> LongStream.of(1L, 2L, 3L).debounce(com.landawn.abacus.util.Duration.ofMillis(-100)).toArray());
+    }
 }

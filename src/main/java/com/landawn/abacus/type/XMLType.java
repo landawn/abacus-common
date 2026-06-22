@@ -17,7 +17,6 @@ package com.landawn.abacus.type;
 import java.util.List;
 import java.util.Map;
 
-import com.landawn.abacus.util.ClassUtil;
 import com.landawn.abacus.util.SK;
 import com.landawn.abacus.util.Strings;
 
@@ -55,7 +54,10 @@ public class XMLType<T> extends AbstractType<T> {
         super(XML + SK.LESS_THAN + TypeFactory.getType(clsName).name() + SK.GREATER_THAN);
 
         declaringName = XML + SK.LESS_THAN + TypeFactory.getType(clsName).declaringName() + SK.GREATER_THAN;
-        typeClass = (Class<T>) ("Map".equalsIgnoreCase(clsName) ? Map.class : ("List".equalsIgnoreCase(clsName) ? List.class : ClassUtil.forName(clsName)));
+        // Resolve through TypeFactory (like the name built above): pool-registered simple names
+        // such as "UUID" are valid type names that ClassUtil.forName cannot resolve.
+        typeClass = (Class<T>) ("Map".equalsIgnoreCase(clsName) ? Map.class
+                : ("List".equalsIgnoreCase(clsName) ? List.class : TypeFactory.getType(clsName).javaType()));
         //        this.parameterTypes = new Type[] { TypeFactory.getType(clsName) };
         //        this.elementType = parameterTypes[0];
     }

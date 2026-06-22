@@ -1,6 +1,7 @@
 package com.landawn.abacus.util;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,29 +15,31 @@ public class ObjectFactoryTest extends AbstractTest {
 
     @Test
     public void test_charBuffer() {
-        long maxMemory = Runtime.getRuntime().maxMemory();
-        N.println(maxMemory / 1024 / 1024);
+        assertDoesNotThrow(() -> {
+            long maxMemory = Runtime.getRuntime().maxMemory();
+            N.println(maxMemory / 1024 / 1024);
 
-        List<Object> list = new ArrayList<>();
-        for (int i = 0; i < 256; i++) {
-            list.add(Objectory.createCharArrayBuffer());
+            List<Object> list = new ArrayList<>();
+            for (int i = 0; i < 256; i++) {
+                list.add(Objectory.createCharArrayBuffer());
 
-            if (i % 100 == 0) {
-                long freeMemory = Runtime.getRuntime().freeMemory();
-                N.println(i + " : " + freeMemory * 1.0d / maxMemory + " : " + freeMemory);
+                if (i % 100 == 0) {
+                    long freeMemory = Runtime.getRuntime().freeMemory();
+                    N.println(i + " : " + freeMemory * 1.0d / maxMemory + " : " + freeMemory);
+                }
             }
-        }
 
-        list.clear();
+            list.clear();
 
-        for (int i = 0; i < 512; i++) {
-            list.add(Objectory.createByteArrayBuffer());
+            for (int i = 0; i < 512; i++) {
+                list.add(Objectory.createByteArrayBuffer());
 
-            if (i % 100 == 0) {
-                long freeMemory = Runtime.getRuntime().freeMemory();
-                N.println(i + " : " + freeMemory * 1.0d / maxMemory + " : " + freeMemory);
+                if (i % 100 == 0) {
+                    long freeMemory = Runtime.getRuntime().freeMemory();
+                    N.println(i + " : " + freeMemory * 1.0d / maxMemory + " : " + freeMemory);
+                }
             }
-        }
+        });
     }
 
     @Test

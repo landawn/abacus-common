@@ -110,6 +110,29 @@ public class KryoParserTest extends TestBase {
         }
     }
 
+    public static class LateRegisteredObject implements Serializable {
+        private String name;
+
+        public LateRegisteredObject() {
+        }
+
+        public LateRegisteredObject(String name) {
+            this.name = name;
+        }
+    }
+
+    public static class LateRegisteredObjectSerializer extends Serializer<LateRegisteredObject> {
+        @Override
+        public void write(Kryo kryo, Output output, LateRegisteredObject object) {
+            output.writeString(object.name + "-registered");
+        }
+
+        @Override
+        public LateRegisteredObject read(Kryo kryo, Input input, Class<? extends LateRegisteredObject> type) {
+            return new LateRegisteredObject(input.readString());
+        }
+    }
+
     @Test
     public void testSerializePrimitiveTypes() {
         assertEquals(123, (int) parser.decode(parser.encode(123)));
@@ -149,6 +172,19 @@ public class KryoParserTest extends TestBase {
 
         String result = parser.serialize(obj, config);
         assertNotNull(result);
+    }
+
+    @Test
+    public void testGlobalRegistrationInvalidatesExistingParserPool() {
+        LateRegisteredObject warmup = new LateRegisteredObject("warmup");
+        LateRegisteredObject warmed = parser.deserialize(parser.serialize(warmup, (KryoSerConfig) null), null, LateRegisteredObject.class);
+        assertEquals("warmup", warmed.name);
+
+        ParserFactory.registerKryo(LateRegisteredObject.class, new LateRegisteredObjectSerializer());
+
+        LateRegisteredObject original = new LateRegisteredObject("late");
+        LateRegisteredObject result = parser.deserialize(parser.serialize(original, (KryoSerConfig) null), null, LateRegisteredObject.class);
+        assertEquals("late-registered", result.name);
     }
 
     @Test

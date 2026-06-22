@@ -69,6 +69,16 @@ public class JsonStringReaderTest extends TestBase {
     }
 
     @Test
+    public void testConstructor_ToIndexGreaterThanLength_ThrowsIllegalArgument() {
+        assertThrows(IllegalArgumentException.class, () -> new JsonStringReader(new char[2], 0, 3, new char[256], null));
+    }
+
+    @Test
+    public void testConstructor_BeginIndexGreaterThanLength_ThrowsIllegalArgument() {
+        assertThrows(IllegalArgumentException.class, () -> new JsonStringReader(new char[2], 3, 3, new char[256], null));
+    }
+
+    @Test
     public void testReadSimpleObject() {
         String json = "{\"name\":\"John\"}";
         JsonReader reader = JsonStringReader.parse(json, cbuf);
@@ -847,6 +857,50 @@ public class JsonStringReaderTest extends TestBase {
         ParsingException ex = assertThrows(ParsingException.class, () -> reader.nextToken());
         assertTrue(ex.getMessage().contains("'Z'"), "Expected message to contain readable char 'Z' but was: " + ex.getMessage());
         assertFalse(ex.getMessage().contains("'" + (int) 'Z' + "'"), "Message should not contain integer code point: " + ex.getMessage());
+    }
+
+    // A two-unit unicode-escape surrogate pair (emoji U+1F600) must round-trip: each escape produces one
+    // char and the two consecutive chars reconstruct the supplementary code point.
+    @Test
+    public void testReadUnicodeEscape_SurrogatePair_RoundTrips() {
+        String json = "\"\\uD83D\\uDE00\""; // grinning face emoji
+        JsonReader reader = JsonStringReader.parse(json, cbuf);
+
+        assertEquals(JsonReader.START_DOUBLE_QUOTE, reader.nextToken());
+        assertEquals(JsonReader.END_DOUBLE_QUOTE, reader.nextToken());
+        String text = reader.getText();
+        assertEquals(2, text.length());
+        assertEquals(0x1F600, text.codePointAt(0));
+    }
+
+    // A "false" literal immediately adjacent to a structural token (no surrounding whitespace)
+    // must be recognized as the boolean text and the terminator returned as the next event.
+    @Test
+    public void testReadFalseLiteral_AdjacentToCloseBrace_NoWhitespace() {
+        String json = "{\"a\":false}";
+        JsonReader reader = JsonStringReader.parse(json, cbuf);
+
+        assertEquals(JsonReader.START_BRACE, reader.nextToken());
+        reader.nextToken(); // START_DOUBLE_QUOTE
+        reader.nextToken(); // END_DOUBLE_QUOTE
+        assertEquals("a", reader.getText());
+        assertEquals(JsonReader.COLON, reader.nextToken());
+
+        // value token: 'false' followed immediately by '}' -> END_BRACE returned, text == "false"
+        assertEquals(JsonReader.END_BRACE, reader.nextToken());
+        assertEquals("false", reader.getText());
+        assertEquals(Boolean.FALSE, reader.readValue(N.typeOf(Boolean.class)));
+    }
+
+    // An unquoted token that merely starts with "false" (e.g. "falsehood") must NOT be mistaken
+    // for the boolean literal: the trailing non-delimiter chars invalidate the fast-path match.
+    @Test
+    public void testReadFalsePrefixToken_IsNotBooleanLiteral() {
+        String json = "falsehood";
+        JsonReader reader = JsonStringReader.parse(json, cbuf);
+
+        assertEquals(JsonReader.EOF, reader.nextToken());
+        assertEquals("falsehood", reader.getText());
     }
 
 }

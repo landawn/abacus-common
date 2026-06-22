@@ -50,9 +50,15 @@ import com.landawn.abacus.annotation.MayReturnNull;
  *   <caption>Method naming comparison between ObjectPool and KeyedObjectPool</caption>
  *   <tr><th>Operation</th><th>ObjectPool (Queue-style)</th><th>KeyedObjectPool (Map-style)</th></tr>
  *   <tr><td>Insert</td><td>{@code add(E)}</td><td>{@code put(K, E)}</td></tr>
- *   <tr><td>Retrieve</td><td>{@code take()}</td><td>{@code get(K)}</td></tr>
+ *   <tr><td>Retrieve-and-remove</td><td>{@code take()}</td><td>{@code remove(K)}</td></tr>
+ *   <tr><td>Retrieve-without-removing</td><td>(no analog)</td><td>{@code get(K)}</td></tr>
  *   <tr><td>Check</td><td>{@code contains(E)}</td><td>{@code containsKey(K)}</td></tr>
  * </table>
+ *
+ * <p>Note: {@code take()} <em>removes</em> the object from the pool, so its true keyed mirror is
+ * {@link KeyedObjectPool#remove(Object)} (which also removes). {@link KeyedObjectPool#get(Object)}
+ * returns the value <em>without</em> removing it and therefore has no unkeyed analog (a
+ * non-removing {@code peek()} on an unkeyed pool would be ambiguous over interchangeable objects).</p>
  *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
@@ -254,8 +260,9 @@ public interface ObjectPool<E extends Poolable> extends Pool {
      * // Example with ByteBuffer wrapper
      * class PooledBuffer extends AbstractPoolable {
      *     private final ByteBuffer buffer;
-     *     public PooledBuffer(int capacity) { this.buffer = ByteBuffer.allocate(capacity); }
+     *     public PooledBuffer(int capacity) { super(3600000, 600000); this.buffer = ByteBuffer.allocate(capacity); }
      *     public int capacity() { return buffer.capacity(); }
+     *     @Override public void destroy(Poolable.Caller caller) {}   // release resources here
      * }
      *
      * MemoryMeasure<PooledBuffer> measure = buffer -> buffer.capacity();

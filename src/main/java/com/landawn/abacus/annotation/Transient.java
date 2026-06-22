@@ -40,9 +40,11 @@ import java.lang.annotation.Target;
  * <p><b>Interaction with JSON/XML serialization:</b></p>
  * <ul>
  *   <li>A transient property is excluded from serialization by default.</li>
- *   <li>To include a transient field in JSON/XML output, the property must declare its exposure
- *       direction explicitly via {@link JsonXmlField#direction() @JsonXmlField(direction = ...)};
- *       otherwise the framework throws when registering the bean.</li>
+ *   <li>A transient property must leave {@link JsonXmlField#direction() @JsonXmlField(direction = ...)}
+ *       at its default ({@code Direction.BOTH}); combining {@code @Transient} (or the {@code transient}
+ *       modifier) with an explicit non-default direction causes an {@code IllegalArgumentException}
+ *       when the bean is first introspected. To include transient fields in serialized output,
+ *       configure the serializer with {@code setSkipTransientField(false)}.</li>
  *   <li>To exclude a non-transient field from serialization only, prefer
  *       {@link JsonXmlField#ignore() @JsonXmlField(ignore = true)} rather than {@code @Transient}.</li>
  * </ul>
@@ -87,7 +89,7 @@ import java.lang.annotation.Target;
  * @see JsonXmlField#direction()
  */
 @Documented
-@Target(value = { FIELD /* METHOD, */ })
+@Target(value = { FIELD })
 @Retention(RUNTIME)
 public @interface Transient {
 }

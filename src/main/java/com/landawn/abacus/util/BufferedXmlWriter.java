@@ -79,14 +79,11 @@ public final class BufferedXmlWriter extends CharacterWriter {
      * under the License.
      */
 
-    /*
-     * From RFC 4627, "All Unicode characters may be placed within the quotation
-     * marks except for the characters that must be escaped: quotation mark,
-     * reverse solidus, and the control characters (U+0000 through U+001F)."
-     *
-     * We also escape '\u2028' and '\u2029', which JavaScript interprets as
-     * newline characters. This prevents eval() from failing with a syntax
-     * error. http://code.google.com/p/google-gson/issues/detail?id=341
+    /**
+     * XML character replacement mappings.
+     * The predefined XML entities are used for quotes, apostrophes, angle brackets, and ampersands.
+     * Other control characters (U+0000 through U+001F and U+007F) are escaped as XML numeric character
+     * references of the form <code>&amp;#xNN;</code> (for example U+001F becomes <code>&amp;#x1f;</code>).
      */
     private static final char[][] REPLACEMENT_CHARS;
 

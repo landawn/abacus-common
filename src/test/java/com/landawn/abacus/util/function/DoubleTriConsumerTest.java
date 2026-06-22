@@ -82,6 +82,6 @@ public class DoubleTriConsumerTest extends TestBase {
     public void testAndThenNullThrowsImmediately() {
         DoubleTriConsumer instance = (a, b, c) -> {
         };
-        org.junit.jupiter.api.Assertions.assertThrows(NullPointerException.class, () -> instance.andThen((DoubleTriConsumer) null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> instance.andThen((DoubleTriConsumer) null));
     }
 }

@@ -15,9 +15,9 @@
  */
 package com.landawn.abacus.util.function;
 
-import java.util.Objects;
-
 import com.landawn.abacus.util.Throwables;
+import com.landawn.abacus.util.N;
+import com.landawn.abacus.util.cs;
 
 /**
  * A functional interface that represents a predicate (boolean-valued function) of four arguments.
@@ -126,10 +126,10 @@ public interface QuadPredicate<A, B, C, D> extends Throwables.QuadPredicate<A, B
      * @param other a predicate that will be logically-ANDed with this predicate. Must not be {@code null}.
      * @return a composed predicate that represents the short-circuiting logical
      *         AND of this predicate and the {@code other} predicate
-     * @throws NullPointerException if {@code other} is null
+     * @throws IllegalArgumentException if {@code other} is null
      */
     default QuadPredicate<A, B, C, D> and(final QuadPredicate<? super A, ? super B, ? super C, ? super D> other) {
-        Objects.requireNonNull(other);
+        N.checkArgNotNull(other, cs.other);
         return (a, b, c, d) -> test(a, b, c, d) && other.test(a, b, c, d);
     }
 
@@ -159,27 +159,26 @@ public interface QuadPredicate<A, B, C, D> extends Throwables.QuadPredicate<A, B
      * @param other a predicate that will be logically-ORed with this predicate. Must not be {@code null}.
      * @return a composed predicate that represents the short-circuiting logical
      *         OR of this predicate and the {@code other} predicate
-     * @throws NullPointerException if {@code other} is null
+     * @throws IllegalArgumentException if {@code other} is null
      */
     default QuadPredicate<A, B, C, D> or(final QuadPredicate<? super A, ? super B, ? super C, ? super D> other) {
-        Objects.requireNonNull(other);
+        N.checkArgNotNull(other, cs.other);
         return (a, b, c, d) -> test(a, b, c, d) || other.test(a, b, c, d);
     }
 
     /**
-     * Converts this QuadPredicate to a Throwables.QuadPredicate that can throw checked exceptions.
-     * This method is useful when you need to use this predicate in a context that expects
-     * a Throwables.QuadPredicate with a specific exception type.
+     * Returns this predicate as a {@link Throwables.QuadPredicate} view.
+     * This method does not translate exceptions or make the original implementation capable of
+     * throwing new checked exceptions; the exception type parameter is for target-type compatibility.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * QuadPredicate<String, Integer, Boolean, Date> predicate = (s, i, b, d) -> { ... };
-     * var throwablePredicate =
-     *     predicate.toThrowable();
+     * QuadPredicate<String, Integer, Boolean, Long> predicate = (s, i, b, id) -> s.length() == i && b && id > 0;
+     * Throwables.QuadPredicate<String, Integer, Boolean, Long, RuntimeException> throwablePredicate = predicate.toThrowable();
      * }</pre>
      *
-     * @param <E> the type of exception that the returned predicate may throw
-     * @return a Throwables.QuadPredicate that wraps this predicate
+     * @param <E> the target exception type for compatibility with {@code Throwables.QuadPredicate}
+     * @return this predicate viewed as a {@code Throwables.QuadPredicate} by unchecked cast
      */
     default <E extends Throwable> Throwables.QuadPredicate<A, B, C, D, E> toThrowable() {
         return (Throwables.QuadPredicate<A, B, C, D, E>) this;

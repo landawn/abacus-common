@@ -90,7 +90,11 @@ public final class XmlMappers {
             }
 
             serializationFeatureNotEnabledByDefault = tmp;
-            defaultSerializationConfigForCopy = defaultSerializationConfig.with(serializationFeatureNotEnabledByDefault);
+            if (tmp != null) {
+                defaultSerializationConfigForCopy = defaultSerializationConfig.with(serializationFeatureNotEnabledByDefault);
+            } else {
+                defaultSerializationConfigForCopy = defaultSerializationConfig;
+            }
         }
 
         {
@@ -103,7 +107,11 @@ public final class XmlMappers {
             }
 
             deserializationFeatureNotEnabledByDefault = tmp;
-            defaultDeserializationConfigForCopy = defaultDeserializationConfig.with(deserializationFeatureNotEnabledByDefault);
+            if (tmp != null) {
+                defaultDeserializationConfigForCopy = defaultDeserializationConfig.with(deserializationFeatureNotEnabledByDefault);
+            } else {
+                defaultDeserializationConfigForCopy = defaultDeserializationConfig;
+            }
         }
     }
 
@@ -269,7 +277,8 @@ public final class XmlMappers {
 
     /**
      * Serializes the specified object to an XML output stream using default configuration.
-     * The stream is not closed by this method.
+     * Note: the stream is closed after writing, because {@code JsonGenerator.Feature.AUTO_CLOSE_TARGET}
+     * is enabled by default on the underlying mapper.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -293,7 +302,7 @@ public final class XmlMappers {
 
     /**
      * Serializes the specified object to an XML output stream using a custom serialization configuration.
-     * The stream is not closed by this method.
+     * The stream is closed after writing (Jackson's default auto-close behavior).
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -322,7 +331,8 @@ public final class XmlMappers {
 
     /**
      * Serializes the specified object to an XML writer using default configuration.
-     * The writer is not closed by this method.
+     * Note: the writer is closed after writing, because {@code JsonGenerator.Feature.AUTO_CLOSE_TARGET}
+     * is enabled by default on the underlying mapper.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -347,7 +357,7 @@ public final class XmlMappers {
 
     /**
      * Serializes the specified object to an XML writer using a custom serialization configuration.
-     * The writer is not closed by this method.
+     * The writer is closed after writing (Jackson's default auto-close behavior).
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -506,6 +516,11 @@ public final class XmlMappers {
     /**
      * Deserializes an XML string into an object of the specified type with custom deserialization features.
      *
+     * <p>Note that each supplied feature is <i>enabled</i>; this method cannot disable a feature.
+     * To disable a feature (or otherwise customize the configuration), use
+     * {@link #fromXml(String, Class, DeserializationConfig)} with a config built via
+     * {@link #createDeserializationConfig()}.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String xml = "<Person><name>John</name><age>30</age></Person>";
@@ -616,7 +631,8 @@ public final class XmlMappers {
 
     /**
      * Deserializes XML from an input stream into an object of the specified type.
-     * The stream is not closed by this method.
+     * Note: the stream is closed after reading, because {@code JsonParser.Feature.AUTO_CLOSE_SOURCE}
+     * is enabled by default on the underlying mapper.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -642,7 +658,7 @@ public final class XmlMappers {
 
     /**
      * Deserializes XML from an input stream into an object of the specified type using a custom deserialization configuration.
-     * The stream is not closed by this method.
+     * The stream is closed after reading (Jackson's default auto-close behavior).
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -675,7 +691,8 @@ public final class XmlMappers {
 
     /**
      * Deserializes XML from a reader into an object of the specified type.
-     * The reader is not closed by this method.
+     * Note: the reader is closed after reading, because {@code JsonParser.Feature.AUTO_CLOSE_SOURCE}
+     * is enabled by default on the underlying mapper.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -701,7 +718,7 @@ public final class XmlMappers {
 
     /**
      * Deserializes XML from a reader into an object of the specified type using a custom deserialization configuration.
-     * The reader is not closed by this method.
+     * The reader is closed after reading (Jackson's default auto-close behavior).
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -792,7 +809,8 @@ public final class XmlMappers {
 
     /**
      * Deserializes XML from a DataInput into an object of the specified type.
-     * This method is useful for reading XML from binary protocols.
+     * Note: Jackson's XML format does not support reading from a {@code DataInput} source;
+     * this method always fails at runtime (see example).
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -930,6 +948,11 @@ public final class XmlMappers {
     /**
      * Deserializes an XML string into an object of the specified generic type with custom deserialization features.
      *
+     * <p>Note that each supplied feature is <i>enabled</i>; this method cannot disable a feature.
+     * To disable a feature (or otherwise customize the configuration), use
+     * {@link #fromXml(String, TypeReference, DeserializationConfig)} with a config built via
+     * {@link #createDeserializationConfig()}.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String xml = "<List><item>a</item><item>b</item></List>";
@@ -1037,7 +1060,7 @@ public final class XmlMappers {
 
     /**
      * Deserializes XML from an input stream into an object of the specified generic type.
-     * The stream is not closed by this method.
+     * The stream is closed after reading (Jackson's default auto-close behavior).
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1064,7 +1087,7 @@ public final class XmlMappers {
 
     /**
      * Deserializes XML from an input stream into an object of the specified generic type using a custom deserialization configuration.
-     * The stream is not closed by this method.
+     * The stream is closed after reading (Jackson's default auto-close behavior).
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1097,7 +1120,7 @@ public final class XmlMappers {
 
     /**
      * Deserializes XML from a reader into an object of the specified generic type.
-     * The reader is not closed by this method.
+     * The reader is closed after reading (Jackson's default auto-close behavior).
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1124,7 +1147,7 @@ public final class XmlMappers {
 
     /**
      * Deserializes XML from a reader into an object of the specified generic type using a custom deserialization configuration.
-     * The reader is not closed by this method.
+     * The reader is closed after reading (Jackson's default auto-close behavior).
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1215,7 +1238,8 @@ public final class XmlMappers {
 
     /**
      * Deserializes XML from a DataInput into an object of the specified generic type.
-     * This method is useful for reading XML from binary protocols.
+     * Note: Jackson's XML format does not support reading from a {@code DataInput} source;
+     * this method always fails at runtime (see example).
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1407,8 +1431,9 @@ public final class XmlMappers {
      * String xml = wrapper.toXml(person);
      * }</pre>
      *
-     * @param xmlMapper the XmlMapper instance to wrap
+     * @param xmlMapper the XmlMapper instance to wrap; must not be {@code null}
      * @return a {@link One} instance wrapping the provided XmlMapper
+     * @throws NullPointerException if {@code xmlMapper} is {@code null}
      * @see One
      */
     public static One wrap(final XmlMapper xmlMapper) {
@@ -1431,7 +1456,7 @@ public final class XmlMappers {
      *
      * // Use the wrapped mapper for multiple operations
      * String xml1 = xmlMappers.toXml(object1);
-     * String xml2 = xmlMappers.toXml(object2, true);   // returns with pretty print
+     * String xml2 = xmlMappers.toXml(object2, true);   // pretty-printed XML
      * Person person = xmlMappers.fromXml(xmlString, Person.class);
      * }</pre>
      *
@@ -1527,7 +1552,8 @@ public final class XmlMappers {
 
         /**
          * Serializes the specified object to an output stream using the wrapped XmlMapper.
-         * The stream is not closed by this method.
+         * Note: with Jackson's default settings the wrapped mapper closes the stream after
+         * writing ({@code JsonGenerator.Feature.AUTO_CLOSE_TARGET}).
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
@@ -1550,7 +1576,8 @@ public final class XmlMappers {
 
         /**
          * Serializes the specified object to a writer using the wrapped XmlMapper.
-         * The writer is not closed by this method.
+         * Note: with Jackson's default settings the wrapped mapper closes the writer after
+         * writing ({@code JsonGenerator.Feature.AUTO_CLOSE_TARGET}).
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
@@ -1701,7 +1728,8 @@ public final class XmlMappers {
 
         /**
          * Deserializes XML from an input stream into an object of the specified type
-         * using the wrapped XmlMapper. The stream is not closed by this method.
+         * using the wrapped XmlMapper. With Jackson's default settings the stream is
+         * closed after reading ({@code JsonParser.Feature.AUTO_CLOSE_SOURCE}).
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
@@ -1729,7 +1757,8 @@ public final class XmlMappers {
 
         /**
          * Deserializes XML from a reader into an object of the specified type
-         * using the wrapped XmlMapper. The reader is not closed by this method.
+         * using the wrapped XmlMapper. With Jackson's default settings the reader is
+         * closed after reading ({@code JsonParser.Feature.AUTO_CLOSE_SOURCE}).
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
@@ -1919,7 +1948,8 @@ public final class XmlMappers {
 
         /**
          * Deserializes XML from an input stream into an object of the specified generic type
-         * using the wrapped XmlMapper. The stream is not closed by this method.
+         * using the wrapped XmlMapper. With Jackson's default settings the stream is
+         * closed after reading ({@code JsonParser.Feature.AUTO_CLOSE_SOURCE}).
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
@@ -1947,7 +1977,8 @@ public final class XmlMappers {
 
         /**
          * Deserializes XML from a reader into an object of the specified generic type
-         * using the wrapped XmlMapper. The reader is not closed by this method.
+         * using the wrapped XmlMapper. With Jackson's default settings the reader is
+         * closed after reading ({@code JsonParser.Feature.AUTO_CLOSE_SOURCE}).
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code

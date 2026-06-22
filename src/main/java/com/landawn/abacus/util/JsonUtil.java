@@ -486,6 +486,8 @@ public final class JsonUtil {
                         value = unwrap((JSONObject) value, valueType);
                     } else if (value instanceof JSONArray) {
                         value = unwrap((JSONArray) value, valueType);
+                    } else if (!valueType.javaType().isAssignableFrom(value.getClass())) {
+                        value = valueType.valueOf(value);
                     }
                 }
 
@@ -656,7 +658,8 @@ public final class JsonUtil {
 
             return (T) coll;
         } else if (targetType.isPrimitiveArray()) {
-            final Object array = N.newArray(targetType.elementType().javaType(), jsonArray.length());
+            final Type<?> elementType = targetType.elementType();
+            final Object array = N.newArray(elementType.javaType(), jsonArray.length());
             Object element = null;
 
             for (int i = 0; i < len; i++) {
@@ -667,7 +670,9 @@ public final class JsonUtil {
                 }
 
                 if (element == null) {
-                    element = targetType.elementType().defaultValue();
+                    element = elementType.defaultValue();
+                } else {
+                    element = elementType.valueOf(element);
                 }
 
                 Array.set(array, i, element);
@@ -689,6 +694,8 @@ public final class JsonUtil {
                         element = unwrap((JSONObject) element, elementType);
                     } else if (element instanceof JSONArray) {
                         element = unwrap((JSONArray) element, elementType);
+                    } else if (!elementType.javaType().isAssignableFrom(element.getClass())) {
+                        element = elementType.valueOf(element);
                     }
                 }
 
@@ -732,8 +739,8 @@ public final class JsonUtil {
      *
      * <p>Supports complex generic element types that cannot be expressed with a plain {@link Class}.
      * Nested {@link JSONObject} and {@link JSONArray} elements are recursively converted according to
-     * {@code elementType}. Elements that are already of an acceptable scalar type (numbers, strings,
-     * booleans) are stored as-is. {@link JSONObject#NULL} is converted to {@code null}.
+     * {@code elementType}. Scalar elements are converted through {@code elementType} when they are not
+     * already assignable to its Java type. {@link JSONObject#NULL} is converted to {@code null}.
      *
      * <p><b>Usage example:</b>
      * <pre>{@code
@@ -764,6 +771,8 @@ public final class JsonUtil {
                     element = unwrap((JSONObject) element, elementType);
                 } else if (element instanceof JSONArray) {
                     element = unwrap((JSONArray) element, elementType);
+                } else if (!elementType.javaType().isAssignableFrom(element.getClass())) {
+                    element = elementType.valueOf(element);
                 }
             }
 

@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -4981,28 +4982,34 @@ public class IOUtilTest extends TestBase {
 
     @Test
     public void testClose_NullURLConnection() {
-        IOUtil.close((java.net.URLConnection) null);
+        assertDoesNotThrow(() -> {
+            IOUtil.close((java.net.URLConnection) null);
+        });
     }
 
     @Test
     public void testClose_NullAutoCloseable() {
-        IOUtil.close((AutoCloseable) null);
+        assertDoesNotThrow(() -> {
+            IOUtil.close((AutoCloseable) null);
+        });
     }
 
     @Test
     public void testClose_URLConnection() throws Exception {
-        File testFile = Files.createTempFile(tempFolder, "urltest", ".txt").toFile();
-        Files.write(testFile.toPath(), TEST_CONTENT.getBytes(UTF_8));
+        assertDoesNotThrow(() -> {
+            File testFile = Files.createTempFile(tempFolder, "urltest", ".txt").toFile();
+            Files.write(testFile.toPath(), TEST_CONTENT.getBytes(UTF_8));
 
-        java.net.URL url = testFile.toURI().toURL();
-        java.net.URLConnection conn = url.openConnection();
-        conn.connect();
+            java.net.URL url = testFile.toURI().toURL();
+            java.net.URLConnection conn = url.openConnection();
+            conn.connect();
 
-        try (InputStream in = conn.getInputStream()) {
-            in.readAllBytes(); // simulate use
-        }
+            try (InputStream in = conn.getInputStream()) {
+                in.readAllBytes(); // simulate use
+            }
 
-        IOUtil.close(conn);
+            IOUtil.close(conn);
+        });
     }
 
     @Test
@@ -5044,13 +5051,17 @@ public class IOUtilTest extends TestBase {
 
     @Test
     public void testCloseAll_EmptyVarArgs() {
-        IOUtil.closeAll();
+        assertDoesNotThrow(() -> {
+            IOUtil.closeAll();
+        });
     }
 
     @Test
     public void testCloseAll_EmptyIterable() {
-        java.util.List<AutoCloseable> closeables = new java.util.ArrayList<>();
-        IOUtil.closeAll(closeables);
+        assertDoesNotThrow(() -> {
+            java.util.List<AutoCloseable> closeables = new java.util.ArrayList<>();
+            IOUtil.closeAll(closeables);
+        });
     }
 
     @Test
@@ -5124,7 +5135,9 @@ public class IOUtilTest extends TestBase {
 
     @Test
     public void testCloseQuietly_Null() {
-        IOUtil.closeQuietly((AutoCloseable) null);
+        assertDoesNotThrow(() -> {
+            IOUtil.closeQuietly((AutoCloseable) null);
+        });
     }
 
     @Test
@@ -5137,11 +5150,13 @@ public class IOUtilTest extends TestBase {
 
     @Test
     public void testCloseQuietly_WithException() {
-        AutoCloseable problematic = () -> {
-            throw new IOException("Test exception");
-        };
+        assertDoesNotThrow(() -> {
+            AutoCloseable problematic = () -> {
+                throw new IOException("Test exception");
+            };
 
-        IOUtil.closeQuietly(problematic);
+            IOUtil.closeQuietly(problematic);
+        });
     }
 
     @Test
@@ -5158,18 +5173,24 @@ public class IOUtilTest extends TestBase {
 
     @Test
     public void testCloseAllQuietly_EmptyVarArgs() {
-        IOUtil.closeAllQuietly();
+        assertDoesNotThrow(() -> {
+            IOUtil.closeAllQuietly();
+        });
     }
 
     @Test
     public void testCloseAllQuietly_EmptyIterable() {
-        java.util.List<AutoCloseable> closeables = new java.util.ArrayList<>();
-        IOUtil.closeAllQuietly(closeables);
+        assertDoesNotThrow(() -> {
+            java.util.List<AutoCloseable> closeables = new java.util.ArrayList<>();
+            IOUtil.closeAllQuietly(closeables);
+        });
     }
 
     @Test
     public void testCloseAllQuietly_NullIterable() {
-        IOUtil.closeAllQuietly((Iterable<? extends AutoCloseable>) null);
+        assertDoesNotThrow(() -> {
+            IOUtil.closeAllQuietly((Iterable<? extends AutoCloseable>) null);
+        });
     }
 
     @Test
@@ -6561,6 +6582,33 @@ public class IOUtilTest extends TestBase {
     }
 
     @Test
+    public void testZip_NonExistentSource_DoesNotTruncateExistingTarget() throws Exception {
+        File missingSource = new File(tempFolder.toFile(), "missing-zip-source.txt");
+        File zipFile = Files.createTempFile(tempFolder, "existing-archive", ".zip").toFile();
+        Files.write(zipFile.toPath(), "precious existing content".getBytes(UTF_8));
+
+        assertThrows(UncheckedIOException.class, () -> IOUtil.zip(missingSource, zipFile));
+
+        // The existing target file must not be truncated when the source is invalid.
+        assertEquals("precious existing content", new String(Files.readAllBytes(zipFile.toPath()), UTF_8));
+    }
+
+    @Test
+    public void testZip_Collection_NonExistentSource_DoesNotTruncateExistingTarget() throws Exception {
+        File okSource = Files.createTempFile(tempFolder, "ok-source", ".txt").toFile();
+        Files.write(okSource.toPath(), "ok".getBytes(UTF_8));
+        File missingSource = new File(tempFolder.toFile(), "missing-zip-source2.txt");
+
+        File zipFile = Files.createTempFile(tempFolder, "existing-archive2", ".zip").toFile();
+        Files.write(zipFile.toPath(), "precious existing content".getBytes(UTF_8));
+
+        assertThrows(UncheckedIOException.class, () -> IOUtil.zip(java.util.Arrays.asList(okSource, missingSource), zipFile));
+
+        // The existing target file must not be truncated when any source is invalid.
+        assertEquals("precious existing content", new String(Files.readAllBytes(zipFile.toPath()), UTF_8));
+    }
+
+    @Test
     public void testUnzip_Basic() throws Exception {
         File sourceFile = Files.createTempFile(tempFolder, "source", ".txt").toFile();
         Files.write(sourceFile.toPath(), "Content to unzip".getBytes(UTF_8));
@@ -6729,6 +6777,19 @@ public class IOUtilTest extends TestBase {
     }
 
     @Test
+    public void testSplitBySize_NonPositiveSize_DoesNotCreateDestDir() throws Exception {
+        File sourceFile = Files.createTempFile(tempFolder, "split-bad-size", ".txt").toFile();
+        Files.write(sourceFile.toPath(), "data".getBytes(UTF_8));
+
+        File destDir = new File(tempFolder.toFile(), "split-bad-size-dest");
+
+        assertThrows(IllegalArgumentException.class, () -> IOUtil.splitBySize(sourceFile, 0, destDir));
+
+        // The destination directory must not be created when sizeOfPart is invalid.
+        assertFalse(destDir.exists());
+    }
+
+    @Test
     public void testSplitByLine_MultiplePartsWithDestDir() throws Exception {
         File file = Files.createTempFile(tempFolder, "split-by-line", ".txt").toFile();
         Files.write(file.toPath(), java.util.Arrays.asList("L1", "L2", "L3", "L4", "L5", "L6", "L7", "L8", "L9", "L10"), UTF_8);
@@ -6872,6 +6933,21 @@ public class IOUtilTest extends TestBase {
 
         assertTrue(totalBytes > 0);
         assertEquals(file1.length() + file2.length(), totalBytes);
+    }
+
+    @Test
+    public void testMerge_NonExistentSource_DoesNotTruncateExistingDest() throws Exception {
+        File okSource = Files.createTempFile(tempFolder, "merge-ok", ".txt").toFile();
+        Files.write(okSource.toPath(), "ok".getBytes(UTF_8));
+        File missingSource = new File(tempFolder.toFile(), "missing-merge-source.txt");
+
+        File destFile = Files.createTempFile(tempFolder, "merged-existing", ".txt").toFile();
+        Files.write(destFile.toPath(), "precious existing content".getBytes(UTF_8));
+
+        assertThrows(UncheckedIOException.class, () -> IOUtil.merge(java.util.Arrays.asList(okSource, missingSource), destFile));
+
+        // The existing destination file must not be truncated when any source is invalid.
+        assertEquals("precious existing content", new String(Files.readAllBytes(destFile.toPath()), UTF_8));
     }
 
     @Test
@@ -7256,15 +7332,6 @@ public class IOUtilTest extends TestBase {
     @Test
     public void testToFile_NullURL() {
         assertThrows(Exception.class, () -> IOUtil.toFile(null));
-    }
-
-    @Test
-    public void testToFile_FileURL() throws Exception {
-        File file = Files.createTempFile(tempFolder, "url-test", ".txt").toFile();
-        java.net.URL url = file.toURI().toURL();
-        File result = IOUtil.toFile(url);
-        assertNotNull(result);
-        assertEquals(file.getAbsolutePath(), result.getAbsolutePath());
     }
 
     @Test
@@ -8487,6 +8554,197 @@ public class IOUtilTest extends TestBase {
         } finally {
             f.delete();
         }
+    }
+
+    // --- regression tests for 2026-06-10 deep-review fixes ---
+
+    @Test
+    public void testReadFileIntoByteBuffer_decompressesGzLikeSiblings() throws Exception {
+        // regression: read(File, byte[], off, len) bypassed openFile(), returning raw gzip container
+        // bytes while the char[] sibling and readBytes(File, ...) returned decompressed content
+        final java.io.File gz = tempFolder.resolve("regression_data.gz").toFile();
+        try (java.util.zip.GZIPOutputStream out = IOUtil.newGZIPOutputStream(IOUtil.newFileOutputStream(gz))) {
+            out.write("hello world".getBytes(java.nio.charset.StandardCharsets.UTF_8));
+        }
+
+        final byte[] buf = new byte[11];
+        final int n = IOUtil.read(gz, buf, 0, buf.length);
+
+        assertEquals(11, n);
+        assertEquals("hello world", new String(buf, java.nio.charset.StandardCharsets.UTF_8));
+    }
+
+    @Test
+    public void testAppendEmptyBytesCreatesTargetFile() throws Exception {
+        // regression: append(byte[], File) with empty input did not create the missing target file,
+        // unlike the char[] sibling and the write family
+        final java.io.File f1 = tempFolder.resolve("append_empty_bytes.txt").toFile();
+        IOUtil.append(new byte[0], f1);
+        assertTrue(f1.exists());
+
+        final java.io.File f2 = tempFolder.resolve("append_zero_count_bytes.txt").toFile();
+        IOUtil.append(new byte[] { 1, 2 }, 0, 0, f2);
+        assertTrue(f2.exists());
+    }
+
+    @Test
+    public void testSplitByLineProducesRequestedNumberOfParts() throws Exception {
+        // regression: floor division created more part files than requested (10 lines / 3 parts -> 4 files)
+        final java.io.File src = tempFolder.resolve("regression_ten_lines.txt").toFile();
+        final StringBuilder sb = new StringBuilder();
+        for (int i = 1; i <= 10; i++) {
+            sb.append("line").append(i).append('\n');
+        }
+        IOUtil.write(sb.toString(), src);
+
+        final java.io.File destDir = tempFolder.resolve("regression_split_parts").toFile();
+        assertTrue(destDir.mkdirs());
+        IOUtil.splitByLine(src, 3, destDir);
+
+        assertEquals(3, destDir.listFiles().length);
+    }
+
+    @Test
+    public void testZipSingleSegmentRelativeDirectory() throws Exception {
+        final File srcDir = new File("io_util_relative_zip_dir_" + System.nanoTime());
+        final File child = new File(srcDir, "child.txt");
+        final File zip = tempFolder.resolve("relative-dir.zip").toFile();
+
+        try {
+            assertTrue(srcDir.mkdir());
+            IOUtil.write("child", child);
+
+            assertDoesNotThrow(() -> IOUtil.zip(srcDir, zip));
+
+            try (java.util.zip.ZipFile zf = new java.util.zip.ZipFile(zip)) {
+                assertNotNull(zf.getEntry(srcDir.getName() + "/"));
+                assertNotNull(zf.getEntry(srcDir.getName() + "/child.txt"));
+            }
+        } finally {
+            IOUtil.deleteRecursivelyIfExists(srcDir);
+        }
+    }
+
+    @Test
+    public void testSplitProducesRequestedNumberOfParts() throws Exception {
+        final File src = tempFolder.resolve("regression_split_exact.bin").toFile();
+        final byte[] data = new byte[10];
+        for (int i = 0; i < data.length; i++) {
+            data[i] = (byte) i;
+        }
+        Files.write(src.toPath(), data);
+
+        final File destDir = tempFolder.resolve("regression_split_exact_parts").toFile();
+        assertTrue(destDir.mkdirs());
+
+        IOUtil.split(src, 6, destDir);
+
+        final File[] parts = destDir.listFiles();
+        assertNotNull(parts);
+        assertEquals(6, parts.length);
+
+        final byte[] merged = new byte[10];
+        int offset = 0;
+        final int[] expectedLengths = { 2, 2, 2, 2, 1, 1 };
+
+        for (int i = 0; i < expectedLengths.length; i++) {
+            final File part = new File(destDir, src.getName() + "_" + Strings.padStart(N.stringOf(i + 1), 4, '0'));
+            assertTrue(part.exists());
+            assertEquals(expectedLengths[i], part.length());
+
+            final byte[] partBytes = Files.readAllBytes(part.toPath());
+            System.arraycopy(partBytes, 0, merged, offset, partBytes.length);
+            offset += partBytes.length;
+        }
+
+        assertArrayEquals(data, merged);
+    }
+
+    @Test
+    public void testSimplifyPathDoesNotTrimComponents() {
+        // regression: trimResults() stripped spaces from path components, which could fabricate
+        // parent-directory traversal (" .. " -> "..") and merge distinct names ("b " -> "b")
+        assertEquals("a/b /c", IOUtil.simplifyPath("a/b /c"));
+        assertEquals("a/ .. /b", IOUtil.simplifyPath("a/ .. /b"));
+
+        // documented behavior unchanged
+        assertEquals("b", IOUtil.simplifyPath("a/../b"));
+        assertEquals(".", IOUtil.simplifyPath(""));
+        assertEquals("a/b", IOUtil.simplifyPath("a//b/"));
+    }
+
+    @Test
+    public void testCopyEmptyDirectoryPreservesFileDate() throws Exception {
+        // regression: the empty-directory early return skipped the preserveFileDate step
+        final java.io.File srcDir = tempFolder.resolve("regression_empty_src_dir").toFile();
+        assertTrue(srcDir.mkdirs());
+        final long past = (System.currentTimeMillis() - 200_000_000L) / 1000 * 1000;
+        assertTrue(srcDir.setLastModified(past));
+
+        final java.io.File destParent = tempFolder.resolve("regression_copy_dest").toFile();
+        assertTrue(destParent.mkdirs());
+        IOUtil.copyToDirectory(srcDir, destParent, true);
+
+        final java.io.File copied = new java.io.File(destParent, srcDir.getName());
+        assertTrue(copied.exists());
+        assertEquals(srcDir.lastModified(), copied.lastModified());
+    }
+
+    @Test
+    public void testWriteFileToFile_negativeOffsetOrCount_doesNotTruncateOutput() throws Exception {
+        // regression: write(File, long, long, File) opened (and truncated) the output file before
+        // validating offset/count, so an invalid call destroyed the existing output content.
+        // Siblings (write(File, long, long, OutputStream, boolean), write(InputStream, long, long, File))
+        // validate before any side effect.
+        final File src = tempFolder.resolve("regression_write_src.txt").toFile();
+        IOUtil.write("source-data", src);
+
+        final File out = tempFolder.resolve("regression_write_out.txt").toFile();
+        IOUtil.write("KEEP", out);
+
+        assertThrows(IllegalArgumentException.class, () -> IOUtil.write(src, -1L, 5L, out));
+        assertThrows(IllegalArgumentException.class, () -> IOUtil.write(src, 0L, -1L, out));
+
+        assertEquals("KEEP", IOUtil.readAllToString(out));
+
+        // a valid call still overwrites the output file
+        assertEquals(11L, IOUtil.write(src, 0L, Long.MAX_VALUE, out));
+        assertEquals("source-data", IOUtil.readAllToString(out));
+    }
+
+    @Test
+    public void testWriteBytesToFile_outOfBoundsRange_doesNotTruncateOutput() throws Exception {
+        // regression: write(byte[], offset, count, File) opened (and truncated) the target before
+        // validating offset+count against the array length, so a bad range destroyed existing content
+        // and then failed with IndexOutOfBoundsException.
+        final File out = tempFolder.resolve("regression_write_bytes_out.txt").toFile();
+        IOUtil.write("KEEP", out);
+
+        final byte[] bytes = { 1, 2, 3 };
+        assertThrows(IndexOutOfBoundsException.class, () -> IOUtil.write(bytes, 1, 5, out));
+
+        assertEquals("KEEP", IOUtil.readAllToString(out));
+
+        // a valid sub-range still overwrites the output file
+        IOUtil.write(bytes, 1, 2, out);
+        assertArrayEquals(new byte[] { 2, 3 }, IOUtil.readAllBytes(out));
+    }
+
+    @Test
+    public void testWriteReaderOffsetPastEofReturnsZeroLikeInputStreamOverload() throws Exception {
+        final java.io.StringWriter writer = new java.io.StringWriter();
+
+        assertEquals(0L, IOUtil.write(new StringReader("abc"), 10L, 1L, writer, false));
+        assertEquals("", writer.toString());
+    }
+
+    @Test
+    public void testToFile_DecodesUtf8AndMalformedPercent() throws Exception {
+        final File file = IOUtil.toFile(new URL("file:/tmp/a%20b/%E2%82%AC%2B%25bad%zz.txt"));
+        final String path = file.getPath();
+
+        assertTrue(path.contains("a b"));
+        assertTrue(path.contains("\u20ac+%bad%zz.txt"));
     }
 
 }

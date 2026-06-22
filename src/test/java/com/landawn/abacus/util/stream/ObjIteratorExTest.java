@@ -1,6 +1,7 @@
 package com.landawn.abacus.util.stream;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -77,6 +78,35 @@ public class ObjIteratorExTest extends TestBase {
     }
 
     @Test
+    public void testOfIteratorCloseResourceDelegatesToAutoCloseable() {
+        final boolean[] closed = { false };
+
+        class CloseableIterator implements Iterator<String>, AutoCloseable {
+            private final Iterator<String> iter = Arrays.asList("a").iterator();
+
+            @Override
+            public boolean hasNext() {
+                return iter.hasNext();
+            }
+
+            @Override
+            public String next() {
+                return iter.next();
+            }
+
+            @Override
+            public void close() {
+                closed[0] = true;
+            }
+        }
+
+        final ObjIteratorEx<String> iter = ObjIteratorEx.of(new CloseableIterator());
+        iter.closeResource();
+
+        Assertions.assertTrue(closed[0]);
+    }
+
+    @Test
     public void testOfIterable() {
         List<String> list = Arrays.asList("a", "b", "c");
         ObjIteratorEx<String> iter = ObjIteratorEx.of((Iterable<String>) list);
@@ -119,16 +149,6 @@ public class ObjIteratorExTest extends TestBase {
 
         String[] result = iter.toArray(new String[0]);
         Assertions.assertArrayEquals(array, result);
-        Assertions.assertFalse(iter.hasNext());
-    }
-
-    @Test
-    public void testToList() {
-        String[] array = { "a", "b", "c" };
-        ObjIteratorEx<String> iter = ObjIteratorEx.of(array);
-
-        List<String> result = iter.toList();
-        Assertions.assertEquals(Arrays.asList("a", "b", "c"), result);
         Assertions.assertFalse(iter.hasNext());
     }
 
@@ -318,6 +338,36 @@ public class ObjIteratorExTest extends TestBase {
     }
 
     @Test
+    public void testDeferCloseResourceDelegatesToIteratorEx() {
+        final boolean[] closed = { false };
+
+        final IteratorEx<String> source = new IteratorEx<>() {
+            private final Iterator<String> iter = Arrays.asList("a").iterator();
+
+            @Override
+            public boolean hasNext() {
+                return iter.hasNext();
+            }
+
+            @Override
+            public String next() {
+                return iter.next();
+            }
+
+            @Override
+            public void closeResource() {
+                closed[0] = true;
+            }
+        };
+
+        final ObjIteratorEx<String> iter = ObjIteratorEx.defer(() -> source);
+        Assertions.assertTrue(iter.hasNext());
+        iter.closeResource();
+
+        Assertions.assertTrue(closed[0]);
+    }
+
+    @Test
     public void testDeferAdvance_NonObjIteratorEx() {
         List<String> list = Arrays.asList("a", "b", "c");
         // Supplier returns a plain Iterator (not ObjIteratorEx), so defer falls back to super.advance
@@ -393,10 +443,12 @@ public class ObjIteratorExTest extends TestBase {
 
     @Test
     public void testDeferCloseResourceBeforeInit() {
-        Supplier<Iterator<String>> supplier = () -> Arrays.asList("a").iterator();
-        ObjIteratorEx<String> iter = ObjIteratorEx.defer(supplier);
-        // Close without using - should init and close without exception
-        iter.closeResource();
+        assertDoesNotThrow(() -> {
+            Supplier<Iterator<String>> supplier = () -> Arrays.asList("a").iterator();
+            ObjIteratorEx<String> iter = ObjIteratorEx.defer(supplier);
+            // Close without using - should init and close without exception
+            iter.closeResource();
+        });
     }
 
     @Test

@@ -218,6 +218,6 @@ public class CharPredicateTest extends TestBase {
     @Test
     public void testAndNullThrowsImmediately() {
         CharPredicate instance = a -> false;
-        org.junit.jupiter.api.Assertions.assertThrows(NullPointerException.class, () -> instance.and((CharPredicate) null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> instance.and((CharPredicate) null));
     }
 }

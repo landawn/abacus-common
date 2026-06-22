@@ -51,7 +51,7 @@ public class HttpHeadersTest extends TestBase {
         map.put("Content-Type", "application/json");
         map.put("Accept", "text/plain");
 
-        HttpHeaders headers = HttpHeaders.of(map);
+        HttpHeaders headers = HttpHeaders.wrap(map);
         assertEquals("application/json", headers.get("Content-Type"));
         assertEquals("text/plain", headers.get("Accept"));
     }
@@ -94,7 +94,7 @@ public class HttpHeadersTest extends TestBase {
         map.put("Content-Type", "application/json");
         map.put("Accept", "text/plain");
 
-        HttpHeaders headers = HttpHeaders.of(map);
+        HttpHeaders headers = HttpHeaders.wrap(map);
         assertNotNull(headers);
         assertEquals("application/json", headers.get("Content-Type"));
         assertEquals("text/plain", headers.get("Accept"));
@@ -135,7 +135,7 @@ public class HttpHeadersTest extends TestBase {
 
     @Test
     public void testOfMapWithNull() {
-        assertThrows(IllegalArgumentException.class, () -> HttpHeaders.of((Map<String, ?>) null));
+        assertThrows(IllegalArgumentException.class, () -> HttpHeaders.wrap((Map<String, ?>) null));
     }
 
     // --- copyOf ---
@@ -425,6 +425,53 @@ public class HttpHeadersTest extends TestBase {
         HttpHeaders result = headers.setAll(newHeaders);
         assertEquals(headers, result);
         assertEquals("value1", result.get("Header1"));
+    }
+
+    // --- setIfAbsent (M8) ---
+
+    @Test
+    public void testSetIfAbsent() {
+        HttpHeaders headers = HttpHeaders.create();
+
+        HttpHeaders result = headers.setIfAbsent("User-Agent", "MyApp/1.0");
+        assertEquals(headers, result);
+        assertEquals("MyApp/1.0", headers.get("User-Agent"));
+
+        // Does nothing when already present.
+        headers.setIfAbsent("User-Agent", "Other/2.0");
+        assertEquals("MyApp/1.0", headers.get("User-Agent"));
+    }
+
+    @Test
+    public void testSetIfAbsentNullName() {
+        HttpHeaders headers = HttpHeaders.create();
+        assertThrows(IllegalArgumentException.class, () -> headers.setIfAbsent(null, "value"));
+    }
+
+    // --- containsHeader (M8) ---
+
+    @Test
+    public void testContainsHeader() {
+        HttpHeaders headers = HttpHeaders.create();
+        assertFalse(headers.containsHeader("Content-Type"));
+
+        headers.setContentType("application/json");
+        assertTrue(headers.containsHeader("Content-Type"));
+        assertFalse(headers.containsHeader("Accept"));
+    }
+
+    // --- getFirst (M8) ---
+
+    @Test
+    public void testGetFirst() {
+        HttpHeaders headers = HttpHeaders.create();
+        assertNull(headers.getFirst("Accept-Encoding"));
+
+        headers.set("Accept-Encoding", Arrays.asList("gzip", "deflate"));
+        assertEquals("gzip, deflate", headers.getFirst("Accept-Encoding"));
+
+        headers.set("X-Num", 42);
+        assertEquals("42", headers.getFirst("X-Num"));
     }
 
     // --- get ---

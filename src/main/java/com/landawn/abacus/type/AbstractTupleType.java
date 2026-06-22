@@ -22,7 +22,6 @@ import java.util.List;
 import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.IOUtil;
-import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Objectory;
 import com.landawn.abacus.util.SK;
 import com.landawn.abacus.util.Strings;
@@ -117,7 +116,7 @@ abstract class AbstractTupleType<T extends Tuple<T>> extends AbstractType<T> {
      * into the original value.</p>
      *
      * @param x the tuple value to serialize, may be {@code null}
-     * @return a JSON array string (e.g., {@code "[\"foo\",42,true]"}), or {@code null} if {@code x} is {@code null}
+     * @return a JSON array string (e.g., {@code "[\"foo\", 42, true]"}), or {@code null} if {@code x} is {@code null}
      * @see #valueOf(String)
      * @see #valueOf(Object)
      */
@@ -129,9 +128,9 @@ abstract class AbstractTupleType<T extends Tuple<T>> extends AbstractType<T> {
     /**
      * Deserializes a JSON array string to a typed tuple.
      * <p>
-     * The string is expected to be a JSON array whose element count matches the arity of this
-     * tuple type. Each element is type-converted using the corresponding entry in
-     * {@link #parameterTypes()}.
+     * The string is expected to be a JSON array with at least the arity of this tuple type.
+     * Each tuple element is type-converted using the corresponding entry in {@link #parameterTypes()};
+     * additional array elements are ignored.
      * </p>
      *
      * <p>This method is the inverse of {@code stringOf} and round-trips with it: it parses the string produced by
@@ -164,8 +163,9 @@ abstract class AbstractTupleType<T extends Tuple<T>> extends AbstractType<T> {
 
         for (int i = 0; i < arity; i++) {
             final Type<?> elementType = parameterTypes.get(i);
-            final Object raw = a[i];
-            converted[i] = (raw == null) ? null : (elementType.javaType().isAssignableFrom(raw.getClass()) ? raw : N.convert(raw, elementType));
+            // Parameterized slots are re-deserialized with their declared element types (see
+            // convertTupleElement): the untyped first-pass parse produced parser defaults.
+            converted[i] = convertTupleElement(a[i], elementType);
         }
 
         return fromArray(converted);

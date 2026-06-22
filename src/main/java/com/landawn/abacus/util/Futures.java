@@ -21,6 +21,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.CancellationException;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.ExecutionException;
@@ -316,7 +317,7 @@ import com.landawn.abacus.util.Tuple.Tuple7;
  *
  * <p><b>Comparison with Alternative Approaches:</b>
  * <ul>
- *   <li><b>vs. CompletableFuture.allOf():</b> Type-safe results vs. Object array returns</li>
+ *   <li><b>vs. CompletableFuture.allOf():</b> typed {@code List<T>} results vs. {@code CompletableFuture<Void>} requiring separate per-future result retrieval</li>
  *   <li><b>vs. Manual Future.get() calls:</b> Parallel execution vs. sequential blocking</li>
  *   <li><b>vs. ExecutorCompletionService:</b> Simplified API vs. lower-level completion service management</li>
  *   <li><b>vs. Custom Thread Management:</b> Built-in error handling vs. manual exception aggregation</li>
@@ -413,8 +414,8 @@ public final class Futures {
      *                         as parameters and returns the composed result. Must not be {@code null}.
      * @return a ContinuableFuture that completes when both input futures complete, with a result
      *         computed by the provided zip function.
-     * @throws RuntimeException if the zip function throws an exception other than InterruptedException or ExecutionException,
-     *                         the exception is wrapped in a RuntimeException and thrown.
+     * @throws RuntimeException if the zip function throws an exception other than InterruptedException, ExecutionException,
+     *                         or TimeoutException, the exception is wrapped in a RuntimeException and thrown.
      * @see #compose(Future, Future, Throwables.BiFunction, Throwables.Function)
      * @see #combine(Future, Future, Throwables.BiFunction)
      * @see ContinuableFuture
@@ -601,7 +602,7 @@ public final class Futures {
      *                         and returns the composed result. Must not be {@code null}.
      * @return a ContinuableFuture that completes when all three input futures complete, with a result
      *         computed by the provided zip function.
-     * @throws RuntimeException if the zip function throws an exception other than InterruptedException or ExecutionException.
+     * @throws RuntimeException if the zip function throws an exception other than InterruptedException, ExecutionException, or TimeoutException.
      * @see #compose(Future, Future, Future, Throwables.TriFunction, Throwables.Function)
      * @see #combine(Future, Future, Future, Throwables.TriFunction)
      */
@@ -828,7 +829,7 @@ public final class Futures {
      * @return a ContinuableFuture that completes when all input futures complete, with a result
      *         computed by the provided zip function.
      * @throws IllegalArgumentException if the collection is {@code null} or empty, or if {@code zipFunctionForGet} is {@code null}.
-     * @throws RuntimeException if the zip function throws an exception other than InterruptedException or ExecutionException.
+     * @throws RuntimeException if the zip function throws an exception other than InterruptedException, ExecutionException, or TimeoutException.
      * @see #compose(Collection, Throwables.Function, Throwables.Function)
      * @see #combine(Collection, Throwables.Function)
      */
@@ -860,7 +861,7 @@ public final class Futures {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Basic partial aggregation under timeout
-     * Set<Future<DataPoint>> dataFutures =
+     * Set<Future<DataPoint>> dataFutures = collectDataPointFutures();
      *
      * ContinuableFuture<Summary> summary = Futures.compose(dataFutures,
      *     futures -> {
@@ -936,7 +937,7 @@ public final class Futures {
      *     },
      *     tuple -> {
      *         // Under timeout, check caches sequentially with time limit
-     *         long remainingTime = unit.toMillis(tuple._2);
+     *         long remainingTime = tuple._3.toMillis(tuple._2);
      *         long startTime = System.currentTimeMillis();
      *
      *         for (Future<CacheEntry> f : tuple._1) {
@@ -1484,7 +1485,8 @@ public final class Futures {
      *         and may throw {@link InterruptedException} or {@link ExecutionException} (the
      *         latter propagated from the first failing future); {@code get(timeout, unit)} may
      *         additionally throw {@link TimeoutException}.
-     * @throws IllegalArgumentException if {@code cfs} is {@code null} or empty.
+     * @throws IllegalArgumentException if {@code cfs} is empty.
+     * @throws NullPointerException if {@code cfs} is {@code null}.
      */
     @SafeVarargs
     public static <T> ContinuableFuture<List<T>> allOf(final Future<? extends T>... cfs) {
@@ -1638,8 +1640,10 @@ public final class Futures {
      * @return a {@code ContinuableFuture} whose {@code get()} returns the result of the first
      *         input future to complete successfully. If every input future fails, {@code get()}
      *         throws a {@link RuntimeException} representing the first failure, with the
-     *         remaining failures attached as suppressed exceptions.
-     * @throws IllegalArgumentException if {@code cfs} is {@code null} or empty.
+     *         remaining failures attached as suppressed exceptions. If the thread calling
+     *         {@code get()} is interrupted while waiting, {@link InterruptedException} is thrown.
+     * @throws IllegalArgumentException if {@code cfs} is empty.
+     * @throws NullPointerException if {@code cfs} is {@code null}.
      */
     @SafeVarargs
     public static <T> ContinuableFuture<T> anyOf(final Future<? extends T>... cfs) {
@@ -1674,7 +1678,8 @@ public final class Futures {
      * @return a {@code ContinuableFuture} whose {@code get()} returns the result of the first
      *         input future to complete successfully. If every input future fails, {@code get()}
      *         throws a {@link RuntimeException} representing the first failure, with the
-     *         remaining failures attached as suppressed exceptions.
+     *         remaining failures attached as suppressed exceptions. If the thread calling
+     *         {@code get()} is interrupted while waiting, {@link InterruptedException} is thrown.
      * @throws IllegalArgumentException if {@code cfs} is {@code null} or empty.
      */
     public static <T> ContinuableFuture<T> anyOf(final Collection<? extends Future<? extends T>> cfs) {
@@ -1722,17 +1727,30 @@ public final class Futures {
 
             @Override
             public boolean isDone() {
+                boolean allDone = true;
+
                 for (final Future<?> future : cfs) {
                     if (future.isDone()) {
-                        return true;
+                        try {
+                            future.get();
+                            return true;
+                        } catch (final InterruptedException e) {
+                            Thread.currentThread().interrupt();
+                            return false;
+                        } catch (final CancellationException | ExecutionException e) {
+                            // A failed or cancelled candidate does not complete anyOf while
+                            // another candidate can still complete successfully.
+                        }
+                    } else {
+                        allDone = false;
                     }
                 }
 
-                return false;
+                return allDone;
             }
 
             @Override
-            public T get() {
+            public T get() throws InterruptedException {
                 final Iterator<Result<T, Exception>> iter = iterate(cfs, Fn.identity());
                 Result<T, Exception> result = null;
                 RuntimeException exception = null;
@@ -1742,6 +1760,18 @@ public final class Futures {
 
                     if (result.isSuccess()) {
                         return result.orElseIfFailure(null);
+                    } else if (result.getException() instanceof InterruptedException) {
+                        // A synthetic interruption from the iterator (the thread calling get() was
+                        // interrupted while waiting), not an input-future failure: rethrow per the
+                        // Future.get() contract (allOf does the same, and the timed overload below
+                        // already rethrows it) instead of wrapping it in an unchecked exception.
+                        final InterruptedException cause = (InterruptedException) result.getException();
+
+                        if (exception != null) {
+                            cause.addSuppressed(exception);
+                        }
+
+                        throw cause;
                     } else {
                         if (exception == null) {
                             exception = ExceptionUtil.toRuntimeException(result.getException(), false);
@@ -1755,7 +1785,7 @@ public final class Futures {
             }
 
             @Override
-            public T get(final long timeout, final TimeUnit unit) {
+            public T get(final long timeout, final TimeUnit unit) throws InterruptedException, TimeoutException {
                 final Iterator<Result<T, Exception>> iter = iterate(cfs, timeout, unit, Fn.identity());
                 Result<T, Exception> result = null;
                 RuntimeException exception = null;
@@ -1765,6 +1795,21 @@ public final class Futures {
 
                     if (result.isSuccess()) {
                         return result.orElseIfFailure(null);
+                    } else if (result.getException() instanceof TimeoutException || result.getException() instanceof InterruptedException) {
+                        // A synthetic total-timeout/interruption from the iterator, not an input-future
+                        // failure: rethrow per the Future.get(timeout, unit) contract (allOf does the
+                        // same) instead of wrapping it in an unchecked exception.
+                        final Exception cause = result.getException();
+
+                        if (exception != null) {
+                            cause.addSuppressed(exception);
+                        }
+
+                        if (cause instanceof TimeoutException) {
+                            throw (TimeoutException) cause;
+                        }
+
+                        throw (InterruptedException) cause;
                     } else {
                         if (exception == null) {
                             exception = ExceptionUtil.toRuntimeException(result.getException(), false);
@@ -1810,6 +1855,7 @@ public final class Futures {
      * @return an {@code ObjIterator} that yields results in completion order (first-finished,
      *         first-out). Calling {@code next()} on a failed future throws the future's failure
      *         wrapped in a {@link RuntimeException}.
+     * @throws IllegalArgumentException if {@code cfs} is empty.
      */
     @SafeVarargs
     public static <T> ObjIterator<T> iterate(final Future<? extends T>... cfs) {
@@ -1846,6 +1892,7 @@ public final class Futures {
      * @return an {@code ObjIterator} that yields results in completion order (first-finished,
      *         first-out). Calling {@code next()} on a failed future throws the future's failure
      *         wrapped in a {@link RuntimeException}.
+     * @throws IllegalArgumentException if {@code cfs} is {@code null} or empty.
      */
     public static <T> ObjIterator<T> iterate(final Collection<? extends Future<? extends T>> cfs) {
         return iterate02(cfs);
@@ -1891,8 +1938,8 @@ public final class Futures {
      *         throws the future's failure wrapped in a {@link RuntimeException}; once the total
      *         timeout elapses, {@code next()} throws a {@link RuntimeException} wrapping a
      *         {@link TimeoutException}.
-     * @throws IllegalArgumentException if {@code totalTimeoutForAll} is not positive or
-     *         {@code unit} is {@code null}.
+     * @throws IllegalArgumentException if {@code cfs} is {@code null} or empty, {@code totalTimeoutForAll} is not positive,
+     *         or {@code unit} is {@code null}.
      */
     public static <T> ObjIterator<T> iterate(final Collection<? extends Future<? extends T>> cfs, final long totalTimeoutForAll, final TimeUnit unit) {
         return iterate02(cfs, totalTimeoutForAll, unit);

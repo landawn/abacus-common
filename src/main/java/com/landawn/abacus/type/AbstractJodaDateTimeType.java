@@ -40,10 +40,15 @@ import com.landawn.abacus.util.Dates;
 public abstract class AbstractJodaDateTimeType<T extends AbstractInstant> extends AbstractType<T> {
 
     /** Pre-configured Joda {@code DateTimeFormatter} for ISO 8601 date-time format */
-    protected static final DateTimeFormatter jodaISO8601DateTimeFT = org.joda.time.format.DateTimeFormat.forPattern(Dates.ISO_8601_DATE_TIME_FORMAT);
+    // withZoneUTC: the pattern's 'Z' is a LITERAL, so without it printing used the value's
+    // chronology zone and parsing the JVM default zone - stringOf/valueOf round trips drifted by
+    // the JVM's UTC offset and the emitted wall time contradicted the 'Z' (UTC) suffix.
+    protected static final DateTimeFormatter jodaISO8601DateTimeFT = org.joda.time.format.DateTimeFormat.forPattern(Dates.ISO_8601_DATE_TIME_FORMAT)
+            .withZoneUTC();
 
     /** Pre-configured Joda {@code DateTimeFormatter} for ISO 8601 timestamp format */
-    protected static final DateTimeFormatter jodaISO8601TimestampFT = org.joda.time.format.DateTimeFormat.forPattern(Dates.ISO_8601_TIMESTAMP_FORMAT);
+    protected static final DateTimeFormatter jodaISO8601TimestampFT = org.joda.time.format.DateTimeFormat.forPattern(Dates.ISO_8601_TIMESTAMP_FORMAT)
+            .withZoneUTC();
 
     /**
      * Constructs an {@code AbstractJodaDateTimeType} with the specified type name.
@@ -201,7 +206,7 @@ public abstract class AbstractJodaDateTimeType<T extends AbstractInstant> extend
                         break;
 
                     default:
-                        throw new RuntimeException("Unsupported operation");
+                        throw new RuntimeException("Unsupported DateTimeFormat: " + config.getDateTimeFormat());
                 }
             }
 

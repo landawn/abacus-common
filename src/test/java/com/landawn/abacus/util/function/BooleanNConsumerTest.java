@@ -181,6 +181,6 @@ public class BooleanNConsumerTest extends TestBase {
     public void testAndThenNullThrowsImmediately() {
         BooleanNConsumer instance = a -> {
         };
-        org.junit.jupiter.api.Assertions.assertThrows(NullPointerException.class, () -> instance.andThen((BooleanNConsumer) null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> instance.andThen((BooleanNConsumer) null));
     }
 }

@@ -15,11 +15,16 @@
 package com.landawn.abacus.exception;
 
 import java.io.Serial;
+import java.util.NoSuchElementException;
 
 /**
  * Exception thrown when an expected object cannot be found.
- * This is an unchecked exception that signals an illegal state: a required object was absent
- * where its presence was assumed.
+ * This is an unchecked exception that signals a failed lookup: a required object was absent
+ * where its presence was expected.
+ *
+ * <p>It extends {@link NoSuchElementException} so that "not found" lookup failures can be caught
+ * with the standard JDK "no such element" semantics, rather than being conflated with
+ * {@link IllegalStateException} (which describes an inappropriate receiver state).</p>
  *
  * <p>Common use cases include:</p>
  * <ul>
@@ -37,9 +42,9 @@ import java.io.Serial;
  * }
  * }</pre>
  *
- * @see IllegalStateException
+ * @see NoSuchElementException
  */
-public class ObjectNotFoundException extends IllegalStateException {
+public class ObjectNotFoundException extends NoSuchElementException {
 
     @Serial
     private static final long serialVersionUID = -1806452586200243492L;
@@ -95,7 +100,11 @@ public class ObjectNotFoundException extends IllegalStateException {
      *              (A {@code null} value is permitted, and indicates that the cause is nonexistent or unknown.)
      */
     public ObjectNotFoundException(final String message, final Throwable cause) {
-        super(message, cause);
+        super(message);
+
+        if (cause != null) {
+            initCause(cause);
+        }
     }
 
     /**
@@ -119,6 +128,10 @@ public class ObjectNotFoundException extends IllegalStateException {
      *              (A {@code null} value is permitted, and indicates that the cause is nonexistent or unknown.)
      */
     public ObjectNotFoundException(final Throwable cause) {
-        super(cause);
+        super(cause == null ? null : cause.toString());
+
+        if (cause != null) {
+            initCause(cause);
+        }
     }
 }

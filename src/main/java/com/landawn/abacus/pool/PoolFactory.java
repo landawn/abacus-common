@@ -51,7 +51,9 @@ package com.landawn.abacus.pool;
  * // Pool with memory constraints
  * class PooledBuffer extends AbstractPoolable {
  *     private int capacity;
+ *     public PooledBuffer() { super(3600000, 600000); }
  *     public int capacity() { return capacity; }
+ *     @Override public void destroy(Poolable.Caller caller) {}   // release resources here
  * }
  * ObjectPool.MemoryMeasure<PooledBuffer> measure = buffer -> buffer.capacity();
  * ObjectPool<PooledBuffer> pool4 = PoolFactory.createObjectPool(
@@ -403,7 +405,9 @@ public final class PoolFactory { //NOSONAR
      * // Example Poolable connection class
      * class DBConnection extends AbstractPoolable {
      *     private long memoryUsage = 1024;  // 1024 bytes is the example size
+     *     public DBConnection() { super(3600000, 600000); }
      *     public long getMemoryUsage() { return memoryUsage; }
+     *     @Override public void destroy(Poolable.Caller caller) {}   // release resources here
      * }
      *
      * KeyedObjectPool.MemoryMeasure<String, DBConnection> measure = (key, conn) ->

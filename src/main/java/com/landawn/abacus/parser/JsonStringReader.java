@@ -155,7 +155,7 @@ class JsonStringReader extends AbstractJsonReader {
      * @throws IllegalArgumentException if {@code beginIndex} or {@code toIndex} is invalid
      */
     JsonStringReader(final char[] strValue, final int beginIndex, final int toIndex, final char[] cbuf, final Reader reader) {
-        if (beginIndex < 0 || toIndex < 0 || toIndex < beginIndex) {
+        if (beginIndex < 0 || toIndex < 0 || toIndex < beginIndex || beginIndex > strValue.length || toIndex > strValue.length) {
             throw new IllegalArgumentException("Invalid beginIndex or toIndex: " + beginIndex + ", " + toIndex);
         }
 
@@ -466,7 +466,14 @@ class JsonStringReader extends AbstractJsonReader {
             nextEvent = -1;
         }
 
-        if (digitCount >= 0 && digitCount <= MAX_PARSABLE_NUM_LEN + 1 && pointPosition != digitCount) {
+        // The decimal fast path divides (double) ret by a power of ten, which is only correctly
+        // rounded when ret converts to double exactly (<= 2^53): 17+-digit mantissas (e.g.
+        // Double.toString output) would mis-parse by 1 ulp, and "-0.0" cannot survive the long
+        // negation - both must fall back to the exact parser. digitCount > 0 rejects bare "-"/"+"
+        // tokens, which previously parsed as a fabricated 0.
+        final boolean exactDecimalFastPath = ret <= (1L << 53) && !(negative && ret == 0);
+
+        if (digitCount > 0 && digitCount <= MAX_PARSABLE_NUM_LEN + 1 && pointPosition != digitCount && (pointPosition <= 0 || exactDecimalFastPath)) {
             if (negative) {
                 ret = -ret;
             }
@@ -502,8 +509,9 @@ class JsonStringReader extends AbstractJsonReader {
     }
 
     /**
-     * Appends a character to the internal token buffer, handling escape sequences and skipping
-     * leading/intra-token whitespace. Whitespace characters ({@code ch <= 32}) are skipped, and
+     * Processes a token character: skips whitespace, resolves escape sequences, and appends to the
+     * internal token buffer only when buffered mode is (or becomes) active (in zero-copy mode,
+     * ordinary characters remain tracked in the source array). Whitespace characters ({@code ch <= 32}) are skipped, and
      * a backslash triggers escape-sequence resolution via {@link #readEscapeCharacter()}.
      * This method manages the character buffer efficiently to minimize allocations.
      *
@@ -649,9 +657,10 @@ class JsonStringReader extends AbstractJsonReader {
 
                     return (T) num;
                 } catch (final Exception e) {
-                    // ignore;
-                    if (logger.isWarnEnabled()) {
-                        logger.warn("Failed to parse: " + numberText + " to Number");
+                    // Recoverable: values such as Infinity/NaN/"+"/"-" aren't valid numbers here;
+                    // fall back to returning the raw text. Log at debug since this is expected.
+                    if (logger.isDebugEnabled()) {
+                        logger.debug("Failed to parse: " + numberText + " to Number; returning it as a String");
                     }
                 }
 

@@ -494,4 +494,44 @@ public class ImmutableMapTest extends TestBase {
         Assertions.assertEquals(42, map.get("x"));
         Assertions.assertThrows(UnsupportedOperationException.class, () -> map.put("y", 99));
     }
+
+    @Test
+    public void testViews_areUnmodifiable_forOfAndWrapInstances() {
+        Map<String, Integer> backing = new HashMap<>();
+        backing.put("a", 1);
+        backing.put("b", 2);
+
+        ImmutableMap<String, Integer> ofMap = ImmutableMap.of("a", 1, "b", 2);
+        ImmutableMap<String, Integer> wrappedMap = ImmutableMap.wrap(backing);
+
+        for (ImmutableMap<String, Integer> map : N.asList(ofMap, wrappedMap)) {
+            // entrySet(): entries must not support setValue, the set must not support removal.
+            Map.Entry<String, Integer> entry = map.entrySet().iterator().next();
+            Assertions.assertThrows(UnsupportedOperationException.class, () -> entry.setValue(99));
+            Assertions.assertThrows(UnsupportedOperationException.class, () -> map.entrySet().clear());
+            Assertions.assertThrows(UnsupportedOperationException.class, () -> map.entrySet().remove(entry));
+
+            Iterator<Map.Entry<String, Integer>> entryIter = map.entrySet().iterator();
+            entryIter.next();
+            Assertions.assertThrows(UnsupportedOperationException.class, entryIter::remove);
+
+            // keySet() view and its iterator.
+            Set<String> keys = map.keySet();
+            Assertions.assertThrows(UnsupportedOperationException.class, () -> keys.remove("a"));
+            Iterator<String> keyIter = keys.iterator();
+            keyIter.next();
+            Assertions.assertThrows(UnsupportedOperationException.class, keyIter::remove);
+
+            // values() view and its iterator.
+            Collection<Integer> values = map.values();
+            Assertions.assertThrows(UnsupportedOperationException.class, () -> values.remove(1));
+            Iterator<Integer> valueIter = values.iterator();
+            valueIter.next();
+            Assertions.assertThrows(UnsupportedOperationException.class, valueIter::remove);
+        }
+
+        // Values are still readable through the views.
+        Assertions.assertTrue(ofMap.keySet().contains("a"));
+        Assertions.assertTrue(wrappedMap.values().contains(2));
+    }
 }

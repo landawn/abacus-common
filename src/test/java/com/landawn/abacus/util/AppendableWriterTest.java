@@ -532,6 +532,43 @@ public class AppendableWriterTest extends TestBase {
         }
     }
 
+    private static final class FailingFlushAndCloseAppendable implements Appendable, java.io.Flushable, AutoCloseable {
+        boolean closed;
+        private final IOException flushFailure;
+        private final IOException closeFailure;
+
+        FailingFlushAndCloseAppendable(IOException flushFailure, IOException closeFailure) {
+            this.flushFailure = flushFailure;
+            this.closeFailure = closeFailure;
+        }
+
+        @Override
+        public Appendable append(CharSequence csq) {
+            return this;
+        }
+
+        @Override
+        public Appendable append(CharSequence csq, int start, int end) {
+            return this;
+        }
+
+        @Override
+        public Appendable append(char c) {
+            return this;
+        }
+
+        @Override
+        public void flush() throws IOException {
+            throw flushFailure;
+        }
+
+        @Override
+        public void close() throws IOException {
+            closed = true;
+            throw closeFailure;
+        }
+    }
+
     @Test
     public void testCloseStillReleasesUnderlyingWhenFlushFails() {
         IOException flushFailure = new IOException("flush failed");
@@ -548,6 +585,23 @@ public class AppendableWriterTest extends TestBase {
         Assertions.assertDoesNotThrow(writer::close);
 
         // Further writes must fail because the writer is closed.
+        assertThrows(IOException.class, () -> writer.write("x"));
+    }
+
+    @Test
+    public void testClosePreservesFlushFailureWhenUnderlyingCloseAlsoFails() {
+        IOException flushFailure = new IOException("flush failed");
+        IOException closeFailure = new IOException("close failed");
+        FailingFlushAndCloseAppendable underlying = new FailingFlushAndCloseAppendable(flushFailure, closeFailure);
+        AppendableWriter writer = new AppendableWriter(underlying);
+
+        IOException thrown = assertThrows(IOException.class, writer::close);
+
+        assertSame(flushFailure, thrown);
+        assertEquals(1, thrown.getSuppressed().length);
+        assertSame(closeFailure, thrown.getSuppressed()[0]);
+        assertTrue(underlying.closed, "Underlying Appendable must be closed even when flush throws");
+        Assertions.assertDoesNotThrow(writer::close);
         assertThrows(IOException.class, () -> writer.write("x"));
     }
 }

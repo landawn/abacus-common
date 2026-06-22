@@ -89,4 +89,18 @@ public interface ToIntFunction<T> extends Throwables.ToIntFunction<T, RuntimeExc
      */
     @Override
     int applyAsInt(T value);
+
+    /**
+     * Returns this object as a {@link Throwables.ToIntFunction} view.
+     *
+     * <p>The returned object has the same behavior as this one. This method does not translate
+     * exceptions or make the original implementation capable of throwing new checked exceptions; the
+     * exception type parameter is for target-type compatibility with APIs that accept {@code Throwables.ToIntFunction}.
+     *
+     * @param <E> the target exception type for compatibility with {@code Throwables.ToIntFunction}
+     * @return a {@link Throwables.ToIntFunction} view of this object
+     */
+    default <E extends Throwable> Throwables.ToIntFunction<T, E> toThrowable() {
+        return (Throwables.ToIntFunction<T, E>) this;
+    }
 }

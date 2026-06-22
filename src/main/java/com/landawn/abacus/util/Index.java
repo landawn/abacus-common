@@ -171,7 +171,7 @@ import com.landawn.abacus.util.u.OptionalInt;
  *
  * // High precision requirements
  * double strictTolerance = 0.001;
- * BitSet strictMatches = Index.allOf(measurements, target, strictTolerance);   // May return empty BitSet
+ * BitSet strictMatches = Index.allOf(measurements, target, strictTolerance);   // returns BitSet with bit 1 set (2.001 matches; 2.002 - 2.0 > 0.001 does not)
  * }</pre>
  *
  * <p><b>Performance Characteristics:</b>
@@ -632,6 +632,7 @@ public final class Index {
      *         or an empty OptionalInt if the value is not found or the array is {@code null} or empty
      * @see #of(boolean[], boolean)
      * @see #of(float[], float, int)
+     * @see #of(float[], float, int, float)
      * @see #of(Object[], Object)
      */
     public static OptionalInt of(final float[] source, final float valueToFind) {
@@ -660,10 +661,42 @@ public final class Index {
      *         or an empty OptionalInt if the value is not found, the array is {@code null} or empty, or {@code fromIndex >= array.length}
      * @see #of(boolean[], boolean, int)
      * @see #of(float[], float)
+     * @see #of(float[], float, int, float)
      * @see #of(Object[], Object, int)
      */
     public static OptionalInt of(final float[] source, final float valueToFind, final int fromIndex) {
         return toOptionalInt(N.indexOf(source, valueToFind, fromIndex));
+    }
+
+    /**
+     * Returns the index of the first occurrence of the specified float value in the array, within a given tolerance and starting from the specified index.
+     * <p>
+     * This method searches for the first occurrence of a value that falls within the range
+     * {@code [valueToFind - tolerance, valueToFind + tolerance]} in the given float array,
+     * beginning at the specified {@code fromIndex}. Negative {@code fromIndex} values are treated as 0.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * float[] arr = {1.0f, 2.1f, 3.0f, 2.2f, 4.0f};
+     * Index.of(arr, 2.0f, 0, 0.2f).get();          // returns 1
+     * Index.of(arr, 2.0f, 2, 0.2f).get();          // returns 3
+     * Index.of(arr, 5.0f, 0, 0.1f).isPresent();    // returns false
+     * Index.of(arr, 2.0f, 5, 0.2f).isPresent();    // returns false
+     * }</pre>
+     *
+     * @param source the float array to be searched, may be {@code null}
+     * @param valueToFind the float value to search for
+     * @param fromIndex the index to start the search from (inclusive); negative values are treated as 0
+     * @param tolerance the tolerance for matching; must be non-negative and not NaN. A value matches if it's within
+     *                  {@code valueToFind +/- tolerance}
+     * @return an OptionalInt containing the zero-based index of the first occurrence of a value within tolerance at or after {@code fromIndex},
+     *         or an empty OptionalInt if no value is found within tolerance, the array is {@code null}, or {@code fromIndex >= array.length}
+     * @throws IllegalArgumentException if {@code tolerance} is negative or NaN
+     * @see #of(float[], float, int)
+     * @see N#indexOf(float[], float, int, float)
+     */
+    public static OptionalInt of(final float[] source, final float valueToFind, final int fromIndex, final float tolerance) {
+        return toOptionalInt(N.indexOf(source, valueToFind, fromIndex, tolerance));
     }
 
     /**
@@ -687,7 +720,6 @@ public final class Index {
      *         or an empty OptionalInt if the value is not found or the array is {@code null} or empty
      * @see #of(boolean[], boolean)
      * @see #of(double[], double, int)
-     * @see #of(double[], double, double)
      * @see #of(Object[], Object)
      */
     public static OptionalInt of(final double[] source, final double valueToFind) {
@@ -716,42 +748,11 @@ public final class Index {
      *         or an empty OptionalInt if the value is not found, the array is {@code null} or empty, or {@code fromIndex >= array.length}
      * @see #of(boolean[], boolean, int)
      * @see #of(double[], double)
-     * @see #of(double[], double, double, int)
+     * @see #of(double[], double, int, double)
      * @see #of(Object[], Object, int)
      */
     public static OptionalInt of(final double[] source, final double valueToFind, final int fromIndex) {
         return toOptionalInt(N.indexOf(source, valueToFind, fromIndex));
-    }
-
-    /**
-     * Returns the index of the first occurrence of the specified double value in the array, within a given tolerance.
-     * <p>
-     * This method searches for the first occurrence of a value that falls within the range
-     * {@code [valueToFind - tolerance, valueToFind + tolerance]} in the given double array.
-     * This is useful for comparing floating-point values where exact equality may not be reliable.
-     *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * double[] arr = {1.0, 2.1, 3.0, 2.2, 4.0};
-     * Index.of(arr, 2.0, 0.2).get();                   // returns 1
-     * Index.of(arr, 3.0, 0.1).get();                   // returns 2
-     * Index.of(arr, 5.0, 0.1).isPresent();             // returns false
-     * Index.of((double[]) null, 2.0, 0.1).isPresent(); // returns false
-     * }</pre>
-     *
-     * @param source the double array to be searched, may be {@code null}
-     * @param valueToFind the double value to search for
-     * @param tolerance the tolerance for matching; must be non-negative and not NaN. A value matches if it's within
-     *                  {@code valueToFind ± tolerance}
-     * @return an OptionalInt containing the zero-based index of the first occurrence of a value within tolerance,
-     *         or an empty OptionalInt if no value is found within tolerance or the array is {@code null}
-     * @throws IllegalArgumentException if {@code tolerance} is negative or NaN
-     * @see #of(double[], double, double, int)
-     * @see #of(double[], double)
-     * @see N#indexOf(double[], double, double)
-     */
-    public static OptionalInt of(final double[] source, final double valueToFind, final double tolerance) {
-        return of(source, valueToFind, tolerance, 0);
     }
 
     /**
@@ -764,26 +765,25 @@ public final class Index {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * double[] arr = {1.0, 2.1, 3.0, 2.2, 4.0};
-     * Index.of(arr, 2.0, 0.2, 0).get();           // returns 1
-     * Index.of(arr, 2.0, 0.2, 2).isPresent();     // returns false (2.2 - 2.0 = 0.200...018 > 0.2)
-     * Index.of(arr, 5.0, 0.1, 0).isPresent();     // returns false
-     * Index.of(arr, 2.0, 0.2, 5).isPresent();     // returns false
+     * Index.of(arr, 2.0, 0, 0.2).get();           // returns 1
+     * Index.of(arr, 2.0, 2, 0.2).isPresent();     // returns false (2.2 - 2.0 = 0.200...018 > 0.2)
+     * Index.of(arr, 5.0, 0, 0.1).isPresent();     // returns false
+     * Index.of(arr, 2.0, 5, 0.2).isPresent();     // returns false
      * }</pre>
      *
      * @param source the double array to be searched, may be {@code null}
      * @param valueToFind the double value to search for
-     * @param tolerance the tolerance for matching; must be non-negative and not NaN. A value matches if it's within
-     *                  {@code valueToFind ± tolerance}
      * @param fromIndex the index to start the search from (inclusive); negative values are treated as 0
+     * @param tolerance the tolerance for matching; must be non-negative and not NaN. A value matches if it's within
+     *                  {@code valueToFind +/- tolerance}
      * @return an OptionalInt containing the zero-based index of the first occurrence of a value within tolerance at or after {@code fromIndex},
      *         or an empty OptionalInt if no value is found within tolerance, the array is {@code null}, or {@code fromIndex >= array.length}
      * @throws IllegalArgumentException if {@code tolerance} is negative or NaN
-     * @see #of(double[], double, double)
      * @see #of(double[], double, int)
-     * @see N#indexOf(double[], double, double, int)
+     * @see N#indexOf(double[], double, int, double)
      */
-    public static OptionalInt of(final double[] source, final double valueToFind, final double tolerance, final int fromIndex) {
-        return toOptionalInt(N.indexOf(source, valueToFind, tolerance, fromIndex));
+    public static OptionalInt of(final double[] source, final double valueToFind, final int fromIndex, final double tolerance) {
+        return toOptionalInt(N.indexOf(source, valueToFind, fromIndex, tolerance));
     }
 
     /**
@@ -1092,6 +1092,47 @@ public final class Index {
     }
 
     /**
+     * Returns the index of the first occurrence of the specified string in the given string array, ignoring case.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Index.ofIgnoreCase(new String[] {"Hello", "World"}, "hello").get();  // returns 0
+     * Index.ofIgnoreCase(new String[] {"Hello"}, "xyz").isPresent();       // returns false
+     * }</pre>
+     *
+     * @param source the string array to be searched, may be {@code null}
+     * @param valueToFind the string to search for (case-insensitive), may be {@code null}
+     * @return an OptionalInt containing the zero-based index of the first element equal (ignoring case) to {@code valueToFind},
+     *         or an empty OptionalInt if not found or the array is {@code null}
+     * @see #ofIgnoreCase(String[], String, int)
+     * @see N#indexOfIgnoreCase(String[], String)
+     */
+    public static OptionalInt ofIgnoreCase(final String[] source, final String valueToFind) {
+        return toOptionalInt(N.indexOfIgnoreCase(source, valueToFind));
+    }
+
+    /**
+     * Returns the index of the first occurrence of the specified string in the given string array, ignoring case, starting from the specified index.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Index.ofIgnoreCase(new String[] {"Hello", "World", "HELLO"}, "hello", 1).get(); // returns 2
+     * Index.ofIgnoreCase(new String[] {"Hello"}, "xyz", 0).isPresent();               // returns false
+     * }</pre>
+     *
+     * @param source the string array to be searched, may be {@code null}
+     * @param valueToFind the string to search for (case-insensitive), may be {@code null}
+     * @param fromIndex the index to start the search from (inclusive); negative values are treated as 0
+     * @return an OptionalInt containing the zero-based index of the first element equal (ignoring case) to {@code valueToFind} at or after {@code fromIndex},
+     *         or an empty OptionalInt if not found, the array is {@code null}, or {@code fromIndex >= array.length}
+     * @see #ofIgnoreCase(String[], String)
+     * @see N#indexOfIgnoreCase(String[], String, int)
+     */
+    public static OptionalInt ofIgnoreCase(final String[] source, final String valueToFind, final int fromIndex) {
+        return toOptionalInt(N.indexOfIgnoreCase(source, valueToFind, fromIndex));
+    }
+
+    /**
      * Returns the index of the first occurrence of the specified subarray in the given source array.
      * <p>
      * This method searches for the complete {@code subArrayToFind} as a contiguous sequence within {@code source}.
@@ -1157,7 +1198,7 @@ public final class Index {
      *   <li>If {@code sizeToMatch} is 0 and both arrays are {@code non-null}, returns {@code fromIndex} (clamped to valid range)</li>
      *   <li>If either array is {@code null}, returns empty OptionalInt</li>
      *   <li>If {@code fromIndex} is negative, it's treated as 0</li>
-     *   <li>If {@code fromIndex >= source.length}, returns empty OptionalInt</li>
+     *   <li>If {@code fromIndex >= source.length} (and {@code sizeToMatch > 0}), returns empty OptionalInt</li>
      * </ul>
      *
      * <p><b>Usage Examples:</b></p>
@@ -1288,7 +1329,7 @@ public final class Index {
      *   <li>If {@code sizeToMatch} is 0 and both arrays are {@code non-null}, returns {@code fromIndex} (clamped to valid range)</li>
      *   <li>If either array is {@code null}, returns empty OptionalInt</li>
      *   <li>If {@code fromIndex} is negative, it's treated as 0</li>
-     *   <li>If {@code fromIndex >= source.length}, returns empty OptionalInt</li>
+     *   <li>If {@code fromIndex >= source.length} (and {@code sizeToMatch > 0}), returns empty OptionalInt</li>
      * </ul>
      *
      * <p><b>Usage Examples:</b></p>
@@ -1702,7 +1743,7 @@ public final class Index {
      *   <li>If {@code sizeToMatch} is 0 and both arrays are {@code non-null}, returns {@code fromIndex} (clamped to valid range)</li>
      *   <li>If either array is {@code null}, returns empty OptionalInt</li>
      *   <li>If {@code fromIndex} is negative, it's treated as 0</li>
-     *   <li>If {@code fromIndex >= source.length}, returns empty OptionalInt</li>
+     *   <li>If {@code fromIndex >= source.length} (and {@code sizeToMatch > 0}), returns empty OptionalInt</li>
      * </ul>
      *
      * <p><b>Usage Examples:</b></p>
@@ -1839,7 +1880,7 @@ public final class Index {
      *   <li>If {@code sizeToMatch} is 0 and both arrays are {@code non-null}, returns {@code fromIndex} (clamped to valid range)</li>
      *   <li>If either array is {@code null}, returns empty OptionalInt</li>
      *   <li>If {@code fromIndex} is negative, it's treated as 0</li>
-     *   <li>If {@code fromIndex >= source.length}, returns empty OptionalInt</li>
+     *   <li>If {@code fromIndex >= source.length} (and {@code sizeToMatch > 0}), returns empty OptionalInt</li>
      * </ul>
      *
      * <p><b>Usage Examples:</b></p>
@@ -1976,7 +2017,7 @@ public final class Index {
      *   <li>If {@code sizeToMatch} is 0 and both arrays are {@code non-null}, returns {@code fromIndex} (clamped to valid range)</li>
      *   <li>If either array is {@code null}, returns empty OptionalInt</li>
      *   <li>If {@code fromIndex} is negative, it's treated as 0</li>
-     *   <li>If {@code fromIndex >= source.length}, returns empty OptionalInt</li>
+     *   <li>If {@code fromIndex >= source.length} (and {@code sizeToMatch > 0}), returns empty OptionalInt</li>
      * </ul>
      *
      * <p><b>Usage Examples:</b></p>
@@ -2113,7 +2154,7 @@ public final class Index {
      *   <li>If {@code sizeToMatch} is 0 and both arrays are {@code non-null}, returns {@code fromIndex} (clamped to valid range)</li>
      *   <li>If either array is {@code null}, returns empty OptionalInt</li>
      *   <li>If {@code fromIndex} is negative, it's treated as 0</li>
-     *   <li>If {@code fromIndex >= source.length}, returns empty OptionalInt</li>
+     *   <li>If {@code fromIndex >= source.length} (and {@code sizeToMatch > 0}), returns empty OptionalInt</li>
      * </ul>
      *
      * <p><b>Usage Examples:</b></p>
@@ -2256,7 +2297,7 @@ public final class Index {
      *   <li>If {@code sizeToMatch} is 0 and both arrays are {@code non-null}, returns {@code fromIndex} (clamped to valid range)</li>
      *   <li>If either array is {@code null}, returns empty OptionalInt</li>
      *   <li>If {@code fromIndex} is negative, it's treated as 0</li>
-     *   <li>If {@code fromIndex >= source.length}, returns empty OptionalInt</li>
+     *   <li>If {@code fromIndex >= source.length} (and {@code sizeToMatch > 0}), returns empty OptionalInt</li>
      * </ul>
      *
      * <p><b>Usage Examples:</b></p>
@@ -2413,7 +2454,7 @@ public final class Index {
      *   <li>If {@code sizeToMatch} is 0 and both lists are {@code non-null}, returns {@code fromIndex} (clamped to valid range)</li>
      *   <li>If either list is {@code null}, returns empty OptionalInt</li>
      *   <li>If {@code fromIndex} is negative, it's treated as 0</li>
-     *   <li>If {@code fromIndex >= source.size()}, returns empty OptionalInt</li>
+     *   <li>If {@code fromIndex >= source.size()} (and {@code sizeToMatch > 0}), returns empty OptionalInt</li>
      * </ul>
      *
      * <p><b>Usage Examples:</b></p>
@@ -2840,6 +2881,7 @@ public final class Index {
      *         or an empty OptionalInt if the value is not found or the array is {@code null} or empty
      * @see #last(boolean[], boolean)
      * @see #last(float[], float, int)
+     * @see #last(float[], float, int, float)
      * @see #last(Object[], Object)
      * @see Float#compare(float, float)
      */
@@ -2869,11 +2911,44 @@ public final class Index {
      *         or an empty OptionalInt if the value is not found or the array is {@code null} or empty
      * @see #last(boolean[], boolean, int)
      * @see #last(float[], float)
+     * @see #last(float[], float, int, float)
      * @see #last(Object[], Object, int)
      * @see Float#compare(float, float)
      */
     public static OptionalInt last(final float[] source, final float valueToFind, final int startIndexFromBack) {
         return toOptionalInt(N.lastIndexOf(source, valueToFind, startIndexFromBack));
+    }
+
+    /**
+     * Returns the index of the last occurrence of the specified float value in the given array within a specified tolerance,
+     * searching backwards from the specified position.
+     * <p>
+     * This method searches backwards from {@code startIndexFromBack} for the last occurrence of a value
+     * that falls within the range {@code [valueToFind - tolerance, valueToFind + tolerance]}.
+     * Matching uses {@link Numbers#fuzzyEquals(float, float, float)}.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * float[] arr = {1.0f, 2.1f, 3.0f, 2.2f, 4.0f};
+     * Index.last(arr, 2.0f, 4, 0.2f).get();          // returns 3
+     * Index.last(arr, 2.0f, 2, 0.2f).get();          // returns 1
+     * Index.last(arr, 5.0f, 3, 0.1f).isPresent();    // returns false
+     * Index.last((float[]) null, 2.0f, 4, 0.1f).isPresent(); // returns false
+     * }</pre>
+     *
+     * @param source the float array to be searched, may be {@code null}
+     * @param valueToFind the float value to search for
+     * @param startIndexFromBack the position to start the backwards search from (inclusive)
+     * @param tolerance the tolerance for matching; must be non-negative and not NaN. A value matches if it's within
+     *                  {@code valueToFind +/- tolerance}
+     * @return an OptionalInt containing the zero-based index of the last occurrence of a value within tolerance at or before {@code startIndexFromBack},
+     *         or an empty OptionalInt if no value is found within tolerance or the array is {@code null}
+     * @throws IllegalArgumentException if {@code tolerance} is negative or NaN
+     * @see #last(float[], float, int)
+     * @see N#lastIndexOf(float[], float, int, float)
+     */
+    public static OptionalInt last(final float[] source, final float valueToFind, final int startIndexFromBack, final float tolerance) {
+        return toOptionalInt(N.lastIndexOf(source, valueToFind, startIndexFromBack, tolerance));
     }
 
     /**
@@ -2934,37 +3009,6 @@ public final class Index {
     }
 
     /**
-     * Returns the index of the last occurrence of the specified double value in the given array, within a specified tolerance.
-     * <p>
-     * This method searches backwards from the end of the array for the last occurrence of a value
-     * that falls within the range {@code [valueToFind - tolerance, valueToFind + tolerance]}.
-     * This is useful for comparing floating-point values where exact equality may not be reliable.
-     *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * double[] arr = {1.0, 2.1, 3.0, 2.2, 4.0};
-     * Index.last(arr, 2.0, 0.2).get();                   // returns 3
-     * Index.last(arr, 4.0, 0.1).get();                   // returns 4
-     * Index.last(arr, 5.0, 0.1).isPresent();             // returns false
-     * Index.last((double[]) null, 2.0, 0.1).isPresent(); // returns false
-     * }</pre>
-     *
-     * @param source the double array to be searched, may be {@code null}
-     * @param valueToFind the double value to search for
-     * @param tolerance the tolerance for matching; must be non-negative and not NaN. A value matches if it's within
-     *                  {@code valueToFind ± tolerance}
-     * @return an OptionalInt containing the zero-based index of the last occurrence of a value within tolerance,
-     *         or an empty OptionalInt if no value is found within tolerance or the array is {@code null}
-     * @throws IllegalArgumentException if {@code tolerance} is negative or NaN
-     * @see #last(double[], double, double, int)
-     * @see #last(double[], double)
-     * @see N#lastIndexOf(double[], double, double)
-     */
-    public static OptionalInt last(final double[] source, final double valueToFind, final double tolerance) {
-        return toOptionalInt(N.lastIndexOf(source, valueToFind, tolerance));
-    }
-
-    /**
      * Returns the index of the last occurrence of the specified double value in the given array within a specified tolerance,
      * searching backwards from the specified position.
      * <p>
@@ -2975,26 +3019,25 @@ public final class Index {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * double[] arr = {1.0, 2.1, 3.0, 2.2, 4.0};
-     * Index.last(arr, 2.0, 0.2, 4).get();                   // returns 3
-     * Index.last(arr, 2.0, 0.2, 2).get();                   // returns 1
-     * Index.last(arr, 5.0, 0.1, 3).isPresent();             // returns false
-     * Index.last((double[]) null, 2.0, 0.1, 4).isPresent(); // returns false
+     * Index.last(arr, 2.0, 4, 0.2).get();                   // returns 1 (2.2 at index 3 is outside the tolerance)
+     * Index.last(arr, 2.0, 2, 0.2).get();                   // returns 1
+     * Index.last(arr, 5.0, 3, 0.1).isPresent();             // returns false
+     * Index.last((double[]) null, 2.0, 4, 0.1).isPresent(); // returns false
      * }</pre>
      *
      * @param source the double array to be searched, may be {@code null}
      * @param valueToFind the double value to search for
-     * @param tolerance the tolerance for matching; must be non-negative and not NaN. A value matches if it's within
-     *                  {@code valueToFind ± tolerance}
      * @param startIndexFromBack the position to start the backwards search from (inclusive)
+     * @param tolerance the tolerance for matching; must be non-negative and not NaN. A value matches if it's within
+     *                  {@code valueToFind +/- tolerance}
      * @return an OptionalInt containing the zero-based index of the last occurrence of a value within tolerance at or before {@code startIndexFromBack},
      *         or an empty OptionalInt if no value is found within tolerance or the array is {@code null}
      * @throws IllegalArgumentException if {@code tolerance} is negative or NaN
-     * @see #last(double[], double, double)
      * @see #last(double[], double, int)
-     * @see N#lastIndexOf(double[], double, double, int)
+     * @see N#lastIndexOf(double[], double, int, double)
      */
-    public static OptionalInt last(final double[] source, final double valueToFind, final double tolerance, final int startIndexFromBack) {
-        return toOptionalInt(N.lastIndexOf(source, valueToFind, tolerance, startIndexFromBack));
+    public static OptionalInt last(final double[] source, final double valueToFind, final int startIndexFromBack, final double tolerance) {
+        return toOptionalInt(N.lastIndexOf(source, valueToFind, startIndexFromBack, tolerance));
     }
 
     /**
@@ -3262,6 +3305,47 @@ public final class Index {
      */
     public static OptionalInt lastOfIgnoreCase(final String source, final String valueToFind, final int startIndexFromBack) {
         return toOptionalInt(Strings.lastIndexOfIgnoreCase(source, valueToFind, startIndexFromBack));
+    }
+
+    /**
+     * Returns the index of the last occurrence of the specified string in the given string array, ignoring case.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Index.lastOfIgnoreCase(new String[] {"Hello", "World", "HELLO"}, "hello").get(); // returns 2
+     * Index.lastOfIgnoreCase(new String[] {"Hello"}, "xyz").isPresent();               // returns false
+     * }</pre>
+     *
+     * @param source the string array to be searched, may be {@code null}
+     * @param valueToFind the string to search for (case-insensitive), may be {@code null}
+     * @return an OptionalInt containing the zero-based index of the last element equal (ignoring case) to {@code valueToFind},
+     *         or an empty OptionalInt if not found or the array is {@code null}
+     * @see #lastOfIgnoreCase(String[], String, int)
+     * @see N#lastIndexOfIgnoreCase(String[], String)
+     */
+    public static OptionalInt lastOfIgnoreCase(final String[] source, final String valueToFind) {
+        return toOptionalInt(N.lastIndexOfIgnoreCase(source, valueToFind));
+    }
+
+    /**
+     * Returns the index of the last occurrence of the specified string in the given string array, ignoring case, searching backwards from the specified index.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Index.lastOfIgnoreCase(new String[] {"Hello", "World", "HELLO"}, "hello", 2).get(); // returns 2
+     * Index.lastOfIgnoreCase(new String[] {"Hello", "World", "HELLO"}, "hello", 1).get(); // returns 0
+     * }</pre>
+     *
+     * @param source the string array to be searched, may be {@code null}
+     * @param valueToFind the string to search for (case-insensitive), may be {@code null}
+     * @param startIndexFromBack the position to start the backwards search from (inclusive)
+     * @return an OptionalInt containing the zero-based index of the last element equal (ignoring case) to {@code valueToFind} at or before {@code startIndexFromBack},
+     *         or an empty OptionalInt if not found or the array is {@code null}
+     * @see #lastOfIgnoreCase(String[], String)
+     * @see N#lastIndexOfIgnoreCase(String[], String, int)
+     */
+    public static OptionalInt lastOfIgnoreCase(final String[] source, final String valueToFind, final int startIndexFromBack) {
+        return toOptionalInt(N.lastIndexOfIgnoreCase(source, valueToFind, startIndexFromBack));
     }
 
     /**
@@ -4974,6 +5058,7 @@ public final class Index {
      * @return a BitSet containing the zero-based indices of all occurrences of the value;
      *         returns an empty BitSet if the value is not found or the array is {@code null} or empty
      * @see #allOf(float[], float, int)
+     * @see #allOf(float[], float, int, float)
      * @see #allOf(Object[], Object)
      */
     public static BitSet allOf(final float[] source, final float valueToFind) {
@@ -4999,6 +5084,7 @@ public final class Index {
      * @return a BitSet containing the zero-based indices of all occurrences of the value at or after {@code fromIndex};
      *         returns an empty BitSet if the value is not found, the array is {@code null} or empty, or {@code fromIndex >= array.length}
      * @see #allOf(float[], float)
+     * @see #allOf(float[], float, int, float)
      * @see #allOf(Object[], Object, int)
      */
     public static BitSet allOf(final float[] source, final float valueToFind, final int fromIndex) {
@@ -5019,12 +5105,53 @@ public final class Index {
     }
 
     /**
+     * Returns the indices of all occurrences of the specified value in the given array within a specified tolerance, starting from the specified index.
+     * <p>
+     * Matching uses {@link Numbers#fuzzyEquals(float, float, float)}, which is consistent with
+     * {@link #of(float[], float, int, float)} and {@link #last(float[], float, int, float)}.
+     * In particular, two {@link Float#NaN} values are considered equal, and infinities of the same sign match.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * float[] arr = {1.0f, 2.1f, 3.0f, 2.2f, 4.0f};
+     * Index.allOf(arr, 2.0f, 0, 0.2f).cardinality(); // returns 2
+     * Index.allOf(arr, 2.0f, 2, 0.2f).toString();    // returns "{3}"
+     * Index.allOf(arr, 5.0f, 0, 0.1f).isEmpty();     // returns true
+     * }</pre>
+     *
+     * @param source the float array to be searched, may be {@code null}
+     * @param valueToFind the float value to search for
+     * @param fromIndex the index to start the search from (inclusive); negative values are treated as 0
+     * @param tolerance the tolerance within which matches will be found; must be non-negative and not NaN
+     * @return a BitSet containing the zero-based indices of all values within the specified tolerance at or after {@code fromIndex};
+     *         returns an empty BitSet if no values are found within tolerance, the array is {@code null} or empty, or {@code fromIndex >= array.length}
+     * @throws IllegalArgumentException if {@code tolerance} is negative or NaN
+     * @see #allOf(float[], float, int)
+     */
+    public static BitSet allOf(final float[] source, final float valueToFind, final int fromIndex, final float tolerance) {
+        final BitSet bitSet = new BitSet();
+        final int len = N.len(source);
+
+        if (len == 0 || fromIndex >= len) {
+            return bitSet;
+        }
+
+        for (int i = N.max(fromIndex, 0); i < len; i++) {
+            if (Numbers.fuzzyEquals(source[i], valueToFind, tolerance)) {
+                bitSet.set(i);
+            }
+        }
+
+        return bitSet;
+    }
+
+    /**
      * Returns the indices of all occurrences of the specified double value in the given array.
      * <p>
      * This method finds all positions where {@code valueToFind} appears in the array and returns
      * them as a BitSet. Comparison is performed using {@link Double#compare(double, double)},
      * which handles NaN and -0.0/+0.0 correctly. For tolerance-based matching, use
-     * {@link #allOf(double[], double, double)}.
+     * {@link #allOf(double[], double, int, double)}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -5039,7 +5166,6 @@ public final class Index {
      * @return a BitSet containing the zero-based indices of all occurrences of the value;
      *         returns an empty BitSet if the value is not found or the array is {@code null} or empty
      * @see #allOf(double[], double, int)
-     * @see #allOf(double[], double, double)
      * @see #allOf(Object[], Object)
      */
     public static BitSet allOf(final double[] source, final double valueToFind) {
@@ -5065,7 +5191,7 @@ public final class Index {
      * @return a BitSet containing the zero-based indices of all occurrences of the value at or after {@code fromIndex};
      *         returns an empty BitSet if the value is not found, the array is {@code null} or empty, or {@code fromIndex >= array.length}
      * @see #allOf(double[], double)
-     * @see #allOf(double[], double, double, int)
+     * @see #allOf(double[], double, int, double)
      * @see #allOf(Object[], Object, int)
      */
     public static BitSet allOf(final double[] source, final double valueToFind, final int fromIndex) {
@@ -5086,59 +5212,30 @@ public final class Index {
     }
 
     /**
-     * Returns the indices of all occurrences of the specified double value in the given array, within a specified tolerance.
-     * <p>
-     * This method finds all positions where a value falls within the range
-     * {@code [valueToFind - tolerance, valueToFind + tolerance]} and returns them as a BitSet.
-     * This is useful for comparing floating-point values where exact equality may not be reliable.
-     *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * double[] arr = {1.0, 2.1, 3.0, 2.2, 4.0};
-     * Index.allOf(arr, 2.0, 0.2).cardinality();  // returns 1  (only 2.1 matches; 2.2 - 2.0 = 0.200...018 > 0.2)
-     * Index.allOf(arr, 2.0, 0.2).toString();     // returns "{1}"
-     * Index.allOf(arr, 5.0, 0.1).isEmpty();      // returns true
-     * }</pre>
-     *
-     * @param source the double array to be searched, may be {@code null}
-     * @param valueToFind the double value to search for
-     * @param tolerance the tolerance for matching; must be non-negative and not NaN. A value matches if it's within
-     *                  {@code valueToFind ± tolerance}
-     * @return a BitSet containing the zero-based indices of all occurrences of values within tolerance;
-     *         returns an empty BitSet if no values are found within tolerance or the array is {@code null} or empty
-     * @throws IllegalArgumentException if {@code tolerance} is negative or NaN
-     * @see #allOf(double[], double, double, int)
-     * @see #allOf(double[], double)
-     */
-    public static BitSet allOf(final double[] source, final double valueToFind, final double tolerance) {
-        return allOf(source, valueToFind, tolerance, 0);
-    }
-
-    /**
      * Returns the indices of all occurrences of the specified value in the given array within a specified tolerance, starting from the specified index.
      * <p>
      * Matching uses {@link Numbers#fuzzyEquals(double, double, double)}, which is consistent with
-     * {@link #of(double[], double, double, int)} and {@link #last(double[], double, double, int)}.
+     * {@link #of(double[], double, int, double)} and {@link #last(double[], double, int, double)}.
      * In particular, two {@link Double#NaN} values are considered equal, and infinities of the same sign match.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * double[] arr = {1.0, 2.1, 3.0, 2.2, 4.0};
-     * Index.allOf(arr, 2.0, 0.2, 0).cardinality(); // returns 1  (only 2.1 matches; 2.2 - 2.0 = 0.200...018 > 0.2)
-     * Index.allOf(arr, 2.0, 0.2, 2).isEmpty();     // returns true (no match from index 2)
-     * Index.allOf(arr, 5.0, 0.1, 0).isEmpty();     // returns true
+     * Index.allOf(arr, 2.0, 0, 0.2).cardinality(); // returns 1  (only 2.1 matches; 2.2 - 2.0 = 0.200...018 > 0.2)
+     * Index.allOf(arr, 2.0, 2, 0.2).isEmpty();     // returns true (no match from index 2)
+     * Index.allOf(arr, 5.0, 0, 0.1).isEmpty();     // returns true
      * }</pre>
      *
      * @param source the double array to be searched, may be {@code null}
      * @param valueToFind the double value to search for
-     * @param tolerance the tolerance within which matches will be found; must be non-negative and not NaN
      * @param fromIndex the index to start the search from (inclusive); negative values are treated as 0
+     * @param tolerance the tolerance within which matches will be found; must be non-negative and not NaN
      * @return a BitSet containing the zero-based indices of all values within the specified tolerance at or after {@code fromIndex};
      *         returns an empty BitSet if no values are found within tolerance, the array is {@code null} or empty, or {@code fromIndex >= array.length}
      * @throws IllegalArgumentException if {@code tolerance} is negative or NaN
-     * @see #allOf(double[], double, double)
+     * @see #allOf(double[], double, int)
      */
-    public static BitSet allOf(final double[] source, final double valueToFind, final double tolerance, final int fromIndex) {
+    public static BitSet allOf(final double[] source, final double valueToFind, final int fromIndex, final double tolerance) {
         final BitSet bitSet = new BitSet();
         final int len = N.len(source);
 
@@ -5250,7 +5347,7 @@ public final class Index {
      * indices.stream().forEach(i -> System.out.println("Found at: " + i));
      *
      * // Get first and last occurrence
-     * OptionalInt first = indices.stream().findFirst();   // returns 0
+     * int first = indices.stream().findFirst().getAsInt();   // returns 0
      * int last = indices.stream().max().orElse(-1);       // returns 4
      *
      * // Check specific index
@@ -5408,13 +5505,13 @@ public final class Index {
      * <p><b>Common Mistakes:</b></p>
      * <pre>{@code
      * // DON'T: Pass null predicate
-     * Index.allOf(collection, null);   // returns NullPointerException!
+     * Index.allOf(collection, null);   // throws NullPointerException!
      *
      * // DO: Provide valid predicate
      * Index.allOf(collection, Objects::nonNull);
      *
      * // DON'T: Assume predicate won't receive nulls
-     * Index.allOf(Arrays.asList(1, null, 3), x -> x > 0);   // returns NPE inside predicate!
+     * Index.allOf(Arrays.asList(1, null, 3), x -> x > 0);   // throws NPE inside predicate!
      *
      * // DO: Handle nulls in predicate
      * Index.allOf(Arrays.asList(1, null, 3), x -> x != null && x > 0);

@@ -33,7 +33,7 @@ import com.landawn.abacus.util.Throwables;
 public interface FloatToIntFunction extends Throwables.FloatToIntFunction<RuntimeException> {
     /**
      * A default function that converts a float value to int through narrowing primitive conversion (casting).
-     * This truncates the decimal portion and may result in overflow if the float value exceeds int range.
+     * This truncates the decimal portion; float values outside the int range are clamped rather than overflowing (see note below).
      *
      * <p>Note: For float values outside the int range [-2^31, 2^31-1], the result is clamped to
      * {@code Integer.MAX_VALUE} or {@code Integer.MIN_VALUE}. Special float values are converted as
@@ -62,4 +62,18 @@ public interface FloatToIntFunction extends Throwables.FloatToIntFunction<Runtim
      */
     @Override
     int applyAsInt(float value);
+
+    /**
+     * Returns this object as a {@link Throwables.FloatToIntFunction} view.
+     *
+     * <p>The returned object has the same behavior as this one. This method does not translate
+     * exceptions or make the original implementation capable of throwing new checked exceptions; the
+     * exception type parameter is for target-type compatibility with APIs that accept {@code Throwables.FloatToIntFunction}.
+     *
+     * @param <E> the target exception type for compatibility with {@code Throwables.FloatToIntFunction}
+     * @return a {@link Throwables.FloatToIntFunction} view of this object
+     */
+    default <E extends Throwable> Throwables.FloatToIntFunction<E> toThrowable() {
+        return (Throwables.FloatToIntFunction<E>) this;
+    }
 }

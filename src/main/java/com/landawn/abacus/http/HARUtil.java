@@ -147,6 +147,11 @@ public final class HARUtil {
      * <p><b>Note:</b> This method sets the logging configuration for the current thread only,
      * as the curl logging settings are stored in thread-local storage.</p>
      *
+     * <p><b>&#9888;</b> The logged curl command includes every request header (e.g. {@code Authorization},
+     * {@code Cookie}, {@code X-Api-Key}) and the request body verbatim, with no masking. HAR files
+     * captured from browsers routinely contain credentials and session tokens; avoid enabling this in
+     * production or when the log destination is untrusted.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * HARUtil.configureCurlLoggingForCurrentThread(true);
@@ -168,6 +173,11 @@ public final class HARUtil {
      *
      * <p><b>Note:</b> This method sets the logging configuration for the current thread only,
      * as the curl logging settings are stored in thread-local storage.</p>
+     *
+     * <p><b>&#9888;</b> The logged curl command includes every request header (e.g. {@code Authorization},
+     * {@code Cookie}, {@code X-Api-Key}) and the request body verbatim, with no masking. HAR files
+     * captured from browsers routinely contain credentials and session tokens; avoid enabling this in
+     * production or when the log destination is untrusted.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -192,6 +202,10 @@ public final class HARUtil {
      * <p><b>Note:</b> This method sets the logging configuration for the current thread only,
      * as the curl logging settings are stored in thread-local storage.</p>
      *
+     * <p><b>&#9888;</b> The generated curl command includes every request header (e.g. {@code Authorization},
+     * {@code Cookie}, {@code X-Api-Key}) and the request body verbatim, with no masking. If your
+     * {@code logHandler} persists or forwards these strings, ensure the destination is trusted.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Log curl commands to a file instead of standard logger
@@ -215,6 +229,33 @@ public final class HARUtil {
     public static void configureCurlLoggingForCurrentThread(final boolean logRequest, final char quoteChar, final Consumer<? super String> logHandler) {
         N.checkArgNotNull(logHandler, "logHandler");
         logCurl_TL.set(Tuple.of(logRequest, quoteChar, logHandler));
+    }
+
+    /**
+     * Resets curl logging for the current thread back to the default (logging disabled, single-quote
+     * style, default log handler).
+     *
+     * <p>Companion to the {@code configureCurlLoggingForCurrentThread(...)} overloads, mirroring how
+     * {@link #resetThreadLocalHeaderFilter()} reverses {@link #setThreadLocalHeaderFilter(BiPredicate)}.
+     * After this call the current thread no longer logs HAR-replay requests as cURL commands until it
+     * is reconfigured.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * HARUtil.configureCurlLoggingForCurrentThread(true);
+     * try {
+     *     // ... replay HAR requests with curl logging ...
+     * } finally {
+     *     HARUtil.resetCurlLoggingForCurrentThread();
+     * }
+     * }</pre>
+     *
+     * @see #configureCurlLoggingForCurrentThread(boolean)
+     * @see #configureCurlLoggingForCurrentThread(boolean, char)
+     * @see #configureCurlLoggingForCurrentThread(boolean, char, Consumer)
+     */
+    public static void resetCurlLoggingForCurrentThread() {
+        logCurl_TL.remove();
     }
 
     /**
@@ -514,10 +555,10 @@ public final class HARUtil {
         final Tuple3<Boolean, Character, Consumer<? super String>> tp = logCurl_TL.get();
 
         if (tp._1 && (tp._3 != defaultCurlLogHandler || logger.isInfoEnabled())) {
-            tp._3.accept(WebUtil.buildCurl(httpMethod.name(), url, httpHeaders.toMap(), requestBody, bodyContentType, tp._2));
+            tp._3.accept(WebUtil.buildCurl(httpMethod, url, httpHeaders.toMap(), requestBody, bodyContentType, tp._2));
         }
 
-        return HttpRequest.url(url).headers(httpHeaders).body(requestBody).execute(httpMethod, responseClass);
+        return HttpRequest.url(url).setHeaders(httpHeaders).body(requestBody).execute(httpMethod, responseClass);
     }
 
     /**

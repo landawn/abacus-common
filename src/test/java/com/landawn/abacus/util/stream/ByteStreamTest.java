@@ -1150,12 +1150,6 @@ public class ByteStreamTest extends TestBase {
     }
 
     @Test
-    public void testFindFirst_NoPredicate_Empty() {
-        OptionalByte result = ByteStream.empty().findFirst();
-        assertFalse(result.isPresent());
-    }
-
-    @Test
     public void testFindAny() {
         ByteStream stream = ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4);
         OptionalByte result = stream.findAny(b -> b > 2);
@@ -1191,12 +1185,6 @@ public class ByteStreamTest extends TestBase {
 
     @Test
     public void testFindAnyNoPredicate_EmptyStream() {
-        OptionalByte result = ByteStream.empty().findAny();
-        assertFalse(result.isPresent());
-    }
-
-    @Test
-    public void testFindAny_NoPredicate_Empty() {
         OptionalByte result = ByteStream.empty().findAny();
         assertFalse(result.isPresent());
     }
@@ -1352,14 +1340,6 @@ public class ByteStreamTest extends TestBase {
         Collection<ByteStream> streams = Arrays.asList(ByteStream.of((byte) 1, (byte) 5), ByteStream.of((byte) 2, (byte) 6), ByteStream.of((byte) 3, (byte) 7));
         ByteStream result = ByteStream.merge(streams, (a, b) -> a <= b ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND);
         assertEquals(6, result.count());
-    }
-
-    @Test
-    public void testMergeWithDedicated() {
-        ByteStream a = createByteStream((byte) 1, (byte) 3, (byte) 5);
-        ByteStream b = ByteStream.of((byte) 2, (byte) 4, (byte) 6);
-        byte[] result = a.mergeWith(b, (x, y) -> x <= y ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND).toArray();
-        assertArrayEquals(new byte[] { 1, 2, 3, 4, 5, 6 }, result);
     }
 
     @Test
@@ -1701,13 +1681,6 @@ public class ByteStreamTest extends TestBase {
     }
 
     @Test
-    public void testDebounce_EmptyStream() {
-        byte[] result = ByteStream.empty().debounce(5, com.landawn.abacus.util.Duration.ofSeconds(1)).toArray();
-
-        assertEquals(0, result.length);
-    }
-
-    @Test
     public void testDefaultIfEmpty() {
         ByteStream empty = ByteStream.empty();
         ByteStream result1 = empty.defaultIfEmpty(() -> createByteStream((byte) 1, (byte) 2));
@@ -1848,11 +1821,6 @@ public class ByteStreamTest extends TestBase {
     }
 
     @Test
-    public void testDeferNullSupplier() {
-        assertThrows(IllegalArgumentException.class, () -> ByteStream.defer(null));
-    }
-
-    @Test
     public void testDefer_NullSupplier() {
         assertThrows(IllegalArgumentException.class, () -> ByteStream.defer(null));
     }
@@ -1873,12 +1841,6 @@ public class ByteStreamTest extends TestBase {
     public void testOfNullableWithNonNull() {
         ByteStream stream = ByteStream.ofNullable((byte) 42);
         assertEquals(1, stream.count());
-    }
-
-    @Test
-    public void testOfNullableWithNull() {
-        ByteStream stream = ByteStream.ofNullable(null);
-        assertEquals(0, stream.count());
     }
 
     @Test
@@ -2041,6 +2003,14 @@ public class ByteStreamTest extends TestBase {
     }
 
     @Test
+    public void testStepIteratorCountConsumes() {
+        // Regression: the step() iterator's count() must exhaust the iterator per the IteratorEx.count contract.
+        ByteIterator iter = ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5, (byte) 6).step(2).iterator();
+        assertEquals(3, iter.count());
+        assertFalse(iter.hasNext());
+    }
+
+    @Test
     public void testRotated() {
         ByteStream stream = ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5);
         assertArrayEquals(new byte[] { 4, 5, 1, 2, 3 }, stream.rotated(2).toArray());
@@ -2089,53 +2059,6 @@ public class ByteStreamTest extends TestBase {
     }
 
     // ==================== debounce tests ====================
-
-    @Test
-    public void testDebounce_BasicFunctionality() {
-        // Allow 3 elements per 1 second window
-        byte[] result = ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).debounce(3, com.landawn.abacus.util.Duration.ofSeconds(1)).toArray();
-
-        // Only first 3 elements should pass through within the window
-        assertEquals(3, result.length);
-        assertEquals((byte) 1, result[0]);
-        assertEquals((byte) 2, result[1]);
-        assertEquals((byte) 3, result[2]);
-    }
-
-    @Test
-    public void testDebounce_AllElementsPassWhenWithinLimit() {
-        // Allow 10 elements per window, but only 5 elements in stream
-        byte[] result = ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).debounce(10, com.landawn.abacus.util.Duration.ofSeconds(1)).toArray();
-
-        // All elements should pass
-        assertEquals(5, result.length);
-    }
-
-    @Test
-    public void testDebounce_PreservesOrder() {
-        byte[] result = ByteStream.of((byte) 10, (byte) 20, (byte) 30, (byte) 40, (byte) 50)
-                .debounce(3, com.landawn.abacus.util.Duration.ofSeconds(1))
-                .toArray();
-
-        assertEquals((byte) 10, result[0]);
-        assertEquals((byte) 20, result[1]);
-        assertEquals((byte) 30, result[2]);
-    }
-
-    @Test
-    public void testDebounce_ChainedWithOtherOperations() {
-        byte[] result = ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5, (byte) 6, (byte) 7, (byte) 8, (byte) 9, (byte) 10)
-                .filter(n -> n % 2 == 0) // 2, 4, 6, 8, 10
-                .debounce(3, com.landawn.abacus.util.Duration.ofSeconds(1)) // 2, 4, 6
-                .map(n -> (byte) (n * 10)) // 20, 40, 60
-                .toArray();
-
-        assertEquals(3, result.length);
-        assertEquals((byte) 20, result[0]);
-        assertEquals((byte) 40, result[1]);
-        assertEquals((byte) 60, result[2]);
-    }
-
     @Test
     public void testOfBoxedBytes() {
         Byte[] data = { 1, 2, 3 };
@@ -2445,47 +2368,6 @@ public class ByteStreamTest extends TestBase {
     }
 
     @Test
-    public void testDebounce_SingleElement() {
-        byte[] result = ByteStream.of((byte) 42).debounce(1, com.landawn.abacus.util.Duration.ofMillis(100)).toArray();
-
-        assertEquals(1, result.length);
-        assertEquals((byte) 42, result[0]);
-    }
-
-    @Test
-    public void testDebounce_MaxWindowSizeOne() {
-        // Only 1 element allowed per window
-        byte[] result = ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).debounce(1, com.landawn.abacus.util.Duration.ofSeconds(1)).toArray();
-
-        assertEquals(1, result.length);
-        assertEquals((byte) 1, result[0]);
-    }
-
-    @Test
-    public void testDebounce_WithLargeMaxWindowSize() {
-        byte[] input = new byte[100];
-        for (int i = 0; i < 100; i++) {
-            input[i] = (byte) i;
-        }
-
-        byte[] result = ByteStream.of(input).debounce(50, com.landawn.abacus.util.Duration.ofSeconds(10)).toArray();
-
-        assertEquals(50, result.length);
-    }
-
-    @Test
-    public void testDebounce_WithMinMaxValues() {
-        byte[] result = ByteStream.of(Byte.MIN_VALUE, (byte) 0, Byte.MAX_VALUE, (byte) 1, (byte) 2)
-                .debounce(3, com.landawn.abacus.util.Duration.ofSeconds(1))
-                .toArray();
-
-        assertEquals(3, result.length);
-        assertEquals(Byte.MIN_VALUE, result[0]);
-        assertEquals((byte) 0, result[1]);
-        assertEquals(Byte.MAX_VALUE, result[2]);
-    }
-
-    @Test
     public void testOfBytes() {
         List<Byte> result = createByteStream((byte) 1, (byte) 2, (byte) 3).toList();
         assertEquals(Arrays.asList((byte) 1, (byte) 2, (byte) 3), result);
@@ -2580,29 +2462,6 @@ public class ByteStreamTest extends TestBase {
         ByteStream emptyStream = ByteStream.empty();
         assertThrows(NoSuchElementException.class, () -> emptyStream.throwIfEmpty().toArray());
     }
-
-    @Test
-    public void testDebounce_ThrowsExceptionForNonPositiveMaxWindowSize() {
-        assertThrows(IllegalArgumentException.class, () -> {
-            ByteStream.of((byte) 1, (byte) 2, (byte) 3).debounce(0, com.landawn.abacus.util.Duration.ofSeconds(1)).toArray();
-        });
-
-        assertThrows(IllegalArgumentException.class, () -> {
-            ByteStream.of((byte) 1, (byte) 2, (byte) 3).debounce(-1, com.landawn.abacus.util.Duration.ofSeconds(1)).toArray();
-        });
-    }
-
-    @Test
-    public void testDebounce_ThrowsExceptionForNonPositiveDuration() {
-        assertThrows(IllegalArgumentException.class, () -> {
-            ByteStream.of((byte) 1, (byte) 2, (byte) 3).debounce(5, com.landawn.abacus.util.Duration.ofMillis(0)).toArray();
-        });
-
-        assertThrows(IllegalArgumentException.class, () -> {
-            ByteStream.of((byte) 1, (byte) 2, (byte) 3).debounce(5, com.landawn.abacus.util.Duration.ofMillis(-100)).toArray();
-        });
-    }
-
     // --- Missing dedicated test methods ---
 
     @Test
@@ -3153,12 +3012,6 @@ public class ByteStreamTest extends TestBase {
 
         ByteStream stream = ByteStream.concat(streams);
         assertArrayEquals(new byte[] { 1, 2, 3, 4, 5 }, stream.toArray());
-    }
-
-    @Test
-    public void testConcatEmptyArrays() {
-        ByteStream stream = ByteStream.concat(new byte[0], new byte[0]);
-        assertEquals(0, stream.count());
     }
 
     @Test
@@ -4307,4 +4160,43 @@ public class ByteStreamTest extends TestBase {
         org.junit.jupiter.api.Assertions.assertEquals(127.0, com.landawn.abacus.util.stream.ByteStream.of(arr).average().getAsDouble(), 0.0001);
     }
 
+    @Test
+    public void testDebounce_emptyEmitsNothing() {
+        org.junit.jupiter.api.Assertions.assertEquals(0, ByteStream.empty().debounce(com.landawn.abacus.util.Duration.ofSeconds(1)).toArray().length);
+    }
+
+    @Test
+    public void testDebounce_singleElementSurvives() {
+        org.junit.jupiter.api.Assertions.assertArrayEquals(new byte[] { (byte) 42 },
+                ByteStream.of((byte) 42).debounce(com.landawn.abacus.util.Duration.ofSeconds(1)).toArray());
+    }
+
+    @Test
+    public void testDebounce_coldStreamEmitsOnlyLastElement() {
+        // A cold in-memory stream yields all elements with ~0 inter-arrival gap, so every element
+        // except the last is superseded within the quiet window; only the final element survives.
+        org.junit.jupiter.api.Assertions.assertArrayEquals(new byte[] { (byte) 5 },
+                ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).debounce(com.landawn.abacus.util.Duration.ofSeconds(1)).toArray());
+    }
+
+    @Test
+    public void testDebounce_slowSourceAllSurviveWhenGapAtLeastDuration() {
+        // delay() makes each element arrive >= 60ms after the previous; with a 20ms quiet window
+        // every element clears the window and survives.
+        org.junit.jupiter.api.Assertions.assertArrayEquals(new byte[] { (byte) 1, (byte) 2, (byte) 3 },
+                ByteStream.of((byte) 1, (byte) 2, (byte) 3)
+                        .delay(com.landawn.abacus.util.Duration.ofMillis(60))
+                        .debounce(com.landawn.abacus.util.Duration.ofMillis(20))
+                        .toArray());
+    }
+
+    @Test
+    public void testDebounce_invalidDurationThrows() {
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class,
+                () -> ByteStream.of((byte) 1, (byte) 2, (byte) 3).debounce((com.landawn.abacus.util.Duration) null).toArray());
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class,
+                () -> ByteStream.of((byte) 1, (byte) 2, (byte) 3).debounce(com.landawn.abacus.util.Duration.ofMillis(0)).toArray());
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class,
+                () -> ByteStream.of((byte) 1, (byte) 2, (byte) 3).debounce(com.landawn.abacus.util.Duration.ofMillis(-100)).toArray());
+    }
 }

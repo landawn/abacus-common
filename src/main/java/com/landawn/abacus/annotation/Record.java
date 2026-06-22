@@ -32,11 +32,12 @@ import java.lang.annotation.Target;
  *       subclasses. Many downstream helpers (bean introspection, copy/clone, property access)
  *       branch on this method and apply record-style semantics (constructor-based instantiation,
  *       canonical property order, no setters required).</li>
- *   <li>{@code com.landawn.abacus.parser.AvroParser} and similar serializers also detect this
- *       annotation to drive record-aware (de)serialization.</li>
+ *   <li>The framework's bean introspection ({@code ParserUtil.getBeanInfo}) also branches on
+ *       {@code Beans.isRecordClass(Class)}, so parsers built on it apply record-aware
+ *       (de)serialization.</li>
  * </ul>
  *
- * <p><b>Note:</b> The annotation is itself meta-annotated with {@link Test}, signaling that the
+ * <p><b>Note:</b> The annotation is itself meta-annotated with {@link Beta}, signaling that the
  * marker is experimental and may change. Despite that, it is consumed by production framework
  * code, so it is safe to apply where record-like introspection is needed.</p>
  *
@@ -84,7 +85,7 @@ import java.lang.annotation.Target;
  * @see java.lang.Record
  * @see com.landawn.abacus.util.Beans#isRecordClass(Class)
  */
-@Test
+@Beta
 @Documented
 @Target(value = { ElementType.TYPE })
 @Retention(RUNTIME)

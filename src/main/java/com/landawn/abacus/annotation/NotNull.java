@@ -57,6 +57,13 @@ import java.lang.annotation.Target;
  * {@code requireNonNull}-style precondition methods in {@code com.landawn.abacus.parser.ParserUtil}.
  * It pairs naturally with {@link MayReturnNull} on the return side of an API.</p>
  *
+ * <p><b>Name collision:</b> the simple name {@code NotNull} collides with the widely used
+ * {@code javax.annotation.Nonnull}, {@code jakarta.annotation.Nonnull},
+ * {@code org.jetbrains.annotations.NotNull}, and {@code jakarta.validation.constraints.NotNull}.
+ * abacus reflects only on <i>its own</i> {@code com.landawn.abacus.annotation.NotNull}; an
+ * accidentally imported third-party {@code NotNull} is invisible to the framework. When relying on
+ * framework-side handling, ensure the import resolves to this annotation.</p>
+ *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * public class UserService {

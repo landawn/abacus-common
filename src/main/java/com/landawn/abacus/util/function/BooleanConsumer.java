@@ -13,9 +13,9 @@
  */
 package com.landawn.abacus.util.function;
 
-import java.util.Objects;
-
 import com.landawn.abacus.util.Throwables;
+import com.landawn.abacus.util.N;
+import com.landawn.abacus.util.cs;
 
 /**
  * Represents an operation that accepts a single {@code boolean}-valued argument and returns no result.
@@ -62,13 +62,27 @@ public interface BooleanConsumer extends Throwables.BooleanConsumer<RuntimeExcep
      *
      * @param after the operation to perform after this operation. Must not be {@code null}.
      * @return a composed {@code BooleanConsumer} that performs in sequence this operation followed by the {@code after} operation
-     * @throws NullPointerException if {@code after} is null
+     * @throws IllegalArgumentException if {@code after} is null
      */
     default BooleanConsumer andThen(final BooleanConsumer after) {
-        Objects.requireNonNull(after);
+        N.checkArgNotNull(after, cs.after);
         return value -> {
             accept(value);
             after.accept(value);
         };
+    }
+
+    /**
+     * Returns this object as a {@link Throwables.BooleanConsumer} view.
+     *
+     * <p>The returned object has the same behavior as this one. This method does not translate
+     * exceptions or make the original implementation capable of throwing new checked exceptions; the
+     * exception type parameter is for target-type compatibility with APIs that accept {@code Throwables.BooleanConsumer}.
+     *
+     * @param <E> the target exception type for compatibility with {@code Throwables.BooleanConsumer}
+     * @return a {@link Throwables.BooleanConsumer} view of this object
+     */
+    default <E extends Throwable> Throwables.BooleanConsumer<E> toThrowable() {
+        return (Throwables.BooleanConsumer<E>) this;
     }
 }

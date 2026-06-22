@@ -57,6 +57,14 @@ import java.util.function.ToIntFunction;
  * );
  * }</pre>
  *
+ * <p><b>Note:</b> {@link #equals(Object)} compares against any {@code Wrapper} instance regardless of which
+ * factory produced it. Equality therefore relies on the wrapped value's hash/equals functions
+ * being consistent across the two wrappers. Mixing the deep-equality factory ({@link #of(Object)})
+ * with the custom-function factory ({@link #of(Object, ToIntFunction, BiPredicate)}) for the same
+ * value type is only safe when the custom functions agree with deep equality; supplying custom
+ * functions that diverge from deep equality can make {@code a.equals(b)} and {@code b.equals(a)}
+ * disagree, because each side applies its own comparison function.
+ *
  * @param <T> the type of the object that this wrapper will hold.
  * @see Keyed
  * @see IndexedKeyed
@@ -145,6 +153,11 @@ public abstract class Wrapper<T> implements Immutable {
      * in hash-based collections, enabling use cases like comparing objects by specific fields,
      * ignoring certain properties, or using custom comparison logic.</p>
      *
+     * <p><b>&#9888; Custom equality:</b> The supplied functions must obey the Java
+     * {@code equals}/{@code hashCode} contract for every wrapper that may be compared with this
+     * wrapper. In particular, equality must be symmetric and transitive, and values considered
+     * equal by {@code equalsFunction} must produce the same hash from {@code hashFunction}.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Wrap a Person object but only consider the ID for equality
@@ -169,9 +182,9 @@ public abstract class Wrapper<T> implements Immutable {
      * @param <T> the type of the value to be wrapped.
      * @param value the value to be wrapped; can be {@code null}.
      * @param hashFunction the function to calculate the hash code of the wrapped value;
-     *                     must not be {@code null}.
+     *                     must not be {@code null} and must be consistent with {@code equalsFunction}.
      * @param equalsFunction the function to compare the wrapped value with other objects;
-     *                       must not be {@code null}.
+     *                       must not be {@code null} and must implement symmetric/transitive equality.
      * @return a Wrapper instance with the specified custom hash and equals behavior.
      * @throws IllegalArgumentException if {@code hashFunction} or {@code equalsFunction} is {@code null}.
      */
@@ -192,6 +205,11 @@ public abstract class Wrapper<T> implements Immutable {
      * of the wrapper's behavior: hash code computation, equality comparison, and string representation.
      * This is particularly useful for complex objects where you need fine-grained control over
      * comparison logic and debugging output.</p>
+     *
+     * <p><b>&#9888; Custom equality:</b> The supplied hash and equality functions must obey the
+     * Java {@code equals}/{@code hashCode} contract for every wrapper that may be compared with
+     * this wrapper. Mixing wrappers that use incompatible custom equality functions can make
+     * equality non-symmetric.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -220,9 +238,9 @@ public abstract class Wrapper<T> implements Immutable {
      * @param <T> the type of the value to be wrapped.
      * @param value the value to be wrapped; can be {@code null}.
      * @param hashFunction the function to calculate the hash code of the wrapped value;
-     *                     must not be {@code null}.
+     *                     must not be {@code null} and must be consistent with {@code equalsFunction}.
      * @param equalsFunction the function to compare the wrapped value with other objects;
-     *                       must not be {@code null}.
+     *                       must not be {@code null} and must implement symmetric/transitive equality.
      * @param toStringFunction the function to generate string representation of the wrapped value;
      *                         must not be {@code null}.
      * @return a Wrapper instance with the specified custom hash, equals, and toString behavior.
@@ -241,16 +259,18 @@ public abstract class Wrapper<T> implements Immutable {
     /**
      * Returns the wrapped value.
      *
-     * <p>The returned value is the same instance that was passed to the {@code of()} factory
-     * method — no copy is made. If the returned value is mutable, mutating it after the wrapper
-     * has been placed into a hash-based collection may corrupt the collection's invariants.</p>
+     * <p>The returned value is the wrapped instance stored by this wrapper. For wrappers created from
+     * non-empty values this is the same instance passed to the {@code of()} factory method; zero-length
+     * arrays and {@code null} may return a shared cached wrapper value. If the returned value is mutable,
+     * mutating it after the wrapper has been placed into a hash-based collection may corrupt the
+     * collection's invariants.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Retrieve the wrapped array
      * int[] array = {1, 2, 3};
      * Wrapper<int[]> wrapper = Wrapper.of(array);
-     * int[] unwrapped = wrapper.value();   // returns the original array
+     * int[] unwrapped = wrapper.value();   // returns the original non-empty array
      *
      * // Access wrapped object in a map
      * Map<Wrapper<String[]>, String> map = new HashMap<>();

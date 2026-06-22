@@ -37,6 +37,7 @@ import org.w3c.dom.Node;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.annotation.JsonXmlField;
+import com.landawn.abacus.parser.entity.RecordB;
 import com.landawn.abacus.type.Type;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Strings;
@@ -140,6 +141,55 @@ public class AbacusXmlParserImplTest extends TestBase {
         public void setName(final String name) {
             this.name = name;
         }
+    }
+
+    public static class RecordWrapper {
+        private String name;
+        private RecordB rec;
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(final String name) {
+            this.name = name;
+        }
+
+        public RecordB getRec() {
+            return rec;
+        }
+
+        public void setRec(final RecordB rec) {
+            this.rec = rec;
+        }
+    }
+
+    @Test
+    public void bugFix_sax_nestedImmutableRecord_isBound() {
+        if (!ParserFactory.isAbacusXmlParserAvailable()) {
+            return;
+        }
+
+        final RecordWrapper outer = new RecordWrapper();
+        outer.setName("OUTER");
+        outer.setRec(new RecordB(7, "first", "last"));
+
+        final String xml = staxParser.serialize(outer);
+        final XmlDeserConfig xdc = new XmlDeserConfig();
+
+        final XmlParser saxParser = new AbacusXmlParserImpl(XmlParserType.SAX);
+        final RecordWrapper fromSax = saxParser.deserialize(xml, xdc, RecordWrapper.class);
+
+        // The nested immutable record must be the finished record, not the raw constructor-arg intermediate.
+        assertNotNull(fromSax.getRec());
+        assertEquals(new RecordB(7, "first", "last"), fromSax.getRec());
+        assertEquals("OUTER", fromSax.getName());
+
+        // And SAX must agree with the reference StAX/DOM parsers.
+        final RecordWrapper fromStax = staxParser.deserialize(xml, xdc, RecordWrapper.class);
+        final RecordWrapper fromDom = domParser.deserialize(xml, xdc, RecordWrapper.class);
+        assertEquals(fromStax.getRec(), fromSax.getRec());
+        assertEquals(fromDom.getRec(), fromSax.getRec());
     }
 
     @Test
@@ -480,6 +530,32 @@ public class AbacusXmlParserImplTest extends TestBase {
         assertNotNull(person);
         assertEquals("David", person.getName());
         assertEquals(45, person.getAge());
+    }
+
+    @Test
+    public void testDeserializeCdataBeanProperty_staxPath() {
+        // Regression: the StAX deserialization path must treat CDATA events as text.
+        // Because the StAX reader is not coalescing, <![CDATA[...]]> arrives as a
+        // separate CDATA event; if only CHARACTERS were recognized the value was
+        // silently dropped (deserialized to null / empty).
+        final String xml = "<bean><name><![CDATA[hello & <world>]]></name><age>7</age></bean>";
+
+        final Person person = staxParser.deserialize(xml, Person.class);
+        assertNotNull(person);
+        assertEquals("hello & <world>", person.getName());
+        assertEquals(7, person.getAge());
+    }
+
+    @Test
+    public void testDeserializeMixedCdataAndCharacters_staxPath() {
+        // Regression: a mixed text node where plain CHARACTERS and CDATA are interleaved
+        // must be concatenated across the CHARACTERS/CDATA event boundaries.
+        final String xml = "<bean><name>pre<![CDATA[mid]]>post</name><age>9</age></bean>";
+
+        final Person person = staxParser.deserialize(xml, Person.class);
+        assertNotNull(person);
+        assertEquals("premidpost", person.getName());
+        assertEquals(9, person.getAge());
     }
 
     @Test
@@ -1143,6 +1219,46 @@ public class AbacusXmlParserImplTest extends TestBase {
         assertEquals(N.asMap("inner", N.asMap("a", "1", "b", "2"), "tail", "TAIL"), fromSax);
         assertEquals(staxParser.deserialize(xml, xdc, Map.class), fromSax);
         assertEquals(domParser.deserialize(xml, xdc, Map.class), fromSax);
+    }
+
+    // --- regression tests for 2026-06-11 deep-review fixes ---
+
+    @Test
+    public void testSharedReferenceIsNotMisdetectedAsCycle() {
+        // regression: write() never removed objects from serializedObjects, so two SIBLING
+        // references to the same object (a DAG, not a cycle) were misidentified as circular and
+        // the second one was silently emitted as an empty element
+        final Map<String, Object> shared = N.asMap("name", "x");
+        final Map<String, Object> root = new java.util.LinkedHashMap<>();
+        root.put("a1", shared);
+        root.put("a2", shared);
+
+        final com.landawn.abacus.parser.XmlSerConfig xsc = new com.landawn.abacus.parser.XmlSerConfig().setSupportCircularReference(true);
+        final String xml = new AbacusXmlParserImpl(XmlParserType.StAX).serialize(root, xsc);
+
+        final int first = xml.indexOf("name");
+        final int second = xml.indexOf("name", first + 1);
+        assertEquals(true, first >= 0 && second > first, "both sibling references must be fully serialized: " + xml);
+    }
+
+    @Test
+    public void testDeserialize_IOExceptionFromReader() {
+        final java.io.Reader failingReader = new java.io.Reader() {
+            @Override
+            public int read(final char[] cbuf, final int off, final int len) throws IOException {
+                throw new IOException("read failed");
+            }
+
+            @Override
+            public void close() throws IOException {
+                // no-op
+            }
+        };
+
+        final com.landawn.abacus.exception.UncheckedIOException ex = assertThrows(com.landawn.abacus.exception.UncheckedIOException.class,
+                () -> new AbacusXmlParserImpl(XmlParserType.StAX).deserialize(failingReader, new XmlDeserConfig(), Map.class));
+
+        assertTrue(ex.getCause() instanceof IOException);
     }
 
 }

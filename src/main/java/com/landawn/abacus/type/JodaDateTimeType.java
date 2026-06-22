@@ -21,6 +21,7 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 
 import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
 
 import com.landawn.abacus.util.Dates;
 import com.landawn.abacus.util.N;
@@ -132,8 +133,12 @@ public class JodaDateTimeType extends AbstractJodaDateTimeType<DateTime> {
             }
         }
 
-        return str.length() == 20 ? jodaISO8601DateTimeFT.parseDateTime(str)
-                : (str.length() == 24 ? jodaISO8601TimestampFT.parseDateTime(str) : new DateTime(Dates.parseTimestamp(str).getTime()));
+        // The formatters parse the 'Z'-suffixed wall time as UTC (correct instant); re-zone to the
+        // default zone so the result equals() a locally-constructed DateTime of the same instant,
+        // like the numeric-millis path above.
+        return str.length() == 20 ? jodaISO8601DateTimeFT.parseDateTime(str).withZone(DateTimeZone.getDefault())
+                : (str.length() == 24 ? jodaISO8601TimestampFT.parseDateTime(str).withZone(DateTimeZone.getDefault())
+                        : new DateTime(Dates.parseTimestamp(str).getTime()));
     }
 
     /**
@@ -154,7 +159,7 @@ public class JodaDateTimeType extends AbstractJodaDateTimeType<DateTime> {
             return null; // NOSONAR
         }
 
-        if (isPossibleLong(cbuf, offset, len)) {
+        if (isPossibleMillis(cbuf, offset, len)) {
             try {
                 return new DateTime(parseLong(cbuf, offset, len));
             } catch (final NumberFormatException e) {

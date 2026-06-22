@@ -36,7 +36,6 @@ import java.nio.file.attribute.FileAttribute;
 import java.util.List;
 
 import com.google.common.base.Predicate;
-import com.google.common.graph.Traverser;
 import com.google.common.io.ByteSink;
 import com.google.common.io.ByteSource;
 import com.google.common.io.CharSink;
@@ -44,6 +43,7 @@ import com.google.common.io.CharSource;
 import com.google.common.io.FileWriteMode;
 import com.google.common.io.InsecureRecursiveDeleteException;
 import com.google.common.io.RecursiveDeleteOption;
+import com.landawn.abacus.util.Charsets;
 import com.landawn.abacus.util.IOUtil;
 import com.landawn.abacus.util.ImmutableList;
 
@@ -140,11 +140,9 @@ import com.landawn.abacus.util.ImmutableList;
  *
  * // Directory traversal
  * Traverser<File> fileTraverser = Files.fileTraverser();
- * for (File file : fileTraverser.depthFirstPreOrder(rootDir)) {
- *     if (file.isFile()) {
- *         processFile(file);
- *     }
- * }
+ * fileTraverser.depthFirstPreOrder(rootDir)
+ *     .filter(File::isFile)
+ *     .forEach(file -> processFile(file));
  *
  * // Path-based operations
  * List<Path> files = Files.listFiles(directory);
@@ -248,6 +246,10 @@ import com.landawn.abacus.util.ImmutableList;
  * <ul>
  *   <li><b>Alias Class:</b> A nested subclass that inherits all static methods from {@link Files}</li>
  *   <li><b>Interchangeable Use:</b> {@code Files.MoreFiles.xxx(...)} is equivalent to {@code Files.xxx(...)}</li>
+ *   <li><b>Import-Clash Workaround:</b> Its primary purpose is to sidestep the very common import clash on the simple
+ *       name {@code Files} (shared by {@link java.nio.file.Files}, {@link com.google.common.io.Files} and this facade);
+ *       when another {@code Files} already occupies the simple name, callers can reach this facade through the
+ *       conflict-free name {@code Files.MoreFiles}. See {@link Files.MoreFiles} for details.</li>
  *   <li><b>Naming Convenience:</b> Provided so callers familiar with Guava's {@code MoreFiles} can use a similarly named type</li>
  * </ul>
  *
@@ -269,8 +271,9 @@ import com.landawn.abacus.util.ImmutableList;
  *
  * // Traverse all configuration files
  * Traverser<File> traverser = Files.fileTraverser();
- * for (File file : traverser.depthFirstPreOrder(configDir)) {
- *     if (file.isFile() && Files.getFileExtension(file.getName()).equals("json")) {
+ * traverser.depthFirstPreOrder(configDir)
+ *     .filter(file -> file.isFile() && Files.getFileExtension(file.getName()).equals("json"))
+ *     .forEach(file -> {
  *         try {
  *             // Read and process configuration
  *             String content = Files.readString(file);
@@ -288,8 +291,7 @@ import com.landawn.abacus.util.ImmutableList;
  *         } catch (IOException e) {
  *             logger.error("Failed to process file: " + file, e);
  *         }
- *     }
- * }
+ *     });
  * }</pre>
  *
  * @see com.landawn.abacus.util.IOUtil
@@ -774,6 +776,11 @@ public abstract class Files { //NOSONAR
      * {@link File#mkdirs()}, this method throws an exception if the parent directory cannot
      * be created.
      *
+     * <p><b>Note:</b> this is the {@link File}-based method. Its {@link Path}-based counterpart is
+     * named {@link #createParentDirectories(Path, FileAttribute...)} — the naming difference (Dirs
+     * vs Directories) mirrors Guava's own {@code com.google.common.io.Files} (File API) vs
+     * {@code com.google.common.io.MoreFiles} (Path API) split, which this facade preserves.
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * File file = new File("/path/to/deep/directory/file.txt");
@@ -784,6 +791,7 @@ public abstract class Files { //NOSONAR
      * @param file the file whose parent directories should be created.
      * @throws IOException if an I/O error occurs, or if any necessary but nonexistent parent
      *     directories of the specified file could not be created.
+     * @see #createParentDirectories(Path, FileAttribute...)
      */
     public static void createParentDirs(final File file) throws IOException {
         com.google.common.io.Files.createParentDirs(file);
@@ -797,6 +805,11 @@ public abstract class Files { //NOSONAR
      * <p>This method does nothing if the parent directory already exists. File attributes
      * can be used to set permissions or other properties on the created directories.
      *
+     * <p><b>Note:</b> this is the {@link Path}-based method. Its {@link File}-based counterpart is
+     * named {@link #createParentDirs(File)} — the naming difference (Directories vs Dirs) mirrors
+     * Guava's own {@code com.google.common.io.MoreFiles} (Path API) vs
+     * {@code com.google.common.io.Files} (File API) split, which this facade preserves.
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Path path = Paths.get("/path/to/deep/directory/file.txt");
@@ -808,6 +821,7 @@ public abstract class Files { //NOSONAR
      * @param attrs an optional list of file attributes to set atomically when creating the directories.
      * @throws IOException if an I/O error occurs, or if any necessary but nonexistent parent
      *     directories of the specified path could not be created.
+     * @see #createParentDirs(File)
      */
     public static void createParentDirectories(final Path path, final FileAttribute<?>... attrs) throws IOException {
         com.google.common.io.MoreFiles.createParentDirectories(path, attrs);
@@ -909,6 +923,10 @@ public abstract class Files { //NOSONAR
      * <p><b>{@link java.nio.file.Path} equivalent:</b> {@link
      * java.nio.file.Files#readAllLines(java.nio.file.Path, Charset)}.
      *
+     * <p><b>Note:</b> {@link #readAllLines(File, Charset)} performs the equivalent operation but is
+     * backed by {@code java.nio.file.Files} rather than Guava's {@code com.google.common.io.Files};
+     * both return an equivalent mutable {@link List} of lines with terminators stripped.
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<String> lines = Files.readLines(new File("data.txt"), StandardCharsets.UTF_8);
@@ -922,6 +940,8 @@ public abstract class Files { //NOSONAR
      *     helpful predefined constants.
      * @return a mutable {@link List} containing all the lines.
      * @throws IOException if an I/O error occurs while reading the file.
+     * @see #readAllLines(File, Charset)
+     * @see #readAllLines(File)
      */
     public static List<String> readLines(final File file, final Charset charset) throws IOException {
         return com.google.common.io.Files.readLines(file, charset);
@@ -968,7 +988,7 @@ public abstract class Files { //NOSONAR
      * <pre>{@code
      * // Create a read-write mapping
      * MappedByteBuffer buffer = Files.map(new File("data.bin"), MapMode.READ_WRITE);
-     * buffer.putInt(0, 42);   // inserts an int at the beginning of the file
+     * buffer.putInt(0, 42);   // writes an int at the beginning of the file
      * }</pre>
      *
      * @param file the file to map.
@@ -1146,43 +1166,54 @@ public abstract class Files { //NOSONAR
     }
 
     /**
-     * Returns a {@link Traverser} instance for the file and directory tree. The returned traverser
-     * starts from a {@link File} and will return all files and directories it encounters.
+     * Returns the library {@link Traverser} instance for the file and directory tree. The returned
+     * traverser starts from a {@link File} and will return all files and directories it encounters.
+     *
+     * <p><b>Note:</b> the returned type is the package's own
+     * {@link com.landawn.abacus.guava.Traverser}, whose traversal methods return a
+     * {@link com.landawn.abacus.util.stream.Stream} (not a Guava {@code Iterable}). This is a thin
+     * accessor for the shared constant {@link Traverser#FILES}.
      *
      * <p><b>Warning:</b> {@code File} provides no support for symbolic links, and as such there is no
      * way to ensure that a symbolic link to a directory is not followed when traversing the tree. In
-     * this case, iterables created by this traverser could contain files that are outside the
+     * this case, streams created by this traverser could contain files that are outside the
      * given directory or even be infinite if there is a symbolic link loop.
      *
      * <p>If available, consider using {@link #pathTraverser()} instead. It behaves the same
      * except that it doesn't follow symbolic links and returns {@code Path} instances.
      *
      * <p>If the {@link File} passed to one of the {@link Traverser} methods does not exist or is not
-     * a directory, no exception will be thrown and the returned {@link Iterable} will contain a
+     * a directory, no exception will be thrown and the returned stream will contain a
      * single element: that file.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Depth-first traversal
-     * Files.fileTraverser().depthFirstPreOrder(new File("/"));
-     * // may return files with the paths: ["/", "/etc", "/etc/config.txt", "/etc/fonts", "/home", "/home/alice", ...]
+     * Files.fileTraverser().depthFirstPreOrder(new File("/")).forEach(System.out::println);
+     * // may stream files with the paths: ["/", "/etc", "/etc/config.txt", "/etc/fonts", "/home", "/home/alice", ...]
      *
      * // Breadth-first traversal
      * Traverser<File> traverser = Files.fileTraverser();
-     * for (File file : traverser.breadthFirst(new File("/home/user"))) {
-     *     System.out.println(file.getPath());
-     * }
+     * traverser.breadthFirst(new File("/home/user"))
+     *     .forEach(file -> System.out.println(file.getPath()));
      * }</pre>
      *
      * @return a traverser for traversing file trees starting from File objects.
+     * @see Traverser#FILES
+     * @see #pathTraverser()
      */
     public static Traverser<File> fileTraverser() {
-        return com.google.common.io.Files.fileTraverser();
+        return Traverser.FILES;
     }
 
     /**
-     * Returns a {@link Traverser} instance for the file and directory tree. The returned traverser
-     * starts from a {@link Path} and will return all files and directories it encounters.
+     * Returns the library {@link Traverser} instance for the file and directory tree. The returned
+     * traverser starts from a {@link Path} and will return all files and directories it encounters.
+     *
+     * <p><b>Note:</b> the returned type is the package's own
+     * {@link com.landawn.abacus.guava.Traverser}, whose traversal methods return a
+     * {@link com.landawn.abacus.util.stream.Stream} (not a Guava {@code Iterable}). This is a thin
+     * accessor for the shared constant {@link Traverser#PATHS}.
      *
      * <p>The returned traverser attempts to avoid following symbolic links to directories. However,
      * the traverser cannot guarantee that it will not follow symbolic links to directories as it is
@@ -1190,37 +1221,42 @@ public abstract class Files { //NOSONAR
      * directory and actually reading the contents of that directory.
      *
      * <p>If the {@link Path} passed to one of the traversal methods does not exist or is not a
-     * directory, no exception will be thrown and the returned {@link Iterable} will contain a single
+     * directory, no exception will be thrown and the returned stream will contain a single
      * element: that path.
      *
-     * <p>{@link DirectoryIteratorException} may be thrown when iterating {@link Iterable} instances
+     * <p>{@link DirectoryIteratorException} may be thrown when consuming the stream
      * created by this traverser if an {@link IOException} is thrown by a call to {@link
      * #listFiles(Path)}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Traverser<Path> traverser = Files.pathTraverser();
-     * Iterable<Path> paths = traverser.depthFirstPreOrder(Paths.get("/"));
-     * // may return the paths: ["/", "/etc", "/etc/config.txt", "/etc/fonts", "/home", "/home/alice", ...]
+     * traverser.depthFirstPreOrder(Paths.get("/")).forEach(System.out::println);
+     * // may stream the paths: ["/", "/etc", "/etc/config.txt", "/etc/fonts", "/home", "/home/alice", ...]
      *
-     * for (Path path : traverser.breadthFirst(Paths.get("/home/user"))) {
-     *     System.out.println(path);
-     * }
+     * traverser.breadthFirst(Paths.get("/home/user")).forEach(System.out::println);
      * }</pre>
      *
      * @return a traverser for traversing file trees starting from Path objects.
+     * @see Traverser#PATHS
+     * @see #fileTraverser()
      */
     public static Traverser<Path> pathTraverser() {
-        return com.google.common.io.MoreFiles.fileTraverser();
+        return Traverser.PATHS;
     }
 
     /**
-     * Returns an immutable list of paths to the files contained in the given directory.
-     * The returned list does not include the directory itself or any subdirectories.
+     * Returns an immutable list of paths to the entries (files and immediate subdirectories) contained in the given directory.
+     * The returned list does not include the directory itself, and does not recurse into subdirectories.
      * Hidden files are included in the results.
      *
      * <p>The order of the returned files is not specified and may vary between invocations
      * or platforms.
+     *
+     * <p><b>Note on immutability:</b> unlike the line readers {@link #readLines(File, Charset)} /
+     * {@link #readAllLines(File, Charset)} (which return a mutable {@link List}), this method returns
+     * an {@link ImmutableList} — mirroring Guava's {@code MoreFiles.listFiles}. To obtain a mutable
+     * copy, wrap the result, e.g. {@code new ArrayList<>(Files.listFiles(dir))}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1427,7 +1463,7 @@ public abstract class Files { //NOSONAR
      * @see IOUtil#readAllToString(File)
      */
     public static String readString(final File file) throws IOException {
-        return readString(file, StandardCharsets.UTF_8);
+        return readString(file, Charsets.UTF_8);
     }
 
     /**
@@ -1461,6 +1497,52 @@ public abstract class Files { //NOSONAR
     }
 
     /**
+     * Writes the given character sequence to a file using UTF-8 charset, overwriting any existing content.
+     *
+     * <p>This is a convenience method equivalent to {@code asCharSink(file, StandardCharsets.UTF_8).write(from)}
+     * and mirrors {@link #readString(File)}.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Files.writeString(new File("document.txt"), "Hello, World!");
+     * }</pre>
+     *
+     * @param file the file to write to.
+     * @param from the character sequence to write.
+     * @throws IOException if an I/O error occurs writing to the file.
+     * @see #writeString(File, CharSequence, Charset)
+     * @see #readString(File)
+     * @see #asCharSink(File, Charset, FileWriteMode...)
+     * @see IOUtil#write(CharSequence, File)
+     */
+    public static void writeString(final File file, final CharSequence from) throws IOException {
+        writeString(file, from, Charsets.UTF_8);
+    }
+
+    /**
+     * Writes the given character sequence to a file using the given character set, overwriting any existing content.
+     *
+     * <p>This is a convenience method equivalent to {@code asCharSink(file, charset).write(from)}
+     * and mirrors {@link #readString(File, Charset)}.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Files.writeString(new File("document.txt"), "Hello, World!", StandardCharsets.ISO_8859_1);
+     * }</pre>
+     *
+     * @param file the file to write to.
+     * @param from the character sequence to write.
+     * @param charset the character set used to encode the output; see {@link StandardCharsets} for
+     *     helpful predefined constants.
+     * @throws IOException if an I/O error occurs writing to the file.
+     * @see #readString(File, Charset)
+     * @see #asCharSink(File, Charset, FileWriteMode...)
+     */
+    public static void writeString(final File file, final CharSequence from, final Charset charset) throws IOException {
+        asCharSink(file, charset).write(from);
+    }
+
+    /**
      * Reads all lines from a file using UTF-8 charset. The lines do not include line-termination characters, but do include
      * other leading and trailing whitespace.
      *
@@ -1474,6 +1556,10 @@ public abstract class Files { //NOSONAR
      *
      * <p><b>{@link java.nio.file.Path} equivalent:</b> {@link
      * java.nio.file.Files#readAllLines(java.nio.file.Path, Charset)}.
+     *
+     * <p><b>Note:</b> this method is backed by {@code java.nio.file.Files}; the Guava-backed
+     * {@link #readLines(File, Charset)} performs the equivalent operation. Both return an
+     * equivalent mutable {@link List} of lines with terminators stripped.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1489,6 +1575,7 @@ public abstract class Files { //NOSONAR
      * @throws SecurityException in the case of the default provider, and a security manager is
      *         installed, the {@link SecurityManager#checkRead(String) checkRead} method is invoked.
      * @see #readAllLines(File, Charset)
+     * @see #readLines(File, Charset)
      * @see java.nio.file.Files#readAllLines(Path, Charset)
      * @see IOUtil#readAllLines(File)
      */
@@ -1505,6 +1592,10 @@ public abstract class Files { //NOSONAR
      *
      * <p><b>{@link java.nio.file.Path} equivalent:</b> {@link
      * java.nio.file.Files#readAllLines(java.nio.file.Path, Charset)}.
+     *
+     * <p><b>Note:</b> this method is backed by {@code java.nio.file.Files}; the Guava-backed
+     * {@link #readLines(File, Charset)} performs the equivalent operation. Both return an
+     * equivalent mutable {@link List} of lines with terminators stripped.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1525,6 +1616,7 @@ public abstract class Files { //NOSONAR
      * @throws SecurityException in the case of the default provider, and a security manager is
      *         installed, the {@link SecurityManager#checkRead(String) checkRead} method is invoked
      *         to check read access to the file.
+     * @see #readLines(File, Charset)
      * @see java.nio.file.Files#readAllLines(Path, Charset)
      * @see IOUtil#readAllLines(File, Charset)
      */
@@ -1533,22 +1625,38 @@ public abstract class Files { //NOSONAR
     }
 
     /**
-     * A nested utility class that extends {@link Files} to provide an alias for
-     * Google Guava's {@code MoreFiles} operations. This class inherits all
-     * static methods from the parent {@link Files} class and can be used interchangeably.
+     * A name-only alias for the enclosing {@link Files} class, provided to sidestep the very common
+     * import clash on the simple name {@code Files}.
      *
-     * <p>All Path-based operations available in {@link Files} (such as
-     * {@link Files#asByteSource(Path, OpenOption...)}, {@link Files#asByteSink(Path, OpenOption...)},
-     * {@link Files#listFiles(Path)}, and {@link Files#deleteRecursively(Path, RecursiveDeleteOption...)})
-     * are accessible through this class as well.
+     * <p>{@code Files} is an unusually overloaded type name: it is used by {@link java.nio.file.Files}
+     * (JDK NIO.2), {@link com.google.common.io.Files} (Guava), and this facade
+     * ({@link com.landawn.abacus.guava.Files}). A single source file can only import one of them by
+     * its simple name; the others must be referenced by their fully qualified names. When another
+     * {@code Files} is already imported, this nested class lets you reach every method of this facade
+     * through the distinct, conflict-free name {@code Files.MoreFiles} (or simply {@code MoreFiles}
+     * once {@code Files.MoreFiles} is statically imported).</p>
+     *
+     * <p>The name mirrors Guava's own {@code com.google.common.io.MoreFiles}, so callers already
+     * familiar with that type have a similarly named entry point here.</p>
+     *
+     * <p>Because {@code MoreFiles} simply {@code extends Files}, it inherits all of the parent's
+     * {@code public static} methods unchanged — there are no additional or overridden members. The two
+     * types are therefore fully interchangeable; {@code Files.MoreFiles.xxx(...)} always behaves
+     * identically to {@code Files.xxx(...)}. Like {@link Files}, this class is a stateless utility and
+     * cannot be instantiated.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * // All Files methods are accessible through MoreFiles
-     * ByteSource source = Files.MoreFiles.asByteSource(Paths.get("data.bin"));
+     * import java.nio.file.Files;                   // JDK Files occupies the simple name
+     * import com.landawn.abacus.guava.Files.MoreFiles;
+     *
+     * // Reach this facade's methods through the non-conflicting MoreFiles name
+     * ByteSource source = MoreFiles.asByteSource(Paths.get("data.bin"));
+     * byte[] bytes = Files.readAllBytes(Paths.get("data.bin")); // JDK Files, no clash
      * }</pre>
      *
      * @see Files
+     * @see com.google.common.io.MoreFiles
      */
     public static final class MoreFiles extends Files {
 

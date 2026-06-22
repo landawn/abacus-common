@@ -2086,4 +2086,13 @@ public class EscapeUtilTest extends TestBase {
         assertEquals(first.length, second.length);
     }
 
+    // --- regression tests for 2026-06-10 deep-review fixes ---
+
+    @Test
+    public void testUnescapeCsvSingleQuoteChar() {
+        // regression: a single '"' satisfied both first/last quote checks (same character) and
+        // subSequence(1, 0) threw StringIndexOutOfBoundsException
+        assertEquals("\"", EscapeUtil.unescapeCsv("\""));
+    }
+
 }

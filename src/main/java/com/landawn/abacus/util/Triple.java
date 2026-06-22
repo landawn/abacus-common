@@ -64,9 +64,9 @@ import com.landawn.abacus.util.u.Optional;
  *   </tr>
  *   <tr>
  *     <td>Functional/tuple API</td>
- *     <td>Minimal: {@code map}, {@code filter}, {@code accept} on the triple as a whole</td>
+ *     <td>Minimal: {@code map}, {@code filter}, {@code accept}, {@code forEach} (overloads accept either the three elements or the triple as a whole)</td>
  *     <td>Rich: {@code accept(TriConsumer)}, {@code map(TriFunction)}, {@code filter(TriPredicate)},
- *         {@code reverse()}, {@code toList()}, {@code toArray()}, plus integration with the
+ *         {@code reverse()}, {@code Tuple.toList(t)}, {@code toArray()}, plus integration with the
  *         {@link Tuple} hierarchy ({@code Tuple1}..{@code Tuple9})</td>
  *   </tr>
  *   <tr>
@@ -180,7 +180,7 @@ public final class Triple<L, M, R> implements Mutable {
      * @param <L> the type of the left element.
      * @param <M> the type of the middle element.
      * @param <R> the type of the right element.
-     * @return an empty, immutable array of Triple instances.
+     * @return a shared empty array of Triple instances with length zero.
      */
     @SuppressWarnings("unchecked")
     public static <L, M, R> Triple<L, M, R>[] emptyArray() {
@@ -682,6 +682,11 @@ public final class Triple<L, M, R> implements Mutable {
      * while keeping the middle element in the same position.
      * The original Triple remains unchanged.
      *
+     * <p>Note: this instance method is non-mutating and returns a <i>new</i> swapped triple, in contrast to the
+     * static {@link N#swap(Triple)} / {@link N#swapIf(Triple, java.util.function.Predicate)} helpers, which
+     * <i>mutate</i> the given triple in place (those require the left and right types to be the same,
+     * {@code Triple<T, M, T>}).
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Triple<String, Integer, Boolean> original = Triple.of("left", 42, true);
@@ -693,6 +698,8 @@ public final class Triple<L, M, R> implements Mutable {
      * @return a new {@code Triple<R, M, L>} where the left and right elements are swapped and the
      *         middle element is preserved
      * @see #copy()
+     * @see N#swap(Triple)
+     * @see N#swapIf(Triple, java.util.function.Predicate)
      */
     @Beta
     public Triple<R, M, L> swap() {
@@ -1027,6 +1034,6 @@ public final class Triple<L, M, R> implements Mutable {
      */
     @Override
     public String toString() {
-        return "(" + N.toString(left) + ", " + N.toString(middle) + ", " + N.toString(right) + ")"; // To align with Pair.toString() in Apache Commons Lang
+        return "(" + N.toString(left) + ", " + N.toString(middle) + ", " + N.toString(right) + ")"; // To align with Triple.toString() in Apache Commons Lang
     }
 }

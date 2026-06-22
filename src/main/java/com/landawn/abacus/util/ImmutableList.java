@@ -623,7 +623,8 @@ public sealed class ImmutableList<E> extends ImmutableCollection<E> implements L
      * @param toIndex the high endpoint (exclusive) of the subList.
      * @return an immutable view of the specified range within this list.
      * @throws IndexOutOfBoundsException for an illegal endpoint index value
-     *         (fromIndex &lt; 0 || toIndex &gt; size || fromIndex &gt; toIndex).
+     *         (fromIndex &lt; 0 || toIndex &gt; size).
+     * @throws IllegalArgumentException if {@code fromIndex > toIndex}.
      * @see List#subList(int, int)
      */
     @Override
@@ -724,8 +725,10 @@ public sealed class ImmutableList<E> extends ImmutableCollection<E> implements L
     /**
      * Returns a view of this immutable list in reverse order. For example,
      * {@code ImmutableList.of(1, 2, 3).reversed()} returns a list containing {@code [3, 2, 1]}.
-     * The returned list is backed by this list, so it's still immutable and reflects the
-     * current state of this list. The reverse operation is efficient and does not copy elements.
+     * The returned list is backed by this list, so it's still immutable. The reverse operation
+     * is efficient and does not copy elements. Note that the view's size is captured when this
+     * method is called; for a list created via {@link #wrap(List)} whose backing list is later
+     * resized, the behavior of the reversed view is undefined.
      *
      * <p>If this list has one or zero elements, this same instance is returned.
      * Calling reversed() on an already reversed list returns the original list.
@@ -1060,6 +1063,37 @@ public sealed class ImmutableList<E> extends ImmutableCollection<E> implements L
             return hashCode;
         }
 
+        /**
+         * Marks this list as a reordered view so {@link ImmutableCollection#equals(Object)} does not
+         * compare it via the (forward-ordered) backing collection.
+         *
+         * @return {@code true} always
+         */
+        @Override
+        boolean isReorderedView() {
+            return true;
+        }
+
+        /**
+         * Returns a string representation of this reversed list in iteration (reversed) order.
+         *
+         * @return a string representation of this list
+         */
+        @Override
+        public String toString() {
+            final StringBuilder sb = new StringBuilder("[");
+
+            for (int i = 0; i < size; i++) {
+                if (i > 0) {
+                    sb.append(", ");
+                }
+
+                sb.append(forwardList.get(reverseIndex(i)));
+            }
+
+            return sb.append(']').toString();
+        }
+
         private int reverseIndex(final int index) {
             return (size - 1) - index;
         }
@@ -1107,10 +1141,13 @@ public sealed class ImmutableList<E> extends ImmutableCollection<E> implements L
      * }</pre>
      *
      * @param <E> the type of elements to be maintained by the list.
-     * @param holder the list to be used as the backing storage for the Builder.
+     * @param holder the list to be used as the backing storage for the Builder; must not be {@code null}.
      * @return a new Builder instance that will use the provided list.
+     * @throws IllegalArgumentException if holder is null.
      */
-    public static <E> Builder<E> builder(final List<E> holder) {
+    public static <E> Builder<E> builder(final List<E> holder) throws IllegalArgumentException {
+        N.checkArgNotNull(holder);
+
         return new Builder<>(holder);
     }
 

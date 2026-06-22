@@ -21,6 +21,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import com.landawn.abacus.TestBase;
+import com.landawn.abacus.annotation.JsonXmlField;
 import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.CharacterWriter;
 
@@ -28,6 +29,11 @@ public class EnumTypeTest extends TestBase {
 
     private enum TestEnum {
         VALUE1, VALUE2, VALUE3
+    }
+
+    private enum JsonXmlNullNameEnum {
+        @JsonXmlField(name = "null")
+        VALUE
     }
 
     private EnumType<TestEnum> enumTypeByName;
@@ -77,6 +83,12 @@ public class EnumTypeTest extends TestBase {
         assertEquals("VALUE1", enumTypeByName.stringOf(TestEnum.VALUE1));
         assertEquals("VALUE2", enumTypeByName.stringOf(TestEnum.VALUE2));
         assertNull(enumTypeByName.stringOf(null));
+    }
+
+    @Test
+    public void testJsonXmlNameLiteralNullRoundTrips() {
+        EnumType<JsonXmlNullNameEnum> type = (EnumType<JsonXmlNullNameEnum>) createType(JsonXmlNullNameEnum.class.getName());
+        assertEquals(JsonXmlNullNameEnum.VALUE, type.valueOf("null"));
     }
 
     @Test

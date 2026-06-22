@@ -77,6 +77,58 @@ public class ReflectionTest extends TestBase {
         public String overloadedMethod(String value, int num) {
             return value + num;
         }
+
+        // Same name and same argument count, different parameter types - exercises type-aware
+        // overload resolution (ReflectASM resolves by name+count only).
+        public String typed(int value) {
+            return "int:" + value;
+        }
+
+        public String typed(String value) {
+            return "str:" + value;
+        }
+
+        private String privateConcat(String a, String b) {
+            return a + b;
+        }
+
+        private void privateSetField(String value) {
+            this.publicField = value;
+        }
+    }
+
+    public static class NullOverloadTarget {
+        private Object value;
+
+        public NullOverloadTarget() {
+        }
+
+        public NullOverloadTarget(final int value) {
+            this.value = value;
+        }
+
+        public NullOverloadTarget(final String value) {
+            this.value = value;
+        }
+
+        public String set(final int value) {
+            this.value = value;
+            return "int";
+        }
+
+        public String set(final String value) {
+            this.value = value;
+            return "string";
+        }
+    }
+
+    public interface Greeter {
+        default String greet(String name) {
+            return "Hello " + name;
+        }
+    }
+
+    public static class GreeterImpl implements Greeter {
     }
 
     public static class PrimitiveTestClass {
@@ -267,6 +319,15 @@ public class ReflectionTest extends TestBase {
         Reflection<TestClass> newReflection = reflection.newInstance((Object) null);
         Assertions.assertNotNull(newReflection);
         Assertions.assertNotNull(newReflection.instance());
+    }
+
+    @Test
+    public void testNewWithNullArgDoesNotMatchPrimitiveConstructor() {
+        Reflection<NullOverloadTarget> reflection = Reflection.on(NullOverloadTarget.class);
+
+        NullOverloadTarget target = reflection.newInstance((Object) null).instance();
+
+        Assertions.assertNull(target.value);
     }
 
     @Test
@@ -524,6 +585,22 @@ public class ReflectionTest extends TestBase {
     }
 
     @Test
+    public void testInvokeOverloadedMethod_sameArgCountDifferentTypes() {
+        // Overloads typed(int) and typed(String) share name and argument count and differ only by
+        // type. ReflectASM resolves invoke by name+count alone, so without type-aware resolution one
+        // of these two calls would be mis-dispatched to the wrong overload (ClassCastException).
+        // Asserting BOTH directions guarantees the bug is caught regardless of method enumeration order.
+        TestClass target = new TestClass();
+        Reflection<TestClass> reflection = Reflection.on(target);
+
+        String strResult = reflection.invoke("typed", "hello");
+        Assertions.assertEquals("str:hello", strResult);
+
+        String intResult = reflection.invoke("typed", 5);
+        Assertions.assertEquals("int:5", intResult);
+    }
+
+    @Test
     public void testInvoke_InheritedMethodFromSuperclass() {
         Integer result = Reflection.on(new SubTestClass()).invoke("calculate", 4, 6);
         Assertions.assertEquals(10, result);
@@ -554,6 +631,16 @@ public class ReflectionTest extends TestBase {
 
         String result = reflection.invoke("concat", null, " World");
         Assertions.assertEquals("null World", result);
+    }
+
+    @Test
+    public void testInvokeWithNullArgDoesNotMatchPrimitiveOverload() {
+        NullOverloadTarget target = new NullOverloadTarget();
+
+        String result = Reflection.on(target).invoke("set", (Object) null);
+
+        Assertions.assertEquals("string", result);
+        Assertions.assertNull(target.value);
     }
 
     @Test
@@ -633,6 +720,69 @@ public class ReflectionTest extends TestBase {
         Reflection<TestClass> ref = Reflection.on(instance);
         String result = ref.invoke("concat", (Object) null, " World");
         Assertions.assertEquals("null World", result);
+    }
+
+    // --- regression tests: invoke()/call() must fall back to standard reflection for members
+    // --- ReflectASM cannot access (private methods, Object-declared methods, interface default
+    // --- methods), mirroring the existing fallback in get()/set() for private fields.
+
+    @Test
+    public void testInvoke_PrivateMethod() {
+        // ReflectASM only exposes non-private methods; previously this threw
+        // IllegalArgumentException ("Unable to find non-private method") when reflectasm was on the classpath.
+        TestClass target = new TestClass();
+        String result = Reflection.on(target).invoke("privateConcat", "a", "b");
+        Assertions.assertEquals("ab", result);
+    }
+
+    @Test
+    public void testInvoke_PrivateMethodFromSuperclass() {
+        // The standard-reflection fallback must search superclasses, like field access does.
+        String result = Reflection.on(new SubTestClass()).invoke("privateConcat", "x", "y");
+        Assertions.assertEquals("xy", result);
+    }
+
+    @Test
+    public void testInvoke_ObjectDeclaredMethod() {
+        // Methods declared by java.lang.Object are not exposed by ReflectASM's MethodAccess;
+        // pins the invoke() javadoc example: Reflection.on(obj).invoke("toString").
+        TestClass target = new TestClass();
+
+        Integer hash = Reflection.on(target).invoke("hashCode");
+        Assertions.assertEquals(target.hashCode(), hash);
+
+        String str = Reflection.on(target).invoke("toString");
+        Assertions.assertEquals(target.toString(), str);
+    }
+
+    @Test
+    public void testInvoke_InterfaceDefaultMethod() {
+        // Interface default methods are not collected by ReflectASM's MethodAccess for classes,
+        // nor declared in any superclass; resolved via Class.getMethod() in the fallback.
+        String result = Reflection.on(new GreeterImpl()).invoke("greet", "World");
+        Assertions.assertEquals("Hello World", result);
+    }
+
+    @Test
+    public void testCall_PrivateMethod() {
+        TestClass target = new TestClass();
+        Reflection<TestClass> ref = Reflection.on(target);
+
+        Reflection<TestClass> returned = ref.call("privateSetField", "viaPrivate");
+
+        Assertions.assertSame(ref, returned);
+        Assertions.assertEquals("viaPrivate", target.publicField);
+    }
+
+    @Test
+    public void testInvoke_PrivateMethod_RepeatedUsesCache() {
+        TestClass target = new TestClass();
+        Reflection<TestClass> ref = Reflection.on(target);
+
+        for (int i = 0; i < 3; i++) {
+            String result = ref.invoke("privateConcat", "a", String.valueOf(i));
+            Assertions.assertEquals("a" + i, result);
+        }
     }
 
 }

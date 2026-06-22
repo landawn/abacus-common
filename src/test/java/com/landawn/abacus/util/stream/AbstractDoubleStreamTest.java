@@ -71,24 +71,6 @@ public class AbstractDoubleStreamTest extends TestBase {
     }
 
     @Test
-    public void testDebounce() {
-        double[] result = createDoubleStream(new double[] { 1.0, 2.0, 3.0, 4.0 }).debounce(2, Duration.ofHours(1)).toArray();
-        assertArrayEquals(new double[] { 1.0, 2.0 }, result, 0.001);
-    }
-
-    @Test
-    public void testDebounce_EmptyInput() {
-        double[] result = createDoubleStream(new double[] {}).debounce(2, Duration.ofHours(1)).toArray();
-        assertArrayEquals(new double[] {}, result, 0.001);
-    }
-
-    @Test
-    public void testDebounce_ErrorPath() {
-        assertThrows(IllegalArgumentException.class, () -> createDoubleStream(new double[] { 1.0 }).debounce(0, Duration.ofHours(1)).toArray());
-        assertThrows(IllegalArgumentException.class, () -> createDoubleStream(new double[] { 1.0 }).debounce(1, Duration.ofMillis(0)).toArray());
-    }
-
-    @Test
     public void testSkipUntil() {
         stream = createDoubleStream(new double[] { 1.0, 2.0, 3.0, 4.0, 5.0 });
 
@@ -879,4 +861,44 @@ public class AbstractDoubleStreamTest extends TestBase {
         assertTrue(Double.isNaN(stats.getMax()), "max should be NaN when input contains NaN");
     }
 
+    @Test
+    public void testDebounce_emptyEmitsNothing() {
+        org.junit.jupiter.api.Assertions.assertEquals(0,
+                createDoubleStream(new double[] {}).debounce(com.landawn.abacus.util.Duration.ofSeconds(1)).toArray().length);
+    }
+
+    @Test
+    public void testDebounce_singleElementSurvives() {
+        org.junit.jupiter.api.Assertions.assertArrayEquals(new double[] { 42.0 },
+                createDoubleStream(new double[] { 42.0 }).debounce(com.landawn.abacus.util.Duration.ofSeconds(1)).toArray(), 0.0);
+    }
+
+    @Test
+    public void testDebounce_coldStreamEmitsOnlyLastElement() {
+        // A cold in-memory stream yields all elements with ~0 inter-arrival gap, so every element
+        // except the last is superseded within the quiet window; only the final element survives.
+        org.junit.jupiter.api.Assertions.assertArrayEquals(new double[] { 5.0 },
+                createDoubleStream(new double[] { 1.0, 2.0, 3.0, 4.0, 5.0 }).debounce(com.landawn.abacus.util.Duration.ofSeconds(1)).toArray(), 0.0);
+    }
+
+    @Test
+    public void testDebounce_slowSourceAllSurviveWhenGapAtLeastDuration() {
+        // delay() makes each element arrive >= 60ms after the previous; with a 20ms quiet window
+        // every element clears the window and survives.
+        org.junit.jupiter.api.Assertions.assertArrayEquals(new double[] { 1.0, 2.0, 3.0 },
+                createDoubleStream(new double[] { 1.0, 2.0, 3.0 }).delay(com.landawn.abacus.util.Duration.ofMillis(60))
+                        .debounce(com.landawn.abacus.util.Duration.ofMillis(20))
+                        .toArray(),
+                0.0);
+    }
+
+    @Test
+    public void testDebounce_invalidDurationThrows() {
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class,
+                () -> createDoubleStream(new double[] { 1.0, 2.0, 3.0 }).debounce((com.landawn.abacus.util.Duration) null).toArray());
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class,
+                () -> createDoubleStream(new double[] { 1.0, 2.0, 3.0 }).debounce(com.landawn.abacus.util.Duration.ofMillis(0)).toArray());
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class,
+                () -> createDoubleStream(new double[] { 1.0, 2.0, 3.0 }).debounce(com.landawn.abacus.util.Duration.ofMillis(-100)).toArray());
+    }
 }

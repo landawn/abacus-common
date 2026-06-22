@@ -80,6 +80,7 @@ public final class IntegerType extends AbstractIntegerType {
      * @return the {@link Integer} value at the specified column,
      *         or {@code null} if the column value is SQL {@code NULL}
      * @throws SQLException if a database access error occurs
+     * @throws NumberFormatException if a non-numeric string value cannot be parsed as an {@code int}
      */
     @Override
     public Integer get(final ResultSet rs, final int columnIndex) throws SQLException {
@@ -108,6 +109,7 @@ public final class IntegerType extends AbstractIntegerType {
      * @return the {@link Integer} value in the specified column,
      *         or {@code null} if the column value is SQL {@code NULL}
      * @throws SQLException if a database access error occurs
+     * @throws NumberFormatException if a non-numeric string value cannot be parsed as an {@code int}
      */
     @Override
     public Integer get(final ResultSet rs, final String columnName) throws SQLException {

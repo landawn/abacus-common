@@ -28,27 +28,28 @@ public class JsonBindingTest extends AbstractParserTest {
 
     @Test
     public void testPerformance() {
+        assertDoesNotThrow(() -> {
+            N.println("josn======================================================================");
+            N.println(jsonParser.serialize(simpleBean, jsc));
 
-        N.println("josn======================================================================");
-        N.println(jsonParser.serialize(simpleBean, jsc));
+            int threadNum = 6;
+            int loopNumForSimpleBean = 300000;
+            Map<String, Integer> methodLoopNumMap = new LinkedHashMap<>();
+            methodLoopNumMap.put("executeByAbacusJSONWithSimpleBean", loopNumForSimpleBean);
+            methodLoopNumMap.put("executeByJacksonWithSimpleBean", loopNumForSimpleBean);
+            methodLoopNumMap.put("executeByFastJSON2WithSimpleBean", loopNumForSimpleBean);
+            methodLoopNumMap.put("executeByAbacusJSONWithBigBean", loopNumForSimpleBean / 30);
+            methodLoopNumMap.put("executeByJacksonWithBigBean", loopNumForSimpleBean / 30);
+            methodLoopNumMap.put("executeByFastJSON2WithBigBean", loopNumForSimpleBean / 10);
 
-        int threadNum = 6;
-        int loopNumForSimpleBean = 300000;
-        Map<String, Integer> methodLoopNumMap = new LinkedHashMap<>();
-        methodLoopNumMap.put("executeByAbacusJSONWithSimpleBean", loopNumForSimpleBean);
-        methodLoopNumMap.put("executeByJacksonWithSimpleBean", loopNumForSimpleBean);
-        methodLoopNumMap.put("executeByFastJSON2WithSimpleBean", loopNumForSimpleBean);
-        methodLoopNumMap.put("executeByAbacusJSONWithBigBean", loopNumForSimpleBean / 30);
-        methodLoopNumMap.put("executeByJacksonWithBigBean", loopNumForSimpleBean / 30);
-        methodLoopNumMap.put("executeByFastJSON2WithBigBean", loopNumForSimpleBean / 10);
-
-        for (String methodName : methodLoopNumMap.keySet()) {
-            Method method = ClassUtil.getDeclaredMethod(JsonBindingTest.class, methodName);
-            ClassUtil.setAccessible(method, true);
-            Profiler.run(threadNum, methodLoopNumMap.get(methodName), 3, methodName, () -> {
-                ClassUtil.invokeMethod(this, method);
-            }).printResult();
-        }
+            for (String methodName : methodLoopNumMap.keySet()) {
+                Method method = ClassUtil.getDeclaredMethod(JsonBindingTest.class, methodName);
+                ClassUtil.setAccessible(method, true);
+                Profiler.run(threadNum, methodLoopNumMap.get(methodName), 3, methodName, () -> {
+                    ClassUtil.invokeMethod(this, method);
+                }).printResult();
+            }
+        });
     }
 
     void executeByFastJSON2WithSimpleBean() {

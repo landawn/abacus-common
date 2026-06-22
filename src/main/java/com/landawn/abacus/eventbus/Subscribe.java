@@ -34,6 +34,13 @@ import com.landawn.abacus.util.ThreadMode;
  *   <li>Should not throw checked exceptions (any thrown exceptions are caught and logged).</li>
  * </ul>
  *
+ * <p><b>Annotation-only advanced features:</b> The {@link #sticky()}, {@link #strictEventType()},
+ * {@link #intervalMillis()} (throttling) and {@link #deduplicate()} knobs can be configured
+ * <em>only</em> through this annotation. The {@code EventBus.register(...)} methods accept
+ * registration-time overrides for the event ID and thread mode only, so a lambda /
+ * {@link Subscriber} registration (which has no annotated method) cannot use any of these four
+ * features. Annotate a subscriber method with {@code @Subscribe} to opt into them.</p>
+ *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * public class EventHandler {
@@ -143,8 +150,8 @@ public @interface Subscribe {
      * Specifies an event ID to filter incoming events.
      * Only events posted with the matching event ID will be delivered to this subscriber.
      *
-     * <p>If empty (default), the subscriber will receive events based on type matching alone,
-     * unless it was registered with a specific event ID.</p>
+     * <p>If empty (default) and no registration-level event ID is supplied, the subscriber receives
+     * only events posted without an event ID, matched by type.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -169,6 +176,10 @@ public @interface Subscribe {
      *
      * <p>This is useful for throttling high-frequency events to prevent overwhelming the subscriber.</p>
      *
+     * <p>A value of {@code 0} (the default) disables throttling. Any value <b>{@code <= 0}</b> is
+     * likewise treated as "no throttling": the {@code EventBus} delivery guard only throttles when
+     * the interval is strictly positive, so a negative interval has the same effect as {@code 0}.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * @Subscribe(intervalMillis = 1000)  // keeps at most one event per second
@@ -182,7 +193,7 @@ public @interface Subscribe {
      * }
      * }</pre>
      *
-     * @return the minimum interval between events in milliseconds, 0 for no throttling
+     * @return the minimum interval between events in milliseconds; any value {@code <= 0} disables throttling
      */
     long intervalMillis() default 0;
 

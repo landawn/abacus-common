@@ -60,6 +60,13 @@ import com.landawn.abacus.util.stream.Stream;
  * formats, offering configurable options for memory management, custom transformations, and filtering
  * operations suitable for production environments with strict performance and reliability requirements.</p>
  *
+ * <p><b>Note (RFC 4180 divergence):</b> the {@code load}/{@code stream}/{@code csvToJson} methods read CSV
+ * input line by line, so quoted fields containing literal line breaks (which RFC 4180 permits) are not
+ * supported and will be split across records. Field-level quoting/escaping follows the opencsv-style
+ * dialect of {@link CsvParser} (see its class documentation for details).</p>
+ *
+ * <p><b>Column-selection convention:</b> a {@code null} {@code selectColumnNames}/{@code selectCsvHeaders} means &quot;not specified&quot; and selects ALL columns; an empty collection is an explicit selection of NO columns (a zero-column result). See the library null/empty selection convention.</p>
+ *
  * @see Dataset
  * @see CsvParser
  * @see com.landawn.abacus.util.stream.Stream
@@ -456,7 +463,7 @@ public final class CsvUtil {
      * }</pre>
      *
      * @param source the File containing CSV data, must not be {@code null}
-     * @param selectColumnNames a Collection of column names to select, {@code null} to include all columns
+     * @param selectColumnNames a Collection of column names to select; {@code null} (unspecified) includes all columns; an empty collection selects no columns (an empty/zero-column result)
      * @return a Dataset containing the loaded CSV data with selected columns
      * @throws UncheckedIOException if an I/O error occurs while reading the file
      * @see #load(File)
@@ -479,7 +486,7 @@ public final class CsvUtil {
      * }</pre>
      *
      * @param source the File containing CSV data
-     * @param selectColumnNames a Collection of column names to select, {@code null} to include all columns
+     * @param selectColumnNames a Collection of column names to select; {@code null} (unspecified) includes all columns; an empty collection selects no columns (an empty/zero-column result)
      * @param offset the number of data rows to skip from the beginning (after header)
      * @param count the maximum number of rows to process
      * @return a Dataset containing the loaded CSV data
@@ -511,7 +518,7 @@ public final class CsvUtil {
      * }</pre>
      *
      * @param source the File containing CSV data, must not be {@code null}
-     * @param selectColumnNames a Collection of column names to select, {@code null} to include all columns
+     * @param selectColumnNames a Collection of column names to select; {@code null} (unspecified) includes all columns; an empty collection selects no columns (an empty/zero-column result)
      * @param offset the number of data rows to skip from the beginning (after header)
      * @param count the maximum number of rows to process
      * @param rowFilter a Predicate to filter rows; only matching rows are included. May be {@code null},
@@ -576,7 +583,7 @@ public final class CsvUtil {
      * }</pre>
      *
      * @param source the Reader providing CSV data
-     * @param selectColumnNames a Collection of column names to select, {@code null} to include all columns
+     * @param selectColumnNames a Collection of column names to select; {@code null} (unspecified) includes all columns; an empty collection selects no columns (an empty/zero-column result)
      * @return a Dataset containing the selected columns
      * @throws UncheckedIOException if an I/O error occurs
      * @see #load(Reader)
@@ -601,7 +608,7 @@ public final class CsvUtil {
      * }</pre>
      *
      * @param source the Reader providing CSV data
-     * @param selectColumnNames a Collection of column names to select, {@code null} to include all columns
+     * @param selectColumnNames a Collection of column names to select; {@code null} (unspecified) includes all columns; an empty collection selects no columns (an empty/zero-column result)
      * @param offset the number of data rows to skip from the beginning (after header)
      * @param count the maximum number of rows to process
      * @return a Dataset containing the loaded CSV data
@@ -636,7 +643,7 @@ public final class CsvUtil {
      * }</pre>
      *
      * @param source the Reader providing CSV data, must not be {@code null}
-     * @param selectColumnNames a Collection of column names to select, {@code null} to include all columns
+     * @param selectColumnNames a Collection of column names to select; {@code null} (unspecified) includes all columns; an empty collection selects no columns (an empty/zero-column result)
      * @param offset the number of data rows to skip from the beginning (after header)
      * @param count the maximum number of rows to process
      * @param rowFilter a Predicate to filter rows; only matching rows are included. May be {@code null},
@@ -651,11 +658,11 @@ public final class CsvUtil {
      * @see #load(File, Collection, long, long, Predicate)
      * @see #load(Reader, Collection, long, long, Predicate, Class)
      */
+    @SuppressWarnings("deprecation")
     @SuppressFBWarnings("RV_DONT_JUST_NULL_CHECK_READLINE")
     public static Dataset load(final Reader source, final Collection<String> selectColumnNames, long offset, long count,
             final Predicate<? super String[]> rowFilter) throws IllegalArgumentException, UncheckedIOException {
         N.checkArgument(offset >= 0 && count >= 0, "'offset'=%s and 'count'=%s cannot be negative", offset, count); //NOSONAR
-
         final Function<String, String[]> headerParser = csvHeaderParser_TL.get();
         final BiConsumer<String, String[]> lineParser = csvLineParser_TL.get();
         final boolean isBufferedReader = IOUtil.isBufferedReader(source);
@@ -670,7 +677,7 @@ public final class CsvUtil {
 
             final String[] titles = headerParser.apply(line);
             final int columnCount = titles.length;
-            final boolean noSelectColumnNamesSpecified = N.isEmpty(selectColumnNames)
+            final boolean noSelectColumnNamesSpecified = selectColumnNames == null
                     || (selectColumnNames.size() == columnCount && selectColumnNames.containsAll(Arrays.asList(titles)));
             final Set<String> selectPropNameSet = noSelectColumnNamesSpecified ? null : N.newHashSet(selectColumnNames);
             final int selectColumnCount = noSelectColumnNamesSpecified ? columnCount : selectPropNameSet.size();
@@ -789,7 +796,7 @@ public final class CsvUtil {
      * }</pre>
      *
      * @param source the File containing CSV data, must not be {@code null}
-     * @param selectColumnNames a Collection of column names to select, {@code null} to include all columns
+     * @param selectColumnNames a Collection of column names to select; {@code null} (unspecified) includes all columns; an empty collection selects no columns (an empty/zero-column result)
      * @param beanClassForColumnType the bean class whose property types are used for column type conversion,
      *        must not be {@code null}
      * @return a Dataset with typed columns
@@ -820,7 +827,7 @@ public final class CsvUtil {
      * }</pre>
      *
      * @param source the File containing CSV data, must not be {@code null}
-     * @param selectColumnNames a Collection of column names to select, {@code null} to include all columns
+     * @param selectColumnNames a Collection of column names to select; {@code null} (unspecified) includes all columns; an empty collection selects no columns (an empty/zero-column result)
      * @param offset the number of data rows to skip from the beginning (after header)
      * @param count the maximum number of rows to process
      * @param beanClassForColumnType the bean class whose property types are used for column type conversion,
@@ -856,7 +863,7 @@ public final class CsvUtil {
      * }</pre>
      *
      * @param source the File containing CSV data, must not be {@code null}
-     * @param selectColumnNames a Collection of column names to select, {@code null} to include all columns
+     * @param selectColumnNames a Collection of column names to select; {@code null} (unspecified) includes all columns; an empty collection selects no columns (an empty/zero-column result)
      * @param offset the number of data rows to skip from the beginning (after header)
      * @param count the maximum number of rows to process
      * @param rowFilter a Predicate to filter rows; only matching rows are included. May be {@code null},
@@ -929,7 +936,7 @@ public final class CsvUtil {
      * }</pre>
      *
      * @param source the Reader providing CSV data, must not be {@code null}
-     * @param selectColumnNames a Collection of column names to select, {@code null} to include all columns
+     * @param selectColumnNames a Collection of column names to select; {@code null} (unspecified) includes all columns; an empty collection selects no columns (an empty/zero-column result)
      * @param beanClassForColumnType the bean class whose property types are used for column type conversion,
      *        must not be {@code null}
      * @return a Dataset with typed columns
@@ -957,7 +964,7 @@ public final class CsvUtil {
      * }</pre>
      *
      * @param source the Reader providing CSV data, must not be {@code null}
-     * @param selectColumnNames a Collection of column names to select, {@code null} to include all columns
+     * @param selectColumnNames a Collection of column names to select; {@code null} (unspecified) includes all columns; an empty collection selects no columns (an empty/zero-column result)
      * @param offset the number of data rows to skip from the beginning (after header)
      * @param count the maximum number of rows to process
      * @param beanClassForColumnType the bean class whose property types are used for column type conversion,
@@ -995,7 +1002,7 @@ public final class CsvUtil {
      * }</pre>
      *
      * @param source the Reader providing CSV data, must not be {@code null}
-     * @param selectColumnNames a Collection of column names to select, {@code null} to include all columns
+     * @param selectColumnNames a Collection of column names to select; {@code null} (unspecified) includes all columns; an empty collection selects no columns (an empty/zero-column result)
      * @param offset the number of data rows to skip from the beginning (after header)
      * @param count the maximum number of rows to process
      * @param rowFilter a Predicate to filter rows; only matching rows are included. May be {@code null},
@@ -1012,12 +1019,12 @@ public final class CsvUtil {
      * @see #load(Reader, Collection, long, long, Class)
      * @see #load(File, Collection, long, long, Predicate, Class)
      */
+    @SuppressWarnings("deprecation")
     @SuppressFBWarnings("RV_DONT_JUST_NULL_CHECK_READLINE")
     public static Dataset load(final Reader source, final Collection<String> selectColumnNames, long offset, long count,
             final Predicate<? super String[]> rowFilter, final Class<?> beanClassForColumnType) throws IllegalArgumentException, UncheckedIOException {
         N.checkArgument(offset >= 0 && count >= 0, "'offset'=%s and 'count'=%s cannot be negative", offset, count);
         N.checkArgNotNull(beanClassForColumnType, cs.beanClassForColumnType);
-
         final Function<String, String[]> headerParser = csvHeaderParser_TL.get();
         final BiConsumer<String, String[]> lineParser = csvLineParser_TL.get();
         final boolean isBufferedReader = IOUtil.isBufferedReader(source);
@@ -1033,7 +1040,7 @@ public final class CsvUtil {
 
             final String[] titles = headerParser.apply(line);
             final int columnCount = titles.length;
-            final boolean noSelectColumnNamesSpecified = N.isEmpty(selectColumnNames)
+            final boolean noSelectColumnNamesSpecified = selectColumnNames == null
                     || (selectColumnNames.size() == columnCount && selectColumnNames.containsAll(Arrays.asList(titles)));
             final Set<String> selectPropNameSet = noSelectColumnNamesSpecified ? null : N.newHashSet(selectColumnNames);
             final int selectColumnCount = noSelectColumnNamesSpecified ? columnCount : selectPropNameSet.size();
@@ -1163,7 +1170,7 @@ public final class CsvUtil {
      * }</pre>
      *
      * @param source the File containing CSV data, must not be {@code null}
-     * @param selectColumnNames a Collection of column names to select, {@code null} to include all columns
+     * @param selectColumnNames a Collection of column names to select; {@code null} (unspecified) includes all columns; an empty collection selects no columns (an empty/zero-column result)
      * @param offset the number of data rows to skip from the beginning (after header)
      * @param count the maximum number of rows to process
      * @param columnTypeMap a mapping of column names to their target {@link Type}s; must not be {@code null} or empty
@@ -1197,7 +1204,7 @@ public final class CsvUtil {
      * }</pre>
      *
      * @param source the File containing CSV data, must not be {@code null}
-     * @param selectColumnNames a Collection of column names to select, {@code null} to include all columns
+     * @param selectColumnNames a Collection of column names to select; {@code null} (unspecified) includes all columns; an empty collection selects no columns (an empty/zero-column result)
      * @param offset the number of data rows to skip from the beginning (after header)
      * @param count the maximum number of rows to process
      * @param rowFilter a Predicate to filter rows; only matching rows are included. May be {@code null},
@@ -1272,7 +1279,7 @@ public final class CsvUtil {
      * }</pre>
      *
      * @param source the Reader providing CSV data, must not be {@code null}
-     * @param selectColumnNames a Collection of column names to select, {@code null} to include all columns
+     * @param selectColumnNames a Collection of column names to select; {@code null} (unspecified) includes all columns; an empty collection selects no columns (an empty/zero-column result)
      * @param offset the number of data rows to skip from the beginning (after header)
      * @param count the maximum number of rows to process
      * @param columnTypeMap a mapping of column names to their target {@link Type}s; must not be {@code null} or empty
@@ -1309,7 +1316,7 @@ public final class CsvUtil {
      * }</pre>
      *
      * @param source the Reader providing CSV data, must not be {@code null}
-     * @param selectColumnNames a Collection of column names to select, {@code null} to include all columns
+     * @param selectColumnNames a Collection of column names to select; {@code null} (unspecified) includes all columns; an empty collection selects no columns (an empty/zero-column result)
      * @param offset the number of data rows to skip from the beginning (after header)
      * @param count the maximum number of rows to process
      * @param rowFilter a Predicate to filter rows; only matching rows are included. May be {@code null},
@@ -1321,6 +1328,7 @@ public final class CsvUtil {
      *         {@code null} or empty
      * @throws UncheckedIOException if an I/O error occurs
      */
+    @SuppressWarnings("deprecation")
     @SuppressFBWarnings("RV_DONT_JUST_NULL_CHECK_READLINE")
     public static Dataset load(final Reader source, final Collection<String> selectColumnNames, long offset, long count,
             final Predicate<? super String[]> rowFilter, final Map<String, ? extends Type<?>> columnTypeMap)
@@ -1346,7 +1354,7 @@ public final class CsvUtil {
             final String[] titles = headerParser.apply(line);
             final int columnCount = titles.length;
 
-            final boolean noSelectColumnNamesSpecified = N.isEmpty(selectColumnNames)
+            final boolean noSelectColumnNamesSpecified = selectColumnNames == null
                     || (selectColumnNames.size() == columnCount && selectColumnNames.containsAll(Arrays.asList(titles)));
             final Set<String> selectPropNameSet = noSelectColumnNamesSpecified ? null : N.newHashSet(selectColumnNames);
             final int selectColumnCount = noSelectColumnNamesSpecified ? columnCount : selectPropNameSet.size();
@@ -1466,7 +1474,7 @@ public final class CsvUtil {
      * }</pre>
      *
      * @param source the File containing CSV data, must not be {@code null}
-     * @param selectColumnNames a Collection of column names to select, {@code null} to include all columns
+     * @param selectColumnNames a Collection of column names to select; {@code null} (unspecified) includes all columns; an empty collection selects no columns (an empty/zero-column result)
      * @param rowExtractor custom logic to extract and convert row data; must not be {@code null}.
      *        The first parameter is the selected column name list, the second is the disposable row data array,
      *        and the third is the output array to populate
@@ -1537,7 +1545,7 @@ public final class CsvUtil {
      * }</pre>
      *
      * @param source the File source to load CSV data from, must not be {@code null}
-     * @param selectColumnNames a Collection of column names to select, {@code null} to include all columns
+     * @param selectColumnNames a Collection of column names to select; {@code null} (unspecified) includes all columns; an empty collection selects no columns (an empty/zero-column result)
      * @param offset the number of data rows to skip from the beginning (after header)
      * @param count the maximum number of rows to process
      * @param rowFilter a Predicate to filter rows; only matching rows are included. May be {@code null},
@@ -1612,7 +1620,7 @@ public final class CsvUtil {
      * }</pre>
      *
      * @param source the Reader source to read CSV data from
-     * @param selectColumnNames a Collection of column names to select, {@code null} to include all columns
+     * @param selectColumnNames a Collection of column names to select; {@code null} (unspecified) includes all columns; an empty collection selects no columns (an empty/zero-column result)
      * @param rowExtractor a TriConsumer to extract the row data to the output array;
      *      the first parameter is the column names, the second is the row data, and the third is the output array
      * @return a Dataset containing the loaded CSV data with selected columns
@@ -1693,7 +1701,7 @@ public final class CsvUtil {
      * }</pre>
      *
      * @param source the Reader source to load CSV data from, must not be {@code null}
-     * @param selectColumnNames a Collection of column names to select, {@code null} to include all columns
+     * @param selectColumnNames a Collection of column names to select; {@code null} (unspecified) includes all columns; an empty collection selects no columns (an empty/zero-column result)
      * @param offset the number of data rows to skip from the beginning (after header)
      * @param count the maximum number of rows to process
      * @param rowFilter a Predicate to filter rows; only matching rows are included. May be {@code null},
@@ -1706,13 +1714,13 @@ public final class CsvUtil {
      *         {@code selectColumnNames} is not present in the CSV header
      * @throws UncheckedIOException if an I/O error occurs
      */
+    @SuppressWarnings("deprecation")
     @SuppressFBWarnings("RV_DONT_JUST_NULL_CHECK_READLINE")
     public static Dataset load(final Reader source, final Collection<String> selectColumnNames, long offset, long count,
             final Predicate<? super String[]> rowFilter,
             final TriConsumer<? super List<String>, ? super NoCachingNoUpdating.DisposableArray<String>, Object[]> rowExtractor)
             throws IllegalArgumentException, UncheckedIOException {
         N.checkArgument(offset >= 0 && count >= 0, "'offset'=%s and 'count'=%s cannot be negative", offset, count);
-
         final Function<String, String[]> headerParser = csvHeaderParser_TL.get();
         final BiConsumer<String, String[]> lineParser = csvLineParser_TL.get();
         final boolean isBufferedReader = IOUtil.isBufferedReader(source);
@@ -1727,7 +1735,7 @@ public final class CsvUtil {
 
             final String[] titles = headerParser.apply(line);
             final int columnCount = titles.length;
-            final boolean noSelectColumnNamesSpecified = N.isEmpty(selectColumnNames)
+            final boolean noSelectColumnNamesSpecified = selectColumnNames == null
                     || (selectColumnNames.size() == columnCount && selectColumnNames.containsAll(Arrays.asList(titles)));
             final Set<String> selectPropNameSet = noSelectColumnNamesSpecified ? null : N.newHashSet(selectColumnNames);
             final int selectColumnCount = noSelectColumnNamesSpecified ? columnCount : selectPropNameSet.size();
@@ -1869,7 +1877,7 @@ public final class CsvUtil {
      *
      * @param <T> the type of the elements in the stream
      * @param source the File source to load CSV data from
-     * @param selectColumnNames a Collection of column names to select, {@code null} to include all columns
+     * @param selectColumnNames a Collection of column names to select; {@code null} (unspecified) includes all columns; an empty collection selects no columns (an empty/zero-column result)
      * @param targetType the Class of the target type
      * @return a Stream of the specified target type containing the loaded CSV data
      * @throws IllegalArgumentException if the target type is {@code null} or not supported, or if selected columns are not found in CSV
@@ -1911,7 +1919,7 @@ public final class CsvUtil {
      *
      * @param <T> the type of the elements in the stream
      * @param source the File source to load CSV data from, must not be {@code null}
-     * @param selectColumnNames a Collection of column names to select, {@code null} to include all columns
+     * @param selectColumnNames a Collection of column names to select; {@code null} (unspecified) includes all columns; an empty collection selects no columns (an empty/zero-column result)
      * @param offset the number of data rows to skip from the beginning (after header)
      * @param count the maximum number of rows to process
      * @param rowFilter a Predicate to filter rows; only matching rows are included. May be {@code null},
@@ -2001,7 +2009,7 @@ public final class CsvUtil {
      *
      * @param <T> the type of the elements in the stream
      * @param source the Reader source to load CSV data from
-     * @param selectColumnNames a Collection of column names to select, {@code null} to include all columns
+     * @param selectColumnNames a Collection of column names to select; {@code null} (unspecified) includes all columns; an empty collection selects no columns (an empty/zero-column result)
      * @param targetType the Class of the target type
      * @param closeReaderWhenStreamIsClosed {@code true} to close the reader when the stream is closed, {@code false} otherwise
      * @return a Stream of the specified target type containing the loaded CSV data
@@ -2049,7 +2057,7 @@ public final class CsvUtil {
      *
      * @param <T> the type of the elements in the stream
      * @param source the Reader source to load CSV data from, must not be {@code null}
-     * @param selectColumnNames a Collection of column names to select, {@code null} to include all columns
+     * @param selectColumnNames a Collection of column names to select; {@code null} (unspecified) includes all columns; an empty collection selects no columns (an empty/zero-column result)
      * @param offset the number of data rows to skip from the beginning (after header)
      * @param count the maximum number of rows to process
      * @param rowFilter a Predicate to filter rows; only matching rows are included. May be {@code null},
@@ -2071,7 +2079,6 @@ public final class CsvUtil {
             throws IllegalArgumentException {
         N.checkArgument(offset >= 0 && count >= 0, "'offset'=%s and 'count'=%s cannot be negative", offset, count);
         N.checkArgNotNull(targetType, cs.targetType);
-
         //noinspection resource
         return Stream.defer(() -> {
 
@@ -2087,7 +2094,11 @@ public final class CsvUtil {
 
                 if (line == null) {
                     noException = true;
-                    return Stream.empty();
+                    return Stream.<T> empty().onClose(() -> {
+                        if (br != source) {
+                            Objectory.recycle(br);
+                        }
+                    });
                 }
 
                 final boolean isBean = Beans.isBeanClass(targetType);
@@ -2095,7 +2106,7 @@ public final class CsvUtil {
 
                 final String[] titles = headerParser.apply(line);
                 final int columnCount = titles.length;
-                final boolean noSelectColumnNamesSpecified = N.isEmpty(selectColumnNames)
+                final boolean noSelectColumnNamesSpecified = selectColumnNames == null
                         || (selectColumnNames.size() == columnCount && selectColumnNames.containsAll(Arrays.asList(titles)));
                 final Set<String> selectPropNameSet = noSelectColumnNamesSpecified ? null : N.newHashSet(selectColumnNames);
                 final int selectColumnCount = noSelectColumnNamesSpecified ? columnCount : selectPropNameSet.size();
@@ -2282,7 +2293,6 @@ public final class CsvUtil {
      * @param rowMapper converts the row data to the target type;
      *                  first parameter is the column names, second parameter is the row data
      * @return a Stream of the specified target type containing the loaded CSV data
-     * @throws IllegalArgumentException if the rowMapper is {@code null}
      * @throws UncheckedIOException if an I/O error occurs while reading the file
      * @see #stream(File, Collection, BiFunction)
      * @see #stream(File, Collection, long, long, Predicate, BiFunction)
@@ -2324,11 +2334,11 @@ public final class CsvUtil {
      *
      * @param <T> the type of the elements in the stream
      * @param source the File source to load CSV data from
-     * @param selectColumnNames a Collection of column names to select, {@code null} to include all columns
+     * @param selectColumnNames a Collection of column names to select; {@code null} (unspecified) includes all columns; an empty collection selects no columns (an empty/zero-column result)
      * @param rowMapper converts the row data to the target type;
      *                  first parameter is the column names, second parameter is the row data
      * @return a Stream of the specified target type containing the loaded CSV data
-     * @throws IllegalArgumentException if the rowMapper is {@code null} or selected columns are not found
+     * @throws IllegalArgumentException if the selected columns are not found
      * @throws UncheckedIOException if an I/O error occurs while reading the file
      * @see #stream(File, BiFunction)
      * @see #stream(File, Collection, long, long, Predicate, BiFunction)
@@ -2370,7 +2380,7 @@ public final class CsvUtil {
      *
      * @param <T> the type of the elements in the stream
      * @param source the File source to load CSV data from, must not be {@code null}
-     * @param selectColumnNames a Collection of column names to select, {@code null} to include all columns
+     * @param selectColumnNames a Collection of column names to select; {@code null} (unspecified) includes all columns; an empty collection selects no columns (an empty/zero-column result)
      * @param offset the number of data rows to skip from the beginning (after header)
      * @param count the maximum number of rows to process
      * @param rowFilter a Predicate to filter rows; only matching rows are included. May be {@code null},
@@ -2378,8 +2388,7 @@ public final class CsvUtil {
      * @param rowMapper converts each row to the target type; must not be {@code null}.
      *        The first argument is the selected column names, the second is the disposable row data array
      * @return a Stream of the specified target type containing the loaded CSV data
-     * @throws IllegalArgumentException if {@code offset} or {@code count} are negative, or if
-     *         {@code rowMapper} is {@code null}
+     * @throws IllegalArgumentException if {@code offset} or {@code count} are negative
      * @throws UncheckedIOException if an I/O error occurs while reading the file
      * @see #stream(File, BiFunction)
      * @see #stream(File, Collection, BiFunction)
@@ -2435,7 +2444,6 @@ public final class CsvUtil {
      *                  first parameter is the column names, second parameter is the row data
      * @param closeReaderWhenStreamIsClosed {@code true} to close the reader when the stream is closed, {@code false} otherwise
      * @return a Stream of the specified target type containing the loaded CSV data
-     * @throws IllegalArgumentException if the rowMapper is {@code null}
      * @throws UncheckedIOException if an I/O error occurs while reading
      * @see #stream(Reader, Collection, BiFunction, boolean)
      * @see #stream(Reader, Collection, long, long, Predicate, BiFunction, boolean)
@@ -2475,12 +2483,12 @@ public final class CsvUtil {
      *
      * @param <T> the type of the elements in the stream
      * @param source the Reader source to load CSV data from
-     * @param selectColumnNames a Collection of column names to select, {@code null} to include all columns
+     * @param selectColumnNames a Collection of column names to select; {@code null} (unspecified) includes all columns; an empty collection selects no columns (an empty/zero-column result)
      * @param rowMapper converts the row data to the target type;
      *                  first parameter is the column names, second parameter is the row data
      * @param closeReaderWhenStreamIsClosed {@code true} to close the reader when the stream is closed, {@code false} otherwise
      * @return a Stream of the specified target type containing the loaded CSV data
-     * @throws IllegalArgumentException if the rowMapper is {@code null} or selected columns are not found
+     * @throws IllegalArgumentException if the selected columns are not found
      * @throws UncheckedIOException if an I/O error occurs while reading
      * @see #stream(Reader, BiFunction, boolean)
      * @see #stream(Reader, Collection, long, long, Predicate, BiFunction, boolean)
@@ -2531,7 +2539,7 @@ public final class CsvUtil {
      *
      * @param <T> the type of the elements in the stream
      * @param source the Reader source to load CSV data from, must not be {@code null}
-     * @param selectColumnNames a Collection of column names to select, {@code null} to include all columns
+     * @param selectColumnNames a Collection of column names to select; {@code null} (unspecified) includes all columns; an empty collection selects no columns (an empty/zero-column result)
      * @param offset the number of data rows to skip from the beginning (after header)
      * @param count the maximum number of rows to process
      * @param rowFilter a Predicate to filter rows; only matching rows are included. May be {@code null},
@@ -2541,8 +2549,7 @@ public final class CsvUtil {
      * @param closeReaderWhenStreamIsClosed {@code true} to close the reader when the stream is closed,
      *        {@code false} otherwise
      * @return a Stream of the specified target type containing the loaded CSV data
-     * @throws IllegalArgumentException if {@code offset} or {@code count} are negative, or if
-     *         {@code rowMapper} is {@code null}
+     * @throws IllegalArgumentException if {@code offset} or {@code count} are negative
      * @throws UncheckedIOException if an I/O error occurs while reading
      * @see #stream(Reader, BiFunction, boolean)
      * @see #stream(Reader, Collection, BiFunction, boolean)
@@ -2553,7 +2560,6 @@ public final class CsvUtil {
             final BiFunction<? super List<String>, ? super NoCachingNoUpdating.DisposableArray<String>, ? extends T> rowMapper,
             final boolean closeReaderWhenStreamIsClosed) throws IllegalArgumentException {
         N.checkArgument(offset >= 0 && count >= 0, "'offset'=%s and 'count'=%s cannot be negative", offset, count);
-
         //noinspection resource
         return Stream.defer(() -> {
             final boolean isBufferedReader = IOUtil.isBufferedReader(source);
@@ -2568,12 +2574,16 @@ public final class CsvUtil {
 
                 if (line == null) {
                     noException = true;
-                    return Stream.empty();
+                    return Stream.<T> empty().onClose(() -> {
+                        if (br != source) {
+                            Objectory.recycle(br);
+                        }
+                    });
                 }
 
                 final String[] titles = headerParser.apply(line);
                 final int columnCount = titles.length;
-                final boolean noSelectColumnNamesSpecified = N.isEmpty(selectColumnNames)
+                final boolean noSelectColumnNamesSpecified = selectColumnNames == null
                         || (selectColumnNames.size() == columnCount && selectColumnNames.containsAll(Arrays.asList(titles)));
                 final Set<String> selectPropNameSet = noSelectColumnNamesSpecified ? null : N.newHashSet(selectColumnNames);
                 final int selectColumnCount = noSelectColumnNamesSpecified ? columnCount : selectPropNameSet.size();
@@ -2729,8 +2739,8 @@ public final class CsvUtil {
      * }</pre>
      *
      * @param csvFile the source CSV file to convert
-     * @param selectColumnNames the collection of column names to include in JSON output,
-     *                         {@code null} to include all columns
+     * @param selectColumnNames the collection of column names to include in JSON output;
+     *                         {@code null} to include all columns; an empty collection selects no columns
      * @param jsonFile the destination JSON file to create
      * @return the number of rows written to the JSON file
      * @throws IllegalArgumentException if csvFile or jsonFile is {@code null}, or if any name in
@@ -2789,8 +2799,8 @@ public final class CsvUtil {
      * }</pre>
      *
      * @param csvFile the source CSV file to convert
-     * @param selectColumnNames the collection of column names to include in JSON output,
-     *                         {@code null} to include all columns
+     * @param selectColumnNames the collection of column names to include in JSON output;
+     *                         {@code null} to include all columns; an empty collection selects no columns
      * @param jsonFile the destination JSON file to create
      * @param beanClassForColumnTypeInference the bean class defining property types for conversion,
      *                               {@code null} to treat all values as strings
@@ -2839,8 +2849,8 @@ public final class CsvUtil {
      * }</pre>
      *
      * @param csvReader the Reader providing CSV data
-     * @param selectColumnNames the collection of column names to include in JSON output,
-     *                         {@code null} to include all columns
+     * @param selectColumnNames the collection of column names to include in JSON output;
+     *                         {@code null} to include all columns; an empty collection selects no columns
      * @param jsonWriter the Writer to write JSON output to
      * @param beanClassForColumnTypeInference the bean class defining property types for conversion,
      *                               {@code null} to treat all values as strings
@@ -2883,7 +2893,7 @@ public final class CsvUtil {
 
             final String[] titles = headerParser.apply(line);
             final int columnCount = titles.length;
-            final boolean noSelectColumnNamesSpecified = N.isEmpty(selectColumnNames)
+            final boolean noSelectColumnNamesSpecified = selectColumnNames == null
                     || (selectColumnNames.size() == columnCount && selectColumnNames.containsAll(Arrays.asList(titles)));
             final Set<String> selectPropNameSet = noSelectColumnNamesSpecified ? null : N.newHashSet(selectColumnNames);
             final boolean[] isColumnSelected = new boolean[columnCount];
@@ -2956,7 +2966,10 @@ public final class CsvUtil {
                         }
 
                         bw.write("\"");
-                        bw.write(titles[i]);
+                        // writeCharacter (not write): a raw title containing '"' or '\' would
+                        // produce invalid/corrupted JSON keys; values already go through the
+                        // escaping serializer.
+                        bw.writeCharacter(titles[i]);
                         bw.write("\":");
                         if (columnType[i] == strType) {
                             columnType[i].serializeTo(bw, rowData[i], config);
@@ -3035,8 +3048,8 @@ public final class CsvUtil {
      *
      * <p>The JSON file must contain an array of objects where each object represents a row.
      * If {@code selectCsvHeaders} is provided, only those properties will be included as columns
-     * in the CSV output. If {@code selectCsvHeaders} is {@code null} or empty, all properties from the
-     * first JSON object will be used as headers.</p>
+     * in the CSV output. If {@code selectCsvHeaders} is {@code null}, all properties from the
+     * first JSON object will be used as headers; an empty collection selects no columns (empty output).</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -3064,8 +3077,8 @@ public final class CsvUtil {
      * }</pre>
      *
      * @param jsonFile the source JSON file to convert
-     * @param selectCsvHeaders the collection of property names to include as CSV headers,
-     *                        {@code null} or empty to include all properties from the first object
+     * @param selectCsvHeaders the collection of property names to include as CSV headers;
+     *                        {@code null} to include all properties from the first object; an empty collection selects no columns (empty output)
      * @param csvFile the destination CSV file to create
      * @return the number of data rows written to the CSV file (excluding the header row)
      * @throws IllegalArgumentException if jsonFile or csvFile is {@code null}
@@ -3091,8 +3104,8 @@ public final class CsvUtil {
      *
      * <p>The JSON reader must provide an array of objects where each object represents a row.
      * If {@code selectCsvHeaders} is provided, only those properties will be included as columns
-     * in the CSV output. If {@code selectCsvHeaders} is {@code null} or empty, all properties from
-     * the first JSON object will be used as headers.</p>
+     * in the CSV output. If {@code selectCsvHeaders} is {@code null}, all properties from
+     * the first JSON object will be used as headers; an empty collection selects no columns (empty output).</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -3108,8 +3121,8 @@ public final class CsvUtil {
      * }</pre>
      *
      * @param jsonReader the Reader providing JSON data (must be an array of objects)
-     * @param selectCsvHeaders the collection of property names to include as CSV headers,
-     *                        {@code null} or empty to include all properties from the first object
+     * @param selectCsvHeaders the collection of property names to include as CSV headers;
+     *                        {@code null} to include all properties from the first object; an empty collection selects no columns (empty output)
      * @param csvWriter the Writer to write CSV output to
      * @return the number of rows written to the CSV output (excluding header row)
      * @throws UncheckedIOException if an I/O error occurs during reading or writing,
@@ -3143,7 +3156,7 @@ public final class CsvUtil {
                 cnt++;
                 row = iter.next();
 
-                if (N.isEmpty(headers)) {
+                if (selectCsvHeaders == null) {
                     headers.addAll(row.keySet());
                 }
 
@@ -3301,9 +3314,6 @@ public final class CsvUtil {
          *
          * // Null parser throws IllegalArgumentException
          * // CsvUtil.loader().setHeaderParser(null);
-         *
-         * // Passing null does NOT reset to default; it throws IllegalArgumentException
-         * CsvUtil.loader().setHeaderParser(null);   // throws, must not be null
          * }</pre>
          *
          * @param headerParser function that parses the header line into column names
@@ -3372,7 +3382,8 @@ public final class CsvUtil {
          *     .source(new File("data.csv"))
          *     .csvToJson(new File("output.json"));
          *
-         * // Use with loader for custom parsing with backslash escape
+         * // Note: this setting only affects CSV WRITING (e.g. jsonToCsv); it has no
+         * // effect on how input is parsed by load().
          * CsvUtil.loader()
          *     .setEscapeCharToBackSlashForWrite()
          *     .source(new File("data.csv"))
@@ -3503,7 +3514,8 @@ public final class CsvUtil {
          * // CsvUtil.loader().selectColumns(Arrays.asList("badColumn")).source(file).load();
          * }</pre>
          *
-         * @param selectColumnNames collection of column names to include, {@code null} for all columns
+         * @param selectColumnNames collection of column names to include; {@code null} for all columns;
+         *            an empty collection selects no columns
          * @return this instance for method chaining
          */
         public This selectColumns(final Collection<String> selectColumnNames) {
@@ -3725,7 +3737,7 @@ public final class CsvUtil {
             N.checkArgNotNull(beanClassForColumnTypeInference, "beanClassForColumnTypeInference");
 
             if (columnTypeMap != null) {
-                throw new IllegalArgumentException("Can't set both 'columnTypeMap' and 'beanClassForTypeReading'");
+                throw new IllegalArgumentException("Can't set both 'columnTypeMap' and 'beanClassForColumnTypeInference'");
             }
 
             this.beanClassForColumnTypeInference = beanClassForColumnTypeInference;
@@ -4063,6 +4075,21 @@ public final class CsvUtil {
                 final Function<String, String[]> prevHp = hp != null ? CsvUtil.getCurrentHeaderParser() : null;
                 final BiConsumer<String, String[]> prevLp = lp != null ? CsvUtil.getCurrentLineParser() : null;
                 final Boolean prevEscBack = escBack != null ? CsvUtil.isBackSlashEscapeCharForWrite() : null;
+                final java.lang.Runnable restoreParsers = () -> {
+                    if (hp != null) {
+                        CsvUtil.setHeaderParser(prevHp);
+                    }
+                    if (lp != null) {
+                        CsvUtil.setLineParser(prevLp);
+                    }
+                    if (escBack != null) {
+                        if (Boolean.TRUE.equals(prevEscBack)) {
+                            CsvUtil.setEscapeCharToBackSlashForWrite();
+                        } else {
+                            CsvUtil.resetEscapeCharForWrite();
+                        }
+                    }
+                };
 
                 if (hp != null) {
                     CsvUtil.setHeaderParser(hp);
@@ -4078,31 +4105,22 @@ public final class CsvUtil {
                     }
                 }
 
-                final Stream<T> stream;
+                try {
+                    final Stream<T> stream;
 
-                if (sourceFile != null) {
-                    stream = CsvUtil.stream(sourceFile, selectColumnNames, offset, count, rowFilter, rowMapper);
-                } else if (sourceReader != null) {
-                    stream = CsvUtil.stream(sourceReader, selectColumnNames, offset, count, rowFilter, rowMapper, closeReaderWhenStreamIsClosed);
-                } else {
-                    throw new IllegalArgumentException("Either 'sourceFile' or 'sourceReader' must be set before calling load().");
+                    if (sourceFile != null) {
+                        stream = CsvUtil.stream(sourceFile, selectColumnNames, offset, count, rowFilter, rowMapper);
+                    } else if (sourceReader != null) {
+                        stream = CsvUtil.stream(sourceReader, selectColumnNames, offset, count, rowFilter, rowMapper, closeReaderWhenStreamIsClosed);
+                    } else {
+                        throw new IllegalArgumentException("Either 'sourceFile' or 'sourceReader' must be set before calling load().");
+                    }
+
+                    return stream.onClose(restoreParsers);
+                } catch (final RuntimeException | Error e) {
+                    restoreParsers.run();
+                    throw e;
                 }
-
-                return stream.onClose(() -> {
-                    if (hp != null) {
-                        CsvUtil.setHeaderParser(prevHp);
-                    }
-                    if (lp != null) {
-                        CsvUtil.setLineParser(prevLp);
-                    }
-                    if (escBack != null) {
-                        if (Boolean.TRUE.equals(prevEscBack)) {
-                            CsvUtil.setEscapeCharToBackSlashForWrite();
-                        } else {
-                            CsvUtil.resetEscapeCharForWrite();
-                        }
-                    }
-                });
             });
         }
     }

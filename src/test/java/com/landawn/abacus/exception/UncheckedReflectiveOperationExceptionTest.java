@@ -169,4 +169,14 @@ public class UncheckedReflectiveOperationExceptionTest extends TestBase {
         Assertions.assertEquals("java.lang.ReflectiveOperationException", exception.getMessage());
     }
 
+    @Test
+    public void testGetCauseCovariantReturn() {
+        ReflectiveOperationException cause = new ReflectiveOperationException("Reflection error");
+        UncheckedReflectiveOperationException exception = new UncheckedReflectiveOperationException(cause);
+        // Covariant override: no cast required.
+        ReflectiveOperationException returnedCause = exception.getCause();
+        assertNotNull(returnedCause);
+        assertEquals(cause, returnedCause);
+    }
+
 }

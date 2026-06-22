@@ -13,10 +13,10 @@
  */
 package com.landawn.abacus.util.function;
 
-import java.util.Objects;
-
 import com.landawn.abacus.util.Fn;
 import com.landawn.abacus.util.Throwables;
+import com.landawn.abacus.util.N;
+import com.landawn.abacus.util.cs;
 
 /**
  * Represents a function that accepts one argument and produces a result.
@@ -73,13 +73,13 @@ public interface Function<T, R> extends Throwables.Function<T, R, RuntimeExcepti
      * @param before the function to apply before this function is applied
      * @return a composed {@code Function} that first applies the {@code before}
      *         function and then applies this function
-     * @throws NullPointerException if {@code before} is null
+     * @throws IllegalArgumentException if {@code before} is null
      *
      * @see #andThen(java.util.function.Function)
      */
     @Override
     default <V> Function<V, R> compose(final java.util.function.Function<? super V, ? extends T> before) {
-        Objects.requireNonNull(before);
+        N.checkArgNotNull(before, cs.before);
         return (final V v) -> apply(before.apply(v));
     }
 
@@ -102,28 +102,29 @@ public interface Function<T, R> extends Throwables.Function<T, R, RuntimeExcepti
      * @param after the function to apply after this function is applied
      * @return a composed {@code Function} that first applies this function and then
      *         applies the {@code after} function
-     * @throws NullPointerException if {@code after} is null
+     * @throws IllegalArgumentException if {@code after} is null
      *
      * @see #compose(java.util.function.Function)
      */
     @Override
     default <V> Function<T, V> andThen(final java.util.function.Function<? super R, ? extends V> after) {
-        Objects.requireNonNull(after);
+        N.checkArgNotNull(after, cs.after);
         return (final T t) -> after.apply(apply(t));
     }
 
     /**
-     * Converts this function to a {@link Throwables.Function} that can throw checked exceptions.
+     * Returns this function as a {@link Throwables.Function} view.
      *
-     * <p>This method provides a bridge to use this function in contexts where checked exceptions
-     * need to be handled. The returned function will have the same behavior as this function
-     * but with the ability to declare checked exceptions.</p>
+     * <p>The returned function has the same behavior as this function. This method does not translate
+     * exceptions or make the original implementation capable of throwing new checked exceptions; the
+     * exception type parameter is for target-type compatibility with APIs that accept
+     * {@code Throwables.Function}.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Function<String, Integer> parser = Integer::parseInt;
-     * var throwableParser = parser.toThrowable();
-     * // Can now be used in contexts that handle NumberFormatException
+     * Throwables.Function<String, Integer, RuntimeException> throwableParser = parser.toThrowable();
+     * Integer value = throwableParser.apply("123");
      * }</pre>
      *
      * @param <E> the type of exception that the returned function may throw

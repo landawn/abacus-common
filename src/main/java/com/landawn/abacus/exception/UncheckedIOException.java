@@ -57,13 +57,6 @@ public class UncheckedIOException extends UncheckedException {
     private static final long serialVersionUID = -8702336402043331418L;
 
     /**
-     * The wrapped {@link IOException} cause.
-     *
-     * @serial
-     */
-    private final IOException cause;
-
-    /**
      * Constructs a new {@code UncheckedIOException} by wrapping the specified {@link IOException}.
      *
      * <p>This constructor preserves all information from the original {@code IOException} including
@@ -83,7 +76,6 @@ public class UncheckedIOException extends UncheckedException {
      */
     public UncheckedIOException(final IOException cause) {
         super(cause);
-        this.cause = cause;
     }
 
     /**
@@ -110,7 +102,6 @@ public class UncheckedIOException extends UncheckedException {
      */
     public UncheckedIOException(final String message, final IOException cause) {
         super(message, cause);
-        this.cause = cause;
     }
 
     /**
@@ -118,8 +109,11 @@ public class UncheckedIOException extends UncheckedException {
      *
      * @return the wrapped {@link IOException}, never {@code null}
      */
+    // NOTE: the 'synchronized' modifier is INTENTIONAL and REQUIRED — do NOT remove it. It mirrors
+    // Throwable.getCause(), which synchronizes access to the non-final 'cause' field (also assignable
+    // via initCause()), preserving that visibility/consistency contract for the covariant override.
     @Override
     public synchronized IOException getCause() {
-        return cause;
+        return (IOException) super.getCause();
     }
 }

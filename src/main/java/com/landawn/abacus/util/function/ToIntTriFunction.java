@@ -28,6 +28,11 @@ import com.landawn.abacus.util.Throwables;
  *
  * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
  *
+ * <p><b>Note:</b> {@code TriFunction} primitive result-specializations are provided only for
+ * {@code int}/{@code long}/{@code double} ({@code ToInt}/{@code ToLong}/{@code ToDoubleTriFunction}) by
+ * design — there are intentionally no {@code byte}/{@code char}/{@code short}/{@code float}/{@code boolean}
+ * three-arg variants, unlike the all-8 {@code ToXxxFunction}/{@code ToXxxBiFunction} families.
+ *
  * @param <A> the type of the first argument to the function
  * @param <B> the type of the second argument to the function
  * @param <C> the type of the third argument to the function
@@ -59,4 +64,18 @@ public interface ToIntTriFunction<A, B, C> extends Throwables.ToIntTriFunction<A
      */
     @Override
     int applyAsInt(A a, B b, C c);
+
+    /**
+     * Returns this object as a {@link Throwables.ToIntTriFunction} view.
+     *
+     * <p>The returned object has the same behavior as this one. This method does not translate
+     * exceptions or make the original implementation capable of throwing new checked exceptions; the
+     * exception type parameter is for target-type compatibility with APIs that accept {@code Throwables.ToIntTriFunction}.
+     *
+     * @param <E> the target exception type for compatibility with {@code Throwables.ToIntTriFunction}
+     * @return a {@link Throwables.ToIntTriFunction} view of this object
+     */
+    default <E extends Throwable> Throwables.ToIntTriFunction<A, B, C, E> toThrowable() {
+        return (Throwables.ToIntTriFunction<A, B, C, E>) this;
+    }
 }

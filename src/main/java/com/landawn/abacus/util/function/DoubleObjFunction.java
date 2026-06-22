@@ -13,9 +13,9 @@
  */
 package com.landawn.abacus.util.function;
 
-import java.util.Objects;
-
 import com.landawn.abacus.util.Throwables;
+import com.landawn.abacus.util.N;
+import com.landawn.abacus.util.cs;
 
 /**
  * Represents a function that accepts a double-valued argument and an object-valued argument,
@@ -69,10 +69,24 @@ public interface DoubleObjFunction<T, R> extends Throwables.DoubleObjFunction<T,
      * @param <V> the type of output of the {@code after} function, and of the composed function
      * @param after the function to apply after this function is applied. Must not be {@code null}.
      * @return a composed function that first applies this function and then applies the {@code after} function
-     * @throws NullPointerException if {@code after} is null
+     * @throws IllegalArgumentException if {@code after} is null
      */
     default <V> DoubleObjFunction<T, V> andThen(final java.util.function.Function<? super R, ? extends V> after) {
-        Objects.requireNonNull(after);
+        N.checkArgNotNull(after, cs.after);
         return (i, t) -> after.apply(apply(i, t));
+    }
+
+    /**
+     * Returns this object as a {@link Throwables.DoubleObjFunction} view.
+     *
+     * <p>The returned object has the same behavior as this one. This method does not translate
+     * exceptions or make the original implementation capable of throwing new checked exceptions; the
+     * exception type parameter is for target-type compatibility with APIs that accept {@code Throwables.DoubleObjFunction}.
+     *
+     * @param <E> the target exception type for compatibility with {@code Throwables.DoubleObjFunction}
+     * @return a {@link Throwables.DoubleObjFunction} view of this object
+     */
+    default <E extends Throwable> Throwables.DoubleObjFunction<T, R, E> toThrowable() {
+        return (Throwables.DoubleObjFunction<T, R, E>) this;
     }
 }

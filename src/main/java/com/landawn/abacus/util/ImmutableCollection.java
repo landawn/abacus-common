@@ -346,11 +346,25 @@ public class ImmutableCollection<E> extends AbstractCollection<E> implements Imm
             return true;
         }
 
-        if (obj instanceof ImmutableCollection ic) {
+        // The backing-collection shortcut is only valid when the other side presents its backing
+        // collection in its natural order; a reordered view (e.g. ImmutableList.reversed()) shares
+        // the FORWARD collection as its backing, so unwrapping would compare the wrong order.
+        if (obj instanceof ImmutableCollection ic && !ic.isReorderedView()) {
             return coll.equals(ic.coll);
         }
 
         return coll.equals(obj);
+    }
+
+    /**
+     * Whether this collection presents its backing collection in a different iteration order
+     * (e.g. a reversed view). Such instances must not be compared via the backing-collection
+     * shortcut in {@link #equals(Object)}.
+     *
+     * @return {@code true} if this is a reordered view of its backing collection
+     */
+    boolean isReorderedView() {
+        return false;
     }
 
     /**

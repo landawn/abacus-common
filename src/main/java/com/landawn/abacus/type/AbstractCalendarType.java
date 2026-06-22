@@ -216,7 +216,7 @@ public abstract class AbstractCalendarType<T extends Calendar> extends AbstractT
                         break;
 
                     default:
-                        throw new RuntimeException("Unsupported operation");
+                        throw new RuntimeException("Unsupported DateTimeFormat: " + config.getDateTimeFormat());
                 }
             }
 

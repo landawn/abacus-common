@@ -84,7 +84,10 @@ import com.landawn.abacus.util.u.Optional;
  * // Result: "[Alice, Bob, Charlie]"
  *
  * // Map entries with custom key-value separator
- * Map<String, Integer> scores = Map.of("Alice", 95, "Bob", 87, "Charlie", 92);
+ * Map<String, Integer> scores = new LinkedHashMap<>();
+ * scores.put("Alice", 95);
+ * scores.put("Bob", 87);
+ * scores.put("Charlie", 92);
  * String report = Joiner.with(", ", "=", "Scores: {", "}")
  *                       .appendEntries(scores)
  *                       .toString();
@@ -385,6 +388,11 @@ public final class Joiner implements Closeable {
      * Creates a new Joiner instance with the specified separator, prefix, and suffix.
      * The prefix is prepended to the result and the suffix is appended to the result.
      *
+     * <p><b>Note:</b> This 3-argument form takes {@code (separator, prefix, suffix)} &mdash; it does
+     * <i>not</i> accept a key-value delimiter. The key-value delimiter defaults to {@code "="}
+     * ({@link #DEFAULT_KEY_VALUE_DELIMITER}); use the 4-argument
+     * {@link #with(CharSequence, CharSequence, CharSequence, CharSequence)} form to override it.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Joiner.with(", ", "[", "]").appendAll(new String[]{"a", "b", "c"}).toString();   // returns: "[a, b, c]"
@@ -525,7 +533,7 @@ public final class Joiner implements Closeable {
     @Beta
     public Joiner reuseBuffer() {
         if (buffer != null) {
-            throw new IllegalStateException("Can't reset because the buffer has been created");
+            throw new IllegalStateException("Can't enable buffer reuse because the buffer has already been created");
         }
 
         reuseBuffer = true;
@@ -2173,8 +2181,8 @@ public final class Joiner implements Closeable {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * StringBuilder sb = new StringBuilder("value");
-     * Joiner.with(", ").appendEntry("key", sb).toString();   // returns: "key=value"
+     * CharSequence cs = "value";
+     * Joiner.with(", ").appendEntry("key", cs).toString();   // returns: "key=value"
      * }</pre>
      *
      * @param key the key to append
@@ -2570,6 +2578,10 @@ public final class Joiner implements Closeable {
      * If {@code selectPropNames} is {@code null} or empty, no properties are appended.
      * </p>
      *
+     * <p><b>Note:</b> this is an intentional exception to the library's general null/empty selection
+     * convention (where a {@code null} selection means "all"). Here {@code null} and empty both mean
+     * "nothing" (append no properties); to append every property, use {@link #appendBean(Object)} instead.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * class Person {
@@ -2591,7 +2603,8 @@ public final class Joiner implements Closeable {
      * }</pre>
      *
      * @param bean the bean object whose selected properties to append; may be {@code null}
-     * @param selectPropNames collection of property names to include; if {@code null} or empty, no properties are appended
+     * @param selectPropNames collection of property names to include; if {@code null} or empty, no properties are
+     *            appended (an intentional "null = nothing" carve-out — see the note above)
      * @return this Joiner instance for method chaining
      * @throws IllegalArgumentException if {@code bean} is not {@code null} and its class is not a valid JavaBean (i.e., doesn't have proper getter/setter methods)
      * @see #appendBean(Object)
@@ -2802,9 +2815,10 @@ public final class Joiner implements Closeable {
                 //noinspection resource
                 append(newString);
             }
-        } else {
-            //noinspection resource
-            append(Strings.repeat(newString, n, separator));
+        } else if (n > 0) {
+            // Bypass append(): newString is already formatted element-wise, and re-formatting the
+            // whole joined block would let trimBeforeAppend eat whitespace separators.
+            prepareBuilder().append(Strings.repeat(newString, n, separator));
         }
 
         return this;
@@ -2855,6 +2869,9 @@ public final class Joiner implements Closeable {
             final int length = other.buffer.length();
             final StringBuilder builder = prepareBuilder();
             builder.append(other.buffer, other.prefix.length(), length);
+        } else if (other.latestToStringValue != null) {
+            // After a reuse-mode toString(), the other Joiner's content lives on in latestToStringValue.
+            prepareBuilder().append(other.latestToStringValue, other.prefix.length(), other.latestToStringValue.length());
         }
 
         return this;
@@ -2880,7 +2897,12 @@ public final class Joiner implements Closeable {
         // Remember that we never actually append the suffix unless we return
         // the full (present) value or some substring or length of it, so that
         // we can add on more if we need to.
-        return (buffer != null ? buffer.length() + suffix.length() : emptyValue.length());
+        if (buffer != null) {
+            return buffer.length() + suffix.length();
+        }
+
+        // After a reuse-mode toString() the content lives on in latestToStringValue.
+        return latestToStringValue != null ? latestToStringValue.length() + suffix.length() : emptyValue.length();
     }
 
     /**
@@ -2905,6 +2927,12 @@ public final class Joiner implements Closeable {
     @Override
     public String toString() {
         if (buffer == null) {
+            // After a reuse-mode toString() the buffer is recycled but the content lives on in
+            // latestToStringValue (appending continues from it), so observers must report it too.
+            if (latestToStringValue != null) {
+                return suffix.isEmpty() ? latestToStringValue : latestToStringValue + suffix;
+            }
+
             return emptyValue;
         } else {
             try {
@@ -2955,7 +2983,9 @@ public final class Joiner implements Closeable {
      * @see #toString()
      */
     public <A extends Appendable> A appendTo(final A appendable) throws IOException {
-        if (buffer == null) {
+        // latestToStringValue carries the content after a reuse-mode toString(); route it through
+        // toString() below instead of falling into the empty-value branch.
+        if (buffer == null && latestToStringValue == null) {
             if (Strings.isNotEmpty(emptyValue)) {
                 appendable.append(emptyValue);
             }
@@ -3012,7 +3042,8 @@ public final class Joiner implements Closeable {
     public <T> Optional<T> mapIfNotEmpty(final Function<? super String, T> mapper) throws IllegalArgumentException {
         N.checkArgNotNull(mapper);
 
-        return buffer == null ? Optional.empty() : Optional.of(mapper.apply(toString()));
+        // latestToStringValue carries the content after a reuse-mode toString().
+        return buffer == null && latestToStringValue == null ? Optional.empty() : Optional.of(mapper.apply(toString()));
     }
 
     /**

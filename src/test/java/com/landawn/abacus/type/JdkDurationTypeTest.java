@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -28,6 +29,18 @@ public class JdkDurationTypeTest extends TestBase {
     @Test
     public void testClazz() {
         assertEquals(Duration.class, durationType.javaType());
+    }
+
+    @Test
+    public void test_isComparable() {
+        assertTrue(durationType.isComparable());
+    }
+
+    @Test
+    public void test_compare() {
+        assertTrue(durationType.compare(Duration.ofSeconds(1), Duration.ofSeconds(2)) < 0);
+        assertTrue(durationType.compare(Duration.ofSeconds(2), Duration.ofSeconds(1)) > 0);
+        assertEquals(0, durationType.compare(Duration.ofSeconds(1), Duration.ofSeconds(1)));
     }
 
     @Test

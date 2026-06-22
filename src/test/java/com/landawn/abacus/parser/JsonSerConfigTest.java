@@ -52,7 +52,7 @@ public class JsonSerConfigTest extends TestBase {
         assertTrue(config.isBracketRootValue());
         assertFalse(config.isWrapRootValue());
         assertFalse(config.isWriteNullToEmpty());
-        assertFalse(config.isWriteDatasetByRow());
+        assertFalse(config.isWriteDatasetAsRows());
     }
 
     @Test
@@ -69,16 +69,16 @@ public class JsonSerConfigTest extends TestBase {
     }
 
     @Test
-    public void test_writeDatasetByRow() {
+    public void test_writeDatasetAsRows() {
         JsonSerConfig config = new JsonSerConfig();
-        assertFalse(config.isWriteDatasetByRow());
+        assertFalse(config.isWriteDatasetAsRows());
 
-        JsonSerConfig result = config.setWriteDatasetByRow(true);
+        JsonSerConfig result = config.setWriteDatasetAsRows(true);
         assertSame(config, result);
-        assertTrue(config.isWriteDatasetByRow());
+        assertTrue(config.isWriteDatasetAsRows());
 
-        config.setWriteDatasetByRow(false);
-        assertFalse(config.isWriteDatasetByRow());
+        config.setWriteDatasetAsRows(false);
+        assertFalse(config.isWriteDatasetAsRows());
     }
 
     @Test
@@ -154,15 +154,15 @@ public class JsonSerConfigTest extends TestBase {
     }
 
     @Test
-    public void testWriteDatasetByRow() {
-        Assertions.assertFalse(config.isWriteDatasetByRow());
+    public void testWriteDatasetAsRows() {
+        Assertions.assertFalse(config.isWriteDatasetAsRows());
 
-        JsonSerConfig result = config.setWriteDatasetByRow(true);
+        JsonSerConfig result = config.setWriteDatasetAsRows(true);
         Assertions.assertSame(config, result);
-        Assertions.assertTrue(config.isWriteDatasetByRow());
+        Assertions.assertTrue(config.isWriteDatasetAsRows());
 
-        config.setWriteDatasetByRow(false);
-        Assertions.assertFalse(config.isWriteDatasetByRow());
+        config.setWriteDatasetAsRows(false);
+        Assertions.assertFalse(config.isWriteDatasetAsRows());
     }
 
     @Test
@@ -302,7 +302,7 @@ public class JsonSerConfigTest extends TestBase {
         Assertions.assertNotEquals(baseHash, modified.hashCode());
 
         modified = new JsonSerConfig();
-        modified.setWriteDatasetByRow(true);
+        modified.setWriteDatasetAsRows(true);
         Assertions.assertNotEquals(baseHash, modified.hashCode());
 
         modified = new JsonSerConfig();
@@ -327,13 +327,13 @@ public class JsonSerConfigTest extends TestBase {
     }
 
     @Test
-    public void testEqualsWithWriteDatasetByRow() {
+    public void testEqualsWithWriteDatasetAsRows() {
         JsonSerConfig c1 = new JsonSerConfig();
         JsonSerConfig c2 = new JsonSerConfig();
-        c2.setWriteDatasetByRow(true);
+        c2.setWriteDatasetAsRows(true);
         Assertions.assertNotEquals(c1, c2);
 
-        c1.setWriteDatasetByRow(true);
+        c1.setWriteDatasetAsRows(true);
         Assertions.assertEquals(c1, c2);
     }
 
@@ -450,9 +450,10 @@ public class JsonSerConfigTest extends TestBase {
         JsonSerConfig c = new JsonSerConfig();
         String str = c.toString();
         Assertions.assertTrue(str.contains("writeNullToEmpty="));
-        Assertions.assertTrue(str.contains("writeDatasetByRow="));
+        Assertions.assertTrue(str.contains("writeDatasetAsRows="));
         Assertions.assertTrue(str.contains("writeRowColumnKeyType="));
         Assertions.assertTrue(str.contains("writeColumnType="));
+        Assertions.assertTrue(str.contains("writeLongAsString="));
         Assertions.assertTrue(str.contains("writeBigDecimalAsPlain="));
         Assertions.assertTrue(str.contains("failOnEmptyBean="));
         Assertions.assertTrue(str.contains("supportCircularReference="));
@@ -552,7 +553,7 @@ public class JsonSerConfigTest extends TestBase {
     public void testMethodChainingAllSetters() {
         JsonSerConfig c = JsonSerConfig.create()
                 .setWriteNullToEmpty(true)
-                .setWriteDatasetByRow(true)
+                .setWriteDatasetAsRows(true)
                 .setWriteRowColumnKeyType(true)
                 .setWriteColumnType(true)
                 .setQuotePropName(false)
@@ -561,7 +562,7 @@ public class JsonSerConfigTest extends TestBase {
                 .setWrapRootValue(true);
 
         Assertions.assertTrue(c.isWriteNullToEmpty());
-        Assertions.assertTrue(c.isWriteDatasetByRow());
+        Assertions.assertTrue(c.isWriteDatasetAsRows());
         Assertions.assertTrue(c.isWriteRowColumnKeyType());
         Assertions.assertTrue(c.isWriteColumnType());
         Assertions.assertFalse(c.isQuotePropName());

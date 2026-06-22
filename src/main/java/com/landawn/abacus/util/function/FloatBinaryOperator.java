@@ -64,4 +64,18 @@ public interface FloatBinaryOperator extends Throwables.FloatBinaryOperator<Runt
      */
     @Override
     float applyAsFloat(float a, float b);
+
+    /**
+     * Returns this object as a {@link Throwables.FloatBinaryOperator} view.
+     *
+     * <p>The returned object has the same behavior as this one. This method does not translate
+     * exceptions or make the original implementation capable of throwing new checked exceptions; the
+     * exception type parameter is for target-type compatibility with APIs that accept {@code Throwables.FloatBinaryOperator}.
+     *
+     * @param <E> the target exception type for compatibility with {@code Throwables.FloatBinaryOperator}
+     * @return a {@link Throwables.FloatBinaryOperator} view of this object
+     */
+    default <E extends Throwable> Throwables.FloatBinaryOperator<E> toThrowable() {
+        return (Throwables.FloatBinaryOperator<E>) this;
+    }
 }

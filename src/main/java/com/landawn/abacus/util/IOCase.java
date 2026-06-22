@@ -56,10 +56,9 @@ public enum IOCase {
      * Case sensitivity determined by the current operating system.
      * Windows is treated as case-insensitive, Unix/Linux as case-sensitive.
      *
-     * <p><strong>Note:</strong> This only handles Windows and Unix. Other operating
-     * systems (e.g., OSX and OpenVMS) are treated as case-sensitive if they use the
-     * Unix file separator and case-insensitive if they use the Windows file separator
-     * (see {@link java.io.File#separatorChar}).</p>
+     * <p><strong>Note:</strong> The sensitivity is derived from the operating-system name:
+     * only Windows is treated as case-insensitive. All other operating systems
+     * (e.g., OSX and OpenVMS) are treated as case-sensitive.</p>
      *
      * <p>If you serialize this constant on Windows and deserialize on Unix (or vice
      * versa), the case-sensitivity flag will change to match the target system.</p>

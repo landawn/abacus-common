@@ -360,6 +360,17 @@ public class DatasetTest extends AbstractTest {
     }
 
     @Test
+    public void testEmptyDataset_NullColumnSelection_ThrowsIAE_NotNPE() {
+        // regression: on a zero-column Dataset a null column selection previously slipped past
+        // checkColumnNames' guard and NPE'd; it must throw the documented IllegalArgumentException.
+        assertThrows(IllegalArgumentException.class, () -> emptyDataset.copy((Collection<String>) null));
+        assertThrows(IllegalArgumentException.class, () -> emptyDataset.toList((Collection<String>) null, Object.class));
+        // an EMPTY (non-null) selection on a zero-column Dataset stays valid: the empty list is the full
+        // (empty) column set, so no-arg operations that delegate via columnNameList() keep working.
+        assertDoesNotThrow(() -> emptyDataset.copy(Collections.<String> emptyList()));
+    }
+
+    @Test
     public void testEmptyDatasetConstant() {
         Dataset empty = Dataset.empty();
         assertEquals(0, empty.size());
@@ -824,6 +835,24 @@ public class DatasetTest extends AbstractTest {
     }
 
     @Test
+    public void testColumnsWithArraysSupportsRowMutation() {
+        // Regression: the Object[][] overload built columns with fixed-size Array.asList(...),
+        // so addRow/removeRow threw UnsupportedOperationException (the Collection overload did not).
+        List<String> names = Arrays.asList("id", "name");
+        Object[][] cols = new Object[][] { { 1, 2 }, { "Alice", "Bob" } };
+        Dataset ds = Dataset.columns(names, cols);
+        assertEquals(2, ds.size());
+
+        ds.addRow(Arrays.asList(3, "Charlie"));
+        assertEquals(3, ds.size());
+        assertEquals(Integer.valueOf(3), ds.get(2, 0));
+        assertEquals("Charlie", ds.get(2, 1));
+
+        ds.removeRow(0);
+        assertEquals(2, ds.size());
+    }
+
+    @Test
     @DisplayName("Should create Dataset with valid column names and columns")
     public void testCreateDatasetWithValidColumnsData2() {
         Collection<String> columnNames = Arrays.asList("id", "name", "age");
@@ -916,6 +945,28 @@ public class DatasetTest extends AbstractTest {
         assertNotNull(dataset);
         assertEquals(0, dataset.size());
         assertEquals(0, dataset.columnNames().size());
+        assertTrue(dataset.isEmpty());
+    }
+
+    @Test
+    @DisplayName("Should create empty Dataset when columns array is null and column names are empty")
+    public void testCreateDatasetWithNullColumnsArray() {
+        Dataset dataset = Dataset.columns(Collections.emptyList(), (Object[][]) null);
+
+        assertNotNull(dataset);
+        assertEquals(0, dataset.size());
+        assertEquals(0, dataset.columnCount());
+        assertTrue(dataset.isEmpty());
+    }
+
+    @Test
+    @DisplayName("Should create empty Dataset when columns collection is null and column names are empty")
+    public void testCreateDatasetWithNullColumnsCollection() {
+        Dataset dataset = Dataset.columns(Collections.emptyList(), (Collection<? extends Collection<?>>) null);
+
+        assertNotNull(dataset);
+        assertEquals(0, dataset.size());
+        assertEquals(0, dataset.columnCount());
         assertTrue(dataset.isEmpty());
     }
 
@@ -1389,6 +1440,18 @@ public class DatasetTest extends AbstractTest {
         List<String> originalColumns = new ArrayList<>(dataset.columnNames());
 
         dataset.moveColumns(Collections.emptyList(), 2);
+
+        assertEquals(originalColumns, dataset.columnNames());
+    }
+
+    @Test
+    @DisplayName("Empty column collection is a no-op regardless of newPosition")
+    public void testMoveColumnsEmptyOutOfRangePositionIsNoOp() {
+        List<String> originalColumns = new ArrayList<>(dataset.columnNames());
+
+        // Nothing to move -> must be a harmless no-op even for an otherwise-out-of-range position,
+        // consistent with moveColumns(emptyList, inRangePosition) and the single-column path.
+        dataset.moveColumns(Collections.emptyList(), dataset.columnCount() + 5);
 
         assertEquals(originalColumns, dataset.columnNames());
     }
@@ -4371,46 +4434,49 @@ public class DatasetTest extends AbstractTest {
 
     @Test
     public void test_join_all() {
-        final Dataset ds1 = N.newDataset(N.toList("id", "name", "city"), N.toList(N.toList(1, "n1", "c1"), N.toList(2, "n2", "c2"), N.toList(3, "n3", "c3")));
-        final Dataset ds2 = N.newDataset(N.toList("id", "address2", "state"),
-                N.toList(N.toList(1, "n1", "c1"), N.toList(2, "n2", "c2"), N.toList(2, "n22", "c22"), N.toList(4, "n4", "c4")));
+        assertDoesNotThrow(() -> {
+            final Dataset ds1 = N.newDataset(N.toList("id", "name", "city"),
+                    N.toList(N.toList(1, "n1", "c1"), N.toList(2, "n2", "c2"), N.toList(3, "n3", "c3")));
+            final Dataset ds2 = N.newDataset(N.toList("id", "address2", "state"),
+                    N.toList(N.toList(1, "n1", "c1"), N.toList(2, "n2", "c2"), N.toList(2, "n22", "c22"), N.toList(4, "n4", "c4")));
 
-        N.println("============================== ds1/2 ===========================");
+            N.println("============================== ds1/2 ===========================");
 
-        ds1.println();
-        ds2.println();
+            ds1.println();
+            ds2.println();
 
-        N.println("============================== innerJoin ===========================");
-        ds1.innerJoin(ds2, "id", "id").println();
-        ds1.innerJoin(ds2, N.asMap("id", "id"), "newAddress", List.class).println();
-        ds1.innerJoin(ds2, N.asMap("id", "id"), "newAddress", List.class, IntFunctions.ofList()).println();
-        ds1.innerJoin(ds2, N.asMap("id", "id", "name", "address2")).println();
-        ds1.innerJoin(ds2, N.asMap("id", "id", "name", "address2"), "newAddress", List.class).println();
-        ds1.innerJoin(ds2, N.asMap("id", "id", "name", "address2"), "newAddress", List.class, IntFunctions.ofSet()).println();
+            N.println("============================== innerJoin ===========================");
+            ds1.innerJoin(ds2, "id", "id").println();
+            ds1.innerJoin(ds2, N.asMap("id", "id"), "newAddress", List.class).println();
+            ds1.innerJoin(ds2, N.asMap("id", "id"), "newAddress", List.class, IntFunctions.ofList()).println();
+            ds1.innerJoin(ds2, N.asMap("id", "id", "name", "address2")).println();
+            ds1.innerJoin(ds2, N.asMap("id", "id", "name", "address2"), "newAddress", List.class).println();
+            ds1.innerJoin(ds2, N.asMap("id", "id", "name", "address2"), "newAddress", List.class, IntFunctions.ofSet()).println();
 
-        N.println("============================== left join ===========================");
-        ds1.leftJoin(ds2, "id", "id").println();
-        ds1.leftJoin(ds2, N.asMap("id", "id"), "newAddress", List.class).println();
-        ds1.leftJoin(ds2, N.asMap("id", "id"), "newAddress", List.class, IntFunctions.ofList()).println();
-        ds1.leftJoin(ds2, N.asMap("id", "id", "name", "address2")).println();
-        ds1.leftJoin(ds2, N.asMap("id", "id", "name", "address2"), "newAddress", List.class).println();
-        ds1.leftJoin(ds2, N.asMap("id", "id", "name", "address2"), "newAddress", List.class, IntFunctions.ofSet()).println();
+            N.println("============================== left join ===========================");
+            ds1.leftJoin(ds2, "id", "id").println();
+            ds1.leftJoin(ds2, N.asMap("id", "id"), "newAddress", List.class).println();
+            ds1.leftJoin(ds2, N.asMap("id", "id"), "newAddress", List.class, IntFunctions.ofList()).println();
+            ds1.leftJoin(ds2, N.asMap("id", "id", "name", "address2")).println();
+            ds1.leftJoin(ds2, N.asMap("id", "id", "name", "address2"), "newAddress", List.class).println();
+            ds1.leftJoin(ds2, N.asMap("id", "id", "name", "address2"), "newAddress", List.class, IntFunctions.ofSet()).println();
 
-        N.println("============================== right join ===========================");
-        ds1.rightJoin(ds2, "id", "id").println();
-        ds1.rightJoin(ds2, N.asMap("id", "id"), "newAddress", List.class).println();
-        ds1.rightJoin(ds2, N.asMap("id", "id"), "newAddress", List.class, IntFunctions.ofList()).println();
-        ds1.rightJoin(ds2, N.asMap("id", "id", "name", "address2")).println();
-        ds1.rightJoin(ds2, N.asMap("id", "id", "name", "address2"), "newAddress", List.class).println();
-        ds1.rightJoin(ds2, N.asMap("id", "id", "name", "address2"), "newAddress", List.class, IntFunctions.ofSet()).println();
+            N.println("============================== right join ===========================");
+            ds1.rightJoin(ds2, "id", "id").println();
+            ds1.rightJoin(ds2, N.asMap("id", "id"), "newAddress", List.class).println();
+            ds1.rightJoin(ds2, N.asMap("id", "id"), "newAddress", List.class, IntFunctions.ofList()).println();
+            ds1.rightJoin(ds2, N.asMap("id", "id", "name", "address2")).println();
+            ds1.rightJoin(ds2, N.asMap("id", "id", "name", "address2"), "newAddress", List.class).println();
+            ds1.rightJoin(ds2, N.asMap("id", "id", "name", "address2"), "newAddress", List.class, IntFunctions.ofSet()).println();
 
-        N.println("============================== full join ===========================");
-        ds1.fullJoin(ds2, "id", "id").println();
-        ds1.fullJoin(ds2, N.asMap("id", "id"), "newAddress", List.class).println();
-        ds1.fullJoin(ds2, N.asMap("id", "id"), "newAddress", List.class, IntFunctions.ofList()).println();
-        ds1.fullJoin(ds2, N.asMap("id", "id", "name", "address2")).println();
-        ds1.fullJoin(ds2, N.asMap("id", "id", "name", "address2"), "newAddress", List.class).println();
-        ds1.fullJoin(ds2, N.asMap("id", "id", "name", "address2"), "newAddress", List.class, IntFunctions.ofSet()).println();
+            N.println("============================== full join ===========================");
+            ds1.fullJoin(ds2, "id", "id").println();
+            ds1.fullJoin(ds2, N.asMap("id", "id"), "newAddress", List.class).println();
+            ds1.fullJoin(ds2, N.asMap("id", "id"), "newAddress", List.class, IntFunctions.ofList()).println();
+            ds1.fullJoin(ds2, N.asMap("id", "id", "name", "address2")).println();
+            ds1.fullJoin(ds2, N.asMap("id", "id", "name", "address2"), "newAddress", List.class).println();
+            ds1.fullJoin(ds2, N.asMap("id", "id", "name", "address2"), "newAddress", List.class, IntFunctions.ofSet()).println();
+        });
     }
 
     @Test
@@ -4815,27 +4881,29 @@ public class DatasetTest extends AbstractTest {
 
     @Test
     public void test_combine_divide() throws Exception {
-        final Dataset ds1 = N.newDataset(N.toList(createAccount(Account.class), createAccount(Account.class), createAccount(Account.class)));
-        ds1.removeColumns(N.toList("gui", "emailAddress", "lastUpdateTime", "createdTime"));
-        ds1.updateRow(0, t -> t instanceof String ? t + "__0" : t);
+        assertDoesNotThrow(() -> {
+            final Dataset ds1 = N.newDataset(N.toList(createAccount(Account.class), createAccount(Account.class), createAccount(Account.class)));
+            ds1.removeColumns(N.toList("gui", "emailAddress", "lastUpdateTime", "createdTime"));
+            ds1.updateRow(0, t -> t instanceof String ? t + "__0" : t);
 
-        Dataset ds2 = ds1.copy();
-        ds2.combineColumns(N.toList("firstName", "lastName"), "name", Map.class);
-        ds2.println();
+            Dataset ds2 = ds1.copy();
+            ds2.combineColumns(N.toList("firstName", "lastName"), "name", Map.class);
+            ds2.println();
 
-        ds2 = ds1.copy();
-        ds2.combineColumns(N.toList("firstName", "lastName"), "name", (Function<DisposableObjArray, String>) t -> Strings.join(t.copy(), "-"));
-        ds2.println();
+            ds2 = ds1.copy();
+            ds2.combineColumns(N.toList("firstName", "lastName"), "name", (Function<DisposableObjArray, String>) t -> Strings.join(t.copy(), "-"));
+            ds2.println();
 
-        ds2.moveColumn("name", 0);
-        ds2.println();
+            ds2.moveColumn("name", 0);
+            ds2.println();
 
-        ds2.divideColumn("name", N.toList("firstName", "lastName"), (BiConsumer<String, Object[]>) (t, a) -> {
-            final String[] strs = Splitter.with("-").splitToArray(t);
-            N.copy(strs, 0, a, 0, a.length);
+            ds2.divideColumn("name", N.toList("firstName", "lastName"), (BiConsumer<String, Object[]>) (t, a) -> {
+                final String[] strs = Splitter.with("-").splitToArray(t);
+                N.copy(strs, 0, a, 0, a.length);
+            });
+
+            ds2.println();
         });
-
-        ds2.println();
     }
 
     @Test
@@ -7610,15 +7678,17 @@ public class DatasetTest extends AbstractTest {
 
     @Test
     public void test_sort_perf() throws Exception {
-        final List<String> columnNameList = new ArrayList<>(Beans.getPropNameList(Account.class));
-        final Dataset dataset = N.newDataset(columnNameList, createAccountList(Account.class, 999));
+        assertDoesNotThrow(() -> {
+            final List<String> columnNameList = new ArrayList<>(Beans.getPropNameList(Account.class));
+            final Dataset dataset = N.newDataset(columnNameList, createAccountList(Account.class, 999));
 
-        Profiler.run(8, 10, 1, () -> {
-            final Dataset copy = dataset.copy();
+            Profiler.run(8, 10, 1, () -> {
+                final Dataset copy = dataset.copy();
 
-            copy.sortBy(N.toList(AccountPNL.GUI, AccountPNL.FIRST_NAME));
+                copy.sortBy(N.toList(AccountPNL.GUI, AccountPNL.FIRST_NAME));
 
-        }).printResult();
+            }).printResult();
+        });
     }
 
     @Test
@@ -8356,10 +8426,10 @@ public class DatasetTest extends AbstractTest {
         final Dataset ds = N.newDataset(accountList);
         ds.println();
 
-        String json = N.toJson(ds, JsonSerConfig.create().setWriteDatasetByRow(true));
+        String json = N.toJson(ds, JsonSerConfig.create().setWriteDatasetAsRows(true));
         N.println(json);
 
-        json = N.toJson(ds, JsonSerConfig.create().setWriteDatasetByRow(true).setPrettyFormat(true));
+        json = N.toJson(ds, JsonSerConfig.create().setWriteDatasetAsRows(true).setPrettyFormat(true));
         N.println(json);
 
         final Dataset ds2 = N.fromJson(json, Dataset.class);

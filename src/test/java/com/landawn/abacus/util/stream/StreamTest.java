@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -1687,6 +1688,7 @@ public class StreamTest extends AbstractTest {
         Stream.flatten(f).println();
         assertNull(f);
     }
+
 
 
 
@@ -4062,12 +4064,6 @@ public class StreamTest extends AbstractTest {
     }
 
     @Test
-    public void testIntersperseSingleElement() {
-        List<Integer> result = Stream.of(1).intersperse(0).toList();
-        assertEquals(Arrays.asList(1), result);
-    }
-
-    @Test
     public void testIntersperse_SingleElement() {
         List<Integer> result = Stream.of(1).intersperse(0).toList();
         assertEquals(Arrays.asList(1), result);
@@ -6436,20 +6432,6 @@ public class StreamTest extends AbstractTest {
     }
 
     @Test
-    public void testDebounce_EmptyStream() {
-        List<Integer> result = Stream.<Integer> empty().debounce(5, com.landawn.abacus.util.Duration.ofSeconds(1)).toList();
-
-        assertTrue(result.isEmpty());
-    }
-
-    @Test
-    public void testDebounce_ParallelStreamEmpty() {
-        List<Integer> result = Stream.<Integer> empty().parallel().debounce(5, com.landawn.abacus.util.Duration.ofSeconds(1)).toList();
-
-        assertTrue(result.isEmpty());
-    }
-
-    @Test
     public void testEmpty2() {
         Stream<String> emptyStream = Stream.empty();
         assertFalse(emptyStream.first().isPresent());
@@ -6891,59 +6873,6 @@ public class StreamTest extends AbstractTest {
     }
 
     // ==================== debounce tests ====================
-
-    @Test
-    public void testDebounce_BasicFunctionality() {
-        // Allow 3 elements per 1 second window
-        List<Integer> result = Stream.of(1, 2, 3, 4, 5).debounce(3, com.landawn.abacus.util.Duration.ofSeconds(1)).toList();
-
-        // Only first 3 elements should pass through within the window
-        assertEquals(3, result.size());
-        assertEquals(Arrays.asList(1, 2, 3), result);
-
-        result = Stream.range(0, 20).delay(Duration.ofMillis(100)).debounce(2, com.landawn.abacus.util.Duration.ofSeconds(1)).toList();
-
-        assertEquals(Arrays.asList(0, 1, 10, 11, 19), result);
-    }
-
-    @Test
-    public void testDebounce_AllElementsPassWhenWithinLimit() {
-        // Allow 10 elements per window, but only 5 elements in stream
-        List<Integer> result = Stream.of(1, 2, 3, 4, 5).debounce(10, com.landawn.abacus.util.Duration.ofSeconds(1)).toList();
-
-        // All elements should pass
-        assertEquals(5, result.size());
-        assertEquals(Arrays.asList(1, 2, 3, 4, 5), result);
-    }
-
-    @Test
-    public void testDebounce_PreservesOrder() {
-        List<String> result = Stream.of("a", "b", "c", "d", "e").debounce(3, com.landawn.abacus.util.Duration.ofSeconds(1)).toList();
-
-        assertEquals(Arrays.asList("a", "b", "c"), result);
-    }
-
-    @Test
-    public void testDebounce_ChainedWithOtherOperations() {
-        List<Integer> result = Stream.of(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)
-                .filter(n -> n % 2 == 0) // 2, 4, 6, 8, 10
-                .debounce(3, com.landawn.abacus.util.Duration.ofSeconds(1)) // 2, 4, 6
-                .map(n -> n * 10) // 20, 40, 60
-                .toList();
-
-        assertEquals(3, result.size());
-        assertEquals(Arrays.asList(20, 40, 60), result);
-    }
-
-    @Test
-    public void testDebounce_WithLongDuration() {
-        // Test with a very long duration to ensure all elements within limit pass
-        List<Integer> result = Stream.of(1, 2, 3, 4, 5).debounce(3, com.landawn.abacus.util.Duration.ofHours(1)).toList();
-
-        assertEquals(3, result.size());
-        assertEquals(Arrays.asList(1, 2, 3), result);
-    }
-
     @Test
     public void testOfArrayWithRange() {
         Integer[] array = { 1, 2, 3, 4, 5 };
@@ -7516,35 +7445,6 @@ public class StreamTest extends AbstractTest {
     }
 
     @Test
-    public void testDebounce_SingleElement() {
-        List<String> result = Stream.of("hello").debounce(1, com.landawn.abacus.util.Duration.ofMillis(100)).toList();
-
-        assertEquals(1, result.size());
-        assertEquals("hello", result.get(0));
-    }
-
-    @Test
-    public void testDebounce_MaxWindowSizeOne() {
-        // Only 1 element allowed per window
-        List<Integer> result = Stream.of(1, 2, 3, 4, 5).debounce(1, com.landawn.abacus.util.Duration.ofSeconds(1)).toList();
-
-        assertEquals(1, result.size());
-        assertEquals(Integer.valueOf(1), result.get(0));
-    }
-
-
-    @Test
-    public void testDebounce_WithNullElements() {
-        List<String> result = Stream.of("a", null, "c", null, "e").debounce(3, com.landawn.abacus.util.Duration.ofSeconds(1)).toList();
-
-        assertEquals(3, result.size());
-        assertEquals("a", result.get(0));
-        assertEquals(null, result.get(1));
-        assertEquals("c", result.get(2));
-    }
-
-
-    @Test
     public void testOfJavaOptional() {
         java.util.Optional<String> optional = java.util.Optional.of("hello");
         Stream<String> stream = createStream(optional);
@@ -7600,14 +7500,6 @@ public class StreamTest extends AbstractTest {
         assertTrue(createStream(new long[0]).toList().isEmpty());
         assertTrue(createStream(new float[0]).toList().isEmpty());
         assertTrue(createStream(new double[0]).toList().isEmpty());
-    }
-
-    @Test
-    public void testDebounce() {
-        List<Integer> result = Stream.of(1, 2, 3, 4, 5).debounce(10, Duration.ofMillis(100)).toList();
-        assertNotNull(result);
-        // debounce groups items within duration windows
-        assertTrue(result.size() >= 1);
     }
 
     @Test
@@ -7699,29 +7591,6 @@ public class StreamTest extends AbstractTest {
             result.add(4);
         } catch (UnsupportedOperationException e) {
         }
-    }
-
-
-    @Test
-    public void testDebounce_ThrowsExceptionForNonPositiveMaxWindowSize() {
-        assertThrows(IllegalArgumentException.class, () -> {
-            Stream.of(1, 2, 3).debounce(0, com.landawn.abacus.util.Duration.ofSeconds(1)).toList();
-        });
-
-        assertThrows(IllegalArgumentException.class, () -> {
-            Stream.of(1, 2, 3).debounce(-1, com.landawn.abacus.util.Duration.ofSeconds(1)).toList();
-        });
-    }
-
-    @Test
-    public void testDebounce_ThrowsExceptionForNonPositiveDuration() {
-        assertThrows(IllegalArgumentException.class, () -> {
-            Stream.of(1, 2, 3).debounce(5, com.landawn.abacus.util.Duration.ofMillis(0)).toList();
-        });
-
-        assertThrows(IllegalArgumentException.class, () -> {
-            Stream.of(1, 2, 3).debounce(5, com.landawn.abacus.util.Duration.ofMillis(-100)).toList();
-        });
     }
 
 
@@ -9035,20 +8904,22 @@ public class StreamTest extends AbstractTest {
 
     @Test
     public void testListFiles_PermissionDenied() throws IOException {
-        File dir = Files.createTempDirectory(tempFolder, "restricted").toFile();
-        File file = new File(dir, "file.txt");
-        file.createNewFile();
+        assertDoesNotThrow(() -> {
+            File dir = Files.createTempDirectory(tempFolder, "restricted").toFile();
+            File file = new File(dir, "file.txt");
+            file.createNewFile();
 
-        boolean permissionChanged = dir.setReadable(false);
+            boolean permissionChanged = dir.setReadable(false);
 
-        if (permissionChanged) {
-            try {
-                List<File> files = Stream.listFiles(dir).toList();
-            } catch (Exception e) {
-            } finally {
-                dir.setReadable(true);
+            if (permissionChanged) {
+                try {
+                    List<File> files = Stream.listFiles(dir).toList();
+                } catch (Exception e) {
+                } finally {
+                    dir.setReadable(true);
+                }
             }
-        }
+        });
     }
 
     @Test
@@ -11845,6 +11716,129 @@ public class StreamTest extends AbstractTest {
 
         assertEquals(1, calls.get());
         assertEquals(1, closed.get());
+    }
+
+    @Test
+    public void testFromJdkStreamIteratorCountConsumes() {
+        try (Stream<String> stream = Stream.from(java.util.stream.Stream.of("a", "b"))) {
+            final ObjIteratorEx<String> iter = stream.iteratorEx();
+
+            assertEquals(2, iter.count());
+            assertFalse(iter.hasNext());
+            assertEquals(0, iter.count());
+            assertArrayEquals(new Object[0], iter.toArray());
+            assertThrows(NoSuchElementException.class, iter::next);
+        }
+    }
+
+    @Test
+    public void testFromJdkStreamIteratorToArrayConsumes() {
+        try (Stream<String> stream = Stream.from(java.util.stream.Stream.of("a", "b"))) {
+            final ObjIteratorEx<String> iter = stream.iteratorEx();
+
+            assertArrayEquals(new String[] { "a", "b" }, iter.toArray(new String[0]));
+            assertFalse(iter.hasNext());
+            assertEquals(0, iter.count());
+            assertThrows(NoSuchElementException.class, iter::next);
+        }
+    }
+
+    @Test
+    public void testFastPathToArrayNullTerminatesOversizedArray() {
+        final Boolean[] booleans = { null, null, Boolean.TRUE };
+        assertSame(booleans, Stream.of(new boolean[] { true, false }).iteratorEx().toArray(booleans));
+        assertArrayEquals(new Boolean[] { Boolean.TRUE, Boolean.FALSE, null }, booleans);
+
+        final Byte[] bytes = { null, null, (byte) 9 };
+        assertSame(bytes, Stream.of(new byte[] { 1, 2 }).iteratorEx().toArray(bytes));
+        assertArrayEquals(new Byte[] { (byte) 1, (byte) 2, null }, bytes);
+
+        final String[] repeated = { null, null, "stale" };
+        assertSame(repeated, Stream.repeat("x", 2).iteratorEx().toArray(repeated));
+        assertArrayEquals(new String[] { "x", "x", null }, repeated);
+    }
+
+    // --- regression tests for 2026-06-10 deep-review fixes ---
+
+
+
+    @Test
+    public void testParallelConcatValidatesReadThreadNum() {
+        // regression: readThreadNum <= 0 started zero reader threads and silently produced an EMPTY stream
+        assertThrows(IllegalArgumentException.class, () -> Stream.parallelConcat(N.asList(Stream.of(1), Stream.of(2)), 0));
+        assertThrows(IllegalArgumentException.class, () -> Stream.parallelConcatIterators(N.asList(N.asList(1).iterator(), N.asList(2).iterator()), -1));
+
+        // null collections return an empty stream, matching concat(Collection) and the 3-arg overloads
+        assertTrue(Stream.parallelConcat((Collection<Stream<Integer>>) null, 2).toList().isEmpty());
+        assertTrue(Stream.parallelConcatIterators((Collection<Iterator<Integer>>) null, 2).toList().isEmpty());
+
+        // normal behavior unchanged
+        assertEquals(N.asSet(1, 2, 3), Stream.parallelConcat(N.asList(Stream.of(1, 2), Stream.of(3)), 2).toSet());
+    }
+
+
+
+
+    @Test
+    public void testJoinByRangeEmptyLeftRoutesUnjoinedElements() {
+        // regression: the NONE sentinel was ambiguous between "iterator exhausted" and "left stream
+        // empty", so the documented mapperForUnJoinedElements step was silently skipped
+        final List<String> result = Stream.<Integer> empty()
+                .joinByRange(N.asList(10, 20).iterator(), (t, u) -> u < t, Collectors.toList(), (t, l) -> "joined:" + t + l,
+                        rem -> Stream.of(rem).map(u -> "unjoined:" + u))
+                .toList();
+
+        assertEquals(N.asList("unjoined:10", "unjoined:20"), result);
+    }
+
+    @Test
+    public void testParallelMergeIteratorsThreeSources() {
+        // pins the size == 3 fast path, where the buffered stream's close handler is now kept reachable
+        // so the background buffering thread stops when the result stream is closed
+        final List<Iterator<Integer>> iterators = N.asList(N.asList(1, 4, 7).iterator(), N.asList(2, 5, 8).iterator(), N.asList(3, 6, 9).iterator());
+
+        final List<Integer> merged = Stream.parallelMergeIterators(iterators, (x, y) -> x <= y ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND, 2).toList();
+
+        assertEquals(N.asList(1, 2, 3, 4, 5, 6, 7, 8, 9), merged);
+    }
+
+    @Test
+    public void testSpsFilterE_ExplicitThreadCount() {
+        final List<Integer> result = Stream.of(1, 2, 3, 4, 5).spsFilterE(2, i -> i % 2 == 1).sorted().toList();
+
+        assertEquals(Arrays.asList(1, 3, 5), result);
+    }
+
+    @Test
+    public void testDebounce_emptyEmitsNothing() {
+        assertTrue(Stream.<Integer> empty().debounce(com.landawn.abacus.util.Duration.ofSeconds(1)).toList().isEmpty());
+        assertTrue(Stream.<Integer> empty().parallel().debounce(com.landawn.abacus.util.Duration.ofSeconds(1)).toList().isEmpty());
+    }
+
+    @Test
+    public void testDebounce_singleElementSurvives() {
+        assertEquals(Arrays.asList(42), Stream.of(42).debounce(com.landawn.abacus.util.Duration.ofSeconds(1)).toList());
+    }
+
+    @Test
+    public void testDebounce_coldStreamEmitsOnlyLastElement() {
+        // A cold in-memory stream yields all elements with ~0 inter-arrival gap, so only the last survives.
+        assertEquals(Arrays.asList(5), Stream.of(1, 2, 3, 4, 5).debounce(com.landawn.abacus.util.Duration.ofSeconds(1)).toList());
+        assertEquals(Arrays.asList(5), Stream.of(1, 2, 3, 4, 5).parallel().debounce(com.landawn.abacus.util.Duration.ofSeconds(1)).toList());
+    }
+
+    @Test
+    public void testDebounce_slowSourceAllSurviveWhenGapAtLeastDuration() {
+        // Each element arrives >= 60ms after the previous (delay); with a 20ms quiet window all survive.
+        assertEquals(Arrays.asList(1, 2, 3),
+                Stream.of(1, 2, 3).delay(com.landawn.abacus.util.Duration.ofMillis(60)).debounce(com.landawn.abacus.util.Duration.ofMillis(20)).toList());
+    }
+
+    @Test
+    public void testDebounce_invalidDurationThrows() {
+        assertThrows(IllegalArgumentException.class, () -> Stream.of(1, 2, 3).debounce((com.landawn.abacus.util.Duration) null).toList());
+        assertThrows(IllegalArgumentException.class, () -> Stream.of(1, 2, 3).debounce(com.landawn.abacus.util.Duration.ofMillis(0)).toList());
+        assertThrows(IllegalArgumentException.class, () -> Stream.of(1, 2, 3).debounce(com.landawn.abacus.util.Duration.ofMillis(-100)).toList());
     }
 
 }

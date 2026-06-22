@@ -226,4 +226,20 @@ public class PairTypeTest extends TestBase {
         stringIntPairType.appendTo(sb, pair);
         org.junit.jupiter.api.Assertions.assertNotEquals(sb.toString(), json);
     }
+
+    // --- regression tests for 2026-06-10 deep-review fixes ---
+
+    @Test
+    public void testValueOfParameterizedSlotConvertsElements() {
+        // regression: the raw-assignability shortcut kept parser-default element types (Integer,
+        // LinkedHashMap, ...) for parameterized slots like List<Long>, breaking the round trip
+        final Type<com.landawn.abacus.util.Pair<java.util.List<Long>, String>> type = TypeFactory.getType("Pair<List<Long>, String>");
+
+        final com.landawn.abacus.util.Pair<java.util.List<Long>, String> p = type
+                .valueOf(type.stringOf(com.landawn.abacus.util.Pair.of(com.landawn.abacus.util.N.asList(1L, 2L), "x")));
+
+        org.junit.jupiter.api.Assertions.assertEquals(Long.class, p.left().get(0).getClass());
+        org.junit.jupiter.api.Assertions.assertEquals(com.landawn.abacus.util.N.asList(1L, 2L), p.left());
+        org.junit.jupiter.api.Assertions.assertEquals("x", p.right());
+    }
 }

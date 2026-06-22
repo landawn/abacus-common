@@ -95,10 +95,28 @@ public class ParserFactoryTest extends TestBase {
         assertTrue(available || !available);
     }
 
+    // =====================================================================
+    // isJaxbParserAvailable
+    // =====================================================================
+
     @Test
-    public void testIsKryoAvailable() {
-        boolean available = ParserFactory.isKryoParserAvailable();
-        assertTrue(available || !available);
+    public void testIsJaxbParserAvailable_returnsConsistentValue() {
+        // Repeated calls must return the same cached value.
+        boolean first = ParserFactory.isJaxbParserAvailable();
+        boolean second = ParserFactory.isJaxbParserAvailable();
+        assertEquals(first, second);
+    }
+
+    @Test
+    public void testIsJaxbParserAvailable_matchesCreateJaxbParser() {
+        // The guard must agree with the actual create* behavior: when the guard reports available,
+        // createJaxbParser() must succeed; otherwise it is allowed to fail (NoClassDefFoundError, etc.).
+        if (ParserFactory.isJaxbParserAvailable()) {
+            XmlParser parser = ParserFactory.createJaxbParser();
+            assertNotNull(parser);
+        } else {
+            assertThrows(Throwable.class, ParserFactory::createJaxbParser);
+        }
     }
 
     // =====================================================================

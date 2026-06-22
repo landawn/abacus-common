@@ -282,6 +282,28 @@ public class MedianTest extends TestBase {
     }
 
     @Test
+    public void testMedianOfNullHostileCollection() {
+        // Regression test: collections that reject contains(null) with NullPointerException
+        // (e.g. List.of(...), TreeSet) must still work for sizes >= 4, where the
+        // implementation pre-scans the collection for null elements.
+        Pair<Integer, Optional<Integer>> result1 = Median.of(List.of(10, 5, 20, 15));
+        assertEquals(10, result1.left());
+        Assertions.assertTrue(result1.right().isPresent());
+        assertEquals(15, result1.right().get());
+
+        Set<Integer> treeSet = new TreeSet<>(Arrays.asList(40, 10, 30, 20, 50));
+        Pair<Integer, Optional<Integer>> result2 = Median.of(treeSet);
+        assertEquals(30, result2.left());
+        Assertions.assertFalse(result2.right().isPresent());
+
+        // The range-based variant routes through the same null pre-scan via N.slice.
+        Pair<Integer, Optional<Integer>> result3 = Median.of(List.of(100, 50, 75, 25, 90), 0, 4);
+        assertEquals(50, result3.left());
+        Assertions.assertTrue(result3.right().isPresent());
+        assertEquals(75, result3.right().get());
+    }
+
+    @Test
     public void testMedianWithLargeArrays() {
         int[] largeArr = new int[1000];
         for (int i = 0; i < 1000; i++) {

@@ -24,6 +24,13 @@ import com.landawn.abacus.util.N;
  * This class extends {@link DeserializationConfig} and adds Avro-specific configuration options,
  * particularly the Avro schema required for deserialization.
  *
+ * <p><b>Design note:</b> The {@link #getSchema()}/{@link #setSchema(Schema)} pair is intentionally
+ * duplicated between this class and {@link AvroSerConfig}. A shared {@code AvroConfig} base is not
+ * possible because the two classes have different (and unrelated) supertypes —
+ * {@code AvroDeserConfig extends DeserializationConfig} while {@code AvroSerConfig extends SerializationConfig} —
+ * so the schema accessors (and their {@code equals}/{@code hashCode}/{@code toString} contributions) are
+ * declared independently on each.</p>
+ *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * Schema schema = new Schema.Parser().parse(schemaString);
@@ -72,7 +79,7 @@ public class AvroDeserConfig extends DeserializationConfig<AvroDeserConfig> {
 
     /**
      * Sets the Avro schema for deserialization.
-     * The schema is required for deserializing data that is not SpecificRecord instances.
+     * The schema is required for deserializing data that is not a {@code SpecificRecord} instance.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -105,13 +112,18 @@ public class AvroDeserConfig extends DeserializationConfig<AvroDeserConfig> {
         int h = 17;
         h = 31 * h + N.hashCode(getIgnoredPropNames());
         h = 31 * h + N.hashCode(isIgnoreUnmatchedProperty());
+        h = 31 * h + N.hashCode(elementType);
+        h = 31 * h + N.hashCode(mapKeyType);
+        h = 31 * h + N.hashCode(mapValueType);
+        h = 31 * h + N.hashCode(valueTypeMap);
+        h = 31 * h + N.hashCode(beanInfoForValueTypes);
         return 31 * h + N.hashCode(schema);
     }
 
     /**
      * Compares this configuration with another object for equality.
      * Two configurations are considered equal if they have the same ignored properties,
-     * unmatched property handling, and schema.
+     * unmatched property handling, element/map key/map value types, value-type mappings, and schema.
      *
      * @param obj the object to compare with
      * @return {@code true} if the objects are equal, {@code false} otherwise
@@ -125,6 +137,8 @@ public class AvroDeserConfig extends DeserializationConfig<AvroDeserConfig> {
 
         if (obj instanceof AvroDeserConfig other) { //NOSONAR
             return N.equals(getIgnoredPropNames(), other.getIgnoredPropNames()) && N.equals(isIgnoreUnmatchedProperty(), other.isIgnoreUnmatchedProperty())
+                    && N.equals(elementType, other.elementType) && N.equals(mapKeyType, other.mapKeyType) && N.equals(mapValueType, other.mapValueType)
+                    && N.equals(valueTypeMap, other.valueTypeMap) && N.equals(beanInfoForValueTypes, other.beanInfoForValueTypes)
                     && N.equals(schema, other.schema);
         }
 
@@ -135,13 +149,15 @@ public class AvroDeserConfig extends DeserializationConfig<AvroDeserConfig> {
      * Returns a string representation of this configuration.
      *
      * <p>The string includes all configuration settings in the format:
-     * {@code {ignoredPropNames=..., ignoreUnmatchedProperty=..., schema=...}}</p>
+     * {@code {ignoredPropNames=..., ignoreUnmatchedProperty=..., elementType=..., mapKeyType=..., mapValueType=..., valueTypeMap=..., beanInfoForValueTypes=..., schema=...}}</p>
      *
      * @return a string representation of this configuration
      */
     @Override
     public String toString() {
-        return "{ignoredPropNames=" + N.toString(getIgnoredPropNames()) + ", ignoreUnmatchedProperty=" + N.toString(isIgnoreUnmatchedProperty()) + ", schema="
+        return "{ignoredPropNames=" + N.toString(getIgnoredPropNames()) + ", ignoreUnmatchedProperty=" + N.toString(isIgnoreUnmatchedProperty())
+                + ", elementType=" + N.toString(elementType) + ", mapKeyType=" + N.toString(mapKeyType) + ", mapValueType=" + N.toString(mapValueType)
+                + ", valueTypeMap=" + N.toString(valueTypeMap) + ", beanInfoForValueTypes=" + N.toString(beanInfoForValueTypes) + ", schema="
                 + N.toString(schema) + "}";
     }
 

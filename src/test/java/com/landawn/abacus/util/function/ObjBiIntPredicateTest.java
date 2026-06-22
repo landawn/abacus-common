@@ -110,6 +110,19 @@ public class ObjBiIntPredicateTest extends TestBase {
     }
 
     @Test
+    public void testAndOrAcceptSuperTypePredicate() {
+        ObjBiIntPredicate<String> notEmpty = (s, i, j) -> s != null && !s.isEmpty();
+        ObjBiIntPredicate<CharSequence> indexesInRange = (s, i, j) -> s != null && i >= 0 && j <= s.length();
+
+        ObjBiIntPredicate<String> and = notEmpty.and(indexesInRange);
+        ObjBiIntPredicate<String> or = notEmpty.or(indexesInRange);
+
+        assertTrue(and.test("Hello", 0, 5));
+        assertFalse(and.test("Hello", 0, 10));
+        assertTrue(or.test("Hello", 0, 10));
+    }
+
+    @Test
     public void testAndShortCircuit() {
         final boolean[] secondCalled = { false };
         ObjBiIntPredicate<String> predicate1 = (t, i, j) -> false;
@@ -157,6 +170,6 @@ public class ObjBiIntPredicateTest extends TestBase {
     @Test
     public void testAndNullThrowsImmediately() {
         ObjBiIntPredicate<String> instance = (a, b, c) -> false;
-        org.junit.jupiter.api.Assertions.assertThrows(NullPointerException.class, () -> instance.and((ObjBiIntPredicate) null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> instance.and((ObjBiIntPredicate) null));
     }
 }

@@ -1866,7 +1866,7 @@ public class ClassUtilTest extends TestBase {
         map.put("first_name", "Doe");
         map.put("age_value", 30);
 
-        Beans.replaceKeysWithCamelCase(map);
+        Maps.replaceKeysWithCamelCase(map);
 
         assertTrue(map.containsKey("userName"));
         assertTrue(map.containsKey("firstName"));
@@ -1887,7 +1887,7 @@ public class ClassUtilTest extends TestBase {
         map.put("firstName", "Doe");
         map.put("ageValue", 30);
 
-        Beans.replaceKeysWithSnakeCase(map);
+        Maps.replaceKeysWithSnakeCase(map);
 
         assertTrue(map.containsKey("user_name"));
         assertTrue(map.containsKey("first_name"));
@@ -1908,7 +1908,7 @@ public class ClassUtilTest extends TestBase {
         map.put("firstName", "Doe");
         map.put("ageValue", 30);
 
-        Beans.replaceKeysWithScreamingSnakeCase(map);
+        Maps.replaceKeysWithScreamingSnakeCase(map);
 
         assertTrue(map.containsKey("USER_NAME"));
         assertTrue(map.containsKey("FIRST_NAME"));
@@ -1971,5 +1971,23 @@ public class ClassUtilTest extends TestBase {
         long elapsed = System.currentTimeMillis() - start;
 
         assertTrue(elapsed < 100, start + ": Performance test failed. Elapsed time: " + elapsed);
+    }
+
+    // --- regression tests for 2026-06-10 deep-review fixes ---
+
+    @org.junit.jupiter.api.Test
+    public void testForNameArrayForms() {
+        // regression: arrays of plain classes hit a false "unresolvable component" guard, and the
+        // array descriptor used getCanonicalName(), which breaks nested-class arrays
+        org.junit.jupiter.api.Assertions.assertEquals(java.util.Random[].class, ClassUtil.forName("java.util.Random[]"));
+        org.junit.jupiter.api.Assertions.assertEquals(java.util.AbstractMap.SimpleEntry[].class, ClassUtil.forName("java.util.AbstractMap$SimpleEntry[]"));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> ClassUtil.forName("com.nonexistent.FooBarBaz[]"));
+    }
+
+    @org.junit.jupiter.api.Test
+    public void testFormatParameterizedTypeNameKeepsJavaLangSubpackages() {
+        // regression: replace("java.lang.", "") also stripped the prefix of java.lang SUBPACKAGES
+        org.junit.jupiter.api.Assertions.assertEquals("java.lang.reflect.Method", ClassUtil.formatParameterizedTypeName("java.lang.reflect.Method"));
+        org.junit.jupiter.api.Assertions.assertEquals("String", ClassUtil.formatParameterizedTypeName("java.lang.String"));
     }
 }

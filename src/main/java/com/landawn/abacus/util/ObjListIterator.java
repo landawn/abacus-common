@@ -218,8 +218,9 @@ public abstract class ObjListIterator<T> extends ImmutableIterator<T> implements
      * Returns an {@code ObjListIterator} over a portion of the specified array.
      * The iterator traverses elements from {@code fromIndex} (inclusive) to
      * {@code toIndex} (exclusive) and supports bidirectional iteration. If the
-     * array is {@code null}/empty or the range is empty, an empty iterator is
-     * returned.
+     * array is empty or the range is empty, an empty iterator is returned. A
+     * {@code null} array is treated as length 0 for range validation, so only
+     * {@code fromIndex == toIndex == 0} is valid.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -233,8 +234,8 @@ public abstract class ObjListIterator<T> extends ImmutableIterator<T> implements
      * @param fromIndex the index of the first element to iterate (inclusive)
      * @param toIndex the index after the last element to iterate (exclusive)
      * @return an {@code ObjListIterator} over the specified range of array elements
-     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code toIndex > a.length},
-     *         or {@code fromIndex > toIndex}
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0},
+     *         {@code toIndex > (a == null ? 0 : a.length)}, or {@code fromIndex > toIndex}
      */
     public static <T> ObjListIterator<T> of(final T[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
@@ -640,6 +641,7 @@ public abstract class ObjListIterator<T> extends ImmutableIterator<T> implements
      * @param a the array into which the elements are stored, if it is big enough;
      *          otherwise a new array of the same runtime type is allocated
      * @return an array containing all remaining elements
+     * @throws NullPointerException if {@code a} is {@code null}
      */
     public <A> A[] toArray(final A[] a) {
         return toList().toArray(a);

@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -89,25 +90,27 @@ public class BooleanSupplierTest extends TestBase {
 
     @Test
     public void testRandomVariability() {
-        // Call random supplier many times and check if we get both true and false
-        boolean gotTrue = false;
-        boolean gotFalse = false;
+        assertDoesNotThrow(() -> {
+            // Call random supplier many times and check if we get both true and false
+            boolean gotTrue = false;
+            boolean gotFalse = false;
 
-        for (int i = 0; i < 100; i++) {
-            boolean result = BooleanSupplier.RANDOM.getAsBoolean();
-            if (result) {
-                gotTrue = true;
-            } else {
-                gotFalse = true;
+            for (int i = 0; i < 100; i++) {
+                boolean result = BooleanSupplier.RANDOM.getAsBoolean();
+                if (result) {
+                    gotTrue = true;
+                } else {
+                    gotFalse = true;
+                }
+
+                if (gotTrue && gotFalse) {
+                    break; // We've seen both values
+                }
             }
 
-            if (gotTrue && gotFalse) {
-                break; // We've seen both values
-            }
-        }
-
-        // With 100 iterations, it's extremely unlikely to not see both values
-        // but we won't assert on it since it's technically possible
+            // With 100 iterations, it's extremely unlikely to not see both values
+            // but we won't assert on it since it's technically possible
+        });
     }
 
     @Test

@@ -51,6 +51,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ConcurrentNavigableMap;
 import java.util.concurrent.ConcurrentSkipListMap;
+import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.LinkedBlockingQueue;
 
@@ -1545,7 +1546,8 @@ public final class Suppliers {
      *   <li>{@code LinkedList} - returns LinkedList supplier</li>
      *   <li>{@code Set}, {@code HashSet}, {@code AbstractSet} - returns HashSet supplier</li>
      *   <li>{@code LinkedHashSet} - returns LinkedHashSet supplier</li>
-     *   <li>{@code SortedSet}, {@code NavigableSet}, {@code TreeSet} (and subtypes) - returns TreeSet supplier</li>
+     *   <li>{@code ConcurrentSkipListSet} - returns ConcurrentSkipListSet supplier</li>
+     *   <li>{@code SortedSet}, {@code NavigableSet}, {@code TreeSet} (and other subtypes) - returns TreeSet supplier</li>
      *   <li>{@code Queue}, {@code Deque}, {@code AbstractQueue} - returns LinkedList supplier (as Deque)</li>
      *   <li>{@code BlockingQueue}, {@code LinkedBlockingQueue} - returns LinkedBlockingQueue supplier</li>
      *   <li>{@code BlockingDeque}, {@code LinkedBlockingDeque} - returns LinkedBlockingDeque supplier</li>
@@ -1584,6 +1586,10 @@ public final class Suppliers {
                 ret = ofSet();
             } else if (LinkedHashSet.class.equals(targetType)) {
                 ret = ofLinkedHashSet();
+            } else if (ConcurrentSkipListSet.class.equals(targetType)) {
+                // Must precede the SortedSet branch (like ConcurrentSkipListMap in ofMap):
+                // downgrading to TreeSet would silently lose thread-safety.
+                ret = Fn.s(ConcurrentSkipListSet::new);
             } else if (SortedSet.class.isAssignableFrom(targetType)) {
                 ret = ofSortedSet();
             } else if (Queue.class.equals(targetType) || AbstractQueue.class.equals(targetType) || Deque.class.equals(targetType)) {
@@ -1626,7 +1632,12 @@ public final class Suppliers {
                 }
             }
 
-            collectionSupplierPool.put(targetType, ret);
+            // putIfAbsent so a concurrent registerForCollection cannot be silently overwritten.
+            final Supplier existing = collectionSupplierPool.putIfAbsent(targetType, ret);
+
+            if (existing != null) {
+                ret = existing;
+            }
         }
 
         return ret;
@@ -1717,7 +1728,12 @@ public final class Suppliers {
                 }
             }
 
-            mapSupplierPool.put(targetType, ret);
+            // putIfAbsent so a concurrent registerForMap cannot be silently overwritten.
+            final Supplier existing = mapSupplierPool.putIfAbsent(targetType, ret);
+
+            if (existing != null) {
+                ret = existing;
+            }
         }
 
         return ret;
@@ -1756,11 +1772,9 @@ public final class Suppliers {
             throw new IllegalArgumentException("Can't register Supplier with built-in class: " + ClassUtil.getCanonicalClassName(targetClass));
         }
 
-        if (collectionSupplierPool.containsKey(targetClass)) {
-            return false;
-        }
-
-        return collectionSupplierPool.put(targetClass, Fn.from(supplier)) == null;
+        // putIfAbsent: a check-then-put pair could overwrite a concurrent registration while
+        // reporting failure to the overwriting caller.
+        return collectionSupplierPool.putIfAbsent(targetClass, Fn.from(supplier)) == null;
     }
 
     /**
@@ -1796,11 +1810,9 @@ public final class Suppliers {
             throw new IllegalArgumentException("Can't register Supplier with built-in class: " + ClassUtil.getCanonicalClassName(targetClass));
         }
 
-        if (mapSupplierPool.containsKey(targetClass)) {
-            return false;
-        }
-
-        return mapSupplierPool.put(targetClass, Fn.from(supplier)) == null;
+        // putIfAbsent: a check-then-put pair could overwrite a concurrent registration while
+        // reporting failure to the overwriting caller.
+        return mapSupplierPool.putIfAbsent(targetClass, Fn.from(supplier)) == null;
     }
 
     /**

@@ -75,6 +75,6 @@ public class IntTriPredicateTest extends TestBase {
     @Test
     public void testAndNullThrowsImmediately() {
         IntTriPredicate instance = (a, b, c) -> false;
-        org.junit.jupiter.api.Assertions.assertThrows(NullPointerException.class, () -> instance.and((IntTriPredicate) null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> instance.and((IntTriPredicate) null));
     }
 }

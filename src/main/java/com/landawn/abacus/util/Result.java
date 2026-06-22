@@ -1033,7 +1033,7 @@ public class Result<T, E extends Throwable> implements Immutable {
      *
      * Result<String, IOException> r3 = Result.of(null, new IOException("error"));
      * Result<String, IOException> r4 = Result.of(null, new IOException("error"));
-     * boolean isEqual2 = r3.equals(r4);  // result depends on IOException's equals implementation
+     * boolean isEqual2 = r3.equals(r4);  // returns false - Throwable does not override equals, so distinct exception instances are never equal
      * }</pre>
      *
      * @param obj the object to compare with this Result.

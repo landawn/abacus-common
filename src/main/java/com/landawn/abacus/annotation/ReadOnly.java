@@ -96,7 +96,7 @@ import java.lang.annotation.Target;
  * @see ReadOnlyId
  */
 @Documented
-@Target(value = { FIELD /* METHOD, */ })
+@Target(value = { FIELD })
 @Retention(RUNTIME)
 public @interface ReadOnly {
 

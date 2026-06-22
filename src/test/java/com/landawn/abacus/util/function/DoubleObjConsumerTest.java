@@ -174,6 +174,6 @@ public class DoubleObjConsumerTest extends TestBase {
     public void testAndThenNullThrowsImmediately() {
         DoubleObjConsumer<String> instance = (a, b) -> {
         };
-        org.junit.jupiter.api.Assertions.assertThrows(NullPointerException.class, () -> instance.andThen((DoubleObjConsumer) null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> instance.andThen((DoubleObjConsumer) null));
     }
 }

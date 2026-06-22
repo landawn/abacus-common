@@ -127,8 +127,8 @@ import java.util.concurrent.LinkedBlockingQueue;
  * Provider<List<Service>> serviceProvider;
  * // Can use Clazz.ofList(Service.class) for type hints
  *
- * // ORM and database frameworks
- * Query query = entityManager.createQuery("SELECT p FROM Person p", Clazz.ofList(Person.class));
+ * // JSON deserialization to a typed collection
+ * List<Person> people = mapper.readValue(json, Clazz.ofList(Person.class));
  *
  * // Configuration and properties handling
  * Properties props = loadProperties();
@@ -186,7 +186,7 @@ import java.util.concurrent.LinkedBlockingQueue;
  * <p><b>Best Practices:</b>
  * <ul>
  *   <li>Use this class for framework APIs that require Class parameters but need type hints</li>
- *   <li>Prefer predefined constants for common type combinations to reduce object allocation</li>
+ *   <li>Prefer predefined constants for common type combinations for brevity and consistency</li>
  *   <li>Use {@code Type.of()} or {@code TypeReference} when actual runtime generic information is needed</li>
  *   <li>Document the intended generic types clearly when using these Class objects</li>
  *   <li>Consider using parameterized method variants for better code documentation</li>
@@ -197,7 +197,7 @@ import java.util.concurrent.LinkedBlockingQueue;
  * <ul>
  *   <li>Expecting runtime generic type information from returned Class objects</li>
  *   <li>Using this class when {@code Type} or {@code TypeReference} would be more appropriate</li>
- *   <li>Creating new Class references repeatedly instead of using cached constants</li>
+ *   <li>Re-deriving common type combinations inline instead of using the predefined constants</li>
  *   <li>Assuming different parameterized versions return different Class objects</li>
  *   <li>Using for collections where raw types would be more appropriate</li>
  * </ul>
@@ -393,7 +393,7 @@ public final class Clazz {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * // Instead of: Class<ArrayList<String>> cls = (Class<ArrayList<String>>) ArrayList.class;
+     * // Instead of: Class<ArrayList<String>> cls = (Class<ArrayList<String>>) (Class<?>) ArrayList.class;
      * Class<ArrayList<String>> arrayListClass = Clazz.of(ArrayList.class);
      *
      * // Useful for method parameters
@@ -1472,8 +1472,8 @@ public final class Clazz {
      * The key and value class parameters are used only for type inference and are not retained at runtime.
      *
      * <p>ConcurrentHashMap is a thread-safe implementation that provides high concurrency for both
-     * read and write operations. It uses lock striping to allow multiple threads to update the map
-     * concurrently without blocking each other. Unlike Hashtable or synchronized HashMap, it does
+     * read and write operations. It allows multiple threads to update the map concurrently using
+     * fine-grained synchronization (CAS and per-bin locks). Unlike Hashtable or synchronized HashMap, it does
      * not lock the entire map, making it ideal for high-concurrency scenarios.</p>
      *
      * <p><b>Thread Safety:</b> This implementation is fully thread-safe. Retrieval operations do not
@@ -1572,7 +1572,7 @@ public final class Clazz {
      * @param <V> the value type of the bimap.
      * @param keyCls the class of map keys (used only for type inference, not retained at runtime).
      * @param valueCls the class of map values (used only for type inference, not retained at runtime).
-     * @return the Class object representing the {@code BiMap} interface.
+     * @return the Class object representing the {@code BiMap} class.
      * @see TypeReference#type()
      * @see com.landawn.abacus.type.Type#of(String)
      * @see com.landawn.abacus.type.Type#of(Class)
@@ -1647,7 +1647,7 @@ public final class Clazz {
      *
      * @param <T> the element type of the multiset.
      * @param eleCls the class of elements (used only for type inference, not retained at runtime).
-     * @return the Class object representing the {@code Multiset} interface.
+     * @return the Class object representing the {@code Multiset} class.
      * @see TypeReference#type()
      * @see com.landawn.abacus.type.Type#of(String)
      * @see com.landawn.abacus.type.Type#of(Class)

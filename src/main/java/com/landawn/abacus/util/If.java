@@ -397,7 +397,7 @@ public final class If {
      * <pre>{@code
      * boolean[] flags = {true, false};
      * If.isEmpty(flags).then(() -> System.out.println("Empty"));   // does nothing
-     * If.isEmpty(null).then(() -> System.out.println("Empty"));    // prints "Empty"
+     * If.isEmpty((boolean[]) null).then(() -> System.out.println("Empty"));    // prints "Empty"
      * }</pre>
      *
      * @param a the boolean array to check
@@ -414,7 +414,7 @@ public final class If {
      * <pre>{@code
      * char[] chars = {'a', 'b', 'c'};
      * If.isEmpty(chars).then(() -> System.out.println("Empty"));   // does nothing
-     * If.isEmpty(null).then(() -> System.out.println("Empty"));    // prints "Empty"
+     * If.isEmpty((char[]) null).then(() -> System.out.println("Empty"));    // prints "Empty"
      * }</pre>
      *
      * @param a the char array to check
@@ -431,7 +431,7 @@ public final class If {
      * <pre>{@code
      * byte[] data = {1, 2, 3};
      * If.isEmpty(data).then(() -> System.out.println("Empty"));   // does nothing
-     * If.isEmpty(null).then(() -> System.out.println("Empty"));   // prints "Empty"
+     * If.isEmpty((byte[]) null).then(() -> System.out.println("Empty"));   // prints "Empty"
      * }</pre>
      *
      * @param a the byte array to check
@@ -448,7 +448,7 @@ public final class If {
      * <pre>{@code
      * short[] values = {10, 20, 30};
      * If.isEmpty(values).then(() -> System.out.println("Empty"));   // does nothing
-     * If.isEmpty(null).then(() -> System.out.println("Empty"));     // prints "Empty"
+     * If.isEmpty((short[]) null).then(() -> System.out.println("Empty"));     // prints "Empty"
      * }</pre>
      *
      * @param a the short array to check
@@ -465,7 +465,7 @@ public final class If {
      * <pre>{@code
      * int[] numbers = {1, 2, 3};
      * If.isEmpty(numbers).then(() -> System.out.println("Empty"));   // does nothing
-     * If.isEmpty(null).then(() -> System.out.println("Empty"));      // prints "Empty"
+     * If.isEmpty((int[]) null).then(() -> System.out.println("Empty"));      // prints "Empty"
      * }</pre>
      *
      * @param a the int array to check
@@ -482,7 +482,7 @@ public final class If {
      * <pre>{@code
      * long[] ids = {100L, 200L, 300L};
      * If.isEmpty(ids).then(() -> System.out.println("Empty"));    // does nothing
-     * If.isEmpty(null).then(() -> System.out.println("Empty"));   // prints "Empty"
+     * If.isEmpty((long[]) null).then(() -> System.out.println("Empty"));   // prints "Empty"
      * }</pre>
      *
      * @param a the long array to check
@@ -499,7 +499,7 @@ public final class If {
      * <pre>{@code
      * float[] prices = {1.5f, 2.5f, 3.5f};
      * If.isEmpty(prices).then(() -> System.out.println("Empty"));   // does nothing
-     * If.isEmpty(null).then(() -> System.out.println("Empty"));     // prints "Empty"
+     * If.isEmpty((float[]) null).then(() -> System.out.println("Empty"));     // prints "Empty"
      * }</pre>
      *
      * @param a the float array to check
@@ -516,7 +516,7 @@ public final class If {
      * <pre>{@code
      * double[] scores = {98.5, 87.3, 92.1};
      * If.isEmpty(scores).then(() -> System.out.println("Empty"));   // does nothing
-     * If.isEmpty(null).then(() -> System.out.println("Empty"));     // prints "Empty"
+     * If.isEmpty((double[]) null).then(() -> System.out.println("Empty"));     // prints "Empty"
      * }</pre>
      *
      * @param a the double array to check
@@ -584,7 +584,7 @@ public final class If {
      * <pre>{@code
      * IntList numbers = IntList.of(1, 2, 3);
      * If.isEmpty(numbers).then(() -> System.out.println("Empty"));        // does nothing
-     * If.isEmpty(null).then(() -> System.out.println("Empty"));           // prints "Empty"
+     * If.isEmpty((PrimitiveList) null).then(() -> System.out.println("Empty"));           // prints "Empty"
      * If.isEmpty(IntList.of()).then(() -> System.out.println("Empty"));   // prints "Empty"
      * }</pre>
      *
@@ -605,7 +605,7 @@ public final class If {
      * <pre>{@code
      * Multiset<String> words = Multiset.of("apple", "banana", "apple");
      * If.isEmpty(words).then(() -> System.out.println("Empty"));           // does nothing
-     * If.isEmpty(null).then(() -> System.out.println("Empty"));            // prints "Empty"
+     * If.isEmpty((Multiset<?>) null).then(() -> System.out.println("Empty"));            // prints "Empty"
      * If.isEmpty(Multiset.of()).then(() -> System.out.println("Empty"));   // prints "Empty"
      * }</pre>
      *
@@ -625,7 +625,7 @@ public final class If {
      * <pre>{@code
      * ListMultimap<String, Integer> map = ListMultimap.of("a", 1, "a", 2, "b", 3);
      * If.isEmpty(map).then(() -> System.out.println("Empty"));                  // does nothing
-     * If.isEmpty(null).then(() -> System.out.println("Empty"));                 // prints "Empty"
+     * If.isEmpty((Multimap<?, ?, ?>) null).then(() -> System.out.println("Empty"));                 // prints "Empty"
      * If.isEmpty(N.newListMultimap()).then(() -> System.out.println("Empty"));  // prints "Empty"
      * }</pre>
      *
@@ -697,7 +697,7 @@ public final class If {
      * <pre>{@code
      * boolean[] flags = {true, false};
      * If.notEmpty(flags).then(() -> System.out.println("Has data"));   // prints "Has data"
-     * If.notEmpty(null).then(() -> System.out.println("Has data"));    // does nothing
+     * If.notEmpty((boolean[]) null).then(() -> System.out.println("Has data"));    // does nothing
      * }</pre>
      *
      * @param a the boolean array to check
@@ -714,7 +714,7 @@ public final class If {
      * <pre>{@code
      * char[] chars = {'a', 'b', 'c'};
      * If.notEmpty(chars).then(() -> System.out.println("Has data"));   // prints "Has data"
-     * If.notEmpty(null).then(() -> System.out.println("Has data"));    // does nothing
+     * If.notEmpty((char[]) null).then(() -> System.out.println("Has data"));    // does nothing
      * }</pre>
      *
      * @param a the char array to check
@@ -731,7 +731,7 @@ public final class If {
      * <pre>{@code
      * byte[] data = {1, 2, 3};
      * If.notEmpty(data).then(() -> System.out.println("Has data"));   // prints "Has data"
-     * If.notEmpty(null).then(() -> System.out.println("Has data"));   // does nothing
+     * If.notEmpty((byte[]) null).then(() -> System.out.println("Has data"));   // does nothing
      * }</pre>
      *
      * @param a the byte array to check
@@ -748,7 +748,7 @@ public final class If {
      * <pre>{@code
      * short[] values = {10, 20, 30};
      * If.notEmpty(values).then(() -> System.out.println("Has data"));   // prints "Has data"
-     * If.notEmpty(null).then(() -> System.out.println("Has data"));     // does nothing
+     * If.notEmpty((short[]) null).then(() -> System.out.println("Has data"));     // does nothing
      * }</pre>
      *
      * @param a the short array to check
@@ -765,7 +765,7 @@ public final class If {
      * <pre>{@code
      * int[] numbers = {1, 2, 3};
      * If.notEmpty(numbers).then(() -> System.out.println("Has data"));   // prints "Has data"
-     * If.notEmpty(null).then(() -> System.out.println("Has data"));      // does nothing
+     * If.notEmpty((int[]) null).then(() -> System.out.println("Has data"));      // does nothing
      * }</pre>
      *
      * @param a the int array to check
@@ -782,7 +782,7 @@ public final class If {
      * <pre>{@code
      * long[] ids = {100L, 200L, 300L};
      * If.notEmpty(ids).then(() -> System.out.println("Has data"));    // prints "Has data"
-     * If.notEmpty(null).then(() -> System.out.println("Has data"));   // does nothing
+     * If.notEmpty((long[]) null).then(() -> System.out.println("Has data"));   // does nothing
      * }</pre>
      *
      * @param a the long array to check
@@ -799,7 +799,7 @@ public final class If {
      * <pre>{@code
      * float[] prices = {1.5f, 2.5f, 3.5f};
      * If.notEmpty(prices).then(() -> System.out.println("Has data"));   // prints "Has data"
-     * If.notEmpty(null).then(() -> System.out.println("Has data"));     // does nothing
+     * If.notEmpty((float[]) null).then(() -> System.out.println("Has data"));     // does nothing
      * }</pre>
      *
      * @param a the float array to check
@@ -816,7 +816,7 @@ public final class If {
      * <pre>{@code
      * double[] scores = {98.5, 87.3, 92.1};
      * If.notEmpty(scores).then(() -> System.out.println("Has data"));   // prints "Has data"
-     * If.notEmpty(null).then(() -> System.out.println("Has data"));     // does nothing
+     * If.notEmpty((double[]) null).then(() -> System.out.println("Has data"));     // does nothing
      * }</pre>
      *
      * @param a the double array to check
@@ -884,7 +884,7 @@ public final class If {
      * <pre>{@code
      * IntList numbers = IntList.of(1, 2, 3);
      * If.notEmpty(numbers).then(() -> System.out.println("Has data"));        // prints "Has data"
-     * If.notEmpty(null).then(() -> System.out.println("Has data"));           // does nothing
+     * If.notEmpty((PrimitiveList) null).then(() -> System.out.println("Has data"));           // does nothing
      * If.notEmpty(IntList.of()).then(() -> System.out.println("Has data"));   // does nothing
      * }</pre>
      *
@@ -905,7 +905,7 @@ public final class If {
      * <pre>{@code
      * Multiset<String> words = Multiset.of("apple", "banana", "apple");
      * If.notEmpty(words).then(() -> System.out.println("Has data"));           // prints "Has data"
-     * If.notEmpty(null).then(() -> System.out.println("Has data"));            // does nothing
+     * If.notEmpty((Multiset<?>) null).then(() -> System.out.println("Has data"));            // does nothing
      * If.notEmpty(Multiset.of()).then(() -> System.out.println("Has data"));   // does nothing
      * }</pre>
      *
@@ -925,7 +925,7 @@ public final class If {
      * <pre>{@code
      * ListMultimap<String, Integer> map = ListMultimap.of("a", 1, "a", 2, "b", 3);
      * If.notEmpty(map).then(() -> System.out.println("Has data"));                  // prints "Has data"
-     * If.notEmpty(null).then(() -> System.out.println("Has data"));                 // does nothing
+     * If.notEmpty((Multimap<?, ?, ?>) null).then(() -> System.out.println("Has data"));                 // does nothing
      * If.notEmpty(N.newListMultimap()).then(() -> System.out.println("Has data"));  // does nothing
      * }</pre>
      *
@@ -1262,8 +1262,8 @@ public final class If {
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * // Example 1: Fallback with parameter
-         * If.isNull(cachedValue)
-         *   .then(() -> value = loadFromCache())
+         * If.notNull(cachedValue)
+         *   .then(() -> value = cachedValue)
          *   .orElse(key, k -> value = loadFromDatabase(k));
          *
          * // Example 2: Context-based fallback

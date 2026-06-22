@@ -42,8 +42,7 @@ public final class PrimitiveIntListType extends AbstractPrimitiveListType<IntLis
 
     /**
      * Constructs a new PrimitiveIntListType instance.
-     * This constructor is protected to allow subclassing while maintaining controlled instantiation
-     * through the TypeFactory.
+     * This constructor is protected to keep instantiation controlled by the TypeFactory.
      */
     protected PrimitiveIntListType() {
         super(INT_LIST);
@@ -226,7 +225,7 @@ public final class PrimitiveIntListType extends AbstractPrimitiveListType<IntLis
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<IntList> type = TypeFactory.getType(IntList.class);
-     * CharacterWriter writer = new CharacterWriter();
+     * BufferedJsonWriter writer = new BufferedJsonWriter();
      * IntList list = IntList.of(5, 10, 15);
      * type.serializeTo(writer, list, null);
      * // Writes: [5, 10, 15]

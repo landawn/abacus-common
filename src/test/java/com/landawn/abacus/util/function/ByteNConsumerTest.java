@@ -156,6 +156,6 @@ public class ByteNConsumerTest extends TestBase {
     public void testAndThenNullThrowsImmediately() {
         ByteNConsumer instance = a -> {
         };
-        org.junit.jupiter.api.Assertions.assertThrows(NullPointerException.class, () -> instance.andThen((ByteNConsumer) null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> instance.andThen((ByteNConsumer) null));
     }
 }

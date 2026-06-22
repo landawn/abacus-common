@@ -76,9 +76,9 @@ public class Utf8 {
      * int length3 = Utf8.encodedLength(emoji);   // accounts for surrogate pairs
      * }</pre>
      *
-     * @implNote Unlike the lone-surrogate-tolerant {@code char}-search methods in {@link Strings}, this method
+     * <p><b>Implementation note:</b> Unlike the lone-surrogate-tolerant {@code char}-search methods in {@link Strings}, this method
      *           must reject unpaired surrogates because a lone surrogate has no valid UTF-8 encoding (it is not a
-     *           Unicode scalar value); do not "relax" this to match {@code Strings} — there is no byte length to return.
+     *           Unicode scalar value); do not "relax" this to match {@code Strings} — there is no byte length to return.</p>
      *
      * @param sequence the character sequence to measure
      * @return the number of bytes needed to encode the sequence in UTF-8

@@ -78,7 +78,7 @@ import com.landawn.abacus.util.stream.CharStream;
  * <pre>{@code
  * // Creating and initializing character lists
  * CharList buffer = CharList.of('H', 'e', 'l', 'l', 'o');
- * CharList alphabet = CharList.rangeClosed('A', 'Z');   // returns ['A', 'B', 'C', ..., 'Z']
+ * CharList alphabet = CharList.rangeClosed('a', 'z');   // returns ['a', 'b', 'c', ..., 'z']
  * CharList digits = CharList.rangeClosed('0', '9');     // returns ['0', '1', '2', ..., '9']
  * CharList textBuffer = new CharList(1000);
  *
@@ -190,7 +190,7 @@ import com.landawn.abacus.util.stream.CharStream;
  * <ul>
  *   <li><b>Initial Capacity:</b> Default capacity of 10 elements</li>
  *   <li><b>Growth Strategy:</b> 1.75x expansion when capacity exceeded</li>
- *   <li><b>Manual Control:</b> {@code ensureCapacity()} for performance optimization</li>
+ *   <li><b>Manual Control:</b> specify the initial capacity via the {@code CharList(int)} constructor</li>
  *   <li><b>Trimming:</b> {@code trimToSize()} to reduce memory footprint</li>
  * </ul>
  *
@@ -246,7 +246,7 @@ import com.landawn.abacus.util.stream.CharStream;
  *
  * <p><b>Performance Tips:</b>
  * <ul>
- *   <li>Pre-size lists with known capacity using constructor or {@code ensureCapacity()}</li>
+ *   <li>Pre-size lists with known capacity using the {@code CharList(int)} constructor</li>
  *   <li>Use {@code addLast()} instead of {@code addFirst()} for better performance</li>
  *   <li>Sort data before using {@code binarySearch()} for O(log n) lookups</li>
  *   <li>Use {@code stream()} API for complex character transformations</li>
@@ -301,7 +301,7 @@ import com.landawn.abacus.util.stream.CharStream;
  *
  * // Pattern matching
  * CharList vowels = CharList.of("aeiou".toCharArray());
- * CharList consonants = CharList.range('a', 'z').difference(vowels);
+ * CharList consonants = CharList.rangeClosed('a', 'z').difference(vowels);
  * boolean hasAllVowels = vowels.stream().allMatch(v -> text.contains(v));
  * }</pre>
  *
@@ -889,7 +889,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
 
         final int numNew = c.size();
 
-        ensureCapacity(size + numNew); // Increments modCount
+        ensureCapacity(size + numNew);
 
         final int numMoved = size - index;
 
@@ -936,7 +936,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
 
         final int numNew = a.length;
 
-        ensureCapacity(size + numNew); // Increments modCount
+        ensureCapacity(size + numNew);
 
         final int numMoved = size - index;
 
@@ -1282,7 +1282,6 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
     /**
      * Removes all elements at the specified indices from this list.
      * The indices array will be sorted internally, and duplicates will be removed.
-     * Elements are removed in descending order of indices to maintain correctness.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1291,7 +1290,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * list.removeAt();          // list unchanged (no indices)
      * }</pre>
      *
-     * @param indices the indices of elements to be removed
+     * @param indices the indices of elements to be removed. If {@code null} or empty, this list remains unchanged.
      * @throws IndexOutOfBoundsException if any index is out of range ({@code index < 0 || index >= size()})
      */
     @Override
@@ -1560,6 +1559,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * @param predicate the predicate to test elements; must not be {@code null}
      * @param newValue the value to replace matching elements with
      * @return {@code true} if any elements were replaced
+     * @throws NullPointerException if {@code predicate} is {@code null}
      */
     public boolean replaceIf(final CharPredicate predicate, final char newValue) {
         N.requireNonNull(predicate, cs.predicate);
@@ -1801,12 +1801,12 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * <pre>{@code
      * CharList list1 = CharList.of('a', 'a', 'b', 'c');
      * CharList list2 = CharList.of('a', 'b', 'b', 'd');
-     * CharList result = list1.intersection(list2);   // returns result will be ['a', 'b']
+     * CharList result = list1.intersection(list2);   // result will be ['a', 'b']
      * // One occurrence of 'a' (minimum count in both lists) and one occurrence of 'b'
      *
      * CharList list3 = CharList.of('x', 'x', 'y');
      * CharList list4 = CharList.of('x', 'z');
-     * CharList result2 = list3.intersection(list4);   // returns result will be ['x']
+     * CharList result2 = list3.intersection(list4);   // result will be ['x']
      * // One occurrence of 'x' (minimum count in both lists)
      * }</pre>
      *
@@ -1846,12 +1846,12 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * <pre>{@code
      * CharList list1 = CharList.of('a', 'a', 'b', 'c');
      * char[] array = new char[] {'a', 'b', 'b', 'd'};
-     * CharList result = list1.intersection(array);   // returns result will be ['a', 'b']
+     * CharList result = list1.intersection(array);   // result will be ['a', 'b']
      * // One occurrence of 'a' (minimum count in both sources) and one occurrence of 'b'
      *
      * CharList list2 = CharList.of('x', 'x', 'y');
      * char[] array2 = new char[] {'x', 'z'};
-     * CharList result2 = list2.intersection(array2);   // returns result will be ['x']
+     * CharList result2 = list2.intersection(array2);   // result will be ['x']
      * // One occurrence of 'x' (minimum count in both sources)
      * }</pre>
      *
@@ -1881,12 +1881,12 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * <pre>{@code
      * CharList list1 = CharList.of('a', 'a', 'b', 'c');
      * CharList list2 = CharList.of('a', 'd');
-     * CharList result = list1.difference(list2);   // returns result will be ['a', 'b', 'c']
+     * CharList result = list1.difference(list2);   // result will be ['a', 'b', 'c']
      * // One 'a' remains because list1 has two occurrences and list2 has one
      *
      * CharList list3 = CharList.of('e', 'f');
      * CharList list4 = CharList.of('e', 'e', 'f');
-     * CharList result2 = list3.difference(list4);   // returns result will be [] (empty)
+     * CharList result2 = list3.difference(list4);   // result will be [] (empty)
      * // No elements remain because list4 has at least as many occurrences of each value as list3
      * }</pre>
      *
@@ -1925,12 +1925,12 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * <pre>{@code
      * CharList list1 = CharList.of('a', 'a', 'b', 'c');
      * char[] array = new char[] {'a', 'd'};
-     * CharList result = list1.difference(array);   // returns result will be ['a', 'b', 'c']
+     * CharList result = list1.difference(array);   // result will be ['a', 'b', 'c']
      * // One 'a' remains because list1 has two occurrences and array has one
      *
      * CharList list2 = CharList.of('e', 'f');
      * char[] array2 = new char[] {'e', 'e', 'f'};
-     * CharList result2 = list2.difference(array2);   // returns result will be [] (empty)
+     * CharList result2 = list2.difference(array2);   // result will be [] (empty)
      * // No elements remain because array2 has at least as many occurrences of each value as list2
      * }</pre>
      *
@@ -1961,7 +1961,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * <pre>{@code
      * CharList list1 = CharList.of('a', 'b', 'c');
      * CharList list2 = CharList.of('b', 'c', 'd');
-     * CharList result = list1.symmetricDifference(list2);   // returns result will be ['a', 'd']
+     * CharList result = list1.symmetricDifference(list2);   // result will be ['a', 'd']
      * }</pre>
      *
      * @param b the CharList to find the symmetric difference with
@@ -2648,10 +2648,13 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * list.shuffle(new Random(42));   // deterministic order for a fixed seed; size() is still 4
      * }</pre>
      *
-     * @param rnd the source of randomness to use for shuffling
+     * @param rnd the source of randomness to use for shuffling; must not be {@code null}
+     * @throws NullPointerException if {@code rnd} is {@code null}
      */
     @Override
     public void shuffle(final Random rnd) {
+        N.checkArgNotNull(rnd, cs.rnd);
+
         if (size() > 1) {
             N.shuffle(elementData, 0, size, rnd);
         }
@@ -2746,7 +2749,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * </ul>
      *
      * @param fromIndex the starting index (inclusive)
-     * @param toIndex the ending index (exclusive for positive step, inclusive for negative step)
+     * @param toIndex the ending index (exclusive) of the range to copy; use {@code -1} for backward iteration to index 0
      * @param step the step size between selected elements
      * @return a new CharList containing the selected elements
      * @throws IndexOutOfBoundsException if the indices are out of range
@@ -2757,7 +2760,9 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
     public CharList copy(final int fromIndex, final int toIndex, final int step) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), Math.max(fromIndex, toIndex));
 
-        return new CharList(N.copyOfRange(elementData, fromIndex, toIndex, step));
+        // Clamp a descending start against the logical size (like forEach): N.copyOfRange clamps
+        // against the backing array's length, which may exceed size and expose phantom elements.
+        return new CharList(N.copyOfRange(elementData, fromIndex > toIndex ? N.min(size - 1, fromIndex) : fromIndex, toIndex, step));
     }
 
     /**

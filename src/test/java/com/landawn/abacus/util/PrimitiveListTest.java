@@ -9,6 +9,7 @@ import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -345,21 +346,23 @@ public class PrimitiveListTest extends AbstractTest {
 
     @Test
     public void test_removeRange() {
-        {
-            final ByteList byteList = ByteList.range((byte) 0, (byte) 10);
+        assertDoesNotThrow(() -> {
+            {
+                final ByteList byteList = ByteList.range((byte) 0, (byte) 10);
 
-            byteList.removeRange(1, 4);
+                byteList.removeRange(1, 4);
 
-            N.println(byteList.internalArray());
+                N.println(byteList.internalArray());
 
-            byteList.removeRange(1, 4);
+                byteList.removeRange(1, 4);
 
-            N.println(byteList.internalArray());
+                N.println(byteList.internalArray());
 
-            byteList.removeRange(1, 4);
+                byteList.removeRange(1, 4);
 
-            N.println(byteList.internalArray());
-        }
+                N.println(byteList.internalArray());
+            }
+        });
     }
 
     @Test
@@ -402,20 +405,22 @@ public class PrimitiveListTest extends AbstractTest {
 
     @Test
     public void test_moveRange() {
-        {
-            final ByteList byteList = ByteList.range((byte) 0, (byte) 10);
+        assertDoesNotThrow(() -> {
+            {
+                final ByteList byteList = ByteList.range((byte) 0, (byte) 10);
 
-            byteList.moveRange(1, 4, 0);
+                byteList.moveRange(1, 4, 0);
 
-            N.println(byteList.internalArray());
-        }
-        {
-            final ByteList byteList = ByteList.range((byte) 0, (byte) 10);
+                N.println(byteList.internalArray());
+            }
+            {
+                final ByteList byteList = ByteList.range((byte) 0, (byte) 10);
 
-            byteList.moveRange(1, 4, 7);
+                byteList.moveRange(1, 4, 7);
 
-            N.println(byteList.internalArray());
-        }
+                N.println(byteList.internalArray());
+            }
+        });
     }
 
     @Test
@@ -472,34 +477,36 @@ public class PrimitiveListTest extends AbstractTest {
 
     @Test
     public void test_replaceRange() {
-        {
-            final ByteList byteList = ByteList.range((byte) 0, (byte) 10);
+        assertDoesNotThrow(() -> {
+            {
+                final ByteList byteList = ByteList.range((byte) 0, (byte) 10);
 
-            byteList.replaceRange(1, 3, new byte[] {});
+                byteList.replaceRange(1, 3, new byte[] {});
 
-            N.println(byteList.internalArray());
-        }
-        {
-            final ByteList byteList = ByteList.range((byte) 0, (byte) 10);
+                N.println(byteList.internalArray());
+            }
+            {
+                final ByteList byteList = ByteList.range((byte) 0, (byte) 10);
 
-            byteList.replaceRange(1, 3, new byte[] { 9 });
+                byteList.replaceRange(1, 3, new byte[] { 9 });
 
-            N.println(byteList.internalArray());
-        }
-        {
-            final ByteList byteList = ByteList.range((byte) 0, (byte) 10);
+                N.println(byteList.internalArray());
+            }
+            {
+                final ByteList byteList = ByteList.range((byte) 0, (byte) 10);
 
-            byteList.replaceRange(1, 3, new byte[] { 9, 9 });
+                byteList.replaceRange(1, 3, new byte[] { 9, 9 });
 
-            N.println(byteList.internalArray());
-        }
-        {
-            final ByteList byteList = ByteList.range((byte) 0, (byte) 10);
+                N.println(byteList.internalArray());
+            }
+            {
+                final ByteList byteList = ByteList.range((byte) 0, (byte) 10);
 
-            byteList.replaceRange(1, 3, new byte[] { 9, 9, 9 });
+                byteList.replaceRange(1, 3, new byte[] { 9, 9, 9 });
 
-            N.println(byteList.internalArray());
-        }
+                N.println(byteList.internalArray());
+            }
+        });
     }
 
     @Test

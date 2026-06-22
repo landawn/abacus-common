@@ -84,14 +84,6 @@ public class UncheckedSQLException extends UncheckedException {
     private static final long serialVersionUID = 9083988895292299710L;
 
     /**
-     * The wrapped {@link SQLException} that caused this unchecked exception.
-     * Retains the original SQL-specific information including SQL state and vendor error code.
-     *
-     * @serial
-     */
-    private final SQLException cause;
-
-    /**
      * Constructs a new {@code UncheckedSQLException} by wrapping the specified {@link SQLException}.
      *
      * <p>This constructor preserves all information from the original {@code SQLException} including
@@ -111,7 +103,6 @@ public class UncheckedSQLException extends UncheckedException {
      */
     public UncheckedSQLException(final SQLException cause) {
         super(cause);
-        this.cause = cause;
     }
 
     /**
@@ -138,7 +129,6 @@ public class UncheckedSQLException extends UncheckedException {
      */
     public UncheckedSQLException(final String message, final SQLException cause) {
         super(message, cause);
-        this.cause = cause;
     }
 
     /**
@@ -166,11 +156,12 @@ public class UncheckedSQLException extends UncheckedException {
      * }</pre>
      *
      * @return the SQL state string from the wrapped {@code SQLException}, or {@code null} if not available
+     * @see #getErrorCode()
      * @see SQLException#getSQLState()
      */
     @MayReturnNull
     public String getSQLState() {
-        return cause.getSQLState();
+        return ((SQLException) super.getCause()).getSQLState();
     }
 
     /**
@@ -209,7 +200,7 @@ public class UncheckedSQLException extends UncheckedException {
      * @see SQLException#getErrorCode()
      */
     public int getErrorCode() {
-        return cause.getErrorCode();
+        return ((SQLException) super.getCause()).getErrorCode();
     }
 
     /**
@@ -217,8 +208,11 @@ public class UncheckedSQLException extends UncheckedException {
      *
      * @return the wrapped {@link SQLException}, never {@code null}
      */
+    // NOTE: the 'synchronized' modifier is INTENTIONAL and REQUIRED — do NOT remove it. It mirrors
+    // Throwable.getCause(), which synchronizes access to the non-final 'cause' field (also assignable
+    // via initCause()), preserving that visibility/consistency contract for the covariant override.
     @Override
     public synchronized SQLException getCause() {
-        return cause;
+        return (SQLException) super.getCause();
     }
 }

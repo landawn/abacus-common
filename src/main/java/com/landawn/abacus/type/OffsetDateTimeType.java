@@ -179,7 +179,7 @@ public class OffsetDateTimeType extends AbstractTemporalType<OffsetDateTime> {
             return null; // NOSONAR
         }
 
-        if (isPossibleLong(cbuf, offset, len)) {
+        if (isPossibleMillis(cbuf, offset, len)) {
             try {
                 return OffsetDateTime.ofInstant(Instant.ofEpochMilli(parseLong(cbuf, offset, len)), DEFAULT_ZONE_ID);
             } catch (final NumberFormatException e) {
@@ -341,7 +341,7 @@ public class OffsetDateTimeType extends AbstractTemporalType<OffsetDateTime> {
                         break;
 
                     default:
-                        throw new RuntimeException("Unsupported operation");
+                        throw new RuntimeException("Unsupported DateTimeFormat: " + config.getDateTimeFormat());
                 }
             }
 

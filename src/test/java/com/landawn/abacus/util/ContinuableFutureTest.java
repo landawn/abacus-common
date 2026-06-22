@@ -1382,6 +1382,13 @@ public class ContinuableFutureTest extends AbstractTest {
     }
 
     @Test
+    public void testCompleted_getWithTimeoutRejectsNullUnit() {
+        ContinuableFuture<String> future = ContinuableFuture.completed("immediate");
+
+        assertThrows(NullPointerException.class, () -> future.get(1, null));
+    }
+
+    @Test
     public void testThenRunWithRunnable_success() throws Exception {
         AtomicBoolean executed = new AtomicBoolean(false);
         ContinuableFuture<String> future = ContinuableFuture.completed("test");
@@ -2386,21 +2393,23 @@ public class ContinuableFutureTest extends AbstractTest {
 
     @Test
     public void test_ObservableFuture_03() {
-        AsyncExecutor asyncExecutor = new AsyncExecutor(8, 16, 300, TimeUnit.SECONDS);
+        assertDoesNotThrow(() -> {
+            AsyncExecutor asyncExecutor = new AsyncExecutor(8, 16, 300, TimeUnit.SECONDS);
 
-        for (int i = 0; i < 100; i++) {
-            asyncExecutor.execute((Throwables.Runnable<RuntimeException>) () -> {
-                N.println(System.currentTimeMillis());
-                N.sleep(100);
-                N.println(System.currentTimeMillis());
-                N.println(Thread.currentThread());
-                throw new RuntimeException();
-            }).thenRunAsync((BiConsumer<Void, Exception>) (value, e) -> N.println("e: " + e + ", result: " + value));
-        }
+            for (int i = 0; i < 100; i++) {
+                asyncExecutor.execute((Throwables.Runnable<RuntimeException>) () -> {
+                    N.println(System.currentTimeMillis());
+                    N.sleep(100);
+                    N.println(System.currentTimeMillis());
+                    N.println(Thread.currentThread());
+                    throw new RuntimeException();
+                }).thenRunAsync((BiConsumer<Void, Exception>) (value, e) -> N.println("e: " + e + ", result: " + value));
+            }
 
-        N.println(System.currentTimeMillis());
+            N.println(System.currentTimeMillis());
 
-        N.sleep(1000);
+            N.sleep(1000);
+        });
     }
 
     @Test
@@ -2707,6 +2716,34 @@ public class ContinuableFutureTest extends AbstractTest {
         // (isDelayed flag set before the capped sleep), this get() returned almost
         // immediately and elapsedMillis would be ~0.
         assertTrue(elapsedMillis >= delayMillis / 2, "Remaining delay was not honored after a short timed get(); elapsedMillis=" + elapsedMillis);
+    }
+
+    // --- regression tests for 2026-06-10 deep-review fixes ---
+
+    @Test
+    public void testThenDelayPropagatesCancelAll() throws Exception {
+        // regression: with() (thenDelay/thenUse) returned a future with no-op cancelAll and
+        // isAllCancelled overrides and null upFutures, silently severing chain cancellation
+        final ContinuableFuture<String> f1 = ContinuableFuture.call(() -> {
+            Thread.sleep(5000);
+            return "step1";
+        });
+        final ContinuableFuture<String> f2 = f1.thenCallAsync(s -> s + "-2");
+        final ContinuableFuture<String> f3 = f2.thenDelay(100, TimeUnit.MILLISECONDS);
+
+        f3.cancelAll(true);
+
+        assertTrue(f1.isCancelled(), "upstream future must be cancelled through thenDelay");
+        assertTrue(f3.isAllCancelled());
+    }
+
+    @Test
+    public void testSubMillisecondTimedGetDoesNotBypassDelay() {
+        // regression: a sub-millisecond timeout truncated to 0 ms skipped the delay gate entirely
+        // and returned the (already completed) value long before the configured delay elapsed
+        final ContinuableFuture<String> delayed = ContinuableFuture.completed("x").thenDelay(10, TimeUnit.SECONDS);
+
+        assertThrows(java.util.concurrent.TimeoutException.class, () -> delayed.get(900, TimeUnit.MICROSECONDS));
     }
 
 }

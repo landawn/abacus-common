@@ -120,6 +120,41 @@ public final class BooleanIntType extends AbstractType<Boolean> {
     }
 
     /**
+     * Converts an object to a {@link Boolean} value.
+     * Booleans are returned as-is and numbers map via {@code > 0} (matching {@code get(ResultSet)});
+     * other objects go through their string form using the {@code 1}/{@code 0} convention.
+     *
+     * @param obj the object to convert; may be {@code null}
+     * @return the Boolean value, or {@code false} if {@code obj} is {@code null}
+     * @see #valueOf(String)
+     */
+    @Override
+    public Boolean valueOf(final Object obj) {
+        // Without this override the inherited valueOf(Object) stringified a Boolean to
+        // "true"/"false", which the 1/0 parser mapped to FALSE - even for Boolean.TRUE; a
+        // Number went through its decimal string, disagreeing with the JDBC get() path.
+        if (obj == null) {
+            return Boolean.FALSE;
+        } else if (obj instanceof Boolean b) {
+            return b;
+        } else if (obj instanceof Number n) {
+            return n.longValue() > 0;
+        }
+
+        return valueOf(obj.toString());
+    }
+
+    /**
+     * Indicates that this type supports comparison operations, like every other Boolean handler.
+     *
+     * @return {@code true}
+     */
+    @Override
+    public boolean isComparable() {
+        return true;
+    }
+
+    /**
      * Parses a character array sub-sequence to a {@link Boolean}.
      * Returns {@link Boolean#TRUE} only if {@code len} is {@code 1} and the character at
      * {@code cbuf[offset]} is {@code '1'}; returns {@link Boolean#FALSE} otherwise,

@@ -120,6 +120,18 @@ public class BigDecimalSummaryStatisticsTest extends TestBase {
     }
 
     @Test
+    public void testAcceptNullDoesNotMutateCount() {
+        BigDecimalSummaryStatistics stats = new BigDecimalSummaryStatistics();
+
+        Assertions.assertThrows(IllegalArgumentException.class, () -> stats.accept(null));
+
+        assertEquals(0L, stats.getCount());
+        assertEquals(BigDecimal.ZERO, stats.getSum());
+        assertNull(stats.getMin());
+        assertNull(stats.getMax());
+    }
+
+    @Test
     public void testAcceptMultipleValues() {
         BigDecimalSummaryStatistics stats = new BigDecimalSummaryStatistics();
         stats.accept(new BigDecimal("10.00"));

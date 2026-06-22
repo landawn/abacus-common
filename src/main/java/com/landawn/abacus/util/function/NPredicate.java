@@ -13,7 +13,8 @@
  */
 package com.landawn.abacus.util.function;
 
-import java.util.Objects;
+import com.landawn.abacus.util.N;
+import com.landawn.abacus.util.cs;
 
 /**
  * Represents a predicate (boolean-valued function) of a variable number of arguments.
@@ -45,6 +46,10 @@ import java.util.Objects;
  *
  * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
  *
+ * <p><b>Note:</b> Unlike {@link NFunction}, this interface intentionally does NOT extend a
+ * {@code Throwables.*} parent, so it exposes no {@code toThrowable()} bridge — there is no
+ * {@code Throwables.NPredicate} to delegate to. This is by design.
+ *
  * @param <T> the type of the input to the predicate
  *
  * @see java.util.function.Predicate
@@ -66,8 +71,8 @@ public interface NPredicate<T> {
      *   <li>Testing relationships between multiple values</li>
      * </ul>
      *
-     * <p>Note: The {@code @SuppressWarnings("unchecked")} annotation is used because
-     * varargs with generics can generate unchecked warnings at the call site.
+     * <p>Note: The {@code @SuppressWarnings("unchecked")} annotation suppresses the
+     * declaration-site generic-varargs warning for this method.
      *
      * @param args the input arguments as a varargs array
      * @return {@code true} if the input arguments match the predicate, otherwise {@code false}
@@ -132,10 +137,10 @@ public interface NPredicate<T> {
      * @param other a predicate that will be logically-ANDed with this predicate. Must not be {@code null}.
      * @return a composed predicate that represents the short-circuiting logical
      *         AND of this predicate and the {@code other} predicate
-     * @throws NullPointerException if {@code other} is null
+     * @throws IllegalArgumentException if {@code other} is null
      */
     default NPredicate<T> and(final NPredicate<? super T> other) {
-        Objects.requireNonNull(other);
+        N.checkArgNotNull(other, cs.other);
         return t -> test(t) && other.test(t);
     }
 
@@ -171,10 +176,10 @@ public interface NPredicate<T> {
      * @param other a predicate that will be logically-ORed with this predicate. Must not be {@code null}.
      * @return a composed predicate that represents the short-circuiting logical
      *         OR of this predicate and the {@code other} predicate
-     * @throws NullPointerException if {@code other} is null
+     * @throws IllegalArgumentException if {@code other} is null
      */
     default NPredicate<T> or(final NPredicate<? super T> other) {
-        Objects.requireNonNull(other);
+        N.checkArgNotNull(other, cs.other);
         return t -> test(t) || other.test(t);
     }
 }

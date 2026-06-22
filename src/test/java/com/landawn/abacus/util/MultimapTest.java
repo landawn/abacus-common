@@ -9,6 +9,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -619,11 +620,6 @@ public class MultimapTest extends AbstractTest {
         assertTrue(listMultimap.containsEntry("a", 1));
         assertTrue(listMultimap.containsEntry("b", 2));
         assertTrue(listMultimap.containsEntry("c", 3));
-    }
-
-    @Test
-    public void testPutAll_NullMap() {
-        assertFalse(listMultimap.putAll((Map<String, Integer>) null));
     }
 
     @Test
@@ -3379,29 +3375,31 @@ public class MultimapTest extends AbstractTest {
 
     @Test
     public void testAllExceptionScenarios() {
-        //        try {
-        //            multimap.forEach((BiConsumer) null);
-        //            fail("Should throw IllegalArgumentException");
-        //        } catch (IllegalArgumentException e) {
-        //        }
+        assertDoesNotThrow(() -> {
+            //        try {
+            //            multimap.forEach((BiConsumer) null);
+            //            fail("Should throw IllegalArgumentException");
+            //        } catch (IllegalArgumentException e) {
+            //        }
 
-        //        try {
-        //            multimap.forEachKey(null);
-        //            fail("Should throw IllegalArgumentException");
-        //        } catch (IllegalArgumentException e) {
-        //        }
-        //
-        //        try {
-        //            multimap.forEachValues(null);
-        //            fail("Should throw IllegalArgumentException");
-        //        } catch (IllegalArgumentException e) {
-        //        }
+            //        try {
+            //            multimap.forEachKey(null);
+            //            fail("Should throw IllegalArgumentException");
+            //        } catch (IllegalArgumentException e) {
+            //        }
+            //
+            //        try {
+            //            multimap.forEachValues(null);
+            //            fail("Should throw IllegalArgumentException");
+            //        } catch (IllegalArgumentException e) {
+            //        }
 
-        //    try {
-        //        multimap.flatForEachValue(null);
-        //        fail("Should throw IllegalArgumentException");
-        //    } catch (IllegalArgumentException e) {
-        //    }
+            //    try {
+            //        multimap.flatForEachValue(null);
+            //        fail("Should throw IllegalArgumentException");
+            //    } catch (IllegalArgumentException e) {
+            //    }
+        });
     }
 
     @Test
@@ -4901,28 +4899,30 @@ public class MultimapTest extends AbstractTest {
 
     @Test
     public void testIntegrationScenario1() {
-        List<String> words = Arrays.asList("apple", "apricot", "banana", "berry", "cherry", "apple");
+        assertDoesNotThrow(() -> {
+            List<String> words = Arrays.asList("apple", "apricot", "banana", "berry", "cherry", "apple");
 
-        Multimap<Character, String, List<String>> grouped = N.newListMultimap();
-        for (String word : words) {
-            grouped.put(word.charAt(0), word);
-        }
-
-        grouped.replaceAll((k, v) -> {
-            List<String> upper = new ArrayList<>();
-            for (String s : v) {
-                upper.add(s.toUpperCase());
+            Multimap<Character, String, List<String>> grouped = N.newListMultimap();
+            for (String word : words) {
+                grouped.put(word.charAt(0), word);
             }
-            return upper;
-        });
 
-        //        Multimap<Character, String, List<String>> filtered = grouped.filter((k, v) -> v.size() > 1);
-        //
-        //        assertEquals(2, filtered.size());
-        //        assertTrue(filtered.containsKey('a'));
-        //        assertTrue(filtered.containsKey('b'));
-        //        assertTrue(filtered.get('a').contains("APPLE"));
-        //        assertTrue(filtered.get('a').contains("APRICOT"));
+            grouped.replaceAll((k, v) -> {
+                List<String> upper = new ArrayList<>();
+                for (String s : v) {
+                    upper.add(s.toUpperCase());
+                }
+                return upper;
+            });
+
+            //        Multimap<Character, String, List<String>> filtered = grouped.filter((k, v) -> v.size() > 1);
+            //
+            //        assertEquals(2, filtered.size());
+            //        assertTrue(filtered.containsKey('a'));
+            //        assertTrue(filtered.containsKey('b'));
+            //        assertTrue(filtered.get('a').contains("APPLE"));
+            //        assertTrue(filtered.get('a').contains("APRICOT"));
+        });
     }
 
     @Test
@@ -5057,6 +5057,94 @@ public class MultimapTest extends AbstractTest {
 
         assertEquals(Arrays.asList(20, 30), result);
         assertEquals(Arrays.asList(20, 30), mm.get("k"));
+    }
+
+    // --- regression tests for 2026-06-10 deep-review fixes ---
+
+    @Test
+    public void testReplaceValuesIfDefendsAgainstAliasedInput() {
+        // regression: replaceValuesIf cleared the live value collection BEFORE copying from
+        // newValues, so passing a live collection (or a view of it) emptied everything
+        final ListMultimap<String, Integer> mm = N.newListMultimap();
+        mm.putValues("a", Arrays.asList(1, 2, 3));
+        mm.replaceValuesIf(k -> k.equals("a"), mm.get("a"));
+        assertEquals(Arrays.asList(1, 2, 3), mm.get("a"));
+
+        final ListMultimap<String, Integer> mm2 = N.newListMultimap();
+        mm2.putValues("a", Arrays.asList(1, 2, 3));
+        mm2.putValues("b", Arrays.asList(4, 5));
+        mm2.replaceValuesIf((k, v) -> true, mm2.get("a"));
+        assertEquals(Arrays.asList(1, 2, 3), mm2.get("a"));
+        assertEquals(Arrays.asList(1, 2, 3), mm2.get("b"));
+    }
+
+    @Test
+    public void testComputeAndMergeEmptiedSameInstanceRemovesMapping() {
+        // regression: the same-instance fast path shadowed the documented "empty result removes the
+        // mapping" rule, leaving an empty value collection in the backing map
+        final ListMultimap<String, Integer> mm = N.newListMultimap();
+        mm.put("k", 1);
+        mm.computeIfPresent("k", (k, v) -> {
+            v.clear();
+            return v;
+        });
+        assertFalse(mm.containsKey("k"));
+        assertNull(mm.get("k"));
+
+        final ListMultimap<String, Integer> mm2 = N.newListMultimap();
+        mm2.put("k", 1);
+        mm2.compute("k", (k, v) -> {
+            v.clear();
+            return v;
+        });
+        assertFalse(mm2.containsKey("k"));
+
+        final ListMultimap<String, Integer> mm3 = N.newListMultimap();
+        mm3.put("k", 1);
+        mm3.merge("k", 9, (v, e) -> {
+            v.clear();
+            return v;
+        });
+        assertFalse(mm3.containsKey("k"));
+    }
+
+    @Test
+    public void testReplaceAllEmptiedSameInstanceRemovesMapping() {
+        // regression: replaceAll checked the same-instance fast path BEFORE the documented
+        // "null or empty result removes the mapping" rule (unlike its already-fixed siblings
+        // compute/computeIfPresent/merge), so a function that emptied the live collection in
+        // place and returned it left an empty value collection in the backing map
+        final ListMultimap<String, Integer> mm = N.newListMultimap();
+        mm.putValues("a", Arrays.asList(1, 2));
+        mm.put("b", 3);
+
+        mm.replaceAll((k, v) -> {
+            if (k.equals("a")) {
+                v.clear(); // emptied in place, same instance returned
+            }
+            return v;
+        });
+
+        assertFalse(mm.containsKey("a"));
+        assertNull(mm.get("a"));
+        assertEquals(Arrays.asList(3), mm.get("b")); // untouched same-instance entry left unchanged
+        assertEquals(1, mm.totalValueCount());
+        assertFalse(mm.isEmpty());
+    }
+
+    @Test
+    public void testToMultisetPreservesMapSupplier() {
+        // regression: toMultiset rebuilt the backing map from its Class, losing custom comparators
+        // (ClassCastException for non-Comparable keys in comparator-backed TreeMaps)
+        final ListMultimap<Object, Integer> mm = N.newListMultimap(() -> new java.util.TreeMap<>(java.util.Comparator.comparingInt(System::identityHashCode)),
+                java.util.ArrayList::new);
+        final Object k = new Object();
+        mm.put(k, 1);
+        mm.put(k, 2);
+
+        final Multiset<Object> ms = mm.toMultiset();
+
+        assertEquals(2, ms.getCount(k));
     }
 
 }

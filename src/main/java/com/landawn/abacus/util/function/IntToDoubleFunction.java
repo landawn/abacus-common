@@ -70,4 +70,18 @@ public interface IntToDoubleFunction extends Throwables.IntToDoubleFunction<Runt
      */
     @Override
     double applyAsDouble(int value);
+
+    /**
+     * Returns this object as a {@link Throwables.IntToDoubleFunction} view.
+     *
+     * <p>The returned object has the same behavior as this one. This method does not translate
+     * exceptions or make the original implementation capable of throwing new checked exceptions; the
+     * exception type parameter is for target-type compatibility with APIs that accept {@code Throwables.IntToDoubleFunction}.
+     *
+     * @param <E> the target exception type for compatibility with {@code Throwables.IntToDoubleFunction}
+     * @return a {@link Throwables.IntToDoubleFunction} view of this object
+     */
+    default <E extends Throwable> Throwables.IntToDoubleFunction<E> toThrowable() {
+        return (Throwables.IntToDoubleFunction<E>) this;
+    }
 }

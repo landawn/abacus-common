@@ -254,7 +254,7 @@ final class FileSystemUtil {
      * @param kb whether to normalize to kilobytes
      * @param timeout the timeout amount in milliseconds or no timeout if the value
      *  is zero or less
-     * @return the amount of free disk space in bytes or kilobytes depending on the kb parameter
+     * @return the amount of free space in kilobytes if {@code kb} is {@code true}; otherwise in bytes on Windows, or in the df command's default block units on Unix
      * @throws IOException if an error occurs when finding the free space
      * @throws IllegalArgumentException if {@code path} is {@code null}
      * @throws IllegalStateException if the operating system is unsupported, or if an error
@@ -296,7 +296,11 @@ final class FileSystemUtil {
             throw new IOException("Invalid path: unable to normalize");
         }
 
-        if (!path.isEmpty() && path.charAt(0) != '"') {
+        if (path.indexOf('"') >= 0) {
+            throw new IllegalArgumentException("Path must not contain quote characters: " + path);
+        }
+
+        if (!path.isEmpty()) {
             path = "\"" + path + "\"";
         }
 
@@ -382,7 +386,7 @@ final class FileSystemUtil {
      * @param posix whether to use the POSIX standard format flag
      * @param timeout the timeout amount in milliseconds or no timeout if the value
      *  is zero or less
-     * @return the amount of free disk space in bytes or kilobytes depending on the kb parameter
+     * @return the amount of free space in kilobytes if {@code kb} is {@code true}, otherwise in the df command's default block units
      * @throws IllegalArgumentException if the path is empty
      * @throws IOException if an error occurs
      */

@@ -41,6 +41,10 @@ import okio.Buffer;
  * <p>The interceptor processes the request headers, method, URL, and body content to generate
  * a complete cURL command that can be executed from the command line.</p>
  *
+ * <p><b>&#9888;</b> The generated cURL command includes every request header (e.g. {@code Authorization},
+ * {@code Cookie}, {@code X-Api-Key}) and the request body verbatim, with no masking. Ensure the
+ * {@code logHandler} destination is trusted before logging requests that carry credentials.</p>
+ *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * OkHttpRequest request = WebUtil.createCurlLoggingOkHttpRequest(
@@ -147,7 +151,7 @@ class CurlInterceptor implements Interceptor {
             }
         }
 
-        final String curl = WebUtil.buildCurl(httpMethod, url, httpHeaders, bodyString, bodyContentType, quoteChar);
+        final String curl = WebUtil.buildCurl(HttpMethod.valueOf(httpMethod), url, httpHeaders, bodyString, bodyContentType, quoteChar);
 
         logHandler.accept(curl);
     }

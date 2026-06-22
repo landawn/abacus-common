@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNotSame;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -336,6 +337,31 @@ public class HttpResponseTest extends TestBase {
         assertEquals(0, body.length);
     }
 
+    // M12: headers()/body() return empty (never null) when absent.
+
+    @Test
+    public void testHeadersNeverNull() {
+        HttpResponse response = new HttpResponse("http://example.com", 1000L, 2000L, 200, "OK", null, "test".getBytes(StandardCharsets.UTF_8),
+                ContentFormat.NONE, StandardCharsets.UTF_8);
+
+        assertNotNull(response.headers());
+        assertTrue(response.headers().isEmpty());
+        // Still unmodifiable.
+        assertThrows(UnsupportedOperationException.class, () -> response.headers().put("X", Collections.singletonList("v")));
+    }
+
+    @Test
+    public void testBodyNeverNull() {
+        HttpResponse response = new HttpResponse("http://example.com", 1000L, 2000L, 200, "OK", new HashMap<>(), null, ContentFormat.NONE,
+                StandardCharsets.UTF_8);
+
+        assertNotNull(response.body());
+        assertEquals(0, response.body().length);
+        // The typed body(...) accessors still return null when there was no body.
+        assertNull(response.body(String.class));
+        assertNull(response.body(byte[].class));
+    }
+
     @Test
     public void testBodyWithTypeString() {
         String content = "test content";
@@ -494,6 +520,30 @@ public class HttpResponseTest extends TestBase {
 
         assertNotEquals(response1, "not a response");
         assertNotEquals(response1, null);
+    }
+
+    @Test
+    public void testEqualsAndHashCodeNullVsEmptyNormalized() {
+        // headers() normalizes null -> empty map and body() normalizes null -> empty array,
+        // so equals()/hashCode() must treat null and empty as equivalent.
+        HttpResponse nullHeaders = new HttpResponse("http://example.com", 1000L, 2000L, 200, "OK", null, "test".getBytes(StandardCharsets.UTF_8),
+                ContentFormat.JSON, StandardCharsets.UTF_8);
+        HttpResponse emptyHeaders = new HttpResponse("http://example.com", 1000L, 2000L, 200, "OK", new HashMap<>(), "test".getBytes(StandardCharsets.UTF_8),
+                ContentFormat.JSON, StandardCharsets.UTF_8);
+
+        assertEquals(nullHeaders, emptyHeaders);
+        assertEquals(emptyHeaders, nullHeaders);
+        assertEquals(nullHeaders.hashCode(), emptyHeaders.hashCode());
+
+        // Same for the body: null body vs empty byte array.
+        HttpResponse nullBody = new HttpResponse("http://example.com", 1000L, 2000L, 200, "OK", new HashMap<>(), null, ContentFormat.JSON,
+                StandardCharsets.UTF_8);
+        HttpResponse emptyBody = new HttpResponse("http://example.com", 1000L, 2000L, 200, "OK", new HashMap<>(), new byte[0], ContentFormat.JSON,
+                StandardCharsets.UTF_8);
+
+        assertEquals(nullBody, emptyBody);
+        assertEquals(emptyBody, nullBody);
+        assertEquals(nullBody.hashCode(), emptyBody.hashCode());
     }
 
     @Test

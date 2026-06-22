@@ -13,10 +13,10 @@
  */
 package com.landawn.abacus.util.function;
 
-import java.util.Objects;
-
 import com.landawn.abacus.annotation.SuppressFBWarnings;
 import com.landawn.abacus.util.Throwables;
+import com.landawn.abacus.util.N;
+import com.landawn.abacus.util.cs;
 
 /**
  * Represents an operation that accepts two input arguments and returns no result.
@@ -72,11 +72,11 @@ public interface BiConsumer<T, U> extends Throwables.BiConsumer<T, U, RuntimeExc
      *
      * @param after the operation to perform after this operation. Must not be {@code null}.
      * @return a composed {@code BiConsumer} that performs in sequence this operation followed by the {@code after} operation
-     * @throws NullPointerException if {@code after} is null
+     * @throws IllegalArgumentException if {@code after} is null
      */
     @Override
     default BiConsumer<T, U> andThen(final java.util.function.BiConsumer<? super T, ? super U> after) {
-        Objects.requireNonNull(after);
+        N.checkArgNotNull(after, cs.after);
         return (t, u) -> {
             accept(t, u);
             after.accept(t, u);

@@ -57,21 +57,22 @@ public interface Supplier<T> extends Throwables.Supplier<T, RuntimeException>, j
     T get();
 
     /**
-     * Converts this supplier to a throwable supplier that can throw checked exceptions.
-     * This method provides a way to use this supplier in contexts that require explicit exception handling.
+     * Returns this supplier as a {@link Throwables.Supplier} view.
      *
-     * <p>The returned supplier will have the same behavior as this supplier but with the ability
-     * to throw checked exceptions of the specified type.
+     * <p>The returned supplier has the same behavior as this supplier. This method does not translate
+     * exceptions or make the original implementation capable of throwing new checked exceptions; the
+     * exception type parameter is for target-type compatibility with APIs that accept
+     * {@code Throwables.Supplier}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Supplier<String> supplier = () -> "data";
-     * Throwables.Supplier<String, Exception> throwableSupplier = supplier.toThrowable();
-     * // Can now be used in contexts that handle exceptions
+     * Throwables.Supplier<String, RuntimeException> throwableSupplier = supplier.toThrowable();
+     * String value = throwableSupplier.get();
      * }</pre>
      *
-     * @param <E> the type of exception that the returned supplier may throw
-     * @return a throwable supplier that wraps this supplier
+     * @param <E> the target exception type for compatibility with {@code Throwables.Supplier}
+     * @return a {@code Throwables.Supplier} view of this supplier
      */
     default <E extends Throwable> Throwables.Supplier<T, E> toThrowable() {
         return (Throwables.Supplier<T, E>) this;

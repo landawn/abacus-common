@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
 import java.io.IOException;
 import java.util.AbstractMap;
@@ -434,9 +435,11 @@ public class FnnTest extends TestBase {
 
     @Test
     public void testClose_null() throws Exception {
-        Throwables.Consumer<AutoCloseable, Exception> closeFn = Fnn.close();
-        // Should not throw on null
-        closeFn.accept(null);
+        assertDoesNotThrow(() -> {
+            Throwables.Consumer<AutoCloseable, Exception> closeFn = Fnn.close();
+            // Should not throw on null
+            closeFn.accept(null);
+        });
     }
 
     @Test
@@ -450,9 +453,11 @@ public class FnnTest extends TestBase {
 
     @Test
     public void testClose_nullAutoCloseable() throws Exception {
-        Throwables.Consumer<AutoCloseable, Exception> closeConsumer = Fnn.close();
-        // should not throw when given null (via lambda$0)
-        closeConsumer.accept(null);
+        assertDoesNotThrow(() -> {
+            Throwables.Consumer<AutoCloseable, Exception> closeConsumer = Fnn.close();
+            // should not throw when given null (via lambda$0)
+            closeConsumer.accept(null);
+        });
     }
 
     @Test

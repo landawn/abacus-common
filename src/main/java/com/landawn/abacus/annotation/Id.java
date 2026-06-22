@@ -72,7 +72,7 @@ import java.lang.annotation.Target;
  * @see ReadOnlyId
  */
 @Documented
-@Target(value = { FIELD, /* METHOD, */ TYPE })
+@Target(value = { FIELD, TYPE })
 @Retention(RUNTIME)
 public @interface Id {
 

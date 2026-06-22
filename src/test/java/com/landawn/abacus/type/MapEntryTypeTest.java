@@ -2,9 +2,11 @@ package com.landawn.abacus.type;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.IOException;
 import java.io.StringWriter;
+import java.io.Writer;
 import java.util.AbstractMap;
 import java.util.List;
 import java.util.Map;
@@ -14,8 +16,11 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
+import com.landawn.abacus.parser.JsonSerConfig;
 import com.landawn.abacus.parser.JsonXmlSerConfig;
+import com.landawn.abacus.util.BufferedJsonWriter;
 import com.landawn.abacus.util.CharacterWriter;
+import com.landawn.abacus.util.Objectory;
 
 public class MapEntryTypeTest extends TestBase {
 
@@ -131,6 +136,13 @@ public class MapEntryTypeTest extends TestBase {
     }
 
     @Test
+    public void testAppendToPropagatesWriterIOException() {
+        Writer writer = newFailingWriter();
+        Map.Entry<String, Integer> entry = new AbstractMap.SimpleEntry<>("key", 123);
+        assertThrows(IOException.class, () -> mapEntryType.appendTo(writer, entry));
+    }
+
+    @Test
     public void testSerializeToWithNull() throws IOException {
         assertDoesNotThrow(() -> {
             mapEntryType.serializeTo(characterWriter, null, null);
@@ -139,8 +151,42 @@ public class MapEntryTypeTest extends TestBase {
 
     @Test
     public void testSerializeToWithNonNull() throws IOException {
-        Map.Entry<String, Integer> entry = new AbstractMap.SimpleEntry<>("key", 123);
-        JsonXmlSerConfig<?> config = null;
-        mapEntryType.serializeTo(characterWriter, entry, config);
+        assertDoesNotThrow(() -> {
+            Map.Entry<String, Integer> entry = new AbstractMap.SimpleEntry<>("key", 123);
+            JsonXmlSerConfig<?> config = null;
+            mapEntryType.serializeTo(characterWriter, entry, config);
+        });
+    }
+
+    @Test
+    public void testSerializeToQuotesNumericMapKeyByDefault() throws IOException {
+        MapEntryType<Integer, String> type = (MapEntryType<Integer, String>) createType("Map.Entry<Integer, String>");
+        BufferedJsonWriter writer = Objectory.createBufferedJsonWriter();
+
+        try {
+            type.serializeTo(writer, new AbstractMap.SimpleEntry<>(1, "a"), JsonSerConfig.create());
+            assertEquals("{\"1\":\"a\"}", writer.toString());
+        } finally {
+            Objectory.recycle(writer);
+        }
+    }
+
+    private static Writer newFailingWriter() {
+        return new Writer() {
+            @Override
+            public void write(final char[] cbuf, final int off, final int len) throws IOException {
+                throw new IOException("boom");
+            }
+
+            @Override
+            public void flush() throws IOException {
+                throw new IOException("boom");
+            }
+
+            @Override
+            public void close() throws IOException {
+                throw new IOException("boom");
+            }
+        };
     }
 }

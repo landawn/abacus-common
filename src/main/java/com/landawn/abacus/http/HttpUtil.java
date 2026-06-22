@@ -26,7 +26,6 @@ import java.security.cert.X509Certificate;
 import java.text.DateFormat;
 import java.text.ParsePosition;
 import java.text.SimpleDateFormat;
-import java.util.Collection;
 import java.util.Date;
 import java.util.EnumMap;
 import java.util.HashMap;
@@ -296,9 +295,15 @@ public final class HttpUtil {
 
     /**
      * Reads an HTTP header value from various object types.
-     * If the value is a {@link Collection}, an empty collection yields an empty string, a single-element
-     * collection yields that element's string form, and multiple values are joined with commas.
-     * Otherwise, converts the value to a string.
+     * This is the read-side counterpart of {@link HttpHeaders#valueOf(Object)} and delegates the
+     * actual coercion to it so that the string form of a header value (separator, {@link Date}/
+     * {@link java.time.Instant} HTTP-date formatting, {@code Collection} joining) is single-sourced. The only
+     * difference is the {@code null} contract: a {@code null} value is returned as {@code null} here
+     * (used as the "header absent" sentinel by the {@code getXxx(...)} reader family), whereas
+     * {@link HttpHeaders#valueOf(Object)} maps {@code null} to an empty string.
+     *
+     * <p>{@link java.util.Collection} values are joined with {@code ", "} (a single-element collection yields
+     * that element's string form); {@link Date}/{@link java.time.Instant} values are HTTP-date formatted.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -307,28 +312,19 @@ public final class HttpUtil {
      *
      * // Multiple values
      * List<String> values = Arrays.asList("gzip", "deflate");
-     * String header2 = HttpUtil.readHttpHeaderValue(values);   // "gzip,deflate"
+     * String header2 = HttpUtil.readHttpHeaderValue(values);   // "gzip, deflate"
      * }</pre>
      *
      * @param value The header value (can be {@code null}, String, Collection, or any object)
      * @return The header value as a string, or {@code null} if value is null
+     * @see HttpHeaders#valueOf(Object)
      */
     public static String readHttpHeaderValue(final Object value) {
         if (value == null) {
             return null;
         }
 
-        if (value instanceof Collection<?> c) {
-            if (N.isEmpty(c)) {
-                return Strings.EMPTY;
-            } else if (c.size() == 1) {
-                return N.stringOf(N.firstOrNullIfEmpty(c));
-            } else {
-                return Strings.join(c, ",");
-            }
-        } else {
-            return N.stringOf(value);
-        }
+        return HttpHeaders.valueOf(value);
     }
 
     /**
@@ -554,13 +550,7 @@ public final class HttpUtil {
             return null;
         }
 
-        Object value = httpHeaders.get(HttpHeaders.Names.ACCEPT);
-
-        if (value == null) {
-            value = httpHeaders.get(HttpHeaders.Names.L_ACCEPT);
-        }
-
-        return readHttpHeaderValue(value);
+        return readHttpHeaderValue(findHeaderValueCaseInsensitive(httpHeaders.map, HttpHeaders.Names.ACCEPT, HttpHeaders.Names.L_ACCEPT));
     }
 
     /**
@@ -648,13 +638,7 @@ public final class HttpUtil {
             return null;
         }
 
-        Object value = httpHeaders.get(HttpHeaders.Names.ACCEPT_ENCODING);
-
-        if (value == null) {
-            value = httpHeaders.get(HttpHeaders.Names.L_ACCEPT_ENCODING);
-        }
-
-        return readHttpHeaderValue(value);
+        return readHttpHeaderValue(findHeaderValueCaseInsensitive(httpHeaders.map, HttpHeaders.Names.ACCEPT_ENCODING, HttpHeaders.Names.L_ACCEPT_ENCODING));
     }
 
     /**
@@ -742,13 +726,7 @@ public final class HttpUtil {
             return null;
         }
 
-        Object value = httpHeaders.get(HttpHeaders.Names.ACCEPT_CHARSET);
-
-        if (value == null) {
-            value = httpHeaders.get(HttpHeaders.Names.L_ACCEPT_CHARSET);
-        }
-
-        return readHttpHeaderValue(value);
+        return readHttpHeaderValue(findHeaderValueCaseInsensitive(httpHeaders.map, HttpHeaders.Names.ACCEPT_CHARSET, HttpHeaders.Names.L_ACCEPT_CHARSET));
     }
 
     /**
@@ -794,6 +772,14 @@ public final class HttpUtil {
     /**
      * Gets the content type string for a ContentFormat.
      * For example, {@link ContentFormat#JSON} returns {@code "application/json"}.
+     *
+     * <p><b>Absent sentinel:</b> this {@link ContentFormat} overload returns the empty string
+     * {@code ""} for an absent/unmapped value, whereas the header-reading overloads
+     * ({@link #getContentType(Map)}, {@link #getContentType(HttpHeaders)}, etc.) return {@code null}.
+     * The split is intentional: this method maps a known enum to a fixed type string (never absent in
+     * the {@code null}-meaningful sense), while the readers signal a missing header with {@code null}.
+     * Both empty-string and {@code null} are treated as "no content type" by callers
+     * (via {@link Strings#isEmpty(CharSequence)}).</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1066,7 +1052,7 @@ public final class HttpUtil {
             return IOUtil.newGZIPOutputStream(os);
         } else if (Strings.containsIgnoreCase(contentFormatName, BR)) {
             // return IOUtil.newBrotliOutputStream(os);
-            throw new UnsupportedOperationException("Unsupported content encoding: Brotli for http request");
+            throw new UnsupportedOperationException("Unsupported content encoding: Brotli for HTTP request");
         } else if (Strings.containsIgnoreCase(contentFormatName, SNAPPY)) {
             return IOUtil.newSnappyOutputStream(os);
         } else if (Strings.containsIgnoreCase(contentFormatName, LZ4)) {
@@ -1377,7 +1363,7 @@ public final class HttpUtil {
      *
      * <p>Copied from: <a href="https://nakov.com/blog/2009/07/16/disable-certificate-validation-in-java-ssl-connections/">disable-certificate-validation-in-java-ssl-connections</a></p>
      *
-     * @deprecated For test only. Don't use it in production.
+     * @deprecated For testing only. Do not use it in production.
      * @throws RuntimeException if SSL context initialization fails
      */
     @Deprecated

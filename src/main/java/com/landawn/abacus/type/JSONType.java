@@ -17,7 +17,6 @@ package com.landawn.abacus.type;
 import java.util.List;
 import java.util.Map;
 
-import com.landawn.abacus.util.ClassUtil;
 import com.landawn.abacus.util.SK;
 import com.landawn.abacus.util.Strings;
 
@@ -50,7 +49,8 @@ public class JSONType<T> extends AbstractType<T> {
      * Creates a JSONType that wraps the specified class for JSON serialization and deserialization.
      * The short aliases {@code "Map"} and {@code "List"} (case-insensitive) are recognized as
      * {@link java.util.Map} and {@link java.util.List} respectively; all other names must be
-     * fully qualified class names resolvable by {@link com.landawn.abacus.util.ClassUtil}.
+     * type names resolvable by {@link TypeFactory} — fully qualified class names or pool-registered
+     * simple names such as {@code "UUID"}.
      *
      * @param clsName the class name or short alias ({@code "Map"}, {@code "List"}) for which
      *                to create the JSON type handler
@@ -60,7 +60,10 @@ public class JSONType<T> extends AbstractType<T> {
         super(JSON + SK.LESS_THAN + TypeFactory.getType(clsName).name() + SK.GREATER_THAN);
 
         declaringName = JSON + SK.LESS_THAN + TypeFactory.getType(clsName).declaringName() + SK.GREATER_THAN;
-        typeClass = (Class<T>) ("Map".equalsIgnoreCase(clsName) ? Map.class : ("List".equalsIgnoreCase(clsName) ? List.class : ClassUtil.forName(clsName)));
+        // Resolve through TypeFactory (like the name built above): pool-registered simple names
+        // such as "UUID" are valid type names that ClassUtil.forName cannot resolve.
+        typeClass = (Class<T>) ("Map".equalsIgnoreCase(clsName) ? Map.class
+                : ("List".equalsIgnoreCase(clsName) ? List.class : TypeFactory.getType(clsName).javaType()));
         //        this.parameterTypes = new Type[] { TypeFactory.getType(clsName) };
         //        this.elementType = parameterTypes[0];
     }

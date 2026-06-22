@@ -1,9 +1,11 @@
 package com.landawn.abacus.util;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -303,6 +305,15 @@ public class BufferedReaderTest extends AbstractTest {
     }
 
     @Test
+    public void testMarkResetUnsupported() throws IOException {
+        BufferedReader reader = new BufferedReader("Hello");
+
+        assertFalse(reader.markSupported());
+        assertThrows(IOException.class, () -> reader.mark(3));
+        assertThrows(IOException.class, () -> reader.reset());
+    }
+
+    @Test
     public void testClose() throws IOException {
         BufferedReader reader = new BufferedReader("Hello");
         assertEquals('H', reader.read());
@@ -313,9 +324,11 @@ public class BufferedReaderTest extends AbstractTest {
 
     @Test
     public void testClose_Idempotent() throws IOException {
-        BufferedReader reader = new BufferedReader("Hello");
-        reader.close();
-        reader.close(); // should not throw
+        assertDoesNotThrow(() -> {
+            BufferedReader reader = new BufferedReader("Hello");
+            reader.close();
+            reader.close(); // should not throw
+        });
     }
 
     @Test

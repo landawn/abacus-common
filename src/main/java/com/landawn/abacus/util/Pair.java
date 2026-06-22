@@ -571,6 +571,10 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
      * Creates and returns a new Pair with the left and right elements swapped.
      * The original pair remains unchanged.
      *
+     * <p>Note: this instance method is non-mutating and returns a <i>new</i> swapped pair, in contrast to the
+     * static {@link N#swap(Pair)} / {@link N#swapIf(Pair, java.util.function.Predicate)} helpers, which
+     * <i>mutate</i> the given pair in place (those require both element types to be the same, {@code Pair<T, T>}).
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Pair<String, Integer> original = Pair.of("Hello", 42);
@@ -580,6 +584,8 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
      * }</pre>
      *
      * @return a new Pair with the right element as the left and the left element as the right.
+     * @see N#swap(Pair)
+     * @see N#swapIf(Pair, java.util.function.Predicate)
      */
     @Beta
     public Pair<R, L> swap() {
@@ -1042,6 +1048,11 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
      * Pair<String, Integer> pair5 = Pair.of(null, null);
      * pair4.equals(pair5);   // returns true
      * }</pre>
+     *
+     * <p><b>Note:</b> Equality is defined against the {@link Map.Entry} interface, not against {@code Pair}
+     * specifically. Any {@code Map.Entry} with an equal key and value is considered equal,
+     * so {@code Pair.of(k, v).equals(Map.entry(k, v))} is {@code true}. A {@code Tuple2} (which
+     * is not a {@code Map.Entry}) is never equal to a {@code Pair}, even with the same elements.
      *
      * @param obj the object to be compared for equality with this pair.
      * @return {@code true} if the specified object is equal to this pair, {@code false} otherwise.

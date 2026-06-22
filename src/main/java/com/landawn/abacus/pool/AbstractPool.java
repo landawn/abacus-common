@@ -185,7 +185,7 @@ public abstract class AbstractPool implements Pool {
      * @param evictDelayInMillis the delay in milliseconds between eviction runs, or 0 to disable eviction (must be non-negative)
      * @param evictionPolicy the policy for determining which objects to evict
      * @param autoBalance whether to automatically remove objects when the pool is full
-     * @param balanceFactor the proportion of objects to remove during balancing, typically 0.1 to 0.5 (must be non-negative)
+     * @param balanceFactor the proportion of objects to remove during balancing, typically 0.1 to 0.5 (must be non-negative); a value of 0 selects the default factor (0.2)
      * @param maxMemorySize the maximum total memory in bytes, or 0 for no limit (must be non-negative)
      * @throws IllegalArgumentException if any numeric parameter is negative
      */
@@ -203,6 +203,16 @@ public abstract class AbstractPool implements Pool {
         this.autoBalance = autoBalance;
         this.balanceFactor = balanceFactor == 0f ? DEFAULT_BALANCE_FACTOR : balanceFactor; // NOSONAR
 
+        initShutdownHook();
+
+        // NOTE: subclass constructors must call registerShutdownHook() as their LAST statement,
+        // AFTER initializing all fields the close()-path touches (pool collection, comparator,
+        // scheduleFuture). Registering here would publish `this` to the JVM shutdown thread
+        // before the subclass finishes initialization — a JVM shutdown beginning in that race
+        // window would invoke close() against half-initialized state and NPE.
+    }
+
+    final void initShutdownHook() {
         final Class<?> cls = this.getClass();
 
         shutdownHook = new Thread(() -> {
@@ -214,12 +224,6 @@ public abstract class AbstractPool implements Pool {
                 logger.warn("Pool shutdown completed: " + ClassUtil.getCanonicalClassName(cls));
             }
         });
-
-        // NOTE: subclass constructors must call registerShutdownHook() as their LAST statement,
-        // AFTER initializing all fields the close()-path touches (pool collection, comparator,
-        // scheduleFuture). Registering here would publish `this` to the JVM shutdown thread
-        // before the subclass finishes initialization — a JVM shutdown beginning in that race
-        // window would invoke close() against half-initialized state and NPE.
     }
 
     /**
@@ -269,6 +273,11 @@ public abstract class AbstractPool implements Pool {
      * Returns the maximum capacity of this pool.
      * The capacity represents the maximum number of objects that can be stored in the pool.
      *
+     * <p>This method intentionally does <em>not</em> call {@link #assertNotClosed()}: capacity is an
+     * immutable configuration value fixed at construction, so it is deliberately readable even after
+     * the pool has been {@link #close() closed} (unlike {@link #size()}/{@link #stats()}/etc., which
+     * reflect live state and throw once closed).
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * if (pool.size() >= pool.capacity() * 0.9) {
@@ -276,7 +285,7 @@ public abstract class AbstractPool implements Pool {
      * }
      * }</pre>
      *
-     * @return the maximum number of objects this pool can hold
+     * @return the maximum number of objects this pool can hold (readable even after the pool is closed)
      */
     @Override
     public int capacity() {

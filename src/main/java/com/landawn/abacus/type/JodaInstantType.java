@@ -143,7 +143,7 @@ public class JodaInstantType extends AbstractJodaDateTimeType<Instant> {
             return null; // NOSONAR
         }
 
-        if (isPossibleLong(cbuf, offset, len)) {
+        if (isPossibleMillis(cbuf, offset, len)) {
             try {
                 return Instant.ofEpochMilli(parseLong(cbuf, offset, len));
             } catch (final NumberFormatException e) {
@@ -275,6 +275,7 @@ public class JodaInstantType extends AbstractJodaDateTimeType<Instant> {
      * @param x      the Joda {@link Instant} to write; may be {@code null}
      * @param config the serialization configuration; may be {@code null}
      * @throws IOException if an I/O error occurs during writing
+     * @throws RuntimeException if an unsupported {@code DateTimeFormat} is specified
      */
     @SuppressWarnings("null")
     @Override
@@ -308,7 +309,7 @@ public class JodaInstantType extends AbstractJodaDateTimeType<Instant> {
                         break;
 
                     default:
-                        throw new RuntimeException("Unsupported operation");
+                        throw new RuntimeException("Unsupported DateTimeFormat: " + config.getDateTimeFormat());
                 }
             }
 

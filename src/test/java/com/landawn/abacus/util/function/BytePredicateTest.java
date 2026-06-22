@@ -248,6 +248,6 @@ public class BytePredicateTest extends TestBase {
     @Test
     public void testAndNullThrowsImmediately() {
         BytePredicate instance = a -> false;
-        org.junit.jupiter.api.Assertions.assertThrows(NullPointerException.class, () -> instance.and((BytePredicate) null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> instance.and((BytePredicate) null));
     }
 }

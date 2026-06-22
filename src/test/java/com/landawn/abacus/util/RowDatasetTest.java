@@ -2158,6 +2158,22 @@ public class RowDatasetTest extends TestBase {
     }
 
     @Test
+    public void testAddRows_NullElement_ThrowsIllegalArgument() {
+        RowDataset ds = new RowDataset(columnNames, copyColumnList());
+        int sizeBefore = ds.size();
+
+        List<Object> newRows = new ArrayList<>();
+        newRows.add(new Object[] { 6, "Frank", 40, 80000.0 });
+        newRows.add(null);
+
+        assertThrows(IllegalArgumentException.class, () -> ds.addRows(newRows));
+        assertThrows(IllegalArgumentException.class, () -> ds.addRows(0, newRows));
+
+        // The failed calls must not have partially added any rows.
+        assertEquals(sizeBefore, ds.size());
+    }
+
+    @Test
     public void testRemoveRow() {
         RowDataset ds = new RowDataset(columnNames, copyColumnList());
         ds.removeRow(0);
@@ -2264,6 +2280,16 @@ public class RowDatasetTest extends TestBase {
 
         ds.removeDuplicateRowsBy(Arrays.asList("id", "name"), (DisposableObjArray arr) -> arr.get(0) + "_" + arr.get(1));
         assertEquals(3, ds.size());
+    }
+
+    @Test
+    public void testRemoveDuplicateRowsBy_NullOrEmptyKeyColumnNames_ThrowsIllegalArgument() {
+        RowDataset ds = new RowDataset(columnNames, copyColumnList());
+
+        assertThrows(IllegalArgumentException.class, () -> ds.removeDuplicateRowsBy((Collection<String>) null));
+        assertThrows(IllegalArgumentException.class, () -> ds.removeDuplicateRowsBy(new ArrayList<>()));
+        assertThrows(IllegalArgumentException.class, () -> ds.removeDuplicateRowsBy((Collection<String>) null, (DisposableObjArray arr) -> arr.get(0)));
+        assertThrows(IllegalArgumentException.class, () -> ds.removeDuplicateRowsBy(new ArrayList<>(), (DisposableObjArray arr) -> arr.get(0)));
     }
 
     @Test
@@ -2514,6 +2540,60 @@ public class RowDatasetTest extends TestBase {
         assertThrows(IllegalArgumentException.class, () -> {
             ds1.merge(ds2, true);
         });
+    }
+
+    @Test
+    public void testPrependAppendMergeWithNullOtherThrowsIllegalArgument() {
+        RowDataset ds = new RowDataset(columnNames, copyColumnList());
+
+        assertThrows(IllegalArgumentException.class, () -> ds.prepend(null));
+        assertThrows(IllegalArgumentException.class, () -> ds.append(null));
+        assertThrows(IllegalArgumentException.class, () -> ds.merge((Dataset) null));
+        assertThrows(IllegalArgumentException.class, () -> ds.merge(null, false));
+        assertThrows(IllegalArgumentException.class, () -> ds.merge(null, Arrays.asList("id")));
+        assertThrows(IllegalArgumentException.class, () -> ds.merge(null, 0, 0, Arrays.asList("id")));
+    }
+
+    @Test
+    public void testMergeWithNullOrEmptySelectColumnNamesThrowsIllegalArgument() {
+        RowDataset ds = new RowDataset(columnNames, copyColumnList());
+        RowDataset other = new RowDataset(new ArrayList<>(Arrays.asList("id")), new ArrayList<>(Arrays.asList(new ArrayList<>(Arrays.asList(9)))));
+
+        assertThrows(IllegalArgumentException.class, () -> ds.merge(other, (Collection<String>) null));
+        assertThrows(IllegalArgumentException.class, () -> ds.merge(other, new ArrayList<>()));
+        assertThrows(IllegalArgumentException.class, () -> ds.merge(other, 0, 1, null));
+        assertThrows(IllegalArgumentException.class, () -> ds.merge(other, 0, 1, new ArrayList<>()));
+    }
+
+    @Test
+    public void testMergeWithSelectColumnNamesNotInOtherThrowsIllegalArgument() {
+        RowDataset ds = new RowDataset(columnNames, copyColumnList());
+        RowDataset other = new RowDataset(new ArrayList<>(Arrays.asList("id", "city")),
+                new ArrayList<>(Arrays.asList(new ArrayList<>(Arrays.asList(9)), new ArrayList<>(Arrays.asList("NYC")))));
+        int sizeBefore = ds.size();
+        int columnCountBefore = ds.columnCount();
+
+        // "name" exists in this dataset but not in `other`: must throw instead of silently appending null-filled data.
+        assertThrows(IllegalArgumentException.class, () -> ds.merge(other, Arrays.asList("id", "name")));
+        // "country" exists in neither Dataset.
+        assertThrows(IllegalArgumentException.class, () -> ds.merge(other, 0, 1, Arrays.asList("country")));
+
+        // The failed merges must not have modified this dataset.
+        assertEquals(sizeBefore, ds.size());
+        assertEquals(columnCountBefore, ds.columnCount());
+    }
+
+    @Test
+    public void testMergeWithZeroColumnOtherIsStillNoOp() {
+        RowDataset ds = new RowDataset(columnNames, copyColumnList());
+        RowDataset zeroColumns = new RowDataset(new ArrayList<>(), new ArrayList<>());
+        int sizeBefore = ds.size();
+        int columnCountBefore = ds.columnCount();
+
+        ds.merge(zeroColumns);
+
+        assertEquals(sizeBefore, ds.size());
+        assertEquals(columnCountBefore, ds.columnCount());
     }
 
     // ==================== Missing test methods below ====================
@@ -3889,6 +3969,25 @@ public class RowDatasetTest extends TestBase {
     }
 
     @Test
+    public void testToJsonEscapesColumnNames() {
+        final List<String> columnNames = Arrays.asList("a\"b", "c\\d", "line\nbreak");
+        final Dataset ds = Dataset.rows(columnNames, new Object[][] { { 1, 2, 3 } });
+
+        final String json = ds.toJson();
+
+        assertTrue(json.contains("\"a\\\"b\":1"));
+        assertTrue(json.contains("\"c\\\\d\":2"));
+        assertTrue(json.contains("\"line\\nbreak\":3"));
+
+        final Dataset parsed = N.fromJson(json, Dataset.class);
+
+        assertEquals(columnNames, parsed.columnNames());
+        assertEquals(1, ((Number) parsed.get(0, 0)).intValue());
+        assertEquals(2, ((Number) parsed.get(0, 1)).intValue());
+        assertEquals(3, ((Number) parsed.get(0, 2)).intValue());
+    }
+
+    @Test
     public void testToJsonToFile() throws IOException {
         final RowDataset dataset = createThreeRowScoreDataset();
         File tempFile = File.createTempFile("dataset", ".json");
@@ -4661,6 +4760,15 @@ public class RowDatasetTest extends TestBase {
     }
 
     @Test
+    public void testGroupBy_WithNullCollector_ThrowsIllegalArgument() {
+        assertThrows(IllegalArgumentException.class, () -> dataset.groupBy("name", "age", "totalAge", (Collector<?, ?, ?>) null));
+        assertThrows(IllegalArgumentException.class, () -> dataset.groupBy("name", Fn.identity(), "age", "totalAge", (Collector<?, ?, ?>) null));
+        assertThrows(IllegalArgumentException.class, () -> dataset.groupBy(Arrays.asList("name", "id"), "age", "totalAge", (Collector<?, ?, ?>) null));
+        assertThrows(IllegalArgumentException.class,
+                () -> dataset.groupBy(Arrays.asList("name", "id"), Fn.identity(), "age", "totalAge", (Collector<?, ?, ?>) null));
+    }
+
+    @Test
     public void testPivotWithSingleAggregateColumn() {
         List<String> columnNames = N.toList("row", "col", "value");
         List<List<Object>> columnValues = new ArrayList<>();
@@ -5317,6 +5425,15 @@ public class RowDatasetTest extends TestBase {
     }
 
     @Test
+    public void testDistinctBy_MultiCols_NullOrEmptyColumnNames_ThrowsIllegalArgumentException() {
+        final RowDataset dataset = createFiveRowCityDataset();
+
+        assertThrows(IllegalArgumentException.class, () -> dataset.distinctBy((Collection<String>) null, Fn.identity()));
+        assertThrows(IllegalArgumentException.class, () -> dataset.distinctBy(new ArrayList<>(), Fn.identity()));
+        assertThrows(IllegalArgumentException.class, () -> dataset.distinctBy((Collection<String>) null));
+    }
+
+    @Test
     public void testFilterWithPredicate() {
         final RowDataset dataset = createFiveRowCityDataset();
         Predicate<DisposableObjArray> filter = arr -> ((Integer) arr.get(2)) > 30;
@@ -5414,6 +5531,30 @@ public class RowDatasetTest extends TestBase {
 
         assertNotNull(filtered);
         assertEquals(2, filtered.size());
+    }
+
+    @Test
+    public void testFilterByTuple2_NegativeMax_ThrowsIllegalArgumentException() {
+        final RowDataset dataset = createFiveRowCityDataset();
+        final BiPredicate<Object, Object> filter = (name, age) -> true;
+
+        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () -> dataset.filter(Tuple.of("name", "age"), filter, -1));
+        assertTrue(ex.getMessage().contains("max"));
+
+        ex = assertThrows(IllegalArgumentException.class, () -> dataset.filter(0, dataset.size(), Tuple.of("name", "age"), filter, -1));
+        assertTrue(ex.getMessage().contains("max"));
+    }
+
+    @Test
+    public void testFilterByTuple3_NegativeMax_ThrowsIllegalArgumentException() {
+        final RowDataset dataset = createFiveRowCityDataset();
+        final TriPredicate<Object, Object, Object> filter = (name, age, city) -> true;
+
+        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () -> dataset.filter(Tuple.of("name", "age", "city"), filter, -1));
+        assertTrue(ex.getMessage().contains("max"));
+
+        ex = assertThrows(IllegalArgumentException.class, () -> dataset.filter(0, dataset.size(), Tuple.of("name", "age", "city"), filter, -1));
+        assertTrue(ex.getMessage().contains("max"));
     }
 
     // ========== filter - empty dataset ==========
@@ -6513,6 +6654,52 @@ public class RowDatasetTest extends TestBase {
     }
 
     @Test
+    public void testUnion_NullOther_ThrowsIllegalArgumentException() {
+        assertThrows(IllegalArgumentException.class, () -> ds1.union(null));
+        assertThrows(IllegalArgumentException.class, () -> ds1.union(null, true));
+        assertThrows(IllegalArgumentException.class, () -> ds1.union(null, Arrays.asList("id")));
+        assertThrows(IllegalArgumentException.class, () -> ds1.union(null, Arrays.asList("id"), false));
+    }
+
+    @Test
+    public void testUnionAll_NullOther_ThrowsIllegalArgumentException() {
+        assertThrows(IllegalArgumentException.class, () -> ds1.unionAll(null));
+        assertThrows(IllegalArgumentException.class, () -> ds1.unionAll(null, false));
+    }
+
+    @Test
+    public void testIntersect_NullOther_ThrowsIllegalArgumentException() {
+        assertThrows(IllegalArgumentException.class, () -> ds1.intersect(null));
+        assertThrows(IllegalArgumentException.class, () -> ds1.intersect(null, true));
+        assertThrows(IllegalArgumentException.class, () -> ds1.intersect(null, Arrays.asList("id")));
+        assertThrows(IllegalArgumentException.class, () -> ds1.intersect(null, Arrays.asList("id"), false));
+    }
+
+    @Test
+    public void testIntersectAll_NullOther_ThrowsIllegalArgumentException() {
+        assertThrows(IllegalArgumentException.class, () -> ds1.intersectAll(null));
+        assertThrows(IllegalArgumentException.class, () -> ds1.intersectAll(null, true));
+        assertThrows(IllegalArgumentException.class, () -> ds1.intersectAll(null, Arrays.asList("id")));
+        assertThrows(IllegalArgumentException.class, () -> ds1.intersectAll(null, Arrays.asList("id"), false));
+    }
+
+    @Test
+    public void testExcept_NullOther_ThrowsIllegalArgumentException() {
+        assertThrows(IllegalArgumentException.class, () -> ds1.except(null));
+        assertThrows(IllegalArgumentException.class, () -> ds1.except(null, true));
+        assertThrows(IllegalArgumentException.class, () -> ds1.except(null, Arrays.asList("id")));
+        assertThrows(IllegalArgumentException.class, () -> ds1.except(null, Arrays.asList("id"), false));
+    }
+
+    @Test
+    public void testExceptAll_NullOther_ThrowsIllegalArgumentException() {
+        assertThrows(IllegalArgumentException.class, () -> ds1.exceptAll(null));
+        assertThrows(IllegalArgumentException.class, () -> ds1.exceptAll(null, true));
+        assertThrows(IllegalArgumentException.class, () -> ds1.exceptAll(null, Arrays.asList("id")));
+        assertThrows(IllegalArgumentException.class, () -> ds1.exceptAll(null, Arrays.asList("id"), false));
+    }
+
+    @Test
     public void testCartesianProduct() {
         List<String> columnNames1 = N.toList("a", "b");
         List<List<Object>> columns1 = new ArrayList<>();
@@ -6552,6 +6739,12 @@ public class RowDatasetTest extends TestBase {
         assertThrows(IllegalArgumentException.class, () -> {
             ds1.cartesianProduct(ds2);
         });
+    }
+
+    @Test
+    public void testCartesianProduct_NullOther_ThrowsIllegalArgumentException() {
+        // regression: a null other dataset failed with a raw NPE; the documented contract is IAE
+        assertThrows(IllegalArgumentException.class, () -> ds1.cartesianProduct(null));
     }
 
     @Test
@@ -7397,6 +7590,58 @@ public class RowDatasetTest extends TestBase {
         data.add(new ArrayList<>(Arrays.asList(1, 2, 3)));
 
         assertThrows(IllegalArgumentException.class, () -> new RowDataset(cols, data));
+    }
+
+    // --- regression tests for 2026-06-10 deep-review fixes ---
+
+    @Test
+    public void testCombineColumnsWithLiveColumnNameView() {
+        // regression: passing the live columnNames() view destroyed the dataset — addColumn mutated
+        // the view, so removeColumns then also removed the freshly combined column
+        final RowDataset ds = new RowDataset(new ArrayList<>(Arrays.asList("a", "b")),
+                new ArrayList<>(Arrays.asList(new ArrayList<>(Arrays.asList(1, 2)), new ArrayList<>(Arrays.asList(10, 20)))));
+
+        ds.combineColumns(ds.columnNames(), "c", arr -> (Integer) arr.get(0) + (Integer) arr.get(1));
+
+        assertEquals(Arrays.asList("c"), ds.columnNames());
+        assertEquals(Arrays.asList(11, 22), ds.getColumn("c"));
+    }
+
+    @Test
+    public void testFullJoinUnmatchedRightRowsKeepRightOrder() {
+        // regression: the single-key fullJoin used a HashMap, emitting unmatched right rows in
+        // hash-bucket order instead of right-dataset order (the multi-key path uses LinkedHashMap)
+        final RowDataset left = new RowDataset(new ArrayList<>(Arrays.asList("id")), new ArrayList<>(Arrays.asList(new ArrayList<>(Arrays.asList(1)))));
+        final RowDataset right = new RowDataset(new ArrayList<>(Arrays.asList("rid", "score")),
+                new ArrayList<>(Arrays.asList(new ArrayList<>(Arrays.asList(18, 16)), new ArrayList<>(Arrays.asList("a", "b")))));
+
+        final Dataset joined = left.fullJoin(right, N.asMap("id", "rid"));
+
+        assertEquals(Arrays.asList(null, 18, 16), joined.getColumn("rid"));
+    }
+
+    @Test
+    public void testJoinNullRightThrowsIllegalArgumentException() {
+        // regression: a null right dataset failed with a raw NPE; the documented contract is IAE
+        final RowDataset left = new RowDataset(new ArrayList<>(Arrays.asList("id")), new ArrayList<>(Arrays.asList(new ArrayList<>(Arrays.asList(1)))));
+
+        assertThrows(IllegalArgumentException.class, () -> left.innerJoin(null, N.asMap("id", "id")));
+        assertThrows(IllegalArgumentException.class, () -> left.leftJoin(null, N.asMap("id", "id")));
+        assertThrows(IllegalArgumentException.class, () -> left.rightJoin(null, N.asMap("id", "id")));
+        assertThrows(IllegalArgumentException.class, () -> left.fullJoin(null, N.asMap("id", "id")));
+    }
+
+    @Test
+    public void testAddRows_ObjectArrayCollectionWithShortRow() {
+        final RowDataset ds = new RowDataset(new ArrayList<>(Arrays.asList("id", "name")),
+                new ArrayList<>(Arrays.asList(new ArrayList<>(Arrays.asList(1)), new ArrayList<>(Arrays.asList("a")))));
+
+        ds.addRows(1, Arrays.asList(new Object[] { 2, "b" }, new Object[] { 3, "c" }));
+
+        assertEquals(3, ds.size());
+        assertEquals(Arrays.asList(1, 2, 3), ds.getColumn("id"));
+        assertEquals(Arrays.asList("a", "b", "c"), ds.getColumn("name"));
+        assertThrows(IllegalArgumentException.class, () -> ds.addRows(Arrays.asList(new Object[] { 4 })));
     }
 
 }

@@ -193,6 +193,6 @@ public class ShortNConsumerTest extends TestBase {
     public void testAndThenNullThrowsImmediately() {
         ShortNConsumer instance = a -> {
         };
-        org.junit.jupiter.api.Assertions.assertThrows(NullPointerException.class, () -> instance.andThen((ShortNConsumer) null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> instance.andThen((ShortNConsumer) null));
     }
 }

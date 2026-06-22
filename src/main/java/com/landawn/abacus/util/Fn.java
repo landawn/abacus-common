@@ -197,7 +197,7 @@ import com.landawn.abacus.util.stream.Stream;
  * // Range validation with numeric predicates
  * List<Integer> scores = Arrays.asList(85, 92, 67, 88, 91);
  * List<Integer> passingScores = scores.stream()
- *     .filter(Fn.geAndLe(70, 100))  // returns >= 70 and <= 100
+ *     .filter(Fn.geAndLe(70, 100))  // keeps scores >= 70 and <= 100
  *     .collect(Collectors.toList());
  *
  * // Map entry processing with key/value operations
@@ -597,6 +597,7 @@ public final class Fn {
      * @param <T> the type of the value supplied
      * @param supplier the supplier whose result should be memoized
      * @return a memoized Supplier that caches the result of the first invocation
+     * @throws IllegalArgumentException if {@code supplier} is {@code null}
      */
     public static <T> Supplier<T> memoize(final java.util.function.Supplier<T> supplier) {
         return LazyInitializer.of(supplier);
@@ -633,7 +634,7 @@ public final class Fn {
      * List<User> users1 = cachedUsers.get();
      *
      * // Subsequent calls within 5 minutes return cached value
-     * List<User> users2 = cachedUsers.get();   // returns No database query
+     * List<User> users2 = cachedUsers.get();   // returns cached value (no database query)
      *
      * // After 5 minutes, the next call will query database again
      * // and cache the new result
@@ -666,7 +667,8 @@ public final class Fn {
      * @return a new supplier that caches the result of the delegate supplier for the specified
      *         duration. The returned supplier's {@code get()} method will return cached values
      *         within the expiration window and fetch fresh values when the cache expires
-     * @throws IllegalArgumentException if {@code duration} is not positive (i.e., duration ≤ 0)
+     * @throws IllegalArgumentException if {@code supplier} or {@code unit} is {@code null},
+     *                                  or if {@code duration} is not positive (i.e., duration ≤ 0)
      */
     public static <T> Supplier<T> memoizeWithExpiration(final java.util.function.Supplier<T> supplier, final long duration, final TimeUnit unit)
             throws IllegalArgumentException {
@@ -858,7 +860,7 @@ public final class Fn {
     @SuppressWarnings("rawtypes")
     static final Predicate<Map> NOT_EMPTY_MAP = value -> value != null && !value.isEmpty();
 
-    private static final Function<Map<Object, Collection<Object>>, List<Map<Object, Object>>> FLAT_MAP_VALUE_FUNC = Maps::flatToMap;
+    private static final Function<Map<Object, Collection<Object>>, List<Map<Object, Object>>> FLAT_MAP_VALUE_FUNC = Maps::transpose;
 
     private static final ToByteFunction<String> PARSE_BYTE_FUNC = Numbers::toByte;
 
@@ -950,7 +952,7 @@ public final class Fn {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Fn.closeAll(s1,s2).run()                                  // closes all
+     * Fn.closeAll(Arrays.asList(s1, s2)).run()                  // closes all
      * }</pre>
      *
      * @param c the collection of AutoCloseable resources to close
@@ -1058,7 +1060,7 @@ public final class Fn {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Fn.closeAllQuietly(s1,s2).run()                           // closes all quietly
+     * Fn.closeAllQuietly(Arrays.asList(s1, s2)).run()           // closes all quietly
      * }</pre>
      *
      * @param c the collection of AutoCloseable resources to close quietly
@@ -1107,14 +1109,14 @@ public final class Fn {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Fn.shutDown(executor).run()
+     * Fn.shutdown(executor).run()
      * }</pre>
      *
      * @param service the ExecutorService to shut down
      * @return a Runnable that shuts down the service when executed
      * @see ExecutorService#shutdown()
      */
-    public static Runnable shutDown(final ExecutorService service) {
+    public static Runnable shutdown(final ExecutorService service) {
         return new Runnable() {
             private volatile boolean isClosed = false;
 
@@ -1142,7 +1144,7 @@ public final class Fn {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Fn.shutDown(executor, 5, TimeUnit.SECONDS).run()
+     * Fn.shutdown(executor, 5, TimeUnit.SECONDS).run()
      * }</pre>
      *
      * @param service the ExecutorService to shut down
@@ -1152,7 +1154,7 @@ public final class Fn {
      * @see ExecutorService#shutdown()
      * @see ExecutorService#awaitTermination(long, TimeUnit)
      */
-    public static Runnable shutDown(final ExecutorService service, final long terminationTimeout, final TimeUnit timeUnit) {
+    public static Runnable shutdown(final ExecutorService service, final long terminationTimeout, final TimeUnit timeUnit) {
         return new Runnable() {
             private volatile boolean isClosed = false;
 
@@ -1440,7 +1442,8 @@ public final class Fn {
                 return PRINTLN_EMPTY;
 
             default:
-                return (t, u) -> N.println(t + separator + u);
+                // Keep array/iterable-aware rendering consistent with the special-cased separator constants.
+                return (t, u) -> N.println(Strings.concat(N.toString(t), separator, N.toString(u)));
         }
     }
 
@@ -2294,7 +2297,9 @@ public final class Fn {
 
     /**
      * Returns a Function that casts objects to the specified class.
-     * This performs an unchecked cast and should be used with caution.
+     * The cast is dynamically checked via {@link Class#cast(Object)}: the returned function throws a
+     * {@code ClassCastException} if the input is not an instance of the specified class, and passes
+     * {@code null} inputs through as {@code null}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -2375,7 +2380,7 @@ public final class Fn {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Fn.isNull(Map.Entry::getValue).test(Map.entry("a", null))  // returns true
+     * Fn.isNull(Map.Entry::getValue).test(N.newEntry("a", null))  // returns true
      * Fn.isNull(Map.Entry::getValue).test(Map.entry("a", "x"))   // returns false
      * }</pre>
      *
@@ -2411,7 +2416,7 @@ public final class Fn {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Fn.isEmpty(Map.Entry::getValue).test(Map.entry("a", ""))     // returns true
-     * Fn.isEmpty(Map.Entry::getValue).test(Map.entry("a", null))   // returns true
+     * Fn.isEmpty(Map.Entry::getValue).test(N.newEntry("a", null))   // returns true
      * Fn.isEmpty(Map.Entry::getValue).test(Map.entry("a", "x"))    // returns false
      * }</pre>
      *
@@ -2448,7 +2453,7 @@ public final class Fn {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Fn.isBlank(Map.Entry::getValue).test(Map.entry("a", "   "))   // returns true
-     * Fn.isBlank(Map.Entry::getValue).test(Map.entry("a", null))    // returns true
+     * Fn.isBlank(Map.Entry::getValue).test(N.newEntry("a", null))    // returns true
      * Fn.isBlank(Map.Entry::getValue).test(Map.entry("a", "hello")) // returns false
      * }</pre>
      *
@@ -2541,7 +2546,7 @@ public final class Fn {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Fn.notNull(Map.Entry::getValue).test(Map.entry("a", "x"))    // returns true
-     * Fn.notNull(Map.Entry::getValue).test(Map.entry("a", null))   // returns false
+     * Fn.notNull(Map.Entry::getValue).test(N.newEntry("a", null))   // returns false
      * }</pre>
      *
      * @param <T> the type of the input to the predicate
@@ -2578,7 +2583,7 @@ public final class Fn {
      * <pre>{@code
      * Fn.notEmpty(Map.Entry::getValue).test(Map.entry("a", "hello")) // returns true
      * Fn.notEmpty(Map.Entry::getValue).test(Map.entry("a", ""))      // returns false
-     * Fn.notEmpty(Map.Entry::getValue).test(Map.entry("a", null))    // returns false
+     * Fn.notEmpty(Map.Entry::getValue).test(N.newEntry("a", null))    // returns false
      * }</pre>
      *
      * @param <T> the type of the input to the predicate
@@ -2615,7 +2620,7 @@ public final class Fn {
      * <pre>{@code
      * Fn.notBlank(Map.Entry::getValue).test(Map.entry("a", "hello")) // returns true
      * Fn.notBlank(Map.Entry::getValue).test(Map.entry("a", "   "))   // returns false
-     * Fn.notBlank(Map.Entry::getValue).test(Map.entry("a", null))    // returns false
+     * Fn.notBlank(Map.Entry::getValue).test(N.newEntry("a", null))    // returns false
      * }</pre>
      *
      * @param <T> the type of the input to the predicate
@@ -2632,7 +2637,7 @@ public final class Fn {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Fn.notEmptyArray().test(new String[]{"a"})                // returns true
-     * Fn.notEmptyArray().test(new int[]{1,2})                   // returns true
+     * Fn.notEmptyArray().test(new Integer[]{1,2})               // returns true
      * Fn.notEmptyArray().test(new String[0])                    // returns false
      * }</pre>
      *
@@ -3205,7 +3210,7 @@ public final class Fn {
     }
 
     /**
-     * Returns a Predicate that tests if a CharSequence matches the specified Pattern.
+     * Returns a Predicate that tests if a CharSequence contains a match for the specified Pattern.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -4223,11 +4228,11 @@ public final class Fn {
     }
 
     /**
-     * Returns a Function that applies two mappers in sequence, returning a default value if any step produces {@code null}.
+     * Returns a Function that applies two mappers in sequence, returning a default value if the input or any intermediate step produces {@code null}.
      *
-     * <p>This method provides null-safe function composition. If the input is null, or if any mapper
-     * in the chain returns null, the default value is returned instead of propagating null or throwing
-     * a NullPointerException.
+     * <p>This method provides null-safe function composition. If the input is null, or if any intermediate
+     * mapper in the chain returns null, the default value is returned; a null result from the final mapper
+     * is returned as-is.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -4246,7 +4251,7 @@ public final class Fn {
      * @param <R> the result type
      * @param mapperA the first mapper (must not be null)
      * @param mapperB the second mapper (must not be null)
-     * @param defaultValue the default value to return if any step is null
+     * @param defaultValue the default value to return if the input or any intermediate step is null
      * @return a Function with null-safe chaining
      * @throws IllegalArgumentException if mapperA or mapperB is null
      * @see #applyIfNotNullOrElseGet(java.util.function.Function, java.util.function.Function, java.util.function.Supplier)
@@ -4272,7 +4277,7 @@ public final class Fn {
     }
 
     /**
-     * Returns a Function that applies three mappers in sequence, returning a default value if any step produces {@code null}.
+     * Returns a Function that applies three mappers in sequence, returning a default value if the input or any intermediate step produces {@code null}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -4287,7 +4292,7 @@ public final class Fn {
      * @param mapperA the first mapper
      * @param mapperB the second mapper
      * @param mapperC the third mapper
-     * @param defaultValue the default value to return if any step is null
+     * @param defaultValue the default value to return if the input or any intermediate step is null
      * @return a Function with null-safe chaining
      * @throws IllegalArgumentException if any mapper is null
      */
@@ -4320,7 +4325,7 @@ public final class Fn {
     }
 
     /**
-     * Returns a Function that applies four mappers in sequence, returning a default value if any step produces {@code null}.
+     * Returns a Function that applies four mappers in sequence, returning a default value if the input or any intermediate step produces {@code null}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -4337,7 +4342,7 @@ public final class Fn {
      * @param mapperB the second mapper
      * @param mapperC the third mapper
      * @param mapperD the fourth mapper
-     * @param defaultValue the default value to return if any step is null
+     * @param defaultValue the default value to return if the input or any intermediate step is null
      * @return a Function with null-safe chaining
      * @throws IllegalArgumentException if any mapper is null
      */
@@ -4377,7 +4382,7 @@ public final class Fn {
     }
 
     /**
-     * Returns a Function that applies two mappers in sequence, using a supplier for the default value if any step produces {@code null}.
+     * Returns a Function that applies two mappers in sequence, using a supplier for the default value if the input or any intermediate step produces {@code null}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -4415,7 +4420,7 @@ public final class Fn {
     }
 
     /**
-     * Returns a Function that applies three mappers in sequence, using a supplier for the default value if any step produces {@code null}.
+     * Returns a Function that applies three mappers in sequence, using a supplier for the default value if the input or any intermediate step produces {@code null}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -4463,7 +4468,7 @@ public final class Fn {
     }
 
     /**
-     * Returns a Function that applies four mappers in sequence, using a supplier for the default value if any step produces {@code null}.
+     * Returns a Function that applies four mappers in sequence, using a supplier for the default value if the input or any intermediate step produces {@code null}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -4627,7 +4632,7 @@ public final class Fn {
      * @param <K> the key type
      * @param <V> the value type
      * @return a Function that flattens Maps with Collection values
-     * @see Maps#flatToMap(Map)
+     * @see Maps#transpose(Map)
      */
     @Beta
     @SuppressWarnings("rawtypes")
@@ -4643,10 +4648,7 @@ public final class Fn {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * List<String> byteStrings = Arrays.asList("1", "2", "127");
-     * int sum = byteStrings.stream()
-     *     .mapToInt(Fn.parseByte())
-     *     .sum();   // = 130
+     * byte b = Fn.parseByte().applyAsByte("127");   // returns 127
      * }</pre>
      *
      * @return a ToByteFunction that parses strings to byte values
@@ -4666,10 +4668,7 @@ public final class Fn {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * List<String> shortStrings = Arrays.asList("100", "200", "32767");
-     * int sum = shortStrings.stream()
-     *     .mapToInt(Fn.parseShort())
-     *     .sum();
+     * short s = Fn.parseShort().applyAsShort("32767");   // returns 32767
      * }</pre>
      *
      * @return a ToShortFunction that parses strings to short values
@@ -4900,7 +4899,7 @@ public final class Fn {
     @Beta
     @Stateful
     public static <T> Predicate<T> atMost(final int count) throws IllegalArgumentException {
-        // TODO cnt or atMost? skip(atMost(n)/limit(atMots(n)/dropWhile(atMost(n)/takeWhile(atMost(n)
+        // TODO cnt or atMost? skip(atMost(n)/limit(atMost(n)/dropWhile(atMost(n)/takeWhile(atMost(n)
         // TODO cnt or atMost? skip(cnt(n)/limit(cnt(n)/dropWhile(cnt(n)/takeWhile(cnt(n)
         // public static <T> Predicate<T> cnt(final int count) {
 
@@ -5159,9 +5158,9 @@ public final class Fn {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Predicate<Object> p = Fn.timeLimit(Duration.ofSeconds(5))
+     * Predicate<Object> p = Fn.timeLimit(5000)   // 5 seconds
      * p.test("data")                                            // returns true within 5 sec, false after
-     * Fn.timeLimit(0).test("data")
+     * Fn.timeLimit(0).test("data")                              // returns false (zero time limit)
      * }</pre>
      *
      * @param <T> the type of the input to the predicate
@@ -5206,13 +5205,13 @@ public final class Fn {
      * <pre>{@code
      * Predicate<Object> p = Fn.timeLimit(Duration.ofSeconds(5))
      * p.test("data")                                            // returns true within 5 sec, false after
-     * Fn.timeLimit(0).test("data")
+     * Fn.timeLimit(Duration.ofMillis(0)).test("data")           // returns false (zero time limit)
      * }</pre>
      *
      * @param <T> the type of the input to the predicate
      * @param duration the time limit as a Duration
      * @return a stateful {@code Predicate}. Don't save or cache for reuse, but it can be used in parallel stream.
-     * @throws IllegalArgumentException if duration is null
+     * @throws IllegalArgumentException if duration is {@code null} or negative
      */
     @Beta
     @Stateful
@@ -6013,7 +6012,7 @@ public final class Fn {
      *   <li>{@code f()} — <b>F</b>unction / BiFunction / TriFunction</li>
      *   <li>{@code r()} — <b>R</b>unnable</li>
      *   <li>{@code rr()} — Throwable <b>R</b>unnable (converts checked exceptions to <b>R</b>untime exceptions)</li>
-     *   <li>{@code cc()} — Throwable <b>C</b>allable (converts checked exceptions)</li>
+     *   <li>{@code cc()} — Throwable-safe <b>C</b>onsumer (also Throwable <b>C</b>allable)</li>
      *   <li>{@code jr()} — <b>J</b>ava <b>R</b>unnable (java.lang.Runnable identity)</li>
      *   <li>{@code jc()} — <b>J</b>ava <b>C</b>allable (java.util.concurrent.Callable identity)</li>
      *   <li>{@code jr2r()} — <b>J</b>ava <b>R</b>unnable <b>to</b> abacus <b>R</b>unnable</li>
@@ -6613,6 +6612,7 @@ public final class Fn {
      * @param <U> the type of elements to be accepted by the result consumer
      * @param mapper the mapping bi-consumer to return
      * @return the bi-consumer unchanged
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}
      * @see Stream#mapMulti(java.util.function.BiConsumer)
      * @see Seq#mapMulti(Throwables.BiConsumer)
      * @see Fnn#mc(Throwables.BiConsumer)
@@ -7136,8 +7136,8 @@ public final class Fn {
      * Creates a function that safely wraps a throwable function by returning a default value if the function throws an exception.
      *
      * <p>This utility method simplifies functional programming by allowing the use of operations that might throw checked exceptions
-     * without explicit try-catch blocks. Any checked exception thrown by the function will be caught and the provided
-     * default value will be returned instead.</p>
+     * without explicit try-catch blocks. Any <i>checked</i> exception thrown by the function will be caught and the provided
+     * default value will be returned instead; unchecked exceptions ({@link RuntimeException} / {@link Error}) propagate to the caller.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -7148,8 +7148,8 @@ public final class Fn {
      * @param <T> the type of the input to the function
      * @param <R> the type of the result of the function
      * @param function the throwable function to be wrapped
-     * @param defaultOnError the default value to return if the function throws an exception
-     * @return a function that delegates to the given throwable function, returning the default value if an exception occurs
+     * @param defaultOnError the default value to return if the function throws a checked exception
+     * @return a function that delegates to the given throwable function, returning the default value if a checked exception occurs
      * @throws IllegalArgumentException if the function is null
      * @see #ff(Throwables.Function)
      * @see #pp(Throwables.Predicate)
@@ -7163,6 +7163,8 @@ public final class Fn {
         return t -> {
             try {
                 return function.apply(t);
+            } catch (final RuntimeException e) {
+                throw e;
             } catch (final Exception e) {
                 return defaultOnError;
             }
@@ -7282,8 +7284,8 @@ public final class Fn {
      * Creates a bi-function that safely wraps a throwable bi-function by returning a default value if the function throws an exception.
      *
      * <p>This utility method simplifies functional programming by allowing the use of operations that might throw checked exceptions
-     * without explicit try-catch blocks. Any checked exception thrown by the bi-function will be caught and the provided
-     * default value will be returned instead.</p>
+     * without explicit try-catch blocks. Any <i>checked</i> exception thrown by the bi-function will be caught and the provided
+     * default value will be returned instead; unchecked exceptions ({@link RuntimeException} / {@link Error}) propagate to the caller.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -7295,8 +7297,8 @@ public final class Fn {
      * @param <U> the type of the second input to the bi-function
      * @param <R> the type of the result of the bi-function
      * @param biFunction the throwable bi-function to be wrapped
-     * @param defaultOnError the default value to return if the function throws an exception
-     * @return a bi-function that delegates to the given throwable bi-function, returning the default value if an exception occurs
+     * @param defaultOnError the default value to return if the function throws a checked exception
+     * @return a bi-function that delegates to the given throwable bi-function, returning the default value if a checked exception occurs
      * @throws IllegalArgumentException if the biFunction is null
      * @see #ff(Throwables.BiFunction)
      * @see #ff(Throwables.Function, Object)
@@ -7309,6 +7311,8 @@ public final class Fn {
         return (t, u) -> {
             try {
                 return biFunction.apply(t, u);
+            } catch (final RuntimeException e) {
+                throw e;
             } catch (final Exception e) {
                 return defaultOnError;
             }
@@ -7393,8 +7397,8 @@ public final class Fn {
      * Creates a tri-function that safely wraps a throwable tri-function by returning a default value if the function throws an exception.
      *
      * <p>This utility method simplifies functional programming by allowing the use of operations that might throw checked exceptions
-     * without explicit try-catch blocks. Any checked exception thrown by the tri-function will be caught and the provided
-     * default value will be returned instead.</p>
+     * without explicit try-catch blocks. Any <i>checked</i> exception thrown by the tri-function will be caught and the provided
+     * default value will be returned instead; unchecked exceptions ({@link RuntimeException} / {@link Error}) propagate to the caller.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -7407,8 +7411,8 @@ public final class Fn {
      * @param <C> the type of the third input to the tri-function
      * @param <R> the type of the result of the tri-function
      * @param triFunction the throwable tri-function to be wrapped
-     * @param defaultOnError the default value to return if the function throws an exception
-     * @return a tri-function that delegates to the given throwable tri-function, returning the default value if an exception occurs
+     * @param defaultOnError the default value to return if the function throws a checked exception
+     * @return a tri-function that delegates to the given throwable tri-function, returning the default value if a checked exception occurs
      * @throws IllegalArgumentException if the triFunction is null
      * @see #ff(Throwables.TriFunction)
      * @see #ff(Throwables.BiFunction, Object)
@@ -7421,6 +7425,8 @@ public final class Fn {
         return (a, b, c) -> {
             try {
                 return triFunction.apply(a, b, c);
+            } catch (final RuntimeException e) {
+                throw e;
             } catch (final Exception e) {
                 return defaultOnError;
             }
@@ -8118,7 +8124,7 @@ public final class Fn {
      * @return a callable that executes the throwable callable and converts checked exceptions to runtime exceptions
      * @see #rr(Throwables.Runnable)
      */
-    public static <R> Callable<R> cc(final Throwables.Callable<R, ? extends Exception> callable) {
+    public static <R> Callable<R> cc(final Throwables.Callable<? extends R, ? extends Exception> callable) {
         return () -> {
             try {
                 return callable.call();
@@ -8169,10 +8175,10 @@ public final class Fn {
      * @throws IllegalArgumentException if the callable is null
      * @see #r(Runnable)
      */
-    public static <R> Callable<R> c(final Callable<R> callable) throws IllegalArgumentException {
+    public static <R> Callable<R> c(final Callable<? extends R> callable) throws IllegalArgumentException {
         N.checkArgNotNull(callable);
 
-        return callable;
+        return (Callable<R>) callable;
     }
 
     /**
@@ -8218,10 +8224,10 @@ public final class Fn {
      * @throws IllegalArgumentException if the callable is null
      * @see #jr(java.lang.Runnable)
      */
-    public static <R> java.util.concurrent.Callable<R> jc(final java.util.concurrent.Callable<R> callable) throws IllegalArgumentException {
+    public static <R> java.util.concurrent.Callable<R> jc(final java.util.concurrent.Callable<? extends R> callable) throws IllegalArgumentException {
         N.checkArgNotNull(callable);
 
-        return callable;
+        return (java.util.concurrent.Callable<R>) callable;
     }
 
     /**
@@ -8299,7 +8305,7 @@ public final class Fn {
      * @throws IllegalArgumentException if the callable is null
      * @see #r2c(java.lang.Runnable)
      */
-    public static <R> Runnable c2r(final Callable<R> callable) throws IllegalArgumentException {
+    public static <R> Runnable c2r(final Callable<? extends R> callable) throws IllegalArgumentException {
         N.checkArgNotNull(callable);
 
         return callable::call;
@@ -8319,7 +8325,8 @@ public final class Fn {
      * }</pre>
      *
      * @param runnable the Java runnable to convert
-     * @return an abacus Runnable that delegates to the Java runnable
+     * @return an abacus Runnable that delegates to the Java runnable; if the argument is already an
+     *         abacus Runnable it is returned unchanged
      * @throws IllegalArgumentException if the runnable is null
      * @see #jc2c(java.util.concurrent.Callable)
      */
@@ -8348,11 +8355,12 @@ public final class Fn {
      *
      * @param <R> the type of the result
      * @param callable the Java callable to convert
-     * @return an abacus Callable that delegates to the Java callable
+     * @return an abacus Callable that delegates to the Java callable; if the argument is already an
+     *         abacus Callable it is returned unchanged
      * @throws IllegalArgumentException if the callable is null
      * @see #jr2r(java.lang.Runnable)
      */
-    public static <R> Callable<R> jc2c(final java.util.concurrent.Callable<R> callable) throws IllegalArgumentException {
+    public static <R> Callable<R> jc2c(final java.util.concurrent.Callable<? extends R> callable) throws IllegalArgumentException {
         N.checkArgNotNull(callable);
 
         if (callable instanceof Callable) {
@@ -8578,7 +8586,7 @@ public final class Fn {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Fn.alternate().apply(oldVal,newVal)                       // returns MergeResult
+     * Fn.alternate().apply(oldVal, newVal)                      // returns TAKE_FIRST (alternates)
      * }</pre>
      *
      * @param <T> the type of the input elements
@@ -8676,9 +8684,10 @@ public final class Fn {
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * Fn.distinct().test("a")                                   // returns true (new)
-         * Fn.distinct().test("a")                                   // returns false (seen)
-         * Fn.distinct().test("b")                                   // returns true (new)
+         * Predicate<String> p = Predicates.distinct();
+         * p.test("a")                                               // returns true (new)
+         * p.test("a")                                               // returns false (seen)
+         * p.test("b")                                               // returns true (new)
          * }</pre>
          *
          * @param <T> the type of the input to the predicate
@@ -8705,8 +8714,9 @@ public final class Fn {
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * Fn.distinctBy(Person::getName).test(new Person("Alice"))  // returns true
-         * Fn.distinctBy(Person::getName).test(new Person("Alice"))  // returns false
+         * Predicate<Person> p = Predicates.distinctBy(Person::getName);
+         * p.test(new Person("Alice"))                               // returns true
+         * p.test(new Person("Alice"))                               // returns false
          * }</pre>
          *
          * @param <T> the type of the input to the predicate
@@ -8734,8 +8744,9 @@ public final class Fn {
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * Fn.concurrentDistinct().test("a")                         // returns true (thread-safe)
-         * Fn.concurrentDistinct().test("a")                         // returns false
+         * Predicate<String> p = Predicates.concurrentDistinct();
+         * p.test("a")                                               // returns true (thread-safe)
+         * p.test("a")                                               // returns false
          * }</pre>
          *
          * @param <T> the type of the input to the predicate
@@ -8762,7 +8773,7 @@ public final class Fn {
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * Fn.concurrentDistinctBy(Person::getName).test(person)     // returns true (thread-safe)
+         * Predicates.concurrentDistinctBy(Person::getName).test(person)   // returns true (thread-safe)
          * }</pre>
          *
          * @param <T> the type of the input to the predicate
@@ -8790,9 +8801,10 @@ public final class Fn {
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * Fn.skipRepeats().test("a")                                // returns true
-         * Fn.skipRepeats().test("a")                                // returns false (repeated)
-         * Fn.skipRepeats().test("b")                                // returns true (different)
+         * Predicate<String> p = Predicates.skipRepeats();
+         * p.test("a")                                               // returns true
+         * p.test("a")                                               // returns false (repeated)
+         * p.test("b")                                               // returns true (different)
          * }</pre>
          *
          * @param <T> the type of the input to the predicate
@@ -10058,7 +10070,8 @@ public final class Fn {
 
         /**
          * Returns a BinaryOperator that appends to the bigger StringBuilder.
-         * The operator compares lengths and appends the smaller StringBuilder to the larger one, returning the larger.
+         * The operator combines the two builders into the larger one (appending the second to the first, or inserting
+         * the first at the front of the second), preserving first-then-second order and returning the larger.
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
@@ -10559,7 +10572,7 @@ public final class Fn {
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * Fn.cloneArray().apply(disposableArray)                    // returns cloned array
+         * Disposables.cloneArray().apply(disposableArray)           // returns cloned array
          * }</pre>
          *
          * @param <T> the component type of the array
@@ -10577,7 +10590,7 @@ public final class Fn {
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * Fn.toStr().apply(disposableArray) // returns the array string representation
+         * Disposables.toStr().apply(disposableArray) // returns the array string representation
          * }</pre>
          *
          * @param <A> the type of DisposableArray
@@ -10594,7 +10607,7 @@ public final class Fn {
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * Fn.join(", ").apply(disposableArray)                      // returns joined string
+         * Disposables.join(", ").apply(disposableArray)             // returns joined string
          * }</pre>
          *
          * @param <A> the type of DisposableArray
@@ -10616,7 +10629,7 @@ public final class Fn {
         /** The Constant IS_ZERO. */
         private static final CharPredicate IS_ZERO = t -> t == 0;
 
-        /** The Constant IS_WHITE_SPACE. */
+        /** The Constant IS_WHITESPACE. */
         private static final CharPredicate IS_WHITESPACE = Character::isWhitespace;
 
         /** The Constant EQUAL. */
@@ -11168,7 +11181,7 @@ public final class Fn {
 
         /**
          * Returns a Function that calculates the sum of all elements in a byte array.
-         * The sum is returned as an Integer to avoid overflow.
+         * The sum is accumulated in and returned as an Integer; large arrays can overflow the integer range.
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
@@ -11509,10 +11522,11 @@ public final class Fn {
 
         /**
          * Returns a Function that calculates the sum of all elements in a short array.
-         * The sum is returned as an Integer to avoid overflow.
+         * The sum is accumulated in and returned as an Integer; large arrays can overflow the integer range.
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
+         * FS.sum().apply(new short[]{1,2,3})                     // returns 6
          * FB.sum().apply(new byte[]{1,2,3})                      // returns 6
          * FI.sum().apply(new int[]{1,2,3})                       // returns 6
          * FL.sum().apply(new long[]{})                           // returns 0
@@ -11533,6 +11547,7 @@ public final class Fn {
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
+         * FS.average().apply(new short[]{1,2,3})                // returns 2.0
          * FB.average().apply(new byte[]{1,2,3})                  // returns 2.0
          * FI.average().apply(new int[]{1,2})                     // returns 1.5
          * FD.average().apply(new double[]{})                     // returns 0.0
@@ -11850,7 +11865,8 @@ public final class Fn {
 
         /**
          * Returns a Function that calculates the sum of all elements in an int array.
-         * The sum is returned as an Integer.
+         * The sum is computed using long arithmetic; the returned function throws an
+         * {@code ArithmeticException} if the sum overflows an int.
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
@@ -12215,6 +12231,7 @@ public final class Fn {
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
+         * FL.average().apply(new long[]{1,2,3})                 // returns 2.0
          * FB.average().apply(new byte[]{1,2,3})                  // returns 2.0
          * FI.average().apply(new int[]{1,2})                     // returns 1.5
          * FD.average().apply(new double[]{})                     // returns 0.0
@@ -12542,6 +12559,7 @@ public final class Fn {
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
+         * FF.sum().apply(new float[]{1,2,3})                     // returns 6.0f
          * FB.sum().apply(new byte[]{1,2,3})                      // returns 6
          * FI.sum().apply(new int[]{1,2,3})                       // returns 6
          * FL.sum().apply(new long[]{})                           // returns 0
@@ -12562,6 +12580,7 @@ public final class Fn {
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
+         * FF.average().apply(new float[]{1,2,3})                // returns 2.0
          * FB.average().apply(new byte[]{1,2,3})                  // returns 2.0
          * FI.average().apply(new int[]{1,2})                     // returns 1.5
          * FD.average().apply(new double[]{})                     // returns 0.0
@@ -12889,6 +12908,7 @@ public final class Fn {
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
+         * FD.sum().apply(new double[]{1,2,3})                    // returns 6.0
          * FB.sum().apply(new byte[]{1,2,3})                      // returns 6
          * FI.sum().apply(new int[]{1,2,3})                       // returns 6
          * FL.sum().apply(new long[]{})                           // returns 0

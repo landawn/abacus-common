@@ -110,7 +110,7 @@ final class BufferedReader extends java.io.BufferedReader { // NOSONAR
      * @param is the input stream to read from
      */
     BufferedReader(final InputStream is) {
-        this(IOUtil.newInputStreamReader(is, Charsets.DEFAULT));
+        this(IOUtil.newInputStreamReader(is, IOUtil.DEFAULT_CHARSET));
     }
 
     /**
@@ -576,6 +576,41 @@ final class BufferedReader extends java.io.BufferedReader { // NOSONAR
         } else {
             return true;
         }
+    }
+
+    /**
+     * This pooled reader does not support mark/reset. It maintains its own read
+     * positions outside the superclass buffer, so the inherited implementation
+     * cannot restore this reader's state correctly.
+     *
+     * @return {@code false}
+     */
+    @Override
+    public boolean markSupported() {
+        return false;
+    }
+
+    /**
+     * Always throws because mark/reset is not supported by this reader.
+     *
+     * @param readAheadLimit ignored
+     * @throws IOException always
+     */
+    @Override
+    public void mark(final int readAheadLimit) throws IOException {
+        ensureOpen();
+        throw new IOException("mark/reset is not supported");
+    }
+
+    /**
+     * Always throws because mark/reset is not supported by this reader.
+     *
+     * @throws IOException always
+     */
+    @Override
+    public void reset() throws IOException {
+        ensureOpen();
+        throw new IOException("mark/reset is not supported");
     }
 
     /**

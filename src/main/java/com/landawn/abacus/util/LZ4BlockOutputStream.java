@@ -37,7 +37,6 @@ import java.io.OutputStream;
  * try (FileOutputStream fileOut = new FileOutputStream("data.lz4");
  *      LZ4BlockOutputStream lz4Out = new LZ4BlockOutputStream(fileOut)) {
  *     lz4Out.write(data);
- *     lz4Out.finish();   // Ensure all data is compressed and written
  * }
  * }</pre>
  *

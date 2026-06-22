@@ -23,7 +23,6 @@ import java.util.IdentityHashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
@@ -42,8 +41,9 @@ import com.landawn.abacus.util.MoreExecutors;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Strings;
 import com.landawn.abacus.util.ThreadMode;
+import com.landawn.abacus.util.cs;
 
-// DO NOT try to move me out of this project. Somebody tried and gave up then. I'm small. I'm stay here.
+// DO NOT try to move me out of this project. Somebody tried and gave up then. I'm small. I stay here.
 
 /**
  * A publish-subscribe event bus that simplifies communication between components.
@@ -133,6 +133,18 @@ public class EventBus {
     private volatile List<List<SubIdentifier>> listOfSubEventSubs = null;
 
     private volatile Map<Object, String> mapOfStickyEvent = null;
+
+    /**
+     * Serializes the decision points of {@link #register} (make a subscriber visible + snapshot the
+     * sticky events to replay) against {@link #postSticky} (record the sticky event + resolve its
+     * delivery list). Holding this single lock across those two short critical sections (never across
+     * the actual {@code dispatch(...)}, which may run subscriber code) guarantees that a sticky event
+     * is delivered to a concurrently-registering subscriber exactly once — either by {@code postSticky}'s
+     * own delivery (if the subscriber was already visible) or by {@code register}'s replay (if the event
+     * was already recorded), but never both. It is always the outermost lock, so it cannot deadlock with
+     * {@code registeredSubMap} / {@code registeredEventIdSubMap} / {@code stickyEventMap}.
+     */
+    private final Object stickyDeliveryLock = new Object();
 
     @SuppressWarnings("unused")
     private transient Thread shutdownHook;
@@ -336,11 +348,78 @@ public class EventBus {
     }
 
     /**
+     * Returns the number of subscribers currently registered with this {@code EventBus}.
+     *
+     * <p>Counts distinct subscriber instances (matching {@code allSubscribers().size()}), not the
+     * number of individual {@link Subscribe @Subscribe} handler methods they expose.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * if (eventBus.countOfSubscribers() == 0) {
+     *     // no subscribers registered
+     * }
+     * }</pre>
+     *
+     * @return the count of currently registered subscribers
+     * @see #allSubscribers()
+     * @see #hasSubscribers(Class)
+     */
+    public int countOfSubscribers() {
+        synchronized (registeredSubMap) {
+            return registeredSubMap.size();
+        }
+    }
+
+    /**
+     * Checks whether any registered subscriber would receive an event of the given type.
+     *
+     * <p>A subscriber matches when its {@link Subscribe @Subscribe} handler parameter type is
+     * compatible with {@code eventType}: for a normal subscriber the parameter type must be
+     * assignable from {@code eventType}; for a {@code strictEventType} subscriber the two types must
+     * be exactly equal. The event-ID filter is intentionally ignored by this query — it reports
+     * purely on event-type compatibility, so a {@code true} result does not guarantee delivery for a
+     * specific event ID.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * if (eventBus.hasSubscribers(OrderPlacedEvent.class)) {
+     *     eventBus.post(new OrderPlacedEvent(...));
+     * }
+     * }</pre>
+     *
+     * @param eventType the event class to test for (must not be {@code null})
+     * @return {@code true} if at least one registered subscriber accepts {@code eventType}
+     * @throws IllegalArgumentException if {@code eventType} is {@code null}
+     * @see #countOfSubscribers()
+     */
+    public boolean hasSubscribers(final Class<?> eventType) {
+        N.checkArgNotNull(eventType, "eventType");
+
+        synchronized (registeredSubMap) {
+            for (final List<SubIdentifier> subs : registeredSubMap.values()) {
+                for (final SubIdentifier sub : subs) {
+                    if (sub.strictEventType ? sub.parameterType.equals(eventType) : sub.parameterType.isAssignableFrom(eventType)) {
+                        return true;
+                    }
+                }
+            }
+        }
+
+        return false;
+    }
+
+    /**
      * Registers a subscriber to receive events.
      * The subscriber must either implement the {@link Subscriber} interface or have methods annotated with {@link Subscribe}.
      * No registration-level thread mode override is applied, so each subscriber method is delivered events using the thread mode declared in its own {@link Subscribe} annotation (defaulting to {@link ThreadMode#DEFAULT}).
-     * Lambda-based subscribers cannot be registered with this method; use
-     * {@link #register(Subscriber, String)} or {@link #register(Subscriber, String, ThreadMode)} instead.
+     *
+     * <p>This {@code Object} overload requires a subscriber whose event handling is exposed through a
+     * {@code public}, non-{@code static}, single-argument method annotated with {@link Subscribe}.
+     * A <b>bare lambda</b> {@link Subscriber} (whose erased {@code on(...)} parameter type is
+     * {@code Object}) cannot be registered here: it has no event ID, so this method throws
+     * {@link IllegalStateException}. Register lambda / {@code Subscriber} instances through
+     * {@link #register(Subscriber, String)} or {@link #register(Subscriber, String, ThreadMode)},
+     * which require an event ID, instead.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -354,7 +433,7 @@ public class EventBus {
      *
      * @param subscriber the subscriber to register
      * @return this {@code EventBus} instance for method chaining
-     * @throws NullPointerException if {@code subscriber} is {@code null}
+     * @throws IllegalArgumentException if {@code subscriber} is {@code null}
      * @throws IllegalArgumentException if no subscriber methods are found in the subscriber class
      * @throws IllegalStateException if the subscriber is identified as a lambda subscriber (an event ID is required for lambda subscribers)
      */
@@ -375,7 +454,7 @@ public class EventBus {
      * @param subscriber the subscriber to register
      * @param eventId the event ID to filter events; must be non-empty for lambda-based subscribers
      * @return this {@code EventBus} instance for method chaining
-     * @throws NullPointerException if {@code subscriber} is {@code null}
+     * @throws IllegalArgumentException if {@code subscriber} is {@code null}
      * @throws IllegalArgumentException if no subscriber methods are found in the subscriber class
      * @throws IllegalStateException if the subscriber is identified as a lambda subscriber and {@code eventId} is empty or {@code null}
      */
@@ -398,7 +477,7 @@ public class EventBus {
      * @param subscriber the subscriber to register
      * @param threadMode the thread mode override for event delivery, or {@code null} to use the thread mode declared in each subscriber method's {@link Subscribe} annotation
      * @return this {@code EventBus} instance for method chaining
-     * @throws NullPointerException if {@code subscriber} is {@code null}
+     * @throws IllegalArgumentException if {@code subscriber} is {@code null}
      * @throws IllegalArgumentException if the thread mode is not supported or no subscriber methods are found in the subscriber class
      * @throws IllegalStateException if the subscriber is identified as a lambda subscriber (an event ID is required for lambda subscribers)
      */
@@ -418,6 +497,14 @@ public class EventBus {
      * subscriber methods is removed from the event-id index and the new {@code eventId}/{@code threadMode}
      * take effect.
      *
+     * <p><b>Registration overrides cover only {@code eventId} and {@code threadMode}.</b> The four
+     * advanced delivery knobs &mdash; {@code sticky}, {@code strictEventType}, {@code intervalMillis}
+     * (throttling) and {@code deduplicate} &mdash; are <b>annotation-only</b>: they can be configured
+     * solely through a {@link Subscribe @Subscribe}-annotated method and there is intentionally no
+     * registration-time override for them. Consequently a lambda / {@link Subscriber} registration
+     * (which has no annotated method) can never be sticky, strict, throttled, or deduplicated; to use
+     * any of those features, register an object whose method is annotated with {@code @Subscribe}.
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * eventBus.register(mySubscriber, "userEvents", ThreadMode.THREAD_POOL_EXECUTOR);
@@ -427,19 +514,19 @@ public class EventBus {
      * @param eventId the event ID to filter events; must be non-empty for lambda-based subscribers; {@code null} for no filtering otherwise
      * @param threadMode the thread mode override for event delivery, or {@code null} to use the thread mode declared in each subscriber method's {@link Subscribe} annotation
      * @return this {@code EventBus} instance for method chaining
-     * @throws NullPointerException if {@code subscriber} is {@code null}
+     * @throws IllegalArgumentException if {@code subscriber} is {@code null}
      * @throws IllegalArgumentException if the thread mode is not supported or no subscriber methods are found in the subscriber class
      * @throws IllegalStateException if the subscriber is identified as a lambda subscriber and {@code eventId} is empty or {@code null}
      */
     public EventBus register(final Object subscriber, final String eventId, final ThreadMode threadMode) {
-        Objects.requireNonNull(subscriber, "subscriber");
+        N.checkArgNotNull(subscriber, cs.subscriber);
 
         if (!isSupportedThreadMode(threadMode)) {
             throw new IllegalArgumentException("Unsupported thread mode: " + threadMode);
         }
 
         if (logger.isDebugEnabled()) {
-            logger.debug("Registering subscriber: " + subscriber + " with eventId: " + eventId + " and thread mode: " + threadMode);
+            logger.debug("Registering subscriber: {} with eventId: {} and thread mode: {}", subscriber, eventId, threadMode);
         }
 
         final Class<?> subscriberClass = subscriber.getClass();
@@ -460,66 +547,88 @@ public class EventBus {
         }
 
         Set<SubIdentifier> oldSubEvents = null;
+        Map<Object, String> stickySnapshot = null;
+        boolean hasStickySub = false;
 
-        synchronized (registeredSubMap) {
-            final List<SubIdentifier> removed = registeredSubMap.put(subscriber, eventSubList);
-            oldSubEvents = removed == null ? null : N.newHashSet(removed);
-            listOfSubEventSubs = null;
-        }
+        // Make the subscriber visible (registeredSubMap / registeredEventIdSubMap) AND snapshot the sticky
+        // events to replay, atomically under stickyDeliveryLock — but do NOT dispatch while holding it.
+        // This is what guarantees a sticky event reaches this subscriber exactly once relative to a
+        // concurrent postSticky(...) (see the stickyDeliveryLock field doc).
+        synchronized (stickyDeliveryLock) {
+            synchronized (registeredSubMap) {
+                final List<SubIdentifier> removed = registeredSubMap.put(subscriber, eventSubList);
+                oldSubEvents = removed == null ? null : N.newHashSet(removed);
+                listOfSubEventSubs = null;
+            }
 
-        if (N.notEmpty(oldSubEvents)) {
-            removeFromEventIdSubMap(oldSubEvents);
-        }
+            if (N.notEmpty(oldSubEvents)) {
+                removeFromEventIdSubMap(oldSubEvents);
+            }
 
-        if (Strings.isEmpty(eventId)) {
-            synchronized (registeredEventIdSubMap) {
-                for (final SubIdentifier sub : eventSubList) {
-                    if (Strings.isEmpty(sub.eventId)) {
-                        continue;
+            if (Strings.isEmpty(eventId)) {
+                synchronized (registeredEventIdSubMap) {
+                    for (final SubIdentifier sub : eventSubList) {
+                        if (Strings.isEmpty(sub.eventId)) {
+                            continue;
+                        }
+
+                        final Set<SubIdentifier> eventSubs = registeredEventIdSubMap.get(sub.eventId);
+
+                        if (eventSubs == null) {
+                            registeredEventIdSubMap.put(sub.eventId, N.toLinkedHashSet(sub));
+                        } else {
+                            eventSubs.add(sub);
+                        }
+
+                        listOfEventIdSubMap.remove(sub.eventId);
                     }
-
-                    final Set<SubIdentifier> eventSubs = registeredEventIdSubMap.get(sub.eventId);
+                }
+            } else {
+                synchronized (registeredEventIdSubMap) {
+                    final Set<SubIdentifier> eventSubs = registeredEventIdSubMap.get(eventId);
 
                     if (eventSubs == null) {
-                        registeredEventIdSubMap.put(sub.eventId, N.toLinkedHashSet(sub));
+                        registeredEventIdSubMap.put(eventId, N.newLinkedHashSet(eventSubList));
                     } else {
-                        eventSubs.add(sub);
+                        eventSubs.addAll(eventSubList);
                     }
 
-                    listOfEventIdSubMap.remove(sub.eventId);
+                    listOfEventIdSubMap.remove(eventId);
                 }
             }
-        } else {
-            synchronized (registeredEventIdSubMap) {
-                final Set<SubIdentifier> eventSubs = registeredEventIdSubMap.get(eventId);
 
-                if (eventSubs == null) {
-                    registeredEventIdSubMap.put(eventId, N.newLinkedHashSet(eventSubList));
-                } else {
-                    eventSubs.addAll(eventSubList);
+            for (final SubIdentifier sub : eventSubList) {
+                if (sub.sticky) {
+                    hasStickySub = true;
+                    break;
                 }
+            }
 
-                listOfEventIdSubMap.remove(eventId);
+            if (hasStickySub) {
+                stickySnapshot = mapOfStickyEvent;
+
+                if (stickySnapshot == null) {
+                    synchronized (stickyEventMap) {
+                        stickySnapshot = new IdentityHashMap<>(stickyEventMap);
+                        mapOfStickyEvent = stickySnapshot;
+                    }
+                }
             }
         }
 
-        Map<Object, String> localMapOfStickyEvent = mapOfStickyEvent;
-
-        for (final SubIdentifier sub : eventSubList) {
-            if (sub.sticky) {
-                if (localMapOfStickyEvent == null) {
-                    synchronized (stickyEventMap) {
-                        localMapOfStickyEvent = new IdentityHashMap<>(stickyEventMap);
-                        mapOfStickyEvent = localMapOfStickyEvent;
-                    }
-                }
-
-                for (final Map.Entry<Object, String> entry : localMapOfStickyEvent.entrySet()) {
-                    if (sub.isMyEvent(entry.getValue(), entry.getKey().getClass())) {
-                        try {
-                            dispatch(sub, entry.getKey());
-                        } catch (final Exception e) {
-                            logger.error("Failed to post sticky event: " + N.toString(entry.getValue()) + " to subscriber: " + N.toString(sub), e); //NOSONAR
+        // Replay matching sticky events to the newly-registered sticky subscribers OUTSIDE the lock
+        // (dispatch may run subscriber code synchronously on this thread).
+        if (hasStickySub) {
+            for (final SubIdentifier sub : eventSubList) {
+                if (sub.sticky) {
+                    for (final Map.Entry<Object, String> entry : stickySnapshot.entrySet()) {
+                        if (sub.isMyEvent(entry.getValue(), entry.getKey().getClass())) {
+                            try {
+                                dispatch(sub, entry.getKey());
+                            } catch (final Exception e) {
+                                logger.error("Failed to post sticky event: " + N.toString(entry.getKey()) + " with eventId: " + N.toString(entry.getValue())
+                                        + " to subscriber: " + N.toString(sub), e); //NOSONAR
+                            }
                         }
                     }
                 }
@@ -614,7 +723,7 @@ public class EventBus {
      * @param subscriber the {@code Subscriber} implementation to register
      * @param eventId the event ID to filter events; must be non-empty when the subscriber is identified as a lambda subscriber
      * @return this {@code EventBus} instance for method chaining
-     * @throws NullPointerException if {@code subscriber} is {@code null}
+     * @throws IllegalArgumentException if {@code subscriber} is {@code null}
      * @throws IllegalArgumentException if no subscriber methods are found
      * @throws IllegalStateException if the subscriber is identified as a lambda subscriber and {@code eventId} is empty or {@code null}
      */
@@ -639,7 +748,7 @@ public class EventBus {
      * @param eventId the event ID to filter events; must be non-empty when the subscriber is identified as a lambda subscriber
      * @param threadMode the thread mode override for event delivery, or {@code null} to use the thread mode declared in each subscriber method's {@link Subscribe} annotation
      * @return this {@code EventBus} instance for method chaining
-     * @throws NullPointerException if {@code subscriber} is {@code null}
+     * @throws IllegalArgumentException if {@code subscriber} is {@code null}
      * @throws IllegalArgumentException if the thread mode is not supported or no subscriber methods are found
      * @throws IllegalStateException if the subscriber is identified as a lambda subscriber and {@code eventId} is empty or {@code null}
      */
@@ -665,7 +774,7 @@ public class EventBus {
      */
     public EventBus unregister(final Object subscriber) {
         if (logger.isDebugEnabled()) {
-            logger.debug("Unregistering subscriber: " + subscriber);
+            logger.debug("Unregistering subscriber: {}", subscriber);
         }
 
         Set<SubIdentifier> subEvents = null;
@@ -725,7 +834,7 @@ public class EventBus {
      *
      * @param event the event to post
      * @return this {@code EventBus} instance for method chaining
-     * @throws NullPointerException if {@code event} is {@code null}
+     * @throws IllegalArgumentException if {@code event} is {@code null}
      */
     public EventBus post(final Object event) {
         return post((String) null, event);
@@ -748,14 +857,25 @@ public class EventBus {
      * @param eventId the event ID for filtering subscribers, or {@code null} (or empty) to deliver to subscribers without a specific event ID
      * @param event the event to post
      * @return this {@code EventBus} instance for method chaining
-     * @throws NullPointerException if {@code event} is {@code null}
+     * @throws IllegalArgumentException if {@code event} is {@code null}
      */
     public EventBus post(final String eventId, final Object event) {
-        Objects.requireNonNull(event, "event");
+        N.checkArgNotNull(event, cs.event);
 
-        final Class<?> eventClass = event.getClass();
         final String normalizedEventId = Strings.isEmpty(eventId) ? null : eventId;
 
+        dispatchToSubscribers(resolveSubscriberLists(normalizedEventId), normalizedEventId, event);
+
+        return this;
+    }
+
+    /**
+     * Resolves (and lazily caches) the list of candidate subscriber lists for the given normalized
+     * event ID. This is the snapshot/decision step of a post; it acquires the relevant map lock briefly
+     * but performs no dispatch. {@link #postSticky} calls this while holding {@link #stickyDeliveryLock}
+     * so that its delivery decision is ordered against a concurrent {@link #register}.
+     */
+    private List<List<SubIdentifier>> resolveSubscriberLists(final String normalizedEventId) {
         List<List<SubIdentifier>> subscriberLists = listOfSubEventSubs;
 
         if (normalizedEventId == null) {
@@ -789,6 +909,17 @@ public class EventBus {
             subscriberLists = Collections.singletonList(eventIdSubscribers);
         }
 
+        return subscriberLists;
+    }
+
+    /**
+     * Dispatches {@code event} to every matching subscriber in the previously-resolved lists. This is
+     * always called OUTSIDE {@link #stickyDeliveryLock} because {@code dispatch(...)} may execute
+     * subscriber code synchronously on the calling thread.
+     */
+    private void dispatchToSubscribers(final List<List<SubIdentifier>> subscriberLists, final String normalizedEventId, final Object event) {
+        final Class<?> eventClass = event.getClass();
+
         for (final List<SubIdentifier> subscribers : subscriberLists) {
             for (final SubIdentifier subscriber : subscribers) {
                 if (subscriber.isMyEvent(normalizedEventId, eventClass)) {
@@ -800,8 +931,6 @@ public class EventBus {
                 }
             }
         }
-
-        return this;
     }
 
     /**
@@ -817,7 +946,7 @@ public class EventBus {
      *
      * @param event the sticky event to post
      * @return this {@code EventBus} instance for method chaining
-     * @throws NullPointerException if {@code event} is {@code null}
+     * @throws IllegalArgumentException if {@code event} is {@code null}
      */
     public EventBus postSticky(final Object event) {
         return postSticky(null, event);
@@ -839,20 +968,30 @@ public class EventBus {
      * @param eventId the event ID to associate with the sticky event, or {@code null} (or empty) to retain it without a specific event ID
      * @param event the sticky event to post
      * @return this {@code EventBus} instance for method chaining
-     * @throws NullPointerException if {@code event} is {@code null}
+     * @throws IllegalArgumentException if {@code event} is {@code null}
      */
     public EventBus postSticky(final String eventId, final Object event) {
-        Objects.requireNonNull(event, "event");
+        N.checkArgNotNull(event, cs.event);
 
         final String normalizedEventId = Strings.isEmpty(eventId) ? null : eventId;
 
-        synchronized (stickyEventMap) {
-            stickyEventMap.put(event, normalizedEventId);
+        final List<List<SubIdentifier>> subscriberLists;
 
-            mapOfStickyEvent = null;
+        // Record the sticky event AND resolve its delivery list atomically under stickyDeliveryLock so
+        // that, relative to a concurrent register(...), this event is delivered to a newly-registering
+        // sticky subscriber exactly once: either here (subscriber already visible) or by register's
+        // replay (event already recorded), never both. dispatch happens after the lock is released.
+        synchronized (stickyDeliveryLock) {
+            synchronized (stickyEventMap) {
+                stickyEventMap.put(event, normalizedEventId);
+
+                mapOfStickyEvent = null;
+            }
+
+            subscriberLists = resolveSubscriberLists(normalizedEventId);
         }
 
-        post(normalizedEventId, event);
+        dispatchToSubscribers(subscriberLists, normalizedEventId, event);
 
         return this;
     }
@@ -969,16 +1108,25 @@ public class EventBus {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * eventBus.removeAllStickyEvents();
+     * boolean removed = eventBus.removeAllStickyEvents();
      * // All sticky events are cleared
      * }</pre>
      *
+     * @return {@code true} if one or more sticky events were removed, {@code false} if there were
+     *         no sticky events to remove. The return type mirrors {@link #removeStickyEvent(Object)}
+     *         and {@link #removeStickyEvents(Class)} for family consistency.
      */
-    public void removeAllStickyEvents() {
+    public boolean removeAllStickyEvents() {
         synchronized (stickyEventMap) {
+            if (stickyEventMap.isEmpty()) {
+                return false;
+            }
+
             stickyEventMap.clear();
 
             mapOfStickyEvent = null;
+
+            return true;
         }
     }
 
@@ -1092,7 +1240,7 @@ public class EventBus {
      *
      * <p><b>Event Filtering:</b></p>
      * <ul>
-     *   <li><b>Interval Filtering:</b> If {@code intervalInMillis} is set on the subscriber, events posted
+     *   <li><b>Interval Filtering:</b> If {@code intervalMillis} is set on the subscriber, events posted
      *       within the specified interval (in milliseconds) will be ignored. This is useful for
      *       throttling high-frequency events.</li>
      *   <li><b>Deduplication:</b> If {@code deduplicate} is enabled, consecutive duplicate events
@@ -1106,23 +1254,23 @@ public class EventBus {
      */
     protected void post(final SubIdentifier sub, final Object event) {
         try {
-            if (sub.intervalInMillis > 0 || sub.deduplicate) {
+            if (sub.intervalMillis > 0 || sub.deduplicate) {
                 //noinspection SynchronizationOnLocalVariableOrMethodParameter
                 synchronized (sub) { //NOSONAR
-                    if (sub.intervalInMillis > 0 && System.currentTimeMillis() - sub.lastPostTime < sub.intervalInMillis) {
+                    if (sub.intervalMillis > 0 && System.currentTimeMillis() - sub.lastPostTime < sub.intervalMillis) {
                         // ignore.
                         if (logger.isDebugEnabled()) {
-                            logger.debug("Ignoring event: " + N.toString(event) + " to subscriber: " + N.toString(sub) + " because it's in the interval: "
-                                    + sub.intervalInMillis);
+                            logger.debug("Ignoring event: {} to subscriber: {} because it is within the interval: {}", N.toString(event), N.toString(sub),
+                                    sub.intervalMillis);
                         }
                     } else if (sub.deduplicate && sub.previousEvent != null && N.equals(sub.previousEvent, event)) {
                         // ignore.
                         if (logger.isDebugEnabled()) {
-                            logger.debug("Ignoring event: " + N.toString(event) + " to subscriber: " + N.toString(sub) + " (duplicate of previous event)");
+                            logger.debug("Ignoring event: {} to subscriber: {} (duplicate of previous event)", N.toString(event), N.toString(sub));
                         }
                     } else {
                         if (logger.isDebugEnabled()) {
-                            logger.debug("Posting event: " + N.toString(event) + " to subscriber: " + N.toString(sub));
+                            logger.debug("Posting event: {} to subscriber: {}", N.toString(event), N.toString(sub));
                         }
 
                         sub.lastPostTime = System.currentTimeMillis();
@@ -1136,7 +1284,7 @@ public class EventBus {
                 }
             } else {
                 if (logger.isDebugEnabled()) {
-                    logger.debug("Posting event: " + N.toString(event) + " to subscriber: " + N.toString(sub));
+                    logger.debug("Posting event: {} to subscriber: {}", N.toString(event), N.toString(sub));
                 }
 
                 sub.method.invoke(sub.instance, event);
@@ -1182,7 +1330,7 @@ public class EventBus {
         final boolean sticky;
 
         /** Minimum interval in milliseconds between consecutive event deliveries; {@code 0} disables throttling. */
-        final long intervalInMillis;
+        final long intervalMillis;
 
         /**
          * If {@code true}, consecutive duplicate events (as determined by {@code equals()}) are ignored
@@ -1222,7 +1370,7 @@ public class EventBus {
             threadMode = subscribe == null ? ThreadMode.DEFAULT : subscribe.threadMode();
             strictEventType = subscribe != null && subscribe.strictEventType();
             sticky = subscribe != null && subscribe.sticky();
-            intervalInMillis = subscribe == null ? 0 : subscribe.intervalMillis();
+            intervalMillis = subscribe == null ? 0 : subscribe.intervalMillis();
             deduplicate = subscribe != null && subscribe.deduplicate();
 
             isPossibleLambdaSubscriber = Subscriber.class.isAssignableFrom(method.getDeclaringClass()) && method.getName().equals("on")
@@ -1248,7 +1396,7 @@ public class EventBus {
             this.threadMode = threadMode == null ? sub.threadMode : threadMode;
             strictEventType = sub.strictEventType;
             sticky = sub.sticky;
-            intervalInMillis = sub.intervalInMillis;
+            intervalMillis = sub.intervalMillis;
             deduplicate = sub.deduplicate;
             isPossibleLambdaSubscriber = sub.isPossibleLambdaSubscriber;
         }
@@ -1280,7 +1428,7 @@ public class EventBus {
             h = 31 * h + N.hashCode(threadMode);
             h = 31 * h + N.hashCode(strictEventType);
             h = 31 * h + N.hashCode(sticky);
-            h = 31 * h + N.hashCode(intervalInMillis);
+            h = 31 * h + N.hashCode(intervalMillis);
             h = 31 * h + N.hashCode(deduplicate);
             return 31 * h + N.hashCode(isPossibleLambdaSubscriber);
         }
@@ -1295,7 +1443,7 @@ public class EventBus {
             if (obj instanceof SubIdentifier other) {
                 return instance == other.instance && N.equals(method, other.method) && N.equals(parameterType, other.parameterType)
                         && N.equals(eventId, other.eventId) && N.equals(threadMode, other.threadMode) && N.equals(strictEventType, other.strictEventType)
-                        && N.equals(sticky, other.sticky) && N.equals(intervalInMillis, other.intervalInMillis) && N.equals(deduplicate, other.deduplicate)
+                        && N.equals(sticky, other.sticky) && N.equals(intervalMillis, other.intervalMillis) && N.equals(deduplicate, other.deduplicate)
                         && N.equals(isPossibleLambdaSubscriber, other.isPossibleLambdaSubscriber);
             }
 
@@ -1306,7 +1454,7 @@ public class EventBus {
         public String toString() {
             return "{obj=" + N.toString(instance) + ", method=" + N.toString(method) + ", parameterType=" + N.toString(parameterType) + ", eventId="
                     + N.toString(eventId) + ", threadMode=" + N.toString(threadMode) + ", strictEventType=" + N.toString(strictEventType) + ", sticky="
-                    + N.toString(sticky) + ", interval=" + N.toString(intervalInMillis) + ", deduplicate=" + N.toString(deduplicate)
+                    + N.toString(sticky) + ", interval=" + N.toString(intervalMillis) + ", deduplicate=" + N.toString(deduplicate)
                     + ", isPossibleLambdaSubscriber=" + N.toString(isPossibleLambdaSubscriber) + "}";
         }
 

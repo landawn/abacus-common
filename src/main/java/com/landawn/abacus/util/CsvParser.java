@@ -35,6 +35,17 @@ import com.landawn.abacus.exception.ParsingException;
  * <li>Can ignore quotation marks entirely for simple parsing</li>
  * </ul>
  *
+ * <p><b>Divergences from RFC 4180 (opencsv-style dialect):</b></p>
+ * <ul>
+ * <li>Inside quoted fields, both RFC 4180 quote-doubling ({@code ""}) and backslash escapes
+ *     ({@code \"} and {@code \\}) are recognized; RFC 4180 defines only the doubled-quote form</li>
+ * <li>With the default settings, surrounding whitespace of unquoted fields is stripped and
+ *     characters outside the quotes are kept as part of the field (RFC 4180 preserves whitespace
+ *     and does not define text outside quotes)</li>
+ * <li>This parser operates on a single line; multi-line records (quoted fields containing
+ *     literal line breaks) must be joined by the caller before parsing</li>
+ * </ul>
+ *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * // Basic usage with default settings (comma separator, double-quote, backslash escape)
@@ -66,14 +77,14 @@ public class CsvParser {
     public static final char DEFAULT_SEPARATOR = ',';
 
     /**
-     * The initial read size for string builders.
-     * Used for setting the initial capacity of internal buffers.
+     * Suggested initial read size for string builders (inherited from opencsv).
+     * Not used by this implementation; retained for API compatibility.
      */
     public static final int INITIAL_READ_SIZE = 1024;
 
     /**
-     * Buffer size to add when the exact line size is known.
-     * Provides extra space to avoid reallocation during parsing.
+     * Suggested extra buffer size when the exact line size is known (inherited from opencsv).
+     * Not used by this implementation; retained for API compatibility.
      */
     public static final int READ_BUFFER_SIZE = 128;
 
@@ -254,7 +265,7 @@ public class CsvParser {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * // Parser that does not treat quoted regions as quoted (ignoreQuotations = true)
+     * // Parser that removes quote characters but does not let quoted regions protect separators
      * CsvParser parser = new CsvParser(',', '"', '\\', false, true, true);
      * List<String> fields = parser.parseLine("\"a\",\"b\",\"c\"");
      * // Result: ["a", "b", "c"] - quote characters are still consumed, but the
@@ -268,7 +279,8 @@ public class CsvParser {
      * @param strictQuotes if {@code true}, characters outside the quotes are ignored
      * @param ignoreLeadingWhiteSpace if {@code true}, surrounding whitespace is stripped from unquoted
      *        fields and whitespace immediately after a separator is skipped
-     * @param ignoreQuotations if {@code true}, treat quotation characters like any other character
+     * @param ignoreQuotations if {@code true}, quote characters are consumed but quoted regions do not
+     *        protect separators or escapes
      * @throws UnsupportedOperationException if any two of separator, quoteChar, and escape are the same
      *         non-{@link #NULL_CHARACTER} characters, or if separator is {@link #NULL_CHARACTER}
      */
@@ -393,8 +405,8 @@ public class CsvParser {
     }
 
     /**
-     * Returns whether this parser ignores quotation marks.
-     * When {@code true}, quotes are treated as regular characters.
+     * Returns whether this parser ignores quoted-region protection.
+     * When {@code true}, quote characters are consumed but quoted regions do not protect separators or escapes.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -521,11 +533,28 @@ public class CsvParser {
                         sb.append(nextLine.charAt(++i));
                     } else {
                         // the tricky case of an embedded quote in the middle: a,bc"d"ef,g
-                        if (!strictQuotes && !sb.isEmpty() //
+                        boolean isEmbedded = !strictQuotes && !sb.isEmpty() //
                                 && i > 0 //not on the beginning of the line //NOSONAR
                                 && nextLine.charAt(i - 1) != separator //not at the beginning of an escape sequence
-                                && i < len - 1 && nextLine.charAt(i + 1) != separator //not at the end of an escape sequence
-                        ) {
+                                && i < len - 1 && nextLine.charAt(i + 1) != separator; //not at the end of an escape sequence
+
+                        // A quote inside a quoted field followed by only whitespace up to the next
+                        // separator (or end of line) is the CLOSING quote, not an embedded one:
+                        // a,"b" ,c must parse like its end-of-line twin a,b,"c" (see the repair below).
+                        if (isEmbedded && inQuotes(inQuotes) && ignoreLeadingWhiteSpace) {
+                            int j = i + 1;
+
+                            while (j < len && nextLine.charAt(j) != separator && Character.isWhitespace(nextLine.charAt(j))) {
+                                j++;
+                            }
+
+                            if (j >= len || nextLine.charAt(j) == separator) {
+                                isEmbedded = false;
+                                i = j - 1; // consume the whitespace between the closing quote and the separator
+                            }
+                        }
+
+                        if (isEmbedded) {
                             sb.append(c);
                         } else {
                             quoted = true;
@@ -547,7 +576,10 @@ public class CsvParser {
                         }
                     }
 
-                    while (ignoreLeadingWhiteSpace && i < len - 1 && Character.isWhitespace(nextLine.charAt(i + 1))) {
+                    // Skip whitespace between the separator and the next field, but never skip the
+                    // separator itself: when the separator is a whitespace character (e.g. tab),
+                    // consuming it here would silently swallow empty fields ("a\t\tb" -> ["a","b"]).
+                    while (ignoreLeadingWhiteSpace && i < len - 1 && nextLine.charAt(i + 1) != separator && Character.isWhitespace(nextLine.charAt(i + 1))) {
                         i++;
                     }
 

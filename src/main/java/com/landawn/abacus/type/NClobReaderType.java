@@ -22,8 +22,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 /**
- * Type handler for NClobReader objects, providing database interaction capabilities
- * for handling National Character Large Objects (NCLOB) as Reader streams.
+ * Type handler for NCLOB (National Character Large Object) database values accessed as
+ * character {@link java.io.Reader} streams.
  * This type automatically converts NCLOB database values to Reader objects.
  */
 public class NClobReaderType extends ReaderType {

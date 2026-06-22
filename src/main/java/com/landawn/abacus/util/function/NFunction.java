@@ -13,9 +13,9 @@
  */
 package com.landawn.abacus.util.function;
 
-import java.util.Objects;
-
 import com.landawn.abacus.util.Throwables;
+import com.landawn.abacus.util.N;
+import com.landawn.abacus.util.cs;
 
 /**
  * Represents a function that accepts a variable number of arguments and produces a result.
@@ -68,8 +68,8 @@ public interface NFunction<T, R> extends Throwables.NFunction<T, R, RuntimeExcep
      *   <li>Building formatted strings from multiple arguments</li>
      * </ul>
      *
-     * <p>Note: The {@code @SuppressWarnings("unchecked")} annotation is used because
-     * varargs with generics can generate unchecked warnings at the call site.
+     * <p>Note: The {@code @SuppressWarnings("unchecked")} annotation suppresses the
+     * declaration-site generic-varargs warning for this method.
      *
      * @param args the function arguments as a varargs array
      * @return the function result of type R
@@ -108,11 +108,25 @@ public interface NFunction<T, R> extends Throwables.NFunction<T, R, RuntimeExcep
      * @param after the function to apply after this function is applied. Must not be {@code null}.
      * @return a composed function that first applies this function and then
      *         applies the {@code after} function
-     * @throws NullPointerException if {@code after} is null
+     * @throws IllegalArgumentException if {@code after} is null
      */
     @Override
     default <V> NFunction<T, V> andThen(final java.util.function.Function<? super R, ? extends V> after) {
-        Objects.requireNonNull(after);
+        N.checkArgNotNull(after, cs.after);
         return args -> after.apply(apply(args));
+    }
+
+    /**
+     * Returns this object as a {@link Throwables.NFunction} view.
+     *
+     * <p>The returned object has the same behavior as this one. This method does not translate
+     * exceptions or make the original implementation capable of throwing new checked exceptions; the
+     * exception type parameter is for target-type compatibility with APIs that accept {@code Throwables.NFunction}.
+     *
+     * @param <E> the target exception type for compatibility with {@code Throwables.NFunction}
+     * @return a {@link Throwables.NFunction} view of this object
+     */
+    default <E extends Throwable> Throwables.NFunction<T, R, E> toThrowable() {
+        return (Throwables.NFunction<T, R, E>) this;
     }
 }

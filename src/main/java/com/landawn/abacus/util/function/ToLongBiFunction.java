@@ -50,4 +50,18 @@ public interface ToLongBiFunction<T, U> extends Throwables.ToLongBiFunction<T, U
      */
     @Override
     long applyAsLong(T t, U u);
+
+    /**
+     * Returns this object as a {@link Throwables.ToLongBiFunction} view.
+     *
+     * <p>The returned object has the same behavior as this one. This method does not translate
+     * exceptions or make the original implementation capable of throwing new checked exceptions; the
+     * exception type parameter is for target-type compatibility with APIs that accept {@code Throwables.ToLongBiFunction}.
+     *
+     * @param <E> the target exception type for compatibility with {@code Throwables.ToLongBiFunction}
+     * @return a {@link Throwables.ToLongBiFunction} view of this object
+     */
+    default <E extends Throwable> Throwables.ToLongBiFunction<T, U, E> toThrowable() {
+        return (Throwables.ToLongBiFunction<T, U, E>) this;
+    }
 }

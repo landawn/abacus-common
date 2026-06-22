@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -507,45 +508,47 @@ public class AbacusXmlDOMParserTest extends AbstractXmlParserTest {
 
     @Test
     public void testSerialize_simple_type() throws Exception {
-        {
-            String xml = abacusXMLDOMParser.serialize(new Object[] {});
+        assertDoesNotThrow(() -> {
+            {
+                String xml = abacusXMLDOMParser.serialize(new Object[] {});
 
-            N.println(xml);
+                N.println(xml);
 
-            String[] a = abacusXMLDOMParser.deserialize(xml, String[].class);
+                String[] a = abacusXMLDOMParser.deserialize(xml, String[].class);
 
-            N.println(N.stringOf(a));
-        }
+                N.println(N.stringOf(a));
+            }
 
-        {
-            String xml = abacusXMLDOMParser.serialize(N.asArray("abc", "123"));
+            {
+                String xml = abacusXMLDOMParser.serialize(N.asArray("abc", "123"));
 
-            N.println(xml);
+                N.println(xml);
 
-            String[] a = abacusXMLDOMParser.deserialize(xml, String[].class);
+                String[] a = abacusXMLDOMParser.deserialize(xml, String[].class);
 
-            N.println(N.stringOf(a));
-        }
+                N.println(N.stringOf(a));
+            }
 
-        {
-            String xml = abacusXMLDOMParser.serialize(new ArrayList<>());
+            {
+                String xml = abacusXMLDOMParser.serialize(new ArrayList<>());
 
-            N.println(xml);
+                N.println(xml);
 
-            List<?> a = abacusXMLDOMParser.deserialize(xml, List.class);
+                List<?> a = abacusXMLDOMParser.deserialize(xml, List.class);
 
-            N.println(N.stringOf(a));
-        }
+                N.println(N.stringOf(a));
+            }
 
-        {
-            String xml = abacusXMLDOMParser.serialize(N.toList("abc", "123"));
+            {
+                String xml = abacusXMLDOMParser.serialize(N.toList("abc", "123"));
 
-            N.println(xml);
+                N.println(xml);
 
-            List<?> a = abacusXMLDOMParser.deserialize(xml, List.class);
+                List<?> a = abacusXMLDOMParser.deserialize(xml, List.class);
 
-            N.println(N.stringOf(a));
-        }
+                N.println(N.stringOf(a));
+            }
+        });
     }
 
     @Test

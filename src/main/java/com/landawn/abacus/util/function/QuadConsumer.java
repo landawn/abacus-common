@@ -15,9 +15,9 @@
  */
 package com.landawn.abacus.util.function;
 
-import java.util.Objects;
-
 import com.landawn.abacus.util.Throwables;
+import com.landawn.abacus.util.N;
+import com.landawn.abacus.util.cs;
 
 /**
  * A functional interface that represents an operation that accepts four input arguments
@@ -104,10 +104,10 @@ public interface QuadConsumer<A, B, C, D> extends Throwables.QuadConsumer<A, B, 
      * @param after the operation to perform after this operation. Must not be {@code null}.
      * @return a composed {@code QuadConsumer} that performs in sequence this
      *         operation followed by the {@code after} operation
-     * @throws NullPointerException if {@code after} is null
+     * @throws IllegalArgumentException if {@code after} is null
      */
     default QuadConsumer<A, B, C, D> andThen(final QuadConsumer<? super A, ? super B, ? super C, ? super D> after) {
-        Objects.requireNonNull(after);
+        N.checkArgNotNull(after, cs.after);
         return (a, b, c, d) -> {
             accept(a, b, c, d);
             after.accept(a, b, c, d);
@@ -115,19 +115,18 @@ public interface QuadConsumer<A, B, C, D> extends Throwables.QuadConsumer<A, B, 
     }
 
     /**
-     * Converts this QuadConsumer to a Throwables.QuadConsumer that can throw checked exceptions.
-     * This method is useful when you need to use this consumer in a context that expects
-     * a Throwables.QuadConsumer with a specific exception type.
+     * Returns this consumer as a {@link Throwables.QuadConsumer} view.
+     * This method does not translate exceptions or make the original implementation capable of
+     * throwing new checked exceptions; the exception type parameter is for target-type compatibility.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * QuadConsumer<String, Integer, Boolean, Date> consumer = (s, i, b, d) -> { ... };
-     * var throwableConsumer =
-     *     consumer.toThrowable();
+     * QuadConsumer<String, Integer, Boolean, Long> consumer = (s, i, b, id) -> { };
+     * Throwables.QuadConsumer<String, Integer, Boolean, Long, RuntimeException> throwableConsumer = consumer.toThrowable();
      * }</pre>
      *
-     * @param <E> the type of exception that the returned consumer may throw
-     * @return a Throwables.QuadConsumer that wraps this consumer
+     * @param <E> the target exception type for compatibility with {@code Throwables.QuadConsumer}
+     * @return a Throwables.QuadConsumer view of this consumer
      */
     default <E extends Throwable> Throwables.QuadConsumer<A, B, C, D, E> toThrowable() {
         return (Throwables.QuadConsumer<A, B, C, D, E>) this;

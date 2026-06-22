@@ -21,6 +21,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.IntFunction;
 import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -506,13 +507,6 @@ public class ArrayStreamTest extends TestBase {
     }
 
     @Test
-    public void testFlattMap() {
-        Stream<String> stream = Stream.of(new String[] { "ab", "cd" });
-        List<Character> result = stream.flatMapArray(s -> new Character[] { s.charAt(0), s.charAt(1) }).toList();
-        assertEquals(Arrays.asList('a', 'b', 'c', 'd'), result);
-    }
-
-    @Test
     public void testFlatMapArray() {
         Stream<String> stream = Stream.of(new String[] { "ab", "cd" });
         List<Character> result = stream.flatMapArray(s -> new Character[] { s.charAt(0), s.charAt(1) }).toList();
@@ -706,11 +700,35 @@ public class ArrayStreamTest extends TestBase {
 
     @Test
     public void testSplit_Count() {
+        // count() consumes the iterator: hasNext() must return false afterwards.
         Stream<List<Integer>> stream = Stream.of(1, 2, 3, 4, 5).split(2, IntFunctions.ofList());
         ObjIterator<List<Integer>> iter = stream.iterator();
         assertEquals(3, iter.count());
-        iter.next();
-        assertEquals(2, iter.count());
+        assertFalse(iter.hasNext());
+
+        Stream<List<Integer>> stream2 = Stream.of(1, 2, 3, 4, 5).split(2, IntFunctions.ofList());
+        ObjIterator<List<Integer>> iter2 = stream2.iterator();
+        assertEquals(Arrays.asList(1, 2), iter2.next());
+        assertEquals(2, iter2.count());
+        assertFalse(iter2.hasNext());
+    }
+
+    @Test
+    public void testSplit_Count_ConsumesIterator() {
+        // split(int)
+        ObjIterator<List<Integer>> listChunks = Stream.of(1, 2, 3, 4, 5).split(2).iterator();
+        assertEquals(3, listChunks.count());
+        assertFalse(listChunks.hasNext());
+
+        // split(int, Collector)
+        ObjIterator<String> joinedChunks = Stream.of(1, 2, 3, 4, 5).split(2, Collectors.mapping(Fn.toStr(), Collectors.joining(","))).iterator();
+        assertEquals(3, joinedChunks.count());
+        assertFalse(joinedChunks.hasNext());
+    }
+
+    @Test
+    public void testSplitWithNullCollectionSupplier() {
+        assertThrows(IllegalArgumentException.class, () -> Stream.of(integerArray).split(2, (IntFunction<List<Integer>>) null));
     }
 
     @Test

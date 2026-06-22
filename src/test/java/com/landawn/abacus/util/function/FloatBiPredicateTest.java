@@ -71,6 +71,6 @@ public class FloatBiPredicateTest extends TestBase {
     @Test
     public void testAndNullThrowsImmediately() {
         FloatBiPredicate instance = (a, b) -> false;
-        org.junit.jupiter.api.Assertions.assertThrows(NullPointerException.class, () -> instance.and((FloatBiPredicate) null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> instance.and((FloatBiPredicate) null));
     }
 }

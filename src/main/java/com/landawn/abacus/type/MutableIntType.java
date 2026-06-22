@@ -169,9 +169,8 @@ public class MutableIntType extends NumberType<MutableInt> {
      * Writes {@code "null"} when {@code x} is {@code null}.
      * <p>
      * <b>appendTo vs. serializeTo:</b> {@code appendTo} produces a plain, {@code toString()}-style rendering with no
-     * JSON/XML quoting or escaping (for general text output), whereas {@code serializeTo} produces the JSON/XML
-     * serialized form (applying string quotation and character escaping per the serialization config) and is used by the
-     * JSON/XML serializers.
+     * JSON/XML quoting or escaping (for general text output), whereas {@code serializeTo} writes this type's JSON/XML
+     * literal form and ignores string quotation/escaping config.
      *
      * @param appendable the target to write to
      * @param x the {@code MutableInt} to append, may be {@code null}
@@ -201,12 +200,10 @@ public class MutableIntType extends NumberType<MutableInt> {
      * Writes the {@code NULL_CHAR_ARRAY} when {@code x} is {@code null}.
      * The {@code config} parameter is not used for integer values.
      * <p>
-     * This method is specifically designed for JSON/XML serialization: it writes the serialized form of {@code x} to the
-     * {@code CharacterWriter}, applying string quotation and character escaping according to the supplied serialization
-     * config (a {@code null} config means no surrounding quotation). It is the streaming counterpart of {@code stringOf}
-     * and is invoked by the JSON/XML serializers.
+     * This method is specifically designed for JSON/XML serialization: it writes this type's literal form to the
+     * {@code CharacterWriter}. String quotation/escaping config is ignored.
      * <p>
-     * <b>serializeTo vs. appendTo:</b> {@code serializeTo} produces machine-readable JSON/XML (quoted and escaped),
+     * <b>serializeTo vs. appendTo:</b> {@code serializeTo} produces machine-readable JSON/XML literal output,
      * whereas {@code appendTo} produces a plain, human-readable {@code toString()}-style rendering without JSON/XML
      * quoting or escaping.
      *
@@ -218,7 +215,11 @@ public class MutableIntType extends NumberType<MutableInt> {
     @Override
     public void serializeTo(final CharacterWriter writer, final MutableInt x, final JsonXmlSerConfig<?> config) throws IOException {
         if (x == null) {
-            writer.write(NULL_CHAR_ARRAY);
+            if (config != null && config.isWriteNullNumberAsZero()) {
+                writer.writeInt(0);
+            } else {
+                writer.write(NULL_CHAR_ARRAY);
+            }
         } else {
             writer.writeInt(x.value());
         }

@@ -103,6 +103,19 @@ public class XmlUtilTest extends TestBase {
     }
 
     @Test
+    public void testMarshal_nonAscii_roundTrip() {
+        // regression: marshal() decoded JAXB's UTF-8 output bytes with the platform default
+        // charset, corrupting non-ASCII content on JVMs whose default charset is not UTF-8
+        Person original = new Person("Café 中文", 42);
+        String xml = XmlUtil.marshal(original);
+
+        Assertions.assertTrue(xml.contains("Café 中文"));
+
+        Person restored = XmlUtil.unmarshal(Person.class, xml);
+        Assertions.assertEquals(original, restored);
+    }
+
+    @Test
     public void testUnmarshal() {
         String xml = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?><person><age>30</age><name>John</name></person>";
         Person person = XmlUtil.unmarshal(Person.class, xml);
@@ -407,6 +420,35 @@ public class XmlUtilTest extends TestBase {
         Assertions.assertTrue(content.contains("<root"));
 
         tempFile.delete();
+    }
+
+    @Test
+    public void testTransformToFile_nonAsciiContent() throws Exception {
+        // regression: transform(Document, File) wrote characters through a platform-default
+        // charset FileWriter while the XML declaration claimed UTF-8, so non-ASCII content
+        // produced an unparseable file on JVMs whose default charset is not UTF-8
+        DocumentBuilder builder = XmlUtil.createDOMParser();
+        Document doc = builder.newDocument();
+        Element root = doc.createElement("root");
+        root.setTextContent("Café 中文");
+        doc.appendChild(root);
+
+        File tempFile = File.createTempFile("xmlutil-utf8", ".xml");
+        tempFile.deleteOnExit();
+
+        try {
+            XmlUtil.transform(doc, tempFile);
+
+            // The bytes on disk must be valid UTF-8, matching the declared encoding.
+            String content = new String(Files.readAllBytes(tempFile.toPath()), Charsets.UTF_8);
+            Assertions.assertTrue(content.contains("Café 中文"));
+
+            // And a conforming parser must read the text back unchanged.
+            Document parsed = XmlUtil.createDOMParser().parse(tempFile);
+            Assertions.assertEquals("Café 中文", parsed.getDocumentElement().getTextContent());
+        } finally {
+            tempFile.delete();
+        }
     }
 
     @Test

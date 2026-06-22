@@ -189,9 +189,11 @@ public class TripleType<L, M, R> extends AbstractType<Triple<L, M, R>> {
             throw new IllegalArgumentException("Invalid Triple format. Expected array with at least 3 elements but got: " + str);
         }
 
-        final L left = a[0] == null ? null : ((L) (leftType.javaType().isAssignableFrom(a[0].getClass()) ? a[0] : N.convert(a[0], leftType)));
-        final M middle = a[1] == null ? null : ((M) (middleType.javaType().isAssignableFrom(a[1].getClass()) ? a[1] : N.convert(a[1], middleType)));
-        final R right = a[2] == null ? null : ((R) (rightType.javaType().isAssignableFrom(a[2].getClass()) ? a[2] : N.convert(a[2], rightType)));
+        // Parameterized slots are re-deserialized with their declared element types (see
+        // convertTupleElement): the untyped first-pass parse produced parser defaults.
+        final L left = (L) convertTupleElement(a[0], leftType);
+        final M middle = (M) convertTupleElement(a[1], middleType);
+        final R right = (R) convertTupleElement(a[2], rightType);
 
         return Triple.of(left, middle, right);
     }
@@ -207,7 +209,7 @@ public class TripleType<L, M, R> extends AbstractType<Triple<L, M, R>> {
      *
      * @param appendable the Appendable to write to
      * @param x the Triple object to append
-     * @throws IOException if an I/O error occurs during the append operation
+     * @throws IOException if an I/O error occurs during the append operation (when the target is a {@code Writer}, the error is rethrown wrapped in an {@code UncheckedIOException})
      * @implNote
      * This method appends a string representation of {@code x} to {@code appendable} (the literal {@code "null"} for a
      * {@code null} value). Conceptually this is the human-readable form produced by {@code toString()}, <i>not</i> the
@@ -278,7 +280,7 @@ public class TripleType<L, M, R> extends AbstractType<Triple<L, M, R>> {
      * @param writer the CharacterWriter to write to
      * @param x the Triple object to write
      * @param config the serialization configuration for formatting options
-     * @throws IOException if an I/O error occurs during the write operation
+     * @throws UncheckedIOException if an I/O error occurs during the write operation (the underlying {@code IOException} is wrapped)
      */
     @Override
     public void serializeTo(final CharacterWriter writer, final Triple<L, M, R> x, final JsonXmlSerConfig<?> config) throws IOException {

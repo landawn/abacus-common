@@ -152,7 +152,7 @@ public class IndexedType<T> extends AbstractType<Indexed<T>> {
         }
 
         final long index = a[0] == null ? 0 : (a[0] instanceof Number ? ((Number) a[0]).longValue() : Numbers.toLong(a[0].toString()));
-        final T value = a[1] == null ? null : ((T) (valueType.javaType().isAssignableFrom(a[1].getClass()) ? a[1] : N.convert(a[1], valueType)));
+        final T value = (T) convertTupleElement(a[1], valueType);
 
         return Indexed.of(value, index);
     }

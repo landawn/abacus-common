@@ -13,9 +13,9 @@
  */
 package com.landawn.abacus.util.function;
 
-import java.util.Objects;
-
 import com.landawn.abacus.util.Throwables;
+import com.landawn.abacus.util.N;
+import com.landawn.abacus.util.cs;
 
 /**
  * Represents an operation on a single byte-valued operand that produces a byte-valued result.
@@ -62,12 +62,12 @@ public interface ByteUnaryOperator extends Throwables.ByteUnaryOperator<RuntimeE
      * @param before the operator to apply before this operator is applied. Must not be {@code null}.
      * @return a composed operator that first applies the {@code before} operator and then
      *         applies this operator
-     * @throws NullPointerException if {@code before} is null
+     * @throws IllegalArgumentException if {@code before} is null
      *
      * @see #andThen(ByteUnaryOperator)
      */
     default ByteUnaryOperator compose(final ByteUnaryOperator before) {
-        Objects.requireNonNull(before);
+        N.checkArgNotNull(before, cs.before);
         return v -> applyAsByte(before.applyAsByte(v));
     }
 
@@ -87,12 +87,12 @@ public interface ByteUnaryOperator extends Throwables.ByteUnaryOperator<RuntimeE
      * @param after the operator to apply after this operator is applied. Must not be {@code null}.
      * @return a composed operator that first applies this operator and then applies the
      *         {@code after} operator
-     * @throws NullPointerException if {@code after} is null
+     * @throws IllegalArgumentException if {@code after} is null
      *
      * @see #compose(ByteUnaryOperator)
      */
     default ByteUnaryOperator andThen(final ByteUnaryOperator after) {
-        Objects.requireNonNull(after);
+        N.checkArgNotNull(after, cs.after);
         return t -> after.applyAsByte(applyAsByte(t));
     }
 
@@ -110,5 +110,19 @@ public interface ByteUnaryOperator extends Throwables.ByteUnaryOperator<RuntimeE
      */
     static ByteUnaryOperator identity() {
         return t -> t;
+    }
+
+    /**
+     * Returns this object as a {@link Throwables.ByteUnaryOperator} view.
+     *
+     * <p>The returned object has the same behavior as this one. This method does not translate
+     * exceptions or make the original implementation capable of throwing new checked exceptions; the
+     * exception type parameter is for target-type compatibility with APIs that accept {@code Throwables.ByteUnaryOperator}.
+     *
+     * @param <E> the target exception type for compatibility with {@code Throwables.ByteUnaryOperator}
+     * @return a {@link Throwables.ByteUnaryOperator} view of this object
+     */
+    default <E extends Throwable> Throwables.ByteUnaryOperator<E> toThrowable() {
+        return (Throwables.ByteUnaryOperator<E>) this;
     }
 }

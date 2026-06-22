@@ -39,7 +39,7 @@ import static com.landawn.abacus.util.Numbers.factorialToBigInteger;
 import static com.landawn.abacus.util.Numbers.format;
 import static com.landawn.abacus.util.Numbers.fuzzyEquals;
 import static com.landawn.abacus.util.Numbers.gcd;
-import static com.landawn.abacus.util.Numbers.isConvertibleToNumber;
+import static com.landawn.abacus.util.Numbers.isCreatable;
 import static com.landawn.abacus.util.Numbers.isParsable;
 import static com.landawn.abacus.util.Numbers.isPowerOfTwo;
 import static com.landawn.abacus.util.Numbers.isPrime;
@@ -93,6 +93,23 @@ public class NumbersTest extends TestBase {
 
     private static final double DELTA = 1e-15;
     private static final float FLOAT_DELTA = 1e-7f;
+
+    @Test
+    public void test_parseFloat() {
+
+        BigDecimal huge = new BigDecimal("1e500"); // finite, but ≈10^500 ≫ Double.MAX_VALUE (≈1.8e308)
+
+        // A finite value beyond the target's range saturates to +-Infinity (IEEE-754) and never throws —
+        // consistently across toFloat/toDouble(Object) and convert(...).
+        assertEquals(Double.POSITIVE_INFINITY, Numbers.toDouble((Object) huge), 0.0);
+        assertEquals(Float.POSITIVE_INFINITY, Numbers.toFloat((Object) huge), 0.0f);
+        assertEquals(Double.POSITIVE_INFINITY, Numbers.convert(huge, Double.class), 0.0);
+        assertEquals(Float.POSITIVE_INFINITY, Numbers.convert(huge, Float.class), 0.0f);
+
+        // String parsing agrees (Float.parseFloat, and convert("1e500", ...) via the Type system).
+        assertEquals(Float.POSITIVE_INFINITY, Float.parseFloat("1e500"), 0.0f);
+        assertEquals(Float.POSITIVE_INFINITY, N.convert("1e500", float.class), 0.0f);
+    }
 
     @Test
     public void testConvert_byteToOthers() {
@@ -244,13 +261,40 @@ public class NumbersTest extends TestBase {
 
     @Test
     public void testConvert_doubleToLong_overflow() {
-        assertEquals(Long.valueOf(Long.MAX_VALUE), Numbers.convert(Long.MAX_VALUE + 100.0, long.class));
+        // (double)/(float) Long.MAX_VALUE round UP to 2^63 (= MAX + 1) -> out of range -> ArithmeticException
+        // (consistent with toLong(Object)), NOT saturation to MAX_VALUE.
+        assertThrows(ArithmeticException.class, () -> Numbers.convert(Long.MAX_VALUE + 100.0, long.class));
+        assertThrows(ArithmeticException.class, () -> Numbers.convert((double) Long.MAX_VALUE, long.class));
+        assertThrows(ArithmeticException.class, () -> Numbers.convert((float) Long.MAX_VALUE, long.class));
+        // Long.MIN_VALUE (-2^63) is exactly representable -> still converts.
+        assertEquals(Long.MIN_VALUE, Numbers.convert((double) Long.MIN_VALUE, long.class).longValue());
+
+        // int target: (float) Integer.MAX_VALUE rounds up to 2^31 -> overflow; MIN and the exact double MAX are in range.
+        assertThrows(ArithmeticException.class, () -> Numbers.convert((float) Integer.MAX_VALUE, int.class));
+        assertEquals(Integer.MIN_VALUE, Numbers.convert((float) Integer.MIN_VALUE, int.class).intValue());
+        assertEquals(Integer.MAX_VALUE, Numbers.convert((double) Integer.MAX_VALUE, int.class).intValue());
     }
 
     @Test
-    public void testConvert_doubleToFloat_Infinity() {
-        assertEquals(Float.POSITIVE_INFINITY, Numbers.convert(Double.POSITIVE_INFINITY, float.class));
-        assertEquals(Float.NEGATIVE_INFINITY, Numbers.convert(Double.NEGATIVE_INFINITY, float.class));
+    public void test_convert_nonFiniteToBigIntegerBigDecimal_throws() {
+        // 16.1: a NaN/+-Infinity input is not representable as a BigInteger/BigDecimal -> ArithmeticException,
+        // consistent with the integer targets (a float/double target, by contrast, PRESERVES a non-finite value).
+        assertThrows(ArithmeticException.class, () -> Numbers.convert(Double.NaN, BigInteger.class));
+        assertThrows(ArithmeticException.class, () -> Numbers.convert(Double.NaN, BigDecimal.class));
+        assertThrows(ArithmeticException.class, () -> Numbers.convert(Double.POSITIVE_INFINITY, BigInteger.class));
+        assertThrows(ArithmeticException.class, () -> Numbers.convert(Double.NEGATIVE_INFINITY, BigDecimal.class));
+        assertThrows(ArithmeticException.class, () -> Numbers.convert(Float.NaN, BigInteger.class));
+        assertThrows(ArithmeticException.class, () -> Numbers.convert(Float.NaN, BigDecimal.class));
+        assertThrows(ArithmeticException.class, () -> Numbers.convert(Float.POSITIVE_INFINITY, BigInteger.class));
+        assertThrows(ArithmeticException.class, () -> Numbers.convert(Float.NEGATIVE_INFINITY, BigDecimal.class));
+
+        // routes identically through the Type overload
+        assertThrows(ArithmeticException.class, () -> Numbers.convert(Double.NaN, Type.of(BigInteger.class)));
+        assertThrows(ArithmeticException.class, () -> Numbers.convert(Float.POSITIVE_INFINITY, Type.of(BigDecimal.class)));
+
+        // a finite value still converts (no regression)
+        assertEquals(BigInteger.valueOf(42), Numbers.convert(42.0, BigInteger.class));
+        assertEquals(BigDecimal.valueOf(100.5), Numbers.convert(100.5, BigDecimal.class));
     }
 
     @Test
@@ -435,7 +479,9 @@ public class NumbersTest extends TestBase {
 
     @Test
     public void testConvert_doubleToFloat_overflow() {
-        assertThrows(ArithmeticException.class, () -> Numbers.convert(Double.MAX_VALUE, float.class));
+        // A finite double beyond the float range saturates to +-Infinity (IEEE-754), not an exception.
+        assertEquals(Float.POSITIVE_INFINITY, Numbers.convert(Double.MAX_VALUE, float.class), 0.0f);
+        assertEquals(Float.NEGATIVE_INFINITY, Numbers.convert(-Double.MAX_VALUE, float.class), 0.0f);
     }
 
     @Test
@@ -599,11 +645,11 @@ public class NumbersTest extends TestBase {
     // --- convert overflow paths: double target ---
     @Test
     public void testConvert_OverflowToDouble_FromBigInteger() {
-        // Numbers.convert throws ArithmeticException on double overflow from BigInteger
+        // A BigInteger beyond the double range saturates to +-Infinity (IEEE-754), not an exception.
         BigInteger hugePositive = BigInteger.TWO.pow(2000);
-        assertThrows(ArithmeticException.class, () -> Numbers.convert(hugePositive, double.class));
+        assertEquals(Double.POSITIVE_INFINITY, Numbers.convert(hugePositive, double.class), 0.0);
         BigInteger hugeNegative = BigInteger.TWO.pow(2000).negate();
-        assertThrows(ArithmeticException.class, () -> Numbers.convert(hugeNegative, double.class));
+        assertEquals(Double.NEGATIVE_INFINITY, Numbers.convert(hugeNegative, double.class), 0.0);
     }
 
     @Test
@@ -642,22 +688,24 @@ public class NumbersTest extends TestBase {
 
     @Test
     public void test_convert_toFloat_BigIntegerBigDecimalOverflow() {
+        // A magnitude beyond the float range saturates to +-Infinity (IEEE-754), not an exception.
         BigInteger hugeInt = new BigInteger("2").pow(200);
-        assertThrows(ArithmeticException.class, () -> Numbers.convert(hugeInt, float.class));
-        assertThrows(ArithmeticException.class, () -> Numbers.convert(hugeInt.negate(), float.class));
+        assertEquals(Float.POSITIVE_INFINITY, Numbers.convert(hugeInt, float.class), 0.0f);
+        assertEquals(Float.NEGATIVE_INFINITY, Numbers.convert(hugeInt.negate(), float.class), 0.0f);
         BigDecimal hugeDecimal = new BigDecimal(hugeInt);
-        assertThrows(ArithmeticException.class, () -> Numbers.convert(hugeDecimal, float.class));
-        assertThrows(ArithmeticException.class, () -> Numbers.convert(hugeDecimal.negate(), float.class));
+        assertEquals(Float.POSITIVE_INFINITY, Numbers.convert(hugeDecimal, float.class), 0.0f);
+        assertEquals(Float.NEGATIVE_INFINITY, Numbers.convert(hugeDecimal.negate(), float.class), 0.0f);
     }
 
     @Test
     public void test_convert_toDouble_BigIntegerBigDecimalOverflow() {
+        // A magnitude beyond the double range saturates to +-Infinity (IEEE-754), not an exception.
         BigInteger hugeInt = new BigInteger("2").pow(1100);
-        assertThrows(ArithmeticException.class, () -> Numbers.convert(hugeInt, double.class));
-        assertThrows(ArithmeticException.class, () -> Numbers.convert(hugeInt.negate(), double.class));
+        assertEquals(Double.POSITIVE_INFINITY, Numbers.convert(hugeInt, double.class), 0.0);
+        assertEquals(Double.NEGATIVE_INFINITY, Numbers.convert(hugeInt.negate(), double.class), 0.0);
         BigDecimal hugeDecimal = new BigDecimal(hugeInt);
-        assertThrows(ArithmeticException.class, () -> Numbers.convert(hugeDecimal, double.class));
-        assertThrows(ArithmeticException.class, () -> Numbers.convert(hugeDecimal.negate(), double.class));
+        assertEquals(Double.POSITIVE_INFINITY, Numbers.convert(hugeDecimal, double.class), 0.0);
+        assertEquals(Double.NEGATIVE_INFINITY, Numbers.convert(hugeDecimal.negate(), double.class), 0.0);
     }
 
     // Coverage: convert(BigInteger, int.class) overflow branch (value beyond Integer range).
@@ -750,30 +798,30 @@ public class NumbersTest extends TestBase {
 
     @Test
     public void testFormat_Integer_null() {
-        assertEquals("0", Numbers.format((Integer) null, "#"));
-        assertEquals("0.00", Numbers.format((Integer) null, "0.00"));
+        assertNull(Numbers.format((Integer) null, "#"));
+        assertNull(Numbers.format((Integer) null, "0.00"));
     }
 
     @Test
     public void testFormat_Long_null() {
-        assertEquals("0.0", Numbers.format((Long) null, "0.0"));
+        assertNull(Numbers.format((Long) null, "0.0"));
     }
 
     @Test
     public void testFormat_Float_null() {
-        assertEquals("0.00", Numbers.format((Float) null, "0.00"));
+        assertNull(Numbers.format((Float) null, "0.00"));
     }
 
     @Test
     public void testFormat_Double_null() {
-        assertEquals("0.00", Numbers.format((Double) null, "0.00"));
+        assertNull(Numbers.format((Double) null, "0.00"));
     }
 
     @Test
     @DisplayName("format with null value should use default")
     public void testFormatNull() {
-        assertEquals("0", Numbers.format((Integer) null, "0"));
-        assertEquals("0.00", Numbers.format((Double) null, "0.00"));
+        assertNull(Numbers.format((Integer) null, "0"));
+        assertNull(Numbers.format((Double) null, "0.00"));
     }
 
     @Test
@@ -786,28 +834,28 @@ public class NumbersTest extends TestBase {
         assertEquals("12.3%", format(0.123f, "0.0%"));
 
         assertEquals("456", format(Integer.valueOf(456), "#"));
-        assertEquals("0", format((Integer) null, "0"));
-        assertEquals("0.00", format((Integer) null, "0.00"));
+        assertNull(format((Integer) null, "0"));
+        assertNull(format((Integer) null, "0.00"));
 
         assertEquals("789", format(789L, "#"));
         assertEquals("789.00", format(789L, "0.00"));
 
         assertEquals("101112", format(Long.valueOf(101112L), "#"));
-        assertEquals("0", format((Long) null, "0"));
+        assertNull(format((Long) null, "0"));
 
         assertEquals("3.14", format(3.14159f, "0.00"));
         assertEquals("3.1", format(3.14159f, "#.#"));
         assertEquals("314.16%", format(3.14159f, "0.00%"));
 
         assertEquals("2.72", format(Float.valueOf(2.71828f), "0.00"));
-        assertEquals("0.00", format((Float) null, "0.00"));
+        assertNull(format((Float) null, "0.00"));
 
         assertEquals("3.14159", format(3.14159265359, "0.00000"));
         assertEquals("3.14", format(3.14159265359, "#.##"));
         assertEquals("31.42%", format(0.31415926, "0.00%"));
 
         assertEquals("2.71828", format(Double.valueOf(2.718281828), "0.00000"));
-        assertEquals("0.00", format((Double) null, "0.00"));
+        assertNull(format((Double) null, "0.00"));
     }
 
     @Test
@@ -819,13 +867,13 @@ public class NumbersTest extends TestBase {
 
     @Test
     public void testFormat_IntegerBoxedNullAndNonNull() {
-        assertEquals("0", Numbers.format((Integer) null, "0"));
+        assertNull(Numbers.format((Integer) null, "0"));
         assertEquals("42", Numbers.format(Integer.valueOf(42), "0"));
     }
 
     @Test
     public void testFormat_LongBoxedNullAndNonNull() {
-        assertEquals("0", Numbers.format((Long) null, "0"));
+        assertNull(Numbers.format((Long) null, "0"));
         assertEquals("999", Numbers.format(Long.valueOf(999L), "0"));
     }
 
@@ -834,7 +882,7 @@ public class NumbersTest extends TestBase {
         // "#,000" is not in the pool, exercises the new-DecimalFormat path
         String result = Numbers.format(Integer.valueOf(1234), "#,000");
         assertEquals("1,234", result);
-        assertEquals("000", Numbers.format((Integer) null, "#,000"));
+        assertNull(Numbers.format((Integer) null, "#,000"));
     }
 
     @Test
@@ -842,21 +890,21 @@ public class NumbersTest extends TestBase {
         // "#,000" is not in the pool, exercises the new-DecimalFormat path
         String result = Numbers.format(Long.valueOf(1234L), "#,000");
         assertEquals("1,234", result);
-        assertEquals("000", Numbers.format((Long) null, "#,000"));
+        assertNull(Numbers.format((Long) null, "#,000"));
     }
 
     @Test
     public void test_format_Float_UncachedPattern() {
         // "0.00E0" is not in the pool, exercises the new-DecimalFormat path
         assertNotNull(Numbers.format(Float.valueOf(123.4f), "0.00E0"));
-        assertNotNull(Numbers.format((Float) null, "0.00E0"));
+        assertNull(Numbers.format((Float) null, "0.00E0"));
     }
 
     @Test
     public void test_format_Double_UncachedPattern() {
         // "0.00E0" is not in the pool, exercises the new-DecimalFormat path
         assertNotNull(Numbers.format(Double.valueOf(123.4), "0.00E0"));
-        assertNotNull(Numbers.format((Double) null, "0.00E0"));
+        assertNull(Numbers.format((Double) null, "0.00E0"));
     }
 
     @Test
@@ -871,7 +919,7 @@ public class NumbersTest extends TestBase {
     @Test
     public void test_format_Integer() {
         assertEquals("123", Numbers.format(Integer.valueOf(123), "0"));
-        assertEquals("0", Numbers.format((Integer) null, "0"));
+        assertNull(Numbers.format((Integer) null, "0"));
         assertEquals("456.00", Numbers.format(Integer.valueOf(456), "0.00"));
 
         assertThrows(IllegalArgumentException.class, () -> Numbers.format((Integer) 123, null));
@@ -888,7 +936,7 @@ public class NumbersTest extends TestBase {
     @Test
     public void test_format_Long() {
         assertEquals("123", Numbers.format(Long.valueOf(123), "0"));
-        assertEquals("0", Numbers.format((Long) null, "0"));
+        assertNull(Numbers.format((Long) null, "0"));
 
         assertThrows(IllegalArgumentException.class, () -> Numbers.format(Long.valueOf(123), null));
     }
@@ -904,7 +952,7 @@ public class NumbersTest extends TestBase {
     @Test
     public void test_format_Float() {
         assertEquals("12.10", Numbers.format(Float.valueOf(12.105f), "0.00"));
-        assertEquals("0.00", Numbers.format((Float) null, "0.00"));
+        assertNull(Numbers.format((Float) null, "0.00"));
 
         assertThrows(IllegalArgumentException.class, () -> Numbers.format((Float) 12.1f, null));
     }
@@ -921,7 +969,7 @@ public class NumbersTest extends TestBase {
     @Test
     public void test_format_Double() {
         assertEquals("12.11", Numbers.format(Double.valueOf(12.105), "0.00"));
-        assertEquals("0.00", Numbers.format((Double) null, "0.00"));
+        assertNull(Numbers.format((Double) null, "0.00"));
         assertEquals("12.16%", Numbers.format(Double.valueOf(0.12156), "#.##%"));
 
         assertThrows(IllegalArgumentException.class, () -> Numbers.format((Double) 12.1, null));
@@ -935,7 +983,7 @@ public class NumbersTest extends TestBase {
     @Test
     public void testFormatInteger() {
         Assertions.assertEquals("123", Numbers.format(Integer.valueOf(123), "0"));
-        Assertions.assertEquals("0", Numbers.format((Integer) null, "0"));
+        Assertions.assertNull(Numbers.format((Integer) null, "0"));
         Assertions.assertEquals("123.00", Numbers.format(Integer.valueOf(123), "0.00"));
         Assertions.assertThrows(IllegalArgumentException.class, () -> Numbers.format(Integer.valueOf(123), null));
     }
@@ -943,7 +991,7 @@ public class NumbersTest extends TestBase {
     @Test
     public void testFormatLongObject() {
         Assertions.assertEquals("1234567890", Numbers.format(Long.valueOf(1234567890L), "0"));
-        Assertions.assertEquals("0", Numbers.format((Long) null, "0"));
+        Assertions.assertNull(Numbers.format((Long) null, "0"));
         Assertions.assertThrows(IllegalArgumentException.class, () -> Numbers.format(Long.valueOf(123L), null));
     }
 
@@ -958,7 +1006,7 @@ public class NumbersTest extends TestBase {
     @Test
     public void testFormatFloatObject() {
         Assertions.assertEquals("12.10", Numbers.format(Float.valueOf(12.105f), "0.00"));
-        Assertions.assertEquals("0.00", Numbers.format((Float) null, "0.00"));
+        Assertions.assertNull(Numbers.format((Float) null, "0.00"));
         Assertions.assertThrows(IllegalArgumentException.class, () -> Numbers.format(Float.valueOf(12.1f), null));
     }
 
@@ -974,7 +1022,7 @@ public class NumbersTest extends TestBase {
     @Test
     public void testFormatDoubleObject() {
         Assertions.assertEquals("12.11", Numbers.format(Double.valueOf(12.105d), "0.00"));
-        Assertions.assertEquals("0.00", Numbers.format((Double) null, "0.00"));
+        Assertions.assertNull(Numbers.format((Double) null, "0.00"));
         Assertions.assertThrows(IllegalArgumentException.class, () -> Numbers.format(Double.valueOf(12.1d), null));
     }
 
@@ -1231,16 +1279,16 @@ public class NumbersTest extends TestBase {
         assertEquals(0.0f, toFloat(""), 1e-10f);
         assertEquals(0.0, toDouble(""), 1e-10);
 
-        assertFalse(isConvertibleToNumber(""));
+        assertFalse(isCreatable(""));
         assertFalse(isParsable(""));
     }
 
     @Test
     public void testCreateNumber_leadingPlusWithLongSuffix() {
-        // Regression: createNumber(String) must return a value for every input where isConvertibleToNumber
+        // Regression: createNumber(String) must return a value for every input where isCreatable
         // returns true. "+7L" (leading '+' with an L/l suffix) previously threw NumberFormatException even
-        // though isConvertibleToNumber("+7L") returns true; the L-suffix branch only handled a leading '-'.
-        assertTrue(isConvertibleToNumber("+7L"));
+        // though isCreatable("+7L") returns true; the L-suffix branch only handled a leading '-'.
+        assertTrue(isCreatable("+7L"));
 
         Number plusL = createNumber("+7L");
         assertTrue(plusL instanceof Long);
@@ -1276,7 +1324,7 @@ public class NumbersTest extends TestBase {
         assertEquals((byte) 0, Numbers.toByte(null));
         assertEquals((byte) -127, Numbers.toByte("-127"));
 
-        assertThrows(NumberFormatException.class, () -> Numbers.toByte("128"));
+        assertThrows(ArithmeticException.class, () -> Numbers.toByte("128"));
         assertThrows(NumberFormatException.class, () -> Numbers.toByte("abc"));
     }
 
@@ -1286,7 +1334,7 @@ public class NumbersTest extends TestBase {
         assertEquals((byte) 5, Numbers.toByte("", (byte) 5));
         assertEquals((byte) 5, Numbers.toByte(null, (byte) 5));
 
-        assertThrows(NumberFormatException.class, () -> Numbers.toByte("200", (byte) 5));
+        assertThrows(ArithmeticException.class, () -> Numbers.toByte("200", (byte) 5));
     }
 
     @Test
@@ -1296,8 +1344,8 @@ public class NumbersTest extends TestBase {
         assertEquals((byte) 10, Numbers.toByte((Object) "10"));
         assertEquals((byte) 0, Numbers.toByte((Object) null));
 
-        assertThrows(NumberFormatException.class, () -> Numbers.toByte(200));
-        assertThrows(NumberFormatException.class, () -> Numbers.toByte(200L));
+        assertThrows(ArithmeticException.class, () -> Numbers.toByte(200));
+        assertThrows(ArithmeticException.class, () -> Numbers.toByte(200L));
     }
 
     @Test
@@ -1306,7 +1354,146 @@ public class NumbersTest extends TestBase {
         assertEquals((byte) 5, Numbers.toByte((Object) null, (byte) 5));
         assertEquals((byte) 10, Numbers.toByte((Object) "10", (byte) 5));
 
-        assertThrows(NumberFormatException.class, () -> Numbers.toByte(300L, (byte) 5));
+        assertThrows(ArithmeticException.class, () -> Numbers.toByte(300L, (byte) 5));
+    }
+
+    @Test
+    public void test_toByteShortInt_Object_BigIntegerBigDecimal_overflow() {
+        // Regression: oversized BigInteger/BigDecimal must NOT silently wrap via longValue() (mod 2^64).
+        final BigInteger hugeBi = BigInteger.valueOf(Long.MAX_VALUE).shiftLeft(8); // way beyond long range
+        final BigInteger wrapsTo50 = new BigInteger("18446744073709551666"); // 2^64 + 50; longValue() == 50
+
+        assertThrows(ArithmeticException.class, () -> Numbers.toByte((Object) hugeBi, (byte) 0));
+        assertThrows(ArithmeticException.class, () -> Numbers.toByte((Object) wrapsTo50, (byte) 0));
+        assertThrows(ArithmeticException.class, () -> Numbers.toShort((Object) wrapsTo50, (short) 0));
+        assertThrows(ArithmeticException.class, () -> Numbers.toInt((Object) wrapsTo50, 0));
+        assertThrows(ArithmeticException.class, () -> Numbers.toByte((Object) new BigDecimal("18446744073709551666"), (byte) 0));
+        assertThrows(ArithmeticException.class, () -> Numbers.toInt((Object) new BigDecimal("3000000000"), 0));
+
+        // In-range BigInteger/BigDecimal still work; an in-range fraction truncates toward zero.
+        assertEquals((byte) 100, Numbers.toByte((Object) BigInteger.valueOf(100), (byte) 0));
+        assertEquals((byte) 100, Numbers.toByte((Object) new BigDecimal("100.9"), (byte) 0)); // in-range fraction truncates
+        assertEquals((short) 1000, Numbers.toShort((Object) BigInteger.valueOf(1000), (short) 0));
+        assertEquals(123, Numbers.toInt((Object) new BigDecimal("123.99"), 0)); // in-range fraction truncates
+        assertEquals((byte) -128, Numbers.toByte((Object) BigInteger.valueOf(-128), (byte) 0));
+
+        // A fractional value whose integer part (truncated toward zero) FITS converts (e.g. 127.9 -> 127),
+        // consistent with convert(...) and JLS narrowing; only an out-of-range integer part overflows.
+        assertEquals((byte) 127, Numbers.toByte((Object) new BigDecimal("127.9"), (byte) 0));
+        assertEquals((byte) -128, Numbers.toByte((Object) new BigDecimal("-128.9"), (byte) 0));
+        assertEquals((short) 32767, Numbers.toShort((Object) new BigDecimal("32767.9"), (short) 0));
+        assertThrows(ArithmeticException.class, () -> Numbers.toByte((Object) new BigDecimal("128.0"), (byte) 0));
+        assertThrows(ArithmeticException.class, () -> Numbers.toByte((Object) new BigDecimal("128.9"), (byte) 0));
+        assertThrows(ArithmeticException.class, () -> Numbers.toShort((Object) new BigDecimal("32768.0"), (short) 0));
+    }
+
+    @Test
+    public void test_toByteShortInt_Object_fractionalTruncates() {
+        // toByte/toShort/toInt(Object) and convert(...) range-check the integer PART (truncated toward zero), so a
+        // fractional value whose truncation fits converts (e.g. 127.9f -> 127) rather than throwing; only an
+        // out-of-range integer part overflows.
+        assertEquals((byte) 127, Numbers.toByte((Object) 127.9f, (byte) 0));
+        assertEquals((byte) 127, Numbers.toByte((Object) 127.5d, (byte) 0));
+        assertEquals((byte) -128, Numbers.toByte((Object) (-128.9f), (byte) 0));
+        assertEquals((short) 32767, Numbers.toShort((Object) 32767.5d, (short) 0));
+        assertEquals(2147483647, Numbers.toInt((Object) 2147483647.5d, 0));
+
+        // convert(...) and toXxx(Object) agree on the fractional band (N.convert delegates to Numbers.convert).
+        assertEquals((byte) 127, Numbers.convert(127.9f, byte.class).byteValue());
+        assertEquals((byte) 127, Numbers.toByte((Object) 127.9f, (byte) 0));
+        assertEquals((short) 32767, Numbers.convert(32767.9d, short.class).shortValue());
+        assertEquals(2147483647, Numbers.convert(2147483647.9d, int.class).intValue());
+
+        // An integer part BEYOND the range is still overflow -> ArithmeticException (for both toXxx and convert).
+        assertThrows(ArithmeticException.class, () -> Numbers.toByte((Object) 128.0f, (byte) 0));
+        assertThrows(ArithmeticException.class, () -> Numbers.toByte((Object) 128.5f, (byte) 0));
+        assertThrows(ArithmeticException.class, () -> Numbers.convert(128.5f, byte.class));
+        assertThrows(ArithmeticException.class, () -> Numbers.toShort((Object) 32768.0d, (short) 0));
+        assertThrows(ArithmeticException.class, () -> Numbers.toInt((Object) 2147483648.0d, 0));
+
+        // Other in-range fractions truncate toward zero; the exact MAX still converts.
+        assertEquals((byte) 100, Numbers.toByte((Object) 100.9f, (byte) 0));
+        assertEquals((byte) -100, Numbers.toByte((Object) (-100.9d), (byte) 0));
+        assertEquals(123, Numbers.toInt((Object) 123.99d, 0));
+        assertEquals((byte) 127, Numbers.toByte((Object) 127.0f, (byte) 0)); // exact MAX still converts
+
+        // NaN -> 0 for toXxx(Object) (matching toLong(Object)); convert(NaN, integer) still THROWS (documented residual);
+        // infinities are out of range -> throw for both.
+        assertEquals((byte) 0, Numbers.toByte((Object) Double.NaN, (byte) 9));
+        assertEquals(0, Numbers.toInt((Object) Float.NaN, 9));
+        assertThrows(ArithmeticException.class, () -> Numbers.convert(Float.NaN, byte.class));
+        assertThrows(ArithmeticException.class, () -> Numbers.toByte((Object) Double.POSITIVE_INFINITY, (byte) 0));
+        assertThrows(ArithmeticException.class, () -> Numbers.toInt((Object) Double.NEGATIVE_INFINITY, 0));
+        assertThrows(ArithmeticException.class, () -> Numbers.convert(Double.POSITIVE_INFINITY, int.class));
+    }
+
+    @Test
+    public void test_toByteShortInt_Object_fractionalTruncates_negative() {
+        // Negative fractional values truncate TOWARD ZERO and the integer part is range-checked, for both
+        // toByte/toShort/toInt(Object) and convert(...). A fraction whose truncation fits converts; note that
+        // -128.9 truncates to -128 (= byte MIN), which is still in range.
+        assertEquals((byte) -127, Numbers.toByte((Object) (-127.9f), (byte) 0));
+        assertEquals((byte) -128, Numbers.toByte((Object) (-128.0f), (byte) 0));
+        assertEquals((byte) -128, Numbers.toByte((Object) (-128.9f), (byte) 0)); // truncates to -128 (MIN), in range
+        assertEquals((short) -32767, Numbers.toShort((Object) (-32767.9d), (short) 0));
+        assertEquals((short) -32768, Numbers.toShort((Object) (-32768.9d), (short) 0)); // truncates to MIN
+        assertEquals(-2147483647, Numbers.toInt((Object) (-2147483647.9d), 0));
+        assertEquals(Integer.MIN_VALUE, Numbers.toInt((Object) (-2147483648.9d), 0)); // truncates to MIN
+        assertEquals((byte) -127, Numbers.toByte((Object) new BigDecimal("-127.9"), (byte) 0));
+        assertEquals((byte) -128, Numbers.toByte((Object) new BigDecimal("-128.9"), (byte) 0));
+
+        // convert(...) and N.convert(...) agree on every negative case (N.convert delegates to Numbers.convert).
+        assertEquals((byte) -127, Numbers.convert(-127.9f, byte.class).byteValue());
+        assertEquals((byte) -128, Numbers.convert(-128.9f, byte.class).byteValue());
+        assertEquals((short) -32767, Numbers.convert(-32767.9d, short.class).shortValue());
+        assertEquals(-2147483647, Numbers.convert(-2147483647.9d, int.class).intValue());
+        assertEquals((byte) -127, Numbers.convert(new BigDecimal("-127.9"), byte.class).byteValue());
+        final Byte viaN = N.convert((Object) (-127.9f), byte.class);
+        assertEquals((byte) -127, viaN.byteValue());
+
+        // A negative integer part BEYOND the range overflows -> ArithmeticException (both toXxx and convert).
+        assertThrows(ArithmeticException.class, () -> Numbers.toByte((Object) (-129.0f), (byte) 0));
+        assertThrows(ArithmeticException.class, () -> Numbers.toByte((Object) (-129.5f), (byte) 0));
+        assertThrows(ArithmeticException.class, () -> Numbers.convert(-129.5f, byte.class));
+        assertThrows(ArithmeticException.class, () -> Numbers.toShort((Object) (-32769.0d), (short) 0));
+        assertThrows(ArithmeticException.class, () -> Numbers.convert(-32769.0d, short.class));
+        assertThrows(ArithmeticException.class, () -> Numbers.toInt((Object) (-2147483649.0d), 0));
+        assertThrows(ArithmeticException.class, () -> Numbers.convert(-2147483649.0d, int.class));
+        assertThrows(ArithmeticException.class, () -> Numbers.toByte((Object) new BigDecimal("-129.0"), (byte) 0));
+        assertThrows(ArithmeticException.class, () -> Numbers.convert(new BigDecimal("-129.0"), byte.class));
+        assertThrows(ArithmeticException.class, () -> Numbers.toInt((Object) new BigDecimal("-3000000000"), 0));
+
+        // Other in-range negative fractions truncate toward zero.
+        assertEquals((byte) -100, Numbers.toByte((Object) (-100.9d), (byte) 0));
+        assertEquals(-123, Numbers.toInt((Object) (-123.99d), 0));
+    }
+
+    @Test
+    public void test_toLong_Object_BigDecimal_truncates() {
+        // 18.1: toLong(Object) and convert(Number, long) truncate a fractional BigDecimal toward zero and range-check the
+        // integer part (aligned with toByte/toShort/toInt). A BigDecimal whose integer part is exactly Long.MAX/MIN converts.
+        assertEquals(Long.MAX_VALUE, Numbers.toLong((Object) new BigDecimal("9223372036854775807.9"), 0L));
+        assertEquals(Long.MIN_VALUE, Numbers.toLong((Object) new BigDecimal("-9223372036854775808.9"), 0L));
+        assertEquals(100L, Numbers.toLong((Object) new BigDecimal("100.9"), 0L));
+        assertEquals(-100L, Numbers.toLong((Object) new BigDecimal("-100.9"), 0L));
+        assertEquals(0L, Numbers.toLong((Object) new BigDecimal("-0.9"), 0L)); // truncates to 0
+
+        // convert(...) / N.convert agree (the long<-BigDecimal lambda).
+        assertEquals(Long.MAX_VALUE, Numbers.convert(new BigDecimal("9223372036854775807.9"), long.class).longValue());
+        assertEquals(Long.MIN_VALUE, Numbers.convert(new BigDecimal("-9223372036854775808.9"), long.class).longValue());
+        final Long viaN = N.convert((Object) new BigDecimal("9223372036854775807.9"), long.class);
+        assertEquals(Long.MAX_VALUE, viaN.longValue());
+
+        // An integer part BEYOND the long range is still overflow -> ArithmeticException.
+        assertThrows(ArithmeticException.class, () -> Numbers.toLong((Object) new BigDecimal("9223372036854775808"), 0L)); // MAX+1
+        assertThrows(ArithmeticException.class, () -> Numbers.toLong((Object) new BigDecimal("9223372036854775808.9"), 0L)); // integer part MAX+1
+        assertThrows(ArithmeticException.class, () -> Numbers.toLong((Object) new BigDecimal("-9223372036854775809"), 0L)); // MIN-1
+        assertThrows(ArithmeticException.class, () -> Numbers.convert(new BigDecimal("9223372036854775808.9"), long.class));
+        assertThrows(ArithmeticException.class, () -> Numbers.convert(new BigDecimal("1e30"), long.class));
+
+        // Exact MAX/MIN (no fraction) still convert.
+        assertEquals(Long.MAX_VALUE, Numbers.toLong((Object) new BigDecimal("9223372036854775807"), 0L));
+        assertEquals(Long.MIN_VALUE, Numbers.convert(new BigDecimal("-9223372036854775808"), long.class).longValue());
     }
 
     @Test
@@ -1315,27 +1502,104 @@ public class NumbersTest extends TestBase {
         assertEquals((byte) 0, Numbers.toByte(null));
         assertEquals((byte) 0, Numbers.toByte(""));
         assertThrows(NumberFormatException.class, () -> Numbers.toByte("abc", (byte) 5));
-        assertThrows(NumberFormatException.class, () -> Numbers.toByte("128"));
+        assertThrows(ArithmeticException.class, () -> Numbers.toByte("128"));
         assertThrows(NumberFormatException.class, () -> Numbers.toByte("abc"));
 
         assertEquals((byte) 10, Numbers.toByte(Byte.valueOf((byte) 10)));
         assertEquals((byte) 10, Numbers.toByte(10));
         assertEquals((byte) 0, Numbers.toByte(null, (byte) 0));
-        assertThrows(NumberFormatException.class, () -> Numbers.toByte(300, (byte) 0));
+        assertThrows(ArithmeticException.class, () -> Numbers.toByte(300, (byte) 0));
     }
 
     @Test
     @DisplayName("toByte with invalid input should throw NumberFormatException")
     public void testToByteInvalid() {
         assertThrows(NumberFormatException.class, () -> toByte("abc"));
-        assertThrows(NumberFormatException.class, () -> toByte("128"));
+        assertThrows(ArithmeticException.class, () -> toByte("128"));
     }
 
     @Test
     public void test_toByte_LongString() {
-        // A string with length >= 5 bypasses the integer cache and calls Byte.parseByte directly.
-        // "12345" is too large for byte, so parseByte throws NumberFormatException.
-        assertThrows(NumberFormatException.class, () -> Numbers.toByte("12345"));
+        // A string with length >= 5 bypasses the integer cache and is parsed/range-checked directly.
+        // "12345" is a valid integer but too large for byte, so it is numeric overflow -> ArithmeticException.
+        assertThrows(ArithmeticException.class, () -> Numbers.toByte("12345"));
+    }
+
+    @Test
+    public void test_toXxx_String_overflow_is_ArithmeticException() {
+        // Unified policy: an out-of-range (overflow) value -> ArithmeticException, whether String or Number.
+        assertThrows(ArithmeticException.class, () -> Numbers.toByte("128"));
+        assertThrows(ArithmeticException.class, () -> Numbers.toByte("-129"));
+        assertThrows(ArithmeticException.class, () -> Numbers.toByte("99999999999999999999999")); // beyond long range
+        assertThrows(ArithmeticException.class, () -> Numbers.toShort("32768"));
+        assertThrows(ArithmeticException.class, () -> Numbers.toShort("-32769"));
+        assertThrows(ArithmeticException.class, () -> Numbers.toInt("2147483648"));
+        assertThrows(ArithmeticException.class, () -> Numbers.toInt("-2147483649"));
+        assertThrows(ArithmeticException.class, () -> Numbers.toInt("9999999999")); // > int, < long
+        assertThrows(ArithmeticException.class, () -> Numbers.toLong("9223372036854775808"));
+        assertThrows(ArithmeticException.class, () -> Numbers.toLong("-9223372036854775809"));
+        assertThrows(ArithmeticException.class, () -> Numbers.toLong("99999999999999999999999")); // way beyond long
+
+        // Malformed (not a valid integer) -> NumberFormatException (unchanged).
+        assertThrows(NumberFormatException.class, () -> Numbers.toByte("abc"));
+        assertThrows(NumberFormatException.class, () -> Numbers.toInt("1.5"));
+        assertThrows(NumberFormatException.class, () -> Numbers.toInt("12x"));
+        assertThrows(NumberFormatException.class, () -> Numbers.toLong("xyz"));
+
+        // Valid, in-range values still convert.
+        assertEquals((byte) 127, Numbers.toByte("127"));
+        assertEquals((short) -32768, Numbers.toShort("-32768"));
+        assertEquals(2147483647, Numbers.toInt("2147483647"));
+        assertEquals(9223372036854775807L, Numbers.toLong("9223372036854775807"));
+        assertEquals(123L, Numbers.toLong("123L")); // 'L' suffix still accepted
+    }
+
+    @Test
+    public void test_toXxx_String_acceptsLSuffix() {
+        // 'L'/'l' suffix is now accepted uniformly by all integer types (not just toLong).
+        assertEquals((byte) 12, Numbers.toByte("12L"));
+        assertEquals((short) 1234, Numbers.toShort("1234l"));
+        assertEquals(123456, Numbers.toInt("123456L"));
+        assertEquals(123L, Numbers.toLong("123l"));
+
+        // Suffix + out-of-range is still overflow -> ArithmeticException.
+        assertThrows(ArithmeticException.class, () -> Numbers.toByte("128L"));
+        assertThrows(ArithmeticException.class, () -> Numbers.toInt("9999999999L"));
+        // A bare "L"/"l" (no digits) is malformed -> NumberFormatException.
+        assertThrows(NumberFormatException.class, () -> Numbers.toInt("L"));
+    }
+
+    @Test
+    public void test_toXxx_String_hexParsing_rangeChecked() {
+        // Non-decimal forms (hex 0x/0X, '#') that Long.parseLong rejects are parsed via createBigInteger and
+        // returned IF they fit the target type; an out-of-[min,max] hex value is overflow, NOT a silent cast truncation.
+        assertEquals((byte) 127, Numbers.toByte("0x7F"));
+        assertEquals((byte) -128, Numbers.toByte("-0x80"));
+        assertEquals((short) 4095, Numbers.toShort("0xFFF"));
+        assertEquals(255, Numbers.toInt("0xFF"));
+        assertEquals(255, Numbers.toInt("#FF"));
+        assertEquals(-1, Numbers.toInt("-0x1"));
+        assertEquals(16L, Numbers.toLong("0x10"));
+        assertEquals(255L, Numbers.toLong("#ff"));
+
+        // Out of the TARGET type's range -> ArithmeticException (regression guard against the (byte)/(short)/(int)
+        // cast silently truncating: toByte("0xFFF") would otherwise return (byte) 4095 == -1).
+        assertThrows(ArithmeticException.class, () -> Numbers.toByte("0xFF")); // 255 > Byte.MAX
+        assertThrows(ArithmeticException.class, () -> Numbers.toByte("0xFFF")); // 4095 -> would be (byte) -1
+        assertThrows(ArithmeticException.class, () -> Numbers.toByte("-0x81")); // -129 < Byte.MIN
+        assertThrows(ArithmeticException.class, () -> Numbers.toShort("0x10000")); // 65536 > Short.MAX
+        assertThrows(ArithmeticException.class, () -> Numbers.toInt("0x100000000")); // 2^32 > Integer.MAX, fits long
+        assertThrows(ArithmeticException.class, () -> Numbers.toLong("0x10000000000000000")); // 2^64 > Long.MAX
+    }
+
+    @Test
+    public void test_round_scale0_NaN_returnsZero() {
+        // round(NaN, 0) returns 0.0 deterministically (explicit guard, not Math.copySign of a NaN sign).
+        assertEquals(0.0f, Numbers.round(Float.NaN, 0), 0.0f);
+        assertEquals(0.0d, Numbers.round(Double.NaN, 0), 0.0d);
+        // Infinity at scale 0 is returned unchanged.
+        assertEquals(Float.POSITIVE_INFINITY, Numbers.round(Float.POSITIVE_INFINITY, 0), 0.0f);
+        assertEquals(Double.NEGATIVE_INFINITY, Numbers.round(Double.NEGATIVE_INFINITY, 0), 0.0d);
     }
 
     @Test
@@ -1353,7 +1617,7 @@ public class NumbersTest extends TestBase {
         assertEquals((short) 0, Numbers.toShort(null));
         assertEquals((short) -1000, Numbers.toShort("-1000"));
 
-        assertThrows(NumberFormatException.class, () -> Numbers.toShort("40000"));
+        assertThrows(ArithmeticException.class, () -> Numbers.toShort("40000"));
         assertThrows(NumberFormatException.class, () -> Numbers.toShort("abc"));
     }
 
@@ -1363,7 +1627,7 @@ public class NumbersTest extends TestBase {
         assertEquals((short) 50, Numbers.toShort("", (short) 50));
         assertEquals((short) 50, Numbers.toShort(null, (short) 50));
 
-        assertThrows(NumberFormatException.class, () -> Numbers.toShort("50000", (short) 50));
+        assertThrows(ArithmeticException.class, () -> Numbers.toShort("50000", (short) 50));
     }
 
     @Test
@@ -1373,7 +1637,7 @@ public class NumbersTest extends TestBase {
         assertEquals((short) 100, Numbers.toShort((Object) "100"));
         assertEquals((short) 0, Numbers.toShort((Object) null));
 
-        assertThrows(NumberFormatException.class, () -> Numbers.toShort(40000));
+        assertThrows(ArithmeticException.class, () -> Numbers.toShort(40000));
     }
 
     @Test
@@ -1382,7 +1646,7 @@ public class NumbersTest extends TestBase {
         assertEquals((short) 50, Numbers.toShort((Object) null, (short) 50));
         assertEquals((short) 100, Numbers.toShort((Object) "100", (short) 50));
 
-        assertThrows(NumberFormatException.class, () -> Numbers.toShort(50000L, (short) 50));
+        assertThrows(ArithmeticException.class, () -> Numbers.toShort(50000L, (short) 50));
     }
 
     @Test
@@ -1390,11 +1654,11 @@ public class NumbersTest extends TestBase {
         assertEquals((short) 1000, Numbers.toShort("1000"));
         assertEquals((short) 0, Numbers.toShort(null));
         assertThrows(NumberFormatException.class, () -> Numbers.toShort("xyz", (short) -5));
-        assertThrows(NumberFormatException.class, () -> Numbers.toShort("32768"));
+        assertThrows(ArithmeticException.class, () -> Numbers.toShort("32768"));
 
         assertEquals((short) 100, Numbers.toShort(Short.valueOf((short) 100)));
         assertEquals((short) 100, Numbers.toShort(100));
-        assertThrows(NumberFormatException.class, () -> Numbers.toShort(40000, (short) 0));
+        assertThrows(ArithmeticException.class, () -> Numbers.toShort(40000, (short) 0));
     }
 
     @Test
@@ -1459,7 +1723,7 @@ public class NumbersTest extends TestBase {
         assertEquals(1000, Numbers.toInt((Object) "1000"));
         assertEquals(0, Numbers.toInt((Object) null));
 
-        assertThrows(NumberFormatException.class, () -> Numbers.toInt((long) Integer.MAX_VALUE + 1));
+        assertThrows(ArithmeticException.class, () -> Numbers.toInt((long) Integer.MAX_VALUE + 1));
     }
 
     @Test
@@ -1467,11 +1731,11 @@ public class NumbersTest extends TestBase {
         assertEquals(100000, Numbers.toInt("100000"));
         assertEquals(0, Numbers.toInt(null));
         assertEquals(77, Numbers.toInt("", 77));
-        assertThrows(NumberFormatException.class, () -> Numbers.toInt("2147483648"));
+        assertThrows(ArithmeticException.class, () -> Numbers.toInt("2147483648"));
 
         assertEquals(1000, Numbers.toInt(Integer.valueOf(1000)));
         assertEquals(1000, Numbers.toInt(1000L));
-        assertThrows(NumberFormatException.class, () -> Numbers.toInt(3000000000L, 0));
+        assertThrows(ArithmeticException.class, () -> Numbers.toInt(3000000000L, 0));
     }
 
     // --- toLong(Object, defaultValue) paths ---
@@ -1548,14 +1812,14 @@ public class NumbersTest extends TestBase {
         assertEquals(123456789012L, Numbers.toLong("123456789012"));
         assertEquals(0L, Numbers.toLong(null));
         assertThrows(NumberFormatException.class, () -> Numbers.toLong("test", 88L));
-        assertThrows(NumberFormatException.class, () -> Numbers.toLong("9223372036854775808"));
+        assertThrows(ArithmeticException.class, () -> Numbers.toLong("9223372036854775808"));
         assertEquals(123L, Numbers.toLong("123L"));
         assertEquals(123L, Numbers.toLong("123l"));
 
         assertEquals(500L, Numbers.toLong(Long.valueOf(500L)));
         assertEquals(500L, Numbers.toLong(500));
         assertEquals(500L, Numbers.toLong(new BigInteger("500")));
-        assertThrows(NumberFormatException.class, () -> Numbers.toLong(new BigInteger(Long.MAX_VALUE + "1"), 0L));
+        assertThrows(ArithmeticException.class, () -> Numbers.toLong(new BigInteger(Long.MAX_VALUE + "1"), 0L));
     }
 
     // Cover toLong(Object, long) with various object types
@@ -1570,11 +1834,11 @@ public class NumbersTest extends TestBase {
         // BigInteger within range
         assertEquals(Long.MAX_VALUE, Numbers.toLong(BigInteger.valueOf(Long.MAX_VALUE), 0L));
         // BigInteger out of range
-        assertThrows(NumberFormatException.class, () -> Numbers.toLong(BigInteger.valueOf(Long.MAX_VALUE).add(BigInteger.ONE), 0L));
+        assertThrows(ArithmeticException.class, () -> Numbers.toLong(BigInteger.valueOf(Long.MAX_VALUE).add(BigInteger.ONE), 0L));
         // BigDecimal within range
         assertEquals(42L, Numbers.toLong(new BigDecimal("42.0"), 0L));
         // BigDecimal out of range
-        assertThrows(NumberFormatException.class, () -> Numbers.toLong(new BigDecimal("9999999999999999999999999"), 0L));
+        assertThrows(ArithmeticException.class, () -> Numbers.toLong(new BigDecimal("9999999999999999999999999"), 0L));
         // String
         assertEquals(100L, Numbers.toLong("100", 0L));
     }
@@ -1583,7 +1847,7 @@ public class NumbersTest extends TestBase {
     public void test_toFloat_String_withDefault() {
         assertEquals(3.14f, Numbers.toFloat("3.14", 1.0f), 0.001f);
         assertEquals(1.0f, Numbers.toFloat("", 1.0f), 0.001f);
-        assertEquals(1.0f, Numbers.toFloat(null, 1.0f), 0.001f);
+        assertEquals(1.0f, Numbers.toFloat((String) null, 1.0f), 0.001f);
     }
 
     @Test
@@ -1628,14 +1892,14 @@ public class NumbersTest extends TestBase {
     public void testToFloat_NullAndEmpty() {
         assertEquals(0.0f, Numbers.toFloat((String) null), FLOAT_DELTA);
         assertEquals(0.0f, Numbers.toFloat(""), FLOAT_DELTA);
-        assertEquals(42.0f, Numbers.toFloat(null, 42.0f), FLOAT_DELTA);
+        assertEquals(42.0f, Numbers.toFloat((String) null, 42.0f), FLOAT_DELTA);
     }
 
     @Test
     public void test_toFloat_String() {
         assertEquals(3.14f, Numbers.toFloat("3.14"), 0.001f);
         assertEquals(0.0f, Numbers.toFloat(""), 0.001f);
-        assertEquals(0.0f, Numbers.toFloat(null), 0.001f);
+        assertEquals(0.0f, Numbers.toFloat((String) null), 0.001f);
         assertEquals(-2.5f, Numbers.toFloat("-2.5"), 0.001f);
 
         assertThrows(NumberFormatException.class, () -> Numbers.toFloat("abc"));
@@ -1644,7 +1908,7 @@ public class NumbersTest extends TestBase {
     @Test
     public void testToFloat() {
         assertEquals(123.45f, Numbers.toFloat("123.45"), DELTA);
-        assertEquals(0.0f, Numbers.toFloat(null), DELTA);
+        assertEquals(0.0f, Numbers.toFloat((String) null), DELTA);
         assertThrows(NumberFormatException.class, () -> Numbers.toFloat("invalid"));
 
         assertEquals(12.3f, Numbers.toFloat(Float.valueOf(12.3f)), DELTA);
@@ -2328,98 +2592,98 @@ public class NumbersTest extends TestBase {
 
     @Test
     public void testIsInteger() {
-        Assertions.assertTrue(Numbers.isInteger("0"));
-        Assertions.assertTrue(Numbers.isInteger("123"));
-        Assertions.assertTrue(Numbers.isInteger("-456"));
-        Assertions.assertTrue(Numbers.isInteger("+7"));
-        Assertions.assertTrue(Numbers.isInteger("00042"));
+        Assertions.assertTrue(Strings.isInteger("0"));
+        Assertions.assertTrue(Strings.isInteger("123"));
+        Assertions.assertTrue(Strings.isInteger("-456"));
+        Assertions.assertTrue(Strings.isInteger("+7"));
+        Assertions.assertTrue(Strings.isInteger("00042"));
     }
 
     @Test
     public void testIsInteger_EdgeCase() {
-        Assertions.assertFalse(Numbers.isInteger(null));
-        Assertions.assertFalse(Numbers.isInteger(""));
-        Assertions.assertFalse(Numbers.isInteger("+"));
-        Assertions.assertFalse(Numbers.isInteger("-"));
-        Assertions.assertFalse(Numbers.isInteger("12.3"));
-        Assertions.assertFalse(Numbers.isInteger(" 123"));
-        Assertions.assertFalse(Numbers.isInteger("123 "));
-        Assertions.assertFalse(Numbers.isInteger("abc"));
+        Assertions.assertFalse(Strings.isInteger(null));
+        Assertions.assertFalse(Strings.isInteger(""));
+        Assertions.assertFalse(Strings.isInteger("+"));
+        Assertions.assertFalse(Strings.isInteger("-"));
+        Assertions.assertFalse(Strings.isInteger("12.3"));
+        Assertions.assertFalse(Strings.isInteger(" 123"));
+        Assertions.assertFalse(Strings.isInteger("123 "));
+        Assertions.assertFalse(Strings.isInteger("abc"));
     }
 
-    // Cover quickCheckForIsConvertibleToNumber with boundary cases
+    // Cover quickCheckForisCreatable with boundary cases
     @Test
-    public void testQuickCheckForIsConvertibleToNumber_Boundaries() {
+    public void testQuickCheckForisCreatable_Boundaries() {
         // Single character that is alphanumeric
-        assertTrue(Numbers.isConvertibleToNumber("5"));
+        assertTrue(Numbers.isCreatable("5"));
         // Character not in range
-        assertFalse(Numbers.isConvertibleToNumber("\u0200test")); // char > 127
+        assertFalse(Numbers.isCreatable("\u0200test")); // char > 127
         // Null / empty
-        assertFalse(Numbers.isConvertibleToNumber(null));
-        assertFalse(Numbers.isConvertibleToNumber(""));
-        assertFalse(Numbers.isConvertibleToNumber("  "));
+        assertFalse(Numbers.isCreatable(null));
+        assertFalse(Numbers.isCreatable(""));
+        assertFalse(Numbers.isCreatable("  "));
     }
 
     @Test
-    public void testIsConvertibleToNumber_whitespace() {
-        Assertions.assertFalse(Numbers.isConvertibleToNumber(" "));
-        Assertions.assertFalse(Numbers.isConvertibleToNumber("\t"));
-        Assertions.assertFalse(Numbers.isConvertibleToNumber("  123  "));
+    public void testisCreatable_whitespace() {
+        Assertions.assertFalse(Numbers.isCreatable(" "));
+        Assertions.assertFalse(Numbers.isCreatable("\t"));
+        Assertions.assertFalse(Numbers.isCreatable("  123  "));
     }
 
     @Test
-    public void testIsConvertibleToNumber_signs() {
-        Assertions.assertTrue(Numbers.isConvertibleToNumber("+123"));
-        Assertions.assertTrue(Numbers.isConvertibleToNumber("-123"));
-        Assertions.assertFalse(Numbers.isConvertibleToNumber("++123"));
-        Assertions.assertFalse(Numbers.isConvertibleToNumber("+-123"));
-        Assertions.assertFalse(Numbers.isConvertibleToNumber("+"));
-        Assertions.assertFalse(Numbers.isConvertibleToNumber("-"));
+    public void testisCreatable_signs() {
+        Assertions.assertTrue(Numbers.isCreatable("+123"));
+        Assertions.assertTrue(Numbers.isCreatable("-123"));
+        Assertions.assertFalse(Numbers.isCreatable("++123"));
+        Assertions.assertFalse(Numbers.isCreatable("+-123"));
+        Assertions.assertFalse(Numbers.isCreatable("+"));
+        Assertions.assertFalse(Numbers.isCreatable("-"));
     }
 
     @Test
-    public void testIsConvertibleToNumber_scientificNotation() {
-        Assertions.assertTrue(Numbers.isConvertibleToNumber("1e10"));
-        Assertions.assertTrue(Numbers.isConvertibleToNumber("1E10"));
-        Assertions.assertTrue(Numbers.isConvertibleToNumber("1.5e-3"));
-        Assertions.assertTrue(Numbers.isConvertibleToNumber("1.5E+3"));
-        Assertions.assertFalse(Numbers.isConvertibleToNumber("1e"));
-        Assertions.assertFalse(Numbers.isConvertibleToNumber("e10"));
+    public void testisCreatable_scientificNotation() {
+        Assertions.assertTrue(Numbers.isCreatable("1e10"));
+        Assertions.assertTrue(Numbers.isCreatable("1E10"));
+        Assertions.assertTrue(Numbers.isCreatable("1.5e-3"));
+        Assertions.assertTrue(Numbers.isCreatable("1.5E+3"));
+        Assertions.assertFalse(Numbers.isCreatable("1e"));
+        Assertions.assertFalse(Numbers.isCreatable("e10"));
     }
 
     @Test
-    public void testIsConvertibleToNumber_typeQualifiers() {
-        Assertions.assertTrue(Numbers.isConvertibleToNumber("123L"));
-        Assertions.assertTrue(Numbers.isConvertibleToNumber("123l"));
-        Assertions.assertTrue(Numbers.isConvertibleToNumber("1.0f"));
-        Assertions.assertTrue(Numbers.isConvertibleToNumber("1.0F"));
-        Assertions.assertTrue(Numbers.isConvertibleToNumber("1.0d"));
-        Assertions.assertTrue(Numbers.isConvertibleToNumber("1.0D"));
+    public void testisCreatable_typeQualifiers() {
+        Assertions.assertTrue(Numbers.isCreatable("123L"));
+        Assertions.assertTrue(Numbers.isCreatable("123l"));
+        Assertions.assertTrue(Numbers.isCreatable("1.0f"));
+        Assertions.assertTrue(Numbers.isCreatable("1.0F"));
+        Assertions.assertTrue(Numbers.isCreatable("1.0d"));
+        Assertions.assertTrue(Numbers.isCreatable("1.0D"));
     }
 
     @Test
-    public void testIsConvertibleToNumber_ExponentEdge() {
-        assertTrue(Numbers.isConvertibleToNumber("1e5"));
-        assertTrue(Numbers.isConvertibleToNumber("1.5e-3"));
-        assertFalse(Numbers.isConvertibleToNumber("1e")); // exponent without digits
-        assertFalse(Numbers.isConvertibleToNumber("1.2.3")); // two decimal points
+    public void testisCreatable_ExponentEdge() {
+        assertTrue(Numbers.isCreatable("1e5"));
+        assertTrue(Numbers.isCreatable("1.5e-3"));
+        assertFalse(Numbers.isCreatable("1e")); // exponent without digits
+        assertFalse(Numbers.isCreatable("1.2.3")); // two decimal points
     }
 
     @Test
-    public void testIsConvertibleToNumber_TypeQualifiers() {
-        assertTrue(Numbers.isConvertibleToNumber("1.5f"));
-        assertTrue(Numbers.isConvertibleToNumber("1.5F"));
-        assertTrue(Numbers.isConvertibleToNumber("1.5d"));
-        assertTrue(Numbers.isConvertibleToNumber("1.5D"));
-        assertTrue(Numbers.isConvertibleToNumber("100l"));
-        assertTrue(Numbers.isConvertibleToNumber("100L"));
+    public void testisCreatable_TypeQualifiers() {
+        assertTrue(Numbers.isCreatable("1.5f"));
+        assertTrue(Numbers.isCreatable("1.5F"));
+        assertTrue(Numbers.isCreatable("1.5d"));
+        assertTrue(Numbers.isCreatable("1.5D"));
+        assertTrue(Numbers.isCreatable("100l"));
+        assertTrue(Numbers.isCreatable("100L"));
     }
 
     @Test
     public void testCreatePositiveHexInteger() {
-        assertTrue(Numbers.isConvertibleToNumber("+0xF"));
-        assertTrue(Numbers.isConvertibleToNumber("+0xFFFFFFFF"));
-        assertTrue(Numbers.isConvertibleToNumber("+0xFFFFFFFFFFFFFFFFF"));
+        assertTrue(Numbers.isCreatable("+0xF"));
+        assertTrue(Numbers.isCreatable("+0xFFFFFFFF"));
+        assertTrue(Numbers.isCreatable("+0xFFFFFFFFFFFFFFFFF"));
 
         assertEquals(Integer.decode("+0xF"), Numbers.createInteger("+0xF"));
         assertEquals(Long.decode("+0xFFFFFFFF"), Numbers.createLong("+0xFFFFFFFF"));
@@ -2443,65 +2707,67 @@ public class NumbersTest extends TestBase {
     }
 
     @Test
-    public void test_isConvertibleToNumber() {
-        assertTrue(Numbers.isConvertibleToNumber("123"));
-        assertTrue(Numbers.isConvertibleToNumber("-123"));
-        assertTrue(Numbers.isConvertibleToNumber("12.3"));
-        assertTrue(Numbers.isConvertibleToNumber("1.23e10"));
-        assertTrue(Numbers.isConvertibleToNumber("0x1F"));
-        assertFalse(Numbers.isConvertibleToNumber("abc"));
-        assertFalse(Numbers.isConvertibleToNumber(""));
-        assertFalse(Numbers.isConvertibleToNumber(null));
+    public void test_isCreatable() {
+        assertTrue(Numbers.isCreatable("123"));
+        assertTrue(Numbers.isCreatable("-123"));
+        assertTrue(Numbers.isCreatable("12.3"));
+        assertTrue(Numbers.isCreatable("1.23e10"));
+        assertTrue(Numbers.isCreatable("0x1F"));
+        assertFalse(Numbers.isCreatable("abc"));
+        assertFalse(Numbers.isCreatable(""));
+        assertFalse(Numbers.isCreatable(null));
+        N.println(NumberUtils.isCreatable("#FF"));
+        N.println(NumberUtils.createNumber("#FF"));
     }
 
     @Test
-    public void testIsConvertibleToNumber_hexEdgeCases() {
-        Assertions.assertTrue(Numbers.isConvertibleToNumber("0x0"));
-        Assertions.assertTrue(Numbers.isConvertibleToNumber("0X0"));
-        Assertions.assertTrue(Numbers.isConvertibleToNumber("-0xABCDEF"));
-        Assertions.assertFalse(Numbers.isConvertibleToNumber("0x"));
-        Assertions.assertFalse(Numbers.isConvertibleToNumber("0xG"));
+    public void testisCreatable_hexEdgeCases() {
+        Assertions.assertTrue(Numbers.isCreatable("0x0"));
+        Assertions.assertTrue(Numbers.isCreatable("0X0"));
+        Assertions.assertTrue(Numbers.isCreatable("-0xABCDEF"));
+        Assertions.assertFalse(Numbers.isCreatable("0x"));
+        Assertions.assertFalse(Numbers.isCreatable("0xG"));
     }
 
     @Test
-    public void testIsConvertibleToNumber_octalEdgeCases() {
-        Assertions.assertTrue(Numbers.isConvertibleToNumber("07"));
-        Assertions.assertTrue(Numbers.isConvertibleToNumber("00"));
-        Assertions.assertFalse(Numbers.isConvertibleToNumber("08"));
-        Assertions.assertFalse(Numbers.isConvertibleToNumber("09"));
+    public void testisCreatable_octalEdgeCases() {
+        Assertions.assertTrue(Numbers.isCreatable("07"));
+        Assertions.assertTrue(Numbers.isCreatable("00"));
+        Assertions.assertFalse(Numbers.isCreatable("08"));
+        Assertions.assertFalse(Numbers.isCreatable("09"));
     }
 
-    // Cover isConvertibleToNumber with more edge cases for various branches
+    // Cover isCreatable with more edge cases for various branches
     @Test
-    public void testIsConvertibleToNumber_MoreEdgeCases() {
+    public void testisCreatable_MoreEdgeCases() {
         // Hex with leading zeroes
-        assertTrue(Numbers.isConvertibleToNumber("0x00FF"));
+        assertTrue(Numbers.isCreatable("0x00FF"));
         // Octal
-        assertTrue(Numbers.isConvertibleToNumber("0777"));
-        assertFalse(Numbers.isConvertibleToNumber("0789")); // invalid octal (8,9)
+        assertTrue(Numbers.isCreatable("0777"));
+        assertFalse(Numbers.isCreatable("0789")); // invalid octal (8,9)
         // Scientific with type
-        assertTrue(Numbers.isConvertibleToNumber("1.5e10D"));
-        assertTrue(Numbers.isConvertibleToNumber("1.5E10F"));
+        assertTrue(Numbers.isCreatable("1.5e10D"));
+        assertTrue(Numbers.isCreatable("1.5E10F"));
         // Type qualifiers
-        assertTrue(Numbers.isConvertibleToNumber("100l"));
-        assertTrue(Numbers.isConvertibleToNumber("100f"));
-        assertTrue(Numbers.isConvertibleToNumber("100d"));
+        assertTrue(Numbers.isCreatable("100l"));
+        assertTrue(Numbers.isCreatable("100f"));
+        assertTrue(Numbers.isCreatable("100d"));
         // Invalid
-        assertFalse(Numbers.isConvertibleToNumber("0x")); // no digits after 0x
-        assertFalse(Numbers.isConvertibleToNumber("1.2.3")); // two decimal points
-        assertFalse(Numbers.isConvertibleToNumber("+"));
-        assertFalse(Numbers.isConvertibleToNumber(null));
-        assertFalse(Numbers.isConvertibleToNumber(""));
+        assertFalse(Numbers.isCreatable("0x")); // no digits after 0x
+        assertFalse(Numbers.isCreatable("1.2.3")); // two decimal points
+        assertFalse(Numbers.isCreatable("+"));
+        assertFalse(Numbers.isCreatable(null));
+        assertFalse(Numbers.isCreatable(""));
     }
 
-    // --- isConvertibleToNumber with hex/octal/exponent paths ---
+    // --- isCreatable with hex/octal/exponent paths ---
     @Test
-    public void testIsConvertibleToNumber_HexAndOctal() {
-        assertTrue(Numbers.isConvertibleToNumber("0xFF"));
-        assertTrue(Numbers.isConvertibleToNumber("0x1A"));
-        assertFalse(Numbers.isConvertibleToNumber("0x")); // no digits after 0x
-        assertTrue(Numbers.isConvertibleToNumber("0777")); // octal
-        assertFalse(Numbers.isConvertibleToNumber("0789")); // invalid octal digit
+    public void testisCreatable_HexAndOctal() {
+        assertTrue(Numbers.isCreatable("0xFF"));
+        assertTrue(Numbers.isCreatable("0x1A"));
+        assertFalse(Numbers.isCreatable("0x")); // no digits after 0x
+        assertTrue(Numbers.isCreatable("0777")); // octal
+        assertFalse(Numbers.isCreatable("0789")); // invalid octal digit
     }
 
     @Test
@@ -2533,7 +2799,7 @@ public class NumbersTest extends TestBase {
             assertEquals(Double.valueOf(0), Numbers.createNumber("0e0D"));
 
             assertEquals(0, Double.compare(0.0d, Double.parseDouble("0.0e-2000")));
-            assertTrue(Numbers.isConvertibleToNumber("0.0e-2000"));
+            assertTrue(Numbers.isCreatable("0.0e-2000"));
 
             assertEquals(Float.valueOf(0.0f), Numbers.createNumber("0.0e-2000F"));
             assertEquals(Double.valueOf(0.0), Numbers.createNumber("0.0e-2000D"));
@@ -2569,55 +2835,77 @@ public class NumbersTest extends TestBase {
 
     @Test
     public void testIsCreatableAndIsNumber() {
-        assertTrue(Numbers.isConvertibleToNumber("123"));
+        assertTrue(Numbers.isCreatable("123"));
         assertTrue(Numbers.isNumber("123"));
-        assertTrue(Numbers.isConvertibleToNumber("123.45"));
-        assertTrue(Numbers.isConvertibleToNumber("-1.2e-5"));
-        assertTrue(Numbers.isConvertibleToNumber("0xFF"));
-        assertTrue(Numbers.isConvertibleToNumber("077"));
-        assertTrue(Numbers.isConvertibleToNumber("123L"));
-        assertTrue(Numbers.isConvertibleToNumber("1.2f"));
-        assertTrue(Numbers.isConvertibleToNumber("1.2d"));
+        assertTrue(Numbers.isCreatable("123.45"));
+        assertTrue(Numbers.isCreatable("-1.2e-5"));
+        assertTrue(Numbers.isCreatable("0xFF"));
+        assertTrue(Numbers.isCreatable("077"));
+        assertTrue(Numbers.isCreatable("123L"));
+        assertTrue(Numbers.isCreatable("1.2f"));
+        assertTrue(Numbers.isCreatable("1.2d"));
 
-        assertFalse(Numbers.isConvertibleToNumber("abc"));
-        assertFalse(Numbers.isConvertibleToNumber(""));
-        assertFalse(Numbers.isConvertibleToNumber(null));
-        assertFalse(Numbers.isConvertibleToNumber("1.2.3"));
-        assertFalse(Numbers.isConvertibleToNumber("--1"));
-        assertFalse(Numbers.isConvertibleToNumber("09"));
-        assertTrue(Numbers.isConvertibleToNumber("0.9"));
+        assertFalse(Numbers.isCreatable("abc"));
+        assertFalse(Numbers.isCreatable(""));
+        assertFalse(Numbers.isCreatable(null));
+        assertFalse(Numbers.isCreatable("1.2.3"));
+        assertFalse(Numbers.isCreatable("--1"));
+        assertFalse(Numbers.isCreatable("09"));
+        assertTrue(Numbers.isCreatable("0.9"));
     }
 
     @Test
     public void testIsCreatable() {
-        Assertions.assertTrue(Numbers.isConvertibleToNumber("123"));
-        Assertions.assertTrue(Numbers.isConvertibleToNumber("-123"));
-        Assertions.assertTrue(Numbers.isConvertibleToNumber("123.45"));
-        Assertions.assertTrue(Numbers.isConvertibleToNumber("-123.45"));
-        Assertions.assertTrue(Numbers.isConvertibleToNumber("1.23e5"));
-        Assertions.assertTrue(Numbers.isConvertibleToNumber("1.23E5"));
-        Assertions.assertTrue(Numbers.isConvertibleToNumber("123L"));
-        Assertions.assertTrue(Numbers.isConvertibleToNumber("123l"));
-        Assertions.assertTrue(Numbers.isConvertibleToNumber("123.45f"));
-        Assertions.assertTrue(Numbers.isConvertibleToNumber("123.45F"));
-        Assertions.assertTrue(Numbers.isConvertibleToNumber("123.45d"));
-        Assertions.assertTrue(Numbers.isConvertibleToNumber("123.45D"));
-        Assertions.assertTrue(Numbers.isConvertibleToNumber("0x1A"));
-        Assertions.assertTrue(Numbers.isConvertibleToNumber("077"));
+        Assertions.assertTrue(Numbers.isCreatable("123"));
+        Assertions.assertTrue(Numbers.isCreatable("-123"));
+        Assertions.assertTrue(Numbers.isCreatable("123.45"));
+        Assertions.assertTrue(Numbers.isCreatable("-123.45"));
+        Assertions.assertTrue(Numbers.isCreatable("1.23e5"));
+        Assertions.assertTrue(Numbers.isCreatable("1.23E5"));
+        Assertions.assertTrue(Numbers.isCreatable("123L"));
+        Assertions.assertTrue(Numbers.isCreatable("123l"));
+        Assertions.assertTrue(Numbers.isCreatable("123.45f"));
+        Assertions.assertTrue(Numbers.isCreatable("123.45F"));
+        Assertions.assertTrue(Numbers.isCreatable("123.45d"));
+        Assertions.assertTrue(Numbers.isCreatable("123.45D"));
+        Assertions.assertTrue(Numbers.isCreatable("0x1A"));
+        Assertions.assertTrue(Numbers.isCreatable("077"));
 
-        Assertions.assertFalse(Numbers.isConvertibleToNumber(""));
-        Assertions.assertFalse(Numbers.isConvertibleToNumber(null));
-        Assertions.assertFalse(Numbers.isConvertibleToNumber("abc"));
-        Assertions.assertFalse(Numbers.isConvertibleToNumber("123.45.67"));
-        Assertions.assertFalse(Numbers.isConvertibleToNumber("123e"));
+        Assertions.assertFalse(Numbers.isCreatable(""));
+        Assertions.assertFalse(Numbers.isCreatable(null));
+        Assertions.assertFalse(Numbers.isCreatable("abc"));
+        Assertions.assertFalse(Numbers.isCreatable("123.45.67"));
+        Assertions.assertFalse(Numbers.isCreatable("123e"));
     }
 
     @Test
-    @DisplayName("isConvertibleToNumber should handle null and empty")
+    public void test_isCreatable_hashHexPrefix() {
+        // The '#' alternative-hex prefix is accepted by createNumber(String), so isCreatable must agree
+        // (isCreatable is the predicate companion of createNumber and the two must not disagree on '#').
+        Assertions.assertTrue(Numbers.isCreatable("#FF"));
+        Assertions.assertTrue(Numbers.isCreatable("-#FF"));
+        Assertions.assertTrue(Numbers.isCreatable("+#1a2b"));
+        Assertions.assertTrue(Numbers.isCreatable("#0"));
+
+        // A '#' with no hex digits, or with a non-hex char, is not creatable.
+        Assertions.assertFalse(Numbers.isCreatable("#"));
+        Assertions.assertFalse(Numbers.isCreatable("-#"));
+        Assertions.assertFalse(Numbers.isCreatable("#FG"));
+        Assertions.assertFalse(Numbers.isCreatable("#1.5"));
+
+        // Invariant: isCreatable(s) == true  =>  createNumber(s) succeeds, for the '#' forms (incl. long->BigInteger).
+        for (final String s : new String[] { "#FF", "-#FF", "+#1a2b", "#0", "#7fffffff", "#ffffffffffffffff", "#fffffffffffffffffff" }) {
+            Assertions.assertTrue(Numbers.isCreatable(s), s);
+            Assertions.assertNotNull(Numbers.createNumber(s), s);
+        }
+    }
+
+    @Test
+    @DisplayName("isCreatable should handle null and empty")
     public void testIsCreatableNullEmpty() {
-        assertFalse(isConvertibleToNumber(null));
-        assertFalse(isConvertibleToNumber(""));
-        assertFalse(isConvertibleToNumber("   "));
+        assertFalse(isCreatable(null));
+        assertFalse(isCreatable(""));
+        assertFalse(isCreatable("   "));
     }
 
     @Test
@@ -3837,6 +4125,42 @@ public class NumbersTest extends TestBase {
     }
 
     @Test
+    public void testCeilingPowerOfTwo_int() {
+        assertEquals(1, Numbers.ceilingPowerOfTwo(1));
+        assertEquals(2, Numbers.ceilingPowerOfTwo(2));
+        assertEquals(4, Numbers.ceilingPowerOfTwo(3));
+        assertEquals(8, Numbers.ceilingPowerOfTwo(7));
+        assertEquals(8, Numbers.ceilingPowerOfTwo(8));
+        assertEquals(16, Numbers.ceilingPowerOfTwo(9));
+        assertEquals(128, Numbers.ceilingPowerOfTwo(100));
+        assertEquals(1024, Numbers.ceilingPowerOfTwo(1000));
+        assertEquals(1 << 30, Numbers.ceilingPowerOfTwo(1 << 30));
+        assertEquals(1 << 30, Numbers.ceilingPowerOfTwo((1 << 30) - 1));
+
+        assertThrows(IllegalArgumentException.class, () -> Numbers.ceilingPowerOfTwo(0));
+        assertThrows(IllegalArgumentException.class, () -> Numbers.ceilingPowerOfTwo(-1));
+        assertThrows(ArithmeticException.class, () -> Numbers.ceilingPowerOfTwo((1 << 30) + 1));
+        assertThrows(ArithmeticException.class, () -> Numbers.ceilingPowerOfTwo(Integer.MAX_VALUE));
+    }
+
+    @Test
+    public void testFloorPowerOfTwo_int() {
+        assertEquals(1, Numbers.floorPowerOfTwo(1));
+        assertEquals(2, Numbers.floorPowerOfTwo(2));
+        assertEquals(2, Numbers.floorPowerOfTwo(3));
+        assertEquals(4, Numbers.floorPowerOfTwo(4));
+        assertEquals(4, Numbers.floorPowerOfTwo(5));
+        assertEquals(8, Numbers.floorPowerOfTwo(15));
+        assertEquals(64, Numbers.floorPowerOfTwo(100));
+        assertEquals(128, Numbers.floorPowerOfTwo(128));
+        assertEquals(128, Numbers.floorPowerOfTwo(129));
+        assertEquals(1 << 30, Numbers.floorPowerOfTwo(Integer.MAX_VALUE));
+
+        assertThrows(IllegalArgumentException.class, () -> Numbers.floorPowerOfTwo(0));
+        assertThrows(IllegalArgumentException.class, () -> Numbers.floorPowerOfTwo(-1));
+    }
+
+    @Test
     public void testFloorPowerOfTwo_LongEdgeCases() {
         assertEquals(1L, Numbers.floorPowerOfTwo(1L));
         assertEquals(2L, Numbers.floorPowerOfTwo(2L));
@@ -4834,6 +5158,31 @@ public class NumbersTest extends TestBase {
     }
 
     @Test
+    public void test_lcm_overflow_message_unified() {
+        // 10.6: both overflow exits — (a) the product overflows the type's range, and (b) the true lcm is exactly
+        // 2^31 / 2^63 (where abs() cannot make the result non-negative) — now throw the SAME descriptive,
+        // operand-naming message (previously the (a) path threw a terse "overflow" from multiplyExact).
+
+        // int (a): product overflows int range.
+        final ArithmeticException e1 = assertThrows(ArithmeticException.class, () -> Numbers.lcm(Integer.MAX_VALUE, 2));
+        Assertions.assertTrue(e1.getMessage().contains("lcm(") && e1.getMessage().contains("non-negative int"), e1.getMessage());
+        // int (b): true lcm is exactly 2^31 (product == Integer.MIN_VALUE).
+        final ArithmeticException e2 = assertThrows(ArithmeticException.class, () -> Numbers.lcm(Integer.MIN_VALUE, 2));
+        Assertions.assertTrue(e2.getMessage().contains("lcm(") && e2.getMessage().contains("non-negative int"), e2.getMessage());
+
+        // long (a): product overflows long range.
+        final ArithmeticException e3 = assertThrows(ArithmeticException.class, () -> Numbers.lcm(Long.MAX_VALUE, 2L));
+        Assertions.assertTrue(e3.getMessage().contains("lcm(") && e3.getMessage().contains("non-negative long"), e3.getMessage());
+        // long (b): true lcm is exactly 2^63 (product == Long.MIN_VALUE).
+        final ArithmeticException e4 = assertThrows(ArithmeticException.class, () -> Numbers.lcm(Long.MIN_VALUE, 2L));
+        Assertions.assertTrue(e4.getMessage().contains("lcm(") && e4.getMessage().contains("non-negative long"), e4.getMessage());
+
+        // Value behavior is unchanged at the boundary.
+        assertEquals(2147483646, Numbers.lcm(Integer.MIN_VALUE / 2 + 1, 2));
+        assertEquals(Integer.MAX_VALUE, Numbers.lcm(Integer.MAX_VALUE, 1));
+    }
+
+    @Test
     public void test_addExact_int() {
         assertEquals(5, Numbers.addExact(2, 3));
         assertEquals(-1, Numbers.addExact(2, -3));
@@ -5508,37 +5857,37 @@ public class NumbersTest extends TestBase {
 
     @Test
     public void test_saturatedCast() {
-        assertEquals(100, Numbers.saturatedCast(100L));
-        assertEquals(Integer.MAX_VALUE, Numbers.saturatedCast((long) Integer.MAX_VALUE + 1));
-        assertEquals(Integer.MIN_VALUE, Numbers.saturatedCast((long) Integer.MIN_VALUE - 1));
+        assertEquals(100, Numbers.saturatedCastToInt(100L));
+        assertEquals(Integer.MAX_VALUE, Numbers.saturatedCastToInt((long) Integer.MAX_VALUE + 1));
+        assertEquals(Integer.MIN_VALUE, Numbers.saturatedCastToInt((long) Integer.MIN_VALUE - 1));
     }
 
     @Test
     public void testSaturatedCast() {
-        assertEquals(123, Numbers.saturatedCast(123L));
-        assertEquals(Integer.MAX_VALUE, Numbers.saturatedCast(Long.MAX_VALUE));
-        assertEquals(Integer.MIN_VALUE, Numbers.saturatedCast(Long.MIN_VALUE));
+        assertEquals(123, Numbers.saturatedCastToInt(123L));
+        assertEquals(Integer.MAX_VALUE, Numbers.saturatedCastToInt(Long.MAX_VALUE));
+        assertEquals(Integer.MIN_VALUE, Numbers.saturatedCastToInt(Long.MIN_VALUE));
     }
 
     @Test
     public void testSaturatedCast_EdgeCases() {
-        assertEquals(Integer.MAX_VALUE, Numbers.saturatedCast(Long.MAX_VALUE));
-        assertEquals(Integer.MIN_VALUE, Numbers.saturatedCast(Long.MIN_VALUE));
-        assertEquals(0, Numbers.saturatedCast(0L));
-        assertEquals(42, Numbers.saturatedCast(42L));
-        assertEquals(-42, Numbers.saturatedCast(-42L));
-        assertEquals(Integer.MAX_VALUE, Numbers.saturatedCast((long) Integer.MAX_VALUE + 1));
-        assertEquals(Integer.MIN_VALUE, Numbers.saturatedCast((long) Integer.MIN_VALUE - 1));
+        assertEquals(Integer.MAX_VALUE, Numbers.saturatedCastToInt(Long.MAX_VALUE));
+        assertEquals(Integer.MIN_VALUE, Numbers.saturatedCastToInt(Long.MIN_VALUE));
+        assertEquals(0, Numbers.saturatedCastToInt(0L));
+        assertEquals(42, Numbers.saturatedCastToInt(42L));
+        assertEquals(-42, Numbers.saturatedCastToInt(-42L));
+        assertEquals(Integer.MAX_VALUE, Numbers.saturatedCastToInt((long) Integer.MAX_VALUE + 1));
+        assertEquals(Integer.MIN_VALUE, Numbers.saturatedCastToInt((long) Integer.MIN_VALUE - 1));
     }
 
     // --- saturatedCast ---
     @Test
     public void testSaturatedCast_InRange() {
-        assertEquals(0, Numbers.saturatedCast(0L));
-        assertEquals(Integer.MAX_VALUE, Numbers.saturatedCast(Integer.MAX_VALUE));
-        assertEquals(Integer.MIN_VALUE, Numbers.saturatedCast(Integer.MIN_VALUE));
-        assertEquals(Integer.MAX_VALUE, Numbers.saturatedCast((long) Integer.MAX_VALUE + 1));
-        assertEquals(Integer.MIN_VALUE, Numbers.saturatedCast((long) Integer.MIN_VALUE - 1));
+        assertEquals(0, Numbers.saturatedCastToInt(0L));
+        assertEquals(Integer.MAX_VALUE, Numbers.saturatedCastToInt(Integer.MAX_VALUE));
+        assertEquals(Integer.MIN_VALUE, Numbers.saturatedCastToInt(Integer.MIN_VALUE));
+        assertEquals(Integer.MAX_VALUE, Numbers.saturatedCastToInt((long) Integer.MAX_VALUE + 1));
+        assertEquals(Integer.MIN_VALUE, Numbers.saturatedCastToInt((long) Integer.MIN_VALUE - 1));
     }
 
     @Test
@@ -5610,7 +5959,6 @@ public class NumbersTest extends TestBase {
     public void testArgumentValidation() {
         assertThrows(IllegalArgumentException.class, () -> factorial(-1));
         assertThrows(IllegalArgumentException.class, () -> pow(2, -1));
-        assertThrows(IllegalArgumentException.class, () -> round(1.5, -1));
         assertThrows(IllegalArgumentException.class, () -> fuzzyEquals(1.0, 2.0, -0.1));
 
         assertThrows(IllegalArgumentException.class, () -> binomial(3, 5));
@@ -5982,18 +6330,6 @@ public class NumbersTest extends TestBase {
     }
 
     @Test
-    public void test_mean_double_double() {
-        assertEquals(5.0, Numbers.mean(4.0, 6.0), 0.001);
-        assertEquals(0.0, Numbers.mean(-1.0, 1.0), 0.001);
-        assertEquals(3.5, Numbers.mean(3.0, 4.0), 0.001);
-    }
-
-    @Test
-    public void testMean_double_double() {
-        assertEquals(2.5, Numbers.mean(2.0, 3.0), DELTA);
-    }
-
-    @Test
     @DisplayName("mean of integers")
     public void testMeanInts() {
         assertEquals(3.0, mean(1, 2, 3, 4, 5), 1e-10);
@@ -6002,79 +6338,10 @@ public class NumbersTest extends TestBase {
     }
 
     @Test
-    @DisplayName("mean of two values")
-    public void testMeanTwo() {
-        assertEquals(1, mean(1, 2), 1e-10);
-        assertEquals(0.0, mean(-1, 1), 1e-10);
-        assertEquals(1.5, mean(1.0, 2.0), 1e-10);
-    }
-
-    @Test
-    public void test_mean_int_int() {
-        assertEquals(5, Numbers.mean(4, 6));
-        assertEquals(0, Numbers.mean(-1, 1));
-        assertEquals(Integer.MAX_VALUE, Numbers.mean(Integer.MAX_VALUE, Integer.MAX_VALUE));
-    }
-
-    @Test
-    public void test_mean_long_long() {
-        assertEquals(5L, Numbers.mean(4L, 6L));
-        assertEquals(0L, Numbers.mean(-1L, 1L));
-        assertEquals(Long.MAX_VALUE, Numbers.mean(Long.MAX_VALUE, Long.MAX_VALUE));
-    }
-
-    @Test
-    public void testMean_int_int() {
-        assertEquals(2, Numbers.mean(2, 3));
-        assertEquals(2, Numbers.mean(3, 2));
-        assertEquals(Integer.MAX_VALUE - 1, Numbers.mean(Integer.MAX_VALUE, Integer.MAX_VALUE - 2));
-        assertEquals(-3, Numbers.mean(-2, -3));
-    }
-
-    @Test
-    public void testMean_long_long() {
-        assertEquals(2L, Numbers.mean(2L, 3L));
-        assertEquals(Long.MAX_VALUE - 1L, Numbers.mean(Long.MAX_VALUE, Long.MAX_VALUE - 2L));
-    }
-
-    @Test
-    public void testMeanInt() {
-        Assertions.assertEquals(3, Numbers.mean(2, 4));
-        Assertions.assertEquals(0, Numbers.mean(-1, 1));
-
-        Assertions.assertEquals(Integer.MAX_VALUE - 1, Numbers.mean(Integer.MAX_VALUE, Integer.MAX_VALUE - 2));
-
-        Assertions.assertEquals(-3, Numbers.mean(-2, -4));
-    }
-
-    @Test
-    public void testMeanLong() {
-        Assertions.assertEquals(3L, Numbers.mean(2L, 4L));
-        Assertions.assertEquals(0L, Numbers.mean(-1L, 1L));
-
-        Assertions.assertEquals(Long.MAX_VALUE - 1, Numbers.mean(Long.MAX_VALUE, Long.MAX_VALUE - 2));
-    }
-
-    @Test
     @DisplayName("mean of longs")
     public void testMeanLongs() {
         assertEquals(3.0, mean(1L, 2L, 3L, 4L, 5L), 1e-10);
         assertEquals(Long.MAX_VALUE, mean(Long.MAX_VALUE), 1e-10);
-    }
-
-    @Test
-    public void testMean_IntPair_EdgeCases() {
-        assertEquals(0, Numbers.mean(0, 0));
-        assertEquals(Integer.MAX_VALUE, Numbers.mean(Integer.MAX_VALUE, Integer.MAX_VALUE));
-        assertEquals(Integer.MIN_VALUE, Numbers.mean(Integer.MIN_VALUE, Integer.MIN_VALUE));
-        assertEquals(-1, Numbers.mean(Integer.MIN_VALUE, Integer.MAX_VALUE));
-    }
-
-    @Test
-    public void testMean_LongPair_EdgeCases() {
-        assertEquals(0L, Numbers.mean(0L, 0L));
-        assertEquals(Long.MAX_VALUE, Numbers.mean(Long.MAX_VALUE, Long.MAX_VALUE));
-        assertEquals(Long.MIN_VALUE, Numbers.mean(Long.MIN_VALUE, Long.MIN_VALUE));
     }
 
     @Test
@@ -6170,6 +6437,11 @@ public class NumbersTest extends TestBase {
         Assertions.assertThrows(IllegalArgumentException.class, () -> {
             Numbers.mean(1.0, Double.NaN);
         });
+
+        // non-finite rejection carries a descriptive message (no longer a messageless IllegalArgumentException)
+        final IllegalArgumentException ex = Assertions.assertThrows(IllegalArgumentException.class, () -> Numbers.mean(1.0, Double.NaN));
+        Assertions.assertNotNull(ex.getMessage());
+        Assertions.assertTrue(ex.getMessage().contains("finite"), ex.getMessage());
     }
 
     @Test
@@ -6259,52 +6531,54 @@ public class NumbersTest extends TestBase {
 
     @Test
     public void test_round() {
-        {
-            N.println(Strings.repeat("=", 80));
-            final float val = 12.10560233f;
-            N.println(Numbers.round(val, 2));
-            N.println(Numbers.round(val, 3));
-            N.println(Numbers.round(val, 4));
-            N.println(Strings.repeat("-", 20));
-            N.println(Numbers.round(val, 2, RoundingMode.HALF_EVEN));
-            N.println(Numbers.round(val, 3, RoundingMode.HALF_EVEN));
-            N.println(Numbers.round(val, 4, RoundingMode.HALF_EVEN));
-            N.println(Strings.repeat("-", 20));
-            N.println(Numbers.round(val, 2, RoundingMode.HALF_UP));
-            N.println(Numbers.round(val, 3, RoundingMode.HALF_UP));
-            N.println(Numbers.round(val, 4, RoundingMode.HALF_UP));
-            N.println(Strings.repeat("-", 20));
-            N.println(Numbers.round(val, 2, RoundingMode.HALF_DOWN));
-            N.println(Numbers.round(val, 3, RoundingMode.HALF_DOWN));
-            N.println(Numbers.round(val, 4, RoundingMode.HALF_DOWN));
-            N.println(Strings.repeat("-", 20));
-            N.println(Numbers.round(val, 2, RoundingMode.DOWN));
-            N.println(Numbers.round(val, 3, RoundingMode.DOWN));
-            N.println(Numbers.round(val, 4, RoundingMode.DOWN));
-        }
-        {
-            N.println(Strings.repeat("=", 80));
-            final double val = 12.156233d;
-            N.println(Numbers.round(val, 2));
-            N.println(Numbers.round(val, 3));
-            N.println(Numbers.round(val, 4));
-            N.println(Strings.repeat("-", 20));
-            N.println(Numbers.round(val, 2, RoundingMode.HALF_EVEN));
-            N.println(Numbers.round(val, 3, RoundingMode.HALF_EVEN));
-            N.println(Numbers.round(val, 4, RoundingMode.HALF_EVEN));
-            N.println(Strings.repeat("-", 20));
-            N.println(Numbers.round(val, 2, RoundingMode.HALF_UP));
-            N.println(Numbers.round(val, 3, RoundingMode.HALF_UP));
-            N.println(Numbers.round(val, 4, RoundingMode.HALF_UP));
-            N.println(Strings.repeat("-", 20));
-            N.println(Numbers.round(val, 2, RoundingMode.HALF_DOWN));
-            N.println(Numbers.round(val, 3, RoundingMode.HALF_DOWN));
-            N.println(Numbers.round(val, 4, RoundingMode.HALF_DOWN));
-            N.println(Strings.repeat("-", 20));
-            N.println(Numbers.round(val, 2, RoundingMode.DOWN));
-            N.println(Numbers.round(val, 3, RoundingMode.DOWN));
-            N.println(Numbers.round(val, 4, RoundingMode.DOWN));
-        }
+        assertDoesNotThrow(() -> {
+            {
+                N.println(Strings.repeat("=", 80));
+                final float val = 12.10560233f;
+                N.println(Numbers.round(val, 2));
+                N.println(Numbers.round(val, 3));
+                N.println(Numbers.round(val, 4));
+                N.println(Strings.repeat("-", 20));
+                N.println(Numbers.round(val, 2, RoundingMode.HALF_EVEN));
+                N.println(Numbers.round(val, 3, RoundingMode.HALF_EVEN));
+                N.println(Numbers.round(val, 4, RoundingMode.HALF_EVEN));
+                N.println(Strings.repeat("-", 20));
+                N.println(Numbers.round(val, 2, RoundingMode.HALF_UP));
+                N.println(Numbers.round(val, 3, RoundingMode.HALF_UP));
+                N.println(Numbers.round(val, 4, RoundingMode.HALF_UP));
+                N.println(Strings.repeat("-", 20));
+                N.println(Numbers.round(val, 2, RoundingMode.HALF_DOWN));
+                N.println(Numbers.round(val, 3, RoundingMode.HALF_DOWN));
+                N.println(Numbers.round(val, 4, RoundingMode.HALF_DOWN));
+                N.println(Strings.repeat("-", 20));
+                N.println(Numbers.round(val, 2, RoundingMode.DOWN));
+                N.println(Numbers.round(val, 3, RoundingMode.DOWN));
+                N.println(Numbers.round(val, 4, RoundingMode.DOWN));
+            }
+            {
+                N.println(Strings.repeat("=", 80));
+                final double val = 12.156233d;
+                N.println(Numbers.round(val, 2));
+                N.println(Numbers.round(val, 3));
+                N.println(Numbers.round(val, 4));
+                N.println(Strings.repeat("-", 20));
+                N.println(Numbers.round(val, 2, RoundingMode.HALF_EVEN));
+                N.println(Numbers.round(val, 3, RoundingMode.HALF_EVEN));
+                N.println(Numbers.round(val, 4, RoundingMode.HALF_EVEN));
+                N.println(Strings.repeat("-", 20));
+                N.println(Numbers.round(val, 2, RoundingMode.HALF_UP));
+                N.println(Numbers.round(val, 3, RoundingMode.HALF_UP));
+                N.println(Numbers.round(val, 4, RoundingMode.HALF_UP));
+                N.println(Strings.repeat("-", 20));
+                N.println(Numbers.round(val, 2, RoundingMode.HALF_DOWN));
+                N.println(Numbers.round(val, 3, RoundingMode.HALF_DOWN));
+                N.println(Numbers.round(val, 4, RoundingMode.HALF_DOWN));
+                N.println(Strings.repeat("-", 20));
+                N.println(Numbers.round(val, 2, RoundingMode.DOWN));
+                N.println(Numbers.round(val, 3, RoundingMode.DOWN));
+                N.println(Numbers.round(val, 4, RoundingMode.DOWN));
+            }
+        });
     }
 
     @Test
@@ -6412,14 +6686,14 @@ public class NumbersTest extends TestBase {
         Assertions.assertEquals(1.3f, Numbers.round(1.25f, 1, RoundingMode.HALF_UP), 0.0001f);
         Assertions.assertEquals(1.2f, Numbers.round(1.25f, 1, RoundingMode.HALF_EVEN), 0.0001f);
 
-        Assertions.assertEquals(1.3f, Numbers.round(1.25f, 1, null), 0.0001f);
+        Assertions.assertThrows(IllegalArgumentException.class, () -> Numbers.round(1.25f, 1, null));
     }
 
     @Test
     public void testRound_FloatWithScale_EdgeCases() {
         assertEquals(1.24f, Numbers.round(1.235f, 2), FLOAT_DELTA);
         assertEquals(0.0f, Numbers.round(0.0f, 5), FLOAT_DELTA);
-        assertEquals(-1.23f, Numbers.round(-1.235f, 2), FLOAT_DELTA);
+        assertEquals(-1.24f, Numbers.round(-1.235f, 2), FLOAT_DELTA); // HALF_UP: half rounds away from zero
     }
 
     @Test
@@ -6430,12 +6704,50 @@ public class NumbersTest extends TestBase {
     }
 
     @Test
+    @DisplayName("round(x, scale) now matches round(x, scale, HALF_UP) for binary-inexact decimal ties")
+    public void test_round_scale_matchesHalfUp_decimalTies() {
+        // Regression for the doc/contract gap: the old fast path rounded in binary floating point and
+        // diverged from decimal HALF_UP for ".....5" literals not exactly representable in binary.
+        // double cases (old fast path returned 1.0 / 1.01)
+        assertEquals(1.01, Numbers.round(1.005, 2), 0.0);
+        assertEquals(1.02, Numbers.round(1.015, 2), 0.0);
+        // float cases (old fast path returned 8.23f / 1.04f)
+        assertEquals(8.24f, Numbers.round(8.235f, 2), 0.0f);
+        assertEquals(1.05f, Numbers.round(1.045f, 2), 0.0f);
+
+        // The 2-arg overload is now exactly equivalent to the 3-arg HALF_UP overload for finite input.
+        for (final double x : new double[] { 1.005, 1.015, 2.675, 8.235, 12.3456, -1.005, 0.0, 123456.789 }) {
+            for (int scale = -2; scale <= 6; scale++) {
+                assertEquals(Numbers.round(x, scale, RoundingMode.HALF_UP), Numbers.round(x, scale), 0.0);
+            }
+        }
+        for (final float x : new float[] { 1.005f, 8.235f, 1.045f, 12.345f, -8.235f, 0.0f }) {
+            for (int scale = -2; scale <= 6; scale++) {
+                assertEquals(Numbers.round(x, scale, RoundingMode.HALF_UP), Numbers.round(x, scale), 0.0f);
+            }
+        }
+    }
+
+    @Test
+    @DisplayName("round(x, scale) never throws on non-finite input at any scale")
+    public void test_round_scale_nonFinite_neverThrows() {
+        for (final int scale : new int[] { -2, 0, 2, 6, 8 }) {
+            assertEquals(0.0f, Numbers.round(Float.NaN, scale), 0.0f);
+            assertEquals(0.0d, Numbers.round(Double.NaN, scale), 0.0d);
+            assertEquals(Float.POSITIVE_INFINITY, Numbers.round(Float.POSITIVE_INFINITY, scale), 0.0f);
+            assertEquals(Float.NEGATIVE_INFINITY, Numbers.round(Float.NEGATIVE_INFINITY, scale), 0.0f);
+            assertEquals(Double.POSITIVE_INFINITY, Numbers.round(Double.POSITIVE_INFINITY, scale), 0.0d);
+            assertEquals(Double.NEGATIVE_INFINITY, Numbers.round(Double.NEGATIVE_INFINITY, scale), 0.0d);
+        }
+    }
+
+    @Test
     public void test_round_float_scale() {
         assertEquals(12.11f, Numbers.round(12.105f, 2), 0.001f);
         assertEquals(12.1f, Numbers.round(12.105f, 1), 0.001f);
         assertEquals(12.0f, Numbers.round(12.105f, 0), 0.001f);
 
-        assertThrows(IllegalArgumentException.class, () -> Numbers.round(12.105f, -1));
+        assertEquals(10.0f, Numbers.round(12.105f, -1), 0.001f); // negative scale rounds to a power of ten
     }
 
     @Test
@@ -6444,7 +6756,7 @@ public class NumbersTest extends TestBase {
         assertEquals(12.1, Numbers.round(12.105, 1), 0.001);
         assertEquals(12.0, Numbers.round(12.105, 0), 0.001);
 
-        assertThrows(IllegalArgumentException.class, () -> Numbers.round(12.105, -1));
+        assertEquals(10.0, Numbers.round(12.105, -1), 0.001); // negative scale rounds to a power of ten
     }
 
     @Test
@@ -6479,11 +6791,27 @@ public class NumbersTest extends TestBase {
     }
 
     @Test
+    public void testRound_StringAndDecimalFormat_nonFinite() {
+        // Regression: NaN / Infinity must be returned unchanged, not throw an undocumented NPE/IAE.
+        final DecimalFormat df = new DecimalFormat("0.00");
+
+        assertTrue(Float.isNaN(Numbers.round(Float.NaN, "0.00")));
+        assertTrue(Float.isNaN(Numbers.round(Float.NaN, df)));
+        assertEquals(Float.POSITIVE_INFINITY, Numbers.round(Float.POSITIVE_INFINITY, "0.00"));
+        assertEquals(Float.NEGATIVE_INFINITY, Numbers.round(Float.NEGATIVE_INFINITY, df));
+
+        assertTrue(Double.isNaN(Numbers.round(Double.NaN, "0.00")));
+        assertTrue(Double.isNaN(Numbers.round(Double.NaN, df)));
+        assertEquals(Double.POSITIVE_INFINITY, Numbers.round(Double.POSITIVE_INFINITY, "0.00"));
+        assertEquals(Double.NEGATIVE_INFINITY, Numbers.round(Double.NEGATIVE_INFINITY, df));
+    }
+
+    @Test
     public void testRound_float_scale() {
         assertEquals(12.35f, Numbers.round(12.345f, 2), DELTA);
         assertEquals(12.3f, Numbers.round(12.345f, 1), DELTA);
         assertEquals(12.0f, Numbers.round(12.345f, 0), DELTA);
-        assertThrows(IllegalArgumentException.class, () -> Numbers.round(12.3f, -1));
+        assertEquals(10.0f, Numbers.round(12.3f, -1), DELTA); // negative scale rounds to a power of ten
     }
 
     @Test
@@ -6491,7 +6819,7 @@ public class NumbersTest extends TestBase {
         assertEquals(12.346, Numbers.round(12.3456, 3), DELTA);
         assertEquals(Math.round(12.3456 * 1000.0) / 1000.0, Numbers.round(12.3456, 3), DELTA);
         assertEquals(12.0, Numbers.round(12.3456, 0), DELTA);
-        assertThrows(IllegalArgumentException.class, () -> Numbers.round(12.3, -1));
+        assertEquals(10.0, Numbers.round(12.3, -1), DELTA); // negative scale rounds to a power of ten
     }
 
     @Test
@@ -6505,9 +6833,7 @@ public class NumbersTest extends TestBase {
 
         Assertions.assertEquals(-1.2f, Numbers.round(-1.234f, 1), 0.0001f);
 
-        Assertions.assertThrows(IllegalArgumentException.class, () -> {
-            Numbers.round(1.234f, -1);
-        });
+        Assertions.assertEquals(0.0f, Numbers.round(1.234f, -1), 0.0001f); // negative scale rounds to a power of ten
     }
 
     @Test
@@ -6520,9 +6846,7 @@ public class NumbersTest extends TestBase {
 
         Assertions.assertEquals(1.2345679, Numbers.round(1.23456789, 7), 0.00000001);
 
-        Assertions.assertThrows(IllegalArgumentException.class, () -> {
-            Numbers.round(1.234, -1);
-        });
+        Assertions.assertEquals(0.0, Numbers.round(1.234, -1), 0.0001); // negative scale rounds to a power of ten
     }
 
     /**
@@ -6597,6 +6921,39 @@ public class NumbersTest extends TestBase {
         assertEquals(123.5f, Numbers.round(123.456f, 1), 1e-4f);
     }
 
+    /**
+     * round(double/float, scale) treats non-finite input uniformly at EVERY scale (no longer scale-dependent):
+     * NaN -> 0 and infinities are returned unchanged. Previously scale &gt; 6 and scale &lt; 0 routed through the
+     * BigDecimal path and threw NumberFormatException; that inconsistency was removed when the 2-arg overload was
+     * made equivalent to round(x, scale, HALF_UP) for finite input.
+     */
+    @Test
+    public void testRound_NonFiniteInput_Scale0To6() {
+        // scale == 0 conventions (pre-existing behavior, pinned here)
+        Assertions.assertEquals(0.0, Numbers.round(Double.NaN, 0), 0.0);
+        Assertions.assertEquals(Double.POSITIVE_INFINITY, Numbers.round(Double.POSITIVE_INFINITY, 0), 0.0);
+        Assertions.assertEquals(Double.NEGATIVE_INFINITY, Numbers.round(Double.NEGATIVE_INFINITY, 0), 0.0);
+        Assertions.assertEquals(0.0f, Numbers.round(Float.NaN, 0), 0.0f);
+        Assertions.assertEquals(Float.POSITIVE_INFINITY, Numbers.round(Float.POSITIVE_INFINITY, 0), 0.0f);
+        Assertions.assertEquals(Float.NEGATIVE_INFINITY, Numbers.round(Float.NEGATIVE_INFINITY, 0), 0.0f);
+
+        // scale 1..6 must behave the same instead of throwing NumberFormatException
+        Assertions.assertEquals(0.0, Numbers.round(Double.NaN, 2), 0.0);
+        Assertions.assertEquals(0.0, Numbers.round(Double.NaN, 6), 0.0);
+        Assertions.assertEquals(Double.POSITIVE_INFINITY, Numbers.round(Double.POSITIVE_INFINITY, 2), 0.0);
+        Assertions.assertEquals(Double.NEGATIVE_INFINITY, Numbers.round(Double.NEGATIVE_INFINITY, 6), 0.0);
+        Assertions.assertEquals(0.0f, Numbers.round(Float.NaN, 2), 0.0f);
+        Assertions.assertEquals(0.0f, Numbers.round(Float.NaN, 6), 0.0f);
+        Assertions.assertEquals(Float.POSITIVE_INFINITY, Numbers.round(Float.POSITIVE_INFINITY, 2), 0.0f);
+        Assertions.assertEquals(Float.NEGATIVE_INFINITY, Numbers.round(Float.NEGATIVE_INFINITY, 6), 0.0f);
+
+        // scale > 6 and scale < 0 are now consistent too: non-finite input never throws.
+        Assertions.assertEquals(0.0, Numbers.round(Double.NaN, 7), 0.0);
+        Assertions.assertEquals(0.0, Numbers.round(Double.NaN, -1), 0.0);
+        Assertions.assertEquals(Float.POSITIVE_INFINITY, Numbers.round(Float.POSITIVE_INFINITY, 7), 0.0f);
+        Assertions.assertEquals(Double.NEGATIVE_INFINITY, Numbers.round(Double.NEGATIVE_INFINITY, -2), 0.0);
+    }
+
     @Test
     public void testRoundFloatWithStringFormat() {
         float result = Numbers.round(1.234f, "#.#");
@@ -6605,7 +6962,8 @@ public class NumbersTest extends TestBase {
         result = Numbers.round(1.234f, "#.##");
         Assertions.assertEquals(1.23f, result, 0.0001f);
 
-        Assertions.assertThrows(NumberFormatException.class, () -> Numbers.round(0.5f, "#%"));
+        // '%' patterns round-trip through the DecimalFormat itself ("50%" -> 0.5)
+        Assertions.assertEquals(0.5f, Numbers.round(0.5f, "#%"), 0.0001f);
     }
 
     @Test
@@ -6616,7 +6974,8 @@ public class NumbersTest extends TestBase {
         result = Numbers.round(1.234, "#.##");
         Assertions.assertEquals(1.23, result, 0.0001);
 
-        Assertions.assertThrows(NumberFormatException.class, () -> Numbers.round(0.5, "#%"));
+        // '%' patterns round-trip through the DecimalFormat itself ("50%" -> 0.5)
+        Assertions.assertEquals(0.5, Numbers.round(0.5, "#%"), 0.0001);
     }
 
     @Test
@@ -6680,11 +7039,7 @@ public class NumbersTest extends TestBase {
         assertEquals(3.14f, round(3.14159f, df), FLOAT_DELTA);
         assertEquals(3.14, round(3.14159, df), DELTA);
 
-        try {
-            round(3.14, -1);
-            fail("Should throw IllegalArgumentException");
-        } catch (IllegalArgumentException e) {
-        }
+        assertEquals(0.0, round(3.14, -1), DELTA); // negative scale rounds to a power of ten
     }
 
     @Test
@@ -7332,6 +7687,204 @@ public class NumbersTest extends TestBase {
         assertEquals(0.0d, DOUBLE_ZERO, DELTA);
         assertEquals(1.0d, DOUBLE_ONE, DELTA);
         assertEquals(-1.0d, DOUBLE_MINUS_ONE, DELTA);
+    }
+
+    // --- regression tests for 2026-06-10 deep-review fixes ---
+
+    @Test
+    public void testCreateNumberNegativeUnderflowEscalatesToBigDecimal() {
+        // regression: Float.compare-based zero equality missed -0.0, so negative underflow returned
+        // a signed zero instead of escalating to BigDecimal like the positive twin
+        final Number typed = Numbers.createNumber("-1e-400D");
+        assertTrue(typed instanceof BigDecimal);
+        assertEquals(0, ((BigDecimal) typed).compareTo(new BigDecimal("-1e-400")));
+
+        assertEquals(Double.valueOf(-1e-60), Numbers.createNumber("-1e-60F")); // float underflow escalates to double
+
+        // regression: the untyped branch had no underflow escalation at all
+        final Number untyped = Numbers.createNumber("1e-400");
+        assertTrue(untyped instanceof BigDecimal);
+        assertEquals(0, ((BigDecimal) untyped).compareTo(new BigDecimal("1e-400")));
+
+        // true zeros are unchanged
+        assertEquals(Double.valueOf(0.0d), Numbers.createNumber("0.0"));
+    }
+
+    @Test
+    public void testCreateBigIntegerRejectsDoubledSigns() {
+        // regression: one sign was stripped manually and BigInteger accepted a second one ("--1" -> 1)
+        assertThrows(NumberFormatException.class, () -> Numbers.createBigInteger("--1"));
+        assertThrows(NumberFormatException.class, () -> Numbers.createBigInteger("+-1"));
+        assertThrows(NumberFormatException.class, () -> Numbers.createBigInteger("-+1"));
+        assertThrows(NumberFormatException.class, () -> Numbers.createBigInteger("++1"));
+
+        // unchanged behavior
+        assertEquals(BigInteger.valueOf(-1), Numbers.createBigInteger("-1"));
+        assertEquals(BigInteger.valueOf(-255), Numbers.createBigInteger("-0xFF"));
+    }
+
+    @Test
+    public void testRoundWithDecimalFormatStringSupportsPercentAndGrouping() {
+        // regression: the String overloads parsed the formatted text with Float/Double.parseFloat,
+        // throwing NumberFormatException for '%' patterns and grouping separators
+        assertEquals(0.121f, Numbers.round(0.121f, "#.##%"), 0.0001f);
+        assertEquals(1234.57d, Numbers.round(1234.567d, "#,##0.00"), 0.0001d);
+
+        // unchanged behavior
+        assertEquals(3.14d, Numbers.round(3.14159d, "#.##"), 0.0001d);
+    }
+
+    // ----- 2026-06-17 (report section 11 fixes + API-symmetry additions) -----
+
+    @Test
+    public void test_isParsable_asciiDigitsOnly() {
+        // 11.1: only ASCII '0'..'9' are accepted. Non-ASCII Unicode digits must return false, because
+        // Float.parseFloat/Double.parseDouble reject them (even though Integer.parseInt/Long.parseLong accept them).
+        // regression: plain ASCII still parses
+        assertTrue(Numbers.isParsable("123"));
+        assertTrue(Numbers.isParsable("-123"));
+        assertTrue(Numbers.isParsable("+12"));
+        assertTrue(Numbers.isParsable("123.45"));
+        assertTrue(Numbers.isParsable(".5"));
+
+        final String arabic123 = "١٢٣"; // Arabic-Indic "123"
+        final String arabic1dot5 = "١.٥"; // Arabic-Indic "1.5"
+        final String devanagari123 = "१२३"; // Devanagari "123"
+        final String fullwidth123 = "１２３"; // fullwidth "123"
+
+        // these are all Unicode digits (Character.isDigit == true) but only ASCII should be accepted
+        assertFalse(Numbers.isParsable(arabic123));
+        assertFalse(Numbers.isParsable(arabic1dot5));
+        assertFalse(Numbers.isParsable(devanagari123));
+        assertFalse(Numbers.isParsable(fullwidth123));
+
+        // rationale: the rejected non-ASCII strings really would throw in the float/double parsers
+        assertThrows(NumberFormatException.class, () -> Float.parseFloat(arabic123));
+        assertThrows(NumberFormatException.class, () -> Double.parseDouble(arabic123));
+    }
+
+    @Test
+    public void test_toFloat_BigDecimal() {
+        assertEquals(0.0f, Numbers.toFloat((BigDecimal) null), 0.0f);
+        assertEquals(8.5f, Numbers.toFloat(BigDecimal.valueOf(8.5)), 0.0f);
+        assertEquals(1.1f, Numbers.toFloat((BigDecimal) null, 1.1f), 0.0f);
+        assertEquals(8.5f, Numbers.toFloat(BigDecimal.valueOf(8.5), 1.1f), 0.0f);
+        // oversized finite magnitude saturates to +-Infinity (IEEE-754 BigDecimal.floatValue), does not throw
+        assertTrue(Float.isInfinite(Numbers.toFloat(new BigDecimal("1e40"))));
+        assertTrue(Float.isInfinite(Numbers.toFloat(new BigDecimal("-1e40"))));
+    }
+
+    @Test
+    public void test_gcd_lcm_BigInteger() {
+        assertEquals(BigInteger.valueOf(4), Numbers.gcd(BigInteger.valueOf(12), BigInteger.valueOf(8)));
+        assertEquals(BigInteger.TEN, Numbers.gcd(BigInteger.ZERO, BigInteger.TEN));
+        assertEquals(BigInteger.ZERO, Numbers.gcd(BigInteger.ZERO, BigInteger.ZERO));
+        assertEquals(BigInteger.valueOf(4), Numbers.gcd(BigInteger.valueOf(-12), BigInteger.valueOf(8)));
+
+        assertEquals(BigInteger.valueOf(12), Numbers.lcm(BigInteger.valueOf(4), BigInteger.valueOf(6)));
+        assertEquals(BigInteger.valueOf(36), Numbers.lcm(BigInteger.valueOf(12), BigInteger.valueOf(18)));
+        assertEquals(BigInteger.ZERO, Numbers.lcm(BigInteger.ZERO, BigInteger.TEN));
+        assertEquals(BigInteger.valueOf(12), Numbers.lcm(BigInteger.valueOf(-4), BigInteger.valueOf(6)));
+
+        assertThrows(IllegalArgumentException.class, () -> Numbers.gcd(null, BigInteger.ONE));
+        assertThrows(IllegalArgumentException.class, () -> Numbers.gcd(BigInteger.ONE, null));
+        assertThrows(IllegalArgumentException.class, () -> Numbers.lcm(null, BigInteger.ONE));
+        assertThrows(IllegalArgumentException.class, () -> Numbers.lcm(BigInteger.ONE, null));
+    }
+
+    @Test
+    public void test_binomialToDouble() {
+        assertEquals(1.0, Numbers.binomialToDouble(0, 0), 0.0);
+        assertEquals(1.0, Numbers.binomialToDouble(10, 0), 0.0);
+        assertEquals(10.0, Numbers.binomialToDouble(5, 2), 0.0);
+        assertEquals(252.0, Numbers.binomialToDouble(10, 5), 0.0);
+        assertEquals(2598960.0, Numbers.binomialToDouble(52, 5), 0.0);
+
+        // exceeds long but fits in double
+        final double c100_50 = Numbers.binomialToDouble(100, 50);
+        assertTrue(c100_50 > 1.0e29 && c100_50 < 2.0e29);
+
+        // exceeds Double.MAX_VALUE -> +Infinity
+        assertEquals(Double.POSITIVE_INFINITY, Numbers.binomialToDouble(2000, 1000), 0.0);
+
+        assertThrows(IllegalArgumentException.class, () -> Numbers.binomialToDouble(5, 6));
+        assertThrows(IllegalArgumentException.class, () -> Numbers.binomialToDouble(-1, 0));
+        assertThrows(IllegalArgumentException.class, () -> Numbers.binomialToDouble(5, -1));
+    }
+
+    @Test
+    public void test_clamp() {
+        assertEquals(5, Numbers.clamp(5, 1, 10));
+        assertEquals(1, Numbers.clamp(-3, 1, 10));
+        assertEquals(10, Numbers.clamp(42, 1, 10));
+        assertEquals(1, Numbers.clamp(1, 1, 1));
+
+        assertEquals(5L, Numbers.clamp(5L, 1L, 10L));
+        assertEquals(1L, Numbers.clamp(-3L, 1L, 10L));
+        assertEquals(10L, Numbers.clamp(42L, 1L, 10L));
+
+        assertEquals(5.0, Numbers.clamp(5.0, 1.0, 10.0), 0.0);
+        assertEquals(1.0, Numbers.clamp(-3.0, 1.0, 10.0), 0.0);
+        assertEquals(10.0, Numbers.clamp(42.0, 1.0, 10.0), 0.0);
+        assertTrue(Double.isNaN(Numbers.clamp(Double.NaN, 1.0, 10.0)));
+
+        // Aligned with JDK 21 Math.clamp: signed zero is ordered -0.0 < +0.0 (via Math.min/Math.max).
+        // clamp(-0.0, 0.0, 1.0) -> +0.0 (raw bits 0); clamp(0.0, -1.0, -0.0) -> -0.0 (raw bits Long.MIN_VALUE).
+        assertEquals(0L, Double.doubleToRawLongBits(Numbers.clamp(-0.0, 0.0, 1.0)));
+        assertEquals(Long.MIN_VALUE, Double.doubleToRawLongBits(Numbers.clamp(0.0, -1.0, -0.0)));
+
+        assertThrows(IllegalArgumentException.class, () -> Numbers.clamp(5, 10, 1));
+        assertThrows(IllegalArgumentException.class, () -> Numbers.clamp(5L, 10L, 1L));
+        assertThrows(IllegalArgumentException.class, () -> Numbers.clamp(5.0, 10.0, 1.0));
+        assertThrows(IllegalArgumentException.class, () -> Numbers.clamp(5.0, Double.NaN, 10.0));
+    }
+
+    @Test
+    public void test_isPrime_int() {
+        assertTrue(Numbers.isPrime(2));
+        assertTrue(Numbers.isPrime(17));
+        assertFalse(Numbers.isPrime(100));
+        assertFalse(Numbers.isPrime(1));
+        assertFalse(Numbers.isPrime(0));
+        assertThrows(IllegalArgumentException.class, () -> Numbers.isPrime(-1));
+
+        // int overload agrees with the long overload across a range
+        for (int i = 0; i <= 1000; i++) {
+            assertEquals(Numbers.isPrime((long) i), Numbers.isPrime(i));
+        }
+    }
+
+    @Test
+    public void test_log10_sqrt_BigInteger_nullX_throwsIAE() {
+        // A null x must throw IllegalArgumentException (matching the @throws javadoc and the rest of the
+        // BigInteger-overload family: log2/ceilingPowerOfTwo/floorPowerOfTwo/gcd/lcm/isPowerOfTwo), NOT a
+        // NullPointerException from the internal checkPositive/checkNonNegative signum() call.
+        assertThrows(IllegalArgumentException.class, () -> Numbers.log10((BigInteger) null, RoundingMode.DOWN));
+        assertThrows(IllegalArgumentException.class, () -> Numbers.sqrt((BigInteger) null, RoundingMode.DOWN));
+        // sibling already behaved this way; lock it in for symmetry
+        assertThrows(IllegalArgumentException.class, () -> Numbers.log2((BigInteger) null, RoundingMode.DOWN));
+
+        // non-null path unchanged
+        assertEquals(2, Numbers.log10(BigInteger.valueOf(100), RoundingMode.DOWN));
+        assertEquals(BigInteger.valueOf(10), Numbers.sqrt(BigInteger.valueOf(100), RoundingMode.UNNECESSARY));
+        assertEquals(7, Numbers.log2(BigInteger.valueOf(128), RoundingMode.UNNECESSARY));
+    }
+
+    @Test
+    public void testCreateNumber_HexBoundaryReturnTypes() {
+        assertEquals(Integer.valueOf(Integer.MAX_VALUE), Numbers.createNumber("#7fffffff"));
+        assertEquals(Long.valueOf(0x80000000L), Numbers.createNumber("#80000000"));
+        assertEquals(new BigInteger("8000000000000000", 16), Numbers.createNumber("#8000000000000000"));
+    }
+
+    @Test
+    public void testDivide_TieRoundingSupplemental() {
+        assertEquals(2, Numbers.divide(5, 2, RoundingMode.HALF_DOWN));
+        assertEquals(3, Numbers.divide(5, 2, RoundingMode.HALF_UP));
+        assertEquals(2, Numbers.divide(5, 2, RoundingMode.HALF_EVEN));
+        assertEquals(-2L, Numbers.divide(-5L, 2L, RoundingMode.HALF_DOWN));
+        assertEquals(-3L, Numbers.divide(-5L, 2L, RoundingMode.HALF_UP));
+        assertThrows(ArithmeticException.class, () -> Numbers.divide(5, 2, RoundingMode.UNNECESSARY));
     }
 
 }

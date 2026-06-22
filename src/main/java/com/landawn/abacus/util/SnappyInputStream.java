@@ -191,8 +191,9 @@ public final class SnappyInputStream extends InputStream {
     /**
      * Marks the current position in this input stream.
      *
-     * <p>The underlying Xerial Snappy input stream does not support mark/reset,
-     * so this method has no effect.</p>
+     * <p>This call is delegated to the underlying Xerial Snappy input stream; its effect (and whether
+     * a subsequent {@link #reset()} succeeds) depends on whether that stream supports mark/reset.
+     * See {@link #markSupported()}.</p>
      *
      * @param readLimit the maximum limit of bytes that can be read before the mark position becomes invalid
      * @see #reset()
@@ -207,10 +208,10 @@ public final class SnappyInputStream extends InputStream {
      * Repositions this stream to the position at the time the {@code mark} method
      * was last called on this input stream.
      *
-     * <p>The underlying Xerial Snappy input stream does not support mark/reset,
-     * so this method always throws an {@link IOException}.</p>
+     * <p>This call is delegated to the underlying Xerial Snappy input stream. If that stream does not
+     * support mark/reset, or no valid mark is set, it throws an {@link IOException}.</p>
      *
-     * @throws IOException always, because the underlying Snappy input stream does not support mark/reset
+     * @throws IOException if the underlying stream does not support mark/reset or the mark is invalid
      * @see #mark(int)
      * @see #markSupported()
      */
@@ -221,10 +222,9 @@ public final class SnappyInputStream extends InputStream {
 
     /**
      * Tests if this input stream supports the {@code mark} and {@code reset} methods.
-     * The underlying Xerial Snappy input stream does not support mark/reset, so this
-     * method returns {@code false}.
+     * The result is delegated to the underlying Xerial Snappy input stream.
      *
-     * @return {@code false}, because the underlying Snappy input stream does not support mark/reset
+     * @return {@code true} if the underlying Snappy input stream supports mark/reset; {@code false} otherwise
      * @see #mark(int)
      * @see #reset()
      */
@@ -235,8 +235,7 @@ public final class SnappyInputStream extends InputStream {
 
     /**
      * Closes this input stream and releases any system resources associated with the stream.
-     * Once the stream has been closed, further read(), available(), reset(), or skip()
-     * invocations will throw an IOException.
+     * Read operations attempted after the stream has been closed typically fail with an exception.
      *
      * <p>Closing a previously closed stream has no effect.</p>
      *

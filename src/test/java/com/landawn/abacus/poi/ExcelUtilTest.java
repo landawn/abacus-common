@@ -1,10 +1,15 @@
 package com.landawn.abacus.poi;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -28,6 +33,7 @@ import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.exception.UncheckedException;
+import com.landawn.abacus.poi.ExcelUtil.ExcelFormat;
 import com.landawn.abacus.poi.ExcelUtil.FreezePane;
 import com.landawn.abacus.poi.ExcelUtil.RowExtractors;
 import com.landawn.abacus.poi.ExcelUtil.RowMappers;
@@ -58,53 +64,79 @@ public class ExcelUtilTest extends TestBase {
         return file;
     }
 
-    // ========== loadSheet(File) ==========
+    /** ByteArrayInputStream that records whether {@link #close()} was invoked. */
+    private static final class CloseTrackingInputStream extends ByteArrayInputStream {
+        boolean closed = false;
+
+        CloseTrackingInputStream(byte[] buf) {
+            super(buf);
+        }
+
+        @Override
+        public void close() throws IOException {
+            closed = true;
+            super.close();
+        }
+    }
+
+    /** ByteArrayOutputStream that records whether {@link #close()} was invoked. */
+    private static final class CloseTrackingOutputStream extends ByteArrayOutputStream {
+        boolean closed = false;
+
+        @Override
+        public void close() throws IOException {
+            closed = true;
+            super.close();
+        }
+    }
+
+    // ========== loadDatasetFromSheet(File) ==========
 
     @Test
-    public void test_loadSheet_File() {
+    public void test_loadDatasetFromSheet_File() {
         File file = new File("./src/test/resources/test_excel_01.xlsx");
-        Dataset dataset = ExcelUtil.loadSheet(file);
+        Dataset dataset = ExcelUtil.loadDatasetFromSheet(file);
         Assertions.assertNotNull(dataset);
         Assertions.assertTrue(dataset.columnCount() > 0);
     }
 
-    // ========== loadSheet(File, int, TriConsumer) ==========
+    // ========== loadDatasetFromSheet(File, int, TriConsumer) ==========
 
     @Test
-    public void test_loadSheet_File_SheetIndex_RowExtractor() {
+    public void test_loadDatasetFromSheet_File_SheetIndex_RowExtractor() {
         File file = new File("./src/test/resources/test_excel_01.xlsx");
-        Dataset dataset = ExcelUtil.loadSheet(file, 0, RowExtractors.DEFAULT);
+        Dataset dataset = ExcelUtil.loadDatasetFromSheet(file, 0, RowExtractors.DEFAULT);
         Assertions.assertNotNull(dataset);
         Assertions.assertTrue(dataset.columnCount() > 0);
     }
 
     @Test
-    public void test_loadSheet_NonExistentFile() {
+    public void test_loadDatasetFromSheet_NonExistentFile() {
         File nonExistent = new File("./nonexistent_file_12345.xlsx");
         Assertions.assertThrows(UncheckedException.class, () -> {
-            ExcelUtil.loadSheet(nonExistent);
+            ExcelUtil.loadDatasetFromSheet(nonExistent);
         });
     }
 
     @Test
-    public void test_loadSheet_EmptySheet() throws Exception {
+    public void test_loadDatasetFromSheet_EmptySheet() throws Exception {
         File tempFile = createTempFile(".xlsx");
         List<Object> headers = Arrays.asList("col1");
         List<List<Object>> rows = new ArrayList<>();
-        ExcelUtil.writeSheet("Empty", headers, rows, tempFile);
+        ExcelUtil.writeRowsToSheet("Empty", headers, rows, tempFile);
 
-        Dataset dataset = ExcelUtil.loadSheet(tempFile);
+        Dataset dataset = ExcelUtil.loadDatasetFromSheet(tempFile);
         Assertions.assertNotNull(dataset);
         Assertions.assertEquals(1, dataset.columnCount());
         Assertions.assertEquals(0, dataset.size());
     }
 
     @Test
-    public void test_loadSheet_CustomRowExtractor() throws Exception {
+    public void test_loadDatasetFromSheet_CustomRowExtractor() throws Exception {
         File tempFile = createTempFile(".xlsx");
         List<Object> headers = Arrays.asList("A", "B");
         List<List<Object>> rows = Arrays.asList(Arrays.asList("x", "y"));
-        ExcelUtil.writeSheet("Sheet1", headers, rows, tempFile);
+        ExcelUtil.writeRowsToSheet("Sheet1", headers, rows, tempFile);
 
         TriConsumer<String[], Row, Object[]> customExtractor = (hdrs, row, output) -> {
             int idx = 0;
@@ -113,43 +145,43 @@ public class ExcelUtilTest extends TestBase {
             }
         };
 
-        Dataset dataset = ExcelUtil.loadSheet(tempFile, 0, customExtractor);
+        Dataset dataset = ExcelUtil.loadDatasetFromSheet(tempFile, 0, customExtractor);
         Assertions.assertEquals("CUSTOM_x", dataset.get(0, 0));
     }
 
-    // ========== loadSheet(File, String, TriConsumer) ==========
+    // ========== loadDatasetFromSheet(File, String, TriConsumer) ==========
 
     @Test
-    public void test_loadSheet_File_SheetName_RowExtractor() throws Exception {
+    public void test_loadDatasetFromSheet_File_SheetName_RowExtractor() throws Exception {
         File tempFile = createTempFile(".xlsx");
         Dataset dataset = N.newDataset(N.toList("col1", "col2"), N.toList(N.toList("a", "b"), N.toList("c", "d")));
-        ExcelUtil.writeSheet("TestSheet", dataset, tempFile);
+        ExcelUtil.writeDatasetToSheet("TestSheet", dataset, tempFile);
 
-        Dataset loaded = ExcelUtil.loadSheet(tempFile, "TestSheet", RowExtractors.DEFAULT);
+        Dataset loaded = ExcelUtil.loadDatasetFromSheet(tempFile, "TestSheet", RowExtractors.DEFAULT);
         Assertions.assertNotNull(loaded);
         Assertions.assertEquals(2, loaded.columnCount());
         Assertions.assertEquals(2, loaded.size());
     }
 
     @Test
-    public void test_loadSheet_File_SheetName_NotFound() throws Exception {
+    public void test_loadDatasetFromSheet_File_SheetName_NotFound() throws Exception {
         File tempFile = createTempFile(".xlsx");
         List<Object> headers = Arrays.asList("A");
         List<List<Object>> rows = Arrays.asList(Arrays.asList("B"));
-        ExcelUtil.writeSheet("RealSheet", headers, rows, tempFile);
+        ExcelUtil.writeRowsToSheet("RealSheet", headers, rows, tempFile);
 
-        Assertions.assertThrows(IllegalArgumentException.class, () -> ExcelUtil.loadSheet(tempFile, "NonExistentSheet", RowExtractors.DEFAULT));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> ExcelUtil.loadDatasetFromSheet(tempFile, "NonExistentSheet", RowExtractors.DEFAULT));
     }
 
     @Test
-    public void test_loadSheet_DefaultExtractorWithMissingCells() throws Exception {
+    public void test_loadDatasetFromSheet_DefaultExtractorWithMissingCells() throws Exception {
         File tempFile = createTempFile(".xlsx");
         List<Object> headers = Arrays.asList("A", "B");
         List<List<Object>> rows = Arrays.asList(Arrays.asList("left-only"));
 
-        ExcelUtil.writeSheet("Sheet1", headers, rows, tempFile);
+        ExcelUtil.writeRowsToSheet("Sheet1", headers, rows, tempFile);
 
-        Dataset dataset = ExcelUtil.loadSheet(tempFile, 0, RowExtractors.DEFAULT);
+        Dataset dataset = ExcelUtil.loadDatasetFromSheet(tempFile, 0, RowExtractors.DEFAULT);
         Assertions.assertEquals(2, dataset.columnCount());
         Assertions.assertEquals("left-only", dataset.get(0, 0));
         Assertions.assertNull(dataset.get(0, 1));
@@ -160,62 +192,62 @@ public class ExcelUtilTest extends TestBase {
     @Test
     public void test_CELL_GETTER_String() {
         File file = new File("./src/test/resources/test_excel_01.xlsx");
-        List<List<Object>> rows = ExcelUtil.readSheet(file);
+        List<List<Object>> rows = ExcelUtil.readRowsFromSheet(file);
         Assertions.assertNotNull(rows);
         Assertions.assertFalse(rows.isEmpty());
     }
 
-    // ========== readSheet(File) ==========
+    // ========== readRowsFromSheet(File) ==========
 
     @Test
-    public void test_readSheet_File() throws Exception {
+    public void test_readRowsFromSheet_File() throws Exception {
         File tempFile = createTempFile(".xlsx");
         List<Object> headers = Arrays.asList("Col");
         List<List<Object>> rows = Arrays.asList(Arrays.asList("Val"));
-        ExcelUtil.writeSheet("Sheet1", headers, rows, tempFile);
+        ExcelUtil.writeRowsToSheet("Sheet1", headers, rows, tempFile);
 
-        List<List<Object>> readRows = ExcelUtil.readSheet(tempFile);
+        List<List<Object>> readRows = ExcelUtil.readRowsFromSheet(tempFile);
         Assertions.assertEquals(2, readRows.size()); // header + 1 data row
     }
 
     @Test
-    public void test_readSheet_NonExistentFile() {
+    public void test_readRowsFromSheet_NonExistentFile() {
         File nonExistent = new File("./nonexistent_file_12345.xlsx");
         Assertions.assertThrows(UncheckedException.class, () -> {
-            ExcelUtil.readSheet(nonExistent);
+            ExcelUtil.readRowsFromSheet(nonExistent);
         });
     }
 
-    // ========== readSheet(File, int, boolean, Function) ==========
+    // ========== readRowsFromSheet(File, int, boolean, Function) ==========
 
     @Test
-    public void test_readSheet_File_SheetIndex_SkipFirstRow_RowMapper() throws Exception {
+    public void test_readRowsFromSheet_File_SheetIndex_SkipFirstRow_RowMapper() throws Exception {
         File tempFile = createTempFile(".xlsx");
         List<Object> headers = Arrays.asList("Name", "Age");
         List<List<Object>> rows = Arrays.asList(Arrays.asList("Alice", 30), Arrays.asList("Bob", 25));
-        ExcelUtil.writeSheet("People", headers, rows, tempFile);
+        ExcelUtil.writeRowsToSheet("People", headers, rows, tempFile);
 
-        List<List<Object>> readRows = ExcelUtil.readSheet(tempFile, 0, true, RowMappers.DEFAULT);
+        List<List<Object>> readRows = ExcelUtil.readRowsFromSheet(tempFile, 0, true, RowMappers.DEFAULT);
         Assertions.assertEquals(2, readRows.size());
     }
 
     @Test
-    public void test_readSheet_File_SheetIndex_NoSkip() throws Exception {
+    public void test_readRowsFromSheet_File_SheetIndex_NoSkip() throws Exception {
         File tempFile = createTempFile(".xlsx");
         List<Object> headers = Arrays.asList("Col1");
         List<List<Object>> rows = Arrays.asList(Arrays.asList("Data"));
-        ExcelUtil.writeSheet("Sheet1", headers, rows, tempFile);
+        ExcelUtil.writeRowsToSheet("Sheet1", headers, rows, tempFile);
 
-        List<List<Object>> readRows = ExcelUtil.readSheet(tempFile, 0, false, RowMappers.DEFAULT);
+        List<List<Object>> readRows = ExcelUtil.readRowsFromSheet(tempFile, 0, false, RowMappers.DEFAULT);
         Assertions.assertEquals(2, readRows.size());
     }
 
     @Test
-    public void test_readSheet_CustomRowMapper() throws Exception {
+    public void test_readRowsFromSheet_CustomRowMapper() throws Exception {
         File tempFile = createTempFile(".xlsx");
         List<Object> headers = Arrays.asList("A", "B");
         List<List<Object>> rows = Arrays.asList(Arrays.asList(1, 2));
-        ExcelUtil.writeSheet("Sheet1", headers, rows, tempFile);
+        ExcelUtil.writeRowsToSheet("Sheet1", headers, rows, tempFile);
 
         Function<Row, Integer> rowMapper = row -> {
             int sum = 0;
@@ -227,137 +259,137 @@ public class ExcelUtilTest extends TestBase {
             return sum;
         };
 
-        List<Integer> sums = ExcelUtil.readSheet(tempFile, 0, true, rowMapper);
+        List<Integer> sums = ExcelUtil.readRowsFromSheet(tempFile, 0, true, rowMapper);
         Assertions.assertEquals(1, sums.size());
         Assertions.assertEquals(3, sums.get(0));
     }
 
-    // ========== readSheet(File, String, boolean, Function) ==========
+    // ========== readRowsFromSheet(File, String, boolean, Function) ==========
 
     @Test
-    public void test_readSheet_File_SheetName_SkipFirstRow_RowMapper() throws Exception {
+    public void test_readRowsFromSheet_File_SheetName_SkipFirstRow_RowMapper() throws Exception {
         File tempFile = createTempFile(".xlsx");
         List<Object> headers = Arrays.asList("Product");
         List<List<Object>> rows = Arrays.asList(Arrays.asList("Widget"));
-        ExcelUtil.writeSheet("Products", headers, rows, tempFile);
+        ExcelUtil.writeRowsToSheet("Products", headers, rows, tempFile);
 
-        List<List<Object>> readRows = ExcelUtil.readSheet(tempFile, "Products", true, RowMappers.DEFAULT);
+        List<List<Object>> readRows = ExcelUtil.readRowsFromSheet(tempFile, "Products", true, RowMappers.DEFAULT);
         Assertions.assertEquals(1, readRows.size());
     }
 
     @Test
-    public void test_readSheet_File_SheetName_NotFound() throws Exception {
+    public void test_readRowsFromSheet_File_SheetName_NotFound() throws Exception {
         File tempFile = createTempFile(".xlsx");
         List<Object> headers = Arrays.asList("A");
         List<List<Object>> rows = Arrays.asList(Arrays.asList("B"));
-        ExcelUtil.writeSheet("RealSheet", headers, rows, tempFile);
+        ExcelUtil.writeRowsToSheet("RealSheet", headers, rows, tempFile);
 
-        Assertions.assertThrows(IllegalArgumentException.class, () -> ExcelUtil.readSheet(tempFile, "FakeSheet", true, RowMappers.DEFAULT));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> ExcelUtil.readRowsFromSheet(tempFile, "FakeSheet", true, RowMappers.DEFAULT));
     }
 
     @Test
-    public void test_readSheet_File_SheetName_NoSkip() throws Exception {
+    public void test_readRowsFromSheet_File_SheetName_NoSkip() throws Exception {
         File tempFile = createTempFile(".xlsx");
         List<Object> headers = Arrays.asList("H");
         List<List<Object>> rows = Arrays.asList(Arrays.asList("D"));
-        ExcelUtil.writeSheet("TestSh", headers, rows, tempFile);
+        ExcelUtil.writeRowsToSheet("TestSh", headers, rows, tempFile);
 
-        List<List<Object>> readRows = ExcelUtil.readSheet(tempFile, "TestSh", false, RowMappers.DEFAULT);
+        List<List<Object>> readRows = ExcelUtil.readRowsFromSheet(tempFile, "TestSh", false, RowMappers.DEFAULT);
         Assertions.assertEquals(2, readRows.size()); // header + data
     }
 
-    // ========== streamSheet(File, int, boolean) ==========
+    // ========== streamRowsFromSheet(File, int, boolean) ==========
 
     @Test
-    public void test_streamSheet_File_SheetIndex_SkipFirstRow() throws Exception {
+    public void test_streamRowsFromSheet_File_SheetIndex_SkipFirstRow() throws Exception {
         File tempFile = createTempFile(".xlsx");
         List<Object> headers = Arrays.asList("Val");
         List<List<Object>> rows = Arrays.asList(Arrays.asList(1), Arrays.asList(2), Arrays.asList(3));
-        ExcelUtil.writeSheet("Sheet1", headers, rows, tempFile);
+        ExcelUtil.writeRowsToSheet("Sheet1", headers, rows, tempFile);
 
-        try (Stream<Row> stream = ExcelUtil.streamSheet(tempFile, 0, true)) {
+        try (Stream<Row> stream = ExcelUtil.streamRowsFromSheet(tempFile, 0, true)) {
             long count = stream.count();
             Assertions.assertEquals(3, count);
         }
     }
 
     @Test
-    public void test_streamSheet_File_SheetIndex_NoSkip() throws Exception {
+    public void test_streamRowsFromSheet_File_SheetIndex_NoSkip() throws Exception {
         File tempFile = createTempFile(".xlsx");
         List<Object> headers = Arrays.asList("Val");
         List<List<Object>> rows = Arrays.asList(Arrays.asList(1));
-        ExcelUtil.writeSheet("Sheet1", headers, rows, tempFile);
+        ExcelUtil.writeRowsToSheet("Sheet1", headers, rows, tempFile);
 
-        try (Stream<Row> stream = ExcelUtil.streamSheet(tempFile, 0, false)) {
+        try (Stream<Row> stream = ExcelUtil.streamRowsFromSheet(tempFile, 0, false)) {
             long count = stream.count();
             Assertions.assertEquals(2, count);
         }
     }
 
     @Test
-    public void test_streamSheet_File_SheetIndex_NonExistentFile() {
+    public void test_streamRowsFromSheet_File_SheetIndex_NonExistentFile() {
         File nonExistent = new File("./nonexistent_file_12345.xlsx");
         Assertions.assertThrows(UncheckedException.class, () -> {
-            ExcelUtil.streamSheet(nonExistent, 0, false);
+            ExcelUtil.streamRowsFromSheet(nonExistent, 0, false);
         });
     }
 
     @Test
-    public void test_streamSheet_FilterAndMap() throws Exception {
+    public void test_streamRowsFromSheet_FilterAndMap() throws Exception {
         File tempFile = createTempFile(".xlsx");
         List<Object> headers = Arrays.asList("Number");
         List<List<Object>> rows = Arrays.asList(Arrays.asList(10), Arrays.asList(20), Arrays.asList(5));
-        ExcelUtil.writeSheet("Numbers", headers, rows, tempFile);
+        ExcelUtil.writeRowsToSheet("Numbers", headers, rows, tempFile);
 
-        try (Stream<Row> stream = ExcelUtil.streamSheet(tempFile, 0, true)) {
+        try (Stream<Row> stream = ExcelUtil.streamRowsFromSheet(tempFile, 0, true)) {
             long count = stream.filter(row -> row.getCell(0).getNumericCellValue() > 8).count();
             Assertions.assertEquals(2, count);
         }
     }
 
-    // ========== streamSheet(File, String, boolean) ==========
+    // ========== streamRowsFromSheet(File, String, boolean) ==========
 
     @Test
-    public void test_streamSheet_File_SheetName_SkipFirstRow() throws Exception {
+    public void test_streamRowsFromSheet_File_SheetName_SkipFirstRow() throws Exception {
         File tempFile = createTempFile(".xlsx");
         List<Object> headers = Arrays.asList("Item");
         List<List<Object>> rows = Arrays.asList(Arrays.asList("A"), Arrays.asList("B"));
-        ExcelUtil.writeSheet("Items", headers, rows, tempFile);
+        ExcelUtil.writeRowsToSheet("Items", headers, rows, tempFile);
 
-        try (Stream<Row> stream = ExcelUtil.streamSheet(tempFile, "Items", true)) {
+        try (Stream<Row> stream = ExcelUtil.streamRowsFromSheet(tempFile, "Items", true)) {
             long count = stream.count();
             Assertions.assertEquals(2, count);
         }
     }
 
     @Test
-    public void test_streamSheet_File_SheetName_NoSkip() throws Exception {
+    public void test_streamRowsFromSheet_File_SheetName_NoSkip() throws Exception {
         File tempFile = createTempFile(".xlsx");
         List<Object> headers = Arrays.asList("X");
         List<List<Object>> rows = Arrays.asList(Arrays.asList("Y"));
-        ExcelUtil.writeSheet("MySh", headers, rows, tempFile);
+        ExcelUtil.writeRowsToSheet("MySh", headers, rows, tempFile);
 
-        try (Stream<Row> stream = ExcelUtil.streamSheet(tempFile, "MySh", false)) {
+        try (Stream<Row> stream = ExcelUtil.streamRowsFromSheet(tempFile, "MySh", false)) {
             long count = stream.count();
             Assertions.assertEquals(2, count);
         }
     }
 
     @Test
-    public void test_streamSheet_File_SheetName_NotFound() throws Exception {
+    public void test_streamRowsFromSheet_File_SheetName_NotFound() throws Exception {
         File tempFile = createTempFile(".xlsx");
         List<Object> headers = Arrays.asList("A");
         List<List<Object>> rows = Arrays.asList(Arrays.asList("B"));
-        ExcelUtil.writeSheet("RealSheet", headers, rows, tempFile);
+        ExcelUtil.writeRowsToSheet("RealSheet", headers, rows, tempFile);
 
-        Assertions.assertThrows(IllegalArgumentException.class, () -> ExcelUtil.streamSheet(tempFile, "FakeSheet", true));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> ExcelUtil.streamRowsFromSheet(tempFile, "FakeSheet", true));
     }
 
     @Test
-    public void test_streamSheet_File_SheetName_NonExistentFile() {
+    public void test_streamRowsFromSheet_File_SheetName_NonExistentFile() {
         File nonExistent = new File("./nonexistent_file_12345.xlsx");
         Assertions.assertThrows(UncheckedException.class, () -> {
-            ExcelUtil.streamSheet(nonExistent, "Sheet1", false);
+            ExcelUtil.streamRowsFromSheet(nonExistent, "Sheet1", false);
         });
     }
 
@@ -366,9 +398,9 @@ public class ExcelUtilTest extends TestBase {
         File tempFile = createTempFile(".xlsx");
         List<Object> headers = Arrays.asList("Number");
         List<List<Object>> rows = Arrays.asList(Arrays.asList(123.45));
-        ExcelUtil.writeSheet("Sheet1", headers, rows, tempFile);
+        ExcelUtil.writeRowsToSheet("Sheet1", headers, rows, tempFile);
 
-        List<List<Object>> readRows = ExcelUtil.readSheet(tempFile);
+        List<List<Object>> readRows = ExcelUtil.readRowsFromSheet(tempFile);
         Assertions.assertEquals(2, readRows.size());
         Assertions.assertEquals(123.45, readRows.get(1).get(0));
     }
@@ -378,9 +410,9 @@ public class ExcelUtilTest extends TestBase {
         File tempFile = createTempFile(".xlsx");
         List<Object> headers = Arrays.asList("Flag");
         List<List<Object>> rows = Arrays.asList(Arrays.asList(true), Arrays.asList(false));
-        ExcelUtil.writeSheet("Sheet1", headers, rows, tempFile);
+        ExcelUtil.writeRowsToSheet("Sheet1", headers, rows, tempFile);
 
-        List<List<Object>> readRows = ExcelUtil.readSheet(tempFile);
+        List<List<Object>> readRows = ExcelUtil.readRowsFromSheet(tempFile);
         Assertions.assertEquals(3, readRows.size());
         Assertions.assertEquals(true, readRows.get(1).get(0));
         Assertions.assertEquals(false, readRows.get(2).get(0));
@@ -393,9 +425,9 @@ public class ExcelUtilTest extends TestBase {
         File tempFile = createTempFile(".xlsx");
         List<Object> headers = Arrays.asList("Text", "Number", "Bool");
         List<List<Object>> rows = Arrays.asList(Arrays.asList("Hello", 42.5, true));
-        ExcelUtil.writeSheet("Sheet1", headers, rows, tempFile);
+        ExcelUtil.writeRowsToSheet("Sheet1", headers, rows, tempFile);
 
-        List<String> stringRow = ExcelUtil.readSheet(tempFile, 0, true, RowMappers.ROW2STRING);
+        List<String> stringRow = ExcelUtil.readRowsFromSheet(tempFile, 0, true, RowMappers.ROW2STRING);
         Assertions.assertEquals(1, stringRow.size());
         Assertions.assertTrue(stringRow.get(0).contains("Hello"));
     }
@@ -405,10 +437,10 @@ public class ExcelUtilTest extends TestBase {
         File tempFile = createTempFile(".xlsx");
         List<Object> headers = Arrays.asList("S", "N", "B");
         List<List<Object>> rows = Arrays.asList(Arrays.asList("txt", 99.0, false));
-        ExcelUtil.writeSheet("Sheet1", headers, rows, tempFile);
+        ExcelUtil.writeRowsToSheet("Sheet1", headers, rows, tempFile);
 
         Function<Row, List<String>> mapper = RowMappers.toList(ExcelUtil.CELL_TO_STRING);
-        List<List<String>> readRows = ExcelUtil.readSheet(tempFile, 0, true, mapper);
+        List<List<String>> readRows = ExcelUtil.readRowsFromSheet(tempFile, 0, true, mapper);
         Assertions.assertEquals(1, readRows.size());
         Assertions.assertEquals("txt", readRows.get(0).get(0));
         Assertions.assertEquals("99.0", readRows.get(0).get(1));
@@ -428,77 +460,77 @@ public class ExcelUtilTest extends TestBase {
         }
     }
 
-    // ========== writeSheet(String, List, List, File) ==========
+    // ========== writeRowsToSheet(String, List, List, File) ==========
 
     @Test
-    public void test_writeSheet_SheetName_Headers_Rows_File() throws Exception {
+    public void test_writeRowsToSheet_SheetName_Headers_Rows_File() throws Exception {
         File tempFile = createTempFile(".xlsx");
         List<Object> headers = Arrays.asList("Name", "Value");
         List<List<Object>> rows = Arrays.asList(Arrays.asList("Item1", 100), Arrays.asList("Item2", 200));
 
-        ExcelUtil.writeSheet("Data", headers, rows, tempFile);
+        ExcelUtil.writeRowsToSheet("Data", headers, rows, tempFile);
 
-        List<List<Object>> readRows = ExcelUtil.readSheet(tempFile, 0, false, RowMappers.DEFAULT);
+        List<List<Object>> readRows = ExcelUtil.readRowsFromSheet(tempFile, 0, false, RowMappers.DEFAULT);
         Assertions.assertEquals(3, readRows.size());
     }
 
     @Test
-    public void test_writeSheet_EmptyRows() throws Exception {
+    public void test_writeRowsToSheet_EmptyRows() throws Exception {
         File tempFile = createTempFile(".xlsx");
         List<Object> headers = Arrays.asList("Header");
         List<List<Object>> rows = new ArrayList<>();
 
-        ExcelUtil.writeSheet("EmptyData", headers, rows, tempFile);
+        ExcelUtil.writeRowsToSheet("EmptyData", headers, rows, tempFile);
 
-        List<List<Object>> readRows = ExcelUtil.readSheet(tempFile);
+        List<List<Object>> readRows = ExcelUtil.readRowsFromSheet(tempFile);
         Assertions.assertEquals(1, readRows.size());
     }
 
     @Test
-    public void test_writeSheet_XlsFormat() throws Exception {
+    public void test_writeRowsToSheet_XlsFormat() throws Exception {
         File tempFile = createTempFile(".xls");
         List<Object> headers = Arrays.asList("Col1", "Col2");
         List<List<Object>> rows = Arrays.asList(Arrays.asList("A", "B"));
 
-        ExcelUtil.writeSheet("XlsSheet", headers, rows, tempFile);
+        ExcelUtil.writeRowsToSheet("XlsSheet", headers, rows, tempFile);
 
-        Dataset loaded = ExcelUtil.loadSheet(tempFile);
+        Dataset loaded = ExcelUtil.loadDatasetFromSheet(tempFile);
         Assertions.assertEquals(2, loaded.columnCount());
         Assertions.assertEquals(1, loaded.size());
     }
 
-    // ========== writeSheet(String, List, List, SheetCreateOptions, File) ==========
+    // ========== writeRowsToSheet(String, List, List, SheetCreateOptions, File) ==========
 
     @Test
-    public void test_writeSheet_SheetName_Headers_Rows_SheetCreateOptions_File() throws Exception {
+    public void test_writeRowsToSheet_SheetName_Headers_Rows_SheetCreateOptions_File() throws Exception {
         File tempFile = createTempFile(".xlsx");
         List<Object> headers = Arrays.asList("Col1", "Col2");
         List<List<Object>> rows = Arrays.asList(Arrays.asList("A", "B"));
 
         SheetCreateOptions options = SheetCreateOptions.builder().autoSizeColumn(true).freezeFirstRow(true).autoFilterByFirstRow(true).build();
 
-        ExcelUtil.writeSheet("Formatted", headers, rows, options, tempFile);
+        ExcelUtil.writeRowsToSheet("Formatted", headers, rows, options, tempFile);
 
-        List<List<Object>> readRows = ExcelUtil.readSheet(tempFile);
+        List<List<Object>> readRows = ExcelUtil.readRowsFromSheet(tempFile);
         Assertions.assertEquals(2, readRows.size());
     }
 
     @Test
-    public void test_writeSheet_NullSheetCreateOptions() throws Exception {
+    public void test_writeRowsToSheet_NullSheetCreateOptions() throws Exception {
         File tempFile = createTempFile(".xlsx");
         List<Object> headers = Arrays.asList("H");
         List<List<Object>> rows = Arrays.asList(Arrays.asList("V"));
 
-        ExcelUtil.writeSheet("Test", headers, rows, (SheetCreateOptions) null, tempFile);
+        ExcelUtil.writeRowsToSheet("Test", headers, rows, (SheetCreateOptions) null, tempFile);
 
-        List<List<Object>> readRows = ExcelUtil.readSheet(tempFile);
+        List<List<Object>> readRows = ExcelUtil.readRowsFromSheet(tempFile);
         Assertions.assertEquals(2, readRows.size());
     }
 
-    // ========== writeSheet(String, List, List, Consumer, File) ==========
+    // ========== writeRowsToSheet(String, List, List, Consumer, File) ==========
 
     @Test
-    public void test_writeSheet_SheetName_Headers_Rows_SheetSetter_File() throws Exception {
+    public void test_writeRowsToSheet_SheetName_Headers_Rows_SheetSetter_File() throws Exception {
         File tempFile = createTempFile(".xlsx");
         List<Object> headers = Arrays.asList("X");
         List<List<Object>> rows = Arrays.asList(Arrays.asList("Y"));
@@ -507,173 +539,173 @@ public class ExcelUtilTest extends TestBase {
             sheet.setDefaultColumnWidth(20);
         };
 
-        ExcelUtil.writeSheet("Custom", headers, rows, sheetSetter, tempFile);
+        ExcelUtil.writeRowsToSheet("Custom", headers, rows, sheetSetter, tempFile);
 
-        List<List<Object>> readRows = ExcelUtil.readSheet(tempFile);
+        List<List<Object>> readRows = ExcelUtil.readRowsFromSheet(tempFile);
         Assertions.assertEquals(2, readRows.size());
     }
 
     @Test
-    public void test_writeSheet_NullSheetSetter() throws Exception {
+    public void test_writeRowsToSheet_NullSheetSetter() throws Exception {
         File tempFile = createTempFile(".xlsx");
         List<Object> headers = Arrays.asList("H");
         List<List<Object>> rows = Arrays.asList(Arrays.asList("V"));
 
-        ExcelUtil.writeSheet("Test", headers, rows, (Consumer<Sheet>) null, tempFile);
+        ExcelUtil.writeRowsToSheet("Test", headers, rows, (Consumer<Sheet>) null, tempFile);
 
-        List<List<Object>> readRows = ExcelUtil.readSheet(tempFile);
+        List<List<Object>> readRows = ExcelUtil.readRowsFromSheet(tempFile);
         Assertions.assertEquals(2, readRows.size());
     }
 
-    // ========== writeSheet(String, Dataset, File) ==========
+    // ========== writeDatasetToSheet(String, Dataset, File) ==========
 
     @Test
-    public void test_writeSheet_WithDataset() throws Exception {
+    public void test_writeDatasetToSheet_WithDataset() throws Exception {
         File tempFile = createTempFile(".xlsx");
         Dataset dataset = N.newDataset(N.toList("column1", "column2"), N.toList(N.toList("ab", "cd"), N.toList("ef", "gh")));
 
-        ExcelUtil.writeSheet("DatasetSheet", dataset, tempFile);
+        ExcelUtil.writeDatasetToSheet("DatasetSheet", dataset, tempFile);
 
-        Dataset loaded = ExcelUtil.loadSheet(tempFile);
+        Dataset loaded = ExcelUtil.loadDatasetFromSheet(tempFile);
         Assertions.assertEquals(dataset.columnCount(), loaded.columnCount());
         Assertions.assertEquals(dataset.size(), loaded.size());
     }
 
-    // ========== writeSheet(String, Dataset, SheetCreateOptions, File) ==========
+    // ========== writeDatasetToSheet(String, Dataset, SheetCreateOptions, File) ==========
 
     @Test
-    public void test_writeSheet_Dataset_SheetCreateOptions() throws Exception {
+    public void test_writeDatasetToSheet_Dataset_SheetCreateOptions() throws Exception {
         File tempFile = createTempFile(".xlsx");
         Dataset dataset = N.newDataset(N.toList("A", "B"), N.toList(N.toList(1, 2)));
 
         SheetCreateOptions options = SheetCreateOptions.builder().autoSizeColumn(true).build();
 
-        ExcelUtil.writeSheet("DS", dataset, options, tempFile);
+        ExcelUtil.writeDatasetToSheet("DS", dataset, options, tempFile);
 
-        Dataset loaded = ExcelUtil.loadSheet(tempFile);
+        Dataset loaded = ExcelUtil.loadDatasetFromSheet(tempFile);
         Assertions.assertEquals(1, loaded.size());
     }
 
     @Test
-    public void test_writeSheet_Dataset_NullSheetCreateOptions() throws Exception {
+    public void test_writeDatasetToSheet_Dataset_NullSheetCreateOptions() throws Exception {
         File tempFile = createTempFile(".xlsx");
         Dataset dataset = N.newDataset(N.toList("A"), N.toList(N.toList(1)));
 
-        ExcelUtil.writeSheet("DS", dataset, (SheetCreateOptions) null, tempFile);
+        ExcelUtil.writeDatasetToSheet("DS", dataset, (SheetCreateOptions) null, tempFile);
 
-        Dataset loaded = ExcelUtil.loadSheet(tempFile);
+        Dataset loaded = ExcelUtil.loadDatasetFromSheet(tempFile);
         Assertions.assertEquals(1, loaded.size());
     }
 
-    // ========== writeSheet(String, Dataset, Consumer, File) ==========
+    // ========== writeDatasetToSheet(String, Dataset, Consumer, File) ==========
 
     @Test
-    public void test_writeSheet_Dataset_SheetSetter() throws Exception {
+    public void test_writeDatasetToSheet_Dataset_SheetSetter() throws Exception {
         File tempFile = createTempFile(".xlsx");
         Dataset dataset = N.newDataset(N.toList("C"), N.toList(N.toList(3)));
 
         Consumer<Sheet> setter = sheet -> sheet.setDefaultRowHeight((short) 400);
 
-        ExcelUtil.writeSheet("DS2", dataset, setter, tempFile);
+        ExcelUtil.writeDatasetToSheet("DS2", dataset, setter, tempFile);
 
-        Dataset loaded = ExcelUtil.loadSheet(tempFile);
+        Dataset loaded = ExcelUtil.loadDatasetFromSheet(tempFile);
         Assertions.assertEquals(1, loaded.size());
     }
 
     @Test
-    public void test_writeSheet_Dataset_NullSheetSetter() throws Exception {
+    public void test_writeDatasetToSheet_Dataset_NullSheetSetter() throws Exception {
         File tempFile = createTempFile(".xlsx");
         Dataset dataset = N.newDataset(N.toList("C"), N.toList(N.toList(3)));
 
-        ExcelUtil.writeSheet("DS2", dataset, (Consumer<Sheet>) null, tempFile);
+        ExcelUtil.writeDatasetToSheet("DS2", dataset, (Consumer<Sheet>) null, tempFile);
 
-        Dataset loaded = ExcelUtil.loadSheet(tempFile);
+        Dataset loaded = ExcelUtil.loadDatasetFromSheet(tempFile);
         Assertions.assertEquals(1, loaded.size());
     }
 
-    // ========== writeSheet - Various data types ==========
+    // ========== writeRowsToSheet - Various data types ==========
 
     @Test
-    public void test_writeSheet_VariousDataTypes() throws Exception {
+    public void test_writeRowsToSheet_VariousDataTypes() throws Exception {
         File tempFile = createTempFile(".xlsx");
         List<Object> headers = Arrays.asList("String", "Integer", "Double", "Boolean", "Date");
         List<List<Object>> rows = Arrays.asList(Arrays.asList("text", 42, 3.14, true, new Date()));
 
-        ExcelUtil.writeSheet("Types", headers, rows, tempFile);
+        ExcelUtil.writeRowsToSheet("Types", headers, rows, tempFile);
 
-        List<List<Object>> readRows = ExcelUtil.readSheet(tempFile, 0, true, RowMappers.DEFAULT);
+        List<List<Object>> readRows = ExcelUtil.readRowsFromSheet(tempFile, 0, true, RowMappers.DEFAULT);
         Assertions.assertEquals(1, readRows.size());
         Assertions.assertNotNull(readRows.get(0).get(0));
     }
 
     @Test
-    public void test_writeSheet_LocalDateType() throws Exception {
+    public void test_writeRowsToSheet_LocalDateType() throws Exception {
         File tempFile = createTempFile(".xlsx");
         List<Object> headers = Arrays.asList("LocalDate");
         List<List<Object>> rows = Arrays.asList(Arrays.asList(LocalDate.of(2025, 1, 15)));
 
-        ExcelUtil.writeSheet("Dates", headers, rows, tempFile);
+        ExcelUtil.writeRowsToSheet("Dates", headers, rows, tempFile);
 
-        List<List<Object>> readRows = ExcelUtil.readSheet(tempFile, 0, true, RowMappers.DEFAULT);
+        List<List<Object>> readRows = ExcelUtil.readRowsFromSheet(tempFile, 0, true, RowMappers.DEFAULT);
         Assertions.assertEquals(1, readRows.size());
         Assertions.assertNotNull(readRows.get(0).get(0));
     }
 
     @Test
-    public void test_writeSheet_LocalDateTimeType() throws Exception {
+    public void test_writeRowsToSheet_LocalDateTimeType() throws Exception {
         File tempFile = createTempFile(".xlsx");
         List<Object> headers = Arrays.asList("LocalDateTime");
         List<List<Object>> rows = Arrays.asList(Arrays.asList(LocalDateTime.of(2025, 6, 15, 10, 30)));
 
-        ExcelUtil.writeSheet("DateTimes", headers, rows, tempFile);
+        ExcelUtil.writeRowsToSheet("DateTimes", headers, rows, tempFile);
 
-        List<List<Object>> readRows = ExcelUtil.readSheet(tempFile, 0, true, RowMappers.DEFAULT);
+        List<List<Object>> readRows = ExcelUtil.readRowsFromSheet(tempFile, 0, true, RowMappers.DEFAULT);
         Assertions.assertEquals(1, readRows.size());
         Assertions.assertNotNull(readRows.get(0).get(0));
     }
 
     @Test
-    public void test_writeSheet_CalendarType() throws Exception {
+    public void test_writeRowsToSheet_CalendarType() throws Exception {
         File tempFile = createTempFile(".xlsx");
         List<Object> headers = Arrays.asList("Calendar");
         Calendar cal = Calendar.getInstance();
         List<List<Object>> rows = Arrays.asList(Arrays.asList(cal));
 
-        ExcelUtil.writeSheet("Calendars", headers, rows, tempFile);
+        ExcelUtil.writeRowsToSheet("Calendars", headers, rows, tempFile);
 
-        List<List<Object>> readRows = ExcelUtil.readSheet(tempFile, 0, true, RowMappers.DEFAULT);
+        List<List<Object>> readRows = ExcelUtil.readRowsFromSheet(tempFile, 0, true, RowMappers.DEFAULT);
         Assertions.assertEquals(1, readRows.size());
         Assertions.assertNotNull(readRows.get(0).get(0));
     }
 
     @Test
-    public void test_writeSheet_NullCellValue() throws Exception {
+    public void test_writeRowsToSheet_NullCellValue() throws Exception {
         File tempFile = createTempFile(".xlsx");
         List<Object> headers = Arrays.asList("Col1", "Col2");
         List<List<Object>> rows = Arrays.asList(Arrays.asList("NotNull", null), Arrays.asList(null, "AlsoNotNull"));
 
-        ExcelUtil.writeSheet("Nulls", headers, rows, tempFile);
+        ExcelUtil.writeRowsToSheet("Nulls", headers, rows, tempFile);
 
-        List<List<Object>> readRows = ExcelUtil.readSheet(tempFile, 0, true, RowMappers.DEFAULT);
+        List<List<Object>> readRows = ExcelUtil.readRowsFromSheet(tempFile, 0, true, RowMappers.DEFAULT);
         Assertions.assertEquals(2, readRows.size());
     }
 
     @Test
-    public void test_writeSheet_LongType() throws Exception {
+    public void test_writeRowsToSheet_LongType() throws Exception {
         File tempFile = createTempFile(".xlsx");
         List<Object> headers = Arrays.asList("LongVal");
         List<List<Object>> rows = Arrays.asList(Arrays.asList(123456789L));
 
-        ExcelUtil.writeSheet("Longs", headers, rows, tempFile);
+        ExcelUtil.writeRowsToSheet("Longs", headers, rows, tempFile);
 
-        List<List<Object>> readRows = ExcelUtil.readSheet(tempFile, 0, true, RowMappers.DEFAULT);
+        List<List<Object>> readRows = ExcelUtil.readRowsFromSheet(tempFile, 0, true, RowMappers.DEFAULT);
         Assertions.assertEquals(1, readRows.size());
         // Long written as double
         Assertions.assertEquals(1.23456789E8, readRows.get(0).get(0));
     }
 
     @Test
-    public void test_writeSheet_CustomObjectType() throws Exception {
+    public void test_writeRowsToSheet_CustomObjectType() throws Exception {
         File tempFile = createTempFile(".xlsx");
         List<Object> headers = Arrays.asList("Obj");
         // An object that is not a recognized type - should be converted via N.stringOf
@@ -685,52 +717,52 @@ public class ExcelUtilTest extends TestBase {
         };
         List<List<Object>> rows = Arrays.asList(Arrays.asList(customObj));
 
-        ExcelUtil.writeSheet("Custom", headers, rows, tempFile);
+        ExcelUtil.writeRowsToSheet("Custom", headers, rows, tempFile);
 
-        List<List<Object>> readRows = ExcelUtil.readSheet(tempFile, 0, true, RowMappers.DEFAULT);
+        List<List<Object>> readRows = ExcelUtil.readRowsFromSheet(tempFile, 0, true, RowMappers.DEFAULT);
         Assertions.assertEquals(1, readRows.size());
         Assertions.assertTrue(readRows.get(0).get(0).toString().contains("CustomToString"));
     }
 
     @Test
-    public void test_writeSheet_SpecialCharacters() throws Exception {
+    public void test_writeRowsToSheet_SpecialCharacters() throws Exception {
         File tempFile = createTempFile(".xlsx");
         List<Object> headers = Arrays.asList("Special");
         List<List<Object>> rows = Arrays.asList(Arrays.asList("Hello, \"World\""), Arrays.asList("Line1\nLine2"), Arrays.asList("Tab\there"));
 
-        ExcelUtil.writeSheet("Special", headers, rows, tempFile);
+        ExcelUtil.writeRowsToSheet("Special", headers, rows, tempFile);
 
-        List<List<Object>> readRows = ExcelUtil.readSheet(tempFile, 0, true, RowMappers.DEFAULT);
+        List<List<Object>> readRows = ExcelUtil.readRowsFromSheet(tempFile, 0, true, RowMappers.DEFAULT);
         Assertions.assertEquals(3, readRows.size());
     }
 
-    // ========== writeSheet with FreezePane ==========
+    // ========== writeRowsToSheet with FreezePane ==========
 
     @Test
-    public void test_writeSheet_WithFreezePane() throws Exception {
+    public void test_writeRowsToSheet_WithFreezePane() throws Exception {
         File tempFile = createTempFile(".xlsx");
         List<Object> headers = Arrays.asList("A", "B", "C");
         List<List<Object>> rows = Arrays.asList(Arrays.asList(1, 2, 3));
 
         SheetCreateOptions options = SheetCreateOptions.builder().freezePane(new FreezePane(1, 1)).build();
 
-        ExcelUtil.writeSheet("Frozen", headers, rows, options, tempFile);
+        ExcelUtil.writeRowsToSheet("Frozen", headers, rows, options, tempFile);
 
-        List<List<Object>> readRows = ExcelUtil.readSheet(tempFile);
+        List<List<Object>> readRows = ExcelUtil.readRowsFromSheet(tempFile);
         Assertions.assertEquals(2, readRows.size());
     }
 
     @Test
-    public void test_writeSheet_WithAutoFilter() throws Exception {
+    public void test_writeRowsToSheet_WithAutoFilter() throws Exception {
         File tempFile = createTempFile(".xlsx");
         List<Object> headers = Arrays.asList("H1", "H2");
         List<List<Object>> rows = Arrays.asList(Arrays.asList("v1", "v2"));
 
         SheetCreateOptions options = SheetCreateOptions.builder().autoFilter(new CellRangeAddress(0, 0, 0, 1)).build();
 
-        ExcelUtil.writeSheet("Filtered", headers, rows, options, tempFile);
+        ExcelUtil.writeRowsToSheet("Filtered", headers, rows, options, tempFile);
 
-        List<List<Object>> readRows = ExcelUtil.readSheet(tempFile);
+        List<List<Object>> readRows = ExcelUtil.readRowsFromSheet(tempFile);
         Assertions.assertEquals(2, readRows.size());
     }
 
@@ -741,9 +773,9 @@ public class ExcelUtilTest extends TestBase {
         File tempFile = createTempFile(".xlsx");
         List<Object> headers = Arrays.asList("A", "B");
         List<List<Object>> rows = Arrays.asList(Arrays.asList("x", 1));
-        ExcelUtil.writeSheet("Sheet1", headers, rows, tempFile);
+        ExcelUtil.writeRowsToSheet("Sheet1", headers, rows, tempFile);
 
-        List<List<Object>> readRows = ExcelUtil.readSheet(tempFile, 0, true, RowMappers.DEFAULT);
+        List<List<Object>> readRows = ExcelUtil.readRowsFromSheet(tempFile, 0, true, RowMappers.DEFAULT);
         Assertions.assertEquals(1, readRows.size());
         Assertions.assertEquals("x", readRows.get(0).get(0));
     }
@@ -753,9 +785,9 @@ public class ExcelUtilTest extends TestBase {
         File tempFile = createTempFile(".xlsx");
         List<Object> headers = Arrays.asList("A");
         List<List<Object>> rows = Arrays.asList(Arrays.asList("test"));
-        ExcelUtil.writeSheet("Sheet1", headers, rows, tempFile);
+        ExcelUtil.writeRowsToSheet("Sheet1", headers, rows, tempFile);
 
-        List<String> stringRows = ExcelUtil.readSheet(tempFile, 0, true, RowMappers.ROW2STRING);
+        List<String> stringRows = ExcelUtil.readRowsFromSheet(tempFile, 0, true, RowMappers.ROW2STRING);
         Assertions.assertEquals(1, stringRows.size());
         Assertions.assertTrue(stringRows.get(0).contains("test"));
     }
@@ -765,10 +797,10 @@ public class ExcelUtilTest extends TestBase {
         File tempFile = createTempFile(".xlsx");
         List<Object> headers = Arrays.asList("A", "B");
         List<List<Object>> rows = Arrays.asList(Arrays.asList("one", "two"));
-        ExcelUtil.writeSheet("Sheet1", headers, rows, tempFile);
+        ExcelUtil.writeRowsToSheet("Sheet1", headers, rows, tempFile);
 
         Function<Row, String> mapper = RowMappers.toDelimitedString("|");
-        List<String> stringRows = ExcelUtil.readSheet(tempFile, 0, true, mapper);
+        List<String> stringRows = ExcelUtil.readRowsFromSheet(tempFile, 0, true, mapper);
         Assertions.assertEquals(1, stringRows.size());
         Assertions.assertTrue(stringRows.get(0).contains("|"));
     }
@@ -778,11 +810,11 @@ public class ExcelUtilTest extends TestBase {
         File tempFile = createTempFile(".xlsx");
         List<Object> headers = Arrays.asList("A", "B");
         List<List<Object>> rows = Arrays.asList(Arrays.asList(1, 2));
-        ExcelUtil.writeSheet("Sheet1", headers, rows, tempFile);
+        ExcelUtil.writeRowsToSheet("Sheet1", headers, rows, tempFile);
 
         Function<Cell, String> cellMapper = cell -> "VAL";
         Function<Row, String> mapper = RowMappers.toDelimitedString(",", cellMapper);
-        List<String> stringRows = ExcelUtil.readSheet(tempFile, 0, true, mapper);
+        List<String> stringRows = ExcelUtil.readRowsFromSheet(tempFile, 0, true, mapper);
         Assertions.assertEquals(1, stringRows.size());
         Assertions.assertEquals("VAL,VAL", stringRows.get(0));
     }
@@ -792,10 +824,10 @@ public class ExcelUtilTest extends TestBase {
         File tempFile = createTempFile(".xlsx");
         List<Object> headers = Arrays.asList("A", "B");
         List<List<Object>> rows = Arrays.asList(Arrays.asList("x", "y"));
-        ExcelUtil.writeSheet("Sheet1", headers, rows, tempFile);
+        ExcelUtil.writeRowsToSheet("Sheet1", headers, rows, tempFile);
 
         Function<Row, String> mapper = RowMappers.toDelimitedString("");
-        List<String> stringRows = ExcelUtil.readSheet(tempFile, 0, true, mapper);
+        List<String> stringRows = ExcelUtil.readRowsFromSheet(tempFile, 0, true, mapper);
         Assertions.assertEquals(1, stringRows.size());
         Assertions.assertEquals("xy", stringRows.get(0));
     }
@@ -805,7 +837,7 @@ public class ExcelUtilTest extends TestBase {
         File tempFile = createTempFile(".xlsx");
         List<Object> headers = Arrays.asList("Num");
         List<List<Object>> rows = Arrays.asList(Arrays.asList(42));
-        ExcelUtil.writeSheet("Sheet1", headers, rows, tempFile);
+        ExcelUtil.writeRowsToSheet("Sheet1", headers, rows, tempFile);
 
         Function<Cell, Integer> cellMapper = cell -> {
             if (cell.getCellType() == CellType.NUMERIC) {
@@ -814,7 +846,7 @@ public class ExcelUtilTest extends TestBase {
             return 0;
         };
         Function<Row, List<Integer>> mapper = RowMappers.toList(cellMapper);
-        List<List<Integer>> intRows = ExcelUtil.readSheet(tempFile, 0, true, mapper);
+        List<List<Integer>> intRows = ExcelUtil.readRowsFromSheet(tempFile, 0, true, mapper);
         Assertions.assertEquals(1, intRows.size());
         Assertions.assertEquals(42, intRows.get(0).get(0));
     }
@@ -824,10 +856,10 @@ public class ExcelUtilTest extends TestBase {
         File tempFile = createTempFile(".xlsx");
         List<Object> headers = Arrays.asList("A", "B", "C");
         List<List<Object>> rows = Arrays.asList(Arrays.asList("x", "y", "z"));
-        ExcelUtil.writeSheet("Sheet1", headers, rows, tempFile);
+        ExcelUtil.writeRowsToSheet("Sheet1", headers, rows, tempFile);
 
         Function<Row, List<String>> mapper = RowMappers.toList(ExcelUtil.CELL_TO_STRING);
-        List<List<String>> stringRows = ExcelUtil.readSheet(tempFile, 0, true, mapper);
+        List<List<String>> stringRows = ExcelUtil.readRowsFromSheet(tempFile, 0, true, mapper);
         Assertions.assertEquals(1, stringRows.size());
         Assertions.assertEquals(3, stringRows.get(0).size());
         Assertions.assertEquals("x", stringRows.get(0).get(0));
@@ -841,9 +873,9 @@ public class ExcelUtilTest extends TestBase {
         File tempFile = createTempFile(".xlsx");
         List<Object> headers = Arrays.asList("Col");
         List<List<Object>> rows = Arrays.asList(Arrays.asList("val"));
-        ExcelUtil.writeSheet("Sheet1", headers, rows, tempFile);
+        ExcelUtil.writeRowsToSheet("Sheet1", headers, rows, tempFile);
 
-        Dataset dataset = ExcelUtil.loadSheet(tempFile, 0, RowExtractors.DEFAULT);
+        Dataset dataset = ExcelUtil.loadDatasetFromSheet(tempFile, 0, RowExtractors.DEFAULT);
         Assertions.assertEquals(1, dataset.size());
     }
 
@@ -852,11 +884,11 @@ public class ExcelUtilTest extends TestBase {
         File tempFile = createTempFile(".xlsx");
         List<Object> headers = Arrays.asList("A");
         List<List<Object>> rows = Arrays.asList(Arrays.asList("text"));
-        ExcelUtil.writeSheet("Sheet1", headers, rows, tempFile);
+        ExcelUtil.writeRowsToSheet("Sheet1", headers, rows, tempFile);
 
         Function<Cell, String> cellMapper = cell -> "PREFIX_" + ExcelUtil.CELL_TO_STRING.apply(cell);
         TriConsumer<String[], Row, Object[]> extractor = RowExtractors.create(cellMapper);
-        Dataset dataset = ExcelUtil.loadSheet(tempFile, 0, extractor);
+        Dataset dataset = ExcelUtil.loadDatasetFromSheet(tempFile, 0, extractor);
         Assertions.assertEquals("PREFIX_text", dataset.get(0, 0));
     }
 
@@ -866,10 +898,10 @@ public class ExcelUtilTest extends TestBase {
         List<Object> headers = Arrays.asList("A", "B");
         // Write row with null in second column - this creates a blank cell
         List<List<Object>> rows = Arrays.asList(Arrays.asList("text", null));
-        ExcelUtil.writeSheet("Sheet1", headers, rows, tempFile);
+        ExcelUtil.writeRowsToSheet("Sheet1", headers, rows, tempFile);
 
         TriConsumer<String[], Row, Object[]> extractor = RowExtractors.create(ExcelUtil.CELL_GETTER);
-        Dataset dataset = ExcelUtil.loadSheet(tempFile, 0, extractor);
+        Dataset dataset = ExcelUtil.loadDatasetFromSheet(tempFile, 0, extractor);
         Assertions.assertEquals(1, dataset.size());
     }
 
@@ -887,9 +919,9 @@ public class ExcelUtilTest extends TestBase {
                 .autoFilterByFirstRow(false)
                 .build();
 
-        ExcelUtil.writeSheet("Options", headers, rows, options, tempFile);
+        ExcelUtil.writeRowsToSheet("Options", headers, rows, options, tempFile);
 
-        List<List<Object>> readRows = ExcelUtil.readSheet(tempFile);
+        List<List<Object>> readRows = ExcelUtil.readRowsFromSheet(tempFile);
         Assertions.assertEquals(2, readRows.size());
     }
 
@@ -901,9 +933,9 @@ public class ExcelUtilTest extends TestBase {
 
         SheetCreateOptions options = SheetCreateOptions.builder().autoSizeColumn(true).build();
 
-        ExcelUtil.writeSheet("Auto", headers, rows, options, tempFile);
+        ExcelUtil.writeRowsToSheet("Auto", headers, rows, options, tempFile);
 
-        List<List<Object>> readRows = ExcelUtil.readSheet(tempFile);
+        List<List<Object>> readRows = ExcelUtil.readRowsFromSheet(tempFile);
         Assertions.assertEquals(2, readRows.size());
     }
 
@@ -915,9 +947,9 @@ public class ExcelUtilTest extends TestBase {
 
         SheetCreateOptions options = SheetCreateOptions.builder().freezeFirstRow(true).build();
 
-        ExcelUtil.writeSheet("Freeze", headers, rows, options, tempFile);
+        ExcelUtil.writeRowsToSheet("Freeze", headers, rows, options, tempFile);
 
-        List<List<Object>> readRows = ExcelUtil.readSheet(tempFile);
+        List<List<Object>> readRows = ExcelUtil.readRowsFromSheet(tempFile);
         Assertions.assertEquals(2, readRows.size());
     }
 
@@ -929,9 +961,9 @@ public class ExcelUtilTest extends TestBase {
 
         SheetCreateOptions options = SheetCreateOptions.builder().autoFilterByFirstRow(true).build();
 
-        ExcelUtil.writeSheet("FilterSheet", headers, rows, options, tempFile);
+        ExcelUtil.writeRowsToSheet("FilterSheet", headers, rows, options, tempFile);
 
-        List<List<Object>> readRows = ExcelUtil.readSheet(tempFile);
+        List<List<Object>> readRows = ExcelUtil.readRowsFromSheet(tempFile);
         Assertions.assertEquals(2, readRows.size());
     }
 
@@ -947,9 +979,9 @@ public class ExcelUtilTest extends TestBase {
                 .freezeFirstRow(true) // should be ignored
                 .build();
 
-        ExcelUtil.writeSheet("Precedence", headers, rows, options, tempFile);
+        ExcelUtil.writeRowsToSheet("Precedence", headers, rows, options, tempFile);
 
-        List<List<Object>> readRows = ExcelUtil.readSheet(tempFile);
+        List<List<Object>> readRows = ExcelUtil.readRowsFromSheet(tempFile);
         Assertions.assertEquals(2, readRows.size());
     }
 
@@ -965,9 +997,9 @@ public class ExcelUtilTest extends TestBase {
                 .autoFilterByFirstRow(true) // should be ignored
                 .build();
 
-        ExcelUtil.writeSheet("Precedence", headers, rows, options, tempFile);
+        ExcelUtil.writeRowsToSheet("Precedence", headers, rows, options, tempFile);
 
-        List<List<Object>> readRows = ExcelUtil.readSheet(tempFile);
+        List<List<Object>> readRows = ExcelUtil.readRowsFromSheet(tempFile);
         Assertions.assertEquals(2, readRows.size());
     }
 
@@ -982,7 +1014,7 @@ public class ExcelUtilTest extends TestBase {
         FreezePane freezePane = new FreezePane(0, 0);
         SheetCreateOptions options = SheetCreateOptions.builder().freezePane(freezePane).build();
 
-        ExcelUtil.writeSheet("NFreeze", headers, rows, options, tempFile);
+        ExcelUtil.writeRowsToSheet("NFreeze", headers, rows, options, tempFile);
 
         Assertions.assertEquals(0, freezePane.colSplit());
         Assertions.assertEquals(0, freezePane.rowSplit());
@@ -997,7 +1029,7 @@ public class ExcelUtilTest extends TestBase {
         FreezePane freezePane = new FreezePane(2, 0);
         SheetCreateOptions options = SheetCreateOptions.builder().freezePane(freezePane).build();
 
-        ExcelUtil.writeSheet("ColFreeze", headers, rows, options, tempFile);
+        ExcelUtil.writeRowsToSheet("ColFreeze", headers, rows, options, tempFile);
 
         Assertions.assertEquals(2, freezePane.colSplit());
         Assertions.assertEquals(0, freezePane.rowSplit());
@@ -1012,7 +1044,7 @@ public class ExcelUtilTest extends TestBase {
         FreezePane freezePane = new FreezePane(0, 2);
         SheetCreateOptions options = SheetCreateOptions.builder().freezePane(freezePane).build();
 
-        ExcelUtil.writeSheet("RowFreeze", headers, rows, options, tempFile);
+        ExcelUtil.writeRowsToSheet("RowFreeze", headers, rows, options, tempFile);
 
         Assertions.assertEquals(0, freezePane.colSplit());
         Assertions.assertEquals(2, freezePane.rowSplit());
@@ -1026,8 +1058,8 @@ public class ExcelUtilTest extends TestBase {
         Dataset original = N.newDataset(N.toList("name", "value", "flag"),
                 N.toList(N.toList("A", 10, true), N.toList("B", 20, false), N.toList("C", 30, true)));
 
-        ExcelUtil.writeSheet("Data", original, tempFile);
-        Dataset loaded = ExcelUtil.loadSheet(tempFile);
+        ExcelUtil.writeDatasetToSheet("Data", original, tempFile);
+        Dataset loaded = ExcelUtil.loadDatasetFromSheet(tempFile);
 
         Assertions.assertEquals(original.columnCount(), loaded.columnCount());
         Assertions.assertEquals(original.size(), loaded.size());
@@ -1039,10 +1071,10 @@ public class ExcelUtilTest extends TestBase {
         File excelFile = createTempFile(".xlsx");
         List<Object> headers = Arrays.asList("X", "Y");
         List<List<Object>> rows = Arrays.asList(Arrays.asList(1, 2), Arrays.asList(3, 4));
-        ExcelUtil.writeSheet("Numbers", headers, rows, excelFile);
+        ExcelUtil.writeRowsToSheet("Numbers", headers, rows, excelFile);
 
         File csvFile = createTempFile(".csv");
-        ExcelUtil.saveSheetAsCsv(excelFile, 0, csvFile);
+        ExcelUtil.exportSheetToCsv(excelFile, 0, csvFile);
 
         Dataset dataset = CsvUtil.load(csvFile);
         Assertions.assertEquals(2, dataset.columnCount());
@@ -1054,9 +1086,9 @@ public class ExcelUtilTest extends TestBase {
         File xlsFile = createTempFile(".xls");
         List<Object> headers = Arrays.asList("Name", "Score");
         List<List<Object>> rows = Arrays.asList(Arrays.asList("Alice", 95), Arrays.asList("Bob", 87));
-        ExcelUtil.writeSheet("Scores", headers, rows, xlsFile);
+        ExcelUtil.writeRowsToSheet("Scores", headers, rows, xlsFile);
 
-        Dataset loaded = ExcelUtil.loadSheet(xlsFile);
+        Dataset loaded = ExcelUtil.loadDatasetFromSheet(xlsFile);
         Assertions.assertEquals(2, loaded.columnCount());
         Assertions.assertEquals(2, loaded.size());
     }
@@ -1069,9 +1101,9 @@ public class ExcelUtilTest extends TestBase {
 
         List<Object> headers1 = Arrays.asList("Sheet1Col");
         List<List<Object>> rows1 = Arrays.asList(Arrays.asList("S1Data"));
-        ExcelUtil.writeSheet("FirstSheet", headers1, rows1, tempFile);
+        ExcelUtil.writeRowsToSheet("FirstSheet", headers1, rows1, tempFile);
 
-        Dataset ds1 = ExcelUtil.loadSheet(tempFile, "FirstSheet", RowExtractors.DEFAULT);
+        Dataset ds1 = ExcelUtil.loadDatasetFromSheet(tempFile, "FirstSheet", RowExtractors.DEFAULT);
         Assertions.assertEquals(1, ds1.columnCount());
         Assertions.assertEquals("Sheet1Col", ds1.getColumnName(0));
     }
@@ -1086,9 +1118,9 @@ public class ExcelUtilTest extends TestBase {
             rows.add(Arrays.asList(i, "Name" + i, i * 10));
         }
 
-        ExcelUtil.writeSheet("Large", headers, rows, tempFile);
+        ExcelUtil.writeRowsToSheet("Large", headers, rows, tempFile);
 
-        List<List<Object>> readRows = ExcelUtil.readSheet(tempFile, 0, true, RowMappers.DEFAULT);
+        List<List<Object>> readRows = ExcelUtil.readRowsFromSheet(tempFile, 0, true, RowMappers.DEFAULT);
         Assertions.assertEquals(100, readRows.size());
     }
 
@@ -1102,9 +1134,9 @@ public class ExcelUtilTest extends TestBase {
             rows.add(Arrays.asList(i));
         }
 
-        ExcelUtil.writeSheet("Stream", headers, rows, tempFile);
+        ExcelUtil.writeRowsToSheet("Stream", headers, rows, tempFile);
 
-        try (Stream<Row> stream = ExcelUtil.streamSheet(tempFile, 0, true)) {
+        try (Stream<Row> stream = ExcelUtil.streamRowsFromSheet(tempFile, 0, true)) {
             long sum = stream.mapToLong(row -> (long) row.getCell(0).getNumericCellValue()).sum();
             Assertions.assertEquals(1275, sum);
         }
@@ -1115,9 +1147,9 @@ public class ExcelUtilTest extends TestBase {
         File tempFile = createTempFile(".xlsx");
         List<Object> headers = Arrays.asList("Name");
         List<List<Object>> rows = Arrays.asList(Arrays.asList("Alice"), Arrays.asList("Bob"));
-        ExcelUtil.writeSheet("Sheet1", headers, rows, tempFile);
+        ExcelUtil.writeRowsToSheet("Sheet1", headers, rows, tempFile);
 
-        try (Stream<Row> stream = ExcelUtil.streamSheet(tempFile, 0, true)) {
+        try (Stream<Row> stream = ExcelUtil.streamRowsFromSheet(tempFile, 0, true)) {
             List<String> names = stream.map(row -> row.getCell(0).getStringCellValue()).toList();
             Assertions.assertEquals(2, names.size());
             Assertions.assertEquals("Alice", names.get(0));
@@ -1125,42 +1157,42 @@ public class ExcelUtilTest extends TestBase {
         }
     }
 
-    // ========== Dataset writeSheet with XLS format ==========
+    // ========== Dataset writeDatasetToSheet with XLS format ==========
 
     @Test
-    public void test_writeSheet_Dataset_XlsFormat() throws Exception {
+    public void test_writeDatasetToSheet_Dataset_XlsFormat() throws Exception {
         File tempFile = createTempFile(".xls");
         Dataset dataset = N.newDataset(N.toList("A"), N.toList(N.toList("val")));
-        ExcelUtil.writeSheet("XlsDS", dataset, tempFile);
+        ExcelUtil.writeDatasetToSheet("XlsDS", dataset, tempFile);
 
-        Dataset loaded = ExcelUtil.loadSheet(tempFile);
+        Dataset loaded = ExcelUtil.loadDatasetFromSheet(tempFile);
         Assertions.assertEquals(1, loaded.columnCount());
         Assertions.assertEquals(1, loaded.size());
     }
 
     @Test
-    public void test_writeSheet_StringifiesUnsupportedCellValue() throws Exception {
+    public void test_writeRowsToSheet_StringifiesUnsupportedCellValue() throws Exception {
         File tempFile = createTempFile(".xlsx");
         List<Object> headers = Arrays.asList("Custom");
         List<List<Object>> rows = Arrays.asList(Arrays.asList(new StringBuilder("builder-value")));
 
-        ExcelUtil.writeSheet("Sheet1", headers, rows, tempFile);
+        ExcelUtil.writeRowsToSheet("Sheet1", headers, rows, tempFile);
 
-        List<List<Object>> readRows = ExcelUtil.readSheet(tempFile);
+        List<List<Object>> readRows = ExcelUtil.readRowsFromSheet(tempFile);
         Assertions.assertEquals("builder-value", readRows.get(1).get(0));
     }
 
-    // ========== saveSheetAsCsv(File, int, File) ==========
+    // ========== exportSheetToCsv(File, int, File) ==========
 
     @Test
-    public void test_saveSheetAsCsv_File_SheetIndex_CsvFile() throws Exception {
+    public void test_exportSheetToCsv_File_SheetIndex_CsvFile() throws Exception {
         File excelFile = createTempFile(".xlsx");
         List<Object> headers = Arrays.asList("Name", "Age");
         List<List<Object>> rows = Arrays.asList(Arrays.asList("John", 30));
-        ExcelUtil.writeSheet("People", headers, rows, excelFile);
+        ExcelUtil.writeRowsToSheet("People", headers, rows, excelFile);
 
         File csvFile = createTempFile(".csv");
-        ExcelUtil.saveSheetAsCsv(excelFile, 0, csvFile);
+        ExcelUtil.exportSheetToCsv(excelFile, 0, csvFile);
 
         Assertions.assertTrue(csvFile.exists());
         String content = IOUtil.readAllToString(csvFile);
@@ -1169,25 +1201,25 @@ public class ExcelUtilTest extends TestBase {
     }
 
     @Test
-    public void test_saveSheetAsCsv_NonExistentFile() {
+    public void test_exportSheetToCsv_NonExistentFile() {
         File nonExistent = new File("./nonexistent_file_12345.xlsx");
         File csvFile = new File("./temp.csv");
         Assertions.assertThrows(UncheckedException.class, () -> {
-            ExcelUtil.saveSheetAsCsv(nonExistent, 0, csvFile);
+            ExcelUtil.exportSheetToCsv(nonExistent, 0, csvFile);
         });
     }
 
-    // ========== saveSheetAsCsv(File, String, File) ==========
+    // ========== exportSheetToCsv(File, String, File) ==========
 
     @Test
-    public void test_saveSheetAsCsv_File_SheetName_CsvFile() throws Exception {
+    public void test_exportSheetToCsv_File_SheetName_CsvFile() throws Exception {
         File excelFile = createTempFile(".xlsx");
         List<Object> headers = Arrays.asList("Product");
         List<List<Object>> rows = Arrays.asList(Arrays.asList("Widget"));
-        ExcelUtil.writeSheet("Products", headers, rows, excelFile);
+        ExcelUtil.writeRowsToSheet("Products", headers, rows, excelFile);
 
         File csvFile = createTempFile(".csv");
-        ExcelUtil.saveSheetAsCsv(excelFile, "Products", csvFile);
+        ExcelUtil.exportSheetToCsv(excelFile, "Products", csvFile);
 
         Assertions.assertTrue(csvFile.exists());
         String content = IOUtil.readAllToString(csvFile);
@@ -1195,29 +1227,29 @@ public class ExcelUtilTest extends TestBase {
     }
 
     @Test
-    public void test_saveSheetAsCsv_File_SheetName_NotFound() throws Exception {
+    public void test_exportSheetToCsv_File_SheetName_NotFound() throws Exception {
         File excelFile = createTempFile(".xlsx");
         List<Object> headers = Arrays.asList("A");
         List<List<Object>> rows = Arrays.asList(Arrays.asList("B"));
-        ExcelUtil.writeSheet("RealSheet", headers, rows, excelFile);
+        ExcelUtil.writeRowsToSheet("RealSheet", headers, rows, excelFile);
 
         File csvFile = createTempFile(".csv");
-        Assertions.assertThrows(IllegalArgumentException.class, () -> ExcelUtil.saveSheetAsCsv(excelFile, "FakeSheet", csvFile));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> ExcelUtil.exportSheetToCsv(excelFile, "FakeSheet", csvFile));
     }
 
-    // ========== saveSheetAsCsv(File, int, List, Writer) ==========
+    // ========== exportSheetToCsv(File, int, List, Writer) ==========
 
     @Test
-    public void test_saveSheetAsCsv_File_SheetIndex_CustomHeaders_Writer() throws Exception {
+    public void test_exportSheetToCsv_File_SheetIndex_CustomHeaders_Writer() throws Exception {
         File excelFile = createTempFile(".xlsx");
         List<Object> headers = Arrays.asList("A", "B");
         List<List<Object>> rows = Arrays.asList(Arrays.asList(1, 2));
-        ExcelUtil.writeSheet("Data", headers, rows, excelFile);
+        ExcelUtil.writeRowsToSheet("Data", headers, rows, excelFile);
 
         File csvFile = createTempFile(".csv");
         List<String> customHeaders = Arrays.asList("Column1", "Column2");
         try (FileWriter newFileWriter = IOUtil.newFileWriter(csvFile, StandardCharsets.UTF_8)) {
-            ExcelUtil.saveSheetAsCsv(excelFile, 0, customHeaders, newFileWriter);
+            ExcelUtil.exportSheetToCsv(excelFile, 0, customHeaders, newFileWriter);
         }
 
         String content = IOUtil.readAllToString(csvFile);
@@ -1226,14 +1258,14 @@ public class ExcelUtilTest extends TestBase {
     }
 
     @Test
-    public void test_saveSheetAsCsv_File_SheetIndex_NullHeaders_Writer() throws Exception {
+    public void test_exportSheetToCsv_File_SheetIndex_NullHeaders_Writer() throws Exception {
         File excelFile = createTempFile(".xlsx");
         List<Object> headers = Arrays.asList("Original");
         List<List<Object>> rows = Arrays.asList(Arrays.asList("data"));
-        ExcelUtil.writeSheet("Sheet1", headers, rows, excelFile);
+        ExcelUtil.writeRowsToSheet("Sheet1", headers, rows, excelFile);
 
         StringWriter sw = new StringWriter();
-        ExcelUtil.saveSheetAsCsv(excelFile, 0, null, sw);
+        ExcelUtil.exportSheetToCsv(excelFile, 0, null, sw);
 
         String content = sw.toString();
         Assertions.assertTrue(content.contains("Original"));
@@ -1241,33 +1273,33 @@ public class ExcelUtilTest extends TestBase {
     }
 
     @Test
-    public void test_saveSheetAsCsv_File_SheetIndex_BooleanValues() throws Exception {
+    public void test_exportSheetToCsv_File_SheetIndex_BooleanValues() throws Exception {
         File excelFile = createTempFile(".xlsx");
         List<Object> headers = Arrays.asList("Flag");
         List<List<Object>> rows = Arrays.asList(Arrays.asList(true), Arrays.asList(false));
-        ExcelUtil.writeSheet("Sheet1", headers, rows, excelFile);
+        ExcelUtil.writeRowsToSheet("Sheet1", headers, rows, excelFile);
 
         StringWriter sw = new StringWriter();
-        ExcelUtil.saveSheetAsCsv(excelFile, 0, null, sw);
+        ExcelUtil.exportSheetToCsv(excelFile, 0, null, sw);
 
         String content = sw.toString();
         Assertions.assertTrue(content.contains("true"));
         Assertions.assertTrue(content.contains("false"));
     }
 
-    // ========== saveSheetAsCsv(File, String, List, Writer) ==========
+    // ========== exportSheetToCsv(File, String, List, Writer) ==========
 
     @Test
-    public void test_saveSheetAsCsv_File_SheetName_CustomHeaders_Writer() throws Exception {
+    public void test_exportSheetToCsv_File_SheetName_CustomHeaders_Writer() throws Exception {
         File excelFile = createTempFile(".xlsx");
         List<Object> headers = Arrays.asList("X");
         List<List<Object>> rows = Arrays.asList(Arrays.asList("Y"));
-        ExcelUtil.writeSheet("TestSheet", headers, rows, excelFile);
+        ExcelUtil.writeRowsToSheet("TestSheet", headers, rows, excelFile);
 
         File csvFile = createTempFile(".csv");
         List<String> customHeaders = Arrays.asList("Custom");
         try (FileWriter newFileWriter = IOUtil.newFileWriter(csvFile, Charsets.UTF_8)) {
-            ExcelUtil.saveSheetAsCsv(excelFile, "TestSheet", customHeaders, newFileWriter);
+            ExcelUtil.exportSheetToCsv(excelFile, "TestSheet", customHeaders, newFileWriter);
         }
 
         String content = IOUtil.readAllToString(csvFile);
@@ -1275,14 +1307,14 @@ public class ExcelUtilTest extends TestBase {
     }
 
     @Test
-    public void test_saveSheetAsCsv_File_SheetName_NullHeaders_Writer() throws Exception {
+    public void test_exportSheetToCsv_File_SheetName_NullHeaders_Writer() throws Exception {
         File excelFile = createTempFile(".xlsx");
         List<Object> headers = Arrays.asList("Orig");
         List<List<Object>> rows = Arrays.asList(Arrays.asList("val"));
-        ExcelUtil.writeSheet("MySh", headers, rows, excelFile);
+        ExcelUtil.writeRowsToSheet("MySh", headers, rows, excelFile);
 
         StringWriter sw = new StringWriter();
-        ExcelUtil.saveSheetAsCsv(excelFile, "MySh", null, sw);
+        ExcelUtil.exportSheetToCsv(excelFile, "MySh", null, sw);
 
         String content = sw.toString();
         Assertions.assertTrue(content.contains("Orig"));
@@ -1290,25 +1322,25 @@ public class ExcelUtilTest extends TestBase {
     }
 
     @Test
-    public void test_saveSheetAsCsv_File_SheetName_NotFound_Writer() throws Exception {
+    public void test_exportSheetToCsv_File_SheetName_NotFound_Writer() throws Exception {
         File excelFile = createTempFile(".xlsx");
         List<Object> headers = Arrays.asList("A");
         List<List<Object>> rows = Arrays.asList(Arrays.asList("B"));
-        ExcelUtil.writeSheet("RealSheet", headers, rows, excelFile);
+        ExcelUtil.writeRowsToSheet("RealSheet", headers, rows, excelFile);
 
         StringWriter sw = new StringWriter();
-        Assertions.assertThrows(IllegalArgumentException.class, () -> ExcelUtil.saveSheetAsCsv(excelFile, "FakeSheet", null, sw));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> ExcelUtil.exportSheetToCsv(excelFile, "FakeSheet", null, sw));
     }
 
     @Test
-    public void test_saveSheetAsCsv_MultipleRows() throws Exception {
+    public void test_exportSheetToCsv_MultipleRows() throws Exception {
         File excelFile = createTempFile(".xlsx");
         List<Object> headers = Arrays.asList("Col1", "Col2", "Col3");
         List<List<Object>> rows = Arrays.asList(Arrays.asList("A", "B", "C"), Arrays.asList("D", "E", "F"), Arrays.asList("G", "H", "I"));
-        ExcelUtil.writeSheet("Sheet1", headers, rows, excelFile);
+        ExcelUtil.writeRowsToSheet("Sheet1", headers, rows, excelFile);
 
         File csvFile = createTempFile(".csv");
-        ExcelUtil.saveSheetAsCsv(excelFile, 0, csvFile);
+        ExcelUtil.exportSheetToCsv(excelFile, 0, csvFile);
 
         String content = IOUtil.readAllToString(csvFile);
         Assertions.assertTrue(content.contains("Col1"));
@@ -1316,17 +1348,17 @@ public class ExcelUtilTest extends TestBase {
         Assertions.assertTrue(content.contains("G"));
     }
 
-    // ========== saveSheetAsCsv with mixed types ==========
+    // ========== exportSheetToCsv with mixed types ==========
 
     @Test
-    public void test_saveSheetAsCsv_MixedTypes() throws Exception {
+    public void test_exportSheetToCsv_MixedTypes() throws Exception {
         File excelFile = createTempFile(".xlsx");
         List<Object> headers = Arrays.asList("String", "Number", "Bool");
         List<List<Object>> rows = Arrays.asList(Arrays.asList("hello", 42.5, true));
-        ExcelUtil.writeSheet("Sheet1", headers, rows, excelFile);
+        ExcelUtil.writeRowsToSheet("Sheet1", headers, rows, excelFile);
 
         StringWriter sw = new StringWriter();
-        ExcelUtil.saveSheetAsCsv(excelFile, 0, null, sw);
+        ExcelUtil.exportSheetToCsv(excelFile, 0, null, sw);
 
         String content = sw.toString();
         Assertions.assertTrue(content.contains("String"));
@@ -1336,28 +1368,28 @@ public class ExcelUtilTest extends TestBase {
     }
 
     @Test
-    public void test_saveSheetAsCsv_EmptySheet() throws Exception {
+    public void test_exportSheetToCsv_EmptySheet() throws Exception {
         File excelFile = createTempFile(".xlsx");
         List<Object> headers = Arrays.asList("H");
         List<List<Object>> rows = new ArrayList<>();
-        ExcelUtil.writeSheet("Sheet1", headers, rows, excelFile);
+        ExcelUtil.writeRowsToSheet("Sheet1", headers, rows, excelFile);
 
         StringWriter sw = new StringWriter();
-        ExcelUtil.saveSheetAsCsv(excelFile, 0, null, sw);
+        ExcelUtil.exportSheetToCsv(excelFile, 0, null, sw);
 
         String content = sw.toString();
         Assertions.assertTrue(content.contains("H"));
     }
 
     @Test
-    public void test_saveSheetAsCsv_WithNumericData() throws Exception {
+    public void test_exportSheetToCsv_WithNumericData() throws Exception {
         File excelFile = createTempFile(".xlsx");
         List<Object> headers = Arrays.asList("N");
         List<List<Object>> rows = Arrays.asList(Arrays.asList(123.456));
-        ExcelUtil.writeSheet("Sheet1", headers, rows, excelFile);
+        ExcelUtil.writeRowsToSheet("Sheet1", headers, rows, excelFile);
 
         StringWriter sw = new StringWriter();
-        ExcelUtil.saveSheetAsCsv(excelFile, 0, null, sw);
+        ExcelUtil.exportSheetToCsv(excelFile, 0, null, sw);
 
         String content = sw.toString();
         Assertions.assertTrue(content.contains("123.456"));
@@ -1400,29 +1432,280 @@ public class ExcelUtilTest extends TestBase {
     }
 
     @Test
-    public void test_writeSheet_AutoFilterByFirstRow_EmptyHeaders() throws Exception {
+    public void test_writeRowsToSheet_AutoFilterByFirstRow_EmptyHeaders() throws Exception {
         File tempFile = createTempFile(".xlsx");
         List<Object> headers = new ArrayList<>();
         List<List<Object>> rows = new ArrayList<>();
 
         SheetCreateOptions options = SheetCreateOptions.builder().autoFilterByFirstRow(true).build();
 
-        Assertions.assertDoesNotThrow(() -> ExcelUtil.writeSheet("Empty", headers, rows, options, tempFile));
+        Assertions.assertDoesNotThrow(() -> ExcelUtil.writeRowsToSheet("Empty", headers, rows, options, tempFile));
 
         Assertions.assertTrue(tempFile.exists());
     }
 
     @Test
-    public void test_loadSheet_HeaderWithBlankCell() throws Exception {
+    public void test_loadDatasetFromSheet_HeaderWithBlankCell() throws Exception {
         File tempFile = createTempFile(".xlsx");
         List<Object> headers = Arrays.asList("A", null, "C");
         List<List<Object>> rows = Arrays.asList(Arrays.asList("x", "y", "z"));
-        ExcelUtil.writeSheet("Sheet1", headers, rows, tempFile);
+        ExcelUtil.writeRowsToSheet("Sheet1", headers, rows, tempFile);
 
-        Dataset dataset = ExcelUtil.loadSheet(tempFile);
+        Dataset dataset = ExcelUtil.loadDatasetFromSheet(tempFile);
         Assertions.assertNotNull(dataset);
         Assertions.assertEquals(3, dataset.columnCount());
         Assertions.assertEquals("A", dataset.getColumnName(0));
         Assertions.assertEquals("C", dataset.getColumnName(2));
+    }
+
+    // ========== M33: InputStream / Path source overloads (readers) ==========
+
+    private byte[] writeXlsxToBytes(String sheetName, List<Object> headers, List<List<Object>> rows) {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        ExcelUtil.writeRowsToSheet(sheetName, headers, rows, (Consumer<Sheet>) null, baos, ExcelFormat.XLSX);
+        return baos.toByteArray();
+    }
+
+    @Test
+    public void test_loadDatasetFromSheet_InputStream_SheetIndex() {
+        byte[] bytes = writeXlsxToBytes("S", Arrays.asList("col1", "col2"), Arrays.asList(Arrays.asList("a", "b"), Arrays.asList("c", "d")));
+
+        try (InputStream is = new ByteArrayInputStream(bytes)) {
+            Dataset dataset = ExcelUtil.loadDatasetFromSheet(is, 0, RowExtractors.DEFAULT);
+            Assertions.assertEquals(2, dataset.columnCount());
+            Assertions.assertEquals(2, dataset.size());
+            Assertions.assertEquals("col1", dataset.getColumnName(0));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Test
+    public void test_loadDatasetFromSheet_InputStream_SheetName() {
+        byte[] bytes = writeXlsxToBytes("Named", Arrays.asList("h"), Arrays.asList(Arrays.asList("v")));
+
+        try (InputStream is = new ByteArrayInputStream(bytes)) {
+            Dataset dataset = ExcelUtil.loadDatasetFromSheet(is, "Named", RowExtractors.DEFAULT);
+            Assertions.assertEquals(1, dataset.columnCount());
+            Assertions.assertEquals("h", dataset.getColumnName(0));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Test
+    public void test_loadDatasetFromSheet_InputStream_SheetName_NotFound() {
+        byte[] bytes = writeXlsxToBytes("Real", Arrays.asList("h"), Arrays.asList(Arrays.asList("v")));
+
+        Assertions.assertThrows(IllegalArgumentException.class, () -> {
+            try (InputStream is = new ByteArrayInputStream(bytes)) {
+                ExcelUtil.loadDatasetFromSheet(is, "Fake", RowExtractors.DEFAULT);
+            }
+        });
+    }
+
+    @Test
+    public void test_loadDatasetFromSheet_Path() throws Exception {
+        File tempFile = createTempFile(".xlsx");
+        ExcelUtil.writeRowsToSheet("S", Arrays.asList("a", "b"), Arrays.asList(Arrays.asList("1", "2")), tempFile);
+
+        Path path = tempFile.toPath();
+        Dataset ds1 = ExcelUtil.loadDatasetFromSheet(path, 0, RowExtractors.DEFAULT);
+        Assertions.assertEquals(2, ds1.columnCount());
+
+        Dataset ds2 = ExcelUtil.loadDatasetFromSheet(path, "S", RowExtractors.DEFAULT);
+        Assertions.assertEquals(2, ds2.columnCount());
+    }
+
+    @Test
+    public void test_readRowsFromSheet_InputStream() {
+        byte[] bytes = writeXlsxToBytes("S", Arrays.asList("h"), Arrays.asList(Arrays.asList("a"), Arrays.asList("b")));
+
+        try (InputStream is = new ByteArrayInputStream(bytes)) {
+            List<List<Object>> rows = ExcelUtil.readRowsFromSheet(is, 0, true, RowMappers.DEFAULT);
+            Assertions.assertEquals(2, rows.size());
+            Assertions.assertEquals("a", rows.get(0).get(0));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Test
+    public void test_readRowsFromSheet_InputStream_SheetName() {
+        byte[] bytes = writeXlsxToBytes("Data", Arrays.asList("h"), Arrays.asList(Arrays.asList("a"), Arrays.asList("b")));
+
+        try (InputStream is = new ByteArrayInputStream(bytes)) {
+            List<List<Object>> rows = ExcelUtil.readRowsFromSheet(is, "Data", false, RowMappers.DEFAULT);
+            Assertions.assertEquals(3, rows.size()); // header + 2 data
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Test
+    public void test_readRowsFromSheet_Path() throws Exception {
+        File tempFile = createTempFile(".xlsx");
+        ExcelUtil.writeRowsToSheet("S", Arrays.asList("h"), Arrays.asList(Arrays.asList("x")), tempFile);
+
+        List<List<Object>> rows1 = ExcelUtil.readRowsFromSheet(tempFile.toPath(), 0, false, RowMappers.DEFAULT);
+        Assertions.assertEquals(2, rows1.size());
+
+        List<List<Object>> rows2 = ExcelUtil.readRowsFromSheet(tempFile.toPath(), "S", true, RowMappers.DEFAULT);
+        Assertions.assertEquals(1, rows2.size());
+    }
+
+    @Test
+    public void test_streamRowsFromSheet_InputStream_SheetIndex() throws IOException {
+        byte[] bytes = writeXlsxToBytes("S", Arrays.asList("n"), Arrays.asList(Arrays.asList(1), Arrays.asList(2), Arrays.asList(3)));
+
+        try (InputStream is = new ByteArrayInputStream(bytes)) {
+            try (Stream<Row> stream = ExcelUtil.streamRowsFromSheet(is, 0, true)) {
+                Assertions.assertEquals(3, stream.count());
+            }
+        }
+    }
+
+    @Test
+    public void test_streamRowsFromSheet_InputStream_CallerOwnsStream() throws Exception {
+        byte[] bytes = writeXlsxToBytes("S", Arrays.asList("n"), Arrays.asList(Arrays.asList(1)));
+
+        // The InputStream overload's onClose closes the workbook, not the caller's stream.
+        // (POI's WorkbookFactory.create(InputStream) may itself consume/close the stream while
+        // building the in-memory package; either way the caller still owns it and closing it
+        // afterwards must be safe and not throw.)
+        CloseTrackingInputStream is = new CloseTrackingInputStream(bytes);
+
+        try (Stream<Row> stream = ExcelUtil.streamRowsFromSheet(is, 0, false)) {
+            Assertions.assertEquals(2, stream.count());
+        }
+
+        // Caller-owned: closing it (again) is safe.
+        Assertions.assertDoesNotThrow(is::close);
+        Assertions.assertTrue(is.closed);
+    }
+
+    @Test
+    public void test_streamRowsFromSheet_InputStream_SheetName() throws IOException {
+        byte[] bytes = writeXlsxToBytes("Items", Arrays.asList("n"), Arrays.asList(Arrays.asList("a"), Arrays.asList("b")));
+
+        try (InputStream is = new ByteArrayInputStream(bytes)) {
+            try (Stream<Row> stream = ExcelUtil.streamRowsFromSheet(is, "Items", true)) {
+                Assertions.assertEquals(2, stream.count());
+            }
+        }
+    }
+
+    @Test
+    public void test_streamRowsFromSheet_Path() throws Exception {
+        File tempFile = createTempFile(".xlsx");
+        ExcelUtil.writeRowsToSheet("S", Arrays.asList("n"), Arrays.asList(Arrays.asList(1), Arrays.asList(2)), tempFile);
+
+        try (Stream<Row> stream = ExcelUtil.streamRowsFromSheet(tempFile.toPath(), 0, true)) {
+            Assertions.assertEquals(2, stream.count());
+        }
+        try (Stream<Row> stream = ExcelUtil.streamRowsFromSheet(tempFile.toPath(), "S", false)) {
+            Assertions.assertEquals(3, stream.count());
+        }
+    }
+
+    // ========== M33: OutputStream / ExcelFormat + Path sink overloads (writers) ==========
+
+    @Test
+    public void test_writeRowsToSheet_OutputStream_Xlsx() throws Exception {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        ExcelUtil.writeRowsToSheet("S", Arrays.asList("a", "b"), Arrays.asList(Arrays.asList("1", "2")), (Consumer<Sheet>) null, baos, ExcelFormat.XLSX);
+
+        try (InputStream is = new ByteArrayInputStream(baos.toByteArray())) {
+            Dataset loaded = ExcelUtil.loadDatasetFromSheet(is, 0, RowExtractors.DEFAULT);
+            Assertions.assertEquals(2, loaded.columnCount());
+            Assertions.assertEquals(1, loaded.size());
+        }
+    }
+
+    @Test
+    public void test_writeRowsToSheet_OutputStream_Xls() throws Exception {
+        // Explicit XLS format selection, independent of any filename.
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        ExcelUtil.writeRowsToSheet("S", Arrays.asList("a"), Arrays.asList(Arrays.asList("v")), (Consumer<Sheet>) null, baos, ExcelFormat.XLS);
+
+        byte[] bytes = baos.toByteArray();
+        Assertions.assertTrue(bytes.length > 0);
+        // XLS (OLE2) magic header: D0 CF 11 E0.
+        Assertions.assertEquals((byte) 0xD0, bytes[0]);
+        Assertions.assertEquals((byte) 0xCF, bytes[1]);
+
+        try (InputStream is = new ByteArrayInputStream(bytes)) {
+            Dataset loaded = ExcelUtil.loadDatasetFromSheet(is, 0, RowExtractors.DEFAULT);
+            Assertions.assertEquals(1, loaded.columnCount());
+        }
+    }
+
+    @Test
+    public void test_writeRowsToSheet_OutputStream_NotClosed() throws Exception {
+        CloseTrackingOutputStream os = new CloseTrackingOutputStream();
+
+        ExcelUtil.writeRowsToSheet("S", Arrays.asList("a"), Arrays.asList(Arrays.asList("v")), (Consumer<Sheet>) null, os, ExcelFormat.XLSX);
+
+        // The OutputStream overload must NOT close the caller-owned stream.
+        Assertions.assertFalse(os.closed);
+    }
+
+    @Test
+    public void test_writeDatasetToSheet_OutputStream_Xlsx() throws Exception {
+        Dataset dataset = N.newDataset(N.toList("A", "B"), N.toList(N.toList(1, 2), N.toList(3, 4)));
+
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        ExcelUtil.writeDatasetToSheet("DS", dataset, (Consumer<Sheet>) null, baos, ExcelFormat.XLSX);
+
+        try (InputStream is = new ByteArrayInputStream(baos.toByteArray())) {
+            Dataset loaded = ExcelUtil.loadDatasetFromSheet(is, 0, RowExtractors.DEFAULT);
+            Assertions.assertEquals(2, loaded.columnCount());
+            Assertions.assertEquals(2, loaded.size());
+        }
+    }
+
+    @Test
+    public void test_writeRowsToSheet_Path() throws Exception {
+        File tempFile = createTempFile(".xlsx");
+        ExcelUtil.writeRowsToSheet("S", Arrays.asList("a", "b"), Arrays.asList(Arrays.asList("1", "2")), (Consumer<Sheet>) null, tempFile.toPath());
+
+        Dataset loaded = ExcelUtil.loadDatasetFromSheet(tempFile);
+        Assertions.assertEquals(2, loaded.columnCount());
+        Assertions.assertEquals(1, loaded.size());
+    }
+
+    @Test
+    public void test_writeDatasetToSheet_Path() throws Exception {
+        File tempFile = createTempFile(".xlsx");
+        Dataset dataset = N.newDataset(N.toList("A"), N.toList(N.toList("v")));
+        ExcelUtil.writeDatasetToSheet("DS", dataset, (Consumer<Sheet>) null, tempFile.toPath());
+
+        Dataset loaded = ExcelUtil.loadDatasetFromSheet(tempFile);
+        Assertions.assertEquals(1, loaded.columnCount());
+        Assertions.assertEquals(1, loaded.size());
+    }
+
+    @Test
+    public void test_formatOf_extensionInference() {
+        Assertions.assertEquals(ExcelFormat.XLS, ExcelUtil.formatOf(new File("a.xls")));
+        Assertions.assertEquals(ExcelFormat.XLS, ExcelUtil.formatOf(new File("a.XLS")));
+        Assertions.assertEquals(ExcelFormat.XLSX, ExcelUtil.formatOf(new File("a.xlsx")));
+        Assertions.assertEquals(ExcelFormat.XLSX, ExcelUtil.formatOf(new File("a.dat")));
+        Assertions.assertEquals(ExcelFormat.XLSX, ExcelUtil.formatOf(new File("noext")));
+    }
+
+    @Test
+    public void test_readers_FileAndInputStream_equivalent() throws Exception {
+        // Round-trip parity: File-source and InputStream-source readers must agree.
+        File tempFile = createTempFile(".xlsx");
+        ExcelUtil.writeRowsToSheet("S", Arrays.asList("a", "b"), Arrays.asList(Arrays.asList("x", "y")), tempFile);
+
+        Dataset fromFile = ExcelUtil.loadDatasetFromSheet(tempFile, 0, RowExtractors.DEFAULT);
+        try (InputStream is = new FileInputStream(tempFile)) {
+            Dataset fromStream = ExcelUtil.loadDatasetFromSheet(is, 0, RowExtractors.DEFAULT);
+            Assertions.assertEquals(fromFile.columnCount(), fromStream.columnCount());
+            Assertions.assertEquals(fromFile.size(), fromStream.size());
+            Assertions.assertEquals((Object) fromFile.get(0, 0), (Object) fromStream.get(0, 0));
+        }
     }
 }

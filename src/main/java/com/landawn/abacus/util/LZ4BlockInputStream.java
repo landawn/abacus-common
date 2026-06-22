@@ -125,6 +125,10 @@ public final class LZ4BlockInputStream extends InputStream {
      * @return the total number of bytes read into the buffer, or -1 if there is no more data
      *         because the end of the stream has been reached
      * @throws IOException if an I/O error occurs
+     * @throws NullPointerException if {@code b} is {@code null}
+     * @throws IllegalArgumentException if {@code len} is negative
+     * @throws IndexOutOfBoundsException if {@code off} is negative or
+     *         {@code off + len} is greater than {@code b.length}
      */
     @Override
     public int read(final byte[] b, final int off, final int len) throws IOException {
@@ -144,7 +148,7 @@ public final class LZ4BlockInputStream extends InputStream {
      * }</pre>
      *
      * @param n the number of bytes to skip
-     * @return the actual number of bytes skipped, or -1 if the end of the stream has already been reached
+     * @return the actual number of bytes skipped; 0 if the end of the stream has already been reached
      * @throws IllegalArgumentException if {@code n} is negative
      * @throws IOException if an I/O error occurs
      */
@@ -183,8 +187,9 @@ public final class LZ4BlockInputStream extends InputStream {
     /**
      * Marks the current position in this input stream.
      *
-     * <p>The underlying LZ4 block input stream does not support mark/reset,
-     * so this method has no effect.</p>
+     * <p>This call is delegated to the underlying LZ4 block input stream; its effect (and whether
+     * a subsequent {@link #reset()} succeeds) depends on whether that stream supports mark/reset.
+     * See {@link #markSupported()}.</p>
      *
      * @param readLimit the maximum limit of bytes that can be read before the mark position becomes invalid
      * @see #reset()
@@ -199,10 +204,10 @@ public final class LZ4BlockInputStream extends InputStream {
      * Repositions this stream to the position at the time the {@code mark} method
      * was last called on this input stream.
      *
-     * <p>The underlying LZ4 block input stream does not support mark/reset,
-     * so this method always throws an {@link IOException}.</p>
+     * <p>This call is delegated to the underlying LZ4 block input stream. If that stream does not
+     * support mark/reset, or no valid mark is set, it throws an {@link IOException}.</p>
      *
-     * @throws IOException always, because the underlying LZ4 block input stream does not support mark/reset
+     * @throws IOException if the underlying stream does not support mark/reset or the mark is invalid
      * @see #mark(int)
      * @see #markSupported()
      */
@@ -213,10 +218,9 @@ public final class LZ4BlockInputStream extends InputStream {
 
     /**
      * Tests if this input stream supports the {@code mark} and {@code reset} methods.
-     * The underlying LZ4 block input stream does not support mark/reset, so this
-     * method returns {@code false}.
+     * The result is delegated to the underlying LZ4 block input stream.
      *
-     * @return {@code false}, because the underlying LZ4 block input stream does not support mark/reset
+     * @return {@code true} if the underlying LZ4 block input stream supports mark/reset; {@code false} otherwise
      * @see #mark(int)
      * @see #reset()
      */

@@ -13,9 +13,9 @@
  */
 package com.landawn.abacus.util.function;
 
-import java.util.Objects;
-
 import com.landawn.abacus.util.Throwables;
+import com.landawn.abacus.util.N;
+import com.landawn.abacus.util.cs;
 
 /**
  * Represents a predicate (boolean-valued function) of two object-valued arguments and a single
@@ -81,10 +81,10 @@ public interface BiObjIntPredicate<T, U> extends Throwables.BiObjIntPredicate<T,
      *
      * @param other a predicate that will be logically-ANDed with this predicate. Must not be {@code null}.
      * @return a composed predicate that represents the short-circuiting logical AND of this predicate and the {@code other} predicate
-     * @throws NullPointerException if {@code other} is null
+     * @throws IllegalArgumentException if {@code other} is null
      */
     default BiObjIntPredicate<T, U> and(final BiObjIntPredicate<? super T, ? super U> other) {
-        Objects.requireNonNull(other);
+        N.checkArgNotNull(other, cs.other);
         return (t, u, i) -> test(t, u, i) && other.test(t, u, i);
     }
 
@@ -105,10 +105,24 @@ public interface BiObjIntPredicate<T, U> extends Throwables.BiObjIntPredicate<T,
      *
      * @param other a predicate that will be logically-ORed with this predicate. Must not be {@code null}.
      * @return a composed predicate that represents the short-circuiting logical OR of this predicate and the {@code other} predicate
-     * @throws NullPointerException if {@code other} is null
+     * @throws IllegalArgumentException if {@code other} is null
      */
     default BiObjIntPredicate<T, U> or(final BiObjIntPredicate<? super T, ? super U> other) {
-        Objects.requireNonNull(other);
+        N.checkArgNotNull(other, cs.other);
         return (t, u, i) -> test(t, u, i) || other.test(t, u, i);
+    }
+
+    /**
+     * Returns this object as a {@link Throwables.BiObjIntPredicate} view.
+     *
+     * <p>The returned object has the same behavior as this one. This method does not translate
+     * exceptions or make the original implementation capable of throwing new checked exceptions; the
+     * exception type parameter is for target-type compatibility with APIs that accept {@code Throwables.BiObjIntPredicate}.
+     *
+     * @param <E> the target exception type for compatibility with {@code Throwables.BiObjIntPredicate}
+     * @return a {@link Throwables.BiObjIntPredicate} view of this object
+     */
+    default <E extends Throwable> Throwables.BiObjIntPredicate<T, U, E> toThrowable() {
+        return (Throwables.BiObjIntPredicate<T, U, E>) this;
     }
 }

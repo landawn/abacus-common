@@ -8,6 +8,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
 import java.io.IOException;
 import java.sql.CallableStatement;
@@ -101,43 +102,53 @@ public class AbstractCalendarTypeTest extends TestBase {
 
     @Test
     public void testSerializeTo_ValidCalendar_NoConfig() throws IOException {
-        Calendar calendar = new GregorianCalendar(2023, Calendar.JANUARY, 15);
-        type.serializeTo(characterWriter, calendar, null);
+        assertDoesNotThrow(() -> {
+            Calendar calendar = new GregorianCalendar(2023, Calendar.JANUARY, 15);
+            type.serializeTo(characterWriter, calendar, null);
+        });
     }
 
     @Test
     public void testSerializeTo_ValidCalendar_WithQuotation() throws IOException {
-        Calendar calendar = new GregorianCalendar(2023, Calendar.JANUARY, 15);
-        when(config.getStringQuotation()).thenReturn('"');
-        when(config.getDateTimeFormat()).thenReturn(null);
+        assertDoesNotThrow(() -> {
+            Calendar calendar = new GregorianCalendar(2023, Calendar.JANUARY, 15);
+            when(config.getStringQuotation()).thenReturn('"');
+            when(config.getDateTimeFormat()).thenReturn(null);
 
-        type.serializeTo(characterWriter, calendar, config);
+            type.serializeTo(characterWriter, calendar, config);
+        });
     }
 
     @Test
     public void testSerializeTo_ValidCalendar_ISO8601DateTime() throws IOException {
-        Calendar calendar = new GregorianCalendar(2023, Calendar.JANUARY, 15);
-        when(config.getDateTimeFormat()).thenReturn(DateTimeFormat.ISO_8601_DATE_TIME);
-        when(config.getStringQuotation()).thenReturn((char) 0);
+        assertDoesNotThrow(() -> {
+            Calendar calendar = new GregorianCalendar(2023, Calendar.JANUARY, 15);
+            when(config.getDateTimeFormat()).thenReturn(DateTimeFormat.ISO_8601_DATE_TIME);
+            when(config.getStringQuotation()).thenReturn((char) 0);
 
-        type.serializeTo(characterWriter, calendar, config);
+            type.serializeTo(characterWriter, calendar, config);
+        });
     }
 
     @Test
     public void testSerializeTo_ValidCalendar_ISO8601Timestamp() throws IOException {
-        Calendar calendar = new GregorianCalendar(2023, Calendar.JANUARY, 15);
-        when(config.getDateTimeFormat()).thenReturn(DateTimeFormat.ISO_8601_TIMESTAMP);
-        when(config.getStringQuotation()).thenReturn((char) 0);
+        assertDoesNotThrow(() -> {
+            Calendar calendar = new GregorianCalendar(2023, Calendar.JANUARY, 15);
+            when(config.getDateTimeFormat()).thenReturn(DateTimeFormat.ISO_8601_TIMESTAMP);
+            when(config.getStringQuotation()).thenReturn((char) 0);
 
-        type.serializeTo(characterWriter, calendar, config);
+            type.serializeTo(characterWriter, calendar, config);
+        });
     }
 
     @Test
     public void testSerializeTo_ValidCalendar_QuotationWithLongFormat() throws IOException {
-        Calendar calendar = new GregorianCalendar(2023, Calendar.JANUARY, 15);
-        when(config.getDateTimeFormat()).thenReturn(DateTimeFormat.LONG);
-        when(config.getStringQuotation()).thenReturn('"');
+        assertDoesNotThrow(() -> {
+            Calendar calendar = new GregorianCalendar(2023, Calendar.JANUARY, 15);
+            when(config.getDateTimeFormat()).thenReturn(DateTimeFormat.LONG);
+            when(config.getStringQuotation()).thenReturn('"');
 
-        type.serializeTo(characterWriter, calendar, config);
+            type.serializeTo(characterWriter, calendar, config);
+        });
     }
 }

@@ -147,6 +147,11 @@ public class DurationTest extends TestBase {
         assertEquals(Duration.ZERO, zeroDiff);
     }
 
+    @Test
+    public void testBetweenDatesThrowsOnOverflow() {
+        assertThrows(ArithmeticException.class, () -> Duration.between(new java.util.Date(Long.MAX_VALUE), new java.util.Date(Long.MIN_VALUE)));
+    }
+
     // --- between(Calendar, Calendar) ---
 
     @Test
@@ -166,6 +171,16 @@ public class DurationTest extends TestBase {
         cal1.setTimeInMillis(5_000L);
         Duration zeroDiff = Duration.between(cal1, cal2);
         assertEquals(Duration.ZERO, zeroDiff);
+    }
+
+    @Test
+    public void testBetweenCalendarsThrowsOnOverflow() {
+        Calendar start = Calendar.getInstance();
+        Calendar end = Calendar.getInstance();
+        start.setTimeInMillis(Long.MAX_VALUE);
+        end.setTimeInMillis(Long.MIN_VALUE);
+
+        assertThrows(ArithmeticException.class, () -> Duration.between(start, end));
     }
 
     // --- between(Temporal, Temporal) ---
@@ -772,6 +787,17 @@ public class DurationTest extends TestBase {
     @Test
     public void testToStringLongMinValueUsesSingleLeadingSign() {
         assertEquals("PT-2562047788015H12M55.808S", Duration.ofMillis(Long.MIN_VALUE).toString());
+    }
+
+    // --- regression tests for 2026-06-11 deep-review fixes ---
+
+    @Test
+    public void testDividedByMinusOneOverflowThrows() {
+        // regression: Long.MIN_VALUE / -1 overflows silently (JLS 15.17.2), returning a negative
+        // duration despite the class's checked-arithmetic contract; it now routes through negated()
+        org.junit.jupiter.api.Assertions.assertThrows(ArithmeticException.class, () -> Duration.ofMillis(Long.MIN_VALUE).dividedBy(-1));
+        assertEquals(Duration.ofMillis(-5), Duration.ofMillis(5).dividedBy(-1));
+        assertEquals(Duration.ofMillis(2), Duration.ofMillis(5).dividedBy(2));
     }
 
 }

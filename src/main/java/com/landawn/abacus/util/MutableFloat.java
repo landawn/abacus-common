@@ -630,14 +630,14 @@ public final class MutableFloat extends Number implements Comparable<MutableFloa
 
     /**
      * Compares this object to the specified object. The result is {@code true} if and only if
-     * the argument is not {@code null} and is a {@code MutableFloat} object that represents
-     * a float that has the identical bit pattern to the bit pattern of the float represented
-     * by this object.
+     * the argument is not {@code null} and is a {@code MutableFloat} object that contains the
+     * same {@code float} value as this object.
      *
      * <p>The comparison is performed via {@link Float#compare(float, float)}, so two float values
      * are considered the same if and only if {@code Float.compare} returns {@code 0} for them.
      * This is equivalent to comparing the values returned by {@link Float#floatToIntBits(float)}
-     * and allows hash tables to operate properly.</p>
+     * (which canonicalizes all NaN values to a single bit pattern) and allows hash tables to
+     * operate properly.</p>
      *
      * <p>Note that in most cases, for two instances of class {@code MutableFloat}, {@code f1}
      * and {@code f2}, the value of {@code f1.equals(f2)} is {@code true} if and only if

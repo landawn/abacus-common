@@ -120,7 +120,7 @@ public enum Gender {
                 return X;
 
             default:
-                throw new IllegalArgumentException("No mapping instance found by int value: " + intValue);
+                throw new IllegalArgumentException("No Gender for int value: " + intValue + ". Expected one of [0, 1, 2, 3]");
         }
     }
 }

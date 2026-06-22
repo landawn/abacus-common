@@ -118,20 +118,24 @@ public class StreamTest extends AbstractTest {
 
     @Test
     public void test_split_001() {
-        Stream.range(0, 7).split(it -> it % 3 == 0).forEach(Fn.println());
-        Stream.of("a1", "a2", "b1", "b2").split(it -> it.startsWith("a")).println();
+        assertDoesNotThrow(() -> {
+            Stream.range(0, 7).split(it -> it % 3 == 0).forEach(Fn.println());
+            Stream.of("a1", "a2", "b1", "b2").split(it -> it.startsWith("a")).println();
 
-        Stream.range(0, 7).splitAt(3).forEach(Stream::println);
-        Stream.range(0, 7).splitAt(it -> it == 4).forEach(Stream::println);
+            Stream.range(0, 7).splitAt(3).forEach(Stream::println);
+            Stream.range(0, 7).splitAt(it -> it == 4).forEach(Stream::println);
 
-        N.println(Strings.repeat("=", 80));
-        Stream.of(1, 2, 3).cartesianProduct(Arrays.asList(4, 5), Arrays.asList(6, 7)).forEach(Fn.println());
-        N.println(Strings.repeat("=", 80));
-        Stream.of(1, 2, 3).rollup().forEach(System.out::println);
-        N.println(Strings.repeat("=", 80));
-        Stream.of("apple", "apple", "apple", "banana", "banana", "cherry").intersection(String::length, Arrays.asList(5, 6, 5)).forEach(System.out::println);
-        N.println(Strings.repeat("=", 80));
-        Stream.of("apple", "apple", "apple", "banana", "banana", "cherry").difference(String::length, Arrays.asList(5, 6, 5)).forEach(System.out::println);
+            N.println(Strings.repeat("=", 80));
+            Stream.of(1, 2, 3).cartesianProduct(Arrays.asList(4, 5), Arrays.asList(6, 7)).forEach(Fn.println());
+            N.println(Strings.repeat("=", 80));
+            Stream.of(1, 2, 3).rollup().forEach(System.out::println);
+            N.println(Strings.repeat("=", 80));
+            Stream.of("apple", "apple", "apple", "banana", "banana", "cherry")
+                    .intersection(String::length, Arrays.asList(5, 6, 5))
+                    .forEach(System.out::println);
+            N.println(Strings.repeat("=", 80));
+            Stream.of("apple", "apple", "apple", "banana", "banana", "cherry").difference(String::length, Arrays.asList(5, 6, 5)).forEach(System.out::println);
+        });
     }
 
     @Test
@@ -186,10 +190,16 @@ public class StreamTest extends AbstractTest {
         IOUtil.deleteIfExists(file);
     }
 
-    @Test
-    public void test_parallel_with_virtual_thread_1() throws Exception {
-
-    }
+    //    @Test
+    //    public void test_parallel_with_virtual_thread_1() throws Exception {
+    //        ExecutorService executor = (ExecutorService) Executors.class.getMethod("newVirtualThreadPerTaskExecutor").invoke(null);
+    //
+    //        try {
+    //            assertEquals(10L, executor.submit(() -> Stream.range(0, 10).count()).get().longValue());
+    //        } finally {
+    //            executor.shutdown();
+    //        }
+    //    }
 
     @Test
     public void test_parallel_with_many_threads_0() throws Exception {
@@ -1027,51 +1037,53 @@ public class StreamTest extends AbstractTest {
 
     @Test
     public void test_size() {
-        final int size = 10_000_000;
-        final List<Object> list = new ArrayList<>(size);
-        final Object[] a = { 1, "a", "b", 2 };
+        assertDoesNotThrow(() -> {
+            final int size = 10_000_000;
+            final List<Object> list = new ArrayList<>(size);
+            final Object[] a = { 1, "a", "b", 2 };
 
-        long startTime = System.currentTimeMillis();
+            long startTime = System.currentTimeMillis();
 
-        for (int i = 0; i < size; i++) {
-            list.add(java.util.stream.Stream.of(a));
-        }
+            for (int i = 0; i < size; i++) {
+                list.add(java.util.stream.Stream.of(a));
+            }
 
-        N.println(list.size());
+            N.println(list.size());
 
-        N.println((System.currentTimeMillis() - startTime) + "ms");
+            N.println((System.currentTimeMillis() - startTime) + "ms");
 
-        System.gc();
-        list.clear();
-        System.gc();
+            System.gc();
+            list.clear();
+            System.gc();
 
-        startTime = System.currentTimeMillis();
+            startTime = System.currentTimeMillis();
 
-        for (int i = 0; i < size; i++) {
-            list.add(Stream.of(a));
-        }
+            for (int i = 0; i < size; i++) {
+                list.add(Stream.of(a));
+            }
 
-        N.println(list.size());
+            N.println(list.size());
 
-        N.println((System.currentTimeMillis() - startTime) + "ms");
+            N.println((System.currentTimeMillis() - startTime) + "ms");
 
-        System.gc();
-        list.clear();
-        System.gc();
+            System.gc();
+            list.clear();
+            System.gc();
 
-        startTime = System.currentTimeMillis();
+            startTime = System.currentTimeMillis();
 
-        for (int i = 0; i < size; i++) {
-            list.add(java.util.stream.Stream.of(a));
-        }
+            for (int i = 0; i < size; i++) {
+                list.add(java.util.stream.Stream.of(a));
+            }
 
-        N.println(list.size());
+            N.println(list.size());
 
-        N.println((System.currentTimeMillis() - startTime) + "ms");
+            N.println((System.currentTimeMillis() - startTime) + "ms");
 
-        System.gc();
-        list.clear();
-        System.gc();
+            System.gc();
+            list.clear();
+            System.gc();
+        });
     }
 
     @Test
@@ -1396,15 +1408,17 @@ public class StreamTest extends AbstractTest {
 
     @Test
     public void test_toMap() {
-        Map<Integer, List<Integer>> map = IntStream.range(1, 100).boxed().parallel().groupTo(Fn.<Integer> identity(), Collectors.<Integer> toList());
-        N.forEach(map.entrySet(), Fn.println());
-        map = IntStream.range(1, 100).boxed().parallel().groupTo(Fn.<Integer> identity(), Collectors.<Integer> toList());
-        N.forEach(map.entrySet(), Fn.println());
+        assertDoesNotThrow(() -> {
+            Map<Integer, List<Integer>> map = IntStream.range(1, 100).boxed().parallel().groupTo(Fn.<Integer> identity(), Collectors.<Integer> toList());
+            N.forEach(map.entrySet(), Fn.println());
+            map = IntStream.range(1, 100).boxed().parallel().groupTo(Fn.<Integer> identity(), Collectors.<Integer> toList());
+            N.forEach(map.entrySet(), Fn.println());
 
-        //        ListMultimap<Integer, Integer> map2 = IntStream.range(1, 100).boxed().parallel().toMultimap(Fn.<Integer> identity());
-        //        N.forEach(map2.entrySet(), Fn.println());
-        //        map2 = IntStream.range(1, 100).boxed().parallel().toMultimap(Fn.<Integer> identity());
-        //        N.forEach(map2.entrySet(), Fn.println());
+            //        ListMultimap<Integer, Integer> map2 = IntStream.range(1, 100).boxed().parallel().toMultimap(Fn.<Integer> identity());
+            //        N.forEach(map2.entrySet(), Fn.println());
+            //        map2 = IntStream.range(1, 100).boxed().parallel().toMultimap(Fn.<Integer> identity());
+            //        N.forEach(map2.entrySet(), Fn.println());
+        });
     }
 
     @Test

@@ -170,6 +170,6 @@ public class BooleanBiConsumerTest extends TestBase {
     public void testAndThenNullThrowsImmediately() {
         BooleanBiConsumer instance = (a, b) -> {
         };
-        org.junit.jupiter.api.Assertions.assertThrows(NullPointerException.class, () -> instance.andThen((BooleanBiConsumer) null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> instance.andThen((BooleanBiConsumer) null));
     }
 }

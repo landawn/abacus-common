@@ -342,10 +342,11 @@ public final class JsonMappers {
 
     /**
      * Serializes the specified object to JSON and writes it to an output stream.
-     * The stream is not closed by this method, allowing for additional operations.
+     * Note: the stream is closed after writing, because {@code JsonGenerator.Feature.AUTO_CLOSE_TARGET}
+     * is enabled by default on the underlying mapper.
      *
      * <p>This method is useful for writing JSON to network streams, HTTP responses,
-     * or any other output stream. The caller is responsible for closing the stream.</p>
+     * or any other output stream.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -358,7 +359,7 @@ public final class JsonMappers {
      * }</pre>
      *
      * @param obj the object to serialize; can be {@code null} (produces "null")
-     * @param output the output stream to write the JSON to; not closed by this method
+     * @param output the output stream to write the JSON to; closed after writing by Jackson's default auto-close behavior
      * @throws RuntimeException if serialization fails or writing to stream fails
      * @see #toJson(Object, OutputStream, SerializationConfig)
      */
@@ -374,9 +375,9 @@ public final class JsonMappers {
      * Serializes the specified object to JSON and writes it to an output stream using custom configuration.
      * This method combines stream output with custom serialization settings.
      *
-     * <p>The stream is not closed by this method. Use this when you need specific
-     * serialization behavior for stream-based output, such as custom date formats
-     * or pretty printing for HTTP responses.</p>
+     * <p>The stream is closed after writing (Jackson's default auto-close behavior).
+     * Use this when you need specific serialization behavior for stream-based output,
+     * such as custom date formats or pretty printing for HTTP responses.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -388,7 +389,7 @@ public final class JsonMappers {
      * }</pre>
      *
      * @param obj the object to serialize; can be {@code null} (produces "null")
-     * @param output the output stream to write the JSON to; not closed by this method
+     * @param output the output stream to write the JSON to; closed after writing by Jackson's default auto-close behavior
      * @param config the custom serialization configuration to use; if {@code null}, uses default configuration
      * @throws RuntimeException if serialization fails or writing to stream fails
      * @see #toJson(Object, OutputStream)
@@ -408,7 +409,8 @@ public final class JsonMappers {
 
     /**
      * Serializes the specified object to JSON and writes it to a Writer.
-     * The writer is not closed by this method, allowing for additional operations.
+     * Note: the writer is closed after writing, because {@code JsonGenerator.Feature.AUTO_CLOSE_TARGET}
+     * is enabled by default on the underlying mapper.
      *
      * <p>This method is ideal for writing JSON to character-based outputs such as
      * StringWriter, FileWriter, or any custom Writer implementation. The character
@@ -429,7 +431,7 @@ public final class JsonMappers {
      * }</pre>
      *
      * @param obj the object to serialize; can be {@code null} (produces "null")
-     * @param output the writer to write the JSON to; not closed by this method
+     * @param output the writer to write the JSON to; closed after writing by Jackson's default auto-close behavior
      * @throws RuntimeException if serialization fails or writing fails
      * @see #toJson(Object, Writer, SerializationConfig)
      */
@@ -459,7 +461,7 @@ public final class JsonMappers {
      * }</pre>
      *
      * @param obj the object to serialize; can be {@code null} (produces "null")
-     * @param output the writer to write the JSON to; not closed by this method
+     * @param output the writer to write the JSON to; closed after writing by Jackson's default auto-close behavior
      * @param config the custom serialization configuration to use; if {@code null}, uses default configuration
      * @throws RuntimeException if serialization fails or writing fails
      * @see #toJson(Object, Writer)
@@ -812,10 +814,11 @@ public final class JsonMappers {
 
     /**
      * Deserializes JSON from an input stream to an object of the specified type.
-     * The stream is not closed by this method, allowing for additional operations.
+     * Note: the stream is closed after reading, because {@code JsonParser.Feature.AUTO_CLOSE_SOURCE}
+     * is enabled by default on the underlying mapper.
      *
      * <p>This method is ideal for reading JSON from network connections, file streams,
-     * or any other input source. The caller is responsible for closing the stream.</p>
+     * or any other input source.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -855,8 +858,9 @@ public final class JsonMappers {
      * Deserializes JSON from an input stream using custom deserialization configuration.
      * This method combines stream input with custom deserialization settings.
      *
-     * <p>The stream is not closed by this method. Use this when reading JSON from
-     * streams that require special handling, such as lenient parsing for external APIs.</p>
+     * <p>The stream is closed after reading (Jackson's default auto-close behavior).
+     * Use this when reading JSON from streams that require special handling, such as
+     * lenient parsing for external APIs.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -892,7 +896,8 @@ public final class JsonMappers {
 
     /**
      * Deserializes JSON from a Reader to an object of the specified type.
-     * The reader is not closed by this method, allowing for additional operations.
+     * Note: the reader is closed after reading, because {@code JsonParser.Feature.AUTO_CLOSE_SOURCE}
+     * is enabled by default on the underlying mapper.
      *
      * <p>This method is useful when you need to control the character encoding
      * or when working with character-based input sources. The Reader handles
@@ -933,8 +938,8 @@ public final class JsonMappers {
      * Deserializes JSON from a Reader using custom deserialization configuration.
      * This method combines reader input with custom deserialization settings.
      *
-     * <p>The reader is not closed by this method. Use this when reading JSON from
-     * character sources that require special handling.</p>
+     * <p>The reader is closed after reading (Jackson's default auto-close behavior).
+     * Use this when reading JSON from character sources that require special handling.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1398,7 +1403,7 @@ public final class JsonMappers {
 
     /**
      * Deserializes JSON from an input stream using TypeReference for generic types.
-     * The stream is not closed by this method; the caller is responsible for closing it.
+     * The stream is closed after reading (Jackson's default auto-close behavior).
      *
      * <p>This method is ideal for deserializing collections, maps, and other generic
      * types from network streams, file streams, or classpath resources.</p>
@@ -1437,7 +1442,8 @@ public final class JsonMappers {
 
     /**
      * Deserializes JSON from an input stream into a Java object of the specified generic type with
-     * custom deserialization configuration. The stream is not closed by this method.
+     * custom deserialization configuration. The stream is closed after reading (Jackson's default
+     * auto-close behavior).
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1451,7 +1457,7 @@ public final class JsonMappers {
      * }</pre>
      *
      * @param <T> the type of the object to deserialize to
-     * @param json the input stream containing JSON content; not closed by this method
+     * @param json the input stream containing JSON content; closed after reading by Jackson's default auto-close behavior
      * @param targetType TypeReference capturing the generic type information
      * @param config the custom deserialization configuration; if {@code null}, uses default
      * @return the deserialized object; {@code null} if JSON contains "null"
@@ -1475,7 +1481,7 @@ public final class JsonMappers {
     /**
      * Deserializes JSON from a Reader into a Java object of the specified generic type using default
      * configuration. Suitable for character-based sources such as {@link java.io.StringReader} or
-     * {@link java.io.FileReader}. The reader is not closed by this method.
+     * {@link java.io.FileReader}. The reader is closed after reading (Jackson's default auto-close behavior).
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1486,7 +1492,7 @@ public final class JsonMappers {
      * }</pre>
      *
      * @param <T> the type of the object to deserialize to
-     * @param json the reader containing JSON content; not closed by this method
+     * @param json the reader containing JSON content; closed after reading by Jackson's default auto-close behavior
      * @param targetType TypeReference capturing the generic type information
      * @return the deserialized object; {@code null} if JSON contains "null"
      * @throws RuntimeException if reading fails or the JSON is invalid
@@ -1504,7 +1510,8 @@ public final class JsonMappers {
 
     /**
      * Deserializes JSON from a Reader into a Java object of the specified generic type with custom
-     * deserialization configuration. The reader is not closed by this method.
+     * deserialization configuration. The reader is closed after reading (Jackson's default
+     * auto-close behavior).
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1518,7 +1525,7 @@ public final class JsonMappers {
      * }</pre>
      *
      * @param <T> the type of the object to deserialize to
-     * @param json the reader containing JSON content; not closed by this method
+     * @param json the reader containing JSON content; closed after reading by Jackson's default auto-close behavior
      * @param targetType TypeReference capturing the generic type information
      * @param config the custom deserialization configuration; if {@code null}, uses default
      * @return the deserialized object; {@code null} if JSON contains "null"
@@ -1927,7 +1934,8 @@ public final class JsonMappers {
 
         /**
          * Serializes a Java object to JSON and writes it to the specified OutputStream.
-         * The stream is not closed by this method, allowing for further operations.
+         * Note: with Jackson's default settings the wrapped mapper closes the stream after
+         * writing ({@code JsonGenerator.Feature.AUTO_CLOSE_TARGET}).
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
@@ -1938,7 +1946,7 @@ public final class JsonMappers {
          * }</pre>
          *
          * @param obj the object to serialize; can be {@code null} (produces {@code "null"})
-         * @param output the output stream to write the JSON to; not closed by this method
+         * @param output the output stream to write the JSON to; closed after writing by Jackson's default auto-close behavior
          * @throws RuntimeException if serialization fails or writing to the stream fails
          */
         public void toJson(final Object obj, final OutputStream output) {
@@ -1963,7 +1971,7 @@ public final class JsonMappers {
          * }</pre>
          *
          * @param obj the object to serialize; can be {@code null} (produces {@code "null"})
-         * @param output the writer to write the JSON to; not closed by this method
+         * @param output the writer to write the JSON to; closed after writing by Jackson's default auto-close behavior
          * @throws RuntimeException if serialization fails or writing fails
          */
         public void toJson(final Object obj, final Writer output) {
@@ -2099,7 +2107,8 @@ public final class JsonMappers {
 
         /**
          * Deserializes JSON from an InputStream into a Java object of the specified type.
-         * The stream is not closed by this method.
+         * Note: with Jackson's default settings the wrapped mapper closes the stream after
+         * reading ({@code JsonParser.Feature.AUTO_CLOSE_SOURCE}).
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code

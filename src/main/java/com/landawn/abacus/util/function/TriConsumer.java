@@ -13,9 +13,9 @@
  */
 package com.landawn.abacus.util.function;
 
-import java.util.Objects;
-
 import com.landawn.abacus.util.Throwables;
+import com.landawn.abacus.util.N;
+import com.landawn.abacus.util.cs;
 
 /**
  * Represents an operation that accepts three input arguments and returns no result.
@@ -81,10 +81,10 @@ public interface TriConsumer<A, B, C> extends Throwables.TriConsumer<A, B, C, Ru
      *
      * @param after the operation to perform after this operation. Must not be {@code null}.
      * @return a composed {@code TriConsumer} that performs in sequence this operation followed by the {@code after} operation
-     * @throws NullPointerException if {@code after} is null
+     * @throws IllegalArgumentException if {@code after} is null
      */
     default TriConsumer<A, B, C> andThen(final TriConsumer<? super A, ? super B, ? super C> after) {
-        Objects.requireNonNull(after);
+        N.checkArgNotNull(after, cs.after);
         return (a, b, c) -> {
             accept(a, b, c);
             after.accept(a, b, c);
@@ -92,19 +92,19 @@ public interface TriConsumer<A, B, C> extends Throwables.TriConsumer<A, B, C, Ru
     }
 
     /**
-     * Converts this TriConsumer to a Throwables.TriConsumer that can throw checked exceptions.
-     * This method is useful when you need to use this consumer in a context that expects
-     * a Throwables.TriConsumer with a specific exception type.
+     * Returns this consumer as a {@link Throwables.TriConsumer} view.
+     * This method does not translate exceptions or make the original implementation capable of
+     * throwing new checked exceptions; the exception type parameter is for target-type compatibility.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * TriConsumer<String, Integer, Boolean> consumer =
      *     (s, i, b) -> System.out.println(s + ":" + i + ":" + b);
-     * var throwableConsumer = consumer.toThrowable();
+     * Throwables.TriConsumer<String, Integer, Boolean, RuntimeException> throwableConsumer = consumer.toThrowable();
      * }</pre>
      *
-     * @param <E> the type of exception that the returned consumer may throw
-     * @return a Throwables.TriConsumer that wraps this consumer
+     * @param <E> the target exception type for compatibility with {@code Throwables.TriConsumer}
+     * @return a {@code Throwables.TriConsumer} view of this consumer
      */
     default <E extends Throwable> Throwables.TriConsumer<A, B, C, E> toThrowable() {
         return (Throwables.TriConsumer<A, B, C, E>) this;

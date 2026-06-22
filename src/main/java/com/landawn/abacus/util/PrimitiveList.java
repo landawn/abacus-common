@@ -133,7 +133,7 @@ import com.landawn.abacus.annotation.Beta;
  * <p><b>Thread Safety:</b>
  * <ul>
  *   <li><b>Not Thread-Safe:</b> Implementations are not synchronized by default</li>
- *   <li><b>External Synchronization:</b> Required for concurrent access (manual synchronization or wrap the boxed view from {@code boxed()})</li>
+ *   <li><b>External Synchronization:</b> Required for concurrent access (e.g., synchronize on the list instance)</li>
  *   <li><b>Concurrent Access:</b> Undefined behavior under concurrent modification</li>
  *   <li><b>Read-Only Access:</b> Multiple threads can safely read without synchronization</li>
  * </ul>
@@ -656,11 +656,11 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
 
     /**
      * Returns {@code true} if this list contains all elements in the specified PrimitiveList.
-     * This method returns {@code true} if the specified list is a subset of this list
-     * (ignoring element order but considering duplicates).
+     * This method returns {@code true} if every element of the specified list is present in this list
+     * (ignoring element order and the number of occurrences).
      *
-     * <p>For elements that appear multiple times, this list must contain at least as many
-     * occurrences as the specified list. An empty list is considered a subset of any list.</p>
+     * <p>This is a pure membership check: a value present once in this list satisfies any number of
+     * occurrences in the specified list. An empty list is considered a subset of any list.</p>
      *
      * <p>This method uses an optimized algorithm when the lists are large, potentially
      * converting to a Set for O(1) lookup performance.</p>
@@ -681,11 +681,11 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
 
     /**
      * Returns {@code true} if this list contains all elements in the specified array.
-     * This method returns {@code true} if all elements in the array are present in this list
-     * (ignoring element order but considering duplicates).
+     * This method returns {@code true} if every element of the array is present in this list
+     * (ignoring element order and the number of occurrences).
      *
-     * <p>For elements that appear multiple times, this list must contain at least as many
-     * occurrences as in the array. An empty array is considered a subset of any list.</p>
+     * <p>This is a pure membership check: a value present once in this list satisfies any number of
+     * occurrences in the array. An empty array is considered a subset of any list.</p>
      *
      * <p>This method uses an optimized algorithm when the list or array is large, potentially
      * converting to a Set for O(1) lookup performance.</p>
@@ -765,12 +765,12 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
      * <pre>{@code
      * IntList list1 = IntList.of(0, 1, 2, 2, 3);
      * IntList list2 = IntList.of(1, 2, 2, 4);
-     * IntList result = list1.intersection(list2);   // returns result will be [1, 2, 2]
+     * IntList result = list1.intersection(list2);   // result will be [1, 2, 2]
      * // One occurrence of '1' (minimum count in both lists) and two occurrences of '2'
      *
      * IntList list3 = IntList.of(5, 5, 6);
      * IntList list4 = IntList.of(5, 7);
-     * IntList result2 = list3.intersection(list4);   // returns result will be [5]
+     * IntList result2 = list3.intersection(list4);   // result will be [5]
      * // One occurrence of '5' (minimum count in both lists)
      * }</pre>
      *
@@ -795,12 +795,12 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
      * <pre>{@code
      * IntList list1 = IntList.of(0, 1, 2, 2, 3);
      * int[] array = new int[] {1, 2, 2, 4};
-     * IntList result = list1.intersection(array);   // returns result will be [1, 2, 2]
+     * IntList result = list1.intersection(array);   // result will be [1, 2, 2]
      * // One occurrence of '1' (minimum count in both sources) and two occurrences of '2'
      *
      * IntList list2 = IntList.of(5, 5, 6);
      * int[] array2 = new int[] {5, 7};
-     * IntList result2 = list2.intersection(array2);   // returns result will be [5]
+     * IntList result2 = list2.intersection(array2);   // result will be [5]
      * // One occurrence of '5' (minimum count in both sources)
      * }</pre>
      *
@@ -825,12 +825,12 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
      * <pre>{@code
      * IntList list1 = IntList.of(0, 1, 2, 2, 3);
      * IntList list2 = IntList.of(2, 5, 1);
-     * IntList result = list1.difference(list2);   // returns result will be [0, 2, 3]
+     * IntList result = list1.difference(list2);   // result will be [0, 2, 3]
      * // One '2' remains because list1 has two occurrences and list2 has one
      *
      * IntList list3 = IntList.of(5, 6);
      * IntList list4 = IntList.of(5, 5, 6);
-     * IntList result2 = list3.difference(list4);   // returns result will be [] (empty)
+     * IntList result2 = list3.difference(list4);   // result will be [] (empty)
      * // No elements remain because list4 has at least as many occurrences of each value as list3
      * }</pre>
      *
@@ -855,12 +855,12 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
      * <pre>{@code
      * IntList list1 = IntList.of(0, 1, 2, 2, 3);
      * int[] array = new int[] {2, 5, 1};
-     * IntList result = list1.difference(array);   // returns result will be [0, 2, 3]
+     * IntList result = list1.difference(array);   // result will be [0, 2, 3]
      * // One '2' remains because list1 has two occurrences and array has one
      *
      * IntList list2 = IntList.of(5, 6);
      * int[] array2 = new int[] {5, 5, 6};
-     * IntList result2 = list2.difference(array2);   // returns result will be [] (empty)
+     * IntList result2 = list2.difference(array2);   // result will be [] (empty)
      * // No elements remain because array2 has at least as many occurrences of each value as list2
      * }</pre>
      *
@@ -1557,7 +1557,7 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IntList list = IntList.of(1, 2, 3);
-     * LinkedList<Integer> linkedList = list.toCollection(LinkedList::new);
+     * LinkedList<Integer> linkedList = list.toCollection(size -> new LinkedList<>());
      * TreeSet<Integer> treeSet = list.toCollection(size -> new TreeSet<>());
      * }</pre>
      *

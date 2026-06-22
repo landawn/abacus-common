@@ -13,9 +13,9 @@
  */
 package com.landawn.abacus.util.function;
 
-import java.util.Objects;
-
 import com.landawn.abacus.util.Throwables;
+import com.landawn.abacus.util.N;
+import com.landawn.abacus.util.cs;
 
 /**
  * Represents a function that accepts three arguments and produces a result.
@@ -42,7 +42,7 @@ public interface TriFunction<A, B, C, R> extends Throwables.TriFunction<A, B, C,
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * TriFunction<Integer, Integer, Integer, Integer> sum = (a, b, c) -> a + b + c;
+     * TriFunction<Integer, Integer, Integer, Integer> sum = (a, b, c) -> Math.addExact(Math.addExact(a, b), c);
      * Integer result = sum.apply(1, 2, 3);   // returns 6
      *
      * TriFunction<String, String, String, String> concatenator =
@@ -69,7 +69,7 @@ public interface TriFunction<A, B, C, R> extends Throwables.TriFunction<A, B, C,
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * TriFunction<Integer, Integer, Integer, Integer> sum = (a, b, c) -> a + b + c;
+     * TriFunction<Integer, Integer, Integer, Integer> sum = (a, b, c) -> Math.addExact(Math.addExact(a, b), c);
      * Function<Integer, String> formatter = n -> "Result: " + n;
      *
      * TriFunction<Integer, Integer, Integer, String> sumAndFormat = sum.andThen(formatter);
@@ -86,27 +86,26 @@ public interface TriFunction<A, B, C, R> extends Throwables.TriFunction<A, B, C,
      * @param <V> the type of output of the after function, and of the composed function
      * @param after the function to apply after this function is applied
      * @return a composed function that first applies this function and then applies the after function
-     * @throws NullPointerException if {@code after} is null
+     * @throws IllegalArgumentException if {@code after} is null
      */
     default <V> TriFunction<A, B, C, V> andThen(final java.util.function.Function<? super R, ? extends V> after) {
-        Objects.requireNonNull(after);
+        N.checkArgNotNull(after, cs.after);
         return (a, b, c) -> after.apply(apply(a, b, c));
     }
 
     /**
-     * Converts this TriFunction to a Throwables.TriFunction that can throw checked exceptions.
-     * This method is useful when you need to use this function in a context that expects
-     * a Throwables.TriFunction with a specific exception type.
+     * Returns this function as a {@link Throwables.TriFunction} view.
+     * This method does not translate exceptions or make the original implementation capable of
+     * throwing new checked exceptions; the exception type parameter is for target-type compatibility.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * TriFunction<String, Integer, Boolean, String> function = (s, i, b) -> { ... };
-     * var throwableFunction =
-     *     function.toThrowable();
+     * TriFunction<String, Integer, Boolean, String> function = (s, i, b) -> s + i + b;
+     * Throwables.TriFunction<String, Integer, Boolean, String, RuntimeException> throwableFunction = function.toThrowable();
      * }</pre>
      *
-     * @param <E> the type of exception that the returned function may throw
-     * @return a Throwables.TriFunction that wraps this function
+     * @param <E> the target exception type for compatibility with {@code Throwables.TriFunction}
+     * @return this function viewed as a {@code Throwables.TriFunction} by unchecked cast
      */
     default <E extends Throwable> Throwables.TriFunction<A, B, C, R, E> toThrowable() {
         return (Throwables.TriFunction<A, B, C, R, E>) this;

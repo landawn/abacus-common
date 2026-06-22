@@ -129,10 +129,12 @@ public class BigDecimalSummaryStatistics implements Consumer<BigDecimal> {
      * }</pre>
      *
      * @param value the input value to be recorded, must not be {@code null}
-     * @throws NullPointerException if {@code value} is {@code null}
+     * @throws IllegalArgumentException if {@code value} is {@code null}
      */
     @Override
     public void accept(final BigDecimal value) {
+        N.checkArgNotNull(value, cs.value);
+
         ++count;
         sum = sum.add(value);
         min = min == null ? value : min.compareTo(value) > 0 ? value : min;
@@ -280,7 +282,7 @@ public class BigDecimalSummaryStatistics implements Consumer<BigDecimal> {
     public String toString() {
         final DecimalFormat df = new DecimalFormat(DECIMAL_FORMAT_PATTERN);
 
-        return Strings.concat("{min=", min == null ? "null" : df.format(min), ", max=", max == null ? "null" : df.format(max), ", count=",
+        return Strings.concatNullToEmpty("{min=", min == null ? "null" : df.format(min), ", max=", max == null ? "null" : df.format(max), ", count=",
                 String.valueOf(count), ", sum=", df.format(getSum()), ", average=", df.format(getAverage()), "}");
     }
 }

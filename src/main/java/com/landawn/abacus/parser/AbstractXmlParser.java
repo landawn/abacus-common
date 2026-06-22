@@ -341,7 +341,7 @@ abstract class AbstractXmlParser extends AbstractParser<XmlSerConfig, XmlDeserCo
      * @param <T> the type of the property instance to create
      * @param propClass the class to instantiate, or {@code null} to use type from the node attribute
      * @param node the XML node that may contain a {@code type} attribute specifying the concrete class
-     * @return a new instance of the property class, or {@code null} if instantiation fails
+     * @return a new instance of the property class; if instantiation fails an exception is thrown (never {@code null})
      */
     @SuppressWarnings("unchecked")
     protected static <T> T newPropInstance(final Class<?> propClass, final Node node) {
@@ -350,7 +350,7 @@ abstract class AbstractXmlParser extends AbstractParser<XmlSerConfig, XmlDeserCo
                 return (T) N.newInstance(propClass);
             } catch (final Exception e) {
                 if (logger.isWarnEnabled()) {
-                    logger.warn("Failed to new instance by class: " + propClass.getName());
+                    logger.warn("Failed to new instance by class: " + propClass.getName(), e);
                 }
             }
         }
@@ -373,7 +373,7 @@ abstract class AbstractXmlParser extends AbstractParser<XmlSerConfig, XmlDeserCo
      * @param <T> the type of the property instance to create
      * @param propClass the class to instantiate, or {@code null} to use type from attributes
      * @param attrs the XML attributes that may contain type information
-     * @return a new instance of the property class, or {@code null} if instantiation fails
+     * @return a new instance of the property class; if instantiation fails an exception is thrown (never {@code null})
      */
     @SuppressWarnings("unchecked")
     protected static <T> T newPropInstance(final Class<?> propClass, final Attributes attrs) {
@@ -382,7 +382,7 @@ abstract class AbstractXmlParser extends AbstractParser<XmlSerConfig, XmlDeserCo
                 return (T) N.newInstance(propClass);
             } catch (final Exception e) {
                 if (logger.isWarnEnabled()) {
-                    logger.warn("Failed to new instance by class: " + propClass.getName());
+                    logger.warn("Failed to new instance by class: " + propClass.getName(), e);
                 }
             }
         }
@@ -589,7 +589,7 @@ abstract class AbstractXmlParser extends AbstractParser<XmlSerConfig, XmlDeserCo
      * }</pre>
      *
      * @param eleNode the XML element node to examine
-     * @return the single child element node
+     * @return the single child element node, or {@code null} if there is none
      * @throws ParsingException if the element contains more than one child element node
      */
     protected static Node checkOneNode(final Node eleNode) {

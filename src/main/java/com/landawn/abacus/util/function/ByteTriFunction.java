@@ -13,9 +13,9 @@
  */
 package com.landawn.abacus.util.function;
 
-import java.util.Objects;
-
 import com.landawn.abacus.util.Throwables;
+import com.landawn.abacus.util.N;
+import com.landawn.abacus.util.cs;
 
 /**
  * Represents a function that accepts three byte-valued arguments and produces a result.
@@ -38,7 +38,7 @@ public interface ByteTriFunction<R> extends Throwables.ByteTriFunction<R, Runtim
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * ByteTriFunction<String> formatter = (r, g, b) -> String.format("RGB(%d,%d,%d)", r, g, b);
+     * ByteTriFunction<String> formatter = (r, g, b) -> String.format("RGB(%d,%d,%d)", r & 0xFF, g & 0xFF, b & 0xFF);
      * String color = formatter.apply((byte) 255, (byte) 128, (byte) 0);   // Returns "RGB(255,128,0)"
      *
      * ByteTriFunction<Integer> sum = (a, b, c) -> (int) (a + b + c);
@@ -71,10 +71,24 @@ public interface ByteTriFunction<R> extends Throwables.ByteTriFunction<R, Runtim
      * @param after the function to apply after this function is applied. Must not be {@code null}.
      * @return a composed function that first applies this function and then applies the
      *         {@code after} function
-     * @throws NullPointerException if {@code after} is null
+     * @throws IllegalArgumentException if {@code after} is null
      */
     default <V> ByteTriFunction<V> andThen(final java.util.function.Function<? super R, ? extends V> after) {
-        Objects.requireNonNull(after);
+        N.checkArgNotNull(after, cs.after);
         return (a, b, c) -> after.apply(apply(a, b, c));
+    }
+
+    /**
+     * Returns this object as a {@link Throwables.ByteTriFunction} view.
+     *
+     * <p>The returned object has the same behavior as this one. This method does not translate
+     * exceptions or make the original implementation capable of throwing new checked exceptions; the
+     * exception type parameter is for target-type compatibility with APIs that accept {@code Throwables.ByteTriFunction}.
+     *
+     * @param <E> the target exception type for compatibility with {@code Throwables.ByteTriFunction}
+     * @return a {@link Throwables.ByteTriFunction} view of this object
+     */
+    default <E extends Throwable> Throwables.ByteTriFunction<R, E> toThrowable() {
+        return (Throwables.ByteTriFunction<R, E>) this;
     }
 }

@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -611,10 +612,10 @@ public class NStringTest extends AbstractParserTest {
         final String nullStr = null;
 
         {
-            assertEquals(0, Strings.indexOf("a, b, c", "a", ","));
-            assertEquals(3, Strings.indexOf("a, b, c", "b", ", "));
-            assertEquals(6, Strings.indexOf("a, b, c", "c", ", "));
-            assertEquals(-1, Strings.indexOf("a,  b, c", "d", ","));
+            assertEquals(0, StrUtil.indexOf("a, b, c", "a", ","));
+            assertEquals(3, StrUtil.indexOf("a, b, c", "b", ", "));
+            assertEquals(6, StrUtil.indexOf("a, b, c", "c", ", "));
+            assertEquals(-1, StrUtil.indexOf("a,  b, c", "d", ","));
 
             final boolean[] b = { true, true };
             assertEquals(0, N.indexOf(b, true));
@@ -658,10 +659,10 @@ public class NStringTest extends AbstractParserTest {
         }
 
         {
-            assertEquals(0, Strings.lastIndexOf("a,  b, c", "a", ","));
-            assertEquals(3, Strings.lastIndexOf("a, b, c", "b", ", "));
-            assertEquals(10, Strings.lastIndexOf("a,  b, c, b", "b", ", "));
-            assertEquals(-1, Strings.lastIndexOf("a,  b, c", "d", ","));
+            assertEquals(0, StrUtil.lastIndexOf("a,  b, c", "a", ","));
+            assertEquals(3, StrUtil.lastIndexOf("a, b, c", "b", ", "));
+            assertEquals(10, StrUtil.lastIndexOf("a,  b, c, b", "b", ", "));
+            assertEquals(-1, StrUtil.lastIndexOf("a,  b, c", "d", ","));
 
             final boolean[] b = { true, true };
             assertEquals(1, N.lastIndexOf(b, true));
@@ -706,10 +707,10 @@ public class NStringTest extends AbstractParserTest {
 
         {
 
-            assertFalse(Strings.contains(nullStr, "a", ","));
-            assertFalse(Strings.contains("", "b", ","));
-            assertTrue(Strings.contains("a,  b, c", "c", ", "));
-            assertFalse(Strings.contains("a,  b, c", "d", ","));
+            assertFalse(StrUtil.contains(nullStr, "a", ","));
+            assertFalse(StrUtil.contains("", "b", ","));
+            assertTrue(StrUtil.contains("a,  b, c", "c", ", "));
+            assertFalse(StrUtil.contains("a,  b, c", "d", ","));
 
             final boolean[] b = { true, true };
             assertTrue(N.contains(b, true));
@@ -1064,7 +1065,7 @@ public class NStringTest extends AbstractParserTest {
             assertFalse(Strings.isAsciiAlphanumeric(new StringBuilder("abc\n\123")));
 
             assertFalse(Strings.isAsciiPrintable(null));
-            assertTrue(Strings.isAsciiPrintable(""));
+            assertFalse(Strings.isAsciiPrintable(""));
             assertTrue(Strings.isAsciiPrintable("abc"));
             assertTrue(Strings.isAsciiPrintable(new StringBuilder("abc")));
             assertFalse(Strings.isAsciiPrintable("abc\n\123"));
@@ -1078,14 +1079,14 @@ public class NStringTest extends AbstractParserTest {
             assertFalse(Strings.isAsciiAlpha(new StringBuilder("abc\n\123")));
 
             assertFalse(Strings.isAsciiAlphaSpace(null));
-            assertTrue(Strings.isAsciiAlphaSpace(""));
+            assertFalse(Strings.isAsciiAlphaSpace(""));
             assertTrue(Strings.isAsciiAlphaSpace("abc "));
             assertTrue(Strings.isAsciiAlphaSpace(new StringBuilder("abc ")));
             assertFalse(Strings.isAsciiAlphaSpace("abc\n\123 "));
             assertFalse(Strings.isAsciiAlphaSpace(new StringBuilder("abc\n\123 ")));
 
             assertFalse(Strings.isAsciiAlphanumericSpace(null));
-            assertTrue(Strings.isAsciiAlphanumericSpace(""));
+            assertFalse(Strings.isAsciiAlphanumericSpace(""));
             assertTrue(Strings.isAsciiAlphanumericSpace("abc "));
             assertTrue(Strings.isAsciiAlphanumericSpace(new StringBuilder("abc ")));
             assertFalse(Strings.isAsciiAlphanumericSpace("abc\n\123 "));
@@ -1106,7 +1107,7 @@ public class NStringTest extends AbstractParserTest {
             assertFalse(Strings.isAlpha(new StringBuilder("abc\n\123")));
 
             assertFalse(Strings.isAlphaSpace(null));
-            assertTrue(Strings.isAlphaSpace(""));
+            assertFalse(Strings.isAlphaSpace(""));
             assertTrue(Strings.isAlphaSpace("abc"));
             assertTrue(Strings.isAlphaSpace(new StringBuilder("abc")));
             assertFalse(Strings.isAlphaSpace("abc\n\123"));
@@ -1120,7 +1121,7 @@ public class NStringTest extends AbstractParserTest {
             assertFalse(Strings.isAlphanumeric(new StringBuilder("abc\n\123")));
 
             assertFalse(Strings.isAlphanumericSpace(null));
-            assertTrue(Strings.isAlphanumericSpace(""));
+            assertFalse(Strings.isAlphanumericSpace(""));
             assertTrue(Strings.isAlphanumericSpace("abc123 "));
             assertTrue(Strings.isAlphanumericSpace(new StringBuilder("abc123 ")));
             assertFalse(Strings.isAlphanumericSpace("abc\n\123 "));
@@ -1134,14 +1135,14 @@ public class NStringTest extends AbstractParserTest {
             assertFalse(Strings.isNumeric(new StringBuilder("abc\n\123 ")));
 
             assertFalse(Strings.isNumericSpace(null));
-            assertTrue(Strings.isNumericSpace(""));
+            assertFalse(Strings.isNumericSpace(""));
             assertTrue(Strings.isNumericSpace("12 3"));
             assertTrue(Strings.isNumericSpace(new StringBuilder("12 3")));
             assertFalse(Strings.isNumericSpace("abc\n\123 "));
             assertFalse(Strings.isNumericSpace(new StringBuilder("abc\n\123 ")));
 
             assertFalse(Strings.isWhitespace(null));
-            assertTrue(Strings.isWhitespace(""));
+            assertFalse(Strings.isWhitespace(""));
             assertTrue(Strings.isWhitespace(" \n \r "));
             assertFalse(Strings.isWhitespace(" \\n \\r "));
             assertTrue(Strings.isWhitespace(new StringBuilder(" \n \r ")));
@@ -4522,15 +4523,15 @@ public class NStringTest extends AbstractParserTest {
     @Test
     public void test_commonPrefix() {
         String commPrefix = Strings.commonPrefix(null, null);
-        assertEquals("", commPrefix);
+        assertNull(commPrefix);
         N.println(commPrefix);
 
         commPrefix = Strings.commonPrefix(null, "");
-        assertEquals("", commPrefix);
+        assertNull(commPrefix);
         N.println(commPrefix);
 
         commPrefix = Strings.commonPrefix("", null);
-        assertEquals("", commPrefix);
+        assertNull(commPrefix);
         N.println(commPrefix);
 
         commPrefix = Strings.commonPrefix("", "");
@@ -4594,30 +4595,30 @@ public class NStringTest extends AbstractParserTest {
         N.println(commPrefix);
 
         commPrefix = Strings.commonPrefix("", null, "");
-        assertEquals("", commPrefix);
+        assertNull(commPrefix);
         N.println(commPrefix);
     }
 
     @Test
     public void test_commonSuffix() {
         String commSuffix = Strings.commonSuffix(null, null);
-        assertEquals("", commSuffix);
+        assertNull(commSuffix);
         N.println(commSuffix);
 
         commSuffix = Strings.commonSuffix(null, null, null, null);
-        assertEquals("", commSuffix);
+        assertNull(commSuffix);
         N.println(commSuffix);
 
         commSuffix = Strings.commonSuffix(null, "");
-        assertEquals("", commSuffix);
+        assertNull(commSuffix);
         N.println(commSuffix);
 
         commSuffix = Strings.commonSuffix("", null);
-        assertEquals("", commSuffix);
+        assertNull(commSuffix);
         N.println(commSuffix);
 
         commSuffix = Strings.commonSuffix("", null, "", null);
-        assertEquals("", commSuffix);
+        assertNull(commSuffix);
         N.println(commSuffix);
 
         commSuffix = Strings.commonSuffix("", "");

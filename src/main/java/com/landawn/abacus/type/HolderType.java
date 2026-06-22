@@ -25,7 +25,7 @@ import com.landawn.abacus.util.SK;
  * Note: this handles the abacus-specific {@code Holder<T>}, not {@code java.util.Optional<T>}
  * (which is handled by {@link JdkOptionalType}).
  * <p>
- * Unlike {@link com.landawn.abacus.util.u.Nullable Nullable} (handled by {@link NullableType}),
+ * Unlike {@link com.landawn.abacus.util.u.Optional Optional} (which disallows {@code null} values),
  * a {@code Holder} may hold {@code null} as its current value. SQL {@code NULL} columns are
  * mapped to a {@code null}-valued {@code Holder} on read, and a {@code null}-valued
  * {@code Holder} maps to SQL {@code NULL} on write.
@@ -285,12 +285,10 @@ public class HolderType<T> extends AbstractType<Holder<T>> {
     /**
      * Appends the string representation of a {@link Holder} to an Appendable.
      * If the Holder is {@code null} or holds a {@code null} value, appends the {@code NULL_STRING} constant.
-     * Otherwise, delegates to the actual type handler of the contained value.
+     * Otherwise, delegates to the runtime type handler of the contained value.
      * <p>
-     * <b>appendTo vs. serializeTo:</b> {@code appendTo} produces a plain, {@code toString()}-style rendering with no
-     * JSON/XML quoting or escaping (for general text output), whereas {@code serializeTo} produces the JSON/XML
-     * serialized form (applying string quotation and character escaping per the serialization config) and is used by the
-     * JSON/XML serializers.
+     * <b>appendTo vs. serializeTo:</b> {@code appendTo} delegates to the contained value's plain append contract,
+     * whereas {@code serializeTo} delegates to the contained value's serialization contract.
      *
      * @param appendable the Appendable to write to
      * @param x the Holder value to append
@@ -316,19 +314,15 @@ public class HolderType<T> extends AbstractType<Holder<T>> {
     }
 
     /**
-     * Writes the character representation of a {@link Holder} to a CharacterWriter.
-     * If the Holder is {@code null} or holds a {@code null} value, writes the {@code NULL_CHAR_ARRAY}.
-     * Otherwise, delegates to the actual type handler of the contained value.
-     * This method is typically used for JSON/XML serialization.
+     * Writes the serialized representation of a {@link Holder} to a {@link CharacterWriter}.
+     * If the Holder is {@code null} or holds a {@code null} value, writes {@code null}.
+     * Otherwise, delegates to the runtime type handler of the contained value.
      * <p>
-     * This method is specifically designed for JSON/XML serialization: it writes the serialized form of {@code x} to the
-     * {@code CharacterWriter}, applying string quotation and character escaping according to the supplied serialization
-     * config (a {@code null} config means no surrounding quotation). It is the streaming counterpart of {@code stringOf}
-     * and is invoked by the JSON/XML serializers.
+     * Any string quotation or character escaping is performed by the delegated value type handler according to the
+     * supplied serialization config.
      * <p>
-     * <b>serializeTo vs. appendTo:</b> {@code serializeTo} produces machine-readable JSON/XML (quoted and escaped),
-     * whereas {@code appendTo} produces a plain, human-readable {@code toString()}-style rendering without JSON/XML
-     * quoting or escaping.
+     * <b>serializeTo vs. appendTo:</b> {@code serializeTo} delegates to the contained value's serialization contract,
+     * whereas {@code appendTo} delegates to the contained value's plain append contract.
      *
      * @param writer the CharacterWriter to write to
      * @param x the Holder value to write

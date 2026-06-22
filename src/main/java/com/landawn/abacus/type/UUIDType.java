@@ -127,4 +127,15 @@ public class UUIDType extends AbstractType<UUID> {
     public UUID valueOf(final String str) {
         return Strings.isBlank(str) ? null : java.util.UUID.fromString(str.trim()); // NOSONAR
     }
+
+    /**
+     * Indicates whether {@link UUID} values are comparable.
+     * {@link UUID} implements {@link Comparable}, so this returns {@code true}.
+     *
+     * @return {@code true}, always, because {@link UUID} is {@link Comparable}
+     */
+    @Override
+    public boolean isComparable() {
+        return true;
+    }
 }

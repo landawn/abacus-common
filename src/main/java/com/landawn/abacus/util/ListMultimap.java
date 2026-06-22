@@ -42,7 +42,7 @@ import com.landawn.abacus.annotation.Internal;
  *   <li><b>Duplicate Values:</b> Allows the same value to be added multiple times for the same key</li>
  *   <li><b>Insertion Order:</b> Maintains the order in which values were added to each key</li>
  *   <li><b>List Semantics:</b> Each key maps to a {@link List} of values with index-based access</li>
- *   <li><b>Efficient Access:</b> O(1) access to first/last elements, O(n) for arbitrary positions</li>
+ *   <li><b>Efficient Access:</b> O(1) positional access with the default {@link java.util.ArrayList} value lists</li>
  *   <li><b>Memory Efficient:</b> Only creates lists when values are actually added to keys</li>
  * </ul>
  *
@@ -907,55 +907,55 @@ public final class ListMultimap<K, E> extends Multimap<K, E, List<E>> {
         return new ListMultimap<>((Map<K, List<E>>) map, valueSupplier);
     }
 
-    //    /**
-    //     * Returns the first value for the given key, or {@code null} if no value is found.
-    //     *
-    //     * <p>Since ListMultimap maintains values in a list, this method returns the first element
-    //     * from the list associated with the specified key. If the key is not present or the list is empty,
-    //     * {@code null} is returned.
-    //     *
-    //     * <p><b>Usage Examples:</b></p>
-    //     * <pre>{@code
-    //     * ListMultimap<String, Integer> multimap = ListMultimap.of("a", 1);
-    //     * multimap.put("a", 2);
-    //     * multimap.getFirst("a");   // returns 1
-    //     * multimap.getFirst("b");   // returns null
-    //     * }</pre>
-    //     *
-    //     * @param key the key whose associated value is to be returned
-    //     * @return the first value associated with the specified key, or {@code null} if the key has no associated values
-    //     * @see #getFirstOrDefault(Object, Object)
-    //     */
-    //    @Override
-    //    public E getFirst(final K key) {
-    //        final List<E> values = backingMap.get(key);
-    //        return N.isEmpty(values) ? null : values.get(0);
-    //    }
-    //
-    //    /**
-    //     * Returns the first value for the given key, or {@code defaultValue} if no value is found.
-    //     *
-    //     * <p>Since ListMultimap maintains values in a list, this method returns the first element
-    //     * from the list associated with the specified key. If the key is not present or the list is empty,
-    //     * the provided default value is returned instead.
-    //     *
-    //     * <p><b>Usage Examples:</b></p>
-    //     * <pre>{@code
-    //     * ListMultimap<String, Integer> multimap = ListMultimap.of("a", 1);
-    //     * multimap.getFirstOrDefault("a", 99);   // returns 1
-    //     * multimap.getFirstOrDefault("b", 99);   // returns 99
-    //     * }</pre>
-    //     *
-    //     * @param key the key whose associated value is to be returned
-    //     * @param defaultValue the default value to return if no value is associated with the key
-    //     * @return the first value associated with the specified key, or the default value if the key has no associated values
-    //     * @see #getFirst(Object)
-    //     */
-    //    @Override
-    //    public E getFirstOrDefault(final K key, final E defaultValue) {
-    //        final List<E> values = backingMap.get(key);
-    //        return N.isEmpty(values) ? defaultValue : values.get(0);
-    //    }
+    /**
+     * Returns the first value for the given key, or {@code null} if no value is found.
+     *
+     * <p>Since ListMultimap maintains values in a list, this method returns the first element
+     * from the list associated with the specified key in O(1) time. If the key is not present
+     * or the list is empty, {@code null} is returned.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * ListMultimap<String, Integer> multimap = ListMultimap.of("a", 1);
+     * multimap.put("a", 2);
+     * multimap.getFirst("a");   // returns 1
+     * multimap.getFirst("b");   // returns null
+     * }</pre>
+     *
+     * @param key the key whose associated value is to be returned
+     * @return the first value associated with the specified key, or {@code null} if the key has no associated values
+     * @see #getFirstOrDefault(Object, Object)
+     */
+    public E getFirst(final K key) {
+        final List<E> values = backingMap.get(key);
+
+        return N.isEmpty(values) ? null : values.get(0);
+    }
+
+    /**
+     * Returns the first value for the given key, or {@code defaultValue} if no value is found.
+     *
+     * <p>Since ListMultimap maintains values in a list, this method returns the first element
+     * from the list associated with the specified key in O(1) time. If the key is not present
+     * or the list is empty, the provided default value is returned instead.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * ListMultimap<String, Integer> multimap = ListMultimap.of("a", 1);
+     * multimap.getFirstOrDefault("a", 99);   // returns 1
+     * multimap.getFirstOrDefault("b", 99);   // returns 99
+     * }</pre>
+     *
+     * @param key the key whose associated value is to be returned
+     * @param defaultValue the default value to return if no value is associated with the key
+     * @return the first value associated with the specified key, or the default value if the key has no associated values
+     * @see #getFirst(Object)
+     */
+    public E getFirstOrDefault(final K key, final E defaultValue) {
+        final List<E> values = backingMap.get(key);
+
+        return N.isEmpty(values) ? defaultValue : values.get(0);
+    }
 
     /**
      * Inverts the ListMultimap, swapping keys with values.
@@ -1133,7 +1133,8 @@ public final class ListMultimap<K, E> extends Multimap<K, E, List<E>> {
      * <p>Each key-value pair in the ListMultimap is transformed into a key-ImmutableList pair in the ImmutableMap.
      * The ImmutableList contains all the values associated with the key in the ListMultimap.
      * The returned ImmutableMap cannot be modified after creation, and attempts to modify it will throw UnsupportedOperationException.
-     * The order of entries in the ImmutableMap matches the order in the original ListMultimap.
+     * If the backing map maintains a defined iteration order (e.g., LinkedHashMap or TreeMap), that
+     * order is preserved in the returned map.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code

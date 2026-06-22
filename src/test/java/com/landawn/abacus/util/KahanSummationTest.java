@@ -98,6 +98,40 @@ public class KahanSummationTest extends TestBase {
     }
 
     @Test
+    public void testSumCompensationSign() {
+        // True sum is 1.0 + 2^-53, whose correctly-rounded double value is 1.0.
+        // With the wrong compensation sign (sum + correction, the pre-JDK-8214761
+        // bug), this returns 0.9999999999999999 - worse than naive summation.
+        final double halfUlp = Math.ulp(1.0) / 2; // 2^-53
+        final KahanSummation sum = KahanSummation.of(1.0, halfUlp);
+
+        Assertions.assertEquals(1.0, sum.sum());
+    }
+
+    @Test
+    public void testCombineCompensationSign() {
+        // other holds sum=1.0 with correction=-2^-53 (true partial sum 1.0 + 2^-53).
+        // Combining must subtract the compensation bits (JDK-8214761); adding them
+        // instead yields 0.9999999999999999.
+        final double halfUlp = Math.ulp(1.0) / 2; // 2^-53
+        final KahanSummation other = KahanSummation.of(1.0, halfUlp);
+
+        final KahanSummation sum = new KahanSummation();
+        sum.combine(other);
+
+        Assertions.assertEquals(2, sum.count());
+        Assertions.assertEquals(1.0, sum.sum());
+
+        // Matches java.util.DoubleSummaryStatistics on the same input.
+        final java.util.DoubleSummaryStatistics jdkOther = new java.util.DoubleSummaryStatistics();
+        jdkOther.accept(1.0);
+        jdkOther.accept(halfUlp);
+        final java.util.DoubleSummaryStatistics jdk = new java.util.DoubleSummaryStatistics();
+        jdk.combine(jdkOther);
+        Assertions.assertEquals(jdk.getSum(), sum.sum());
+    }
+
+    @Test
     public void testAverage() {
         KahanSummation sum = new KahanSummation();
         sum.add(1.0);

@@ -164,6 +164,6 @@ public class ShortBiConsumerTest extends TestBase {
     public void testAndThenNullThrowsImmediately() {
         ShortBiConsumer instance = (a, b) -> {
         };
-        org.junit.jupiter.api.Assertions.assertThrows(NullPointerException.class, () -> instance.andThen((ShortBiConsumer) null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> instance.andThen((ShortBiConsumer) null));
     }
 }

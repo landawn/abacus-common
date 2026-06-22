@@ -121,7 +121,7 @@ public class ListMultimapType<K, E> extends MultimapType<K, E, List<E>, ListMult
      *
      * @param str the JSON string to parse
      * @return a ListMultimap instance populated with the parsed data, or {@code null} if the string is {@code null}, empty, or blank
-     * @throws IllegalArgumentException if the JSON string is malformed
+     * @throws com.landawn.abacus.exception.ParsingException if the JSON string is malformed
      * @see #valueOf(Object)
      * @see #stringOf(ListMultimap)
      */

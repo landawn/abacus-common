@@ -2535,6 +2535,12 @@ public class DoubleListTest extends TestBase {
     }
 
     @Test
+    public void testShuffleNullRandomRejectedForSmallLists() {
+        assertThrows(IllegalArgumentException.class, () -> new DoubleList().shuffle(null));
+        assertThrows(IllegalArgumentException.class, () -> DoubleList.of(1.1).shuffle(null));
+    }
+
+    @Test
     public void testShuffleEmptyList() {
         list.shuffle();
         assertTrue(list.isEmpty());
@@ -3226,6 +3232,23 @@ public class DoubleListTest extends TestBase {
         assertThrows(NullPointerException.class, () -> nonEmpty.forEach((com.landawn.abacus.util.function.DoubleConsumer) null));
         assertThrows(NullPointerException.class, () -> nonEmpty.removeIf((com.landawn.abacus.util.function.DoublePredicate) null));
         assertThrows(NullPointerException.class, () -> nonEmpty.replaceIf((com.landawn.abacus.util.function.DoublePredicate) null, 0d));
+    }
+
+    // --- regression tests for 2026-06-10 deep-review fixes ---
+
+    @org.junit.jupiter.api.Test
+    public void testCopyDescendingFromSizeClampsToLogicalSize() {
+        // regression (template-shared across all 8 primitive lists): copy(size, -1, -step) clamped
+        // the start against the backing array's CAPACITY, exposing phantom elements beyond size
+        final DoubleList padded = new DoubleList(10);
+        padded.add(1d);
+        padded.add(2d);
+        padded.add(3d);
+        assertEquals(DoubleList.of(3d, 2d, 1d), padded.copy(3, -1, -1));
+
+        final DoubleList backed = new DoubleList(new double[] { 1d, 2d, 3d, 99d, 98d }, 3);
+        assertEquals(DoubleList.of(3d, 2d, 1d), backed.copy(3, -1, -1));
+        assertEquals(DoubleList.of(3d, 1d), backed.copy(3, -1, -2));
     }
 
 }

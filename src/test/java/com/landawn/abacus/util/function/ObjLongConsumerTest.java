@@ -41,6 +41,6 @@ public class ObjLongConsumerTest extends TestBase {
     public void testAndThenNullThrowsImmediately() {
         ObjLongConsumer<String> instance = (a, b) -> {
         };
-        org.junit.jupiter.api.Assertions.assertThrows(NullPointerException.class, () -> instance.andThen((ObjLongConsumer) null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> instance.andThen((ObjLongConsumer) null));
     }
 }

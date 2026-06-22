@@ -132,7 +132,7 @@ public class LocalDateTimeType extends AbstractTemporalType<LocalDateTime> {
      * Parses a string to create a LocalDateTime object.
      * This method supports multiple string formats with intelligent format detection:
      * <ul>
-     *   <li>{@code null}, empty, or blank string returns {@code null}</li>
+     *   <li>{@code null}, empty string, or the literal {@code "null"} (case-insensitive) returns {@code null}</li>
      *   <li>{@code "SYS_TIME"} returns the current {@code LocalDateTime}</li>
      *   <li>Numeric strings are treated as milliseconds since the epoch</li>
      *   <li>ISO-8601 formatted strings are parsed directly via {@link LocalDateTime#parse(CharSequence)}</li>
@@ -162,7 +162,7 @@ public class LocalDateTimeType extends AbstractTemporalType<LocalDateTime> {
      * {@link LocalDateTime#toString()}, the value returned by {@code toString()} round-trips as well.</p>
      *
      * @param str the string to parse
-     * @return the parsed {@code LocalDateTime} object, or {@code null} if the input is {@code null}, empty, or blank
+     * @return the parsed {@code LocalDateTime} object, or {@code null} if the input is {@code null}, empty, or the literal {@code "null"}
      * @throws java.time.format.DateTimeParseException if the string is not a valid millisecond
      *         number nor an ISO-8601 {@code LocalDateTime} representation
      * @see #valueOf(Object)
@@ -191,7 +191,6 @@ public class LocalDateTimeType extends AbstractTemporalType<LocalDateTime> {
 
     /**
      * Converts a character array to a LocalDateTime object.
-     * This method provides efficient parsing from character arrays without intermediate String allocation.
      *
      * The character array is first converted to a string, then parsed.
      *

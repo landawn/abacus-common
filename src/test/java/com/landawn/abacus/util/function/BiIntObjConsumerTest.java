@@ -156,6 +156,6 @@ public class BiIntObjConsumerTest extends TestBase {
     public void testAndThenNullThrowsImmediately() {
         BiIntObjConsumer<String> instance = (a, b, c) -> {
         };
-        org.junit.jupiter.api.Assertions.assertThrows(NullPointerException.class, () -> instance.andThen((BiIntObjConsumer) null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> instance.andThen((BiIntObjConsumer) null));
     }
 }

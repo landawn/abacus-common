@@ -13,9 +13,9 @@
  */
 package com.landawn.abacus.util.function;
 
-import java.util.Objects;
-
 import com.landawn.abacus.util.Throwables;
+import com.landawn.abacus.util.N;
+import com.landawn.abacus.util.cs;
 
 /**
  * Represents an operation on a single {@code int}-valued operand that produces
@@ -87,13 +87,13 @@ public interface IntUnaryOperator extends Throwables.IntUnaryOperator<RuntimeExc
      *               Must not be {@code null}.
      * @return a composed operator that first applies the {@code before}
      *         operator and then applies this operator
-     * @throws NullPointerException if {@code before} is null
+     * @throws IllegalArgumentException if {@code before} is null
      *
      * @see #andThen(java.util.function.IntUnaryOperator)
      */
     @Override
     default IntUnaryOperator compose(final java.util.function.IntUnaryOperator before) {
-        Objects.requireNonNull(before);
+        N.checkArgNotNull(before, cs.before);
         return (final int v) -> applyAsInt(before.applyAsInt(v));
     }
 
@@ -118,13 +118,13 @@ public interface IntUnaryOperator extends Throwables.IntUnaryOperator<RuntimeExc
      *              Must not be {@code null}.
      * @return a composed operator that first applies this operator and then
      *         applies the {@code after} operator
-     * @throws NullPointerException if {@code after} is null
+     * @throws IllegalArgumentException if {@code after} is null
      *
      * @see #compose(java.util.function.IntUnaryOperator)
      */
     @Override
     default IntUnaryOperator andThen(final java.util.function.IntUnaryOperator after) {
-        Objects.requireNonNull(after);
+        N.checkArgNotNull(after, cs.after);
         return (final int t) -> after.applyAsInt(applyAsInt(t));
     }
 
@@ -144,5 +144,19 @@ public interface IntUnaryOperator extends Throwables.IntUnaryOperator<RuntimeExc
      */
     static IntUnaryOperator identity() {
         return t -> t;
+    }
+
+    /**
+     * Returns this object as a {@link Throwables.IntUnaryOperator} view.
+     *
+     * <p>The returned object has the same behavior as this one. This method does not translate
+     * exceptions or make the original implementation capable of throwing new checked exceptions; the
+     * exception type parameter is for target-type compatibility with APIs that accept {@code Throwables.IntUnaryOperator}.
+     *
+     * @param <E> the target exception type for compatibility with {@code Throwables.IntUnaryOperator}
+     * @return a {@link Throwables.IntUnaryOperator} view of this object
+     */
+    default <E extends Throwable> Throwables.IntUnaryOperator<E> toThrowable() {
+        return (Throwables.IntUnaryOperator<E>) this;
     }
 }

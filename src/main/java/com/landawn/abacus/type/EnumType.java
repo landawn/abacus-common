@@ -215,15 +215,21 @@ public final class EnumType<T extends Enum<T>> extends SingleValueType<T> {
     @Override
     public T valueOf(final String str) {
         if (jsonValueType == null) {
-            if (Strings.isEmpty(str) || (!hasNull && NULL.equals(str))) {
+            if (Strings.isEmpty(str)) {
                 return null; // NOSONAR
             }
 
-            if (Strings.isAsciiInteger(str) && !jsonXmlNameEnumMap.containsKey(str)) {
+            final T value = jsonXmlNameEnumMap.get(str);
+
+            if (value != null) {
+                return value;
+            } else if (!hasNull && NULL.equals(str)) {
+                return null; // NOSONAR
+            }
+
+            if (Strings.isAsciiInteger(str)) {
                 return valueOf(Numbers.toInt(str));
             } else {
-                final T value = jsonXmlNameEnumMap.get(str);
-
                 return Objects.requireNonNullElseGet(value, () -> Enum.valueOf(typeClass, str));
             }
         } else {

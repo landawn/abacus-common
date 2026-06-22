@@ -67,6 +67,8 @@ public class ContentFormatTest extends TestBase {
 
     @Test
     public void testContentTypeKRYO() {
+        // KRYO.contentType() is intentionally "" by design (the "application/kryo" wire type lives in
+        // HttpUtil.contentFormat2Type, not on the enum). See M3 RESOLVED — WON'T-FIX (by design, per owner).
         assertEquals("", ContentFormat.KRYO.contentType());
     }
 
@@ -109,7 +111,7 @@ public class ContentFormatTest extends TestBase {
         assertEquals("application/xml", ContentFormat.XML_GZIP.contentType());
         assertEquals("application/xml", ContentFormat.XML_BR.contentType());
         assertEquals("application/x-www-form-urlencoded", ContentFormat.FORM_URL_ENCODED.contentType());
-        assertEquals("", ContentFormat.KRYO.contentType());
+        assertEquals("", ContentFormat.KRYO.contentType()); // KRYO contentType is "" by design (per owner)
         assertEquals("", ContentFormat.LZ4.contentType());
         assertEquals("", ContentFormat.SNAPPY.contentType());
         assertEquals("", ContentFormat.GZIP.contentType());

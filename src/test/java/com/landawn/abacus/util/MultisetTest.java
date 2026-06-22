@@ -1968,7 +1968,7 @@ public class MultisetTest extends AbstractTest {
     @Test
     public void testComputeIfAbsent_NegativeValue() {
         int count = multiset.computeIfAbsent("apple", e -> -1);
-        assertEquals(-1, count);
+        assertEquals(0, count);
         assertEquals(0, multiset.getCount("apple"));
     }
 
@@ -3387,15 +3387,6 @@ public class MultisetTest extends AbstractTest {
     }
 
     @Test
-    public void testElements() {
-        multiset.add("a", 2);
-        multiset.add("b", 1);
-
-        List<String> list = multiset.elements().toList();
-        assertEquals(3, list.size());
-    }
-
-    @Test
     public void testElementsStream() {
         Multiset<String> multiset = Multiset.of("a", "b", "a", "c");
         List<String> streamed = multiset.elements().toList();
@@ -3770,6 +3761,30 @@ public class MultisetTest extends AbstractTest {
         Multiset<String> set = Multiset.of("a", "a", "b");
 
         assertTrue(set.removeAllOccurrencesOf(set));
+        assertTrue(set.isEmpty());
+    }
+
+    @Test
+    public void testComputeMethodsReturnZeroWhenNonPositiveResultRemovesEntry() {
+        Multiset<String> set = Multiset.of("a", "a");
+
+        assertEquals(0, set.computeIfPresent("a", (e, count) -> -1));
+        assertEquals(0, set.getCount("a"));
+
+        set = Multiset.of("a", "a");
+        assertEquals(0, set.compute("a", (e, count) -> -1));
+        assertEquals(0, set.getCount("a"));
+
+        set = Multiset.of("a", "a");
+        assertEquals(0, set.merge("a", 1, (oldCount, value) -> -1));
+        assertEquals(0, set.getCount("a"));
+    }
+
+    @Test
+    public void testRemoveAllElementSetViewClearsWithoutConcurrentModification() {
+        final Multiset<String> set = Multiset.of("a", "a", "b");
+
+        assertTrue(set.removeAll(set.elementSet()));
         assertTrue(set.isEmpty());
     }
 }

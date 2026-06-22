@@ -125,7 +125,7 @@ public final class ImmutableNavigableSet<E> extends ImmutableSortedSet<E> implem
     }
 
     /**
-     * Returns an ImmutableNavigableSet containing exactly two elements in sorted order.
+     * Returns an ImmutableNavigableSet containing up to two distinct elements in sorted order.
      * The elements must implement Comparable to determine their natural ordering.
      * Duplicate elements will be removed, potentially resulting in a set with fewer elements.
      *
@@ -146,7 +146,7 @@ public final class ImmutableNavigableSet<E> extends ImmutableSortedSet<E> implem
     }
 
     /**
-     * Returns an ImmutableNavigableSet containing exactly three elements in sorted order.
+     * Returns an ImmutableNavigableSet containing up to three distinct elements in sorted order.
      * The elements must implement Comparable to determine their natural ordering.
      * Duplicate elements will be removed, potentially resulting in a set with fewer elements.
      *
@@ -170,7 +170,7 @@ public final class ImmutableNavigableSet<E> extends ImmutableSortedSet<E> implem
     }
 
     /**
-     * Returns an ImmutableNavigableSet containing exactly four elements in sorted order.
+     * Returns an ImmutableNavigableSet containing up to four distinct elements in sorted order.
      * The elements must implement Comparable to determine their natural ordering.
      * Duplicate elements will be removed, potentially resulting in a set with fewer elements.
      *
@@ -195,7 +195,7 @@ public final class ImmutableNavigableSet<E> extends ImmutableSortedSet<E> implem
     }
 
     /**
-     * Returns an ImmutableNavigableSet containing exactly five elements in sorted order.
+     * Returns an ImmutableNavigableSet containing up to five distinct elements in sorted order.
      * The elements must implement Comparable to determine their natural ordering.
      * Duplicate elements will be removed, potentially resulting in a set with fewer elements.
      *
@@ -221,7 +221,7 @@ public final class ImmutableNavigableSet<E> extends ImmutableSortedSet<E> implem
     }
 
     /**
-     * Returns an ImmutableNavigableSet containing exactly six elements in sorted order.
+     * Returns an ImmutableNavigableSet containing up to six distinct elements in sorted order.
      * The elements must implement Comparable to determine their natural ordering.
      * Duplicate elements will be removed, potentially resulting in a set with fewer elements.
      *
@@ -248,7 +248,7 @@ public final class ImmutableNavigableSet<E> extends ImmutableSortedSet<E> implem
     }
 
     /**
-     * Returns an ImmutableNavigableSet containing exactly seven elements in sorted order.
+     * Returns an ImmutableNavigableSet containing up to seven distinct elements in sorted order.
      * The elements must implement Comparable to determine their natural ordering.
      * Duplicate elements will be removed, potentially resulting in a set with fewer elements.
      *
@@ -277,7 +277,7 @@ public final class ImmutableNavigableSet<E> extends ImmutableSortedSet<E> implem
     }
 
     /**
-     * Returns an ImmutableNavigableSet containing exactly eight elements in sorted order.
+     * Returns an ImmutableNavigableSet containing up to eight distinct elements in sorted order.
      * The elements must implement Comparable to determine their natural ordering.
      * Duplicate elements will be removed, potentially resulting in a set with fewer elements.
      *
@@ -307,7 +307,7 @@ public final class ImmutableNavigableSet<E> extends ImmutableSortedSet<E> implem
     }
 
     /**
-     * Returns an ImmutableNavigableSet containing exactly nine elements in sorted order.
+     * Returns an ImmutableNavigableSet containing up to nine distinct elements in sorted order.
      * The elements must implement Comparable to determine their natural ordering.
      * Duplicate elements will be removed, potentially resulting in a set with fewer elements.
      *
@@ -338,7 +338,7 @@ public final class ImmutableNavigableSet<E> extends ImmutableSortedSet<E> implem
     }
 
     /**
-     * Returns an ImmutableNavigableSet containing exactly ten elements in sorted order.
+     * Returns an ImmutableNavigableSet containing up to ten distinct elements in sorted order.
      * The elements must implement Comparable to determine their natural ordering.
      * Duplicate elements will be removed, potentially resulting in a set with fewer elements.
      *
@@ -389,6 +389,7 @@ public final class ImmutableNavigableSet<E> extends ImmutableSortedSet<E> implem
      * @param c the collection whose elements are to be placed into this set
      * @return an {@code ImmutableNavigableSet} containing the elements of the specified collection, or the same instance if it is already an {@code ImmutableNavigableSet}, or an empty instance if {@code c} is {@code null} or empty
      * @throws ClassCastException if the elements are not mutually comparable (when the source collection is not a {@code SortedSet})
+     * @throws NullPointerException if the collection contains a {@code null} element and natural ordering is used
      * @see #wrap(NavigableSet)
      */
     public static <E> ImmutableNavigableSet<E> copyOf(final Collection<? extends E> c) {

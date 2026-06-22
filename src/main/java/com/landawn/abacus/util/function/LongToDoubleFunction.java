@@ -68,4 +68,18 @@ public interface LongToDoubleFunction extends Throwables.LongToDoubleFunction<Ru
      */
     @Override
     double applyAsDouble(long value);
+
+    /**
+     * Returns this object as a {@link Throwables.LongToDoubleFunction} view.
+     *
+     * <p>The returned object has the same behavior as this one. This method does not translate
+     * exceptions or make the original implementation capable of throwing new checked exceptions; the
+     * exception type parameter is for target-type compatibility with APIs that accept {@code Throwables.LongToDoubleFunction}.
+     *
+     * @param <E> the target exception type for compatibility with {@code Throwables.LongToDoubleFunction}
+     * @return a {@link Throwables.LongToDoubleFunction} view of this object
+     */
+    default <E extends Throwable> Throwables.LongToDoubleFunction<E> toThrowable() {
+        return (Throwables.LongToDoubleFunction<E>) this;
+    }
 }

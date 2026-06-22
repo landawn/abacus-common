@@ -328,7 +328,7 @@ abstract class AbstractParser<SC extends SerializationConfig<?>, DC extends Dese
      * @param propClass the declared property class from the target bean (may be {@code null})
      * @param attributeTypeClass the type specified by a type attribute in the serialized data (may be {@code null})
      * @return a new instance of the appropriate type
-     * @throws ParsingException if no suitable type is available or instantiation fails
+     * @throws ParsingException if neither a property class nor a type-attribute class is available (instantiation failures propagate as runtime exceptions)
      */
     @SuppressFBWarnings("NP_LOAD_OF_KNOWN_NULL_VALUE")
     @SuppressWarnings("unchecked")
@@ -338,7 +338,7 @@ abstract class AbstractParser<SC extends SerializationConfig<?>, DC extends Dese
                 return (T) N.newInstance(attributeTypeClass);
             } catch (final Exception e) {
                 if (logger.isWarnEnabled()) {
-                    logger.warn("Failed to new instance by type attribute: " + attributeTypeClass.getCanonicalName());
+                    logger.warn("Failed to new instance by type attribute: " + attributeTypeClass.getCanonicalName(), e);
                 }
             }
         }
@@ -422,11 +422,11 @@ abstract class AbstractParser<SC extends SerializationConfig<?>, DC extends Dese
      * <p>This utility method is used by serialization methods that write to files.
      * It ensures the target file exists before attempting to write to it.</p>
      *
-     * <p>Note: This method does not create parent directories. Parent directories
-     * must already exist or the file creation will fail.</p>
+     * <p>Note: If the parent directories do not exist, an attempt is made to
+     * create them automatically before the file is created.</p>
      *
      * @param file the file to create if it doesn't exist (must not be {@code null})
-     * @throws IOException if the file cannot be created or if parent directories don't exist
+     * @throws IOException if the file cannot be created
      */
     protected static void createNewFileIfNotExists(final File file) throws IOException {
         if (!file.exists() && !IOUtil.createFileIfNotExists(file)) {

@@ -2111,6 +2111,12 @@ public class FloatListTest extends TestBase {
     }
 
     @Test
+    public void testShuffleNullRandomRejectedForSmallLists() {
+        assertThrows(IllegalArgumentException.class, () -> new FloatList().shuffle(null));
+        assertThrows(IllegalArgumentException.class, () -> FloatList.of(1.0f).shuffle(null));
+    }
+
+    @Test
     public void testShuffleWithRandom() {
         list.addAll(new float[] { 1.1f, 2.2f, 3.3f, 4.4f, 5.5f });
         Random rnd = new Random(42);
@@ -2637,13 +2643,6 @@ public class FloatListTest extends TestBase {
     public void testEquals_withNull() {
         FloatList fl = FloatList.of(1.0f);
         assertNotEquals(fl, null);
-    }
-
-    @Test
-    public void testEquals_sameValues() {
-        FloatList fl1 = FloatList.of(1.0f, 2.0f, 3.0f);
-        FloatList fl2 = FloatList.of(1.0f, 2.0f, 3.0f);
-        assertEquals(fl1, fl2);
     }
 
     @Test

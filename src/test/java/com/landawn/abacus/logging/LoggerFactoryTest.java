@@ -117,9 +117,9 @@ public class LoggerFactoryTest extends TestBase {
     }
 
     @Test
-    @DisplayName("Test getLogger with null String throws NullPointerException")
+    @DisplayName("Test getLogger with null String throws IllegalArgumentException")
     public void testGetLoggerWithNullString() {
-        assertThrows(NullPointerException.class, () -> {
+        assertThrows(IllegalArgumentException.class, () -> {
             LoggerFactory.getLogger((String) null);
         });
     }

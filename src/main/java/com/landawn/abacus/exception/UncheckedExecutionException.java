@@ -118,4 +118,17 @@ public class UncheckedExecutionException extends UncheckedException {
     public UncheckedExecutionException(final String message, final ExecutionException cause) {
         super(message, cause);
     }
+
+    /**
+     * Returns the {@link ExecutionException} that caused this exception.
+     *
+     * @return the wrapped {@link ExecutionException}, never {@code null}
+     */
+    // NOTE: the 'synchronized' modifier is INTENTIONAL and REQUIRED — do NOT remove it. It mirrors
+    // Throwable.getCause(), which synchronizes access to the non-final 'cause' field (also assignable
+    // via initCause()), preserving that visibility/consistency contract for the covariant override.
+    @Override
+    public synchronized ExecutionException getCause() {
+        return (ExecutionException) super.getCause();
+    }
 }

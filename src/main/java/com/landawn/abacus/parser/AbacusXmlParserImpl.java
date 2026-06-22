@@ -358,53 +358,62 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
             return;
         }
 
-        if (propInfo != null && propInfo.isJsonRawValue) {
-            bw.write(jsonParser.serialize(obj, getJSC(config)));
-            return;
-        }
+        try {
+            if (propInfo != null && propInfo.isJsonRawValue) {
+                bw.write(jsonParser.serialize(obj, getJSC(config)));
+                return;
+            }
 
-        final Class<?> cls = obj.getClass();
-        final Type<Object> type = Type.of(cls);
+            final Class<?> cls = obj.getClass();
+            final Type<Object> type = Type.of(cls);
 
-        switch (type.serializationType()) {
-            case SERIALIZABLE:
-                if (type.isObjectArray()) {
-                    writeArray(obj, configToUse, indentation, serializedObjects, type, bw);
-                } else if (type.isCollection()) {
-                    writeCollection((Collection<?>) obj, configToUse, indentation, serializedObjects, type, bw);
-                } else {
-                    if (propInfo != null && propInfo.hasFormat) {
-                        propInfo.writePropValue(bw, obj, configToUse);
+            switch (type.serializationType()) {
+                case SERIALIZABLE:
+                    if (type.isObjectArray()) {
+                        writeArray(obj, configToUse, indentation, serializedObjects, type, bw);
+                    } else if (type.isCollection()) {
+                        writeCollection((Collection<?>) obj, configToUse, indentation, serializedObjects, type, bw);
                     } else {
-                        type.serializeTo(bw, obj, configToUse);
+                        if (propInfo != null && propInfo.hasFormat) {
+                            propInfo.writePropValue(bw, obj, configToUse);
+                        } else {
+                            type.serializeTo(bw, obj, configToUse);
+                        }
                     }
-                }
 
-                break;
+                    break;
 
-            case ENTITY:
-                writeBean(obj, configToUse, indentation, serializedObjects, type, bw);
+                case ENTITY:
+                    writeBean(obj, configToUse, indentation, serializedObjects, type, bw);
 
-                break;
+                    break;
 
-            case MAP:
-                writeMap((Map<?, ?>) obj, configToUse, indentation, serializedObjects, type, bw);
+                case MAP:
+                    writeMap((Map<?, ?>) obj, configToUse, indentation, serializedObjects, type, bw);
 
-                break;
+                    break;
 
-            case ARRAY:
-                writeArray(obj, configToUse, indentation, serializedObjects, type, bw);
+                case ARRAY:
+                    writeArray(obj, configToUse, indentation, serializedObjects, type, bw);
 
-                break;
+                    break;
 
-            case COLLECTION:
-                writeCollection((Collection<?>) obj, configToUse, indentation, serializedObjects, type, bw);
+                case COLLECTION:
+                    writeCollection((Collection<?>) obj, configToUse, indentation, serializedObjects, type, bw);
 
-                break;
+                    break;
 
-            default:
-                throw new ParsingException("Unsupported class: " + ClassUtil.getCanonicalClassName(cls)
-                        + ". Only Array/List/Map and Bean class with getter/setter methods are supported");
+                default:
+                    throw new ParsingException("Unsupported class: " + ClassUtil.getCanonicalClassName(cls)
+                            + ". Only Array/List/Map and Bean class with getter/setter methods are supported");
+            }
+        } finally {
+            // Path-based cycle detection (like JsonParserImpl.write): without removing the object
+            // after it is fully written, two sibling references to the SAME object (a DAG, not a
+            // cycle) would be misidentified as circular and silently emitted as empty elements.
+            if (serializedObjects != null) {
+                serializedObjects.remove(obj);
+            }
         }
 
         if (flush) {
@@ -1841,10 +1850,11 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
                             break;
                         }
 
+                        case XMLStreamConstants.CDATA:
                         case XMLStreamConstants.CHARACTERS: {
                             text = xmlReader.getText();
 
-                            if (text != null && (event = xmlReader.next()) == XMLStreamConstants.CHARACTERS) {
+                            if (text != null && isTextEvent(event = xmlReader.next())) {
                                 do {
                                     if (sb == null) {
                                         sb = new StringBuilder(text.length() * 2);
@@ -1861,7 +1871,7 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
                                     }
 
                                     sb.append(xmlReader.getText());
-                                } while ((event = xmlReader.next()) == XMLStreamConstants.CHARACTERS);
+                                } while (isTextEvent(event = xmlReader.next()));
 
                                 if (sb != null && sb.length() > text.length()) {
                                     text = sb.toString();
@@ -1994,10 +2004,11 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
 
                                     break;
 
+                                case XMLStreamConstants.CDATA:
                                 case XMLStreamConstants.CHARACTERS:
                                     text = xmlReader.getText();
 
-                                    if (text != null && (event = xmlReader.next()) == XMLStreamConstants.CHARACTERS) {
+                                    if (text != null && isTextEvent(event = xmlReader.next())) {
                                         do {
                                             if (sb == null) {
                                                 sb = new StringBuilder(text.length() * 2);
@@ -2009,7 +2020,7 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
                                             }
 
                                             sb.append(xmlReader.getText());
-                                        } while ((event = xmlReader.next()) == XMLStreamConstants.CHARACTERS);
+                                        } while (isTextEvent(event = xmlReader.next()));
 
                                         if (sb != null && sb.length() > text.length()) {
                                             text = sb.toString();
@@ -2019,7 +2030,7 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
 
                                     key = isNullValue ? null : entryKeyType.valueOf(text);
 
-                                    if (event == XMLStreamConstants.CHARACTERS) {
+                                    if (isTextEvent(event)) {
                                         // end of a key.
                                         xmlReader.next();
                                     }
@@ -2061,10 +2072,11 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
 
                                     break;
 
+                                case XMLStreamConstants.CDATA:
                                 case XMLStreamConstants.CHARACTERS:
                                     text = xmlReader.getText();
 
-                                    if (text != null && (event = xmlReader.next()) == XMLStreamConstants.CHARACTERS) {
+                                    if (text != null && isTextEvent(event = xmlReader.next())) {
                                         do {
                                             if (sb == null) {
                                                 sb = new StringBuilder(text.length() * 2);
@@ -2076,7 +2088,7 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
                                             }
 
                                             sb.append(xmlReader.getText());
-                                        } while ((event = xmlReader.next()) == XMLStreamConstants.CHARACTERS);
+                                        } while (isTextEvent(event = xmlReader.next()));
 
                                         if (sb != null && sb.length() > text.length()) {
                                             text = sb.toString();
@@ -2086,7 +2098,7 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
 
                                     propValue = isNullValue ? null : entryValueType.valueOf(text);
 
-                                    if (event == XMLStreamConstants.CHARACTERS) {
+                                    if (isTextEvent(event)) {
                                         // end of value.
                                         xmlReader.next();
                                     }
@@ -2186,10 +2198,11 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
                                         break;
                                     }
 
+                                    case XMLStreamConstants.CDATA:
                                     case XMLStreamConstants.CHARACTERS: {
                                         text = xmlReader.getText();
 
-                                        if (text != null && (event = xmlReader.next()) == XMLStreamConstants.CHARACTERS) {
+                                        if (text != null && isTextEvent(event = xmlReader.next())) {
                                             do {
                                                 if (sb == null) {
                                                     sb = new StringBuilder(text.length() * 2);
@@ -2201,7 +2214,7 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
                                                 }
 
                                                 sb.append(xmlReader.getText());
-                                            } while ((event = xmlReader.next()) == XMLStreamConstants.CHARACTERS);
+                                            } while (isTextEvent(event = xmlReader.next()));
 
                                             if (sb != null && sb.length() > text.length()) {
                                                 text = sb.toString();
@@ -2211,7 +2224,7 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
 
                                         list.add(isNullValue ? null : eleType.valueOf(text));
 
-                                        if (event == XMLStreamConstants.CHARACTERS) {
+                                        if (isTextEvent(event)) {
                                             // end of an element.
                                             xmlReader.next();
                                         }
@@ -2233,10 +2246,11 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
                             }
 
                             // simple array with sample format <array>[1, 2, 3...]</array>
+                            case XMLStreamConstants.CDATA:
                             case XMLStreamConstants.CHARACTERS: {
                                 text = xmlReader.getText();
 
-                                if (text != null && (event = xmlReader.next()) == XMLStreamConstants.CHARACTERS) {
+                                if (text != null && isTextEvent(event = xmlReader.next())) {
                                     do {
                                         if (sb == null) {
                                             sb = new StringBuilder(text.length() * 2);
@@ -2248,7 +2262,7 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
                                         }
 
                                         sb.append(xmlReader.getText());
-                                    } while ((event = xmlReader.next()) == XMLStreamConstants.CHARACTERS);
+                                    } while (isTextEvent(event = xmlReader.next()));
 
                                     if (sb != null && sb.length() > text.length()) {
                                         text = sb.toString();
@@ -2355,10 +2369,11 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
                                     break;
                                 }
 
+                                case XMLStreamConstants.CDATA:
                                 case XMLStreamConstants.CHARACTERS: {
                                     text = xmlReader.getText();
 
-                                    if (text != null && (event = xmlReader.next()) == XMLStreamConstants.CHARACTERS) {
+                                    if (text != null && isTextEvent(event = xmlReader.next())) {
                                         do {
                                             if (sb == null) {
                                                 sb = new StringBuilder(text.length() * 2);
@@ -2370,7 +2385,7 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
                                             }
 
                                             sb.append(xmlReader.getText());
-                                        } while ((event = xmlReader.next()) == XMLStreamConstants.CHARACTERS);
+                                        } while (isTextEvent(event = xmlReader.next()));
 
                                         if (sb != null && sb.length() > text.length()) {
                                             text = sb.toString();
@@ -2380,7 +2395,7 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
 
                                     result.add(isNullValue ? null : eleType.valueOf(text));
 
-                                    if (event == XMLStreamConstants.CHARACTERS) {
+                                    if (isTextEvent(event)) {
                                         // end of an element.
                                         xmlReader.next();
                                     }
@@ -2402,10 +2417,11 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
                         }
 
                         // simple list with sample format <list>[1, 2, 3...]</list>
+                        case XMLStreamConstants.CDATA:
                         case XMLStreamConstants.CHARACTERS: {
                             text = xmlReader.getText();
 
-                            if (text != null && (event = xmlReader.next()) == XMLStreamConstants.CHARACTERS) {
+                            if (text != null && isTextEvent(event = xmlReader.next())) {
                                 do {
                                     if (sb == null) {
                                         sb = new StringBuilder(text.length() * 2);
@@ -2417,7 +2433,7 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
                                     }
 
                                     sb.append(xmlReader.getText());
-                                } while ((event = xmlReader.next()) == XMLStreamConstants.CHARACTERS);
+                                } while (isTextEvent(event = xmlReader.next()));
 
                                 if (sb != null && sb.length() > text.length()) {
                                     text = sb.toString();
@@ -2462,6 +2478,19 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
             default:
                 throw new ParsingException("Unsupported class type: " + targetClass + ". Only object array, collection, map and bean types are supported");
         }
+    }
+
+    /**
+     * Checks whether the given StAX event represents a text event. Both {@code CHARACTERS} and
+     * {@code CDATA} carry text content; because the StAX reader is not configured to coalesce,
+     * {@code <![CDATA[...]]>} sections arrive as separate {@code CDATA} events and must be treated
+     * the same as ordinary character data.
+     *
+     * @param event the StAX event type
+     * @return {@code true} if the event is {@code CHARACTERS} or {@code CDATA}
+     */
+    private static boolean isTextEvent(final int event) {
+        return event == XMLStreamConstants.CHARACTERS || event == XMLStreamConstants.CDATA;
     }
 
     <T> T readByDOMParser(final Node node, final XmlDeserConfig config, Type<? extends T> targetType) {
@@ -2895,7 +2924,7 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
 
     private static void checkBeanType(final Class<?> targetClass, final String nodeName, final Class<?> inputClass) {
         if (!Beans.isBeanClass(targetClass)) {
-            throw new ParsingException("No bean class found by node name : " + nodeName + " in package of class: " + inputClass.getCanonicalName());
+            throw new ParsingException("No bean class found for node name: " + nodeName + " in package of class: " + inputClass.getCanonicalName());
         }
     }
 
@@ -3511,9 +3540,15 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
                         resultHolder.setValue((T) array);
                     }
 
-                    array = null;
-
                     nodeValueQueue.remove(nodeValueQueue.size() - 1);
+
+                    // The slot at the new top of nodeValueQueue still holds the empty placeholder array
+                    // created in startElement. Replace it with the freshly populated `array` so that
+                    // popupNodeValue() assigns the actual elements to the enclosing bean/collection/map.
+                    // Without this, a nested array would be set as an empty array on its parent.
+                    nodeValueQueue.set(nodeValueQueue.size() - 1, array);
+
+                    array = null;
 
                     popupNodeValue();
 
@@ -3681,6 +3716,11 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
                 } else {
                     bean = beanInfo.finishBeanResult(bean);
                 }
+
+                // For immutable beans/records/builders finishBeanResult returns a NEW finished object,
+                // so the popped intermediate held in eleValue is stale. Re-point eleValue at the finished
+                // bean so the enclosing bean/collection/map consumes the finished value, not the intermediate.
+                eleValue = bean;
             } else if (eleValue instanceof Map) {
                 keyTypeQueue.remove(keyTypeQueue.size() - 1);
                 valueTypeQueue.remove(valueTypeQueue.size() - 1);

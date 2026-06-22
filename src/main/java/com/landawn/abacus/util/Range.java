@@ -247,7 +247,7 @@ import com.landawn.abacus.util.u.Optional;
  *             .collect(Collectors.toList());
  *     }
  *
- *     public Optional<Range<LocalDateTime>> findLongestFreeTime(
+ *     public Optional<Range<LocalDateTime>> findCommonBusyWindow(
  *             List<Range<LocalDateTime>> busyPeriods, Range<LocalDateTime> workingHours) {
  *         Range<LocalDateTime> result = workingHours;
  *         for (Range<LocalDateTime> busy : busyPeriods) {
@@ -356,7 +356,7 @@ public final class Range<T extends Comparable<? super T>> implements Serializabl
      */
     public static <T extends Comparable<? super T>> Range<T> open(final T min, final T max) throws IllegalArgumentException {
         if (min == null || max == null || min.compareTo(max) > 0) {
-            throw new IllegalArgumentException("'fromInclusive' and 'toInclusive' cannot be null, or min > max");//NOSONAR
+            throw new IllegalArgumentException("'min' and 'max' cannot be null, or min > max");//NOSONAR
         }
 
         return new Range<>(new LowerEndpoint<>(min, false), new UpperEndpoint<>(max, false), BoundType.OPEN_OPEN);
@@ -387,7 +387,7 @@ public final class Range<T extends Comparable<? super T>> implements Serializabl
      */
     public static <T extends Comparable<? super T>> Range<T> openClosed(final T min, final T max) throws IllegalArgumentException {
         if (min == null || max == null || min.compareTo(max) > 0) {
-            throw new IllegalArgumentException("'fromInclusive' and 'toInclusive' cannot be null, or min > max");
+            throw new IllegalArgumentException("'min' and 'max' cannot be null, or min > max");
         }
 
         return new Range<>(new LowerEndpoint<>(min, false), new UpperEndpoint<>(max, true), BoundType.OPEN_CLOSED);
@@ -418,7 +418,7 @@ public final class Range<T extends Comparable<? super T>> implements Serializabl
      */
     public static <T extends Comparable<? super T>> Range<T> closedOpen(final T min, final T max) throws IllegalArgumentException {
         if (min == null || max == null || min.compareTo(max) > 0) {
-            throw new IllegalArgumentException("'fromInclusive' and 'toInclusive' cannot be null, or min > max");
+            throw new IllegalArgumentException("'min' and 'max' cannot be null, or min > max");
         }
 
         return new Range<>(new LowerEndpoint<>(min, true), new UpperEndpoint<>(max, false), BoundType.CLOSED_OPEN);
@@ -449,7 +449,7 @@ public final class Range<T extends Comparable<? super T>> implements Serializabl
      */
     public static <T extends Comparable<? super T>> Range<T> closed(final T min, final T max) throws IllegalArgumentException {
         if (min == null || max == null || min.compareTo(max) > 0) {
-            throw new IllegalArgumentException("'fromInclusive' and 'toInclusive' cannot be null, or min > max");
+            throw new IllegalArgumentException("'min' and 'max' cannot be null, or min > max");
         }
 
         return new Range<>(new LowerEndpoint<>(min, true), new UpperEndpoint<>(max, true), BoundType.CLOSED_CLOSED);
@@ -797,7 +797,7 @@ public final class Range<T extends Comparable<? super T>> implements Serializabl
      */
     public int positionOf(final T element) throws IllegalArgumentException {
         if (element == null) {
-            // Comparable API says throw NPE on null
+            // Library convention: reject null with IllegalArgumentException (not the NPE Comparable would imply)
             throw new IllegalArgumentException("Element is null");
         }
 
@@ -996,8 +996,9 @@ public final class Range<T extends Comparable<? super T>> implements Serializabl
      * @param other the range to intersect with this range; a {@code null} value is treated
      *              as non-overlapping and yields {@code Optional.empty()}
      * @return an {@code Optional} containing the intersection range if the ranges overlap;
-     *         {@code Optional.empty()} if they do not overlap (or {@code other} is {@code null});
-     *         or an {@code Optional} containing this range if the two ranges are equal
+     *         {@code Optional.empty()} if they do not overlap (or {@code other} is {@code null},
+     *         or either range is empty); or an {@code Optional} containing this range if the
+     *         two ranges are equal and non-empty
      * @see #isOverlappedBy(Range)
      * @see #span(Range)
      */
@@ -1274,8 +1275,8 @@ public final class Range<T extends Comparable<? super T>> implements Serializabl
          * <pre>{@code
          * Range<Integer> range = Range.closed(1, 5);
          * // The lower endpoint value is 1, upper endpoint value is 5
-         * // LowerEndpoint.compareTo(1) returns 0 (equal), compareTo(0) returns negative (value less than endpoint)
-         * // UpperEndpoint.compareTo(5) returns 0 (equal), compareTo(3) returns positive (value greater than endpoint)
+         * // LowerEndpoint.compareTo(1) returns 0 (equal), compareTo(0) returns positive (endpoint value is greater than the argument)
+         * // UpperEndpoint.compareTo(5) returns 0 (equal), compareTo(3) returns positive (endpoint value is greater than the argument)
          *
          * // Used internally: N.compare(endpoint.value, value)
          * }</pre>

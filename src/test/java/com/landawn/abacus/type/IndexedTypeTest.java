@@ -72,6 +72,19 @@ public class IndexedTypeTest extends TestBase {
 
     }
 
+    @SuppressWarnings("unchecked")
+    @Test
+    public void testValueOfParameterizedSlotConvertsElements() {
+        IndexedType<List<Long>> type = (IndexedType<List<Long>>) createType("Indexed<List<Long>>");
+
+        Indexed<List<Long>> result = type.valueOf("[5,[1,2]]");
+
+        assertEquals(5, result.index());
+        Long first = result.value().get(0);
+        assertEquals(1L, first);
+        assertEquals(2L, result.value().get(1));
+    }
+
     @Test
     public void testAppendTo() throws IOException {
         StringWriter writer = new StringWriter();

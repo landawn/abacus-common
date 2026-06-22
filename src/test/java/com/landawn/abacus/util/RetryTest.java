@@ -354,6 +354,17 @@ public class RetryTest extends TestBase {
     }
 
     @Test
+    public void testRunAndCallRejectNullActions() {
+        final Retry<String> retry = Retry.withFixedDelay(1, 0, (result, ex) -> false);
+
+        final IllegalArgumentException runEx = Assertions.assertThrows(IllegalArgumentException.class, () -> retry.run(null));
+        Assertions.assertTrue(runEx.getMessage().contains("cmd"));
+
+        final IllegalArgumentException callEx = Assertions.assertThrows(IllegalArgumentException.class, () -> retry.call(null));
+        Assertions.assertTrue(callEx.getMessage().contains("callable"));
+    }
+
+    @Test
     public void testRun_BiPredicate_FailAfterAllRetries() {
         Retry<Void> retry = Retry.withFixedDelay(2, 0, (result, ex) -> ex instanceof IOException);
         AtomicInteger counter = new AtomicInteger(0);

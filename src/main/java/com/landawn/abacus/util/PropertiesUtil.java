@@ -178,8 +178,8 @@ public final class PropertiesUtil {
                             InputStream is = null;
 
                             if (logger.isWarnEnabled()) {
-                                logger.warn("Start to refresh properties with the updated file: " + file.getAbsolutePath());
-                                logger.warn("[PROPERTIES]" + properties);
+                                logger.warn("Start to refresh properties with the updated file: {}; propertyCount={}", file.getAbsolutePath(),
+                                        properties.size());
                             }
 
                             try {
@@ -193,14 +193,13 @@ public final class PropertiesUtil {
 
                                 resource.setLastLoadTime(lastLoadTime);
                             } catch (final Exception e) {
-                                logger.error("Failed to refresh properties: " + properties, e);
+                                logger.error(e, "Failed to refresh properties from file: {}; propertyCount={}", file.getAbsolutePath(), properties.size());
                             } finally {
                                 IOUtil.close(is);
                             }
 
                             if (logger.isWarnEnabled()) {
-                                logger.warn("End to refresh properties with the updated file: " + file.getAbsolutePath());
-                                logger.warn("[NEW PROPERTIES]" + properties);
+                                logger.warn("End to refresh properties with the updated file: {}; propertyCount={}", file.getAbsolutePath(), properties.size());
                             }
                         }
                     }
@@ -793,7 +792,8 @@ public final class PropertiesUtil {
     /**
      * Loads properties from the specified XML InputStream.
      * The XML structure should have property names as element names and property values as element content.
-     * Optional {@code type} attributes can specify the data type for property values.
+     * An optional {@code type} attribute on an element specifies the data type to convert its text content to;
+     * if absent, the value is kept as a (stripped) {@code String}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -816,7 +816,8 @@ public final class PropertiesUtil {
     /**
      * Loads properties from the specified XML Reader.
      * The XML structure should have property names as element names and property values as element content.
-     * Optional {@code type} attributes can specify the data type for property values.
+     * An optional {@code type} attribute on an element specifies the data type to convert its text content to;
+     * if absent, the value is kept as a (stripped) {@code String}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -839,6 +840,8 @@ public final class PropertiesUtil {
     /**
      * Loads properties from the specified XML file into the target properties class.
      * This allows loading into custom Properties subclasses.
+     * An optional {@code type} attribute on an element specifies the data type to convert its text content to;
+     * if absent, the value is kept as a (stripped) {@code String}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -922,6 +925,8 @@ public final class PropertiesUtil {
     /**
      * Loads properties from the specified XML InputStream into the target properties class.
      * This method parses the XML structure and creates an instance of the target class with the loaded properties.
+     * An optional {@code type} attribute on an element specifies the data type to convert its text content to;
+     * if absent, the value is kept as a (stripped) {@code String}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -963,6 +968,8 @@ public final class PropertiesUtil {
     /**
      * Loads properties from the specified XML Reader into the target properties class.
      * This method parses the XML structure and creates an instance of the target class with the loaded properties.
+     * An optional {@code type} attribute on an element specifies the data type to convert its text content to;
+     * if absent, the value is kept as a (stripped) {@code String}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1005,9 +1012,9 @@ public final class PropertiesUtil {
     private static <T extends Properties<String, Object>> T loadFromXml(final Node source, Method propSetMethod, final boolean isFirstCall, final T output,
             final Class<T> inputClass) {
 
-        // TODO it's difficult to support duplicated property and may be misused.
+        // TODO: It is difficult to support duplicate properties, and they may be misused.
         if (hasDuplicatedPropName(source)) {
-            throw new RuntimeException("The source xml document contains duplicated properties which has same node tag name in the same root.");
+            throw new RuntimeException("The source XML document contains duplicate properties that have the same node tag name in the same root.");
         }
 
         Class<?> targetClass = null;
@@ -1040,7 +1047,7 @@ public final class PropertiesUtil {
             newKeySet.add(propName);
 
             typeAttr = XmlUtil.getAttribute(propNode, TYPE);
-            propSetMethod = Beans.getPropSetter(targetClass, propName);
+            propSetMethod = getPropSetterForXml(targetClass, propName);
 
             if (XmlUtil.isTextElement(propNode)) {
                 if (Strings.isEmpty(typeAttr)) {
@@ -1049,7 +1056,7 @@ public final class PropertiesUtil {
                     propValue = Type.of(typeAttr).valueOf(Strings.strip(XmlUtil.getTextContent(propNode)));
                 }
             } else {
-                // TODO it's difficult to support duplicated property and may be misused.
+                // TODO: It is difficult to support duplicate properties, and they may be misused.
                 // How to get target property value for auto-refresh if it's list of Properties or entities.
                 final T targetPropValue = (T) properties.get(propName);
                 final Class<T> propClass = (Class<T>) (propSetMethod == null ? Properties.class : propSetMethod.getParameterTypes()[0]);
@@ -1099,6 +1106,22 @@ public final class PropertiesUtil {
         }
 
         return properties;
+    }
+
+    private static Method getPropSetterForXml(final Class<?> targetClass, final String propName) {
+        if (targetClass == null || targetClass.equals(Properties.class)) {
+            return null;
+        }
+
+        if (Properties.class.isAssignableFrom(targetClass)) {
+            try {
+                return Beans.getPropSetter(targetClass, propName);
+            } catch (final IllegalArgumentException e) {
+                return null;
+            }
+        }
+
+        return Beans.isBeanClass(targetClass) ? Beans.getPropSetter(targetClass, propName) : null;
     }
 
     /**
@@ -1252,7 +1275,7 @@ public final class PropertiesUtil {
      * @param writeTypeInfo if {@code true}, type information will be written as attributes in the XML.
      *                      For example: {@code <port type="int">8080</port>} or {@code <enabled type="boolean">true</enabled>}.
      *                      When {@code false}, all values are written as plain text without type attributes.
-     * @param output the OutputStream to which the properties will be stored.
+     * @param output the OutputStream to which the properties will be stored, encoded as UTF-8. The stream is flushed but not closed.
      * @throws UncheckedIOException if an I/O error occurs while writing to the stream
      */
     public static void storeToXml(final Properties<?, ?> properties, final String rootElementName, final boolean writeTypeInfo, final OutputStream output)
@@ -1281,7 +1304,7 @@ public final class PropertiesUtil {
      * @param writeTypeInfo if {@code true}, type information will be written as attributes in the XML.
      *                      For example: {@code <port type="int">8080</port>} or {@code <enabled type="boolean">true</enabled>}.
      *                      When {@code false}, all values are written as plain text without type attributes.
-     * @param output the Writer to which the properties will be stored.
+     * @param output the Writer to which the properties will be stored. The writer is flushed but not closed.
      * @throws UncheckedIOException if an I/O error occurs while writing to the writer
      */
     public static void storeToXml(final Properties<?, ?> properties, final String rootElementName, final boolean writeTypeInfo, final Writer output)
@@ -1354,7 +1377,9 @@ public final class PropertiesUtil {
                                 if (ClassUtil.isPrimitiveWrapper(type.javaType())) {
                                     bw.write("<" + elementPropName + " type=\"" + ClassUtil.getSimpleClassName(ClassUtil.unwrap(type.javaType())) + "\">");
                                 } else {
-                                    bw.write("<" + elementPropName + " type=\"" + type.declaringName() + "\">");
+                                    // escape: parameterized declaring names contain '<'/'>', which are
+                                    // illegal inside an XML attribute value (the output couldn't be re-parsed).
+                                    bw.write("<" + elementPropName + " type=\"" + escapeTypeAttr(type.declaringName()) + "\">");
                                 }
                             } else {
                                 bw.write("<" + elementPropName + ">");
@@ -1377,7 +1402,9 @@ public final class PropertiesUtil {
                         if (ClassUtil.isPrimitiveWrapper(type.javaType())) {
                             bw.write("<" + propName + " type=\"" + ClassUtil.getSimpleClassName(ClassUtil.unwrap(type.javaType())) + "\">");
                         } else {
-                            bw.write("<" + propName + " type=\"" + type.declaringName() + "\">");
+                            // escape: parameterized declaring names contain '<'/'>', which are
+                            // illegal inside an XML attribute value (the output couldn't be re-parsed).
+                            bw.write("<" + propName + " type=\"" + escapeTypeAttr(type.declaringName()) + "\">");
                         }
                     } else {
                         bw.write("<" + propName + ">");
@@ -1397,6 +1424,23 @@ public final class PropertiesUtil {
         } finally {
             Objectory.recycle(bw);
         }
+    }
+
+    /**
+     * Escapes characters that are illegal inside an XML attribute value. Parameterized type
+     * declaring names (e.g. {@code List<Object>}) contain {@code '<'}/{@code '>'}; written raw
+     * they make the stored XML unparseable. The XML parser unescapes them on reload, so
+     * {@code Type.of(...)} still receives the original name.
+     *
+     * @param typeName the type name to escape
+     * @return the escaped attribute value
+     */
+    private static String escapeTypeAttr(final String typeName) {
+        if (typeName.indexOf('<') < 0 && typeName.indexOf('>') < 0 && typeName.indexOf('&') < 0) {
+            return typeName;
+        }
+
+        return typeName.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;");
     }
 
     /**
@@ -1540,9 +1584,9 @@ public final class PropertiesUtil {
                 throw new RuntimeException("No document element found in XML source");
             }
 
-            // TODO it's difficult to support duplicated property and may be misused.
+            // TODO: It is difficult to support duplicate properties, and they may be misused.
             if (hasDuplicatedPropName(root)) {
-                throw new RuntimeException("The source xml document contains duplicated properties which has same node tag name in the same root.");
+                throw new RuntimeException("The source XML document contains duplicate properties that have the same node tag name in the same root.");
             }
 
             if (className == null) {
@@ -1716,7 +1760,11 @@ public final class PropertiesUtil {
 
                 propNameSet.add(propName);
 
-                if (childNode.getChildNodes().getLength() > 1) {
+                // !isTextElement = has at least one element child. Don't use getChildNodes().getLength() > 1:
+                // in compact XML (no whitespace text nodes, e.g. the output of storeToXml) a nested element
+                // with a single child element has length 1, while loadFromXml still treats it as a nested
+                // Properties (XmlUtil.isTextElement). The two must agree or the generated accessors are wrong.
+                if (!XmlUtil.isTextElement(childNode)) {
                     xmlPropertiesToJava(childNode, null, isPublicField, spaces + "    ", false, output);
                 }
             }
@@ -1761,7 +1809,9 @@ public final class PropertiesUtil {
                 }
             }
 
-            if (childNode.getChildNodes().getLength() > 1) {
+            // See xmlPropertiesToJava: must match loadFromXml's nested-element detection (XmlUtil.isTextElement)
+            // so that type attributes inside compact single-child chains still get their imports collected.
+            if (!XmlUtil.isTextElement(childNode)) {
                 result.addAll(getImportType(childNode));
             }
         }
@@ -1797,7 +1847,7 @@ public final class PropertiesUtil {
         output.write(spaces + "    " + "super.remove(\"" + propName + "\");" + IOUtil.LINE_SEPARATOR_UNIX);
         // output.write(spaces + "    " + "this." + propName + " = " + Type.of(typeName).defaultValue() + ";" + IOUtil.LINE_SEPARATOR_UNIX);
 
-        // TODO it's difficult to support duplicated property and may be misused.
+        // TODO: It is difficult to support duplicate properties, and they may be misused.
         //        if (duplicatedPropNameSet.contains(propName)) {
         //            writer.write(spaces + "    " + "remove(\"" + listPropName + "\", " + listPropName + ");" + N.LINE_SEPARATOR);
         //            writer.write(spaces + "    " + "this." + listPropName + ".remove(" + propName + ");" + N.LINE_SEPARATOR);
@@ -1823,7 +1873,9 @@ public final class PropertiesUtil {
     }
 
     private static String getTypeName(final Node node, final String propName) {
-        String typeName = node.getChildNodes().getLength() > 1 ? Strings.capitalize(propName) : "String";
+        // A node with an element child is a nested Properties type; a text-only node is a String property.
+        // Must match loadFromXml's detection (XmlUtil.isTextElement) — see comment in xmlPropertiesToJava.
+        String typeName = XmlUtil.isTextElement(node) ? "String" : Strings.capitalize(propName);
         final String typeAttr = XmlUtil.getAttribute(node, TYPE);
 
         if (Strings.isNotEmpty(typeAttr)) {
@@ -1862,7 +1914,9 @@ public final class PropertiesUtil {
 
             propName = Beans.normalizePropName(childNode.getNodeName());
 
-            if (propNameSet.contains(propName) || ((childNode.getChildNodes().getLength() > 1) && hasDuplicatedPropName(childNode))) {
+            // !isTextElement (instead of getChildNodes().getLength() > 1) so duplicates nested below a
+            // compact single-child chain are still found — xmlToJava only checks the document root.
+            if (propNameSet.contains(propName) || (!XmlUtil.isTextElement(childNode) && hasDuplicatedPropName(childNode))) {
                 return true;
             } else {
                 propNameSet.add(propName);

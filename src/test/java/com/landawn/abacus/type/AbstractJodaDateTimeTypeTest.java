@@ -55,7 +55,9 @@ public class AbstractJodaDateTimeTypeTest extends TestBase {
 
     @Test
     public void testStringOf() {
-        DateTime dateTime = new DateTime(2023, 6, 15, 10, 30, 45, 123);
+        // constructed in UTC: the 'Z'-suffixed output is UTC wall time (it previously leaked the
+        // JVM default zone's wall time under the Z suffix)
+        DateTime dateTime = new DateTime(2023, 6, 15, 10, 30, 45, 123, org.joda.time.DateTimeZone.UTC);
         String result = jodaDateTimeType.stringOf(dateTime);
         assertNotNull(result);
         assertTrue(result.contains("2023-06-15"));
@@ -66,7 +68,8 @@ public class AbstractJodaDateTimeTypeTest extends TestBase {
 
     @Test
     public void testAppendTo() throws IOException {
-        DateTime dateTime = new DateTime(2023, 6, 15, 10, 30, 45, 123);
+        // constructed in UTC: the 'Z'-suffixed output is UTC wall time
+        DateTime dateTime = new DateTime(2023, 6, 15, 10, 30, 45, 123, org.joda.time.DateTimeZone.UTC);
         StringWriter sw = new StringWriter();
 
         jodaDateTimeType.appendTo(sw, dateTime);

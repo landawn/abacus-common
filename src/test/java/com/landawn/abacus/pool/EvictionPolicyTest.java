@@ -18,7 +18,7 @@ public class EvictionPolicyTest extends TestBase {
         EvictionPolicy[] policies = EvictionPolicy.values();
 
         assertNotNull(policies);
-        assertEquals(3, policies.length);
+        assertEquals(5, policies.length);
     }
 
     @Test
@@ -26,6 +26,8 @@ public class EvictionPolicyTest extends TestBase {
         assertEquals(EvictionPolicy.LAST_ACCESS_TIME, EvictionPolicy.valueOf("LAST_ACCESS_TIME"));
         assertEquals(EvictionPolicy.EXPIRATION_TIME, EvictionPolicy.valueOf("EXPIRATION_TIME"));
         assertEquals(EvictionPolicy.ACCESS_COUNT, EvictionPolicy.valueOf("ACCESS_COUNT"));
+        assertEquals(EvictionPolicy.CREATED_TIME, EvictionPolicy.valueOf("CREATED_TIME"));
+        assertEquals(EvictionPolicy.FIFO, EvictionPolicy.valueOf("FIFO"));
     }
 
     @Test
@@ -57,6 +59,8 @@ public class EvictionPolicyTest extends TestBase {
         assertEquals(0, EvictionPolicy.LAST_ACCESS_TIME.ordinal());
         assertEquals(1, EvictionPolicy.EXPIRATION_TIME.ordinal());
         assertEquals(2, EvictionPolicy.ACCESS_COUNT.ordinal());
+        assertEquals(3, EvictionPolicy.CREATED_TIME.ordinal());
+        assertEquals(4, EvictionPolicy.FIFO.ordinal());
     }
 
     @Test
@@ -69,11 +73,13 @@ public class EvictionPolicyTest extends TestBase {
     @Test
     public void testEnumValues() {
         EvictionPolicy[] values = EvictionPolicy.values();
-        assertEquals(3, values.length);
+        assertEquals(5, values.length);
 
         assertEquals(EvictionPolicy.LAST_ACCESS_TIME, values[0]);
         assertEquals(EvictionPolicy.EXPIRATION_TIME, values[1]);
         assertEquals(EvictionPolicy.ACCESS_COUNT, values[2]);
+        assertEquals(EvictionPolicy.CREATED_TIME, values[3]);
+        assertEquals(EvictionPolicy.FIFO, values[4]);
     }
 
     @Test
@@ -120,6 +126,8 @@ public class EvictionPolicyTest extends TestBase {
                 case LAST_ACCESS_TIME -> "LRU";
                 case EXPIRATION_TIME -> "Time-based";
                 case ACCESS_COUNT -> "LFU";
+                case CREATED_TIME -> "Created-time";
+                case FIFO -> "FIFO";
             };
 
             switch (policy) {
@@ -131,6 +139,12 @@ public class EvictionPolicyTest extends TestBase {
                     break;
                 case ACCESS_COUNT:
                     assertEquals("LFU", description);
+                    break;
+                case CREATED_TIME:
+                    assertEquals("Created-time", description);
+                    break;
+                case FIFO:
+                    assertEquals("FIFO", description);
                     break;
                 default:
                     fail("Unexpected policy: " + policy);

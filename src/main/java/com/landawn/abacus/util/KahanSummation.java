@@ -172,7 +172,11 @@ public final class KahanSummation { // NOSONAR
         count += other.count;
         simpleSum += other.simpleSum;
         kahanSum(other.sum);
-        kahanSum(other.correction);
+        // Subtract the compensation bits: the running invariant is
+        // (true sum) ~= sum - correction, so the other's correction must be
+        // incorporated with a negated sign (see JDK-8214761 for the identical
+        // fix in java.util.DoubleSummaryStatistics).
+        kahanSum(-other.correction);
     }
 
     /**
@@ -210,7 +214,11 @@ public final class KahanSummation { // NOSONAR
      * @return the sum with Kahan error compensation applied
      */
     public double sum() {
-        final double tmp = sum + correction;
+        // The running invariant is (true sum) ~= sum - correction, because
+        // kahanSum stores correction = (t - sum) - y, i.e. the negated lost
+        // low-order bits (see JDK-8214761 for the identical fix in
+        // java.util.DoubleSummaryStatistics.getSum()).
+        final double tmp = sum - correction;
 
         if (Double.isNaN(tmp) && Double.isInfinite(simpleSum)) {
             return simpleSum;

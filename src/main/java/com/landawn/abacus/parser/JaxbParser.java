@@ -144,7 +144,7 @@ final class JaxbParser extends AbstractXmlParser {
      *
      * <p>This method serializes a Java object to XML and writes it to the specified file.
      * The file will be created if it doesn't exist, or overwritten if it does.
-     * Parent directories must exist or an exception will be thrown.</p>
+     * Missing parent directories are created automatically.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code

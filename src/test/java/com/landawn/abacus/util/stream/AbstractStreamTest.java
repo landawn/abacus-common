@@ -264,6 +264,11 @@ public class AbstractStreamTest extends TestBase {
     }
 
     @Test
+    public void testStep_OneReturnsAllElements() {
+        assertEquals(Arrays.asList(1, 2, 3), Stream.of(1, 2, 3).step(1).toList());
+    }
+
+    @Test
     public void test_slidingMap_biFunction() {
         List<Integer> result = Stream.of(1, 2, 3, 4).slidingMap((a, b) -> a + b).toList();
         assertEquals(Arrays.asList(3, 5, 7), result);
@@ -2214,14 +2219,6 @@ public class AbstractStreamTest extends TestBase {
     public void testDelay_Parallel() {
         List<Integer> result = Stream.of(1, 2, 3).parallel().delay(Duration.ofMillis(0)).sorted().toList();
         assertEquals(Arrays.asList(1, 2, 3), result);
-    }
-
-    @Test
-    public void testDebounce() {
-        Stream<Integer> stream = createStream(1, 2, 3, 4, 5);
-        List<Integer> result = stream.debounce(10, Duration.ofMillis(100)).toList();
-        assertNotNull(result);
-        assertTrue(result.size() >= 1);
     }
 
     @Test
@@ -4622,6 +4619,34 @@ public class AbstractStreamTest extends TestBase {
         final java.io.StringWriter writer = new java.io.StringWriter();
         org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class,
                 () -> com.landawn.abacus.util.stream.Stream.of(new TestPerson(1, "Alice")).persistToCsv(java.util.List.of("id", "nonexistent"), writer));
+    }
+
+    @Test
+    public void testDebounce_emptyEmitsNothing() {
+        assertTrue(this.<Integer> createStream().debounce(com.landawn.abacus.util.Duration.ofSeconds(1)).toList().isEmpty());
+    }
+
+    @Test
+    public void testDebounce_singleElementSurvives() {
+        assertEquals(Arrays.asList(42), createStream(42).debounce(com.landawn.abacus.util.Duration.ofSeconds(1)).toList());
+    }
+
+    @Test
+    public void testDebounce_coldStreamEmitsOnlyLastElement() {
+        assertEquals(Arrays.asList(5), createStream(1, 2, 3, 4, 5).debounce(com.landawn.abacus.util.Duration.ofSeconds(1)).toList());
+    }
+
+    @Test
+    public void testDebounce_slowSourceAllSurviveWhenGapAtLeastDuration() {
+        assertEquals(Arrays.asList(1, 2, 3),
+                createStream(1, 2, 3).delay(com.landawn.abacus.util.Duration.ofMillis(60)).debounce(com.landawn.abacus.util.Duration.ofMillis(20)).toList());
+    }
+
+    @Test
+    public void testDebounce_invalidDurationThrows() {
+        assertThrows(IllegalArgumentException.class, () -> createStream(1, 2, 3).debounce((com.landawn.abacus.util.Duration) null).toList());
+        assertThrows(IllegalArgumentException.class, () -> createStream(1, 2, 3).debounce(com.landawn.abacus.util.Duration.ofMillis(0)).toList());
+        assertThrows(IllegalArgumentException.class, () -> createStream(1, 2, 3).debounce(com.landawn.abacus.util.Duration.ofMillis(-100)).toList());
     }
 
 }

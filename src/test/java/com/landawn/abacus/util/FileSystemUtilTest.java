@@ -1,5 +1,6 @@
 package com.landawn.abacus.util;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import java.io.IOException;
 
 import org.junit.jupiter.api.Assertions;
@@ -122,11 +123,13 @@ public class FileSystemUtilTest extends TestBase {
 
     @Test
     public void testFreeSpaceKbNullTimeout() {
-        try {
-            FileSystemUtil.freeSpaceKb(".", 0);
-        } catch (IOException e) {
-        } catch (IllegalStateException e) {
-        }
+        assertDoesNotThrow(() -> {
+            try {
+                FileSystemUtil.freeSpaceKb(".", 0);
+            } catch (IOException e) {
+            } catch (IllegalStateException e) {
+            }
+        });
     }
 
     @Test
@@ -167,6 +170,11 @@ public class FileSystemUtilTest extends TestBase {
     public void testParseBytes_NegativeValue() {
         IOException exception = Assertions.assertThrows(IOException.class, () -> newFileSystemUtil().parseBytes("-1", "."));
         Assertions.assertTrue(exception.getMessage().contains("did not find free space"));
+    }
+
+    @Test
+    public void testFreeSpaceWindowsRejectsQuotedPathBeforeProcessExecution() {
+        Assertions.assertThrows(IllegalArgumentException.class, () -> newFileSystemUtil().freeSpaceWindows("C:\\tmp\"bad", 0));
     }
 
 }

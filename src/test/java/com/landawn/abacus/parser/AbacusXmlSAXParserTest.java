@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -244,6 +245,30 @@ public class AbacusXmlSAXParserTest extends AbstractXmlParserTest {
         String nullElement = null;
         String str = abacusXMLSAXParser.serialize(nullElement);
         assertNull(abacusXMLSAXParser.deserialize(str, String.class));
+    }
+
+    @Test
+    public void test_nested_array_sax() {
+        // Regression: a nested <array> must propagate its parsed elements to the enclosing
+        // array/collection. A prior bug caused popupNodeValue() to pick up the stale empty
+        // placeholder array instead of the populated one, so nested arrays came back empty.
+        String xml = "<array>" //
+                + "<e><array><e>a</e><e>b</e></array></e>" //
+                + "<e><array><e>c</e></array></e>" //
+                + "</array>";
+
+        String[][] result = abacusXMLSAXParser.deserialize(xml, String[][].class);
+
+        assertEquals(2, result.length);
+        assertTrue(N.equals(new String[] { "a", "b" }, result[0]));
+        assertTrue(N.equals(new String[] { "c" }, result[1]));
+
+        // Cross-check: StAX and DOM parsers parse the same nested-array XML identically.
+        String[][] staxResult = abacusXMLStAXParser.deserialize(xml, String[][].class);
+        assertTrue(N.equals(result, staxResult));
+
+        String[][] domResult = abacusXMLDOMParser.deserialize(xml, String[][].class);
+        assertTrue(N.equals(result, domResult));
     }
 
     @Test
@@ -515,45 +540,47 @@ public class AbacusXmlSAXParserTest extends AbstractXmlParserTest {
 
     @Test
     public void testSerialize_simple_type() throws Exception {
-        {
-            String xml = abacusXMLSAXParser.serialize(new Object[] {});
+        assertDoesNotThrow(() -> {
+            {
+                String xml = abacusXMLSAXParser.serialize(new Object[] {});
 
-            N.println(xml);
+                N.println(xml);
 
-            String[] a = abacusXMLSAXParser.deserialize(xml, String[].class);
+                String[] a = abacusXMLSAXParser.deserialize(xml, String[].class);
 
-            N.println(N.stringOf(a));
-        }
+                N.println(N.stringOf(a));
+            }
 
-        {
-            String xml = abacusXMLSAXParser.serialize(N.asArray("abc", "123"));
+            {
+                String xml = abacusXMLSAXParser.serialize(N.asArray("abc", "123"));
 
-            N.println(xml);
+                N.println(xml);
 
-            String[] a = abacusXMLSAXParser.deserialize(xml, String[].class);
+                String[] a = abacusXMLSAXParser.deserialize(xml, String[].class);
 
-            N.println(N.stringOf(a));
-        }
+                N.println(N.stringOf(a));
+            }
 
-        {
-            String xml = abacusXMLSAXParser.serialize(new ArrayList<>());
+            {
+                String xml = abacusXMLSAXParser.serialize(new ArrayList<>());
 
-            N.println(xml);
+                N.println(xml);
 
-            List<?> a = abacusXMLSAXParser.deserialize(xml, List.class);
+                List<?> a = abacusXMLSAXParser.deserialize(xml, List.class);
 
-            N.println(N.stringOf(a));
-        }
+                N.println(N.stringOf(a));
+            }
 
-        {
-            String xml = abacusXMLSAXParser.serialize(N.toList("abc", "123"));
+            {
+                String xml = abacusXMLSAXParser.serialize(N.toList("abc", "123"));
 
-            N.println(xml);
+                N.println(xml);
 
-            List<?> a = abacusXMLSAXParser.deserialize(xml, List.class);
+                List<?> a = abacusXMLSAXParser.deserialize(xml, List.class);
 
-            N.println(N.stringOf(a));
-        }
+                N.println(N.stringOf(a));
+            }
+        });
     }
 
     @Test

@@ -170,6 +170,6 @@ public class DoubleObjPredicateTest extends TestBase {
     @Test
     public void testAndNullThrowsImmediately() {
         DoubleObjPredicate<String> instance = (a, b) -> false;
-        org.junit.jupiter.api.Assertions.assertThrows(NullPointerException.class, () -> instance.and((DoubleObjPredicate) null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> instance.and((DoubleObjPredicate) null));
     }
 }

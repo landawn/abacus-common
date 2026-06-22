@@ -148,7 +148,7 @@ public final class AvroParser extends AbstractParser<AvroSerConfig, AvroDeserCon
      * Serializes an object to a file with raw binary content (NOT Base64 encoded).
      *
      * <p>The file will be created if it doesn't exist, or overwritten if it does.
-     * Parent directories must exist or an exception will be thrown. The content
+     * Missing parent directories are created automatically. The content
      * is written in raw binary format without Base64 encoding for optimal performance.</p>
      *
      * <p>Usage Examples:</p>
@@ -576,6 +576,13 @@ public final class AvroParser extends AbstractParser<AvroSerConfig, AvroDeserCon
 
     private static OutputStream nonClosingOutputStream(final OutputStream output) {
         return new FilterOutputStream(output) {
+            @Override
+            public void write(final byte[] b, final int off, final int len) throws IOException {
+                // FilterOutputStream's default bulk write loops byte-by-byte through write(int);
+                // delegate directly to avoid one syscall per byte for every Avro block.
+                out.write(b, off, len);
+            }
+
             @Override
             public void close() throws IOException {
                 flush();

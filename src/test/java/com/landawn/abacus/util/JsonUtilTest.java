@@ -954,6 +954,25 @@ public class JsonUtilTest extends TestBase {
     }
 
     @Test
+    public void testUnwrapJSONArrayWithObjectArrayTypeConvertsScalars() {
+        JSONArray strings = new JSONArray();
+        strings.put(1);
+        strings.put(true);
+
+        String[] stringArray = JsonUtil.unwrap(strings, String[].class);
+
+        assertArrayEquals(new String[] { "1", "true" }, stringArray);
+
+        JSONArray integers = new JSONArray();
+        integers.put("1");
+        integers.put(2);
+
+        Integer[] integerArray = JsonUtil.unwrap(integers, Integer[].class);
+
+        assertArrayEquals(new Integer[] { 1, 2 }, integerArray);
+    }
+
+    @Test
     public void testUnwrapJSONArrayWithNestedObjects() {
         JSONObject obj1 = new JSONObject();
         obj1.put("name", "John");
@@ -1140,19 +1159,23 @@ public class JsonUtilTest extends TestBase {
     @Test
     public void testUnwrapJSONArrayToByteArray() {
         JSONArray json = new JSONArray();
-        json.put((byte) 10);
-        json.put((byte) 20);
+        json.put(10);
+        json.put(20);
 
-        assertThrows(IllegalArgumentException.class, () -> JsonUtil.unwrap(json, byte[].class));
+        byte[] array = JsonUtil.unwrap(json, byte[].class);
+
+        assertArrayEquals(new byte[] { 10, 20 }, array);
     }
 
     @Test
     public void testUnwrapJSONArrayToShortArray() {
         JSONArray json = new JSONArray();
-        json.put((short) 100);
-        json.put((short) 200);
+        json.put(100);
+        json.put(200);
 
-        assertThrows(IllegalArgumentException.class, () -> JsonUtil.unwrap(json, short[].class));
+        short[] array = JsonUtil.unwrap(json, short[].class);
+
+        assertArrayEquals(new short[] { 100, 200 }, array);
     }
 
     @Test
@@ -1161,7 +1184,9 @@ public class JsonUtilTest extends TestBase {
         json.put("A");
         json.put("B");
 
-        assertThrows(IllegalArgumentException.class, () -> JsonUtil.unwrap(json, char[].class));
+        char[] array = JsonUtil.unwrap(json, char[].class);
+
+        assertArrayEquals(new char[] { 'A', 'B' }, array);
     }
 
     @Test
@@ -1192,6 +1217,23 @@ public class JsonUtilTest extends TestBase {
         assertEquals(2, list.size());
         assertEquals(100, list.get(0));
         assertEquals(200, list.get(1));
+    }
+
+    @Test
+    public void testToListConvertsScalarElementsToElementType() {
+        JSONArray strings = new JSONArray();
+        strings.put(123);
+
+        List<String> stringList = JsonUtil.toList(strings, String.class);
+
+        assertEquals("123", stringList.get(0));
+
+        JSONArray integers = new JSONArray();
+        integers.put("123");
+
+        List<Integer> integerList = JsonUtil.toList(integers, Integer.class);
+
+        assertEquals(Integer.valueOf(123), integerList.get(0));
     }
 
     @Test
@@ -1283,6 +1325,17 @@ public class JsonUtilTest extends TestBase {
         assertEquals(2, list.size());
         assertEquals(1, list.get(0).get("id"));
         assertEquals(2, list.get(1).get("id"));
+    }
+
+    @Test
+    public void testUnwrapJSONObjectConvertsScalarMapValuesToValueType() {
+        JSONObject json = new JSONObject();
+        json.put("id", 123);
+
+        Type<Map<String, String>> type = N.typeOf("Map<String, String>");
+        Map<String, String> map = JsonUtil.unwrap(json, type);
+
+        assertEquals("123", map.get("id"));
     }
 
     @Test

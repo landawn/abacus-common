@@ -509,7 +509,7 @@ public final class MutableChar implements Mutable, Serializable, Comparable<Muta
      *
      * int hash1 = a.hashCode();  // returns 65 (Unicode value of 'A')
      * int hash2 = b.hashCode();  // returns 65
-     * assert hash1 == hash2;     // returns true
+     * assert hash1 == hash2;     // passes — hash codes are equal
      * }</pre>
      *
      * @return a hash code value for this object, equal to the char value

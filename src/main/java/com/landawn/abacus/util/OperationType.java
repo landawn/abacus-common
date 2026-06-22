@@ -112,7 +112,7 @@ public enum OperationType {
                 return DELETE;
 
             default:
-                throw new IllegalArgumentException("Not found the mapping OperationType for int value[" + intValue + "]. ");
+                throw new IllegalArgumentException("No OperationType for int value: " + intValue + ". Expected one of [1, 2, 4, 8]");
         }
     }
 }

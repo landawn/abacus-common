@@ -21,6 +21,8 @@ import java.util.Map;
 import com.landawn.abacus.parser.JsonDeserConfig;
 import com.landawn.abacus.util.ClassUtil;
 import com.landawn.abacus.util.ImmutableMap;
+import com.landawn.abacus.util.ImmutableNavigableMap;
+import com.landawn.abacus.util.ImmutableSortedMap;
 import com.landawn.abacus.util.SK;
 import com.landawn.abacus.util.Strings;
 
@@ -50,13 +52,26 @@ public class ImmutableMapType<K, V, T extends ImmutableMap<K, V>> extends Abstra
      * @param keyTypeName the name of the key type parameter
      * @param valueTypeName the name of the value type parameter
      */
-    @SuppressWarnings("rawtypes")
     ImmutableMapType(final String keyTypeName, final String valueTypeName) {
-        super(getTypeName(ImmutableMap.class, keyTypeName, valueTypeName, false));
+        this(ImmutableMap.class, keyTypeName, valueTypeName);
+    }
 
-        declaringName = getTypeName(ImmutableMap.class, keyTypeName, valueTypeName, true);
+    /**
+     * Package-private constructor for ImmutableMapType with an explicit target class.
+     * Sorted/navigable subclasses are routed here by the TypeFactory and must produce the declared
+     * subtype from {@link #valueOf(String)}.
+     *
+     * @param typeClass the concrete ImmutableMap (sub)class this handler produces
+     * @param keyTypeName the name of the key type parameter
+     * @param valueTypeName the name of the value type parameter
+     */
+    @SuppressWarnings("rawtypes")
+    ImmutableMapType(final Class<?> typeClass, final String keyTypeName, final String valueTypeName) {
+        super(getTypeName(typeClass, keyTypeName, valueTypeName, false));
 
-        this.typeClass = (Class) ImmutableMap.class;
+        declaringName = getTypeName(typeClass, keyTypeName, valueTypeName, true);
+
+        this.typeClass = (Class) typeClass;
 
         parameterTypes = List.of(TypeFactory.getType(keyTypeName), TypeFactory.getType(valueTypeName));
 
@@ -187,11 +202,29 @@ public class ImmutableMapType<K, V, T extends ImmutableMap<K, V>> extends Abstra
         if (Strings.isEmpty(str) || Strings.isBlank(str)) {
             return null; // NOSONAR
         } else if ("{}".equals(str)) {
+            // Sorted/navigable subclasses route here too (TypeFactory dispatches on assignability).
+            if (ImmutableNavigableMap.class.isAssignableFrom(typeClass)) {
+                return (T) ImmutableNavigableMap.empty();
+            } else if (ImmutableSortedMap.class.isAssignableFrom(typeClass)) {
+                return (T) ImmutableSortedMap.empty();
+            }
+
             return (T) ImmutableMap.empty();
         } else {
             final ImmutableMap<K, V> map = Utils.jsonParser.deserialize(str, jdc, ImmutableMap.class);
 
-            return map == null ? null : (T) ImmutableMap.wrap(map);
+            if (map == null) {
+                return null;
+            }
+
+            // Produce the declared subtype instead of a plain ImmutableMap (ClassCastException).
+            if (ImmutableNavigableMap.class.isAssignableFrom(typeClass)) {
+                return (T) ImmutableNavigableMap.copyOf(map);
+            } else if (ImmutableSortedMap.class.isAssignableFrom(typeClass)) {
+                return (T) ImmutableSortedMap.copyOf(map);
+            }
+
+            return (T) ImmutableMap.wrap(map);
         }
     }
 

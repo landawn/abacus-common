@@ -104,7 +104,7 @@ import com.landawn.abacus.logging.LoggerFactory;
  * <p><b>Profiler Configuration and Control:</b>
  * <ul>
  *   <li><b>Thread Pool Management:</b> Custom ExecutorService support for specialized threading models</li>
- *   <li><b>Suspension Control:</b> {@code setSuspended(boolean)} for debugging and conditional execution</li>
+ *   <li><b>Suspension Control:</b> {@code suspend(boolean)} for debugging and conditional execution</li>
  *   <li><b>Output Customization:</b> Multiple output formats and custom result processors</li>
  *   <li><b>Memory Optimization:</b> Configurable result collection strategies for large-scale testing</li>
  *   <li><b>Error Handling:</b> Comprehensive exception handling with detailed error reporting</li>
@@ -363,7 +363,7 @@ public final class Profiler {
      * @param label a descriptive identifier for this test that appears in all result outputs.
      *              Use meaningful names that clearly describe what is being tested.
      *              This label will appear in console output, HTML reports, and XML exports.
-     *              Should not be {@code null}; if {@code null} is passed, "null" may appear in output
+     *              Should not be {@code null}; if {@code null} is passed, the string {@code "null"} is used as the label
      * @param command the code block to be profiled and executed in each loop iteration.
      *                Should be a Runnable that encapsulates the operation being benchmarked
      * @return a {@link MultiLoopsStatistics} object containing comprehensive performance metrics
@@ -467,7 +467,7 @@ public final class Profiler {
      *                 statistically stable measurements
      * @param label a descriptive identifier for this test that appears in all result outputs.
      *              Use meaningful names to distinguish between different test scenarios.
-     *              Should not be {@code null}; if {@code null} is passed, "null" may appear in output
+     *              Should not be {@code null}; if {@code null} is passed, the string {@code "null"} is used as the label
      * @param command the code block to be profiled and executed in each loop iteration.
      *                Execution time is measured individually for each invocation, excluding delay periods.
      *                The command can throw checked exceptions which will be caught and logged
@@ -482,7 +482,10 @@ public final class Profiler {
      */
     public static MultiLoopsStatistics run(final int threadNum, final long threadDelay, final int loopNum, final long loopDelay, final int roundNum,
             final String label, final Throwables.Runnable<? extends Exception> command) {
-        return run(command, label, getMethod(command, "run"), null, null, null, null, null, threadNum, threadDelay, loopNum, loopDelay, roundNum);
+        // A null label is normalized to the string "null" so that statistics queries and report
+        // rendering (which use the label as the method name) won't fail with NullPointerException.
+        return run(command, String.valueOf(label), getMethod(command, "run"), null, null, null, null, null, threadNum, threadDelay, loopNum, loopDelay,
+                roundNum);
     }
 
     /**
@@ -708,7 +711,7 @@ public final class Profiler {
                 } catch (final Exception e) {
                     // ignore;
                     e.printStackTrace(ps);
-                    logger.warn(ExceptionUtil.getErrorMessage(e, true));
+                    logger.warn(e, "Profiler loop setup failed for method {} at loop {}", methodName, loopIndex);
                 }
             }
 
@@ -724,7 +727,7 @@ public final class Profiler {
                 } catch (final Exception e) {
                     // ignore;
                     e.printStackTrace(ps);
-                    logger.warn(ExceptionUtil.getErrorMessage(e, true));
+                    logger.warn(e, "Profiler loop teardown failed for method {} at loop {}", methodName, loopIndex);
                 }
             }
 
@@ -758,7 +761,7 @@ public final class Profiler {
             } catch (final Exception e) {
                 // ignore;
                 e.printStackTrace(ps);
-                logger.warn(ExceptionUtil.getErrorMessage(e, true));
+                logger.warn(e, "Profiler method setup failed for method: {}", methodName);
             }
         }
 
@@ -774,11 +777,11 @@ public final class Profiler {
             }
         } catch (final InvocationTargetException e) {
             e.printStackTrace(ps);
-            logger.warn(ExceptionUtil.getErrorMessage(e, true));
+            logger.warn(e.getTargetException(), "Profiled method threw exception: {}", methodName);
             result = e.getTargetException();
         } catch (final Exception e) {
             e.printStackTrace(ps);
-            logger.warn(ExceptionUtil.getErrorMessage(e, true));
+            logger.warn(e, "Profiler method invocation failed for method: {}", methodName);
             result = e;
         }
 
@@ -791,7 +794,7 @@ public final class Profiler {
             } catch (final Exception e) {
                 // ignore;
                 e.printStackTrace(ps);
-                logger.warn(ExceptionUtil.getErrorMessage(e, true));
+                logger.warn(e, "Profiler method teardown failed for method: {}", methodName);
             }
         }
 
@@ -1736,7 +1739,7 @@ public final class Profiler {
          * // ... run performance test ...
          * long endNano = System.nanoTime();
          * long endMillis = System.currentTimeMillis();
-         * MultiLoopsStatistics stats = new MultiLoopsStatistics(startMillis, endMillis, startNano, endNano, 4);
+         * MultiLoopsStatistics stats = new MultiLoopsStatistics(startMillis, endMillis, startNano, endNano, 4, new ArrayList<>());
          * stats.printResult();
          * }</pre>
          *
@@ -1853,8 +1856,9 @@ public final class Profiler {
          * <p><b>Usage Example:</b></p>
          * <pre>{@code
          * MultiLoopsStatistics stats = Profiler.run(1, 100, 1, "test", () -> doWork());
+         * MultiLoopsStatistics merged = new MultiLoopsStatistics(startMillis, endMillis, startNano, endNano, 4, new ArrayList<>());
          * for (LoopStatistics loopStat : stats.getLoopStatisticsList()) {
-         *     stats.addMethodStatisticsList(loopStat);
+         *     merged.addMethodStatisticsList(loopStat);
          * }
          * }</pre>
          *
@@ -2085,7 +2089,7 @@ public final class Profiler {
          *   <li><b>Time Metrics:</b> Start time, end time, and total elapsed time for the entire test</li>
          *   <li><b>Per-Method Statistics:</b> Average, minimum, and maximum execution times for each profiled method</li>
          *   <li><b>Percentile Analysis:</b> Execution time percentiles (0.01%, 0.1%, 1%, 10%, 20%, 50%, 80%, 90%, 99%, 99.9%, 99.99%)</li>
-         *   <li><b>Error Summary:</b> Detailed information about any failed method executions with stack traces</li>
+         *   <li><b>Error Summary:</b> Details of any failed method executions (exception class and message)</li>
          * </ul>
          *
          * <p><b>Output Format Details:</b>
@@ -2128,7 +2132,7 @@ public final class Profiler {
          * databaseQuery,        1.234,      0.123,      12.345,     10.000,     8.000,      5.000,      2.000,      1.500,      1.200,      0.800,      0.500,      0.250,      0.150,      0.123
          * cacheOperation,       0.456,      0.050,      2.100,       1.800,      1.500,      1.200,      0.750,      0.600,      0.450,      0.350,      0.250,      0.100,      0.070,       0.060
          *
-         * Errors: 5 (0.125%)
+         * Errors:5 (0.125%)
          * --------------------------------------------------------------------------------
          * method=databaseQuery, startTime=2023-01-01T10:00:01, endTime=2023-01-01T10:00:01, result=SQLException: Connection timeout.
          * ========================================================================================================================
@@ -2676,6 +2680,7 @@ public final class Profiler {
          *     <_0.0001>10.000</_0.0001>
          *     <_0.001>8.000</_0.001>
          *     <_0.01>5.000</_0.01>
+         *     <_0.1>2.000</_0.1>
          *     <_0.2>1.500</_0.2>
          *     <_0.5>1.200</_0.5>
          *     <_0.8>0.800</_0.8>

@@ -42,8 +42,7 @@ public final class PrimitiveFloatListType extends AbstractPrimitiveListType<Floa
 
     /**
      * Constructs a new PrimitiveFloatListType instance.
-     * This constructor is protected to allow subclassing while maintaining controlled instantiation
-     * through the TypeFactory.
+     * This constructor is protected to keep instantiation controlled by the TypeFactory.
      */
     protected PrimitiveFloatListType() {
         super(FLOAT_LIST);

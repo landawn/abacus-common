@@ -3,6 +3,7 @@ package com.landawn.abacus.util;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
 import org.junit.jupiter.api.Test;
 
@@ -80,14 +81,16 @@ public class MonthTest extends TestBase {
 
     @Test
     public void testIntValue_uniqueness() {
-        Month[] months = Month.values();
-        for (int i = 0; i < months.length; i++) {
-            for (int j = i + 1; j < months.length; j++) {
-                if (months[i].intValue() == months[j].intValue()) {
-                    throw new AssertionError("Duplicate int value: " + months[i] + " and " + months[j]);
+        assertDoesNotThrow(() -> {
+            Month[] months = Month.values();
+            for (int i = 0; i < months.length; i++) {
+                for (int j = i + 1; j < months.length; j++) {
+                    if (months[i].intValue() == months[j].intValue()) {
+                        throw new AssertionError("Duplicate int value: " + months[i] + " and " + months[j]);
+                    }
                 }
             }
-        }
+        });
     }
 
     @Test

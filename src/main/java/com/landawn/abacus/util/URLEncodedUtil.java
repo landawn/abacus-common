@@ -457,7 +457,7 @@ public final class URLEncodedUtil {
      * <li>{@code Map<String, ?>}: Keys and values are encoded as name=value pairs</li>
      * <li>JavaBean: Bean properties are encoded using camelCase naming</li>
      * <li>{@code Object[]}: Pairs of name-value elements (must have even length)</li>
-     * <li>{@code String}: If contains "=", treated as encoded parameters; otherwise encoded as-is</li>
+     * <li>{@code String}: If it contains "=", parsed as name=value parameter pairs which are then encoded; otherwise encoded as a single value</li>
      * </ul>
      * Characters are percent-encoded according to application/x-www-form-urlencoded rules, where spaces become '+'.
      *
@@ -465,7 +465,7 @@ public final class URLEncodedUtil {
      * <pre>{@code
      * Map<String, Object> params = Map.of("name", "John Doe", "age", 30);
      * String query = URLEncodedUtil.encode(params);
-     * // query: "name=John+Doe&amp;age=30"
+     * // query: "name=John+Doe&age=30"
      * }</pre>
      *
      * @param parameters the parameters to encode (Map, bean, Object array pairs, or String); may be {@code null}.
@@ -476,7 +476,7 @@ public final class URLEncodedUtil {
      * @see URLEncoder#encode(String, Charset)
      */
     public static String encode(final Object parameters) {
-        return encode(parameters, Charsets.DEFAULT);
+        return encode(parameters, IOUtil.DEFAULT_CHARSET);
     }
 
     /**
@@ -487,7 +487,7 @@ public final class URLEncodedUtil {
      * <li>{@code Map<String, ?>}: Keys and values are encoded as name=value pairs</li>
      * <li>JavaBean: Bean properties are encoded using camelCase naming (default)</li>
      * <li>{@code Object[]}: Pairs of name-value elements (must have even length)</li>
-     * <li>{@code String}: If contains "=", treated as encoded parameters; otherwise encoded as-is</li>
+     * <li>{@code String}: If it contains "=", parsed as name=value parameter pairs which are then encoded; otherwise encoded as a single value</li>
      * </ul>
      * Characters are percent-encoded using the specified charset according to application/x-www-form-urlencoded rules.
      *
@@ -497,6 +497,11 @@ public final class URLEncodedUtil {
      * String query = URLEncodedUtil.encode(params, StandardCharsets.UTF_8);
      * // query: "name=%E4%B8%AD%E6%96%87"
      * }</pre>
+     *
+     * <p><b>Note:</b> This overload applies {@link NamingPolicy#CAMEL_CASE} as the naming policy. This affects
+     * not only bean property names but also {@code Map} keys, so a key such as {@code "first_name"}
+     * is emitted as {@code "firstName"}. To preserve {@code Map} keys (or any names) verbatim, use
+     * {@link #encode(Object, Charset, NamingPolicy)} with {@link NamingPolicy#NO_CHANGE}.
      *
      * @param parameters the parameters to encode (Map, bean, Object array pairs, or String); may be {@code null}.
      * @param charset the charset to use for percent-encoding; if {@code null}, defaults to the platform default charset.
@@ -518,7 +523,7 @@ public final class URLEncodedUtil {
      * <li>{@code Map<String, ?>}: Keys and values are encoded as name=value pairs (keys transformed by naming policy)</li>
      * <li>JavaBean: Bean properties are encoded with names transformed according to the naming policy</li>
      * <li>{@code Object[]}: Pairs of name-value elements (must have even length; names transformed by naming policy)</li>
-     * <li>{@code String}: If contains "=", treated as encoded parameters; otherwise encoded as-is</li>
+     * <li>{@code String}: If it contains "=", parsed as name=value parameter pairs which are then encoded; otherwise encoded as a single value</li>
      * </ul>
      * Characters are percent-encoded using the specified charset according to application/x-www-form-urlencoded rules.
      *
@@ -527,7 +532,7 @@ public final class URLEncodedUtil {
      * class User { String firstName; int userAge; }
      * User user = new User("John", 30);
      * String query = URLEncodedUtil.encode(user, StandardCharsets.UTF_8, NamingPolicy.SNAKE_CASE);
-     * // query: "first_name=John&amp;user_age=30"
+     * // query: "first_name=John&user_age=30"
      * }</pre>
      *
      * @param parameters the parameters to encode (Map, bean, Object array pairs, or String); may be {@code null}.
@@ -561,6 +566,8 @@ public final class URLEncodedUtil {
      * application/x-www-form-urlencoded rules, and appends them to the URL with a '?' separator.
      * If the URL already contains a '?' the encoded parameters are joined with '&amp;'. Any fragment
      * identifier ({@code #...}) in the URL is preserved and placed after the encoded parameters.
+     * If {@code parameters} is a {@code CharSequence} containing {@code '='}, it is treated as an
+     * already URL-encoded query string and appended verbatim (duplicate parameter names are preserved).
      * If {@code parameters} is {@code null} or an empty Map, the original URL is returned unchanged.
      * </p>
      *
@@ -568,7 +575,7 @@ public final class URLEncodedUtil {
      * <pre>{@code
      * Map<String, Object> params = Map.of("q", "java url encoding", "page", 1);
      * String fullUrl = URLEncodedUtil.encode("http://search.example.com", params);
-     * // fullUrl: "http://search.example.com?q=java+url+encoding&amp;page=1"
+     * // fullUrl: "http://search.example.com?q=java+url+encoding&page=1"
      * }</pre>
      *
      * @param url the base URL to which the query string will be appended (e.g., "http://example.com/path").
@@ -580,7 +587,7 @@ public final class URLEncodedUtil {
      * @see #encode(Object)
      */
     public static String encode(final String url, final Object parameters) {
-        return encode(url, parameters, Charsets.DEFAULT);
+        return encode(url, parameters, IOUtil.DEFAULT_CHARSET);
     }
 
     /**
@@ -590,6 +597,8 @@ public final class URLEncodedUtil {
      * according to application/x-www-form-urlencoded rules, and appends them to the URL with a '?'
      * separator. If the URL already contains a '?' the encoded parameters are joined with '&amp;'. Any
      * fragment identifier ({@code #...}) in the URL is preserved and placed after the encoded parameters.
+     * If {@code parameters} is a {@code CharSequence} containing {@code '='}, it is treated as an
+     * already URL-encoded query string and appended verbatim (duplicate parameter names are preserved).
      * If {@code parameters} is {@code null} or an empty Map, the original URL is returned unchanged.
      * </p>
      *
@@ -621,6 +630,9 @@ public final class URLEncodedUtil {
      * a '?' separator. If the URL already contains a '?' the encoded parameters are joined with '&amp;'.
      * Any fragment identifier ({@code #...}) present in the URL is preserved and appended after the parameters.
      * Property/key names are transformed according to the naming policy before encoding.
+     * If {@code parameters} is a {@code CharSequence} containing {@code '='}, it is treated as an
+     * already URL-encoded query string and appended verbatim (duplicate parameter names are preserved;
+     * the naming policy is not applied).
      * If {@code parameters} is {@code null} or an empty Map, the original URL is returned unchanged.
      * </p>
      *
@@ -665,7 +677,16 @@ public final class URLEncodedUtil {
                 sb.append('?');
             }
 
-            encode(parameters, charset, namingPolicy, sb);
+            if (parameters instanceof CharSequence queryString && queryString.toString().contains(NAME_VALUE_SEPARATOR)) {
+                // A pre-built query STRING is documented (HttpRequest.query(String)) as already
+                // URL-encoded: append it verbatim. Routing it through the map-based splitter
+                // silently dropped duplicate parameter names (a=1&a=2 -> a=2) and re-percent-
+                // encoded the already-encoded text (q=a%20b -> q=a%2520b).
+                sb.append(queryString);
+            } else {
+                encode(parameters, charset, namingPolicy, sb);
+            }
+
             sb.append(fragment);
 
             return sb.toString();
@@ -696,7 +717,7 @@ public final class URLEncodedUtil {
      * @see #encode(Object, Charset, Appendable)
      */
     public static void encode(final Object parameters, final Appendable output) {
-        encode(parameters, Charsets.DEFAULT, output);
+        encode(parameters, IOUtil.DEFAULT_CHARSET, output);
     }
 
     /**
@@ -713,6 +734,11 @@ public final class URLEncodedUtil {
      * URLEncodedUtil.encode(Map.of("name", "中文"), StandardCharsets.UTF_8, writer);
      * // writer content: "name=%E4%B8%AD%E6%96%87"
      * }</pre>
+     *
+     * <p><b>Note:</b> This overload applies {@link NamingPolicy#CAMEL_CASE} as the naming policy. This affects
+     * not only bean property names but also {@code Map} keys, so a key such as {@code "first_name"}
+     * is emitted as {@code "firstName"}. To preserve {@code Map} keys (or any names) verbatim, use
+     * {@link #encode(Object, Charset, NamingPolicy, Appendable)} with {@link NamingPolicy#NO_CHANGE}.
      *
      * @param parameters the parameters to encode (Map, bean, Object array pairs, or String); may be {@code null}.
      * @param charset the charset to use for percent-encoding; if {@code null}, defaults to the platform default charset.
@@ -739,7 +765,7 @@ public final class URLEncodedUtil {
      * <li>{@code Map<String, ?>}: Keys and values are encoded as name=value pairs</li>
      * <li>JavaBean: Bean properties are encoded with names transformed by the naming policy</li>
      * <li>{@code Object[]}: Pairs of name-value elements (must have even length)</li>
-     * <li>{@code String}: If contains "=", treated as pre-encoded parameters; otherwise encoded as-is</li>
+     * <li>{@code String}: If it contains "=", parsed as name=value parameter pairs which are then encoded; otherwise encoded as a single value</li>
      * </ul>
      *
      * <p><b>Usage Examples:</b></p>
@@ -747,7 +773,7 @@ public final class URLEncodedUtil {
      * class User { String firstName; int age; }
      * StringBuilder sb = new StringBuilder();
      * URLEncodedUtil.encode(new User("John", 30), StandardCharsets.UTF_8, NamingPolicy.SNAKE_CASE, sb);
-     * // sb: "first_name=John&amp;age=30"
+     * // sb: "first_name=John&age=30"
      * }</pre>
      *
      * @param parameters the parameters to encode (Map, bean, Object array pairs, or String); may be {@code null}.
@@ -839,7 +865,7 @@ public final class URLEncodedUtil {
      * @throws IOException if an I/O error occurs while appending to the output.
      */
     private static void encodeFormFields(final String content, final Charset charset, final Appendable output) throws IOException {
-        urlEncode(content, (charset != null) ? charset : Charsets.DEFAULT, URL_ENCODER, true, output);
+        urlEncode(content, (charset != null) ? charset : IOUtil.DEFAULT_CHARSET, URL_ENCODER, true, output);
     }
 
     private static void urlEncode(final String content, final Charset charset, final BitSet safeChars, final boolean blankAsPlus, final Appendable output)
@@ -931,12 +957,13 @@ public final class URLEncodedUtil {
      * only the last occurrence is retained (use {@link #decodeToMultimap(String)} to preserve all values).
      * </p>
      * <p>
-     * Supports both <i>&amp;</i> and ';' as parameter separators according to RFC 2396.
+     * Supports both <i>&amp;</i> and ';' as parameter separators (the semicolon separator follows
+     * the W3C HTML 4.01 recommendation, Appendix B.2.2).
      * </p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Map<String, String> params = URLEncodedUtil.decode("name=John+Doe&amp;age=30");
+     * Map<String, String> params = URLEncodedUtil.decode("name=John+Doe&age=30");
      * // params: {name=John Doe, age=30}
      * }</pre>
      *
@@ -948,7 +975,7 @@ public final class URLEncodedUtil {
      * @see URLDecoder#decode(String, String)
      */
     public static Map<String, String> decode(final String urlQuery) {
-        return decode(urlQuery, Charsets.DEFAULT);
+        return decode(urlQuery, IOUtil.DEFAULT_CHARSET);
     }
 
     /**
@@ -960,7 +987,8 @@ public final class URLEncodedUtil {
      * multiple times, only the last occurrence is retained.
      * </p>
      * <p>
-     * Supports both <i>&amp;</i> and ';' as parameter separators according to RFC 2396.
+     * Supports both <i>&amp;</i> and ';' as parameter separators (the semicolon separator follows
+     * the W3C HTML 4.01 recommendation, Appendix B.2.2).
      * </p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -990,12 +1018,13 @@ public final class URLEncodedUtil {
      * occurrence is retained.
      * </p>
      * <p>
-     * Supports both <i>&amp;</i> and ';' as parameter separators according to RFC 2396.
+     * Supports both <i>&amp;</i> and ';' as parameter separators (the semicolon separator follows
+     * the W3C HTML 4.01 recommendation, Appendix B.2.2).
      * </p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * TreeMap<String, String> params = URLEncodedUtil.decode("b=2&amp;a=1", StandardCharsets.UTF_8, TreeMap::new);
+     * TreeMap<String, String> params = URLEncodedUtil.decode("b=2&a=1", StandardCharsets.UTF_8, TreeMap::new);
      * // params: {a=1, b=2} (sorted by key)
      * }</pre>
      *
@@ -1023,6 +1052,14 @@ public final class URLEncodedUtil {
 
             while (scanner.hasNext()) {
                 final String token = scanner.next();
+
+                // Consecutive separators ("a=1&&b=2") produce an empty token; real-world URLs
+                // contain them and every mainstream parser skips them instead of fabricating
+                // an empty-string parameter name.
+                if (token.isEmpty()) {
+                    continue;
+                }
+
                 final int i = token.indexOf(NAME_VALUE_SEPARATOR);
 
                 if (i != -1) {
@@ -1049,12 +1086,13 @@ public final class URLEncodedUtil {
      * sequences are decoded. Parameter names and values are trimmed of whitespace.
      * </p>
      * <p>
-     * Supports both <i>&amp;</i> and ';' as parameter separators according to RFC 2396.
+     * Supports both <i>&amp;</i> and ';' as parameter separators (the semicolon separator follows
+     * the W3C HTML 4.01 recommendation, Appendix B.2.2).
      * </p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * ListMultimap<String, String> params = URLEncodedUtil.decodeToMultimap("color=red&amp;color=blue&amp;size=L");
+     * ListMultimap<String, String> params = URLEncodedUtil.decodeToMultimap("color=red&color=blue&size=L");
      * // params: {color=[red, blue], size=[L]}
      * }</pre>
      *
@@ -1065,7 +1103,7 @@ public final class URLEncodedUtil {
      * @see #decode(String)
      */
     public static ListMultimap<String, String> decodeToMultimap(final String urlQuery) {
-        return decodeToMultimap(urlQuery, Charsets.DEFAULT);
+        return decodeToMultimap(urlQuery, IOUtil.DEFAULT_CHARSET);
     }
 
     /**
@@ -1077,12 +1115,13 @@ public final class URLEncodedUtil {
      * sequences are decoded using the specified charset. Parameter names and values are trimmed of whitespace.
      * </p>
      * <p>
-     * Supports both <i>&amp;</i> and ';' as parameter separators according to RFC 2396.
+     * Supports both <i>&amp;</i> and ';' as parameter separators (the semicolon separator follows
+     * the W3C HTML 4.01 recommendation, Appendix B.2.2).
      * </p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * ListMultimap<String, String> params = URLEncodedUtil.decodeToMultimap("tag=java&amp;tag=url", StandardCharsets.UTF_8);
+     * ListMultimap<String, String> params = URLEncodedUtil.decodeToMultimap("tag=java&tag=url", StandardCharsets.UTF_8);
      * // params: {tag=[java, url]}
      * }</pre>
      *
@@ -1108,6 +1147,14 @@ public final class URLEncodedUtil {
 
             while (scanner.hasNext()) {
                 final String token = scanner.next();
+
+                // Consecutive separators ("a=1&&b=2") produce an empty token; real-world URLs
+                // contain them and every mainstream parser skips them instead of fabricating
+                // an empty-string parameter name.
+                if (token.isEmpty()) {
+                    continue;
+                }
+
                 final int i = token.indexOf(NAME_VALUE_SEPARATOR);
 
                 if (i != -1) {
@@ -1129,18 +1176,19 @@ public final class URLEncodedUtil {
      * Decodes a URL-encoded query string into a bean or Map of the specified type using the platform default charset ({@link Charset#defaultCharset()}).
      * <p>
      * This method parses a URL query string and populates a JavaBean or Map instance with the decoded parameters.
-     * Parameter names are matched to bean property names (case-sensitive). Values are automatically converted
+     * Parameter names are matched to bean property names (exact match first, falling back to case-insensitive matching). Values are automatically converted
      * to the appropriate property types using the bean's property information. Both '+' characters and <i>%XX</i>
      * sequences are decoded. Parameter names and values are trimmed of whitespace.
      * </p>
      * <p>
-     * Supports both <i>&amp;</i> and ';' as parameter separators according to RFC 2396.
+     * Supports both <i>&amp;</i> and ';' as parameter separators (the semicolon separator follows
+     * the W3C HTML 4.01 recommendation, Appendix B.2.2).
      * </p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * class User { String name; int age; }
-     * User user = URLEncodedUtil.decode("name=John&amp;age=30", User.class);
+     * User user = URLEncodedUtil.decode("name=John&age=30", User.class);
      * // user: {name="John", age=30}
      * }</pre>
      *
@@ -1149,18 +1197,18 @@ public final class URLEncodedUtil {
      * @param targetType the class of the bean or Map to create and populate; must not be {@code null}.
      * @return an instance of type T populated with the decoded parameter values;
      *         returns an empty instance if {@code urlQuery} is {@code null} or empty.
-     * @throws IllegalArgumentException if {@code targetType} is neither a {@code Map} type nor a supported bean class.
+     * @throws IllegalArgumentException if {@code targetType} is {@code null}, neither a {@code Map} type, nor a supported bean class.
      * @see #decode(String, Charset, Class)
      */
     public static <T> T decode(final String urlQuery, final Class<? extends T> targetType) {
-        return decode(urlQuery, Charsets.DEFAULT, targetType);
+        return decode(urlQuery, IOUtil.DEFAULT_CHARSET, targetType);
     }
 
     /**
      * Decodes a URL-encoded query string into a bean or Map of the specified type using the specified charset.
      * <p>
      * This method parses a URL query string and populates a JavaBean or Map instance with the decoded parameters.
-     * Parameter names are matched to bean property names (case-sensitive). Values are automatically converted
+     * Parameter names are matched to bean property names (exact match first, falling back to case-insensitive matching). Values are automatically converted
      * to the appropriate property types using the bean's property information. Both '+' characters and <i>%XX</i>
      * sequences are decoded using the specified charset. Parameter names and values are trimmed of whitespace.
      * </p>
@@ -1169,13 +1217,14 @@ public final class URLEncodedUtil {
      * Otherwise, it creates and populates a bean instance.
      * </p>
      * <p>
-     * Supports both <i>&amp;</i> and ';' as parameter separators according to RFC 2396.
+     * Supports both <i>&amp;</i> and ';' as parameter separators (the semicolon separator follows
+     * the W3C HTML 4.01 recommendation, Appendix B.2.2).
      * </p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * class Product { String name; double price; }
-     * Product p = URLEncodedUtil.decode("name=Laptop&amp;price=999.99", StandardCharsets.UTF_8, Product.class);
+     * Product p = URLEncodedUtil.decode("name=Laptop&price=999.99", StandardCharsets.UTF_8, Product.class);
      * // p: {name="Laptop", price=999.99}
      * }</pre>
      *
@@ -1185,11 +1234,13 @@ public final class URLEncodedUtil {
      * @param targetType the class of the bean or Map to create and populate; must not be {@code null}.
      * @return an instance of type T populated with the decoded parameter values;
      *         returns an empty instance if {@code urlQuery} is {@code null} or empty.
-     * @throws IllegalArgumentException if {@code targetType} is neither a {@code Map} type nor a supported bean class.
+     * @throws IllegalArgumentException if {@code targetType} is {@code null}, neither a {@code Map} type, nor a supported bean class.
      * @see #decode(String, Class)
      */
     @SuppressWarnings("rawtypes")
     public static <T> T decode(final String urlQuery, final Charset charset, final Class<? extends T> targetType) {
+        N.checkArgNotNull(targetType, "targetType");
+
         if (Map.class.isAssignableFrom(targetType)) {
             final Supplier<Map<String, String>> supplier = Suppliers.ofMap((Class) targetType);
 
@@ -1213,6 +1264,14 @@ public final class URLEncodedUtil {
 
             while (scanner.hasNext()) {
                 final String token = scanner.next();
+
+                // Consecutive separators ("a=1&&b=2") produce an empty token; real-world URLs
+                // contain them and every mainstream parser skips them instead of fabricating
+                // an empty-string parameter name.
+                if (token.isEmpty()) {
+                    continue;
+                }
+
                 final int i = token.indexOf(NAME_VALUE_SEPARATOR);
 
                 if (i != -1) {
@@ -1242,7 +1301,7 @@ public final class URLEncodedUtil {
      * Converts a parameter map (with String array values) into a bean of the specified type.
      * <p>
      * This method is typically used to convert HTTP servlet request parameters into a JavaBean.
-     * The keys in the map should correspond to bean property names (case-sensitive). Values are String arrays,
+     * The keys in the map should correspond to bean property names (exact match first, falling back to case-insensitive matching). Values are String arrays,
      * where each array contains one or more values for the corresponding property. If a property has multiple
      * values and the target property type is {@code String[]}, all values are set. Otherwise, values are joined
      * with ", " and converted to the property type.
@@ -1270,6 +1329,8 @@ public final class URLEncodedUtil {
      * @throws IllegalArgumentException if {@code targetType} is {@code null} or not a supported bean type.
      */
     public static <T> T convertToBean(final Map<String, String[]> parameters, final Class<? extends T> targetType) {
+        N.checkArgNotNull(targetType, "targetType");
+
         final BeanInfo beanInfo = ParserUtil.getBeanInfo(targetType);
         final Object result = beanInfo.createBeanResult();
 
@@ -1307,7 +1368,7 @@ public final class URLEncodedUtil {
             return null;
         }
 
-        return urlDecode(content, (charset != null) ? charset : Charsets.DEFAULT, true);
+        return urlDecode(content, (charset != null) ? charset : IOUtil.DEFAULT_CHARSET, true);
     }
 
     /**
@@ -1316,7 +1377,7 @@ public final class URLEncodedUtil {
      * Non-ASCII characters that appear literally in the string (i.e., not encoded) are also
      * converted using the given charset.
      *
-     * @param content the string to decode; must not be {@code null}.
+     * @param content the string to decode; {@code null} returns {@code null}.
      * @param charset the charset used to decode percent-encoded byte sequences;
      *                must not be {@code null}.
      * @param plusAsBlank if {@code true}, {@code '+'} characters are converted to spaces

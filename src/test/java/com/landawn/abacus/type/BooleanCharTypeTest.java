@@ -303,4 +303,23 @@ public class BooleanCharTypeTest extends TestBase {
         verify(mockWriter).write("Y");
     }
 
+    // --- regression tests for 2026-06-10 deep-review fixes ---
+
+    @Test
+    public void testValueOfObjectBooleanAndNumber() {
+        // regression: the inherited valueOf(Object) stringified Boolean.TRUE to "true", which the
+        // Y/N parser mapped to FALSE; same family bug in BooleanIntType
+        org.junit.jupiter.api.Assertions.assertEquals(Boolean.TRUE, type.valueOf((Object) Boolean.TRUE));
+        org.junit.jupiter.api.Assertions.assertEquals(Boolean.FALSE, type.valueOf((Object) Boolean.FALSE));
+        org.junit.jupiter.api.Assertions.assertEquals(Boolean.TRUE, type.valueOf((Object) 1));
+        org.junit.jupiter.api.Assertions.assertEquals(Boolean.FALSE, type.valueOf((Object) 0));
+        org.junit.jupiter.api.Assertions.assertTrue(type.isComparable());
+
+        final BooleanIntType intType = (BooleanIntType) createType("BooleanInt");
+        org.junit.jupiter.api.Assertions.assertEquals(Boolean.TRUE, intType.valueOf((Object) Boolean.TRUE));
+        org.junit.jupiter.api.Assertions.assertEquals(Boolean.TRUE, intType.valueOf((Object) 2)); // matches get(ResultSet): value > 0
+        org.junit.jupiter.api.Assertions.assertEquals(Boolean.FALSE, intType.valueOf((Object) 0));
+        org.junit.jupiter.api.Assertions.assertTrue(intType.isComparable());
+    }
+
 }

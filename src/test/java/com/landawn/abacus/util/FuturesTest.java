@@ -1098,6 +1098,23 @@ public class FuturesTest extends TestBase {
     }
 
     @Test
+    public void testAnyOfIsDoneWaitsForSuccessAfterFailure() throws Exception {
+        CompletableFuture<String> failed = new CompletableFuture<>();
+        CompletableFuture<String> pending = new CompletableFuture<>();
+
+        ContinuableFuture<String> anyOfFuture = Futures.anyOf(failed, pending);
+
+        failed.completeExceptionally(new IllegalStateException("boom"));
+
+        assertFalse(anyOfFuture.isDone());
+
+        pending.complete("Second");
+
+        assertTrue(anyOfFuture.isDone());
+        assertEquals("Second", anyOfFuture.get());
+    }
+
+    @Test
     public void testAnyOfWithEmptyCollectionThrowsException() {
         List<CompletableFuture<Integer>> emptyList = new ArrayList<>();
 
@@ -1563,6 +1580,58 @@ public class FuturesTest extends TestBase {
 
         ExecutionException e3 = new ExecutionException(new Error("error"));
         Assertions.assertEquals(e3, Futures.convertException(e3));
+    }
+
+    // --- regression tests for 2026-06-10 deep-review fixes ---
+
+    @Test
+    public void testAnyOfTimedGetThrowsTimeoutException() {
+        // regression: a total timeout was wrapped in UncheckedException instead of the
+        // TimeoutException documented by Future.get(timeout, unit) (and thrown by allOf)
+        final java.util.concurrent.ExecutorService executor = java.util.concurrent.Executors.newSingleThreadExecutor();
+
+        try {
+            final java.util.concurrent.Future<String> never = executor.submit(() -> {
+                Thread.sleep(60_000);
+                return "never";
+            });
+
+            Assertions.assertThrows(java.util.concurrent.TimeoutException.class,
+                    () -> Futures.anyOf(java.util.Arrays.asList(never)).get(200, java.util.concurrent.TimeUnit.MILLISECONDS));
+        } finally {
+            executor.shutdownNow();
+        }
+    }
+
+    @Test
+    @Timeout(10)
+    public void testAnyOfUntimedGetThrowsInterruptedExceptionWhenInterrupted() throws Exception {
+        // regression: when the thread blocked in anyOf(...).get() was interrupted, the synthetic
+        // InterruptedException was wrapped in an unchecked exception instead of being rethrown
+        // per the Future.get() contract (the timed overload already rethrew it).
+        final CompletableFuture<String> never = new CompletableFuture<>();
+        final java.util.concurrent.atomic.AtomicReference<Throwable> thrown = new java.util.concurrent.atomic.AtomicReference<>();
+        final java.util.concurrent.CountDownLatch done = new java.util.concurrent.CountDownLatch(1);
+
+        final Thread worker = new Thread(() -> {
+            try {
+                Futures.anyOf(Arrays.asList(never)).get();
+            } catch (Throwable e) {
+                thrown.set(e);
+            } finally {
+                done.countDown();
+            }
+        });
+
+        worker.start();
+        // A pending interrupt makes the iterator's blocking take() throw immediately, so this is
+        // deterministic regardless of whether the worker has reached the blocking call yet.
+        worker.interrupt();
+
+        assertTrue(done.await(5, TimeUnit.SECONDS), "worker thread did not finish");
+        assertTrue(thrown.get() instanceof InterruptedException, "expected InterruptedException but got: " + thrown.get());
+
+        never.complete("unblock");
     }
 
 }

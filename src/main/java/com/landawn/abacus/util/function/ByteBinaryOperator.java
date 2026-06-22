@@ -40,4 +40,18 @@ public interface ByteBinaryOperator extends Throwables.ByteBinaryOperator<Runtim
      */
     @Override
     byte applyAsByte(byte a, byte b);
+
+    /**
+     * Returns this object as a {@link Throwables.ByteBinaryOperator} view.
+     *
+     * <p>The returned object has the same behavior as this one. This method does not translate
+     * exceptions or make the original implementation capable of throwing new checked exceptions; the
+     * exception type parameter is for target-type compatibility with APIs that accept {@code Throwables.ByteBinaryOperator}.
+     *
+     * @param <E> the target exception type for compatibility with {@code Throwables.ByteBinaryOperator}
+     * @return a {@link Throwables.ByteBinaryOperator} view of this object
+     */
+    default <E extends Throwable> Throwables.ByteBinaryOperator<E> toThrowable() {
+        return (Throwables.ByteBinaryOperator<E>) this;
+    }
 }

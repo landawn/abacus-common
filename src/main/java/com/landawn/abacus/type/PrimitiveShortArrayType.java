@@ -260,7 +260,7 @@ public final class PrimitiveShortArrayType extends AbstractPrimitiveArrayType<sh
      * Type<short[]> type = TypeFactory.getType(short[].class);
      * short[] array = {100, 200, 300};
      * BufferedJsonWriter writer = new BufferedJsonWriter();
-     * JsonXmlSerConfig<?> config = new JsonXmlSerConfig<>();
+     * JsonXmlSerConfig<?> config = null;
      * type.serializeTo(writer, array, config);
      * System.out.println(writer.toString());   // Output: [100, 200, 300]
      *

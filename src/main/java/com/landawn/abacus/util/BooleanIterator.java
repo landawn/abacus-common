@@ -59,8 +59,9 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
     }
 
     /**
-     * A singleton empty BooleanIterator instance that contains no elements.
-     * This iterator's hasNext() always returns false, and nextBoolean() always throws NoSuchElementException.
+     * A singleton empty {@code BooleanIterator} instance that contains no elements.
+     * This iterator's {@code hasNext()} always returns {@code false}, and {@code nextBoolean()}
+     * always throws {@link NoSuchElementException}.
      *
      * @see #empty()
      */
@@ -133,7 +134,7 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
      * @param a the boolean array (may be {@code null})
      * @param fromIndex the starting index (inclusive)
      * @param toIndex the ending index (exclusive)
-     * @return a new {@code BooleanIterator} over the specified range, or an empty iterator if the array is {@code null} or {@code fromIndex} equals {@code toIndex}
+     * @return a new {@code BooleanIterator} over the specified range, or an empty iterator if the array is {@code null} or {@code fromIndex == toIndex}
      * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code toIndex > a.length}, or {@code fromIndex > toIndex}
      */
     public static BooleanIterator of(final boolean[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
@@ -189,13 +190,14 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
      * @param iteratorSupplier a Supplier that provides the {@code BooleanIterator} when needed, must not be {@code null}
      * @return a {@code BooleanIterator} that is initialized on the first call to {@code hasNext()} or {@code nextBoolean()}
      * @throws IllegalArgumentException if {@code iteratorSupplier} is {@code null}
+     * @throws IllegalStateException if the supplier returns {@code null} when invoked
      */
     public static BooleanIterator defer(final Supplier<? extends BooleanIterator> iteratorSupplier) throws IllegalArgumentException {
         N.checkArgNotNull(iteratorSupplier, cs.iteratorSupplier);
 
         return new BooleanIterator() {
             private BooleanIterator iter = null;
-            private boolean isInitialized = false;
+            private volatile boolean isInitialized = false;
 
             @Override
             public boolean hasNext() {
@@ -215,10 +217,13 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
                 return iter.nextBoolean();
             }
 
-            private void init() {
+            private synchronized void init() {
                 if (!isInitialized) {
                     isInitialized = true;
                     iter = iteratorSupplier.get();
+                    if (iter == null) {
+                        throw new IllegalStateException("Iterator supplier returned null");
+                    }
                 }
             }
         };
@@ -255,7 +260,11 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
     }
 
     /**
-     * Returns a BooleanIterator that generates values while a condition is {@code true}.
+     * Returns a {@code BooleanIterator} that generates values while a condition is {@code true}.
+     *
+     * <p>Note: The {@code hasNext} supplier may be called multiple times for the same element
+     * (once by the user, once internally for validation), so it should be idempotent or
+     * designed to handle multiple calls.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code

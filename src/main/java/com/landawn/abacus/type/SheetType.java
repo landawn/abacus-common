@@ -180,9 +180,8 @@ public class SheetType<R, C, E> extends AbstractType<Sheet<R, C, E>> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * SheetType<String, String, Integer> type = new SheetType<>("String", "String", "Integer");
-     * Sheet<String, String, Integer> sheet = new Sheet<>();
-     * sheet.put("row1", "col1", 100);
-     * sheet.put("row1", "col2", 200);
+     * Sheet<String, String, Integer> sheet = Sheet.rows(List.of("row1"), List.of("col1", "col2"),
+     *         new Integer[][] {{100, 200}});
      * String json = type.stringOf(sheet);
      * // Returns JSON representation of the sheet
      *
@@ -213,7 +212,7 @@ public class SheetType<R, C, E> extends AbstractType<Sheet<R, C, E>> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * SheetType<String, String, Integer> type = new SheetType<>("String", "String", "Integer");
-     * String json = "{\"row1\":{\"col1\":100,\"col2\":200}}";
+     * String json = "{\"rowKeySet\": [\"row1\"], \"columnKeySet\": [\"col1\", \"col2\"], \"columns\": {\"col1\": [100], \"col2\": [200]}}";
      * Sheet<String, String, Integer> sheet = type.valueOf(json);
      * // sheet contains the parsed structure
      *

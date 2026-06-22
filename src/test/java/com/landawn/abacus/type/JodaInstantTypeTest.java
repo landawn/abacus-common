@@ -205,4 +205,22 @@ public class JodaInstantTypeTest extends TestBase {
         verify(characterWriter, times(2)).write('"');
         verify(characterWriter).write(anyString());
     }
+
+    // --- regression tests for 2026-06-10 deep-review fixes ---
+
+    @Test
+    public void testStringOfValueOfRoundTripIsUtc() {
+        // regression: the shared Joda formatters lacked withZoneUTC(), so printing used the
+        // value's chronology zone while parsing used the JVM default zone - round trips drifted
+        // by the JVM's UTC offset on any non-UTC machine, and the emitted wall time contradicted
+        // the literal 'Z' (UTC) suffix
+        final Instant epoch = new Instant(0L);
+
+        assertEquals("1970-01-01T00:00:00.000Z", instantType.stringOf(epoch));
+        assertEquals(0L, instantType.valueOf("1970-01-01T00:00:00.000Z").getMillis());
+        assertEquals(0L, instantType.valueOf("1970-01-01T00:00:00Z").getMillis());
+
+        final Instant now = new Instant(1703502645123L);
+        assertEquals(now.getMillis(), instantType.valueOf(instantType.stringOf(now)).getMillis());
+    }
 }

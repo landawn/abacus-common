@@ -139,8 +139,8 @@ public final class HttpSettings {
      * attempt starts and expires if the connection cannot be established within the specified time.</p>
      *
      * <p>If the timeout expires before a connection is established, a {@link java.net.SocketTimeoutException}
-     * will be thrown. A timeout of 0 means infinite timeout (wait indefinitely), which is not recommended
-     * for production environments.</p>
+     * will be thrown. A timeout of 0 means not set: the client-level connect timeout
+     * (default 8000 ms) is used instead.</p>
      *
      * <p><b>Important:</b> This setting only applies to {@code HttpClient}, not {@code OkHttpClient}.</p>
      *
@@ -161,7 +161,7 @@ public final class HttpSettings {
      *         .setReadTimeout(10000);    // 10s to read response
      * }</pre>
      *
-     * @param connectTimeout the connection timeout in milliseconds (0 = infinite)
+     * @param connectTimeout the connection timeout in milliseconds (0 = not set; the client-level default applies)
      * @return this HttpSettings instance for method chaining
      */
     public HttpSettings setConnectTimeout(final long connectTimeout) {
@@ -193,7 +193,7 @@ public final class HttpSettings {
     /**
      * Sets the read timeout in milliseconds.
      * The read timeout is the time to wait for data to be available for reading.
-     * A timeout of 0 means infinite timeout.
+     * A timeout of 0 means not set: the client-level read timeout (default 16000 ms) is used instead.
      *
      * <p><b>Note:</b> Only for {@code HttpClient}, not for {@code OkHttpClient}.
      *
@@ -202,7 +202,7 @@ public final class HttpSettings {
      * settings.setReadTimeout(10000);   // 10 seconds
      * }</pre>
      *
-     * @param readTimeout the read timeout in milliseconds (0 = infinite)
+     * @param readTimeout the read timeout in milliseconds (0 = not set; the client-level default applies)
      * @return this HttpSettings instance for method chaining
      */
     public HttpSettings setReadTimeout(final long readTimeout) {
@@ -499,9 +499,9 @@ public final class HttpSettings {
 
     /**
      * Gets the Content-Type header value.
-     * If not explicitly set but a content format is configured,
-     * the content type will be derived from the content format and stored
-     * back into the headers as a side-effect.
+     * If not explicitly set as a header but a content format is configured, the content type is
+     * derived from the content format. This is a pure read/derivation: it does not mutate this
+     * settings object (the derived value is not written back into the headers).
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -519,13 +519,13 @@ public final class HttpSettings {
      * @return The Content-Type header value, or {@code null} if not set and no content format is configured
      */
     public String getContentType() {
-        String contentType = HttpUtil.getContentType(headers);
+        final String contentType = HttpUtil.getContentType(headers);
 
         if (Strings.isEmpty(contentType) && contentFormat != null) {
-            contentType = HttpUtil.getContentType(contentFormat);
+            final String derived = HttpUtil.getContentType(contentFormat);
 
-            if (Strings.isNotEmpty(contentType)) {
-                header(HttpHeaders.Names.CONTENT_TYPE, contentType);
+            if (Strings.isNotEmpty(derived)) {
+                return derived;
             }
         }
 
@@ -559,9 +559,9 @@ public final class HttpSettings {
 
     /**
      * Gets the Content-Encoding header value.
-     * If not explicitly set but a content format is configured,
-     * the content encoding will be derived from the content format and stored
-     * back into the headers as a side-effect.
+     * If not explicitly set as a header but a content format is configured, the content encoding is
+     * derived from the content format. This is a pure read/derivation: it does not mutate this
+     * settings object (the derived value is not written back into the headers).
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -579,13 +579,13 @@ public final class HttpSettings {
      * @return The Content-Encoding header value, or {@code null} if not set and no content format is configured
      */
     public String getContentEncoding() {
-        String contentEncoding = HttpUtil.getContentEncoding(headers);
+        final String contentEncoding = HttpUtil.getContentEncoding(headers);
 
         if (Strings.isEmpty(contentEncoding) && contentFormat != null) {
-            contentEncoding = HttpUtil.getContentEncoding(contentFormat);
+            final String derived = HttpUtil.getContentEncoding(contentFormat);
 
-            if (Strings.isNotEmpty(contentEncoding)) {
-                header(HttpHeaders.Names.CONTENT_ENCODING, contentEncoding);
+            if (Strings.isNotEmpty(derived)) {
+                return derived;
             }
         }
 
@@ -650,6 +650,7 @@ public final class HttpSettings {
      * @param name the header name (must not be {@code null})
      * @param value the header value
      * @return this HttpSettings instance for method chaining
+     * @throws IllegalArgumentException if {@code name} is {@code null}
      * @see HttpHeaders
      */
     public HttpSettings header(final String name, final Object value) {
@@ -717,22 +718,30 @@ public final class HttpSettings {
     }
 
     /**
-     * Sets HTTP headers from the specified map.
-     * If this settings object already has any headers with the same names, they are all replaced.
+     * Merges the given header entries into the headers already on this settings object.
+     * For each entry in the map, a header with the same name is overwritten with the new value,
+     * while any existing headers whose names are <i>not</i> present in the map are kept unchanged.
+     * This is a merge, not a replace-all: use {@link #setHeaders(HttpHeaders)} if you want to
+     * discard all prior headers and install a fresh set.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
+     * settings.header("Old", "value");                // pre-existing header
+     *
      * Map<String, String> headers = Map.of(
      *     "Authorization", "Bearer token123",
      *     "Accept", "application/json",
      *     "User-Agent", "MyApp/1.0"
      * );
-     * settings.headers(headers);
+     * settings.headers(headers);                       // merges the three entries in
+     * settings.headers().get("Old");                   // still "value" (kept, not in the map)
+     * settings.headers().get("Accept");                // "application/json" (added/overwritten)
      * }</pre>
      *
-     * @param headers a map containing header names and values
+     * @param headers a map containing header names and values to merge in
      * @return this HttpSettings instance for method chaining
      * @see HttpHeaders
+     * @see #setHeaders(HttpHeaders)
      */
     public HttpSettings headers(final Map<String, ?> headers) {
         headers().setAll(headers);
@@ -741,23 +750,28 @@ public final class HttpSettings {
     }
 
     /**
-     * Removes all headers on this settings object and adds the specified headers.
+     * Resets the headers by removing all existing headers first and then adds the specified headers (replace-all).
+     *
+     * <p>This is the {@link HttpHeaders}-typed, replace-all counterpart of {@link #headers(Map)},
+     * which <i>merges</i>. Prefer this clearly-named method over the deprecated
+     * {@link #headers(HttpHeaders)} alias.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * HttpHeaders custom = HttpHeaders.create().set("Accept", "application/json");
      * HttpSettings settings = HttpSettings.create().header("Old", "value");
      *
-     * settings.headers(custom);                      // replaces all prior headers
+     * settings.setHeaders(custom);                   // replaces all prior headers
      * settings.headers().get("Accept");              // returns "application/json"
      * settings.headers().get("Old");                 // returns null (cleared)
      * }</pre>
      *
-     * @param headers the HttpHeaders to set
+     * @param headers the HttpHeaders to set (replacing all existing headers); {@code null} clears all headers
      * @return this HttpSettings instance for method chaining
      * @see HttpHeaders
+     * @see #headers(Map)
      */
-    public HttpSettings headers(final HttpHeaders headers) {
+    public HttpSettings setHeaders(final HttpHeaders headers) {
         if (this.headers == headers) {
             return this;
         }
@@ -769,6 +783,20 @@ public final class HttpSettings {
         }
 
         return this;
+    }
+
+    /**
+     * Resets the headers by removing all existing headers first and then adds the specified headers (replace-all).
+     *
+     * @param headers the HttpHeaders to set
+     * @return this HttpSettings instance for method chaining
+     * @see HttpHeaders
+     * @deprecated this name collides semantically with {@link #headers(Map)} (which <i>merges</i>);
+     *             use {@link #setHeaders(HttpHeaders)} for the replace-all behavior instead.
+     */
+    @Deprecated
+    public HttpSettings headers(final HttpHeaders headers) {
+        return setHeaders(headers);
     }
 
     /**
@@ -820,7 +848,7 @@ public final class HttpSettings {
                 .setContentFormat(contentFormat);
 
         if (headers != null) {
-            copy.headers(headers.copy());
+            copy.setHeaders(headers.copy());
         }
 
         return copy;

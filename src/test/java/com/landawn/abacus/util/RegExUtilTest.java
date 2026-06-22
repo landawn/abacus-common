@@ -2082,4 +2082,26 @@ public class RegExUtilTest extends AbstractTest {
         assertEquals("HelloXWorld", RegExUtil.replaceLast("Hello123World", "\\d+", "X"));
     }
 
+    // --- regression tests for 2026-06-10 deep-review fixes ---
+
+    @Test
+    public void testFunctionReplacersAreLiteral() {
+        // regression: function-replacer results went through Matcher template interpretation,
+        // so '$'/'\' in the result crashed (e.g. "No group 5") or was misinterpreted
+        assertEquals("PRICE $5", RegExUtil.replaceAll("price $5", Pattern.compile("price \\$\\d"), (String m) -> m.toUpperCase()));
+        assertEquals("price $5", RegExUtil.replaceAll("price $5", Pattern.compile("\\$\\d"), (String m) -> m));
+        assertEquals("a\\b", RegExUtil.replaceAll("a\\b", Pattern.compile("\\\\"), (String m) -> m));
+        assertEquals("cost $9 now", RegExUtil.replaceFirst("cost $9 now", Pattern.compile("\\$\\d"), (String m) -> m));
+        assertEquals("a$bc", RegExUtil.replaceAll("abc", Pattern.compile("b"), (start, end) -> "$b"));
+    }
+
+    @Test
+    public void testReplaceLastMatchesForwardIterationSemantics() {
+        // regression: reverse find(i) probing could replace a shorter sub-match that forward
+        // iteration (findLast's semantics) would never report
+        assertEquals("X", RegExUtil.replaceLast("ababab", Pattern.compile("(ab)+"), "X"));
+        assertEquals("X", RegExUtil.replaceLast("aba", Pattern.compile("aba|a"), "X"));
+        assertEquals("Hello123WorldX", RegExUtil.replaceLast("Hello123World456", "\\d+", "X"));
+    }
+
 }

@@ -266,7 +266,7 @@ public class OkHttpRequestTest extends TestBase {
     public void testHeadersWithOkHttpHeaders() {
         okhttp3.Headers headers = new okhttp3.Headers.Builder().add("Accept", "application/json").add("Content-Type", "application/json").build();
 
-        OkHttpRequest request = OkHttpRequest.url("https://api.example.com").headers(headers);
+        OkHttpRequest request = OkHttpRequest.url("https://api.example.com").setHeaders(headers);
         assertNotNull(request);
     }
 
@@ -276,13 +276,13 @@ public class OkHttpRequestTest extends TestBase {
         headers.set("Accept", "application/json");
         headers.set("Content-Type", "application/json");
 
-        OkHttpRequest request = OkHttpRequest.url("https://api.example.com").headers(headers);
+        OkHttpRequest request = OkHttpRequest.url("https://api.example.com").setHeaders(headers);
         assertNotNull(request);
 
-        OkHttpRequest requestWithNull = OkHttpRequest.url("https://api.example.com").headers((HttpHeaders) null);
+        OkHttpRequest requestWithNull = OkHttpRequest.url("https://api.example.com").setHeaders((HttpHeaders) null);
         assertNotNull(requestWithNull);
 
-        OkHttpRequest requestWithEmpty = OkHttpRequest.url("https://api.example.com").headers(HttpHeaders.create());
+        OkHttpRequest requestWithEmpty = OkHttpRequest.url("https://api.example.com").setHeaders(HttpHeaders.create());
         assertNotNull(requestWithEmpty);
     }
 
@@ -293,7 +293,7 @@ public class OkHttpRequestTest extends TestBase {
         HttpHeaders headers = HttpHeaders.create();
         headers.set("Accept", Arrays.asList("application/json", "text/plain"));
 
-        OkHttpRequest.url(baseUrl).headers(headers).execute(HttpMethod.GET).close();
+        OkHttpRequest.url(baseUrl).setHeaders(headers).execute(HttpMethod.GET).close();
 
         RecordedRequest recordedRequest = server.takeRequest();
         // RFC 7230 §3.2.2 — multi-value headers are comma-separated, not semicolon-separated.
@@ -320,7 +320,7 @@ public class OkHttpRequestTest extends TestBase {
     public void testHeadersWithHeaders() {
         OkHttpRequest request = OkHttpRequest.url(baseUrl);
         Headers headers = new Headers.Builder().add("Header1", "value1").add("Header2", "value2").build();
-        OkHttpRequest result = request.headers(headers);
+        OkHttpRequest result = request.setHeaders(headers);
         assertSame(request, result);
     }
 
@@ -826,7 +826,8 @@ public class OkHttpRequestTest extends TestBase {
         server.enqueue(new MockResponse().setResponseCode(404).setBody("Not Found"));
         OkHttpRequest request = OkHttpRequest.url(baseUrl);
 
-        assertThrows(IOException.class, () -> request.execute(HttpMethod.GET, String.class));
+        // M11: OkHttpRequest now wraps IOException as UncheckedIOException (parity with the other builders).
+        assertThrows(com.landawn.abacus.exception.UncheckedIOException.class, () -> request.execute(HttpMethod.GET, String.class));
     }
 
     @Test
@@ -1314,7 +1315,7 @@ public class OkHttpRequestTest extends TestBase {
     public void testExecute_voidResultClassStillThrowsOnHttpError() throws Exception {
         server.enqueue(new MockResponse().setBody("server error").setResponseCode(500));
 
-        assertThrows(IOException.class, () -> OkHttpRequest.url(baseUrl).execute(HttpMethod.GET, Void.class));
+        assertThrows(com.landawn.abacus.exception.UncheckedIOException.class, () -> OkHttpRequest.url(baseUrl).execute(HttpMethod.GET, Void.class));
     }
 
     @Test

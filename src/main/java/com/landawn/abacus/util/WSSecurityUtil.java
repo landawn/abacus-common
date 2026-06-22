@@ -53,7 +53,7 @@ import java.security.SecureRandom;
  * // Create WS-Security password digest
  * String timestamp = getCurrentTimestamp();
  * String passwordDigest = WSSecurityUtil.computePasswordDigest(
- *     nonce, timestamp.getBytes(), password.getBytes()
+ *     nonce, timestamp.getBytes(StandardCharsets.UTF_8), password.getBytes(StandardCharsets.UTF_8)
  * );
  * }</pre>
  *
@@ -78,7 +78,7 @@ public final class WSSecurityUtil {
         try {
             random = SecureRandom.getInstance(RNG_ALGORITHM);
         } catch (final NoSuchAlgorithmException e) {
-            throw new RuntimeException(e);
+            throw new RuntimeException("Failed to initialize SecureRandom with algorithm: " + RNG_ALGORITHM, e);
         }
     }
 
@@ -86,7 +86,7 @@ public final class WSSecurityUtil {
         // Complete
     }
 
-    /** Cap to prevent a hostile-length call from holding the class lock through GC of a giant array. */
+    /** Cap to prevent a hostile-length call from monopolizing the shared SecureRandom instance (whose nextBytes is internally synchronized) and from allocating a giant array. */
     private static final int MAX_NONCE_LENGTH = 1024;
 
     /**

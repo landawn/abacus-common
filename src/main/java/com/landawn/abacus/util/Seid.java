@@ -281,9 +281,10 @@ public class Seid implements EntityId {
      * Seid userId = Seid.create(user);   // will contain id=123
      * }</pre>
      *
-     * @param entity the entity object to extract ID from
+     * @param entity the entity object to extract ID from; must not be {@code null}
      * @return a new Seid containing the entity's ID properties
      * @throws IllegalArgumentException if no ID properties are defined in the entity class
+     * @throws NullPointerException if {@code entity} is {@code null}
      */
     public static Seid create(final Object entity) {
         final List<String> idPropNames = Seid.getIdFieldNames(entity.getClass());
@@ -305,10 +306,11 @@ public class Seid implements EntityId {
      * Seid emailId = Seid.create(user, Arrays.asList("email"));
      * }</pre>
      *
-     * @param entity the entity object to extract values from
+     * @param entity the entity object to extract values from; must not be {@code null}
      * @param idPropNames the simple names of properties to use as ID; must not be {@code null} or empty
      * @return a new Seid containing the specified properties and their values from the entity
      * @throws IllegalArgumentException if idPropNames is {@code null} or empty
+     * @throws NullPointerException if {@code entity} is {@code null}
      */
     public static Seid create(final Object entity, final Collection<String> idPropNames) {
         if (N.isEmpty(idPropNames)) {

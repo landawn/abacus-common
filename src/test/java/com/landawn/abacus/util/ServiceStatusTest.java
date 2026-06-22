@@ -3,6 +3,7 @@ package com.landawn.abacus.util;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
 import org.junit.jupiter.api.Test;
 
@@ -60,14 +61,16 @@ public class ServiceStatusTest extends TestBase {
 
     @Test
     public void testIntValue_uniqueness() {
-        ServiceStatus[] statuses = ServiceStatus.values();
-        for (int i = 0; i < statuses.length; i++) {
-            for (int j = i + 1; j < statuses.length; j++) {
-                if (statuses[i].code() == statuses[j].code()) {
-                    throw new AssertionError("Duplicate int value: " + statuses[i] + " and " + statuses[j]);
+        assertDoesNotThrow(() -> {
+            ServiceStatus[] statuses = ServiceStatus.values();
+            for (int i = 0; i < statuses.length; i++) {
+                for (int j = i + 1; j < statuses.length; j++) {
+                    if (statuses[i].code() == statuses[j].code()) {
+                        throw new AssertionError("Duplicate int value: " + statuses[i] + " and " + statuses[j]);
+                    }
                 }
             }
-        }
+        });
     }
 
     @Test

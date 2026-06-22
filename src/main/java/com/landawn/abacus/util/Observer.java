@@ -109,7 +109,7 @@ public abstract class Observer<T> implements Immutable {
     }
 
     /**
-     * Scheduled executor used by intermediate operators (debounce, throttle, delay, buffer)
+     * Scheduled executor used by intermediate operators (debounce, throttleFirst/throttleLast, buffer)
      * to schedule deferred or periodic tasks within the processing pipeline.
      */
     protected static final ScheduledThreadPoolExecutor schedulerForIntermediateOp = new ScheduledThreadPoolExecutor(
@@ -449,8 +449,11 @@ public abstract class Observer<T> implements Immutable {
         final long intervalDurationInMillis = unit.toMillis(intervalDuration);
 
         dispatcher.append(new Dispatcher<>() {
-            private long prevTimestamp = 0;
-            private long lastScheduledTime = 0;
+            // volatile: written under synchronized(holder) in onNext but read off-lock in the scheduler
+            // thread (and lastScheduledTime is written off-lock via the reschedule path), so these need a
+            // happens-before edge to avoid stale reads.
+            private volatile long prevTimestamp = 0;
+            private volatile long lastScheduledTime = 0;
 
             @Override
             public void onNext(final Object param) {
@@ -882,13 +885,28 @@ public abstract class Observer<T> implements Immutable {
     public Observer<T> limit(final long maxSize) throws IllegalArgumentException {
         N.checkArgNotNegative(maxSize, cs.maxSize);
 
+        if (maxSize == 0) {
+            hasMore = false;
+            return this;
+        }
+
         dispatcher.append(new Dispatcher<>() {
             private final AtomicLong counter = new AtomicLong();
 
             @Override
             public void onNext(final Object param) {
-                if (downDispatcher != null && counter.incrementAndGet() <= maxSize) {
-                    downDispatcher.onNext(param);
+                if (downDispatcher != null) {
+                    final long current = counter.incrementAndGet();
+
+                    if (current <= maxSize) {
+                        downDispatcher.onNext(param);
+
+                        if (current == maxSize) {
+                            hasMore = false;
+                        }
+                    } else {
+                        hasMore = false;
+                    }
                 } else {
                     hasMore = false;
                 }
@@ -1678,7 +1696,11 @@ public abstract class Observer<T> implements Immutable {
                             dispatcher.onError(e);
                         } finally {
                             try {
-                                future.cancel(true);
+                                // future may not be assigned yet if the first tick (initialDelay 0) runs
+                                // before scheduleAtFixedRate() returns; guard against the NPE.
+                                if (future != null) {
+                                    future.cancel(true);
+                                }
                             } finally {
                                 cancelScheduledFutures();
                             }
@@ -1690,7 +1712,9 @@ public abstract class Observer<T> implements Immutable {
                             try {
                                 dispatcher.onError(e);
                             } finally {
-                                future.cancel(true);
+                                if (future != null) {
+                                    future.cancel(true);
+                                }
                                 cancelScheduledFutures();
                             }
                         }

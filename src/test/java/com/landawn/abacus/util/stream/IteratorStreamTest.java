@@ -3,6 +3,7 @@ package com.landawn.abacus.util.stream;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.ArrayList;
@@ -15,6 +16,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.IntFunction;
 import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -26,6 +28,7 @@ import com.landawn.abacus.util.IntFunctions;
 import com.landawn.abacus.util.ListMultimap;
 import com.landawn.abacus.util.Multimap;
 import com.landawn.abacus.util.Multiset;
+import com.landawn.abacus.util.ObjIterator;
 import com.landawn.abacus.util.u.Optional;
 
 public class IteratorStreamTest extends TestBase {
@@ -197,13 +200,6 @@ public class IteratorStreamTest extends TestBase {
         Stream<Integer> stream = createStream(Arrays.asList(1, 2, 3));
         List<String> result = stream.mapLastOrElse(x -> "last:" + x, x -> "other:" + x).toList();
         assertEquals(Arrays.asList("other:1", "other:2", "last:3"), result);
-    }
-
-    @Test
-    public void testMapToChar() {
-        Stream<Integer> stream = createStream(Arrays.asList(65, 66, 67));
-        char[] result = stream.mapToChar(x -> (char) x.intValue()).toArray();
-        assertArrayEquals(new char[] { 'A', 'B', 'C' }, result);
     }
 
     @Test
@@ -449,6 +445,25 @@ public class IteratorStreamTest extends TestBase {
         List<LinkedList<Integer>> result = stream.split(2, IntFunctions.ofLinkedList()).toList();
         assertEquals(3, result.size());
         assertTrue(result.get(0) instanceof LinkedList);
+    }
+
+    @Test
+    public void testSplitWithNullCollectionSupplier() {
+        Stream<Integer> stream = createStream(Arrays.asList(1, 2, 3, 4, 5));
+        assertThrows(IllegalArgumentException.class, () -> stream.split(2, (IntFunction<List<Integer>>) null));
+    }
+
+    @Test
+    public void testSplit_Count_ConsumesIterator() {
+        // count() consumes the iterator: hasNext() must return false afterwards.
+        ObjIterator<List<Integer>> iter = createStream(Arrays.asList(1, 2, 3, 4, 5)).split(2, IntFunctions.ofList()).iterator();
+        assertEquals(3, iter.count());
+        assertFalse(iter.hasNext());
+
+        ObjIterator<List<Integer>> iter2 = createStream(Arrays.asList(1, 2, 3, 4, 5)).split(2, IntFunctions.ofList()).iterator();
+        assertEquals(Arrays.asList(1, 2), iter2.next());
+        assertEquals(2, iter2.count());
+        assertFalse(iter2.hasNext());
     }
 
     @Test
@@ -1127,8 +1142,7 @@ public class IteratorStreamTest extends TestBase {
         DistinctItem second = new DistinctItem(2, 2);
         DistinctItem duplicateOfFirst = new DistinctItem(1, 3);
 
-        List<DistinctItem> result = createStream(Arrays.asList(first, second, duplicateOfFirst))
-                .sorted(Comparator.comparingInt(item -> item.rank))
+        List<DistinctItem> result = createStream(Arrays.asList(first, second, duplicateOfFirst)).sorted(Comparator.comparingInt(item -> item.rank))
                 .distinct()
                 .toList();
 

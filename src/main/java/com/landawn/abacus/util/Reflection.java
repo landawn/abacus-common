@@ -279,7 +279,10 @@ public final class Reflection<T> {
     /**
      * Invokes the specified method on the target instance with the given arguments and returns the result.
      * The method is selected based on its name and the types of the provided arguments.
-     * If ReflectASM is available, it will be used for better performance.
+     * If ReflectASM is available, it will be used for better performance; in that case the method is
+     * selected by name and argument count, and methods ReflectASM cannot access (private methods,
+     * methods declared by {@code Object}, interface default methods) automatically fall back to
+     * standard reflection, which also searches superclasses.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -294,7 +297,12 @@ public final class Reflection<T> {
      * @throws RuntimeException if the method doesn't exist or invocation fails
      */
     public <V> V invoke(final String methodName, final Object... args) {
-        if (reflectASM != null) {
+        // ReflectASM only exposes non-private methods declared in the class or its superclasses
+        // (excluding Object, and excluding interface default methods); fall back to standard
+        // reflection for the members it cannot resolve. The check happens BEFORE the invocation:
+        // catching the resolution exception around reflectASM.invoke(...) would be unsafe because
+        // the invoked method itself may throw IllegalArgumentException after side effects.
+        if (reflectASM != null && reflectASM.canInvoke(methodName, args)) {
             return reflectASM.invoke(methodName, args);
         } else {
             try {
@@ -312,7 +320,8 @@ public final class Reflection<T> {
      * Invokes the specified method on the target instance with the given arguments without returning a result.
      * This is a convenience method for void methods or when the return value is not needed.
      * The method is selected based on its name and the types of the provided arguments.
-     * If ReflectASM is available, it will be used for better performance.
+     * If ReflectASM is available, it will be used for better performance, with the same
+     * standard-reflection fallback as {@link #invoke(String, Object...)}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -327,9 +336,10 @@ public final class Reflection<T> {
      * @throws RuntimeException if the method doesn't exist or invocation fails
      */
     public Reflection<T> call(final String methodName, final Object... args) {
-        if (reflectASM != null) {
+        if (reflectASM != null && reflectASM.canInvoke(methodName, args)) {
             reflectASM.call(methodName, args);
         } else {
+            // Falls back to standard reflection for private/inherited members (see invoke(String, Object...)).
             invoke(methodName, args);
         }
 
@@ -390,9 +400,15 @@ public final class Reflection<T> {
         Constructor<?> result = constructorPool.get(key);
 
         if (result == null) {
-            try {
-                result = cls.getDeclaredConstructor(argTypes);
-            } catch (final NoSuchMethodException e) {
+            if (!hasNullArgType(argTypes)) {
+                try {
+                    result = cls.getDeclaredConstructor(argTypes);
+                } catch (final NoSuchMethodException e) {
+                    // Fall back to compatible constructor search below.
+                }
+            }
+
+            if (result == null) {
                 for (final Constructor<?> constructor : cls.getDeclaredConstructors()) {
                     final Class<?>[] paramTypes = constructor.getParameterTypes();
 
@@ -401,8 +417,7 @@ public final class Reflection<T> {
                         boolean allMatch = true;
 
                         for (int i = 0, len = paramTypes.length; i < len; i++) {
-                            if (!(argTypes[i] == null || paramTypes[i].isAssignableFrom(argTypes[i])
-                                    || wrap(paramTypes[i]).isAssignableFrom(wrap(argTypes[i])))) {
+                            if (!isParameterCompatible(paramTypes[i], argTypes[i])) {
                                 allMatch = false;
                                 break;
                             }
@@ -430,10 +445,14 @@ public final class Reflection<T> {
     }
 
     /**
-     * Returns the declared method matching the specified name and parameter types.
-     * Results are cached per class for performance. If no exact match is found,
-     * assignability (including primitive/wrapper equivalence) is used to locate
-     * a compatible method.
+     * Returns the method matching the specified name and parameter types, searching the class
+     * itself first and then its superclasses (mirroring {@link #getField(String)}), so inherited
+     * and private methods are found even when ReflectASM is unavailable or cannot resolve them.
+     * Results are cached per class for performance. At each level of the hierarchy an exact match
+     * is tried first; failing that, assignability (including primitive/wrapper equivalence) is
+     * used to locate a compatible method. As a last resort, {@link Class#getMethod(String, Class...)}
+     * is consulted to resolve public methods that are not declared anywhere in the superclass
+     * chain (e.g., interface default methods).
      *
      * @param cls the class to search for the method
      * @param methodName the name of the method to retrieve
@@ -452,43 +471,80 @@ public final class Reflection<T> {
         Method result = argsMethodPool.get(key);
 
         if (result == null) {
-            try {
-                result = cls.getDeclaredMethod(methodName, argTypes);
-            } catch (final NoSuchMethodException e) {
-                for (final Method method : cls.getDeclaredMethods()) {
-                    final Class<?>[] paramTypes = method.getParameterTypes();
+            Class<?> current = cls;
 
-                    //noinspection ConstantValue
-                    if (method.getName().equals(methodName) && (paramTypes != null && paramTypes.length == argTypes.length)) {
-                        boolean allMatch = true;
-
-                        for (int i = 0, len = paramTypes.length; i < len; i++) {
-                            if (!(argTypes[i] == null || paramTypes[i].isAssignableFrom(argTypes[i])
-                                    || wrap(paramTypes[i]).isAssignableFrom(wrap(argTypes[i])))) {
-                                allMatch = false;
-                                break;
-                            }
-                        }
-
-                        if (allMatch) {
-                            result = method;
-                        }
-                    }
-
-                    if (result != null) {
-                        break;
+            while (result == null && current != null) {
+                if (!hasNullArgType(argTypes)) {
+                    try {
+                        result = current.getDeclaredMethod(methodName, argTypes);
+                    } catch (final NoSuchMethodException e) {
+                        // Fall back to compatible method search below.
                     }
                 }
 
                 if (result == null) {
-                    throw new RuntimeException("No method found by name: " + methodName + " with parameter types: " + N.toString(argTypes));
+                    for (final Method method : current.getDeclaredMethods()) {
+                        final Class<?>[] paramTypes = method.getParameterTypes();
+
+                        if (method.getName().equals(methodName) && paramTypes.length == argTypes.length) {
+                            boolean allMatch = true;
+
+                            for (int i = 0, len = paramTypes.length; i < len; i++) {
+                                if (!isParameterCompatible(paramTypes[i], argTypes[i])) {
+                                    allMatch = false;
+                                    break;
+                                }
+                            }
+
+                            if (allMatch) {
+                                result = method;
+                                break;
+                            }
+                        }
+                    }
                 }
+
+                current = current.getSuperclass();
+            }
+
+            if (result == null) {
+                if (!hasNullArgType(argTypes)) {
+                    try {
+                        // Public methods inherited from interfaces (default methods) are not declared
+                        // in any superclass; Class.getMethod() resolves them.
+                        result = cls.getMethod(methodName, argTypes);
+                    } catch (final NoSuchMethodException e) {
+                        // ignore - handled below.
+                    }
+                }
+            }
+
+            if (result == null) {
+                throw new RuntimeException("No method found by name: " + methodName + " with parameter types: " + N.toString(argTypes));
             }
 
             argsMethodPool.put(key, result);
         }
 
         return result;
+    }
+
+    private boolean hasNullArgType(final Class<?>[] argTypes) {
+        for (final Class<?> argType : argTypes) {
+            if (argType == null) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private boolean isParameterCompatible(final Class<?> paramType, final Class<?> argType) {
+        if (argType == null) {
+            return !paramType.isPrimitive();
+        }
+
+        return paramType.isAssignableFrom(argType) || wrap(paramType).isAssignableFrom(wrap(argType));
     }
 
     /**

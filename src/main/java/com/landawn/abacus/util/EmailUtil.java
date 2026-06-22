@@ -15,7 +15,6 @@
 package com.landawn.abacus.util;
 
 import java.io.File;
-import java.util.Arrays;
 import java.util.Properties;
 
 import javax.activation.DataHandler;
@@ -114,6 +113,7 @@ public final class EmailUtil {
      *              <li>{@code mail.smtp.ssl.enable} - enable SSL (true/false)</li>
      *              <li>{@code mail.smtp.ssl.trust} - trusted hosts</li>
      *              </ul>
+     * @throws IllegalArgumentException if {@code recipients} is {@code null} or empty
      * @throws RuntimeException if sending the email fails due to invalid addresses, authentication failure,
      *                          connection issues, or messaging errors
      * @see #sendEmailWithAttachment(String[], String, String, String, String[], String, String, Properties)
@@ -158,6 +158,7 @@ public final class EmailUtil {
      *              <li>{@code mail.smtp.ssl.enable} - enable SSL (true/false)</li>
      *              <li>{@code mail.smtp.ssl.trust} - trusted hosts</li>
      *              </ul>
+     * @throws IllegalArgumentException if {@code recipients} is {@code null} or empty
      * @throws RuntimeException if sending the email fails due to invalid addresses, authentication failure,
      *                          connection issues, file access errors, or messaging errors
      * @see #sendEmail(String[], String, String, String, String, String, Properties)
@@ -205,6 +206,7 @@ public final class EmailUtil {
      *              <li>{@code mail.smtp.ssl.enable} - enable SSL (true/false)</li>
      *              <li>{@code mail.smtp.ssl.trust} - trusted hosts</li>
      *              </ul>
+     * @throws IllegalArgumentException if {@code recipients} is {@code null} or empty
      * @throws RuntimeException if sending the email fails due to invalid addresses, authentication failure,
      *                          connection issues, or messaging errors
      * @see #sendHtmlEmailWithAttachment(String[], String, String, String, String[], String, String, Properties)
@@ -258,6 +260,7 @@ public final class EmailUtil {
      *              <li>{@code mail.smtp.ssl.enable} - enable SSL (true/false)</li>
      *              <li>{@code mail.smtp.ssl.trust} - trusted hosts</li>
      *              </ul>
+     * @throws IllegalArgumentException if {@code recipients} is {@code null} or empty
      * @throws RuntimeException if sending the email fails due to invalid addresses, authentication failure,
      *                          connection issues, file access errors, or messaging errors
      * @see #sendHtmlEmail(String[], String, String, String, String, String, Properties)
@@ -270,6 +273,7 @@ public final class EmailUtil {
 
     private static void send(final String[] recipients, final String from, final String subject, final String content, final String[] attachedFiles,
             final boolean isHTML, final String userName, final String password, final Properties props) {
+        N.checkArgNotEmpty(recipients, "recipients");
 
         try {
             final Session session = Session.getInstance(props, new javax.mail.Authenticator() {
@@ -297,9 +301,9 @@ public final class EmailUtil {
             BodyPart messageBodyPart = new MimeBodyPart();
 
             if (isHTML) {
-                messageBodyPart.setContent(content, "text/html");
+                messageBodyPart.setContent(content, "text/html; charset=UTF-8");
             } else {
-                messageBodyPart.setContent(content, "text/plain");
+                messageBodyPart.setContent(content, "text/plain; charset=UTF-8");
             }
 
             multipart.addBodyPart(messageBodyPart);
@@ -319,7 +323,7 @@ public final class EmailUtil {
             mail.setContent(multipart);
             Transport.send(mail);
         } catch (final MessagingException e) {
-            throw new RuntimeException("Failed to send email to: " + Arrays.toString(recipients), e);
+            throw new RuntimeException("Failed to send email to " + recipients.length + " recipient(s)", e);
         }
     }
 }

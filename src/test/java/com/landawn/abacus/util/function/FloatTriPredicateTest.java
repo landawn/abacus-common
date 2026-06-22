@@ -68,6 +68,6 @@ public class FloatTriPredicateTest extends TestBase {
     @Test
     public void testAndNullThrowsImmediately() {
         FloatTriPredicate instance = (a, b, c) -> false;
-        org.junit.jupiter.api.Assertions.assertThrows(NullPointerException.class, () -> instance.and((FloatTriPredicate) null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> instance.and((FloatTriPredicate) null));
     }
 }

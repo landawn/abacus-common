@@ -169,7 +169,7 @@ abstract class AbstractJsonParser extends AbstractParser<JsonSerConfig, JsonDese
      * }</pre>
      *
      * @param <T> the type of the target class
-     * @param source the JSON string to deserialize; must not be {@code null}
+     * @param source the JSON string to deserialize; may be {@code null} or empty
      * @param config the deserialization configuration to use, or {@code null} to use default configuration
      * @param targetType the class of the target object to deserialize into; must not be {@code null}
      * @return an instance of the target class populated with data from the JSON string
@@ -190,7 +190,7 @@ abstract class AbstractJsonParser extends AbstractParser<JsonSerConfig, JsonDese
      * parser.parse("[\"Alice\",\"Bob\",\"Charlie\"]", output);
      * }</pre>
      *
-     * @param source the JSON array string to deserialize; may be {@code null} (in which case no action is taken)
+     * @param source the JSON array string to deserialize; may be {@code null} or empty (in which case no action is taken)
      * @param output the array to populate with deserialized elements; must not be {@code null}
      * @throws UncheckedIOException if an I/O error occurs during deserialization
      * @throws ParsingException if the JSON structure is invalid or not an array
@@ -215,7 +215,7 @@ abstract class AbstractJsonParser extends AbstractParser<JsonSerConfig, JsonDese
      * parser.parse("[\"Alice\",\"Bob\",\"Charlie\"]", config, output);
      * }</pre>
      *
-     * @param source the JSON array string to deserialize; must not be {@code null}
+     * @param source the JSON array string to deserialize; may be {@code null} or empty
      * @param config the deserialization configuration to use, or {@code null} to use default configuration
      * @param output the array to populate with deserialized elements; must not be {@code null}
      * @throws UnsupportedOperationException always thrown by this base-class implementation
@@ -235,7 +235,7 @@ abstract class AbstractJsonParser extends AbstractParser<JsonSerConfig, JsonDese
      * parser.parse("[\"Alice\",\"Bob\"]", output);
      * }</pre>
      *
-     * @param source the JSON array string to deserialize; may be {@code null} (in which case no action is taken)
+     * @param source the JSON array string to deserialize; may be {@code null} or empty (in which case no action is taken)
      * @param output the collection to populate with deserialized elements; must not be {@code null}
      * @throws UncheckedIOException if an I/O error occurs during deserialization
      * @throws ParsingException if the JSON structure is invalid or not an array
@@ -260,7 +260,7 @@ abstract class AbstractJsonParser extends AbstractParser<JsonSerConfig, JsonDese
      * parser.parse("[\"Alice\",\"Bob\"]", config, output);
      * }</pre>
      *
-     * @param source the JSON array string to deserialize; must not be {@code null}
+     * @param source the JSON array string to deserialize; may be {@code null} or empty
      * @param config the deserialization configuration to use, or {@code null} to use default configuration
      * @param output the collection to populate with deserialized elements; must not be {@code null}
      * @throws UnsupportedOperationException always thrown by this base-class implementation
@@ -305,7 +305,7 @@ abstract class AbstractJsonParser extends AbstractParser<JsonSerConfig, JsonDese
      * parser.parse("{\"name\":\"John\",\"age\":30}", config, output);
      * }</pre>
      *
-     * @param source the JSON object string to deserialize; must not be {@code null}
+     * @param source the JSON object string to deserialize; may be {@code null} or empty
      * @param config the deserialization configuration to use, or {@code null} to use default configuration
      * @param output the map to populate with deserialized key-value pairs; must not be {@code null}
      * @throws UnsupportedOperationException always thrown by this base-class implementation

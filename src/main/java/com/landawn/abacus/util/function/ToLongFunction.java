@@ -89,4 +89,18 @@ public interface ToLongFunction<T> extends Throwables.ToLongFunction<T, RuntimeE
      */
     @Override
     long applyAsLong(T value);
+
+    /**
+     * Returns this object as a {@link Throwables.ToLongFunction} view.
+     *
+     * <p>The returned object has the same behavior as this one. This method does not translate
+     * exceptions or make the original implementation capable of throwing new checked exceptions; the
+     * exception type parameter is for target-type compatibility with APIs that accept {@code Throwables.ToLongFunction}.
+     *
+     * @param <E> the target exception type for compatibility with {@code Throwables.ToLongFunction}
+     * @return a {@link Throwables.ToLongFunction} view of this object
+     */
+    default <E extends Throwable> Throwables.ToLongFunction<T, E> toThrowable() {
+        return (Throwables.ToLongFunction<T, E>) this;
+    }
 }

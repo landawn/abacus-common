@@ -210,7 +210,7 @@ public class SubscriberTest extends TestBase {
         Subscriber<String> subscriber = receivedEvent::set;
 
         eventBus.register(subscriber, "nullEvent");
-        assertThrows(NullPointerException.class, () -> eventBus.post("nullEvent", null));
+        assertThrows(IllegalArgumentException.class, () -> eventBus.post("nullEvent", null));
     }
 
     @Test

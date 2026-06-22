@@ -10,6 +10,7 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -28,6 +29,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.function.BiFunction;
 import java.util.function.BiPredicate;
 import java.util.function.Function;
@@ -346,6 +349,24 @@ public class MapsTest extends AbstractTest {
         assertEquals(Integer.valueOf(2), result.get("b"));
     }
 
+    //    @Test
+    //    public void testZipWithDefaults_OneNullSide() {
+    //        // regression: the defaults overload used '&&' for the both-empty short-circuit and then
+    //        // dereferenced keys.iterator()/values.iterator() unconditionally, throwing NPE when exactly
+    //        // one side was null. A null/empty side should be treated as empty so defaults are applied.
+    //        final Map<String, Integer> r1 = Maps.zip(null, Arrays.asList(1, 2, 3), "k", 0);
+    //        assertEquals(1, r1.size());
+    //        assertEquals(Integer.valueOf(1), r1.get("k")); // selectFirst merge keeps the first surplus value
+    //
+    //        final Map<String, Integer> r2 = Maps.zip(Arrays.asList("a", "b"), null, "k", 0);
+    //        assertEquals(2, r2.size());
+    //        assertEquals(Integer.valueOf(0), r2.get("a"));
+    //        assertEquals(Integer.valueOf(0), r2.get("b"));
+    //
+    //        // both null still yields an empty map (unchanged behavior)
+    //        assertTrue(Maps.zip(null, null, "k", 0).isEmpty());
+    //    }
+
     @Test
     public void testZip_NonCollectionIterables() {
         Iterable<String> keys = () -> Arrays.asList("k1", "k2", "k3").iterator();
@@ -382,38 +403,38 @@ public class MapsTest extends AbstractTest {
         assertEquals(Integer.valueOf(3), result.get("tail"));
     }
 
-    @Test
-    public void testZipWithDefaults() {
-        List<String> keys = Arrays.asList("a", "b");
-        List<Integer> values = Arrays.asList(1, 2, 3);
+    //    @Test
+    //    public void testZipWithDefaults() {
+    //        List<String> keys = Arrays.asList("a", "b");
+    //        List<Integer> values = Arrays.asList(1, 2, 3);
+    //
+    //        Map<String, Integer> result = Maps.zip(keys, values, "default", 99);
+    //        assertEquals(3, result.size());
+    //        assertEquals(Integer.valueOf(1), result.get("a"));
+    //        assertEquals(Integer.valueOf(2), result.get("b"));
+    //        assertEquals(Integer.valueOf(3), result.get("default"));
+    //
+    //        List<String> longerKeys = Arrays.asList("a", "b", "c");
+    //        List<Integer> shorterValues = Arrays.asList(1, 2);
+    //        Map<String, Integer> result2 = Maps.zip(longerKeys, shorterValues, "default", 99);
+    //        assertEquals(3, result2.size());
+    //        assertEquals(Integer.valueOf(99), result2.get("c"));
+    //    }
 
-        Map<String, Integer> result = Maps.zip(keys, values, "default", 99);
-        assertEquals(3, result.size());
-        assertEquals(Integer.valueOf(1), result.get("a"));
-        assertEquals(Integer.valueOf(2), result.get("b"));
-        assertEquals(Integer.valueOf(3), result.get("default"));
-
-        List<String> longerKeys = Arrays.asList("a", "b", "c");
-        List<Integer> shorterValues = Arrays.asList(1, 2);
-        Map<String, Integer> result2 = Maps.zip(longerKeys, shorterValues, "default", 99);
-        assertEquals(3, result2.size());
-        assertEquals(Integer.valueOf(99), result2.get("c"));
-    }
-
-    @Test
-    public void testZipWithDefaultsAndMergeFunction() {
-        List<String> keys = Arrays.asList("a", "b");
-        List<Integer> values = Arrays.asList(1, 2, 3, 4);
-
-        BiFunction<Integer, Integer, Integer> merger = Integer::sum;
-        IntFunction<HashMap<String, Integer>> supplier = HashMap::new;
-
-        Map<String, Integer> result = Maps.zip(keys, values, "default", 0, merger, supplier);
-        assertEquals(3, result.size());
-        assertEquals(Integer.valueOf(1), result.get("a"));
-        assertEquals(Integer.valueOf(2), result.get("b"));
-        assertEquals(Integer.valueOf(7), result.get("default"));
-    }
+    //    @Test
+    //    public void testZipWithDefaultsAndMergeFunction() {
+    //        List<String> keys = Arrays.asList("a", "b");
+    //        List<Integer> values = Arrays.asList(1, 2, 3, 4);
+    //
+    //        BiFunction<Integer, Integer, Integer> merger = Integer::sum;
+    //        IntFunction<HashMap<String, Integer>> supplier = HashMap::new;
+    //
+    //        Map<String, Integer> result = Maps.zip(keys, values, "default", 0, merger, supplier);
+    //        assertEquals(3, result.size());
+    //        assertEquals(Integer.valueOf(1), result.get("a"));
+    //        assertEquals(Integer.valueOf(2), result.get("b"));
+    //        assertEquals(Integer.valueOf(7), result.get("default"));
+    //    }
 
     @Test
     public void testZip_iterables_withSupplier() {
@@ -439,46 +460,46 @@ public class MapsTest extends AbstractTest {
         assertEquals(expected, result);
     }
 
-    @Test
-    public void testZip_iterables_withDefaults() {
-        List<String> keys = Arrays.asList("a");
-        List<Integer> values = Arrays.asList(1, 2);
-        Map<String, Integer> result = Maps.zip(keys, values, "defaultKey", 99);
-        Map<String, Integer> expected = new HashMap<>();
-        expected.put("a", 1);
-        expected.put("defaultKey", 2);
-        assertEquals(expected, result);
-
-        List<String> keys2 = Arrays.asList("x", "y");
-        List<Integer> values2 = Arrays.asList(10);
-        Map<String, Integer> result2 = Maps.zip(keys2, values2, "defaultKey", 99);
-        Map<String, Integer> expected2 = new HashMap<>();
-        expected2.put("x", 10);
-        expected2.put("y", 99);
-        assertEquals(expected2, result2);
-    }
-
-    @Test
-    public void testZip_iterables_withDefaultsAndMerge() {
-        List<String> keys = Arrays.asList("a", "defaultKey");
-        List<Integer> values = Arrays.asList(1, 2, 3);
-        BiFunction<Integer, Integer, Integer> merger = Integer::sum;
-        Map<String, Integer> result = Maps.zip(keys, values, "defaultKey", 99, merger, HashMap::new);
-
-        Map<String, Integer> expected = new HashMap<>();
-        expected.put("a", 1);
-        expected.put("defaultKey", 5);
-        assertEquals(expected, result);
-
-        List<String> keys2 = Arrays.asList("k1", "k2", "k3");
-        List<Integer> values2 = Arrays.asList(10, 20);
-        Map<String, Integer> result2 = Maps.zip(keys2, values2, "defaultKeyX", 99, merger, HashMap::new);
-        Map<String, Integer> expected2 = new HashMap<>();
-        expected2.put("k1", 10);
-        expected2.put("k2", 20);
-        expected2.put("k3", 99);
-        assertEquals(expected2, result2);
-    }
+    //    @Test
+    //    public void testZip_iterables_withDefaults() {
+    //        List<String> keys = Arrays.asList("a");
+    //        List<Integer> values = Arrays.asList(1, 2);
+    //        Map<String, Integer> result = Maps.zip(keys, values, "defaultKey", 99);
+    //        Map<String, Integer> expected = new HashMap<>();
+    //        expected.put("a", 1);
+    //        expected.put("defaultKey", 2);
+    //        assertEquals(expected, result);
+    //
+    //        List<String> keys2 = Arrays.asList("x", "y");
+    //        List<Integer> values2 = Arrays.asList(10);
+    //        Map<String, Integer> result2 = Maps.zip(keys2, values2, "defaultKey", 99);
+    //        Map<String, Integer> expected2 = new HashMap<>();
+    //        expected2.put("x", 10);
+    //        expected2.put("y", 99);
+    //        assertEquals(expected2, result2);
+    //    }
+    //
+    //    @Test
+    //    public void testZip_iterables_withDefaultsAndMerge() {
+    //        List<String> keys = Arrays.asList("a", "defaultKey");
+    //        List<Integer> values = Arrays.asList(1, 2, 3);
+    //        BiFunction<Integer, Integer, Integer> merger = Integer::sum;
+    //        Map<String, Integer> result = Maps.zip(keys, values, "defaultKey", 99, merger, HashMap::new);
+    //
+    //        Map<String, Integer> expected = new HashMap<>();
+    //        expected.put("a", 1);
+    //        expected.put("defaultKey", 5);
+    //        assertEquals(expected, result);
+    //
+    //        List<String> keys2 = Arrays.asList("k1", "k2", "k3");
+    //        List<Integer> values2 = Arrays.asList(10, 20);
+    //        Map<String, Integer> result2 = Maps.zip(keys2, values2, "defaultKeyX", 99, merger, HashMap::new);
+    //        Map<String, Integer> expected2 = new HashMap<>();
+    //        expected2.put("k1", 10);
+    //        expected2.put("k2", 20);
+    //        expected2.put("k3", 99);
+    //        assertEquals(expected2, result2);
+    //    }
 
     @Test
     public void testMapSupplierBehavior() {
@@ -515,15 +536,15 @@ public class MapsTest extends AbstractTest {
         assertEquals(Integer.valueOf(2), result.get("b"));
     }
 
-    @Test
-    public void testZip_WithDefaultsAndMerge() {
-        List<String> keys = Arrays.asList("a", "b");
-        List<Integer> values = Arrays.asList(1, 2, 3);
-        Map<String, Integer> result = Maps.zip(keys, values, "default", 0, (v1, v2) -> v1 + v2, HashMap::new);
-        assertEquals(Integer.valueOf(1), result.get("a"));
-        assertEquals(Integer.valueOf(2), result.get("b"));
-        assertEquals(Integer.valueOf(3), result.get("default"));
-    }
+    //    @Test
+    //    public void testZip_WithDefaultsAndMerge() {
+    //        List<String> keys = Arrays.asList("a", "b");
+    //        List<Integer> values = Arrays.asList(1, 2, 3);
+    //        Map<String, Integer> result = Maps.zip(keys, values, "default", 0, (v1, v2) -> v1 + v2, HashMap::new);
+    //        assertEquals(Integer.valueOf(1), result.get("a"));
+    //        assertEquals(Integer.valueOf(2), result.get("b"));
+    //        assertEquals(Integer.valueOf(3), result.get("default"));
+    //    }
 
     @Test
     public void testZip() {
@@ -586,14 +607,14 @@ public class MapsTest extends AbstractTest {
         assertEquals(3, result.get("c"));
     }
 
-    @Test
-    public void testZip_emptyValues_withDefaultAndSupplier() {
-        List<String> keys = new ArrayList<>();
-        List<Integer> values = new ArrayList<>();
-        Map<String, Integer> result = Maps.zip(keys, values, "defaultKey", 0, Integer::sum, HashMap::new);
-        assertNotNull(result);
-        assertTrue(result.isEmpty());
-    }
+    //    @Test
+    //    public void testZip_emptyValues_withDefaultAndSupplier() {
+    //        List<String> keys = new ArrayList<>();
+    //        List<Integer> values = new ArrayList<>();
+    //        Map<String, Integer> result = Maps.zip(keys, values, "defaultKey", 0, Integer::sum, HashMap::new);
+    //        assertNotNull(result);
+    //        assertTrue(result.isEmpty());
+    //    }
 
     @Test
     public void testNewEntry() {
@@ -919,26 +940,13 @@ public class MapsTest extends AbstractTest {
     }
 
     @Test
-    public void testGetByPath_withTargetType() {
-        Map<String, Object> map = Map.of("count", "123");
-        assertEquals(Integer.valueOf(123), Maps.getByPathAs(map, "count", Integer.class));
-    }
-
-    @Test
     public void testGetByPath_withDefaultValue() {
         Map<String, Object> map = Map.of("name", "Test");
-        assertEquals("Test", Maps.getByPathOrDefault(map, "name", "Default"));
-        assertEquals("Default", Maps.getByPathOrDefault(map, "address", "Default"));
-        assertEquals(Integer.valueOf(123), Maps.getByPathOrDefault(map, "name_no", 123));
-    }
-
-    // getByPathAs: value found and is already correct type -> returns directly (L1111)
-    @Test
-    public void testGetByPathAs_ValueAlreadyCorrectType() {
-        Map<String, Object> map = new HashMap<>();
-        map.put("score", 42);
-        Integer result = Maps.getByPathAs(map, "score", Integer.class);
-        assertEquals(Integer.valueOf(42), result);
+        assertEquals("Test", Maps.getByPathAsOrDefaultIfAbsent(map, "name", "Default", String.class));
+        assertEquals("Default", Maps.getByPathAsOrDefaultIfAbsent(map, "address", "Default", String.class));
+        assertEquals(Integer.valueOf(123), Maps.getByPathAsOrDefaultIfAbsent(map, "name_no", 123, Integer.class));
+        assertThrows(IllegalArgumentException.class, () -> Maps.getByPathAsOrDefaultIfAbsent(map, "address", (String) null, String.class));
+        assertThrows(IllegalArgumentException.class, () -> Maps.getByPathAsOrDefaultIfAbsent(map, "name", "Default", (Class<String>) null));
     }
 
     @Test
@@ -1003,23 +1011,57 @@ public class MapsTest extends AbstractTest {
     }
 
     @Test
-    public void testGetByPathWithClass() {
-        Map<String, Object> map = new HashMap<>();
-        map.put("int", "123");
-
-        Integer result = Maps.getByPathAs(map, "int", Integer.class);
-        assertEquals(Integer.valueOf(123), result);
-
-        assertNull(Maps.getByPathAs(map, "missing", String.class));
-    }
-
-    @Test
     public void testGetByPathWithDefault() {
         Map<String, Object> map = new HashMap<>();
         map.put("key", "value");
 
-        assertEquals("value", Maps.getByPathOrDefault(map, "key", "default"));
-        assertEquals("default", Maps.getByPathOrDefault(map, "missing", "default"));
+        assertEquals("value", Maps.getByPathAsOrDefaultIfAbsent(map, "key", "default", String.class));
+        assertEquals("default", Maps.getByPathAsOrDefaultIfAbsent(map, "missing", "default", String.class));
+    }
+
+    @Test
+    public void testGetByPathAsOrDefaultIfAbsent_appliesDefaultForPresentNull() {
+        final Map<String, Object> map = new HashMap<>();
+        final Map<String, Object> nested = new HashMap<>();
+
+        map.put("key", null);
+        map.put("nested", nested);
+        map.put("list", Arrays.asList((Object) null));
+        nested.put("value", null);
+
+        assertEquals("default", Maps.getByPathAsOrDefaultIfAbsent(map, "key", "default", String.class));
+        assertEquals("default", Maps.getByPathAsOrDefaultIfAbsent(map, "nested.value", "default", String.class));
+        assertEquals("default", Maps.getByPathAsOrDefaultIfAbsent(map, "list[0]", "default", String.class));
+        assertEquals("default", Maps.getByPathAsOrDefaultIfAbsent(map, "missing", "default", String.class));
+        assertEquals("default", Maps.getByPathAsOrDefaultIfAbsent(map, "nested.missing", "default", String.class));
+    }
+
+    @Test
+    public void testGetByPathAsOrDefaultIfAbsentUsesNullAsAbsentForCustomMaps() {
+        final Map<String, Object> map = new HashMap<String, Object>() {
+            @Override
+            public Object getOrDefault(final Object key, final Object defaultValue) {
+                final Object val = get(key);
+                return val == null ? defaultValue : val;
+            }
+        };
+
+        final Map<String, Object> nested = new HashMap<String, Object>() {
+            @Override
+            public Object getOrDefault(final Object key, final Object defaultValue) {
+                final Object val = get(key);
+                return val == null ? defaultValue : val;
+            }
+        };
+
+        map.put("", null);
+        map.put("key", null);
+        map.put("nested", nested);
+        nested.put("value", null);
+
+        assertEquals("default", Maps.getByPathAsOrDefaultIfAbsent(map, "", "default", String.class));
+        assertEquals("default", Maps.getByPathAsOrDefaultIfAbsent(map, "key", "default", String.class));
+        assertEquals("default", Maps.getByPathAsOrDefaultIfAbsent(map, "nested.value", "default", String.class));
     }
 
     @Test
@@ -1058,7 +1100,7 @@ public class MapsTest extends AbstractTest {
         assertNull(Maps.getByPath(map, "list[abc]"));
         assertNull(Maps.getByPath(map, "list[0].child"));
         assertNull(Maps.getByPath(map, "nestedLists[0][0][0]"));
-        assertEquals("fallback", Maps.getByPathOrDefault(map, "list[-1]", "fallback"));
+        assertEquals("fallback", Maps.getByPathAsOrDefaultIfAbsent(map, "list[-1]", "fallback", String.class));
         assertFalse(Maps.getByPathIfExists(map, "scalar.child").isPresent());
     }
 
@@ -1129,82 +1171,102 @@ public class MapsTest extends AbstractTest {
     }
 
     @Test
-    public void testGetByPathOrDefault_nullMap() {
-        assertEquals("default", Maps.getByPathOrDefault(null, "key", "default"));
+    public void testGetByPathAsOrDefaultIfAbsent_nullMap() {
+        assertEquals("default", Maps.getByPathAsOrDefaultIfAbsent(null, "key", "default", String.class));
     }
 
     @Test
-    public void testGetByPathOrDefault_NestedCollectionIndexDefaultValue() {
+    public void testGetByPathAsOrDefaultIfAbsent_NestedCollectionIndexDefaultValue() {
         final Map<String, Object> map = new HashMap<>();
         map.put("items", Arrays.asList(Collections.singletonMap("count", "5")));
 
-        assertEquals(Integer.valueOf(5), Maps.getByPathOrDefault(map, "items[0].count", 0));
-        assertEquals("fallback", Maps.getByPathOrDefault(map, "items[1].count", "fallback"));
-        assertEquals("fallback", Maps.getByPathOrDefault(map, "items[0].missing", "fallback"));
+        assertEquals(Integer.valueOf(5), Maps.getByPathAsOrDefaultIfAbsent(map, "items[0].count", 0, Integer.class));
+        assertEquals("fallback", Maps.getByPathAsOrDefaultIfAbsent(map, "items[1].count", "fallback", String.class));
+        assertEquals("fallback", Maps.getByPathAsOrDefaultIfAbsent(map, "items[0].missing", "fallback", String.class));
     }
 
     @Test
-    public void testGetByPathAs_nullMap() {
-        assertNull(Maps.getByPathAs(null, "key", String.class));
+    public void testGetByPathAsInt() {
+        final Map<String, Object> map = new HashMap<>();
+        map.put("user", N.asMap("age", "25", "score", 98, "nullValue", null));
+
+        final OptionalInt age = Maps.getByPathAsInt(map, "user.age");
+        assertTrue(age.isPresent());
+        assertEquals(25, age.getAsInt());
+
+        final OptionalInt score = Maps.getByPathAsInt(map, "user.score");
+        assertTrue(score.isPresent());
+        assertEquals(98, score.getAsInt());
+
+        assertFalse(Maps.getByPathAsInt(map, "user.nullValue").isPresent());
+        assertFalse(Maps.getByPathAsInt(map, "user.missing").isPresent());
+        assertFalse(Maps.getByPathAsInt(null, "user.age").isPresent());
     }
 
     @Test
-    public void testGetByPathAs_emptyMap() {
-        assertNull(Maps.getByPathAs(new HashMap<>(), "key", String.class));
-    }
+    public void testGetByPathAsIntOrDefaultIfAbsent() {
+        final Map<String, Object> map = new HashMap<>();
+        map.put("user", N.asMap("age", "25", "nullValue", null));
 
-    // getByPathAsIfExists: value found and is correct type -> returns Nullable.of(val) (L1216)
-    @Test
-    public void testGetByPathAsIfExists_ValueAlreadyCorrectType() {
-        Map<String, Object> map = new HashMap<>();
-        map.put("name", "Alice");
-        Nullable<String> result = Maps.getByPathAsIfExists(map, "name", String.class);
-        assertTrue(result.isPresent());
-        assertEquals("Alice", result.get());
+        assertEquals(25, Maps.getByPathAsIntOrDefaultIfAbsent(map, "user.age", -1));
+        assertEquals(-1, Maps.getByPathAsIntOrDefaultIfAbsent(map, "user.nullValue", -1));
+        assertEquals(-1, Maps.getByPathAsIntOrDefaultIfAbsent(map, "user.missing", -1));
+        assertEquals(-1, Maps.getByPathAsIntOrDefaultIfAbsent(null, "user.age", -1));
     }
 
     @Test
-    public void testGetByPathIfExists() {
-        Map<String, Object> map = new HashMap<>();
-        map.put("key", "value");
-        map.put("key2", N.asMap("kk2", "123"));
+    public void testGetByPathAsString() {
+        final Map<String, Object> map = new HashMap<>();
+        map.put("user", N.asMap("name", "John", "age", 25, "nullValue", null));
 
-        Nullable<String> result = Maps.getByPathIfExists(map, "key");
-        assertTrue(result.isPresent());
-        assertEquals("value", result.get());
+        final Optional<String> name = Maps.getByPathAsString(map, "user.name");
+        assertTrue(name.isPresent());
+        assertEquals("John", name.get());
 
-        Nullable<Integer> result2 = Maps.getByPathAsIfExists(map, "key2.kk2", int.class);
-        assertTrue(result2.isPresent());
-        assertEquals(123, result2.get());
+        final Optional<String> age = Maps.getByPathAsString(map, "user.age");
+        assertTrue(age.isPresent());
+        assertEquals("25", age.get());
 
-        Nullable<String> missing = Maps.getByPathIfExists(map, "missing");
-        assertFalse(missing.isPresent());
+        assertFalse(Maps.getByPathAsString(map, "user.nullValue").isPresent());
+        assertFalse(Maps.getByPathAsString(map, "user.missing").isPresent());
+        assertFalse(Maps.getByPathAsString(null, "user.name").isPresent());
+    }
+
+    @Test
+    public void testGetByPathAsStringOrDefaultIfAbsent() {
+        final Map<String, Object> map = new HashMap<>();
+        map.put("user", N.asMap("name", "John", "age", 25, "nullValue", null));
+
+        assertEquals("John", Maps.getByPathAsStringOrDefaultIfAbsent(map, "user.name", "Unknown"));
+        assertEquals("25", Maps.getByPathAsStringOrDefaultIfAbsent(map, "user.age", "Unknown"));
+        assertEquals("Unknown", Maps.getByPathAsStringOrDefaultIfAbsent(map, "user.nullValue", "Unknown"));
+        assertEquals("Unknown", Maps.getByPathAsStringOrDefaultIfAbsent(map, "user.missing", "Unknown"));
+        assertEquals("Unknown", Maps.getByPathAsStringOrDefaultIfAbsent(null, "user.name", "Unknown"));
+        assertThrows(IllegalArgumentException.class, () -> Maps.getByPathAsStringOrDefaultIfAbsent(map, "user.name", null));
+    }
+
+    @Test
+    public void testGetByPathAs() {
+        final Map<String, Object> map = new HashMap<>();
+        map.put("user", N.asMap("age", "25", "active", "true", "nullValue", null));
+
+        final Optional<Integer> age = Maps.getByPathAs(map, "user.age", Integer.class);
+        assertTrue(age.isPresent());
+        assertEquals(Integer.valueOf(25), age.get());
+
+        final Optional<Boolean> active = Maps.getByPathAs(map, "user.active", Boolean.class);
+        assertTrue(active.isPresent());
+        assertEquals(Boolean.TRUE, active.get());
+
+        assertFalse(Maps.getByPathAs(map, "user.nullValue", Integer.class).isPresent());
+        assertFalse(Maps.getByPathAs(map, "user.missing", Integer.class).isPresent());
+        assertFalse(Maps.getByPathAs(null, "user.age", Integer.class).isPresent());
+        assertThrows(IllegalArgumentException.class, () -> Maps.getByPathAs(map, "user.age", (Class<Integer>) null));
     }
 
     @Test
     public void testGetByPathIfExists_nullMap() {
         assertFalse(Maps.getByPathIfExists(null, "key").isPresent());
-    }
-
-    @Test
-    public void testGetByPathAsIfExists_nullMap() {
-        assertFalse(Maps.getByPathAsIfExists(null, "key", String.class).isPresent());
-    }
-
-    @Test
-    public void testGetByPathAsIfExists_missing() {
-        Map<String, Object> map = new HashMap<>();
-        map.put("key", "value");
-        assertFalse(Maps.getByPathAsIfExists(map, "missing", String.class).isPresent());
-    }
-
-    @Test
-    public void testGetByPathAsIfExists_conversion() {
-        Map<String, Object> map = new HashMap<>();
-        map.put("num", "42");
-        Nullable<Integer> result = Maps.getByPathAsIfExists(map, "num", Integer.class);
-        assertTrue(result.isPresent());
-        assertEquals(42, result.get().intValue());
     }
 
     @Test
@@ -1214,7 +1276,7 @@ public class MapsTest extends AbstractTest {
         assertEquals(1, Maps.getOrDefaultIfAbsent(map, "a", 0).intValue());
         assertEquals(0, Maps.getOrDefaultIfAbsent(map, "d", 0).intValue());
 
-        assertEquals(N.toList(1, 0), Maps.getValuesOrDefault(map, N.toList("a", "d"), 0));
+        assertEquals(N.toList(1, 0), Maps.getValuesOrDefaultIfAbsent(map, N.toList("a", "d"), 0));
 
         assertEquals(N.toList(1), Maps.getValuesIfPresent(map, N.toList("a", "d")));
     }
@@ -1222,11 +1284,11 @@ public class MapsTest extends AbstractTest {
     @Test
     public void testGetOrDefaultIfAbsentForEach() {
         List<String> keys = Arrays.asList("key1", "missing", "key2");
-        List<String> values = Maps.getValuesOrDefault(testMap, keys, "default");
+        List<String> values = Maps.getValuesOrDefaultIfAbsent(testMap, keys, "default");
         assertEquals(3, values.size());
         assertEquals(Arrays.asList("value1", "default", "value2"), values);
 
-        List<String> defaultValues = Maps.getValuesOrDefault(new HashMap<>(), keys, "default");
+        List<String> defaultValues = Maps.getValuesOrDefaultIfAbsent(new HashMap<>(), keys, "default");
         assertEquals(Arrays.asList("default", "default", "default"), defaultValues);
     }
 
@@ -1512,24 +1574,24 @@ public class MapsTest extends AbstractTest {
 
     @Test
     public void testGetBooleanWithDefault() {
-        assertTrue(Maps.getAsBooleanOrDefault(objectMap, "boolean", false));
-        assertTrue(Maps.getAsBooleanOrDefault(objectMap, "missing", true));
-        assertFalse(Maps.getAsBooleanOrDefault(objectMap, "missing", false));
-        assertFalse(Maps.getAsBooleanOrDefault(null, "key", false));
+        assertTrue(Maps.getAsBooleanOrDefaultIfAbsent(objectMap, "boolean", false));
+        assertTrue(Maps.getAsBooleanOrDefaultIfAbsent(objectMap, "missing", true));
+        assertFalse(Maps.getAsBooleanOrDefaultIfAbsent(objectMap, "missing", false));
+        assertFalse(Maps.getAsBooleanOrDefaultIfAbsent(null, "key", false));
     }
 
     @Test
     public void testGetAsBooleanOrDefault_nullMap() {
-        assertTrue(Maps.getAsBooleanOrDefault(null, "key", true));
-        assertFalse(Maps.getAsBooleanOrDefault(new HashMap<>(), "key", false));
+        assertTrue(Maps.getAsBooleanOrDefaultIfAbsent(null, "key", true));
+        assertFalse(Maps.getAsBooleanOrDefaultIfAbsent(new HashMap<>(), "key", false));
     }
 
-    // getAsCharOrDefault: value is not Character -> calls Strings.parseChar(N.toString(val))
+    // getAsCharOrDefaultIfAbsent: value is not Character -> calls Strings.parseChar(N.toString(val))
     @Test
     public void testGetAsCharOrDefault_NonCharValue_Converts() {
         Map<String, Object> map = new HashMap<>();
         map.put("key", "X"); // String, not Character
-        char result = Maps.getAsCharOrDefault(map, "key", 'Z');
+        char result = Maps.getAsCharOrDefaultIfAbsent(map, "key", 'Z');
         assertEquals('X', result);
     }
 
@@ -1556,22 +1618,22 @@ public class MapsTest extends AbstractTest {
 
     @Test
     public void testGetCharWithDefault() {
-        assertEquals('A', Maps.getAsCharOrDefault(objectMap, "char", 'Z'));
-        assertEquals('Z', Maps.getAsCharOrDefault(objectMap, "missing", 'Z'));
+        assertEquals('A', Maps.getAsCharOrDefaultIfAbsent(objectMap, "char", 'Z'));
+        assertEquals('Z', Maps.getAsCharOrDefaultIfAbsent(objectMap, "missing", 'Z'));
     }
 
     @Test
     public void testGetAsCharOrDefault_nullMap() {
-        assertEquals('x', Maps.getAsCharOrDefault(null, "key", 'x'));
-        assertEquals('x', Maps.getAsCharOrDefault(new HashMap<>(), "key", 'x'));
+        assertEquals('x', Maps.getAsCharOrDefaultIfAbsent(null, "key", 'x'));
+        assertEquals('x', Maps.getAsCharOrDefaultIfAbsent(new HashMap<>(), "key", 'x'));
     }
 
-    // getAsByteOrDefault: value is not Number -> calls Numbers.toByte(N.toString(val))
+    // getAsByteOrDefaultIfAbsent: value is not Number -> calls Numbers.toByte(N.toString(val))
     @Test
     public void testGetAsByteOrDefault_StringValue_Converts() {
         Map<String, Object> map = new HashMap<>();
         map.put("key", "42"); // String, not Number
-        byte result = Maps.getAsByteOrDefault(map, "key", (byte) 0);
+        byte result = Maps.getAsByteOrDefaultIfAbsent(map, "key", (byte) 0);
         assertEquals((byte) 42, result);
     }
 
@@ -1598,22 +1660,22 @@ public class MapsTest extends AbstractTest {
 
     @Test
     public void testGetByteWithDefault() {
-        assertEquals(10, Maps.getAsByteOrDefault(objectMap, "byte", (byte) 99));
-        assertEquals(99, Maps.getAsByteOrDefault(objectMap, "missing", (byte) 99));
+        assertEquals(10, Maps.getAsByteOrDefaultIfAbsent(objectMap, "byte", (byte) 99));
+        assertEquals(99, Maps.getAsByteOrDefaultIfAbsent(objectMap, "missing", (byte) 99));
     }
 
     @Test
     public void testGetAsByteOrDefault_nullMap() {
-        assertEquals((byte) 5, Maps.getAsByteOrDefault(null, "key", (byte) 5));
-        assertEquals((byte) 5, Maps.getAsByteOrDefault(new HashMap<>(), "key", (byte) 5));
+        assertEquals((byte) 5, Maps.getAsByteOrDefaultIfAbsent(null, "key", (byte) 5));
+        assertEquals((byte) 5, Maps.getAsByteOrDefaultIfAbsent(new HashMap<>(), "key", (byte) 5));
     }
 
-    // getAsShortOrDefault: value is not Number -> calls Numbers.toShort
+    // getAsShortOrDefaultIfAbsent: value is not Number -> calls Numbers.toShort
     @Test
     public void testGetAsShortOrDefault_StringValue_Converts() {
         Map<String, Object> map = new HashMap<>();
         map.put("key", "100"); // String
-        short result = Maps.getAsShortOrDefault(map, "key", (short) 0);
+        short result = Maps.getAsShortOrDefaultIfAbsent(map, "key", (short) 0);
         assertEquals((short) 100, result);
     }
 
@@ -1640,14 +1702,14 @@ public class MapsTest extends AbstractTest {
 
     @Test
     public void testGetShortWithDefault() {
-        assertEquals(100, Maps.getAsShortOrDefault(objectMap, "short", (short) 999));
-        assertEquals(999, Maps.getAsShortOrDefault(objectMap, "missing", (short) 999));
+        assertEquals(100, Maps.getAsShortOrDefaultIfAbsent(objectMap, "short", (short) 999));
+        assertEquals(999, Maps.getAsShortOrDefaultIfAbsent(objectMap, "missing", (short) 999));
     }
 
     @Test
     public void testGetAsShortOrDefault_nullMap() {
-        assertEquals((short) 10, Maps.getAsShortOrDefault(null, "key", (short) 10));
-        assertEquals((short) 10, Maps.getAsShortOrDefault(new HashMap<>(), "key", (short) 10));
+        assertEquals((short) 10, Maps.getAsShortOrDefaultIfAbsent(null, "key", (short) 10));
+        assertEquals((short) 10, Maps.getAsShortOrDefaultIfAbsent(new HashMap<>(), "key", (short) 10));
     }
 
     @Test
@@ -1672,14 +1734,14 @@ public class MapsTest extends AbstractTest {
 
     @Test
     public void testGetIntWithDefault() {
-        assertEquals(123, Maps.getAsIntOrDefault(objectMap, "integer", 999));
-        assertEquals(999, Maps.getAsIntOrDefault(objectMap, "missing", 999));
+        assertEquals(123, Maps.getAsIntOrDefaultIfAbsent(objectMap, "integer", 999));
+        assertEquals(999, Maps.getAsIntOrDefaultIfAbsent(objectMap, "missing", 999));
     }
 
     @Test
     public void testGetAsIntOrDefault_nullMap() {
-        assertEquals(99, Maps.getAsIntOrDefault(null, "key", 99));
-        assertEquals(99, Maps.getAsIntOrDefault(new HashMap<>(), "key", 99));
+        assertEquals(99, Maps.getAsIntOrDefaultIfAbsent(null, "key", 99));
+        assertEquals(99, Maps.getAsIntOrDefaultIfAbsent(new HashMap<>(), "key", 99));
     }
 
     @Test
@@ -1691,9 +1753,9 @@ public class MapsTest extends AbstractTest {
         conversionMap.put("boolAsInt", 1);
         conversionMap.put("hexString", "0xFF");
 
-        assertEquals(123, Maps.getAsIntOrDefault(conversionMap, "intAsString", 0));
-        assertEquals(45.67, Maps.getAsDoubleOrDefault(conversionMap, "doubleAsString", 0.0), 0.001);
-        assertTrue(Maps.getAsBooleanOrDefault(conversionMap, "boolAsString", false));
+        assertEquals(123, Maps.getAsIntOrDefaultIfAbsent(conversionMap, "intAsString", 0));
+        assertEquals(45.67, Maps.getAsDoubleOrDefaultIfAbsent(conversionMap, "doubleAsString", 0.0), 0.001);
+        assertTrue(Maps.getAsBooleanOrDefaultIfAbsent(conversionMap, "boolAsString", false));
 
         conversionMap.put("invalidNumber", "not-a-number");
         try {
@@ -1703,12 +1765,12 @@ public class MapsTest extends AbstractTest {
         }
     }
 
-    // getAsLongOrDefault: value is not Number -> calls Numbers.toLong
+    // getAsLongOrDefaultIfAbsent: value is not Number -> calls Numbers.toLong
     @Test
     public void testGetAsLongOrDefault_StringValue_Converts() {
         Map<String, Object> map = new HashMap<>();
         map.put("key", "99999"); // String
-        long result = Maps.getAsLongOrDefault(map, "key", 0L);
+        long result = Maps.getAsLongOrDefaultIfAbsent(map, "key", 0L);
         assertEquals(99999L, result);
     }
 
@@ -1735,8 +1797,8 @@ public class MapsTest extends AbstractTest {
 
     @Test
     public void testGetLongWithDefault() {
-        assertEquals(123456789L, Maps.getAsLongOrDefault(objectMap, "long", 999L));
-        assertEquals(999L, Maps.getAsLongOrDefault(objectMap, "missing", 999L));
+        assertEquals(123456789L, Maps.getAsLongOrDefaultIfAbsent(objectMap, "long", 999L));
+        assertEquals(999L, Maps.getAsLongOrDefaultIfAbsent(objectMap, "missing", 999L));
     }
 
     @Test
@@ -1748,19 +1810,19 @@ public class MapsTest extends AbstractTest {
         edgeCaseMap.put("infinity", Double.POSITIVE_INFINITY);
         edgeCaseMap.put("nan", Double.NaN);
 
-        assertEquals(Long.MAX_VALUE, Maps.getAsLongOrDefault(edgeCaseMap, "maxLong", 0L));
-        assertEquals(Long.MIN_VALUE, Maps.getAsLongOrDefault(edgeCaseMap, "minLong", 0L));
-        assertTrue(Double.isInfinite(Maps.getAsDoubleOrDefault(edgeCaseMap, "infinity", 0.0)));
-        assertTrue(Double.isNaN(Maps.getAsDoubleOrDefault(edgeCaseMap, "nan", 0.0)));
+        assertEquals(Long.MAX_VALUE, Maps.getAsLongOrDefaultIfAbsent(edgeCaseMap, "maxLong", 0L));
+        assertEquals(Long.MIN_VALUE, Maps.getAsLongOrDefaultIfAbsent(edgeCaseMap, "minLong", 0L));
+        assertTrue(Double.isInfinite(Maps.getAsDoubleOrDefaultIfAbsent(edgeCaseMap, "infinity", 0.0)));
+        assertTrue(Double.isNaN(Maps.getAsDoubleOrDefaultIfAbsent(edgeCaseMap, "nan", 0.0)));
 
         edgeCaseMap.put("scientific", "1.23e4");
-        assertEquals(12300.0, Maps.getAsDoubleOrDefault(edgeCaseMap, "scientific", 0.0), 0.001);
+        assertEquals(12300.0, Maps.getAsDoubleOrDefaultIfAbsent(edgeCaseMap, "scientific", 0.0), 0.001);
     }
 
     @Test
     public void testGetAsLongOrDefault_nullMap() {
-        assertEquals(100L, Maps.getAsLongOrDefault(null, "key", 100L));
-        assertEquals(100L, Maps.getAsLongOrDefault(new HashMap<>(), "key", 100L));
+        assertEquals(100L, Maps.getAsLongOrDefaultIfAbsent(null, "key", 100L));
+        assertEquals(100L, Maps.getAsLongOrDefaultIfAbsent(new HashMap<>(), "key", 100L));
     }
 
     @Test
@@ -1786,14 +1848,14 @@ public class MapsTest extends AbstractTest {
 
     @Test
     public void testGetFloatWithDefault() {
-        assertEquals(12.34f, Maps.getAsFloatOrDefault(objectMap, "float", 99.99f), 0.001f);
-        assertEquals(99.99f, Maps.getAsFloatOrDefault(objectMap, "missing", 99.99f), 0.001f);
+        assertEquals(12.34f, Maps.getAsFloatOrDefaultIfAbsent(objectMap, "float", 99.99f), 0.001f);
+        assertEquals(99.99f, Maps.getAsFloatOrDefaultIfAbsent(objectMap, "missing", 99.99f), 0.001f);
     }
 
     @Test
     public void testGetAsFloatOrDefault_nullMap() {
-        assertEquals(1.5f, Maps.getAsFloatOrDefault(null, "key", 1.5f));
-        assertEquals(1.5f, Maps.getAsFloatOrDefault(new HashMap<>(), "key", 1.5f));
+        assertEquals(1.5f, Maps.getAsFloatOrDefaultIfAbsent(null, "key", 1.5f));
+        assertEquals(1.5f, Maps.getAsFloatOrDefaultIfAbsent(new HashMap<>(), "key", 1.5f));
     }
 
     @Test
@@ -1818,22 +1880,22 @@ public class MapsTest extends AbstractTest {
 
     @Test
     public void testGetDoubleWithDefault() {
-        assertEquals(45.67, Maps.getAsDoubleOrDefault(objectMap, "double", 99.99), 0.001);
-        assertEquals(99.99, Maps.getAsDoubleOrDefault(objectMap, "missing", 99.99), 0.001);
+        assertEquals(45.67, Maps.getAsDoubleOrDefaultIfAbsent(objectMap, "double", 99.99), 0.001);
+        assertEquals(99.99, Maps.getAsDoubleOrDefaultIfAbsent(objectMap, "missing", 99.99), 0.001);
     }
 
     @Test
     public void testGetAsDoubleOrDefault_nullMap() {
-        assertEquals(2.5, Maps.getAsDoubleOrDefault(null, "key", 2.5));
-        assertEquals(2.5, Maps.getAsDoubleOrDefault(new HashMap<>(), "key", 2.5));
+        assertEquals(2.5, Maps.getAsDoubleOrDefaultIfAbsent(null, "key", 2.5));
+        assertEquals(2.5, Maps.getAsDoubleOrDefaultIfAbsent(new HashMap<>(), "key", 2.5));
     }
 
-    // getAsStringOrDefault: value is not String -> calls N.stringOf(val)
+    // getAsStringOrDefaultIfAbsent: value is not String -> calls N.stringOf(val)
     @Test
     public void testGetAsStringOrDefault_NonStringValue_Converts() {
         Map<String, Object> map = new HashMap<>();
         map.put("key", 123); // Integer, not String
-        String result = Maps.getAsStringOrDefault(map, "key", "default");
+        String result = Maps.getAsStringOrDefaultIfAbsent(map, "key", "default");
         assertEquals("123", result);
     }
 
@@ -1858,16 +1920,16 @@ public class MapsTest extends AbstractTest {
 
     @Test
     public void testGetAsStringOrDefault_nullMap() {
-        assertEquals("default", Maps.getAsStringOrDefault(null, "key", "default"));
-        assertEquals("default", Maps.getAsStringOrDefault(new HashMap<>(), "key", "default"));
+        assertEquals("default", Maps.getAsStringOrDefaultIfAbsent(null, "key", "default"));
+        assertEquals("default", Maps.getAsStringOrDefaultIfAbsent(new HashMap<>(), "key", "default"));
     }
 
     @Test
     public void testGetStringWithDefault() {
-        assertEquals("test", Maps.getAsStringOrDefault(objectMap, "string", "default"));
-        assertEquals("default", Maps.getAsStringOrDefault(objectMap, "missing", "default"));
+        assertEquals("test", Maps.getAsStringOrDefaultIfAbsent(objectMap, "string", "default"));
+        assertEquals("default", Maps.getAsStringOrDefaultIfAbsent(objectMap, "missing", "default"));
 
-        assertThrows(IllegalArgumentException.class, () -> Maps.getAsStringOrDefault(objectMap, "missing", null));
+        assertThrows(IllegalArgumentException.class, () -> Maps.getAsStringOrDefaultIfAbsent(objectMap, "missing", null));
     }
 
     @Test
@@ -1941,23 +2003,24 @@ public class MapsTest extends AbstractTest {
     public void testGetAsOrDefault_conversion() {
         Map<String, Object> map = new HashMap<>();
         map.put("val", "123");
-        assertEquals(Integer.valueOf(123), Maps.getAsOrDefault(map, "val", 0));
+        assertEquals(Integer.valueOf(123), Maps.getAsOrDefaultIfAbsent(map, "val", 0, Integer.class));
     }
 
     @Test
     public void testGetAsOrDefault_nullMap() {
-        assertEquals(Integer.valueOf(99), Maps.getAsOrDefault(null, "key", 99));
+        assertEquals(Integer.valueOf(99), Maps.getAsOrDefaultIfAbsent(null, "key", 99, Integer.class));
     }
 
     @Test
     public void testGetNonNullWithDefault() {
-        Integer result = Maps.getAsOrDefault(objectMap, "integer", 999);
+        Integer result = Maps.getAsOrDefaultIfAbsent(objectMap, "integer", 999, Integer.class);
         assertEquals(Integer.valueOf(123), result);
 
-        Integer defaultResult = Maps.getAsOrDefault(objectMap, "missing", 999);
+        Integer defaultResult = Maps.getAsOrDefaultIfAbsent(objectMap, "missing", 999, Integer.class);
         assertEquals(Integer.valueOf(999), defaultResult);
 
-        assertThrows(IllegalArgumentException.class, () -> Maps.getAsOrDefault(objectMap, "missing", (Integer) null));
+        assertThrows(IllegalArgumentException.class, () -> Maps.getAsOrDefaultIfAbsent(objectMap, "missing", (Integer) null, Integer.class));
+        assertThrows(IllegalArgumentException.class, () -> Maps.getAsOrDefaultIfAbsent(objectMap, "missing", 999, (Class<Integer>) null));
     }
 
     @Test
@@ -1969,12 +2032,13 @@ public class MapsTest extends AbstractTest {
         String defaultStr = "default";
         Integer defaultInt = 999;
 
-        assertEquals("text", Maps.getAsOrDefault(map, "s", defaultStr));
-        assertEquals(Integer.valueOf(123), Maps.getAsOrDefault(map, "i", defaultInt));
-        assertEquals("123", Maps.getAsOrDefault(map, "i", defaultStr));
-        assertEquals(defaultStr, Maps.getAsOrDefault(map, "n", defaultStr));
-        assertEquals(defaultStr, Maps.getAsOrDefault(map, "missing", defaultStr));
-        assertThrows(IllegalArgumentException.class, () -> Maps.getAsOrDefault(map, "s", (String) null));
+        assertEquals("text", Maps.getAsOrDefaultIfAbsent(map, "s", defaultStr, String.class));
+        assertEquals(Integer.valueOf(123), Maps.getAsOrDefaultIfAbsent(map, "i", defaultInt, Integer.class));
+        assertEquals("123", Maps.getAsOrDefaultIfAbsent(map, "i", defaultStr, String.class));
+        assertEquals(defaultStr, Maps.getAsOrDefaultIfAbsent(map, "n", defaultStr, String.class));
+        assertEquals(defaultStr, Maps.getAsOrDefaultIfAbsent(map, "missing", defaultStr, String.class));
+        assertThrows(IllegalArgumentException.class, () -> Maps.getAsOrDefaultIfAbsent(map, "s", (String) null, String.class));
+        assertThrows(IllegalArgumentException.class, () -> Maps.getAsOrDefaultIfAbsent(map, "s", defaultStr, (Class<String>) null));
     }
 
     @Test
@@ -1996,14 +2060,14 @@ public class MapsTest extends AbstractTest {
 
     @Test
     public void testGetValuesOrDefault_emptyKeys() {
-        List<String> result = Maps.getValuesOrDefault(testMap, new ArrayList<>(), "default");
+        List<String> result = Maps.getValuesOrDefaultIfAbsent(testMap, new ArrayList<>(), "default");
         assertTrue(result.isEmpty());
     }
 
     @Test
     public void testGetValuesOrDefault_nullMap() {
         List<String> keys = Arrays.asList("a", "b");
-        List<String> result = Maps.getValuesOrDefault(null, keys, "default");
+        List<String> result = Maps.getValuesOrDefaultIfAbsent(null, keys, "default");
         assertEquals(2, result.size());
         assertEquals("default", result.get(0));
         assertEquals("default", result.get(1));
@@ -2373,6 +2437,45 @@ public class MapsTest extends AbstractTest {
 
         assertNull(Maps.putIfAbsent(map, "b", supplier));
         assertEquals("newVal", map.get("b"));
+    }
+
+    @Test
+    @DisplayName("putIfAbsent(Supplier) invokes the supplier and returns null when the key is mapped to null")
+    public void testPutIfAbsentWithSupplier_nullMappedKey() {
+        Map<String, String> map = new HashMap<>();
+        map.put("nullKey", null);
+
+        final boolean[] supplierCalled = { false };
+        String result = Maps.putIfAbsent(map, "nullKey", Fn.s(() -> {
+            supplierCalled[0] = true;
+            return "supplied";
+        }));
+
+        // Returns the previous value (null), not the newly supplied one
+        assertNull(result);
+        assertTrue(supplierCalled[0]);
+        assertEquals("supplied", map.get("nullKey"));
+    }
+
+    @Test
+    @DisplayName("putIfAbsent(Supplier) returns the previous value uniformly for a ConcurrentMap")
+    public void testPutIfAbsentWithSupplier_concurrentMap() {
+        ConcurrentMap<String, String> map = new ConcurrentHashMap<>();
+        map.put("existing", "value");
+
+        // Existing non-null key: supplier not called, existing value returned
+        final boolean[] supplierCalled = { false };
+        assertEquals("value", Maps.putIfAbsent(map, "existing", Fn.s(() -> {
+            supplierCalled[0] = true;
+            return "other";
+        })));
+        assertFalse(supplierCalled[0]);
+        assertEquals("value", map.get("existing"));
+
+        // Absent key: returns the PREVIOUS value (null), not the newly created one,
+        // matching the plain-Map contract (no longer delegates to computeIfAbsent).
+        assertNull(Maps.putIfAbsent(map, "fresh", Fn.s(() -> "created")));
+        assertEquals("created", map.get("fresh"));
     }
 
     @Test
@@ -3142,7 +3245,7 @@ public class MapsTest extends AbstractTest {
         map.put("b", Arrays.asList(4, 5, 6));
         map.put("c", Arrays.asList(7, 8));
 
-        List<Map<String, Integer>> result = Maps.flatToMap(map);
+        List<Map<String, Integer>> result = Maps.transpose(map);
         assertEquals(3, result.size());
 
         Map<String, Integer> first = result.get(0);
@@ -3163,13 +3266,13 @@ public class MapsTest extends AbstractTest {
 
     @Test
     public void testFlatToMap_nullMap() {
-        List<Map<String, String>> result = Maps.flatToMap(null);
+        List<Map<String, String>> result = Maps.transpose(null);
         assertTrue(result.isEmpty());
     }
 
     @Test
     public void testFlatToMap_emptyMap() {
-        List<Map<String, String>> result = Maps.flatToMap(new HashMap<>());
+        List<Map<String, String>> result = Maps.transpose(new HashMap<>());
         assertTrue(result.isEmpty());
     }
 
@@ -3179,7 +3282,7 @@ public class MapsTest extends AbstractTest {
         map.put("a", Arrays.asList(1, 2, 3));
         map.put("b", Arrays.asList(4, 5));
 
-        List<Map<String, Integer>> result = Maps.flatToMap(map);
+        List<Map<String, Integer>> result = Maps.transpose(map);
         assertEquals(3, result.size());
         assertEquals(Integer.valueOf(1), result.get(0).get("a"));
         assertEquals(Integer.valueOf(4), result.get(0).get("b"));
@@ -3191,7 +3294,7 @@ public class MapsTest extends AbstractTest {
 
     @Test
     public void testFlatToMap_NullMap() {
-        List<Map<String, Integer>> result = Maps.flatToMap(null);
+        List<Map<String, Integer>> result = Maps.transpose(null);
         assertEquals(0, result.size());
     }
 
@@ -3202,7 +3305,7 @@ public class MapsTest extends AbstractTest {
         map.put("a", Arrays.asList(1, 2));
         map.put("b", new ArrayList<>()); // empty collection - should be skipped
         map.put("c", Arrays.asList(3));
-        List<Map<String, Integer>> result = Maps.flatToMap(map);
+        List<Map<String, Integer>> result = Maps.transpose(map);
         assertEquals(2, result.size());
         // "b" not in results since it had empty collection
         assertFalse(result.get(0).containsKey("b"));
@@ -3223,7 +3326,7 @@ public class MapsTest extends AbstractTest {
 
         N.println(list);
 
-        list = Maps.flatToMap(map);
+        list = Maps.transpose(map);
         N.println(list);
 
         list = Stream.just(map).map(Fn.<String, Object> flatmapValue()).first().orElseThrow();
@@ -3291,7 +3394,7 @@ public class MapsTest extends AbstractTest {
         nested.put("key", "value");
         map.put("outer", nested);
 
-        LinkedHashMap<String, Object> flattened = Maps.flatten(map, () -> new LinkedHashMap<>());
+        LinkedHashMap<String, Object> flattened = Maps.flatten(map, size -> new LinkedHashMap<>());
         assertTrue(flattened instanceof LinkedHashMap);
         assertEquals("value", flattened.get("outer.key"));
     }
@@ -3390,7 +3493,7 @@ public class MapsTest extends AbstractTest {
         Map<String, Object> flat = new HashMap<>();
         flat.put("a.b.c", "value");
 
-        Map<String, Object> unflattened = Maps.unflatten(flat, () -> new LinkedHashMap<>());
+        Map<String, Object> unflattened = Maps.unflatten(flat, size -> new LinkedHashMap<>());
         assertTrue(unflattened instanceof LinkedHashMap);
 
         @SuppressWarnings("unchecked")
@@ -3509,14 +3612,18 @@ public class MapsTest extends AbstractTest {
 
     @Test
     public void testReplaceKeys_nullMap() {
-        Maps.replaceKeys((Map<String, Integer>) null, String::toUpperCase);
-        // no exception should be thrown
+        assertDoesNotThrow(() -> {
+            Maps.replaceKeys((Map<String, Integer>) null, String::toUpperCase);
+            // no exception should be thrown
+        });
     }
 
     @Test
     public void testReplaceKeys_withMerger_nullMap() {
-        Maps.replaceKeys((Map<String, Integer>) null, String::toUpperCase, Integer::sum);
-        // no exception should be thrown
+        assertDoesNotThrow(() -> {
+            Maps.replaceKeys((Map<String, Integer>) null, String::toUpperCase, Integer::sum);
+            // no exception should be thrown
+        });
     }
 
     @Test
@@ -3526,6 +3633,15 @@ public class MapsTest extends AbstractTest {
         map.put("right", 2);
 
         assertThrows(IllegalStateException.class, () -> Maps.replaceKeys(map, key -> "dup"));
+    }
+
+    @Test
+    public void testReplaceKeysRejectedKeyDoesNotMutateMap() {
+        final Map<String, Integer> map = new ConcurrentHashMap<>();
+        map.put("a", 1);
+
+        assertThrows(NullPointerException.class, () -> Maps.replaceKeys(map, key -> null));
+        assertEquals(Map.of("a", 1), map);
     }
 
     @Test
@@ -3580,7 +3696,7 @@ public class MapsTest extends AbstractTest {
         assertEquals("hello", bean.value);
 
         Map<String, Object> mapNoMatch = Map.of("id", 20, "value", "world", "extraField", "data");
-        assertThrows(IllegalArgumentException.class, () -> Beans.mapToBean(mapNoMatch, false, false, SimpleBean.class));
+        assertThrows(IllegalArgumentException.class, () -> Beans.mapToBean(mapNoMatch, false, SimpleBean.class));
 
     }
 
@@ -3633,12 +3749,12 @@ public class MapsTest extends AbstractTest {
         map.put("age", null);
         map.put("unknownProperty", "value");
 
-        TestBean bean1 = Beans.mapToBean(map, true, true, TestBean.class);
+        TestBean bean1 = Beans.mapToBean(map, true, TestBean.class);
         assertEquals("John", bean1.getName());
         assertEquals(0, bean1.getAge());
 
         try {
-            Beans.mapToBean(map, false, false, TestBean.class);
+            Beans.mapToBean(map, false, TestBean.class);
             fail("Should throw exception for unmatched property");
         } catch (Exception e) {
         }
@@ -3668,7 +3784,7 @@ public class MapsTest extends AbstractTest {
         map2.put("age", 25);
 
         List<Map<String, Object>> maps = Arrays.asList(map1, map2);
-        List<TestBean> beans = Beans.mapToBean(maps, TestBean.class);
+        List<TestBean> beans = Beans.mapsToBeans(maps, TestBean.class);
 
         assertEquals(2, beans.size());
         assertEquals("John", beans.get(0).getName());
@@ -3676,7 +3792,7 @@ public class MapsTest extends AbstractTest {
         assertEquals("Jane", beans.get(1).getName());
         assertEquals(25, beans.get(1).getAge());
 
-        List<TestBean> beans2 = Beans.mapToBean(maps, N.toList("name"), TestBean.class);
+        List<TestBean> beans2 = Beans.mapsToBeans(maps, N.toList("name"), TestBean.class);
 
         assertEquals(2, beans2.size());
         assertEquals("John", beans2.get(0).getName());
@@ -3810,6 +3926,215 @@ public class MapsTest extends AbstractTest {
             Beans.deepBeanToMap(bean1);
         } catch (StackOverflowError e) {
         }
+    }
+
+    // --- regression tests for 2026-06-10 deep-review fixes ---
+
+    @Test
+    public void testReplaceKeysWithMergerHandlesChainedRenames() {
+        // regression: iterating a key snapshot while renaming let later iterations see earlier
+        // renames - chained renames merged spuriously and results were iteration-order dependent
+        final Map<String, Integer> map = new LinkedHashMap<>();
+        map.put("a", 1);
+        map.put("b", 2);
+        Maps.replaceKeys(map, k -> k.equals("a") ? "b" : "c", Integer::sum);
+        assertEquals(N.asMap("b", 1, "c", 2), map); // distinct targets: no merge at all
+
+        final Map<String, Integer> swapped = new LinkedHashMap<>();
+        swapped.put("a", 1);
+        swapped.put("b", 2);
+        Maps.replaceKeys(swapped, k -> k.equals("a") ? "b" : "a", Integer::sum);
+        assertEquals(N.asMap("b", 1, "a", 2), swapped); // clean swap
+
+        final Map<String, Integer> dup = new LinkedHashMap<>();
+        dup.put("a", 1);
+        dup.put("b", 2);
+        Maps.replaceKeys(dup, k -> "x", Integer::sum);
+        assertEquals(N.asMap("x", 3), dup); // true duplicate targets still merge
+    }
+
+    @Test
+    public void testGetByPathEmptyPathTreatsPresentNullAsExisting() {
+        // A present null under the "" key is still observable through IfExists, while
+        // getByPathAsOrDefaultIfAbsent applies null-as-absent default semantics.
+        final Map<String, Object> map = new HashMap<>();
+        map.put("", null);
+
+        assertTrue(Maps.getByPathIfExists(map, "").isPresent());
+        assertEquals("dflt", Maps.getByPathAsOrDefaultIfAbsent(map, "", "dflt", String.class));
+
+        map.put("", "5");
+        assertEquals(Integer.valueOf(5), Maps.getByPathAsOrDefaultIfAbsent(map, "", 0, Integer.class));
+    }
+
+    // ===================== API review 2026-06-15 follow-up =====================
+
+    // 3.2 removeEntry(Map, Map.Entry) tolerates a null entry (matches containsEntry)
+    @Test
+    public void testRemoveEntry_nullEntry_returnsFalse() {
+        final Map<String, Integer> map = new HashMap<>(Map.of("a", 1, "b", 2));
+        final Map.Entry<String, Integer> nullEntry = null;
+
+        assertFalse(Maps.removeEntry(map, nullEntry));
+        assertEquals(2, map.size());
+
+        // the query/mutate idiom is now safe for a null entry on both sides
+        assertFalse(Maps.containsEntry(map, nullEntry));
+        if (Maps.containsEntry(map, nullEntry)) {
+            Maps.removeEntry(map, nullEntry);
+        }
+        assertEquals(2, map.size());
+
+        // a null map combined with a non-null entry is also tolerated
+        assertFalse(Maps.removeEntry(null, N.newEntry("a", 1)));
+    }
+
+    // 3.4 keySet/values/entrySet always return an unmodifiable, live read-through view
+    @Test
+    public void testKeySetValuesEntrySet_alwaysUnmodifiable() {
+        final Map<String, Integer> map = new LinkedHashMap<>();
+        map.put("a", 1);
+        map.put("b", 2);
+
+        final Set<String> keys = Maps.keySet(map);
+        final Collection<Integer> values = Maps.values(map);
+        final Set<Map.Entry<String, Integer>> entries = Maps.entrySet(map);
+
+        assertThrows(UnsupportedOperationException.class, () -> keys.remove("a"));
+        assertThrows(UnsupportedOperationException.class, values::clear);
+        assertThrows(UnsupportedOperationException.class, entries::clear);
+
+        // empty/null inputs also return unmodifiable (empty) views
+        assertThrows(UnsupportedOperationException.class, () -> Maps.keySet(null).add("x"));
+        assertThrows(UnsupportedOperationException.class, () -> Maps.values(new HashMap<String, Integer>()).add(1));
+        assertThrows(UnsupportedOperationException.class, () -> Maps.entrySet(new HashMap<String, Integer>()).clear());
+
+        // the non-empty result is a live read-through view of the backing map
+        map.put("c", 3);
+        assertTrue(keys.contains("c"));
+        assertEquals(3, keys.size());
+        assertEquals(3, values.size());
+        assertEquals(3, entries.size());
+    }
+
+    // 3.6 difference/symmetricDifference accept a covariantly-typed second map
+    @Test
+    public void testDifferenceSymmetricDifference_covariantSecondMap() {
+        final Map<String, Number> first = new LinkedHashMap<>();
+        first.put("a", 1);
+        first.put("b", 2);
+
+        // Integer <: Number — only compiles because the second param was widened to Map<? extends K, ? extends V>
+        final Map<String, Integer> second = new LinkedHashMap<>();
+        second.put("a", 1);
+        second.put("c", 9);
+
+        final Map<String, Pair<Number, Nullable<Number>>> diff = Maps.difference(first, second);
+        assertFalse(diff.containsKey("a")); // identical value -> excluded
+        assertTrue(diff.containsKey("b")); // only in first
+        assertEquals(2, diff.get("b").left().intValue());
+        assertFalse(diff.get("b").right().isPresent());
+
+        final Map<String, Pair<Nullable<Number>, Nullable<Number>>> sym = Maps.symmetricDifference(first, second);
+        assertFalse(sym.containsKey("a")); // identical
+        assertTrue(sym.containsKey("b")); // only in first
+        assertTrue(sym.containsKey("c")); // only in second
+        assertEquals(9, sym.get("c").right().get().intValue());
+        assertFalse(sym.get("c").left().isPresent());
+    }
+
+    // 3.8 flatten/unflatten accept a size-aware IntFunction map supplier
+    @Test
+    public void testFlattenUnflatten_intFunctionSupplier() {
+        final Map<String, Object> map = new LinkedHashMap<>();
+        map.put("name", "John");
+        final Map<String, Object> address = new LinkedHashMap<>();
+        address.put("city", "NYC");
+        map.put("address", address);
+
+        final int[] sizeHint = { -1 };
+        final IntFunction<LinkedHashMap<String, Object>> supplier = size -> {
+            sizeHint[0] = size;
+            return new LinkedHashMap<>();
+        };
+
+        final LinkedHashMap<String, Object> flat = Maps.flatten(map, supplier);
+        assertEquals("John", flat.get("name"));
+        assertEquals("NYC", flat.get("address.city"));
+        assertEquals(map.size(), sizeHint[0]); // top-level expected-size hint forwarded to the supplier
+
+        @SuppressWarnings("unchecked")
+        final Map<String, Object> round = (Map<String, Object>) Maps.unflatten(flat, LinkedHashMap::new).get("address");
+        assertEquals("NYC", round.get("city"));
+    }
+
+    // 5.4 filter(map, BiPredicate, IntFunction mapSupplier) — caller controls the result map type
+    @Test
+    public void testFilter_biPredicate_withMapSupplier() {
+        final Map<String, Integer> map = new LinkedHashMap<>();
+        map.put("apple", 5);
+        map.put("banana", 2);
+        map.put("cherry", 8);
+
+        final LinkedHashMap<String, Integer> filtered = Maps.filter(map, (k, v) -> v > 4, LinkedHashMap::new);
+        assertTrue(filtered instanceof LinkedHashMap);
+        assertEquals(2, filtered.size());
+        assertEquals(Integer.valueOf(5), filtered.get("apple"));
+        assertEquals(Integer.valueOf(8), filtered.get("cherry"));
+        assertFalse(filtered.containsKey("banana"));
+
+        // null map -> empty map produced by the supplier
+        final TreeMap<String, Integer> empty = Maps.filter((Map<String, Integer>) null, (k, v) -> true, size -> new TreeMap<>());
+        assertNotNull(empty);
+        assertTrue(empty.isEmpty());
+
+        // null predicate -> IllegalArgumentException
+        assertThrows(IllegalArgumentException.class, () -> Maps.filter(map, (BiPredicate<String, Integer>) null, HashMap::new));
+    }
+
+    // 5.1 Maps.merge(Map, K, V, BiFunction) — null-safe static mirror of Map.merge
+    @Test
+    public void testMerge() {
+        final Map<String, Integer> counts = new HashMap<>();
+
+        // absent key -> stored directly; mergeFunction not invoked
+        final int[] calls = { 0 };
+        final BiFunction<Integer, Integer, Integer> sum = (a, b) -> {
+            calls[0]++;
+            return a + b;
+        };
+        assertEquals(Integer.valueOf(1), Maps.merge(counts, "a", 1, sum));
+        assertEquals(0, calls[0]);
+        assertEquals(Integer.valueOf(1), counts.get("a"));
+
+        // present key -> mergeFunction combines existing and new value
+        assertEquals(Integer.valueOf(6), Maps.merge(counts, "a", 5, sum));
+        assertEquals(1, calls[0]);
+        assertEquals(Integer.valueOf(6), counts.get("a"));
+
+        // key mapped to null is treated as absent -> stored directly, mergeFunction not invoked
+        counts.put("n", null);
+        assertEquals(Integer.valueOf(9), Maps.merge(counts, "n", 9, sum));
+        assertEquals(1, calls[0]);
+        assertEquals(Integer.valueOf(9), counts.get("n"));
+
+        // mergeFunction returning null removes the entry
+        assertNull(Maps.merge(counts, "a", 100, (oldV, v) -> null));
+        assertFalse(counts.containsKey("a"));
+
+        // empty (but non-null) map is a valid insertion target
+        final Map<String, Integer> empty = new HashMap<>();
+        assertEquals(Integer.valueOf(7), Maps.merge(empty, "k", 7, sum));
+        assertEquals(Integer.valueOf(7), empty.get("k"));
+    }
+
+    @Test
+    public void testMerge_nullArgs() {
+        final Map<String, Integer> map = new HashMap<>();
+        // null map / value / mergeFunction all -> IllegalArgumentException
+        assertThrows(IllegalArgumentException.class, () -> Maps.merge(null, "a", 1, Integer::sum));
+        assertThrows(IllegalArgumentException.class, () -> Maps.merge(map, "a", null, Integer::sum));
+        assertThrows(IllegalArgumentException.class, () -> Maps.merge(map, "a", 1, null));
     }
 
 }

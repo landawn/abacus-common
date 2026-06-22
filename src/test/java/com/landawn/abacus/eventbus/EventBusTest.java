@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -673,7 +674,7 @@ public class EventBusTest extends TestBase {
 
     @Test
     public void testRegister_NullSubscriber() {
-        Assertions.assertThrows(NullPointerException.class, () -> eventBus.register(null));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> eventBus.register(null));
     }
 
     @Test
@@ -903,7 +904,7 @@ public class EventBusTest extends TestBase {
 
     @Test
     public void testPost_NullEvent() {
-        Assertions.assertThrows(NullPointerException.class, () -> eventBus.post((Object) null));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> eventBus.post((Object) null));
     }
 
     @Test
@@ -915,30 +916,32 @@ public class EventBusTest extends TestBase {
 
     @Test
     public void testPost_SubscriberExceptionDoesNotStopOthers() {
-        AtomicReference<String> goodResult = new AtomicReference<>();
+        assertDoesNotThrow(() -> {
+            AtomicReference<String> goodResult = new AtomicReference<>();
 
-        Object throwingSubscriber = new Object() {
-            @Subscribe
-            public void onEvent(String event) {
-                throw new RuntimeException("intentional");
-            }
-        };
+            Object throwingSubscriber = new Object() {
+                @Subscribe
+                public void onEvent(String event) {
+                    throw new RuntimeException("intentional");
+                }
+            };
 
-        Object goodSubscriber = new Object() {
-            @Subscribe
-            public void onEvent(String event) {
-                goodResult.set(event);
-            }
-        };
+            Object goodSubscriber = new Object() {
+                @Subscribe
+                public void onEvent(String event) {
+                    goodResult.set(event);
+                }
+            };
 
-        eventBus.register(throwingSubscriber);
-        eventBus.register(goodSubscriber);
+            eventBus.register(throwingSubscriber);
+            eventBus.register(goodSubscriber);
 
-        // Should not throw even though one subscriber throws
-        eventBus.post("test");
+            // Should not throw even though one subscriber throws
+            eventBus.post("test");
 
-        eventBus.unregister(throwingSubscriber);
-        eventBus.unregister(goodSubscriber);
+            eventBus.unregister(throwingSubscriber);
+            eventBus.unregister(goodSubscriber);
+        });
     }
 
     @Test
@@ -950,7 +953,7 @@ public class EventBusTest extends TestBase {
 
     @Test
     public void testPost_EventIdNullEvent() {
-        Assertions.assertThrows(NullPointerException.class, () -> eventBus.post("someId", null));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> eventBus.post("someId", null));
     }
 
     @Test
@@ -969,6 +972,29 @@ public class EventBusTest extends TestBase {
         assertEquals("sticky message", result.get());
 
         eventBus.unregister(handler);
+    }
+
+    @Test
+    public void testStickyPostThenRegister_deliveredExactlyOnce() {
+        // Event already recorded before the subscriber registers: delivered once via register's replay.
+        TestStickySubscriber sub = new TestStickySubscriber();
+        eventBus.postSticky("only-once");
+        eventBus.register(sub);
+
+        assertEquals(1, sub.receivedEvents.size());
+        assertEquals("only-once", sub.receivedEvents.get(0));
+    }
+
+    @Test
+    public void testStickyRegisterThenPostSticky_deliveredExactlyOnce() {
+        // Subscriber already visible before the sticky event is posted: delivered once via postSticky,
+        // and register's earlier (empty) sticky snapshot must not also deliver it.
+        TestStickySubscriber sub = new TestStickySubscriber();
+        eventBus.register(sub);
+        eventBus.postSticky("only-once");
+
+        assertEquals(1, sub.receivedEvents.size());
+        assertEquals("only-once", sub.receivedEvents.get(0));
     }
 
     // ---- postSticky(String, Object) ----
@@ -1093,8 +1119,8 @@ public class EventBusTest extends TestBase {
 
     @Test
     public void testPostStickyRejectsNullEvent() {
-        Assertions.assertThrows(NullPointerException.class, () -> eventBus.postSticky((Object) null));
-        Assertions.assertThrows(NullPointerException.class, () -> eventBus.postSticky("eventId", null));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> eventBus.postSticky((Object) null));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> eventBus.postSticky("eventId", null));
     }
 
     // ---- removeStickyEvent(Object) ----
@@ -1246,7 +1272,7 @@ public class EventBusTest extends TestBase {
         eventBus.postSticky("Event 2");
         eventBus.postSticky(123);
 
-        eventBus.removeAllStickyEvents();
+        assertTrue(eventBus.removeAllStickyEvents());
 
         Assertions.assertEquals(0, eventBus.stickyEvents(String.class).size());
         Assertions.assertEquals(0, eventBus.stickyEvents(Integer.class).size());
@@ -1254,8 +1280,8 @@ public class EventBusTest extends TestBase {
 
     @Test
     public void testRemoveAllStickyEvents_EmptyBus() {
-        // Should not throw on empty bus
-        eventBus.removeAllStickyEvents();
+        // Should not throw on empty bus and should report that nothing was removed.
+        assertFalse(eventBus.removeAllStickyEvents());
         assertTrue(eventBus.stickyEvents(Object.class).isEmpty());
     }
 

@@ -785,6 +785,11 @@ public class URLEncodedUtilTest extends AbstractTest {
     }
 
     @Test
+    public void test_decode_string_class_nullTargetType() {
+        assertThrows(IllegalArgumentException.class, () -> URLEncodedUtil.decode("name=John", (Class<User>) null));
+    }
+
+    @Test
     public void test_decode_string_class_map() {
         @SuppressWarnings("unchecked")
         Map<String, String> result = URLEncodedUtil.decode("name=John&age=30", LinkedHashMap.class);
@@ -835,6 +840,11 @@ public class URLEncodedUtilTest extends AbstractTest {
     public void test_decodeToBean_nullMap() {
         User user = URLEncodedUtil.convertToBean(null, User.class);
         assertNotNull(user);
+    }
+
+    @Test
+    public void test_decodeToBean_nullTargetType() {
+        assertThrows(IllegalArgumentException.class, () -> URLEncodedUtil.convertToBean(new HashMap<>(), null));
     }
 
     @Test
@@ -1101,6 +1111,31 @@ public class URLEncodedUtilTest extends AbstractTest {
         String value = "ab" + emoji + "cd";
         Map<String, String> decoded = URLEncodedUtil.decode("q=" + value);
         assertEquals(value, decoded.get("q"));
+    }
+
+    // --- regression tests for 2026-06-10 deep-review fixes ---
+
+    @Test
+    public void testDecodeSkipsEmptyTokensBetweenSeparators() {
+        // regression: consecutive separators produced an empty token that was decoded into a
+        // bogus empty-string parameter name
+        Map<String, String> decoded = URLEncodedUtil.decode("a=1&&b=2");
+
+        assertEquals(2, decoded.size());
+        assertEquals("1", decoded.get("a"));
+        assertEquals("2", decoded.get("b"));
+        org.junit.jupiter.api.Assertions.assertFalse(decoded.containsKey(""));
+    }
+
+    @Test
+    public void testEncodeUrlWithPreEncodedQueryStringAppendsVerbatim() {
+        // regression: a pre-built query string (documented as already URL-encoded) was split via
+        // a map-based splitter (silently dropping duplicate names: a=1&a=2 -> a=2) and re-percent-
+        // encoded (q=a%20b -> q=a%2520b)
+        assertEquals("http://h/search?a=1&a=2", URLEncodedUtil.encode("http://h/search", "a=1&a=2"));
+        assertEquals("http://h/s?q=a%20b", URLEncodedUtil.encode("http://h/s", "q=a%20b"));
+        assertEquals("http://h/s?q=a+b", URLEncodedUtil.encode("http://h/s", "q=a+b"));
+        assertEquals("http://h/s?x=1&q=2", URLEncodedUtil.encode("http://h/s?x=1", "q=2")); // existing query joined with &
     }
 
 }

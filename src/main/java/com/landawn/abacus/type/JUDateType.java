@@ -145,7 +145,7 @@ public class JUDateType extends AbstractDateType<Date> {
             return null; // NOSONAR
         }
 
-        if (isPossibleLong(cbuf, offset, len)) {
+        if (isPossibleMillis(cbuf, offset, len)) {
             try {
                 return Dates.createJUDate(parseLong(cbuf, offset, len));
             } catch (final NumberFormatException e) {

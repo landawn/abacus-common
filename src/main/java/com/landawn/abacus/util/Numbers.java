@@ -157,7 +157,10 @@ import com.landawn.abacus.util.Strings.StrUtil;
  * <ul>
  *   <li><b>Fuzzy Equality:</b> {@code Numbers.fuzzyEquals()} with tolerance-based comparison</li>
  *   <li><b>Fuzzy Comparison:</b> {@code Numbers.fuzzyCompare()} returning comparison result</li>
- *   <li><b>Mathematical Validation:</b> {@code Numbers.isMathematicalInteger()}, {@code Numbers.isFinite()}, {@code Numbers.isNormal()}</li>
+ *   <li><b>Mathematical Validation:</b> {@code Numbers.isMathematicalInteger()}</li>
+ *   <li><b>Primality Testing:</b> {@code Numbers.isPrime()} for 64-bit integers</li>
+ *   <li><b>Power-of-Two Detection:</b> {@code Numbers.isPowerOfTwo()} for int/long/double/BigInteger</li>
+ *   <li><b>Perfect Square Detection:</b> {@code Numbers.isPerfectSquare()} for int/long</li>
  *   <li><b>Range Checking:</b> Internal validation for parameter bounds and overflow conditions</li>
  * </ul>
  *
@@ -297,14 +300,56 @@ import com.landawn.abacus.util.Strings.StrUtil;
  *
  * <p><b>Nested Classes:</b>
  * <ul>
- *   <li><b>{@link UnsignedLongs}:</b> Utilities for unsigned long operations</li>
- *   <li><b>{@link MillerRabinTester}:</b> Enumeration for primality testing algorithms</li>
+ *   <li><b>UnsignedLongs:</b> internal (package-private) helper for unsigned long operations</li>
+ *   <li><b>MillerRabinTester:</b> internal (private) enumeration for primality testing algorithms</li>
  * </ul>
  *
  * <p><b>Attribution:</b>
  * This class includes code adapted from Apache Commons Lang, Google Guava, and other
  * open source projects under the Apache License 2.0. Methods from these libraries may have been
  * modified for consistency, performance optimization, and null-safety enhancement.
+ *
+ * <p><b>Cross-library behavior differences (quick reference):</b> a number of methods deliberately differ from the
+ * equivalent helper in the JDK ({@code java.lang.Math}/{@code Integer}/{@code java.math}), Apache Commons Lang
+ * ({@code NumberUtils}), and Guava ({@code com.google.common.math.IntMath}/{@code LongMath}/{@code DoubleMath} and the
+ * primitive {@code Ints}/{@code Longs}/{@code Doubles}/... helpers) &mdash; usually to add range/overflow checking,
+ * ASCII-strict parsing, or {@code null}-safety. The table below summarizes the notable cases; each point where a
+ * library diverges from {@code Numbers} is flagged with {@code &#9888;&#65039;}.</p>
+ * <table border="1">
+ *   <caption>How selected {@code Numbers} methods differ from JDK / Apache Commons Lang / Guava</caption>
+ *   <thead>
+ *     <tr><th>Method</th><th>Key divergence</th></tr>
+ *   </thead>
+ *   <tbody>
+ *     <tr>
+ *       <td>{@code toInt/toLong/toByte/toShort/toFloat/toDouble(String)}</td>
+ *       <td><b><i>Numbers</i></b>: {@code null}/{@code ""}&rarr;{@code 0}, malformed&rarr;{@code NumberFormatException}, out-of-range&rarr;{@code ArithmeticException} &middot; &#9888;&#65039; <b><i>JDK</i></b> throws for all &middot; &#9888;&#65039; <b><i>Commons</i></b> returns default for all &middot; &#9888;&#65039; <b><i>Guava</i></b> {@code tryParse}&rarr;{@code null}</td>
+ *     </tr>
+ *     <tr>
+ *       <td>{@code toByte/.../toLong(Object)} (fractional {@code Number})</td>
+ *       <td><b><i>Numbers</i></b>: truncate-toward-zero + range-check ({@code 128.9f}&rarr;{@code ArithmeticException}) &middot; &#9888;&#65039; <b><i>JDK</i></b> {@code Number.byteValue()} silently wraps to {@code -128}</td>
+ *     </tr>
+ *     <tr>
+ *       <td>{@code isParsable(String)}</td>
+ *       <td><b><i>Numbers</i></b>: ASCII {@code 0}-{@code 9} only &middot; &#9888;&#65039; <b><i>Commons</i></b> uses {@code Character.isDigit} (accepts Unicode digits)</td>
+ *     </tr>
+ *     <tr>
+ *       <td>{@code gcd(int,int)/gcd(long,long)}</td>
+ *       <td><b><i>Numbers</i></b>: takes abs of args ({@code gcd(-4,6)}&rarr;{@code 2}) &middot; &#9888;&#65039; <b><i>Guava</i></b> {@code IntMath.gcd} throws on negatives</td>
+ *     </tr>
+ *     <tr>
+ *       <td>{@code round(double, scale)}</td>
+ *       <td><b><i>Numbers</i></b>: scale-based, {@code HALF_UP} away-from-zero ({@code round(-2.5,0)}&rarr;{@code -3.0}) &middot; &#9888;&#65039; <b><i>JDK</i></b> {@code Math.round}&rarr;{@code long}, toward {@code +Infinity} ({@code -2.5}&rarr;{@code -2}) &middot; &#9888;&#65039; <b><i>Guava</i></b> {@code DoubleMath.roundTo*} integer-only</td>
+ *     </tr>
+ *     <tr>
+ *       <td>{@code pow(int,int)/pow(long,int)}</td>
+ *       <td><b><i>Numbers</i></b>: wraps on overflow + {@code powExact}/{@code saturatedPow} &middot; &#9888;&#65039; <b><i>JDK</i></b> {@code Math.pow}&rarr;{@code double} only; <b><i>Guava</i></b> mirrors</td>
+ *     </tr>
+ *   </tbody>
+ * </table>
+ *
+ * <br />
+ * <br />
  *
  * @see com.landawn.abacus.util.N
  * @see com.landawn.abacus.util.IEEE754rUtil
@@ -524,29 +569,21 @@ public final class Numbers {
     static final BigDecimal BIG_DECIMAL_WITH_MIN_SHORT_VALUE = BigDecimal.valueOf(Short.MIN_VALUE);
     static final BigDecimal BIG_DECIMAL_WITH_MIN_INT_VALUE = BigDecimal.valueOf(Integer.MIN_VALUE);
     static final BigDecimal BIG_DECIMAL_WITH_MIN_LONG_VALUE = BigDecimal.valueOf(Long.MIN_VALUE);
-    static final BigDecimal BIG_DECIMAL_WITH_MIN_FLOAT_VALUE = BigDecimal.valueOf(-Float.MAX_VALUE);
-    static final BigDecimal BIG_DECIMAL_WITH_MIN_DOUBLE_VALUE = BigDecimal.valueOf(-Double.MAX_VALUE);
 
     static final BigDecimal BIG_DECIMAL_WITH_MAX_BYTE_VALUE = BigDecimal.valueOf(Byte.MAX_VALUE);
     static final BigDecimal BIG_DECIMAL_WITH_MAX_SHORT_VALUE = BigDecimal.valueOf(Short.MAX_VALUE);
     static final BigDecimal BIG_DECIMAL_WITH_MAX_INT_VALUE = BigDecimal.valueOf(Integer.MAX_VALUE);
     static final BigDecimal BIG_DECIMAL_WITH_MAX_LONG_VALUE = BigDecimal.valueOf(Long.MAX_VALUE);
-    static final BigDecimal BIG_DECIMAL_WITH_MAX_FLOAT_VALUE = BigDecimal.valueOf(Float.MAX_VALUE);
-    static final BigDecimal BIG_DECIMAL_WITH_MAX_DOUBLE_VALUE = BigDecimal.valueOf(Double.MAX_VALUE);
 
     static final BigInteger BIG_INTEGER_WITH_MIN_BYTE_VALUE = BigInteger.valueOf(Byte.MIN_VALUE);
     static final BigInteger BIG_INTEGER_WITH_MIN_SHORT_VALUE = BigInteger.valueOf(Short.MIN_VALUE);
     static final BigInteger BIG_INTEGER_WITH_MIN_INT_VALUE = BigInteger.valueOf(Integer.MIN_VALUE);
     static final BigInteger BIG_INTEGER_WITH_MIN_LONG_VALUE = BigInteger.valueOf(Long.MIN_VALUE);
-    static final BigInteger BIG_INTEGER_WITH_MIN_FLOAT_VALUE = BIG_DECIMAL_WITH_MIN_FLOAT_VALUE.toBigInteger();
-    static final BigInteger BIG_INTEGER_WITH_MIN_DOUBLE_VALUE = BIG_DECIMAL_WITH_MIN_DOUBLE_VALUE.toBigInteger();
 
     static final BigInteger BIG_INTEGER_WITH_MAX_BYTE_VALUE = BigInteger.valueOf(Byte.MAX_VALUE);
     static final BigInteger BIG_INTEGER_WITH_MAX_SHORT_VALUE = BigInteger.valueOf(Short.MAX_VALUE);
     static final BigInteger BIG_INTEGER_WITH_MAX_INT_VALUE = BigInteger.valueOf(Integer.MAX_VALUE);
     static final BigInteger BIG_INTEGER_WITH_MAX_LONG_VALUE = BigInteger.valueOf(Long.MAX_VALUE);
-    static final BigInteger BIG_INTEGER_WITH_MAX_FLOAT_VALUE = BIG_DECIMAL_WITH_MAX_FLOAT_VALUE.toBigInteger();
-    static final BigInteger BIG_INTEGER_WITH_MAX_DOUBLE_VALUE = BIG_DECIMAL_WITH_MAX_DOUBLE_VALUE.toBigInteger();
 
     private static final Map<Class<?>, Map<Class<?>, UnaryOperator<Number>>> numberConverterFuncMap = new HashMap<>();
 
@@ -588,21 +625,25 @@ public final class Numbers {
         });
 
         temp.put(float.class, it -> {
-            if (Float.compare(it.floatValue(), Byte.MAX_VALUE) > 0 || Float.compare(it.floatValue(), Byte.MIN_VALUE) < 0) {
+            final float v = it.floatValue();
+
+            // Truncate toward zero (JLS narrowing) and range-check the integer part: a fractional value whose
+            // truncation fits converts (e.g. 127.9f -> 127); NaN/Infinity or an out-of-range integer part overflows.
+            if (Float.isNaN(v) || Float.isInfinite(v) || (long) v < Byte.MIN_VALUE || (long) v > Byte.MAX_VALUE) {
                 throw new ArithmeticException("byte overflow: " + it);
             }
 
-            //noinspection UnnecessaryBoxing
-            return Byte.valueOf(it.byteValue());
+            return Byte.valueOf((byte) v);
         });
 
         temp.put(double.class, it -> {
-            if (Double.compare(it.doubleValue(), Byte.MAX_VALUE) > 0 || Double.compare(it.doubleValue(), Byte.MIN_VALUE) < 0) {
+            final double v = it.doubleValue();
+
+            if (Double.isNaN(v) || Double.isInfinite(v) || (long) v < Byte.MIN_VALUE || (long) v > Byte.MAX_VALUE) {
                 throw new ArithmeticException("byte overflow: " + it);
             }
 
-            //noinspection UnnecessaryBoxing
-            return Byte.valueOf(it.byteValue());
+            return Byte.valueOf((byte) v);
         });
 
         temp.put(BigInteger.class, it -> {
@@ -617,9 +658,10 @@ public final class Numbers {
         });
 
         temp.put(BigDecimal.class, it -> {
-            final BigDecimal bigDecimal = (BigDecimal) it;
+            // Truncate the fraction toward zero, then range-check the integer part (e.g. 127.9 -> 127).
+            final BigDecimal truncated = new BigDecimal(((BigDecimal) it).toBigInteger());
 
-            if (bigDecimal.compareTo(BIG_DECIMAL_WITH_MAX_BYTE_VALUE) > 0 || bigDecimal.compareTo(BIG_DECIMAL_WITH_MIN_BYTE_VALUE) < 0) {
+            if (truncated.compareTo(BIG_DECIMAL_WITH_MAX_BYTE_VALUE) > 0 || truncated.compareTo(BIG_DECIMAL_WITH_MIN_BYTE_VALUE) < 0) {
                 throw new ArithmeticException("byte overflow: " + it);
             }
 
@@ -658,21 +700,25 @@ public final class Numbers {
         });
 
         temp.put(float.class, it -> {
-            if (Float.compare(it.floatValue(), Short.MAX_VALUE) > 0 || Float.compare(it.floatValue(), Short.MIN_VALUE) < 0) {
+            final float v = it.floatValue();
+
+            // Truncate toward zero (JLS narrowing) and range-check the integer part: a fractional value whose
+            // truncation fits converts (e.g. 32767.9f -> 32767); NaN/Infinity or an out-of-range integer part overflows.
+            if (Float.isNaN(v) || Float.isInfinite(v) || (long) v < Short.MIN_VALUE || (long) v > Short.MAX_VALUE) {
                 throw new ArithmeticException("short overflow: " + it);
             }
 
-            //noinspection UnnecessaryBoxing
-            return Short.valueOf(it.shortValue());
+            return Short.valueOf((short) v);
         });
 
         temp.put(double.class, it -> {
-            if (Double.compare(it.doubleValue(), Short.MAX_VALUE) > 0 || Double.compare(it.doubleValue(), Short.MIN_VALUE) < 0) {
+            final double v = it.doubleValue();
+
+            if (Double.isNaN(v) || Double.isInfinite(v) || (long) v < Short.MIN_VALUE || (long) v > Short.MAX_VALUE) {
                 throw new ArithmeticException("short overflow: " + it);
             }
 
-            //noinspection UnnecessaryBoxing
-            return Short.valueOf(it.shortValue());
+            return Short.valueOf((short) v);
         });
 
         temp.put(BigInteger.class, it -> {
@@ -687,9 +733,10 @@ public final class Numbers {
         });
 
         temp.put(BigDecimal.class, it -> {
-            final BigDecimal bigDecimal = (BigDecimal) it;
+            // Truncate the fraction toward zero, then range-check the integer part (e.g. 32767.9 -> 32767).
+            final BigDecimal truncated = new BigDecimal(((BigDecimal) it).toBigInteger());
 
-            if (bigDecimal.compareTo(BIG_DECIMAL_WITH_MAX_SHORT_VALUE) > 0 || bigDecimal.compareTo(BIG_DECIMAL_WITH_MIN_SHORT_VALUE) < 0) {
+            if (truncated.compareTo(BIG_DECIMAL_WITH_MAX_SHORT_VALUE) > 0 || truncated.compareTo(BIG_DECIMAL_WITH_MIN_SHORT_VALUE) < 0) {
                 throw new ArithmeticException("short overflow: " + it);
             }
 
@@ -718,7 +765,9 @@ public final class Numbers {
         });
 
         temp.put(float.class, it -> {
-            if (Float.compare(it.floatValue(), Integer.MAX_VALUE) > 0 || Float.compare(it.floatValue(), Integer.MIN_VALUE) < 0) {
+            // Upper bound is >= because (float) Integer.MAX_VALUE rounds UP to 2^31 (= MAX + 1): a float equal to it
+            // is out of range and must throw (consistent with toInt(Object)), not saturate. MIN (-2^31) is exact, so '<'.
+            if (Float.compare(it.floatValue(), Integer.MAX_VALUE) >= 0 || Float.compare(it.floatValue(), Integer.MIN_VALUE) < 0) {
                 throw new ArithmeticException("integer overflow: " + it);
             }
 
@@ -727,12 +776,16 @@ public final class Numbers {
         });
 
         temp.put(double.class, it -> {
-            if (Double.compare(it.doubleValue(), Integer.MAX_VALUE) > 0 || Double.compare(it.doubleValue(), Integer.MIN_VALUE) < 0) {
+            final double v = it.doubleValue();
+
+            // Truncate toward zero (JLS narrowing) and range-check the integer part: a fractional value whose truncation
+            // fits converts (e.g. 2147483647.9 -> 2147483647); NaN/Infinity or an out-of-range integer part overflows.
+            // (long) is used for the bound check so a too-large double is not masked by (int) saturation.
+            if (Double.isNaN(v) || Double.isInfinite(v) || (long) v < Integer.MIN_VALUE || (long) v > Integer.MAX_VALUE) {
                 throw new ArithmeticException("integer overflow: " + it);
             }
 
-            //noinspection UnnecessaryBoxing
-            return Integer.valueOf(it.intValue());
+            return Integer.valueOf((int) v);
         });
 
         temp.put(BigInteger.class, it -> {
@@ -747,9 +800,10 @@ public final class Numbers {
         });
 
         temp.put(BigDecimal.class, it -> {
-            final BigDecimal bigDecimal = (BigDecimal) it;
+            // Truncate the fraction toward zero, then range-check the integer part (e.g. 2147483647.9 -> 2147483647).
+            final BigDecimal truncated = new BigDecimal(((BigDecimal) it).toBigInteger());
 
-            if (bigDecimal.compareTo(BIG_DECIMAL_WITH_MAX_INT_VALUE) > 0 || bigDecimal.compareTo(BIG_DECIMAL_WITH_MIN_INT_VALUE) < 0) {
+            if (truncated.compareTo(BIG_DECIMAL_WITH_MAX_INT_VALUE) > 0 || truncated.compareTo(BIG_DECIMAL_WITH_MIN_INT_VALUE) < 0) {
                 throw new ArithmeticException("integer overflow: " + it);
             }
 
@@ -768,7 +822,9 @@ public final class Numbers {
         temp.put(long.class, UnaryOperator.identity());
 
         temp.put(float.class, it -> {
-            if (Float.compare(it.floatValue(), Long.MAX_VALUE) > 0 || Float.compare(it.floatValue(), Long.MIN_VALUE) < 0) {
+            // Upper bound is >= because (float) Long.MAX_VALUE rounds UP to 2^63 (= MAX + 1): a float equal to it is
+            // out of range and must throw (consistent with toLong(Object)), not saturate. MIN (-2^63) is exact, so '<'.
+            if (Float.compare(it.floatValue(), Long.MAX_VALUE) >= 0 || Float.compare(it.floatValue(), Long.MIN_VALUE) < 0) {
                 throw new ArithmeticException("long overflow: " + it);
             }
 
@@ -777,7 +833,9 @@ public final class Numbers {
         });
 
         temp.put(double.class, it -> {
-            if (Double.compare(it.doubleValue(), Long.MAX_VALUE) > 0 || Double.compare(it.doubleValue(), Long.MIN_VALUE) < 0) {
+            // Upper bound is >= because (double) Long.MAX_VALUE rounds UP to 2^63 (= MAX + 1): a double equal to it is
+            // out of range and must throw (consistent with toLong(Object)), not saturate. MIN (-2^63) is exact, so '<'.
+            if (Double.compare(it.doubleValue(), Long.MAX_VALUE) >= 0 || Double.compare(it.doubleValue(), Long.MIN_VALUE) < 0) {
                 throw new ArithmeticException("long overflow: " + it);
             }
 
@@ -797,9 +855,11 @@ public final class Numbers {
         });
 
         temp.put(BigDecimal.class, it -> {
-            final BigDecimal bigDecimal = (BigDecimal) it;
+            // Truncate the fraction toward zero, then range-check the integer part (e.g. 9223372036854775807.9 -> Long.MAX),
+            // consistent with the byte/short/int targets and toLong(Object).
+            final BigDecimal truncated = new BigDecimal(((BigDecimal) it).toBigInteger());
 
-            if (bigDecimal.compareTo(BIG_DECIMAL_WITH_MAX_LONG_VALUE) > 0 || bigDecimal.compareTo(BIG_DECIMAL_WITH_MIN_LONG_VALUE) < 0) {
+            if (truncated.compareTo(BIG_DECIMAL_WITH_MAX_LONG_VALUE) > 0 || truncated.compareTo(BIG_DECIMAL_WITH_MIN_LONG_VALUE) < 0) {
                 throw new ArithmeticException("long overflow: " + it);
             }
 
@@ -826,32 +886,22 @@ public final class Numbers {
                 return Float.NaN;
             } else if (num.isInfinite()) {
                 return Double.compare(it.doubleValue(), Double.POSITIVE_INFINITY) == 0 ? Float.POSITIVE_INFINITY : Float.NEGATIVE_INFINITY;
-            } else if (Double.compare(it.doubleValue(), Float.MAX_VALUE) > 0 || Double.compare(it.doubleValue(), -Float.MAX_VALUE) < 0) {
-                throw new ArithmeticException("float overflow: " + it);
             } else {
+                // A finite value beyond the float range saturates to +-Infinity (IEEE-754),
+                // consistent with Numbers.toFloat(Object) and Float.parseFloat.
                 // return Float.valueOf(num.floatValue());   // 1.21D May not be 1.21F
                 return Float.parseFloat(num.toString());
             }
         });
 
         temp.put(BigInteger.class, it -> {
-            final BigInteger bigInteger = (BigInteger) it;
-
-            if (bigInteger.compareTo(BIG_INTEGER_WITH_MAX_FLOAT_VALUE) > 0 || bigInteger.compareTo(BIG_INTEGER_WITH_MIN_FLOAT_VALUE) < 0) {
-                throw new ArithmeticException("float overflow: " + it);
-            }
-
+            // A magnitude beyond the float range saturates to +-Infinity (IEEE-754), consistent with Numbers.toFloat.
             //noinspection UnnecessaryBoxing
             return Float.valueOf(it.floatValue());
         });
 
         temp.put(BigDecimal.class, it -> {
-            final BigDecimal bigDecimal = (BigDecimal) it;
-
-            if (bigDecimal.compareTo(BIG_DECIMAL_WITH_MAX_FLOAT_VALUE) > 0 || bigDecimal.compareTo(BIG_DECIMAL_WITH_MIN_FLOAT_VALUE) < 0) {
-                throw new ArithmeticException("float overflow: " + it);
-            }
-
+            // A magnitude beyond the float range saturates to +-Infinity (IEEE-754), consistent with Numbers.toFloat.
             //noinspection UnnecessaryBoxing
             return Float.valueOf(it.floatValue());
         });
@@ -882,23 +932,13 @@ public final class Numbers {
         temp.put(double.class, UnaryOperator.identity());
 
         temp.put(BigInteger.class, it -> {
-            final BigInteger bigInteger = (BigInteger) it;
-
-            if (bigInteger.compareTo(BIG_INTEGER_WITH_MAX_DOUBLE_VALUE) > 0 || bigInteger.compareTo(BIG_INTEGER_WITH_MIN_DOUBLE_VALUE) < 0) {
-                throw new ArithmeticException("double overflow: " + it);
-            }
-
+            // A magnitude beyond the double range saturates to +-Infinity (IEEE-754), consistent with Numbers.toDouble.
             //noinspection UnnecessaryBoxing
             return Double.valueOf(it.doubleValue());
         });
 
         temp.put(BigDecimal.class, it -> {
-            final BigDecimal bigDecimal = (BigDecimal) it;
-
-            if (bigDecimal.compareTo(BIG_DECIMAL_WITH_MAX_DOUBLE_VALUE) > 0 || bigDecimal.compareTo(BIG_DECIMAL_WITH_MIN_DOUBLE_VALUE) < 0) {
-                throw new ArithmeticException("double overflow: " + it);
-            }
-
+            // A magnitude beyond the double range saturates to +-Infinity (IEEE-754), consistent with Numbers.toDouble.
             //noinspection UnnecessaryBoxing
             return Double.valueOf(it.doubleValue());
         });
@@ -914,9 +954,27 @@ public final class Numbers {
         temp.put(long.class, it -> BigInteger.valueOf(it.longValue()));
         // BigDecimal.valueOf has no float overload; using floatValue() widens through double and
         // produces the long-form double representation (e.g. 1.21f -> 1.2100000381469727). Use the
-        // canonical Float.toString form instead.
-        temp.put(float.class, it -> new BigDecimal(Float.toString(it.floatValue())).toBigInteger());
-        temp.put(double.class, it -> BigDecimal.valueOf(it.doubleValue()).toBigInteger());
+        // canonical Float.toString form instead. A NaN/+-Infinity input cannot be represented as an
+        // exact value, so reject it with ArithmeticException (consistent with the integer targets,
+        // which also reject NaN/Infinity as "overflow"; a float/double TARGET instead preserves them).
+        temp.put(float.class, it -> {
+            final float f = it.floatValue();
+
+            if (Float.isNaN(f) || Float.isInfinite(f)) {
+                throw new ArithmeticException("BigInteger overflow: " + it);
+            }
+
+            return new BigDecimal(Float.toString(f)).toBigInteger();
+        });
+        temp.put(double.class, it -> {
+            final double d = it.doubleValue();
+
+            if (Double.isNaN(d) || Double.isInfinite(d)) {
+                throw new ArithmeticException("BigInteger overflow: " + it);
+            }
+
+            return BigDecimal.valueOf(d).toBigInteger();
+        });
         temp.put(BigInteger.class, UnaryOperator.identity());
         temp.put(BigDecimal.class, it -> ((BigDecimal) it).toBigInteger());
 
@@ -930,9 +988,27 @@ public final class Numbers {
         temp.put(int.class, it -> BigDecimal.valueOf(it.intValue()));
         temp.put(long.class, it -> BigDecimal.valueOf(it.longValue()));
         // See note in BigInteger conversion above: route float through Float.toString to preserve
-        // the source precision rather than the widened-double representation.
-        temp.put(float.class, it -> new BigDecimal(Float.toString(it.floatValue())));
-        temp.put(double.class, it -> BigDecimal.valueOf(it.doubleValue()));
+        // the source precision rather than the widened-double representation; and reject a
+        // NaN/+-Infinity input (not representable) with ArithmeticException, consistent with the
+        // integer targets.
+        temp.put(float.class, it -> {
+            final float f = it.floatValue();
+
+            if (Float.isNaN(f) || Float.isInfinite(f)) {
+                throw new ArithmeticException("BigDecimal overflow: " + it);
+            }
+
+            return new BigDecimal(Float.toString(f));
+        });
+        temp.put(double.class, it -> {
+            final double d = it.doubleValue();
+
+            if (Double.isNaN(d) || Double.isInfinite(d)) {
+                throw new ArithmeticException("BigDecimal overflow: " + it);
+            }
+
+            return BigDecimal.valueOf(d);
+        });
         temp.put(BigInteger.class, it -> new BigDecimal((BigInteger) it));
         temp.put(BigDecimal.class, UnaryOperator.identity());
 
@@ -972,7 +1048,8 @@ public final class Numbers {
      *
      * <p>This method supports conversion between all primitive number types (byte, short, int, long, float, double)
      * and their corresponding wrapper classes. It also supports conversion to and from BigInteger and BigDecimal.
-     * If the conversion would result in an overflow, an ArithmeticException is thrown.</p>
+     * If a conversion to an integer type would overflow, an {@code ArithmeticException} is thrown; a
+     * {@code float}/{@code double} target instead saturates to {@code ±Infinity} (IEEE-754 semantics).</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -986,12 +1063,35 @@ public final class Numbers {
      * byte primByteValue = Numbers.convert(null, byte.class);   // returns 0
      * }</pre>
      *
+     * <p><b>Note:</b> overflow handling depends on the target type. For an integer target
+     * ({@code byte}/{@code short}/{@code int}/{@code long}), an out-of-range value throws {@link ArithmeticException}
+     * (consistent with {@code toByte}/{@code toShort}/{@code toInt}/{@code toLong}). For a {@code float}/{@code double}
+     * target, a magnitude beyond the type's range saturates to {@code ±Infinity} (IEEE-754 semantics, consistent with
+     * {@link #toFloat(Object)}/{@link #toDouble(Object)}), and {@code NaN}/{@code ±Infinity} inputs are preserved —
+     * no exception is thrown. For a {@code BigInteger}/{@code BigDecimal} target, a {@code NaN}/{@code ±Infinity} input
+     * is not representable and throws {@link ArithmeticException} (it is rejected as overflow, like the integer
+     * targets — only the {@code float}/{@code double} targets preserve a non-finite value).</p>
+     *
+     * <p><b>Note:</b> because {@code Integer.MAX_VALUE}/{@code Long.MAX_VALUE} are not exactly representable in
+     * {@code float} (nor {@code Long.MAX_VALUE} in {@code double}), a value such as {@code (float) Integer.MAX_VALUE}
+     * actually equals {@code 2^31} (i.e. {@code MAX_VALUE + 1}) and is therefore treated as out of range — it throws
+     * {@link ArithmeticException}, consistent with {@link #toInt(Object)}/{@link #toLong(Object)} (it does NOT
+     * saturate to {@code MAX_VALUE}).</p>
+     *
+     * <p><b>Note:</b> the standard {@code Number} types (the primitive wrappers, {@code BigInteger} and
+     * {@code BigDecimal}) are handled directly. A non-standard {@code Number} subtype (e.g. {@code AtomicInteger},
+     * {@code LongAdder} or a custom subclass) is converted via its string form, so for those an out-of-range value
+     * may surface as a {@link NumberFormatException} rather than {@link ArithmeticException}.</p>
+     *
      * @param <T> the target type of the conversion (must extend Number)
      * @param value the number to convert
      * @param targetType the class object representing the target type
      * @return the converted number as an instance of the target type,
      *         or the default value of the target type if the input value is null
-     * @throws ArithmeticException if the conversion would result in an overflow
+     * @throws ArithmeticException if the conversion to an integer ({@code byte}/{@code short}/{@code int}/{@code long})
+     *         target would overflow, or if a {@code NaN}/{@code ±Infinity} value is converted to a {@code BigInteger} or
+     *         {@code BigDecimal} target (a {@code float}/{@code double} target saturates to {@code ±Infinity} instead of throwing)
+     * @see N#convert(Object, Class)
      */
     public static <T extends Number> T convert(final Number value, final Class<? extends T> targetType) throws ArithmeticException {
         if (value == null) {
@@ -1014,7 +1114,8 @@ public final class Numbers {
      *
      * <p>This method supports conversion between all primitive number types (byte, short, int, long, float, double)
      * and their corresponding wrapper classes. It also supports conversion to and from BigInteger and BigDecimal.
-     * If the conversion would result in an overflow, an ArithmeticException is thrown.</p>
+     * If a conversion to an integer type would overflow, an {@code ArithmeticException} is thrown; a
+     * {@code float}/{@code double} target instead saturates to {@code ±Infinity} (IEEE-754 semantics).</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1038,7 +1139,8 @@ public final class Numbers {
      * @param defaultValue the value to return if the input value is null
      * @return the converted number as an instance of the target type,
      *         or the specified default value if the input value is null
-     * @throws ArithmeticException if the conversion would result in an overflow
+     * @throws ArithmeticException if the conversion to an integer target type would overflow
+     *         (a {@code float}/{@code double} target saturates to {@code ±Infinity} instead of throwing)
      * @see #convert(Number, Class)
      */
     public static <T extends Number> T convert(final Number value, final Class<? extends T> targetType, T defaultValue) throws ArithmeticException {
@@ -1054,7 +1156,8 @@ public final class Numbers {
      *
      * <p>This method supports conversion between all primitive number types (byte, short, int, long, float, double),
      * as well as their corresponding wrapper classes. It also supports conversion to and from BigInteger and BigDecimal.
-     * If the conversion would result in an overflow, an ArithmeticException is thrown.</p>
+     * If a conversion to an integer type would overflow, an {@code ArithmeticException} is thrown; a
+     * {@code float}/{@code double} target instead saturates to {@code ±Infinity} (IEEE-754 semantics).</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1070,13 +1173,20 @@ public final class Numbers {
      * Byte byteValue = Numbers.convert(null, byteType);   // returns null
      * }</pre>
      *
+     * <p><b>Note:</b> the standard {@code Number} types (the primitive wrappers, {@code BigInteger} and
+     * {@code BigDecimal}) are handled directly. A non-standard {@code Number} subtype (e.g. {@code AtomicInteger},
+     * {@code LongAdder} or a custom subclass) is converted via its string form, so for those an out-of-range value
+     * may surface as a {@link NumberFormatException} rather than {@link ArithmeticException}.</p>
+     *
      * @param <T> the target type of the conversion (must extend Number)
      * @param value the number to convert
      * @param targetType the Type object representing the target type
      * @return the converted number as an instance of the target type,
      *         or the default value of the target type if the input value is null
-     * @throws ArithmeticException if the conversion would result in an overflow
+     * @throws ArithmeticException if the conversion to an integer target type would overflow
+     *         (a {@code float}/{@code double} target saturates to {@code ±Infinity} instead of throwing)
      * @see #convert(Number, Class)
+     * @see N#convert(Object, com.landawn.abacus.type.Type)
      * @see com.landawn.abacus.type.Type
      */
     public static <T extends Number> T convert(final Number value, final Type<? extends T> targetType) throws ArithmeticException {
@@ -1099,7 +1209,8 @@ public final class Numbers {
      *
      * <p>This method supports conversion between all primitive number types (byte, short, int, long, float, double),
      * as well as their corresponding wrapper classes. It also supports conversion to and from BigInteger and BigDecimal.
-     * If the conversion would result in an overflow, an ArithmeticException is thrown.</p>
+     * If a conversion to an integer type would overflow, an {@code ArithmeticException} is thrown; a
+     * {@code float}/{@code double} target instead saturates to {@code ±Infinity} (IEEE-754 semantics).</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1120,13 +1231,19 @@ public final class Numbers {
      * }
      * }</pre>
      *
+     * <p><b>Note:</b> the standard {@code Number} types (the primitive wrappers, {@code BigInteger} and
+     * {@code BigDecimal}) are handled directly. A non-standard {@code Number} subtype (e.g. {@code AtomicInteger},
+     * {@code LongAdder} or a custom subclass) is converted via its string form, so for those an out-of-range value
+     * may surface as a {@link NumberFormatException} rather than {@link ArithmeticException}.</p>
+     *
      * @param <T> the target type of the conversion (must extend Number)
      * @param value the number to convert
      * @param targetType the Type object representing the target type
      * @param defaultValue the value to return if the input value is null
      * @return the converted number as an instance of the target type,
      *         or the specified default value if the input value is null
-     * @throws ArithmeticException if the conversion would result in an overflow
+     * @throws ArithmeticException if the conversion to an integer target type would overflow
+     *         (a {@code float}/{@code double} target saturates to {@code ±Infinity} instead of throwing)
      * @see #convert(Number, Type)
      * @see #convert(Number, Class, Number)
      * @see com.landawn.abacus.type.Type
@@ -1151,6 +1268,10 @@ public final class Numbers {
      * Numbers.format(1234, "0.00");        // returns "1234.00"
      * Numbers.format(1234, "$#,###.00");   // returns "$1,234.00"
      * }</pre>
+     *
+     * <p><b>Note:</b> The {@code DecimalFormat} pattern is locale-sensitive; grouping and decimal
+     * separator symbols follow the default {@link java.util.Locale}. Callers needing locale-neutral
+     * output must supply their own pre-configured {@code DecimalFormat} instance.</p>
      *
      * @param x the int value to be formatted
      * @param decimalFormat the decimal format pattern to be used for formatting (must not be null)
@@ -1180,26 +1301,34 @@ public final class Numbers {
      * <p>This method uses {@link java.text.DecimalFormat} to format the Integer value. The format should be a valid pattern
      * for DecimalFormat, such as "0.00" for two decimal places or "#,###" for thousand separators.</p>
      *
-     * <p>If the Integer value is {@code null}, it will be treated as 0.</p>
+     * <p>If the {@code Integer} value is {@code null}, {@code null} is returned.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Numbers.format(1234, "#,###");             // returns "1,234"
      * Numbers.format(1234, "0.00");              // returns "1234.00"
-     * Numbers.format((Integer) null, "#,###");   // returns "0"
+     * Numbers.format((Integer) null, "#,###");   // returns null
      * Numbers.format(1234, "$#,###.00");         // returns "$1,234.00"
      * }</pre>
      *
-     * @param x the Integer value to be formatted (null will be treated as 0)
+     * <p><b>Note:</b> The {@code DecimalFormat} pattern is locale-sensitive; grouping and decimal
+     * separator symbols follow the default {@link java.util.Locale}. Callers needing locale-neutral
+     * output must supply their own pre-configured {@code DecimalFormat} instance.</p>
+     *
+     * @param x the Integer value to be formatted; if {@code null}, {@code null} is returned
      * @param decimalFormat the decimal format pattern to be used for formatting (must not be null)
      * @return a string representation of the Integer value formatted according to the provided decimal format
      * @throws IllegalArgumentException if the decimalFormat is {@code null}
      * @see #format(int, String)
-     * @see #format(Double, String)
+     * @see #format(Long, String)
      * @see java.text.DecimalFormat#format(long)
      */
     public static String format(final Integer x, final String decimalFormat) throws IllegalArgumentException {
         N.checkArgNotNull(decimalFormat, cs.decimalFormat);
+
+        if (x == null) {
+            return null;
+        }
 
         DecimalFormat df = decimalFormatPool.get(decimalFormat);
 
@@ -1209,11 +1338,7 @@ public final class Numbers {
             df = (DecimalFormat) df.clone();
         }
 
-        if (x == null) {
-            return df.format(0);
-        } else {
-            return df.format(x);
-        }
+        return df.format(x);
     }
 
     /**
@@ -1228,6 +1353,10 @@ public final class Numbers {
      * Numbers.format(123456789L, "0.00");        // returns "123456789.00"
      * Numbers.format(123456789L, "$#,###.00");   // returns "$123,456,789.00"
      * }</pre>
+     *
+     * <p><b>Note:</b> The {@code DecimalFormat} pattern is locale-sensitive; grouping and decimal
+     * separator symbols follow the default {@link java.util.Locale}. Callers needing locale-neutral
+     * output must supply their own pre-configured {@code DecimalFormat} instance.</p>
      *
      * @param x the long value to be formatted
      * @param decimalFormat the decimal format pattern to be used for formatting (must not be null)
@@ -1257,26 +1386,34 @@ public final class Numbers {
      * <p>This method uses {@link java.text.DecimalFormat} to format the Long value. The format should be a valid pattern
      * for DecimalFormat, such as "0.00" for two decimal places or "#,###" for thousand separators.</p>
      *
-     * <p>If the Long value is {@code null}, it will be treated as 0.</p>
+     * <p>If the {@code Long} value is {@code null}, {@code null} is returned.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Numbers.format(123456789L, "#,###");       // returns "123,456,789"
      * Numbers.format(123456789L, "0.00");        // returns "123456789.00"
-     * Numbers.format((Long) null, "#,###");      // returns "0"
+     * Numbers.format((Long) null, "#,###");      // returns null
      * Numbers.format(123456789L, "$#,###.00");   // returns "$123,456,789.00"
      * }</pre>
      *
-     * @param x the Long value to be formatted (null will be treated as 0)
+     * <p><b>Note:</b> The {@code DecimalFormat} pattern is locale-sensitive; grouping and decimal
+     * separator symbols follow the default {@link java.util.Locale}. Callers needing locale-neutral
+     * output must supply their own pre-configured {@code DecimalFormat} instance.</p>
+     *
+     * @param x the Long value to be formatted; if {@code null}, {@code null} is returned
      * @param decimalFormat the decimal format pattern to be used for formatting (must not be null)
      * @return a string representation of the Long value formatted according to the provided decimal format
      * @throws IllegalArgumentException if the decimalFormat is {@code null}
      * @see #format(long, String)
-     * @see #format(Double, String)
+     * @see #format(Integer, String)
      * @see java.text.DecimalFormat#format(long)
      */
     public static String format(final Long x, final String decimalFormat) throws IllegalArgumentException {
         N.checkArgNotNull(decimalFormat, cs.decimalFormat);
+
+        if (x == null) {
+            return null;
+        }
 
         DecimalFormat df = decimalFormatPool.get(decimalFormat);
 
@@ -1286,11 +1423,7 @@ public final class Numbers {
             df = (DecimalFormat) df.clone();
         }
 
-        if (x == null) {
-            return df.format(0);
-        } else {
-            return df.format(x);
-        }
+        return df.format(x);
     }
 
     /**
@@ -1306,6 +1439,10 @@ public final class Numbers {
      * Numbers.format(0.121f, "#.##%");     // returns "12.1%"
      * Numbers.format(0.12156f, "#.##%");   // returns "12.16%"
      * }</pre>
+     *
+     * <p><b>Note:</b> The {@code DecimalFormat} pattern is locale-sensitive; grouping and decimal
+     * separator symbols follow the default {@link java.util.Locale}. Callers needing locale-neutral
+     * output must supply their own pre-configured {@code DecimalFormat} instance.</p>
      *
      * @param x the float value to be formatted.
      * @param decimalFormat the decimal format pattern to be used for formatting.
@@ -1335,18 +1472,22 @@ public final class Numbers {
      * <p>This method uses {@link java.text.DecimalFormat} to format the Float value. The format should be a valid pattern
      * for DecimalFormat, such as "0.00" for two decimal places or "#.##" for up to two decimal places.
      *
-     * <p>If the Float value is {@code null}, it will be treated as 0f.
+     * <p>If the {@code Float} value is {@code null}, {@code null} is returned.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Numbers.format(12.105f, "0.00");      // returns "12.10"
      * Numbers.format(12.105f, "#.##");      // returns "12.1"
-     * Numbers.format((Float) null, "0.00"); // returns "0.00"
+     * Numbers.format((Float) null, "0.00"); // returns null
      * Numbers.format(0.121f, "#.##%");      // returns "12.1%"
      * Numbers.format(0.12156f, "#.##%");    // returns "12.16%"
      * }</pre>
      *
-     * @param x the Float value to be formatted. If {@code null}, it will be treated as 0f.
+     * <p><b>Note:</b> The {@code DecimalFormat} pattern is locale-sensitive; grouping and decimal
+     * separator symbols follow the default {@link java.util.Locale}. Callers needing locale-neutral
+     * output must supply their own pre-configured {@code DecimalFormat} instance.</p>
+     *
+     * @param x the Float value to be formatted; if {@code null}, {@code null} is returned.
      * @param decimalFormat the decimal format pattern to be used for formatting.
      * @return a string representation of the Float value formatted according to the provided decimal format.
      * @throws IllegalArgumentException if the decimalFormat is {@code null}.
@@ -1357,6 +1498,10 @@ public final class Numbers {
     public static String format(final Float x, final String decimalFormat) throws IllegalArgumentException {
         N.checkArgNotNull(decimalFormat, cs.decimalFormat);
 
+        if (x == null) {
+            return null;
+        }
+
         DecimalFormat df = decimalFormatPool.get(decimalFormat);
 
         if (df == null) {
@@ -1365,11 +1510,7 @@ public final class Numbers {
             df = (DecimalFormat) df.clone();
         }
 
-        if (x == null) {
-            return df.format(0f);
-        } else {
-            return df.format(x.doubleValue());
-        }
+        return df.format(x.doubleValue());
     }
 
     /**
@@ -1387,6 +1528,10 @@ public final class Numbers {
      * Numbers.format(0.12156, "0.00%");   // returns "12.16%"
      * Numbers.format(0.12156, "#.##%");   // returns "12.16%"
      * }</pre>
+     *
+     * <p><b>Note:</b> The {@code DecimalFormat} pattern is locale-sensitive; grouping and decimal
+     * separator symbols follow the default {@link java.util.Locale}. Callers needing locale-neutral
+     * output must supply their own pre-configured {@code DecimalFormat} instance.</p>
      *
      * @param x the double value to be formatted.
      * @param decimalFormat the decimal format pattern to be used for formatting.
@@ -1417,18 +1562,22 @@ public final class Numbers {
      * <p>This method uses {@link java.text.DecimalFormat} to format the Double value. The format should be a valid pattern
      * for DecimalFormat, such as "0.00" for two decimal places or "#.##" for up to two decimal places.
      *
-     * <p>If the Double value is {@code null}, it will be treated as 0d.
+     * <p>If the {@code Double} value is {@code null}, {@code null} is returned.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Numbers.format(12.105, "0.00");        // returns "12.11"
      * Numbers.format(12.105, "#.##");        // returns "12.11"
-     * Numbers.format((Double) null, "0.00"); // returns "0.00"
+     * Numbers.format((Double) null, "0.00"); // returns null
      * Numbers.format(0.121, "#.##%");        // returns "12.1%"
      * Numbers.format(0.12156, "#.##%");      // returns "12.16%"
      * }</pre>
      *
-     * @param x the Double value to be formatted. If {@code null}, it will be treated as 0d.
+     * <p><b>Note:</b> The {@code DecimalFormat} pattern is locale-sensitive; grouping and decimal
+     * separator symbols follow the default {@link java.util.Locale}. Callers needing locale-neutral
+     * output must supply their own pre-configured {@code DecimalFormat} instance.</p>
+     *
+     * @param x the Double value to be formatted; if {@code null}, {@code null} is returned.
      * @param decimalFormat the decimal format pattern to be used for formatting.
      * @return a string representation of the Double value formatted according to the provided decimal format.
      * @throws IllegalArgumentException if the decimalFormat is {@code null}.
@@ -1440,6 +1589,10 @@ public final class Numbers {
     public static String format(final Double x, final String decimalFormat) throws IllegalArgumentException {
         N.checkArgNotNull(decimalFormat, cs.decimalFormat);
 
+        if (x == null) {
+            return null;
+        }
+
         DecimalFormat df = decimalFormatPool.get(decimalFormat);
 
         if (df == null) {
@@ -1448,11 +1601,7 @@ public final class Numbers {
             df = (DecimalFormat) df.clone();
         }
 
-        if (x == null) {
-            return df.format(0d);
-        } else {
-            return df.format(x);
-        }
+        return df.format(x);
     }
 
     /**
@@ -1474,6 +1623,8 @@ public final class Numbers {
      *
      * @param str the string to extract the int value from (may be {@code null} or empty).
      * @return the extracted int value wrapped in an OptionalInt, or an empty OptionalInt if no int value is found or if the input string is null/empty.
+     * @throws NumberFormatException if the first matched digit run represents a value outside the {@code int} range;
+     *         the underlying pattern matches digit runs of any length, so for example {@code extractFirstInt("id=99999999999")} throws rather than returning empty
      * @see #extractFirstInt(String, int)
      * @see #extractFirstLong(String)
      * @see Strings#extractFirstInteger(String)
@@ -1515,6 +1666,8 @@ public final class Numbers {
      * @param str the string to extract the int value from (may be {@code null} or empty).
      * @param defaultValue the value to return if no integer is found in the string
      * @return the first integer found in the string, or the specified default value if no integer is found or if the input string is null/empty
+     * @throws NumberFormatException if the first matched digit run represents a value outside the {@code int} range;
+     *         the underlying pattern matches digit runs of any length, so for example {@code extractFirstInt("id=99999999999", 0)} throws rather than returning the default value
      * @see #extractFirstInt(String)
      * @see #extractFirstLong(String, long)
      * @see Strings#extractFirstInteger(String)
@@ -1555,6 +1708,8 @@ public final class Numbers {
      *
      * @param str the string to extract the long value from.
      * @return the extracted long value wrapped in an OptionalLong, or an empty OptionalLong if no long value is found or if the input string is null/empty.
+     * @throws NumberFormatException if the first matched digit run represents a value outside the {@code long} range;
+     *         the underlying pattern matches digit runs of any length, so for example a 20-digit run throws rather than returning empty
      * @see #extractFirstLong(String, long)
      * @see #extractFirstInt(String)
      * @see Strings#extractFirstInteger(String)
@@ -1596,6 +1751,8 @@ public final class Numbers {
      * @param str the string to extract the long value from.
      * @param defaultValue the default value to return if no long value is found.
      * @return the extracted long value, or the specified default value if no long value is found or if the input string is null/empty.
+     * @throws NumberFormatException if the first matched digit run represents a value outside the {@code long} range;
+     *         the underlying pattern matches digit runs of any length, so for example a 20-digit run throws rather than returning the default value
      * @see #extractFirstLong(String)
      * @see #extractFirstInt(String, int)
      * @see Strings#extractFirstInteger(String)
@@ -1633,6 +1790,10 @@ public final class Numbers {
      * Numbers.extractFirstDouble(null);                    // returns OptionalDouble.empty()
      * }</pre>
      *
+     * <p><b>Note:</b> Unlike {@link #extractFirstInt(String)} and {@link #extractFirstLong(String)},
+     * this method never throws {@code NumberFormatException}; an over-long match parses to
+     * {@code Double.POSITIVE_INFINITY} or {@code Double.NEGATIVE_INFINITY} rather than throwing.</p>
+     *
      * @param str the string to extract the double value from.
      * @return the extracted double value wrapped in an OptionalDouble, or an empty OptionalDouble if no double value is found or if the input string is null/empty.
      * @see #extractFirstDouble(String, boolean)
@@ -1667,6 +1828,10 @@ public final class Numbers {
      * Numbers.extractFirstDouble(null, false);                    // returns OptionalDouble.empty()
      * }</pre>
      *
+     * <p><b>Note:</b> Unlike {@link #extractFirstInt(String)} and {@link #extractFirstLong(String)},
+     * this method never throws {@code NumberFormatException}; an over-long match parses to
+     * {@code Double.POSITIVE_INFINITY} or {@code Double.NEGATIVE_INFINITY} rather than throwing.</p>
+     *
      * @param str the string to extract the double value from.
      * @param includingScientificNumber whether to include scientific notation in the search for double values.
      * @return the extracted double value wrapped in an OptionalDouble, or an empty OptionalDouble if no double value is found or if the input string is null/empty.
@@ -1674,6 +1839,7 @@ public final class Numbers {
      * @see #extractFirstDouble(String, double)
      * @see #extractFirstDouble(String, double, boolean)
      * @see Strings#extractFirstDouble(String)
+     * @see Strings#extractFirstDouble(String, boolean)
      * @see RegExUtil#findFirst(String, Pattern)
      * @see RegExUtil#findLast(String, Pattern)
      * @see RegExUtil#NUMBER_FINDER
@@ -1710,6 +1876,10 @@ public final class Numbers {
      * Numbers.extractFirstDouble(null, 0.0);                    // returns 0.0
      * }</pre>
      *
+     * <p><b>Note:</b> Unlike {@link #extractFirstInt(String)} and {@link #extractFirstLong(String)},
+     * this method never throws {@code NumberFormatException}; an over-long match parses to
+     * {@code Double.POSITIVE_INFINITY} or {@code Double.NEGATIVE_INFINITY} rather than throwing.</p>
+     *
      * @param str the string to extract the double value from.
      * @param defaultValue the default value to return if no double value is found.
      * @return the extracted double value, or the specified default value if no double value is found or if the input string is null/empty.
@@ -1745,6 +1915,10 @@ public final class Numbers {
      * Numbers.extractFirstDouble(null, 0.0, false);                    // returns 0.0
      * }</pre>
      *
+     * <p><b>Note:</b> Unlike {@link #extractFirstInt(String)} and {@link #extractFirstLong(String)},
+     * this method never throws {@code NumberFormatException}; an over-long match parses to
+     * {@code Double.POSITIVE_INFINITY} or {@code Double.NEGATIVE_INFINITY} rather than throwing.</p>
+     *
      * @param str the string to extract the double value from.
      * @param defaultValue the default value to return if no double value is found.
      * @param includingScientificNumber whether to include scientific notation in the search for double values.
@@ -1753,6 +1927,7 @@ public final class Numbers {
      * @see #extractFirstDouble(String, boolean)
      * @see #extractFirstDouble(String, double)
      * @see Strings#extractFirstDouble(String)
+     * @see Strings#extractFirstDouble(String, boolean)
      * @see RegExUtil#findFirst(String, Pattern)
      * @see RegExUtil#findLast(String, Pattern)
      * @see RegExUtil#NUMBER_FINDER
@@ -1776,7 +1951,8 @@ public final class Numbers {
      * Converts the given string to a byte value.
      *
      * <p>This method attempts to convert the provided string to a byte. If the string is {@code null} or empty,
-     * default value {@code 0} is returned. Otherwise, the method attempts to parse the string as a byte.</p>
+     * default value {@code 0} is returned. Otherwise, the method attempts to parse the string as a byte.
+     * A trailing {@code 'L'} or {@code 'l'} suffix (Java long-literal style, e.g. {@code "12L"}) is accepted.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1789,14 +1965,15 @@ public final class Numbers {
      *
      * @param str the string to convert. This can be any instance of String.
      * @return the byte representation of the provided string, or {@code 0} if the string is {@code null} or empty.
-     * @throws NumberFormatException if the string cannot be parsed as a byte.
+     * @throws ArithmeticException if the string represents an integer value outside the byte range.
+     * @throws NumberFormatException if the string is not a valid integer.
      * @see #toByte(String, byte)
      * @see #toByte(Object)
      * @see #isParsable(String)
      * @see Byte#parseByte(String)
      * @see Byte#decode(String)
      */
-    public static byte toByte(final String str) throws NumberFormatException {
+    public static byte toByte(final String str) throws NumberFormatException, ArithmeticException {
         return toByte(str, (byte) 0);
     }
 
@@ -1815,10 +1992,15 @@ public final class Numbers {
      * Numbers.toByte((Object) Byte.valueOf((byte) 100));   // returns 100
      * }</pre>
      *
+     * <p><b>Note:</b> a {@code Number}'s integer part (truncated toward zero, per JLS narrowing) is range-checked
+     * (consistent with {@link #convert(Number, Class)}): a {@code Float}/{@code Double}/{@code BigDecimal} whose truncated
+     * value lies outside the {@code byte} range throws {@code ArithmeticException}, while a fractional value whose
+     * truncation fits converts (e.g. {@code 127.9} &rarr; {@code 127}). {@code NaN} converts to {@code 0} (whereas {@link #convert(Number, Class)} instead throws for {@code NaN}); an infinite value throws.</p>
+     *
      * @param obj the object to convert. This can be any instance of Object.
      * @return the byte representation of the provided object, or {@code 0} if the object is {@code null}.
-     * @throws NumberFormatException if the object is a Number whose value is outside the byte range,
-     *         or if the object is not a Number and its string representation cannot be parsed as a byte.
+     * @throws ArithmeticException if the value (a {@code Number}, or the integer parsed from its string representation) is outside the byte range.
+     * @throws NumberFormatException if the object is not a {@code Number} and its string representation is not a valid integer.
      * @see #toByte(String)
      * @see #toByte(String, byte)
      * @see #toByte(Object, byte)
@@ -1826,7 +2008,7 @@ public final class Numbers {
      * @see Byte#parseByte(String)
      * @see Byte#decode(String)
      */
-    public static byte toByte(final Object obj) throws NumberFormatException {
+    public static byte toByte(final Object obj) throws NumberFormatException, ArithmeticException {
         return toByte(obj, (byte) 0);
     }
 
@@ -1834,7 +2016,8 @@ public final class Numbers {
      * Converts the given string to a byte value.
      *
      * <p>This method attempts to convert the provided string to a byte. If the string is {@code null} or empty,
-     * the provided default value is returned. Otherwise, the method attempts to parse the string as a byte.</p>
+     * the provided default value is returned. Otherwise, the method attempts to parse the string as a byte.
+     * A trailing {@code 'L'} or {@code 'l'} suffix (Java long-literal style, e.g. {@code "12L"}) is accepted.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1844,13 +2027,14 @@ public final class Numbers {
      * Numbers.toByte((String) null, (byte) 1);   // returns 1
      * Numbers.toByte("", (byte) 1);              // returns 1
      * Numbers.toByte("abc", (byte) 0);           // throws NumberFormatException
-     * Numbers.toByte("128", (byte) 0);           // throws NumberFormatException (out of range)
+     * Numbers.toByte("128", (byte) 0);           // throws ArithmeticException (out of range)
      * }</pre>
      *
      * @param str the string to convert. This can be any instance of String.
      * @param defaultValue the default value to return if the string is {@code null} or empty.
      * @return the byte representation of the provided string, or the default value if the string is {@code null} or empty.
-     * @throws NumberFormatException if the string cannot be parsed as a byte.
+     * @throws ArithmeticException if the string represents an integer value outside the byte range.
+     * @throws NumberFormatException if the string is not a valid integer.
      * @see #toByte(String)
      * @see #toByte(Object)
      * @see #toByte(Object, byte)
@@ -1858,7 +2042,7 @@ public final class Numbers {
      * @see Byte#parseByte(String)
      * @see Byte#decode(String)
      */
-    public static byte toByte(final String str, final byte defaultValue) throws NumberFormatException {
+    public static byte toByte(final String str, final byte defaultValue) throws NumberFormatException, ArithmeticException {
         if (Strings.isEmpty(str)) {
             return defaultValue;
         }
@@ -1868,14 +2052,67 @@ public final class Numbers {
 
             if (result != null) {
                 if (result < Byte.MIN_VALUE || result > Byte.MAX_VALUE) {
-                    throw new NumberFormatException("Value out of range. Value:\"" + str + "\" Radix: 10");
+                    throw new ArithmeticException("byte overflow: " + str);
                 }
 
                 return result.byteValue();
             }
         }
 
-        return Byte.parseByte(str);
+        return (byte) parseLongInRange(str, Byte.MIN_VALUE, Byte.MAX_VALUE, "byte");
+    }
+
+    /**
+     * Parses {@code str} as a base-10 integer and returns its value if it lies within {@code [min, max]}.
+     * A string that is a valid integer but out of the {@code [min, max]} range (or beyond the {@code long}
+     * range) throws {@code ArithmeticException} ("&lt;typeName&gt; overflow: ..."); a string that is not a
+     * valid integer throws {@code NumberFormatException}. This lets the integer {@code toByte/toShort/toInt/
+     * toLong(String, ...)} methods report numeric overflow and malformed input distinctly, and consistently
+     * with their {@code Number}/{@code Object} overloads.
+     */
+    private static long parseLongInRange(final String str, final long min, final long max, final String typeName) {
+        // Accept an optional trailing 'L'/'l' (Java long-literal style), e.g. "123L", uniformly for all integer types.
+        final int len = str.length();
+        final String numStr = (len > 1 && (str.charAt(len - 1) == 'L' || str.charAt(len - 1) == 'l')) ? str.substring(0, len - 1) : str;
+
+        final long lng;
+
+        try {
+            lng = Long.parseLong(numStr);
+        } catch (final NumberFormatException e) {
+            // A value beyond the long range is still numeric overflow, not a format error: only re-throw
+            // NumberFormatException when the string is not a valid integer at all.
+            try {
+                final BigInteger bigInteger = Numbers.createBigInteger(numStr);
+
+                if (bigInteger != null) {
+                    if (bigInteger.compareTo(BIG_INTEGER_WITH_MAX_LONG_VALUE) > 0 || bigInteger.compareTo(BIG_INTEGER_WITH_MIN_LONG_VALUE) < 0) {
+                        throw new ArithmeticException(typeName + " overflow: " + str);
+                    }
+
+                    // A non-decimal form Long.parseLong rejects (e.g. hex "0xFF"/"#FF") parsed via createBigInteger:
+                    // still range-check it against the TARGET type [min, max], otherwise the caller's (byte)/(short)/(int)
+                    // cast would silently truncate (e.g. toByte("0xFFF") -> 4095 -> (byte) -1 instead of overflow).
+                    final long value = bigInteger.longValue();
+
+                    if (value < min || value > max) {
+                        throw new ArithmeticException(typeName + " overflow: " + str);
+                    }
+
+                    return value;
+                }
+            } catch (final NumberFormatException ignored) {
+                throw e;
+            }
+
+            throw new ArithmeticException(typeName + " overflow: " + str);
+        }
+
+        if (lng < min || lng > max) {
+            throw new ArithmeticException(typeName + " overflow: " + str);
+        }
+
+        return lng;
     }
 
     /**
@@ -1895,11 +2132,16 @@ public final class Numbers {
      * Numbers.toByte((Object) "abc", (byte) 0);                      // throws NumberFormatException
      * }</pre>
      *
+     * <p><b>Note:</b> a {@code Number}'s integer part (truncated toward zero, per JLS narrowing) is range-checked
+     * (consistent with {@link #convert(Number, Class)}): a {@code Float}/{@code Double}/{@code BigDecimal} whose truncated
+     * value lies outside the {@code byte} range throws {@code ArithmeticException}, while a fractional value whose
+     * truncation fits converts (e.g. {@code 127.9} &rarr; {@code 127}). {@code NaN} converts to {@code 0} (whereas {@link #convert(Number, Class)} instead throws for {@code NaN}); an infinite value throws.</p>
+     *
      * @param obj the object to convert. This can be any instance of Object.
      * @param defaultValue the default value to return if the object is {@code null}.
      * @return the byte representation of the provided object, or the default value if the object is {@code null}.
-     * @throws NumberFormatException if the object is a Number whose value is outside the byte range,
-     *         or if the object is not a Number and its string representation cannot be parsed as a byte.
+     * @throws ArithmeticException if the value (a {@code Number}, or the integer parsed from its string representation) is outside the byte range.
+     * @throws NumberFormatException if the object is not a {@code Number} and its string representation is not a valid integer.
      * @see #toByte(String)
      * @see #toByte(String, byte)
      * @see #toByte(Object)
@@ -1907,7 +2149,7 @@ public final class Numbers {
      * @see Byte#parseByte(String)
      * @see Byte#decode(String)
      */
-    public static byte toByte(final Object obj, final byte defaultValue) throws NumberFormatException {
+    public static byte toByte(final Object obj, final byte defaultValue) throws NumberFormatException, ArithmeticException {
         if (obj == null) {
             return defaultValue;
         }
@@ -1915,13 +2157,7 @@ public final class Numbers {
         if (obj instanceof Byte) {
             return ((Byte) obj);
         } else if (obj instanceof Number) {
-            final long lng = ((Number) obj).longValue();
-
-            if (lng > Byte.MAX_VALUE || lng < Byte.MIN_VALUE) {
-                throw new NumberFormatException("Value out of range. Value:\"" + obj + "\"");
-            }
-
-            return (byte) lng;
+            return (byte) toLongWithinRange((Number) obj, Byte.MIN_VALUE, Byte.MAX_VALUE, "byte");
         }
 
         return toByte(obj.toString(), defaultValue);
@@ -1931,7 +2167,8 @@ public final class Numbers {
      * Converts the given string to a short value.
      *
      * <p>This method attempts to convert the provided string to a short. If the string is {@code null} or empty,
-     * default value {@code 0} is returned. Otherwise, the method attempts to parse the string as a short.</p>
+     * default value {@code 0} is returned. Otherwise, the method attempts to parse the string as a short.
+     * A trailing {@code 'L'} or {@code 'l'} suffix (Java long-literal style, e.g. {@code "1234L"}) is accepted.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1944,14 +2181,15 @@ public final class Numbers {
      *
      * @param str the string to convert. This can be any instance of String.
      * @return the short representation of the provided string, or {@code 0} if the string is {@code null} or empty.
-     * @throws NumberFormatException if the string cannot be parsed as a short.
+     * @throws ArithmeticException if the string represents an integer value outside the short range.
+     * @throws NumberFormatException if the string is not a valid integer.
      * @see #toShort(String, short)
      * @see #toShort(Object)
      * @see #isParsable(String)
      * @see Short#parseShort(String)
      * @see Short#decode(String)
      */
-    public static short toShort(final String str) throws NumberFormatException {
+    public static short toShort(final String str) throws NumberFormatException, ArithmeticException {
         return toShort(str, (short) 0);
     }
 
@@ -1970,10 +2208,15 @@ public final class Numbers {
      * Numbers.toShort((Object) Short.valueOf((short) 32767));   // returns 32767
      * }</pre>
      *
+     * <p><b>Note:</b> a {@code Number}'s integer part (truncated toward zero, per JLS narrowing) is range-checked
+     * (consistent with {@link #convert(Number, Class)}): a {@code Float}/{@code Double}/{@code BigDecimal} whose truncated
+     * value lies outside the {@code short} range throws {@code ArithmeticException}, while a fractional value whose
+     * truncation fits converts (e.g. {@code 32767.9} &rarr; {@code 32767}). {@code NaN} converts to {@code 0} (whereas {@link #convert(Number, Class)} instead throws for {@code NaN}); an infinite value throws.</p>
+     *
      * @param obj the object to convert. This can be any instance of Object.
      * @return the short representation of the provided object, or {@code 0} if the object is {@code null}.
-     * @throws NumberFormatException if the object is a Number whose value is outside the short range,
-     *         or if the object is not a Number and its string representation cannot be parsed as a short.
+     * @throws ArithmeticException if the value (a {@code Number}, or the integer parsed from its string representation) is outside the short range.
+     * @throws NumberFormatException if the object is not a {@code Number} and its string representation is not a valid integer.
      * @see #toShort(String)
      * @see #toShort(String, short)
      * @see #toShort(Object, short)
@@ -1981,7 +2224,7 @@ public final class Numbers {
      * @see Short#parseShort(String)
      * @see Short#decode(String)
      */
-    public static short toShort(final Object obj) throws NumberFormatException {
+    public static short toShort(final Object obj) throws NumberFormatException, ArithmeticException {
         return toShort(obj, (short) 0);
     }
 
@@ -1989,7 +2232,8 @@ public final class Numbers {
      * Converts the given string to a short value.
      *
      * <p>This method attempts to convert the provided string to a short. If the string is {@code null} or empty,
-     * the provided default value is returned. Otherwise, the method attempts to parse the string as a short.</p>
+     * the provided default value is returned. Otherwise, the method attempts to parse the string as a short.
+     * A trailing {@code 'L'} or {@code 'l'} suffix (Java long-literal style, e.g. {@code "1234L"}) is accepted.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1999,13 +2243,14 @@ public final class Numbers {
      * Numbers.toShort((String) null, (short) 1);   // returns 1
      * Numbers.toShort("", (short) 1);              // returns 1
      * Numbers.toShort("abc", (short) 0);           // throws NumberFormatException
-     * Numbers.toShort("32768", (short) 0);         // throws NumberFormatException (out of range)
+     * Numbers.toShort("32768", (short) 0);         // throws ArithmeticException (out of range)
      * }</pre>
      *
      * @param str the string to convert. This can be any instance of String.
      * @param defaultValue the default value to return if the string is {@code null} or empty.
      * @return the short representation of the provided string, or the default value if the string is {@code null} or empty.
-     * @throws NumberFormatException if the string cannot be parsed as a short.
+     * @throws ArithmeticException if the string represents an integer value outside the short range.
+     * @throws NumberFormatException if the string is not a valid integer.
      * @see #toShort(String)
      * @see #toShort(Object)
      * @see #toShort(Object, short)
@@ -2013,7 +2258,7 @@ public final class Numbers {
      * @see Short#parseShort(String)
      * @see Short#decode(String)
      */
-    public static short toShort(final String str, final short defaultValue) throws NumberFormatException {
+    public static short toShort(final String str, final short defaultValue) throws NumberFormatException, ArithmeticException {
         if (Strings.isEmpty(str)) {
             return defaultValue;
         }
@@ -2023,14 +2268,14 @@ public final class Numbers {
 
             if (result != null) {
                 if (result < Short.MIN_VALUE || result > Short.MAX_VALUE) {
-                    throw new NumberFormatException("Value out of range. Value:\"" + str + "\" Radix: 10");
+                    throw new ArithmeticException("short overflow: " + str);
                 }
 
                 return result.shortValue();
             }
         }
 
-        return Short.parseShort(str);
+        return (short) parseLongInRange(str, Short.MIN_VALUE, Short.MAX_VALUE, "short");
     }
 
     /**
@@ -2050,11 +2295,16 @@ public final class Numbers {
      * Numbers.toShort((Object) "abc", (short) 0);                          // throws NumberFormatException
      * }</pre>
      *
+     * <p><b>Note:</b> a {@code Number}'s integer part (truncated toward zero, per JLS narrowing) is range-checked
+     * (consistent with {@link #convert(Number, Class)}): a {@code Float}/{@code Double}/{@code BigDecimal} whose truncated
+     * value lies outside the {@code short} range throws {@code ArithmeticException}, while a fractional value whose
+     * truncation fits converts (e.g. {@code 32767.9} &rarr; {@code 32767}). {@code NaN} converts to {@code 0} (whereas {@link #convert(Number, Class)} instead throws for {@code NaN}); an infinite value throws.</p>
+     *
      * @param obj the object to convert. This can be any instance of Object.
      * @param defaultValue the default value to return if the object is {@code null}.
      * @return the short representation of the provided object, or the default value if the object is {@code null}.
-     * @throws NumberFormatException if the object is a Number whose value is outside the short range,
-     *         or if the object is not a Number and its string representation cannot be parsed as a short.
+     * @throws ArithmeticException if the value (a {@code Number}, or the integer parsed from its string representation) is outside the short range.
+     * @throws NumberFormatException if the object is not a {@code Number} and its string representation is not a valid integer.
      * @see #toShort(String)
      * @see #toShort(String, short)
      * @see #toShort(Object)
@@ -2062,7 +2312,7 @@ public final class Numbers {
      * @see Short#parseShort(String)
      * @see Short#decode(String)
      */
-    public static short toShort(final Object obj, final short defaultValue) throws NumberFormatException {
+    public static short toShort(final Object obj, final short defaultValue) throws NumberFormatException, ArithmeticException {
         if (obj == null) {
             return defaultValue;
         }
@@ -2070,13 +2320,7 @@ public final class Numbers {
         if (obj instanceof Short) {
             return ((Short) obj);
         } else if (obj instanceof Number) {
-            final long lng = ((Number) obj).longValue();
-
-            if (lng > Short.MAX_VALUE || lng < Short.MIN_VALUE) {
-                throw new NumberFormatException("Value out of range. Value:\"" + obj + "\"");
-            }
-
-            return (short) lng;
+            return (short) toLongWithinRange((Number) obj, Short.MIN_VALUE, Short.MAX_VALUE, "short");
         }
 
         return toShort(obj.toString(), defaultValue);
@@ -2086,7 +2330,8 @@ public final class Numbers {
      * Converts the given string to an integer value.
      *
      * <p>This method attempts to convert the provided string to an integer. If the string is {@code null} or empty,
-     * default value {@code 0} is returned. Otherwise, the method attempts to parse the string as an integer.</p>
+     * default value {@code 0} is returned. Otherwise, the method attempts to parse the string as an integer.
+     * A trailing {@code 'L'} or {@code 'l'} suffix (Java long-literal style, e.g. {@code "12345L"}) is accepted.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -2099,14 +2344,15 @@ public final class Numbers {
      *
      * @param str the string to convert. This can be any instance of String.
      * @return the integer representation of the provided string, or {@code 0} if the string is {@code null} or empty.
-     * @throws NumberFormatException if the string cannot be parsed as an integer.
+     * @throws ArithmeticException if the string represents an integer value outside the int range.
+     * @throws NumberFormatException if the string is not a valid integer.
      * @see #toInt(String, int)
      * @see #toInt(Object)
      * @see #isParsable(String)
      * @see Integer#parseInt(String)
      * @see Integer#decode(String)
      */
-    public static int toInt(final String str) throws NumberFormatException {
+    public static int toInt(final String str) throws NumberFormatException, ArithmeticException {
         return toInt(str, 0);
     }
 
@@ -2125,10 +2371,16 @@ public final class Numbers {
      * Numbers.toInt((Object) Integer.valueOf(2147483647));   // returns 2147483647
      * }</pre>
      *
+     * <p><b>Note:</b> a {@code Number}'s integer part (truncated toward zero, per JLS narrowing) is range-checked
+     * (consistent with {@link #convert(Number, Class)}): a {@code Float}/{@code Double}/{@code BigDecimal} whose truncated
+     * value lies outside the {@code int} range throws {@code ArithmeticException}, while a fractional value whose
+     * truncation fits converts (e.g. {@code 2147483647.9} &rarr; {@code 2147483647}). {@code NaN} converts to {@code 0} (whereas {@link #convert(Number, Class)} instead throws for {@code NaN}); an
+     * infinite value throws.</p>
+     *
      * @param obj the object to convert. This can be any instance of Object.
      * @return the integer representation of the provided object, or {@code 0} if the object is {@code null}.
-     * @throws NumberFormatException if the object is a Number whose value is outside the int range,
-     *         or if the object is not a Number and its string representation cannot be parsed as an integer.
+     * @throws ArithmeticException if the value (a {@code Number}, or the integer parsed from its string representation) is outside the int range.
+     * @throws NumberFormatException if the object is not a {@code Number} and its string representation is not a valid integer.
      * @see #toInt(String)
      * @see #toInt(String, int)
      * @see #toInt(Object, int)
@@ -2136,7 +2388,7 @@ public final class Numbers {
      * @see Integer#parseInt(String)
      * @see Integer#decode(String)
      */
-    public static int toInt(final Object obj) throws NumberFormatException {
+    public static int toInt(final Object obj) throws NumberFormatException, ArithmeticException {
         return toInt(obj, 0);
     }
 
@@ -2144,7 +2396,8 @@ public final class Numbers {
      * Converts the given string to an integer value.
      *
      * <p>This method attempts to convert the provided string to an integer. If the string is {@code null} or empty,
-     * the provided default value is returned. Otherwise, the method attempts to parse the string as an integer.</p>
+     * the provided default value is returned. Otherwise, the method attempts to parse the string as an integer.
+     * A trailing {@code 'L'} or {@code 'l'} suffix (Java long-literal style, e.g. {@code "12345L"}) is accepted.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -2154,13 +2407,14 @@ public final class Numbers {
      * Numbers.toInt((String) null, 1);  // returns 1
      * Numbers.toInt("", 1);             // returns 1
      * Numbers.toInt("abc", 0);          // throws NumberFormatException
-     * Numbers.toInt("2147483648", 0);   // throws NumberFormatException (out of range)
+     * Numbers.toInt("2147483648", 0);   // throws ArithmeticException (out of range)
      * }</pre>
      *
      * @param str the string to convert. This can be any instance of String.
      * @param defaultValue the default value to return if the string is {@code null} or empty.
      * @return the integer representation of the provided string, or the default value if the string is {@code null} or empty.
-     * @throws NumberFormatException if the string cannot be parsed as an integer.
+     * @throws ArithmeticException if the string represents an integer value outside the int range.
+     * @throws NumberFormatException if the string is not a valid integer.
      * @see #toInt(String)
      * @see #toInt(Object)
      * @see #toInt(Object, int)
@@ -2168,7 +2422,7 @@ public final class Numbers {
      * @see Integer#parseInt(String)
      * @see Integer#decode(String)
      */
-    public static int toInt(final String str, final int defaultValue) throws NumberFormatException {
+    public static int toInt(final String str, final int defaultValue) throws NumberFormatException, ArithmeticException {
         if (Strings.isEmpty(str)) {
             return defaultValue;
         }
@@ -2181,7 +2435,7 @@ public final class Numbers {
             }
         }
 
-        return Integer.parseInt(str);
+        return (int) parseLongInRange(str, Integer.MIN_VALUE, Integer.MAX_VALUE, "int");
     }
 
     /**
@@ -2201,11 +2455,17 @@ public final class Numbers {
      * Numbers.toInt((Object) "abc", 0);                         // throws NumberFormatException
      * }</pre>
      *
+     * <p><b>Note:</b> a {@code Number}'s integer part (truncated toward zero, per JLS narrowing) is range-checked
+     * (consistent with {@link #convert(Number, Class)}): a {@code Float}/{@code Double}/{@code BigDecimal} whose truncated
+     * value lies outside the {@code int} range throws {@code ArithmeticException}, while a fractional value whose
+     * truncation fits converts (e.g. {@code 2147483647.9} &rarr; {@code 2147483647}). {@code NaN} converts to {@code 0} (whereas {@link #convert(Number, Class)} instead throws for {@code NaN}); an
+     * infinite value throws.</p>
+     *
      * @param obj the object to convert. This can be any instance of Object.
      * @param defaultValue the default value to return if the object is {@code null}.
      * @return the integer representation of the provided object, or the default value if the object is {@code null}.
-     * @throws NumberFormatException if the object is a Number whose value is outside the int range,
-     *         or if the object is not a Number and its string representation cannot be parsed as an integer.
+     * @throws ArithmeticException if the value (a {@code Number}, or the integer parsed from its string representation) is outside the int range.
+     * @throws NumberFormatException if the object is not a {@code Number} and its string representation is not a valid integer.
      * @see #toInt(String)
      * @see #toInt(String, int)
      * @see #toInt(Object)
@@ -2213,7 +2473,7 @@ public final class Numbers {
      * @see Integer#parseInt(String)
      * @see Integer#decode(String)
      */
-    public static int toInt(final Object obj, final int defaultValue) throws NumberFormatException {
+    public static int toInt(final Object obj, final int defaultValue) throws NumberFormatException, ArithmeticException {
         if (obj == null) {
             return defaultValue;
         }
@@ -2221,43 +2481,96 @@ public final class Numbers {
         if (obj instanceof Integer) {
             return ((Integer) obj);
         } else if (obj instanceof Number) {
-            final long lng = ((Number) obj).longValue();
-
-            if (lng > Integer.MAX_VALUE || lng < Integer.MIN_VALUE) {
-                throw new NumberFormatException("Value out of range. Value:\"" + obj + "\"");
-            }
-
-            return (int) lng;
+            return (int) toLongWithinRange((Number) obj, Integer.MIN_VALUE, Integer.MAX_VALUE, "int");
         }
 
         return toInt(obj.toString(), defaultValue);
     }
 
     /**
+     * Narrows the given {@code Number} to a {@code long} whose value must lie within {@code [min, max]},
+     * throwing {@code ArithmeticException} otherwise. A {@code Float}/{@code Double}/{@code BigDecimal} is first
+     * truncated toward zero (JLS narrowing) and the resulting integer part is range-checked, so a fractional value
+     * whose truncation fits converts (e.g. {@code 127.9 -> byte 127}) while an out-of-range integer part overflows.
+     * {@code NaN} truncates to {@code 0}; an infinite value truncates out of range and throws. {@code BigInteger}/
+     * {@code BigDecimal} are compared via {@code compareTo}/{@code toBigInteger} (not {@code longValue()} directly,
+     * which would silently wrap mod 2^64 for magnitudes beyond the {@code long} range). Used by
+     * {@link #toByte(Object, byte)}, {@link #toShort(Object, short)} and {@link #toInt(Object, int)} (whose ranges all
+     * fit within {@code long}).
+     */
+    private static long toLongWithinRange(final Number num, final long min, final long max, final String typeName) {
+        if (num instanceof BigInteger) {
+            final BigInteger bi = (BigInteger) num;
+
+            if (bi.compareTo(BigInteger.valueOf(min)) < 0 || bi.compareTo(BigInteger.valueOf(max)) > 0) {
+                throw new ArithmeticException(typeName + " overflow: " + num);
+            }
+
+            return bi.longValue();
+        }
+
+        if (num instanceof BigDecimal) {
+            // Truncate the fraction toward zero, then range-check the integer part (e.g. 127.9 -> byte 127),
+            // consistent with JLS narrowing and convert(...). An out-of-range integer part throws.
+            final BigInteger truncated = ((BigDecimal) num).toBigInteger();
+
+            if (truncated.compareTo(BigInteger.valueOf(min)) < 0 || truncated.compareTo(BigInteger.valueOf(max)) > 0) {
+                throw new ArithmeticException(typeName + " overflow: " + num);
+            }
+
+            return truncated.longValue();
+        }
+
+        if (num instanceof Float || num instanceof Double) {
+            // Truncate toward zero (JLS narrowing) and range-check the integer part: a fractional value whose
+            // truncation fits converts (e.g. 127.9 -> byte 127). NaN truncates to 0; an infinite value truncates
+            // to Long.MIN/MAX, which is out of [min, max] for any integer type -> throws.
+            final long truncated = (long) num.doubleValue();
+
+            if (truncated < min || truncated > max) {
+                throw new ArithmeticException(typeName + " overflow: " + num);
+            }
+
+            return truncated;
+        }
+
+        final long lng = num.longValue();
+
+        if (lng < min || lng > max) {
+            throw new ArithmeticException(typeName + " overflow: " + num);
+        }
+
+        return lng;
+    }
+
+    /**
      * Converts the given string to a long value.
      *
      * <p>This method attempts to convert the provided string to a long. If the string is {@code null} or empty,
-     * default value {@code 0L} is returned. Otherwise, the method attempts to parse the string as a long.</p>
+     * default value {@code 0L} is returned. Otherwise, the method attempts to parse the string as a long.
+     * This method also supports the "L" or "l" suffix for long literals (e.g., "123L").</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Numbers.toLong("123456789");             // returns 123456789L
      * Numbers.toLong("-987654321");            // returns -987654321L
      * Numbers.toLong("9223372036854775807");   // returns 9223372036854775807L
+     * Numbers.toLong("123L");                  // returns 123L
      * Numbers.toLong((String) null);           // returns 0L
      * Numbers.toLong("");                      // returns 0L
      * }</pre>
      *
      * @param str the string to convert. This can be any instance of String.
      * @return the long representation of the provided string, or {@code 0L} if the string is {@code null} or empty.
-     * @throws NumberFormatException if the string cannot be parsed as a long.
+     * @throws ArithmeticException if the string represents an integer value outside the long range.
+     * @throws NumberFormatException if the string is not a valid integer.
      * @see #toLong(String, long)
      * @see #toLong(Object)
      * @see #isParsable(String)
      * @see Long#parseLong(String)
      * @see Long#decode(String)
      */
-    public static long toLong(final String str) throws NumberFormatException {
+    public static long toLong(final String str) throws NumberFormatException, ArithmeticException {
         return toLong(str, 0L);
     }
 
@@ -2276,10 +2589,17 @@ public final class Numbers {
      * Numbers.toLong((Object) Long.valueOf(9223372036854775807L));   // returns 9223372036854775807L
      * }</pre>
      *
+     * <p><b>Note:</b> a {@code Number}'s integer part (truncated toward zero, per JLS narrowing) is range-checked
+     * (consistent with {@link #toInt(Object)} and {@link #convert(Number, Class)}): a {@code Float}/{@code Double}/
+     * {@code BigDecimal} whose truncated value lies outside the {@code long} range throws {@code ArithmeticException},
+     * while a fractional value whose truncation fits converts (e.g. a {@code BigDecimal} whose integer part equals
+     * {@code Long.MAX_VALUE} converts even with a fractional part). {@code NaN} converts to {@code 0L}; an infinite value
+     * throws (rather than saturating at {@code Long.MIN_VALUE}/{@code Long.MAX_VALUE}).</p>
+     *
      * @param obj the object to convert. This can be any instance of Object.
      * @return the long representation of the provided object, or {@code 0L} if the object is {@code null}.
-     * @throws NumberFormatException if the object is a {@code BigInteger} or {@code BigDecimal} whose value is outside the long range,
-     *         or if the object is not a Number and its string representation cannot be parsed as a long.
+     * @throws ArithmeticException if the value (a {@code Number}, or the integer parsed from its string representation) is outside the long range.
+     * @throws NumberFormatException if the object is not a {@code Number} and its string representation is not a valid integer.
      * @see #toLong(String)
      * @see #toLong(String, long)
      * @see #toLong(Object, long)
@@ -2287,8 +2607,8 @@ public final class Numbers {
      * @see Long#parseLong(String)
      * @see Long#decode(String)
      */
-    public static long toLong(final Object obj) throws NumberFormatException {
-        return toLong(obj, 0);
+    public static long toLong(final Object obj) throws NumberFormatException, ArithmeticException {
+        return toLong(obj, 0L);
     }
 
     /**
@@ -2307,13 +2627,14 @@ public final class Numbers {
      * Numbers.toLong((String) null, 1L);           // returns 1L
      * Numbers.toLong("", 1L);                      // returns 1L
      * Numbers.toLong("abc", 0L);                   // throws NumberFormatException
-     * Numbers.toLong("9223372036854775808", 0L);   // throws NumberFormatException (out of range)
+     * Numbers.toLong("9223372036854775808", 0L);   // throws ArithmeticException (out of range)
      * }</pre>
      *
      * @param str the string to convert. This can be any instance of String.
      * @param defaultValue the default value to return if the string is {@code null} or empty.
      * @return the long representation of the provided string, or the default value if the string is {@code null} or empty.
-     * @throws NumberFormatException if the string cannot be parsed as a long.
+     * @throws ArithmeticException if the string represents an integer value outside the long range.
+     * @throws NumberFormatException if the string is not a valid integer.
      * @see #toLong(String)
      * @see #toLong(Object)
      * @see #toLong(Object, long)
@@ -2321,7 +2642,7 @@ public final class Numbers {
      * @see Long#parseLong(String)
      * @see Long#decode(String)
      */
-    public static long toLong(final String str, final long defaultValue) throws NumberFormatException {
+    public static long toLong(final String str, final long defaultValue) throws NumberFormatException, ArithmeticException {
         if (Strings.isEmpty(str)) {
             return defaultValue;
         }
@@ -2333,18 +2654,7 @@ public final class Numbers {
             }
         }
 
-        final int len = str.length();
-        final char ch = str.charAt(len - 1);
-
-        if (len > 1 && (ch == 'L' || ch == 'l')) {
-            try {
-                return Long.parseLong(str.substring(0, len - 1));
-            } catch (final NumberFormatException e) {
-                throw new NumberFormatException("Cannot parse string: " + str + ". " + e.getMessage());
-            }
-        }
-
-        return Long.parseLong(str);
+        return parseLongInRange(str, Long.MIN_VALUE, Long.MAX_VALUE, "long");
     }
 
     /**
@@ -2364,11 +2674,18 @@ public final class Numbers {
      * Numbers.toLong((Object) "abc", 0L);                                // throws NumberFormatException
      * }</pre>
      *
+     * <p><b>Note:</b> a {@code Number}'s integer part (truncated toward zero, per JLS narrowing) is range-checked
+     * (consistent with {@link #toInt(Object, int)} and {@link #convert(Number, Class)}): a {@code Float}/{@code Double}/
+     * {@code BigDecimal} whose truncated value lies outside the {@code long} range throws {@code ArithmeticException},
+     * while a fractional value whose truncation fits converts (e.g. a {@code BigDecimal} whose integer part equals
+     * {@code Long.MAX_VALUE} converts even with a fractional part). {@code NaN} converts to {@code 0L}; an infinite value
+     * throws (rather than saturating at {@code Long.MIN_VALUE}/{@code Long.MAX_VALUE}).</p>
+     *
      * @param obj the object to convert. This can be any instance of Object.
      * @param defaultValue the default value to return if the object is {@code null}.
      * @return the long representation of the provided object, or the default value if the object is {@code null}.
-     * @throws NumberFormatException if the object is a {@code BigInteger} or {@code BigDecimal} whose value is outside the long range,
-     *         or if the object is not a Number and its string representation cannot be parsed as a long.
+     * @throws ArithmeticException if the value (a {@code Number}, or the integer parsed from its string representation) is outside the long range.
+     * @throws NumberFormatException if the object is not a {@code Number} and its string representation is not a valid integer.
      * @see #toLong(String)
      * @see #toLong(String, long)
      * @see #toLong(Object)
@@ -2376,7 +2693,7 @@ public final class Numbers {
      * @see Long#parseLong(String)
      * @see Long#decode(String)
      */
-    public static long toLong(final Object obj, final long defaultValue) throws NumberFormatException {
+    public static long toLong(final Object obj, final long defaultValue) throws NumberFormatException, ArithmeticException {
         if (obj == null) {
             return defaultValue;
         }
@@ -2387,16 +2704,32 @@ public final class Numbers {
 
         if (obj instanceof final BigInteger bigInt) {
             if (bigInt.compareTo(BIG_INTEGER_WITH_MIN_LONG_VALUE) < 0 || bigInt.compareTo(BIG_INTEGER_WITH_MAX_LONG_VALUE) > 0) {
-                throw new NumberFormatException("Value out of range. Value:\"" + obj + "\"");
+                throw new ArithmeticException("long overflow: " + obj);
             }
 
             return bigInt.longValue();
         } else if (obj instanceof final BigDecimal bigDecimal) {
-            if (bigDecimal.compareTo(BIG_DECIMAL_WITH_MIN_LONG_VALUE) < 0 || bigDecimal.compareTo(BIG_DECIMAL_WITH_MAX_LONG_VALUE) > 0) {
-                throw new NumberFormatException("Value out of range. Value:\"" + obj + "\"");
+            // Truncate the fraction toward zero, then range-check the integer part (consistent with toByte/toShort/toInt
+            // and JLS narrowing): a BigDecimal whose integer part is in [Long.MIN, Long.MAX] converts even with a fraction.
+            final BigDecimal truncated = new BigDecimal(bigDecimal.toBigInteger());
+
+            if (truncated.compareTo(BIG_DECIMAL_WITH_MIN_LONG_VALUE) < 0 || truncated.compareTo(BIG_DECIMAL_WITH_MAX_LONG_VALUE) > 0) {
+                throw new ArithmeticException("long overflow: " + obj);
             }
 
             return bigDecimal.longValue();
+        }
+
+        if (obj instanceof Float || obj instanceof Double) {
+            final double d = ((Number) obj).doubleValue();
+            // Range-check non-integral floating-point inputs (like toInt does) instead of saturating
+            // silently at Long.MIN_VALUE/Long.MAX_VALUE. NaN converts to 0L (Number.longValue semantics);
+            // 0x1p63 is 2^63, i.e. one above Long.MAX_VALUE.
+            if (Double.isInfinite(d) || d < Long.MIN_VALUE || d >= 0x1p63) {
+                throw new ArithmeticException("long overflow: " + obj);
+            }
+
+            return (long) d;
         }
 
         if (obj instanceof Number) {
@@ -2420,6 +2753,8 @@ public final class Numbers {
      * Numbers.toFloat((String) null);   // returns 0.0f
      * Numbers.toFloat("");              // returns 0.0f
      * Numbers.toFloat("1.23e10");       // returns 1.23e10f
+     * Numbers.toFloat("NaN");           // returns Float.NaN
+     * Numbers.toFloat("Infinity");      // returns Float.POSITIVE_INFINITY
      * }</pre>
      *
      * @param str the string to convert. This can be any instance of String.
@@ -2452,6 +2787,14 @@ public final class Numbers {
      * Numbers.toFloat((Object) Float.valueOf(3.14f));     // returns 3.14f
      * }</pre>
      *
+     * <p><b>Note:</b> When the input is a {@code Float}, {@code BigInteger}, or {@code BigDecimal},
+     * the conversion uses {@link Number#floatValue()} semantics: a magnitude that exceeds
+     * {@code Float.MAX_VALUE} yields {@code Float.POSITIVE_INFINITY} or {@code Float.NEGATIVE_INFINITY}
+     * without throwing, and a {@code Float} {@code NaN} stays {@code NaN} (a {@code BigInteger} or
+     * {@code BigDecimal} is never {@code NaN}).
+     * {@link #convert(Number, Class)} behaves the same way for a {@code float}/{@code double} target
+     * (it only throws on overflow for integer target types).</p>
+     *
      * @param obj the object to convert. This can be any instance of Object.
      * @return the float representation of the object, or {@code 0.0f} if the object is {@code null}.
      * @throws NumberFormatException if the object is not a Number and its string representation cannot be parsed as a float.
@@ -2462,7 +2805,7 @@ public final class Numbers {
      * @see Float#parseFloat(String)
      */
     public static float toFloat(final Object obj) throws NumberFormatException {
-        return toFloat(obj, 0);
+        return toFloat(obj, 0F);
     }
 
     /**
@@ -2479,6 +2822,8 @@ public final class Numbers {
      * Numbers.toFloat((String) null, 1.0f);   // returns 1.0f
      * Numbers.toFloat("", 1.0f);              // returns 1.0f
      * Numbers.toFloat("1.23e10", 0.0f);       // returns 1.23e10f
+     * Numbers.toFloat("NaN", 0.0f);           // returns Float.NaN
+     * Numbers.toFloat("Infinity", 0.0f);      // returns Float.POSITIVE_INFINITY
      * Numbers.toFloat("abc", 0.0f);           // throws NumberFormatException
      * }</pre>
      *
@@ -2517,6 +2862,14 @@ public final class Numbers {
      * Numbers.toFloat((Object) "abc", 0.0f);                    // throws NumberFormatException
      * }</pre>
      *
+     * <p><b>Note:</b> When the input is a {@code Float}, {@code BigInteger}, or {@code BigDecimal},
+     * the conversion uses {@link Number#floatValue()} semantics: a magnitude that exceeds
+     * {@code Float.MAX_VALUE} yields {@code Float.POSITIVE_INFINITY} or {@code Float.NEGATIVE_INFINITY}
+     * without throwing, and a {@code Float} {@code NaN} stays {@code NaN} (a {@code BigInteger} or
+     * {@code BigDecimal} is never {@code NaN}).
+     * {@link #convert(Number, Class)} behaves the same way for a {@code float}/{@code double} target
+     * (it only throws on overflow for integer target types).</p>
+     *
      * @param obj the object to convert. This can be any instance of Object.
      * @param defaultValue the default value to return if the object is {@code null}.
      * @return the float representation of the object, or the default value if the object is {@code null}.
@@ -2541,6 +2894,51 @@ public final class Numbers {
         }
 
         return toFloat(obj.toString(), defaultValue);
+    }
+
+    /**
+     * Converts a {@code BigDecimal} to a {@code float}.
+     *
+     * <p>If the {@code BigDecimal} {@code value} is {@code null}, then the default value {@code 0.0f} is returned.
+     * A finite magnitude outside the {@code float} range saturates to {@code ±Infinity} (the IEEE-754 semantics of
+     * {@link BigDecimal#floatValue()}); it does not throw.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Numbers.toFloat((BigDecimal) null);          // returns 0.0f
+     * Numbers.toFloat(BigDecimal.valueOf(8.5));    // returns 8.5f
+     * }</pre>
+     *
+     * @param value the {@code BigDecimal} to convert, may be {@code null}.
+     * @return the float represented by the {@code BigDecimal} or {@code 0.0f} if the {@code BigDecimal} is {@code null}.
+     * @see #toFloat(BigDecimal, float)
+     * @see #toDouble(BigDecimal)
+     */
+    public static float toFloat(final BigDecimal value) {
+        return toFloat(value, 0.0f);
+    }
+
+    /**
+     * Converts a {@code BigDecimal} to a {@code float}.
+     *
+     * <p>If the {@code BigDecimal} {@code value} is {@code null}, then the specified default value is returned.
+     * A finite magnitude outside the {@code float} range saturates to {@code ±Infinity} (the IEEE-754 semantics of
+     * {@link BigDecimal#floatValue()}); it does not throw.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Numbers.toFloat((BigDecimal) null, 1.1f);          // returns 1.1f
+     * Numbers.toFloat(BigDecimal.valueOf(8.5), 1.1f);    // returns 8.5f
+     * }</pre>
+     *
+     * @param value the {@code BigDecimal} to convert, may be {@code null}.
+     * @param defaultValue the default value to return if the {@code BigDecimal} is {@code null}.
+     * @return the float represented by the {@code BigDecimal} or the default value if the {@code BigDecimal} is {@code null}.
+     * @see #toFloat(BigDecimal)
+     * @see #toDouble(BigDecimal, double)
+     */
+    public static float toFloat(final BigDecimal value, final float defaultValue) {
+        return value == null ? defaultValue : value.floatValue();
     }
 
     /**
@@ -2590,6 +2988,14 @@ public final class Numbers {
      * Numbers.toDouble((Object) Double.valueOf(3.141592));   // returns 3.141592
      * }</pre>
      *
+     * <p><b>Note:</b> When the input is a {@code Double}, {@code BigInteger}, or {@code BigDecimal},
+     * the conversion uses {@link Number#doubleValue()} semantics: a magnitude that exceeds
+     * {@code Double.MAX_VALUE} yields {@code Double.POSITIVE_INFINITY} or {@code Double.NEGATIVE_INFINITY}
+     * without throwing, and a {@code Double} {@code NaN} stays {@code NaN} (a {@code BigInteger} or
+     * {@code BigDecimal} is never {@code NaN}).
+     * {@link #convert(Number, Class)} behaves the same way for a {@code float}/{@code double} target
+     * (it only throws on overflow for integer target types).</p>
+     *
      * @param obj the object to convert. This can be any instance of Object.
      * @return the double representation of the object, or {@code 0.0} if the object is {@code null}.
      * @throws NumberFormatException if the object is not a Number and its string representation cannot be parsed as a double.
@@ -2600,7 +3006,7 @@ public final class Numbers {
      * @see Double#parseDouble(String)
      */
     public static double toDouble(final Object obj) throws NumberFormatException {
-        return toDouble(obj, 0);
+        return toDouble(obj, 0D);
     }
 
     /**
@@ -2655,6 +3061,14 @@ public final class Numbers {
      * Numbers.toDouble((Object) "abc", 0.0);                      // throws NumberFormatException
      * }</pre>
      *
+     * <p><b>Note:</b> When the input is a {@code Double}, {@code BigInteger}, or {@code BigDecimal},
+     * the conversion uses {@link Number#doubleValue()} semantics: a magnitude that exceeds
+     * {@code Double.MAX_VALUE} yields {@code Double.POSITIVE_INFINITY} or {@code Double.NEGATIVE_INFINITY}
+     * without throwing, and a {@code Double} {@code NaN} stays {@code NaN} (a {@code BigInteger} or
+     * {@code BigDecimal} is never {@code NaN}).
+     * {@link #convert(Number, Class)} behaves the same way for a {@code float}/{@code double} target
+     * (it only throws on overflow for integer target types).</p>
+     *
      * @param obj the object to convert. This can be any instance of Object.
      * @param defaultValue the default value to return if the object is {@code null}.
      * @return the double representation of the object, or the default value if the object is {@code null}.
@@ -2694,6 +3108,8 @@ public final class Numbers {
      *
      * @param value the {@code BigDecimal} to convert, may be {@code null}.
      * @return the double represented by the {@code BigDecimal} or {@code 0.0} if the {@code BigDecimal} is {@code null}.
+     * @see #toDouble(BigDecimal, double)
+     * @see #toFloat(BigDecimal)
      */
     public static double toDouble(final BigDecimal value) {
         return toDouble(value, 0.0d);
@@ -2713,6 +3129,8 @@ public final class Numbers {
      * @param value the {@code BigDecimal} to convert, may be {@code null}.
      * @param defaultValue the default value to return if the {@code BigDecimal} is {@code null}.
      * @return the double represented by the {@code BigDecimal} or the default value if the {@code BigDecimal} is {@code null}.
+     * @see #toDouble(BigDecimal)
+     * @see #toFloat(BigDecimal, float)
      */
     public static double toDouble(final BigDecimal value, final double defaultValue) {
         return value == null ? defaultValue : value.doubleValue();
@@ -2730,8 +3148,13 @@ public final class Numbers {
      * Numbers.toScaledBigDecimal(new BigDecimal("123.456"));   // returns 123.46
      * Numbers.toScaledBigDecimal(new BigDecimal("123.454"));   // returns 123.45
      * Numbers.toScaledBigDecimal(new BigDecimal("123.455"));   // returns 123.46 (HALF_EVEN)
-     * Numbers.toScaledBigDecimal(null);                        // returns BigDecimal.ZERO
+     * Numbers.toScaledBigDecimal((BigDecimal) null);                        // returns BigDecimal.ZERO
      * }</pre>
+     *
+     * <p><b>Note:</b> This overload defaults to {@link java.math.RoundingMode#HALF_EVEN}. To choose a
+     * different rounding mode use the 3-argument overload
+     * {@link #toScaledBigDecimal(BigDecimal, int, RoundingMode)}. Note that
+     * {@link #round(double, int)} instead defaults to {@code HALF_UP}.</p>
      *
      * @param value the {@code BigDecimal} to convert, may be {@code null}.
      * @return the scaled, with appropriate rounding, {@code BigDecimal}.
@@ -2750,20 +3173,22 @@ public final class Numbers {
      * Numbers.toScaledBigDecimal(new BigDecimal("123.456"), 2, RoundingMode.HALF_UP);   // returns 123.46
      * Numbers.toScaledBigDecimal(new BigDecimal("123.456"), 1, RoundingMode.DOWN);      // returns 123.4
      * Numbers.toScaledBigDecimal(new BigDecimal("123.456"), 3, RoundingMode.UP);        // returns 123.456
-     * Numbers.toScaledBigDecimal(null, 2, RoundingMode.HALF_EVEN);                      // returns BigDecimal.ZERO
-     * Numbers.toScaledBigDecimal(new BigDecimal("123.456"), 2, null);                   // returns 123.46 (defaults to HALF_EVEN)
+     * Numbers.toScaledBigDecimal((BigDecimal) null, 2, RoundingMode.HALF_EVEN);                      // returns BigDecimal.ZERO
      * }</pre>
      *
      * @param value the {@code BigDecimal} to convert, may be {@code null}.
      * @param scale the number of digits to the right of the decimal point.
-     * @param roundingMode a rounding behavior for numerical operations capable of discarding precision.
+     * @param roundingMode the rounding mode to use; must not be {@code null}.
      * @return the scaled, with appropriate rounding, {@code BigDecimal}.
+     * @throws IllegalArgumentException if {@code roundingMode} is {@code null}.
      */
     public static BigDecimal toScaledBigDecimal(final BigDecimal value, final int scale, final RoundingMode roundingMode) {
+        N.checkArgNotNull(roundingMode);
+
         if (value == null) {
             return BigDecimal.ZERO;
         }
-        return value.setScale(scale, (roundingMode == null) ? RoundingMode.HALF_EVEN : roundingMode);
+        return value.setScale(scale, roundingMode);
     }
 
     /**
@@ -2778,8 +3203,16 @@ public final class Numbers {
      * Numbers.toScaledBigDecimal(123.456f);   // returns 123.46
      * Numbers.toScaledBigDecimal(123.454f);   // returns 123.45
      * Numbers.toScaledBigDecimal(123.455f);   // returns 123.46 (HALF_EVEN)
-     * Numbers.toScaledBigDecimal(null);       // returns BigDecimal.ZERO
+     * Numbers.toScaledBigDecimal((Float) null);       // returns BigDecimal.ZERO
      * }</pre>
+     *
+     * <p>The {@code Float} is converted via {@link Float#toString(float)}, preserving the float's
+     * decimal string form (consistent with {@link #round(float, int, RoundingMode)}).</p>
+     *
+     * <p><b>Note:</b> This overload defaults to {@link java.math.RoundingMode#HALF_EVEN}. To choose a
+     * different rounding mode use the 3-argument overload
+     * {@link #toScaledBigDecimal(Float, int, RoundingMode)}. Note that
+     * {@link #round(float, int)} instead defaults to {@code HALF_UP}.</p>
      *
      * @param value the {@code Float} to convert, may be {@code null}.
      * @return the scaled, with appropriate rounding, {@code BigDecimal}.
@@ -2797,20 +3230,30 @@ public final class Numbers {
      * <pre>{@code
      * Numbers.toScaledBigDecimal(123.456f, 2, RoundingMode.HALF_UP);   // returns 123.46
      * Numbers.toScaledBigDecimal(123.456f, 1, RoundingMode.DOWN);      // returns 123.4
-     * Numbers.toScaledBigDecimal(123.456f, 3, RoundingMode.UP);        // returns 123.457
-     * Numbers.toScaledBigDecimal(null, 2, RoundingMode.HALF_EVEN);     // returns BigDecimal.ZERO
+     * Numbers.toScaledBigDecimal(123.456f, 3, RoundingMode.UP);        // returns 123.456
+     * Numbers.toScaledBigDecimal((Float) null, 2, RoundingMode.HALF_EVEN);     // returns BigDecimal.ZERO
      * }</pre>
+     *
+     * <p>The {@code Float} is converted via {@link Float#toString(float)}, preserving the float's decimal
+     * string form. This is consistent with {@link #round(float, int, RoundingMode)}: both
+     * {@code toScaledBigDecimal(1.005f, 2, RoundingMode.HALF_UP)} and
+     * {@code round(1.005f, 2, RoundingMode.HALF_UP)} round {@code 1.005f} up to {@code 1.01}.</p>
      *
      * @param value the {@code Float} to convert, may be {@code null}.
      * @param scale the number of digits to the right of the decimal point.
-     * @param roundingMode a rounding behavior for numerical operations capable of discarding precision.
+     * @param roundingMode the rounding mode to use; must not be {@code null}.
      * @return the scaled, with appropriate rounding, {@code BigDecimal}.
+     * @throws IllegalArgumentException if {@code roundingMode} is {@code null}.
      */
     public static BigDecimal toScaledBigDecimal(final Float value, final int scale, final RoundingMode roundingMode) {
+        N.checkArgNotNull(roundingMode);
+
         if (value == null) {
             return BigDecimal.ZERO;
         }
-        return toScaledBigDecimal(BigDecimal.valueOf(value), scale, roundingMode);
+        // Convert via Float.toString so the result reflects the float's decimal string form, consistent
+        // with round(float, int, RoundingMode) (e.g. 1.005f -> "1.005" -> 1.01, not the widened 1.00).
+        return toScaledBigDecimal(new BigDecimal(Float.toString(value)), scale, roundingMode);
     }
 
     /**
@@ -2825,8 +3268,16 @@ public final class Numbers {
      * Numbers.toScaledBigDecimal(123.456);   // returns 123.46
      * Numbers.toScaledBigDecimal(123.454);   // returns 123.45
      * Numbers.toScaledBigDecimal(123.455);   // returns 123.46 (HALF_EVEN)
-     * Numbers.toScaledBigDecimal(null);      // returns BigDecimal.ZERO
+     * Numbers.toScaledBigDecimal((Double) null);      // returns BigDecimal.ZERO
      * }</pre>
+     *
+     * <p><b>Note:</b> This overload defaults to {@link java.math.RoundingMode#HALF_EVEN}. To choose a
+     * different rounding mode use the 3-argument overload
+     * {@link #toScaledBigDecimal(Double, int, RoundingMode)}. Note that
+     * {@link #round(double, int)} instead defaults to {@code HALF_UP}.</p>
+     *
+     * <p>The {@code Double} is converted via {@link java.math.BigDecimal#valueOf(double)}, i.e. the double's
+     * canonical {@link Double#toString(double)} form (not the exact binary value of {@code new BigDecimal(double)}).</p>
      *
      * @param value the {@code Double} to convert, may be {@code null}.
      * @return the scaled, with appropriate rounding, {@code BigDecimal}.
@@ -2845,15 +3296,21 @@ public final class Numbers {
      * Numbers.toScaledBigDecimal(123.456, 2, RoundingMode.HALF_UP);   // returns 123.46
      * Numbers.toScaledBigDecimal(123.456, 1, RoundingMode.DOWN);      // returns 123.4
      * Numbers.toScaledBigDecimal(123.456, 3, RoundingMode.UP);        // returns 123.456
-     * Numbers.toScaledBigDecimal(null, 2, RoundingMode.HALF_EVEN);    // returns BigDecimal.ZERO
+     * Numbers.toScaledBigDecimal((Double) null, 2, RoundingMode.HALF_EVEN);    // returns BigDecimal.ZERO
      * }</pre>
+     *
+     * <p>The {@code Double} is converted via {@link java.math.BigDecimal#valueOf(double)}, i.e. the double's
+     * canonical {@link Double#toString(double)} form (not the exact binary value of {@code new BigDecimal(double)}).</p>
      *
      * @param value the {@code Double} to convert, may be {@code null}.
      * @param scale the number of digits to the right of the decimal point.
-     * @param roundingMode a rounding behavior for numerical operations capable of discarding precision.
+     * @param roundingMode the rounding mode to use; must not be {@code null}.
      * @return the scaled, with appropriate rounding, {@code BigDecimal}.
+     * @throws IllegalArgumentException if {@code roundingMode} is {@code null}.
      */
     public static BigDecimal toScaledBigDecimal(final Double value, final int scale, final RoundingMode roundingMode) {
+        N.checkArgNotNull(roundingMode);
+
         if (value == null) {
             return BigDecimal.ZERO;
         }
@@ -2872,11 +3329,17 @@ public final class Numbers {
      * Numbers.toScaledBigDecimal("123.456");   // returns 123.46
      * Numbers.toScaledBigDecimal("123.454");   // returns 123.45
      * Numbers.toScaledBigDecimal("123.455");   // returns 123.46 (HALF_EVEN)
-     * Numbers.toScaledBigDecimal(null);        // returns BigDecimal.ZERO
+     * Numbers.toScaledBigDecimal((String) null);        // returns BigDecimal.ZERO
      * }</pre>
+     *
+     * <p><b>Note:</b> This overload defaults to {@link java.math.RoundingMode#HALF_EVEN}. To choose a
+     * different rounding mode use the 3-argument overload
+     * {@link #toScaledBigDecimal(String, int, RoundingMode)}. Note that
+     * {@link #round(double, int)} instead defaults to {@code HALF_UP}.</p>
      *
      * @param value the {@code String} to convert, may be {@code null}.
      * @return the scaled, with appropriate rounding, {@code BigDecimal}.
+     * @throws NumberFormatException if {@code value} is empty/blank or not a valid number
      */
     public static BigDecimal toScaledBigDecimal(final String value) {
         return toScaledBigDecimal(value, INTEGER_TWO, RoundingMode.HALF_EVEN);
@@ -2892,15 +3355,19 @@ public final class Numbers {
      * Numbers.toScaledBigDecimal("123.456", 2, RoundingMode.HALF_UP);   // returns 123.46
      * Numbers.toScaledBigDecimal("123.456", 1, RoundingMode.DOWN);      // returns 123.4
      * Numbers.toScaledBigDecimal("123.456", 3, RoundingMode.UP);        // returns 123.456
-     * Numbers.toScaledBigDecimal(null, 2, RoundingMode.HALF_EVEN);      // returns BigDecimal.ZERO
+     * Numbers.toScaledBigDecimal((String) null, 2, RoundingMode.HALF_EVEN);      // returns BigDecimal.ZERO
      * }</pre>
      *
      * @param value the {@code String} to convert, may be {@code null}.
      * @param scale the number of digits to the right of the decimal point.
-     * @param roundingMode a rounding behavior for numerical operations capable of discarding precision.
+     * @param roundingMode the rounding mode to use; must not be {@code null}.
      * @return the scaled, with appropriate rounding, {@code BigDecimal}.
+     * @throws IllegalArgumentException if {@code roundingMode} is {@code null}.
+     * @throws NumberFormatException if {@code value} is empty/blank or not a valid number
      */
     public static BigDecimal toScaledBigDecimal(final String value, final int scale, final RoundingMode roundingMode) {
+        N.checkArgNotNull(roundingMode);
+
         if (value == null) {
             return BigDecimal.ZERO;
         }
@@ -2926,6 +3393,7 @@ public final class Numbers {
      * @return the int value represented by the long argument
      * @throws ArithmeticException if the {@code value} overflows an int (outside range of Integer.MIN_VALUE to Integer.MAX_VALUE)
      * @see Math#toIntExact(long)
+     * @see #saturatedCastToInt(long)
      */
     public static int toIntExact(final long value) {
         //    if (value < Integer.MIN_VALUE || value > Integer.MAX_VALUE) {
@@ -2960,10 +3428,39 @@ public final class Numbers {
      * Numbers.createInteger("abc");                      // throws NumberFormatException
      * }</pre>
      *
+     * <p><b>Comparison of the {@code create*} methods</b> (per input, what each returns or throws):
+     * {@code createInteger}/{@code createLong}/{@code createBigInteger} parse <i>integer</i> forms only (decimal,
+     * {@code 0x}/{@code #} hexadecimal, leading-{@code 0} octal, optional sign) and reject a decimal point, exponent or
+     * type suffix &mdash; except {@code createLong}, which also accepts a trailing {@code 'L'}/{@code 'l'}; they differ
+     * only in width (Integer vs Long vs unbounded BigInteger). {@code createFloat}/{@code createDouble} parse
+     * <i>floating-point</i> forms (decimal, exponent, optional {@code f}/{@code F} or {@code d}/{@code D} suffix,
+     * {@code Infinity}/{@code NaN}); a magnitude beyond the type saturates to {@code ±Infinity}, hexadecimal is rejected
+     * and a leading {@code 0} is <b>not</b> octal. {@code createBigDecimal} parses arbitrary-precision decimal/exponent
+     * forms (no hexadecimal). {@code createNumber} returns the <i>smallest</i> type that fits, escalating
+     * {@code Integer}&rarr;{@code Long}&rarr;{@code BigInteger} (or {@code Float}/{@code Double}&rarr;{@code BigDecimal})
+     * and honouring {@code 0x}/{@code #} and {@code f}/{@code d}/{@code l} suffixes. For every method {@code null} returns
+     * {@code null}, and an empty or non-numeric string throws {@code NumberFormatException} ({@code NFE} below).</p>
+     *
+     * <table border="1">
+     *   <caption>{@code create*} results by input ({@code NFE} = throws {@link NumberFormatException})</caption>
+     *   <tr><th>Input</th><th>{@code createInteger}</th><th>{@code createLong}</th><th>{@code createFloat}</th><th>{@code createDouble}</th><th>{@code createBigInteger}</th><th>{@code createBigDecimal}</th><th>{@code createNumber}</th></tr>
+     *   <tr><td>{@code "123"}</td><td>Integer 123</td><td>Long 123</td><td>Float 123.0</td><td>Double 123.0</td><td>BigInteger 123</td><td>BigDecimal 123</td><td>Integer 123</td></tr>
+     *   <tr><td>{@code "1.5"}</td><td>NFE</td><td>NFE</td><td>Float 1.5</td><td>Double 1.5</td><td>NFE</td><td>BigDecimal 1.5</td><td>Double 1.5</td></tr>
+     *   <tr><td>{@code "0xFF"}</td><td>Integer 255</td><td>Long 255</td><td>NFE</td><td>NFE</td><td>BigInteger 255</td><td>NFE</td><td>Integer 255</td></tr>
+     *   <tr><td>{@code "010"}</td><td>Integer 8</td><td>Long 8</td><td>Float 10.0</td><td>Double 10.0</td><td>BigInteger 8</td><td>BigDecimal 10</td><td>Integer 8</td></tr>
+     *   <tr><td>{@code "1e3"}</td><td>NFE</td><td>NFE</td><td>Float 1000.0</td><td>Double 1000.0</td><td>NFE</td><td>BigDecimal 1E+3</td><td>Double 1000.0</td></tr>
+     *   <tr><td>{@code "123L"}</td><td>NFE</td><td>Long 123</td><td>NFE</td><td>NFE</td><td>NFE</td><td>NFE</td><td>Long 123</td></tr>
+     *   <tr><td>{@code "1.5f"}</td><td>NFE</td><td>NFE</td><td>Float 1.5</td><td>Double 1.5</td><td>NFE</td><td>NFE</td><td>Float 1.5</td></tr>
+     *   <tr><td>{@code "99999999999999999999"} (beyond long)</td><td>NFE</td><td>NFE</td><td>Float 1.0E20</td><td>Double 1.0E20</td><td>BigInteger 99999999999999999999</td><td>BigDecimal 99999999999999999999</td><td>BigInteger 99999999999999999999</td></tr>
+     *   <tr><td>{@code "9e99"}</td><td>NFE</td><td>NFE</td><td>Float Infinity</td><td>Double 9.0E99</td><td>NFE</td><td>BigDecimal 9E+99</td><td>Double 9.0E99</td></tr>
+     *   <tr><td>{@code "abc"}, {@code ""}</td><td>NFE</td><td>NFE</td><td>NFE</td><td>NFE</td><td>NFE</td><td>NFE</td><td>NFE</td></tr>
+     *   <tr><td>{@code null}</td><td>{@code null}</td><td>{@code null}</td><td>{@code null}</td><td>{@code null}</td><td>{@code null}</td><td>{@code null}</td><td>{@code null}</td></tr>
+     * </table>
+     *
      * @param str the string to convert; may be {@code null} (returns {@code null}), but must not be empty
      * @return the Integer value represented by the string, or {@code null} if the input string is {@code null}
      * @throws NumberFormatException if the string is empty or cannot be parsed as a valid integer
-     * @see #isConvertibleToNumber(String)
+     * @see #isCreatable(String)
      * @see Integer#decode(String)
      * @see StrUtil#createInteger(String)
      */
@@ -3003,10 +3500,39 @@ public final class Numbers {
      * Numbers.createLong("abc");                      // throws NumberFormatException
      * }</pre>
      *
+     * <p><b>Comparison of the {@code create*} methods</b> (per input, what each returns or throws):
+     * {@code createInteger}/{@code createLong}/{@code createBigInteger} parse <i>integer</i> forms only (decimal,
+     * {@code 0x}/{@code #} hexadecimal, leading-{@code 0} octal, optional sign) and reject a decimal point, exponent or
+     * type suffix &mdash; except {@code createLong}, which also accepts a trailing {@code 'L'}/{@code 'l'}; they differ
+     * only in width (Integer vs Long vs unbounded BigInteger). {@code createFloat}/{@code createDouble} parse
+     * <i>floating-point</i> forms (decimal, exponent, optional {@code f}/{@code F} or {@code d}/{@code D} suffix,
+     * {@code Infinity}/{@code NaN}); a magnitude beyond the type saturates to {@code ±Infinity}, hexadecimal is rejected
+     * and a leading {@code 0} is <b>not</b> octal. {@code createBigDecimal} parses arbitrary-precision decimal/exponent
+     * forms (no hexadecimal). {@code createNumber} returns the <i>smallest</i> type that fits, escalating
+     * {@code Integer}&rarr;{@code Long}&rarr;{@code BigInteger} (or {@code Float}/{@code Double}&rarr;{@code BigDecimal})
+     * and honouring {@code 0x}/{@code #} and {@code f}/{@code d}/{@code l} suffixes. For every method {@code null} returns
+     * {@code null}, and an empty or non-numeric string throws {@code NumberFormatException} ({@code NFE} below).</p>
+     *
+     * <table border="1">
+     *   <caption>{@code create*} results by input ({@code NFE} = throws {@link NumberFormatException})</caption>
+     *   <tr><th>Input</th><th>{@code createInteger}</th><th>{@code createLong}</th><th>{@code createFloat}</th><th>{@code createDouble}</th><th>{@code createBigInteger}</th><th>{@code createBigDecimal}</th><th>{@code createNumber}</th></tr>
+     *   <tr><td>{@code "123"}</td><td>Integer 123</td><td>Long 123</td><td>Float 123.0</td><td>Double 123.0</td><td>BigInteger 123</td><td>BigDecimal 123</td><td>Integer 123</td></tr>
+     *   <tr><td>{@code "1.5"}</td><td>NFE</td><td>NFE</td><td>Float 1.5</td><td>Double 1.5</td><td>NFE</td><td>BigDecimal 1.5</td><td>Double 1.5</td></tr>
+     *   <tr><td>{@code "0xFF"}</td><td>Integer 255</td><td>Long 255</td><td>NFE</td><td>NFE</td><td>BigInteger 255</td><td>NFE</td><td>Integer 255</td></tr>
+     *   <tr><td>{@code "010"}</td><td>Integer 8</td><td>Long 8</td><td>Float 10.0</td><td>Double 10.0</td><td>BigInteger 8</td><td>BigDecimal 10</td><td>Integer 8</td></tr>
+     *   <tr><td>{@code "1e3"}</td><td>NFE</td><td>NFE</td><td>Float 1000.0</td><td>Double 1000.0</td><td>NFE</td><td>BigDecimal 1E+3</td><td>Double 1000.0</td></tr>
+     *   <tr><td>{@code "123L"}</td><td>NFE</td><td>Long 123</td><td>NFE</td><td>NFE</td><td>NFE</td><td>NFE</td><td>Long 123</td></tr>
+     *   <tr><td>{@code "1.5f"}</td><td>NFE</td><td>NFE</td><td>Float 1.5</td><td>Double 1.5</td><td>NFE</td><td>NFE</td><td>Float 1.5</td></tr>
+     *   <tr><td>{@code "99999999999999999999"} (beyond long)</td><td>NFE</td><td>NFE</td><td>Float 1.0E20</td><td>Double 1.0E20</td><td>BigInteger 99999999999999999999</td><td>BigDecimal 99999999999999999999</td><td>BigInteger 99999999999999999999</td></tr>
+     *   <tr><td>{@code "9e99"}</td><td>NFE</td><td>NFE</td><td>Float Infinity</td><td>Double 9.0E99</td><td>NFE</td><td>BigDecimal 9E+99</td><td>Double 9.0E99</td></tr>
+     *   <tr><td>{@code "abc"}, {@code ""}</td><td>NFE</td><td>NFE</td><td>NFE</td><td>NFE</td><td>NFE</td><td>NFE</td><td>NFE</td></tr>
+     *   <tr><td>{@code null}</td><td>{@code null}</td><td>{@code null}</td><td>{@code null}</td><td>{@code null}</td><td>{@code null}</td><td>{@code null}</td><td>{@code null}</td></tr>
+     * </table>
+     *
      * @param str the string to convert; may be {@code null} (returns {@code null}), but must not be empty
      * @return the Long value represented by the string, or {@code null} if the input string is {@code null}
      * @throws NumberFormatException if the string is empty or cannot be parsed as a valid long
-     * @see #isConvertibleToNumber(String)
+     * @see #isCreatable(String)
      * @see Long#decode(String)
      * @see StrUtil#createLong(String)
      */
@@ -3047,10 +3573,39 @@ public final class Numbers {
      * Numbers.createFloat("abc");                    // throws NumberFormatException
      * }</pre>
      *
+     * <p><b>Comparison of the {@code create*} methods</b> (per input, what each returns or throws):
+     * {@code createInteger}/{@code createLong}/{@code createBigInteger} parse <i>integer</i> forms only (decimal,
+     * {@code 0x}/{@code #} hexadecimal, leading-{@code 0} octal, optional sign) and reject a decimal point, exponent or
+     * type suffix &mdash; except {@code createLong}, which also accepts a trailing {@code 'L'}/{@code 'l'}; they differ
+     * only in width (Integer vs Long vs unbounded BigInteger). {@code createFloat}/{@code createDouble} parse
+     * <i>floating-point</i> forms (decimal, exponent, optional {@code f}/{@code F} or {@code d}/{@code D} suffix,
+     * {@code Infinity}/{@code NaN}); a magnitude beyond the type saturates to {@code ±Infinity}, hexadecimal is rejected
+     * and a leading {@code 0} is <b>not</b> octal. {@code createBigDecimal} parses arbitrary-precision decimal/exponent
+     * forms (no hexadecimal). {@code createNumber} returns the <i>smallest</i> type that fits, escalating
+     * {@code Integer}&rarr;{@code Long}&rarr;{@code BigInteger} (or {@code Float}/{@code Double}&rarr;{@code BigDecimal})
+     * and honouring {@code 0x}/{@code #} and {@code f}/{@code d}/{@code l} suffixes. For every method {@code null} returns
+     * {@code null}, and an empty or non-numeric string throws {@code NumberFormatException} ({@code NFE} below).</p>
+     *
+     * <table border="1">
+     *   <caption>{@code create*} results by input ({@code NFE} = throws {@link NumberFormatException})</caption>
+     *   <tr><th>Input</th><th>{@code createInteger}</th><th>{@code createLong}</th><th>{@code createFloat}</th><th>{@code createDouble}</th><th>{@code createBigInteger}</th><th>{@code createBigDecimal}</th><th>{@code createNumber}</th></tr>
+     *   <tr><td>{@code "123"}</td><td>Integer 123</td><td>Long 123</td><td>Float 123.0</td><td>Double 123.0</td><td>BigInteger 123</td><td>BigDecimal 123</td><td>Integer 123</td></tr>
+     *   <tr><td>{@code "1.5"}</td><td>NFE</td><td>NFE</td><td>Float 1.5</td><td>Double 1.5</td><td>NFE</td><td>BigDecimal 1.5</td><td>Double 1.5</td></tr>
+     *   <tr><td>{@code "0xFF"}</td><td>Integer 255</td><td>Long 255</td><td>NFE</td><td>NFE</td><td>BigInteger 255</td><td>NFE</td><td>Integer 255</td></tr>
+     *   <tr><td>{@code "010"}</td><td>Integer 8</td><td>Long 8</td><td>Float 10.0</td><td>Double 10.0</td><td>BigInteger 8</td><td>BigDecimal 10</td><td>Integer 8</td></tr>
+     *   <tr><td>{@code "1e3"}</td><td>NFE</td><td>NFE</td><td>Float 1000.0</td><td>Double 1000.0</td><td>NFE</td><td>BigDecimal 1E+3</td><td>Double 1000.0</td></tr>
+     *   <tr><td>{@code "123L"}</td><td>NFE</td><td>Long 123</td><td>NFE</td><td>NFE</td><td>NFE</td><td>NFE</td><td>Long 123</td></tr>
+     *   <tr><td>{@code "1.5f"}</td><td>NFE</td><td>NFE</td><td>Float 1.5</td><td>Double 1.5</td><td>NFE</td><td>NFE</td><td>Float 1.5</td></tr>
+     *   <tr><td>{@code "99999999999999999999"} (beyond long)</td><td>NFE</td><td>NFE</td><td>Float 1.0E20</td><td>Double 1.0E20</td><td>BigInteger 99999999999999999999</td><td>BigDecimal 99999999999999999999</td><td>BigInteger 99999999999999999999</td></tr>
+     *   <tr><td>{@code "9e99"}</td><td>NFE</td><td>NFE</td><td>Float Infinity</td><td>Double 9.0E99</td><td>NFE</td><td>BigDecimal 9E+99</td><td>Double 9.0E99</td></tr>
+     *   <tr><td>{@code "abc"}, {@code ""}</td><td>NFE</td><td>NFE</td><td>NFE</td><td>NFE</td><td>NFE</td><td>NFE</td><td>NFE</td></tr>
+     *   <tr><td>{@code null}</td><td>{@code null}</td><td>{@code null}</td><td>{@code null}</td><td>{@code null}</td><td>{@code null}</td><td>{@code null}</td><td>{@code null}</td></tr>
+     * </table>
+     *
      * @param str the string to convert; may be {@code null} (returns {@code null}), but must not be empty
      * @return the Float value represented by the string, or {@code null} if the input string is {@code null}
      * @throws NumberFormatException if the string is empty or cannot be parsed as a valid float
-     * @see #isConvertibleToNumber(String)
+     * @see #isCreatable(String)
      * @see Float#valueOf(String)
      * @see StrUtil#createFloat(String)
      */
@@ -3081,10 +3636,39 @@ public final class Numbers {
      * Numbers.createDouble("abc");                     // throws NumberFormatException
      * }</pre>
      *
+     * <p><b>Comparison of the {@code create*} methods</b> (per input, what each returns or throws):
+     * {@code createInteger}/{@code createLong}/{@code createBigInteger} parse <i>integer</i> forms only (decimal,
+     * {@code 0x}/{@code #} hexadecimal, leading-{@code 0} octal, optional sign) and reject a decimal point, exponent or
+     * type suffix &mdash; except {@code createLong}, which also accepts a trailing {@code 'L'}/{@code 'l'}; they differ
+     * only in width (Integer vs Long vs unbounded BigInteger). {@code createFloat}/{@code createDouble} parse
+     * <i>floating-point</i> forms (decimal, exponent, optional {@code f}/{@code F} or {@code d}/{@code D} suffix,
+     * {@code Infinity}/{@code NaN}); a magnitude beyond the type saturates to {@code ±Infinity}, hexadecimal is rejected
+     * and a leading {@code 0} is <b>not</b> octal. {@code createBigDecimal} parses arbitrary-precision decimal/exponent
+     * forms (no hexadecimal). {@code createNumber} returns the <i>smallest</i> type that fits, escalating
+     * {@code Integer}&rarr;{@code Long}&rarr;{@code BigInteger} (or {@code Float}/{@code Double}&rarr;{@code BigDecimal})
+     * and honouring {@code 0x}/{@code #} and {@code f}/{@code d}/{@code l} suffixes. For every method {@code null} returns
+     * {@code null}, and an empty or non-numeric string throws {@code NumberFormatException} ({@code NFE} below).</p>
+     *
+     * <table border="1">
+     *   <caption>{@code create*} results by input ({@code NFE} = throws {@link NumberFormatException})</caption>
+     *   <tr><th>Input</th><th>{@code createInteger}</th><th>{@code createLong}</th><th>{@code createFloat}</th><th>{@code createDouble}</th><th>{@code createBigInteger}</th><th>{@code createBigDecimal}</th><th>{@code createNumber}</th></tr>
+     *   <tr><td>{@code "123"}</td><td>Integer 123</td><td>Long 123</td><td>Float 123.0</td><td>Double 123.0</td><td>BigInteger 123</td><td>BigDecimal 123</td><td>Integer 123</td></tr>
+     *   <tr><td>{@code "1.5"}</td><td>NFE</td><td>NFE</td><td>Float 1.5</td><td>Double 1.5</td><td>NFE</td><td>BigDecimal 1.5</td><td>Double 1.5</td></tr>
+     *   <tr><td>{@code "0xFF"}</td><td>Integer 255</td><td>Long 255</td><td>NFE</td><td>NFE</td><td>BigInteger 255</td><td>NFE</td><td>Integer 255</td></tr>
+     *   <tr><td>{@code "010"}</td><td>Integer 8</td><td>Long 8</td><td>Float 10.0</td><td>Double 10.0</td><td>BigInteger 8</td><td>BigDecimal 10</td><td>Integer 8</td></tr>
+     *   <tr><td>{@code "1e3"}</td><td>NFE</td><td>NFE</td><td>Float 1000.0</td><td>Double 1000.0</td><td>NFE</td><td>BigDecimal 1E+3</td><td>Double 1000.0</td></tr>
+     *   <tr><td>{@code "123L"}</td><td>NFE</td><td>Long 123</td><td>NFE</td><td>NFE</td><td>NFE</td><td>NFE</td><td>Long 123</td></tr>
+     *   <tr><td>{@code "1.5f"}</td><td>NFE</td><td>NFE</td><td>Float 1.5</td><td>Double 1.5</td><td>NFE</td><td>NFE</td><td>Float 1.5</td></tr>
+     *   <tr><td>{@code "99999999999999999999"} (beyond long)</td><td>NFE</td><td>NFE</td><td>Float 1.0E20</td><td>Double 1.0E20</td><td>BigInteger 99999999999999999999</td><td>BigDecimal 99999999999999999999</td><td>BigInteger 99999999999999999999</td></tr>
+     *   <tr><td>{@code "9e99"}</td><td>NFE</td><td>NFE</td><td>Float Infinity</td><td>Double 9.0E99</td><td>NFE</td><td>BigDecimal 9E+99</td><td>Double 9.0E99</td></tr>
+     *   <tr><td>{@code "abc"}, {@code ""}</td><td>NFE</td><td>NFE</td><td>NFE</td><td>NFE</td><td>NFE</td><td>NFE</td><td>NFE</td></tr>
+     *   <tr><td>{@code null}</td><td>{@code null}</td><td>{@code null}</td><td>{@code null}</td><td>{@code null}</td><td>{@code null}</td><td>{@code null}</td><td>{@code null}</td></tr>
+     * </table>
+     *
      * @param str the string to convert; may be {@code null} (returns {@code null}), but must not be empty
      * @return the Double value represented by the string, or {@code null} if the input string is {@code null}
      * @throws NumberFormatException if the string is empty or cannot be parsed as a valid double
-     * @see #isConvertibleToNumber(String)
+     * @see #isCreatable(String)
      * @see Double#valueOf(String)
      * @see StrUtil#createDouble(String)
      */
@@ -3122,10 +3706,39 @@ public final class Numbers {
      * Numbers.createBigInteger("abc");                                    // throws NumberFormatException
      * }</pre>
      *
+     * <p><b>Comparison of the {@code create*} methods</b> (per input, what each returns or throws):
+     * {@code createInteger}/{@code createLong}/{@code createBigInteger} parse <i>integer</i> forms only (decimal,
+     * {@code 0x}/{@code #} hexadecimal, leading-{@code 0} octal, optional sign) and reject a decimal point, exponent or
+     * type suffix &mdash; except {@code createLong}, which also accepts a trailing {@code 'L'}/{@code 'l'}; they differ
+     * only in width (Integer vs Long vs unbounded BigInteger). {@code createFloat}/{@code createDouble} parse
+     * <i>floating-point</i> forms (decimal, exponent, optional {@code f}/{@code F} or {@code d}/{@code D} suffix,
+     * {@code Infinity}/{@code NaN}); a magnitude beyond the type saturates to {@code ±Infinity}, hexadecimal is rejected
+     * and a leading {@code 0} is <b>not</b> octal. {@code createBigDecimal} parses arbitrary-precision decimal/exponent
+     * forms (no hexadecimal). {@code createNumber} returns the <i>smallest</i> type that fits, escalating
+     * {@code Integer}&rarr;{@code Long}&rarr;{@code BigInteger} (or {@code Float}/{@code Double}&rarr;{@code BigDecimal})
+     * and honouring {@code 0x}/{@code #} and {@code f}/{@code d}/{@code l} suffixes. For every method {@code null} returns
+     * {@code null}, and an empty or non-numeric string throws {@code NumberFormatException} ({@code NFE} below).</p>
+     *
+     * <table border="1">
+     *   <caption>{@code create*} results by input ({@code NFE} = throws {@link NumberFormatException})</caption>
+     *   <tr><th>Input</th><th>{@code createInteger}</th><th>{@code createLong}</th><th>{@code createFloat}</th><th>{@code createDouble}</th><th>{@code createBigInteger}</th><th>{@code createBigDecimal}</th><th>{@code createNumber}</th></tr>
+     *   <tr><td>{@code "123"}</td><td>Integer 123</td><td>Long 123</td><td>Float 123.0</td><td>Double 123.0</td><td>BigInteger 123</td><td>BigDecimal 123</td><td>Integer 123</td></tr>
+     *   <tr><td>{@code "1.5"}</td><td>NFE</td><td>NFE</td><td>Float 1.5</td><td>Double 1.5</td><td>NFE</td><td>BigDecimal 1.5</td><td>Double 1.5</td></tr>
+     *   <tr><td>{@code "0xFF"}</td><td>Integer 255</td><td>Long 255</td><td>NFE</td><td>NFE</td><td>BigInteger 255</td><td>NFE</td><td>Integer 255</td></tr>
+     *   <tr><td>{@code "010"}</td><td>Integer 8</td><td>Long 8</td><td>Float 10.0</td><td>Double 10.0</td><td>BigInteger 8</td><td>BigDecimal 10</td><td>Integer 8</td></tr>
+     *   <tr><td>{@code "1e3"}</td><td>NFE</td><td>NFE</td><td>Float 1000.0</td><td>Double 1000.0</td><td>NFE</td><td>BigDecimal 1E+3</td><td>Double 1000.0</td></tr>
+     *   <tr><td>{@code "123L"}</td><td>NFE</td><td>Long 123</td><td>NFE</td><td>NFE</td><td>NFE</td><td>NFE</td><td>Long 123</td></tr>
+     *   <tr><td>{@code "1.5f"}</td><td>NFE</td><td>NFE</td><td>Float 1.5</td><td>Double 1.5</td><td>NFE</td><td>NFE</td><td>Float 1.5</td></tr>
+     *   <tr><td>{@code "99999999999999999999"} (beyond long)</td><td>NFE</td><td>NFE</td><td>Float 1.0E20</td><td>Double 1.0E20</td><td>BigInteger 99999999999999999999</td><td>BigDecimal 99999999999999999999</td><td>BigInteger 99999999999999999999</td></tr>
+     *   <tr><td>{@code "9e99"}</td><td>NFE</td><td>NFE</td><td>Float Infinity</td><td>Double 9.0E99</td><td>NFE</td><td>BigDecimal 9E+99</td><td>Double 9.0E99</td></tr>
+     *   <tr><td>{@code "abc"}, {@code ""}</td><td>NFE</td><td>NFE</td><td>NFE</td><td>NFE</td><td>NFE</td><td>NFE</td><td>NFE</td></tr>
+     *   <tr><td>{@code null}</td><td>{@code null}</td><td>{@code null}</td><td>{@code null}</td><td>{@code null}</td><td>{@code null}</td><td>{@code null}</td><td>{@code null}</td></tr>
+     * </table>
+     *
      * @param str the string to convert; may be {@code null} (returns {@code null}), but must not be empty
      * @return the BigInteger value represented by the string, or {@code null} if the input string is {@code null}
      * @throws NumberFormatException if the string is empty or not a valid BigInteger representation
-     * @see #isConvertibleToNumber(String)
+     * @see #isCreatable(String)
      * @see BigInteger#BigInteger(String, int)
      * @see Long#decode(String)
      * @see StrUtil#createBigInteger(String)
@@ -3136,7 +3749,7 @@ public final class Numbers {
             return null;
         }
 
-        if (!quickCheckForIsConvertibleToNumber(str)) {
+        if (!quickCheckForisCreatable(str)) {
             throw new NumberFormatException(str + " is not a valid BigInteger.");
         }
 
@@ -3160,6 +3773,11 @@ public final class Numbers {
             radix = 8;
             pos++;
         } // default is to treat as decimal
+
+        // A sign was already consumed above; BigInteger would accept a second one ("--1" -> 1).
+        if (pos > 0 && pos < str.length() && (str.charAt(pos) == '-' || str.charAt(pos) == '+')) {
+            throw new NumberFormatException(str + " is not a valid BigInteger.");
+        }
 
         final BigInteger value = new BigInteger(str.substring(pos), radix);
 
@@ -3191,10 +3809,39 @@ public final class Numbers {
      * Numbers.createBigDecimal("abc");                         // throws NumberFormatException
      * }</pre>
      *
+     * <p><b>Comparison of the {@code create*} methods</b> (per input, what each returns or throws):
+     * {@code createInteger}/{@code createLong}/{@code createBigInteger} parse <i>integer</i> forms only (decimal,
+     * {@code 0x}/{@code #} hexadecimal, leading-{@code 0} octal, optional sign) and reject a decimal point, exponent or
+     * type suffix &mdash; except {@code createLong}, which also accepts a trailing {@code 'L'}/{@code 'l'}; they differ
+     * only in width (Integer vs Long vs unbounded BigInteger). {@code createFloat}/{@code createDouble} parse
+     * <i>floating-point</i> forms (decimal, exponent, optional {@code f}/{@code F} or {@code d}/{@code D} suffix,
+     * {@code Infinity}/{@code NaN}); a magnitude beyond the type saturates to {@code ±Infinity}, hexadecimal is rejected
+     * and a leading {@code 0} is <b>not</b> octal. {@code createBigDecimal} parses arbitrary-precision decimal/exponent
+     * forms (no hexadecimal). {@code createNumber} returns the <i>smallest</i> type that fits, escalating
+     * {@code Integer}&rarr;{@code Long}&rarr;{@code BigInteger} (or {@code Float}/{@code Double}&rarr;{@code BigDecimal})
+     * and honouring {@code 0x}/{@code #} and {@code f}/{@code d}/{@code l} suffixes. For every method {@code null} returns
+     * {@code null}, and an empty or non-numeric string throws {@code NumberFormatException} ({@code NFE} below).</p>
+     *
+     * <table border="1">
+     *   <caption>{@code create*} results by input ({@code NFE} = throws {@link NumberFormatException})</caption>
+     *   <tr><th>Input</th><th>{@code createInteger}</th><th>{@code createLong}</th><th>{@code createFloat}</th><th>{@code createDouble}</th><th>{@code createBigInteger}</th><th>{@code createBigDecimal}</th><th>{@code createNumber}</th></tr>
+     *   <tr><td>{@code "123"}</td><td>Integer 123</td><td>Long 123</td><td>Float 123.0</td><td>Double 123.0</td><td>BigInteger 123</td><td>BigDecimal 123</td><td>Integer 123</td></tr>
+     *   <tr><td>{@code "1.5"}</td><td>NFE</td><td>NFE</td><td>Float 1.5</td><td>Double 1.5</td><td>NFE</td><td>BigDecimal 1.5</td><td>Double 1.5</td></tr>
+     *   <tr><td>{@code "0xFF"}</td><td>Integer 255</td><td>Long 255</td><td>NFE</td><td>NFE</td><td>BigInteger 255</td><td>NFE</td><td>Integer 255</td></tr>
+     *   <tr><td>{@code "010"}</td><td>Integer 8</td><td>Long 8</td><td>Float 10.0</td><td>Double 10.0</td><td>BigInteger 8</td><td>BigDecimal 10</td><td>Integer 8</td></tr>
+     *   <tr><td>{@code "1e3"}</td><td>NFE</td><td>NFE</td><td>Float 1000.0</td><td>Double 1000.0</td><td>NFE</td><td>BigDecimal 1E+3</td><td>Double 1000.0</td></tr>
+     *   <tr><td>{@code "123L"}</td><td>NFE</td><td>Long 123</td><td>NFE</td><td>NFE</td><td>NFE</td><td>NFE</td><td>Long 123</td></tr>
+     *   <tr><td>{@code "1.5f"}</td><td>NFE</td><td>NFE</td><td>Float 1.5</td><td>Double 1.5</td><td>NFE</td><td>NFE</td><td>Float 1.5</td></tr>
+     *   <tr><td>{@code "99999999999999999999"} (beyond long)</td><td>NFE</td><td>NFE</td><td>Float 1.0E20</td><td>Double 1.0E20</td><td>BigInteger 99999999999999999999</td><td>BigDecimal 99999999999999999999</td><td>BigInteger 99999999999999999999</td></tr>
+     *   <tr><td>{@code "9e99"}</td><td>NFE</td><td>NFE</td><td>Float Infinity</td><td>Double 9.0E99</td><td>NFE</td><td>BigDecimal 9E+99</td><td>Double 9.0E99</td></tr>
+     *   <tr><td>{@code "abc"}, {@code ""}</td><td>NFE</td><td>NFE</td><td>NFE</td><td>NFE</td><td>NFE</td><td>NFE</td><td>NFE</td></tr>
+     *   <tr><td>{@code null}</td><td>{@code null}</td><td>{@code null}</td><td>{@code null}</td><td>{@code null}</td><td>{@code null}</td><td>{@code null}</td><td>{@code null}</td></tr>
+     * </table>
+     *
      * @param str the string to convert; may be {@code null} (returns {@code null}), but must not be empty
      * @return the BigDecimal value represented by the string, or {@code null} if the input string is {@code null}
      * @throws NumberFormatException if the string is empty or not a valid BigDecimal representation
-     * @see #isConvertibleToNumber(String)
+     * @see #isCreatable(String)
      * @see BigDecimal#BigDecimal(String)
      * @see StrUtil#createBigDecimal(String)
      */
@@ -3205,7 +3852,7 @@ public final class Numbers {
         }
 
         // handle JDK1.3.1 bug where "" throws IndexOutOfBoundsException
-        if (!quickCheckForIsConvertibleToNumber(str)) {
+        if (!quickCheckForisCreatable(str)) {
             throw new NumberFormatException(str + " is not a valid BigDecimal.");
         }
 
@@ -3246,10 +3893,63 @@ public final class Numbers {
      * Numbers.createNumber("abc");                     // throws NumberFormatException
      * }</pre>
      *
+     * <p><b>Relationship between {@code isCreatable} and {@code createNumber}:</b> {@code isCreatable} is a
+     * <i>conservative</i> predictor of {@code createNumber}. If {@code isCreatable(s)} is {@code true}, then
+     * {@code createNumber(s)} is guaranteed to succeed (the forward guarantee); but a {@code false} result does
+     * <strong>not</strong> guarantee {@code createNumber(s)} fails &mdash; some leading-zero forms with a type suffix
+     * or exponent are rejected by {@code isCreatable} yet still parsed by {@code createNumber} (a quirk inherited from
+     * Apache Commons {@code NumberUtils}). The three possible cases:</p>
+     *
+     * <table border="1">
+     *   <caption>{@code isCreatable(s)} vs {@code createNumber(s)}</caption>
+     *   <tr><th>Input {@code s}</th><th>{@code isCreatable(s)}</th><th>{@code createNumber(s)}</th></tr>
+     *   <tr><td colspan="3"><i>{@code isCreatable} is {@code true} &rarr; {@code createNumber} always succeeds</i></td></tr>
+     *   <tr><td>{@code "123"}</td><td>{@code true}</td><td>{@code Integer} 123</td></tr>
+     *   <tr><td>{@code "0xFF"}</td><td>{@code true}</td><td>{@code Integer} 255 (hexadecimal)</td></tr>
+     *   <tr><td>{@code "1.5e3"}</td><td>{@code true}</td><td>{@code Double} 1500.0 (scientific notation)</td></tr>
+     *   <tr><td colspan="3"><i>{@code isCreatable} is {@code false}, yet {@code createNumber} still succeeds (conservative false-negative)</i></td></tr>
+     *   <tr><td>{@code "01f"}</td><td>{@code false}</td><td>{@code Float} 1.0</td></tr>
+     *   <tr><td>{@code "0123L"}</td><td>{@code false}</td><td>{@code Long} 83 (leading-zero octal)</td></tr>
+     *   <tr><td>{@code "01e1"}</td><td>{@code false}</td><td>{@code Double} 10.0</td></tr>
+     *   <tr><td colspan="3"><i>{@code isCreatable} is {@code false} and {@code createNumber} fails (the common case)</i></td></tr>
+     *   <tr><td>{@code "abc"}</td><td>{@code false}</td><td>throws {@code NumberFormatException}</td></tr>
+     *   <tr><td>{@code "1.2.3"}</td><td>{@code false}</td><td>throws {@code NumberFormatException}</td></tr>
+     *   <tr><td>{@code null}</td><td>{@code false}</td><td>{@code null}</td></tr>
+     * </table>
+     *
+     * <p><b>Comparison of the {@code create*} methods</b> (per input, what each returns or throws):
+     * {@code createInteger}/{@code createLong}/{@code createBigInteger} parse <i>integer</i> forms only (decimal,
+     * {@code 0x}/{@code #} hexadecimal, leading-{@code 0} octal, optional sign) and reject a decimal point, exponent or
+     * type suffix &mdash; except {@code createLong}, which also accepts a trailing {@code 'L'}/{@code 'l'}; they differ
+     * only in width (Integer vs Long vs unbounded BigInteger). {@code createFloat}/{@code createDouble} parse
+     * <i>floating-point</i> forms (decimal, exponent, optional {@code f}/{@code F} or {@code d}/{@code D} suffix,
+     * {@code Infinity}/{@code NaN}); a magnitude beyond the type saturates to {@code ±Infinity}, hexadecimal is rejected
+     * and a leading {@code 0} is <b>not</b> octal. {@code createBigDecimal} parses arbitrary-precision decimal/exponent
+     * forms (no hexadecimal). {@code createNumber} returns the <i>smallest</i> type that fits, escalating
+     * {@code Integer}&rarr;{@code Long}&rarr;{@code BigInteger} (or {@code Float}/{@code Double}&rarr;{@code BigDecimal})
+     * and honouring {@code 0x}/{@code #} and {@code f}/{@code d}/{@code l} suffixes. For every method {@code null} returns
+     * {@code null}, and an empty or non-numeric string throws {@code NumberFormatException} ({@code NFE} below).</p>
+     *
+     * <table border="1">
+     *   <caption>{@code create*} results by input ({@code NFE} = throws {@link NumberFormatException})</caption>
+     *   <tr><th>Input</th><th>{@code createInteger}</th><th>{@code createLong}</th><th>{@code createFloat}</th><th>{@code createDouble}</th><th>{@code createBigInteger}</th><th>{@code createBigDecimal}</th><th>{@code createNumber}</th></tr>
+     *   <tr><td>{@code "123"}</td><td>Integer 123</td><td>Long 123</td><td>Float 123.0</td><td>Double 123.0</td><td>BigInteger 123</td><td>BigDecimal 123</td><td>Integer 123</td></tr>
+     *   <tr><td>{@code "1.5"}</td><td>NFE</td><td>NFE</td><td>Float 1.5</td><td>Double 1.5</td><td>NFE</td><td>BigDecimal 1.5</td><td>Double 1.5</td></tr>
+     *   <tr><td>{@code "0xFF"}</td><td>Integer 255</td><td>Long 255</td><td>NFE</td><td>NFE</td><td>BigInteger 255</td><td>NFE</td><td>Integer 255</td></tr>
+     *   <tr><td>{@code "010"}</td><td>Integer 8</td><td>Long 8</td><td>Float 10.0</td><td>Double 10.0</td><td>BigInteger 8</td><td>BigDecimal 10</td><td>Integer 8</td></tr>
+     *   <tr><td>{@code "1e3"}</td><td>NFE</td><td>NFE</td><td>Float 1000.0</td><td>Double 1000.0</td><td>NFE</td><td>BigDecimal 1E+3</td><td>Double 1000.0</td></tr>
+     *   <tr><td>{@code "123L"}</td><td>NFE</td><td>Long 123</td><td>NFE</td><td>NFE</td><td>NFE</td><td>NFE</td><td>Long 123</td></tr>
+     *   <tr><td>{@code "1.5f"}</td><td>NFE</td><td>NFE</td><td>Float 1.5</td><td>Double 1.5</td><td>NFE</td><td>NFE</td><td>Float 1.5</td></tr>
+     *   <tr><td>{@code "99999999999999999999"} (beyond long)</td><td>NFE</td><td>NFE</td><td>Float 1.0E20</td><td>Double 1.0E20</td><td>BigInteger 99999999999999999999</td><td>BigDecimal 99999999999999999999</td><td>BigInteger 99999999999999999999</td></tr>
+     *   <tr><td>{@code "9e99"}</td><td>NFE</td><td>NFE</td><td>Float Infinity</td><td>Double 9.0E99</td><td>NFE</td><td>BigDecimal 9E+99</td><td>Double 9.0E99</td></tr>
+     *   <tr><td>{@code "abc"}, {@code ""}</td><td>NFE</td><td>NFE</td><td>NFE</td><td>NFE</td><td>NFE</td><td>NFE</td><td>NFE</td></tr>
+     *   <tr><td>{@code null}</td><td>{@code null}</td><td>{@code null}</td><td>{@code null}</td><td>{@code null}</td><td>{@code null}</td><td>{@code null}</td><td>{@code null}</td></tr>
+     * </table>
+     *
      * @param str the string to convert; may be {@code null} (returns {@code null}), but must not be empty
      * @return the parsed Number value, or {@code null} if the input string is {@code null}
      * @throws NumberFormatException if the string is empty or the value cannot be converted
-     * @see #isConvertibleToNumber(String)
+     * @see #isCreatable(String)
      * @see #createInteger(String)
      * @see #createLong(String)
      * @see #createFloat(String)
@@ -3266,7 +3966,7 @@ public final class Numbers {
             return null;
         }
 
-        if (!quickCheckForIsConvertibleToNumber(str)) {
+        if (!quickCheckForisCreatable(str)) {
             throw new NumberFormatException(str + " is not a valid number.");
         }
 
@@ -3355,7 +4055,7 @@ public final class Numbers {
                 case 'l':
                 case 'L':
                     // Accept a leading '+' as well as '-' (createLong/createBigInteger both parse a leading '+'),
-                    // otherwise "+7L" throws here even though isConvertibleToNumber("+7L") returns true.
+                    // otherwise "+7L" throws here even though isCreatable("+7L") returns true.
                     if (dec == null && exp == null
                             && (!numeric.isEmpty() && (numeric.charAt(0) == '-' || numeric.charAt(0) == '+') && isDigits(numeric.substring(1))
                                     || isDigits(numeric))) {
@@ -3372,7 +4072,9 @@ public final class Numbers {
                 case 'F':
                     try {
                         final Float f = createFloat(str);
-                        if (!(f.isInfinite() || N.equals(f.floatValue(), 0.0F) && !isZero(mant, dec))) {
+                        // Primitive comparison on purpose: -0.0f must count as "underflowed to zero"
+                        // (Float.compare-based equality would miss negative underflow).
+                        if (!(f.isInfinite() || f.floatValue() == 0.0F && !isZero(mant, dec))) {
                             //If it's too big for a float or the float value = 0 and the string
                             //has non-zeros in it, then float does not have the precision we want
                             return f;
@@ -3386,7 +4088,8 @@ public final class Numbers {
                 case 'D':
                     try {
                         final Double d = createDouble(str);
-                        if (!(d.isInfinite() || N.equals(d.doubleValue(), 0.0d) && !isZero(mant, dec))) {
+                        // Primitive comparison on purpose: -0.0d must count as "underflowed to zero".
+                        if (!(d.isInfinite() || d.doubleValue() == 0.0d && !isZero(mant, dec))) {
                             return d;
                         }
                     } catch (final NumberFormatException ignored) {
@@ -3432,7 +4135,9 @@ public final class Numbers {
 
             final Double d = Double.valueOf(str);
 
-            if (d.isInfinite() && !str.contains("Infinity")) {
+            // Escalate to BigDecimal on overflow to infinity AND on underflow to (signed) zero when
+            // the string has non-zero digits, mirroring the typed 'D' branch above.
+            if ((d.isInfinite() && !str.contains("Infinity")) || (d.doubleValue() == 0.0d && !isZero(mant, dec))) {
                 return createBigDecimal(str);
             }
 
@@ -3449,6 +4154,9 @@ public final class Numbers {
      *
      * <p>{@code null} and empty String will return {@code false}.</p>
      *
+     * <p>This method simply delegates to {@link Strings#isNumeric(CharSequence)} and is kept for
+     * familiarity with Apache Commons Lang {@code NumberUtils.isDigits}.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Numbers.isDigits("12345");    // returns true
@@ -3460,12 +4168,44 @@ public final class Numbers {
      * Numbers.isDigits("");         // returns false
      * }</pre>
      *
+     * <p><b>Comparison of {@code isCreatable}, {@code isParsable} and {@code isDigits}:</b> the three predicates accept
+     * progressively different forms of numeric string:</p>
+     * <ul>
+     *   <li>{@code isDigits} &mdash; <i>digit characters only</i>: every character must be a Unicode digit; no sign,
+     *       decimal point, exponent, {@code 0x}/{@code #} prefix or type suffix (but non-ASCII digits ARE accepted).</li>
+     *   <li>{@code isParsable} &mdash; what {@code Integer}/{@code Long}/{@code Float}/{@code Double.parseXxx} accept:
+     *       ASCII digits with an optional leading sign and a single decimal point (a leading {@code "."} is allowed, a
+     *       trailing one is not); no hexadecimal, scientific notation, type suffix or non-ASCII digit.</li>
+     *   <li>{@code isCreatable} &mdash; any string {@link #createNumber(String)} can parse: like {@code isParsable} but
+     *       also accepting hexadecimal ({@code 0x}/{@code #}), octal, scientific notation, a trailing decimal point and
+     *       type suffixes ({@code l/L}, {@code f/F}, {@code d/D}). It is <i>not</i> a strict superset of {@code isParsable}:
+     *       a leading-zero decimal whose digits include {@code 8} or {@code 9} (e.g. {@code "08"}, {@code "09"}) is accepted
+     *       by {@code isParsable} but rejected by {@code isCreatable}, which reads a leading {@code 0} as octal.</li>
+     * </ul>
+     *
+     * <table border="1">
+     *   <caption>{@code isCreatable} vs {@code isParsable} vs {@code isDigits}</caption>
+     *   <tr><th>Input</th><th>{@code isCreatable}</th><th>{@code isParsable}</th><th>{@code isDigits}</th><th>Reason</th></tr>
+     *   <tr><td>{@code "123"}</td><td>{@code true}</td><td>{@code true}</td><td>{@code true}</td><td>plain non-negative integer</td></tr>
+     *   <tr><td>{@code "-123"}</td><td>{@code true}</td><td>{@code true}</td><td>{@code false}</td><td>leading sign is not a digit</td></tr>
+     *   <tr><td>{@code "123.45"}</td><td>{@code true}</td><td>{@code true}</td><td>{@code false}</td><td>decimal point</td></tr>
+     *   <tr><td>{@code ".5"}</td><td>{@code true}</td><td>{@code true}</td><td>{@code false}</td><td>leading decimal point (accepted)</td></tr>
+     *   <tr><td>{@code "123."}</td><td>{@code true}</td><td>{@code false}</td><td>{@code false}</td><td>trailing decimal point ({@code isParsable} rejects)</td></tr>
+     *   <tr><td>{@code "0xFF"}</td><td>{@code true}</td><td>{@code false}</td><td>{@code false}</td><td>hexadecimal</td></tr>
+     *   <tr><td>{@code "1.5e3"}</td><td>{@code true}</td><td>{@code false}</td><td>{@code false}</td><td>scientific notation</td></tr>
+     *   <tr><td>{@code "123L"}</td><td>{@code true}</td><td>{@code false}</td><td>{@code false}</td><td>type suffix (also {@code 1.5f}, {@code 2d})</td></tr>
+     *   <tr><td>Arabic-Indic {@code U+0661 U+0662 U+0663}</td><td>{@code false}</td><td>{@code false}</td><td>{@code true}</td><td>non-ASCII Unicode digits</td></tr>
+     *   <tr><td>{@code "abc"}, {@code ""}, {@code null}</td><td>{@code false}</td><td>{@code false}</td><td>{@code false}</td><td>not numeric</td></tr>
+     * </table>
+     *
      * @param str the string to check
      * @return {@code true} if {@code str} contains only Unicode digit characters, {@code false} otherwise
-     * @see #isNumber(String)
+     * @see #isCreatable(String)
      * @see #isParsable(String)
      * @see Strings#isNumeric(CharSequence)
+     * @deprecated Use {@code Strings#isNumeric(CharSequence)} instead
      */
+    @Deprecated
     public static boolean isDigits(final String str) {
         return Strings.isNumeric(str);
     }
@@ -3541,7 +4281,7 @@ public final class Numbers {
      *
      * <p>Note: It's copied from NumberUtils in Apache Commons Lang under Apache License 2.0</p>
      *
-     * <p>It's same as {@code Numbers.isConvertibleToNumber(String)}.</p>
+     * <p>This method is an exact alias of {@link #isCreatable(String)}, to which it delegates.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -3557,47 +4297,15 @@ public final class Numbers {
      *
      * @param str the string to check
      * @return {@code true} if the string is a valid number, otherwise {@code false}
-     * @see #isConvertibleToNumber(String)
+     * @see #isCreatable(String)
      * @see #isParsable(String)
-     * @see #isDigits(String)
+     * @see Strings#isNumber(String)
+     * @see Strings#isNumeric(CharSequence)
+     * @deprecated replaced by {@link #isCreatable(String)}
      */
+    @Deprecated
     public static boolean isNumber(final String str) {
-        return isConvertibleToNumber(str);
-    }
-
-    /**
-     * Checks if the given string represents a valid integer value (signed or unsigned).
-     *
-     * <p>A valid integer is a string that consists of an optional leading sign ({@code +} or {@code -})
-     * followed by one or more digit characters ({@code 0-9}). The entire string must match this pattern —
-     * no surrounding whitespace or extra characters are allowed.</p>
-     *
-     * <p><b>Note:</b> This method only validates the format of the string. It does <em>not</em> check
-     * whether the numeric value falls within the range of any specific integer type (e.g., {@code int}
-     * or {@code long}). Use {@link Integer#parseInt(String)} or {@link Long#parseLong(String)} for
-     * range-validated parsing.</p>
-     *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Numbers.isInteger("123");    // returns true
-     * Numbers.isInteger("-456");   // returns true
-     * Numbers.isInteger("+7");     // returns true
-     * Numbers.isInteger("0");      // returns true
-     * Numbers.isInteger("12.3");   // returns false (decimal point not allowed)
-     * Numbers.isInteger("abc");    // returns false
-     * Numbers.isInteger("");       // returns false
-     * Numbers.isInteger(null);     // returns false
-     * }</pre>
-     *
-     * @param str the string to check, may be {@code null}
-     * @return {@code true} if the string is a valid integer representation, {@code false} otherwise
-     * @see RegExUtil#INTEGER_MATCHER
-     * @see RegExUtil#POSITIVE_INTEGER_MATCHER
-     * @see RegExUtil#NEGATIVE_INTEGER_MATCHER
-     * @see RegExUtil#NUMBER_MATCHER
-     */
-    public static boolean isInteger(final String str) {
-        return RegExUtil.matches(str, RegExUtil.INTEGER_MATCHER);
+        return isCreatable(str);
     }
 
     private static final boolean[] alphanumerics = new boolean[128];
@@ -3657,7 +4365,7 @@ public final class Numbers {
         alphanumerics['D'] = true;
     }
 
-    static boolean quickCheckForIsConvertibleToNumber(final String str) {
+    static boolean quickCheckForisCreatable(final String str) {
         if (Strings.isEmpty(str)) {
             return false;
         }
@@ -3683,31 +4391,79 @@ public final class Numbers {
      *
      * <p>{@code null} and empty/blank {@code String} will return {@code false}.</p>
      *
-     * <p>Note, {@link #createNumber(String)} should return a number for every input resulting in {@code true}.</p>
+     * <p><b>Relationship between {@code isCreatable} and {@code createNumber}:</b> {@code isCreatable} is a
+     * <i>conservative</i> predictor of {@code createNumber}. If {@code isCreatable(s)} is {@code true}, then
+     * {@code createNumber(s)} is guaranteed to succeed (the forward guarantee); but a {@code false} result does
+     * <strong>not</strong> guarantee {@code createNumber(s)} fails &mdash; some leading-zero forms with a type suffix
+     * or exponent are rejected by {@code isCreatable} yet still parsed by {@code createNumber} (a quirk inherited from
+     * Apache Commons {@code NumberUtils}). The three possible cases:</p>
+     *
+     * <table border="1">
+     *   <caption>{@code isCreatable(s)} vs {@code createNumber(s)}</caption>
+     *   <tr><th>Input {@code s}</th><th>{@code isCreatable(s)}</th><th>{@code createNumber(s)}</th></tr>
+     *   <tr><td colspan="3"><i>{@code isCreatable} is {@code true} &rarr; {@code createNumber} always succeeds</i></td></tr>
+     *   <tr><td>{@code "123"}</td><td>{@code true}</td><td>{@code Integer} 123</td></tr>
+     *   <tr><td>{@code "0xFF"}</td><td>{@code true}</td><td>{@code Integer} 255 (hexadecimal)</td></tr>
+     *   <tr><td>{@code "1.5e3"}</td><td>{@code true}</td><td>{@code Double} 1500.0 (scientific notation)</td></tr>
+     *   <tr><td colspan="3"><i>{@code isCreatable} is {@code false}, yet {@code createNumber} still succeeds (conservative false-negative)</i></td></tr>
+     *   <tr><td>{@code "01f"}</td><td>{@code false}</td><td>{@code Float} 1.0</td></tr>
+     *   <tr><td>{@code "0123L"}</td><td>{@code false}</td><td>{@code Long} 83 (leading-zero octal)</td></tr>
+     *   <tr><td>{@code "01e1"}</td><td>{@code false}</td><td>{@code Double} 10.0</td></tr>
+     *   <tr><td colspan="3"><i>{@code isCreatable} is {@code false} and {@code createNumber} fails (the common case)</i></td></tr>
+     *   <tr><td>{@code "abc"}</td><td>{@code false}</td><td>throws {@code NumberFormatException}</td></tr>
+     *   <tr><td>{@code "1.2.3"}</td><td>{@code false}</td><td>throws {@code NumberFormatException}</td></tr>
+     *   <tr><td>{@code null}</td><td>{@code false}</td><td>{@code null}</td></tr>
+     * </table>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Numbers.isConvertibleToNumber("123");       // returns true
-     * Numbers.isConvertibleToNumber("123.45");    // returns true
-     * Numbers.isConvertibleToNumber("1.23e10");   // returns true
-     * Numbers.isConvertibleToNumber("0xFF");      // returns true   (hexadecimal)
-     * Numbers.isConvertibleToNumber("0X1A");      // returns true   (hexadecimal)
-     * Numbers.isConvertibleToNumber("010");       // returns true   (octal)
-     * Numbers.isConvertibleToNumber("09");        // returns false  (invalid octal, 9 not valid in octal)
-     * Numbers.isConvertibleToNumber("123L");      // returns true   (long type qualifier)
-     * Numbers.isConvertibleToNumber("123.45f");   // returns true   (float type qualifier)
-     * Numbers.isConvertibleToNumber("abc");       // returns false
-     * Numbers.isConvertibleToNumber(null);        // returns false
-     * Numbers.isConvertibleToNumber("");          // returns false
+     * Numbers.isCreatable("123");       // returns true
+     * Numbers.isCreatable("123.45");    // returns true
+     * Numbers.isCreatable("0xFF");      // returns true   (hexadecimal)
+     * Numbers.isCreatable("09");        // returns false  (invalid octal)
+     * Numbers.isCreatable("abc");       // returns false
+     * Numbers.isCreatable(null);        // returns false
+     * Numbers.isCreatable("");          // returns false
      * }</pre>
+     *
+     * <p><b>Comparison of {@code isCreatable}, {@code isParsable} and {@code isDigits}:</b> the three predicates accept
+     * progressively different forms of numeric string:</p>
+     * <ul>
+     *   <li>{@code isDigits} &mdash; <i>digit characters only</i>: every character must be a Unicode digit; no sign,
+     *       decimal point, exponent, {@code 0x}/{@code #} prefix or type suffix (but non-ASCII digits ARE accepted).</li>
+     *   <li>{@code isParsable} &mdash; what {@code Integer}/{@code Long}/{@code Float}/{@code Double.parseXxx} accept:
+     *       ASCII digits with an optional leading sign and a single decimal point (a leading {@code "."} is allowed, a
+     *       trailing one is not); no hexadecimal, scientific notation, type suffix or non-ASCII digit.</li>
+     *   <li>{@code isCreatable} &mdash; any string {@link #createNumber(String)} can parse: like {@code isParsable} but
+     *       also accepting hexadecimal ({@code 0x}/{@code #}), octal, scientific notation, a trailing decimal point and
+     *       type suffixes ({@code l/L}, {@code f/F}, {@code d/D}). It is <i>not</i> a strict superset of {@code isParsable}:
+     *       a leading-zero decimal whose digits include {@code 8} or {@code 9} (e.g. {@code "08"}, {@code "09"}) is accepted
+     *       by {@code isParsable} but rejected by {@code isCreatable}, which reads a leading {@code 0} as octal.</li>
+     * </ul>
+     *
+     * <table border="1">
+     *   <caption>{@code isCreatable} vs {@code isParsable} vs {@code isDigits}</caption>
+     *   <tr><th>Input</th><th>{@code isCreatable}</th><th>{@code isParsable}</th><th>{@code isDigits}</th><th>Reason</th></tr>
+     *   <tr><td>{@code "123"}</td><td>{@code true}</td><td>{@code true}</td><td>{@code true}</td><td>plain non-negative integer</td></tr>
+     *   <tr><td>{@code "-123"}</td><td>{@code true}</td><td>{@code true}</td><td>{@code false}</td><td>leading sign is not a digit</td></tr>
+     *   <tr><td>{@code "123.45"}</td><td>{@code true}</td><td>{@code true}</td><td>{@code false}</td><td>decimal point</td></tr>
+     *   <tr><td>{@code ".5"}</td><td>{@code true}</td><td>{@code true}</td><td>{@code false}</td><td>leading decimal point (accepted)</td></tr>
+     *   <tr><td>{@code "123."}</td><td>{@code true}</td><td>{@code false}</td><td>{@code false}</td><td>trailing decimal point ({@code isParsable} rejects)</td></tr>
+     *   <tr><td>{@code "0xFF"}</td><td>{@code true}</td><td>{@code false}</td><td>{@code false}</td><td>hexadecimal</td></tr>
+     *   <tr><td>{@code "1.5e3"}</td><td>{@code true}</td><td>{@code false}</td><td>{@code false}</td><td>scientific notation</td></tr>
+     *   <tr><td>{@code "123L"}</td><td>{@code true}</td><td>{@code false}</td><td>{@code false}</td><td>type suffix (also {@code 1.5f}, {@code 2d})</td></tr>
+     *   <tr><td>Arabic-Indic {@code U+0661 U+0662 U+0663}</td><td>{@code false}</td><td>{@code false}</td><td>{@code true}</td><td>non-ASCII Unicode digits</td></tr>
+     *   <tr><td>{@code "abc"}, {@code ""}, {@code null}</td><td>{@code false}</td><td>{@code false}</td><td>{@code false}</td><td>not numeric</td></tr>
+     * </table>
      *
      * @param str the string to check
      * @return {@code true} if the string is a correctly formatted number
-     * @see #isNumber(String)
      * @see #isParsable(String)
+     * @see #isDigits(String)
+     * @see #createNumber(String)
      */
-    public static boolean isConvertibleToNumber(final String str) {
-        if (!quickCheckForIsConvertibleToNumber(str)) {
+    public static boolean isCreatable(final String str) {
+        if (!quickCheckForisCreatable(str)) {
             return false;
         }
 
@@ -3720,6 +4476,20 @@ public final class Numbers {
         boolean foundDigit = false;
         // deal with any possible sign up front
         final int start = chars[0] == '-' || chars[0] == '+' ? 1 : 0;
+
+        if (len > start && chars[start] == '#') { // alternative hex prefix '#' (e.g. "#FF", "-#FF"), accepted by createNumber(String)
+            int i = start + 1;
+            if (i == len) {
+                return false; // str == "#" / "-#" / "+#"
+            }
+            // checking hex (it can't be anything else)
+            for (; i < chars.length; i++) {
+                if ((chars[i] < '0' || chars[i] > '9') && (chars[i] < 'a' || chars[i] > 'f') && (chars[i] < 'A' || chars[i] > 'F')) {
+                    return false;
+                }
+            }
+            return true;
+        }
 
         if (len > start + 1 && chars[start] == '0' && !Strings.contains(str, '.')) { // leading 0, skip if is a decimal number
             if (chars[start + 1] == 'x' || chars[start + 1] == 'X') { // leading 0x/0X
@@ -3813,48 +4583,9 @@ public final class Numbers {
             // last character is illegal
             return false;
         }
-        // allowSigns is true iff the val ends in 'E'
+        // allowSigns is true if the val ends in 'E'
         // found digit it to make sure weird stuff like '.' and '1E-' doesn't pass
         return !allowSigns && foundDigit;
-    }
-
-    /**
-     * <p>Checks whether the String a valid Java number.</p>
-     *
-     * <p>Valid numbers include hexadecimal marked with the {@code 0x} or
-     * {@code 0X} qualifier, octal numbers, scientific notation and
-     * numbers marked with a type qualifier (e.g., 123L).</p>
-     *
-     * <p>Non-hexadecimal strings beginning with a leading zero are
-     * treated as octal values. Thus the string {@code 09} will return
-     * {@code false}, since {@code 9} is not a valid octal value.
-     * However, numbers beginning with {@code 0.} are treated as decimal.</p>
-     *
-     * <p>{@code null} and empty/blank {@code String} will return {@code false}.</p>
-     *
-     * <p>Note, {@link #createNumber(String)} should return a number for every input resulting in {@code true}.</p>
-     *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Numbers.isCreatable("123");       // returns true
-     * Numbers.isCreatable("123.45");    // returns true
-     * Numbers.isCreatable("0xFF");      // returns true   (hexadecimal)
-     * Numbers.isCreatable("09");        // returns false  (invalid octal)
-     * Numbers.isCreatable("abc");       // returns false
-     * Numbers.isCreatable(null);        // returns false
-     * Numbers.isCreatable("");          // returns false
-     * }</pre>
-     *
-     * @param str the string to check
-     * @return {@code true} if the string is a correctly formatted number
-     * @see #isNumber(String)
-     * @see #isParsable(String)
-     * @see #isConvertibleToNumber(String)
-     * @deprecated replaced by {@link #isConvertibleToNumber(String)}
-     */
-    @Deprecated
-    public static boolean isCreatable(final String str) {
-        return isConvertibleToNumber(str);
     }
 
     /**
@@ -3865,15 +4596,39 @@ public final class Numbers {
      * {@link Double#parseDouble(String)}. This method can be used instead of catching {@link NumberFormatException} when calling one of those methods.</p>
      *
      * <p>Hexadecimal and scientific notations are <strong>not</strong> considered parsable.
-     * See {@link #isConvertibleToNumber(String)} on those cases.</p>
+     * See {@link #isCreatable(String)} on those cases.</p>
      *
      * <p>{@code Null} and empty String will return {@code false}.</p>
+     *
+     * <p><b>Note:</b> this checks only that the string is <i>syntactically</i> a decimal number; it does
+     * <strong>not</strong> verify that the value fits in any particular type. A long run of digits such as
+     * {@code "99999999999999999999"} returns {@code true}, yet {@link Integer#parseInt(String)} and
+     * {@link Long#parseLong(String)} would still throw {@link NumberFormatException} on overflow (only
+     * {@link Float#parseFloat(String)}/{@link Double#parseDouble(String)} accept it, saturating to infinity).
+     * Use a range-checked converter such as {@link #toInt(String)} / {@link #toLong(String)} when the value
+     * must fit the target type.</p>
+     *
+     * <p><b>Note:</b> only ASCII digits {@code '0'} to {@code '9'} are recognized. A run of non-ASCII Unicode
+     * digits (for example the Arabic-Indic digits {@code U+0661..U+0669}) returns {@code false}: although
+     * {@link Integer#parseInt(String)} and {@link Long#parseLong(String)} would accept such digits,
+     * {@link Float#parseFloat(String)} and {@link Double#parseDouble(String)} reject them. Restricting to ASCII
+     * therefore keeps the guarantee that a {@code true} result is accepted by {@link Float#parseFloat(String)} /
+     * {@link Double#parseDouble(String)} (and, for a pure-integer form, by {@link Integer#parseInt(String)} /
+     * {@link Long#parseLong(String)} too, subject to the overflow caveat above). A decimal form such as
+     * {@code "1.5"} is <i>not</i> accepted by {@code parseInt}/{@code parseLong}, so a {@code true} result does not
+     * imply that all four {@code parse*} methods succeed.</p>
+     *
+     * <p><b>Note:</b> at most one decimal point may appear, and it must be followed by at least one digit: a leading
+     * decimal point is accepted ({@code ".5"} &rarr; {@code true}) but a trailing one is not ({@code "123."} &rarr;
+     * {@code false}). An optional leading {@code '+'}/{@code '-'} sign is allowed.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Numbers.isParsable("123");       // returns true
      * Numbers.isParsable("-123");      // returns true
      * Numbers.isParsable("123.45");    // returns true
+     * Numbers.isParsable(".5");        // returns true   (leading decimal point allowed)
+     * Numbers.isParsable("123.");      // returns false  (trailing decimal point not allowed)
      * Numbers.isParsable("1.23e10");   // returns false  (scientific notation not supported)
      * Numbers.isParsable("0xFF");      // returns false  (hexadecimal not supported)
      * Numbers.isParsable("abc");       // returns false
@@ -3881,11 +4636,43 @@ public final class Numbers {
      * Numbers.isParsable("");          // returns false
      * }</pre>
      *
+     * <p><b>Comparison of {@code isCreatable}, {@code isParsable} and {@code isDigits}:</b> the three predicates accept
+     * progressively different forms of numeric string:</p>
+     * <ul>
+     *   <li>{@code isDigits} &mdash; <i>digit characters only</i>: every character must be a Unicode digit; no sign,
+     *       decimal point, exponent, {@code 0x}/{@code #} prefix or type suffix (but non-ASCII digits ARE accepted).</li>
+     *   <li>{@code isParsable} &mdash; what {@code Integer}/{@code Long}/{@code Float}/{@code Double.parseXxx} accept:
+     *       ASCII digits with an optional leading sign and a single decimal point (a leading {@code "."} is allowed, a
+     *       trailing one is not); no hexadecimal, scientific notation, type suffix or non-ASCII digit.</li>
+     *   <li>{@code isCreatable} &mdash; any string {@link #createNumber(String)} can parse: like {@code isParsable} but
+     *       also accepting hexadecimal ({@code 0x}/{@code #}), octal, scientific notation, a trailing decimal point and
+     *       type suffixes ({@code l/L}, {@code f/F}, {@code d/D}). It is <i>not</i> a strict superset of {@code isParsable}:
+     *       a leading-zero decimal whose digits include {@code 8} or {@code 9} (e.g. {@code "08"}, {@code "09"}) is accepted
+     *       by {@code isParsable} but rejected by {@code isCreatable}, which reads a leading {@code 0} as octal.</li>
+     * </ul>
+     *
+     * <table border="1">
+     *   <caption>{@code isCreatable} vs {@code isParsable} vs {@code isDigits}</caption>
+     *   <tr><th>Input</th><th>{@code isCreatable}</th><th>{@code isParsable}</th><th>{@code isDigits}</th><th>Reason</th></tr>
+     *   <tr><td>{@code "123"}</td><td>{@code true}</td><td>{@code true}</td><td>{@code true}</td><td>plain non-negative integer</td></tr>
+     *   <tr><td>{@code "-123"}</td><td>{@code true}</td><td>{@code true}</td><td>{@code false}</td><td>leading sign is not a digit</td></tr>
+     *   <tr><td>{@code "123.45"}</td><td>{@code true}</td><td>{@code true}</td><td>{@code false}</td><td>decimal point</td></tr>
+     *   <tr><td>{@code ".5"}</td><td>{@code true}</td><td>{@code true}</td><td>{@code false}</td><td>leading decimal point (accepted)</td></tr>
+     *   <tr><td>{@code "123."}</td><td>{@code true}</td><td>{@code false}</td><td>{@code false}</td><td>trailing decimal point ({@code isParsable} rejects)</td></tr>
+     *   <tr><td>{@code "0xFF"}</td><td>{@code true}</td><td>{@code false}</td><td>{@code false}</td><td>hexadecimal</td></tr>
+     *   <tr><td>{@code "1.5e3"}</td><td>{@code true}</td><td>{@code false}</td><td>{@code false}</td><td>scientific notation</td></tr>
+     *   <tr><td>{@code "123L"}</td><td>{@code true}</td><td>{@code false}</td><td>{@code false}</td><td>type suffix (also {@code 1.5f}, {@code 2d})</td></tr>
+     *   <tr><td>Arabic-Indic {@code U+0661 U+0662 U+0663}</td><td>{@code false}</td><td>{@code false}</td><td>{@code true}</td><td>non-ASCII Unicode digits</td></tr>
+     *   <tr><td>{@code "abc"}, {@code ""}, {@code null}</td><td>{@code false}</td><td>{@code false}</td><td>{@code false}</td><td>not numeric</td></tr>
+     * </table>
+     *
      * @param str the String to check
      * @return {@code true} if the string is a parsable number.
-     * @see #isConvertibleToNumber(String)
-     * @see #isNumber(String)
+     * @see #isCreatable(String)
      * @see #isDigits(String)
+     * @see Strings#isNumeric(CharSequence)
+     * @see Strings#isAsciiNumber(String)
+     * @see Strings#isAsciiInteger(String)
      */
     public static boolean isParsable(final String str) {
         if (Strings.isEmpty(str)) {
@@ -3924,7 +4711,11 @@ public final class Numbers {
                 decimalPoints++;
             }
 
-            if ((decimalPoints > 1) || (!isDecimalPoint && !Character.isDigit(ch))) {
+            // Only ASCII digits '0'..'9' are accepted (NOT Character.isDigit, which also matches non-ASCII
+            // Unicode digits): Float.parseFloat/Double.parseDouble reject non-ASCII digits, so accepting them
+            // here would break the guarantee that a 'true' result is accepted by Float.parseFloat/Double.parseDouble
+            // (the parsers the OR-contract relies on for a decimal form; parseInt/parseLong reject any decimal form).
+            if ((decimalPoints > 1) || (!isDecimalPoint && (ch < '0' || ch > '9'))) {
                 return false;
             }
         }
@@ -3933,6 +4724,29 @@ public final class Numbers {
     }
 
     //    /**
+
+    /**
+     * Returns {@code true} if {@code n} is a <a href="http://mathworld.wolfram.com/PrimeNumber.html">prime number</a>.
+     *
+     * <p>Convenience {@code int} overload that widens to {@link #isPrime(long)}; provided to complete the
+     * {@code int}/{@code long} family (as with {@link #isPerfectSquare(int)} and {@link #isPowerOfTwo(int)}).</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Numbers.isPrime(2);     // returns true  (smallest prime)
+     * Numbers.isPrime(17);    // returns true
+     * Numbers.isPrime(100);   // returns false (composite)
+     * Numbers.isPrime(1);     // returns false (not prime by definition)
+     * }</pre>
+     *
+     * @param n the number to test for primality; must be &gt;= 0
+     * @return {@code true} if n is prime, {@code false} otherwise (0 and 1 return {@code false})
+     * @throws IllegalArgumentException if {@code n} is negative
+     * @see #isPrime(long)
+     */
+    public static boolean isPrime(final int n) {
+        return isPrime((long) n);
+    }
 
     /**
      * Returns {@code true} if {@code n} is a <a href="http://mathworld.wolfram.com/PrimeNumber.html">prime number</a>:
@@ -3957,6 +4771,7 @@ public final class Numbers {
      * @param n the number to test for primality; must be &gt;= 0
      * @return {@code true} if n is prime, {@code false} otherwise (0 and 1 return {@code false})
      * @throws IllegalArgumentException if {@code n} is negative
+     * @see #isPrime(int)
      * @see BigInteger#isProbablePrime(int)
      */
     @SuppressWarnings("ConditionCoveredByFurtherCondition")
@@ -4084,6 +4899,9 @@ public final class Numbers {
      *
      * @param x the integer to check
      * @return {@code true} if x is a power of two, {@code false} otherwise
+     * @see #isPowerOfTwo(long)
+     * @see #isPowerOfTwo(double)
+     * @see #isPowerOfTwo(BigInteger)
      */
     public static boolean isPowerOfTwo(final int x) {
         return x > 0 && (x & (x - 1)) == 0;
@@ -4107,6 +4925,9 @@ public final class Numbers {
      *
      * @param x the long value to check
      * @return {@code true} if x is a power of two, {@code false} otherwise
+     * @see #isPowerOfTwo(int)
+     * @see #isPowerOfTwo(double)
+     * @see #isPowerOfTwo(BigInteger)
      */
     public static boolean isPowerOfTwo(final long x) {
         return x > 0 && (x & (x - 1)) == 0;
@@ -4220,7 +5041,7 @@ public final class Numbers {
      * @param x the integer value to compute the logarithm of, must be positive
      * @param mode the rounding mode to apply
      * @return the base-2 logarithm of the specified value, rounded according to the specified rounding mode
-     * @throws IllegalArgumentException if x is not positive
+     * @throws IllegalArgumentException if {@code x <= 0}, or if {@code mode} is {@code null}
      * @throws ArithmeticException if {@code mode} is {@link RoundingMode#UNNECESSARY} and {@code x}
      *     is not a power of two
      * @see #log2(long, RoundingMode)
@@ -4228,7 +5049,6 @@ public final class Numbers {
      * @see #log2(double, RoundingMode)
      * @see #log2(BigInteger, RoundingMode)
      * @see RoundingMode
-     * @throws IllegalArgumentException if {@code mode} is {@code null}
      */
     @SuppressFBWarnings("SF_SWITCH_FALLTHROUGH")
     public static int log2(final int x, final RoundingMode mode) {
@@ -4278,7 +5098,7 @@ public final class Numbers {
      * @param x the value to compute the logarithm of, must be positive
      * @param mode the rounding mode to apply
      * @return the base-2 logarithm of x, rounded according to the specified mode
-     * @throws IllegalArgumentException if {@code x <= 0}
+     * @throws IllegalArgumentException if {@code x <= 0}, or if {@code mode} is {@code null}
      * @throws ArithmeticException if {@code mode} is {@link RoundingMode#UNNECESSARY} and {@code x}
      *     is not a power of two
      * @see #log2(int, RoundingMode)
@@ -4286,7 +5106,6 @@ public final class Numbers {
      * @see #log2(double, RoundingMode)
      * @see #log2(BigInteger, RoundingMode)
      * @see RoundingMode
-     * @throws IllegalArgumentException if {@code mode} is {@code null}
      */
     @SuppressFBWarnings("SF_SWITCH_FALLTHROUGH")
     public static int log2(final long x, final RoundingMode mode) {
@@ -4378,7 +5197,7 @@ public final class Numbers {
      * @param mode the rounding mode to apply
      * @return the base-2 logarithm of the specified value, rounded to an int
      * @throws IllegalArgumentException if {@code x <= 0.0}, {@code x} is NaN, or {@code x} is
-     *     infinite
+     *     infinite, or if {@code mode} is {@code null}
      * @throws ArithmeticException if {@code mode} is {@link RoundingMode#UNNECESSARY} and {@code x}
      *     is not a power of two
      * @see #log2(int, RoundingMode)
@@ -4386,7 +5205,6 @@ public final class Numbers {
      * @see #log2(double)
      * @see #log2(BigInteger, RoundingMode)
      * @see RoundingMode
-     * @throws IllegalArgumentException if {@code mode} is {@code null}, or if {@code x} is not positive or not finite
      */
     @SuppressFBWarnings("SF_SWITCH_FALLTHROUGH")
     public static int log2(final double x, final RoundingMode mode) throws IllegalArgumentException {
@@ -4451,7 +5269,7 @@ public final class Numbers {
      * @param x the value to compute the logarithm of, must be positive
      * @param mode the rounding mode to apply
      * @return the base-2 logarithm of the specified value, rounded according to the specified rounding mode
-     * @throws IllegalArgumentException if {@code x <= 0}
+     * @throws IllegalArgumentException if {@code x <= 0}, or if {@code mode} is {@code null}
      * @throws ArithmeticException if {@code mode} is {@link RoundingMode#UNNECESSARY} and {@code x}
      *     is not a power of two
      * @see #log2(int, RoundingMode)
@@ -4459,7 +5277,6 @@ public final class Numbers {
      * @see #log2(double)
      * @see #log2(double, RoundingMode)
      * @see RoundingMode
-     * @throws IllegalArgumentException if {@code mode} is {@code null}
      */
     @SuppressFBWarnings("SF_SWITCH_FALLTHROUGH")
     @SuppressWarnings("fallthrough")
@@ -4516,14 +5333,13 @@ public final class Numbers {
      * @param x the integer value to compute the logarithm of, must be positive
      * @param mode the rounding mode to apply
      * @return the base-10 logarithm of the specified value, rounded according to the specified rounding mode
-     * @throws IllegalArgumentException if x is not positive
+     * @throws IllegalArgumentException if {@code x <= 0}, or if {@code mode} is {@code null}
      * @throws ArithmeticException if {@code mode} is {@link RoundingMode#UNNECESSARY} and {@code x}
      *     is not a power of ten
      * @see #log10(long, RoundingMode)
      * @see #log10(double)
      * @see #log10(BigInteger, RoundingMode)
      * @see RoundingMode
-     * @throws IllegalArgumentException if {@code mode} is {@code null}
      */
     @SuppressFBWarnings("SF_SWITCH_FALLTHROUGH")
     public static int log10(final int x, final RoundingMode mode) {
@@ -4583,14 +5399,13 @@ public final class Numbers {
      * @param x the value to compute the logarithm of, must be positive
      * @param mode the rounding mode to apply
      * @return the base-10 logarithm of the specified value, rounded according to the specified rounding mode
-     * @throws IllegalArgumentException if {@code x <= 0}
+     * @throws IllegalArgumentException if {@code x <= 0}, or if {@code mode} is {@code null}
      * @throws ArithmeticException if {@code mode} is {@link RoundingMode#UNNECESSARY} and {@code x}
      *     is not a power of ten
      * @see #log10(int, RoundingMode)
      * @see #log10(double)
      * @see #log10(BigInteger, RoundingMode)
      * @see RoundingMode
-     * @throws IllegalArgumentException if {@code mode} is {@code null}
      */
     @SuppressFBWarnings("SF_SWITCH_FALLTHROUGH")
     public static int log10(final long x, final RoundingMode mode) {
@@ -4685,19 +5500,18 @@ public final class Numbers {
      * @param x the value to compute the logarithm of, must be positive
      * @param mode the rounding mode to apply
      * @return the base-10 logarithm of the specified value, rounded according to the specified rounding mode
-     * @throws IllegalArgumentException if {@code x <= 0}
+     * @throws IllegalArgumentException if {@code x <= 0}, or if {@code mode} is {@code null}
      * @throws ArithmeticException if {@code mode} is {@link RoundingMode#UNNECESSARY} and {@code x}
      *     is not a power of ten
      * @see #log10(int, RoundingMode)
      * @see #log10(long, RoundingMode)
      * @see #log10(double)
      * @see RoundingMode
-     * @throws IllegalArgumentException if {@code mode} is {@code null}
      */
     @SuppressFBWarnings("SF_SWITCH_FALLTHROUGH")
     public static int log10(final BigInteger x, final RoundingMode mode) {
         N.checkArgNotNull(mode);
-        checkPositive("x", x);
+        checkPositive("x", N.checkArgNotNull(x));
         if (fitsInLong(x)) {
             return log10(x.longValue(), mode);
         }
@@ -4901,6 +5715,36 @@ public final class Numbers {
     }
 
     /**
+     * Returns the smallest power of two greater than or equal to {@code x}. This is equivalent to
+     * {@code Numbers.powExact(2, Numbers.log2(x, CEILING))}.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Numbers.ceilingPowerOfTwo(7);      // returns 8     (next power of 2 after 7)
+     * Numbers.ceilingPowerOfTwo(8);      // returns 8     (8 is already a power of 2)
+     * Numbers.ceilingPowerOfTwo(9);      // returns 16    (next power of 2 after 9)
+     * Numbers.ceilingPowerOfTwo(100);    // returns 128   (2^7 = 128)
+     * Numbers.ceilingPowerOfTwo(1000);   // returns 1024  (2^10 = 1024)
+     * }</pre>
+     *
+     * @param x the value to compute the ceiling power of two for, must be positive
+     * @return the smallest power of two greater than or equal to x
+     * @throws IllegalArgumentException if {@code x <= 0}
+     * @throws ArithmeticException if the next-higher power of two is not representable as an
+     *         {@code int}, i.e., when {@code x > 2^30}
+     * @see #ceilingPowerOfTwo(long)
+     * @see #ceilingPowerOfTwo(BigInteger)
+     * @see #floorPowerOfTwo(int)
+     */
+    public static int ceilingPowerOfTwo(final int x) {
+        checkPositive("x", x);
+        if (x > (1 << (Integer.SIZE - 2))) {
+            throw new ArithmeticException("ceilingPowerOfTwo(" + x + ") is not representable as an int");
+        }
+        return 1 << -Integer.numberOfLeadingZeros(x - 1);
+    }
+
+    /**
      * Returns the smallest power of two greater than or equal to {@code x}.  This is equivalent to
      * {@code Numbers.powExact(2, Numbers.log2(x, CEILING))}.
      *
@@ -4918,6 +5762,9 @@ public final class Numbers {
      * @throws IllegalArgumentException if {@code x <= 0}
      * @throws ArithmeticException if the next-higher power of two is not representable as a
      *         {@code long}, i.e., when {@code x > 2^62}
+     * @see #ceilingPowerOfTwo(int)
+     * @see #ceilingPowerOfTwo(BigInteger)
+     * @see #floorPowerOfTwo(long)
      */
     public static long ceilingPowerOfTwo(final long x) {
         checkPositive("x", x);
@@ -4943,12 +5790,38 @@ public final class Numbers {
      *
      * @param x the BigInteger value (must be positive)
      * @return the smallest power of two greater than or equal to x
-     * @throws IllegalArgumentException if x is not positive
+     * @throws IllegalArgumentException if x is not positive, or if {@code x} is {@code null}
+     * @see #ceilingPowerOfTwo(int)
      * @see #ceilingPowerOfTwo(long)
      * @see #floorPowerOfTwo(BigInteger)
      */
     public static BigInteger ceilingPowerOfTwo(final BigInteger x) {
         return BigInteger.ZERO.setBit(log2(x, RoundingMode.CEILING));
+    }
+
+    /**
+     * Returns the largest power of two less than or equal to {@code x}. This is equivalent to
+     * {@code Numbers.powExact(2, Numbers.log2(x, FLOOR))}.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Numbers.floorPowerOfTwo(100);   // returns 64    (2^6)
+     * Numbers.floorPowerOfTwo(128);   // returns 128   (already power of 2)
+     * Numbers.floorPowerOfTwo(129);   // returns 128
+     * Numbers.floorPowerOfTwo(1);     // returns 1     (2^0)
+     * }</pre>
+     *
+     * @param x the value to compute the floor power of two for, must be positive
+     * @return the largest power of two less than or equal to x
+     * @throws IllegalArgumentException if {@code x <= 0}
+     * @see #floorPowerOfTwo(long)
+     * @see #floorPowerOfTwo(BigInteger)
+     * @see #ceilingPowerOfTwo(int)
+     */
+    public static int floorPowerOfTwo(final int x) {
+        checkPositive("x", x);
+
+        return 1 << ((Integer.SIZE - 1) - Integer.numberOfLeadingZeros(x));
     }
 
     /**
@@ -4966,6 +5839,9 @@ public final class Numbers {
      * @param x the value to compute the floor power of two for, must be positive
      * @return the largest power of two less than or equal to x
      * @throws IllegalArgumentException if {@code x <= 0}
+     * @see #floorPowerOfTwo(int)
+     * @see #floorPowerOfTwo(BigInteger)
+     * @see #ceilingPowerOfTwo(long)
      */
     public static long floorPowerOfTwo(final long x) {
         checkPositive("x", x);
@@ -4991,7 +5867,8 @@ public final class Numbers {
      *
      * @param x the BigInteger value (must be positive)
      * @return the largest power of two less than or equal to x
-     * @throws IllegalArgumentException if x is not positive
+     * @throws IllegalArgumentException if x is not positive, or if {@code x} is {@code null}
+     * @see #floorPowerOfTwo(int)
      * @see #floorPowerOfTwo(long)
      * @see #ceilingPowerOfTwo(BigInteger)
      */
@@ -5020,13 +5897,12 @@ public final class Numbers {
      * @param x the value to compute the square root of; must be non-negative
      * @param mode the rounding mode to apply
      * @return the integer square root of {@code x}, rounded according to the specified mode
-     * @throws IllegalArgumentException if {@code x < 0}
+     * @throws IllegalArgumentException if {@code x < 0}, or if {@code mode} is {@code null}
      * @throws ArithmeticException if {@code mode} is {@link RoundingMode#UNNECESSARY} and
      *         {@code x} is not a perfect square
      * @see #sqrt(long, RoundingMode)
      * @see #sqrt(BigInteger, RoundingMode)
      * @see RoundingMode
-     * @throws IllegalArgumentException if {@code mode} is {@code null}
      */
     @SuppressFBWarnings("SF_SWITCH_FALLTHROUGH")
     @SuppressWarnings("fallthrough")
@@ -5092,13 +5968,12 @@ public final class Numbers {
      * @param x the value to compute the square root of; must be non-negative
      * @param mode the rounding mode to apply
      * @return the integer square root of {@code x}, rounded according to the specified mode
-     * @throws IllegalArgumentException if {@code x < 0}
+     * @throws IllegalArgumentException if {@code x < 0}, or if {@code mode} is {@code null}
      * @throws ArithmeticException if {@code mode} is {@link RoundingMode#UNNECESSARY} and
      *         {@code x} is not a perfect square
      * @see #sqrt(int, RoundingMode)
      * @see #sqrt(BigInteger, RoundingMode)
      * @see RoundingMode
-     * @throws IllegalArgumentException if {@code mode} is {@code null}
      */
     public static long sqrt(final long x, final RoundingMode mode) {
         N.checkArgNotNull(mode);
@@ -5187,22 +6062,21 @@ public final class Numbers {
      * Numbers.sqrt(large, RoundingMode.DOWN);   // returns the rounded-down square root
      * }</pre>
      *
-     * @param x the value to compute the square root of; must be non-negative
+     * @param x the value to compute the square root of; must be non-null and non-negative
      * @param mode the rounding mode to apply
      * @return the integer square root of {@code x}, rounded according to the specified mode
-     * @throws IllegalArgumentException if {@code x} is negative
+     * @throws IllegalArgumentException if {@code x} is {@code null} or negative, or if {@code mode} is {@code null}
      * @throws ArithmeticException if {@code mode} is {@link RoundingMode#UNNECESSARY} and
      *         {@code x} is not a perfect square
      * @see RoundingMode
      * @see #sqrt(int, RoundingMode)
      * @see #sqrt(long, RoundingMode)
-     * @throws IllegalArgumentException if {@code mode} is {@code null}
      */
     @SuppressFBWarnings("SF_SWITCH_FALLTHROUGH")
     @SuppressWarnings("fallthrough")
     public static BigInteger sqrt(final BigInteger x, final RoundingMode mode) {
         N.checkArgNotNull(mode);
-        checkNonNegative("x", x);
+        checkNonNegative("x", N.checkArgNotNull(x));
         if (fitsInLong(x)) {
             return BigInteger.valueOf(sqrt(x.longValue(), mode));
         }
@@ -5304,7 +6178,8 @@ public final class Numbers {
      * @param mode the rounding mode to apply
      * @return the result of {@code p / q} rounded according to the specified mode
      * @throws IllegalArgumentException if {@code mode} is {@code null}
-     * @throws ArithmeticException if {@code q == 0}, or if {@code mode == UNNECESSARY} and {@code p}
+     * @throws ArithmeticException if {@code q == 0}; if {@code p == Integer.MIN_VALUE && q == -1}
+     *         (the quotient 2^31 overflows an int); or if {@code mode == UNNECESSARY} and {@code p}
      *         is not an integer multiple of {@code q}
      * @see RoundingMode
      * @see #divide(long, long, RoundingMode)
@@ -5394,7 +6269,8 @@ public final class Numbers {
      * @param mode the rounding mode to apply
      * @return the result of {@code p / q} rounded according to the specified mode
      * @throws IllegalArgumentException if {@code mode} is {@code null}
-     * @throws ArithmeticException if {@code q == 0}, or if {@code mode == UNNECESSARY} and {@code p}
+     * @throws ArithmeticException if {@code q == 0}; if {@code p == Long.MIN_VALUE && q == -1}
+     *         (the quotient 2^63 overflows a long); or if {@code mode == UNNECESSARY} and {@code p}
      *         is not an integer multiple of {@code q}
      * @see RoundingMode
      * @see #divide(int, int, RoundingMode)
@@ -5481,6 +6357,7 @@ public final class Numbers {
      * @param mode the rounding mode to apply
      * @return the result of {@code p / q} rounded according to the specified mode as a BigInteger
      * @throws IllegalArgumentException if {@code mode} is {@code null}
+     * @throws NullPointerException if {@code p} or {@code q} is {@code null}
      * @throws ArithmeticException if {@code q} is zero, or if {@code mode == UNNECESSARY} and {@code p}
      *         is not an integer multiple of {@code q}
      * @see RoundingMode
@@ -5567,7 +6444,7 @@ public final class Numbers {
      */
     public static long mod(final long x, final long m) {
         if (m <= 0) {
-            throw new ArithmeticException("Modulus must be positive");
+            throw new ArithmeticException("Modulus " + m + " must be > 0");
         }
         final long result = x % m;
         return (result >= 0) ? result : result + m;
@@ -5753,9 +6630,10 @@ public final class Numbers {
      *
      * <p>Special cases:
      * <ul>
-     * <li>The invocations {@code Numbers.lcm(Integer.MIN_VALUE, n)} and {@code Numbers.lcm(n, Integer.MIN_VALUE)},
-     * where {@code Math.abs(n)} is a power of 2, throw an {@code ArithmeticException}, because the result
-     * would be 2^31, which is too large for an int value.</li>
+     * <li>The invocations {@code Numbers.lcm(Integer.MIN_VALUE, n)} and {@code Numbers.lcm(n, Integer.MIN_VALUE)} throw
+     * an {@code ArithmeticException} for every non-zero {@code n}, because once an operand is {@code -2^31} the true LCM
+     * is at least 2^31, which is too large for an int value (the smallest such case is when {@code Math.abs(n)} is a
+     * power of 2, where the result would be exactly 2^31).</li>
      * <li>The result of {@code Numbers.lcm(0, x)} and {@code Numbers.lcm(x, 0)} is {@code 0} for any {@code x}.</li>
      * </ul>
      *
@@ -5773,13 +6651,14 @@ public final class Numbers {
             return 0;
         }
 
-        final int lcm = abs(multiplyExact(a / gcd(a, b), b));
+        // Compute in long so the product cannot overflow (|a / gcd| and |b| are each <= 2^31), then range-check once.
+        final long lcm = abs((long) (a / gcd(a, b)) * b);
 
-        if (lcm == Integer.MIN_VALUE) {
-            throw new ArithmeticException();
+        if (lcm > Integer.MAX_VALUE) {
+            throw new ArithmeticException("overflow: lcm(" + a + ", " + b + ") is not representable as a non-negative int");
         }
 
-        return lcm;
+        return (int) lcm;
     }
 
     /**
@@ -5802,9 +6681,10 @@ public final class Numbers {
      *
      * <p>Special cases:
      * <ul>
-     * <li>The invocations {@code Numbers.lcm(Long.MIN_VALUE, n)} and {@code Numbers.lcm(n, Long.MIN_VALUE)},
-     * where {@code Math.abs(n)} is a power of 2, throw an {@code ArithmeticException}, because the result
-     * would be 2^63, which is too large for a long value.</li>
+     * <li>The invocations {@code Numbers.lcm(Long.MIN_VALUE, n)} and {@code Numbers.lcm(n, Long.MIN_VALUE)} throw an
+     * {@code ArithmeticException} for every non-zero {@code n}, because once an operand is {@code -2^63} the true LCM is
+     * at least 2^63, which is too large for a long value (the smallest such case is when {@code Math.abs(n)} is a power
+     * of 2, where the result would be exactly 2^63).</li>
      * <li>The result of {@code Numbers.lcm(0L, x)} and {@code Numbers.lcm(x, 0L)} is {@code 0L} for any {@code x}.</li>
      * </ul>
      *
@@ -5822,13 +6702,86 @@ public final class Numbers {
             return 0;
         }
 
-        final long lcm = abs(multiplyExact(a / gcd(a, b), b));
+        final long quotient = a / gcd(a, b); // computed outside the try: gcd >= 1, so this cannot throw
 
-        if (lcm == Long.MIN_VALUE) {
-            throw new ArithmeticException();
+        try {
+            final long lcm = abs(multiplyExact(quotient, b));
+
+            if (lcm != Long.MIN_VALUE) { // MIN_VALUE means the true lcm is 2^63, which is not a non-negative long
+                return lcm;
+            }
+        } catch (final ArithmeticException e) {
+            // the product overflowed long -> fall through to the single descriptive throw below
         }
 
-        return lcm;
+        throw new ArithmeticException("overflow: lcm(" + a + ", " + b + ") is not representable as a non-negative long");
+    }
+
+    /**
+     * Returns the greatest common divisor (GCD) of two {@code BigInteger} values.
+     *
+     * <p>This convenience wrapper around {@link BigInteger#gcd(BigInteger)} completes the
+     * {@code int}/{@code long}/{@code BigInteger} family. As with the primitive overloads the result is
+     * non-negative, the computation is sign-independent, and {@code gcd(0, 0)} returns {@code 0}. Unlike the
+     * primitive overloads there is no overflow case.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Numbers.gcd(BigInteger.valueOf(12), BigInteger.valueOf(8));    // returns 4
+     * Numbers.gcd(BigInteger.ZERO, BigInteger.TEN);                  // returns 10
+     * Numbers.gcd(BigInteger.valueOf(-12), BigInteger.valueOf(8));   // returns 4  (sign-independent)
+     * }</pre>
+     *
+     * @param a the first value; must not be {@code null}
+     * @param b the second value; must not be {@code null}
+     * @return the greatest common divisor of the absolute values of {@code a} and {@code b}
+     * @throws IllegalArgumentException if {@code a} or {@code b} is {@code null}
+     * @see #gcd(int, int)
+     * @see #gcd(long, long)
+     * @see #lcm(BigInteger, BigInteger)
+     * @see BigInteger#gcd(BigInteger)
+     */
+    public static BigInteger gcd(final BigInteger a, final BigInteger b) {
+        N.checkArgNotNull(a, "a");
+        N.checkArgNotNull(b, "b");
+
+        return a.gcd(b);
+    }
+
+    /**
+     * Returns the least common multiple (LCM) of two {@code BigInteger} values.
+     *
+     * <p>This wrapper completes the {@code int}/{@code long}/{@code BigInteger} family (there is no
+     * {@code BigInteger.lcm}). It is computed as {@code |a / gcd(a, b) * b|}. As with the primitive overloads
+     * the result is non-negative and {@code lcm(0, x) == lcm(x, 0) == 0}. Unlike the primitive overloads there
+     * is no overflow case.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Numbers.lcm(BigInteger.valueOf(4), BigInteger.valueOf(6));     // returns 12
+     * Numbers.lcm(BigInteger.valueOf(12), BigInteger.valueOf(18));   // returns 36
+     * Numbers.lcm(BigInteger.ZERO, BigInteger.TEN);                  // returns 0
+     * Numbers.lcm(BigInteger.valueOf(-4), BigInteger.valueOf(6));    // returns 12  (sign-independent)
+     * }</pre>
+     *
+     * @param a the first value; must not be {@code null}
+     * @param b the second value; must not be {@code null}
+     * @return the least common multiple of the absolute values of {@code a} and {@code b};
+     *         returns {@code 0} if either is zero
+     * @throws IllegalArgumentException if {@code a} or {@code b} is {@code null}
+     * @see #lcm(int, int)
+     * @see #lcm(long, long)
+     * @see #gcd(BigInteger, BigInteger)
+     */
+    public static BigInteger lcm(final BigInteger a, final BigInteger b) {
+        N.checkArgNotNull(a, "a");
+        N.checkArgNotNull(b, "b");
+
+        if (a.signum() == 0 || b.signum() == 0) {
+            return BigInteger.ZERO;
+        }
+
+        return a.divide(a.gcd(b)).multiply(b).abs();
     }
 
     /**
@@ -6034,6 +6987,7 @@ public final class Numbers {
      * @throws ArithmeticException if {@code b} to the {@code k}th power overflows in signed {@code int} arithmetic
      * @see #pow(int, int)
      * @see #saturatedPow(int, int)
+     * @see #powExact(long, int)
      */
     public static int powExact(int b, int k) {
         checkNonNegative("exponent", k);
@@ -6100,6 +7054,7 @@ public final class Numbers {
      * @throws ArithmeticException if {@code b} to the {@code k}th power overflows in signed {@code long} arithmetic
      * @see #pow(long, int)
      * @see #saturatedPow(long, int)
+     * @see #powExact(int, int)
      */
     public static long powExact(long b, int k) {
         checkNonNegative("exponent", k);
@@ -6166,7 +7121,7 @@ public final class Numbers {
      * @see #addExact(int, int)
      */
     public static int saturatedAdd(final int a, final int b) {
-        return saturatedCast((long) a + b);
+        return saturatedCastToInt((long) a + b);
     }
 
     /**
@@ -6226,7 +7181,7 @@ public final class Numbers {
      * @see #subtractExact(int, int)
      */
     public static int saturatedSubtract(final int a, final int b) {
-        return saturatedCast((long) a - b);
+        return saturatedCastToInt((long) a - b);
     }
 
     /**
@@ -6286,7 +7241,7 @@ public final class Numbers {
      * @see #multiplyExact(int, int)
      */
     public static int saturatedMultiply(final int a, final int b) {
-        return saturatedCast((long) a * b);
+        return saturatedCastToInt((long) a * b);
     }
 
     /**
@@ -6348,7 +7303,7 @@ public final class Numbers {
      * Numbers.saturatedPow(10, 10);   // returns Integer.MAX_VALUE    (saturates instead of overflowing)
      * Numbers.saturatedPow(2, 31);    // returns Integer.MAX_VALUE    (saturates at max value)
      * Numbers.saturatedPow(2, 100);   // returns Integer.MAX_VALUE    (saturates at max value)
-     * Numbers.saturatedPow(-2, 31);   // returns Integer.MIN_VALUE    (saturates at min value, odd exponent)
+     * Numbers.saturatedPow(-2, 31);   // returns Integer.MIN_VALUE    (exactly representable)
      * Numbers.saturatedPow(-2, 32);   // returns Integer.MAX_VALUE    (saturates at max value, even exponent)
      * }</pre>
      *
@@ -6358,6 +7313,7 @@ public final class Numbers {
      * @throws IllegalArgumentException if {@code k < 0}
      * @see #pow(int, int)
      * @see #powExact(int, int)
+     * @see #saturatedPow(long, int)
      */
     public static int saturatedPow(int b, int k) {
         checkNonNegative("exponent", k);
@@ -6423,7 +7379,7 @@ public final class Numbers {
      * Numbers.saturatedPow(10L, 19);   // returns Long.MAX_VALUE      (saturates instead of overflowing)
      * Numbers.saturatedPow(2L, 63);    // returns Long.MAX_VALUE      (saturates at max value)
      * Numbers.saturatedPow(2L, 100);   // returns Long.MAX_VALUE      (saturates at max value)
-     * Numbers.saturatedPow(-2L, 63);   // returns Long.MIN_VALUE      (saturates at min value, odd exponent)
+     * Numbers.saturatedPow(-2L, 63);   // returns Long.MIN_VALUE      (exactly representable)
      * Numbers.saturatedPow(-2L, 64);   // returns Long.MAX_VALUE      (saturates at max value, even exponent)
      * }</pre>
      *
@@ -6433,6 +7389,7 @@ public final class Numbers {
      * @throws IllegalArgumentException if {@code k < 0}
      * @see #pow(long, int)
      * @see #powExact(long, int)
+     * @see #saturatedPow(int, int)
      */
     public static long saturatedPow(long b, int k) {
         checkNonNegative("exponent", k);
@@ -6492,20 +7449,24 @@ public final class Numbers {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Numbers.saturatedCast(100L);            // returns 100
-     * Numbers.saturatedCast(2147483647L);     // returns Integer.MAX_VALUE  (exact fit)
-     * Numbers.saturatedCast(2147483648L);     // returns Integer.MAX_VALUE  (saturates at max)
-     * Numbers.saturatedCast(10000000000L);    // returns Integer.MAX_VALUE  (saturates at max)
-     * Numbers.saturatedCast(-2147483648L);    // returns Integer.MIN_VALUE  (exact fit)
-     * Numbers.saturatedCast(-2147483649L);    // returns Integer.MIN_VALUE  (saturates at min)
-     * Numbers.saturatedCast(-10000000000L);   // returns Integer.MIN_VALUE  (saturates at min)
+     * Numbers.saturatedCastToInt(100L);            // returns 100
+     * Numbers.saturatedCastToInt(2147483647L);     // returns Integer.MAX_VALUE  (exact fit)
+     * Numbers.saturatedCastToInt(2147483648L);     // returns Integer.MAX_VALUE  (saturates at max)
+     * Numbers.saturatedCastToInt(10000000000L);    // returns Integer.MAX_VALUE  (saturates at max)
+     * Numbers.saturatedCastToInt(-2147483648L);    // returns Integer.MIN_VALUE  (exact fit)
+     * Numbers.saturatedCastToInt(-2147483649L);    // returns Integer.MIN_VALUE  (saturates at min)
+     * Numbers.saturatedCastToInt(-10000000000L);   // returns Integer.MIN_VALUE  (saturates at min)
      * }</pre>
+     *
+     * <p>The throwing counterpart of this {@code long}-to-{@code int} narrowing is
+     * {@link #toIntExact(long)}, which throws an {@code ArithmeticException} instead of saturating.</p>
      *
      * @param value any {@code long} value
      * @return the {@code int} value nearest to {@code value}, or {@code Integer.MAX_VALUE} if {@code value}
      *         is too large, or {@code Integer.MIN_VALUE} if {@code value} is too small
+     * @see #toIntExact(long)
      */
-    public static int saturatedCast(final long value) {
+    public static int saturatedCastToInt(final long value) {
         if (value > Integer.MAX_VALUE) {
             return Integer.MAX_VALUE;
         }
@@ -6513,6 +7474,125 @@ public final class Numbers {
             return Integer.MIN_VALUE;
         }
         return (int) value;
+    }
+
+    /**
+     * Clamps the given {@code int} value to the inclusive range {@code [min, max]}.
+     *
+     * <p>Returns {@code min} if {@code value < min}, {@code max} if {@code value > max}, otherwise {@code value}.
+     * Equivalent to {@code Math.clamp(value, min, max)} (Java 21+), provided here for the Java 17 baseline.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Numbers.clamp(5, 1, 10);     // returns 5
+     * Numbers.clamp(-3, 1, 10);    // returns 1   (below min)
+     * Numbers.clamp(42, 1, 10);    // returns 10  (above max)
+     * }</pre>
+     *
+     * @param value the value to clamp
+     * @param min the lower bound (inclusive)
+     * @param max the upper bound (inclusive)
+     * @return {@code value} constrained to {@code [min, max]}
+     * @throws IllegalArgumentException if {@code min > max}
+     * @see #clamp(long, long, long)
+     * @see #clamp(double, double, double)
+     */
+    public static int clamp(final int value, final int min, final int max) {
+        N.checkArgument(min <= max, "min (%s) must not be greater than max (%s)", min, max);
+
+        return Math.min(max, Math.max(value, min));
+    }
+
+    /**
+     * Clamps the given {@code long} value to the inclusive range {@code [min, max]}.
+     *
+     * <p>Returns {@code min} if {@code value < min}, {@code max} if {@code value > max}, otherwise {@code value}.
+     * Equivalent to {@code Math.clamp(value, min, max)} (Java 21+), provided here for the Java 17 baseline.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Numbers.clamp(5L, 1L, 10L);     // returns 5L
+     * Numbers.clamp(-3L, 1L, 10L);    // returns 1L   (below min)
+     * Numbers.clamp(42L, 1L, 10L);    // returns 10L  (above max)
+     * }</pre>
+     *
+     * @param value the value to clamp
+     * @param min the lower bound (inclusive)
+     * @param max the upper bound (inclusive)
+     * @return {@code value} constrained to {@code [min, max]}
+     * @throws IllegalArgumentException if {@code min > max}
+     * @see #clamp(int, int, int)
+     * @see #clamp(double, double, double)
+     */
+    public static long clamp(final long value, final long min, final long max) {
+        N.checkArgument(min <= max, "min (%s) must not be greater than max (%s)", min, max);
+
+        return Math.min(max, Math.max(value, min));
+    }
+
+    /**
+     * Clamps the given {@code float} value to the inclusive range {@code [min, max]}.
+     *
+     * <p>Returns {@code min} if {@code value < min}, {@code max} if {@code value > max}, otherwise {@code value}.
+     * A {@code NaN} {@code value} is returned unchanged. Equivalent to {@code Math.clamp(value, min, max)} (Java 21+),
+     * provided here for the Java 17 baseline; implemented as {@code Math.min(max, Math.max(value, min))}, so it
+     * matches {@code Math.clamp} exactly, including signed-zero ordering: {@code -0.0f} is treated as strictly less
+     * than {@code +0.0f} (e.g. {@code clamp(-0.0f, 0.0f, 1.0f)} returns {@code +0.0f}).</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Numbers.clamp(5.0f, 1.0f, 10.0f);         // returns 5.0f
+     * Numbers.clamp(-3.0f, 1.0f, 10.0f);        // returns 1.0f   (below min)
+     * Numbers.clamp(42.0f, 1.0f, 10.0f);        // returns 10.0f  (above max)
+     * Numbers.clamp(-0.0f, 0.0f, 1.0f);         // returns +0.0f  (-0.0f ordered below +0.0f, as in Math.clamp)
+     * Numbers.clamp(Float.NaN, 1.0f, 10.0f);    // returns NaN
+     * }</pre>
+     *
+     * @param value the value to clamp
+     * @param min the lower bound (inclusive); must not be {@code NaN}
+     * @param max the upper bound (inclusive); must not be {@code NaN}
+     * @return {@code value} constrained to {@code [min, max]}, or {@code NaN} if {@code value} is {@code NaN}
+     * @throws IllegalArgumentException if {@code min > max} or either bound is {@code NaN}
+     * @see #clamp(int, int, int)
+     * @see #clamp(long, long, long)
+     * @see #clamp(double, double, double)
+     */
+    public static float clamp(final float value, final float min, final float max) {
+        N.checkArgument(min <= max, "min (%s) must not be greater than max (%s)", min, max);
+
+        return Math.min(max, Math.max(value, min));
+    }
+
+    /**
+     * Clamps the given {@code double} value to the inclusive range {@code [min, max]}.
+     *
+     * <p>Returns {@code min} if {@code value < min}, {@code max} if {@code value > max}, otherwise {@code value}.
+     * A {@code NaN} {@code value} is returned unchanged. Equivalent to {@code Math.clamp(value, min, max)} (Java 21+),
+     * provided here for the Java 17 baseline; implemented as {@code Math.min(max, Math.max(value, min))}, so it
+     * matches {@code Math.clamp} exactly, including signed-zero ordering: {@code -0.0} is treated as strictly less
+     * than {@code +0.0} (e.g. {@code clamp(-0.0, 0.0, 1.0)} returns {@code +0.0}).</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Numbers.clamp(5.0, 1.0, 10.0);          // returns 5.0
+     * Numbers.clamp(-3.0, 1.0, 10.0);         // returns 1.0   (below min)
+     * Numbers.clamp(42.0, 1.0, 10.0);         // returns 10.0  (above max)
+     * Numbers.clamp(-0.0, 0.0, 1.0);          // returns +0.0  (-0.0 ordered below +0.0, as in Math.clamp)
+     * Numbers.clamp(Double.NaN, 1.0, 10.0);   // returns NaN
+     * }</pre>
+     *
+     * @param value the value to clamp
+     * @param min the lower bound (inclusive); must not be {@code NaN}
+     * @param max the upper bound (inclusive); must not be {@code NaN}
+     * @return {@code value} constrained to {@code [min, max]}, or {@code NaN} if {@code value} is {@code NaN}
+     * @throws IllegalArgumentException if {@code min > max} or either bound is {@code NaN}
+     * @see #clamp(int, int, int)
+     * @see #clamp(long, long, long)
+     */
+    public static double clamp(final double value, final double min, final double max) {
+        N.checkArgument(min <= max, "min (%s) must not be greater than max (%s)", min, max);
+
+        return Math.min(max, Math.max(value, min));
     }
 
     /**
@@ -6539,6 +7619,7 @@ public final class Numbers {
      * @return {@code n!} if it fits in an {@code int}, otherwise {@code Integer.MAX_VALUE}
      * @throws IllegalArgumentException if {@code n < 0}
      * @see #factorialToLong(int)
+     * @see #factorialToDouble(int)
      * @see #factorialToBigInteger(int)
      */
     public static int factorial(final int n) {
@@ -6571,6 +7652,7 @@ public final class Numbers {
      * @return {@code n!} if it fits in a {@code long}, otherwise {@code Long.MAX_VALUE}
      * @throws IllegalArgumentException if {@code n < 0}
      * @see #factorial(int)
+     * @see #factorialToDouble(int)
      * @see #factorialToBigInteger(int)
      */
     public static long factorialToLong(final int n) {
@@ -6595,7 +7677,7 @@ public final class Numbers {
      * Numbers.factorialToDouble(5);      // returns 120.0
      * Numbers.factorialToDouble(10);     // returns 3628800.0
      * Numbers.factorialToDouble(20);     // returns 2.43290200817664E18
-     * Numbers.factorialToDouble(170);    // returns 7.257415615307999E306
+     * Numbers.factorialToDouble(170);    // returns 7.257415615308E306
      * Numbers.factorialToDouble(171);    // returns Double.POSITIVE_INFINITY  (exceeds Double.MAX_VALUE)
      * Numbers.factorialToDouble(1000);   // returns Double.POSITIVE_INFINITY  (exceeds Double.MAX_VALUE)
      * }</pre>
@@ -6648,6 +7730,7 @@ public final class Numbers {
      * @throws IllegalArgumentException if {@code n < 0}
      * @see #factorial(int)
      * @see #factorialToLong(int)
+     * @see #factorialToDouble(int)
      */
     public static BigInteger factorialToBigInteger(final int n) {
         checkNonNegative("n", n);
@@ -6658,6 +7741,12 @@ public final class Numbers {
         }
 
         // Pre-allocate space for our list of intermediate BigIntegers.
+        // NOTE: the product {@code n * log2(n, CEILING)} is an int multiplication that could overflow for an
+        // astronomically large n (n > ~69 million, since log2(n) <= 31), which would make this a negative capacity
+        // hint and cause new ArrayList<>(...) to throw. This is unreachable in practice: such an n would require a
+        // BigInteger of billions of bits (and n loop iterations), exhausting memory/time long before. It is also a
+        // capacity HINT only (the list grows dynamically), so the computed factorial is unaffected. Behavior is
+        // identical to Guava's BigIntegerMath.factorial, from which this is ported. Left as-is by design.
         final int approxSize = divide(n * log2(n, CEILING), Long.SIZE, CEILING);
         final ArrayList<BigInteger> bignums = new ArrayList<>(approxSize);
 
@@ -6748,6 +7837,7 @@ public final class Numbers {
      * @return the binomial coefficient C(n, k) if it fits in an {@code int}, otherwise {@code Integer.MAX_VALUE}
      * @throws IllegalArgumentException if {@code n < 0}, {@code k < 0}, or {@code k > n}
      * @see #binomialToLong(int, int)
+     * @see #binomialToDouble(int, int)
      * @see #binomialToBigInteger(int, int)
      */
     public static int binomial(final int n, int k) throws IllegalArgumentException {
@@ -6798,6 +7888,7 @@ public final class Numbers {
      * @return the binomial coefficient C(n, k) if it fits in a {@code long}, otherwise {@code Long.MAX_VALUE}
      * @throws IllegalArgumentException if {@code n < 0}, {@code k < 0}, or {@code k > n}
      * @see #binomial(int, int)
+     * @see #binomialToDouble(int, int)
      * @see #binomialToBigInteger(int, int)
      */
     public static long binomialToLong(int n, int k) throws IllegalArgumentException {
@@ -6861,6 +7952,36 @@ public final class Numbers {
     }
 
     /**
+     * Returns the binomial coefficient "n choose k" as a {@code double}, denoted as C(n, k) or (n k).
+     *
+     * <p>The binomial coefficient represents the number of ways to choose {@code k} items from {@code n} items
+     * without regard to order. It is computed exactly (via {@link #binomialToBigInteger(int, int)}) and then
+     * converted to the nearest {@code double}; if the true result exceeds {@code Double.MAX_VALUE} this method
+     * returns {@code Double.POSITIVE_INFINITY}. This is the {@code double}-valued rung of the binomial family,
+     * mirroring {@link #factorialToDouble(int)}.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Numbers.binomialToDouble(5, 2);        // returns 10.0
+     * Numbers.binomialToDouble(52, 5);       // returns 2598960.0
+     * Numbers.binomialToDouble(100, 50);     // returns about 1.0089E29 (exceeds long, fits double)
+     * Numbers.binomialToDouble(2000, 1000);  // returns Double.POSITIVE_INFINITY (exceeds Double.MAX_VALUE)
+     * }</pre>
+     *
+     * @param n the total number of items; must be non-negative
+     * @param k the number of items to choose; must be non-negative and at most {@code n}
+     * @return the binomial coefficient C(n, k) as a {@code double}, or {@code Double.POSITIVE_INFINITY}
+     *         if the true value exceeds {@code Double.MAX_VALUE}
+     * @throws IllegalArgumentException if {@code n < 0}, {@code k < 0}, or {@code k > n}
+     * @see #binomial(int, int)
+     * @see #binomialToLong(int, int)
+     * @see #binomialToBigInteger(int, int)
+     */
+    public static double binomialToDouble(final int n, final int k) throws IllegalArgumentException {
+        return binomialToBigInteger(n, k).doubleValue();
+    }
+
+    /**
      * Returns the binomial coefficient "n choose k" as a {@code BigInteger}, denoted as C(n, k) or (n k).
      *
      * <p>The binomial coefficient represents the number of ways to choose {@code k} items from
@@ -6885,6 +8006,7 @@ public final class Numbers {
      * @throws IllegalArgumentException if {@code n < 0}, {@code k < 0}, or {@code k > n}
      * @see #binomial(int, int)
      * @see #binomialToLong(int, int)
+     * @see #binomialToDouble(int, int)
      */
     public static BigInteger binomialToBigInteger(final int n, int k) throws IllegalArgumentException {
         checkNonNegative("n", n);
@@ -6930,112 +8052,6 @@ public final class Numbers {
     }
 
     /**
-     * Returns the arithmetic mean of {@code x} and {@code y}, rounded towards
-     * negative infinity. This method is resilient to integer overflow.
-     *
-     * <p>This implementation uses bitwise operations to compute the mean safely:
-     * {@code (x & y) + ((x ^ y) >> 1)} which avoids the overflow issues with
-     * the traditional {@code (x + y) / 2} approach.
-     *
-     * <p>The method correctly handles:
-     * <ul>
-     *   <li>Large values where {@code (x + y)} would overflow</li>
-     *   <li>Negative values where unsigned shift {@code (x + y) >>> 1} would fail</li>
-     * </ul>
-     *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Numbers.mean(10, 20);                                     // returns 15
-     * Numbers.mean(Integer.MAX_VALUE, Integer.MAX_VALUE);       // returns Integer.MAX_VALUE  (no overflow)
-     * Numbers.mean(Integer.MAX_VALUE, Integer.MAX_VALUE - 1);   // returns Integer.MAX_VALUE - 1
-     * Numbers.mean(-10, 10);                                    // returns 0
-     * Numbers.mean(7, 8);                                       // returns 7  (rounds toward negative infinity)
-     * }</pre>
-     *
-     * @param x first value
-     * @param y second value
-     * @return the arithmetic mean of {@code x} and {@code y}, rounded towards negative infinity
-     * @see #mean(long, long)
-     * @see #mean(double, double)
-     * @see #mean(int...)
-     * @see #mean(long...)
-     * @see #mean(double...)
-     */
-    public static int mean(final int x, final int y) {
-        // Efficient method for computing the arithmetic mean.
-        // The alternative (x + y) / 2 fails for large values.
-        // The alternative (x + y) >>> 1 fails for negative values.
-        return (x & y) + ((x ^ y) >> 1);
-    }
-
-    /**
-     * Returns the arithmetic mean of {@code x} and {@code y}, rounded towards negative infinity.
-     * This method is resilient to integer overflow.
-     *
-     * <p>This implementation uses bitwise operations to compute the mean safely:
-     * {@code (x & y) + ((x ^ y) >> 1)} which avoids the overflow issues with
-     * the traditional {@code (x + y) / 2} approach.
-     *
-     * <p>The method correctly handles:
-     * <ul>
-     *   <li>Large values where {@code (x + y)} would overflow</li>
-     *   <li>Negative values where unsigned shift {@code (x + y) >>> 1} would fail</li>
-     * </ul>
-     *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Numbers.mean(10L, 20L);                             // returns 15L
-     * Numbers.mean(Long.MAX_VALUE, Long.MAX_VALUE);       // returns Long.MAX_VALUE  (no overflow)
-     * Numbers.mean(Long.MAX_VALUE, Long.MAX_VALUE - 1);   // returns Long.MAX_VALUE - 1
-     * Numbers.mean(-10L, 10L);                            // returns 0L
-     * Numbers.mean(7L, 8L);                               // returns 7L  (rounds toward negative infinity)
-     * }</pre>
-     *
-     * @param x first value
-     * @param y second value
-     * @return the arithmetic mean of {@code x} and {@code y}, rounded towards negative infinity
-     * @see #mean(int, int)
-     * @see #mean(double, double)
-     * @see #mean(int...)
-     * @see #mean(long...)
-     * @see #mean(double...)
-     */
-    public static long mean(final long x, final long y) {
-        // Efficient method for computing the arithmetic mean.
-        // The alternative (x + y) / 2 fails for large values.
-        // The alternative (x + y) >>> 1 fails for negative values.
-        return (x & y) + ((x ^ y) >> 1);
-    }
-
-    /**
-     * Returns the arithmetic mean of {@code x} and {@code y}.
-     *
-     * <p>This implementation divides each value by 2 before adding to avoid overflow
-     * and maintain precision. Both inputs must be finite values.
-     *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Numbers.mean(10.0, 20.0);                           // returns 15.0
-     * Numbers.mean(1.5, 2.5);                             // returns 2.0
-     * Numbers.mean(-10.0, 10.0);                          // returns 0.0
-     * Numbers.mean(Double.MAX_VALUE, Double.MAX_VALUE);   // returns Double.MAX_VALUE
-     * }</pre>
-     *
-     * @param x the first double value; must be finite
-     * @param y the second double value; must be finite
-     * @return the arithmetic mean of {@code x} and {@code y}
-     * @throws IllegalArgumentException if either {@code x} or {@code y} is not finite (NaN or infinite)
-     * @see #mean(int, int)
-     * @see #mean(long, long)
-     * @see #mean(int...)
-     * @see #mean(long...)
-     * @see #mean(double...)
-     */
-    public static double mean(final double x, final double y) {
-        return checkFinite(x) / 2 + checkFinite(y) / 2;
-    }
-
-    /**
      * Returns the <a href="http://en.wikipedia.org/wiki/Arithmetic_mean">arithmetic mean</a> of
      * {@code values}.
      *
@@ -7050,14 +8066,16 @@ public final class Numbers {
      * Numbers.mean(-10, 0, 10);             // returns 0.0
      * }</pre>
      *
+     * <p><b>Note:</b> this method throws an {@code IllegalArgumentException} for an empty array,
+     * whereas {@link N#average(int...)} returns {@code 0d} for a {@code null} or empty array.</p>
+     *
      * @param values a nonempty series of values
      * @return the arithmetic mean of the values
      * @throws IllegalArgumentException if {@code values} is empty
-     * @see #mean(int, int)
-     * @see #mean(long, long)
-     * @see #mean(double, double)
+     * @throws NullPointerException if {@code values} is {@code null}
      * @see #mean(long...)
      * @see #mean(double...)
+     * @see N#average(int...)
      */
     public static double mean(final int... values) throws IllegalArgumentException {
         N.checkArgument(values.length > 0, "Cannot take mean of 0 values");
@@ -7086,15 +8104,17 @@ public final class Numbers {
      * Numbers.mean(-10L, 0L, 10L);             // returns 0.0
      * }</pre>
      *
+     * <p><b>Note:</b> this method throws an {@code IllegalArgumentException} for an empty array,
+     * whereas {@link N#average(long...)} returns {@code 0d} for a {@code null} or empty array.</p>
+     *
      * @param values a nonempty series of values, which will be converted to {@code double} values
      *     (this may cause loss of precision for longs of magnitude over 2^53 (slightly over 9e15))
      * @return the arithmetic mean of the values
      * @throws IllegalArgumentException if {@code values} is empty
-     * @see #mean(int, int)
-     * @see #mean(long, long)
-     * @see #mean(double, double)
+     * @throws NullPointerException if {@code values} is {@code null}
      * @see #mean(int...)
      * @see #mean(double...)
+     * @see N#average(long...)
      */
     public static double mean(final long... values) throws IllegalArgumentException {
         N.checkArgument(values.length > 0, "Cannot take mean of 0 values");
@@ -7125,14 +8145,17 @@ public final class Numbers {
      * Numbers.mean(5.0);                // returns 5.0
      * }</pre>
      *
+     * <p><b>Note:</b> this method throws an {@code IllegalArgumentException} for an empty array or
+     * any non-finite value, whereas {@link N#average(double...)} returns {@code 0d} for a
+     * {@code null} or empty array and does not reject non-finite values.</p>
+     *
      * @param values a nonempty series of finite double values
      * @return the arithmetic mean of the values
      * @throws IllegalArgumentException if {@code values} is empty or contains any non-finite values (NaN or infinite)
-     * @see #mean(int, int)
-     * @see #mean(long, long)
-     * @see #mean(double, double)
+     * @throws NullPointerException if {@code values} is {@code null}
      * @see #mean(int...)
      * @see #mean(long...)
+     * @see N#average(double...)
      */
     public static double mean(final double... values) throws IllegalArgumentException {
         N.checkArgument(values.length > 0, "Cannot take mean of 0 values");
@@ -7148,7 +8171,7 @@ public final class Numbers {
     }
 
     private static double checkFinite(final double argument) {
-        N.checkArgument(isFinite(argument));
+        N.checkArgument(isFinite(argument), "%s is not a finite double value", argument);
         return argument;
     }
 
@@ -7214,102 +8237,87 @@ public final class Numbers {
     }
 
     /**
-     * Rounds the given float value to the specified number of decimal places.
+     * Rounds the given float value to the specified number of decimal places using
+     * {@link RoundingMode#HALF_UP} (halfway values round away from zero), at every scale.
      *
-     * <p>This method uses the {@link RoundingMode#HALF_UP} rounding mode by default.</p>
+     * <p>For finite input this is exactly equivalent to
+     * {@link #round(float, int, RoundingMode) round(x, scale, RoundingMode.HALF_UP)}: the value is converted
+     * via {@code new BigDecimal(Float.toString(x))}, so rounding follows the float's decimal string form
+     * (e.g. {@code round(1.005f, 2)} returns {@code 1.01f}, not {@code 1.0f}). A negative scale rounds to the
+     * corresponding power of ten (e.g. {@code scale == -2} rounds to the nearest hundred), as in
+     * {@link BigDecimal#setScale(int, RoundingMode)}.</p>
+     *
+     * <p>Non-finite input never throws, at every scale: {@code NaN} returns {@code 0.0f} and an infinity is
+     * returned unchanged.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Numbers.round(3.14159f, 2);    // returns 3.14f
      * Numbers.round(123.456f, 1);    // returns 123.5f
-     * Numbers.round(10.0f, 0);       // returns 10.0f
-     * Numbers.round(2.5f, 0);        // returns 3.0f
-     * Numbers.round(-3.14159f, 3);   // returns -3.142f
+     * Numbers.round(2.5f, 0);        // returns 3.0f     (half rounds away from zero)
+     * Numbers.round(-2.5f, 0);       // returns -3.0f    (half rounds away from zero)
+     * Numbers.round(1.005f, 2);      // returns 1.01f    (decimal HALF_UP, same as the 3-arg overload)
+     * Numbers.round(12345.0f, -2);   // returns 12300.0f (negative scale rounds to a power of ten)
      * }</pre>
      *
      * @param x the float value to be rounded
-     * @param scale the number of decimal places to round to, must be non-negative
-     * @return the rounded float value
-     * @throws IllegalArgumentException if the scale is negative
+     * @param scale the number of decimal places to round to; a negative scale rounds to the
+     *     corresponding power of ten (as in {@link BigDecimal#setScale(int, RoundingMode)})
+     * @return the rounded float value; {@code NaN} returns {@code 0.0f} and an infinity is returned unchanged
      * @see #round(float, int, RoundingMode)
      * @see #round(double, int)
      * @see Math#round(double)
      */
-    public static float round(final float x, final int scale) throws IllegalArgumentException {
-        N.checkArgNotNegative(scale, cs.scale);
-
-        if (scale == 0) {
-            // For |x| >= 2^63 the value is already an exact integer and Math.round(double)->long
-            // would saturate at Long.MAX_VALUE / Long.MIN_VALUE, narrowing back to the wrong float.
-            if (Math.abs(x) >= 0x1p63f) {
-                return x;
-            }
-            // Math.round(float)->int silently clamps at Integer.MAX_VALUE for values >= ~2.147e9.
-            // Widen the same float to double so Math.round returns long and avoids that clamp.
-            return Math.round((double) x);
-        } else if (scale <= 6) {
-            final long factor = pow(10, scale);
-            // Multiply in float precision (preserves the half-tie semantics callers depend on),
-            // then widen the float product to double for Math.round so we get a long without int saturation.
-            // Math.round(double)->long still saturates at Long.MAX_VALUE/Long.MIN_VALUE once the scaled
-            // product exceeds the long range, silently returning a value off by orders of magnitude
-            // (e.g. round(1e18f, 6)). Fall back to the BigDecimal path in that case, mirroring the
-            // saturation guard already present in the scale==0 branch.
-            if (Math.abs(x) < 0x1p63f / factor) {
-                return ((float) Math.round((double) (x * factor))) / factor; //NOSONAR
-            }
-            return round(x, scale, RoundingMode.HALF_UP);
-        } else {
-            return round(x, scale, RoundingMode.HALF_UP);
+    public static float round(final float x, final int scale) {
+        if (Float.isNaN(x)) {
+            return 0.0f;
+        } else if (Float.isInfinite(x)) {
+            return x;
         }
+
+        return round(x, scale, RoundingMode.HALF_UP);
     }
 
     /**
-     * Rounds the given double value to the specified number of decimal places.
+     * Rounds the given double value to the specified number of decimal places using
+     * {@link RoundingMode#HALF_UP} (halfway values round away from zero), at every scale.
      *
-     * <p>This method uses the {@link RoundingMode#HALF_UP} rounding mode by default.</p>
+     * <p>For finite input this is exactly equivalent to
+     * {@link #round(double, int, RoundingMode) round(x, scale, RoundingMode.HALF_UP)}: the value is converted
+     * via {@code BigDecimal.valueOf(x)}, so rounding follows the double's canonical decimal string form
+     * (e.g. {@code round(1.005, 2)} returns {@code 1.01}, not {@code 1.0}). A negative scale rounds to the
+     * corresponding power of ten (e.g. {@code scale == -2} rounds to the nearest hundred), as in
+     * {@link BigDecimal#setScale(int, RoundingMode)}.</p>
+     *
+     * <p>Non-finite input never throws, at every scale: {@code NaN} returns {@code 0.0d} and an infinity is
+     * returned unchanged.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Numbers.round(3.14159, 2);      // returns 3.14
      * Numbers.round(123.456, 1);      // returns 123.5
-     * Numbers.round(10.0, 0);         // returns 10.0
-     * Numbers.round(2.5, 0);          // returns 3.0
-     * Numbers.round(-3.14159, 3);     // returns -3.142
-     * Numbers.round(1.23456789, 5);   // returns 1.23457
+     * Numbers.round(2.5, 0);          // returns 3.0     (half rounds away from zero)
+     * Numbers.round(-2.5, 0);         // returns -3.0    (half rounds away from zero)
+     * Numbers.round(1.005, 2);        // returns 1.01    (decimal HALF_UP, same as the 3-arg overload)
+     * Numbers.round(12345.0, -2);     // returns 12300.0 (negative scale rounds to a power of ten)
      * }</pre>
      *
      * @param x the double value to be rounded
-     * @param scale the number of decimal places to round to, must be non-negative
-     * @return the rounded double value
-     * @throws IllegalArgumentException if the scale is negative
+     * @param scale the number of decimal places to round to; a negative scale rounds to the
+     *     corresponding power of ten (as in {@link BigDecimal#setScale(int, RoundingMode)})
+     * @return the rounded double value; {@code NaN} returns {@code 0.0d} and an infinity is returned unchanged
      * @see #round(double, int, RoundingMode)
      * @see #round(float, int)
      * @see Math#round(double)
      */
-    public static double round(final double x, final int scale) throws IllegalArgumentException {
-        N.checkArgNotNegative(scale, cs.scale);
-
-        if (scale == 0) {
-            // For |x| >= 2^63 the value is already an exact integer and Math.round would
-            // saturate at Long.MAX_VALUE / Long.MIN_VALUE.
-            if (Math.abs(x) >= 0x1p63) {
-                return x;
-            }
-            return Math.round(x);
-        } else if (scale <= 6) {
-            final long factor = pow(10, scale);
-            // Math.round(double)->long saturates at Long.MAX_VALUE/Long.MIN_VALUE once x*factor
-            // exceeds the long range, silently returning a value off by orders of magnitude
-            // (e.g. round(1e17, 2)). Fall back to the BigDecimal path when the scaled product
-            // would overflow, mirroring the saturation guard already present in the scale==0 branch.
-            if (Math.abs(x) < 0x1p63 / factor) {
-                return ((double) Math.round(x * factor)) / factor; //NOSONAR
-            }
-            return round(x, scale, RoundingMode.HALF_UP);
-        } else {
-            return round(x, scale, RoundingMode.HALF_UP);
+    public static double round(final double x, final int scale) {
+        if (Double.isNaN(x)) {
+            return 0.0d;
+        } else if (Double.isInfinite(x)) {
+            return x;
         }
+
+        return round(x, scale, RoundingMode.HALF_UP);
     }
 
     /**
@@ -7324,18 +8332,30 @@ public final class Numbers {
      * Numbers.round(-2.5f, 0, RoundingMode.FLOOR);        // returns -3.0f
      * }</pre>
      *
-     * @param x the float value to be rounded
+     * <p>The value is converted via {@code new BigDecimal(Float.toString(x))}, which preserves the
+     * float's decimal string form. {@link #toScaledBigDecimal(Float, int, RoundingMode)} uses the same
+     * conversion, so the two agree: both {@code round(1.005f, 2, RoundingMode.HALF_UP)} and
+     * {@code toScaledBigDecimal(1.005f, 2, RoundingMode.HALF_UP)} round {@code 1.005f} up to {@code 1.01}.</p>
+     *
+     * @param x the float value to be rounded; must be finite ({@code NaN} or infinite values cause a
+     *     {@code NumberFormatException} from the underlying BigDecimal conversion)
      * @param scale the number of decimal places to round to; a negative scale rounds to the
      *     corresponding power of ten (as in {@link BigDecimal#setScale(int, RoundingMode)})
-     * @param roundingMode the rounding mode to use; if {@code null}, {@link RoundingMode#HALF_UP} is used
+     * @param roundingMode the rounding mode to use; must not be {@code null}
      * @return the rounded float value
+     * @throws IllegalArgumentException if {@code roundingMode} is {@code null}
+     * @throws NumberFormatException if {@code x} is NaN or infinite
+     * @throws ArithmeticException if {@code roundingMode} is {@link RoundingMode#UNNECESSARY} but the value
+     *         cannot be represented exactly at the requested {@code scale}
      * @see #round(float, int)
      * @see #round(double, int, RoundingMode)
      * @see BigDecimal#setScale(int, RoundingMode)
      * @see BigDecimal#floatValue()
      */
     public static float round(final float x, final int scale, final RoundingMode roundingMode) {
-        final BigDecimal bd = new BigDecimal(Float.toString(x)).setScale(scale, roundingMode == null ? RoundingMode.HALF_UP : roundingMode);
+        N.checkArgNotNull(roundingMode);
+
+        final BigDecimal bd = new BigDecimal(Float.toString(x)).setScale(scale, roundingMode);
         final float rounded = bd.floatValue();
         return N.equals(rounded, FLOAT_POSITIVE_ZERO) ? FLOAT_POSITIVE_ZERO * x : rounded;
     }
@@ -7352,18 +8372,25 @@ public final class Numbers {
      * Numbers.round(-2.5, 0, RoundingMode.FLOOR);        // returns -3.0
      * }</pre>
      *
-     * @param x the double value to be rounded
+     * @param x the double value to be rounded; must be finite ({@code NaN} or infinite values cause a
+     *     {@code NumberFormatException} from the underlying BigDecimal conversion)
      * @param scale the number of decimal places to round to; a negative scale rounds to the
      *     corresponding power of ten (as in {@link BigDecimal#setScale(int, RoundingMode)})
-     * @param roundingMode the rounding mode to use; if {@code null}, {@link RoundingMode#HALF_UP} is used
+     * @param roundingMode the rounding mode to use; must not be {@code null}
      * @return the rounded double value
+     * @throws IllegalArgumentException if {@code roundingMode} is {@code null}
+     * @throws NumberFormatException if {@code x} is NaN or infinite
+     * @throws ArithmeticException if {@code roundingMode} is {@link RoundingMode#UNNECESSARY} but the value
+     *         cannot be represented exactly at the requested {@code scale}
      * @see #round(double, int)
      * @see #round(float, int, RoundingMode)
      * @see BigDecimal#setScale(int, RoundingMode)
      * @see BigDecimal#doubleValue()
      */
     public static double round(final double x, final int scale, final RoundingMode roundingMode) {
-        final BigDecimal bd = BigDecimal.valueOf(x).setScale(scale, roundingMode == null ? RoundingMode.HALF_UP : roundingMode);
+        N.checkArgNotNull(roundingMode);
+
+        final BigDecimal bd = BigDecimal.valueOf(x).setScale(scale, roundingMode);
         final double rounded = bd.doubleValue();
         return N.equals(rounded, DOUBLE_POSITIVE_ZERO) ? DOUBLE_POSITIVE_ZERO * x : rounded;
     }
@@ -7418,16 +8445,25 @@ public final class Numbers {
      * Numbers.round(2.5f, "#");          // returns 2.0f   (DecimalFormat rounds half to even by default)
      * }</pre>
      *
+     * <p>The rounding mode applied is the {@code DecimalFormat}'s own rounding mode (default
+     * {@link java.math.RoundingMode#HALF_EVEN}).</p>
+     *
      * @param x the float value to be rounded
      * @param decimalFormat the {@link java.text.DecimalFormat} pattern to use for rounding
-     * @return the rounded float value
-     * @throws IllegalArgumentException if {@code decimalFormat} is {@code null}
+     * @return the rounded float value; {@code NaN} and infinite values are returned unchanged
+     * @throws IllegalArgumentException if {@code decimalFormat} is {@code null} or is not a valid {@link DecimalFormat} pattern
      * @see java.text.DecimalFormat#format(double)
      * @see #toFloat(String)
      * @see #round(float, int)
      */
     public static float round(final float x, final String decimalFormat) {
-        return toFloat(format(x, decimalFormat));
+        N.checkArgNotNull(decimalFormat, cs.decimalFormat);
+
+        final DecimalFormat df = decimalFormatPool.get(decimalFormat);
+
+        // Round-trip through the same DecimalFormat so '%', grouping separators and
+        // locale-specific decimal separators parse back instead of failing in Float.parseFloat.
+        return round(x, df != null ? df : new DecimalFormat(decimalFormat));
     }
 
     /**
@@ -7449,16 +8485,25 @@ public final class Numbers {
      * Numbers.round(2.5, "#");          // returns 2.0   (DecimalFormat rounds half to even by default)
      * }</pre>
      *
+     * <p>The rounding mode applied is the {@code DecimalFormat}'s own rounding mode (default
+     * {@link java.math.RoundingMode#HALF_EVEN}).</p>
+     *
      * @param x the double value to be rounded
      * @param decimalFormat the {@link java.text.DecimalFormat} pattern to use for rounding
-     * @return the rounded double value
-     * @throws IllegalArgumentException if {@code decimalFormat} is {@code null}
+     * @return the rounded double value; {@code NaN} and infinite values are returned unchanged
+     * @throws IllegalArgumentException if {@code decimalFormat} is {@code null} or is not a valid {@link DecimalFormat} pattern
      * @see java.text.DecimalFormat#format(double)
      * @see #toDouble(String)
      * @see #round(double, int)
      */
     public static double round(final double x, final String decimalFormat) {
-        return toDouble(format(x, decimalFormat));
+        N.checkArgNotNull(decimalFormat, cs.decimalFormat);
+
+        final DecimalFormat df = decimalFormatPool.get(decimalFormat);
+
+        // Round-trip through the same DecimalFormat so '%', grouping separators and
+        // locale-specific decimal separators parse back instead of failing in Double.parseDouble.
+        return round(x, df != null ? df : new DecimalFormat(decimalFormat));
     }
 
     /**
@@ -7466,7 +8511,8 @@ public final class Numbers {
      *
      * <p>This method formats the float value using the provided DecimalFormat instance
      * and then parses it back to a float. This is useful when you have a pre-configured
-     * DecimalFormat that you want to reuse for multiple rounding operations.</p>
+     * DecimalFormat that you want to reuse for multiple rounding operations. The supplied instance is defensively
+     * cloned before use, so it is never mutated and may safely be shared across threads.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -7478,9 +8524,12 @@ public final class Numbers {
      * Numbers.round(3.1f, df2);      // returns 3.1f
      * }</pre>
      *
+     * <p>The rounding mode applied is the {@code DecimalFormat}'s own rounding mode (default
+     * {@link java.math.RoundingMode#HALF_EVEN}).</p>
+     *
      * @param x the float value to be rounded
      * @param decimalFormat the {@link java.text.DecimalFormat} instance to use for rounding
-     * @return the rounded float value
+     * @return the rounded float value; {@code NaN} and infinite values are returned unchanged
      * @throws IllegalArgumentException if {@code decimalFormat} is {@code null}
      * @see java.text.DecimalFormat#format(double)
      * @see #round(float, String)
@@ -7489,12 +8538,17 @@ public final class Numbers {
     public static float round(final float x, final DecimalFormat decimalFormat) throws IllegalArgumentException {
         N.checkArgNotNull(decimalFormat, cs.decimalFormat);
 
+        if (!Float.isFinite(x)) {
+            // NaN / +-Infinity cannot be formatted-and-parsed back; return unchanged.
+            return x;
+        }
+
         final DecimalFormat df = (DecimalFormat) decimalFormat.clone();
 
         try {
             return df.parse(df.format(x)).floatValue();
         } catch (ParseException e) {
-            throw new IllegalArgumentException(e);
+            throw new IllegalArgumentException("Failed to round " + x + " with DecimalFormat pattern '" + df.toPattern() + "'", e);
         }
     }
 
@@ -7503,7 +8557,8 @@ public final class Numbers {
      *
      * <p>This method formats the double value using the provided DecimalFormat instance
      * and then parses it back to a double. This is useful when you have a pre-configured
-     * DecimalFormat that you want to reuse for multiple rounding operations.</p>
+     * DecimalFormat that you want to reuse for multiple rounding operations. The supplied instance is defensively
+     * cloned before use, so it is never mutated and may safely be shared across threads.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -7515,9 +8570,12 @@ public final class Numbers {
      * Numbers.round(3.1, df2);      // returns 3.1
      * }</pre>
      *
+     * <p>The rounding mode applied is the {@code DecimalFormat}'s own rounding mode (default
+     * {@link java.math.RoundingMode#HALF_EVEN}).</p>
+     *
      * @param x the double value to be rounded
      * @param decimalFormat the {@link java.text.DecimalFormat} instance to use for rounding
-     * @return the rounded double value
+     * @return the rounded double value; {@code NaN} and infinite values are returned unchanged
      * @throws IllegalArgumentException if {@code decimalFormat} is {@code null}
      * @see java.text.DecimalFormat#format(double)
      * @see #round(double, String)
@@ -7526,12 +8584,17 @@ public final class Numbers {
     public static double round(final double x, final DecimalFormat decimalFormat) throws IllegalArgumentException {
         N.checkArgNotNull(decimalFormat, cs.decimalFormat);
 
+        if (!Double.isFinite(x)) {
+            // NaN / +-Infinity cannot be formatted-and-parsed back; return unchanged.
+            return x;
+        }
+
         final DecimalFormat df = (DecimalFormat) decimalFormat.clone();
 
         try {
             return df.parse(df.format(x)).doubleValue();
         } catch (ParseException e) {
-            throw new IllegalArgumentException(e);
+            throw new IllegalArgumentException("Failed to round " + x + " with DecimalFormat pattern '" + df.toPattern() + "'", e);
         }
     }
 
@@ -7560,10 +8623,10 @@ public final class Numbers {
      *     <li>{@code x} is not a mathematical integer and {@code mode} is
      *         {@link RoundingMode#UNNECESSARY}
      *     </ul>
+     * @throws IllegalArgumentException if {@code mode} is {@code null}
      * @see #roundToLong(double, RoundingMode)
      * @see #roundToBigInteger(double, RoundingMode)
      * @see RoundingMode
-     * @throws IllegalArgumentException if {@code mode} is {@code null}
      */
     public static int roundToInt(final double x, final RoundingMode mode) {
         final double z = roundIntermediate(x, mode);
@@ -7596,10 +8659,10 @@ public final class Numbers {
      *     <li>{@code x} is not a mathematical integer and {@code mode} is
      *         {@link RoundingMode#UNNECESSARY}
      *     </ul>
+     * @throws IllegalArgumentException if {@code mode} is {@code null}
      * @see #roundToInt(double, RoundingMode)
      * @see #roundToBigInteger(double, RoundingMode)
      * @see RoundingMode
-     * @throws IllegalArgumentException if {@code mode} is {@code null}
      */
     public static long roundToLong(final double x, final RoundingMode mode) {
         final double z = roundIntermediate(x, mode);
@@ -7629,10 +8692,10 @@ public final class Numbers {
      *     <li>{@code x} is not a mathematical integer and {@code mode} is
      *         {@link RoundingMode#UNNECESSARY}
      *     </ul>
+     * @throws IllegalArgumentException if {@code mode} is {@code null}
      * @see #roundToInt(double, RoundingMode)
      * @see #roundToLong(double, RoundingMode)
      * @see RoundingMode
-     * @throws IllegalArgumentException if {@code mode} is {@code null}
      */
     public static BigInteger roundToBigInteger(double x, final RoundingMode mode) {
         // #roundIntermediate, java.lang.Math.getExponent, com.google.common.math.DoubleUtils
@@ -7656,6 +8719,18 @@ public final class Numbers {
      *
      * <p>Technically speaking, this is equivalent to
      * {@code Math.abs(a - b) <= tolerance || Float.valueOf(a).equals(Float.valueOf(b))}.
+     *
+     * <p>Notable special cases include:
+     * <ul>
+     * <li>All NaNs are fuzzily equal.
+     * <li>If {@code a == b}, then {@code a} and {@code b} are always fuzzily equal.
+     * <li>Positive and negative zero are always fuzzily equal.
+     * <li>If {@code tolerance} is zero, and neither {@code a} nor {@code b} is NaN, then {@code a}
+     *     and {@code b} are fuzzily equal if and only if {@code a == b}.
+     * <li>With {@link Float#POSITIVE_INFINITY} tolerance, all non-NaN values are fuzzily equal.
+     * <li>With finite tolerance, {@code Float.POSITIVE_INFINITY} and {@code
+     *     Float.NEGATIVE_INFINITY} are fuzzily equal only to themselves.
+     * </ul>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -8074,6 +9149,11 @@ public final class Numbers {
      *   <li>Range: all real numbers (-∞, +∞)</li>
      * </ul>
      *
+     * <p><b>Note:</b> for very large magnitudes ({@code |a| > ~1.34e154}, i.e. just above
+     * {@code sqrt(Double.MAX_VALUE)}) the intermediate {@code a * a} overflows to {@code +Infinity}, so the result
+     * saturates to {@code ±Infinity} even though the true value is finite. This is the same limitation as the naive
+     * formula in Guava/Commons-Math.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Numbers.asinh(0.0);    // returns 0.0
@@ -8132,6 +9212,10 @@ public final class Numbers {
      *   <li>For {@code x < 1}, the result is NaN</li>
      * </ul>
      *
+     * <p><b>Note:</b> for very large inputs ({@code a > ~1.34e154}, i.e. just above {@code sqrt(Double.MAX_VALUE)})
+     * the intermediate {@code a * a} overflows to {@code +Infinity}, so the result saturates to {@code +Infinity}
+     * even though the true value is finite. This is the same limitation as the naive formula in Guava/Commons-Math.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Numbers.acosh(1.0);    // returns 0.0
@@ -8140,7 +9224,7 @@ public final class Numbers {
      * Numbers.acosh(0.5);    // returns NaN (outside domain)
      * }</pre>
      *
-     * @param a the number on which to compute the inverse hyperbolic cosine; must be &gt;= 1
+     * @param a the number on which to compute the inverse hyperbolic cosine; values &lt; 1 return {@code NaN}
      * @return the inverse hyperbolic cosine of {@code a}, or NaN if {@code a < 1}
      * @see #asinh(double)
      * @see #atanh(double)

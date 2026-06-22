@@ -52,7 +52,8 @@ import com.landawn.abacus.util.stream.ShortStream;
 public abstract class ShortIterator extends ImmutableIterator<Short> {
 
     /**
-     * Protected constructor for subclasses.
+     * Constructs a new {@code ShortIterator}.
+     * Intended for use by subclasses only.
      */
     protected ShortIterator() {
     }
@@ -122,7 +123,8 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
      *
      * <p>The iterator will iterate over elements from {@code fromIndex} (inclusive) to
      * {@code toIndex} (exclusive). If {@code fromIndex} equals {@code toIndex}, an empty
-     * iterator is returned.</p>
+     * iterator is returned. A {@code null} array is treated as length 0 for range validation,
+     * so only {@code fromIndex == toIndex == 0} is valid.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -133,8 +135,8 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
      * @param a the {@code short} array (may be {@code null})
      * @param fromIndex the starting index (inclusive)
      * @param toIndex the ending index (exclusive)
-     * @return a new {@code ShortIterator} over the specified range, or an empty iterator if the array is {@code null} or {@code fromIndex == toIndex}
-     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code toIndex > a.length}, or {@code fromIndex > toIndex}
+     * @return a new {@code ShortIterator} over the specified range, or an empty iterator if the validated range is empty
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code toIndex > (a == null ? 0 : a.length)}, or {@code fromIndex > toIndex}
      */
     public static ShortIterator of(final short[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
@@ -190,13 +192,14 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
      * @param iteratorSupplier a {@link Supplier} that provides the {@code ShortIterator} when needed; must not be {@code null}
      * @return a lazily initialized {@code ShortIterator}
      * @throws IllegalArgumentException if {@code iteratorSupplier} is {@code null}
+     * @throws IllegalStateException if the supplier returns {@code null} when invoked
      */
     public static ShortIterator defer(final Supplier<? extends ShortIterator> iteratorSupplier) throws IllegalArgumentException {
         N.checkArgNotNull(iteratorSupplier, cs.iteratorSupplier);
 
         return new ShortIterator() {
             private ShortIterator iter = null;
-            private boolean isInitialized = false;
+            private volatile boolean isInitialized = false;
 
             @Override
             public boolean hasNext() {
@@ -216,10 +219,13 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
                 return iter.nextShort();
             }
 
-            private void init() {
+            private synchronized void init() {
                 if (!isInitialized) {
                     isInitialized = true;
                     iter = iteratorSupplier.get();
+                    if (iter == null) {
+                        throw new IllegalStateException("Iterator supplier returned null");
+                    }
                 }
             }
         };
@@ -260,6 +266,10 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
     /**
      * Creates a ShortIterator that generates values using the provided supplier while the hasNext condition is {@code true}.
      * This allows for creating finite iterators with custom termination conditions.
+     *
+     * <p>Note: The {@code hasNext} supplier may be called multiple times for the same element
+     * (once by the user, once internally for validation), so it should be idempotent or
+     * designed to handle multiple calls.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -346,7 +356,7 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
      *
      * @param n the number of elements to skip; must be non-negative
      * @return this iterator unchanged if {@code n == 0}, otherwise a new {@code ShortIterator}
-     *         that skips the first {@code n} elements
+     *         with the first {@code n} elements skipped
      * @throws IllegalArgumentException if {@code n} is negative
      * @see #limit(long)
      */

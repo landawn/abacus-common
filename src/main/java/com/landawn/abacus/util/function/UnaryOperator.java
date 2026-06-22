@@ -13,10 +13,10 @@
  */
 package com.landawn.abacus.util.function;
 
-import java.util.Objects;
-
 import com.landawn.abacus.util.Fn.UnaryOperators;
 import com.landawn.abacus.util.Throwables;
+import com.landawn.abacus.util.N;
+import com.landawn.abacus.util.cs;
 
 /**
  * Represents an operation on a single operand that produces a result of the same type as its operand.
@@ -56,11 +56,11 @@ public interface UnaryOperator<T> extends Function<T, T>, Throwables.UnaryOperat
      *
      * @param before the operator to apply before this operator is applied
      * @return a composed operator that first applies the before operator and then applies this operator
-     * @throws NullPointerException if {@code before} is null
+     * @throws IllegalArgumentException if {@code before} is null
      * @see #andThen(java.util.function.UnaryOperator)
      */
     default UnaryOperator<T> compose(final java.util.function.UnaryOperator<T> before) {
-        Objects.requireNonNull(before);
+        N.checkArgNotNull(before, cs.before);
         return t -> apply(before.apply(t));
     }
 
@@ -86,11 +86,11 @@ public interface UnaryOperator<T> extends Function<T, T>, Throwables.UnaryOperat
      *
      * @param after the operator to apply after this operator is applied
      * @return a composed operator that first applies this operator and then applies the after operator
-     * @throws NullPointerException if {@code after} is null
+     * @throws IllegalArgumentException if {@code after} is null
      * @see #compose(java.util.function.UnaryOperator)
      */
     default UnaryOperator<T> andThen(final java.util.function.UnaryOperator<T> after) {
-        Objects.requireNonNull(after);
+        N.checkArgNotNull(after, cs.after);
         return t -> after.apply(apply(t));
     }
 
@@ -123,19 +123,18 @@ public interface UnaryOperator<T> extends Function<T, T>, Throwables.UnaryOperat
     }
 
     /**
-     * Converts this UnaryOperator to a Throwables.UnaryOperator that can throw checked exceptions.
-     * This method is useful when you need to use this operator in a context that expects
-     * a Throwables.UnaryOperator with a specific exception type.
+     * Returns this operator as a {@link Throwables.UnaryOperator} view.
+     * This method does not translate exceptions or make the original implementation capable of
+     * throwing new checked exceptions; the exception type parameter is for target-type compatibility.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * UnaryOperator<String> operator = s -> s.toUpperCase();
-     * var throwableOperator =
-     *     operator.toThrowable();
+     * Throwables.UnaryOperator<String, RuntimeException> throwableOperator = operator.toThrowable();
      * }</pre>
      *
-     * @param <E> the type of exception that the returned operator may throw
-     * @return a Throwables.UnaryOperator that wraps this operator
+     * @param <E> the target exception type for compatibility with {@code Throwables.UnaryOperator}
+     * @return a {@code Throwables.UnaryOperator} view of this operator
      */
     @Override
     default <E extends Throwable> Throwables.UnaryOperator<T, E> toThrowable() {

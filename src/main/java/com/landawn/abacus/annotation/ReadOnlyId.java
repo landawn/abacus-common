@@ -31,7 +31,7 @@ import java.lang.annotation.Target;
  * ({@code com.landawn.abacus.parser.ParserUtil}) flags a property as {@code isMarkedAsReadOnlyId}
  * when ANY of the following is true:</p>
  * <ul>
- *   <li>The property (or its declaring class) carries {@code @ReadOnlyId}.</li>
+ *   <li>The property itself carries {@code @ReadOnlyId}.</li>
  *   <li>The property carries both {@code @Id} and {@link ReadOnly}.</li>
  *   <li>The property name appears in the {@link #value()} array of a type-level {@code @ReadOnlyId}.</li>
  * </ul>
@@ -96,7 +96,7 @@ import java.lang.annotation.Target;
  * @see ReadOnly
  */
 @Documented
-@Target(value = { FIELD, /* METHOD, */ TYPE })
+@Target(value = { FIELD, TYPE })
 @Retention(RUNTIME)
 public @interface ReadOnlyId {
 

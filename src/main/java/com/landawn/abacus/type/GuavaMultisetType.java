@@ -21,6 +21,8 @@ import java.util.List;
 import java.util.Map;
 
 import com.google.common.collect.HashMultiset;
+import com.google.common.collect.ImmutableMultiset;
+import com.google.common.collect.ImmutableSortedMultiset;
 import com.google.common.collect.LinkedHashMultiset;
 import com.google.common.collect.Multiset;
 import com.google.common.collect.TreeMultiset;
@@ -186,6 +188,7 @@ public class GuavaMultisetType<E, T extends Multiset<E>> extends AbstractType<T>
      * @see #valueOf(Object)
      * @see #stringOf(Multiset)
      */
+    @SuppressWarnings("rawtypes")
     @Override
     public T valueOf(final String str) {
         if (Strings.isEmpty(str) || Strings.isBlank(str)) {
@@ -202,6 +205,14 @@ public class GuavaMultisetType<E, T extends Multiset<E>> extends AbstractType<T>
 
         for (final Map.Entry<E, Integer> entry : map.entrySet()) {
             multiset.add(entry.getKey(), entry.getValue());
+        }
+
+        // Immutable targets are abstract, so newInstance() built a mutable HashMultiset: convert
+        // (like the GuavaMultimapType sibling) instead of returning the wrong runtime type.
+        if (ImmutableSortedMultiset.class.isAssignableFrom(typeClass)) {
+            return (T) ImmutableSortedMultiset.copyOf((Multiset) multiset);
+        } else if (ImmutableMultiset.class.isAssignableFrom(typeClass)) {
+            return (T) ImmutableMultiset.copyOf(multiset);
         }
 
         return multiset;

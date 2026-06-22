@@ -66,7 +66,7 @@ public class FloatSummaryStatistics implements FloatConsumer {
     }
 
     /**
-     * Constructs a non-empty instance with the specified count, min, max, and sum.
+     * Constructs an instance with the specified count, min, max, and sum.
      * This constructor is useful for creating a summary from pre-calculated values
      * or for combining multiple summaries.
      *

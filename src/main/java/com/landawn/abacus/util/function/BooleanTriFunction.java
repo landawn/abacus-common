@@ -13,9 +13,9 @@
  */
 package com.landawn.abacus.util.function;
 
-import java.util.Objects;
-
 import com.landawn.abacus.util.Throwables;
+import com.landawn.abacus.util.N;
+import com.landawn.abacus.util.cs;
 
 /**
  * Represents a function that accepts three {@code boolean}-valued arguments and produces a result.
@@ -60,10 +60,24 @@ public interface BooleanTriFunction<R> extends Throwables.BooleanTriFunction<R, 
      * @param <V> the type of output of the {@code after} function, and of the composed function
      * @param after the function to apply after this function is applied. Must not be {@code null}.
      * @return a composed function that first applies this function and then applies the {@code after} function
-     * @throws NullPointerException if {@code after} is null
+     * @throws IllegalArgumentException if {@code after} is null
      */
     default <V> BooleanTriFunction<V> andThen(final java.util.function.Function<? super R, ? extends V> after) {
-        Objects.requireNonNull(after);
+        N.checkArgNotNull(after, cs.after);
         return (a, b, c) -> after.apply(apply(a, b, c));
+    }
+
+    /**
+     * Returns this object as a {@link Throwables.BooleanTriFunction} view.
+     *
+     * <p>The returned object has the same behavior as this one. This method does not translate
+     * exceptions or make the original implementation capable of throwing new checked exceptions; the
+     * exception type parameter is for target-type compatibility with APIs that accept {@code Throwables.BooleanTriFunction}.
+     *
+     * @param <E> the target exception type for compatibility with {@code Throwables.BooleanTriFunction}
+     * @return a {@link Throwables.BooleanTriFunction} view of this object
+     */
+    default <E extends Throwable> Throwables.BooleanTriFunction<R, E> toThrowable() {
+        return (Throwables.BooleanTriFunction<R, E>) this;
     }
 }

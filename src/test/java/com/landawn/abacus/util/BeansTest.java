@@ -32,7 +32,7 @@ import com.landawn.abacus.annotation.DiffIgnore;
 import com.landawn.abacus.annotation.Entity;
 import com.landawn.abacus.annotation.Record;
 import com.landawn.abacus.parser.ParserUtil.BeanInfo;
-import com.landawn.abacus.util.Tuple.Tuple3;
+import com.landawn.abacus.util.u.Nullable;
 
 public class BeansTest extends TestBase {
 
@@ -450,15 +450,18 @@ public class BeansTest extends TestBase {
 
     @Test
     public void testGetBuilderInfoForClassWithBuilder() {
-        var builderInfo = Beans.getBuilderInfo(BeanWithBuilder.class);
+        Beans.BuilderInfo builderInfo = Beans.getBuilderInfo(BeanWithBuilder.class);
         assertNotNull(builderInfo);
-        assertNotNull(builderInfo._1);
-        assertNotNull(builderInfo._2);
-        assertNotNull(builderInfo._3);
+        assertNotNull(builderInfo.builderClass());
 
-        Object builder = builderInfo._2.get();
+        Object builder = builderInfo.newBuilder();
         assertNotNull(builder);
         assertTrue(builder.getClass().getName().contains("Builder"));
+
+        // build() turns a builder into the target bean
+        Object built = builderInfo.build(builder);
+        assertNotNull(built);
+        assertTrue(built instanceof BeanWithBuilder);
     }
 
     @Test
@@ -474,14 +477,12 @@ public class BeansTest extends TestBase {
 
     @Test
     public void testGetBuilderInfo() {
-        Tuple3<Class<?>, com.landawn.abacus.util.function.Supplier<Object>, com.landawn.abacus.util.function.Function<Object, Object>> builderInfo = Beans
-                .getBuilderInfo(BeanWithBuilder.class);
+        Beans.BuilderInfo builderInfo = Beans.getBuilderInfo(BeanWithBuilder.class);
 
         assertNotNull(builderInfo);
-        assertNotNull(builderInfo._2);
-        assertNotNull(builderInfo._3);
+        assertNotNull(builderInfo.builderClass());
 
-        Object builder = builderInfo._2.get();
+        Object builder = builderInfo.newBuilder();
         assertNotNull(builder);
 
         assertNull(Beans.getBuilderInfo(SimpleBean.class));
@@ -736,6 +737,21 @@ public class BeansTest extends TestBase {
         Method getActive = SimpleBean.class.getMethod("getActive");
         String propName = Beans.getPropNameByMethod(getActive);
         assertEquals("active", propName);
+    }
+
+    public static class HasPrefixBean {
+        private boolean active;
+
+        public boolean hasActive() {
+            return active;
+        }
+    }
+
+    @Test
+    public void testGetPropNameByMethod_HasPrefix() throws Exception {
+        final Method hasActive = HasPrefixBean.class.getMethod("hasActive");
+
+        assertEquals("active", Beans.getPropNameByMethod(hasActive));
     }
 
     @Test
@@ -1057,6 +1073,17 @@ public class BeansTest extends TestBase {
     }
 
     @Test
+    public void testGetPropGetterSetter_NonBeanClass_Throws() {
+        // Consistent with getPropField: a non-bean class throws IllegalArgumentException (instead of returning null).
+        assertThrows(IllegalArgumentException.class, () -> Beans.getPropGetter(NonBean.class, "field"));
+        assertThrows(IllegalArgumentException.class, () -> Beans.getPropSetter(NonBean.class, "field"));
+
+        // A bean class with a missing property still returns null (unchanged).
+        assertNull(Beans.getPropGetter(SimpleBean.class, "nonExistent"));
+        assertNull(Beans.getPropSetter(SimpleBean.class, "nonExistent"));
+    }
+
+    @Test
     public void testGetPropFields() {
         ImmutableMap<String, Field> fields = Beans.getPropFields(SimpleBean.class);
         assertNotNull(fields);
@@ -1083,17 +1110,7 @@ public class BeansTest extends TestBase {
         assertNotNull(fields.get("value"));
     }
 
-    // ===== getPropFields =====
-
-    @Test
-    public void testGetPropFields_returnsAllFields() {
-        ImmutableMap<String, java.lang.reflect.Field> fields = Beans.getPropFields(SimpleBean.class);
-        assertNotNull(fields);
-        assertTrue(fields.containsKey("name"));
-        assertTrue(fields.containsKey("age"));
-    }
-
-    // ===== getPropFields returns correct fields =====
+    // ===== getPropFields =====    // ===== getPropFields returns correct fields =====
 
     @Test
     public void testGetPropFields_includesExpectedFields() {
@@ -1302,6 +1319,43 @@ public class BeansTest extends TestBase {
 
         assertEquals("John", Beans.getPropValue(nestedBean, "simpleBean.name"));
         assertEquals(25, (Integer) Beans.getPropValue(nestedBean, "simpleBean.age"));
+    }
+
+    @Test
+    public void testGetPropValueIfPresent() {
+        // present, non-null
+        Nullable<String> name = Beans.getPropValueIfPresent(simpleBean, "name");
+        assertTrue(name.isPresent());
+        assertEquals("John", name.get());
+
+        // present but null (active is null on a fresh SimpleBean) -> Nullable.of(null), NOT empty
+        SimpleBean bean = new SimpleBean("John", 25);
+        Nullable<Boolean> active = Beans.getPropValueIfPresent(bean, "active");
+        assertTrue(active.isPresent());
+        assertNull(active.orElseNull());
+
+        // absent (unmatched property) -> empty
+        Nullable<Object> unknown = Beans.getPropValueIfPresent(bean, "unknown");
+        assertTrue(unknown.isEmpty());
+
+        // nested, reachable leaf (nestedBean.address.city == "New York")
+        Nullable<String> city = Beans.getPropValueIfPresent(nestedBean, "address.city");
+        assertTrue(city.isPresent());
+        assertEquals("New York", city.get());
+
+        // nested, leaf present but null
+        NestedBean nb = new NestedBean();
+        nb.setAddress(new Address("NYC")); // street/zipCode null
+        Nullable<String> street = Beans.getPropValueIfPresent(nb, "address.street");
+        assertTrue(street.isPresent());
+        assertNull(street.orElseNull());
+
+        // nested, intermediate null -> unreachable -> empty
+        NestedBean nb2 = new NestedBean(); // address == null
+        assertTrue(Beans.getPropValueIfPresent(nb2, "address.city").isEmpty());
+
+        // nested, unknown path segment -> empty
+        assertTrue(Beans.getPropValueIfPresent(nb2, "address.nope").isEmpty());
     }
 
     @Test
@@ -1640,7 +1694,7 @@ public class BeansTest extends TestBase {
         map.put("user_name", "John");
         map.put("first_name", "Jane");
 
-        Beans.replaceKeysWithCamelCase(map);
+        Maps.replaceKeysWithCamelCase(map);
 
         assertTrue(map.containsKey("userName"));
         assertTrue(map.containsKey("firstName"));
@@ -1675,7 +1729,7 @@ public class BeansTest extends TestBase {
         map.put("USER_ID", 123);
         map.put("address-line", "Main St");
 
-        Beans.replaceKeysWithCamelCase(map);
+        Maps.replaceKeysWithCamelCase(map);
 
         assertTrue(map.containsKey("userName"));
         assertTrue(map.containsKey("firstName"));
@@ -1688,7 +1742,7 @@ public class BeansTest extends TestBase {
         assertFalse(map.containsKey("address-line"));
 
         Map<String, Object> emptyMap = new HashMap<>();
-        Beans.replaceKeysWithCamelCase(emptyMap);
+        Maps.replaceKeysWithCamelCase(emptyMap);
         assertTrue(emptyMap.isEmpty());
     }
 
@@ -1717,7 +1771,7 @@ public class BeansTest extends TestBase {
         map.put("userName", "John");
         map.put("firstName", "Jane");
 
-        Beans.replaceKeysWithSnakeCase(map);
+        Maps.replaceKeysWithSnakeCase(map);
 
         assertTrue(map.containsKey("user_name"));
         assertTrue(map.containsKey("first_name"));
@@ -1751,7 +1805,7 @@ public class BeansTest extends TestBase {
         map.put("userId", 123);
         map.put("addressLine", "Main St");
 
-        Beans.replaceKeysWithSnakeCase(map);
+        Maps.replaceKeysWithSnakeCase(map);
 
         assertTrue(map.containsKey("user_name"));
         assertTrue(map.containsKey("first_name"));
@@ -1783,7 +1837,7 @@ public class BeansTest extends TestBase {
         map.put("userName", "John");
         map.put("firstName", "Jane");
 
-        Beans.replaceKeysWithScreamingSnakeCase(map);
+        Maps.replaceKeysWithScreamingSnakeCase(map);
 
         assertTrue(map.containsKey("USER_NAME"));
         assertTrue(map.containsKey("FIRST_NAME"));
@@ -1816,7 +1870,7 @@ public class BeansTest extends TestBase {
         map.put("firstName", "Jane");
         map.put("userId", 123);
 
-        Beans.replaceKeysWithScreamingSnakeCase(map);
+        Maps.replaceKeysWithScreamingSnakeCase(map);
 
         assertTrue(map.containsKey("USER_NAME"));
         assertTrue(map.containsKey("FIRST_NAME"));
@@ -1834,7 +1888,7 @@ public class BeansTest extends TestBase {
     @Test
     public void testReplaceKeysWithCamelCase_EmptyMap() {
         Map<String, Object> map = new HashMap<>();
-        Beans.replaceKeysWithCamelCase(map);
+        Maps.replaceKeysWithCamelCase(map);
         assertTrue(map.isEmpty());
     }
 
@@ -1846,7 +1900,7 @@ public class BeansTest extends TestBase {
         nested.put("first_name", "John");
         map.put("inner_data", nested);
 
-        Beans.replaceKeysWithCamelCase(map);
+        Maps.replaceKeysWithCamelCase(map);
         assertTrue(map.containsKey("userName"));
         assertTrue(map.containsKey("innerData"));
     }
@@ -1854,7 +1908,7 @@ public class BeansTest extends TestBase {
     @Test
     public void testReplaceKeysWithSnakeCase_EmptyMap() {
         Map<String, Object> map = new HashMap<>();
-        Beans.replaceKeysWithSnakeCase(map);
+        Maps.replaceKeysWithSnakeCase(map);
         assertTrue(map.isEmpty());
     }
 
@@ -1863,7 +1917,7 @@ public class BeansTest extends TestBase {
         Map<String, Object> map = new HashMap<>();
         map.put("already_snake", "value");
 
-        Beans.replaceKeysWithSnakeCase(map);
+        Maps.replaceKeysWithSnakeCase(map);
         assertTrue(map.containsKey("already_snake"));
         assertEquals("value", map.get("already_snake"));
     }
@@ -1871,7 +1925,7 @@ public class BeansTest extends TestBase {
     @Test
     public void testReplaceKeysWithScreamingSnakeCase_EmptyMap() {
         Map<String, Object> map = new HashMap<>();
-        Beans.replaceKeysWithScreamingSnakeCase(map);
+        Maps.replaceKeysWithScreamingSnakeCase(map);
         assertTrue(map.isEmpty());
     }
 
@@ -1881,7 +1935,7 @@ public class BeansTest extends TestBase {
         map.put("userName", "John");
         map.put("already_snake", "value");
 
-        Beans.replaceKeysWithScreamingSnakeCase(map);
+        Maps.replaceKeysWithScreamingSnakeCase(map);
         assertTrue(map.containsKey("USER_NAME"));
         assertTrue(map.containsKey("ALREADY_SNAKE"));
     }
@@ -1900,12 +1954,12 @@ public class BeansTest extends TestBase {
         map2.put("age", 30);
         mapList.add(map2);
 
-        List<SimpleBean> beans = Beans.mapToBean(mapList, SimpleBean.class);
+        List<SimpleBean> beans = Beans.mapsToBeans(mapList, SimpleBean.class);
         assertEquals(2, beans.size());
         assertEquals("John", beans.get(0).getName());
         assertEquals("Jane", beans.get(1).getName());
 
-        beans = Beans.mapToBean(mapList, Arrays.asList("name"), SimpleBean.class);
+        beans = Beans.mapsToBeans(mapList, Arrays.asList("name"), SimpleBean.class);
         assertEquals(2, beans.size());
         assertEquals("John", beans.get(0).getName());
         assertEquals(0, beans.get(0).getAge());
@@ -1931,7 +1985,7 @@ public class BeansTest extends TestBase {
         map1.put("age", 22);
         mapList.add(map1);
 
-        List<SimpleBean> beans = Beans.mapToBean(mapList, SimpleBean.class);
+        List<SimpleBean> beans = Beans.mapsToBeans(mapList, SimpleBean.class);
         assertEquals(1, beans.size());
         assertEquals("Eve", beans.get(0).getName());
         assertEquals(22, beans.get(0).getAge());
@@ -1950,7 +2004,7 @@ public class BeansTest extends TestBase {
         m2.put("age", 32);
 
         List<Map<String, Object>> mapList = Arrays.asList(m1, m2);
-        List<SimpleBean> beans = Beans.mapToBean(mapList, Arrays.asList("name"), SimpleBean.class);
+        List<SimpleBean> beans = Beans.mapsToBeans(mapList, Arrays.asList("name"), SimpleBean.class);
         assertEquals(2, beans.size());
         assertEquals("Xena", beans.get(0).getName());
         assertEquals(0, beans.get(0).getAge()); // age not selected
@@ -1979,7 +2033,7 @@ public class BeansTest extends TestBase {
         map.put("age", 30);
         map.put("active", null);
 
-        SimpleBean bean = Beans.mapToBean(map, true, true, SimpleBean.class);
+        SimpleBean bean = Beans.mapToBean(map, true, SimpleBean.class);
         assertEquals("Jane", bean.getName());
         assertEquals(30, bean.getAge());
         assertNull(bean.getActive());
@@ -1998,7 +2052,7 @@ public class BeansTest extends TestBase {
         map1.put("age", null);
         mapList.add(map1);
 
-        List<SimpleBean> beans = Beans.mapToBean(mapList, true, true, SimpleBean.class);
+        List<SimpleBean> beans = Beans.mapsToBeans(mapList, true, SimpleBean.class);
         assertEquals(1, beans.size());
         assertEquals("John", beans.get(0).getName());
     }
@@ -2010,12 +2064,12 @@ public class BeansTest extends TestBase {
         map.put("age", null);
         map.put("unknownField", "value");
 
-        SimpleBean bean = Beans.mapToBean(map, false, true, SimpleBean.class);
+        SimpleBean bean = Beans.mapToBean(map, true, SimpleBean.class);
         assertEquals("Jane", bean.getName());
         assertNull(bean.getActive());
 
         map.put("age", 25);
-        bean = Beans.mapToBean(map, true, true, SimpleBean.class);
+        bean = Beans.mapToBean(map, true, SimpleBean.class);
         assertEquals("Jane", bean.getName());
         assertEquals(25, bean.getAge());
     }
@@ -2036,7 +2090,7 @@ public class BeansTest extends TestBase {
         map2.put("active", false);
         mapList.add(map2);
 
-        List<SimpleBean> beans = Beans.mapToBean(mapList, Arrays.asList("name", "age"), SimpleBean.class);
+        List<SimpleBean> beans = Beans.mapsToBeans(mapList, Arrays.asList("name", "age"), SimpleBean.class);
         assertEquals(2, beans.size());
         assertEquals("John", beans.get(0).getName());
         assertEquals(25, beans.get(0).getAge());
@@ -2092,7 +2146,7 @@ public class BeansTest extends TestBase {
         map2.put("age", 25);
         mapList.add(map2);
 
-        List<SimpleBean> beans = Beans.mapToBean(mapList, true, true, SimpleBean.class);
+        List<SimpleBean> beans = Beans.mapsToBeans(mapList, true, SimpleBean.class);
         assertEquals(2, beans.size());
         assertEquals("John", beans.get(0).getName());
         assertEquals(0, beans.get(0).getAge());
@@ -2121,7 +2175,7 @@ public class BeansTest extends TestBase {
         map.put("age", null);
         map.put("unknownField", "value");
 
-        SimpleBean bean = Beans.mapToBean(map, true, true, SimpleBean.class);
+        SimpleBean bean = Beans.mapToBean(map, true, SimpleBean.class);
         assertEquals("Test", bean.getName());
     }
 
@@ -2141,7 +2195,7 @@ public class BeansTest extends TestBase {
         map2.put("active", false);
         mapList.add(map2);
 
-        List<SimpleBean> beans = Beans.mapToBean(mapList, Arrays.asList("name"), SimpleBean.class);
+        List<SimpleBean> beans = Beans.mapsToBeans(mapList, Arrays.asList("name"), SimpleBean.class);
         assertEquals(2, beans.size());
         assertEquals("Alice", beans.get(0).getName());
         assertEquals(0, beans.get(0).getAge());
@@ -2151,7 +2205,7 @@ public class BeansTest extends TestBase {
 
     @Test
     public void testMapToBean_MapList_Empty() {
-        List<SimpleBean> beans = Beans.mapToBean(Collections.emptyList(), SimpleBean.class);
+        List<SimpleBean> beans = Beans.mapsToBeans(Collections.emptyList(), SimpleBean.class);
         assertNotNull(beans);
         assertTrue(beans.isEmpty());
     }
@@ -2168,6 +2222,46 @@ public class BeansTest extends TestBase {
         assertNotNull(bean);
         assertEquals("Bob", bean.getName());
         assertEquals(0, bean.getAge());
+    }
+
+    @Test
+    public void testMapToBean_SelectPropNames_NullMeansAllEmptyMeansNone() {
+        Map<String, Object> map = new HashMap<>();
+        map.put("name", "Nora");
+        map.put("age", 31);
+        map.put("active", true);
+
+        SimpleBean bean = Beans.mapToBean(map, (Collection<String>) null, SimpleBean.class);
+        assertEquals("Nora", bean.getName());
+        assertEquals(31, bean.getAge());
+        assertEquals(true, bean.getActive());
+
+        bean = Beans.mapToBean(map, Collections.emptyList(), SimpleBean.class);
+        assertNull(bean.getName());
+        assertEquals(0, bean.getAge());
+        assertNull(bean.getActive());
+    }
+
+    @Test
+    public void testMapToBean_MapList_SelectPropNames_NullMeansAllEmptyMeansNone() {
+        Map<String, Object> map = new HashMap<>();
+        map.put("name", "Owen");
+        map.put("age", 42);
+        map.put("active", false);
+
+        List<Map<String, Object>> mapList = Collections.singletonList(map);
+
+        List<SimpleBean> beans = Beans.mapsToBeans(mapList, (Collection<String>) null, SimpleBean.class);
+        assertEquals(1, beans.size());
+        assertEquals("Owen", beans.get(0).getName());
+        assertEquals(42, beans.get(0).getAge());
+        assertEquals(false, beans.get(0).getActive());
+
+        beans = Beans.mapsToBeans(mapList, Collections.emptyList(), SimpleBean.class);
+        assertEquals(1, beans.size());
+        assertNull(beans.get(0).getName());
+        assertEquals(0, beans.get(0).getAge());
+        assertNull(beans.get(0).getActive());
     }
 
     @Test
@@ -2226,6 +2320,56 @@ public class BeansTest extends TestBase {
         assertEquals("Wendy", bean.getName());
     }
 
+    // ===== flatMapToBean (inverse of beanToFlatMap) - is it already supported? =====
+    // YES: mapToBean delegates unmatched (dotted) keys to BeanInfo.setPropValue, which resolves dotted
+    // property names via getPropInfoChain, creating intermediate beans. So a beanToFlatMap -> mapToBean
+    // round-trip reconstructs the nested bean; no dedicated flatMapToBean method is required.
+    @Test
+    public void testFlatMapToBean_roundTripViaMapToBean() {
+        final Map<String, Object> flat = Beans.beanToFlatMap(nestedBean);
+
+        // sanity: this really is a FLAT (dotted-key) map, not nested sub-maps
+        assertEquals("New York", flat.get("address.city"));
+        assertEquals("John", flat.get("simpleBean.name"));
+        assertFalse(flat.get("address") instanceof Map);
+        assertFalse(flat.get("simpleBean") instanceof Map);
+
+        final NestedBean restored = Beans.mapToBean(flat, NestedBean.class);
+
+        assertNotNull(restored);
+        assertEquals("123", restored.getId());
+        assertNotNull(restored.getSimpleBean());
+        assertEquals("John", restored.getSimpleBean().getName());
+        assertEquals(25, restored.getSimpleBean().getAge());
+        assertTrue(restored.getSimpleBean().getActive());
+        assertNotNull(restored.getAddress());
+        assertEquals("New York", restored.getAddress().getCity());
+        assertEquals("5th Avenue", restored.getAddress().getStreet());
+        assertEquals("10001", restored.getAddress().getZipCode());
+    }
+
+    @Test
+    public void testMapToBean_dottedKeys_buildsNestedBeans() {
+        // A flat map with dotted keys assembled by hand (independent of beanToFlatMap) is reconstructed
+        // into the nested bean graph by mapToBean - intermediate beans (address, simpleBean) are created.
+        final Map<String, Object> flat = new LinkedHashMap<>();
+        flat.put("id", "789");
+        flat.put("address.city", "Boston");
+        flat.put("address.zipCode", "02101");
+        flat.put("simpleBean.name", "Ann");
+        flat.put("simpleBean.age", 40);
+
+        final NestedBean bean = Beans.mapToBean(flat, NestedBean.class);
+
+        assertEquals("789", bean.getId());
+        assertNotNull(bean.getAddress());
+        assertEquals("Boston", bean.getAddress().getCity());
+        assertEquals("02101", bean.getAddress().getZipCode());
+        assertNotNull(bean.getSimpleBean());
+        assertEquals("Ann", bean.getSimpleBean().getName());
+        assertEquals(40, bean.getSimpleBean().getAge());
+    }
+
     @Test
     public void testBean2MapWithOutput() {
         Map<String, Object> output = new LinkedHashMap<>();
@@ -2263,6 +2407,145 @@ public class BeansTest extends TestBase {
         assertEquals(2, map.size());
         assertTrue(map.containsKey("name"));
         assertTrue(map.containsKey("active"));
+    }
+
+    @Test
+    public void testBeanToMap_SelectPropNames_NullMeansAllEmptyMeansNone() {
+        Map<String, Object> map = Beans.beanToMap(simpleBean, (Collection<String>) null);
+        assertTrue(map.containsKey("name"));
+        assertTrue(map.containsKey("age"));
+        assertTrue(map.containsKey("active"));
+
+        map = Beans.beanToMap(simpleBean, Collections.emptyList());
+        assertTrue(map.isEmpty());
+
+        map = Beans.beanToMap(simpleBean, Collections.emptyList(), IntFunctions.ofLinkedHashMap());
+        assertTrue(map instanceof LinkedHashMap);
+        assertTrue(map.isEmpty());
+
+        map = Beans.beanToMap(simpleBean, Collections.emptyList(), NamingPolicy.SNAKE_CASE, IntFunctions.ofMap());
+        assertTrue(map.isEmpty());
+    }
+
+    // ===== 5.2 fluent conversion builder: Beans.mapBuilder(bean) =====
+
+    @Test
+    public void testToMapBuilder_basicSelectExclude() {
+        // simpleBean: name="John", age=25, active=true. Default: all props, camelCase, shallow, LinkedHashMap.
+        Map<String, Object> all = Beans.mapBuilder(simpleBean).toMap();
+        assertTrue(all instanceof LinkedHashMap);
+        assertEquals(3, all.size());
+        assertEquals("John", all.get("name"));
+        assertEquals(25, all.get("age"));
+        assertEquals(true, all.get("active"));
+
+        Map<String, Object> sel = Beans.mapBuilder(simpleBean).select("name", "age").toMap();
+        assertEquals(2, sel.size());
+        assertTrue(sel.containsKey("name"));
+        assertTrue(sel.containsKey("age"));
+
+        Map<String, Object> exc = Beans.mapBuilder(simpleBean).exclude("active").toMap();
+        assertEquals(2, exc.size());
+        assertFalse(exc.containsKey("active"));
+
+        // a selected property that does not exist -> IllegalArgumentException
+        assertThrows(IllegalArgumentException.class, () -> Beans.mapBuilder(simpleBean).select("nope").toMap());
+    }
+
+    @Test
+    public void testToMapBuilder_filterAndSkipNulls() {
+        SimpleBean bean = new SimpleBean("John", 25); // active defaults to null
+
+        // filter: a plain inline lambda works (filter is a builder method, not an overload -> no ambiguity)
+        Map<String, Object> strings = Beans.mapBuilder(bean).filter((name, value) -> value instanceof String).toMap();
+        assertEquals(1, strings.size());
+        assertEquals("John", strings.get("name"));
+
+        // skipNulls drops the null "active"
+        Map<String, Object> nonNull = Beans.mapBuilder(bean).skipNulls().toMap();
+        assertEquals(2, nonNull.size());
+        assertFalse(nonNull.containsKey("active"));
+
+        // nulls are kept by default
+        Map<String, Object> withNulls = Beans.mapBuilder(bean).toMap();
+        assertEquals(3, withNulls.size());
+        assertTrue(withNulls.containsKey("active"));
+        assertNull(withNulls.get("active"));
+    }
+
+    @Test
+    public void testToMapBuilder_namingSupplierInto() {
+        NestedBean nb = new NestedBean();
+        nb.setSimpleBean(new SimpleBean("x", 1));
+
+        // naming applies to keys: simpleBean -> simple_bean
+        Map<String, Object> snake = Beans.mapBuilder(nb).select("simpleBean").naming(NamingPolicy.SNAKE_CASE).toMap();
+        assertTrue(snake.containsKey("simple_bean"));
+
+        // custom supplier -> TreeMap
+        Map<String, Object> tree = Beans.mapBuilder(simpleBean).toMap(size -> new java.util.TreeMap<>());
+        assertTrue(tree instanceof java.util.TreeMap);
+        assertEquals(3, tree.size());
+
+        // into(existing) fills and returns the same map, preserving existing entries
+        Map<String, Object> existing = new LinkedHashMap<>();
+        existing.put("id", 1);
+        Map<String, Object> filled = Beans.mapBuilder(simpleBean).select("name").into(existing);
+        assertTrue(existing == filled);
+        assertEquals(1, existing.get("id"));
+        assertEquals("John", existing.get("name"));
+    }
+
+    @Test
+    public void testToMapBuilder_deepAndFlat() {
+        NestedBean bean = new NestedBean();
+        bean.setId("u1");
+        bean.setAddress(new Address("NYC")); // city="NYC", street/zipCode null
+        bean.setSimpleBean(null);
+        bean.setTags(null);
+
+        // deep: nested Address -> nested map (nested nulls omitted)
+        Map<String, Object> deep = Beans.mapBuilder(bean).skipNulls().deep().toMap();
+        assertEquals("u1", deep.get("id"));
+        assertTrue(deep.get("address") instanceof Map);
+        assertEquals("NYC", ((Map<?, ?>) deep.get("address")).get("city"));
+
+        // flat: dotted keys
+        Map<String, Object> flat = Beans.mapBuilder(bean).skipNulls().flat().toMap();
+        assertEquals("u1", flat.get("id"));
+        assertEquals("NYC", flat.get("address.city"));
+
+        // deep()/flat() are mutually exclusive; calling both (either order) throws IllegalStateException.
+        assertThrows(IllegalStateException.class, () -> Beans.mapBuilder(bean).flat().deep());
+        assertThrows(IllegalStateException.class, () -> Beans.mapBuilder(bean).deep().flat());
+
+        // calling the same mode more than once is harmless
+        Map<String, Object> repeated = Beans.mapBuilder(bean).skipNulls().deep().deep().toMap();
+        assertTrue(repeated.get("address") instanceof Map);
+    }
+
+    @Test
+    public void testToMapBuilder_nullBean() {
+        assertTrue(Beans.mapBuilder((Object) null).toMap().isEmpty());
+
+        Map<String, Object> out = new LinkedHashMap<>();
+        out.put("x", 1);
+        assertTrue(Beans.mapBuilder((Object) null).into(out) == out);
+        assertEquals(1, out.size());
+    }
+
+    @Test
+    public void testBeanToMap_SelectPropNames_OutputEmptySelectDoesNotModifyOutput() {
+        Map<String, Object> output = new LinkedHashMap<>();
+        output.put("existing", "value");
+
+        Beans.beanToMap(simpleBean, Collections.emptyList(), output);
+        assertEquals(1, output.size());
+        assertEquals("value", output.get("existing"));
+
+        Beans.beanToMap(simpleBean, Collections.emptyList(), NamingPolicy.SNAKE_CASE, output);
+        assertEquals(1, output.size());
+        assertEquals("value", output.get("existing"));
     }
 
     @Test
@@ -3240,6 +3523,38 @@ public class BeansTest extends TestBase {
     }
 
     @Test
+    public void testDeepBeanToMap_SelectPropNames_NullMeansAllEmptyMeansNone() {
+        Map<String, Object> map = Beans.deepBeanToMap(nestedBean, (Collection<String>) null);
+        assertTrue(map.containsKey("id"));
+        assertTrue(map.get("simpleBean") instanceof Map);
+        assertTrue(map.get("address") instanceof Map);
+
+        map = Beans.deepBeanToMap(nestedBean, Collections.emptyList());
+        assertTrue(map.isEmpty());
+
+        map = Beans.deepBeanToMap(nestedBean, Collections.emptyList(), IntFunctions.ofLinkedHashMap());
+        assertTrue(map instanceof LinkedHashMap);
+        assertTrue(map.isEmpty());
+
+        map = Beans.deepBeanToMap(nestedBean, Collections.emptyList(), NamingPolicy.SNAKE_CASE, IntFunctions.ofMap());
+        assertTrue(map.isEmpty());
+    }
+
+    @Test
+    public void testDeepBeanToMap_SelectPropNames_OutputEmptySelectDoesNotModifyOutput() {
+        Map<String, Object> output = new LinkedHashMap<>();
+        output.put("existing", "value");
+
+        Beans.deepBeanToMap(nestedBean, Collections.emptyList(), output);
+        assertEquals(1, output.size());
+        assertEquals("value", output.get("existing"));
+
+        Beans.deepBeanToMap(nestedBean, Collections.emptyList(), NamingPolicy.SNAKE_CASE, output);
+        assertEquals(1, output.size());
+        assertEquals("value", output.get("existing"));
+    }
+
+    @Test
     public void testBean2FlatMap() {
         Map<String, Object> map = Beans.beanToFlatMap(nestedBean);
         assertEquals("123", map.get("id"));
@@ -3619,6 +3934,38 @@ public class BeansTest extends TestBase {
     }
 
     @Test
+    public void testBeanToFlatMap_SelectPropNames_NullMeansAllEmptyMeansNone() {
+        Map<String, Object> map = Beans.beanToFlatMap(nestedBean, (Collection<String>) null);
+        assertTrue(map.containsKey("id"));
+        assertTrue(map.containsKey("simpleBean.name"));
+        assertTrue(map.containsKey("address.city"));
+
+        map = Beans.beanToFlatMap(nestedBean, Collections.emptyList());
+        assertTrue(map.isEmpty());
+
+        map = Beans.beanToFlatMap(nestedBean, Collections.emptyList(), IntFunctions.ofLinkedHashMap());
+        assertTrue(map instanceof LinkedHashMap);
+        assertTrue(map.isEmpty());
+
+        map = Beans.beanToFlatMap(nestedBean, Collections.emptyList(), NamingPolicy.SNAKE_CASE, IntFunctions.ofMap());
+        assertTrue(map.isEmpty());
+    }
+
+    @Test
+    public void testBeanToFlatMap_SelectPropNames_OutputEmptySelectDoesNotModifyOutput() {
+        Map<String, Object> output = new LinkedHashMap<>();
+        output.put("existing", "value");
+
+        Beans.beanToFlatMap(nestedBean, Collections.emptyList(), output);
+        assertEquals(1, output.size());
+        assertEquals("value", output.get("existing"));
+
+        Beans.beanToFlatMap(nestedBean, Collections.emptyList(), NamingPolicy.SNAKE_CASE, output);
+        assertEquals(1, output.size());
+        assertEquals("value", output.get("existing"));
+    }
+
+    @Test
     public void testBeanToFlatMap_selectProps_output_nullBean() {
         Map<String, Object> output = new LinkedHashMap<>();
         Beans.beanToFlatMap(null, java.util.Arrays.asList("name"), NamingPolicy.CAMEL_CASE, output);
@@ -3933,8 +4280,20 @@ public class BeansTest extends TestBase {
         assertEquals("John", copied.getName());
         assertEquals(0, copied.getAge());
 
+        copied = Beans.copy(simpleBean, (Collection<String>) null);
+        assertEquals("John", copied.getName());
+        assertEquals(25, copied.getAge());
+        assertEquals(true, copied.getActive());
+
         copied = Beans.copy(simpleBean, Collections.emptyList());
+        assertNull(copied.getName());
         assertEquals(0, copied.getAge());
+        assertNull(copied.getActive());
+
+        copied = Beans.copyAs(simpleBean, Collections.emptyList(), SimpleBean.class);
+        assertNull(copied.getName());
+        assertEquals(0, copied.getAge());
+        assertNull(copied.getActive());
     }
 
     @Test
@@ -4200,12 +4559,57 @@ public class BeansTest extends TestBase {
         assertThrows(NullPointerException.class, () -> Beans.copyAs(source, Arrays.asList("name"), null, SimpleBean.class));
     }
 
+    // ===== copyAs/copy exception behavior documented in @throws clauses =====
+
+    @Test
+    public void testCopyAs_selectPropNames_unmatchedTargetProp_throws() {
+        SimpleBean source = new SimpleBean("Liam", 31);
+        // "name" exists in SimpleBean (source) but not in Address (target) -> throws
+        assertThrows(IllegalArgumentException.class, () -> Beans.copyAs(source, Arrays.asList("name"), Address.class));
+    }
+
+    @Test
+    public void testCopyAs_selectPropNames_invalidSourceProp_throws() {
+        SimpleBean source = new SimpleBean("Mia", 22);
+        assertThrows(IllegalArgumentException.class, () -> Beans.copyAs(source, Arrays.asList("nonExistentProp"), SimpleBean.class));
+    }
+
+    @Test
+    public void testCopyAs_biPredicate_unmatchedTargetProp_throws() {
+        SimpleBean source = new SimpleBean("Noah", 41);
+        // "name" passes the filter but does not exist in Address -> throws
+        assertThrows(IllegalArgumentException.class,
+                () -> Beans.copyAs(source, (java.util.function.BiPredicate<String, Object>) (propName, propValue) -> propName.equals("name"), Address.class));
+    }
+
+    @Test
+    public void testCopy_selectPropNames_invalidPropName_throws() {
+        SimpleBean source = new SimpleBean("Olivia", 19);
+        assertThrows(IllegalArgumentException.class, () -> Beans.copy(source, Arrays.asList("nonExistentProp")));
+    }
+
+    @Test
+    public void testCopyAs_ignoreUnmatchedFalse_skipsNullSourceValues() {
+        // SimpleBean has "name" (String), "age" (int), "active" (Boolean); Address has none of them.
+        // Null-valued source properties are skipped, so with "age" (primitive -> always non-null boxed)
+        // excluded via ignoredPropNames, nothing is copied and the unmatched check never fires.
+        SimpleBean source = new SimpleBean(); // name=null, age=0, active=null
+        Set<String> ignored = new HashSet<>(Collections.singletonList("age"));
+        Address copy = Beans.copyAs(source, false, ignored, Address.class);
+        assertNotNull(copy);
+        assertNull(copy.getCity());
+
+        // A non-null source value ("name") now triggers the unmatched check and throws.
+        source.setName("Pia");
+        assertThrows(IllegalArgumentException.class, () -> Beans.copyAs(source, false, ignored, Address.class));
+    }
+
     @Test
     public void testMergeWithConverter() {
         SimpleBean source = new SimpleBean("Jane", 30);
         SimpleBean target = new SimpleBean("John", 25);
 
-        Beans.copyInto(source, target, name -> name, (srcVal, tgtVal) -> srcVal);
+        Beans.mergeInto(source, target, name -> name, (srcVal, tgtVal) -> srcVal);
         assertEquals("Jane", target.getName());
         assertEquals(30, target.getAge());
     }
@@ -4215,7 +4619,7 @@ public class BeansTest extends TestBase {
         SimpleBean source = new SimpleBean("Jane", 30);
         SimpleBean target = new SimpleBean("John", 25);
 
-        Beans.copyInto(source, target, (name, value) -> true, name -> name, (srcVal, tgtVal) -> srcVal);
+        Beans.mergeInto(source, target, (name, value) -> true, name -> name, (srcVal, tgtVal) -> srcVal);
         assertEquals("Jane", target.getName());
         assertEquals(30, target.getAge());
     }
@@ -4225,7 +4629,7 @@ public class BeansTest extends TestBase {
         SimpleBean source = new SimpleBean("Jane", 30);
         SimpleBean target = new SimpleBean("John", 25);
 
-        Beans.copyInto(source, target, Arrays.asList("name"), name -> name, (a, b) -> a);
+        Beans.mergeInto(source, target, Arrays.asList("name"), name -> name, (a, b) -> a);
         assertEquals("Jane", target.getName());
         assertEquals(25, target.getAge());
     }
@@ -4235,7 +4639,7 @@ public class BeansTest extends TestBase {
         SimpleBean source = new SimpleBean("John", 10);
         SimpleBean target = new SimpleBean("Jane", 20);
 
-        Beans.copyInto(source, target, Fn.o((srcVal, tgtVal) -> {
+        Beans.mergeInto(source, target, Fn.o((srcVal, tgtVal) -> {
             if (srcVal instanceof Integer && tgtVal instanceof Integer) {
                 return ((Integer) srcVal) + ((Integer) tgtVal);
             }
@@ -4251,7 +4655,7 @@ public class BeansTest extends TestBase {
         SimpleBean source = new SimpleBean("Alice", 5);
         SimpleBean target = new SimpleBean("Bob", 10);
 
-        Beans.copyInto(source, target, Arrays.asList("age"), (srcVal, tgtVal) -> {
+        Beans.mergeInto(source, target, Arrays.asList("age"), (srcVal, tgtVal) -> {
             if (srcVal instanceof Integer && tgtVal instanceof Integer) {
                 return ((Integer) srcVal) + ((Integer) tgtVal);
             }
@@ -4267,7 +4671,7 @@ public class BeansTest extends TestBase {
         SimpleBean source = new SimpleBean("John", 25);
         SimpleBean target = new SimpleBean("Jane", 30);
 
-        Beans.copyInto(source, target, Arrays.asList("name"), name -> name, (a, b) -> a);
+        Beans.mergeInto(source, target, Arrays.asList("name"), name -> name, (a, b) -> a);
         assertEquals("John", target.getName());
         assertEquals(30, target.getAge());
     }
@@ -4279,7 +4683,7 @@ public class BeansTest extends TestBase {
         SimpleBean target = new SimpleBean("Jane", 30);
         target.setActive(false);
 
-        Beans.copyInto(source, target, (name, value) -> value instanceof String, name -> name, (a, b) -> a);
+        Beans.mergeInto(source, target, (name, value) -> value instanceof String, name -> name, (a, b) -> a);
 
         assertEquals("John", target.getName());
         assertEquals(30, target.getAge());
@@ -4291,7 +4695,7 @@ public class BeansTest extends TestBase {
         SimpleBean source = new SimpleBean("Alice", 10);
         SimpleBean target = new SimpleBean("Bob", 20);
 
-        Beans.copyInto(source, target, (name, value) -> value instanceof Integer, name -> name, (srcVal, tgtVal) -> ((Integer) srcVal) + ((Integer) tgtVal));
+        Beans.mergeInto(source, target, (name, value) -> value instanceof Integer, name -> name, (srcVal, tgtVal) -> ((Integer) srcVal) + ((Integer) tgtVal));
 
         assertEquals("Bob", target.getName());
         assertEquals(30, target.getAge());
@@ -4302,7 +4706,7 @@ public class BeansTest extends TestBase {
         SimpleBean source = new SimpleBean("Source", 10);
         SimpleBean target = new SimpleBean("Target", 20);
 
-        Beans.copyInto(source, target);
+        Beans.mergeInto(source, target);
         assertEquals("Source", target.getName());
         assertEquals(10, target.getAge());
     }
@@ -4312,7 +4716,7 @@ public class BeansTest extends TestBase {
         SimpleBean source = new SimpleBean("A", 5);
         SimpleBean target = new SimpleBean("B", 10);
 
-        Beans.copyInto(source, target, Fn.o((srcVal, tgtVal) -> {
+        Beans.mergeInto(source, target, Fn.o((srcVal, tgtVal) -> {
             if (srcVal instanceof Integer && tgtVal instanceof Integer) {
                 return ((Integer) srcVal) + ((Integer) tgtVal);
             }
@@ -4328,7 +4732,7 @@ public class BeansTest extends TestBase {
         SimpleBean source = new SimpleBean("Test", 7);
         SimpleBean target = new SimpleBean("Original", 3);
 
-        Beans.copyInto(source, target, name -> name, (srcVal, tgtVal) -> srcVal);
+        Beans.mergeInto(source, target, name -> name, (srcVal, tgtVal) -> srcVal);
         assertEquals("Test", target.getName());
         assertEquals(7, target.getAge());
     }
@@ -4340,8 +4744,33 @@ public class BeansTest extends TestBase {
         SimpleBean target = new SimpleBean("Old", 200);
         target.setActive(false);
 
-        Beans.copyInto(source, target, Arrays.asList("name"));
+        Beans.mergeInto(source, target, Arrays.asList("name"));
         assertEquals("New", target.getName());
+        assertEquals(200, target.getAge());
+        assertEquals(false, target.getActive());
+    }
+
+    @Test
+    public void testCopyInto_SelectPropNames_NullMeansAllEmptyMeansNone() {
+        SimpleBean source = new SimpleBean("New", 100);
+        source.setActive(true);
+
+        SimpleBean target = new SimpleBean("Old", 200);
+        target.setActive(false);
+        Beans.mergeInto(source, target, (Collection<String>) null);
+        assertEquals("New", target.getName());
+        assertEquals(100, target.getAge());
+        assertEquals(true, target.getActive());
+
+        target = new SimpleBean("Old", 200);
+        target.setActive(false);
+        Beans.mergeInto(source, target, Collections.emptyList());
+        assertEquals("Old", target.getName());
+        assertEquals(200, target.getAge());
+        assertEquals(false, target.getActive());
+
+        Beans.mergeInto(source, target, Collections.emptyList(), (srcVal, tgtVal) -> srcVal);
+        assertEquals("Old", target.getName());
         assertEquals(200, target.getAge());
         assertEquals(false, target.getActive());
     }
@@ -4351,7 +4780,7 @@ public class BeansTest extends TestBase {
         SimpleBean source = new SimpleBean("X", 8);
         SimpleBean target = new SimpleBean("Y", 2);
 
-        Beans.copyInto(source, target, Arrays.asList("age"), (srcVal, tgtVal) -> {
+        Beans.mergeInto(source, target, Arrays.asList("age"), (srcVal, tgtVal) -> {
             if (srcVal instanceof Integer && tgtVal instanceof Integer) {
                 return ((Integer) srcVal) * ((Integer) tgtVal);
             }
@@ -4367,7 +4796,7 @@ public class BeansTest extends TestBase {
         SimpleBean source = new SimpleBean("Merge", 15);
         SimpleBean target = new SimpleBean("Base", 5);
 
-        Beans.copyInto(source, target, Arrays.asList("age"), name -> name, (srcVal, tgtVal) -> {
+        Beans.mergeInto(source, target, Arrays.asList("age"), name -> name, (srcVal, tgtVal) -> {
             if (srcVal instanceof Integer && tgtVal instanceof Integer) {
                 return ((Integer) srcVal) - ((Integer) tgtVal);
             }
@@ -4385,7 +4814,7 @@ public class BeansTest extends TestBase {
         SimpleBean target = new SimpleBean("BaseTarget", 40);
         target.setActive(false);
 
-        Beans.copyInto(source, target, Fn.p((name, value) -> value instanceof Integer));
+        Beans.mergeInto(source, target, Fn.p((name, value) -> value instanceof Integer));
         assertEquals("BaseTarget", target.getName());
         assertEquals(20, target.getAge());
         assertEquals(false, target.getActive());
@@ -4396,7 +4825,7 @@ public class BeansTest extends TestBase {
         SimpleBean source = new SimpleBean("PropFilter", 25);
         SimpleBean target = new SimpleBean("TargetBean", 75);
 
-        Beans.copyInto(source, target, (name, value) -> true, name -> name);
+        Beans.mergeInto(source, target, (name, value) -> true, name -> name);
         assertEquals("PropFilter", target.getName());
         assertEquals(25, target.getAge());
     }
@@ -4406,7 +4835,7 @@ public class BeansTest extends TestBase {
         SimpleBean source = new SimpleBean("Complex", 12);
         SimpleBean target = new SimpleBean("Base", 8);
 
-        Beans.copyInto(source, target, (name, value) -> value instanceof Integer, name -> name, (srcVal, tgtVal) -> ((Integer) srcVal) + ((Integer) tgtVal));
+        Beans.mergeInto(source, target, (name, value) -> value instanceof Integer, name -> name, (srcVal, tgtVal) -> ((Integer) srcVal) + ((Integer) tgtVal));
 
         assertEquals("Base", target.getName());
         assertEquals(20, target.getAge());
@@ -4421,7 +4850,7 @@ public class BeansTest extends TestBase {
         Set<String> ignored = new HashSet<>();
         ignored.add("age");
 
-        Beans.copyInto(source, target, true, ignored);
+        Beans.mergeInto(source, target, true, ignored);
         assertEquals("Ignore", target.getName());
         assertEquals(60, target.getAge());
     }
@@ -4433,7 +4862,7 @@ public class BeansTest extends TestBase {
         SimpleBean target = new SimpleBean("Tgt", 20);
         target.setActive(false);
 
-        Beans.copyInto(source, target, (name, value) -> name.equals("age"), name -> name, (srcVal, tgtVal) -> ((Integer) srcVal) + ((Integer) tgtVal));
+        Beans.mergeInto(source, target, (name, value) -> name.equals("age"), name -> name, (srcVal, tgtVal) -> ((Integer) srcVal) + ((Integer) tgtVal));
         assertEquals("Tgt", target.getName());
         assertEquals(30, target.getAge());
         assertEquals(false, target.getActive());
@@ -4449,7 +4878,7 @@ public class BeansTest extends TestBase {
         Set<String> ignored = new HashSet<>();
         ignored.add("active");
 
-        Beans.copyInto(source, target, true, ignored, (srcVal, tgtVal) -> {
+        Beans.mergeInto(source, target, true, ignored, (srcVal, tgtVal) -> {
             if (srcVal instanceof Integer && tgtVal instanceof Integer) {
                 return ((Integer) srcVal) + ((Integer) tgtVal);
             }
@@ -4470,7 +4899,7 @@ public class BeansTest extends TestBase {
         Set<String> ignored = new HashSet<>();
         ignored.add("active");
 
-        Beans.copyInto(source, target, true, ignored);
+        Beans.mergeInto(source, target, true, ignored);
         assertEquals("Src", target.getName());
         assertEquals(10, target.getAge());
         assertEquals(false, target.getActive());
@@ -4483,7 +4912,7 @@ public class BeansTest extends TestBase {
         SimpleBean target = new SimpleBean("OrigTarget", 100);
         target.setActive(false);
 
-        Beans.copyInto(source, target, (name, value) -> name.equals("name"), name -> name);
+        Beans.mergeInto(source, target, (name, value) -> name.equals("name"), name -> name);
         assertEquals("FromSrc", target.getName());
         assertEquals(100, target.getAge());
         assertEquals(false, target.getActive());
@@ -4494,7 +4923,7 @@ public class BeansTest extends TestBase {
         SimpleBean source = new SimpleBean("SrcOnly", 10);
         SimpleBean target = new SimpleBean("TgtOnly", 20);
 
-        Beans.copyInto(source, target, Arrays.asList("name", "age"), (srcVal, tgtVal) -> srcVal);
+        Beans.mergeInto(source, target, Arrays.asList("name", "age"), (srcVal, tgtVal) -> srcVal);
         assertEquals("SrcOnly", target.getName());
         assertEquals(10, target.getAge());
     }
@@ -4506,7 +4935,7 @@ public class BeansTest extends TestBase {
         SimpleBean target = new SimpleBean("John", 25);
         target.setActive(false);
 
-        Beans.copyInto(source, target, Fn.p((name, value) -> value instanceof String));
+        Beans.mergeInto(source, target, Fn.p((name, value) -> value instanceof String));
         assertEquals("Jane", target.getName());
         assertEquals(25, target.getAge());
         assertEquals(false, target.getActive());
@@ -4514,7 +4943,7 @@ public class BeansTest extends TestBase {
         BeanWithSnakeCase snakeSource = new BeanWithSnakeCase();
         snakeSource.setFirstName("NewFirst");
         SimpleBean convertTarget = new SimpleBean();
-        Beans.copyInto(snakeSource, convertTarget, (name, value) -> true, name -> "name");
+        Beans.mergeInto(snakeSource, convertTarget, (name, value) -> true, name -> "name");
         assertEquals("NewFirst", convertTarget.getName());
     }
 
@@ -4524,12 +4953,12 @@ public class BeansTest extends TestBase {
         EntityBean target = new EntityBean();
         target.setId(1L);
 
-        Beans.copyInto(source, target, true, null);
+        Beans.mergeInto(source, target, true, null);
         assertEquals(1L, target.getId());
 
         source.setAge(5);
         SimpleBean target2 = new SimpleBean("John", 10);
-        Beans.copyInto(source, target2, true, null, (srcVal, tgtVal) -> {
+        Beans.mergeInto(source, target2, true, null, (srcVal, tgtVal) -> {
             if (srcVal instanceof Integer && tgtVal instanceof Integer) {
                 return ((Integer) srcVal) + ((Integer) tgtVal);
             }
@@ -4539,21 +4968,13 @@ public class BeansTest extends TestBase {
     }
 
     @Test
-    public void testMergeWithNullSource() {
-        SimpleBean target = new SimpleBean("Jane", 30);
-        Beans.copyInto(null, target);
-        assertEquals("Jane", target.getName());
-        assertEquals(30, target.getAge());
-    }
-
-    @Test
     public void testMergeWithDifferentBeanTypes() {
         SimpleBean source = new SimpleBean("John", 25);
         EntityBean target = new EntityBean();
         target.setId(1L);
         target.setValue("original");
 
-        Beans.copyInto(source, target, true, null);
+        Beans.mergeInto(source, target, true, null);
         assertEquals(1L, target.getId());
         assertEquals("original", target.getValue());
     }
@@ -4562,7 +4983,7 @@ public class BeansTest extends TestBase {
     public void testMergeWithNullSourceDoesNotModify() {
         SimpleBean target = new SimpleBean("Target", 30);
 
-        Beans.copyInto(null, target);
+        Beans.mergeInto(null, target);
         assertEquals("Target", target.getName());
         assertEquals(30, target.getAge());
     }
@@ -4572,7 +4993,7 @@ public class BeansTest extends TestBase {
         SimpleBean source = new SimpleBean("Final", 4);
         SimpleBean target = new SimpleBean("Init", 6);
 
-        Beans.copyInto(source, target, true, null, (srcVal, tgtVal) -> {
+        Beans.mergeInto(source, target, true, null, (srcVal, tgtVal) -> {
             if (srcVal instanceof Integer && tgtVal instanceof Integer) {
                 return ((Integer) srcVal) * ((Integer) tgtVal);
             }
@@ -4588,7 +5009,7 @@ public class BeansTest extends TestBase {
         SimpleBean source = new SimpleBean("SrcName", 15);
         SimpleBean target = new SimpleBean("TgtName", 25);
 
-        Beans.copyInto(source, target, Arrays.asList("age"), name -> name, (srcVal, tgtVal) -> {
+        Beans.mergeInto(source, target, Arrays.asList("age"), name -> name, (srcVal, tgtVal) -> {
             if (srcVal instanceof Integer && tgtVal instanceof Integer) {
                 return Math.max((Integer) srcVal, (Integer) tgtVal);
             }
@@ -4601,7 +5022,7 @@ public class BeansTest extends TestBase {
     @Test
     public void testCopyInto_NullSource() {
         SimpleBean target = new SimpleBean("Jane", 30);
-        Beans.copyInto(null, target);
+        Beans.mergeInto(null, target);
         // Target should remain unchanged
         assertEquals("Jane", target.getName());
         assertEquals(30, target.getAge());
@@ -4613,37 +5034,37 @@ public class BeansTest extends TestBase {
             SimpleBean source = new SimpleBean("Jane", 30);
             SimpleBean target = new SimpleBean("John", 25);
 
-            Beans.copyInto(source, target);
+            Beans.mergeInto(source, target);
             assertEquals("Jane", target.getName());
             assertEquals(30, target.getAge());
 
             SimpleBean original = new SimpleBean("Bob", 40);
-            Beans.copyInto(null, original);
+            Beans.mergeInto(null, original);
             assertEquals("Bob", original.getName());
         }
 
         {
             SimpleBean source = new SimpleBean("Alice", 35);
             SimpleBean target = new SimpleBean("Charlie", 28);
-            Beans.copyInto(source, target, Arrays.asList("age"));
+            Beans.mergeInto(source, target, Arrays.asList("age"));
             assertEquals("Charlie", target.getName());
             assertEquals(35, target.getAge());
 
             source.setAge(10);
             target.setAge(20);
-            Beans.copyInto(source, target, Arrays.asList("age"), (srcVal, tgtVal) -> ((Integer) srcVal) + ((Integer) tgtVal));
+            Beans.mergeInto(source, target, Arrays.asList("age"), (srcVal, tgtVal) -> ((Integer) srcVal) + ((Integer) tgtVal));
             assertEquals(30, target.getAge());
 
-            assertThrows(IllegalArgumentException.class, () -> Beans.copyInto(source, null));
+            assertThrows(IllegalArgumentException.class, () -> Beans.mergeInto(source, null));
         }
     }
 
     @Test
     public void testCopyInto_NullTarget() {
-        assertThrows(IllegalArgumentException.class, () -> Beans.copyInto(simpleBean, null));
+        assertThrows(IllegalArgumentException.class, () -> Beans.mergeInto(simpleBean, null));
     }
 
-    // ===== copyInto(source, target, ignoreUnmatched=false, ignoredProps) throws on unmatched target prop (L5682) =====
+    // ===== mergeInto(source, target, ignoreUnmatched=false, ignoredProps) throws on unmatched target prop (L5682) =====
 
     // SimpleBean has "name", "age", "active"; Address has "street", "city", "zipCode".
     // Copying a SimpleBean into an Address with ignoreUnmatchedProperty=false should throw
@@ -4651,18 +5072,18 @@ public class BeansTest extends TestBase {
     @Test
     public void testCopyInto_IgnoreUnmatched_False_Throws() {
         Address target = new Address();
-        assertThrows(IllegalArgumentException.class, () -> Beans.copyInto(simpleBean, target, false, (Set<String>) null));
+        assertThrows(IllegalArgumentException.class, () -> Beans.mergeInto(simpleBean, target, false, (Set<String>) null));
     }
 
-    // ===== copyInto(source, target, selectPropNames) throws on invalid source prop name (L5764) =====
+    // ===== mergeInto(source, target, selectPropNames) throws on invalid source prop name (L5764) =====
 
     @Test
     public void testCopyInto_SelectPropNames_InvalidSourceProp_Throws() {
         SimpleBean target = new SimpleBean();
-        assertThrows(IllegalArgumentException.class, () -> Beans.copyInto(simpleBean, target, Arrays.asList("nonExistentProp")));
+        assertThrows(IllegalArgumentException.class, () -> Beans.mergeInto(simpleBean, target, Arrays.asList("nonExistentProp")));
     }
 
-    // ===== copyInto(source, target, biPredicate, propNameConverter, mergeFunc) throws on unmatched target prop (L5826) =====
+    // ===== mergeInto(source, target, biPredicate, propNameConverter, mergeFunc) throws on unmatched target prop (L5826) =====
 
     // Use a BiPredicate that accepts all props and a name converter that maps every prop name
     // to a name that does not exist in the target class, so targetPropInfo is null and throws.
@@ -4672,9 +5093,52 @@ public class BeansTest extends TestBase {
         // target: SimpleBean (same class – use an identity converter but then map to a bad name)
         // Map every source prop name to "__bad__" so it can't be found in target.
         SimpleBean target = new SimpleBean();
-        assertThrows(IllegalArgumentException.class, () -> Beans.copyInto(simpleBean, target, (propName, propValue) -> true, // include every property
+        assertThrows(IllegalArgumentException.class, () -> Beans.mergeInto(simpleBean, target, (propName, propValue) -> true, // include every property
                 propName -> "__bad__", // convert to a name that doesn't exist
                 (srcVal, tgtVal) -> srcVal));
+    }
+
+    // ===== mergeInto merge-all overloads silently skip unmatched target props (no throw) =====
+
+    // Regression for the former strictness flip: adding only a mergeFunc must NOT turn a cross-type
+    // merge into a thrown exception. SimpleBean (name, age, active) and Address (street, city, zipCode)
+    // share no properties, so every source property is unmatched and silently skipped.
+    @Test
+    public void testMergeInto_MergeFunc_UnmatchedTarget_SkipsSilently() {
+        Address target = new Address();
+        target.setCity("NYC");
+
+        Address result = Beans.mergeInto(simpleBean, target, Fn.o((srcVal, tgtVal) -> srcVal));
+
+        assertTrue(target == result);
+        assertNull(target.getStreet());
+        assertEquals("NYC", target.getCity()); // unchanged: no source property matched
+        assertNull(target.getZipCode());
+    }
+
+    // The (propNameConverter, mergeFunc) merge-all overload behaves the same way (no throw on unmatched).
+    @Test
+    public void testMergeInto_Converter_MergeFunc_UnmatchedTarget_SkipsSilently() {
+        Address target = new Address();
+        target.setCity("NYC");
+
+        assertDoesNotThrow(() -> Beans.mergeInto(simpleBean, target, name -> name, (srcVal, tgtVal) -> srcVal));
+        assertEquals("NYC", target.getCity());
+    }
+
+    // Null source must return the target unchanged (documented), not NPE - consistent with the other mergeInto overloads.
+    @Test
+    public void testMergeInto_Converter_MergeFunc_NullSource_ReturnsTargetUnchanged() {
+        SimpleBean target = new SimpleBean("John", 25);
+
+        SimpleBean result = Beans.mergeInto(null, target, name -> name, (srcVal, tgtVal) -> srcVal);
+
+        assertTrue(target == result);
+        assertEquals("John", target.getName());
+        assertEquals(25, target.getAge());
+
+        // null target still throws (documented)
+        assertThrows(IllegalArgumentException.class, () -> Beans.mergeInto(simpleBean, (SimpleBean) null, name -> name, (srcVal, tgtVal) -> srcVal));
     }
 
     @Test
@@ -4840,6 +5304,15 @@ public class BeansTest extends TestBase {
         Beans.randomize(bean, Arrays.asList("name"));
         assertNotNull(bean.getName());
         assertEquals(0, bean.getAge());
+    }
+
+    @Test
+    public void testRandomize_NullPropNamesToFill_ThrowsIAE() {
+        // a null propNamesToFill now throws the documented IllegalArgumentException (was an NPE)
+        SimpleBean bean = new SimpleBean();
+        assertThrows(IllegalArgumentException.class, () -> Beans.randomize(bean, (Collection<String>) null));
+        assertThrows(IllegalArgumentException.class, () -> Beans.newRandomBean(SimpleBean.class, (Collection<String>) null));
+        assertThrows(IllegalArgumentException.class, () -> Beans.newRandomBeanList(SimpleBean.class, (Collection<String>) null, 2));
     }
 
     @Test
@@ -5039,10 +5512,10 @@ public class BeansTest extends TestBase {
         BeanY y = new BeanY();
         y.setName("Common");
 
-        assertTrue(Beans.equalsByCommonProps(x, y));
+        assertTrue(N.equalsByCommonProps(x, y));
 
         y.setName("Different");
-        assertFalse(Beans.equalsByCommonProps(x, y));
+        assertFalse(N.equalsByCommonProps(x, y));
     }
 
     @Test
@@ -5051,7 +5524,7 @@ public class BeansTest extends TestBase {
         EntityBean bean2 = new EntityBean();
         bean2.setValue("test");
 
-        assertThrows(IllegalArgumentException.class, () -> Beans.equalsByCommonProps(bean1, bean2));
+        assertThrows(IllegalArgumentException.class, () -> N.equalsByCommonProps(bean1, bean2));
 
         class BeanA {
             private String name;
@@ -5100,19 +5573,19 @@ public class BeansTest extends TestBase {
         BeanB b = new BeanB();
         b.setName("John");
 
-        assertTrue(Beans.equalsByCommonProps(a, b));
+        assertTrue(N.equalsByCommonProps(a, b));
 
         b.setName("Jane");
-        assertFalse(Beans.equalsByCommonProps(a, b));
+        assertFalse(N.equalsByCommonProps(a, b));
 
-        assertThrows(IllegalArgumentException.class, () -> Beans.equalsByCommonProps(null, bean1));
-        assertThrows(IllegalArgumentException.class, () -> Beans.equalsByCommonProps(bean1, null));
+        assertThrows(IllegalArgumentException.class, () -> N.equalsByCommonProps(null, bean1));
+        assertThrows(IllegalArgumentException.class, () -> N.equalsByCommonProps(bean1, null));
     }
 
     @Test
     public void testEqualsByCommonProps_NullArgs() {
-        assertThrows(IllegalArgumentException.class, () -> Beans.equalsByCommonProps(null, simpleBean));
-        assertThrows(IllegalArgumentException.class, () -> Beans.equalsByCommonProps(simpleBean, null));
+        assertThrows(IllegalArgumentException.class, () -> N.equalsByCommonProps(null, simpleBean));
+        assertThrows(IllegalArgumentException.class, () -> N.equalsByCommonProps(simpleBean, null));
     }
 
     @Test
@@ -5122,7 +5595,7 @@ public class BeansTest extends TestBase {
         SimpleBean bean2 = new SimpleBean("Equal", 50);
         bean2.setActive(true);
 
-        assertTrue(Beans.equalsByProps(bean1, bean2, Arrays.asList("name", "age", "active")));
+        assertTrue(N.equalsByProps(bean1, bean2, Arrays.asList("name", "age", "active")));
     }
 
     @Test
@@ -5130,9 +5603,9 @@ public class BeansTest extends TestBase {
         SimpleBean bean1 = new SimpleBean("Same", 100);
         SimpleBean bean2 = new SimpleBean("Same", 200);
 
-        assertTrue(Beans.equalsByProps(bean1, bean2, Arrays.asList("name")));
-        assertFalse(Beans.equalsByProps(bean1, bean2, Arrays.asList("age")));
-        assertFalse(Beans.equalsByProps(bean1, bean2, Arrays.asList("name", "age")));
+        assertTrue(N.equalsByProps(bean1, bean2, Arrays.asList("name")));
+        assertFalse(N.equalsByProps(bean1, bean2, Arrays.asList("age")));
+        assertFalse(N.equalsByProps(bean1, bean2, Arrays.asList("name", "age")));
     }
 
     @Test
@@ -5140,11 +5613,11 @@ public class BeansTest extends TestBase {
         SimpleBean bean1 = new SimpleBean("John", 25);
         SimpleBean bean2 = new SimpleBean("John", 30);
 
-        assertTrue(Beans.equalsByProps(bean1, bean2, Arrays.asList("name")));
-        assertFalse(Beans.equalsByProps(bean1, bean2, Arrays.asList("age")));
-        assertFalse(Beans.equalsByProps(bean1, bean2, Arrays.asList("name", "age")));
+        assertTrue(N.equalsByProps(bean1, bean2, Arrays.asList("name")));
+        assertFalse(N.equalsByProps(bean1, bean2, Arrays.asList("age")));
+        assertFalse(N.equalsByProps(bean1, bean2, Arrays.asList("name", "age")));
 
-        assertThrows(IllegalArgumentException.class, () -> Beans.equalsByProps(bean1, bean2, Collections.emptyList()));
+        assertThrows(IllegalArgumentException.class, () -> N.equalsByProps(bean1, bean2, Collections.emptyList()));
     }
 
     @Test
@@ -5152,27 +5625,59 @@ public class BeansTest extends TestBase {
         SimpleBean bean1 = new SimpleBean("John", 25);
         SimpleBean bean2 = new SimpleBean("John", 25);
 
-        assertTrue(Beans.equalsByProps(bean1, bean2, Arrays.asList("name", "age")));
+        assertTrue(N.equalsByProps(bean1, bean2, Arrays.asList("name", "age")));
 
         bean1.setActive(null);
         bean2.setActive(null);
-        assertTrue(Beans.equalsByProps(bean1, bean2, Arrays.asList("name", "age", "active")));
+        assertTrue(N.equalsByProps(bean1, bean2, Arrays.asList("name", "age", "active")));
 
-        assertThrows(IllegalArgumentException.class, () -> Beans.equalsByProps(bean1, bean2, Collections.emptyList()));
+        assertThrows(IllegalArgumentException.class, () -> N.equalsByProps(bean1, bean2, Collections.emptyList()));
     }
 
     @Test
     public void testEqualsByProps_EmptyPropNames() {
         SimpleBean bean1 = new SimpleBean("John", 25);
         SimpleBean bean2 = new SimpleBean("John", 25);
-        assertThrows(IllegalArgumentException.class, () -> Beans.equalsByProps(bean1, bean2, Collections.emptyList()));
+        assertThrows(IllegalArgumentException.class, () -> N.equalsByProps(bean1, bean2, Collections.emptyList()));
     }
 
     @Test
     public void testEqualsByProps_NullBeans() {
-        assertThrows(IllegalArgumentException.class, () -> Beans.equalsByProps(null, null, Arrays.asList("name")));
-        assertThrows(IllegalArgumentException.class, () -> Beans.equalsByProps(simpleBean, null, Arrays.asList("name")));
-        assertThrows(IllegalArgumentException.class, () -> Beans.equalsByProps(null, simpleBean, Arrays.asList("name")));
+        assertThrows(IllegalArgumentException.class, () -> N.equalsByProps(null, null, Arrays.asList("name")));
+        assertThrows(IllegalArgumentException.class, () -> N.equalsByProps(simpleBean, null, Arrays.asList("name")));
+        assertThrows(IllegalArgumentException.class, () -> N.equalsByProps(null, simpleBean, Arrays.asList("name")));
+    }
+
+    // Regression: equalsByProps used to delegate to compareByProps, which cast each value to Comparable
+    // and threw ClassCastException for non-Comparable properties (List/Map/nested bean). It now compares
+    // via N.equals (value equality), so a List-valued property compares correctly without throwing.
+    @Test
+    public void testEqualsByProps_NonComparableProperty_NoClassCastException() {
+        NestedBean b1 = new NestedBean();
+        b1.setTags(new ArrayList<>(Arrays.asList("a", "b")));
+        NestedBean b2 = new NestedBean();
+        b2.setTags(new ArrayList<>(Arrays.asList("a", "b")));
+
+        assertTrue(N.equalsByProps(b1, b2, Arrays.asList("tags")));
+
+        b2.setTags(new ArrayList<>(Arrays.asList("a", "c")));
+        assertFalse(N.equalsByProps(b1, b2, Arrays.asList("tags")));
+    }
+
+    @Test
+    public void testEqualsByCommonProps_NonComparableProperty_NoClassCastException() {
+        NestedBean b1 = new NestedBean();
+        b1.setId("x");
+        b1.setTags(new ArrayList<>(Arrays.asList("a", "b")));
+        NestedBean b2 = new NestedBean();
+        b2.setId("x");
+        b2.setTags(new ArrayList<>(Arrays.asList("a", "b")));
+
+        // Common props include the List-valued "tags" (and the null nested beans): compared by equals, no CCE.
+        assertTrue(N.equalsByCommonProps(b1, b2));
+
+        b2.setTags(new ArrayList<>(Arrays.asList("a", "c")));
+        assertFalse(N.equalsByCommonProps(b1, b2));
     }
 
     @Test
@@ -5180,7 +5685,7 @@ public class BeansTest extends TestBase {
         SimpleBean bean1 = new SimpleBean("Equal", 100);
         SimpleBean bean2 = new SimpleBean("Equal", 100);
 
-        assertEquals(0, Beans.compareByProps(bean1, bean2, Arrays.asList("name", "age")));
+        assertEquals(0, N.compareByProps(bean1, bean2, Arrays.asList("name", "age")));
     }
 
     // ===== compareByProps =====
@@ -5189,7 +5694,7 @@ public class BeansTest extends TestBase {
     public void testCompareByProps_equal() {
         SimpleBean b1 = new SimpleBean("Tom", 25);
         SimpleBean b2 = new SimpleBean("Tom", 25);
-        int result = Beans.compareByProps(b1, b2, java.util.Arrays.asList("name", "age"));
+        int result = N.compareByProps(b1, b2, java.util.Arrays.asList("name", "age"));
         assertEquals(0, result);
     }
 
@@ -5197,7 +5702,7 @@ public class BeansTest extends TestBase {
     public void testCompareByProps_less() {
         SimpleBean b1 = new SimpleBean("Anna", 20);
         SimpleBean b2 = new SimpleBean("Zara", 20);
-        int result = Beans.compareByProps(b1, b2, java.util.Arrays.asList("name"));
+        int result = N.compareByProps(b1, b2, java.util.Arrays.asList("name"));
         assertTrue(result < 0);
     }
 
@@ -5205,7 +5710,7 @@ public class BeansTest extends TestBase {
     public void testCompareByProps_greater() {
         SimpleBean b1 = new SimpleBean("Zara", 30);
         SimpleBean b2 = new SimpleBean("Anna", 30);
-        int result = Beans.compareByProps(b1, b2, java.util.Arrays.asList("name"));
+        int result = N.compareByProps(b1, b2, java.util.Arrays.asList("name"));
         assertTrue(result > 0);
     }
 
@@ -5214,9 +5719,18 @@ public class BeansTest extends TestBase {
         SimpleBean bean1 = new SimpleBean("Alpha", 10);
         SimpleBean bean2 = new SimpleBean("Beta", 20);
 
-        assertTrue(Beans.compareByProps(bean1, bean2, Arrays.asList("name")) < 0);
-        assertTrue(Beans.compareByProps(bean2, bean1, Arrays.asList("name")) > 0);
-        assertEquals(0, Beans.compareByProps(bean1, bean1, Arrays.asList("name")));
+        assertTrue(N.compareByProps(bean1, bean2, Arrays.asList("name")) < 0);
+        assertTrue(N.compareByProps(bean2, bean1, Arrays.asList("name")) > 0);
+        assertEquals(0, N.compareByProps(bean1, bean1, Arrays.asList("name")));
+    }
+
+    @Test
+    public void testCompareByProps_NullOrEmptyProps_ThrowsIAE() {
+        // empty propNamesToCompare now throws IAE (was: returned 0), matching equalsByProps
+        SimpleBean bean1 = new SimpleBean("Alpha", 10);
+        SimpleBean bean2 = new SimpleBean("Beta", 20);
+        assertThrows(IllegalArgumentException.class, () -> N.compareByProps(bean1, bean2, Collections.<String> emptyList()));
+        assertThrows(IllegalArgumentException.class, () -> N.compareByProps(bean1, bean2, (Collection<String>) null));
     }
 
     @Test
@@ -5224,8 +5738,8 @@ public class BeansTest extends TestBase {
         SimpleBean bean1 = new SimpleBean("Same", 10);
         SimpleBean bean2 = new SimpleBean("Same", 20);
 
-        assertTrue(Beans.compareByProps(bean1, bean2, Arrays.asList("name", "age")) < 0);
-        assertTrue(Beans.compareByProps(bean2, bean1, Arrays.asList("name", "age")) > 0);
+        assertTrue(N.compareByProps(bean1, bean2, Arrays.asList("name", "age")) < 0);
+        assertTrue(N.compareByProps(bean2, bean1, Arrays.asList("name", "age")) > 0);
     }
 
     @Test
@@ -5233,18 +5747,18 @@ public class BeansTest extends TestBase {
         SimpleBean bean1 = new SimpleBean("Alice", 25);
         SimpleBean bean2 = new SimpleBean("Bob", 30);
 
-        assertTrue(Beans.compareByProps(bean1, bean2, Arrays.asList("name")) < 0);
-        assertTrue(Beans.compareByProps(bean2, bean1, Arrays.asList("name")) > 0);
-        assertTrue(Beans.compareByProps(bean1, bean1, Arrays.asList("name")) == 0);
+        assertTrue(N.compareByProps(bean1, bean2, Arrays.asList("name")) < 0);
+        assertTrue(N.compareByProps(bean2, bean1, Arrays.asList("name")) > 0);
+        assertTrue(N.compareByProps(bean1, bean1, Arrays.asList("name")) == 0);
 
-        assertTrue(Beans.compareByProps(bean1, bean2, Arrays.asList("age")) < 0);
+        assertTrue(N.compareByProps(bean1, bean2, Arrays.asList("age")) < 0);
 
         SimpleBean bean3 = new SimpleBean("Alice", 30);
-        assertTrue(Beans.compareByProps(bean1, bean3, Arrays.asList("name", "age")) < 0);
+        assertTrue(N.compareByProps(bean1, bean3, Arrays.asList("name", "age")) < 0);
 
-        assertThrows(IllegalArgumentException.class, () -> Beans.compareByProps(null, bean2, Arrays.asList("name")));
-        assertThrows(IllegalArgumentException.class, () -> Beans.compareByProps(bean1, null, Arrays.asList("name")));
-        assertThrows(IllegalArgumentException.class, () -> Beans.compareByProps(bean1, bean2, null));
+        assertThrows(IllegalArgumentException.class, () -> N.compareByProps(null, bean2, Arrays.asList("name")));
+        assertThrows(IllegalArgumentException.class, () -> N.compareByProps(bean1, null, Arrays.asList("name")));
+        assertThrows(IllegalArgumentException.class, () -> N.compareByProps(bean1, bean2, null));
     }
 
     @Test
@@ -5253,22 +5767,22 @@ public class BeansTest extends TestBase {
         SimpleBean bean2 = new SimpleBean("Bob", 25);
         SimpleBean bean3 = new SimpleBean("Alice", 30);
 
-        assertTrue(Beans.compareByProps(bean1, bean2, Arrays.asList("name")) < 0);
+        assertTrue(N.compareByProps(bean1, bean2, Arrays.asList("name")) < 0);
 
-        assertTrue(Beans.compareByProps(bean1, bean3, Arrays.asList("name", "age")) < 0);
+        assertTrue(N.compareByProps(bean1, bean3, Arrays.asList("name", "age")) < 0);
 
-        assertEquals(0, Beans.compareByProps(bean1, bean1, Arrays.asList("name", "age")));
+        assertEquals(0, N.compareByProps(bean1, bean1, Arrays.asList("name", "age")));
 
-        assertThrows(IllegalArgumentException.class, () -> Beans.compareByProps(null, bean2, Arrays.asList("name")));
-        assertThrows(IllegalArgumentException.class, () -> Beans.compareByProps(bean1, null, Arrays.asList("name")));
-        assertThrows(IllegalArgumentException.class, () -> Beans.compareByProps(bean1, bean2, null));
+        assertThrows(IllegalArgumentException.class, () -> N.compareByProps(null, bean2, Arrays.asList("name")));
+        assertThrows(IllegalArgumentException.class, () -> N.compareByProps(bean1, null, Arrays.asList("name")));
+        assertThrows(IllegalArgumentException.class, () -> N.compareByProps(bean1, bean2, null));
     }
 
     @Test
     public void testCompareByProps_NullArgs() {
-        assertThrows(IllegalArgumentException.class, () -> Beans.compareByProps(null, simpleBean, Arrays.asList("name")));
-        assertThrows(IllegalArgumentException.class, () -> Beans.compareByProps(simpleBean, null, Arrays.asList("name")));
-        assertThrows(IllegalArgumentException.class, () -> Beans.compareByProps(simpleBean, simpleBean, null));
+        assertThrows(IllegalArgumentException.class, () -> N.compareByProps(null, simpleBean, Arrays.asList("name")));
+        assertThrows(IllegalArgumentException.class, () -> N.compareByProps(simpleBean, null, Arrays.asList("name")));
+        assertThrows(IllegalArgumentException.class, () -> N.compareByProps(simpleBean, simpleBean, null));
     }
 
     // ===== compareByProps - invalid property throws =====
@@ -5277,7 +5791,7 @@ public class BeansTest extends TestBase {
     public void testCompareByProps_invalidPropThrows() {
         SimpleBean b1 = new SimpleBean("Ned", 30);
         SimpleBean b2 = new SimpleBean("Ned", 30);
-        assertThrows(IllegalArgumentException.class, () -> Beans.compareByProps(b1, b2, Arrays.asList("nonExistentProp")));
+        assertThrows(IllegalArgumentException.class, () -> N.compareByProps(b1, b2, Arrays.asList("nonExistentProp")));
     }
 
     // ===== compareByProps - prop not found in bean2 (different bean types) =====
@@ -5289,7 +5803,7 @@ public class BeansTest extends TestBase {
         nb.setId("test");
         SimpleBean sb = new SimpleBean("test", 0);
         // "id" exists in NestedBean (bean1) but not in SimpleBean (bean2)
-        assertThrows(IllegalArgumentException.class, () -> Beans.compareByProps(nb, sb, Arrays.asList("id")));
+        assertThrows(IllegalArgumentException.class, () -> N.compareByProps(nb, sb, Arrays.asList("id")));
     }
 
     @Test
@@ -5480,5 +5994,106 @@ public class BeansTest extends TestBase {
 
         assertNotNull(result);
         assertTrue(result.isEmpty(), "All props are excluded so result should be empty");
+    }
+
+    // --- regression tests for 2026-06-10 deep-review fixes ---
+
+    @java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.RUNTIME)
+    @java.lang.annotation.Target({ java.lang.annotation.ElementType.FIELD, java.lang.annotation.ElementType.METHOD })
+    public @interface DifferenceIgnore {
+    }
+
+    public static class DiffProbeBean {
+        private String name;
+        @DifferenceIgnore
+        private String secret;
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(final String name) {
+            this.name = name;
+        }
+
+        public String getSecret() {
+            return secret;
+        }
+
+        public void setSecret(final String secret) {
+            this.secret = secret;
+        }
+    }
+
+    @org.junit.jupiter.api.Test
+    public void testGetIgnoredPropNamesForDiffMatchesThirdPartyAnnotationByName() {
+        // regression: the name match used getClass().getSimpleName() on the annotation proxy
+        // ("$ProxyN"), so non-abacus DiffIgnore/DifferenceIgnore annotations never matched
+        assertEquals(N.asSet("secret"), Beans.getIgnoredPropNamesForDiff(DiffProbeBean.class));
+    }
+
+    public static class XmlRegistryProbeBean {
+        private String name;
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(final String name) {
+            this.name = name;
+        }
+    }
+
+    @org.junit.jupiter.api.Test
+    public void testXmlBindingRegistryDistinguishesNonBeanEntries() {
+        // regression: registerNonBeanClass stores a FALSE entry in the same map, but
+        // isRegisteredXmlBindingClass used containsKey and reported TRUE for it (and
+        // registerXmlBindingClass silently no-op'd); isBeanClass also kept a stale cached TRUE
+        assertTrue(Beans.isBeanClass(XmlRegistryProbeBean.class));
+
+        Beans.registerNonBeanClass(XmlRegistryProbeBean.class);
+
+        assertFalse(Beans.isRegisteredXmlBindingClass(XmlRegistryProbeBean.class));
+        assertFalse(Beans.isBeanClass(XmlRegistryProbeBean.class));
+
+        Beans.registerXmlBindingClass(XmlRegistryProbeBean.class);
+
+        assertTrue(Beans.isRegisteredXmlBindingClass(XmlRegistryProbeBean.class));
+    }
+
+    public static class ConverterProbeBean {
+        private String name;
+        private String nickName;
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(final String name) {
+            this.name = name;
+        }
+
+        public String getNickName() {
+            return nickName;
+        }
+
+        public void setNickName(final String nickName) {
+            this.nickName = nickName;
+        }
+    }
+
+    @org.junit.jupiter.api.Test
+    public void testCopyAsHonorsPropNameConverterForSameType() {
+        // regression: the Kryo shallow-copy shortcut (taken when targetType == source class)
+        // silently ignored a non-identity propNameConverter
+        final ConverterProbeBean src = new ConverterProbeBean();
+        src.setName("John");
+        src.setNickName("Johnny");
+
+        final java.util.function.Function<String, String> swap = p -> p.equals("name") ? "nickName" : (p.equals("nickName") ? "name" : p);
+        final ConverterProbeBean copy = Beans.copyAs(src, (Collection<String>) null, swap, ConverterProbeBean.class);
+
+        assertEquals("Johnny", copy.getName());
+        assertEquals("John", copy.getNickName());
     }
 }

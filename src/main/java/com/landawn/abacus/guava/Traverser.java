@@ -14,10 +14,10 @@
 package com.landawn.abacus.guava;
 
 import java.io.File;
-import java.util.Arrays;
+import java.nio.file.DirectoryIteratorException;
+import java.nio.file.Path;
 import java.util.function.Function;
 
-import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.stream.Stream;
 
 /**
@@ -52,7 +52,8 @@ import com.landawn.abacus.util.stream.Stream;
  *
  * // Create a custom tree traverser
  * class TreeNode {
- *     List<TreeNode> getChildren() { return null; }
+ *     List<TreeNode> children = new ArrayList<>();
+ *     List<TreeNode> getChildren() { return children; } // return an empty list (not null) for leaf nodes
  * }
  * TreeNode root = new TreeNode();
  * Traverser<TreeNode> treeTraverser = Traverser.forTree(node -> node.getChildren());
@@ -89,12 +90,41 @@ public final class Traverser<T> {
      * }</pre>
      *
      * <p><b>Note:</b> This traverser may follow symbolic links, which could lead to
-     * infinite loops if there are circular symbolic links in the file system.
+     * infinite loops if there are circular symbolic links in the file system. For a
+     * symbolic-link-aware, {@link Path}-based alternative, see {@link #PATHS}.
+     *
+     * @see #PATHS
      */
-    public static final Traverser<File> FILES = forTree(directory -> {
-        final File[] subFiles = directory.listFiles();
-        return N.isEmpty(subFiles) ? N.emptyList() : Arrays.asList(subFiles);
-    });
+    public static final Traverser<File> FILES = wrap(com.google.common.io.Files.fileTraverser());
+
+    /**
+     * A pre-configured traverser for traversing file system directories and files using the NIO
+     * {@link Path} API. This traverser treats the file system as a tree where directories are
+     * internal nodes and files are leaf nodes.
+     *
+     * <p>This is the {@link Path}-based counterpart of {@link #FILES}. Unlike {@link #FILES}, this
+     * traverser attempts to avoid following symbolic links to directories. However, it cannot
+     * guarantee that it will not follow symbolic links to directories, as it is possible for a
+     * directory to be replaced with a symbolic link between checking if the file is a directory and
+     * actually reading the contents of that directory.
+     *
+     * <p>If a {@link Path} passed to one of the traversal methods does not exist or is not a
+     * directory, no exception is thrown and the traversal yields a single element: that path.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * // Find all .java files in a directory tree
+     * Traverser.PATHS.breadthFirst(Paths.get("src"))
+     *     .filter(p -> p.toString().endsWith(".java"))
+     *     .forEach(System.out::println);
+     * }</pre>
+     *
+     * <p><b>Note:</b> {@link DirectoryIteratorException} may be thrown while consuming the returned
+     * stream if an {@link java.io.IOException} occurs while reading a directory's contents.
+     *
+     * @see #FILES
+     */
+    public static final Traverser<Path> PATHS = wrap(com.google.common.io.MoreFiles.fileTraverser());
 
     private final com.google.common.graph.Traverser<T> gTraverser;
 
@@ -106,6 +136,22 @@ public final class Traverser<T> {
      */
     private Traverser(final com.google.common.graph.Traverser<T> gTraverser) {
         this.gTraverser = gTraverser;
+    }
+
+    /**
+     * Wraps an existing Guava {@link com.google.common.graph.Traverser} in a library
+     * {@code Traverser}. This package-private factory lets the {@code guava} package expose a single
+     * {@code Traverser} type while reusing Guava's pre-built traversers (for example
+     * {@code com.google.common.io.Files.fileTraverser()} and
+     * {@code com.google.common.io.MoreFiles.fileTraverser()}), which are wrapped by {@link #FILES}
+     * and {@link #PATHS} respectively.
+     *
+     * @param <T> the type of nodes in the graph
+     * @param gTraverser the Guava traverser to wrap
+     * @return a new library Traverser delegating to the given Guava traverser
+     */
+    static <T> Traverser<T> wrap(final com.google.common.graph.Traverser<T> gTraverser) {
+        return new Traverser<>(gTraverser);
     }
 
     /**
@@ -184,9 +230,14 @@ public final class Traverser<T> {
      *     .forEach(employee -> System.out.println(employee.getName()));
      * }</pre>
      *
+     * <p><b>Note:</b> the successor function must not return {@code null}; return an empty
+     * {@link Iterable} for leaf nodes. A {@code null} return is not guarded here and causes a
+     * {@link NullPointerException} during stream consumption, not at factory-creation time.
+     *
      * @param <T> the type of nodes in the tree
      * @param tree {@link Function} representing a directed acyclic graph that has at most
-     *     one path between any two nodes. The function takes a node and returns its children.
+     *     one path between any two nodes. The function takes a node and returns its children
+     *     (an empty {@link Iterable} for leaf nodes; must not return {@code null}).
      * @return a new Traverser for the specified tree structure
      * @see #forGraph(Function)
      */
@@ -231,9 +282,15 @@ public final class Traverser<T> {
      *     .toSet();
      * }</pre>
      *
+     * <p><b>Note:</b> the successor function must not return {@code null}; return an empty
+     * {@link Iterable} for nodes with no successors. A {@code null} return is not guarded here
+     * and causes a {@link NullPointerException} during stream consumption, not at
+     * factory-creation time.
+     *
      * @param <T> the type of nodes in the graph
      * @param graph {@link Function} representing a general graph that may have cycles.
-     *     The function takes a node and returns its adjacent nodes (successors).
+     *     The function takes a node and returns its adjacent nodes (successors); return an empty
+     *     {@link Iterable} for nodes with no successors (must not return {@code null}).
      * @return a new Traverser for the specified graph structure
      * @see #forTree(Function)
      */
@@ -249,14 +306,17 @@ public final class Traverser<T> {
      * <p>Breadth-first traversal is useful when you want to explore nodes level by level,
      * such as finding the shortest path or exploring nodes in increasing distance from the start.
      *
-     * <p><b>Example:</b> The following graph with {@code startNode} {@code a} would return nodes in
-     * the order {@code abcdef} (assuming successors are returned in alphabetical order).
+     * <p><b>Example:</b> For the following directed tree (edges point downward) with
+     * {@code startNode} {@code a}, and assuming each node's successors are returned in alphabetical
+     * order, breadth-first traversal returns the nodes in the order {@code a, b, c, d, e, f}
+     * ({@code a} at depth 0; then {@code b, c} at depth 1; then {@code d, e, f} at depth 2):
      *
      * <pre>{@code
-     * b ---- a ---- d
-     * |      |
-     * |      |
-     * e ---- c ---- f
+     *       a
+     *      / \
+     *     b   c
+     *    / \   \
+     *   d   e   f
      * }</pre>
      *
      * <p>The behavior of this method is undefined if the nodes, or the topology of the graph, change
@@ -280,12 +340,38 @@ public final class Traverser<T> {
      *
      * @param startNode the node to start traversal from
      * @return a Stream of nodes in breadth-first order
-     * @throws IllegalArgumentException if {@code startNode} is not an element of the graph
+     * @see #breadthFirst(Iterable)
      * @see #depthFirstPreOrder(Object)
      * @see #depthFirstPostOrder(Object)
      */
     public Stream<T> breadthFirst(final T startNode) {
         return Stream.of(gTraverser.breadthFirst(startNode).iterator());
+    }
+
+    /**
+     * Returns a {@link Stream} over the nodes reachable from any of the given {@code startNodes}, in
+     * the order of a breadth-first traversal. This is the multi-root counterpart of
+     * {@link #breadthFirst(Object)}: it behaves as if a virtual root with edges to each of the
+     * {@code startNodes} were traversed, except that the virtual root itself is not returned. The
+     * {@code startNodes} themselves are visited in the order they are provided (all at depth 0),
+     * before their successors.
+     *
+     * <p>This is useful for traversing a forest of trees, or a graph from a set of seed nodes.</p>
+     *
+     * <p>The behavior of this method is undefined if the nodes, or the topology of the graph, change
+     * while iteration is in progress.
+     *
+     * <p>The returned {@code Stream} is lazily evaluated, meaning traversal happens as elements
+     * are consumed from the stream.
+     *
+     * @param startNodes the nodes to start traversal from
+     * @return a Stream of nodes in breadth-first order
+     * @see #breadthFirst(Object)
+     * @see #depthFirstPreOrder(Iterable)
+     * @see #depthFirstPostOrder(Iterable)
+     */
+    public Stream<T> breadthFirst(final Iterable<? extends T> startNodes) {
+        return Stream.of(gTraverser.breadthFirst(startNodes).iterator());
     }
 
     /**
@@ -297,14 +383,18 @@ public final class Traverser<T> {
      * a node before processing its descendants, such as copying a tree structure or
      * printing a hierarchical representation.
      *
-     * <p><b>Example:</b> The following graph with {@code startNode} {@code a} would return nodes in
-     * the order {@code abecfd} (assuming successors are returned in alphabetical order).
+     * <p><b>Example:</b> For the following directed tree (edges point downward) with
+     * {@code startNode} {@code a}, and assuming each node's successors are returned in alphabetical
+     * order, depth-first pre-order traversal returns the nodes in the order {@code a, b, d, e, c, f}
+     * (each node is emitted before its descendants; the {@code b} subtree is fully visited before
+     * {@code c}):
      *
      * <pre>{@code
-     * b ---- a ---- d
-     * |      |
-     * |      |
-     * e ---- c ---- f
+     *       a
+     *      / \
+     *     b   c
+     *    / \   \
+     *   d   e   f
      * }</pre>
      *
      * <p>The behavior of this method is undefined if the nodes, or the topology of the graph, change
@@ -325,12 +415,37 @@ public final class Traverser<T> {
      *
      * @param startNode the node to start traversal from
      * @return a Stream of nodes in depth-first pre-order
-     * @throws IllegalArgumentException if {@code startNode} is not an element of the graph
+     * @see #depthFirstPreOrder(Iterable)
      * @see #breadthFirst(Object)
      * @see #depthFirstPostOrder(Object)
      */
     public Stream<T> depthFirstPreOrder(final T startNode) {
         return Stream.of(gTraverser.depthFirstPreOrder(startNode).iterator());
+    }
+
+    /**
+     * Returns a {@link Stream} over the nodes reachable from any of the given {@code startNodes}, in
+     * the order of a depth-first pre-order traversal. This is the multi-root counterpart of
+     * {@link #depthFirstPreOrder(Object)}: it behaves as if a virtual root with edges to each of the
+     * {@code startNodes} were traversed, except that the virtual root itself is not returned. Each
+     * {@code startNode}'s subtree is fully visited (pre-order) before moving on to the next
+     * {@code startNode}.
+     *
+     * <p>This is useful for traversing a forest of trees, or a graph from a set of seed nodes.</p>
+     *
+     * <p>The behavior of this method is undefined if the nodes, or the topology of the graph, change
+     * while iteration is in progress.
+     *
+     * <p>The returned {@code Stream} is lazily evaluated.
+     *
+     * @param startNodes the nodes to start traversal from
+     * @return a Stream of nodes in depth-first pre-order
+     * @see #depthFirstPreOrder(Object)
+     * @see #breadthFirst(Iterable)
+     * @see #depthFirstPostOrder(Iterable)
+     */
+    public Stream<T> depthFirstPreOrder(final Iterable<? extends T> startNodes) {
+        return Stream.of(gTraverser.depthFirstPreOrder(startNodes).iterator());
     }
 
     /**
@@ -342,14 +457,17 @@ public final class Traverser<T> {
      * a node after processing all its descendants, such as computing sizes of subtrees,
      * deleting a tree structure, or performing bottom-up computations.
      *
-     * <p><b>Example:</b> The following graph with {@code startNode} {@code a} would return nodes in
-     * the order {@code fcebda} (assuming successors are returned in alphabetical order).
+     * <p><b>Example:</b> For the following directed tree (edges point downward) with
+     * {@code startNode} {@code a}, and assuming each node's successors are returned in alphabetical
+     * order, depth-first post-order traversal returns the nodes in the order {@code d, e, b, f, c, a}
+     * (each node is emitted only after all of its descendants):
      *
      * <pre>{@code
-     * b ---- a ---- d
-     * |      |
-     * |      |
-     * e ---- c ---- f
+     *       a
+     *      / \
+     *     b   c
+     *    / \   \
+     *   d   e   f
      * }</pre>
      *
      * <p>The behavior of this method is undefined if the nodes, or the topology of the graph, change
@@ -375,11 +493,36 @@ public final class Traverser<T> {
      *
      * @param startNode the node to start traversal from
      * @return a Stream of nodes in depth-first post-order
-     * @throws IllegalArgumentException if {@code startNode} is not an element of the graph
+     * @see #depthFirstPostOrder(Iterable)
      * @see #breadthFirst(Object)
      * @see #depthFirstPreOrder(Object)
      */
     public Stream<T> depthFirstPostOrder(final T startNode) {
         return Stream.of(gTraverser.depthFirstPostOrder(startNode).iterator());
+    }
+
+    /**
+     * Returns a {@link Stream} over the nodes reachable from any of the given {@code startNodes}, in
+     * the order of a depth-first post-order traversal. This is the multi-root counterpart of
+     * {@link #depthFirstPostOrder(Object)}: it behaves as if a virtual root with edges to each of the
+     * {@code startNodes} were traversed, except that the virtual root itself is not returned. Each
+     * {@code startNode}'s subtree is fully visited (post-order, so descendants precede the
+     * {@code startNode}) before moving on to the next {@code startNode}.
+     *
+     * <p>This is useful for traversing a forest of trees, or a graph from a set of seed nodes.</p>
+     *
+     * <p>The behavior of this method is undefined if the nodes, or the topology of the graph, change
+     * while iteration is in progress.
+     *
+     * <p>The returned {@code Stream} is lazily evaluated.
+     *
+     * @param startNodes the nodes to start traversal from
+     * @return a Stream of nodes in depth-first post-order
+     * @see #depthFirstPostOrder(Object)
+     * @see #breadthFirst(Iterable)
+     * @see #depthFirstPreOrder(Iterable)
+     */
+    public Stream<T> depthFirstPostOrder(final Iterable<? extends T> startNodes) {
+        return Stream.of(gTraverser.depthFirstPostOrder(startNodes).iterator());
     }
 }

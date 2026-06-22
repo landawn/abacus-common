@@ -13,9 +13,9 @@
  */
 package com.landawn.abacus.util.function;
 
-import java.util.Objects;
-
 import com.landawn.abacus.util.Throwables;
+import com.landawn.abacus.util.N;
+import com.landawn.abacus.util.cs;
 
 /**
  * Represents an operation that accepts two {@code int}-valued arguments and a single object-valued
@@ -62,13 +62,27 @@ public interface BiIntObjConsumer<T> extends Throwables.BiIntObjConsumer<T, Runt
      *
      * @param after the operation to perform after this operation. Must not be {@code null}.
      * @return a composed {@code BiIntObjConsumer} that performs in sequence this operation followed by the {@code after} operation
-     * @throws NullPointerException if {@code after} is null
+     * @throws IllegalArgumentException if {@code after} is null
      */
     default BiIntObjConsumer<T> andThen(final BiIntObjConsumer<? super T> after) {
-        Objects.requireNonNull(after);
+        N.checkArgNotNull(after, cs.after);
         return (i, j, t) -> {
             accept(i, j, t);
             after.accept(i, j, t);
         };
+    }
+
+    /**
+     * Returns this object as a {@link Throwables.BiIntObjConsumer} view.
+     *
+     * <p>The returned object has the same behavior as this one. This method does not translate
+     * exceptions or make the original implementation capable of throwing new checked exceptions; the
+     * exception type parameter is for target-type compatibility with APIs that accept {@code Throwables.BiIntObjConsumer}.
+     *
+     * @param <E> the target exception type for compatibility with {@code Throwables.BiIntObjConsumer}
+     * @return a {@link Throwables.BiIntObjConsumer} view of this object
+     */
+    default <E extends Throwable> Throwables.BiIntObjConsumer<T, E> toThrowable() {
+        return (Throwables.BiIntObjConsumer<T, E>) this;
     }
 }

@@ -16,6 +16,7 @@ import java.sql.CallableStatement;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Types;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -158,7 +159,7 @@ public class OptionalFloatTypeTest extends TestBase {
     public void testSetPreparedStatementWithNull() throws SQLException {
         PreparedStatement stmt = mock(PreparedStatement.class);
         optionalFloatType.set(stmt, 1, null);
-        verify(stmt).setNull(1, java.sql.Types.FLOAT);
+        verify(stmt).setNull(1, Types.REAL);
     }
 
     @Test
@@ -166,7 +167,7 @@ public class OptionalFloatTypeTest extends TestBase {
         PreparedStatement stmt = mock(PreparedStatement.class);
         OptionalFloat empty = OptionalFloat.empty();
         optionalFloatType.set(stmt, 1, empty);
-        verify(stmt).setNull(1, java.sql.Types.FLOAT);
+        verify(stmt).setNull(1, Types.REAL);
     }
 
     @Test
@@ -181,7 +182,7 @@ public class OptionalFloatTypeTest extends TestBase {
     public void testSetCallableStatementWithNull() throws SQLException {
         CallableStatement stmt = mock(CallableStatement.class);
         optionalFloatType.set(stmt, "param", null);
-        verify(stmt).setNull("param", java.sql.Types.FLOAT);
+        verify(stmt).setNull("param", Types.REAL);
     }
 
     @Test
@@ -189,7 +190,7 @@ public class OptionalFloatTypeTest extends TestBase {
         CallableStatement stmt = mock(CallableStatement.class);
         OptionalFloat empty = OptionalFloat.empty();
         optionalFloatType.set(stmt, "param", empty);
-        verify(stmt).setNull("param", java.sql.Types.FLOAT);
+        verify(stmt).setNull("param", Types.REAL);
     }
 
     @Test

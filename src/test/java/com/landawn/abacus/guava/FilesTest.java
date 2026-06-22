@@ -35,7 +35,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
 import com.google.common.base.Predicate;
-import com.google.common.graph.Traverser;
 import com.google.common.io.ByteSink;
 import com.google.common.io.ByteSource;
 import com.google.common.io.CharSink;
@@ -941,10 +940,7 @@ public class FilesTest extends TestBase {
         assertNotNull(traverser);
 
         // Test breadth-first traversal
-        List<File> files = new ArrayList<>();
-        for (File f : traverser.breadthFirst(dir1)) {
-            files.add(f);
-        }
+        List<File> files = traverser.breadthFirst(dir1).toList();
 
         assertTrue(files.size() >= 4); // dir1, dir2, file1, file2
         assertTrue(files.contains(dir1));
@@ -966,10 +962,7 @@ public class FilesTest extends TestBase {
         Traverser<Path> traverser = Files.pathTraverser();
         assertNotNull(traverser);
 
-        List<Path> paths = new ArrayList<>();
-        for (Path p : traverser.depthFirstPreOrder(dir1)) {
-            paths.add(p);
-        }
+        List<Path> paths = traverser.depthFirstPreOrder(dir1).toList();
 
         assertTrue(paths.contains(dir1));
         assertTrue(paths.contains(file1));

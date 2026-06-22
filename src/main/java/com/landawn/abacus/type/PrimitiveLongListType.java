@@ -42,8 +42,7 @@ public final class PrimitiveLongListType extends AbstractPrimitiveListType<LongL
 
     /**
      * Constructs a new PrimitiveLongListType instance.
-     * This constructor is protected to allow subclassing while maintaining controlled instantiation
-     * through the TypeFactory.
+     * This constructor is protected to keep instantiation controlled by the TypeFactory.
      */
     protected PrimitiveLongListType() {
         super(LONG_LIST);
@@ -73,14 +72,14 @@ public final class PrimitiveLongListType extends AbstractPrimitiveListType<LongL
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<LongList> type = TypeFactory.getType(LongList.class);
-     * Type<?> elementType = type.elementType();
+     * Type<Long> elementType = type.elementType();
      * System.out.println(elementType.name());   // Output: long
      * }</pre>
      *
      * @return the Type instance representing long type for list elements
      */
     @Override
-    public Type<?> elementType() {
+    public Type<Long> elementType() {
         return elementType;
     }
 

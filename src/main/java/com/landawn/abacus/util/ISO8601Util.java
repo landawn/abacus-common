@@ -155,18 +155,21 @@ final class ISO8601Util {
         calendar.setTime(date);
 
         // estimate capacity of buffer as close as we can (yeah, that's pedantic ;)
+        // ISO 8601 output is locale-independent: always use ASCII digits. String.format
+        // without an explicit locale would use the default FORMAT locale, which can emit
+        // non-Latin digits (e.g. Arabic-Indic under "ar", Thai under "th-TH-u-nu-thai").
         final StringBuilder sb = new StringBuilder(30);
-        sb.append(String.format("%04d-%02d-%02dT%02d:%02d:%02d", calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH) + 1,
+        sb.append(String.format(Locale.US, "%04d-%02d-%02dT%02d:%02d:%02d", calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH) + 1,
                 calendar.get(Calendar.DAY_OF_MONTH), calendar.get(Calendar.HOUR_OF_DAY), calendar.get(Calendar.MINUTE), calendar.get(Calendar.SECOND)));
         if (millis) {
-            sb.append(String.format(".%03d", calendar.get(Calendar.MILLISECOND)));
+            sb.append(String.format(Locale.US, ".%03d", calendar.get(Calendar.MILLISECOND)));
         }
 
         final int offset = tz.getOffset(calendar.getTimeInMillis());
         if (offset != 0) {
             final int hours = Math.abs((offset / (60 * 1000)) / 60);
             final int minutes = Math.abs((offset / (60 * 1000)) % 60);
-            sb.append(String.format("%c%02d:%02d", (offset < 0 ? '-' : '+'), hours, minutes));
+            sb.append(String.format(Locale.US, "%c%02d:%02d", (offset < 0 ? '-' : '+'), hours, minutes));
         } else {
             sb.append('Z');
         }

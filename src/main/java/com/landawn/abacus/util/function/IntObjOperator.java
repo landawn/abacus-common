@@ -51,4 +51,18 @@ public interface IntObjOperator<T> extends Throwables.IntObjOperator<T, RuntimeE
     // @ai-ignore IntObj*/ObjInt* argument order convention - intentional: class name prefix determines parameter order. IntObj* has int first; ObjInt* has object first. Do not suggest reordering.
     @Override
     int applyAsInt(int t, T u);
+
+    /**
+     * Returns this object as a {@link Throwables.IntObjOperator} view.
+     *
+     * <p>The returned object has the same behavior as this one. This method does not translate
+     * exceptions or make the original implementation capable of throwing new checked exceptions; the
+     * exception type parameter is for target-type compatibility with APIs that accept {@code Throwables.IntObjOperator}.
+     *
+     * @param <E> the target exception type for compatibility with {@code Throwables.IntObjOperator}
+     * @return a {@link Throwables.IntObjOperator} view of this object
+     */
+    default <E extends Throwable> Throwables.IntObjOperator<T, E> toThrowable() {
+        return (Throwables.IntObjOperator<T, E>) this;
+    }
 }

@@ -144,6 +144,6 @@ public class DoubleUnaryOperatorTest extends TestBase {
     @Test
     public void testComposeNullThrowsImmediately() {
         DoubleUnaryOperator instance = a -> 0d;
-        org.junit.jupiter.api.Assertions.assertThrows(NullPointerException.class, () -> instance.compose((java.util.function.DoubleUnaryOperator) null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> instance.compose((java.util.function.DoubleUnaryOperator) null));
     }
 }

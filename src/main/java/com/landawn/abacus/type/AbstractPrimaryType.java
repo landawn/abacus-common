@@ -17,11 +17,12 @@ package com.landawn.abacus.type;
 /**
  * The abstract base class for primary types in the type system.
  * <p>
- * Primary types are fundamental, immutable, comparable value types that can be directly
- * converted from arbitrary objects. This includes primitive wrappers
+ * Primary types are fundamental value types that can be directly converted from arbitrary objects.
+ * This base implementation treats them as immutable and comparable. Specialized subclasses may
+ * override those defaults when the represented values are mutable or not naturally comparable.
+ * This includes primitive wrappers
  * ({@code Integer}, {@code Long}, {@code Double}, etc.),
  * {@code String}, {@code Character}, {@code Boolean}, and other basic value types.
- * All primary types are both immutable and comparable by definition.
  * </p>
  *
  * @param <T> the primary type (e.g., {@code Integer}, {@code String}, {@code Boolean}, {@code Character})
@@ -38,10 +39,10 @@ public abstract class AbstractPrimaryType<T> extends AbstractType<T> {
     }
 
     /**
-     * Returns {@code true} because primary types are always immutable — their values
-     * cannot be changed after creation. This includes all primitive wrappers and {@code String}.
+     * Returns {@code true} for this base implementation. Specialized primary types may override this
+     * when their represented values are mutable.
      *
-     * @return {@code true}
+     * @return {@code true} by default
      */
     @Override
     public boolean isImmutable() {
@@ -49,11 +50,10 @@ public abstract class AbstractPrimaryType<T> extends AbstractType<T> {
     }
 
     /**
-     * Returns {@code true} because primary types implement natural ordering and can be
-     * compared with each other, allowing them to be used in sorted collections and
-     * comparison operations.
+     * Returns {@code true} for this base implementation. Specialized primary types may override this
+     * when their represented values are not naturally comparable.
      *
-     * @return {@code true}
+     * @return {@code true} by default
      */
     @Override
     public boolean isComparable() {

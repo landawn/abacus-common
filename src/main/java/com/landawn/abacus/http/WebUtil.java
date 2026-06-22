@@ -49,7 +49,7 @@ import com.landawn.abacus.util.cs;
  */
 public final class WebUtil {
 
-    static final ImmutableBiMap<HttpMethod, String> httpMethodMap = N.enumMapOf(HttpMethod.class);
+    static final ImmutableBiMap<HttpMethod, String> httpMethodMap = N.enumNameMap(HttpMethod.class);
 
     /**
      * Converts a cURL command string into Java code for creating an HttpRequest.
@@ -480,7 +480,7 @@ public final class WebUtil {
                 } while (++i < len);
 
                 if (ch != quoteChar) {
-                    throw new IllegalArgumentException("It's not quoted with ' from position: " + cursor + " to position: " + i);
+                    throw new IllegalArgumentException("Missing closing quote " + quoteChar + " from position: " + cursor + " to position: " + i);
                 }
 
                 tokens.add(str.substring(cursor, i));
@@ -644,10 +644,15 @@ public final class WebUtil {
      *       and {@code bodyContentType} is specified, the Content-Type header is automatically added</li>
      *   <li>Header values are read using {@link HttpUtil#readHttpHeaderValue(Object)} to handle
      *       various value types (String, List, etc.)</li>
-     *   <li>Quote characters within strings are properly escaped using
-     *       {@link Strings#quoteEscaped(String, char)}</li>
+     *   <li>Values are escaped for the chosen {@code quoteChar} so the command is shell-safe:
+     *       inside single quotes each {@code '} becomes {@code '\''}; inside double quotes
+     *       {@code \ " $ `} are backslash-escaped</li>
      *   <li>The command is formatted with line separators at the beginning and end</li>
      * </ul>
+     *
+     * <p><b>&#9888;</b> Prefer single-quote ({@code '}) mode for untrusted values: inside double
+     * quotes the shell still performs variable/command expansion ({@code $(...)}, {@code `...`},
+     * {@code ${...}}), which is only safe if you intend that expansion.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -656,7 +661,7 @@ public final class WebUtil {
      * headers.put("Authorization", "Bearer token123");
      *
      * String curl = WebUtil.buildCurl(
-     *     "POST",
+     *     HttpMethod.POST,
      *     "http://localhost:18080/users",
      *     headers,
      *     "{\"name\":\"John\",\"email\":\"john@example.com\"}",
@@ -666,7 +671,7 @@ public final class WebUtil {
      * System.out.println(curl);
      * }</pre>
      *
-     * @param httpMethod the HTTP method (e.g., "GET", "POST", "PUT", "DELETE"), must not be {@code null} or empty
+     * @param httpMethod the HTTP method (e.g., {@link HttpMethod#GET}, {@link HttpMethod#POST}), must not be {@code null}
      * @param url the target URL, must not be {@code null} or empty
      * @param headers map of HTTP headers where values can be String or other types that
      *                {@link HttpUtil#readHttpHeaderValue(Object)} can handle (can be {@code null} or empty)
@@ -676,20 +681,20 @@ public final class WebUtil {
      * @param quoteChar the character to use for quoting values in the cURL command,
      *                  typically single quote (') or double quote (")
      * @return a formatted cURL command string with line separators, ready for execution
-     * @throws IllegalArgumentException if {@code httpMethod} or {@code url} is {@code null} or empty
+     * @throws IllegalArgumentException if {@code httpMethod} is {@code null} or {@code url} is {@code null} or empty
      * @see HttpUtil#readHttpHeaderValue(Object)
      * @see Strings#quoteEscaped(String, char)
      */
-    public static String buildCurl(final String httpMethod, final String url, final Map<String, ?> headers, final String body, final String bodyContentType,
+    public static String buildCurl(final HttpMethod httpMethod, final String url, final Map<String, ?> headers, final String body, final String bodyContentType,
             final char quoteChar) {
-        N.checkArgNotEmpty(httpMethod, "httpMethod");
+        N.checkArgNotNull(httpMethod, "httpMethod");
         N.checkArgNotEmpty(url, "url");
 
         final StringBuilder sb = Objectory.createStringBuilder();
 
         try {
             sb.append(IOUtil.LINE_SEPARATOR_UNIX);
-            sb.append("curl -X ").append(httpMethod).append(" ").append(quoteChar).append(Strings.quoteEscaped(url, quoteChar)).append(quoteChar);
+            sb.append("curl -X ").append(httpMethod.name()).append(" ").append(quoteChar).append(escapeForShellQuote(url, quoteChar)).append(quoteChar);
 
             if (N.notEmpty(headers)) {
                 String headerValue = null;
@@ -697,7 +702,7 @@ public final class WebUtil {
                 for (final Map.Entry<String, ?> e : headers.entrySet()) {
                     headerValue = HttpUtil.readHttpHeaderValue(e.getValue());
 
-                    sb.append(" -H ").append(quoteChar).append(e.getKey()).append(": ").append(Strings.quoteEscaped(headerValue, quoteChar)).append(quoteChar);
+                    sb.append(" -H ").append(quoteChar).append(e.getKey()).append(": ").append(escapeForShellQuote(headerValue, quoteChar)).append(quoteChar);
                 }
             }
 
@@ -709,11 +714,11 @@ public final class WebUtil {
                             .append(quoteChar)
                             .append(HttpHeaders.Names.CONTENT_TYPE)
                             .append(": ")
-                            .append(Strings.quoteEscaped(bodyContentType, quoteChar))
+                            .append(escapeForShellQuote(bodyContentType, quoteChar))
                             .append(quoteChar);
                 }
 
-                sb.append(" -d ").append(quoteChar).append(Strings.quoteEscaped(body, quoteChar)).append(quoteChar);
+                sb.append(" -d ").append(quoteChar).append(escapeForShellQuote(body, quoteChar)).append(quoteChar);
             }
 
             sb.append(IOUtil.LINE_SEPARATOR_UNIX);
@@ -721,6 +726,49 @@ public final class WebUtil {
             return sb.toString();
         } finally {
             Objectory.recycle(sb);
+        }
+    }
+
+    /**
+     * Escapes a value so it survives inside a shell-quoted argument in the generated cURL command.
+     *
+     * <p>POSIX single-quoted strings cannot contain an escaped single quote, so each embedded
+     * {@code '} is rewritten as {@code '\''} (close quote, escaped quote, reopen quote). Inside
+     * double quotes the shell still expands {@code $}, {@code `} and processes {@code \}, so those
+     * (and {@code "}) are backslash-escaped. For any other quote character it falls back to
+     * {@link Strings#quoteEscaped(String, char)}.</p>
+     *
+     * @param str the value to escape; may be {@code null} or empty (returned unchanged)
+     * @param quoteChar the quote character used to wrap the value in the cURL command
+     * @return the escaped value, safe to place between two {@code quoteChar} characters
+     */
+    private static String escapeForShellQuote(final String str, final char quoteChar) {
+        if (Strings.isEmpty(str)) {
+            return str;
+        }
+
+        if (quoteChar == '\'') {
+            return str.replace("'", "'\\''");
+        } else if (quoteChar == '"') {
+            final StringBuilder sb = Objectory.createStringBuilder(str.length() + 16);
+
+            try {
+                for (int i = 0, len = str.length(); i < len; i++) {
+                    final char ch = str.charAt(i);
+
+                    if (ch == '\\' || ch == '"' || ch == '$' || ch == '`') {
+                        sb.append('\\');
+                    }
+
+                    sb.append(ch);
+                }
+
+                return sb.toString();
+            } finally {
+                Objectory.recycle(sb);
+            }
+        } else {
+            return Strings.quoteEscaped(str, quoteChar);
         }
     }
 

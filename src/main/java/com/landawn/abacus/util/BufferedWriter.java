@@ -80,7 +80,7 @@ sealed class BufferedWriter extends java.io.BufferedWriter permits CharacterWrit
 
     /**
      * The internal character buffer used in internal buffer mode, or {@code null}
-     * when writing to an underlying {@link #out} writer.
+     * when writing to an underlying {@code out} writer.
      */
     protected char[] value;
 
@@ -90,7 +90,7 @@ sealed class BufferedWriter extends java.io.BufferedWriter permits CharacterWrit
     protected int count = 0;
 
     /**
-     * The temporary flush buffer used when writing to an underlying {@link #out} writer.
+     * The temporary flush buffer used when writing to an underlying {@code out} writer.
      */
     protected char[] _cbuf; //NOSONAR
 
@@ -136,7 +136,7 @@ sealed class BufferedWriter extends java.io.BufferedWriter permits CharacterWrit
      * @param os the output stream to write to
      */
     BufferedWriter(final OutputStream os) {
-        this(IOUtil.newOutputStreamWriter(os, Charsets.DEFAULT));
+        this(IOUtil.newOutputStreamWriter(os, IOUtil.DEFAULT_CHARSET));
     }
 
     /**
@@ -658,7 +658,7 @@ sealed class BufferedWriter extends java.io.BufferedWriter permits CharacterWrit
 
     /**
      * Writes the contents of the transient flush buffer ({@link #_cbuf}) to the
-     * underlying {@link #out} writer and resets the buffer position. This is a no-op
+     * underlying {@code out} writer and resets the buffer position. This is a no-op
      * in internal buffer mode (when {@link #value} is non-{@code null}) and when the
      * flush buffer is empty. It is invoked automatically when the flush buffer becomes
      * full or cannot accommodate the next write.
@@ -681,8 +681,8 @@ sealed class BufferedWriter extends java.io.BufferedWriter permits CharacterWrit
      * Flushes the stream.
      *
      * <p>In external writer mode, any characters saved in the flush buffer are written
-     * immediately to the underlying {@link #out} writer, and that writer is then flushed.
-     * In internal buffer mode (created via {@link #BufferedWriter()}) there is no
+     * immediately to the underlying {@code out} writer, and that writer is then flushed.
+     * In internal buffer mode (created via {@code BufferedWriter()}) there is no
      * underlying destination, so the accumulated content is retained and this method only
      * releases the transient flush buffer.</p>
      *
@@ -747,11 +747,35 @@ sealed class BufferedWriter extends java.io.BufferedWriter permits CharacterWrit
 
         try {
             // Always attempt to close the underlying writer even if flush() throws,
-            // so we don't leak the underlying resource on a flush failure.
+            // while preserving the original failure and suppressing close failures.
+            Throwable exception = null;
+
             try {
                 flush();
-            } finally {
-                IOUtil.close(out);
+            } catch (final Throwable e) {
+                exception = e;
+            }
+
+            try {
+                if (out != null) {
+                    out.close();
+                }
+            } catch (final Throwable e) {
+                if (exception == null) {
+                    exception = e;
+                } else {
+                    exception.addSuppressed(e);
+                }
+            }
+
+            if (exception instanceof IOException) {
+                throw (IOException) exception;
+            } else if (exception instanceof RuntimeException) {
+                throw (RuntimeException) exception;
+            } else if (exception instanceof Error) {
+                throw (Error) exception;
+            } else if (exception != null) {
+                throw new IOException(exception);
             }
         } finally {
             _reset();
@@ -762,7 +786,7 @@ sealed class BufferedWriter extends java.io.BufferedWriter permits CharacterWrit
     /**
      * Returns the contents of the internal buffer as a string.
      *
-     * <p>For writers in internal buffer mode (created via {@link #BufferedWriter()}),
+     * <p>For writers in internal buffer mode (created via {@code BufferedWriter()}),
      * this returns all content written so far without flushing.
      * For writers backed by an underlying output stream or writer, the flush buffer
      * is first flushed to the underlying writer and then {@code out.toString()} is

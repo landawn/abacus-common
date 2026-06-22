@@ -157,7 +157,7 @@ public final class Synchronized<T> {
      * @throws IllegalArgumentException if either mutex or cmd is null.
      * @throws E if the callable throws an exception of type E.
      */
-    public static <T, R, E extends Throwable> R call(final T mutex, final Throwables.Callable<R, E> cmd) throws IllegalArgumentException, E {
+    public static <T, R, E extends Throwable> R call(final T mutex, final Throwables.Callable<? extends R, E> cmd) throws IllegalArgumentException, E {
         N.checkArgNotNull(mutex);
         N.checkArgNotNull(cmd);
 
@@ -419,7 +419,7 @@ public final class Synchronized<T> {
      * @throws IllegalArgumentException if cmd is null.
      * @throws E if the callable throws an exception of type E.
      */
-    public <R, E extends Throwable> R call(final Throwables.Callable<R, E> cmd) throws IllegalArgumentException, E {
+    public <R, E extends Throwable> R call(final Throwables.Callable<? extends R, E> cmd) throws IllegalArgumentException, E {
         N.checkArgNotNull(cmd);
 
         synchronized (mutex) {

@@ -50,4 +50,18 @@ public interface ToIntBiFunction<T, U> extends Throwables.ToIntBiFunction<T, U, 
      */
     @Override
     int applyAsInt(T t, U u);
+
+    /**
+     * Returns this object as a {@link Throwables.ToIntBiFunction} view.
+     *
+     * <p>The returned object has the same behavior as this one. This method does not translate
+     * exceptions or make the original implementation capable of throwing new checked exceptions; the
+     * exception type parameter is for target-type compatibility with APIs that accept {@code Throwables.ToIntBiFunction}.
+     *
+     * @param <E> the target exception type for compatibility with {@code Throwables.ToIntBiFunction}
+     * @return a {@link Throwables.ToIntBiFunction} view of this object
+     */
+    default <E extends Throwable> Throwables.ToIntBiFunction<T, U, E> toThrowable() {
+        return (Throwables.ToIntBiFunction<T, U, E>) this;
+    }
 }

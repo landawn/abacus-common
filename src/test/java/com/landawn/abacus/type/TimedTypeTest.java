@@ -75,6 +75,19 @@ public class TimedTypeTest extends TestBase {
         assertThrows(IllegalArgumentException.class, () -> timedType.valueOf(" "));
     }
 
+    @SuppressWarnings("unchecked")
+    @Test
+    public void testValueOfParameterizedSlotConvertsElements() {
+        TimedType<List<Long>> type = (TimedType<List<Long>>) createType("Timed<List<Long>>");
+
+        Timed<List<Long>> result = type.valueOf("[123456789,[1,2]]");
+
+        assertEquals(123456789L, result.timestamp());
+        Long first = result.value().get(0);
+        assertEquals(1L, first);
+        assertEquals(2L, result.value().get(1));
+    }
+
     @Test
     public void testAppendTo() throws IOException {
         StringWriter writer = new StringWriter();

@@ -122,7 +122,7 @@ public class LocalTimeType extends AbstractTemporalType<LocalTime> {
      * Parses a string to create a LocalTime object.
      * The method supports multiple formats:
      * <ul>
-     *   <li>{@code null}, empty, or blank string returns {@code null}</li>
+     *   <li>{@code null}, empty string, or the literal {@code "null"} (case-insensitive) returns {@code null}</li>
      *   <li>{@code "SYS_TIME"} returns the current {@code LocalTime}</li>
      *   <li>Numeric strings are treated as milliseconds since the epoch</li>
      *   <li>ISO-8601 formatted strings are parsed directly via {@link LocalTime#parse(CharSequence)}</li>
@@ -145,7 +145,7 @@ public class LocalTimeType extends AbstractTemporalType<LocalTime> {
      * {@link LocalTime#toString()}, the value returned by {@code toString()} round-trips as well.</p>
      *
      * @param str the string to parse
-     * @return the parsed {@code LocalTime} object, or {@code null} if the input is {@code null}, empty, or blank
+     * @return the parsed {@code LocalTime} object, or {@code null} if the input is {@code null}, empty, or the literal {@code "null"}
      * @throws java.time.format.DateTimeParseException if the string is not a valid millisecond
      *         number nor an ISO-8601 {@code LocalTime} representation
      * @see #valueOf(Object)

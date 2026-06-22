@@ -50,8 +50,8 @@ import com.landawn.abacus.annotation.MayReturnNull;
  * // Get base name without extension
  * String base = FilenameUtil.getBaseName("/docs/report.pdf");   // returns "report"
  *
- * // Normalize path
- * String normalized = FilenameUtil.normalize("/foo/../bar/./file.txt");   // returns "/bar/file.txt"
+ * // Normalize path (output uses the system separator)
+ * String normalized = FilenameUtil.normalize("/foo/../bar/./file.txt");   // returns "/bar/file.txt" on Unix, "\\bar\\file.txt" on Windows
  *
  * // Check if file matches wildcard pattern
  * boolean matches = FilenameUtil.wildcardMatch("test.java", "*.java");   // returns true
@@ -130,6 +130,8 @@ public final class FilenameUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
+     * // Unix-style outputs shown; the actual output uses the system separator,
+     * // e.g., normalize("/foo//") returns "\\foo\\" on Windows.
      * FilenameUtil.normalize("/foo//");               // returns "/foo/"
      * FilenameUtil.normalize("/foo/./");              // returns "/foo/"
      * FilenameUtil.normalize("/foo/../bar");          // returns "/bar"
@@ -189,6 +191,8 @@ public final class FilenameUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
+     * // Unix-style outputs shown; the actual output uses the system separator,
+     * // e.g., normalizeNoEndSeparator("/foo//") returns "\\foo" on Windows.
      * FilenameUtil.normalizeNoEndSeparator("/foo//");        // returns "/foo"
      * FilenameUtil.normalizeNoEndSeparator("/foo/./");       // returns "/foo"
      * FilenameUtil.normalizeNoEndSeparator("/foo/../bar");   // returns "/bar"
@@ -328,6 +332,8 @@ public final class FilenameUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
+     * // Unix-style outputs shown; the result is normalized, so the actual
+     * // output uses the system separator (e.g., "\\foo\\bar" on Windows).
      * FilenameUtil.concat("/foo/", "bar");         // returns "/foo/bar"
      * FilenameUtil.concat("/foo", "bar");          // returns "/foo/bar"
      * FilenameUtil.concat("/foo", "/bar");         // returns "/bar"
@@ -926,6 +932,50 @@ public final class FilenameUtil {
         } else {
             return filename.substring(0, index);
         }
+    }
+
+    /**
+     * Changes the extension of a filename to the specified new extension.
+     *
+     * <p>This method first removes any existing extension (via {@link #removeExtension(String)}) and
+     * then appends the new extension. A leading dot ('.') in {@code extension} is accepted and not
+     * duplicated, so both {@code "txt"} and {@code ".txt"} produce the same result. If {@code extension}
+     * is {@code null} or empty, the extension is simply removed (no trailing dot is added).</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * FilenameUtil.changeExtension("foo.txt", "log");    // returns "foo.log"
+     * FilenameUtil.changeExtension("foo.txt", ".log");   // returns "foo.log"
+     * FilenameUtil.changeExtension("foo", "log");        // returns "foo.log"
+     * FilenameUtil.changeExtension("foo.txt", "");       // returns "foo"
+     * FilenameUtil.changeExtension("foo.txt", null);     // returns "foo"
+     * FilenameUtil.changeExtension(null, "log");         // returns null
+     * }</pre>
+     *
+     * @param filename the filename to modify, {@code null} returns {@code null}
+     * @param extension the new extension (with or without a leading dot); {@code null} or empty removes the extension
+     * @return the filename with the new extension, or {@code null} if the filename is {@code null}
+     * @throws IllegalArgumentException if the supplied filename contains {@code null} bytes
+     * @see #removeExtension(String)
+     * @see #getExtension(String)
+     */
+    @MayReturnNull
+    public static String changeExtension(final String filename, final String extension) {
+        if (filename == null) {
+            return null;
+        }
+
+        final String withoutExtension = removeExtension(filename);
+
+        if (Strings.isEmpty(extension)) {
+            return withoutExtension;
+        }
+
+        if (extension.charAt(0) == EXTENSION_SEPARATOR) {
+            return withoutExtension + extension;
+        }
+
+        return withoutExtension + EXTENSION_SEPARATOR_STR + extension;
     }
 
     //-----------------------------------------------------------------------

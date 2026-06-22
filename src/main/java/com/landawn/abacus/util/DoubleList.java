@@ -145,6 +145,8 @@ import com.landawn.abacus.util.stream.DoubleStream;
  *   <li><b>Precision:</b> ~15-17 decimal digits of precision (53-bit mantissa)</li>
  *   <li><b>Range:</b> Approximately ±1.8 × 10^308 with subnormal support</li>
  *   <li><b>Comparison:</b> NaN-aware comparison operations</li>
+ *   <li><b>Aggregation:</b> {@code min()}, {@code max()}, and {@code median()} <i>propagate</i> NaN (they do not skip it);
+ *       any NaN present makes the result NaN. Use {@code stream().filter(Double::isFinite)} first to ignore NaN.</li>
  * </ul>
  *
  * <p><b>Double-Specific Operations:</b>
@@ -192,7 +194,7 @@ import com.landawn.abacus.util.stream.DoubleStream;
  * <ul>
  *   <li><b>Initial Capacity:</b> Default capacity of 10 elements</li>
  *   <li><b>Growth Strategy:</b> 1.75x expansion when capacity exceeded</li>
- *   <li><b>Manual Control:</b> {@code ensureCapacity()} for performance optimization</li>
+ *   <li><b>Manual Control:</b> specify the initial capacity via the {@code DoubleList(int)} constructor</li>
  *   <li><b>Trimming:</b> {@code trimToSize()} to reduce memory footprint</li>
  * </ul>
  *
@@ -249,7 +251,7 @@ import com.landawn.abacus.util.stream.DoubleStream;
  *
  * <p><b>Performance Tips:</b>
  * <ul>
- *   <li>Pre-size lists with known capacity using constructor or {@code ensureCapacity()}</li>
+ *   <li>Pre-size lists with known capacity using the {@code DoubleList(int)} constructor</li>
  *   <li>Use {@code addLast()} instead of {@code addFirst()} for better performance</li>
  *   <li>Sort data before using {@code binarySearch()} for O(log n) lookups</li>
  *   <li>Use {@code parallelSort()} for large datasets to leverage multi-core processors</li>
@@ -750,7 +752,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
 
         final int numNew = c.size();
 
-        ensureCapacity(size + numNew); // Increments modCount
+        ensureCapacity(size + numNew);
 
         final int numMoved = size - index;
 
@@ -798,7 +800,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
 
         final int numNew = a.length;
 
-        ensureCapacity(size + numNew); // Increments modCount
+        ensureCapacity(size + numNew);
 
         final int numMoved = size - index;
 
@@ -906,6 +908,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * Removes from this list all of its elements that are contained in the specified DoubleList.
      * This operation effectively performs a set difference, removing elements based on their values
      * rather than their positions. If an element appears multiple times, all occurrences are removed.
+     * The comparison is done using {@code Double.compare} to handle NaN values correctly.
      *
      * @param c the DoubleList containing elements to be removed from this list
      * @return {@code true} if this list was modified as a result of this operation
@@ -923,6 +926,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * Removes from this list all of its elements that are contained in the specified array.
      * This operation effectively performs a set difference, removing elements based on their values
      * rather than their positions. If an element appears multiple times, all occurrences are removed.
+     * The comparison is done using {@code Double.compare} to handle NaN values correctly.
      *
      * @param a the array containing elements to be removed from this list
      * @return {@code true} if this list was modified as a result of this operation
@@ -1024,6 +1028,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * Retains only the elements in this list that are contained in the specified DoubleList.
      * In other words, removes from this list all elements that are not contained in the specified list.
      * This operation effectively performs a set intersection based on element values.
+     * The comparison is done using {@code Double.compare} to handle NaN values correctly.
      *
      * @param c the DoubleList containing elements to be retained in this list
      * @return {@code true} if this list was modified as a result of this operation
@@ -1043,6 +1048,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * Retains only the elements in this list that are contained in the specified array.
      * In other words, removes from this list all elements that are not contained in the specified array.
      * This operation effectively performs a set intersection based on element values.
+     * The comparison is done using {@code Double.compare} to handle NaN values correctly.
      *
      * <p>If the specified array is {@code null} or empty, all elements are removed from this list.</p>
      *
@@ -1486,6 +1492,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     /**
      * Checks if this list contains any element from the specified DoubleList.
      * Returns {@code true} if there is at least one element that appears in both lists.
+     * The comparison is done using {@code Double.compare} to handle NaN values correctly.
      *
      * @param c the DoubleList to check for common elements
      * @return {@code true} if this list contains any element from the specified list
@@ -1502,6 +1509,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     /**
      * Checks if this list contains any element from the specified array.
      * Returns {@code true} if there is at least one element that appears in both this list and the array.
+     * The comparison is done using {@code Double.compare} to handle NaN values correctly.
      *
      * @param a the array to check for common elements
      * @return {@code true} if this list contains any element from the specified array
@@ -1519,6 +1527,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * Checks if this list contains all elements from the specified DoubleList.
      * Returns {@code true} only if every element in the specified list is also present in this list.
      * The frequency of elements is not considered; only presence is checked.
+     * The comparison is done using {@code Double.compare} to handle NaN values correctly.
      *
      * @param c the DoubleList to check for containment
      * @return {@code true} if this list contains all elements from the specified list
@@ -1554,6 +1563,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * Checks if this list contains all elements from the specified array.
      * Returns {@code true} only if every element in the specified array is also present in this list.
      * The frequency of elements is not considered; only presence is checked.
+     * The comparison is done using {@code Double.compare} to handle NaN values correctly.
      *
      * @param a the array to check for containment
      * @return {@code true} if this list contains all elements from the specified array
@@ -1626,12 +1636,12 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * <pre>{@code
      * DoubleList list1 = DoubleList.of(1.0, 1.0, 2.0, 3.0);
      * DoubleList list2 = DoubleList.of(1.0, 2.0, 2.0, 4.0);
-     * DoubleList result = list1.intersection(list2);   // returns result will be [1.0, 2.0]
+     * DoubleList result = list1.intersection(list2);   // result will be [1.0, 2.0]
      * // One occurrence of '1.0' (minimum count in both lists) and one occurrence of '2.0'
      *
      * DoubleList list3 = DoubleList.of(5.0, 5.0, 6.0);
      * DoubleList list4 = DoubleList.of(5.0, 7.0);
-     * DoubleList result2 = list3.intersection(list4);   // returns result will be [5.0]
+     * DoubleList result2 = list3.intersection(list4);   // result will be [5.0]
      * // One occurrence of '5.0' (minimum count in both lists)
      * }</pre>
      *
@@ -1672,12 +1682,12 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * <pre>{@code
      * DoubleList list1 = DoubleList.of(1.0, 1.0, 2.0, 3.0);
      * double[] array = new double[] {1.0, 2.0, 2.0, 4.0};
-     * DoubleList result = list1.intersection(array);   // returns result will be [1.0, 2.0]
+     * DoubleList result = list1.intersection(array);   // result will be [1.0, 2.0]
      * // One occurrence of '1.0' (minimum count in both sources) and one occurrence of '2.0'
      *
      * DoubleList list2 = DoubleList.of(5.0, 5.0, 6.0);
      * double[] array2 = new double[] {5.0, 7.0};
-     * DoubleList result2 = list2.intersection(array2);   // returns result will be [5.0]
+     * DoubleList result2 = list2.intersection(array2);   // result will be [5.0]
      * // One occurrence of '5.0' (minimum count in both sources)
      * }</pre>
      *
@@ -1709,18 +1719,19 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * <pre>{@code
      * DoubleList list1 = DoubleList.of(1.0, 1.0, 2.0, 3.0);
      * DoubleList list2 = DoubleList.of(1.0, 4.0);
-     * DoubleList result = list1.difference(list2);   // returns result will be [1.0, 2.0, 3.0]
+     * DoubleList result = list1.difference(list2);   // result will be [1.0, 2.0, 3.0]
      * // One '1.0' remains because list1 has two occurrences and list2 has one
      *
      * DoubleList list3 = DoubleList.of(5.0, 6.0);
      * DoubleList list4 = DoubleList.of(5.0, 5.0, 6.0);
-     * DoubleList result2 = list3.difference(list4);   // returns result will be [] (empty)
+     * DoubleList result2 = list3.difference(list4);   // result will be [] (empty)
      * // No elements remain because list4 has at least as many occurrences of each value as list3
      * }</pre>
      *
      * @param b the list to compare against this list
      * @return a new DoubleList containing the elements that are present in this list but not in the specified list,
      *         considering the number of occurrences.
+     *         Returns a copy of this list if {@code b} is {@code null} or empty.
      * @see #difference(double[])
      * @see #symmetricDifference(DoubleList)
      * @see #intersection(DoubleList)
@@ -1755,12 +1766,12 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * <pre>{@code
      * DoubleList list1 = DoubleList.of(1.0, 1.0, 2.0, 3.0);
      * double[] array = new double[] {1.0, 4.0};
-     * DoubleList result = list1.difference(array);   // returns result will be [1.0, 2.0, 3.0]
+     * DoubleList result = list1.difference(array);   // result will be [1.0, 2.0, 3.0]
      * // One '1.0' remains because list1 has two occurrences and array has one
      *
      * DoubleList list2 = DoubleList.of(5.0, 6.0);
      * double[] array2 = new double[] {5.0, 5.0, 6.0};
-     * DoubleList result2 = list2.difference(array2);   // returns result will be [] (empty)
+     * DoubleList result2 = list2.difference(array2);   // result will be [] (empty)
      * // No elements remain because array2 has at least as many occurrences of each value as list2
      * }</pre>
      *
@@ -1789,7 +1800,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * in occurrences between the two lists.
      *
      * <p>The order of elements is preserved, with elements from this list appearing first,
-     * followed by elements from the specified list that are not in this list.
+     * followed by elements from the specified list.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1806,7 +1817,8 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      *
      * @param b the list to compare with this list for symmetric difference
      * @return a new DoubleList containing elements that are present in either this list or the specified list,
-     *         but not in both, considering the number of occurrences
+     *         but not in both, considering the number of occurrences.
+     *         Returns a copy of this list if {@code b} is {@code null} or empty, or a copy of {@code b} if this list is empty.
      * @see #symmetricDifference(double[])
      * @see #difference(DoubleList)
      * @see #intersection(DoubleList)
@@ -1849,7 +1861,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * in occurrences between this list and the array.
      *
      * <p>The order of elements is preserved, with elements from this list appearing first,
-     * followed by elements from the specified array that are not in this list.
+     * followed by elements from the specified array.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1866,7 +1878,8 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      *
      * @param b the array to compare with this list for symmetric difference
      * @return a new DoubleList containing elements that are present in either this list or the specified array,
-     *         but not in both, considering the number of occurrences
+     *         but not in both, considering the number of occurrences.
+     *         Returns a copy of this list if {@code b} is {@code null} or empty, or a copy of {@code b} if this list is empty.
      * @see #symmetricDifference(DoubleList)
      * @see #difference(double[])
      * @see #intersection(double[])
@@ -1946,7 +1959,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * }</pre>
      *
      * @param valueToFind the element to search for
-     * @param fromIndex the index to start the search from (inclusive)
+     * @param fromIndex the index to start the search from (inclusive). May be negative, in which case it is treated as 0.
      * @return the index of the first occurrence of the specified element at or after fromIndex,
      *         or {@code N.INDEX_NOT_FOUND} (-1) if not found
      */
@@ -2020,7 +2033,8 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
 
     /**
      * Returns the minimum element in this list wrapped in an OptionalDouble.
-     * If the list is empty, returns an empty OptionalDouble.
+     * If the list is empty, returns an empty OptionalDouble. If any element is NaN,
+     * the result is NaN (NaN propagates per {@link Math#min(double, double)}).
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -2038,7 +2052,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     /**
      * Returns the minimum element in the specified range of this list wrapped in an OptionalDouble.
      * If the range is empty (fromIndex == toIndex), returns an empty OptionalDouble.
-     * For ranges containing NaN values, the behavior follows the standard double comparison rules.
+     * If any element in the range is NaN, the result is NaN (NaN propagates per {@link Math#min(double, double)}).
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -2059,8 +2073,8 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
 
     /**
      * Returns the maximum element in this list wrapped in an OptionalDouble.
-     * If the list is empty, returns an empty OptionalDouble.
-     * For lists containing NaN values, the behavior follows the standard double comparison rules.
+     * If the list is empty, returns an empty OptionalDouble. If any element is NaN,
+     * the result is NaN (NaN propagates per {@link Math#max(double, double)}).
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -2078,7 +2092,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     /**
      * Returns the maximum element in the specified range of this list wrapped in an OptionalDouble.
      * If the range is empty (fromIndex == toIndex), returns an empty OptionalDouble.
-     * For ranges containing NaN values, the behavior follows the standard double comparison rules.
+     * If any element in the range is NaN, the result is NaN (NaN propagates per {@link Math#max(double, double)}).
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -2192,7 +2206,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      *                or -1 for reverse iteration to the beginning
      * @param action the action to be performed for each element. Must not be {@code null}.
      * @throws IndexOutOfBoundsException if fromIndex or toIndex is out of range
-     *         ({@code fromIndex < 0 || toIndex > size() || (fromIndex > toIndex && toIndex != -1)})
+     *         ({@code min(fromIndex, toIndex == -1 ? 0 : toIndex) < 0 || max(fromIndex, toIndex) > size()})
      * @throws NullPointerException if the specified action is {@code null}
      */
     public void forEach(final int fromIndex, final int toIndex, final DoubleConsumer action) throws IndexOutOfBoundsException {
@@ -2325,7 +2339,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      *
      * <p>The sorting algorithm is a Dual-Pivot Quicksort by Vladimir Yaroslavskiy,
      * Jon Bentley, and Joshua Bloch. This algorithm offers O(n log(n)) performance
-     * on many data sets.</p>
+     * on many data sets. NaN values are sorted to the end of the list.</p>
      *
      * <p>If the list contains fewer than 2 elements, no sorting is performed.</p>
      */
@@ -2341,7 +2355,8 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      *
      * <p>This method modifies the list in-place, arranging all elements according
      * to their natural ordering. The parallel sort algorithm divides the array into
-     * sub-arrays that are sorted in parallel and then merged.</p>
+     * sub-arrays that are sorted in parallel and then merged. NaN values are sorted
+     * to the end of the list.</p>
      *
      * <p>This method is beneficial for large lists on multi-core systems. For small
      * lists, the overhead of parallelization may make it slower than {@link #sort()}.</p>
@@ -2369,7 +2384,8 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      *
      * <p>This method first sorts the list in ascending order using {@link #sort()},
      * then reverses the entire list to achieve descending order. This approach
-     * maintains stability for equal elements.</p>
+     * maintains stability for equal elements. NaN values will appear at the
+     * beginning of the list after reverse sorting.</p>
      *
      * <p>If the list contains fewer than 2 elements, no sorting is performed.</p>
      */
@@ -2534,9 +2550,12 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * <p>If the list contains fewer than 2 elements, no shuffling is performed.</p>
      *
      * @param rnd the source of randomness to use to shuffle the list. Must not be {@code null}.
+     * @throws NullPointerException if {@code rnd} is {@code null}
      */
     @Override
     public void shuffle(final Random rnd) {
+        N.checkArgNotNull(rnd, cs.rnd);
+
         if (size() > 1) {
             N.shuffle(elementData, 0, size, rnd);
         }
@@ -2621,7 +2640,9 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     public DoubleList copy(final int fromIndex, final int toIndex, final int step) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), Math.max(fromIndex, toIndex));
 
-        return new DoubleList(N.copyOfRange(elementData, fromIndex, toIndex, step));
+        // Clamp a descending start against the logical size (like forEach): N.copyOfRange clamps
+        // against the backing array's length, which may exceed size and expose phantom elements.
+        return new DoubleList(N.copyOfRange(elementData, fromIndex > toIndex ? N.min(size - 1, fromIndex) : fromIndex, toIndex, step));
     }
 
     /**

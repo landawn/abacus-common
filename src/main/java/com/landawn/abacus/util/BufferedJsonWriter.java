@@ -33,12 +33,13 @@ import java.io.Writer;
  *   <li>Control characters (U+0000 through U+001F) and U+007F are escaped
  *       as <code>&#92;uXXXX</code> sequences</li>
  *   <li>Line separator (U+2028) and paragraph separator (U+2029) are escaped
- *       as {@code \u2028} and {@code \u2029} to prevent JavaScript syntax errors</li>
+ *       as <code>&#92;u2028</code> and <code>&#92;u2029</code> to prevent JavaScript syntax errors</li>
  * </ul>
  *
- * <p>This writer also provides HTML-safe character replacements for environments where
- * JSON may be embedded in HTML contexts. The HTML-safe replacements include additional
- * escaping for {@code <}, {@code >}, {@code &}, {@code =}, and single quotes.</p>
+ * <p>An HTML-safe replacement table (with additional escaping for {@code <}, {@code >},
+ * {@code &}, {@code =}, and single quotes) is defined for potential use when JSON is embedded
+ * in HTML contexts, but it is not currently selected by any constructor; this writer always
+ * uses the standard RFC 4627 replacements.</p>
  *
  * <p>Note that escaping is performed only by the {@code writeCharacter(...)} methods
  * inherited from {@link CharacterWriter}. The plain {@code write(...)} methods write
@@ -83,7 +84,7 @@ public final class BufferedJsonWriter extends CharacterWriter {
      * From RFC 4627, "All Unicode characters may be placed within the quotation marks except for the characters that
      * must be escaped: quotation mark, reverse solidus, and the control characters (U+0000 through U+001F)."
      *
-     * We also escape '\u2028' and '\u2029', which JavaScript interprets as newline characters. This prevents eval()
+     * We also escape U+2028 and U+2029, which JavaScript interprets as newline characters. This prevents eval()
      * from failing with a syntax error. http://code.google.com/p/google-gson/issues/detail?id=341
      */
 

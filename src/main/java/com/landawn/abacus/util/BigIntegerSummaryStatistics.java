@@ -129,10 +129,12 @@ public class BigIntegerSummaryStatistics implements Consumer<BigInteger> {
      * }</pre>
      *
      * @param value the input value to be recorded, must not be {@code null}
-     * @throws NullPointerException if {@code value} is {@code null}
+     * @throws IllegalArgumentException if {@code value} is {@code null}
      */
     @Override
     public void accept(final BigInteger value) {
+        N.checkArgNotNull(value, cs.value);
+
         ++count;
         sum = sum.add(value);
         min = min == null ? value : min.compareTo(value) > 0 ? value : min;

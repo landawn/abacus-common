@@ -177,7 +177,7 @@ public class InstantType extends AbstractTemporalType<Instant> {
             return null; // NOSONAR
         }
 
-        if (isPossibleLong(cbuf, offset, len)) {
+        if (isPossibleMillis(cbuf, offset, len)) {
             try {
                 return Instant.ofEpochMilli(parseLong(cbuf, offset, len));
             } catch (final NumberFormatException e) {
@@ -287,8 +287,9 @@ public class InstantType extends AbstractTemporalType<Instant> {
      * The output format depends on the serialization configuration:
      * <ul>
      *   <li>{@code LONG}: writes epoch milliseconds as an unquoted number</li>
-     *   <li>{@code ISO_8601_DATE_TIME}: writes in {@code "yyyy-MM-dd'T'HH:mm:ss'Z'"} format</li>
-     *   <li>{@code ISO_8601_TIMESTAMP}: writes in {@code "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"} format</li>
+     *   <li>{@code ISO_8601_DATE_TIME} / {@code ISO_8601_TIMESTAMP}: writes ISO-8601 with UTC offset via
+     *       {@code DateTimeFormatter.ISO_OFFSET_DATE_TIME} (e.g., {@code 2023-12-25T10:30:45.123Z};
+     *       fractional seconds are omitted when zero)</li>
      *   <li>No config / {@code null} format: uses {@link #stringOf(Instant)}</li>
      * </ul>
      * Non-{@code LONG} formats are quoted when {@code config} specifies a string quotation character.
@@ -340,7 +341,7 @@ public class InstantType extends AbstractTemporalType<Instant> {
                         break;
 
                     default:
-                        throw new RuntimeException("Unsupported operation");
+                        throw new RuntimeException("Unsupported DateTimeFormat: " + config.getDateTimeFormat());
                 }
             }
 

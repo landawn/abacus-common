@@ -142,4 +142,14 @@ public class UncheckedInterruptedExceptionTest extends TestBase {
         Assertions.assertEquals(rootCause, exception.getCause().getCause());
     }
 
+    @Test
+    public void testGetCauseCovariantReturn() {
+        InterruptedException cause = new InterruptedException("Thread interrupted");
+        UncheckedInterruptedException exception = new UncheckedInterruptedException(cause);
+        // Covariant override: no cast required.
+        InterruptedException returnedCause = exception.getCause();
+        assertNotNull(returnedCause);
+        assertEquals(cause, returnedCause);
+    }
+
 }

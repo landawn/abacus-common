@@ -42,8 +42,7 @@ public final class PrimitiveCharListType extends AbstractPrimitiveListType<CharL
 
     /**
      * Constructs a new PrimitiveCharListType instance.
-     * This constructor is protected to allow subclassing while maintaining controlled instantiation
-     * through the TypeFactory.
+     * This constructor is protected to keep instantiation controlled by the TypeFactory.
      */
     protected PrimitiveCharListType() {
         super(CHAR_LIST);

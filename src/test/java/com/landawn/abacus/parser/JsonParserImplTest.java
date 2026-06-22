@@ -10,6 +10,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.Reader;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.io.Writer;
@@ -597,6 +598,7 @@ public class JsonParserImplTest extends TestBase {
 
         Sheet<String, String, Integer> sheet2 = parser.deserialize(json, Sheet.class);
         assertEquals(sheet, sheet2);
+        assertTrue(sheet2.isFrozen());
     }
 
     @Test
@@ -613,6 +615,7 @@ public class JsonParserImplTest extends TestBase {
 
         Sheet<String, Integer, Integer> sheet2 = parser.deserialize(json, Sheet.class);
         assertEquals(sheet, sheet2);
+        assertTrue(sheet2.isFrozen());
     }
 
     @Test
@@ -636,6 +639,29 @@ public class JsonParserImplTest extends TestBase {
         String json = parser.serialize(entityId);
         assertTrue(json.contains("TestId"));
         assertTrue(json.contains("\"id\": 123"));
+    }
+
+    @Test
+    public void testSerializeMapEntityWithNullValue() {
+        MapEntity entity = new MapEntity("TestEntity");
+        entity.set("prop1", "value1");
+        entity.set("prop2", null);
+
+        String json = parser.serialize(entity);
+        assertTrue(json.contains("TestEntity"));
+        assertTrue(json.contains("value1"));
+        assertTrue(json.contains("\"prop2\": null"), json);
+    }
+
+    @Test
+    public void testSerializeEntityIdWithNullValue() {
+        Seid entityId = Seid.of("TestId");
+        entityId.set("id", 123);
+        entityId.set("type", null);
+
+        String json = parser.serialize(entityId);
+        assertTrue(json.contains("TestId"));
+        assertTrue(json.contains("\"type\": null"), json);
     }
 
     @Test
@@ -1165,6 +1191,21 @@ public class JsonParserImplTest extends TestBase {
         Assertions.assertEquals(2, array.size());
         Assertions.assertTrue(array.get(0));
         Assertions.assertFalse(array.get(1));
+    }
+
+    @Test
+    public void testDeserialize_EmptyStreamingSources_ReturnEmptyArrayOrCollection() throws IOException {
+        assertArrayEquals(new Object[0], parser.deserialize(new StringReader(""), null, Object[].class));
+        Assertions.assertTrue(parser.deserialize(new StringReader(""), null, List.class).isEmpty());
+
+        assertArrayEquals(new Object[0], parser.deserialize(new ByteArrayInputStream(new byte[0]), null, Object[].class));
+        Assertions.assertTrue(parser.deserialize(new ByteArrayInputStream(new byte[0]), null, List.class).isEmpty());
+
+        File file = tempDir.resolve("empty.json").toFile();
+        Files.write(file.toPath(), new byte[0]);
+
+        assertArrayEquals(new Object[0], parser.deserialize(file, null, Object[].class));
+        Assertions.assertTrue(parser.deserialize(file, null, List.class).isEmpty());
     }
 
     @Test
@@ -1770,14 +1811,14 @@ public class JsonParserImplTest extends TestBase {
     }
 
     @Test
-    public void testSerialize_WriteDatasetByRow() {
+    public void testSerialize_WriteDatasetAsRows() {
         List<String> columnNames = Arrays.asList("col1", "col2");
         List<List<Object>> columnList = new ArrayList<>();
         columnList.add(Arrays.asList("a", "b"));
         columnList.add(Arrays.asList(1, 2));
 
         Dataset ds = N.newDataset(columnNames, columnList);
-        JsonSerConfig config = JsonSerConfig.create().setWriteDatasetByRow(true);
+        JsonSerConfig config = JsonSerConfig.create().setWriteDatasetAsRows(true);
 
         String json = parser.serialize(ds, config);
         assertNotNull(json);
@@ -1910,6 +1951,138 @@ public class JsonParserImplTest extends TestBase {
     public void testStream_UnsupportedNonArray_Throws() {
         // A bean-typed stream over object JSON: only Collection/Array JSON supported by stream methods.
         Assertions.assertThrows(Exception.class, () -> parser.stream("{\"a\":1}", null, Type.of(StringBuilder.class)).toList());
+    }
+
+    // --- regression tests for 2026-06-11 deep-review fixes ---
+
+    @Test
+    public void testStream_SingleScalarAndEmptyInnerArrays_NoSpuriousNulls() {
+        // regression: after an element consuming exactly one token ([1] or []), the stream
+        // iterator reused jr.lastToken() as its sentinel and injected spurious null elements
+        Assertions.assertEquals(java.util.List.of(java.util.List.of(1), java.util.List.of(2)),
+                parser.stream("[[1],[2]]", null, Type.of(java.util.List.class)).toList());
+        Assertions.assertEquals(java.util.List.of(java.util.List.of(), java.util.List.of(1)),
+                parser.stream("[[],[1]]", null, Type.of(java.util.List.class)).toList());
+    }
+
+    @Test
+    public void testReadNumber_17DigitDoubleRoundTripAndNegativeZero() {
+        // regression: the decimal fast path divided an inexact (double) long, mis-parsing ~15% of
+        // 17-significant-digit doubles by 1 ulp; "-0.0" lost its sign; bare "-" parsed as 0
+        final double d = 1913.4547307115454d;
+        Assertions.assertEquals(d, (Double) parser.deserialize(parser.serialize(java.util.List.of(d)), java.util.List.class).get(0));
+
+        final java.util.List<Object> nz = parser.deserialize("[-0.0]", java.util.List.class);
+        Assertions.assertEquals(Double.doubleToLongBits(-0.0d), Double.doubleToLongBits(((Number) nz.get(0)).doubleValue()));
+    }
+
+    @Test
+    public void testWriteDataset_ColumnNameWithQuoteIsEscaped() {
+        // regression: Dataset/Sheet/MapEntity/EntityId names were written unescaped -> invalid JSON
+        final com.landawn.abacus.util.Dataset ds = com.landawn.abacus.util.Dataset.rows(java.util.List.of("a\"b"), new Object[][] { { 1 }, { 2 } });
+        final String json = parser.serialize(ds);
+
+        Assertions.assertTrue(json.contains("\"a\\\"b\": [1, 2]"), json);
+        Assertions.assertEquals(ds, parser.deserialize(json, com.landawn.abacus.util.Dataset.class));
+    }
+
+    @Test
+    public void testReadDataset_EmptyRowsArePositionIndependent() {
+        // regression: a stale key from the previous row made empty {} rows throw position-dependently
+        final com.landawn.abacus.util.Dataset ds1 = parser.deserialize("[{\"a\":1},{}]", com.landawn.abacus.util.Dataset.class);
+        Assertions.assertEquals(2, ds1.size());
+
+        final com.landawn.abacus.util.Dataset ds2 = parser.deserialize("[{\"a\":1},{},{\"a\":2}]", com.landawn.abacus.util.Dataset.class);
+        Assertions.assertEquals(3, ds2.size());
+        Assertions.assertEquals(java.util.Arrays.asList(1, null, 2), ds2.getColumn("a"));
+    }
+
+    @Test
+    public void testParse_EmptySourceIntoCollectionIsNoOp() {
+        // regression: parse("", collection) fabricated a spurious "" element
+        final java.util.List<String> out = new java.util.ArrayList<>();
+        parser.parse("", null, out);
+        Assertions.assertTrue(out.isEmpty());
+    }
+
+    @Test
+    public void testCircularReference_WritesNullPlaceholder() {
+        // regression: the cycle skip emitted '"name": ' with no value -> malformed JSON
+        final java.util.Map<String, Object> m = new java.util.HashMap<>();
+        m.put("name", "x");
+        m.put("self", m);
+
+        final String json = parser.serialize(m, new JsonSerConfig().setSupportCircularReference(true));
+
+        Assertions.assertTrue(json.contains("null"), json);
+        Assertions.assertFalse(json.matches(".*:\\s*[,}].*"), json); // every name has a value
+    }
+
+    @Test
+    public void testSerializeArrayToOutputStream_bracketRootValueFalse() {
+        // regression: serializable arrays/collections with bracketRootValue=false were written to the
+        // BufferedJsonWriter's internal OutputStreamWriter but never flushed to the underlying
+        // OutputStream -> total silent data loss. The String overload (source of truth) always worked.
+        final JsonSerConfig config = new JsonSerConfig().setBracketRootValue(false);
+
+        final String[] strArray = { "a", "b" };
+        final String expectedStr = parser.serialize(strArray, config);
+        final ByteArrayOutputStream os1 = new ByteArrayOutputStream();
+        parser.serialize(strArray, config, os1);
+        assertEquals(expectedStr, new String(os1.toByteArray()));
+        assertTrue(os1.size() > 0);
+
+        final int[] intArray = { 1, 2, 3 };
+        final String expectedInt = parser.serialize(intArray, config);
+        final ByteArrayOutputStream os2 = new ByteArrayOutputStream();
+        parser.serialize(intArray, config, os2);
+        assertEquals(expectedInt, new String(os2.toByteArray()));
+        assertTrue(os2.size() > 0);
+    }
+
+    @Test
+    public void testSerialize_IOExceptionFromWriter() {
+        final Writer failingWriter = new Writer() {
+            @Override
+            public void write(final char[] cbuf, final int off, final int len) throws IOException {
+                throw new IOException("write failed");
+            }
+
+            @Override
+            public void flush() throws IOException {
+                throw new IOException("flush failed");
+            }
+
+            @Override
+            public void close() throws IOException {
+                throw new IOException("close failed");
+            }
+        };
+
+        final UncheckedIOException ex = Assertions.assertThrows(UncheckedIOException.class,
+                () -> parser.serialize(N.asMap("name", "json"), JsonSerConfig.create(), failingWriter));
+
+        Assertions.assertTrue(ex.getCause() instanceof IOException);
+    }
+
+    @Test
+    public void testDeserialize_IOExceptionFromReader() {
+        final Reader failingReader = new Reader() {
+            @Override
+            public int read(final char[] cbuf, final int off, final int len) throws IOException {
+                throw new IOException("read failed");
+            }
+
+            @Override
+            public void close() throws IOException {
+                throw new IOException("close failed");
+            }
+        };
+
+        final UncheckedIOException ex = Assertions.assertThrows(UncheckedIOException.class,
+                () -> parser.deserialize(failingReader, JsonDeserConfig.create(), Map.class));
+
+        Assertions.assertTrue(ex.getCause() instanceof IOException);
     }
 
 }

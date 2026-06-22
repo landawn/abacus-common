@@ -604,24 +604,27 @@ public final class HttpHeaders {
     }
 
     /**
-     * Creates a new {@code HttpHeaders} instance backed by the supplied map.
+     * Creates a new {@code HttpHeaders} instance backed by (wrapping) the supplied map.
      * The original map is used directly, not copied; subsequent modifications to either the map
      * or the returned {@code HttpHeaders} are visible to the other. Use {@link #copyOf(Map)} when
      * an independent snapshot is desired. Note that the supplied map must therefore be mutable
      * if you intend to call any setter or {@link #remove(String)} on the returned instance.
      *
+     * <p>This method is named {@code wrap} (rather than {@code of}) to signal that it shares the
+     * caller's map by reference; {@link #copyOf(Map)} is the defensive-copy counterpart.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Map<String, String> map = new HashMap<>();
      * map.put("Content-Type", "application/json");
-     * HttpHeaders headers = HttpHeaders.of(map);
+     * HttpHeaders headers = HttpHeaders.wrap(map);
      * }</pre>
      *
      * @param headers the map of header names to values
      * @return a new {@code HttpHeaders} instance backed by the provided map
      * @throws IllegalArgumentException if {@code headers} is {@code null}
      */
-    public static HttpHeaders of(final Map<String, ?> headers) throws IllegalArgumentException {
+    public static HttpHeaders wrap(final Map<String, ?> headers) throws IllegalArgumentException {
         N.checkArgNotNull(headers);
 
         return new HttpHeaders(headers);
@@ -630,7 +633,7 @@ public final class HttpHeaders {
     /**
      * Creates a new {@code HttpHeaders} instance with a copy of the provided headers map.
      * The headers are copied into a new map of the same type as the input.
-     * Unlike {@link #of(Map)}, this method creates a copy rather than using the original map.
+     * Unlike {@link #wrap(Map)}, this method creates a copy rather than using the original map.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1067,6 +1070,35 @@ public final class HttpHeaders {
     }
 
     /**
+     * Sets a header only if it is not already present, following {@link Map#putIfAbsent} semantics.
+     * The header is set when there is currently no mapping for the given name <i>or</i> when the name
+     * is explicitly mapped to {@code null}; in both cases such a name is treated as absent and the new
+     * value is stored. If the name is already mapped to a non-{@code null} value, this method does
+     * nothing and that existing value is preserved. This is convenient for supplying defaults (e.g. a
+     * default {@code User-Agent} or {@code Content-Type}) without overriding a caller-provided value.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * headers.setIfAbsent("User-Agent", "MyApp/1.0");   // set: no existing mapping
+     * headers.set("X-Trace", (Object) null);
+     * headers.setIfAbsent("X-Trace", "abc");            // set: previous value was null (treated as absent)
+     * headers.setIfAbsent("User-Agent", "Other/2.0");   // no-op: already mapped to a non-null value
+     * }</pre>
+     *
+     * @param name The header name
+     * @param value The header value (can be a {@code String}, {@code Collection}, {@code Date}, {@code Instant}, or any object)
+     * @return This HttpHeaders instance for method chaining
+     * @throws IllegalArgumentException if {@code name} is {@code null}
+     */
+    public HttpHeaders setIfAbsent(final String name, final Object value) {
+        N.checkArgNotNull(name, cs.name);
+
+        map.putIfAbsent(name, value);
+
+        return this;
+    }
+
+    /**
      * Sets all headers from the provided map.
      * Existing headers with the same names are replaced.
      *
@@ -1101,6 +1133,45 @@ public final class HttpHeaders {
      */
     public Object get(final String headerName) {
         return map.get(headerName);
+    }
+
+    /**
+     * Returns the value of a header coerced to its {@link String} form via {@link #valueOf(Object)}.
+     * Unlike {@link #get(String)} (which returns the raw stored value), this applies the same
+     * coercion used when writing the header to the wire: {@link Collection} values are joined with
+     * {@code ", "}, {@link Date}/{@link Instant} values are HTTP-date formatted, and a {@code null}
+     * (absent) header yields {@code null}.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * headers.set("Accept-Encoding", Arrays.asList("gzip", "deflate"));
+     * String value = headers.getFirst("Accept-Encoding");   // "gzip, deflate"
+     * }</pre>
+     *
+     * @param headerName The name of the header to retrieve
+     * @return The coerced header value, or {@code null} if the header is not present
+     */
+    public String getFirst(final String headerName) {
+        final Object value = map.get(headerName);
+
+        return value == null ? null : valueOf(value);
+    }
+
+    /**
+     * Checks whether a header with the given name is present.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * if (!headers.containsHeader("Content-Type")) {
+     *     headers.setContentType("application/json");
+     * }
+     * }</pre>
+     *
+     * @param headerName The header name to check
+     * @return {@code true} if a header with the given name is present; {@code false} otherwise
+     */
+    public boolean containsHeader(final String headerName) {
+        return map.containsKey(headerName);
     }
 
     /**

@@ -158,7 +158,7 @@ public class InputStreamType extends AbstractType<InputStream> {
             return null; // NOSONAR
         }
 
-        final byte[] bytes = str.getBytes(Charsets.DEFAULT);
+        final byte[] bytes = str.getBytes(Charsets.UTF_8);
 
         if (bytesConstructor != null) {
             //noinspection PrimitiveArrayArgumentToVarargsMethod

@@ -841,25 +841,13 @@ public class ParallelIteratorShortStreamTest extends TestBase {
     }
 
     @Test
-    public void testMaxThreadNum() throws IllegalAccessException, NoSuchFieldException {
-    }
-
-    @Test
     public void testSplitor_SequentialFallback() {
         assertEquals(Splitor.ITERATOR, ((ParallelIteratorShortStream) createShortStream(TEST_ARRAY)).splitor());
     }
 
     @Test
-    public void testSplitor() throws IllegalAccessException, NoSuchFieldException {
-    }
-
-    @Test
     public void testAsyncExecutor_SequentialFallback() {
         assertTrue(((ParallelIteratorShortStream) createShortStream(TEST_ARRAY)).asyncExecutor() != null);
-    }
-
-    @Test
-    public void testAsyncExecutor() throws IllegalAccessException, NoSuchFieldException {
     }
 
     @Test

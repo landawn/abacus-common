@@ -57,4 +57,18 @@ public interface ToCharFunction<T> extends Throwables.ToCharFunction<T, RuntimeE
      */
     @Override
     char applyAsChar(T value);
+
+    /**
+     * Returns this object as a {@link Throwables.ToCharFunction} view.
+     *
+     * <p>The returned object has the same behavior as this one. This method does not translate
+     * exceptions or make the original implementation capable of throwing new checked exceptions; the
+     * exception type parameter is for target-type compatibility with APIs that accept {@code Throwables.ToCharFunction}.
+     *
+     * @param <E> the target exception type for compatibility with {@code Throwables.ToCharFunction}
+     * @return a {@link Throwables.ToCharFunction} view of this object
+     */
+    default <E extends Throwable> Throwables.ToCharFunction<T, E> toThrowable() {
+        return (Throwables.ToCharFunction<T, E>) this;
+    }
 }

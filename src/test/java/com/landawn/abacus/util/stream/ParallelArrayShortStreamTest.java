@@ -1256,10 +1256,9 @@ public class ParallelArrayShortStreamTest extends TestBase {
     public void testOverflowScenarios() {
         parallelStream = createShortStream(new short[] { Short.MAX_VALUE, 1, 1 });
 
-        short[] result = parallelStream.map(s -> (short) (s * 2)).toArray();
-        assertEquals(-2, result[0]);
-        assertEquals(2, result[1]);
-        assertEquals(2, result[2]);
+        // parallel map() re-wraps into an iterator-based stream, so encounter order is not guaranteed
+        short[] result = parallelStream.map(s -> (short) (s * 2)).sorted().toArray();
+        assertArrayEquals(new short[] { -2, 2, 2 }, result);
     }
 
     @Test

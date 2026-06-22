@@ -25,6 +25,15 @@ import java.util.Map;
  * to the corresponding {@link Calendar} field constants. Each enum value has the same
  * integer value as its corresponding Calendar constant, ensuring compatibility.</p>
  *
+ * <p><b>Note on {@code SEMI_MONTH}:</b> this enum intentionally has no {@code SEMI_MONTH} constant.
+ * {@code SEMI_MONTH} ({@code Dates.SEMI_MONTH = 1001}) is an Apache-Commons-Lang-compatible extension
+ * that has no backing {@link Calendar} field constant, so it cannot satisfy this enum's invariant that
+ * every value mirrors a real {@code Calendar} field. To round/truncate/ceiling by the semi-month
+ * boundary, use the {@code int}-field overloads of {@link Dates#round(java.util.Date, int)},
+ * {@link Dates#truncate(java.util.Date, int)} and {@link Dates#ceiling(java.util.Date, int)} with
+ * {@code Dates.SEMI_MONTH}; the {@code CalendarField} overloads of those methods deliberately cover the
+ * standard fields only.</p>
+ *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * Calendar cal = Calendar.getInstance();

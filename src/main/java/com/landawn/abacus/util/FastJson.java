@@ -86,10 +86,10 @@ public final class FastJson {
      * <pre>{@code
      * Person person = new Person("John", 30);
      * String json = FastJson.toJson(person, true);
-     * // Result (pretty formatted):
+     * // Result (pretty formatted; FastJSON2 indents with tabs and puts no space after the colon):
      * // {
-     * //   "age": 30,
-     * //   "name": "John"
+     * //     "age":30,
+     * //     "name":"John"
      * // }
      * }</pre>
      *

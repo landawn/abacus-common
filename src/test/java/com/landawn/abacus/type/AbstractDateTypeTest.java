@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
 import java.io.IOException;
 import java.util.Date;
@@ -70,52 +71,64 @@ public class AbstractDateTypeTest extends TestBase {
 
     @Test
     public void testSerializeTo_ValidDate_NoConfig() throws IOException {
-        Date date = new Date();
-        type.serializeTo(characterWriter, date, null);
+        assertDoesNotThrow(() -> {
+            Date date = new Date();
+            type.serializeTo(characterWriter, date, null);
+        });
     }
 
     @Test
     public void testSerializeTo_ValidDate_WithQuotation() throws IOException {
-        Date date = new Date();
-        when(config.getStringQuotation()).thenReturn('"');
-        when(config.getDateTimeFormat()).thenReturn(null);
+        assertDoesNotThrow(() -> {
+            Date date = new Date();
+            when(config.getStringQuotation()).thenReturn('"');
+            when(config.getDateTimeFormat()).thenReturn(null);
 
-        type.serializeTo(characterWriter, date, config);
+            type.serializeTo(characterWriter, date, config);
+        });
     }
 
     @Test
     public void testSerializeTo_ValidDate_ISO8601DateTime() throws IOException {
-        Date date = new Date();
-        when(config.getDateTimeFormat()).thenReturn(DateTimeFormat.ISO_8601_DATE_TIME);
-        when(config.getStringQuotation()).thenReturn((char) 0);
+        assertDoesNotThrow(() -> {
+            Date date = new Date();
+            when(config.getDateTimeFormat()).thenReturn(DateTimeFormat.ISO_8601_DATE_TIME);
+            when(config.getStringQuotation()).thenReturn((char) 0);
 
-        type.serializeTo(characterWriter, date, config);
+            type.serializeTo(characterWriter, date, config);
+        });
     }
 
     @Test
     public void testSerializeTo_ValidDate_ISO8601Timestamp() throws IOException {
-        Date date = new Date();
-        when(config.getDateTimeFormat()).thenReturn(DateTimeFormat.ISO_8601_TIMESTAMP);
-        when(config.getStringQuotation()).thenReturn((char) 0);
+        assertDoesNotThrow(() -> {
+            Date date = new Date();
+            when(config.getDateTimeFormat()).thenReturn(DateTimeFormat.ISO_8601_TIMESTAMP);
+            when(config.getStringQuotation()).thenReturn((char) 0);
 
-        type.serializeTo(characterWriter, date, config);
+            type.serializeTo(characterWriter, date, config);
+        });
     }
 
     @Test
     public void testSerializeTo_ValidDate_QuotationWithLongFormat() throws IOException {
-        Date date = new Date();
-        when(config.getDateTimeFormat()).thenReturn(DateTimeFormat.LONG);
-        when(config.getStringQuotation()).thenReturn('"');
+        assertDoesNotThrow(() -> {
+            Date date = new Date();
+            when(config.getDateTimeFormat()).thenReturn(DateTimeFormat.LONG);
+            when(config.getStringQuotation()).thenReturn('"');
 
-        type.serializeTo(characterWriter, date, config);
+            type.serializeTo(characterWriter, date, config);
+        });
     }
 
     @Test
     public void testSerializeTo_ValidDate_WithQuotationAndISO8601() throws IOException {
-        Date date = new Date();
-        when(config.getDateTimeFormat()).thenReturn(DateTimeFormat.ISO_8601_DATE_TIME);
-        when(config.getStringQuotation()).thenReturn('\'');
+        assertDoesNotThrow(() -> {
+            Date date = new Date();
+            when(config.getDateTimeFormat()).thenReturn(DateTimeFormat.ISO_8601_DATE_TIME);
+            when(config.getStringQuotation()).thenReturn('\'');
 
-        type.serializeTo(characterWriter, date, config);
+            type.serializeTo(characterWriter, date, config);
+        });
     }
 }

@@ -41,7 +41,7 @@ public interface ToDoubleBiFunction<T, U> extends Throwables.ToDoubleBiFunction<
      * double result1 = lengthMultiplier.applyAsDouble("Hello", 2);   // returns 10.0
      *
      * ToDoubleBiFunction<Integer, Integer> divider = (a, b) -> (double) a / b;
-     * double result2 = divider.applyAsDouble(10, 3);   // returns 3.333...
+     * double result2 = divider.applyAsDouble(10, 2);   // returns 5.0
      *
      * ToDoubleBiFunction<Double, Double> average = (a, b) -> (a + b) / 2.0;
      * double result3 = average.applyAsDouble(5.0, 15.0);   // returns 10.0
@@ -53,4 +53,18 @@ public interface ToDoubleBiFunction<T, U> extends Throwables.ToDoubleBiFunction<
      */
     @Override
     double applyAsDouble(T t, U u);
+
+    /**
+     * Returns this object as a {@link Throwables.ToDoubleBiFunction} view.
+     *
+     * <p>The returned object has the same behavior as this one. This method does not translate
+     * exceptions or make the original implementation capable of throwing new checked exceptions; the
+     * exception type parameter is for target-type compatibility with APIs that accept {@code Throwables.ToDoubleBiFunction}.
+     *
+     * @param <E> the target exception type for compatibility with {@code Throwables.ToDoubleBiFunction}
+     * @return a {@link Throwables.ToDoubleBiFunction} view of this object
+     */
+    default <E extends Throwable> Throwables.ToDoubleBiFunction<T, U, E> toThrowable() {
+        return (Throwables.ToDoubleBiFunction<T, U, E>) this;
+    }
 }

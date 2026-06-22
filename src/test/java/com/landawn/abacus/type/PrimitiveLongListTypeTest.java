@@ -29,6 +29,15 @@ public class PrimitiveLongListTypeTest extends TestBase {
     }
 
     @Test
+    public void testGetElementTypeReturnTypeNarrowed() {
+        // elementType() is covariantly narrowed to Type<Long> (consistent with the other primitive list types).
+        final Type<Long> elementType = type.elementType();
+        assertNotNull(elementType);
+        assertEquals("long", elementType.name());
+        assertEquals(long.class, elementType.javaType());
+    }
+
+    @Test
     public void testStringOfEmptyList() {
         LongList list = LongList.of(new long[0]);
         assertEquals("[]", type.stringOf(list));

@@ -49,6 +49,16 @@ public class BiIteratorTest extends TestBase {
     }
 
     @Test
+    public void testEmptyRejectsNullTypedActions() {
+        BiIterator<String, Integer> iter = BiIterator.empty();
+
+        assertThrows(IllegalArgumentException.class,
+                () -> iter.forEachRemaining((com.landawn.abacus.util.function.BiConsumer<? super String, ? super Integer>) null));
+        assertThrows(IllegalArgumentException.class,
+                () -> iter.foreachRemaining((Throwables.BiConsumer<? super String, ? super Integer, RuntimeException>) null));
+    }
+
+    @Test
     @DisplayName("Test empty iterator operations chaining")
     public void testEmptyChaining() {
         BiIterator<String, Integer> result = BiIterator.<String, Integer> empty().skip(10).limit(5).filter((a, b) -> true);
@@ -1129,6 +1139,21 @@ public class BiIteratorTest extends TestBase {
         assertEquals(35, nameAgeMap.get("Charlie"));
     }
 
+    @Test
+    public void testUnzipIterableWithSeparateSuppliers() {
+        List<String> list = Arrays.asList("a=1", "b=2", "a=3");
+
+        Pair<LinkedHashSet<String>, ArrayList<Integer>> result = BiIterator.unzip(list, (str, pair) -> {
+            String[] parts = str.split("=");
+            pair.set(parts[0], Integer.parseInt(parts[1]));
+        }, LinkedHashSet::new, ArrayList::new);
+
+        assertTrue(result.left() instanceof LinkedHashSet);
+        assertTrue(result.right() instanceof ArrayList);
+        assertEquals(new LinkedHashSet<>(Arrays.asList("a", "b")), result.left());
+        assertEquals(Arrays.asList(1, 2, 3), result.right());
+    }
+
     // =====================================================================
     // unzip(Iterator, BiConsumer)
     // =====================================================================
@@ -1155,6 +1180,21 @@ public class BiIteratorTest extends TestBase {
     }
 
     @Test
+    public void testUnzipIteratorWithSeparateSuppliers() {
+        Iterator<String> iterator = Arrays.asList("a=1", "b=2", "a=3").iterator();
+
+        Pair<LinkedHashSet<String>, ArrayList<Integer>> result = BiIterator.unzip(iterator, (str, pair) -> {
+            String[] parts = str.split("=");
+            pair.set(parts[0], Integer.parseInt(parts[1]));
+        }, LinkedHashSet::new, ArrayList::new);
+
+        assertTrue(result.left() instanceof LinkedHashSet);
+        assertTrue(result.right() instanceof ArrayList);
+        assertEquals(new LinkedHashSet<>(Arrays.asList("a", "b")), result.left());
+        assertEquals(Arrays.asList(1, 2, 3), result.right());
+    }
+
+    @Test
     public void testUnzipIterable_null() {
         BiIterator<String, Integer> iter = BiIterator.unzip((Iterable<String>) null, (s, pair) -> {
         });
@@ -1162,10 +1202,24 @@ public class BiIteratorTest extends TestBase {
     }
 
     @Test
+    public void testUnzipIterable_nullFunction() {
+        assertThrows(IllegalArgumentException.class, () -> BiIterator.unzip(Arrays.asList("a"), null));
+        // The unzip function is validated even when the iterable is null.
+        assertThrows(IllegalArgumentException.class, () -> BiIterator.unzip((Iterable<String>) null, null));
+    }
+
+    @Test
     public void testUnzipIterator_null() {
         BiIterator<String, Integer> iter = BiIterator.unzip((Iterator<String>) null, (s, pair) -> {
         });
         assertFalse(iter.hasNext());
+    }
+
+    @Test
+    public void testUnzipIterator_nullFunction() {
+        assertThrows(IllegalArgumentException.class, () -> BiIterator.unzip(Arrays.asList("a").iterator(), null));
+        // The unzip function is validated even when the iterator is null.
+        assertThrows(IllegalArgumentException.class, () -> BiIterator.unzip((Iterator<String>) null, null));
     }
 
     @Test
@@ -1815,30 +1869,30 @@ public class BiIteratorTest extends TestBase {
     }
 
     // =====================================================================
-    // toMultiList(Supplier)
+    // unzipToLists(Supplier)
     // =====================================================================
 
     @Test
-    public void testToMultiList() {
+    public void testUnzipToLists() {
         Map<String, Integer> map = new LinkedHashMap<>();
         map.put("a", 1);
         map.put("b", 2);
         map.put("c", 3);
 
         BiIterator<String, Integer> iter = BiIterator.of(map);
-        Pair<List<String>, List<Integer>> multiList = iter.toMultiList(ArrayList::new);
+        Pair<List<String>, List<Integer>> multiList = iter.unzipToLists(ArrayList::new);
 
         Assertions.assertEquals(Arrays.asList("a", "b", "c"), multiList.left());
         Assertions.assertEquals(Arrays.asList(1, 2, 3), multiList.right());
     }
 
     @Test
-    @DisplayName("Test toMultiList with custom list implementations")
-    public void testToMultiListCustomImpl() {
+    @DisplayName("Test unzipToLists with custom list implementations")
+    public void testUnzipToListsCustomImpl() {
         String[] arr1 = { "a", "b", "c" };
         Integer[] arr2 = { 1, 2, 3 };
 
-        Pair<List<String>, List<Integer>> result = BiIterator.zip(arr1, arr2).toMultiList(LinkedList::new);
+        Pair<List<String>, List<Integer>> result = BiIterator.zip(arr1, arr2).unzipToLists(LinkedList::new);
 
         assertTrue(result.left() instanceof LinkedList);
         assertTrue(result.right() instanceof LinkedList);
@@ -1847,27 +1901,27 @@ public class BiIteratorTest extends TestBase {
     }
 
     @Test
-    public void testToMultiList_empty() {
+    public void testUnzipToLists_empty() {
         BiIterator<String, Integer> iter = BiIterator.empty();
-        Pair<List<String>, List<Integer>> multiList = iter.toMultiList(LinkedList::new);
+        Pair<List<String>, List<Integer>> multiList = iter.unzipToLists(LinkedList::new);
 
         Assertions.assertTrue(multiList.left().isEmpty());
         Assertions.assertTrue(multiList.right().isEmpty());
     }
 
     // =====================================================================
-    // toMultiSet(Supplier)
+    // unzipToSets(Supplier)
     // =====================================================================
 
     @Test
-    public void testToMultiSet() {
+    public void testUnzipToSets() {
         Map<String, Integer> map = new LinkedHashMap<>();
         map.put("a", 1);
         map.put("b", 2);
         map.put("a", 3);
 
         BiIterator<String, Integer> iter = BiIterator.of(map);
-        Pair<Set<String>, Set<Integer>> multiSet = iter.toMultiSet(HashSet::new);
+        Pair<Set<String>, Set<Integer>> multiSet = iter.unzipToSets(HashSet::new);
 
         Assertions.assertEquals(2, multiSet.left().size());
         Assertions.assertTrue(multiSet.left().contains("a"));
@@ -1877,14 +1931,14 @@ public class BiIteratorTest extends TestBase {
     }
 
     @Test
-    public void testToMultiSetLinkedHashSet() {
+    public void testUnzipToSetsLinkedHashSet() {
         Map<String, Integer> map = new LinkedHashMap<>();
         map.put("x", 10);
         map.put("y", 20);
         map.put("z", 30);
 
         BiIterator<String, Integer> iter = BiIterator.of(map);
-        Pair<Set<String>, Set<Integer>> multiSet = iter.toMultiSet(LinkedHashSet::new);
+        Pair<Set<String>, Set<Integer>> multiSet = iter.unzipToSets(LinkedHashSet::new);
 
         Iterator<String> keyIter = multiSet.left().iterator();
         Assertions.assertEquals("x", keyIter.next());
@@ -1898,12 +1952,12 @@ public class BiIteratorTest extends TestBase {
     }
 
     @Test
-    @DisplayName("Test toMultiSet with duplicates")
-    public void testToMultiSetDuplicates() {
+    @DisplayName("Test unzipToSets with duplicates")
+    public void testUnzipToSetsDuplicates() {
         String[] arr1 = { "a", "b", "a", "c", "b" };
         Integer[] arr2 = { 1, 2, 1, 3, 2 };
 
-        Pair<Set<String>, Set<Integer>> result = BiIterator.zip(arr1, arr2).toMultiSet(TreeSet::new);
+        Pair<Set<String>, Set<Integer>> result = BiIterator.zip(arr1, arr2).unzipToSets(TreeSet::new);
 
         assertTrue(result.left() instanceof TreeSet);
         assertTrue(result.right() instanceof TreeSet);
@@ -1915,9 +1969,9 @@ public class BiIteratorTest extends TestBase {
     }
 
     @Test
-    public void testToMultiSet_empty() {
+    public void testUnzipToSets_empty() {
         BiIterator<String, Integer> iter = BiIterator.empty();
-        Pair<Set<String>, Set<Integer>> sets = iter.toMultiSet(HashSet::new);
+        Pair<Set<String>, Set<Integer>> sets = iter.unzipToSets(HashSet::new);
 
         assertTrue(sets.left().isEmpty());
         assertTrue(sets.right().isEmpty());

@@ -916,7 +916,7 @@ public interface NoCachingNoUpdating {
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * DisposableCharArray arr = DisposableCharArray.create(5);    // array has length 5, all '\\0'
+         * DisposableCharArray arr = DisposableCharArray.create(5);    // array has length 5, all '\0'
          * DisposableCharArray.create(0);                              // creates an empty array
          * DisposableCharArray.create(-1);                             // throws IllegalArgumentException
          * DisposableCharArray.create(1);                              // array has length 1
@@ -1085,7 +1085,7 @@ public interface NoCachingNoUpdating {
          * arr.sum();                                                   // returns 294 (97 + 98 + 99)
          * DisposableCharArray.wrap(new char[0]).sum();                 // returns 0
          * DisposableCharArray.wrap(new char[] {'A'}).sum();            // returns 65
-         * DisposableCharArray.wrap(new char[] {'\\0', '\\0'}).sum();   // returns 0
+         * DisposableCharArray.wrap(new char[] {'\0', '\0'}).sum();     // returns 0
          * }</pre>
          *
          * @return the sum of all elements
@@ -2221,6 +2221,15 @@ public interface NoCachingNoUpdating {
 
         /**
          * Converts the int array to an Integer object array.
+         *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * DisposableIntArray arr = DisposableIntArray.wrap(new int[] {1, 2, 3});
+         * arr.box();                                        // returns [Integer.valueOf(1), Integer.valueOf(2), Integer.valueOf(3)]
+         * DisposableIntArray.wrap(new int[0]).box();        // returns empty Integer[]
+         * DisposableIntArray.wrap(new int[] {99}).box();    // returns [Integer.valueOf(99)]
+         * arr.box().length;                                 // returns 3
+         * }</pre>
          *
          * @return a new Integer array containing boxed values
          */

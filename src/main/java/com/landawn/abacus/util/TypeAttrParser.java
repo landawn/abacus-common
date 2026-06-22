@@ -162,6 +162,7 @@ public final class TypeAttrParser {
      * @param attr the type attribute string to parse
      * @return a {@code TypeAttrParser} instance containing the parsed components; the returned
      *         instance never has {@code null} type-parameter or constructor-parameter arrays
+     * @throws IllegalArgumentException if generic angle brackets are missing, unbalanced, or otherwise malformed
      * @throws NullPointerException if {@code attr} is {@code null}
      * @throws StringIndexOutOfBoundsException if the string is malformed, for example an opening
      *         parenthesis with no matching closing parenthesis
@@ -178,6 +179,10 @@ public final class TypeAttrParser {
         if (beginIndex >= 0) {
             final int endIndex = attr.lastIndexOf('>');
 
+            if (endIndex <= beginIndex) {
+                throw new IllegalArgumentException("Malformed type attribute: missing closing '>' in: " + attr);
+            }
+
             className = attr.substring(0, beginIndex).trim();
             final List<String> typeParameterList = new ArrayList<>();
 
@@ -192,8 +197,12 @@ public final class TypeAttrParser {
                     continue;
                 }
 
-                if ((bracketNum > 0) && (ch == '>')) {
-                    bracketNum--;
+                if (ch == '>') {
+                    if (bracketNum > 0) {
+                        bracketNum--;
+                    } else {
+                        throw new IllegalArgumentException("Malformed type attribute: unexpected closing '>' in: " + attr);
+                    }
                 }
 
                 if (bracketNum == 0 && (ch == ',' || idx == endIndex - 1)) {
@@ -203,20 +212,34 @@ public final class TypeAttrParser {
                 }
             }
 
+            if (bracketNum != 0) {
+                throw new IllegalArgumentException("Malformed type attribute: unbalanced generic brackets in: " + attr);
+            }
+
             typeParameters = typeParameterList.toArray(new String[0]);
 
             beginIndex = endIndex;
         }
 
+        int endIndex = beginIndex;
         beginIndex = attr.indexOf(_PARENTHESIS_L, N.max(0, beginIndex));
 
         if (beginIndex >= 0) {
+            if (className != null && endIndex >= 0 && N.notEmpty(attr.substring(endIndex + 1, beginIndex).trim())) {
+                throw new IllegalArgumentException("Malformed type attribute: unexpected trailing text in: " + attr);
+            }
+
             if (className == null) {
                 className = attr.substring(0, beginIndex).trim();
             }
 
-            final String str = attr.substring(beginIndex + 1, attr.lastIndexOf(_PARENTHESIS_R)).trim();
+            endIndex = attr.lastIndexOf(_PARENTHESIS_R);
+            final String str = attr.substring(beginIndex + 1, endIndex).trim();
             parameters = str.isEmpty() ? N.EMPTY_STRING_ARRAY : (COMMA.equals(str) ? new String[] { COMMA } : CsvUtil.CSV_HEADER_PARSER.apply(str));
+        }
+
+        if (endIndex >= 0 && N.notEmpty(attr.substring(endIndex + 1).trim())) {
+            throw new IllegalArgumentException("Malformed type attribute: unexpected trailing text in: " + attr);
         }
 
         if (className == null) {
@@ -325,8 +348,8 @@ public final class TypeAttrParser {
      * Reflectively creates a new instance described by the type attribute plus explicit constructor arguments.
      * The attr string may include generic type parameters. Explicit args are passed as pairs of Class and Object.
      * These pairs are prepended to parsed type parameters and constructor parameters (all treated as String)
-     * to build a candidate constructor signature. If no exact match exists and there are multiple constructor
-     * parameters from attr, a fallback tries replacing those parameters with a single String[] parameter.
+     * to build a candidate constructor signature. If no exact match exists and {@code attr} contains any
+     * constructor parameters, a fallback tries replacing those parameters with a single {@code String[]} parameter.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code

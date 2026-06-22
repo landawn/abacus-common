@@ -33,6 +33,19 @@ public class ObjIntPredicateTest extends TestBase {
     }
 
     @Test
+    public void testAndOrAcceptSuperTypePredicate() {
+        ObjIntPredicate<String> notEmpty = (s, value) -> s != null && !s.isEmpty();
+        ObjIntPredicate<CharSequence> longerThan = (s, value) -> s != null && s.length() > value;
+
+        ObjIntPredicate<String> and = notEmpty.and(longerThan);
+        ObjIntPredicate<String> or = notEmpty.or(longerThan);
+
+        assertTrue(and.test("hello", 3));
+        assertFalse(and.test("hi", 5));
+        assertTrue(or.test("hi", 5));
+    }
+
+    @Test
     public void testOr() {
         ObjIntPredicate<String> p1 = (t, u) -> t.length() > 10;
         ObjIntPredicate<String> p2 = (t, u) -> u > 10;
@@ -48,6 +61,6 @@ public class ObjIntPredicateTest extends TestBase {
     @Test
     public void testAndNullThrowsImmediately() {
         ObjIntPredicate<String> instance = (a, b) -> false;
-        org.junit.jupiter.api.Assertions.assertThrows(NullPointerException.class, () -> instance.and((ObjIntPredicate) null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> instance.and((ObjIntPredicate) null));
     }
 }

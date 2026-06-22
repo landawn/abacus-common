@@ -41,13 +41,13 @@ import com.landawn.abacus.logging.LoggerFactory;
  * String data = retry2.call(() -> fetchDataFromServer());
  * }</pre>
  *
- * @param <T> the type of the result returned by the operation to be retried;
+ * @param <R> the type of the result returned by the operation to be retried;
  *            use {@code Void} for operations that do not return a value
  * @see Predicate
  * @see BiPredicate
  */
 @SuppressWarnings("java:S1192")
-public final class Retry<T> {
+public final class Retry<R> {
 
     private static final Logger logger = LoggerFactory.getLogger(Retry.class);
 
@@ -57,10 +57,10 @@ public final class Retry<T> {
 
     private final Predicate<? super Exception> retryCondition;
 
-    private final BiPredicate<? super T, ? super Exception> retryCondition2;
+    private final BiPredicate<? super R, ? super Exception> retryCondition2;
 
     Retry(final int retryTimes, final long retryIntervalInMillis, final Predicate<? super Exception> retryCondition,
-            final BiPredicate<? super T, ? super Exception> retryCondition2) {
+            final BiPredicate<? super R, ? super Exception> retryCondition2) {
 
         this.retryTimes = retryTimes;
         this.retryIntervalInMillis = retryIntervalInMillis;
@@ -171,12 +171,12 @@ public final class Retry<T> {
      *                   or the last exception thrown if all retry attempts are exhausted.
      */
     public void run(final Throwables.Runnable<? extends Exception> cmd) throws Exception {
+        N.checkArgNotNull(cmd, "cmd");
+
         if (retryTimes > 0) {
             try {
                 cmd.run();
             } catch (final Exception e) {
-                logger.error("Failed to run", e);
-
                 int retriedTimes = 0;
                 Exception ex = e;
 
@@ -190,13 +190,11 @@ public final class Retry<T> {
                             N.sleepUninterruptibly(retryIntervalInMillis);
                         }
 
-                        logger.info("Start " + retriedTimes + " retry");
+                        logger.debug("Starting retry attempt {} of {}", retriedTimes, retryTimes);
 
                         cmd.run();
                         return;
                     } catch (final Exception e2) {
-                        logger.error("Retried: " + retriedTimes, e2);
-
                         ex = e2;
                     }
                 }
@@ -229,8 +227,9 @@ public final class Retry<T> {
      * <p>After all retries are exhausted:</p>
      * <ul>
      *   <li>If the last attempt threw an exception, that exception is rethrown.</li>
-     *   <li>If the last attempt returned a result that still satisfies {@code retryCondition2},
-     *       a {@link RuntimeException} is thrown describing the persistent failure.</li>
+     *   <li>If no attempt threw and the last attempt returned a result that still satisfies
+     *       {@code retryCondition2}, a {@link RuntimeException} is thrown describing the persistent
+     *       failure. If any attempt threw, the most recently caught exception is rethrown instead.</li>
      * </ul>
      *
      * <p>If {@code retryTimes} is 0, the operation is executed exactly once without any retries.</p>
@@ -245,15 +244,17 @@ public final class Retry<T> {
      *
      * @param callable the callable operation to execute; must not be {@code null}.
      * @return the result of the first invocation whose outcome does not satisfy the retry condition.
-     * @throws RuntimeException if all retry attempts are exhausted and the final invocation returned
-     *                          a result that still satisfies {@code retryCondition2}.
+     * @throws RuntimeException if all retry attempts are exhausted, no attempt threw an exception,
+     *                          and the final invocation returned a result that still satisfies {@code retryCondition2}.
      * @throws Exception the exception thrown by {@code callable} if the retry condition is not
      *                   satisfied, or the last exception thrown if all retry attempts are exhausted.
      */
     @SuppressFBWarnings("RCN_REDUNDANT_NULLCHECK_OF_NONNULL_VALUE")
-    public T call(final java.util.concurrent.Callable<T> callable) throws Exception {
+    public R call(final java.util.concurrent.Callable<? extends R> callable) throws Exception {
+        N.checkArgNotNull(callable, "callable");
+
         if (retryTimes > 0) {
-            T result = null;
+            R result = null;
             int retriedTimes = 0;
 
             try {
@@ -270,7 +271,7 @@ public final class Retry<T> {
                         N.sleepUninterruptibly(retryIntervalInMillis);
                     }
 
-                    logger.info("Start " + retriedTimes + " retry");
+                    logger.debug("Starting retry attempt {} of {}", retriedTimes, retryTimes);
 
                     result = callable.call();
 
@@ -280,8 +281,6 @@ public final class Retry<T> {
                     }
                 }
             } catch (final Exception e) {
-                logger.error("Failed to call", e);
-
                 Exception ex = e;
 
                 if (!((retryCondition != null && retryCondition.test(ex)) || (retryCondition2 != null && retryCondition2.test(null, ex)))) {
@@ -296,7 +295,7 @@ public final class Retry<T> {
                             N.sleepUninterruptibly(retryIntervalInMillis);
                         }
 
-                        logger.info("Start " + retriedTimes + " retry");
+                        logger.debug("Starting retry attempt {} of {}", retriedTimes, retryTimes);
 
                         result = callable.call();
 
@@ -304,8 +303,6 @@ public final class Retry<T> {
                             return result;
                         }
                     } catch (final Exception e2) {
-                        logger.error("Retried: " + retriedTimes, e2);
-
                         ex = e2;
 
                         if (!((retryCondition != null && retryCondition.test(ex)) || (retryCondition2 != null && retryCondition2.test(null, ex)))) {

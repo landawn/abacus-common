@@ -64,6 +64,13 @@ import com.landawn.abacus.util.EnumType;
  * }
  * }</pre>
  *
+ * <p><b>Placement:</b> {@code @Type} may be declared on a field or on a property accessor method
+ * (a getter or setter). The framework's reflection layer ({@code com.landawn.abacus.parser.ParserUtil})
+ * merges the annotations found on a property's field, getter, and setter into a single view, so a
+ * getter/setter-level {@code @Type} is honored exactly like a field-level one. This is why
+ * {@link java.lang.annotation.ElementType#METHOD} is included in {@code @Target} (unlike the
+ * field-only ORM markers such as {@link Column}).</p>
+ *
  * @see JsonXmlField
  * @see Column
  */

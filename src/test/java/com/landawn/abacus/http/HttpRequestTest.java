@@ -290,7 +290,7 @@ public class HttpRequestTest extends TestBase {
     public void testHeadersWithHttpHeaders() {
         HttpRequest request = HttpRequest.url(baseUrl);
         HttpHeaders headers = HttpHeaders.create().set("Header1", "value1").set("Header2", "value2");
-        assertSame(request, request.headers(headers));
+        assertSame(request, request.setHeaders(headers));
     }
 
     @Test
@@ -564,6 +564,47 @@ public class HttpRequestTest extends TestBase {
         HttpRequest request = HttpRequest.url(baseUrl);
         HttpResponse response = request.head();
         assertNotNull(response);
+    }
+
+    // M10: head(Class)/asyncHead(Class) are now public.
+
+    @Test
+    public void testHeadWithResultClassPublic() throws IOException {
+        server.enqueue(new MockResponse());
+        HttpRequest request = HttpRequest.url(baseUrl);
+        HttpResponse response = request.head(HttpResponse.class);
+        assertNotNull(response);
+    }
+
+    @Test
+    public void testAsyncHeadWithResultClassPublic() throws Exception {
+        server.enqueue(new MockResponse());
+        HttpRequest request = HttpRequest.url(baseUrl);
+        ContinuableFuture<HttpResponse> future = request.asyncHead(HttpResponse.class);
+        assertNotNull(future.get());
+    }
+
+    // M9: patch()/asyncPatch() convenience methods. PATCH is rejected by HttpURLConnection at the JDK
+    // level, so these tests assert the body-validation routing rather than a real round-trip.
+
+    @Test
+    public void testPatchRoutesAsPatch() {
+        // patch() permits a body (like POST/PUT), unlike GET/DELETE — verify it routes to PATCH by
+        // confirming a query(...) misuse is rejected the same way execute(HttpMethod.PATCH) would be.
+        HttpRequest request = HttpRequest.url(baseUrl).query("a=b");
+        assertThrows(IllegalStateException.class, request::patch);
+        assertThrows(IllegalStateException.class, () -> request.patch(String.class));
+    }
+
+    @Test
+    public void testAsyncPatchMethodsExist() {
+        // Smoke-test that all four asyncPatch overloads are public and return a future.
+        Executor executor = Executors.newSingleThreadExecutor();
+        HttpRequest request = HttpRequest.url(baseUrl);
+        assertNotNull(request.asyncPatch());
+        assertNotNull(request.asyncPatch(executor));
+        assertNotNull(request.asyncPatch(String.class));
+        assertNotNull(request.asyncPatch(String.class, executor));
     }
 
     @Test

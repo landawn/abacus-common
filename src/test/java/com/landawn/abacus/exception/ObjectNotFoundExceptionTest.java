@@ -48,9 +48,9 @@ public class ObjectNotFoundExceptionTest extends TestBase {
     }
 
     @Test
-    public void testIsInstanceOfIllegalStateException() {
+    public void testIsInstanceOfNoSuchElementException() {
         ObjectNotFoundException exception = new ObjectNotFoundException();
-        assertTrue(exception instanceof IllegalStateException);
+        assertTrue(exception instanceof java.util.NoSuchElementException);
     }
 
     @Test

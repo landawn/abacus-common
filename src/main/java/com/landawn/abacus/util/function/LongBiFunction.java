@@ -13,9 +13,9 @@
  */
 package com.landawn.abacus.util.function;
 
-import java.util.Objects;
-
 import com.landawn.abacus.util.Throwables;
+import com.landawn.abacus.util.N;
+import com.landawn.abacus.util.cs;
 
 /**
  * Represents a function that accepts two {@code long}-valued arguments and produces
@@ -71,7 +71,7 @@ public interface LongBiFunction<R> extends Throwables.LongBiFunction<R, RuntimeE
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * LongBiFunction<Long> difference = (a, b) -> Math.abs(a - b);
+     * LongBiFunction<Long> difference = (a, b) -> Math.absExact(Math.subtractExact(a, b));
      * LongBiFunction<String> differenceAsString = difference.andThen(String::valueOf);
      * String result = differenceAsString.apply(100L, 75L);   // "25"
      * }</pre>
@@ -82,10 +82,24 @@ public interface LongBiFunction<R> extends Throwables.LongBiFunction<R, RuntimeE
      *              Must not be {@code null}.
      * @return a composed function that first applies this function and then
      *         applies the {@code after} function
-     * @throws NullPointerException if {@code after} is null
+     * @throws IllegalArgumentException if {@code after} is null
      */
     default <V> LongBiFunction<V> andThen(final java.util.function.Function<? super R, ? extends V> after) {
-        Objects.requireNonNull(after);
+        N.checkArgNotNull(after, cs.after);
         return (a, b) -> after.apply(apply(a, b));
+    }
+
+    /**
+     * Returns this object as a {@link Throwables.LongBiFunction} view.
+     *
+     * <p>The returned object has the same behavior as this one. This method does not translate
+     * exceptions or make the original implementation capable of throwing new checked exceptions; the
+     * exception type parameter is for target-type compatibility with APIs that accept {@code Throwables.LongBiFunction}.
+     *
+     * @param <E> the target exception type for compatibility with {@code Throwables.LongBiFunction}
+     * @return a {@link Throwables.LongBiFunction} view of this object
+     */
+    default <E extends Throwable> Throwables.LongBiFunction<R, E> toThrowable() {
+        return (Throwables.LongBiFunction<R, E>) this;
     }
 }

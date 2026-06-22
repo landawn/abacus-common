@@ -48,4 +48,18 @@ public interface IntTernaryOperator extends Throwables.IntTernaryOperator<Runtim
      */
     @Override
     int applyAsInt(int a, int b, int c);
+
+    /**
+     * Returns this object as a {@link Throwables.IntTernaryOperator} view.
+     *
+     * <p>The returned object has the same behavior as this one. This method does not translate
+     * exceptions or make the original implementation capable of throwing new checked exceptions; the
+     * exception type parameter is for target-type compatibility with APIs that accept {@code Throwables.IntTernaryOperator}.
+     *
+     * @param <E> the target exception type for compatibility with {@code Throwables.IntTernaryOperator}
+     * @return a {@link Throwables.IntTernaryOperator} view of this object
+     */
+    default <E extends Throwable> Throwables.IntTernaryOperator<E> toThrowable() {
+        return (Throwables.IntTernaryOperator<E>) this;
+    }
 }

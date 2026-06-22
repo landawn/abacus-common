@@ -20,6 +20,8 @@ import java.util.AbstractSet;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.SortedMap;
+import java.util.TreeMap;
 import java.util.function.Supplier;
 
 import com.landawn.abacus.annotation.Internal;
@@ -108,7 +110,7 @@ import com.landawn.abacus.annotation.Internal;
  * <p><b>Factory Methods:</b>
  * <ul>
  *   <li>{@link #of(Object, Object)} - Single key-value pair</li>
- *   <li>{@link #of(Object, Object, Object, Object)} - Two pairs (up to 10 pairs)</li>
+ *   <li>{@link #of(Object, Object, Object, Object)} - Two key-value pairs (additional arity-overloads accept up to 10 pairs)</li>
  *   <li>{@link #copyOf(Map)} - Create from existing Map with validation</li>
  *   <li>{@link #builder()} - Start builder pattern construction</li>
  *   <li>{@link #builder(Map)} - Builder initialized with existing Map</li>
@@ -140,7 +142,8 @@ import com.landawn.abacus.annotation.Internal;
  * </ul>
  *
  * <p><b>Collection Views:</b>
- * All collection views are immutable to maintain bijective integrity:
+ * All collection views are read-only (live views backed by the BiMap that cannot be modified directly),
+ * to maintain bijective integrity:
  * <ul>
  *   <li>{@code keySet()} - Returns {@link ImmutableSet} of keys</li>
  *   <li>{@code values()} - Returns {@link ImmutableSet} of values</li>
@@ -190,7 +193,7 @@ import com.landawn.abacus.annotation.Internal;
  *   <li>{@code put(key, value)} - Add entry with duplicate validation</li>
  *   <li>{@code forcePut(key, value)} - Add entry overriding conflicts</li>
  *   <li>{@code putAll(map)} - Bulk addition with validation</li>
- *   <li>{@code build()} - Create immutable snapshot of current state</li>
+ *   <li>{@code build()} - Return the constructed (mutable) BiMap</li>
  * </ul>
  *
  * <p><b>Integration Points:</b>
@@ -227,7 +230,8 @@ import com.landawn.abacus.annotation.Internal;
  *
  * <p><b>{@code Map} vs. {@code BiMap} vs. {@code Multimap} vs. {@code Multiset}:</b> these model different
  * key/value relationships — pick by how many (and what kind of) values a key holds:</p>
- * <table border="1" summary="Choosing between Map, BiMap, Multimap, and Multiset">
+ * <table border="1">
+ *   <caption>Choosing between Map, BiMap, Multimap, and Multiset</caption>
  *   <tr>
  *     <th>Type</th>
  *     <th>Models</th>
@@ -338,9 +342,8 @@ public final class BiMap<K, V> implements Map<K, V> {
      * @param loadFactor the load factor of the BiMap
      * @throws IllegalArgumentException if {@code initialCapacity} is negative
      */
-    @SuppressWarnings("deprecation")
     public BiMap(final int initialCapacity, final float loadFactor) {
-        this(new HashMap<>(N.initHashCapacity(initialCapacity), loadFactor), new HashMap<>(N.initHashCapacity(initialCapacity), loadFactor));
+        this(new HashMap<>(initialCapacity, loadFactor), new HashMap<>(initialCapacity, loadFactor));
     }
 
     /**
@@ -355,6 +358,7 @@ public final class BiMap<K, V> implements Map<K, V> {
      *
      * @param keyMapType the Class object representing the type of Map to be used for storing keys; must not be {@code null}
      * @param valueMapType the Class object representing the type of Map to be used for storing values; must not be {@code null}
+     * @throws IllegalArgumentException if either specified map type cannot be instantiated.
      */
     @SuppressWarnings("rawtypes")
     public BiMap(final Class<? extends Map> keyMapType, final Class<? extends Map> valueMapType) {
@@ -397,6 +401,24 @@ public final class BiMap<K, V> implements Map<K, V> {
     }
 
     /**
+     * Constructs a BiMap with the specified backing maps and explicit suppliers.
+     * Used when class-derived suppliers would lose state (e.g. a TreeMap's custom comparator).
+     *
+     * @param keyMapSupplier the Supplier used by copy()/inverse() to recreate the key map.
+     * @param valueMapSupplier the Supplier used by copy()/inverse() to recreate the value map.
+     * @param keyMap the Map to be used for storing keys.
+     * @param valueMap the Map to be used for storing values.
+     */
+    @Internal
+    BiMap(final Supplier<? extends Map<K, V>> keyMapSupplier, final Supplier<? extends Map<V, K>> valueMapSupplier, final Map<K, V> keyMap,
+            final Map<V, K> valueMap) {
+        this.keyMapSupplier = keyMapSupplier;
+        this.valueMapSupplier = valueMapSupplier;
+        this.keyMap = keyMap;
+        this.valueMap = valueMap;
+    }
+
+    /**
      * Constructs a BiMap with the specified key and value maps, and an inverted BiMap.
      * This constructor allows the user to provide the underlying maps used to store keys and values, as well as an inverted BiMap.
      *
@@ -406,8 +428,11 @@ public final class BiMap<K, V> implements Map<K, V> {
      */
     @Internal
     BiMap(final Map<K, V> keyMap, final Map<V, K> valueMap, BiMap<V, K> inverted) {
-        keyMapSupplier = Suppliers.ofMap(keyMap.getClass());
-        valueMapSupplier = Suppliers.ofMap(valueMap.getClass());
+        // Reuse the inverted BiMap's suppliers (swapped) instead of re-deriving them from the runtime map
+        // classes: Suppliers.ofMap can't instantiate wrapper classes (e.g. Collections.synchronizedMap) and
+        // would drop a custom Comparator from a supplier-built TreeMap.
+        keyMapSupplier = inverted.valueMapSupplier;
+        valueMapSupplier = inverted.keyMapSupplier;
         this.keyMap = keyMap;
         this.valueMap = valueMap;
         this.invertedView = inverted;
@@ -830,9 +855,19 @@ public final class BiMap<K, V> implements Map<K, V> {
      * @throws NullPointerException if {@code map} itself is {@code null}.
      * @throws IllegalArgumentException if any key or value in {@code map} is {@code null}, or if {@code map} contains a duplicated value (bound to more than one key).
      */
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     public static <K, V> BiMap<K, V> copyOf(final Map<? extends K, ? extends V> map) {
-        //noinspection rawtypes
-        final BiMap<K, V> biMap = new BiMap<>(Maps.newTargetMap(map), Maps.newOrderingMap(map));
+        final Map<K, V> keyMap = Maps.newTargetMap(map);
+        final Map<V, K> valueMap = Maps.newOrderingMap(map);
+
+        // Preserve a SortedMap's comparator in the key-map supplier: deriving the supplier from
+        // keyMap.getClass() builds natural-order TreeMaps, so copy()/inverse().copy() of a BiMap
+        // copied from a comparator-backed TreeMap would throw CCE for non-Comparable keys.
+        final Supplier<? extends Map<K, V>> keyMapSupplier = map instanceof SortedMap ? () -> new TreeMap(((SortedMap) map).comparator())
+                : Suppliers.ofMap(keyMap.getClass());
+        final Supplier<? extends Map<V, K>> valueMapSupplier = Suppliers.ofMap(valueMap.getClass());
+
+        final BiMap<K, V> biMap = new BiMap<>(keyMapSupplier, valueMapSupplier, keyMap, valueMap);
 
         biMap.putAll(map);
 
@@ -935,6 +970,33 @@ public final class BiMap<K, V> implements Map<K, V> {
     }
 
     /**
+     * Inserts all entries from the specified map into this BiMap.
+     * Each key-value pair in the provided map is inserted into this BiMap using {@link #put}.
+     * If a key in the provided map is already present in this BiMap, the associated value is replaced.
+     *
+     * <p><b>Warning:</b> The results of calling this method may vary depending on the iteration order of {@code map}.
+     * If the operation fails, some entries may have already been added to the BiMap before the exception was thrown.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * BiMap<String, Integer> biMap = new BiMap<>();
+     * Map<String, Integer> map = Map.of("one", 1, "two", 2);
+     * biMap.putAll(map);
+     * }</pre>
+     *
+     * @param m the map whose entries are to be added to this BiMap, must not be {@code null}.
+     * @throws NullPointerException if {@code m} is {@code null}.
+     * @throws IllegalArgumentException if any key or value is {@code null}, or if an attempt to {@code put} any entry fails due to a duplicate value. Note that some map entries may have been added to the BiMap before the exception was thrown.
+     * @see #put(Object, Object)
+     */
+    @Override
+    public void putAll(final Map<? extends K, ? extends V> m) {
+        for (final Map.Entry<? extends K, ? extends V> e : m.entrySet()) {
+            put(e.getKey(), e.getValue());
+        }
+    }
+
+    /**
      * An alternate form of {@code put} that silently removes any existing entry
      * with the value {@code value} before proceeding with the {@link #put}
      * operation. If the BiMap previously contained the provided key-value
@@ -996,7 +1058,13 @@ public final class BiMap<K, V> implements Map<K, V> {
             throw new IllegalArgumentException("Value already exists: " + value);
         }
 
-        final V oldValue = keyMap.remove(key);
+        final V oldValue = keyMap.get(key);
+
+        // No-op when the exact mapping already exists: documented for forcePut, and re-inserting
+        // would needlessly move the entry to the end of LinkedHashMap-backed BiMaps.
+        if (value.equals(oldValue)) {
+            return oldValue;
+        }
 
         if (oldValue != null) {
             valueMap.remove(oldValue);
@@ -1008,6 +1076,8 @@ public final class BiMap<K, V> implements Map<K, V> {
             keyMap.remove(oldKey);
         }
 
+        // put without a prior remove(key) so an existing key keeps its position in ordered backing
+        // maps (LinkedHashMap re-insertion would move it to the end).
         keyMap.put(key, value);
         valueMap.put(value, key);
 
@@ -1015,30 +1085,66 @@ public final class BiMap<K, V> implements Map<K, V> {
     }
 
     /**
-     * Inserts all entries from the specified map into this BiMap.
-     * Each key-value pair in the provided map is inserted into this BiMap using {@link #put}.
-     * If a key in the provided map is already present in this BiMap, the associated value is replaced.
+     * Inserts all entries from the specified map into this BiMap using {@link #forcePut} for each entry.
+     * Unlike {@link #putAll(Map)}, value conflicts do not throw; any existing entry whose value collides
+     * with an incoming value is silently removed before the incoming entry is inserted.
      *
-     * <p><b>Warning:</b> The results of calling this method may vary depending on the iteration order of {@code map}.
-     * If the operation fails, some entries may have already been added to the BiMap before the exception was thrown.
+     * <p><b>Warning:</b> The results of calling this method may vary depending on the iteration order of {@code m}.
+     * If the operation fails (e.g. a null key or value), some entries may have already been added.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * BiMap<String, Integer> biMap = new BiMap<>();
-     * Map<String, Integer> map = Map.of("one", 1, "two", 2);
-     * biMap.putAll(map);
+     * BiMap<String, Integer> biMap = BiMap.of("one", 1);
+     * Map<String, Integer> map = Map.of("two", 1, "three", 3);
+     * biMap.forcePutAll(map);   // ("one", 1) replaced by ("two", 1); ("three", 3) added
      * }</pre>
      *
-     * @param m the map whose entries are to be added to this BiMap, must not be {@code null}.
+     * @param m the map whose entries are to be force-inserted into this BiMap, must not be {@code null}.
      * @throws NullPointerException if {@code m} is {@code null}.
-     * @throws IllegalArgumentException if any key or value is {@code null}, or if an attempt to {@code put} any entry fails due to a duplicate value. Note that some map entries may have been added to the BiMap before the exception was thrown.
+     * @throws IllegalArgumentException if any key or value is {@code null}.
+     * @see #forcePut(Object, Object)
+     * @see #putAll(Map)
+     */
+    public void forcePutAll(final Map<? extends K, ? extends V> m) {
+        for (final Map.Entry<? extends K, ? extends V> e : m.entrySet()) {
+            forcePut(e.getKey(), e.getValue());
+        }
+    }
+
+    /**
+     * Associates the specified value with the specified key only if the key is not already present.
+     * If the key is already mapped, the existing mapping is left unchanged and its value is returned.
+     *
+     * <p>Unlike the inherited {@link Map#putIfAbsent(Object, Object)} default method, this override
+     * applies the bijective constraint: if the key is absent but the value is already bound to a
+     * different key, an {@link IllegalArgumentException} is thrown (use {@link #forcePut(Object, Object)}
+     * to override such a conflict).</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * BiMap<String, Integer> map = BiMap.of("one", 1);
+     * map.putIfAbsent("one", 99);   // returns 1, mapping unchanged: "one" -> 1
+     * map.putIfAbsent("two", 2);    // returns null, adds: "two" -> 2
+     * }</pre>
+     *
+     * @param key the key with which the specified value is to be associated.
+     * @param value the value to be associated with the specified key.
+     * @return the value already associated with the key, or {@code null} if there was no mapping and the value was inserted.
+     * @throws IllegalArgumentException if the key or value is {@code null}, or if the key is absent but the given value is already bound to a different key. To avoid this exception, call {@link #forcePut} instead.
      * @see #put(Object, Object)
+     * @see #forcePut(Object, Object)
      */
     @Override
-    public void putAll(final Map<? extends K, ? extends V> m) {
-        for (final Map.Entry<? extends K, ? extends V> e : m.entrySet()) {
-            put(e.getKey(), e.getValue());
+    public V putIfAbsent(final K key, final V value) {
+        final V curValue = keyMap.get(key);
+
+        if (curValue != null) {
+            return curValue;
         }
+
+        put(key, value);
+
+        return null;
     }
 
     /**
@@ -1124,6 +1230,31 @@ public final class BiMap<K, V> implements Map<K, V> {
     public boolean containsValue(final Object value) {
         //noinspection SuspiciousMethodCalls
         return valueMap.containsKey(value);
+    }
+
+    /**
+     * Checks if this BiMap contains the exact key-value mapping specified, i.e. the key is present
+     * and is mapped to a value equal to {@code value}.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * BiMap<String, Integer> map = BiMap.of("one", 1);
+     * map.containsEntry("one", 1);   // returns true
+     * map.containsEntry("one", 2);   // returns false
+     * map.containsEntry("two", 1);   // returns false
+     * }</pre>
+     *
+     * @param key the key whose mapping is to be tested.
+     * @param value the value expected to be associated with the key.
+     * @return {@code true} if this BiMap maps {@code key} to a value equal to {@code value}, {@code false} otherwise.
+     * @see #containsKey(Object)
+     * @see #containsValue(Object)
+     */
+    public boolean containsEntry(final Object key, final Object value) {
+        //noinspection SuspiciousMethodCalls
+        final V curValue = keyMap.get(key);
+
+        return curValue != null && curValue.equals(value);
     }
 
     /**

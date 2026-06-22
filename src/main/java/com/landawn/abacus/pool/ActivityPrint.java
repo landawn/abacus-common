@@ -40,6 +40,12 @@ import com.landawn.abacus.annotation.SuppressFBWarnings;
  *   <li>Current time - last access time &gt; max idle time</li>
  * </ul>
  *
+ * <p><b>Accessor naming:</b> {@code ActivityPrint} is a hand-written mutable class and intentionally
+ * uses JavaBean {@code getXxx} accessors ({@link #getLiveTime()}, {@link #getLastAccessTime()}, …)
+ * with fluent {@code setXxx} setters. This differs from the sibling {@link PoolStats}, which is a
+ * {@code record} whose accessors are compiler-forced bare nouns. The convention split (JavaBean vs.
+ * record-forced) is by design and the existing getter names are kept rather than renamed.</p>
+ *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * // Create activity print with 1 hour lifetime, 10 minute max idle
@@ -351,23 +357,19 @@ public final class ActivityPrint implements Cloneable, Serializable {
      * Creates and returns a shallow copy of this ActivityPrint. The clone has the same values
      * for all fields (creation/access times, live/idle limits, and access count) as the source
      * instance. Because {@code ActivityPrint} implements {@link Cloneable},
-     * {@link CloneNotSupportedException} is not expected to occur in practice; if it ever did,
-     * this method swallows it and returns {@code null}.
+     * {@link CloneNotSupportedException} is never thrown in practice; should the underlying
+     * {@link Object#clone()} ever throw it, this method wraps it in an {@link AssertionError}.
      *
-     * @return a clone of this ActivityPrint, or {@code null} if the underlying
-     *         {@link Object#clone()} call unexpectedly throws {@link CloneNotSupportedException}
+     * @return a clone of this ActivityPrint (never {@code null})
      */
     @Override
-    public Object clone() { //NOSONAR
-        ActivityPrint result = null;
-
+    public ActivityPrint clone() { //NOSONAR
         try {
-            result = (ActivityPrint) super.clone();
+            return (ActivityPrint) super.clone();
         } catch (final CloneNotSupportedException e) {
-            // ignore;
+            // Cannot happen: ActivityPrint implements Cloneable.
+            throw new AssertionError(e);
         }
-
-        return result;
     }
 
     /**

@@ -47,8 +47,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TimeZone;
 import java.util.UUID;
-import java.util.function.Function;
-import java.util.function.Supplier;
 
 import com.landawn.abacus.annotation.AccessFieldByMethod;
 import com.landawn.abacus.annotation.Beta;
@@ -88,7 +86,6 @@ import com.landawn.abacus.util.ObjectPool;
 import com.landawn.abacus.util.SK;
 import com.landawn.abacus.util.Splitter;
 import com.landawn.abacus.util.Strings;
-import com.landawn.abacus.util.Tuple.Tuple3;
 import com.landawn.abacus.util.u.Optional;
 import com.landawn.abacus.util.stream.Stream;
 
@@ -368,7 +365,10 @@ public final class ParserUtil {
      * @return the enumeration strategy, never {@code null} (defaults to {@code EnumType.NAME})
      */
     static EnumType getEnumerated(final Field field, final JsonXmlConfig jsonXmlConfig) {
-        if ((field != null) && (field.isAnnotationPresent(JsonXmlField.class) && field.getAnnotation(JsonXmlField.class).enumerated() != null)) {
+        // Annotation methods never return null, so compare against the NAME default to detect an unset
+        // field-level value; otherwise a field annotated for any other attribute (e.g. name) would always
+        // report NAME and silently override the class-level @JsonXmlConfig(enumerated = ...) setting.
+        if ((field != null) && field.isAnnotationPresent(JsonXmlField.class) && field.getAnnotation(JsonXmlField.class).enumerated() != EnumType.NAME) {
             return field.getAnnotation(JsonXmlField.class).enumerated();
         }
 
@@ -1083,7 +1083,7 @@ public final class ParserUtil {
         /** Whether this bean is immutable (e.g., a record or has no setters) */
         public final boolean isImmutable;
         private final boolean isByBuilder;
-        private final Tuple3<Class<?>, ? extends Supplier<Object>, ? extends Function<Object, Object>> builderInfo;
+        private final Beans.BuilderInfo builderInfo;
 
         /** Whether this class is marked with @Entity or similar annotations */
         public final boolean isMarkedAsBean;
@@ -1220,7 +1220,7 @@ public final class ParserUtil {
             for (final String propName : propNameList) {
                 field = Beans.getPropField(beanClass, propName);
                 getMethod = Beans.getPropGetter(beanClass, propName);
-                setMethod = isByBuilder ? Beans.getPropSetter(builderInfo._1, propName) : Beans.getPropSetter(beanClass, propName);
+                setMethod = isByBuilder ? Beans.getPropSetter(builderInfo.builderClass(), propName) : Beans.getPropSetter(beanClass, propName);
 
                 propInfo = ASMUtil.isASMAvailable() && isASMSupported
                         ? new ASMPropInfo(propName, field, getMethod, setMethod, jsonXmlConfig, annotations, idx, isImmutable, isByBuilder, idPropNames,
@@ -1262,7 +1262,17 @@ public final class ParserUtil {
 
                 if (N.notEmpty(aliases)) {
                     for (final String alias : aliases) {
-                        if (propInfoMap.containsKey(alias)) {
+                        final Optional<PropInfo> existing = propInfoMap.get(alias);
+
+                        if (existing != null) {
+                            // The naming-policy tags of THIS property were registered above; an alias
+                            // that merely restates one of them (e.g. aliases = {"first_name"} on
+                            // firstName) is redundant, not a collision - only an alias already bound
+                            // to a DIFFERENT property is an error.
+                            if (existing.orElseNull() == propInfo) {
+                                continue;
+                            }
+
                             throw new IllegalArgumentException("Cannot set alias: " + alias + " for property/field: " + propInfo.field + " because " + alias
                                     + " is a property/field name in class: " + beanClass);
                         }
@@ -1443,7 +1453,9 @@ public final class ParserUtil {
 
                 if (propInfoOpt == null) {
                     for (final Map.Entry<String, Optional<PropInfo>> entry : propInfoMap.entrySet()) { //NOSONAR
-                        if (isPropName(clazz, propName, entry.getKey())) {
+                        // Skip cached MISSES (Optional.empty): a negative-cache key that fuzzy-matches
+                        // the query would shadow the real property and poison the cache with null.
+                        if (entry.getValue().isPresent() && isPropName(clazz, propName, entry.getKey())) {
                             propInfoOpt = entry.getValue();
 
                             break;
@@ -1528,7 +1540,7 @@ public final class ParserUtil {
          * @param obj the object to get the property value from
          * @param propName the property name (supports nested paths)
          * @return the property value, or the type's default value if an intermediate object in a nested path is {@code null}
-         * @throws RuntimeException if no getter method is found for the property
+         * @throws IllegalArgumentException if no getter method is found for the property
          */
         @SuppressWarnings("unchecked")
         public <T> T getPropValue(final Object obj, final String propName) {
@@ -1538,7 +1550,7 @@ public final class ParserUtil {
                 final List<PropInfo> propInfoQueue = getPropInfoChain(propName);
 
                 if (propInfoQueue.size() == 0) {
-                    throw new RuntimeException("No getter method found with property name: " + propName + " in class: " + clazz.getCanonicalName());
+                    throw new IllegalArgumentException("No getter method found with property name: " + propName + " in class: " + clazz.getCanonicalName());
                 } else {
                     final int len = propInfoQueue.size();
                     Object propBean = obj;
@@ -1632,7 +1644,7 @@ public final class ParserUtil {
                                     c.add(subPropValue);
                                     propInfo.setPropValue(propBean, c);
                                 } else {
-                                    // TODO what's about if propInfo.clazz is immutable (Record)?
+                                    // TODO: What about when propInfo.clazz is immutable, such as a record?
                                     // For example: set "account.Name.firstName" key in Beans.mapToBean, if Account.Name is a Record?
                                     subPropValue = N.newInstance(propInfo.clazz);
                                     propInfo.setPropValue(propBean, subPropValue);
@@ -1702,7 +1714,7 @@ public final class ParserUtil {
          * @param propValue the value to set
          * @param ignoreUnmatchedProperty if {@code true}, silently ignore properties that don't exist
          * @return {@code true} if the property was set, {@code false} if it was ignored
-         * @throws RuntimeException if no setter found and ignoreUnmatchedProperty is false
+         * @throws IllegalArgumentException if no setter found and ignoreUnmatchedProperty is false
          */
         public boolean setPropValue(final Object obj, final PropInfo propInfoFromOtherBean, final Object propValue, final boolean ignoreUnmatchedProperty) {
             if (propInfoFromOtherBean.aliases.isEmpty()) {
@@ -1719,7 +1731,7 @@ public final class ParserUtil {
                 }
 
                 if (!ignoreUnmatchedProperty) {
-                    throw new RuntimeException(
+                    throw new IllegalArgumentException(
                             "No setter method found with property name: " + propInfoFromOtherBean.name + " in class: " + clazz.getCanonicalName());
                 }
 
@@ -2040,7 +2052,7 @@ public final class ParserUtil {
          */
         @Beta
         public Object createBeanResult() {
-            return isImmutable ? (builderInfo != null ? builderInfo._2.get() : createArgsForConstructor()) : N.newInstance(clazz);
+            return isImmutable ? (builderInfo != null ? builderInfo.newBuilder() : createArgsForConstructor()) : N.newInstance(clazz);
         }
 
         /**
@@ -2067,7 +2079,7 @@ public final class ParserUtil {
                 return null;
             }
 
-            return isImmutable ? (builderInfo != null ? (T) builderInfo._3.apply(result) : newInstance(((Object[]) result))) : (T) result;
+            return isImmutable ? (builderInfo != null ? (T) builderInfo.build(result) : newInstance(((Object[]) result))) : (T) result;
         }
 
         /**
@@ -2454,7 +2466,10 @@ public final class ParserUtil {
             dateFormat = Strings.isEmpty(dateFormatStr) ? null : dateFormatStr;
             timeZone = Strings.isEmpty(timeZoneStr) ? TimeZone.getDefault() : TimeZone.getTimeZone(timeZoneStr);
             zoneId = timeZone.toZoneId();
-            dateTimeFormatter = Strings.isEmpty(dateFormat) ? null : DateTimeFormatter.ofPattern(dateFormat).withZone(zoneId);
+            isLongDateFormat = Strings.isNotEmpty(dateFormat) && "long".equalsIgnoreCase(dateFormat);
+
+            // "long" is the epoch-millis marker, not a pattern; DateTimeFormatter.ofPattern would reject it.
+            dateTimeFormatter = Strings.isEmpty(dateFormat) || isLongDateFormat ? null : DateTimeFormatter.ofPattern(dateFormat).withZone(zoneId);
             isJsonRawValue = isJsonRawValue(field);
 
             JodaDateTimeFormatterHolder tmpJodaDTFH = null;
@@ -2468,8 +2483,6 @@ public final class ParserUtil {
             }
 
             jodaDTFH = tmpJodaDTFH;
-
-            isLongDateFormat = Strings.isNotEmpty(dateFormat) && "long".equalsIgnoreCase(dateFormat);
 
             if (isLongDateFormat && (java.time.LocalTime.class.isAssignableFrom(clazz) || java.time.LocalDate.class.isAssignableFrom(clazz))) {
                 throw new UnsupportedOperationException("Date format cannot be 'long' for type java.time.LocalTime/LocalDate");
@@ -2903,7 +2916,10 @@ public final class ParserUtil {
                     }
 
                     if (propInfo.isLongDateFormat) {
-                        return new java.sql.Timestamp(Numbers.toLong(strValue)).toLocalDateTime();
+                        // Use the configured zone (mirrors the write path x.atZone(propInfo.zoneId)) instead of
+                        // Timestamp.toLocalDateTime(), which would silently apply the JVM-default zone and break
+                        // the epoch-millis round-trip whenever a non-default field timeZone is configured.
+                        return java.time.LocalDateTime.ofInstant(Instant.ofEpochMilli(Numbers.toLong(strValue)), propInfo.zoneId);
                     } else {
                         return java.time.LocalDateTime.parse(strValue, propInfo.dateTimeFormatter);
                     }
@@ -3843,7 +3859,9 @@ public final class ParserUtil {
 
         JodaDateTimeFormatterHolder(final String dateFormat, final TimeZone timeZone) {
             dtz = org.joda.time.DateTimeZone.forTimeZone(timeZone);
-            dtf = org.joda.time.format.DateTimeFormat.forPattern(dateFormat).withZone(dtz);
+            // "long" means epoch millis (isLongDateFormat); only the zone is needed then and
+            // DateTimeFormat.forPattern would reject "long" as a pattern.
+            dtf = "long".equalsIgnoreCase(dateFormat) ? null : org.joda.time.format.DateTimeFormat.forPattern(dateFormat).withZone(dtz);
         }
     }
 

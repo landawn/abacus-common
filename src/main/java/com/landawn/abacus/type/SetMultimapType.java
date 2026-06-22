@@ -53,7 +53,7 @@ public class SetMultimapType<K, E> extends MultimapType<K, E, Set<E>, SetMultima
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * SetMultimapType<String, Integer> type = new SetMultimapType<>(SetMultimap.class, "String", "Integer");
+     * Type<SetMultimap<String, Integer>> type = TypeFactory.getType("SetMultimap<String, Integer>");
      * SetMultimap<String, Integer> multimap = N.newLinkedSetMultimap();
      * multimap.put("tags", 1);
      * multimap.put("tags", 2);
@@ -90,7 +90,7 @@ public class SetMultimapType<K, E> extends MultimapType<K, E, Set<E>, SetMultima
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * SetMultimapType<String, Integer> type = new SetMultimapType<>(SetMultimap.class, "String", "Integer");
+     * Type<SetMultimap<String, Integer>> type = TypeFactory.getType("SetMultimap<String, Integer>");
      *
      * SetMultimap<String, Integer> multimap = type.valueOf("{\"tags\":[1,2,1],\"ids\":[100]}");
      * // Returns: SetMultimap with "tags" -> [1, 2] (duplicates removed) and "ids" -> [100]
@@ -109,7 +109,7 @@ public class SetMultimapType<K, E> extends MultimapType<K, E, Set<E>, SetMultima
      *
      * @param str the JSON string to parse
      * @return the parsed SetMultimap, or {@code null} if the input string is {@code null}, empty, or blank
-     * @throws IllegalArgumentException if the string cannot be parsed as a valid map structure
+     * @throws com.landawn.abacus.exception.ParsingException if the JSON string is malformed
      * @see #valueOf(Object)
      * @see #stringOf(SetMultimap)
      */

@@ -123,6 +123,16 @@ public class PrimitiveCharArrayTypeTest extends TestBase {
         assertArrayEquals(new char[] { 'a', 'b', 'c' }, result);
     }
 
+    @Test
+    public void testValueOfMixedQuotedChars() {
+        // regression: quoting was decided once from the first element, so a mixed input like "[a, 'b']"
+        // tried to parse 'b' (with quotes) as a char and threw. Detection is now per-element,
+        // matching CharacterArrayType (boxed).
+        assertArrayEquals(new char[] { 'a', 'b' }, type.valueOf("[a, 'b']"));
+        assertArrayEquals(new char[] { 'a', 'b' }, type.valueOf("['a', b]"));
+        assertArrayEquals(new char[] { 'a', 'b', 'c' }, type.valueOf("[a, \"b\", c]"));
+    }
+
     // Covers valueOf(String) - quoted single-char edge cases
     @Test
     public void testValueOfQuotedSingleChar() {

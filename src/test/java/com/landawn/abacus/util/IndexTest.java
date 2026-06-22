@@ -57,11 +57,72 @@ public class IndexTest extends TestBase {
     }
 
     @Test
+    public void test_subArray_emptyTarget_fromIndexClamping() {
+        // Mirrors String.indexOf("")/lastIndexOf("") conventions: an empty target always matches,
+        // and an out-of-range fromIndex/startIndexFromBack is clamped to [0, length].
+        final int[] source = { 1, 2, 3 };
+        final int[] sub = { 9 };
+
+        // forward, sizeToMatch == 0: clamped to length, NOT empty ("aaa".indexOf("", 4) == 3)
+        assertEquals(OptionalInt.of(3), Index.ofSubArray(source, 5, sub, 0, 0));
+        assertEquals(OptionalInt.of(3), Index.ofSubArray(source, 3, sub, 0, 0));
+        assertEquals(OptionalInt.of(2), Index.ofSubArray(source, 2, sub, 0, 0));
+        assertEquals(OptionalInt.of(0), Index.ofSubArray(source, -1, sub, 0, 0));
+        assertEquals(OptionalInt.of(0), Index.ofSubArray(source, new int[0]));
+        // forward, sizeToMatch > 0: out-of-range fromIndex => empty
+        assertFalse(Index.ofSubArray(source, 3, sub, 0, 1).isPresent());
+        assertFalse(Index.ofSubArray(source, 5, sub, 0, 1).isPresent());
+        // null arrays with empty target => empty
+        assertFalse(Index.ofSubArray((int[]) null, 5, new int[0], 0, 0).isPresent());
+
+        // backward, sizeToMatch == 0: min(startIndexFromBack, length); negative => empty
+        assertEquals(OptionalInt.of(3), Index.lastOfSubArray(source, 5, sub, 0, 0));
+        assertEquals(OptionalInt.of(2), Index.lastOfSubArray(source, 2, sub, 0, 0));
+        assertEquals(OptionalInt.of(0), Index.lastOfSubArray(source, 0, sub, 0, 0));
+        assertFalse(Index.lastOfSubArray(source, -1, sub, 0, 0).isPresent());
+        assertEquals(OptionalInt.of(3), Index.lastOfSubArray(source, new int[0]));
+
+        // same conventions for the List variants
+        final List<Integer> sourceList = Arrays.asList(1, 2, 3);
+        final List<Integer> subList = Arrays.asList(9);
+        assertEquals(OptionalInt.of(3), Index.ofSubList(sourceList, 5, subList, 0, 0));
+        assertEquals(OptionalInt.of(0), Index.ofSubList(sourceList, -1, subList, 0, 0));
+        assertFalse(Index.ofSubList(sourceList, 3, subList, 0, 1).isPresent());
+        assertEquals(OptionalInt.of(3), Index.lastOfSubList(sourceList, 5, subList, 0, 0));
+        assertFalse(Index.lastOfSubList(sourceList, -1, subList, 0, 0).isPresent());
+    }
+
+    @Test
+    public void test_subList_nonRandomAccess_branches() {
+        // LinkedList exercises the non-RandomAccess (toArray-based) branches of ofSubList/lastOfSubList;
+        // results must match the RandomAccess path.
+        final List<String> raSource = Arrays.asList("a", "b", "c", "b", "c", "d");
+        final List<String> raSub = Arrays.asList("b", "c");
+        final List<String> llSource = new LinkedList<>(raSource);
+        final List<String> llSub = new LinkedList<>(raSub);
+
+        assertEquals(OptionalInt.of(1), Index.ofSubList(llSource, llSub));
+        assertEquals(OptionalInt.of(3), Index.ofSubList(llSource, 2, llSub));
+        assertEquals(OptionalInt.of(3), Index.ofSubList(llSource, 2, llSub, 0, 2));
+        assertFalse(Index.ofSubList(llSource, 4, llSub, 0, 2).isPresent());
+
+        assertEquals(OptionalInt.of(3), Index.lastOfSubList(llSource, llSub));
+        assertEquals(OptionalInt.of(1), Index.lastOfSubList(llSource, 2, llSub));
+        assertEquals(OptionalInt.of(1), Index.lastOfSubList(llSource, 2, llSub, 0, 2));
+        assertEquals(OptionalInt.of(3), Index.lastOfSubList(llSource, 10, llSub, 0, 2));
+        assertFalse(Index.lastOfSubList(llSource, 0, llSub, 0, 2).isPresent());
+
+        // results identical to the RandomAccess implementation
+        assertEquals(Index.ofSubList(raSource, 2, raSub), Index.ofSubList(llSource, 2, llSub));
+        assertEquals(Index.lastOfSubList(raSource, 2, raSub), Index.lastOfSubList(llSource, 2, llSub));
+    }
+
+    @Test
     public void testOfDoubleArrayWithTolerance() {
         double[] array = { 1.0, 2.0, 3.0, 1.05 };
-        assertEquals(OptionalInt.of(0), Index.of(array, 1.0, 0.1));
-        assertEquals(OptionalInt.of(0), Index.of(array, 1.0, 0.01));
-        assertEquals(OptionalInt.of(3), Index.of(array, 1.0, 0.1, 1));
+        assertEquals(OptionalInt.of(0), Index.of(array, 1.0, 0, 0.1));
+        assertEquals(OptionalInt.of(0), Index.of(array, 1.0, 0, 0.01));
+        assertEquals(OptionalInt.of(3), Index.of(array, 1.0, 1, 0.1));
 
     }
 
@@ -129,15 +190,15 @@ public class IndexTest extends TestBase {
     public void testOf_DoubleArray_WithTolerance() {
         double[] array = { 1.0, 2.001, 3.0, 2.999, 4.0 };
 
-        OptionalInt result = Index.of(array, 2.0, 0.01);
+        OptionalInt result = Index.of(array, 2.0, 0, 0.01);
         Assertions.assertTrue(result.isPresent());
         Assertions.assertEquals(1, result.get());
 
-        result = Index.of(array, 3.0, 0.01);
+        result = Index.of(array, 3.0, 0, 0.01);
         Assertions.assertTrue(result.isPresent());
         Assertions.assertEquals(2, result.get());
 
-        result = Index.of(array, 2.5, 0.1);
+        result = Index.of(array, 2.5, 0, 0.1);
         Assertions.assertFalse(result.isPresent());
     }
 
@@ -432,6 +493,37 @@ public class IndexTest extends TestBase {
     }
 
     @Test
+    public void test_of_float_array_tolerance() {
+        float[] a = { 1.0f, 2.0f, 3.0f, 2.1f };
+        OptionalInt result = Index.of(a, 2.0f, 0, 0.2f);
+        assertTrue(result.isPresent());
+        assertEquals(1, result.getAsInt());
+
+        result = Index.of(a, 2.0f, 0, 0.05f);
+        assertTrue(result.isPresent());
+        assertEquals(1, result.getAsInt());
+
+        result = Index.of((float[]) null, 2.0f, 0, 0.1f);
+        assertFalse(result.isPresent());
+        assertThrows(IllegalArgumentException.class, () -> Index.of(a, 2.0f, 0, -0.1f));
+    }
+
+    @Test
+    public void test_of_float_array_tolerance_fromIndex() {
+        float[] a = { 1.0f, 2.0f, 3.0f, 2.1f };
+        OptionalInt result = Index.of(a, 2.0f, 2, 0.2f);
+        assertTrue(result.isPresent());
+        assertEquals(3, result.getAsInt());
+
+        result = Index.of(a, 2.0f, -1, 0.2f);
+        assertTrue(result.isPresent());
+        assertEquals(1, result.getAsInt());
+
+        result = Index.of(a, 2.0f, 2, 0.05f);
+        assertFalse(result.isPresent());
+    }
+
+    @Test
     public void test_of_double_array() {
         double[] a = { 1.0, 2.0, 3.0, 2.0 };
         OptionalInt result = Index.of(a, 2.0);
@@ -466,30 +558,30 @@ public class IndexTest extends TestBase {
     @Test
     public void test_of_double_array_tolerance() {
         double[] a = { 1.0, 2.0, 3.0, 2.1 };
-        OptionalInt result = Index.of(a, 2.0, 0.2);
+        OptionalInt result = Index.of(a, 2.0, 0, 0.2);
         assertTrue(result.isPresent());
         assertEquals(1, result.getAsInt());
 
-        result = Index.of(a, 2.0, 0.05);
+        result = Index.of(a, 2.0, 0, 0.05);
         assertTrue(result.isPresent());
         assertEquals(1, result.getAsInt());
 
-        result = Index.of((double[]) null, 2.0, 0.1);
+        result = Index.of((double[]) null, 2.0, 0, 0.1);
         assertFalse(result.isPresent());
     }
 
     @Test
     public void test_of_double_array_tolerance_fromIndex() {
         double[] a = { 1.0, 2.0, 3.0, 2.1 };
-        OptionalInt result = Index.of(a, 2.0, 0.2, 2);
+        OptionalInt result = Index.of(a, 2.0, 2, 0.2);
         assertTrue(result.isPresent());
         assertEquals(3, result.getAsInt());
 
-        result = Index.of(a, 2.0, 0.2, -1);
+        result = Index.of(a, 2.0, -1, 0.2);
         assertTrue(result.isPresent());
         assertEquals(1, result.getAsInt());
 
-        result = Index.of(a, 2.0, 0.05, 2);
+        result = Index.of(a, 2.0, 2, 0.05);
         assertFalse(result.isPresent());
     }
 
@@ -810,10 +902,10 @@ public class IndexTest extends TestBase {
     @Test
     public void testOfDoubleWithTolerance_EdgeCases() {
         double[] array = { 1.0, 1.05, 1.1, 1.15, 1.2 };
-        assertEquals(OptionalInt.of(2), Index.of(array, 1.1, 0.0));
-        assertEquals(OptionalInt.of(1), Index.of(array, 1.0, 0.051, 1));
-        assertEquals(OptionalInt.of(0), Index.of(array, 1.0, 0.04999));
-        assertEquals(OptionalInt.empty(), Index.of(array, 0.9, 0.05));
+        assertEquals(OptionalInt.of(2), Index.of(array, 1.1, 0, 0.0));
+        assertEquals(OptionalInt.of(1), Index.of(array, 1.0, 1, 0.051));
+        assertEquals(OptionalInt.of(0), Index.of(array, 1.0, 0, 0.04999));
+        assertEquals(OptionalInt.empty(), Index.of(array, 0.9, 0, 0.05));
     }
 
     @Test
@@ -965,11 +1057,11 @@ public class IndexTest extends TestBase {
     public void testOf_DoubleArray_WithToleranceAndFromIndex() {
         double[] array = { 1.0, 2.001, 3.0, 2.999, 4.0 };
 
-        OptionalInt result = Index.of(array, 3.0, 0.01, 2);
+        OptionalInt result = Index.of(array, 3.0, 2, 0.01);
         Assertions.assertTrue(result.isPresent());
         Assertions.assertEquals(2, result.get());
 
-        result = Index.of(array, 3.0, 0.01, 3);
+        result = Index.of(array, 3.0, 3, 0.01);
         Assertions.assertTrue(result.isPresent());
         Assertions.assertEquals(3, result.get());
     }
@@ -1261,10 +1353,10 @@ public class IndexTest extends TestBase {
         assertEquals(OptionalInt.of(3), Index.of(arr, -Double.MAX_VALUE));
 
         double[] toleranceArr = { 1.0, 1.1, 1.2, 1.3, 1.4, 1.5 };
-        assertEquals(OptionalInt.of(2), Index.of(toleranceArr, 1.25, 0.051));
-        assertEquals(OptionalInt.empty(), Index.of(toleranceArr, 1.25, 0.04));
+        assertEquals(OptionalInt.of(2), Index.of(toleranceArr, 1.25, 0, 0.051));
+        assertEquals(OptionalInt.empty(), Index.of(toleranceArr, 1.25, 0, 0.04));
 
-        assertThrows(IllegalArgumentException.class, () -> Index.of(toleranceArr, 1.25, -0.05));
+        assertThrows(IllegalArgumentException.class, () -> Index.of(toleranceArr, 1.25, 0, -0.05));
     }
 
     @Test
@@ -1281,7 +1373,7 @@ public class IndexTest extends TestBase {
         result = Index.ofIgnoreCase(str, "DE");
         assertFalse(result.isPresent());
 
-        result = Index.ofIgnoreCase(null, "a");
+        result = Index.ofIgnoreCase((String) null, "a");
         assertFalse(result.isPresent());
     }
 
@@ -2370,6 +2462,22 @@ public class IndexTest extends TestBase {
     }
 
     @Test
+    public void test_last_float_array_tolerance_startIndexFromBack() {
+        float[] a = { 1.0f, 2.0f, 3.0f, 2.1f };
+        OptionalInt result = Index.last(a, 2.0f, 2, 0.2f);
+        assertTrue(result.isPresent());
+        assertEquals(1, result.getAsInt());
+
+        result = Index.last(a, 2.0f, 10, 0.2f);
+        assertTrue(result.isPresent());
+        assertEquals(3, result.getAsInt());
+
+        result = Index.last(a, 2.0f, 2, 0.05f);
+        assertTrue(result.isPresent());
+        assertEquals(1, result.getAsInt());
+    }
+
+    @Test
     public void test_last_double_array_startIndexFromBack() {
         double[] a = { 1.0, 2.0, 3.0, 2.0 };
         OptionalInt result = Index.last(a, 2.0, 2);
@@ -2384,11 +2492,11 @@ public class IndexTest extends TestBase {
     @Test
     public void test_last_double_array_tolerance_startIndexFromBack() {
         double[] a = { 1.0, 2.0, 3.0, 2.1 };
-        OptionalInt result = Index.last(a, 2.0, 0.2, 2);
+        OptionalInt result = Index.last(a, 2.0, 2, 0.2);
         assertTrue(result.isPresent());
         assertEquals(1, result.getAsInt());
 
-        result = Index.last(a, 2.0, 0.2, 10);
+        result = Index.last(a, 2.0, 10, 0.2);
         assertTrue(result.isPresent());
         assertEquals(3, result.getAsInt());
     }
@@ -2531,7 +2639,7 @@ public class IndexTest extends TestBase {
     public void testLast_DoubleArray_WithTolerance() {
         double[] array = { 1.0, 2.001, 3.0, 2.999, 4.0 };
 
-        OptionalInt result = Index.last(array, 3.0, 0.01);
+        OptionalInt result = Index.last(array, 3.0, array.length - 1, 0.01);
         Assertions.assertTrue(result.isPresent());
         Assertions.assertEquals(3, result.get());
     }
@@ -2540,11 +2648,11 @@ public class IndexTest extends TestBase {
     public void testLast_DoubleArray_WithToleranceAndStartIndex() {
         double[] array = { 1.0, 2.001, 3.0, 2.999, 4.0 };
 
-        OptionalInt result = Index.last(array, 3.0, 0.01, 3);
+        OptionalInt result = Index.last(array, 3.0, 3, 0.01);
         Assertions.assertTrue(result.isPresent());
         Assertions.assertEquals(3, result.get());
 
-        result = Index.last(array, 3.0, 0.01, 2);
+        result = Index.last(array, 3.0, 2, 0.01);
         Assertions.assertTrue(result.isPresent());
         Assertions.assertEquals(2, result.get());
     }
@@ -2768,6 +2876,22 @@ public class IndexTest extends TestBase {
     }
 
     @Test
+    public void test_last_float_array_tolerance() {
+        float[] a = { 1.0f, 2.0f, 3.0f, 2.1f };
+        OptionalInt result = Index.last(a, 2.0f, a.length - 1, 0.2f);
+        assertTrue(result.isPresent());
+        assertEquals(3, result.getAsInt());
+
+        result = Index.last(a, 2.0f, a.length - 1, 0.05f);
+        assertTrue(result.isPresent());
+        assertEquals(1, result.getAsInt());
+
+        result = Index.last((float[]) null, 2.0f, 0, 0.1f);
+        assertFalse(result.isPresent());
+        assertThrows(IllegalArgumentException.class, () -> Index.last(a, 2.0f, a.length - 1, -0.1f));
+    }
+
+    @Test
     public void test_last_double_array() {
         double[] a = { 1.0, 2.0, 3.0, 2.0 };
         OptionalInt result = Index.last(a, 2.0);
@@ -2787,15 +2911,15 @@ public class IndexTest extends TestBase {
     @Test
     public void test_last_double_array_tolerance() {
         double[] a = { 1.0, 2.0, 3.0, 2.1 };
-        OptionalInt result = Index.last(a, 2.0, 0.2);
+        OptionalInt result = Index.last(a, 2.0, a.length - 1, 0.2);
         assertTrue(result.isPresent());
         assertEquals(3, result.getAsInt());
 
-        result = Index.last(a, 2.0, 0.05);
+        result = Index.last(a, 2.0, a.length - 1, 0.05);
         assertTrue(result.isPresent());
         assertEquals(1, result.getAsInt());
 
-        result = Index.last((double[]) null, 2.0, 0.1);
+        result = Index.last((double[]) null, 2.0, 0, 0.1);
         assertFalse(result.isPresent());
     }
 
@@ -2949,7 +3073,7 @@ public class IndexTest extends TestBase {
         result = Index.lastOfIgnoreCase(str, "DE");
         assertFalse(result.isPresent());
 
-        result = Index.lastOfIgnoreCase(null, "a");
+        result = Index.lastOfIgnoreCase((String) null, "a");
         assertFalse(result.isPresent());
     }
 
@@ -3862,7 +3986,7 @@ public class IndexTest extends TestBase {
     public void testAllOf_DoubleArray_WithTolerance() {
         double[] array = { 1.0, 2.001, 1.01, 2.999, 0.99 };
 
-        BitSet result = Index.allOf(array, 1.0, 0.02);
+        BitSet result = Index.allOf(array, 1.0, 0, 0.02);
         Assertions.assertEquals(3, result.cardinality());
         Assertions.assertTrue(result.get(0));
         Assertions.assertTrue(result.get(2));
@@ -4226,6 +4350,36 @@ public class IndexTest extends TestBase {
     }
 
     @Test
+    public void test_allOf_float_array_tolerance() {
+        float[] a = { 1.0f, 2.0f, 2.1f, 3.0f, 2.05f };
+        BitSet result = Index.allOf(a, 2.0f, 0, 0.2f);
+        assertEquals(3, result.cardinality());
+        assertTrue(result.get(1));
+        assertTrue(result.get(2));
+        assertTrue(result.get(4));
+
+        result = Index.allOf(a, 2.0f, 0, 0.01f);
+        assertEquals(1, result.cardinality());
+        assertTrue(result.get(1));
+
+        result = Index.allOf((float[]) null, 2.0f, 0, 0.1f);
+        assertEquals(0, result.cardinality());
+        assertThrows(IllegalArgumentException.class, () -> Index.allOf(a, 2.0f, 0, -0.1f));
+    }
+
+    @Test
+    public void test_allOf_float_array_tolerance_fromIndex() {
+        float[] a = { 1.0f, 2.0f, 2.1f, 3.0f, 2.05f };
+        BitSet result = Index.allOf(a, 2.0f, 2, 0.2f);
+        assertEquals(2, result.cardinality());
+        assertTrue(result.get(2));
+        assertTrue(result.get(4));
+
+        result = Index.allOf(a, 2.0f, -1, 0.2f);
+        assertEquals(3, result.cardinality());
+    }
+
+    @Test
     public void test_allOf_double_array() {
         double[] a = { 1.0, 2.0, 1.0, 3.0, 1.0 };
         BitSet result = Index.allOf(a, 1.0);
@@ -4256,29 +4410,29 @@ public class IndexTest extends TestBase {
     @Test
     public void test_allOf_double_array_tolerance() {
         double[] a = { 1.0, 2.0, 2.1, 3.0, 2.05 };
-        BitSet result = Index.allOf(a, 2.0, 0.2);
+        BitSet result = Index.allOf(a, 2.0, 0, 0.2);
         assertEquals(3, result.cardinality());
         assertTrue(result.get(1));
         assertTrue(result.get(2));
         assertTrue(result.get(4));
 
-        result = Index.allOf(a, 2.0, 0.01);
+        result = Index.allOf(a, 2.0, 0, 0.01);
         assertEquals(1, result.cardinality());
         assertTrue(result.get(1));
 
-        result = Index.allOf((double[]) null, 2.0, 0.1);
+        result = Index.allOf((double[]) null, 2.0, 0, 0.1);
         assertEquals(0, result.cardinality());
     }
 
     @Test
     public void test_allOf_double_array_tolerance_fromIndex() {
         double[] a = { 1.0, 2.0, 2.1, 3.0, 2.05 };
-        BitSet result = Index.allOf(a, 2.0, 0.2, 2);
+        BitSet result = Index.allOf(a, 2.0, 2, 0.2);
         assertEquals(2, result.cardinality());
         assertTrue(result.get(2));
         assertTrue(result.get(4));
 
-        result = Index.allOf(a, 2.0, 0.2, -1);
+        result = Index.allOf(a, 2.0, -1, 0.2);
         assertEquals(3, result.cardinality());
     }
 
@@ -4478,13 +4632,13 @@ public class IndexTest extends TestBase {
         expected.set(1);
         expected.set(3);
         expected.set(4);
-        assertEquals(expected, Index.allOf(array, 1.0, 0.11));
+        assertEquals(expected, Index.allOf(array, 1.0, 0, 0.11));
 
         BitSet expectedFromIndex = new BitSet();
         expectedFromIndex.set(1);
         expectedFromIndex.set(3);
         expectedFromIndex.set(4);
-        assertEquals(expectedFromIndex, Index.allOf(array, 1.0, 0.11, 1));
+        assertEquals(expectedFromIndex, Index.allOf(array, 1.0, 1, 0.11));
     }
 
     @Test
@@ -4570,6 +4724,18 @@ public class IndexTest extends TestBase {
         BitSet infResult = Index.allOf(arr, Float.POSITIVE_INFINITY);
         assertTrue(infResult.get(4));
         assertEquals(1, infResult.cardinality());
+
+        BitSet fuzzyNanResult = Index.allOf(arr, Float.NaN, 0, 0.1f);
+        assertTrue(fuzzyNanResult.get(1));
+        assertTrue(fuzzyNanResult.get(3));
+        assertTrue(fuzzyNanResult.get(5));
+        assertEquals(3, fuzzyNanResult.cardinality());
+        assertEquals(OptionalInt.of(1), Index.of(arr, Float.NaN, 0, 0.1f));
+        assertEquals(OptionalInt.of(5), Index.last(arr, Float.NaN, arr.length - 1, 0.1f));
+
+        BitSet fuzzyInfResult = Index.allOf(arr, Float.POSITIVE_INFINITY, 0, 0.0f);
+        assertTrue(fuzzyInfResult.get(4));
+        assertEquals(1, fuzzyInfResult.cardinality());
     }
 
     @Test
@@ -4717,13 +4883,13 @@ public class IndexTest extends TestBase {
     @Test
     public void testAllOf_DoubleArrayWithTolerance_FromIndex() {
         double[] source = { 1.0, 2.0, 1.05, 3.0, 0.95 };
-        java.util.BitSet result = Index.allOf(source, 1.0, 0.1, 1);
+        java.util.BitSet result = Index.allOf(source, 1.0, 1, 0.1);
         assertEquals(2, result.cardinality());
         assertTrue(result.get(2));
         assertTrue(result.get(4));
 
         // fromIndex >= len
-        result = Index.allOf(source, 1.0, 0.1, 10);
+        result = Index.allOf(source, 1.0, 10, 0.1);
         assertEquals(0, result.cardinality());
     }
 
@@ -4791,21 +4957,21 @@ public class IndexTest extends TestBase {
         // while of(...) and last(...) use Numbers.fuzzyEquals which treats NaN==NaN as true.
         // After fix, allOf is consistent with of/last: NaN matches NaN.
         double[] arr = { 1.0, Double.NaN, 2.0, Double.NaN, 5.0 };
-        BitSet result = Index.allOf(arr, Double.NaN, 0.1);
+        BitSet result = Index.allOf(arr, Double.NaN, 0, 0.1);
         assertEquals(2, result.cardinality());
         assertTrue(result.get(1));
         assertTrue(result.get(3));
 
         // Sanity: of/last/allOf all agree
-        assertEquals(OptionalInt.of(1), Index.of(arr, Double.NaN, 0.1));
-        assertEquals(OptionalInt.of(3), Index.last(arr, Double.NaN, 0.1));
+        assertEquals(OptionalInt.of(1), Index.of(arr, Double.NaN, 0, 0.1));
+        assertEquals(OptionalInt.of(3), Index.last(arr, Double.NaN, arr.length - 1, 0.1));
     }
 
     @Test
     public void test_allOf_doubleArray_tolerance_infinity() {
         // Infinities of the same sign should match each other under fuzzyEquals (which Index.of uses).
         double[] arr = { Double.POSITIVE_INFINITY, 1.0, Double.POSITIVE_INFINITY, Double.NEGATIVE_INFINITY };
-        BitSet result = Index.allOf(arr, Double.POSITIVE_INFINITY, 0.0);
+        BitSet result = Index.allOf(arr, Double.POSITIVE_INFINITY, 0, 0.0);
         assertEquals(2, result.cardinality());
         assertTrue(result.get(0));
         assertTrue(result.get(2));
@@ -4815,7 +4981,7 @@ public class IndexTest extends TestBase {
     public void test_allOf_doubleArray_tolerance_negative_throws() {
         // Numbers.fuzzyEquals throws on negative tolerance; allOf now propagates this.
         double[] arr = { 1.0, 2.0, 3.0 };
-        assertThrows(IllegalArgumentException.class, () -> Index.allOf(arr, 2.0, -0.1));
+        assertThrows(IllegalArgumentException.class, () -> Index.allOf(arr, 2.0, 0, -0.1));
     }
 
     @Test

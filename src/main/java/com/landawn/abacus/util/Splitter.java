@@ -1745,7 +1745,8 @@ public final class Splitter {
          *   <li>{@code limit(N)} means: produce <b>AT MOST N</b> map entries</li>
          *   <li>If input has fewer than N pairs: returns all pairs</li>
          *   <li>If input has exactly N pairs: returns all N pairs</li>
-         *   <li>If input has more than N pairs: returns first N pairs, remainder is discarded</li>
+         *   <li>If input has more than N pairs: returns N entries; the remaining input is absorbed
+         *       into the value of the last entry (it is not discarded)</li>
          * </ul>
          *
          * <p><b>Common Confusion:</b>

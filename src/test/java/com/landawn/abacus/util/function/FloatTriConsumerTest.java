@@ -50,6 +50,6 @@ public class FloatTriConsumerTest extends TestBase {
     public void testAndThenNullThrowsImmediately() {
         FloatTriConsumer instance = (a, b, c) -> {
         };
-        org.junit.jupiter.api.Assertions.assertThrows(NullPointerException.class, () -> instance.andThen((FloatTriConsumer) null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> instance.andThen((FloatTriConsumer) null));
     }
 }

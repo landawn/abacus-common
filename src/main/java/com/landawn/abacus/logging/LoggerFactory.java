@@ -16,10 +16,11 @@ package com.landawn.abacus.logging;
 
 import java.util.Locale;
 import java.util.Map;
-import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
 import com.landawn.abacus.annotation.SuppressFBWarnings;
+import com.landawn.abacus.util.N;
+import com.landawn.abacus.util.cs;
 
 /**
  * A factory for creating Logger objects with automatic detection of the logging framework.
@@ -120,12 +121,12 @@ public final class LoggerFactory {
      *
      * @param name the name of the logger; must not be {@code null}
      * @return a Logger instance for the specified name
-     * @throws NullPointerException if {@code name} is {@code null}
+     * @throws IllegalArgumentException if {@code name} is {@code null}
      */
     @SuppressFBWarnings("SF_SWITCH_FALLTHROUGH")
     @SuppressWarnings("fallthrough")
     public static synchronized Logger getLogger(final String name) {
-        Objects.requireNonNull(name, "name");
+        N.checkArgNotNull(name, cs.name);
 
         Logger logger = namedLoggers.get(name);
 

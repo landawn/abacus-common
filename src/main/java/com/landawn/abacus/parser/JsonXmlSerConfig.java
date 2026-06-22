@@ -106,6 +106,12 @@ public abstract class JsonXmlSerConfig<C extends JsonXmlSerConfig<C>> extends Se
     /**
      * Gets the character used for quoting char values.
      *
+     * <p><b>Note on deprecation:</b> The concrete subclasses {@link JsonSerConfig} and {@link XmlSerConfig}
+     * deprecate the quotation setters because JSON mandates double quotes and XML emits values as element
+     * text. These accessors are intentionally <i>not</i> deprecated on this shared base: the serialization
+     * engine reads {@code getStringQuotation()} at runtime (see {@code ParserUtil}) as a generic quoting
+     * mechanism, so the base-level accessors remain part of the live, non-deprecated contract.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * JsonSerConfig config = new JsonSerConfig();

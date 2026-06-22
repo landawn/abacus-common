@@ -110,7 +110,7 @@ public class XMLGregorianCalendarType extends AbstractType<XMLGregorianCalendar>
      * This method handles several input formats:
      * </p>
      * <ul>
-     *   <li>null or empty string returns null</li>
+     *   <li>null, empty, or the literal {@code "null"} string returns null</li>
      *   <li>"SYS_TIME" returns the current time as XMLGregorianCalendar</li>
      *   <li>Standard date/time strings are parsed using the Dates utility</li>
      * </ul>
@@ -161,7 +161,7 @@ public class XMLGregorianCalendarType extends AbstractType<XMLGregorianCalendar>
             return null; // NOSONAR
         }
 
-        if (isPossibleLong(cbuf, offset, len)) {
+        if (isPossibleMillis(cbuf, offset, len)) {
             try {
                 return Dates.createXMLGregorianCalendar(parseLong(cbuf, offset, len));
             } catch (final NumberFormatException e) {
@@ -352,8 +352,8 @@ public class XMLGregorianCalendarType extends AbstractType<XMLGregorianCalendar>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * CharacterWriter writer = new CharacterWriter();
-     * JsonXmlSerConfig<?> config = JsonXmlSerConfig.of();
+     * BufferedJsonWriter writer = new BufferedJsonWriter();
+     * JsonSerConfig config = JsonSerConfig.create();
      * type.serializeTo(writer, xmlGregorianCalendar, config);   // Writes formatted date/time
      * }</pre>
      * <p>
@@ -404,7 +404,7 @@ public class XMLGregorianCalendarType extends AbstractType<XMLGregorianCalendar>
                         break;
 
                     default:
-                        throw new RuntimeException("Unsupported operation");
+                        throw new RuntimeException("Unsupported DateTimeFormat: " + config.getDateTimeFormat());
                 }
             }
 

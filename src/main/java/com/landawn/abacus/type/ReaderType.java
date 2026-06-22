@@ -170,7 +170,7 @@ public class ReaderType extends AbstractType<Reader> {
 
     /**
      * Converts a Reader to its string representation by reading all content from the Reader.
-     * The Reader is fully consumed and closed after this operation.
+     * The Reader is fully consumed (but not closed) by this operation.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -482,15 +482,15 @@ public class ReaderType extends AbstractType<Reader> {
      * <pre>{@code
      * Type<Reader> type = TypeFactory.getType(Reader.class);
      * Reader reader = new StringReader("Sample text");
-     * CharacterWriter writer = new CharacterWriter();
-     * JsonXmlSerConfig<?> config = new JsonXmlSerConfig<>();
+     * BufferedJsonWriter writer = new BufferedJsonWriter();
+     * JsonSerConfig config = JsonSerConfig.create();
      * config.setStringQuotation('"');
      * type.serializeTo(writer, reader, config);
      * System.out.println(writer.toString());   // Output: "Sample text"
      *
      * // Without quotation
      * Reader reader2 = new StringReader("No quotes");
-     * CharacterWriter writer2 = new CharacterWriter();
+     * BufferedJsonWriter writer2 = new BufferedJsonWriter();
      * type.serializeTo(writer2, reader2, null);
      * System.out.println(writer2.toString());   // Output: No quotes
      * }</pre>

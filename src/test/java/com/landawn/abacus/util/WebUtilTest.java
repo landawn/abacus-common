@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.http.HttpHeaders;
+import com.landawn.abacus.http.HttpMethod;
 import com.landawn.abacus.http.HttpUtil;
 import com.landawn.abacus.http.OkHttpRequest;
 import com.landawn.abacus.http.WebUtil;
@@ -356,7 +357,7 @@ public class WebUtilTest extends TestBase {
 
     @Test
     public void testBuildCurl_SimpleGetRequest() {
-        String result = WebUtil.buildCurl("GET", "https://api.example.com/users", null, null, null, '\'');
+        String result = WebUtil.buildCurl(HttpMethod.GET, "https://api.example.com/users", null, null, null, '\'');
 
         Assertions.assertNotNull(result);
         Assertions.assertTrue(result.contains("curl -X GET"));
@@ -365,7 +366,7 @@ public class WebUtilTest extends TestBase {
 
     @Test
     public void testBuildCurl_PostWithBody() {
-        String result = WebUtil.buildCurl("POST", "https://api.example.com/users", null, "{\"name\":\"John\"}", "application/json", '\'');
+        String result = WebUtil.buildCurl(HttpMethod.POST, "https://api.example.com/users", null, "{\"name\":\"John\"}", "application/json", '\'');
 
         Assertions.assertNotNull(result);
         Assertions.assertTrue(result.contains("curl -X POST"));
@@ -379,7 +380,7 @@ public class WebUtilTest extends TestBase {
         headers.put("Content-Type", "application/json");
         headers.put("Authorization", "Bearer token123");
 
-        String result = WebUtil.buildCurl("POST", "https://api.example.com/users", headers, "{\"name\":\"John\"}", null, '\'');
+        String result = WebUtil.buildCurl(HttpMethod.POST, "https://api.example.com/users", headers, "{\"name\":\"John\"}", null, '\'');
 
         Assertions.assertNotNull(result);
         Assertions.assertTrue(result.contains("-H"));
@@ -389,7 +390,7 @@ public class WebUtilTest extends TestBase {
 
     @Test
     public void testBuildCurl_WithSingleQuote() {
-        String result = WebUtil.buildCurl("GET", "https://api.example.com", null, null, null, '\'');
+        String result = WebUtil.buildCurl(HttpMethod.GET, "https://api.example.com", null, null, null, '\'');
 
         Assertions.assertNotNull(result);
         Assertions.assertTrue(result.contains("'https://api.example.com'"));
@@ -397,7 +398,7 @@ public class WebUtilTest extends TestBase {
 
     @Test
     public void testBuildCurl_WithDoubleQuote() {
-        String result = WebUtil.buildCurl("GET", "https://api.example.com", null, null, null, '"');
+        String result = WebUtil.buildCurl(HttpMethod.GET, "https://api.example.com", null, null, null, '"');
 
         Assertions.assertNotNull(result);
         Assertions.assertTrue(result.contains("\"https://api.example.com\""));
@@ -405,7 +406,7 @@ public class WebUtilTest extends TestBase {
 
     @Test
     public void testBuildCurl_PutRequest() {
-        String result = WebUtil.buildCurl("PUT", "https://api.example.com/users/1", null, "{\"name\":\"Updated\"}", "application/json", '\'');
+        String result = WebUtil.buildCurl(HttpMethod.PUT, "https://api.example.com/users/1", null, "{\"name\":\"Updated\"}", "application/json", '\'');
 
         Assertions.assertNotNull(result);
         Assertions.assertTrue(result.contains("curl -X PUT"));
@@ -413,7 +414,7 @@ public class WebUtilTest extends TestBase {
 
     @Test
     public void testBuildCurl_DeleteRequest() {
-        String result = WebUtil.buildCurl("DELETE", "https://api.example.com/users/1", null, null, null, '\'');
+        String result = WebUtil.buildCurl(HttpMethod.DELETE, "https://api.example.com/users/1", null, null, null, '\'');
 
         Assertions.assertNotNull(result);
         Assertions.assertTrue(result.contains("curl -X DELETE"));
@@ -421,7 +422,7 @@ public class WebUtilTest extends TestBase {
 
     @Test
     public void testBuildCurl_WithBodyTypeButNoContentTypeHeader() {
-        String result = WebUtil.buildCurl("POST", "https://api.example.com/users", null, "{\"data\":\"test\"}", "application/json", '\'');
+        String result = WebUtil.buildCurl(HttpMethod.POST, "https://api.example.com/users", null, "{\"data\":\"test\"}", "application/json", '\'');
 
         Assertions.assertNotNull(result);
         Assertions.assertTrue(result.contains("Content-Type"));
@@ -433,7 +434,7 @@ public class WebUtilTest extends TestBase {
         Map<String, String> headers = new HashMap<>();
         headers.put("Content-Type", "text/xml");
 
-        String result = WebUtil.buildCurl("POST", "https://api.example.com/users", headers, "<data>test</data>", "application/json", '\'');
+        String result = WebUtil.buildCurl(HttpMethod.POST, "https://api.example.com/users", headers, "<data>test</data>", "application/json", '\'');
 
         Assertions.assertNotNull(result);
         Assertions.assertTrue(result.contains("text/xml"));
@@ -443,7 +444,7 @@ public class WebUtilTest extends TestBase {
     public void testBuildCurl_EmptyHeaders() {
         Map<String, String> headers = new HashMap<>();
 
-        String result = WebUtil.buildCurl("GET", "https://api.example.com", headers, null, null, '\'');
+        String result = WebUtil.buildCurl(HttpMethod.GET, "https://api.example.com", headers, null, null, '\'');
 
         Assertions.assertNotNull(result);
         Assertions.assertTrue(result.contains("curl -X GET"));
@@ -451,7 +452,7 @@ public class WebUtilTest extends TestBase {
 
     @Test
     public void testBuildCurl_EmptyBody() {
-        String result = WebUtil.buildCurl("POST", "https://api.example.com", null, "", null, '\'');
+        String result = WebUtil.buildCurl(HttpMethod.POST, "https://api.example.com", null, "", null, '\'');
 
         Assertions.assertNotNull(result);
         Assertions.assertFalse(result.contains("-d"));
@@ -459,7 +460,7 @@ public class WebUtilTest extends TestBase {
 
     @Test
     public void testBuildCurl_WithSpecialCharactersInUrl() {
-        String result = WebUtil.buildCurl("GET", "https://api.example.com/search?q=test&page=1", null, null, null, '\'');
+        String result = WebUtil.buildCurl(HttpMethod.GET, "https://api.example.com/search?q=test&page=1", null, null, null, '\'');
 
         Assertions.assertNotNull(result);
         Assertions.assertTrue(result.contains("search?q=test&page=1"));
@@ -467,7 +468,7 @@ public class WebUtilTest extends TestBase {
 
     @Test
     public void testBuildCurl_WithSpecialCharactersInBody() {
-        String result = WebUtil.buildCurl("POST", "https://api.example.com", null, "{\"message\":\"Hello\\nWorld\"}", null, '\'');
+        String result = WebUtil.buildCurl(HttpMethod.POST, "https://api.example.com", null, "{\"message\":\"Hello\\nWorld\"}", null, '\'');
 
         Assertions.assertNotNull(result);
         Assertions.assertTrue(result.contains("-d"));
@@ -480,7 +481,7 @@ public class WebUtilTest extends TestBase {
         headers.put("Header2", "value2");
         headers.put("Header3", "value3");
 
-        String result = WebUtil.buildCurl("GET", "https://api.example.com", headers, null, null, '\'');
+        String result = WebUtil.buildCurl(HttpMethod.GET, "https://api.example.com", headers, null, null, '\'');
 
         Assertions.assertNotNull(result);
         Assertions.assertTrue(result.contains("Header1"));
@@ -490,7 +491,7 @@ public class WebUtilTest extends TestBase {
 
     @Test
     public void testBuildCurl_CustomHttpMethod() {
-        String result = WebUtil.buildCurl("PATCH", "https://api.example.com/users/1", null, "{\"status\":\"active\"}", "application/json", '\'');
+        String result = WebUtil.buildCurl(HttpMethod.PATCH, "https://api.example.com/users/1", null, "{\"status\":\"active\"}", "application/json", '\'');
 
         Assertions.assertNotNull(result);
         Assertions.assertTrue(result.contains("curl -X PATCH"));
@@ -503,8 +504,8 @@ public class WebUtilTest extends TestBase {
         headers.put("Authorization", "Bearer abc123");
         headers.put("Accept", "application/json");
 
-        String result = WebUtil.buildCurl("POST", "https://api.example.com/v1/users", headers, "{\"name\":\"John\",\"email\":\"john@example.com\"}", null,
-                '\'');
+        String result = WebUtil.buildCurl(HttpMethod.POST, "https://api.example.com/v1/users", headers, "{\"name\":\"John\",\"email\":\"john@example.com\"}",
+                null, '\'');
 
         Assertions.assertNotNull(result);
         Assertions.assertTrue(result.contains("curl -X POST"));
@@ -623,7 +624,7 @@ public class WebUtilTest extends TestBase {
 
     @Test
     public void testBuildCurl_HeadRequest() {
-        String result = WebUtil.buildCurl("HEAD", "https://api.example.com/users", null, null, null, '\'');
+        String result = WebUtil.buildCurl(HttpMethod.HEAD, "https://api.example.com/users", null, null, null, '\'');
 
         Assertions.assertNotNull(result);
         Assertions.assertTrue(result.contains("curl -X HEAD"));
@@ -631,7 +632,7 @@ public class WebUtilTest extends TestBase {
 
     @Test
     public void testBuildCurl_OptionsRequest() {
-        String result = WebUtil.buildCurl("OPTIONS", "https://api.example.com", null, null, null, '\'');
+        String result = WebUtil.buildCurl(HttpMethod.OPTIONS, "https://api.example.com", null, null, null, '\'');
 
         Assertions.assertNotNull(result);
         Assertions.assertTrue(result.contains("curl -X OPTIONS"));

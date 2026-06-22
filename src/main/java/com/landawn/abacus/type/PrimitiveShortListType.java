@@ -42,8 +42,7 @@ public final class PrimitiveShortListType extends AbstractPrimitiveListType<Shor
 
     /**
      * Constructs a new PrimitiveShortListType instance.
-     * This constructor is protected to allow subclassing while maintaining controlled instantiation
-     * through the TypeFactory.
+     * This constructor is protected to keep instantiation controlled by the TypeFactory.
      */
     protected PrimitiveShortListType() {
         super(SHORT_LIST);
@@ -228,7 +227,7 @@ public final class PrimitiveShortListType extends AbstractPrimitiveListType<Shor
      * Type<ShortList> type = TypeFactory.getType(ShortList.class);
      * ShortList list = ShortList.of((short) 100, (short) 200, (short) 300);
      * BufferedJsonWriter writer = new BufferedJsonWriter();
-     * JsonXmlSerConfig<?> config = new JsonXmlSerConfig<>();
+     * JsonXmlSerConfig<?> config = null;
      * type.serializeTo(writer, list, config);
      * System.out.println(writer.toString());   // Output: [100, 200, 300]
      *

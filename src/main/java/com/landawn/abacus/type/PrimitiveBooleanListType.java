@@ -42,8 +42,7 @@ public final class PrimitiveBooleanListType extends AbstractPrimitiveListType<Bo
 
     /**
      * Constructs a new PrimitiveBooleanListType instance.
-     * This constructor is protected to allow subclassing while maintaining controlled instantiation
-     * through the TypeFactory.
+     * This constructor is protected to keep instantiation controlled by the TypeFactory.
      */
     protected PrimitiveBooleanListType() {
         super(BOOLEAN_LIST);
@@ -62,10 +61,10 @@ public final class PrimitiveBooleanListType extends AbstractPrimitiveListType<Bo
     /**
      * Returns the Type object for the boolean element type.
      *
-     * @return the Type object representing boolean elements
+     * @return the Type object representing Boolean/boolean elements
      */
     @Override
-    public Type<?> elementType() {
+    public Type<Boolean> elementType() {
         return elementType;
     }
 

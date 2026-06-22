@@ -324,17 +324,6 @@ public class JsonXmlSerConfigTest extends TestBase {
     }
 
     @Test
-    public void testWriteLongAsString() {
-        assertFalse(config.isWriteLongAsString());
-
-        config.setWriteLongAsString(true);
-        assertTrue(config.isWriteLongAsString());
-
-        config.setWriteLongAsString(false);
-        assertFalse(config.isWriteLongAsString());
-    }
-
-    @Test
     public void testWriteLongAsStringToggle() {
         assertFalse(config.isWriteLongAsString());
         config.setWriteLongAsString(true);
@@ -364,17 +353,6 @@ public class JsonXmlSerConfigTest extends TestBase {
     }
 
     @Test
-    public void testWriteNullStringAsEmpty() {
-        assertFalse(config.isWriteNullStringAsEmpty());
-
-        config.setWriteNullStringAsEmpty(true);
-        assertTrue(config.isWriteNullStringAsEmpty());
-
-        config.setWriteNullStringAsEmpty(false);
-        assertFalse(config.isWriteNullStringAsEmpty());
-    }
-
-    @Test
     public void testWriteNullStringAsEmptyToggle() {
         assertFalse(config.isWriteNullStringAsEmpty());
         config.setWriteNullStringAsEmpty(true);
@@ -391,17 +369,6 @@ public class JsonXmlSerConfigTest extends TestBase {
         TestConfig result = config.setWriteNullNumberAsZero(true);
         assertSame(config, result);
         assertTrue(config.isWriteNullNumberAsZero());
-    }
-
-    @Test
-    public void testWriteNullNumberAsZero() {
-        assertFalse(config.isWriteNullNumberAsZero());
-
-        config.setWriteNullNumberAsZero(true);
-        assertTrue(config.isWriteNullNumberAsZero());
-
-        config.setWriteNullNumberAsZero(false);
-        assertFalse(config.isWriteNullNumberAsZero());
     }
 
     @Test
@@ -424,34 +391,12 @@ public class JsonXmlSerConfigTest extends TestBase {
     }
 
     @Test
-    public void testWriteNullBooleanAsFalse() {
-        assertFalse(config.isWriteNullBooleanAsFalse());
-
-        config.setWriteNullBooleanAsFalse(true);
-        assertTrue(config.isWriteNullBooleanAsFalse());
-
-        config.setWriteNullBooleanAsFalse(false);
-        assertFalse(config.isWriteNullBooleanAsFalse());
-    }
-
-    @Test
     public void testWriteNullBooleanAsFalseToggle() {
         assertFalse(config.isWriteNullBooleanAsFalse());
         config.setWriteNullBooleanAsFalse(true);
         assertTrue(config.isWriteNullBooleanAsFalse());
         config.setWriteNullBooleanAsFalse(false);
         assertFalse(config.isWriteNullBooleanAsFalse());
-    }
-
-    @Test
-    public void testWriteBigDecimalAsPlain() {
-        assertFalse(config.isWriteBigDecimalAsPlain());
-
-        config.setWriteBigDecimalAsPlain(true);
-        assertTrue(config.isWriteBigDecimalAsPlain());
-
-        config.setWriteBigDecimalAsPlain(false);
-        assertFalse(config.isWriteBigDecimalAsPlain());
     }
 
     @Test
@@ -484,34 +429,12 @@ public class JsonXmlSerConfigTest extends TestBase {
     }
 
     @Test
-    public void testFailOnEmptyBean() {
-        assertTrue(config.isFailOnEmptyBean());
-
-        config.setFailOnEmptyBean(false);
-        assertFalse(config.isFailOnEmptyBean());
-
-        config.setFailOnEmptyBean(true);
-        assertTrue(config.isFailOnEmptyBean());
-    }
-
-    @Test
     public void testFailOnEmptyBeanToggle() {
         assertTrue(config.isFailOnEmptyBean());
         config.setFailOnEmptyBean(false);
         assertFalse(config.isFailOnEmptyBean());
         config.setFailOnEmptyBean(true);
         assertTrue(config.isFailOnEmptyBean());
-    }
-
-    @Test
-    public void testSupportCircularReference() {
-        assertFalse(config.isSupportCircularReference());
-
-        config.setSupportCircularReference(true);
-        assertTrue(config.isSupportCircularReference());
-
-        config.setSupportCircularReference(false);
-        assertFalse(config.isSupportCircularReference());
     }
 
     @Test

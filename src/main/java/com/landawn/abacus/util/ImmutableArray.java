@@ -570,7 +570,7 @@ public final class ImmutableArray<T> implements Iterable<T>, Immutable {
      * }</pre>
      *
      * @param <E> the type of exception that the consumer may throw
-     * @param consumer a BiConsumer that accepts the index and the element
+     * @param consumer an IntObjConsumer that accepts the index and the element
      * @throws IllegalArgumentException if the specified consumer is null
      * @throws E if the consumer throws an exception
      */

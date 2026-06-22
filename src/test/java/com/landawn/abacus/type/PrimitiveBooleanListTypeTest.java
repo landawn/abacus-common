@@ -46,6 +46,15 @@ public class PrimitiveBooleanListTypeTest extends TestBase {
     }
 
     @Test
+    public void testGetElementTypeReturnTypeNarrowed() {
+        // elementType() is covariantly narrowed to Type<Boolean> (consistent with the other primitive list types).
+        final Type<Boolean> elementType = booleanListType.elementType();
+        assertNotNull(elementType);
+        assertEquals("boolean", elementType.name());
+        assertEquals(boolean.class, elementType.javaType());
+    }
+
+    @Test
     public void testStringOfWithNull() {
         assertNull(booleanListType.stringOf(null));
     }

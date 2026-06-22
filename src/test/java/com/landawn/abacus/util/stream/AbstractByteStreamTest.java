@@ -135,24 +135,6 @@ public class AbstractByteStreamTest extends TestBase {
     }
 
     @Test
-    public void testDebounce() {
-        byte[] result = createAbstractStream((byte) 1, (byte) 2, (byte) 3, (byte) 4).debounce(2, Duration.ofHours(1)).toArray();
-        assertArrayEquals(new byte[] { 1, 2 }, result);
-    }
-
-    @Test
-    public void testDebounce_EmptyInput() {
-        byte[] result = createAbstractStream().debounce(2, Duration.ofHours(1)).toArray();
-        assertArrayEquals(new byte[] {}, result);
-    }
-
-    @Test
-    public void testDebounce_ErrorPath() {
-        assertThrows(IllegalArgumentException.class, () -> createAbstractStream((byte) 1).debounce(0, Duration.ofHours(1)).toArray());
-        assertThrows(IllegalArgumentException.class, () -> createAbstractStream((byte) 1).debounce(1, Duration.ofMillis(0)).toArray());
-    }
-
-    @Test
     public void skipUntil() {
         byte[] result = stream.skipUntil(b -> b > 2).toArray();
         assertArrayEquals(new byte[] { 3, 4, 5 }, result);
@@ -1021,12 +1003,6 @@ public class AbstractByteStreamTest extends TestBase {
         assertEquals(1, indexed.size());
         assertEquals(0, indexed.get(0).index());
         assertEquals(42, indexed.get(0).value());
-    }
-
-    @Test
-    public void boxed() {
-        List<Byte> result = stream.boxed().toList();
-        assertEquals(Arrays.asList((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5), result);
     }
 
     @Test
@@ -1938,4 +1914,42 @@ public class AbstractByteStreamTest extends TestBase {
         assertFalse(revIter2.hasNext());
     }
 
+    @Test
+    public void testDebounce_emptyEmitsNothing() {
+        org.junit.jupiter.api.Assertions.assertEquals(0, createAbstractStream().debounce(com.landawn.abacus.util.Duration.ofSeconds(1)).toArray().length);
+    }
+
+    @Test
+    public void testDebounce_singleElementSurvives() {
+        org.junit.jupiter.api.Assertions.assertArrayEquals(new byte[] { (byte) 42 },
+                createAbstractStream((byte) 42).debounce(com.landawn.abacus.util.Duration.ofSeconds(1)).toArray());
+    }
+
+    @Test
+    public void testDebounce_coldStreamEmitsOnlyLastElement() {
+        // A cold in-memory stream yields all elements with ~0 inter-arrival gap, so every element
+        // except the last is superseded within the quiet window; only the final element survives.
+        org.junit.jupiter.api.Assertions.assertArrayEquals(new byte[] { (byte) 5 },
+                createAbstractStream((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).debounce(com.landawn.abacus.util.Duration.ofSeconds(1)).toArray());
+    }
+
+    @Test
+    public void testDebounce_slowSourceAllSurviveWhenGapAtLeastDuration() {
+        // delay() makes each element arrive >= 60ms after the previous; with a 20ms quiet window
+        // every element clears the window and survives.
+        org.junit.jupiter.api.Assertions.assertArrayEquals(new byte[] { (byte) 1, (byte) 2, (byte) 3 },
+                createAbstractStream((byte) 1, (byte) 2, (byte) 3).delay(com.landawn.abacus.util.Duration.ofMillis(60))
+                        .debounce(com.landawn.abacus.util.Duration.ofMillis(20))
+                        .toArray());
+    }
+
+    @Test
+    public void testDebounce_invalidDurationThrows() {
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class,
+                () -> createAbstractStream((byte) 1, (byte) 2, (byte) 3).debounce((com.landawn.abacus.util.Duration) null).toArray());
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class,
+                () -> createAbstractStream((byte) 1, (byte) 2, (byte) 3).debounce(com.landawn.abacus.util.Duration.ofMillis(0)).toArray());
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class,
+                () -> createAbstractStream((byte) 1, (byte) 2, (byte) 3).debounce(com.landawn.abacus.util.Duration.ofMillis(-100)).toArray());
+    }
 }

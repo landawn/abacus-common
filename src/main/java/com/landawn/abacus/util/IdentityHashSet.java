@@ -94,7 +94,8 @@ public final class IdentityHashSet<T> extends AbstractSet<T> {
      * IdentityHashSet<String> set = new IdentityHashSet<>(list);
      * }</pre>
      *
-     * @param c the collection whose elements are to be placed into this set
+     * @param c the collection whose elements are to be placed into this set; a {@code null}
+     *          collection results in an empty set
      */
     public IdentityHashSet(final Collection<? extends T> c) {
         map = N.newIdentityHashMap(N.size(c));
@@ -462,16 +463,17 @@ public final class IdentityHashSet<T> extends AbstractSet<T> {
     }
 
     /**
-     * Returns a hash code for this set as defined by {@link java.util.AbstractSet#hashCode()} —
-     * the sum of {@link Object#hashCode()} of each element.
-     * Note: this uses {@code hashCode()}, not {@link System#identityHashCode(Object)}.
+     * Returns a hash code for this set: the sum of {@link System#identityHashCode(Object)} of each
+     * element (as defined by {@code IdentityHashMap}'s key-set view).
+     * Note: this uses {@code System.identityHashCode(Object)}, not the elements' own {@code hashCode()},
+     * keeping it consistent with this set's reference-equality {@code equals}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IdentityHashSet<String> set = new IdentityHashSet<>();
      * set.add("a");
      * set.add("b");
-     * int hash = set.hashCode();   // returns the sum of the elements' hashCode() values
+     * int hash = set.hashCode();   // returns the sum of System.identityHashCode(e) for each element
      * }</pre>
      *
      * @return the hash code value for this set

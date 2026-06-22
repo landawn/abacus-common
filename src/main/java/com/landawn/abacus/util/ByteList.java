@@ -76,7 +76,7 @@ import com.landawn.abacus.util.stream.ByteStream;
  * // Creating and initializing byte lists
  * ByteList data = ByteList.of((byte)1, (byte)2, (byte)3, (byte)255);
  * ByteList buffer = new ByteList(1024);
- * ByteList range = ByteList.range(Byte.MIN_VALUE, Byte.MAX_VALUE);   // returns All byte values except Byte.MAX_VALUE (exclusive end)
+ * ByteList range = ByteList.range(Byte.MIN_VALUE, Byte.MAX_VALUE);   // returns all byte values except Byte.MAX_VALUE (exclusive end)
  *
  * // Basic operations
  * data.add((byte)42);         // Append byte value
@@ -168,7 +168,7 @@ import com.landawn.abacus.util.stream.ByteStream;
  * <ul>
  *   <li><b>Initial Capacity:</b> Default capacity of 10 elements</li>
  *   <li><b>Growth Strategy:</b> 1.75x expansion when capacity exceeded</li>
- *   <li><b>Manual Control:</b> {@code ensureCapacity()} for performance optimization</li>
+ *   <li><b>Manual Control:</b> specify the initial capacity via the {@code ByteList(int)} constructor</li>
  *   <li><b>Trimming:</b> {@code trimToSize()} to reduce memory footprint</li>
  * </ul>
  *
@@ -215,7 +215,7 @@ import com.landawn.abacus.util.stream.ByteStream;
  *
  * <p><b>Performance Tips:</b>
  * <ul>
- *   <li>Pre-size lists with known capacity using constructor or {@code ensureCapacity()}</li>
+ *   <li>Pre-size lists with known capacity using the {@code ByteList(int)} constructor</li>
  *   <li>Use {@code toArray()} for bulk operations requiring primitive arrays</li>
  *   <li>Prefer {@code addLast()} over {@code addFirst()} for better performance</li>
  *   <li>Use binary search on sorted data for O(log n) lookups</li>
@@ -859,7 +859,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
 
         final int numNew = c.size();
 
-        ensureCapacity(size + numNew); // Increments modCount
+        ensureCapacity(size + numNew);
 
         final int numMoved = size - index;
 
@@ -909,7 +909,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
 
         final int numNew = a.length;
 
-        ensureCapacity(size + numNew); // Increments modCount
+        ensureCapacity(size + numNew);
 
         final int numMoved = size - index;
 
@@ -2375,8 +2375,8 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      *
      * <p>For example, if the range contains [1, 2, 2, 3, 1, 4], the returned list will contain [1, 2, 3, 4].</p>
      *
-     * <p>The time complexity is O(n) for small ranges using a boolean array for tracking seen values,
-     * where n is the size of the range. The original list is not modified.</p>
+     * <p>This method uses an efficient hash-based algorithm to identify distinct elements
+     * without modifying the original list.</p>
      *
      * @param fromIndex the starting index (inclusive) of the range to process
      * @param toIndex the ending index (exclusive) of the range to process
@@ -2398,13 +2398,12 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * Checks whether this list contains any duplicate elements.
      *
      * <p>This method scans through all elements in the list and returns {@code true} if any element appears
-     * more than once. It uses an efficient algorithm that typically completes in O(n) time for byte
-     * values by using a boolean array to track seen values.</p>
+     * more than once. It uses an efficient algorithm that may short-circuit as soon as a duplicate is found.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * ByteList list1 = ByteList.of(1, 2, 3, 4);   // containsDuplicates() returns false
-     * ByteList list2 = ByteList.of(1, 2, 2, 3);   // containsDuplicates() returns true
+     * ByteList list1 = ByteList.of((byte) 1, (byte) 2, (byte) 3, (byte) 4);   // containsDuplicates() returns false
+     * ByteList list2 = ByteList.of((byte) 1, (byte) 2, (byte) 2, (byte) 3);   // containsDuplicates() returns true
      * ByteList list3 = ByteList.of();             // containsDuplicates() returns false
      * }</pre>
      *
@@ -2427,9 +2426,9 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * ByteList.of(-5, 0, 3, 10).isSorted();   // returns true
-     * ByteList.of(3, 1, 4, 2).isSorted();     // returns false
-     * ByteList.of(1, 1, 2, 2).isSorted();     // returns true (duplicates allowed)
+     * ByteList.of((byte) -5, (byte) 0, (byte) 3, (byte) 10).isSorted();   // returns true
+     * ByteList.of((byte) 3, (byte) 1, (byte) 4, (byte) 2).isSorted();     // returns false
+     * ByteList.of((byte) 1, (byte) 1, (byte) 2, (byte) 2).isSorted();     // returns true (duplicates allowed)
      * }</pre>
      *
      * @return {@code true} if the list is sorted in ascending order, {@code false} otherwise
@@ -2451,7 +2450,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * ByteList list = ByteList.of(3, -1, 4, 1, 5);
+     * ByteList list = ByteList.of((byte) 3, (byte) -1, (byte) 4, (byte) 1, (byte) 5);
      * list.sort();   // list now contains [-1, 1, 3, 4, 5]
      * }</pre>
      *
@@ -2503,7 +2502,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * ByteList list = ByteList.of(3, -1, 4, 1, 5);
+     * ByteList list = ByteList.of((byte) 3, (byte) -1, (byte) 4, (byte) 1, (byte) 5);
      * list.reverseSort();   // list now contains [5, 4, 3, 1, -1]
      * }</pre>
      *
@@ -2529,7 +2528,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * ByteList list = ByteList.of(1, 3, 5, 7, 9);
+     * ByteList list = ByteList.of((byte) 1, (byte) 3, (byte) 5, (byte) 7, (byte) 9);
      * list.binarySearch((byte)5);   // returns 2
      * list.binarySearch((byte)6);   // returns -4 (insertion point would be 3)
      * }</pre>
@@ -2586,7 +2585,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * ByteList list = ByteList.of(1, 2, 3, 4, 5);
+     * ByteList list = ByteList.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5);
      * list.reverse();   // list now contains [5, 4, 3, 2, 1]
      * }</pre>
      *
@@ -2607,7 +2606,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * ByteList list = ByteList.of(1, 2, 3, 4, 5, 6);
+     * ByteList list = ByteList.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5, (byte) 6);
      * list.reverse(1, 5);   // list now contains [1, 5, 4, 3, 2, 6]
      * }</pre>
      *
@@ -2656,7 +2655,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * ByteList list = ByteList.of(1, 2, 3, 4, 5);
+     * ByteList list = ByteList.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5);
      * list.shuffle();   // list might now contain [3, 1, 5, 2, 4]
      * }</pre>
      *
@@ -2683,7 +2682,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * ByteList list = ByteList.of(1, 2, 3, 4, 5);
+     * ByteList list = ByteList.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5);
      * Random rnd = new Random(12345);
      * list.shuffle(rnd);                // Will always produce the same shuffle with this seed
      * }</pre>
@@ -2693,6 +2692,8 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      */
     @Override
     public void shuffle(final Random rnd) {
+        N.checkArgNotNull(rnd, cs.rnd);
+
         if (size() > 1) {
             N.shuffle(elementData, 0, size, rnd);
         }
@@ -2707,7 +2708,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * ByteList list = ByteList.of(1, 2, 3, 4, 5);
+     * ByteList list = ByteList.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5);
      * list.swap(1, 3);   // list now contains [1, 4, 3, 2, 5]
      * }</pre>
      *
@@ -2749,7 +2750,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * ByteList list = ByteList.of(1, 2, 3, 4, 5);
+     * ByteList list = ByteList.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5);
      * ByteList subCopy = list.copy(1, 4);   // returns subCopy contains [2, 3, 4]
      * }</pre>
      *
@@ -2785,7 +2786,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * ByteList list = ByteList.of(0, 1, 2, 3, 4, 5);
+     * ByteList list = ByteList.of((byte) 0, (byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5);
      * list.copy(0, 6, 2);     // returns [0, 2, 4] (every other element)
      * list.copy(5, -1, -2);   // returns [5, 3, 1] (reverse, every other)
      * }</pre>
@@ -2802,7 +2803,9 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     public ByteList copy(final int fromIndex, final int toIndex, final int step) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), Math.max(fromIndex, toIndex));
 
-        return new ByteList(N.copyOfRange(elementData, fromIndex, toIndex, step));
+        // Clamp a descending start against the logical size (like forEach): N.copyOfRange clamps
+        // against the backing array's length, which may exceed size and expose phantom elements.
+        return new ByteList(N.copyOfRange(elementData, fromIndex > toIndex ? N.min(size - 1, fromIndex) : fromIndex, toIndex, step));
     }
 
     /**
@@ -2817,7 +2820,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * ByteList list = ByteList.of(1, 2, 3, 4, 5, 6, 7);
+     * ByteList list = ByteList.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5, (byte) 6, (byte) 7);
      * List<ByteList> chunks = list.split(0, 7, 3);
      * // chunks contains: [[1, 2, 3], [4, 5, 6], [7]]
      * }</pre>
@@ -3088,10 +3091,10 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * ByteList list = ByteList.of(1, 2, 3, 4, 5);
+     * ByteList list = ByteList.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5);
      * int sum = list.stream()
      *     .filter(b -> b > 2)
-     *     .map(b -> b * 2)
+     *     .map(b -> (byte) (b * 2))
      *     .sum();   // returns Sum of (3*2 + 4*2 + 5*2) = 24
      * }</pre>
      *
@@ -3111,7 +3114,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * ByteList list = ByteList.of(1, 2, 3, 4, 5, 6);
+     * ByteList list = ByteList.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5, (byte) 6);
      * long count = list.stream(2, 5)
      *     .filter(b -> b % 2 == 0)
      *     .count();   // Counts even numbers in elements [3, 4, 5], result is 1
@@ -3336,8 +3339,8 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ByteList.of().toString();          // returns "[]"
-     * ByteList.of(1).toString();         // returns "[1]"
-     * ByteList.of(1, 2, 3).toString();   // returns "[1, 2, 3]"
+     * ByteList.of((byte) 1).toString();         // returns "[1]"
+     * ByteList.of((byte) 1, (byte) 2, (byte) 3).toString();   // returns "[1, 2, 3]"
      * }</pre>
      *
      * @return a string representation of this list

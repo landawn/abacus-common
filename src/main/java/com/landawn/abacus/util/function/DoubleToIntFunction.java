@@ -32,7 +32,8 @@ import com.landawn.abacus.util.Throwables;
 public interface DoubleToIntFunction extends Throwables.DoubleToIntFunction<RuntimeException>, java.util.function.DoubleToIntFunction { //NOSONAR
     /**
      * A default implementation that casts the double value to int.
-     * Note that this conversion truncates the decimal part and may overflow for large double values.
+     * Note that this conversion truncates the decimal part; double values outside the int range are
+     * clamped to {@code Integer.MAX_VALUE} or {@code Integer.MIN_VALUE} (NaN becomes 0).
      */
     DoubleToIntFunction DEFAULT = value -> (int) value;
 
@@ -53,4 +54,18 @@ public interface DoubleToIntFunction extends Throwables.DoubleToIntFunction<Runt
      */
     @Override
     int applyAsInt(double value);
+
+    /**
+     * Returns this object as a {@link Throwables.DoubleToIntFunction} view.
+     *
+     * <p>The returned object has the same behavior as this one. This method does not translate
+     * exceptions or make the original implementation capable of throwing new checked exceptions; the
+     * exception type parameter is for target-type compatibility with APIs that accept {@code Throwables.DoubleToIntFunction}.
+     *
+     * @param <E> the target exception type for compatibility with {@code Throwables.DoubleToIntFunction}
+     * @return a {@link Throwables.DoubleToIntFunction} view of this object
+     */
+    default <E extends Throwable> Throwables.DoubleToIntFunction<E> toThrowable() {
+        return (Throwables.DoubleToIntFunction<E>) this;
+    }
 }

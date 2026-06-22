@@ -129,11 +129,11 @@ import com.landawn.abacus.util.u.Optional;
  * Type<Map<String, Integer>> mapType = TypeFactory.getType("Map<String, Integer>");
  * Type<Optional<Person>> optionalType = TypeFactory.getType("Optional<Person>");
  *
- * // Custom type registration with simple functions
+ * // Custom type registration with simple functions (the class must not already have a built-in/registered type)
  * TypeFactory.registerType(
- *     LocalDate.class,
- *     date -> date.toString(),                   // Serialization function
- *     str -> LocalDate.parse(str)                // Deserialization function
+ *     EmailAddress.class,
+ *     email -> email.getValue(),                 // Serialization function
+ *     str -> new EmailAddress(str)               // Deserialization function
  * );
  *
  * // Custom type registration with JsonParser support
@@ -635,7 +635,7 @@ public final class TypeFactory {
                 if (cls == null) {
                     if (clsName.equals(PasswordType.PASSWORD)) {
                         if (typeParameters.length > 0) {
-                            throw new IllegalArgumentException("Incorrect type parameters: " + typeName + ". PasswordType can only have zero type parameter.");
+                            throw new IllegalArgumentException("Incorrect type parameters: " + typeName + ". PasswordType can only have zero type parameters.");
                         }
                         if (parameters.length > 1) {
                             throw new IllegalArgumentException("Incorrect parameters: " + typeName + ". PasswordType can only have zero or one parameter.");
@@ -675,11 +675,11 @@ public final class TypeFactory {
                     } else if (parameters.length == 1) {
                         type = new EnumType(clsName, com.landawn.abacus.util.EnumType.valueOf(parameters[0]));
                     } else {
-                        throw new IllegalArgumentException("Not supported parameters " + typeName + " for EnumType.");
+                        throw new IllegalArgumentException("Unsupported parameters for EnumType: " + typeName);
                     }
                 } else if (java.util.Optional.class.isAssignableFrom(cls)) {
                     if (typeParameters.length > 1) {
-                        throw new IllegalArgumentException("Incorrect type parameters: " + typeName + ". Optional has one and only has one type parameter.");
+                        throw new IllegalArgumentException("Incorrect type parameters: " + typeName + ". Optional has one and only one type parameter.");
                     }
                     if (parameters.length > 0) {
                         throw new IllegalArgumentException("Incorrect parameters: " + typeName + ". Optional Type can only have zero parameter.");
@@ -688,7 +688,7 @@ public final class TypeFactory {
                     type = new JdkOptionalType(typeParameters.length == 0 ? "Object" : typeParameters[0]);
                 } else if (Optional.class.isAssignableFrom(cls)) {
                     if (typeParameters.length > 1) {
-                        throw new IllegalArgumentException("Incorrect type parameters: " + typeName + ". Optional has one and only has one type parameter.");
+                        throw new IllegalArgumentException("Incorrect type parameters: " + typeName + ". Optional has one and only one type parameter.");
                     }
                     if (parameters.length > 0) {
                         throw new IllegalArgumentException("Incorrect parameters: " + typeName + ". Optional Type can only have zero parameter.");
@@ -697,7 +697,7 @@ public final class TypeFactory {
                     type = new OptionalType(typeParameters.length == 0 ? "Object" : typeParameters[0]);
                 } else if (Nullable.class.isAssignableFrom(cls)) {
                     if (typeParameters.length > 1) {
-                        throw new IllegalArgumentException("Incorrect type parameters: " + typeName + ". Nullable has one and only has one type parameter.");
+                        throw new IllegalArgumentException("Incorrect type parameters: " + typeName + ". Nullable has one and only one type parameter.");
                     }
                     if (parameters.length > 0) {
                         throw new IllegalArgumentException("Incorrect parameters: " + typeName + ". Nullable Type can only have zero parameter.");
@@ -706,7 +706,7 @@ public final class TypeFactory {
                     type = new NullableType(typeParameters.length == 0 ? "Object" : typeParameters[0]);
                 } else if (Holder.class.isAssignableFrom(cls)) {
                     if (typeParameters.length > 1) {
-                        throw new IllegalArgumentException("Incorrect type parameters: " + typeName + ". Holder has one and only has one type parameter.");
+                        throw new IllegalArgumentException("Incorrect type parameters: " + typeName + ". Holder has one and only one type parameter.");
                     }
                     if (parameters.length > 0) {
                         throw new IllegalArgumentException("Incorrect parameters: " + typeName + ". Holder Type can only have zero parameter.");
@@ -731,7 +731,7 @@ public final class TypeFactory {
                 } else if (ListMultimap.class.isAssignableFrom(cls)) {
                     if ((typeParameters.length != 2) && (typeParameters.length != 0)) {
                         throw new IllegalArgumentException(
-                                "Incorrect type parameters: " + typeName + ". ListMultimap Type can only have zero or two type parameter.");
+                                "Incorrect type parameters: " + typeName + ". ListMultimap Type can only have zero or two type parameters.");
                     }
                     if (parameters.length > 0) {
                         throw new IllegalArgumentException("Incorrect parameters: " + typeName + ". ListMultimap Type can only have zero parameter.");
@@ -745,7 +745,7 @@ public final class TypeFactory {
                 } else if (SetMultimap.class.isAssignableFrom(cls)) {
                     if ((typeParameters.length != 2) && (typeParameters.length != 0)) {
                         throw new IllegalArgumentException(
-                                "Incorrect type parameters: " + typeName + ". SetMultimap Type can only have zero or two type parameter.");
+                                "Incorrect type parameters: " + typeName + ". SetMultimap Type can only have zero or two type parameters.");
                     }
                     if (parameters.length > 0) {
                         throw new IllegalArgumentException("Incorrect parameters: " + typeName + ". SetMultimap Type can only have zero parameter.");
@@ -761,7 +761,7 @@ public final class TypeFactory {
 
                     if (!(typeParamCount == 0 || typeParamCount == 2 || typeParamCount == 3)) {
                         throw new IllegalArgumentException(
-                                "Incorrect type parameters: " + typeName + ". Multimap Type can only have zero, two or three type parameter.");
+                                "Incorrect type parameters: " + typeName + ". Multimap Type can only have zero, two, or three type parameters.");
                     }
                     if (parameters.length > 0) {
                         throw new IllegalArgumentException("Incorrect parameters: " + typeName + ". Multimap Type can only have zero parameter.");
@@ -794,7 +794,7 @@ public final class TypeFactory {
                 } else if (Sheet.class.isAssignableFrom(cls)) {
                     if ((typeParameters.length != 3) && (typeParameters.length != 0)) {
                         throw new IllegalArgumentException(
-                                "Incorrect type parameters: " + typeName + ". Sheet Type can only have zero or Three type parameters.");
+                                "Incorrect type parameters: " + typeName + ". Sheet Type can only have zero or three type parameters.");
                     }
 
                     if (parameters.length > 0) {
@@ -843,9 +843,9 @@ public final class TypeFactory {
                     }
 
                     if (typeParameters.length == 0) {
-                        type = new ImmutableSetType(ObjectType.OBJECT);
+                        type = new ImmutableSetType(cls, ObjectType.OBJECT);
                     } else {
-                        type = new ImmutableSetType(typeParameters[0]);
+                        type = new ImmutableSetType(cls, typeParameters[0]);
                     }
                 } else if (guavaMultisetClass != null && guavaMultisetClass.isAssignableFrom(cls)) {
                     if (typeParameters.length > 1) {
@@ -865,7 +865,7 @@ public final class TypeFactory {
                 } else if (guavaMultimapClass != null && guavaMultimapClass.isAssignableFrom(cls)) {
                     if ((typeParameters.length != 2) && (typeParameters.length != 0)) {
                         throw new IllegalArgumentException(
-                                "Incorrect type parameters: " + typeName + ". Guava Multimap Type can only have zero or two type parameter.");
+                                "Incorrect type parameters: " + typeName + ". Guava Multimap Type can only have zero or two type parameters.");
                     }
 
                     if (parameters.length > 0) {
@@ -895,20 +895,20 @@ public final class TypeFactory {
                 } else if (ImmutableMap.class.isAssignableFrom(cls)) {
                     if ((typeParameters.length != 2) && (typeParameters.length != 0)) {
                         throw new IllegalArgumentException(
-                                "Incorrect type parameters: " + typeName + ". ImmutableMap Type can only have zero or two type parameter.");
+                                "Incorrect type parameters: " + typeName + ". ImmutableMap Type can only have zero or two type parameters.");
                     }
                     if (parameters.length > 0) {
                         throw new IllegalArgumentException("Incorrect parameters: " + typeName + ". ImmutableMap Type can only have zero parameter.");
                     }
 
                     if (typeParameters.length == 0) {
-                        type = new ImmutableMapType(ObjectType.OBJECT, ObjectType.OBJECT);
+                        type = new ImmutableMapType(cls, ObjectType.OBJECT, ObjectType.OBJECT);
                     } else {
-                        type = new ImmutableMapType(typeParameters[0], typeParameters[1]);
+                        type = new ImmutableMapType(cls, typeParameters[0], typeParameters[1]);
                     }
                 } else if (Map.class.isAssignableFrom(cls)) {
                     if ((typeParameters.length != 2) && (typeParameters.length != 0)) {
-                        throw new IllegalArgumentException("Incorrect type parameters: " + typeName + ". Map Type can only have zero or two type parameter.");
+                        throw new IllegalArgumentException("Incorrect type parameters: " + typeName + ". Map Type can only have zero or two type parameters.");
                     }
                     if (parameters.length > 0) {
                         throw new IllegalArgumentException("Incorrect parameters: " + typeName + ". Map Type can only have zero parameter.");
@@ -921,7 +921,7 @@ public final class TypeFactory {
                     }
                 } else if (Pair.class.isAssignableFrom(cls)) {
                     if ((typeParameters.length != 2) && (typeParameters.length != 0)) {
-                        throw new IllegalArgumentException("Incorrect type parameters: " + typeName + ". Pair Type can only have zero or two type parameter.");
+                        throw new IllegalArgumentException("Incorrect type parameters: " + typeName + ". Pair Type can only have zero or two type parameters.");
                     }
                     if (parameters.length > 0) {
                         throw new IllegalArgumentException("Incorrect parameters: " + typeName + ". Pair Type can only have zero parameter.");
@@ -935,7 +935,7 @@ public final class TypeFactory {
                 } else if (Triple.class.isAssignableFrom(cls)) {
                     if ((typeParameters.length != 3) && (typeParameters.length != 0)) {
                         throw new IllegalArgumentException(
-                                "Incorrect type parameters: " + typeName + ". Triple Type can only have zero or three type parameter.");
+                                "Incorrect type parameters: " + typeName + ". Triple Type can only have zero or three type parameters.");
                     }
                     if (parameters.length > 0) {
                         throw new IllegalArgumentException("Incorrect parameters: " + typeName + ". Triple Type can only have zero parameter.");
@@ -963,7 +963,7 @@ public final class TypeFactory {
                 } else if (Tuple2.class.equals(cls)) {
                     if ((typeParameters.length != 2) && (typeParameters.length != 0)) {
                         throw new IllegalArgumentException(
-                                "Incorrect type parameters: " + typeName + ". Tuple2 Type can only have zero or two type parameter.");
+                                "Incorrect type parameters: " + typeName + ". Tuple2 Type can only have zero or two type parameters.");
                     }
                     if (parameters.length > 0) {
                         throw new IllegalArgumentException("Incorrect parameters: " + typeName + ". Tuple2 Type can only have zero parameter.");
@@ -977,7 +977,7 @@ public final class TypeFactory {
                 } else if (Tuple3.class.equals(cls)) {
                     if ((typeParameters.length != 3) && (typeParameters.length != 0)) {
                         throw new IllegalArgumentException(
-                                "Incorrect type parameters: " + typeName + ". Tuple3 Type can only have zero or three type parameter.");
+                                "Incorrect type parameters: " + typeName + ". Tuple3 Type can only have zero or three type parameters.");
                     }
                     if (parameters.length > 0) {
                         throw new IllegalArgumentException("Incorrect parameters: " + typeName + ". Tuple3 Type can only have zero parameter.");
@@ -991,7 +991,7 @@ public final class TypeFactory {
                 } else if (Tuple4.class.equals(cls)) {
                     if ((typeParameters.length != 4) && (typeParameters.length != 0)) {
                         throw new IllegalArgumentException(
-                                "Incorrect type parameters: " + typeName + ". Tuple4 Type can only have zero or four type parameter.");
+                                "Incorrect type parameters: " + typeName + ". Tuple4 Type can only have zero or four type parameters.");
                     }
                     if (parameters.length > 0) {
                         throw new IllegalArgumentException("Incorrect parameters: " + typeName + ". Tuple4 Type can only have zero parameter.");
@@ -1005,7 +1005,7 @@ public final class TypeFactory {
                 } else if (Tuple5.class.equals(cls)) {
                     if ((typeParameters.length != 5) && (typeParameters.length != 0)) {
                         throw new IllegalArgumentException(
-                                "Incorrect type parameters: " + typeName + ". Tuple5 Type can only have zero or five type parameter.");
+                                "Incorrect type parameters: " + typeName + ". Tuple5 Type can only have zero or five type parameters.");
                     }
                     if (parameters.length > 0) {
                         throw new IllegalArgumentException("Incorrect parameters: " + typeName + ". Tuple5 Type can only have zero parameter.");
@@ -1019,7 +1019,7 @@ public final class TypeFactory {
                 } else if (Tuple6.class.equals(cls)) {
                     if ((typeParameters.length != 6) && (typeParameters.length != 0)) {
                         throw new IllegalArgumentException(
-                                "Incorrect type parameters: " + typeName + ". Tuple6 Type can only have zero or six type parameter.");
+                                "Incorrect type parameters: " + typeName + ". Tuple6 Type can only have zero or six type parameters.");
                     }
                     if (parameters.length > 0) {
                         throw new IllegalArgumentException("Incorrect parameters: " + typeName + ". Tuple6 Type can only have zero parameter.");
@@ -1033,7 +1033,7 @@ public final class TypeFactory {
                 } else if (Tuple7.class.equals(cls)) {
                     if ((typeParameters.length != 7) && (typeParameters.length != 0)) {
                         throw new IllegalArgumentException(
-                                "Incorrect type parameters: " + typeName + ". Tuple7 Type can only have zero or seven type parameter.");
+                                "Incorrect type parameters: " + typeName + ". Tuple7 Type can only have zero or seven type parameters.");
                     }
                     if (parameters.length > 0) {
                         throw new IllegalArgumentException("Incorrect parameters: " + typeName + ". Tuple7 Type can only have zero parameter.");
@@ -1049,7 +1049,7 @@ public final class TypeFactory {
                 } else if (Tuple8.class.equals(cls)) {
                     if ((typeParameters.length != 8) && (typeParameters.length != 0)) {
                         throw new IllegalArgumentException(
-                                "Incorrect type parameters: " + typeName + ". Tuple8 Type can only have zero or eight type parameter.");
+                                "Incorrect type parameters: " + typeName + ". Tuple8 Type can only have zero or eight type parameters.");
                     }
                     if (parameters.length > 0) {
                         throw new IllegalArgumentException("Incorrect parameters: " + typeName + ". Tuple8 Type can only have zero parameter.");
@@ -1065,7 +1065,7 @@ public final class TypeFactory {
                 } else if (Tuple9.class.equals(cls)) {
                     if ((typeParameters.length != 9) && (typeParameters.length != 0)) {
                         throw new IllegalArgumentException(
-                                "Incorrect type parameters: " + typeName + ". Tuple9 Type can only have zero or nine type parameter.");
+                                "Incorrect type parameters: " + typeName + ". Tuple9 Type can only have zero or nine type parameters.");
                     }
                     if (parameters.length > 0) {
                         throw new IllegalArgumentException("Incorrect parameters: " + typeName + ". Tuple9 Type can only have zero parameter.");
@@ -1108,7 +1108,7 @@ public final class TypeFactory {
                 } else if (AbstractMap.SimpleImmutableEntry.class.isAssignableFrom(cls)) {
                     if ((typeParameters.length != 2) && (typeParameters.length != 0)) {
                         throw new IllegalArgumentException(
-                                "Incorrect type parameters: " + typeName + ". Map.ImmutableEntry Type can only have zero or two type parameter.");
+                                "Incorrect type parameters: " + typeName + ". Map.ImmutableEntry Type can only have zero or two type parameters.");
                     }
                     if (parameters.length > 0) {
                         throw new IllegalArgumentException("Incorrect parameters: " + typeName + ". Map.ImmutableEntry Type can only have zero parameter.");
@@ -1122,7 +1122,7 @@ public final class TypeFactory {
                 } else if (Map.Entry.class.isAssignableFrom(cls)) {
                     if ((typeParameters.length != 2) && (typeParameters.length != 0)) {
                         throw new IllegalArgumentException(
-                                "Incorrect type parameters: " + typeName + ". Map.Entry Type can only have zero or two type parameter.");
+                                "Incorrect type parameters: " + typeName + ". Map.Entry Type can only have zero or two type parameters.");
                     }
                     if (parameters.length > 0) {
                         throw new IllegalArgumentException("Incorrect parameters: " + typeName + ". Map.Entry Type can only have zero parameter.");
@@ -1190,7 +1190,10 @@ public final class TypeFactory {
             }
 
             if (typeName.endsWith("[]") && !type.isArray()) {
-                type = new ObjectArrayType(type);
+                // Build the array type from the COMPONENT type: pool-registered simple names like
+                // "UUID" resolve correctly there, while the full-name fallback produced a doubled
+                // name ("UUID[][]") with Object (String-deserialized) elements.
+                type = new ObjectArrayType(getType(typeName.substring(0, typeName.length() - 2)));
             }
 
             typePool.put(typeName, type);
@@ -1202,33 +1205,6 @@ public final class TypeFactory {
 
         return type;
     }
-
-    //    /**
-    //     * Retrieves a list of Type objects corresponding to the specified array of Class objects.
-    //     *
-    //     * @param <T> the type parameter
-    //     * @param classes the array of Class objects
-    //     * @return a list of Type objects corresponding to the specified classes
-    //     * @deprecated Use individual {@link #getType(Class)} calls instead
-    //     */
-    //    @Deprecated
-    //    @SafeVarargs
-    //    static <T> List<Type<T>> getType(final Class<? extends T>... classes) {
-    //        if (N.isEmpty(classes)) {
-    //            return new ArrayList<>();
-    //        }
-    //
-    //        final List<Type<T>> result = new ArrayList<>(classes.length);
-    //
-    //        Class<?> cls = null;
-    //        for (final Class<? extends T> element : classes) {
-    //            cls = element;
-    //
-    //            result.add(cls == null ? null : getType(cls));
-    //        }
-    //
-    //        return result;
-    //    }
 
     /**
      * Retrieves the Type object corresponding to the specified Class object.
@@ -1242,6 +1218,11 @@ public final class TypeFactory {
      * and custom bean types. For generic types, use {@link #getType(String)} with a type name
      * that includes type parameters.
      * </p>
+     * <p>
+     * This method never returns {@code null}: a class with no dedicated {@code Type} resolves to a
+     * fabricated, cached {@link com.landawn.abacus.type.ObjectType ObjectType} (or a bean type)
+     * rather than failing.
+     * </p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1250,9 +1231,18 @@ public final class TypeFactory {
      * Type<List> listType = TypeFactory.getType(List.class);
      * }</pre>
      *
+     * <p><b>Note — the type parameter {@code <T>} is intentionally unbound (it is {@code Class<?>},
+     * NOT {@code Class<? extends T>}).</b> This is deliberate and is kept on purpose: callers
+     * frequently collect heterogeneous results into a single typed container (e.g.
+     * {@code classes.stream().map(TypeFactory::getType).collect(toList())} assigned to a
+     * {@code List<Type<Object>>}). Tightening the parameter to {@code Class<? extends T>} would make
+     * {@code T} inferable per-element and break those legitimate call sites, so the looser
+     * {@code Class<?>} signature is retained by design (the inconsistency with
+     * {@code registerType(Class<T>, ...)} is accepted).</p>
+     *
      * @param <T> the Java type represented by the requested {@code Type} object
      * @param cls the Class object for which to retrieve the Type
-     * @return the Type object corresponding to the specified class
+     * @return the Type object corresponding to the specified class (never {@code null})
      * @throws IllegalArgumentException if {@code cls} is {@code null}
      * @see #getType(String)
      * @see #getType(java.lang.reflect.Type)
@@ -1274,25 +1264,6 @@ public final class TypeFactory {
         return type;
     }
 
-    //    /**
-    //     * Retrieves a list of Type objects corresponding to the specified collection of Class objects.
-    //     *
-    //     * @param <T> the type parameter
-    //     * @param classes the collection of Class objects
-    //     * @return a list of Type objects corresponding to the specified classes
-    //     * @deprecated Use individual {@link #getType(Class)} calls instead
-    //     */
-    //    @Deprecated
-    //    static <T> List<Type<T>> getType(final Collection<Class<? extends T>> classes) {
-    //        final List<Type<T>> result = new ArrayList<>(classes.size());
-    //
-    //        for (final Class<?> cls : classes) {
-    //            result.add(cls == null ? null : getType(cls));
-    //        }
-    //
-    //        return result;
-    //    }
-
     /**
      * Retrieves the Type object corresponding to the specified java.lang.reflect.Type.
      * <p>
@@ -1302,23 +1273,32 @@ public final class TypeFactory {
      * Type object. Results are cached for performance.
      * </p>
      *
+     * <p>This method never returns {@code null}: for an unrecognized type it fabricates and caches an
+     * {@link com.landawn.abacus.type.ObjectType ObjectType} fallback (the same behavior as
+     * {@link #getType(Class)} / {@link #getType(String)}) rather than failing. An
+     * {@link IllegalArgumentException} is thrown only for a {@code null} argument or for structurally
+     * malformed generic/parameter syntax (e.g., a wrong number of type arguments).</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * java.lang.reflect.Type listType = new TypeReference<List<String>>() {}.getType();
+     * java.lang.reflect.Type listType = new TypeReference<List<String>>() {}.javaType();
      * Type<List<String>> strings = TypeFactory.getType(listType);
      *
-     * java.lang.reflect.Type mapType = new TypeReference<Map<String, Integer>>() {}.getType();
+     * java.lang.reflect.Type mapType = new TypeReference<Map<String, Integer>>() {}.javaType();
      * Type<Map<String, Integer>> mapping = TypeFactory.getType(mapType);
      * }</pre>
      *
      * @param <T> the Java type represented by the requested {@code Type} object
      * @param javaType the java.lang.reflect.Type to convert, can be a Class or ParameterizedType
-     * @return the corresponding Type object
+     * @return the corresponding Type object (never {@code null})
+     * @throws IllegalArgumentException if {@code javaType} is {@code null}, or if the type name format is structurally invalid
      * @see #getType(Class)
      * @see #getType(String)
      */
     @SuppressWarnings("rawtypes")
-    public static <T> Type<T> getType(final java.lang.reflect.Type javaType) {
+    public static <T> Type<T> getType(final java.lang.reflect.Type javaType) throws IllegalArgumentException {
+        N.checkArgNotNull(javaType, "javaType");
+
         Type result = javaType2TypeCache.get(javaType);
 
         if (result == null) {
@@ -1363,6 +1343,14 @@ public final class TypeFactory {
      * The method caches Type objects for reuse. If the type pool size reaches multiples of 100,
      * a warning is logged about the pool size.
      * </p>
+     * <p>
+     * This method never returns {@code null}: an unrecognized or unresolvable name does <b>not</b> throw —
+     * it fabricates and caches an {@link com.landawn.abacus.type.ObjectType ObjectType} fallback
+     * (a usable, generic {@code Object}-backed {@code Type}) and returns it. An
+     * {@link IllegalArgumentException} is thrown only for a {@code null} name or for structurally malformed
+     * generic/parameter syntax (for example, a type-parameter count that does not match the container, such
+     * as {@code "Map<String>"} or {@code "Pair<String>"}).
+     * </p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1373,13 +1361,17 @@ public final class TypeFactory {
      * t2.name();                      // returns "List<String>"
      * t2.javaType();                  // returns List.class
      *
+     * Type<?> t3 = TypeFactory.getType("CompletelyUnknownName");
+     * t3.isObject();                  // returns true (ObjectType fallback, not an exception)
+     *
      * TypeFactory.getType((String) null);   // throws IllegalArgumentException
      * }</pre>
      *
      * @param <T> the Java type represented by the requested {@code Type} object
      * @param typeName the name of the type to retrieve, with optional type parameters
-     * @return the Type object corresponding to the type name
-     * @throws IllegalArgumentException if typeName is {@code null} or if the type name format is invalid
+     * @return the Type object corresponding to the type name (never {@code null}; an
+     *         {@link com.landawn.abacus.type.ObjectType ObjectType} is returned for unresolvable names)
+     * @throws IllegalArgumentException if {@code typeName} is {@code null}, or if the type name format is structurally invalid (e.g., a mismatched type-parameter count)
      * @see #getType(Class)
      * @see #registerType(String, Type)
      */
@@ -1448,9 +1440,9 @@ public final class TypeFactory {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * TypeFactory.registerType(
-     *     LocalDate.class,
-     *     date -> date.toString(),
-     *     str -> LocalDate.parse(str)
+     *     EmailAddress.class,
+     *     email -> email.getValue(),
+     *     str -> new EmailAddress(str)
      * );
      * }</pre>
      *
@@ -1516,13 +1508,18 @@ public final class TypeFactory {
         N.checkArgNotNull(cls, cs.cls);
         N.checkArgNotNull(type, cs.type);
 
+        // Fast-fail (preserves single-threaded message/order) before mutating the name pool.
         if (javaType2TypeCache.containsKey(cls)) {
             throw new IllegalArgumentException("A type has already registered with class: " + cls);
         }
 
         registerType(type);
 
-        javaType2TypeCache.put(cls, type);
+        // Atomic check-then-put closes the check-then-act race: a concurrent registration for the
+        // same class cannot silently overwrite an existing mapping.
+        if (javaType2TypeCache.putIfAbsent(cls, type) != null) {
+            throw new IllegalArgumentException("A type has already registered with class: " + cls);
+        }
     }
 
     /**
@@ -1579,9 +1576,7 @@ public final class TypeFactory {
 
         registerType(typeName, type);
 
-        if (!javaType2TypeCache.containsKey(targetClass)) {
-            javaType2TypeCache.put(targetClass, type);
-        }
+        javaType2TypeCache.putIfAbsent(targetClass, type);
     }
 
     /**
@@ -1638,9 +1633,7 @@ public final class TypeFactory {
 
         registerType(typeName, type);
 
-        if (!javaType2TypeCache.containsKey(targetClass)) {
-            javaType2TypeCache.put(targetClass, type);
-        }
+        javaType2TypeCache.putIfAbsent(targetClass, type);
     }
 
     /**
@@ -1663,7 +1656,7 @@ public final class TypeFactory {
      *
      * @param typeName the name to register the type under
      * @param type the Type implementation to register
-     * @throws IllegalArgumentException if typeName or type is {@code null}, or if a type with the given name already exists
+     * @throws IllegalArgumentException if typeName or type is {@code null}, if a type with the given name already exists, or if a type with the same name (as returned by {@link Type#name()}) already exists
      * @see #registerType(Type)
      * @see #getType(String)
      */
@@ -1671,13 +1664,22 @@ public final class TypeFactory {
         N.checkArgNotNull(typeName, cs.typeName);
         N.checkArgNotNull(type, cs.type);
 
-        if (typePool.containsKey(typeName)) {
-            throw new IllegalArgumentException("A type has already registered with name: " + typeName);
+        if (typeName.equals(type.name())) {
+            // typeName IS the type's own name: a single atomic registration (no separate alias slot).
+            // Delegating avoids a self-conflict where the alias put would collide with the name just
+            // inserted by registerType(type).
+            registerType(type);
+            return;
         }
 
+        // Distinct alias name: register the type under its intrinsic name() first (atomic), then claim
+        // the alias name. The atomic putIfAbsent closes the check-then-act race so a concurrent
+        // registration for the same name cannot silently overwrite an existing mapping.
         registerType(type);
 
-        typePool.put(typeName, type);
+        if (typePool.putIfAbsent(typeName, type) != null) {
+            throw new IllegalArgumentException("A type has already registered with name: " + typeName);
+        }
     }
 
     /**
@@ -1709,11 +1711,11 @@ public final class TypeFactory {
     public static void registerType(final Type<?> type) throws IllegalArgumentException {
         N.checkArgNotNull(type, cs.type);
 
-        if (typePool.containsKey(type.name())) {
+        // Atomic check-then-put closes the check-then-act race: a concurrent registration for the
+        // same name cannot silently overwrite an existing mapping (a startup-time op in practice).
+        if (typePool.putIfAbsent(type.name(), type) != null) {
             throw new IllegalArgumentException("A type has already registered with name: " + type.name());
         }
-
-        typePool.put(type.name(), type);
 
         //    if (!typePool.containsKey(getClassName(type.javaType()))) {
         //        typePool.put(getClassName(type.javaType()), type);

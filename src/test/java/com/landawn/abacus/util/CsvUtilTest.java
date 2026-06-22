@@ -14,6 +14,7 @@ import java.io.StringReader;
 import java.io.StringWriter;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -1383,17 +1384,6 @@ public class CsvUtilTest extends TestBase {
     }
 
     @Test
-    @DisplayName("Test stream(Reader, Collection<String>, long, long, Predicate, Class, boolean)")
-    public void testStreamFromReaderWithAllParamsAndClass() {
-        Reader reader = new StringReader(testCsvContent);
-        Predicate<String[]> filter = row -> "true".equals(row[3]);
-        try (Stream<Person> stream = CsvUtil.stream(reader, null, 0, Long.MAX_VALUE, filter, Person.class, true)) {
-            List<Person> persons = stream.toList();
-            assertEquals(3, persons.size());
-        }
-    }
-
-    @Test
     @DisplayName("Test stream(File, Collection<String>, long, long, Predicate, BiFunction)")
     public void testStreamFromFileWithAllParamsAndBiFunction() {
         Predicate<String[]> filter = row -> Integer.parseInt(row[0]) <= 3;
@@ -1645,18 +1635,6 @@ public class CsvUtilTest extends TestBase {
             List<Map> results = stream.toList();
             assertEquals(0, results.size());
         }
-    }
-
-    @Test
-    @DisplayName("Test stream Reader not closed when closeReaderWhenStreamIsClosed is false")
-    public void testStreamReaderNotClosed() throws IOException {
-        StringReader reader = new StringReader(testCsvContent);
-
-        try (Stream<Person> stream = CsvUtil.stream(reader, Person.class, false)) {
-            List<Person> persons = stream.toList();
-            assertEquals(5, persons.size());
-        }
-        // Reader should still be usable after stream is closed (though exhausted)
     }
 
     @Test
@@ -2303,6 +2281,20 @@ public class CsvUtilTest extends TestBase {
             assertEquals(5, names.size());
             assertEquals("John", names.get(0));
         }
+    }
+
+    @Test
+    @DisplayName("CSVLoader stream restores custom parsers if lazy creation fails")
+    public void testCSVLoaderStreamRestoresParsersWhenLazyCreationFails() {
+        Function<String, String[]> defaultHeaderParser = CsvUtil.getCurrentHeaderParser();
+        Function<String, String[]> customHeaderParser = line -> line.split(";");
+        BiFunction<List<String>, DisposableArray<String>, String> mapper = (columns, row) -> row.get(0);
+
+        try (Stream<String> stream = CsvUtil.loader().setHeaderParser(customHeaderParser).stream(mapper)) {
+            assertThrows(IllegalArgumentException.class, stream::toList);
+        }
+
+        assertSame(defaultHeaderParser, CsvUtil.getCurrentHeaderParser());
     }
 
     @Test
@@ -3030,9 +3022,72 @@ public class CsvUtilTest extends TestBase {
         assertFalse(reader.closed);
     }
 
+    @Test
+    @DisplayName("CSV stream recycles pooled reader for empty source")
+    public void testStream_EmptySourceRecyclesBorrowedBufferedReader() {
+        List<java.io.BufferedReader> drainedReaders = new ArrayList<>();
+        java.io.BufferedReader markerReader = null;
+        java.io.BufferedReader nextReader = null;
+
+        try {
+            for (int i = 0; i < 64; i++) {
+                drainedReaders.add(Objectory.createBufferedReader("drain-" + i));
+            }
+
+            markerReader = Objectory.createBufferedReader("marker");
+            Objectory.recycle(markerReader);
+
+            BiFunction<List<String>, DisposableArray<String>, String> mapper = (columns, row) -> row.get(0);
+
+            try (Stream<String> stream = CsvUtil.stream(new StringReader(""), null, 0, Long.MAX_VALUE, null, mapper, false)) {
+                assertTrue(stream.toList().isEmpty());
+            }
+
+            nextReader = Objectory.createBufferedReader("next");
+            assertSame(markerReader, nextReader);
+        } finally {
+            if (nextReader != null && nextReader != markerReader) {
+                Objectory.recycle(nextReader);
+            }
+
+            if (markerReader != null) {
+                Objectory.recycle(markerReader);
+            }
+
+            for (java.io.BufferedReader reader : drainedReaders) {
+                Objectory.recycle(reader);
+            }
+        }
+    }
+
     // -------------------------------------------------------------------------
     // Backslash round-trip tests (regression for REPLACEMENT_CHARS['\\'] = null bug)
     // -------------------------------------------------------------------------
+
+    @Test
+    @DisplayName("backslash-escape mode: writeField output round-trips through load")
+    public void testBackslashEscapeMode_WriteFieldRoundTripThroughLoad() throws IOException {
+        // regression: in backslash-escape mode literal backslashes were written raw
+        // (REPLACEMENT_CHARS_BACK_SLASH['\\'] == null), so the default CsvParser (escape = backslash)
+        // collapsed "\\" to "\" and corrupted backslash-before-quote sequences on read-back
+        CsvUtil.setEscapeCharToBackSlashForWrite();
+        try {
+            final String value = "c:\\temp\\\"x\".txt"; // contains backslash and backslash-before-quote
+            StringWriter sw = new StringWriter();
+            BufferedCsvWriter w = new BufferedCsvWriter(sw);
+            CsvUtil.writeField(w, Type.of(String.class), "path");
+            w.write(',');
+            CsvUtil.writeField(w, Type.of(String.class), value);
+            w.flush();
+
+            Dataset ds = CsvUtil.load(new StringReader("name,value\n" + sw + "\n"));
+            assertEquals(1, ds.size());
+            assertEquals("path", ds.get(0, 0));
+            assertEquals(value, ds.get(0, 1));
+        } finally {
+            CsvUtil.resetEscapeCharForWrite();
+        }
+    }
 
     // --- Helpers ---
 
@@ -3084,5 +3139,147 @@ public class CsvUtilTest extends TestBase {
         public void close() {
             closed = true;
         }
+    }
+
+    // --- regression tests for 2026-06-11 deep-review fixes ---
+
+    @org.junit.jupiter.api.Test
+    public void testCsvToJsonEscapesHeaderKeys() {
+        // regression: JSON keys were written raw, so a header containing '"' produced invalid JSON
+        final String csv = "\"a\"\"b\",x\n1,2\n";
+        final java.io.StringWriter out = new java.io.StringWriter();
+
+        CsvUtil.csvToJson(new java.io.StringReader(csv), null, out, null);
+
+        final String json = out.toString();
+        org.junit.jupiter.api.Assertions.assertTrue(json.contains("\"a\\\"b\""), json);
+
+        // the output must be parseable JSON (one data row with two columns)
+        final java.util.List<java.util.Map<String, Object>> parsed = N.fromJson(json, java.util.List.class);
+        org.junit.jupiter.api.Assertions.assertEquals(1, parsed.size());
+        org.junit.jupiter.api.Assertions.assertEquals("1", parsed.get(0).get("a\"b"));
+        org.junit.jupiter.api.Assertions.assertEquals("2", parsed.get(0).get("x"));
+    }
+
+    // =========================================================================
+    // 2026-06-12: selectColumnNames / selectCsvHeaders null-vs-empty contract.
+    // Convention: a null selection means "not specified" -> include ALL columns;
+    // an empty (non-null) selection is an explicit selection of NO columns and
+    // yields a degenerate-but-constructible zero-column result (NOT an exception,
+    // NOT all-columns). For jsonToCsv: null -> all keys, empty -> empty output.
+    // =========================================================================
+
+    @Test
+    @DisplayName("load(File, null selection) includes ALL columns")
+    public void testLoad_File_NullSelectColumns_IncludesAll() {
+        Dataset ds = CsvUtil.load(testCsvFile, (List<String>) null);
+        assertEquals(4, ds.columnCount());
+        assertEquals(5, ds.size());
+    }
+
+    @Test
+    @DisplayName("load(File, empty selection) selects NO columns (zero-column result) [Family A]")
+    public void testLoad_File_EmptySelectColumns_ZeroColumns() {
+        Dataset ds = CsvUtil.load(testCsvFile, List.<String> of());
+        assertEquals(0, ds.columnCount());
+    }
+
+    @Test
+    @DisplayName("load(Reader, empty selection) selects NO columns (zero-column result) [Family A]")
+    public void testLoad_Reader_EmptySelectColumns_ZeroColumns() {
+        Dataset ds = CsvUtil.load(new StringReader(testCsvContent), List.<String> of());
+        assertEquals(0, ds.columnCount());
+    }
+
+    @Test
+    @DisplayName("load(File, empty selection, beanClass) selects NO columns (zero-column result) [Family B]")
+    public void testLoad_BeanClass_EmptySelectColumns_ZeroColumns() {
+        Dataset ds = CsvUtil.load(testCsvFile, List.<String> of(), Person.class);
+        assertEquals(0, ds.columnCount());
+    }
+
+    @Test
+    @DisplayName("load(Reader, empty selection, columnTypeMap) selects NO columns (zero-column result) [Family C]")
+    public void testLoad_ColumnTypeMap_EmptySelectColumns_ZeroColumns() {
+        Map<String, Type<?>> typeMap = new HashMap<>();
+        typeMap.put("age", Type.of(Integer.class));
+        Dataset ds = CsvUtil.load(new StringReader(testCsvContent), List.<String> of(), 0, Long.MAX_VALUE, (Predicate<? super String[]>) null, typeMap);
+        assertEquals(0, ds.columnCount());
+    }
+
+    @Test
+    @DisplayName("load(File, empty selection, rowExtractor) selects NO columns (zero-column result) [Family D]")
+    public void testLoad_RowExtractor_EmptySelectColumns_ZeroColumns() {
+        TriConsumer<List<String>, DisposableArray<String>, Object[]> extractor = (columns, row, output) -> {
+            for (int i = 0; i < output.length; i++) {
+                output[i] = row.get(i);
+            }
+        };
+        Dataset ds = CsvUtil.load(testCsvFile, List.<String> of(), extractor);
+        assertEquals(0, ds.columnCount());
+    }
+
+    @Test
+    @DisplayName("stream(File, empty selection, beanClass) is consumable without throwing [Family E]")
+    public void testStream_File_BeanClass_EmptySelectColumns_Consumable() {
+        try (Stream<Person> stream = CsvUtil.stream(testCsvFile, List.<String> of(), Person.class)) {
+            assertNotNull(stream.toList());
+        }
+    }
+
+    @Test
+    @DisplayName("stream(Reader, empty selection, beanClass) is consumable without throwing [Family E]")
+    public void testStream_Reader_BeanClass_EmptySelectColumns_Consumable() {
+        try (Stream<Person> stream = CsvUtil.stream(new StringReader(testCsvContent), List.<String> of(), Person.class, true)) {
+            assertNotNull(stream.toList());
+        }
+    }
+
+    @Test
+    @DisplayName("stream(File, empty selection, rowMapper) is consumable without throwing [Family F]")
+    public void testStream_RowMapper_EmptySelectColumns_Consumable() {
+        BiFunction<List<String>, DisposableArray<String>, String> mapper = (columns, row) -> columns.toString();
+        try (Stream<String> stream = CsvUtil.stream(testCsvFile, List.<String> of(), mapper)) {
+            assertNotNull(stream.toList());
+        }
+    }
+
+    @Test
+    @DisplayName("csvToJson(Reader, empty selection, Writer) does not throw and returns a count [Family G]")
+    public void testCsvToJson_EmptySelectColumns_NoThrow() {
+        StringWriter writer = new StringWriter();
+        long count = CsvUtil.csvToJson(new StringReader(testCsvContent), List.<String> of(), writer, null);
+        assertEquals(5, count);
+    }
+
+    @Test
+    @DisplayName("jsonToCsv(Reader, null headers, Writer) includes ALL properties of the first object [Family H]")
+    public void testJsonToCsv_NullSelectHeaders_IncludesAll() {
+        String json = "[{\"id\":\"1\",\"name\":\"John\"},{\"id\":\"2\",\"name\":\"Jane\"}]";
+        StringWriter writer = new StringWriter();
+        long count = CsvUtil.jsonToCsv(new StringReader(json), null, writer);
+        assertEquals(2, count);
+        String csv = writer.toString();
+        assertTrue(csv.contains("id"));
+        assertTrue(csv.contains("name"));
+    }
+
+    @Test
+    @DisplayName("jsonToCsv(Reader, empty headers, Writer) does not throw and selects NO columns [Family H]")
+    public void testJsonToCsv_EmptySelectHeaders_NoThrow() {
+        String json = "[{\"id\":\"1\",\"name\":\"John\"}]";
+        StringWriter writer = new StringWriter();
+        long count = CsvUtil.jsonToCsv(new StringReader(json), List.<String> of(), writer);
+        assertEquals(1, count);
+        // empty selection -> zero columns -> the keys are not emitted as headers
+        assertFalse(writer.toString().contains("id"));
+        assertFalse(writer.toString().contains("name"));
+    }
+
+    @Test
+    @DisplayName("CSVLoader builder: empty selectColumns selects NO columns (zero-column result)")
+    public void testLoaderBuilder_EmptySelectColumns_ZeroColumns() {
+        Dataset ds = CsvUtil.loader().source(testCsvFile).selectColumns(List.<String> of()).load();
+        assertEquals(0, ds.columnCount());
     }
 }

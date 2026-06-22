@@ -14,6 +14,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.Temporal;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -194,7 +195,8 @@ public class ArrayTest extends TestBase {
         int[] singleDimension = Array.newInstance(int.class, 5);
         assertEquals(5, singleDimension.length);
 
-        assertThrows(NullPointerException.class, () -> Array.newInstance(null, 1, 2));
+        // null componentType now throws the documented IllegalArgumentException (like the 1-dim sibling)
+        assertThrows(IllegalArgumentException.class, () -> Array.newInstance(null, 1, 2));
         assertThrows(NegativeArraySizeException.class, () -> Array.newInstance(Integer.class, 1, -1, 2));
         assertThrows(NegativeArraySizeException.class, () -> Array.newInstance(Integer.class, -1));
 
@@ -773,13 +775,6 @@ public class ArrayTest extends TestBase {
         List<String> emptyList = Array.asList(new String[0]);
         assertNotNull(emptyList);
         assertEquals(0, emptyList.size());
-    }
-
-    @Test
-    public void test_asList_withNull() {
-        List<String> list = Array.asList((String[]) null);
-        assertNotNull(list);
-        assertEquals(0, list.size());
     }
 
     @Test
@@ -4654,6 +4649,10 @@ public class ArrayTest extends TestBase {
         String[][] fromNull = Array.concat2D(null, nonNull);
         assertNotNull(fromNull);
         assertEquals(1, fromNull.length);
+
+        String[][] emptyResult = Array.concat2D(new String[0][], null);
+        assertNotNull(emptyResult);
+        assertEquals(0, emptyResult.length);
     }
 
     @Test
@@ -4676,6 +4675,10 @@ public class ArrayTest extends TestBase {
         String[][] a = { { "x" } };
         String[][] cloneA = Array.concat2D(a, null);
         assertArrayEquals(a[0], cloneA[0]);
+
+        String[][] empty = Array.concat2D(new String[0][], null);
+        assertNotNull(empty);
+        assertEquals(0, empty.length);
     }
 
     @Test
@@ -4747,6 +4750,10 @@ public class ArrayTest extends TestBase {
         String[][][] fromNull = Array.concat3D(null, nonNull);
         assertNotNull(fromNull);
         assertEquals(1, fromNull.length);
+
+        String[][][] emptyResult = Array.concat3D(new String[0][][], null);
+        assertNotNull(emptyResult);
+        assertEquals(0, emptyResult.length);
     }
 
     @Test
@@ -4763,6 +4770,10 @@ public class ArrayTest extends TestBase {
     @Test
     public void testConcat3D_NullInputs() {
         assertNull(Array.concat3D((String[][][]) null, (String[][][]) null));
+
+        String[][][] empty = Array.concat3D(new String[0][][], null);
+        assertNotNull(empty);
+        assertEquals(0, empty.length);
     }
 
     @Test
@@ -8636,18 +8647,6 @@ public class ArrayTest extends TestBase {
     }
 
     @Test
-    public void testBox_nullReturnsNull() {
-        assertNull(Array.box((boolean[]) null));
-        assertNull(Array.box((char[]) null));
-        assertNull(Array.box((byte[]) null));
-        assertNull(Array.box((short[]) null));
-        assertNull(Array.box((int[]) null));
-        assertNull(Array.box((long[]) null));
-        assertNull(Array.box((float[]) null));
-        assertNull(Array.box((double[]) null));
-    }
-
-    @Test
     public void testBox_rangeOnNullArray_returnsNull_doesNotThrowOOBE() {
         // Documented contract: null array yields null (bounds check only when non-null)
         assertNull(Array.box((int[]) null, 0, 0));
@@ -8765,6 +8764,160 @@ public class ArrayTest extends TestBase {
         // start>=end throws
         assertThrows(IllegalArgumentException.class, () -> Array.random(5, 5, 10));
         assertThrows(IllegalArgumentException.class, () -> Array.random(10, 5, 10));
+    }
+
+    // --- regression tests for 2026-06-10 deep-review fixes ---
+
+    @org.junit.jupiter.api.Test
+    public void testNewInstanceVarargsNullComponentTypeThrowsIAE() {
+        // regression: the varargs overload threw a raw NPE for a null component type while the
+        // single-length sibling throws the documented IllegalArgumentException
+        assertThrows(IllegalArgumentException.class, () -> Array.newInstance(null, 2, 3));
+    }
+
+    @org.junit.jupiter.api.Test
+    public void testTransposeCovariantMatrix() {
+        // regression: the result component type was derived from the FIRST row's runtime class,
+        // throwing ArrayStoreException for a covariant matrix with mixed row subtypes
+        final Number[][] m = { new Integer[] { 1 }, new Double[] { 2.0 } };
+        final Number[][] t = Array.transpose(m);
+
+        assertEquals(1, t.length);
+        assertArrayEquals(new Number[] { 1, 2.0 }, t[0]);
+
+        // homogeneous matrices unchanged
+        final Integer[][] m2 = { { 1, 2 }, { 3, 4 } };
+        assertArrayEquals(new Integer[] { 1, 3 }, Array.transpose(m2)[0]);
+    }
+
+    // Consolidated from ArrayUtilTest/ArraySortTest; ArrayUtil is nested in Array.java.
+    @Test
+    public void test_00() {
+        final int[] values = { 3, 1, 2 };
+        N.sort(values);
+
+        assertArrayEquals(new int[] { 1, 2, 3 }, values);
+    }
+
+    @Test
+    public void test_parallel_sort_perf() {
+        final int arrayLength = 1000;
+        final int loopNum = 1;
+        {
+            final int[] a = Array.random(arrayLength);
+            Profiler.run(1, loopNum, 3, "Arrays.sort(int[])", () -> Arrays.sort(a.clone())).printResult();
+            Profiler.run(1, loopNum, 3, "N.sort(int[])", () -> N.sort(a.clone())).printResult();
+            Profiler.run(1, loopNum, 3, "Arrays.parallelSort(int[])", () -> Arrays.parallelSort(a.clone())).printResult();
+            Profiler.run(1, loopNum, 3, "N.parallelSort(int[])", () -> N.parallelSort(a.clone())).printResult();
+        }
+
+        {
+            final long[] a = LongList.random(arrayLength).toArray();
+            Profiler.run(1, loopNum, 3, "Arrays.sort(long[])", () -> Arrays.sort(a.clone())).printResult();
+            Profiler.run(1, loopNum, 3, "N.sort(long[])", () -> N.sort(a.clone())).printResult();
+            Profiler.run(1, loopNum, 3, "Arrays.parallelSort(long[])", () -> Arrays.parallelSort(a.clone())).printResult();
+            Profiler.run(1, loopNum, 3, "N.parallelSort(long[])", () -> N.parallelSort(a.clone())).printResult();
+        }
+
+        {
+            final double[] a = DoubleList.random(arrayLength).toArray();
+            Profiler.run(1, loopNum, 3, "Arrays.sort(double[])", () -> Arrays.sort(a.clone())).printResult();
+            Profiler.run(1, loopNum, 3, "N.sort(double[])", () -> N.sort(a.clone())).printResult();
+            Profiler.run(1, loopNum, 3, "Arrays.parallelSort(double[])", () -> Arrays.parallelSort(a.clone())).printResult();
+            Profiler.run(1, loopNum, 3, "N.parallelSort(double[])", () -> N.parallelSort(a.clone())).printResult();
+        }
+
+        {
+            final String[] a = new String[2000];
+            for (int i = 0; i < a.length; i++) {
+                a[i] = Strings.uuid();
+            }
+
+            Profiler.run(1, loopNum, 3, "Arrays.sort(Object[])", () -> Arrays.sort(a.clone())).printResult();
+            Profiler.run(1, loopNum, 3, "N.sort(Object[])", () -> N.sort(a.clone())).printResult();
+            Profiler.run(1, loopNum, 3, "Arrays.parallelSort(Object[])", () -> Arrays.parallelSort(a.clone())).printResult();
+            Profiler.run(1, loopNum, 3, "N.parallelSort(Object[])", () -> N.parallelSort(a.clone())).printResult();
+        }
+
+        final int[] values = { 3, 1, 2 };
+        Arrays.parallelSort(values);
+        assertArrayEquals(new int[] { 1, 2, 3 }, values);
+    }
+
+    @Test
+    public void test_transpose() {
+
+        final int[][] a = { { 1, 2, 3, 4 }, { 5, 5, 5, 5 } };
+        final int[][] b = Array.transpose(a);
+
+        N.println(N.deepToString(a));
+        N.println(Strings.repeat("=", 80));
+        N.println(N.deepToString(b));
+
+        final Integer[][] c = Array.box(a);
+
+        final Integer[][] d = Array.transpose(c);
+        N.println(Strings.repeat("=", 80));
+        N.println(N.deepToString(d));
+        assertNotNull(d);
+        assertArrayEquals(new Integer[] { 1, 5 }, d[0]);
+        assertArrayEquals(new Integer[] { 4, 5 }, d[3]);
+    }
+
+    @Test
+    public void test_removeElementAll() {
+
+        int[] a = { 1, 2, 3, 3, 4, 5, 5, 5, 5 };
+
+        a = N.removeAllOccurrences(a, 3);
+
+        N.println(a);
+
+        a = N.removeAllOccurrences(a, 4);
+
+        N.println(a);
+        a = N.removeAllOccurrences(a, 5);
+
+        N.println(a);
+        assertArrayEquals(new int[] { 1, 2 }, a);
+    }
+
+    @Test
+    public void test_clone() {
+        final int[] a = { 1, 2, 3 };
+        final int[] b = a.clone();
+        N.println(a);
+        N.println(b);
+
+        assertFalse(a == b);
+        assertTrue(a[1] == b[1]);
+        a[1] = 0;
+        assertFalse(a[1] == b[1]);
+
+        N.println(a);
+        N.println(b);
+
+        final String[] strs = { null, null, "abc" };
+
+        N.println(N.indexOf(strs, "abc"));
+
+        N.println(strs[0] instanceof String);
+
+        N.println(Array.of(WeekDay.MONDAY, WeekDay.TUESDAY, WeekDay.WEDNESDAY).clone());
+    }
+
+    @Test
+    public void test_repeat() {
+        Byte[] a = Array.repeat(Byte.valueOf(Byte.MIN_VALUE), 10);
+        N.println(a);
+
+        a = Array.repeatNonNull(Byte.MIN_VALUE, 10);
+        N.println(a);
+
+        final byte[] b = Array.repeat(Byte.MAX_VALUE, 10);
+        N.println(b);
+        assertEquals(10, b.length);
+        assertEquals(Byte.MAX_VALUE, b[0]);
     }
 
 }

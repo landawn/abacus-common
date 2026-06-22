@@ -2613,4 +2613,14 @@ public class ParallelArrayStreamTest extends TestBase {
         assertEquals(Arrays.asList(2, 4), result.get("even").stream().sorted().toList());
     }
 
+    @Test
+    public void testMapFirstOrElse_SequentialFallback() {
+        final List<String> result = Stream.of(1, 2, 3)
+                .parallel(PS.create(Splitor.ARRAY).maxThreadNum(1))
+                .mapFirstOrElse(i -> "first:" + i, i -> "other:" + i)
+                .toList();
+
+        assertEquals(Arrays.asList("first:1", "other:2", "other:3"), result);
+    }
+
 }

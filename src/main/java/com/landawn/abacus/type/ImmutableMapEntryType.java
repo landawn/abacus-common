@@ -23,6 +23,7 @@ import java.util.Map;
 
 import com.landawn.abacus.exception.UncheckedIOException;
 import com.landawn.abacus.parser.JsonDeserConfig;
+import com.landawn.abacus.parser.JsonSerConfig;
 import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.Clazz;
@@ -136,7 +137,7 @@ public class ImmutableMapEntryType<K, V> extends AbstractType<AbstractMap.Simple
      */
     @Override
     public String stringOf(final AbstractMap.SimpleImmutableEntry<K, V> x) {
-        return (x == null) ? null : Utils.jsonParser.serialize(N.asMap(x.getKey(), x.getValue()));
+        return (x == null) ? null : Utils.jsonParser.serialize(N.asMap(x.getKey(), x.getValue()), Utils.jsc);
     }
 
     /**
@@ -205,6 +206,8 @@ public class ImmutableMapEntryType<K, V> extends AbstractType<AbstractMap.Simple
                 final boolean isBufferedWriter = IOUtil.isBufferedWriter(writer);
                 final Writer bw = isBufferedWriter ? writer : Objectory.createBufferedWriter(writer);
 
+                IOException thrown = null;
+
                 try {
                     bw.write(SK._BRACE_L);
 
@@ -218,10 +221,21 @@ public class ImmutableMapEntryType<K, V> extends AbstractType<AbstractMap.Simple
                         bw.flush();
                     }
                 } catch (final IOException e) {
-                    throw new UncheckedIOException(e);
+                    thrown = e;
+                    throw e;
                 } finally {
                     if (!isBufferedWriter) {
-                        Objectory.recycle((BufferedWriter) bw);
+                        try {
+                            Objectory.recycle((BufferedWriter) bw);
+                        } catch (final UncheckedIOException e) {
+                            final Throwable cause = e.getCause();
+
+                            if (thrown == null && cause instanceof IOException) {
+                                throw (IOException) cause;
+                            } else if (thrown == null) {
+                                throw e;
+                            }
+                        }
                     }
                 }
             } else {
@@ -259,18 +273,37 @@ public class ImmutableMapEntryType<K, V> extends AbstractType<AbstractMap.Simple
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {
-            try {
-                writer.write(SK._BRACE_L);
+            writer.write(SK._BRACE_L);
 
-                keyType.serializeTo(writer, x.getKey(), config);
-                writer.write(SK._COLON);
-                valueType.serializeTo(writer, x.getValue(), config);
+            serializeKey(writer, x.getKey(), config);
+            writer.write(SK._COLON);
+            valueType.serializeTo(writer, x.getValue(), config);
 
-                writer.write(SK._BRACE_R);
+            writer.write(SK._BRACE_R);
+        }
+    }
 
-            } catch (final IOException e) {
-                throw new UncheckedIOException(e);
+    private void serializeKey(final CharacterWriter writer, final K key, final JsonXmlSerConfig<?> config) throws IOException {
+        final boolean isQuoteMapKey = config instanceof JsonSerConfig jsonConfig ? jsonConfig.isQuoteMapKey() : config != null;
+
+        if (key == null) {
+            if (isQuoteMapKey) {
+                writer.write(SK._DOUBLE_QUOTE);
+                writer.write(NULL_CHAR_ARRAY);
+                writer.write(SK._DOUBLE_QUOTE);
+            } else {
+                writer.write(NULL_CHAR_ARRAY);
             }
+        } else if (keyType.isSerializable() && !(keyType.isArray() || keyType.isCollection() || keyType.javaType().isEnum())) {
+            if (isQuoteMapKey || !(keyType.isNumber() || keyType.isBoolean())) {
+                writer.write(SK._DOUBLE_QUOTE);
+                writer.writeCharacter(keyType.stringOf(key));
+                writer.write(SK._DOUBLE_QUOTE);
+            } else {
+                writer.writeCharacter(keyType.stringOf(key));
+            }
+        } else {
+            keyType.serializeTo(writer, key, config);
         }
     }
 

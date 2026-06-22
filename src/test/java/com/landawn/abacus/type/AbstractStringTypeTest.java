@@ -2,6 +2,7 @@ package com.landawn.abacus.type;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -104,6 +105,38 @@ public class AbstractStringTypeTest extends TestBase {
 
         assertEquals("123", stringType.valueOf(123));
         assertEquals("true", stringType.valueOf(true));
+    }
+
+    @Test
+    public void testValueOfClob_FreeThrowsAfterRead_PropagatesFreeException() throws SQLException {
+        Clob clob = mock(Clob.class);
+        SQLException freeException = new SQLException("Free error");
+
+        when(clob.length()).thenReturn(3L);
+        when(clob.getSubString(1, 3)).thenReturn("foo");
+        doThrow(freeException).when(clob).free();
+
+        UncheckedSQLException thrown = assertThrows(UncheckedSQLException.class, () -> stringType.valueOf(clob));
+
+        assertSame(freeException, thrown.getCause());
+    }
+
+    @Test
+    public void testValueOfClob_ReadThrowsAndFreeThrows_PreservesPrimaryException() throws SQLException {
+        Clob clob = mock(Clob.class);
+        SQLException readException = new SQLException("Read error");
+        SQLException freeException = new SQLException("Free error");
+
+        when(clob.length()).thenReturn(3L);
+        when(clob.getSubString(1, 3)).thenThrow(readException);
+        doThrow(freeException).when(clob).free();
+
+        UncheckedSQLException thrown = assertThrows(UncheckedSQLException.class, () -> stringType.valueOf(clob));
+
+        assertSame(readException, thrown.getCause());
+        assertEquals(1, thrown.getSuppressed().length);
+        assertTrue(thrown.getSuppressed()[0] instanceof UncheckedSQLException);
+        assertSame(freeException, ((UncheckedSQLException) thrown.getSuppressed()[0]).getCause());
     }
 
     @Test

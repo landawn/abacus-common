@@ -74,6 +74,6 @@ public class IntObjPredicateTest extends TestBase {
     @Test
     public void testAndNullThrowsImmediately() {
         IntObjPredicate<String> instance = (a, b) -> false;
-        org.junit.jupiter.api.Assertions.assertThrows(NullPointerException.class, () -> instance.and((IntObjPredicate) null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> instance.and((IntObjPredicate) null));
     }
 }

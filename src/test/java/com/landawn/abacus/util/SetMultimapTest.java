@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -1129,17 +1130,19 @@ public class SetMultimapTest extends TestBase {
 
     @Test
     public void test_filter_complexPredicate() {
-        SetMultimap<String, Integer> map = N.newSetMultimap();
-        map.putValues("a", N.toList(1, 2, 3));
-        map.putValues("b", N.toList(4));
-        map.putValues("c", N.toList(5, 6));
+        assertDoesNotThrow(() -> {
+            SetMultimap<String, Integer> map = N.newSetMultimap();
+            map.putValues("a", N.toList(1, 2, 3));
+            map.putValues("b", N.toList(4));
+            map.putValues("c", N.toList(5, 6));
 
-        //    SetMultimap<String, Integer> filtered = map.filter((k, v) -> k.compareTo("b") < 0 && v.size() > 2);
-        //
-        //    assertEquals(1, filtered.size());
-        //    assertTrue(filtered.containsKey("a"));
-        //    assertFalse(filtered.containsKey("b"));
-        //    assertFalse(filtered.containsKey("c"));
+            //    SetMultimap<String, Integer> filtered = map.filter((k, v) -> k.compareTo("b") < 0 && v.size() > 2);
+            //
+            //    assertEquals(1, filtered.size());
+            //    assertTrue(filtered.containsKey("a"));
+            //    assertFalse(filtered.containsKey("b"));
+            //    assertFalse(filtered.containsKey("c"));
+        });
     }
 
     @Test

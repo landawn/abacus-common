@@ -991,9 +991,7 @@ public class DatesTest extends TestBase {
         assertNull(Dates.parseDate(""));
         assertNull(Dates.parseDate("null"));
 
-        // Raw epoch-millis input (no format) preserves the exact value to keep serialize/
-        // deserialize round-trips of sql.Date bit-exact. JDBC normalization only applies to
-        // format-parsed inputs.
+        // Numeric epoch-millis input preserves the raw value for serialization round-trips.
         java.sql.Date date = Dates.parseDate("1000000000");
         assertNotNull(date);
         assertEquals(1000000000L, date.getTime());
@@ -1037,7 +1035,7 @@ public class DatesTest extends TestBase {
         assertNull(Dates.parseTime(""));
         assertNull(Dates.parseTime("null"));
 
-        // Raw epoch-millis input preserves the exact value to keep round-trips bit-exact.
+        // Numeric epoch-millis input preserves the raw value for serialization round-trips.
         Time time = Dates.parseTime("1000000000");
         assertNotNull(time);
         assertEquals(1000000000L, time.getTime());
@@ -1341,8 +1339,7 @@ public class DatesTest extends TestBase {
 
     @Test
     public void testParse_withNullFormat_longString() {
-        // Raw epoch-millis input is not JDBC-normalized; it preserves the exact value for
-        // serialize/deserialize round-trips.
+        // Numeric epoch-millis input preserves the raw value for serialization round-trips.
         long millis = 1234567890000L;
         java.sql.Date date = Dates.parseDate(String.valueOf(millis));
         assertNotNull(date);
@@ -1359,36 +1356,18 @@ public class DatesTest extends TestBase {
         assertThrows(RuntimeException.class, () -> Dates.parseDate("99999999999999999999", null, null));
     }
 
-    // ===== formatLocalDate =====
+    // ===== formatCurrentLocalDate =====    // ===== formatCurrentLocalDateTime =====    // ===== Missing tests: formatCurrentLocalDate/formatCurrentLocalDateTime value validation =====
 
     @Test
-    public void testFormatLocalDate() {
-        String formatted = Dates.formatLocalDate();
-        assertNotNull(formatted);
-        assertTrue(formatted.matches("\\d{4}-\\d{2}-\\d{2}"));
-    }
-
-    // ===== formatLocalDateTime =====
-
-    @Test
-    public void testFormatLocalDateTime() {
-        String formatted = Dates.formatLocalDateTime();
-        assertNotNull(formatted);
-        assertTrue(formatted.matches("\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}"));
-    }
-
-    // ===== Missing tests: formatLocalDate/formatLocalDateTime value validation =====
-
-    @Test
-    public void testFormatLocalDate_matchesPattern() {
-        String formatted = Dates.formatLocalDate();
+    public void testFormatCurrentLocalDate_matchesPattern() {
+        String formatted = Dates.formatCurrentLocalDate();
         assertNotNull(formatted);
         assertTrue(formatted.matches("\\d{4}-\\d{2}-\\d{2}"));
     }
 
     @Test
-    public void testFormatLocalDateTime_matchesPattern() {
-        String formatted = Dates.formatLocalDateTime();
+    public void testFormatCurrentLocalDateTime_matchesPattern() {
+        String formatted = Dates.formatCurrentLocalDateTime();
         assertNotNull(formatted);
         assertTrue(formatted.matches("\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}"));
     }
@@ -1402,16 +1381,7 @@ public class DatesTest extends TestBase {
         assertTrue(formatted.matches("\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}Z"));
     }
 
-    // ===== formatCurrentTimestamp =====
-
-    @Test
-    public void testFormatCurrentTimestamp() {
-        String formatted = Dates.formatCurrentTimestamp();
-        assertNotNull(formatted);
-        assertTrue(formatted.matches("\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z"));
-    }
-
-    @Test
+    // ===== formatCurrentTimestamp =====    @Test
     public void testFormatCurrentTimestamp_matchesPattern() {
         String formatted = Dates.formatCurrentTimestamp();
         assertNotNull(formatted);
@@ -1438,10 +1408,36 @@ public class DatesTest extends TestBase {
 
     @Test
     public void testDTF_customFormat() {
-        Dates.DTF dtf = new Dates.DTF("dd/MM/yyyy");
+        Dates.DTF dtf = Dates.DTF.of("dd/MM/yyyy");
         LocalDate ld = LocalDate.of(2025, 10, 4);
         String formatted = dtf.format(ld);
         assertEquals("04/10/2025", formatted);
+    }
+
+    @Test
+    public void testDTF_of_roundTrip() {
+        Dates.DTF dtf = Dates.DTF.of("MM/dd/yyyy HH:mm");
+        LocalDateTime ldt = LocalDateTime.of(2023, 12, 25, 15, 30);
+
+        String formatted = dtf.format(ldt);
+        assertEquals("12/25/2023 15:30", formatted);
+        assertEquals(ldt, dtf.parseToLocalDateTime(formatted));
+    }
+
+    @Test
+    public void testDTF_of_predefinedUtcPattern() {
+        // Passing exactly the ISO 8601 'Z'-literal pattern enables the same UTC handling as the predefined constant.
+        Dates.DTF dtf = Dates.DTF.of(Dates.ISO_8601_DATE_TIME_FORMAT);
+        assertEquals("1970-01-01T00:00:00Z", dtf.format(new java.util.Date(0L)));
+        assertEquals(Dates.DTF.ISO_8601_DATE_TIME.format(new java.util.Date(0L)), dtf.format(new java.util.Date(0L)));
+    }
+
+    @Test
+    public void testDTF_of_invalidArgs() {
+        assertThrows(IllegalArgumentException.class, () -> Dates.DTF.of(null));
+        assertThrows(IllegalArgumentException.class, () -> Dates.DTF.of(""));
+        // '{' is a reserved character in DateTimeFormatter patterns.
+        assertThrows(IllegalArgumentException.class, () -> Dates.DTF.of("{"));
     }
 
     // ===== format(Date) =====
@@ -1452,11 +1448,6 @@ public class DatesTest extends TestBase {
         String formatted = Dates.format(date);
         assertNotNull(formatted);
         assertTrue(formatted.contains("T"));
-    }
-
-    @Test
-    public void testFormat_date_null() {
-        assertNull(Dates.format((java.util.Date) null));
     }
 
     @Test
@@ -2091,12 +2082,15 @@ public class DatesTest extends TestBase {
 
     @Test
     public void testFormat_yearOutOfRange_throws() {
-        // Create a date with year >= 10000 to trigger L2967 in fastDateFormat
+        // Years >= 10000 don't fit the fast-format buffer; format(date) now falls back to the
+        // SimpleDateFormat slow path instead of throwing, matching the explicit-format siblings.
         Calendar cal = Calendar.getInstance(Dates.UTC_TIME_ZONE);
         cal.set(Calendar.YEAR, 10001);
         java.util.Date futureDate = cal.getTime();
-        // format(date) with no format/timezone uses fastDateFormat which validates year
-        assertThrows(IllegalArgumentException.class, () -> Dates.format(futureDate));
+
+        String formatted = Dates.format(futureDate);
+        assertTrue(formatted.startsWith("10001-"));
+        assertEquals(Dates.format(futureDate, Dates.ISO_8601_DATE_TIME_FORMAT), formatted);
     }
 
     // ===== setYears =====
@@ -3939,63 +3933,63 @@ public class DatesTest extends TestBase {
     public void testIsLastDateOfMonth_february() {
         Calendar cal = Calendar.getInstance();
         cal.set(2025, Calendar.FEBRUARY, 28, 10, 30, 45);
-        assertTrue(Dates.isLastDateOfMonth(cal.getTime()));
+        assertTrue(Dates.isLastDayOfMonth(cal.getTime()));
     }
 
     @Test
     public void testIsLastDateOfMonth_leapYear() {
         Calendar cal = Calendar.getInstance();
         cal.set(2024, Calendar.FEBRUARY, 29, 10, 30, 45);
-        assertTrue(Dates.isLastDateOfMonth(cal.getTime()));
+        assertTrue(Dates.isLastDayOfMonth(cal.getTime()));
     }
 
-    // ===== isLastDateOfMonth =====
+    // ===== isLastDayOfMonth =====
 
     @Test
     public void testIsLastDateOfMonth() {
         Calendar cal = Calendar.getInstance();
         cal.set(2025, Calendar.JANUARY, 31, 10, 30, 45);
-        assertTrue(Dates.isLastDateOfMonth(cal.getTime()));
+        assertTrue(Dates.isLastDayOfMonth(cal.getTime()));
 
         cal.set(2025, Calendar.JANUARY, 30, 10, 30, 45);
-        assertFalse(Dates.isLastDateOfMonth(cal.getTime()));
+        assertFalse(Dates.isLastDayOfMonth(cal.getTime()));
 
-        assertThrows(IllegalArgumentException.class, () -> Dates.isLastDateOfMonth(null));
+        assertThrows(IllegalArgumentException.class, () -> Dates.isLastDayOfMonth(null));
     }
 
-    // ===== Missing tests: isLastDateOfMonth null =====
+    // ===== Missing tests: isLastDayOfMonth null =====
 
     @Test
     public void testIsLastDateOfMonth_null() {
-        assertThrows(IllegalArgumentException.class, () -> Dates.isLastDateOfMonth(null));
+        assertThrows(IllegalArgumentException.class, () -> Dates.isLastDayOfMonth(null));
     }
 
     @Test
     public void testIsLastDateOfYear_notLastDay() {
         Calendar cal = Calendar.getInstance();
         cal.set(2025, Calendar.JUNE, 15);
-        assertFalse(Dates.isLastDateOfYear(cal.getTime()));
+        assertFalse(Dates.isLastDayOfYear(cal.getTime()));
     }
 
-    // ===== isLastDateOfYear =====
+    // ===== isLastDayOfYear =====
 
     @Test
     public void testIsLastDateOfYear() {
         Calendar cal = Calendar.getInstance();
         cal.set(2025, Calendar.DECEMBER, 31, 10, 30, 45);
-        assertTrue(Dates.isLastDateOfYear(cal.getTime()));
+        assertTrue(Dates.isLastDayOfYear(cal.getTime()));
 
         cal.set(2025, Calendar.DECEMBER, 30, 10, 30, 45);
-        assertFalse(Dates.isLastDateOfYear(cal.getTime()));
+        assertFalse(Dates.isLastDayOfYear(cal.getTime()));
 
-        assertThrows(IllegalArgumentException.class, () -> Dates.isLastDateOfYear(null));
+        assertThrows(IllegalArgumentException.class, () -> Dates.isLastDayOfYear(null));
     }
 
-    // ===== Missing tests: isLastDateOfYear null =====
+    // ===== Missing tests: isLastDayOfYear null =====
 
     @Test
     public void testIsLastDateOfYear_null() {
-        assertThrows(IllegalArgumentException.class, () -> Dates.isLastDateOfYear(null));
+        assertThrows(IllegalArgumentException.class, () -> Dates.isLastDayOfYear(null));
     }
 
     @Test
@@ -4571,6 +4565,62 @@ public class DatesTest extends TestBase {
         org.junit.jupiter.api.Assertions.assertNull(Dates.DTF.LOCAL_DATE_TIME.parseToOffsetDateTime("null"));
         org.junit.jupiter.api.Assertions.assertNull(Dates.DTF.LOCAL_DATE_TIME.parseToZonedDateTime("null"));
         org.junit.jupiter.api.Assertions.assertNull(Dates.DTF.LOCAL_DATE_TIME.parseToInstant("null"));
+    }
+
+    // --- regression tests for 2026-06-10 deep-review fixes ---
+
+    @Test
+    public void testParseIsoZStringAcceptsAnyZeroOffsetZone() {
+        // regression: any zero-offset zone other than the exact UTC instance (GMT, Etc/UTC) was
+        // rejected for 'Z' strings with a raw RuntimeException; 'Z' fully determines the instant
+        final java.util.Date expected = Dates.parseJUDate("2025-01-15T10:30:45Z");
+
+        assertEquals(expected, Dates.parseJUDate("2025-01-15T10:30:45Z", null, Dates.GMT_TIME_ZONE));
+        assertEquals(expected.getTime(), Dates.parseTimestamp("2025-01-15T10:30:45Z", null, TimeZone.getTimeZone("Etc/UTC")).getTime());
+
+        // non-zero-offset zones are still rejected, now with the documented IllegalArgumentException
+        assertThrows(IllegalArgumentException.class, () -> Dates.parseJUDate("2025-01-15T10:30:45Z", null, TimeZone.getTimeZone("America/New_York")));
+    }
+
+    @Test
+    public void testDtfFormatTemporalConvertsToUtcForZFormats() {
+        // regression: the quoted 'Z' patterns printed the temporal's LOCAL wall-clock fields and
+        // stamped 'Z' on them, silently corrupting the instant for non-UTC zoned/offset temporals
+        final ZonedDateTime zdt = ZonedDateTime.of(2023, 12, 25, 15, 30, 45, 0, ZoneId.of("America/New_York")); // = 2023-12-25T20:30:45Z
+
+        assertEquals("2023-12-25T20:30:45Z", Dates.DTF.ISO_8601_DATE_TIME.format(zdt));
+        assertEquals("2023-12-25T20:30:45.000Z", Dates.DTF.ISO_8601_TIMESTAMP.format(zdt));
+
+        // local temporals are unaffected (no instant to convert)
+        assertEquals("2023-12-25T15:30:45Z", Dates.DTF.ISO_8601_DATE_TIME.format(LocalDateTime.of(2023, 12, 25, 15, 30, 45)));
+    }
+
+    @Test
+    public void testDtfParseToLocalForZFormatsReturnsValueAsWritten() {
+        // regression: the default branch rendered the UTC instant in the JVM default zone,
+        // diverging from the ZONED/OFFSET siblings which return the value as written
+        assertEquals(LocalDate.of(2023, 12, 25), Dates.DTF.ISO_8601_DATE_TIME.parseToLocalDate("2023-12-25T20:30:45Z"));
+        assertEquals(LocalTime.of(20, 30, 45), Dates.DTF.ISO_8601_DATE_TIME.parseToLocalTime("2023-12-25T20:30:45Z"));
+        assertEquals(LocalDateTime.of(2023, 12, 25, 20, 30, 45), Dates.DTF.ISO_8601_DATE_TIME.parseToLocalDateTime("2023-12-25T20:30:45Z"));
+    }
+
+    @Test
+    public void testFormatYear10000FallsBackToSlowPath() {
+        // regression: the default-format fast path threw IllegalArgumentException for years >= 10000
+        // (and leaked a pooled calendar), while every explicit-format sibling succeeded
+        final java.util.Date d = new java.util.Date(253402304400000L); // year 10000 in UTC
+
+        final String s = Dates.format(d);
+        assertTrue(s.startsWith("10000-"));
+        assertEquals(Dates.format(d, Dates.ISO_8601_DATE_TIME_FORMAT), s);
+    }
+
+    @Test
+    public void testParseTimestamp_OffsetSeparatorRoundTrip() {
+        final Timestamp timestamp = Dates.parseTimestamp("2023-03-15T10:20:30.123+02:30");
+
+        assertEquals("2023-03-15T07:50:30.123Z", Dates.format(timestamp, Dates.ISO_8601_TIMESTAMP_FORMAT, Dates.UTC_TIME_ZONE));
+        assertEquals(123000000, timestamp.getNanos());
     }
 
 }

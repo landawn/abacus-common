@@ -375,10 +375,12 @@ public class SheetTest extends AbstractTest {
         List<List<String>> rowsDataMismatchRow = Arrays.asList(Arrays.asList("V11", "V12"));
         List<String> rk = Arrays.asList("R1", "R2");
         List<String> ck = Arrays.asList("C1", "C2");
-        assertThrows(IllegalArgumentException.class, () -> Sheet.rows(rk, ck, rowsDataMismatchRow));
+        IllegalArgumentException rowMismatch = assertThrows(IllegalArgumentException.class, () -> Sheet.rows(rk, ck, rowsDataMismatchRow));
+        assertEquals("The size of row collection is not equal to size of row key set", rowMismatch.getMessage());
 
         List<List<String>> rowsDataMismatchCol = Arrays.asList(Arrays.asList("V11"), Arrays.asList("V21"));
-        assertThrows(IllegalArgumentException.class, () -> Sheet.rows(rk, ck, rowsDataMismatchCol));
+        IllegalArgumentException colMismatch = assertThrows(IllegalArgumentException.class, () -> Sheet.rows(rk, ck, rowsDataMismatchCol));
+        assertEquals("The size of row is not equal to size of column key set", colMismatch.getMessage());
     }
 
     @Test
@@ -985,7 +987,7 @@ public class SheetTest extends AbstractTest {
         sourceSheet.set("R1", "C1", "SourceV11");
         sourceSheet.set("R2", "C2", "SourceV22");
 
-        objectSheet.putAll(sourceSheet, (a, b) -> Iterables.firstNonNull(b, a));
+        objectSheet.putAll(sourceSheet, (a, b) -> Nulls.firstNonNull(b, a));
         assertEquals("SourceV11", objectSheet.get("R1", "C1"));
         assertEquals("V12", objectSheet.get("R1", "C2"));
         assertEquals("SourceV22", objectSheet.get("R2", "C2"));
@@ -1317,7 +1319,9 @@ public class SheetTest extends AbstractTest {
         assertNull(row.get(2));
 
         uninitSheet.set("row1", "col2", 20);
-        assertThrows(IndexOutOfBoundsException.class, () -> row.get(1));
+        // the lazy view now reflects writes that initialize the sheet (it previously captured
+        // rowIndex = -1 and crashed with IndexOutOfBoundsException)
+        assertEquals(Integer.valueOf(20), row.get(1));
     }
 
     @Test
@@ -2689,19 +2693,7 @@ public class SheetTest extends AbstractTest {
     }
 
     @Test
-    public void testRowCount() {
-        assertEquals(3, sheet.rowCount());
-        assertEquals(0, emptySheet.rowCount());
-    }
-
-    @Test
     public void testColumnLength() {
-        assertEquals(3, sheet.columnCount());
-        assertEquals(0, emptySheet.columnCount());
-    }
-
-    @Test
-    public void testColumnCount() {
         assertEquals(3, sheet.columnCount());
         assertEquals(0, emptySheet.columnCount());
     }
@@ -5591,13 +5583,6 @@ public class SheetTest extends AbstractTest {
     }
 
     @Test
-    public void testToString() {
-        String str = sheet.toString();
-        assertNotNull(str);
-        assertTrue(str.length() > 0);
-    }
-
-    @Test
     public void testPointToString() {
         Point point = Point.of(1, 2);
         String str = point.toString();
@@ -6249,6 +6234,169 @@ public class SheetTest extends AbstractTest {
                 .iterator();
         org.junit.jupiter.api.Assertions.assertEquals(3L, it2.count());
         org.junit.jupiter.api.Assertions.assertFalse(it2.hasNext());
+    }
+
+    // --- regression tests for 2026-06-10 deep-review fixes ---
+
+    @org.junit.jupiter.api.Test
+    public void testRowValuesViewCreatedBeforeInitialization() {
+        // regression: the lazy view captured rowIndex = -1 on an uninitialized sheet and crashed
+        // with IndexOutOfBoundsException once a later write initialized the sheet
+        final Sheet<String, String, Integer> sheet = new Sheet<>(N.asList("r1"), N.asList("c1", "c2"));
+        final ImmutableList<Integer> row = sheet.rowValues("r1");
+
+        org.junit.jupiter.api.Assertions.assertNull(row.get(0));
+
+        sheet.set("r1", "c1", 42);
+
+        org.junit.jupiter.api.Assertions.assertEquals(Integer.valueOf(42), row.get(0));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> sheet.rowValues("missing"));
+    }
+
+    @org.junit.jupiter.api.Test
+    public void testNullKeyMutatorsFailBeforeAnyMutation() {
+        // regression: a null new key was rejected by BiMap.put only AFTER the key set had been
+        // mutated, leaving the sheet permanently inconsistent (phantom rows, unreachable data)
+        final Sheet<String, String, Integer> sheet = Sheet.rows(N.asList("r1"), N.asList("c1"), new Integer[][] { { 1 } });
+
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> sheet.addRow(null, N.asList(2)));
+        org.junit.jupiter.api.Assertions.assertEquals(1, sheet.rowCount());
+
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> sheet.renameRow("r1", null));
+        org.junit.jupiter.api.Assertions.assertEquals(Integer.valueOf(1), sheet.get("r1", "c1"));
+
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> sheet.addColumn(null, N.asList(2)));
+        org.junit.jupiter.api.Assertions.assertEquals(1, sheet.columnCount());
+
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> sheet.renameColumn("c1", null));
+        org.junit.jupiter.api.Assertions.assertEquals(Integer.valueOf(1), sheet.get("r1", "c1"));
+    }
+
+    @org.junit.jupiter.api.Test
+    public void testSortByValuesValidatesKeyOnUninitializedSheet() {
+        // regression: the value-based sorts silently no-op'd for a nonexistent key when the sheet
+        // had no data yet, contradicting the documented IllegalArgumentException
+        final Sheet<String, String, Integer> sheet = new Sheet<>(N.asList("r1"), N.asList("c1"));
+
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> sheet.sortRowsByColumnValues("missing", null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> sheet.sortColumnsByRowValues("missing", null));
+
+        // valid keys remain a harmless no-op on an uninitialized sheet
+        sheet.sortRowsByColumnValues("c1", null);
+        sheet.sortColumnsByRowValues("r1", null);
+    }
+
+    @org.junit.jupiter.api.Test
+    public void testPrintlnWithOneNullKeySetTreatedAsEmpty() {
+        // regression: println(keys, null, ...) threw NPE while println(keys, emptyList, ...) worked
+        final Sheet<String, String, Integer> sheet = Sheet.rows(N.asList("r1", "r2"), N.asList("c1", "c2"), new Integer[][] { { 1, 2 }, { 3, 4 } });
+
+        final StringBuilder sb1 = new StringBuilder();
+        sheet.println(N.asList("r1"), null, sb1);
+
+        final StringBuilder sb2 = new StringBuilder();
+        sheet.println(N.asList("r1"), N.emptyList(), sb2);
+
+        org.junit.jupiter.api.Assertions.assertEquals(sb2.toString(), sb1.toString());
+    }
+
+    // =========================================================================
+    // 2026-06-12 (strict): null/empty key-collection contract for copy(Collection,
+    // Collection) and the multi-key sort methods, aligned with Dataset/RowDataset.
+    //   copy(...) / sort*(Collection): a null OR empty key collection throws
+    //   IllegalArgumentException; only an UNKNOWN key also throws IAE. Use the
+    //   no-arg copy() to copy the whole sheet.
+    //   Carve-out (matches Dataset's zero-column rule): an EMPTY collection is
+    //   accepted on the corresponding EMPTY axis of a zero-row / zero-column Sheet
+    //   (there the empty list IS the full, empty axis); only null is always rejected.
+    // println(...) is intentionally NOT changed: it is a display method that
+    // normalizes null to empty (see testPrintlnWithOneNullKeySetTreatedAsEmpty).
+    // =========================================================================
+
+    @Test
+    public void testCopy_NullRowKeySet_ThrowsIAE() {
+        assertThrows(IllegalArgumentException.class, () -> sheet.copy((List<String>) null, columnKeys));
+    }
+
+    @Test
+    public void testCopy_NullColumnKeySet_ThrowsIAE() {
+        assertThrows(IllegalArgumentException.class, () -> sheet.copy(rowKeys, (List<String>) null));
+    }
+
+    @Test
+    public void testCopy_EmptyRowKeySetOnPopulatedSheet_ThrowsIAE() {
+        assertThrows(IllegalArgumentException.class, () -> sheet.copy(Collections.<String> emptyList(), columnKeys));
+    }
+
+    @Test
+    public void testCopy_EmptyColumnKeySetOnPopulatedSheet_ThrowsIAE() {
+        assertThrows(IllegalArgumentException.class, () -> sheet.copy(rowKeys, Collections.<String> emptyList()));
+    }
+
+    @Test
+    public void testCopy_ValidSubset_StillWorks() {
+        // regression: a non-empty valid subset still works
+        Sheet<String, String, Integer> sub = sheet.copy(Arrays.asList("row1"), Arrays.asList("col1", "col2"));
+        assertEquals(1, sub.rowCount());
+        assertEquals(2, sub.columnCount());
+        assertEquals(Integer.valueOf(1), sub.get("row1", "col1"));
+        assertEquals(Integer.valueOf(2), sub.get("row1", "col2"));
+    }
+
+    @Test
+    public void testCopy_UnknownKey_StillThrowsIAE() {
+        assertThrows(IllegalArgumentException.class, () -> sheet.copy(Arrays.asList("rowX"), columnKeys));
+        assertThrows(IllegalArgumentException.class, () -> sheet.copy(rowKeys, Arrays.asList("colX")));
+    }
+
+    @Test
+    public void testCopy_EmptyKeysOnEmptyAxis_Allowed() {
+        // carve-out (matches Dataset): empty is accepted on the corresponding EMPTY axis.
+        // zero-row Sheet: empty rowKeySet is the full (empty) row set.
+        Sheet<String, String, Integer> zeroRow = new Sheet<>(Collections.<String> emptyList(), Arrays.asList("c1", "c2"));
+        Sheet<String, String, Integer> sub1 = assertDoesNotThrow(() -> zeroRow.copy(Collections.<String> emptyList(), Arrays.asList("c1")));
+        assertEquals(0, sub1.rowCount());
+        assertEquals(1, sub1.columnCount());
+
+        // zero-column Sheet: empty columnKeySet is the full (empty) column set.
+        Sheet<String, String, Integer> zeroCol = new Sheet<>(Arrays.asList("r1", "r2"), Collections.<String> emptyList());
+        Sheet<String, String, Integer> sub2 = assertDoesNotThrow(() -> zeroCol.copy(Arrays.asList("r1"), Collections.<String> emptyList()));
+        assertEquals(1, sub2.rowCount());
+        assertEquals(0, sub2.columnCount());
+
+        // fully-empty Sheet: copy(empty, empty) is allowed (mirrors Dataset emptyDataset.copy(columnNameList()))
+        Sheet<String, String, Integer> empty = new Sheet<>(Collections.<String> emptyList(), Collections.<String> emptyList());
+        assertDoesNotThrow(() -> empty.copy(Collections.<String> emptyList(), Collections.<String> emptyList()));
+    }
+
+    @Test
+    public void testSortRowsByColumnValues_NullCollection_ThrowsIAE() {
+        assertThrows(IllegalArgumentException.class, () -> sheet.sortRowsByColumnValues((List<String>) null, (Object[] a, Object[] b) -> 0));
+    }
+
+    @Test
+    public void testSortColumnsByRowValues_NullCollection_ThrowsIAE() {
+        assertThrows(IllegalArgumentException.class, () -> sheet.sortColumnsByRowValues((List<String>) null, (Object[] a, Object[] b) -> 0));
+    }
+
+    @Test
+    public void testSortRowsByColumnValues_EmptyOnPopulatedSheet_ThrowsIAE() {
+        assertThrows(IllegalArgumentException.class, () -> sheet.sortRowsByColumnValues(Collections.<String> emptyList(), (Object[] a, Object[] b) -> 0));
+    }
+
+    @Test
+    public void testSortColumnsByRowValues_EmptyOnPopulatedSheet_ThrowsIAE() {
+        assertThrows(IllegalArgumentException.class, () -> sheet.sortColumnsByRowValues(Collections.<String> emptyList(), (Object[] a, Object[] b) -> 0));
+    }
+
+    @Test
+    public void testSort_EmptyKeysOnEmptyAxis_Allowed() {
+        // carve-out: empty sort keys accepted (no-op) on the corresponding empty axis.
+        Sheet<String, String, Integer> zeroCol = new Sheet<>(Arrays.asList("r1", "r2"), Collections.<String> emptyList());
+        assertDoesNotThrow(() -> zeroCol.sortRowsByColumnValues(Collections.<String> emptyList(), (Object[] a, Object[] b) -> 0));
+
+        Sheet<String, String, Integer> zeroRow = new Sheet<>(Collections.<String> emptyList(), Arrays.asList("c1", "c2"));
+        assertDoesNotThrow(() -> zeroRow.sortColumnsByRowValues(Collections.<String> emptyList(), (Object[] a, Object[] b) -> 0));
     }
 
 }

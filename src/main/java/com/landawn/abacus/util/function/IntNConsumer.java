@@ -13,7 +13,8 @@
  */
 package com.landawn.abacus.util.function;
 
-import java.util.Objects;
+import com.landawn.abacus.util.N;
+import com.landawn.abacus.util.cs;
 
 /**
  * Represents an operation that accepts a variable number of {@code int}-valued arguments and returns no result.
@@ -68,10 +69,10 @@ public interface IntNConsumer {
      * @param after the operation to perform after this operation. Must not be {@code null}.
      * @return a composed {@code IntNConsumer} that performs in sequence this operation followed by
      *         the {@code after} operation
-     * @throws NullPointerException if {@code after} is null
+     * @throws IllegalArgumentException if {@code after} is null
      */
     default IntNConsumer andThen(final IntNConsumer after) {
-        Objects.requireNonNull(after);
+        N.checkArgNotNull(after, cs.after);
         return args -> {
             accept(args);
             after.accept(args);

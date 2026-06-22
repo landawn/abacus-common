@@ -1698,6 +1698,18 @@ public class ParallelIteratorStreamTest extends TestBase {
     }
 
     @Test
+    public void testErrorHandling_ErrorFromMapperPropagates() {
+        // regression: an Error (e.g. AssertionError) thrown by a parallel mapper was swallowed by
+        // catch(Exception) in the parallel-concat worker, silently truncating the stream instead of
+        // propagating it. The worker now catches Throwable so the error reaches the caller.
+        final List<Integer> data = N.asList(1, 2, 3, 4, 5, 6, 7, 8);
+
+        assertThrows(RuntimeException.class, () -> Stream.of(data.iterator()).parallel(PS.create(Splitor.ITERATOR).maxThreadNum(4)).map(x -> {
+            throw new AssertionError("boom-" + x);
+        }).count());
+    }
+
+    @Test
     public void testSlidingMapTriFunction_SequentialFallback() {
         List<Integer> result = Stream.of(1, 2, 3, 4, 5)
                 .parallel(PS.create(Splitor.ITERATOR).maxThreadNum(1))
@@ -1705,6 +1717,16 @@ public class ParallelIteratorStreamTest extends TestBase {
                 .toList();
 
         assertEquals(Arrays.asList(6), result);
+    }
+
+    @Test
+    public void testMapLastOrElse_SequentialFallback() {
+        final List<String> result = Stream.of(Arrays.asList(1, 2, 3).iterator())
+                .parallel(PS.create(Splitor.ITERATOR).maxThreadNum(1))
+                .mapLastOrElse(i -> "last:" + i, i -> "other:" + i)
+                .toList();
+
+        assertEquals(Arrays.asList("other:1", "other:2", "last:3"), result);
     }
 
 }

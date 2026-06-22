@@ -2,6 +2,7 @@ package com.landawn.abacus.parser;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -186,6 +187,53 @@ public class AvroDeserConfigTest extends TestBase {
         AvroDeserConfig config = AvroDeserConfig.create();
         config.setElementType(String.class);
         assertNotNull(config.getElementType());
+    }
+
+    // Regression: equals/hashCode/toString previously ignored inherited fields
+    // (elementType, mapKeyType, mapValueType, ...) which are actually used by AvroParser
+    // during deserialization. Two configs that differ only by elementType must NOT be equal.
+    @Test
+    public void test_equals_includesElementType() {
+        AvroDeserConfig config1 = AvroDeserConfig.create();
+        AvroDeserConfig config2 = AvroDeserConfig.create();
+        assertEquals(config1, config2);
+
+        config1.setElementType(String.class);
+        assertFalse(config1.equals(config2));
+        assertNotEquals(config1.hashCode(), config2.hashCode());
+
+        config2.setElementType(String.class);
+        assertTrue(config1.equals(config2));
+        assertEquals(config1.hashCode(), config2.hashCode());
+    }
+
+    @Test
+    public void test_equals_includesMapKeyAndValueType() {
+        AvroDeserConfig config1 = AvroDeserConfig.create();
+        AvroDeserConfig config2 = AvroDeserConfig.create();
+
+        config1.setMapKeyType(String.class);
+        assertFalse(config1.equals(config2));
+
+        config2.setMapKeyType(String.class);
+        assertTrue(config1.equals(config2));
+
+        config1.setMapValueType(Integer.class);
+        assertFalse(config1.equals(config2));
+
+        config2.setMapValueType(Integer.class);
+        assertTrue(config1.equals(config2));
+    }
+
+    @Test
+    public void test_toString_includesInheritedFields() {
+        AvroDeserConfig config = AvroDeserConfig.create();
+        config.setElementType(String.class);
+        String str = config.toString();
+        assertTrue(str.contains("elementType="));
+        assertTrue(str.contains("mapKeyType="));
+        assertTrue(str.contains("mapValueType="));
+        assertTrue(str.contains("schema="));
     }
 
 }

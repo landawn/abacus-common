@@ -31,7 +31,8 @@ public interface IntToByteFunction {
     /**
      * A default implementation that performs a narrowing primitive conversion
      * from {@code int} to {@code byte}. This may result in loss of information
-     * if the input value is outside the range of {@code byte} (-128 to 127).
+     * if the input value is outside the range of {@code byte} (-128 to 127):
+     * only the low-order 8 bits of the input are retained.
      */
     IntToByteFunction DEFAULT = value -> (byte) value;
 

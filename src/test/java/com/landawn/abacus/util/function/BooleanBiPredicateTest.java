@@ -210,6 +210,6 @@ public class BooleanBiPredicateTest extends TestBase {
     @Test
     public void testAndNullThrowsImmediately() {
         BooleanBiPredicate instance = (a, b) -> false;
-        org.junit.jupiter.api.Assertions.assertThrows(NullPointerException.class, () -> instance.and((BooleanBiPredicate) null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> instance.and((BooleanBiPredicate) null));
     }
 }

@@ -168,7 +168,7 @@ public interface Type<T> {
      * Type<String> stringType = Type.of(reflectType);
      *
      * // Get type from a generic type
-     * ParameterizedType listType = (ParameterizedType) new TypeReference<List<String>>(){}.getType();
+     * ParameterizedType listType = (ParameterizedType) new TypeReference<List<String>>(){}.javaType();
      * Type<List<String>> type = Type.of(listType);
      * }</pre>
      *
@@ -260,7 +260,7 @@ public interface Type<T> {
      * // types: [Type<String>, Type<Integer>, Type<Date>]
      *
      * // Get types for custom classes
-     * List<Type<MyClass>> customTypes = Type.ofAll(User.class, Order.class);
+     * List<Type<Object>> customTypes = Type.ofAll(User.class, Order.class);
      * }</pre>
      *
      * @param <T> the Java type represented by the returned {@code Type} instance
@@ -1047,9 +1047,9 @@ public interface Type<T> {
     }
 
     /**
-     * Checks if this type is a generic type with type parameters.
+     * Checks if this type is a parameterized type (a generic type with actual type arguments, e.g. {@code List<String>}).
      *
-     * @return {@code true} if this is a generic type, {@code false} otherwise
+     * @return {@code true} if this is a parameterized type, {@code false} otherwise
      */
     default boolean isParameterizedType() {
         return false; // Default implementation, can be overridden by specific types
@@ -1065,12 +1065,21 @@ public interface Type<T> {
     }
 
     /**
-     * Checks if this type implements Comparable.
+     * Checks whether values of this type are mutually {@link Comparable} (and therefore whether
+     * {@link #compare(Object, Object)} is supported).
+     *
+     * <p>The default derives the answer from {@link #javaType()}: it returns {@code true} when the
+     * type's Java class implements {@link Comparable}. This means a scalar type whose values are
+     * naturally comparable (e.g. {@code String}, {@code BigDecimal}, an enum) is reported comparable
+     * without an explicit override — closing the former "forgot-to-override" trap where
+     * {@link #compare(Object, Object)} would throw {@link UnsupportedOperationException} for a
+     * genuinely comparable type. Specific types may still override to force a particular answer.
      *
      * @return {@code true} if this type is comparable, {@code false} otherwise
      */
     default boolean isComparable() {
-        return false; // Default implementation, can be overridden by specific types
+        final Class<T> cls = javaType();
+        return cls != null && Comparable.class.isAssignableFrom(cls);
     }
 
     /**
@@ -1080,15 +1089,16 @@ public interface Type<T> {
      * here. Collection/array container types may return {@code true} only when their element
      * type is itself serializable.
      *
-     * <p>Note: the default interface implementation returns {@code false}; however,
-     * {@link AbstractType} overrides this to return {@code true} as the base-class default,
-     * so most concrete types inherit a {@code true} return value unless they explicitly
-     * override it.</p>
+     * <p>The default implementation returns {@code true} (the common case for the value/scalar
+     * types that dominate the type system). Structured types whose values are not directly
+     * serializable to a single string (object arrays, beans, maps, and similar) override this to
+     * return {@code false}. The base class {@link AbstractType} no longer overrides this method,
+     * so the interface default and the base-class behavior agree.</p>
      *
      * @return {@code true} if this type is directly serializable to a string
      */
     default boolean isSerializable() {
-        return false; // Default implementation, can be overridden by specific types
+        return true; // Default implementation, can be overridden by specific types
     }
 
     /**
@@ -1210,7 +1220,7 @@ public interface Type<T> {
      * (for example, a JSON-format string for collections, maps, arrays and beans) back into a value of this type. The
      * two methods are designed to round-trip, so {@code type.valueOf(type.stringOf(x))} should yield a value equal to
      * the original {@code x}. This generally does not hold for strings produced by {@link Object#toString()}, which are
-     * not guaranteed to be parseable back into the original object.</p> 
+     * not guaranteed to be parseable back into the original object.</p>
      *
      * @param str the string to parse; may be {@code null} or empty
      * @return the parsed value, or {@code null} (or the type's default) when {@code str} is {@code null} or empty

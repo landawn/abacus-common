@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -117,6 +118,25 @@ public class KeyedObjectPoolTest extends TestBase {
         }
 
         @Override
+        public boolean put(String key, TestPoolable e, long timeout, java.util.concurrent.TimeUnit unit) {
+            // Simple stub: ignore the timeout and delegate to the non-timed put.
+            return put(key, e);
+        }
+
+        @Override
+        public boolean put(String key, TestPoolable e, long timeout, java.util.concurrent.TimeUnit unit, boolean autoDestroyOnFailedToPut) {
+            boolean success = false;
+            try {
+                success = put(key, e, timeout, unit);
+            } finally {
+                if (!success && autoDestroyOnFailedToPut && e != null) {
+                    e.destroy(Poolable.Caller.PUT_ADD_FAILURE);
+                }
+            }
+            return success;
+        }
+
+        @Override
         public TestPoolable get(String key) {
             if (closed)
                 throw new IllegalStateException("Pool is closed");
@@ -137,6 +157,12 @@ public class KeyedObjectPoolTest extends TestBase {
                 }
                 return e;
             }
+        }
+
+        @Override
+        public TestPoolable get(String key, long timeout, java.util.concurrent.TimeUnit unit) {
+            // Simple stub: ignore the timeout and delegate to the non-timed get.
+            return get(key);
         }
 
         @Override
@@ -630,9 +656,11 @@ public class KeyedObjectPoolTest extends TestBase {
 
     @Test
     public void testLockAndUnlock() {
-        // Should not throw
-        pool.lock();
-        pool.unlock();
+        assertDoesNotThrow(() -> {
+            // Should not throw
+            pool.lock();
+            pool.unlock();
+        });
     }
 
     @Test

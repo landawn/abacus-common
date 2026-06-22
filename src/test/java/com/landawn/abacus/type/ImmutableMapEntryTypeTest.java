@@ -9,6 +9,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
 import java.io.StringWriter;
+import java.io.Writer;
 import java.util.AbstractMap;
 import java.util.List;
 
@@ -18,8 +19,11 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import com.landawn.abacus.TestBase;
+import com.landawn.abacus.parser.JsonSerConfig;
 import com.landawn.abacus.parser.JsonXmlSerConfig;
+import com.landawn.abacus.util.BufferedJsonWriter;
 import com.landawn.abacus.util.CharacterWriter;
+import com.landawn.abacus.util.Objectory;
 
 public class ImmutableMapEntryTypeTest extends TestBase {
 
@@ -91,10 +95,30 @@ public class ImmutableMapEntryTypeTest extends TestBase {
     }
 
     @Test
+    public void testAppendToPropagatesWriterIOException() {
+        Writer writer = newFailingWriter();
+        AbstractMap.SimpleImmutableEntry<String, Integer> entry = new AbstractMap.SimpleImmutableEntry<>("key", 123);
+        assertThrows(IOException.class, () -> immutableMapEntryType.appendTo(writer, entry));
+    }
+
+    @Test
     public void testSerializeTo() throws IOException {
         assertDoesNotThrow(() -> {
             immutableMapEntryType.serializeTo(characterWriter, null, config);
         });
+    }
+
+    @Test
+    public void testSerializeToQuotesNumericMapKeyByDefault() throws IOException {
+        ImmutableMapEntryType<Integer, String> type = (ImmutableMapEntryType<Integer, String>) createType("Map.ImmutableEntry<Integer, String>");
+        BufferedJsonWriter writer = Objectory.createBufferedJsonWriter();
+
+        try {
+            type.serializeTo(writer, new AbstractMap.SimpleImmutableEntry<>(1, "a"), JsonSerConfig.create());
+            assertEquals("{\"1\":\"a\"}", writer.toString());
+        } finally {
+            Objectory.recycle(writer);
+        }
     }
 
     @Test
@@ -110,5 +134,24 @@ public class ImmutableMapEntryTypeTest extends TestBase {
         assertTrue(typeName.contains("Map.ImmutableEntry"));
         assertTrue(typeName.contains("String"));
         assertTrue(typeName.contains("Integer"));
+    }
+
+    private static Writer newFailingWriter() {
+        return new Writer() {
+            @Override
+            public void write(final char[] cbuf, final int off, final int len) throws IOException {
+                throw new IOException("boom");
+            }
+
+            @Override
+            public void flush() throws IOException {
+                throw new IOException("boom");
+            }
+
+            @Override
+            public void close() throws IOException {
+                throw new IOException("boom");
+            }
+        };
     }
 }

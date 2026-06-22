@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
 import java.io.IOException;
 import java.sql.CallableStatement;
@@ -127,9 +128,9 @@ public class AbstractByteTypeTest extends TestBase {
 
     @Test
     public void testValueOf_String_OutOfRange() {
-        assertThrows(NumberFormatException.class, () -> type.valueOf("128"));
-        assertThrows(NumberFormatException.class, () -> type.valueOf("-129"));
-        assertThrows(NumberFormatException.class, () -> type.valueOf("256"));
+        assertThrows(ArithmeticException.class, () -> type.valueOf("128"));
+        assertThrows(ArithmeticException.class, () -> type.valueOf("-129"));
+        assertThrows(ArithmeticException.class, () -> type.valueOf("256"));
     }
 
     @Test
@@ -210,24 +211,32 @@ public class AbstractByteTypeTest extends TestBase {
 
     @Test
     public void testSerializeTo_ByteValue_NoConfig() throws IOException {
-        type.serializeTo(characterWriter, (byte) 42, null);
+        assertDoesNotThrow(() -> {
+            type.serializeTo(characterWriter, (byte) 42, null);
+        });
     }
 
     @Test
     public void testSerializeTo_Null_WithWriteNullNumberAsZero() throws IOException {
-        when(config.isWriteNullNumberAsZero()).thenReturn(true);
-        type.serializeTo(characterWriter, null, config);
+        assertDoesNotThrow(() -> {
+            when(config.isWriteNullNumberAsZero()).thenReturn(true);
+            type.serializeTo(characterWriter, null, config);
+        });
     }
 
     @Test
     public void testSerializeTo_Null_WithoutWriteNullNumberAsZero() throws IOException {
-        when(config.isWriteNullNumberAsZero()).thenReturn(false);
-        type.serializeTo(characterWriter, null, config);
+        assertDoesNotThrow(() -> {
+            when(config.isWriteNullNumberAsZero()).thenReturn(false);
+            type.serializeTo(characterWriter, null, config);
+        });
     }
 
     @Test
     public void testSerializeTo_NumberValue() throws IOException {
-        type.serializeTo(characterWriter, (byte) 100, config);
+        assertDoesNotThrow(() -> {
+            type.serializeTo(characterWriter, (byte) 100, config);
+        });
     }
 
     // Bug: appendTo previously delegated to x.toString() instead of byteValue(),

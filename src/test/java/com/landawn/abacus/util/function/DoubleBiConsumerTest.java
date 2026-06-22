@@ -140,6 +140,6 @@ public class DoubleBiConsumerTest extends TestBase {
     public void testAndThenNullThrowsImmediately() {
         DoubleBiConsumer instance = (a, b) -> {
         };
-        org.junit.jupiter.api.Assertions.assertThrows(NullPointerException.class, () -> instance.andThen((DoubleBiConsumer) null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> instance.andThen((DoubleBiConsumer) null));
     }
 }

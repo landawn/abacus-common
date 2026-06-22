@@ -58,13 +58,14 @@ import com.landawn.abacus.annotation.MayReturnNull;
  * Type<?> type = typeCache.get("int");
  * }</pre>
  *
- * <p><b>Thread safety note:</b> Although the underlying {@link ConcurrentHashMap} provides
- * atomic implementations of methods like {@code computeIfAbsent}, this class extends
- * {@link AbstractMap} and does <i>not</i> override those default methods. As a result,
- * default {@link Map} methods inherited from {@code AbstractMap} (such as
- * {@link Map#computeIfAbsent}, {@link Map#merge}, {@link Map#compute}) are <i>not</i>
- * guaranteed to be atomic on this class. For atomic compound operations, use a
- * {@link ConcurrentHashMap} directly or apply explicit external synchronization.</p>
+ * <p><b>Thread safety note:</b> {@link #putIfAbsent(Object, Object)} is overridden to delegate
+ * directly to the underlying {@link ConcurrentHashMap} and is therefore genuinely atomic.
+ * However, this class extends {@link AbstractMap} and does <i>not</i> override the other
+ * default compound methods. As a result, default {@link Map} methods inherited from
+ * {@code AbstractMap} (such as {@link Map#computeIfAbsent}, {@link Map#merge},
+ * {@link Map#compute}) are <i>not</i> guaranteed to be atomic on this class. For atomic
+ * compound operations beyond {@code putIfAbsent}, use a {@link ConcurrentHashMap} directly or
+ * apply explicit external synchronization.</p>
  *
  * @param <K> the type of keys maintained by this map
  * @param <V> the type of mapped values
@@ -147,6 +148,35 @@ public final class ObjectPool<K, V> extends AbstractMap<K, V> {
     @Override
     public V put(final K key, final V value) {
         return map.put(key, value);
+    }
+
+    /**
+     * Atomically associates the specified value with the specified key only if the key is
+     * not already present.
+     *
+     * <p>Unlike the default {@link Map#putIfAbsent(Object, Object)} inherited from
+     * {@link AbstractMap}, this implementation delegates directly to the underlying
+     * {@link ConcurrentHashMap#putIfAbsent(Object, Object)} and is therefore genuinely
+     * atomic and safe for concurrent use as a check-then-insert primitive.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Type<?> prior = typeCache.putIfAbsent("int", IntType.INSTANCE);
+     * if (prior != null) {
+     *     // a mapping already existed for "int"; "int" was left unchanged
+     * }
+     * }</pre>
+     *
+     * @param key   key with which the specified value is to be associated
+     * @param value value to be associated with the specified key
+     * @return the previous value associated with {@code key},
+     *         or {@code null} if there was no mapping for the key
+     * @throws NullPointerException if the specified key or value is {@code null}
+     */
+    @MayReturnNull
+    @Override
+    public V putIfAbsent(final K key, final V value) {
+        return map.putIfAbsent(key, value);
     }
 
     /**

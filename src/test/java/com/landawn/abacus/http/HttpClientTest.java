@@ -311,6 +311,9 @@ public class HttpClientTest extends TestBase {
         assertThrows(IllegalArgumentException.class, () -> HttpClient.create("https://api.example.com", -1, 5000L, 10000L));
         assertThrows(IllegalArgumentException.class, () -> HttpClient.create("https://api.example.com", 16, -1L, 10000L));
         assertThrows(IllegalArgumentException.class, () -> HttpClient.create("https://api.example.com", 16, 5000L, -1L));
+        assertThrows(IllegalArgumentException.class, () -> HttpClient.create("https://api.example.com", 16, 5000L, 10000L, null, (AtomicInteger) null));
+        assertThrows(IllegalArgumentException.class,
+                () -> HttpClient.create(new URL("https://api.example.com"), 16, 5000L, 10000L, null, (AtomicInteger) null));
     }
 
     @Test
@@ -636,7 +639,9 @@ public class HttpClientTest extends TestBase {
     public void testHead() throws IOException {
         server.enqueue(new MockResponse());
         HttpClient client = HttpClient.create(baseUrl);
-        client.head();
+        // M14: head() now returns an HttpResponse (status + headers) instead of void.
+        HttpResponse response = client.head();
+        assertNotNull(response);
 
         RecordedRequest request = server.takeRequest();
         assertEquals("HEAD", request.getMethod());
@@ -647,7 +652,8 @@ public class HttpClientTest extends TestBase {
         server.enqueue(new MockResponse());
         HttpClient client = HttpClient.create(baseUrl);
         HttpSettings settings = HttpSettings.create();
-        client.head(settings);
+        HttpResponse response = client.head(settings);
+        assertNotNull(response);
 
         RecordedRequest request = server.takeRequest();
         assertEquals("HEAD", request.getMethod());
@@ -844,6 +850,16 @@ public class HttpClientTest extends TestBase {
         HttpClient client = HttpClient.create("https://api.example.com");
         client.close();
         assertNotNull(client);
+    }
+
+    // M13: HttpClient implements AutoCloseable (usable in try-with-resources).
+    @Test
+    public void testAutoCloseable() throws IOException {
+        server.enqueue(new MockResponse().setBody("OK"));
+        try (HttpClient client = HttpClient.create(baseUrl)) {
+            assertTrue(client instanceof AutoCloseable);
+            assertEquals("OK", client.get());
+        }
     }
 
     @Test

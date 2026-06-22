@@ -189,6 +189,7 @@ public abstract class RateLimiter {
      * @return a newly created {@code RateLimiter} with the specified rate and warmup period
      * @throws IllegalArgumentException if {@code permitsPerSecond} is negative, zero, or NaN, or
      *     {@code warmupPeriod} is negative
+     * @throws NullPointerException if {@code unit} is {@code null}
      */
     public static RateLimiter create(final double permitsPerSecond, final long warmupPeriod, final TimeUnit unit) throws IllegalArgumentException {
         N.checkArgument(warmupPeriod >= 0, "warmupPeriod must not be negative: %s", warmupPeriod);
@@ -207,7 +208,8 @@ public abstract class RateLimiter {
      */
     static RateLimiter create(final double permitsPerSecond, final long warmupPeriod, final TimeUnit unit, final double coldFactor,
             final SleepingStopwatch stopwatch) {
-        final RateLimiter rateLimiter = new SmoothWarmingUp(stopwatch, warmupPeriod, unit, coldFactor);
+        final RateLimiter rateLimiter = unit.toMicros(warmupPeriod) == 0L ? new SmoothBursty(stopwatch, 1.0 /* maxBurstSeconds */)
+                : new SmoothWarmingUp(stopwatch, warmupPeriod, unit, coldFactor);
         rateLimiter.setRate(permitsPerSecond);
         return rateLimiter;
     }
@@ -450,6 +452,7 @@ public abstract class RateLimiter {
      * @param timeout the maximum time to wait for the permit. Negative values are treated as zero.
      * @param unit the time unit of the timeout argument, must not be null
      * @return {@code true} if the permit was acquired within the timeout, {@code false} otherwise
+     * @throws NullPointerException if {@code unit} is {@code null}
      * @see #tryAcquire()
      * @see #tryAcquire(int)
      * @see #tryAcquire(int, long, TimeUnit)
@@ -515,7 +518,7 @@ public abstract class RateLimiter {
      *
      * RateLimiter fastLimiter = RateLimiter.create(1000.0);
      * fastLimiter.tryAcquire();    // returns true (permit available instantly)
-     * fastLimiter.tryAcquire();    // returns true (still available at high rate)
+     * fastLimiter.tryAcquire();    // returns false if called immediately (next permit is ~1ms away)
      * }</pre>
      *
      * @return {@code true} if the permit was acquired, {@code false} otherwise
@@ -559,6 +562,7 @@ public abstract class RateLimiter {
      * @param unit the time unit of the timeout argument, must not be null
      * @return {@code true} if the permits were acquired, {@code false} otherwise
      * @throws IllegalArgumentException if the requested number of permits is negative or zero
+     * @throws NullPointerException if {@code unit} is {@code null}
      * @see #tryAcquire()
      * @see #tryAcquire(int)
      * @see #tryAcquire(long, TimeUnit)

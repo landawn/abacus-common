@@ -55,6 +55,9 @@ public interface ToFloatFunction<T> extends Throwables.ToFloatFunction<T, Runtim
      * perform the conversion. This function can handle various Number subclasses including
      * Integer, Long, Double, BigDecimal, etc.
      *
+     * <p>Note: This conversion may result in loss of precision, and values whose magnitude exceeds
+     * the float range are converted to {@code Float.POSITIVE_INFINITY} or {@code Float.NEGATIVE_INFINITY}.
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Integer intValue = 42;
@@ -92,4 +95,18 @@ public interface ToFloatFunction<T> extends Throwables.ToFloatFunction<T, Runtim
      */
     @Override
     float applyAsFloat(T value);
+
+    /**
+     * Returns this object as a {@link Throwables.ToFloatFunction} view.
+     *
+     * <p>The returned object has the same behavior as this one. This method does not translate
+     * exceptions or make the original implementation capable of throwing new checked exceptions; the
+     * exception type parameter is for target-type compatibility with APIs that accept {@code Throwables.ToFloatFunction}.
+     *
+     * @param <E> the target exception type for compatibility with {@code Throwables.ToFloatFunction}
+     * @return a {@link Throwables.ToFloatFunction} view of this object
+     */
+    default <E extends Throwable> Throwables.ToFloatFunction<T, E> toThrowable() {
+        return (Throwables.ToFloatFunction<T, E>) this;
+    }
 }

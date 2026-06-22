@@ -124,10 +124,9 @@ public class ZonedDateTimeType extends AbstractTemporalType<ZonedDateTime> {
      * String str = type.stringOf(zdt);   // e.g. "2023-10-15T10:30:00+01:00"
      * }</pre>
      *
-     * <p>The returned string is a serializable representation designed to be parsed back into an equivalent value
-     * via {@link #valueOf(String)}; {@code stringOf} and {@code valueOf} are inverse operations that round-trip. This
-     * is the key distinction from {@link Object#toString()}, whose result is not guaranteed to be convertible back
-     * into the original value.</p>
+     * <p>The returned string is a serializable representation designed to be parsed by {@link #valueOf(String)}.
+     * It preserves the local date-time, offset, and instant, but not a region {@link java.time.ZoneId}; parsing
+     * this form may produce a {@link java.time.ZoneOffset} zone.</p>
      *
      * @param x the ZonedDateTime instance to convert to string
      * @return the ISO 8601 string representation, or {@code null} if the input is null
@@ -202,10 +201,11 @@ public class ZonedDateTimeType extends AbstractTemporalType<ZonedDateTime> {
      * ZonedDateTime copy = type.valueOf(src.toString());          // equal to src
      * }</pre>
      *
-     * <p>This method is the inverse of {@code stringOf} and round-trips with it: it parses the string produced by
-     * {@code stringOf} back into a value of this type. It additionally accepts the output of
-     * {@link ZonedDateTime#toString()} — including the region-zone suffix shown above, which {@code stringOf} itself
-     * does not emit — so values written with {@code toString()} round-trip as well.</p>
+     * <p>This method parses the string produced by {@code stringOf} back into the same local date-time, offset,
+     * and instant, though the original region {@link java.time.ZoneId} is not preserved by the {@code stringOf}
+     * representation. It additionally accepts the output of {@link ZonedDateTime#toString()} — including the
+     * region-zone suffix shown above, which {@code stringOf} itself does not emit — so values written with
+     * {@code toString()} round-trip as well.</p>
      *
      * @param str the string to convert to ZonedDateTime
      * @return a ZonedDateTime instance, or {@code null} if the string is {@code null}, empty, or the literal "null"
@@ -275,7 +275,7 @@ public class ZonedDateTimeType extends AbstractTemporalType<ZonedDateTime> {
             return null; // NOSONAR
         }
 
-        if (isPossibleLong(cbuf, offset, len)) {
+        if (isPossibleMillis(cbuf, offset, len)) {
             try {
                 return ZonedDateTime.ofInstant(Instant.ofEpochMilli(parseLong(cbuf, offset, len)), DEFAULT_ZONE_ID);
             } catch (final NumberFormatException e) {
@@ -396,9 +396,8 @@ public class ZonedDateTimeType extends AbstractTemporalType<ZonedDateTime> {
      * }</pre>
      * <p>
      * <b>appendTo vs. serializeTo:</b> {@code appendTo} produces a plain, {@code toString()}-style rendering with no
-     * JSON/XML quoting or escaping (for general text output), whereas {@code serializeTo} produces the JSON/XML
-     * serialized form (applying string quotation and character escaping per the serialization config) and is used by the
-     * JSON/XML serializers.
+     * JSON/XML quoting or escaping (for general text output), whereas {@code serializeTo} writes the configured JSON/XML
+     * serialized form, including string quotation for non-LONG date/time formats when requested by config.
      *
      * @param appendable the Appendable to write to
      * @param x the ZonedDateTime value to append
@@ -439,19 +438,17 @@ public class ZonedDateTimeType extends AbstractTemporalType<ZonedDateTime> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * CharacterWriter writer = new CharacterWriter();
-     * JsonXmlSerConfig<?> config = JsonXmlSerConfig.of();
+     * BufferedJsonWriter writer = new BufferedJsonWriter();
+     * JsonSerConfig config = JsonSerConfig.create();
      * type.serializeTo(writer, ZonedDateTime.now(), config);   // Writes formatted date/time
      * }</pre>
      * <p>
-     * This method is specifically designed for JSON/XML serialization: it writes the serialized form of {@code x} to the
-     * {@code CharacterWriter}, applying string quotation and character escaping according to the supplied serialization
-     * config (a {@code null} config means no surrounding quotation). It is the streaming counterpart of {@code stringOf}
-     * and is invoked by the JSON/XML serializers.
+     * This method is specifically designed for JSON/XML serialization: it writes the configured serialized form of
+     * {@code x} to the {@code CharacterWriter}. {@link DateTimeFormat#LONG} writes epoch milliseconds without quotes;
+     * string date/time formats use the requested string quotation when configured.
      * <p>
-     * <b>serializeTo vs. appendTo:</b> {@code serializeTo} produces machine-readable JSON/XML (quoted and escaped),
-     * whereas {@code appendTo} produces a plain, human-readable {@code toString()}-style rendering without JSON/XML
-     * quoting or escaping.
+     * <b>serializeTo vs. appendTo:</b> {@code serializeTo} produces machine-readable JSON/XML using the selected
+     * date/time format, whereas {@code appendTo} produces a plain, human-readable {@code toString()}-style rendering.
      *
      * @param writer the CharacterWriter to write to
      * @param x the ZonedDateTime value to write
@@ -490,7 +487,7 @@ public class ZonedDateTimeType extends AbstractTemporalType<ZonedDateTime> {
                         break;
 
                     default:
-                        throw new RuntimeException("Unsupported operation");
+                        throw new RuntimeException("Unsupported DateTimeFormat: " + config.getDateTimeFormat());
                 }
             }
 

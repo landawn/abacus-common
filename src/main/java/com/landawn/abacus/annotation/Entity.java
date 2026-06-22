@@ -60,6 +60,14 @@ import java.lang.annotation.Target;
  * <p><strong>Note:</strong> This annotation is marked as {@link Beta}, indicating it may
  * undergo changes in future versions.</p>
  *
+ * <p><strong>Inheritance:</strong> This and the other TYPE-level markers in this package
+ * deliberately omit {@link java.lang.annotation.Inherited}. The framework's reflection layer
+ * ({@code com.landawn.abacus.parser.ParserUtil}) instead walks the full supertype hierarchy
+ * (superclasses <i>and</i> interfaces) when collecting class-level annotations, which is broader
+ * than the superclass-only semantics {@code @Inherited} would provide. As a result a subclass (or
+ * implementer) of an {@code @Entity}-annotated type is still treated as an entity even though the
+ * marker is not declared {@code @Inherited}.</p>
+ *
  * @see Table
  * @see Column
  * @see Id

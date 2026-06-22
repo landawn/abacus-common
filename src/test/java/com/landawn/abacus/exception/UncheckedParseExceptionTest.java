@@ -141,4 +141,15 @@ public class UncheckedParseExceptionTest extends TestBase {
         Assertions.assertEquals("java.text.ParseException", exception.getMessage());
     }
 
+    @Test
+    public void testGetCauseCovariantReturn() {
+        ParseException cause = new ParseException("Parse error", 10);
+        UncheckedParseException exception = new UncheckedParseException(cause);
+        // Covariant override: no cast required.
+        ParseException returnedCause = exception.getCause();
+        assertNotNull(returnedCause);
+        assertEquals(cause, returnedCause);
+        assertEquals(10, returnedCause.getErrorOffset());
+    }
+
 }

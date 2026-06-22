@@ -189,14 +189,11 @@ public final class BigDecimalType extends NumberType<BigDecimal> {
      * the value is written using {@link java.math.BigDecimal#toPlainString()} (no scientific notation);
      * otherwise {@link java.math.BigDecimal#toString()} is used.
      * <p>
-     * This method is specifically designed for JSON/XML serialization: it writes the serialized form of {@code x} to the
-     * {@code CharacterWriter}, applying string quotation and character escaping according to the supplied serialization
-     * config (a {@code null} config means no surrounding quotation). It is the streaming counterpart of {@code stringOf}
-     * and is invoked by the JSON/XML serializers.
+     * This method is specifically designed for JSON/XML serialization: it writes an unquoted numeric literal to the
+     * {@code CharacterWriter}, using plain notation when requested by config.
      * <p>
-     * <b>serializeTo vs. appendTo:</b> {@code serializeTo} produces machine-readable JSON/XML (quoted and escaped),
-     * whereas {@code appendTo} produces a plain, human-readable {@code toString()}-style rendering without JSON/XML
-     * quoting or escaping.
+     * <b>serializeTo vs. appendTo:</b> {@code serializeTo} produces machine-readable JSON/XML numeric output, whereas
+     * {@code appendTo} produces a plain, human-readable {@code toString()}-style rendering.
      *
      * @param writer the {@code CharacterWriter} to write to
      * @param x the {@code BigDecimal} value to write; may be {@code null}

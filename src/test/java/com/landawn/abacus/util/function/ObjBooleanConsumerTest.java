@@ -125,6 +125,6 @@ public class ObjBooleanConsumerTest extends TestBase {
     public void testAndThenNullThrowsImmediately() {
         ObjBooleanConsumer<String> instance = (a, b) -> {
         };
-        org.junit.jupiter.api.Assertions.assertThrows(NullPointerException.class, () -> instance.andThen((ObjBooleanConsumer) null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> instance.andThen((ObjBooleanConsumer) null));
     }
 }

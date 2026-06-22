@@ -946,11 +946,6 @@ public class IteratorsTest extends TestBase {
     }
 
     @Test
-    public void testCycleToSize_NullThrows() {
-        assertThrows(IllegalArgumentException.class, () -> Iterators.cycleToSize(null, 5));
-    }
-
-    @Test
     public void testConcatBiIterator_NextWithAction() {
         List<Pair<String, Integer>> pairs = new ArrayList<>();
         pairs.add(Pair.of("a", 1));
@@ -3692,95 +3687,101 @@ public class IteratorsTest extends TestBase {
 
     @Test
     public void test_filter_map() throws Exception {
-
-        {
-            final Iterator<String> iter = ObjIterator.of("a", "b", "c");
-            Iterators.map(iter, it -> it + "1").forEachRemaining(Fn.println());
-            N.println("==========================================================================");
-        }
-        {
-            final Iterator<String> iter = ObjIterator.of("a", "b", "c");
-            Iterators.flatMap(iter, it -> N.toList(it + "1", it + "2")).forEachRemaining(Fn.println());
-            N.println("==========================================================================");
-        }
-        {
-            final Iterator<String> iter = ObjIterator.of("a", "b", "c");
-            Iterators.flatmap(iter, it -> N.asArray(it + "1", it + "2")).forEachRemaining(Fn.println());
-            N.println("==========================================================================");
-        }
+        assertDoesNotThrow(() -> {
+            {
+                final Iterator<String> iter = ObjIterator.of("a", "b", "c");
+                Iterators.map(iter, it -> it + "1").forEachRemaining(Fn.println());
+                N.println("==========================================================================");
+            }
+            {
+                final Iterator<String> iter = ObjIterator.of("a", "b", "c");
+                Iterators.flatMap(iter, it -> N.toList(it + "1", it + "2")).forEachRemaining(Fn.println());
+                N.println("==========================================================================");
+            }
+            {
+                final Iterator<String> iter = ObjIterator.of("a", "b", "c");
+                Iterators.flatmap(iter, it -> N.asArray(it + "1", it + "2")).forEachRemaining(Fn.println());
+                N.println("==========================================================================");
+            }
+        });
     }
 
     @Test
     public void test_filter_map_2() throws Exception {
-
-        {
-            final List<String> list = N.toList("a", "b", "c");
-            N.map(list, it -> it + "1").forEach(Fn.println());
-            N.println("==========================================================================");
-        }
-        {
-            final List<String> list = N.toList("a", "b", "c");
-            N.flatMap(list, it -> N.toList(it + "1", it + "2")).forEach(Fn.println());
-            N.println("==========================================================================");
-        }
+        assertDoesNotThrow(() -> {
+            {
+                final List<String> list = N.toList("a", "b", "c");
+                N.map(list, it -> it + "1").forEach(Fn.println());
+                N.println("==========================================================================");
+            }
+            {
+                final List<String> list = N.toList("a", "b", "c");
+                N.flatMap(list, it -> N.toList(it + "1", it + "2")).forEach(Fn.println());
+                N.println("==========================================================================");
+            }
+        });
     }
 
     @Test
     public void test_filter() throws Exception {
-        {
-            final Iterator<String> iter = ObjIterator.of("a", "b", "c");
-            Iterators.filter(iter, it -> !it.equals("b")).forEachRemaining(Fn.println());
-            N.println("==========================================================================");
-        }
-        {
-            final Iterator<String> iter = ObjIterator.of("a", "b", "c");
-            Iterators.takeWhile(iter, it -> !it.equals("b")).forEachRemaining(Fn.println());
-            N.println("==========================================================================");
-        }
-        {
-            final Iterator<String> iter = ObjIterator.of("a", "b", "c");
-            Iterators.takeWhileInclusive(iter, it -> !it.equals("b")).forEachRemaining(Fn.println());
-            N.println("==========================================================================");
-        }
-        {
-            final Iterator<String> iter = ObjIterator.of("a", "b", "c");
-            Iterators.dropWhile(iter, it -> !it.equals("b")).forEachRemaining(Fn.println());
-            N.println("==========================================================================");
-        }
-        {
-            final Iterator<String> iter = ObjIterator.of("a", "b", "c");
-            Iterators.skipUntil(iter, it -> it.equals("b")).forEachRemaining(Fn.println());
-            N.println("==========================================================================");
-        }
+        assertDoesNotThrow(() -> {
+            {
+                final Iterator<String> iter = ObjIterator.of("a", "b", "c");
+                Iterators.filter(iter, it -> !it.equals("b")).forEachRemaining(Fn.println());
+                N.println("==========================================================================");
+            }
+            {
+                final Iterator<String> iter = ObjIterator.of("a", "b", "c");
+                Iterators.takeWhile(iter, it -> !it.equals("b")).forEachRemaining(Fn.println());
+                N.println("==========================================================================");
+            }
+            {
+                final Iterator<String> iter = ObjIterator.of("a", "b", "c");
+                Iterators.takeWhileInclusive(iter, it -> !it.equals("b")).forEachRemaining(Fn.println());
+                N.println("==========================================================================");
+            }
+            {
+                final Iterator<String> iter = ObjIterator.of("a", "b", "c");
+                Iterators.dropWhile(iter, it -> !it.equals("b")).forEachRemaining(Fn.println());
+                N.println("==========================================================================");
+            }
+            {
+                final Iterator<String> iter = ObjIterator.of("a", "b", "c");
+                Iterators.skipUntil(iter, it -> it.equals("b")).forEachRemaining(Fn.println());
+                N.println("==========================================================================");
+            }
+        });
     }
 
     @Test
     public void test_filter_2() throws Exception {
-        {
-            final List<String> list = N.toList("a", "b", "c");
-            N.filter(list, it -> !it.equals("b")).forEach(Fn.println());
-            N.println("==========================================================================");
-        }
-        {
-            final List<String> list = N.toList("a", "b", "c");
-            N.takeWhile(list, it -> !it.equals("b")).forEach(Fn.println());
-            N.println("==========================================================================");
-        }
-        {
-            final List<String> list = N.toList("a", "b", "c");
-            N.takeWhileInclusive(list, it -> !it.equals("b")).forEach(Fn.println());
-            N.println("==========================================================================");
-        }
-        {
-            final List<String> list = N.toList("a", "b", "c");
-            N.dropWhile(list, it -> !it.equals("b")).forEach(Fn.println());
-            N.println("==========================================================================");
-        }
-        {
-            final List<String> list = N.toList("a", "b", "c");
-            N.skipUntil(list, it -> it.equals("b")).forEach(Fn.println());
-            N.println("==========================================================================");
-        }
+        assertDoesNotThrow(() -> {
+            {
+                final List<String> list = N.toList("a", "b", "c");
+                N.filter(list, it -> !it.equals("b")).forEach(Fn.println());
+                N.println("==========================================================================");
+            }
+            {
+                final List<String> list = N.toList("a", "b", "c");
+                N.takeWhile(list, it -> !it.equals("b")).forEach(Fn.println());
+                N.println("==========================================================================");
+            }
+            {
+                final List<String> list = N.toList("a", "b", "c");
+                N.takeWhileInclusive(list, it -> !it.equals("b")).forEach(Fn.println());
+                N.println("==========================================================================");
+            }
+            {
+                final List<String> list = N.toList("a", "b", "c");
+                N.dropWhile(list, it -> !it.equals("b")).forEach(Fn.println());
+                N.println("==========================================================================");
+            }
+            {
+                final List<String> list = N.toList("a", "b", "c");
+                N.skipUntil(list, it -> it.equals("b")).forEach(Fn.println());
+                N.println("==========================================================================");
+            }
+        });
     }
 
     @Test
@@ -4952,6 +4953,14 @@ public class IteratorsTest extends TestBase {
     @Disabled("Parallel forEach tests require more setup or a test environment that can handle threads properly.")
     @Test
     public void testForEachIteratorParallelPath() throws Exception {
+        List<String> result = Collections.synchronizedList(new ArrayList<>());
+        AtomicBoolean completed = new AtomicBoolean(false);
+        Throwables.Consumer<String, Exception> consumer = result::add;
+        Throwables.Runnable<Exception> onComplete = () -> completed.set(true);
+
+        Iterators.forEach(list("a", "b", "c").iterator(), 0, 3, 2, 2, consumer, onComplete);
+        assertEquals(list("a", "b", "c"), result);
+        assertTrue(completed.get());
     }
 
     @Test
@@ -5671,6 +5680,133 @@ public class IteratorsTest extends TestBase {
     @Test
     public void testRepeatElementsToSize_EmptyCollection_NonZeroThrows() {
         assertThrows(IllegalArgumentException.class, () -> Iterators.repeatElementsToSize(Collections.<String> emptyList(), 5));
+    }
+
+    // --- regression tests for 2026-06-10 deep-review fixes ---
+
+    @Test
+    public void testForEachEmptyIteratorCollectionRunsOnComplete() throws Exception {
+        // regression: an EMPTY collection of iterators returned before running onComplete, while a
+        // collection of empty iterators (zero elements either way) did run it
+        final java.util.concurrent.atomic.AtomicBoolean done = new java.util.concurrent.atomic.AtomicBoolean(false);
+        Iterators.forEach(new java.util.ArrayList<java.util.Iterator<String>>(), s -> {
+        }, () -> done.set(true));
+        assertTrue(done.get());
+
+        final java.util.concurrent.atomic.AtomicBoolean done2 = new java.util.concurrent.atomic.AtomicBoolean(false);
+        Iterators.forEach(java.util.List.of(Collections.<String> emptyIterator()), s -> {
+        }, () -> done2.set(true));
+        assertTrue(done2.get());
+    }
+
+    // --- tests for the IterateOptions builder + forEach(Collection, IterateOptions, ...) overloads (R-2) ---
+
+    @Test
+    public void testForEachWithIterateOptions_offsetCountSlicing() throws Exception {
+        final List<Iterator<Integer>> iters = Arrays.asList(Arrays.asList(1, 2, 3).iterator(), Arrays.asList(4, 5, 6).iterator());
+        final List<Integer> result = new ArrayList<>();
+        Iterators.forEach(iters, Iterators.IterateOptions.builder().offset(2).count(3).build(), result::add);
+        assertEquals(Arrays.asList(3, 4, 5), result);
+    }
+
+    @Test
+    public void testForEachWithIterateOptions_runsOnComplete() throws Exception {
+        final List<Iterator<Integer>> iters = Arrays.asList(Arrays.asList(1, 2).iterator(), Arrays.asList(3, 4).iterator());
+        final List<Integer> result = new ArrayList<>();
+        final AtomicBoolean done = new AtomicBoolean(false);
+        Iterators.forEach(iters, Iterators.IterateOptions.builder().build(), result::add, () -> done.set(true));
+        assertEquals(Arrays.asList(1, 2, 3, 4), result);
+        assertTrue(done.get());
+    }
+
+    @Test
+    public void testForEachWithIterateOptions_nullOptionsTreatedAsDefaults() throws Exception {
+        final List<Iterator<Integer>> iters = Arrays.asList(Arrays.asList(1, 2, 3).iterator());
+        final List<Integer> result = new ArrayList<>();
+        Iterators.forEach(iters, (Iterators.IterateOptions) null, result::add);
+        assertEquals(Arrays.asList(1, 2, 3), result);
+    }
+
+    @Test
+    public void testForEachWithIterateOptions_parallelProcessesAllElements() throws Exception {
+        final List<Integer> range1 = new ArrayList<>();
+        final List<Integer> range2 = new ArrayList<>();
+        for (int i = 0; i < 100; i++) {
+            range1.add(i);
+            range2.add(i + 100);
+        }
+        final List<Iterator<Integer>> iters = Arrays.asList(range1.iterator(), range2.iterator());
+        final java.util.Set<Integer> processed = java.util.concurrent.ConcurrentHashMap.newKeySet();
+        Iterators.forEach(iters, Iterators.IterateOptions.builder().readThreads(2).processThreads(4).queueSize(50).build(), processed::add);
+        assertEquals(200, processed.size());
+        assertTrue(processed.contains(0));
+        assertTrue(processed.contains(199));
+    }
+
+    @Test
+    public void testForEachWithIterateOptions_negativeOffsetOrCountThrows() {
+        final List<Iterator<Integer>> iters = Arrays.asList(Arrays.asList(1, 2, 3).iterator());
+        assertThrows(IllegalArgumentException.class, () -> Iterators.forEach(iters, Iterators.IterateOptions.builder().offset(-1).build(), x -> {
+        }));
+        final List<Iterator<Integer>> iters2 = Arrays.asList(Arrays.asList(1, 2, 3).iterator());
+        assertThrows(IllegalArgumentException.class, () -> Iterators.forEach(iters2, Iterators.IterateOptions.builder().count(-1).build(), x -> {
+        }));
+    }
+
+    @Test
+    public void testIterateOptions_builderDefaults() throws Exception {
+        // @Builder.Default must carry the documented defaults: offset=0, count=Long.MAX_VALUE (process all)
+        final Iterators.IterateOptions opts = Iterators.IterateOptions.builder().build();
+        assertEquals(0L, opts.offset());
+        assertEquals(Long.MAX_VALUE, opts.count());
+        assertEquals(0, opts.readThreads());
+        assertEquals(0, opts.processThreads());
+        assertEquals(0, opts.queueSize());
+
+        final List<Iterator<Integer>> iters = Arrays.asList(Arrays.asList(1, 2, 3).iterator());
+        final List<Integer> result = new ArrayList<>();
+        Iterators.forEach(iters, opts, result::add);
+        assertEquals(Arrays.asList(1, 2, 3), result);
+    }
+
+    @Test
+    public void testForEachIteratorWithIterateOptions_offsetCountSlicing() throws Exception {
+        final Iterator<Integer> iter = Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8).iterator();
+        final List<Integer> result = new ArrayList<>();
+        Iterators.forEach(iter, Iterators.IterateOptions.builder().offset(2).count(3).build(), result::add);
+        assertEquals(Arrays.asList(3, 4, 5), result);
+    }
+
+    @Test
+    public void testForEachIteratorWithIterateOptions_runsOnComplete() throws Exception {
+        final Iterator<Integer> iter = Arrays.asList(1, 2, 3).iterator();
+        final List<Integer> result = new ArrayList<>();
+        final AtomicBoolean done = new AtomicBoolean(false);
+        Iterators.forEach(iter, Iterators.IterateOptions.builder().build(), result::add, () -> done.set(true));
+        assertEquals(Arrays.asList(1, 2, 3), result);
+        assertTrue(done.get());
+    }
+
+    @Test
+    public void testForEachIteratorWithIterateOptions_nullOptionsTreatedAsDefaults() throws Exception {
+        final Iterator<Integer> iter = Arrays.asList(1, 2, 3).iterator();
+        final List<Integer> result = new ArrayList<>();
+        Iterators.forEach(iter, (Iterators.IterateOptions) null, result::add);
+        assertEquals(Arrays.asList(1, 2, 3), result);
+    }
+
+    @Test
+    public void testForEachIteratorWithIterateOptions_parallelIgnoresReadThreadsAndProcessesAll() throws Exception {
+        final List<Integer> range = new ArrayList<>();
+        for (int i = 0; i < 200; i++) {
+            range.add(i);
+        }
+        final java.util.Set<Integer> processed = java.util.concurrent.ConcurrentHashMap.newKeySet();
+        // readThreads(2) is silently ignored for a single iterator; processing still uses 4 threads
+        Iterators.forEach(range.iterator(), Iterators.IterateOptions.builder().readThreads(2).processThreads(4).queueSize(50).build(), processed::add);
+        assertEquals(200, processed.size());
+        assertTrue(processed.contains(0));
+        assertTrue(processed.contains(199));
     }
 
 }

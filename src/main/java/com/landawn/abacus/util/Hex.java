@@ -39,10 +39,8 @@ package com.landawn.abacus.util;
  * }</pre>
  *
  * <p><b>Attribution:</b>
- * This class includes code adapted from Apache Commons Lang under the Apache License 2.0.
+ * This class includes code adapted from Apache Commons Codec under the Apache License 2.0.
  * Methods from these libraries may have been modified for consistency, performance optimization, and null-safety enhancement.</p>
- *
- * @version $Id: Hex.java 1619948 2014-08-22 22:53:55Z ggregory $
  */
 public final class Hex {
 

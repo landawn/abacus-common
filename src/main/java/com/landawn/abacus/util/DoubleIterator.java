@@ -62,9 +62,7 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
 
     /**
      * Constructs a new {@code DoubleIterator}.
-     * Intended for use by subclasses. Subclasses must implement the abstract
-     * {@link #nextDouble()} method and override {@link #hasNext()} to provide
-     * custom iteration logic over {@code double} values.
+     * Intended for use by subclasses only.
      */
     protected DoubleIterator() {
     }

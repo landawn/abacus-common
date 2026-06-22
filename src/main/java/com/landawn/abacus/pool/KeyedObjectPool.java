@@ -16,6 +16,7 @@ package com.landawn.abacus.pool;
 
 import java.util.Collection;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 import com.landawn.abacus.annotation.MayReturnNull;
 
@@ -50,9 +51,14 @@ import com.landawn.abacus.annotation.MayReturnNull;
  *   <caption>Method naming comparison between ObjectPool and KeyedObjectPool</caption>
  *   <tr><th>Operation</th><th>ObjectPool (Queue-style)</th><th>KeyedObjectPool (Map-style)</th></tr>
  *   <tr><td>Insert</td><td>{@code add(E)}</td><td>{@code put(K, E)}</td></tr>
- *   <tr><td>Retrieve</td><td>{@code take()}</td><td>{@code get(K)}</td></tr>
+ *   <tr><td>Retrieve-and-remove</td><td>{@code take()}</td><td>{@code remove(K)}</td></tr>
+ *   <tr><td>Retrieve-without-removing</td><td>(no analog)</td><td>{@code get(K)}</td></tr>
  *   <tr><td>Check</td><td>{@code contains(E)}</td><td>{@code containsKey(K)}</td></tr>
  * </table>
+ *
+ * <p>Note: {@link ObjectPool#take()} <em>removes</em> the object from the pool, so its true keyed
+ * mirror is {@link #remove(Object)} (which also removes). {@link #get(Object)} returns the value
+ * <em>without</em> removing it and therefore has no unkeyed analog.</p>
  *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
@@ -86,7 +92,8 @@ public interface KeyedObjectPool<K, E extends Poolable> extends Pool {
      * Associates the specified poolable element with the specified key in this pool.
      * If the pool previously contained an element for the key, the old element is removed and
      * destroyed (with {@link Poolable.Caller#REMOVE_REPLACE_CLEAR}) <em>before</em> the new value
-     * is inserted; this happens even when the subsequent insertion of the new value fails.
+     * is inserted; this happens even when the subsequent insertion of the new value fails — unless
+     * the old element is the same instance as {@code value}, in which case it is not destroyed.
      *
      * <p>The put operation returns {@code false} (does not insert) if:</p>
      * <ul>
@@ -138,6 +145,65 @@ public interface KeyedObjectPool<K, E extends Poolable> extends Pool {
     boolean put(K key, E value, boolean autoDestroyOnFailedToPut);
 
     /**
+     * Attempts to associate the specified element with the specified key, waiting if necessary for
+     * a capacity slot to become available. This is the keyed mirror of
+     * {@link ObjectPool#add(Poolable, long, TimeUnit)}: when the pool is at capacity, this method
+     * blocks until a slot frees up (because another thread removes/evicts an entry), the timeout
+     * expires, or the thread is interrupted.
+     *
+     * <p>All non-capacity {@code put} semantics of {@link #put(Object, Poolable)} still apply: the
+     * previous mapping for {@code key} (if any, and a different instance) is removed and destroyed
+     * before insertion, an already-expired value is rejected ({@code false}), and a configured
+     * memory measure is consulted. The method returns {@code false} if the timeout elapses before a
+     * slot becomes available.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * DBConnection conn = new DBConnection("server1");
+     * if (pool.put("database1", conn, 5, TimeUnit.SECONDS)) {
+     *     // Successfully pooled
+     * } else {
+     *     // Timed out waiting for a slot - handle the connection
+     *     conn.destroy(Caller.PUT_ADD_FAILURE);
+     * }
+     * }</pre>
+     *
+     * @param key the key with which the specified value is to be associated, must not be {@code null}
+     * @param value the value to be associated with the specified key, must not be {@code null}
+     * @param timeout the maximum time to wait for a capacity slot to become available
+     * @param unit the time unit of the timeout argument
+     * @return {@code true} if the value was successfully added, {@code false} if the timeout elapsed
+     *         (or the value was already/became expired, or memory constraints rejected it)
+     * @throws IllegalArgumentException if the key or value is null
+     * @throws IllegalStateException if the pool has been closed
+     * @throws InterruptedException if interrupted while waiting
+     */
+    boolean put(K key, E value, long timeout, TimeUnit unit) throws InterruptedException;
+
+    /**
+     * Attempts to associate the specified element with the specified key within the given timeout,
+     * with optional automatic destruction on failure. This combines the timed-wait behavior of
+     * {@link #put(Object, Poolable, long, TimeUnit)} with the cleanup convenience of
+     * {@link #put(Object, Poolable, boolean)}.
+     *
+     * <p>If the put fails (timeout elapsed, capacity could not be freed, the value expired, or
+     * memory constraints rejected it) and {@code autoDestroyOnFailedToPut} is {@code true}, the
+     * pool calls {@code value.destroy(PUT_ADD_FAILURE)} in a finally block to ensure no resource
+     * leak, even if an exception is thrown.</p>
+     *
+     * @param key the key with which the specified value is to be associated, must not be {@code null}
+     * @param value the value to be associated with the specified key, must not be {@code null}
+     * @param timeout the maximum time to wait for a capacity slot to become available
+     * @param unit the time unit of the timeout argument
+     * @param autoDestroyOnFailedToPut if {@code true}, calls value.destroy(PUT_ADD_FAILURE) if put fails
+     * @return {@code true} if the value was successfully added, {@code false} if the timeout elapsed or put failed
+     * @throws IllegalArgumentException if the key or value is null
+     * @throws IllegalStateException if the pool has been closed
+     * @throws InterruptedException if interrupted while waiting
+     */
+    boolean put(K key, E value, long timeout, TimeUnit unit, boolean autoDestroyOnFailedToPut) throws InterruptedException;
+
+    /**
      * Returns the element associated with the specified key, or {@code null} if no mapping exists.
      * The element's activity print is updated (last access time and access count) to reflect this access.
      *
@@ -161,6 +227,40 @@ public interface KeyedObjectPool<K, E extends Poolable> extends Pool {
      */
     @MayReturnNull
     E get(K key);
+
+    /**
+     * Returns the element associated with the specified key, waiting if necessary until a non-expired
+     * mapping for the key becomes available, the timeout expires, or the thread is interrupted. This
+     * is the keyed mirror of {@link ObjectPool#take(long, TimeUnit)}: a keyed pool retrieval is keyed
+     * on a specific {@code key}, so this method blocks until <em>that</em> key is populated (typically
+     * by another thread's {@code put}) rather than for any arbitrary object.
+     *
+     * <p>Like {@link #get(Object)}, on success the element's activity print is updated (last access
+     * time and access count), the element is <em>not</em> removed (it stays in the pool), and an
+     * expired mapping encountered for the key is removed and destroyed (the method then keeps waiting
+     * for a fresh mapping until the timeout). Returns {@code null} if the timeout elapses before a
+     * valid mapping for the key is available.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * DBConnection conn = pool.get("database1", 10, TimeUnit.SECONDS);
+     * if (conn != null) {
+     *     // use connection (still pooled under "database1")
+     * } else {
+     *     // timed out - no connection became available for that key
+     * }
+     * }</pre>
+     *
+     * @param key the key whose associated element is to be returned
+     * @param timeout the maximum time to wait for a valid mapping for the key to become available
+     * @param unit the time unit of the timeout argument
+     * @return the element associated with the key, or {@code null} if the timeout elapsed before a
+     *         valid mapping was available
+     * @throws IllegalStateException if the pool has been closed
+     * @throws InterruptedException if interrupted while waiting
+     */
+    @MayReturnNull
+    E get(K key, long timeout, TimeUnit unit) throws InterruptedException;
 
     /**
      * Removes and returns the element associated with the specified key.
