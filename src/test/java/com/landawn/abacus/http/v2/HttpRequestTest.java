@@ -2160,10 +2160,11 @@ public class HttpRequestTest extends TestBase {
 
     @Test
     public void testGetInputStreamResultOnErrorStatusDoesNotLeakBodyStream() throws Exception {
-        // On a non-2xx response, get(InputStream.class) must close the deferred-cleanup body stream
-        // (releasing the per-request HttpClient/connection) before throwing, rather than rendering and
-        // leaking the stream. The fixed branch reports only the status + a placeholder; the old code
-        // did statusCode + ": " + body, rendering the stream's identity and never closing it.
+        // On a non-2xx response, get(InputStream.class) must read AND close the deferred-cleanup body
+        // stream (releasing the per-request HttpClient/connection) before throwing, rather than
+        // rendering and leaking the raw stream object. The fixed getBody surfaces the actual body
+        // content in the message; the old code did statusCode + ": " + body, rendering the
+        // CleanupInputStream's identity and never closing it (leaking the client).
         final HttpServer server = startErrorServer(404, "not found");
 
         try {
@@ -2172,8 +2173,8 @@ public class HttpRequestTest extends TestBase {
 
             final String msg = ex.getCause() != null ? ex.getCause().getMessage() : ex.getMessage();
             assertEquals(true, msg.contains("404"), "message should report the status code: " + msg);
-            assertEquals(true, msg.contains("<response body stream>"), "the error response InputStream should be closed and summarized, not rendered: " + msg);
-            assertEquals(false, msg.contains("CleanupInputStream"), "the response body stream identity must not leak into the message: " + msg);
+            assertEquals(true, msg.contains("not found"), "the error response body content should be read out and surfaced: " + msg);
+            assertEquals(false, msg.contains("CleanupInputStream"), "the raw response body stream must be read & closed, not rendered into the message: " + msg);
         } finally {
             server.stop(0);
         }
