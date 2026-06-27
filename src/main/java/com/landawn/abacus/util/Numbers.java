@@ -323,7 +323,7 @@ import com.landawn.abacus.util.Strings.StrUtil;
  *   <tbody>
  *     <tr>
  *       <td>{@code toInt/toLong/toByte/toShort/toFloat/toDouble(String)}</td>
- *       <td><b><i>Numbers</i></b>: {@code null}/{@code ""}&rarr;{@code 0}, malformed&rarr;{@code NumberFormatException}, out-of-range&rarr;{@code ArithmeticException} &middot; &#9888;&#65039; <b><i>JDK</i></b> throws for all &middot; &#9888;&#65039; <b><i>Commons</i></b> returns default for all &middot; &#9888;&#65039; <b><i>Guava</i></b> {@code tryParse}&rarr;{@code null}</td>
+ *       <td><b><i>Numbers</i></b>: {@code null}/{@code ""}&rarr;{@code 0}, malformed&rarr;{@code NumberFormatException}, integer out-of-range&rarr;{@code ArithmeticException} (the {@code toFloat}/{@code toDouble} string parsers instead saturate to &plusmn;Infinity and never throw on overflow) &middot; &#9888;&#65039; <b><i>JDK</i></b> throws for all &middot; &#9888;&#65039; <b><i>Commons</i></b> returns default for all &middot; &#9888;&#65039; <b><i>Guava</i></b> {@code tryParse}&rarr;{@code null}</td>
  *     </tr>
  *     <tr>
  *       <td>{@code toByte/.../toLong(Object)} (fractional {@code Number})</td>
@@ -1317,12 +1317,14 @@ public final class Numbers {
      *
      * @param x the Integer value to be formatted; if {@code null}, {@code null} is returned
      * @param decimalFormat the decimal format pattern to be used for formatting (must not be null)
-     * @return a string representation of the Integer value formatted according to the provided decimal format
+     * @return a string representation of the Integer value formatted according to the provided decimal format,
+     *         or {@code null} if {@code x} is {@code null}
      * @throws IllegalArgumentException if the decimalFormat is {@code null}
      * @see #format(int, String)
      * @see #format(Long, String)
      * @see java.text.DecimalFormat#format(long)
      */
+    @MayReturnNull
     public static String format(final Integer x, final String decimalFormat) throws IllegalArgumentException {
         N.checkArgNotNull(decimalFormat, cs.decimalFormat);
 
@@ -1402,12 +1404,14 @@ public final class Numbers {
      *
      * @param x the Long value to be formatted; if {@code null}, {@code null} is returned
      * @param decimalFormat the decimal format pattern to be used for formatting (must not be null)
-     * @return a string representation of the Long value formatted according to the provided decimal format
+     * @return a string representation of the Long value formatted according to the provided decimal format,
+     *         or {@code null} if {@code x} is {@code null}
      * @throws IllegalArgumentException if the decimalFormat is {@code null}
      * @see #format(long, String)
      * @see #format(Integer, String)
      * @see java.text.DecimalFormat#format(long)
      */
+    @MayReturnNull
     public static String format(final Long x, final String decimalFormat) throws IllegalArgumentException {
         N.checkArgNotNull(decimalFormat, cs.decimalFormat);
 
@@ -1489,12 +1493,14 @@ public final class Numbers {
      *
      * @param x the Float value to be formatted; if {@code null}, {@code null} is returned.
      * @param decimalFormat the decimal format pattern to be used for formatting.
-     * @return a string representation of the Float value formatted according to the provided decimal format.
+     * @return a string representation of the Float value formatted according to the provided decimal format,
+     *         or {@code null} if {@code x} is {@code null}.
      * @throws IllegalArgumentException if the decimalFormat is {@code null}.
      * @see #format(float, String)
      * @see #format(Double, String)
      * @see java.text.DecimalFormat#format(double)
      */
+    @MayReturnNull
     public static String format(final Float x, final String decimalFormat) throws IllegalArgumentException {
         N.checkArgNotNull(decimalFormat, cs.decimalFormat);
 
@@ -1579,13 +1585,15 @@ public final class Numbers {
      *
      * @param x the Double value to be formatted; if {@code null}, {@code null} is returned.
      * @param decimalFormat the decimal format pattern to be used for formatting.
-     * @return a string representation of the Double value formatted according to the provided decimal format.
+     * @return a string representation of the Double value formatted according to the provided decimal format,
+     *         or {@code null} if {@code x} is {@code null}.
      * @throws IllegalArgumentException if the decimalFormat is {@code null}.
      * @see #format(double, String)
      * @see #format(Integer, String)
      * @see #format(Long, String)
      * @see java.text.DecimalFormat#format(double)
      */
+    @MayReturnNull
     public static String format(final Double x, final String decimalFormat) throws IllegalArgumentException {
         N.checkArgNotNull(decimalFormat, cs.decimalFormat);
 

@@ -24,7 +24,7 @@ package com.landawn.abacus.parser;
  *   <li>Basic XML attributes and values (IS_NULL, TRUE, FALSE, etc.)</li>
  *   <li>Collection-related elements (ARRAY, LIST, SET, etc.)</li>
  *   <li>Map-related elements (MAP, ENTRY, KEY, VALUE, etc.)</li>
- *   <li>Entity and property elements (ENTITY, PROPERTY, etc.)</li>
+ *   <li>Bean and property elements (BEAN, PROPERTY, etc.)</li>
  *   <li>SOAP envelope elements</li>
  * </ul>
  *
@@ -365,76 +365,100 @@ public class XmlConstants {
     public static final String ENTITY_IDS_NULL_ELE = "<entityIds isNull=\"true\" />";
 
     /**
-     * XML element name for entity/bean structures.
+     * XML element name for bean structures.
      * Value: {@code "bean"}.
      */
-    public static final String ENTITY = "bean";
+    public static final String BEAN = "bean";
 
     /**
-     * Opening tag for entity/bean XML elements.
+     * Opening tag for bean XML elements.
      * Value: {@code "<bean>"}.
      */
-    public static final String ENTITY_ELE_START = "<bean>";
+    public static final String BEAN_ELE_START = "<bean>";
 
     /**
-     * Closing tag for entity/bean XML elements.
+     * Closing tag for bean XML elements.
      * Value: {@code "</bean>"}.
      */
-    public static final String ENTITY_ELE_END = "</bean>";
+    public static final String BEAN_ELE_END = "</bean>";
 
     /**
-     * Self-closing XML element representing a {@code null} entity/bean.
+     * Self-closing XML element representing a {@code null} bean.
      * Value: {@code "<bean isNull=\"true\" />"}.
      */
-    public static final String ENTITY_NULL_ELE = "<bean isNull=\"true\" />";
+    public static final String BEAN_NULL_ELE = "<bean isNull=\"true\" />";
 
     /**
-     * XML element name for entity/bean names.
+     * XML element name for bean names.
      * Value: {@code "beanName"}.
      */
-    public static final String ENTITY_NAME = "beanName";
+    public static final String BEAN_NAME = "beanName";
 
     /**
-     * Opening tag for entity/bean name XML elements.
+     * Opening tag for bean name XML elements.
      * Value: {@code "<beanName>"}.
      */
-    public static final String ENTITY_NAME_ELE_START = "<beanName>";
+    public static final String BEAN_NAME_ELE_START = "<beanName>";
 
     /**
-     * Closing tag for entity/bean name XML elements.
+     * Closing tag for bean name XML elements.
      * Value: {@code "</beanName>"}.
      */
-    public static final String ENTITY_NAME_ELE_END = "</beanName>";
+    public static final String BEAN_NAME_ELE_END = "</beanName>";
 
     /**
-     * Self-closing XML element representing a {@code null} entity/bean name.
+     * Self-closing XML element representing a {@code null} bean name.
      * Value: {@code "<beanName isNull=\"true\" />"}.
      */
-    public static final String ENTITY_NAME_NULL_ELE = "<beanName isNull=\"true\" />";
+    public static final String BEAN_NAME_NULL_ELE = "<beanName isNull=\"true\" />";
 
     /**
-     * XML element name for entity/bean class information.
+     * XML element name for bean class information.
      * Value: {@code "beanClass"}.
      */
-    public static final String ENTITY_CLASS = "beanClass";
+    public static final String BEAN_CLASS = "beanClass";
 
     /**
-     * Opening tag for entity/bean class XML elements.
+     * Opening tag for bean class XML elements.
      * Value: {@code "<beanClass>"}.
      */
-    public static final String ENTITY_CLASS_ELE_START = "<beanClass>";
+    public static final String BEAN_CLASS_ELE_START = "<beanClass>";
 
     /**
-     * Closing tag for entity/bean class XML elements.
+     * Closing tag for bean class XML elements.
      * Value: {@code "</beanClass>"}.
      */
-    public static final String ENTITY_CLASS_ELE_END = "</beanClass>";
+    public static final String BEAN_CLASS_ELE_END = "</beanClass>";
 
     /**
-     * Self-closing XML element representing a {@code null} entity/bean class.
+     * Self-closing XML element representing a {@code null} bean class.
      * Value: {@code "<beanClass isNull=\"true\" />"}.
      */
-    public static final String ENTITY_CLASS_NULL_ELE = "<beanClass isNull=\"true\" />";
+    public static final String BEAN_CLASS_NULL_ELE = "<beanClass isNull=\"true\" />";
+
+    /**
+     * XML element name for collections of beans.
+     * Value: {@code "beans"}.
+     */
+    public static final String BEANS = "beans";
+
+    /**
+     * Opening tag for beans collection XML elements.
+     * Value: {@code "<beans>"}.
+     */
+    public static final String BEANS_ELE_START = "<beans>";
+
+    /**
+     * Closing tag for beans collection XML elements.
+     * Value: {@code "</beans>"}.
+     */
+    public static final String BEANS_ELE_END = "</beans>";
+
+    /**
+     * Self-closing XML element representing a {@code null} beans collection.
+     * Value: {@code "<beans isNull=\"true\" />"}.
+     */
+    public static final String BEANS_NULL_ELE = "<beans isNull=\"true\" />";
 
     /**
      * XML element name for property elements.
@@ -605,30 +629,6 @@ public class XmlConstants {
     public static final String PROPS_LIST_NULL_ELE = "<propsList isNull=\"true\" />";
 
     /**
-     * XML element name for collections of entities.
-     * Value: {@code "entities"}.
-     */
-    public static final String ENTITIES = "entities";
-
-    /**
-     * Opening tag for entities collection XML elements.
-     * Value: {@code "<entities>"}.
-     */
-    public static final String ENTITIES_ELE_START = "<entities>";
-
-    /**
-     * Closing tag for entities collection XML elements.
-     * Value: {@code "</entities>"}.
-     */
-    public static final String ENTITIES_ELE_END = "</entities>";
-
-    /**
-     * Self-closing XML element representing a {@code null} entities collection.
-     * Value: {@code "<entities isNull=\"true\" />"}.
-     */
-    public static final String ENTITIES_NULL_ELE = "<entities isNull=\"true\" />";
-
-    /**
      * XML element name for result elements.
      * Value: {@code "result"}.
      */
@@ -713,13 +713,10 @@ public class XmlConstants {
     public static final String SOAP_HEADER_ELE_END = "</soap:Header>";
 
     /**
-     * Uppercase string constant {@code "BODY"} used for case-insensitive matching of the SOAP body
-     * element name. The actual SOAP body XML tags use mixed-case (see {@link #SOAP_BODY_ELE_START}
-     * and {@link #SOAP_BODY_ELE_END}); this constant is intended for comparisons such as
-     * {@code localName.equalsIgnoreCase(BODY)}.
-     * Value: {@code "BODY"}.
+     * XML element name for SOAP body elements.
+     * Value: {@code "Body"}.
      */
-    public static final String BODY = "BODY";
+    public static final String BODY = "Body";
 
     /**
      * Opening tag for SOAP body XML elements.

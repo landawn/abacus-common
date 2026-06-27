@@ -100,7 +100,7 @@ import com.landawn.abacus.util.stream.Stream;
  *   <li><b>Stream Processing:</b> Advanced stream utilities with automatic resource management</li>
  *   <li><b>Compression Support:</b> Built-in support for ZIP, GZIP, Snappy, and Brotli compression</li>
  *   <li><b>NIO Integration:</b> Modern NIO.2 operations with Path and Channel support</li>
- *   <li><b>Charset Handling:</b> Intelligent charset detection and conversion utilities</li>
+ *   <li><b>Charset Handling:</b> Explicit charset conversion utilities for reads and writes</li>
  *   <li><b>Memory Mapping:</b> Support for memory-mapped files for large file operations</li>
  *   <li><b>Parallel Processing:</b> Multi-threaded file processing with configurable thread pools</li>
  * </ul>
@@ -118,7 +118,7 @@ import com.landawn.abacus.util.stream.Stream;
  * <p><b>Parameter Conventions:</b>
  * <ul>
  *   <li><b>Offset Parameters:</b> Uses {@code offset/count/len} instead of {@code fromIndex/toIndex}</li>
- *   <li><b>Charset Handling:</b> Defaults to {@code Charsets.DEFAULT} for consistent encoding</li>
+ *   <li><b>Charset Handling:</b> Defaults to UTF-8 ({@code Charsets.UTF_8}) for consistent encoding (NOT the JVM platform default)</li>
  *   <li><b>Buffer Sizes:</b> Intelligent default buffer sizes with customization options</li>
  *   <li><b>Exception Handling:</b> {@code UncheckedIOException} wrapping for cleaner API usage</li>
  * </ul>
@@ -360,7 +360,7 @@ public final class IOUtil {
     // Do not rely on the system default charset unless you are intentionally reading/writing files in the user’s local legacy encoding.
     // Since JDK 18, Java’s standard default charset is UTF-8 across platforms, except console I/O, via JEP 400.
     // But if your library or app supports Java 8/11/17, the platform default may still vary by OS/locale, especially on older Windows setups.
-    static final Charset DEFAULT_CHARSET = Charsets.UTF_8; // platform default charset (Charset.defaultCharset()), NOT necessarily UTF-8
+    static final Charset DEFAULT_CHARSET = Charsets.UTF_8; // library-wide default: ALWAYS UTF-8 (NOT the JVM platform default), for cross-platform consistency
 
     // ..
     private static final String JAVA_VENDOR_STR = "java.vendor";
@@ -907,7 +907,7 @@ public final class IOUtil {
     }
 
     /**
-     * Converts a character array to a byte array using the default character set of the platform.
+     * Converts a character array to a byte array using the default charset (UTF-8).
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -933,7 +933,7 @@ public final class IOUtil {
      * }</pre>
      *
      * @param chars the character array to convert. May be {@code null} or empty.
-     * @param charset the character set to use for encoding. If {@code null}, the platform's default charset is used.
+     * @param charset the character set to use for encoding. If {@code null}, the default charset (UTF-8) is used.
      * @return the resulting byte array, or an empty byte array if the input is {@code null} or empty.
      */
     public static byte[] charsToBytes(final char[] chars, final Charset charset) {
@@ -957,7 +957,7 @@ public final class IOUtil {
      * @param chars the source character array, may be {@code null} or empty.
      * @param offset the starting position in the character array (0-based), must be &gt;= 0.
      * @param charCount the number of characters to convert, must be &gt;= 0.
-     * @param charset the character set to use for encoding. If {@code null}, the platform's default charset is used.
+     * @param charset the character set to use for encoding. If {@code null}, the default charset (UTF-8) is used.
      * @return the resulting byte array, or an empty byte array if {@code charCount} is zero.
      * @throws IndexOutOfBoundsException if {@code offset} or {@code charCount} is out of bounds.
      * @throws IllegalArgumentException if {@code offset} or {@code charCount} is negative.
@@ -980,7 +980,7 @@ public final class IOUtil {
     }
 
     /**
-     * Converts a byte array to a character array using the default character set of the platform.
+     * Converts a byte array to a character array using the default charset (UTF-8).
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1006,7 +1006,7 @@ public final class IOUtil {
      * }</pre>
      *
      * @param bytes the byte array to convert. May be {@code null} or empty.
-     * @param charset the character set to use for decoding. If {@code null}, the platform's default charset is used.
+     * @param charset the character set to use for decoding. If {@code null}, the default charset (UTF-8) is used.
      * @return the resulting character array, or an empty character array if the input is {@code null} or empty.
      */
     public static char[] bytesToChars(final byte[] bytes, final Charset charset) {
@@ -1030,7 +1030,7 @@ public final class IOUtil {
      * @param bytes the source byte array, may be {@code null} or empty.
      * @param offset the starting position in the byte array (0-based), must be &gt;= 0.
      * @param byteCount the number of bytes to convert, must be &gt;= 0.
-     * @param charset the character set to use for decoding. If {@code null}, the platform's default charset is used.
+     * @param charset the character set to use for decoding. If {@code null}, the default charset (UTF-8) is used.
      * @return the resulting character array, or an empty character array if {@code byteCount} is zero.
      * @throws IndexOutOfBoundsException if {@code offset} or {@code byteCount} is out of bounds.
      * @throws IllegalArgumentException if {@code offset} or {@code byteCount} is negative.
@@ -1053,7 +1053,7 @@ public final class IOUtil {
     }
 
     /**
-     * Converts a {@code String} to an {@code InputStream} using the platform's default character set.
+     * Converts a {@code String} to an {@code InputStream} using the default charset (UTF-8).
      * If the input string is {@code null} or empty, an empty {@code InputStream} is returned.
      *
      * <p><b>Usage Examples:</b></p>
@@ -1084,7 +1084,7 @@ public final class IOUtil {
      * }</pre>
      *
      * @param str the string to convert. May be {@code null}.
-     * @param charset the character set to use for encoding. If {@code null}, the platform's default charset is used.
+     * @param charset the character set to use for encoding. If {@code null}, the default charset (UTF-8) is used.
      * @return an {@code InputStream} for the given string, or an empty {@code InputStream} if the input is {@code null} or empty.
      */
     public static InputStream stringToInputStream(final String str, Charset charset) {
@@ -1392,7 +1392,7 @@ public final class IOUtil {
     }
 
     /**
-     * Reads all characters from a file into a character array using the platform's default character set.
+     * Reads all characters from a file into a character array using the default charset (UTF-8).
      * This method handles regular files, gzipped files (.gz), and zip files (.zip, reading the first entry).
      * <p>
      * Note: This method should not be used for files with a size close to {@code Integer.MAX_VALUE} due to memory constraints.
@@ -1435,7 +1435,7 @@ public final class IOUtil {
      * }</pre>
      *
      * @param source the file to read from, must not be {@code null}.
-     * @param charset the character set to use for decoding, if {@code null} the platform's default charset is used.
+     * @param charset the character set to use for decoding, if {@code null} the default charset (UTF-8) is used.
      * @return a character array containing all characters from the file.
      * @throws OutOfMemoryError if the file is too large to be read into a character array.
      * @throws UncheckedIOException if an I/O error occurs.
@@ -1457,7 +1457,7 @@ public final class IOUtil {
     }
 
     /**
-     * Reads all remaining characters from an {@code InputStream} into a character array using the platform's default character set.
+     * Reads all remaining characters from an {@code InputStream} into a character array using the default charset (UTF-8).
      * <p>
      * Note: This method should not be used for streams with a size close to {@code Integer.MAX_VALUE} due to memory constraints.
      * The input stream is not closed by this method.
@@ -1498,7 +1498,7 @@ public final class IOUtil {
      * }</pre>
      *
      * @param source the {@code InputStream} to read from, must not be {@code null}.
-     * @param charset the character set to use for decoding, if {@code null} the platform's default charset is used.
+     * @param charset the character set to use for decoding, if {@code null} the default charset (UTF-8) is used.
      * @return a character array containing all characters read from the stream.
      * @throws OutOfMemoryError if the stream is too large to be read into a character array.
      * @throws UncheckedIOException if an I/O error occurs.
@@ -1543,7 +1543,7 @@ public final class IOUtil {
     }
 
     /**
-     * Reads all characters from a file into a character array using the platform's default character set.
+     * Reads all characters from a file into a character array using the default charset (UTF-8).
      * This method is similar to {@link #readAllChars(File)} but throws a checked {@code IOException}.
      * This method handles regular files, gzipped files (.gz), and zip files (.zip, reading the first entry).
      * <p>
@@ -1590,7 +1590,7 @@ public final class IOUtil {
      * }</pre>
      *
      * @param source the file to read from, must not be {@code null}.
-     * @param charset the character set to use for decoding, if {@code null} the platform's default charset is used.
+     * @param charset the character set to use for decoding, if {@code null} the default charset (UTF-8) is used.
      * @return a character array containing all characters from the file.
      * @throws OutOfMemoryError if the file is too large to be read into a character array.
      * @throws IOException if an I/O error occurs.
@@ -1602,7 +1602,7 @@ public final class IOUtil {
     }
 
     /**
-     * Reads up to a specified number of characters from a file into a character array, starting from a given character offset, using the platform's default charset.
+     * Reads up to a specified number of characters from a file into a character array, starting from a given character offset, using the default charset (UTF-8).
      * This method handles regular files, gzipped files (.gz), and zip files (.zip, reading the first entry).
      *
      * <p><b>Usage Examples:</b></p>
@@ -1645,7 +1645,7 @@ public final class IOUtil {
      * }</pre>
      *
      * @param source the file to read from, must not be {@code null}.
-     * @param charset the character set to use for decoding, if {@code null} the platform's default charset is used.
+     * @param charset the character set to use for decoding, if {@code null} the default charset (UTF-8) is used.
      * @param offset the starting position in characters from where to begin reading, must be &gt;= 0.
      * @param maxLen the maximum number of characters to read, must be &gt;= 0.
      * @return a character array containing the characters read from the file. The length of the array will be at most {@code maxLen}.
@@ -1670,7 +1670,7 @@ public final class IOUtil {
     }
 
     /**
-     * Reads all remaining characters from an {@code InputStream} into a character array using the platform's default character set.
+     * Reads all remaining characters from an {@code InputStream} into a character array using the default charset (UTF-8).
      * This method is similar to {@link #readAllChars(InputStream)} but throws a checked {@code IOException}.
      * <p>
      * Note: This method should not be used for streams with a size close to {@code Integer.MAX_VALUE} due to memory constraints.
@@ -1717,7 +1717,7 @@ public final class IOUtil {
      * }</pre>
      *
      * @param source the {@code InputStream} to read from, must not be {@code null}.
-     * @param charset the character set to use for decoding, if {@code null} the platform's default charset is used.
+     * @param charset the character set to use for decoding, if {@code null} the default charset (UTF-8) is used.
      * @return a character array containing all characters read from the stream.
      * @throws OutOfMemoryError if the stream is too large to be read into a character array.
      * @throws IOException if an I/O error occurs.
@@ -1730,7 +1730,7 @@ public final class IOUtil {
     }
 
     /**
-     * Reads up to a specified number of characters from an {@code InputStream} into a character array, starting from a given character offset, using the platform's default charset.
+     * Reads up to a specified number of characters from an {@code InputStream} into a character array, starting from a given character offset, using the default charset (UTF-8).
      * This method will skip the specified number of characters from the stream before starting to read.
      * The input stream is not closed by this method.
      *
@@ -1775,7 +1775,7 @@ public final class IOUtil {
      * }</pre>
      *
      * @param source the {@code InputStream} to read from, must not be {@code null}.
-     * @param charset the character set to use for decoding, if {@code null} the platform's default charset is used.
+     * @param charset the character set to use for decoding, if {@code null} the default charset (UTF-8) is used.
      * @param offset the starting position in characters from where to begin reading, must be &gt;= 0.
      * @param maxLen the maximum number of characters to read, must be &gt;= 0.
      * @return a character array containing the characters read from the stream. The length of the array will be at most {@code maxLen}.
@@ -1901,7 +1901,7 @@ public final class IOUtil {
     }
 
     /**
-     * Reads the entire content of a file into a {@code String} using the platform's default character set.
+     * Reads the entire content of a file into a {@code String} using the default charset (UTF-8).
      * This method handles regular files, gzipped files (.gz), and zip files (.zip, reading the first entry).
      * <p>
      * Note: This method should not be used for files with a size close to {@code Integer.MAX_VALUE} due to memory constraints.
@@ -1972,7 +1972,7 @@ public final class IOUtil {
      * }</pre>
      *
      * @param source the file to read from. It can be a regular file, gzipped file (.gz), and zip file (.zip, reading the first entry).
-     * @param charset the character set to use for decoding, if {@code null} the platform's default charset is used.
+     * @param charset the character set to use for decoding, if {@code null} the default charset (UTF-8) is used.
      * @return a {@code String} containing the entire content of the file.
      * @throws OutOfMemoryError if the file is too large to be read into a string.
      * @throws UncheckedIOException if an I/O error occurs.
@@ -1994,7 +1994,7 @@ public final class IOUtil {
     }
 
     /**
-     * Reads all remaining characters from an {@code InputStream} into a {@code String} using the platform's default character set.
+     * Reads all remaining characters from an {@code InputStream} into a {@code String} using the default charset (UTF-8).
      * <p>
      * Note: This method should not be used for streams with a size close to {@code Integer.MAX_VALUE} due to memory constraints.
      * The input stream is not closed by this method.
@@ -2037,7 +2037,7 @@ public final class IOUtil {
      * }</pre>
      *
      * @param source the {@code InputStream} to read from, must not be {@code null}.
-     * @param charset the character set to use for decoding, if {@code null} the platform's default charset is used.
+     * @param charset the character set to use for decoding, if {@code null} the default charset (UTF-8) is used.
      * @return a {@code String} containing all content read from the stream.
      * @throws OutOfMemoryError if the stream is too large to be read into a string.
      * @throws UncheckedIOException if an I/O error occurs.
@@ -2086,7 +2086,7 @@ public final class IOUtil {
     }
 
     /**
-     * Reads up to a specified number of characters from a file into a {@code String}, starting from a given character offset, using the platform's default charset.
+     * Reads up to a specified number of characters from a file into a {@code String}, starting from a given character offset, using the default charset (UTF-8).
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -2127,7 +2127,7 @@ public final class IOUtil {
      * }</pre>
      *
      * @param source the file to read from. It can be a regular file, gzipped file (.gz), and zip file (.zip, reading the first entry).
-     * @param charset the character set to use for decoding, if {@code null} the platform's default charset is used.
+     * @param charset the character set to use for decoding, if {@code null} the default charset (UTF-8) is used.
      * @param offset the starting position in characters from where to begin reading, must be &gt;= 0.
      * @param maxLen the maximum number of characters to read, must be &gt;= 0.
      * @return a {@code String} containing the characters read from the file.
@@ -2152,7 +2152,7 @@ public final class IOUtil {
     }
 
     /**
-     * Reads up to a specified number of characters from an {@code InputStream} into a {@code String}, starting from a given character offset, using the platform's default charset.
+     * Reads up to a specified number of characters from an {@code InputStream} into a {@code String}, starting from a given character offset, using the default charset (UTF-8).
      * This method will skip the specified number of characters from the stream before starting to read.
      * The input stream is not closed by this method.
      *
@@ -2197,7 +2197,7 @@ public final class IOUtil {
      * }</pre>
      *
      * @param source the {@code InputStream} to read from, must not be {@code null}.
-     * @param charset the character set to use for decoding, if {@code null} the platform's default charset is used.
+     * @param charset the character set to use for decoding, if {@code null} the default charset (UTF-8) is used.
      * @param offset the starting position in characters from where to begin reading, must be &gt;= 0.
      * @param maxLen the maximum number of characters to read, must be &gt;= 0.
      * @return a {@code String} containing the characters read from the stream.
@@ -2248,7 +2248,7 @@ public final class IOUtil {
     }
 
     /**
-     * Reads all lines from a file into a list of strings, using the platform's default charset.
+     * Reads all lines from a file into a list of strings, using the default charset (UTF-8).
      * This method handles regular files, gzipped files (.gz), and zip files (.zip, reading the first entry).
      * <p>
      * Note: This method should not be used for files with a size close to {@code Integer.MAX_VALUE} due to memory constraints.
@@ -2319,7 +2319,7 @@ public final class IOUtil {
      * }</pre>
      *
      * @param source the file to read from. It can be a regular file, gzipped file (.gz), and zip file (.zip, reading the first entry).
-     * @param charset the character set to use for decoding, if {@code null} the platform's default charset is used.
+     * @param charset the character set to use for decoding, if {@code null} the default charset (UTF-8) is used.
      * @return a list of strings, each representing a line in the file.
      * @throws OutOfMemoryError if the file is too large to be read into memory.
      * @throws UncheckedIOException if an I/O error occurs.
@@ -2341,7 +2341,7 @@ public final class IOUtil {
     }
 
     /**
-     * Reads all lines from an {@code InputStream} into a list of strings, using the platform's default character set.
+     * Reads all lines from an {@code InputStream} into a list of strings, using the default charset (UTF-8).
      * <p>
      * Note: This method should not be used for streams with a size close to {@code Integer.MAX_VALUE} due to memory constraints.
      * The input stream is not closed by this method.
@@ -2384,7 +2384,7 @@ public final class IOUtil {
      * }</pre>
      *
      * @param source the {@code InputStream} to read from, must not be {@code null}.
-     * @param charset the character set to use for decoding, if {@code null} the platform's default charset is used.
+     * @param charset the character set to use for decoding, if {@code null} the default charset (UTF-8) is used.
      * @return a list of strings, each representing a line from the stream.
      * @throws OutOfMemoryError if the stream is too large to be read into memory.
      * @throws UncheckedIOException if an I/O error occurs.
@@ -2445,7 +2445,7 @@ public final class IOUtil {
     }
 
     /**
-     * Reads a specified number of lines from a file into a list of strings, starting from a given line offset, using the platform's default charset.
+     * Reads a specified number of lines from a file into a list of strings, starting from a given line offset, using the default charset (UTF-8).
      * This method handles regular files, gzipped files (.gz), and zip files (.zip, reading the first entry).
      *
      * <p><b>Usage Examples:</b></p>
@@ -2488,7 +2488,7 @@ public final class IOUtil {
      * }</pre>
      *
      * @param source the file to read from, must not be {@code null}.
-     * @param charset the character set to use for decoding, if {@code null} the platform's default charset is used.
+     * @param charset the character set to use for decoding, if {@code null} the default charset (UTF-8) is used.
      * @param offset the 0-based index of the first line to read, must be &gt;= 0.
      * @param count the number of lines to read, must be &gt;= 0.
      * @return a list of strings, each representing a line from the specified range in the file.
@@ -2513,7 +2513,7 @@ public final class IOUtil {
     }
 
     /**
-     * Reads a specified number of lines from an {@code InputStream} into a list of strings, starting from a given line offset, using the platform's default charset.
+     * Reads a specified number of lines from an {@code InputStream} into a list of strings, starting from a given line offset, using the default charset (UTF-8).
      * The input stream is not closed by this method.
      *
      * <p><b>Usage Examples:</b></p>
@@ -2556,7 +2556,7 @@ public final class IOUtil {
      * }</pre>
      *
      * @param source the {@code InputStream} to read from, must not be {@code null}.
-     * @param charset the character set to use for decoding, if {@code null} the platform's default charset is used.
+     * @param charset the character set to use for decoding, if {@code null} the default charset (UTF-8) is used.
      * @param offset the 0-based index of the first line to read, must be &gt;= 0.
      * @param count the number of lines to read, must be &gt;= 0.
      * @return a list of strings, each representing a line from the specified range in the stream.
@@ -2623,7 +2623,7 @@ public final class IOUtil {
     }
 
     /**
-     * Reads the first line from a file using the platform's default charset.
+     * Reads the first line from a file using the default charset (UTF-8).
      * This method handles regular files, gzipped files (.gz), and zip files (.zip, reading the first entry).
      *
      * <p><b>Usage Examples:</b></p>
@@ -2666,7 +2666,7 @@ public final class IOUtil {
      * }</pre>
      *
      * @param source the file to read from, must not be {@code null}.
-     * @param charset the character set to use for decoding, if {@code null} the platform's default charset is used.
+     * @param charset the character set to use for decoding, if {@code null} the default charset (UTF-8) is used.
      * @return the first line of the file, or {@code null} if the file is empty.
      * @throws IOException if an I/O error occurs.
      */
@@ -2711,7 +2711,7 @@ public final class IOUtil {
     }
 
     /**
-     * Reads the last line from a file using the platform's default charset.
+     * Reads the last line from a file using the default charset (UTF-8).
      * This method handles regular files, gzipped files (.gz), and zip files (.zip, reading the first entry).
      *
      * <p><b>Usage Examples:</b></p>
@@ -2754,7 +2754,7 @@ public final class IOUtil {
      * }</pre>
      *
      * @param source the file to read from, must not be {@code null}.
-     * @param charset the character set to use for decoding, if {@code null} the platform's default charset is used.
+     * @param charset the character set to use for decoding, if {@code null} the default charset (UTF-8) is used.
      * @return the last line of the file, or {@code null} if the file is empty.
      * @throws IOException if an I/O error occurs.
      */
@@ -2858,7 +2858,7 @@ public final class IOUtil {
      * }</pre>
      *
      * @param source the file to read from, must not be {@code null}.
-     * @param charset the character set to use for decoding, if {@code null} the platform's default charset is used.
+     * @param charset the character set to use for decoding, if {@code null} the default charset (UTF-8) is used.
      * @param lineIndex the index of the line to read, starting from 0 for the first line, must be &gt;= 0.
      * @return a {@code String} containing the specified line, or {@code null} if the file has fewer lines.
      * @throws IllegalArgumentException if {@code lineIndex} is negative.
@@ -3770,7 +3770,7 @@ public final class IOUtil {
      * }</pre>
      *
      * @param cs      the CharSequence whose byte array representation is to be written.
-     * @param charset the Charset to be used to encode the CharSequence into a sequence of bytes, if {@code null} the platform's default charset is used.
+     * @param charset the Charset to be used to encode the CharSequence into a sequence of bytes, if {@code null} the default charset (UTF-8) is used.
      * @param output  the File where the CharSequence's byte array representation is to be written, must not be {@code null}.
      *                If the file exists, it will be overwritten (unless the input is empty, in which case existing content is left unchanged). If the file's parent directory doesn't exist, it will be created.
      * @throws IOException if an I/O error occurs.
@@ -3814,7 +3814,7 @@ public final class IOUtil {
      * }</pre>
      *
      * @param cs      the CharSequence whose byte array representation is to be written.
-     * @param charset the Charset to be used to encode the CharSequence into a sequence of bytes, if {@code null} the platform's default charset is used.
+     * @param charset the Charset to be used to encode the CharSequence into a sequence of bytes, if {@code null} the default charset (UTF-8) is used.
      * @param output  the OutputStream where the CharSequence's byte array representation is to be written, must not be {@code null}.
      * @throws IOException if an I/O error occurs.
      * @see String#getBytes(Charset)
@@ -3856,7 +3856,7 @@ public final class IOUtil {
      * }</pre>
      *
      * @param cs      the CharSequence whose byte array representation is to be written.
-     * @param charset the Charset to be used to encode the CharSequence into a sequence of bytes, if {@code null} the platform's default charset is used.
+     * @param charset the Charset to be used to encode the CharSequence into a sequence of bytes, if {@code null} the default charset (UTF-8) is used.
      * @param output  the OutputStream where the CharSequence's byte array representation is to be written, must not be {@code null}.
      * @param flush   if {@code true}, the output stream is flushed after writing the CharSequence.
      * @throws IOException if an I/O error occurs.
@@ -3949,7 +3949,7 @@ public final class IOUtil {
      * }</pre>
      *
      * @param chars   the character array whose byte array representation is to be written.
-     * @param charset the Charset to be used to encode the character array into a sequence of bytes, if {@code null} the platform's default charset is used.
+     * @param charset the Charset to be used to encode the character array into a sequence of bytes, if {@code null} the default charset (UTF-8) is used.
      * @param output  the File where the character array's byte array representation is to be written, must not be {@code null}.
      *                If the file exists, it will be overwritten (unless the input is empty, in which case existing content is left unchanged). If the file's parent directory doesn't exist, it will be created.
      * @throws IOException if an I/O error occurs.
@@ -4008,7 +4008,7 @@ public final class IOUtil {
      * @param chars   the character array whose byte array representation is to be written.
      * @param offset  the starting position in the character array.
      * @param count   the number of characters to be written from the character array.
-     * @param charset the Charset to be used to encode the character array into a sequence of bytes, if {@code null} the platform's default charset is used.
+     * @param charset the Charset to be used to encode the character array into a sequence of bytes, if {@code null} the default charset (UTF-8) is used.
      * @param output  the File where the character array's byte array representation is to be written, must not be {@code null}.
      *                If the file exists, it will be overwritten (unless the input is empty, in which case existing content is left unchanged). If the file's parent directory doesn't exist, it will be created.
      * @throws IOException if an I/O error occurs.
@@ -4898,7 +4898,7 @@ public final class IOUtil {
      * }</pre>
      *
      * @param source  the {@code Reader} to be written, must not be {@code null}.
-     * @param charset the {@code Charset} to be used to open the specified file for writing. If {@code null}, the platform's default charset is used.
+     * @param charset the {@code Charset} to be used to open the specified file for writing. If {@code null}, the default charset (UTF-8) is used.
      * @param output  the file where the {@code Reader}'s content is to be written, must not be {@code null}.
      *      if the file exists, it will be overwritten. if the file's parent directory doesn't exist, it will be created.
      * @return the total number of characters written.
@@ -4946,7 +4946,7 @@ public final class IOUtil {
      * @param source  the {@code Reader} to be written, must not be {@code null}.
      * @param offset  the position in the {@code Reader} to start writing from, in characters.
      * @param count   the maximum number of characters to be written.
-     * @param charset the {@code Charset} to be used to open the specified file for writing. If {@code null}, the platform's default charset is used.
+     * @param charset the {@code Charset} to be used to open the specified file for writing. If {@code null}, the default charset (UTF-8) is used.
      * @param output  the file where the {@code Reader}'s content is to be written, must not be {@code null}.
      *      if the file exists, it will be overwritten. if the file's parent directory doesn't exist, it will be created.
      * @return the total number of characters written.
@@ -5485,7 +5485,7 @@ public final class IOUtil {
      * }</pre>
      *
      * @param source the {@code Reader} to read from, must not be {@code null}.
-     * @param charset the character set to use for encoding, if {@code null} the platform's default charset is used.
+     * @param charset the character set to use for encoding, if {@code null} the default charset (UTF-8) is used.
      * @param targetFile the file where the {@code Reader}'s content is to be appended, must not be {@code null}.
      *                   If the file exists, content will be appended. If the file's parent directory doesn't exist, it will be created
      * @return the total number of characters appended.
@@ -5538,7 +5538,7 @@ public final class IOUtil {
      * @param source the {@code Reader} to read from, must not be {@code null}.
      * @param offset the starting position in characters from where to begin reading, must be &gt;= 0.
      * @param count the maximum number of characters to read, must be &gt;= 0.
-     * @param charset the character set to use for encoding, if {@code null} the platform's default charset is used.
+     * @param charset the character set to use for encoding, if {@code null} the default charset (UTF-8) is used.
      * @param targetFile the file where the {@code Reader}'s content is to be appended, must not be {@code null}.
      *                   If the file exists, content will be appended. If the file's parent directory doesn't exist, it will be created
      * @return the total number of characters appended.
@@ -10545,7 +10545,7 @@ public final class IOUtil {
      * @param file1       the first file.
      * @param file2       the second file.
      * @param charsetName the name of the requested charset.
-     *                    May be {@code null} or empty, in which case the platform's default charset is used.
+     *                    May be {@code null} or empty, in which case the default charset (UTF-8) is used.
      * @return {@code true} if the content of the files are equal or neither exists,
      *         {@code false} otherwise.
      * @throws IllegalArgumentException when an input is not a file.
@@ -11932,7 +11932,7 @@ public final class IOUtil {
      * Converts a CharSequence to a byte array using the specified charset.
      *
      * @param cs      the CharSequence to convert.
-     * @param charset the charset to use for encoding; if {@code null}, the platform's default charset is used.
+     * @param charset the charset to use for encoding; if {@code null}, the default charset (UTF-8) is used.
      * @return the byte array representation of the CharSequence.
      */
     private static byte[] toByteArray(final CharSequence cs, final Charset charset) {

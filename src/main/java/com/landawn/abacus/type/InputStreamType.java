@@ -37,7 +37,7 @@ import com.landawn.abacus.util.IOUtil;
 /**
  * Type handler for InputStream and its subclasses.
  * This class provides serialization, deserialization, and database access capabilities for InputStream instances.
- * InputStreams are serialized by reading all their bytes and decoding them as a string using the platform default charset.
+ * InputStreams are serialized by reading all their bytes and decoding them as a string using UTF-8.
  * Note that the InputStream content is consumed during serialization.
  */
 @SuppressWarnings("java:S2160")

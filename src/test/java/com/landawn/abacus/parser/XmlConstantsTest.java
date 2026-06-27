@@ -112,11 +112,11 @@ public class XmlConstantsTest extends TestBase {
     }
 
     @Test
-    public void test_ENTITY_constants() {
-        assertEquals("bean", XmlConstants.ENTITY);
-        assertEquals("<bean>", XmlConstants.ENTITY_ELE_START);
-        assertEquals("</bean>", XmlConstants.ENTITY_ELE_END);
-        assertEquals("<bean isNull=\"true\" />", XmlConstants.ENTITY_NULL_ELE);
+    public void test_BEAN_constants() {
+        assertEquals("bean", XmlConstants.BEAN);
+        assertEquals("<bean>", XmlConstants.BEAN_ELE_START);
+        assertEquals("</bean>", XmlConstants.BEAN_ELE_END);
+        assertEquals("<bean isNull=\"true\" />", XmlConstants.BEAN_NULL_ELE);
     }
 
     @Test
@@ -143,7 +143,7 @@ public class XmlConstantsTest extends TestBase {
 
     @Test
     public void test_SOAP_BODY_constants() {
-        assertEquals("BODY", XmlConstants.BODY);
+        assertEquals("Body", XmlConstants.BODY);
         assertEquals("<soap:Body>", XmlConstants.SOAP_BODY_ELE_START);
         assertEquals("</soap:Body>", XmlConstants.SOAP_BODY_ELE_END);
     }
@@ -216,19 +216,19 @@ public class XmlConstantsTest extends TestBase {
     }
 
     @Test
-    public void test_ENTITY_NAME_constants() {
-        assertEquals("beanName", XmlConstants.ENTITY_NAME);
-        assertEquals("<beanName>", XmlConstants.ENTITY_NAME_ELE_START);
-        assertEquals("</beanName>", XmlConstants.ENTITY_NAME_ELE_END);
-        assertEquals("<beanName isNull=\"true\" />", XmlConstants.ENTITY_NAME_NULL_ELE);
+    public void test_BEAN_NAME_constants() {
+        assertEquals("beanName", XmlConstants.BEAN_NAME);
+        assertEquals("<beanName>", XmlConstants.BEAN_NAME_ELE_START);
+        assertEquals("</beanName>", XmlConstants.BEAN_NAME_ELE_END);
+        assertEquals("<beanName isNull=\"true\" />", XmlConstants.BEAN_NAME_NULL_ELE);
     }
 
     @Test
-    public void test_ENTITY_CLASS_constants() {
-        assertEquals("beanClass", XmlConstants.ENTITY_CLASS);
-        assertEquals("<beanClass>", XmlConstants.ENTITY_CLASS_ELE_START);
-        assertEquals("</beanClass>", XmlConstants.ENTITY_CLASS_ELE_END);
-        assertEquals("<beanClass isNull=\"true\" />", XmlConstants.ENTITY_CLASS_NULL_ELE);
+    public void test_BEAN_CLASS_constants() {
+        assertEquals("beanClass", XmlConstants.BEAN_CLASS);
+        assertEquals("<beanClass>", XmlConstants.BEAN_CLASS_ELE_START);
+        assertEquals("</beanClass>", XmlConstants.BEAN_CLASS_ELE_END);
+        assertEquals("<beanClass isNull=\"true\" />", XmlConstants.BEAN_CLASS_NULL_ELE);
     }
 
     @Test
@@ -280,11 +280,11 @@ public class XmlConstantsTest extends TestBase {
     }
 
     @Test
-    public void test_ENTITIES_constants() {
-        assertEquals("entities", XmlConstants.ENTITIES);
-        assertEquals("<entities>", XmlConstants.ENTITIES_ELE_START);
-        assertEquals("</entities>", XmlConstants.ENTITIES_ELE_END);
-        assertEquals("<entities isNull=\"true\" />", XmlConstants.ENTITIES_NULL_ELE);
+    public void test_BEANS_constants() {
+        assertEquals("beans", XmlConstants.BEANS);
+        assertEquals("<beans>", XmlConstants.BEANS_ELE_START);
+        assertEquals("</beans>", XmlConstants.BEANS_ELE_END);
+        assertEquals("<beans isNull=\"true\" />", XmlConstants.BEANS_NULL_ELE);
     }
 
     @Test
@@ -326,7 +326,7 @@ public class XmlConstantsTest extends TestBase {
         assertTrue(XmlConstants.LIST_NULL_ELE.contains("isNull=\"true\""));
         assertTrue(XmlConstants.SET_NULL_ELE.contains("isNull=\"true\""));
         assertTrue(XmlConstants.MAP_NULL_ELE.contains("isNull=\"true\""));
-        assertTrue(XmlConstants.ENTITY_NULL_ELE.contains("isNull=\"true\""));
+        assertTrue(XmlConstants.BEAN_NULL_ELE.contains("isNull=\"true\""));
     }
 
     @Test
@@ -397,20 +397,20 @@ public class XmlConstantsTest extends TestBase {
         assertEquals("</entityIds>", XmlConstants.ENTITY_IDS_ELE_END);
         assertEquals("<entityIds isNull=\"true\" />", XmlConstants.ENTITY_IDS_NULL_ELE);
 
-        assertEquals("bean", XmlConstants.ENTITY);
-        assertEquals("<bean>", XmlConstants.ENTITY_ELE_START);
-        assertEquals("</bean>", XmlConstants.ENTITY_ELE_END);
-        assertEquals("<bean isNull=\"true\" />", XmlConstants.ENTITY_NULL_ELE);
+        assertEquals("bean", XmlConstants.BEAN);
+        assertEquals("<bean>", XmlConstants.BEAN_ELE_START);
+        assertEquals("</bean>", XmlConstants.BEAN_ELE_END);
+        assertEquals("<bean isNull=\"true\" />", XmlConstants.BEAN_NULL_ELE);
 
-        assertEquals("beanName", XmlConstants.ENTITY_NAME);
-        assertEquals("<beanName>", XmlConstants.ENTITY_NAME_ELE_START);
-        assertEquals("</beanName>", XmlConstants.ENTITY_NAME_ELE_END);
-        assertEquals("<beanName isNull=\"true\" />", XmlConstants.ENTITY_NAME_NULL_ELE);
+        assertEquals("beanName", XmlConstants.BEAN_NAME);
+        assertEquals("<beanName>", XmlConstants.BEAN_NAME_ELE_START);
+        assertEquals("</beanName>", XmlConstants.BEAN_NAME_ELE_END);
+        assertEquals("<beanName isNull=\"true\" />", XmlConstants.BEAN_NAME_NULL_ELE);
 
-        assertEquals("beanClass", XmlConstants.ENTITY_CLASS);
-        assertEquals("<beanClass>", XmlConstants.ENTITY_CLASS_ELE_START);
-        assertEquals("</beanClass>", XmlConstants.ENTITY_CLASS_ELE_END);
-        assertEquals("<beanClass isNull=\"true\" />", XmlConstants.ENTITY_CLASS_NULL_ELE);
+        assertEquals("beanClass", XmlConstants.BEAN_CLASS);
+        assertEquals("<beanClass>", XmlConstants.BEAN_CLASS_ELE_START);
+        assertEquals("</beanClass>", XmlConstants.BEAN_CLASS_ELE_END);
+        assertEquals("<beanClass isNull=\"true\" />", XmlConstants.BEAN_CLASS_NULL_ELE);
 
         assertEquals("property", XmlConstants.PROPERTY);
         assertEquals("<property>", XmlConstants.PROPERTY_ELE_START);
@@ -447,10 +447,10 @@ public class XmlConstantsTest extends TestBase {
         assertEquals("</propsList>", XmlConstants.PROPS_LIST_ELE_END);
         assertEquals("<propsList isNull=\"true\" />", XmlConstants.PROPS_LIST_NULL_ELE);
 
-        assertEquals("entities", XmlConstants.ENTITIES);
-        assertEquals("<entities>", XmlConstants.ENTITIES_ELE_START);
-        assertEquals("</entities>", XmlConstants.ENTITIES_ELE_END);
-        assertEquals("<entities isNull=\"true\" />", XmlConstants.ENTITIES_NULL_ELE);
+        assertEquals("beans", XmlConstants.BEANS);
+        assertEquals("<beans>", XmlConstants.BEANS_ELE_START);
+        assertEquals("</beans>", XmlConstants.BEANS_ELE_END);
+        assertEquals("<beans isNull=\"true\" />", XmlConstants.BEANS_NULL_ELE);
 
         assertEquals("result", XmlConstants.RESULT);
         assertEquals("<result>", XmlConstants.RESULT_ELE_START);
@@ -470,7 +470,7 @@ public class XmlConstantsTest extends TestBase {
         assertEquals("<soap:Header>", XmlConstants.SOAP_HEADER_ELE_START);
         assertEquals("</soap:Header>", XmlConstants.SOAP_HEADER_ELE_END);
 
-        assertEquals("BODY", XmlConstants.BODY);
+        assertEquals("Body", XmlConstants.BODY);
         assertEquals("<soap:Body>", XmlConstants.SOAP_BODY_ELE_START);
         assertEquals("</soap:Body>", XmlConstants.SOAP_BODY_ELE_END);
 

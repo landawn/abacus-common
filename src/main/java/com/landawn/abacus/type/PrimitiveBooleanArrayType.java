@@ -253,12 +253,11 @@ public final class PrimitiveBooleanArrayType extends AbstractPrimitiveArrayType<
      * Each primitive boolean value is boxed to a Boolean object and added to the output collection.
      * Does nothing if the input array is {@code null} or empty.
      *
-     * @param <E> the type of elements in the output collection
      * @param x the boolean array to convert
      * @param output the Collection to add the boxed Boolean values to
      */
     @Override
-    public <E> void arrayToCollection(final boolean[] x, final Collection<E> output) {
+    public void arrayToCollection(final boolean[] x, final Collection<?> output) {
         if (N.notEmpty(x)) {
             final Collection<Object> c = (Collection<Object>) output;
 

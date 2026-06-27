@@ -990,7 +990,7 @@ public final class ClassUtil {
      *
      * @param cls the class whose package is to be retrieved
      * @return the package of the class, or {@code null} if the class is a primitive type or no package is defined
-     * @throws NullPointerException if {@code cls} is {@code null}
+     * @throws IllegalArgumentException if {@code cls} is {@code null}
      */
     @MayReturnNull
     public static Package getPackage(final Class<?> cls) {
@@ -1022,7 +1022,7 @@ public final class ClassUtil {
      *
      * @param cls the class whose package name is to be retrieved
      * @return the package name of the class, or an empty string if the class is a primitive type or no package is defined
-     * @throws NullPointerException if {@code cls} is {@code null}
+     * @throws IllegalArgumentException if {@code cls} is {@code null}
      */
     public static String getPackageName(final Class<?> cls) {
         String pkgName = packageNamePool.get(cls);

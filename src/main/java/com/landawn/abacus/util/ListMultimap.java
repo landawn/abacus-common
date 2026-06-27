@@ -849,7 +849,6 @@ public final class ListMultimap<K, E> extends Multimap<K, E, List<E>> {
      *
      * @param <K> the type of the keys in the map
      * @param <E> the type of the elements in the list
-     * @param <V> the type of the list
      * @param map The map to be wrapped into a ListMultimap, must not be {@code null}
      * @return a new instance of ListMultimap backed by the provided map
      * @throws IllegalArgumentException if {@code map} is {@code null}, or if any value in the map is {@code null} or an empty list
@@ -857,7 +856,7 @@ public final class ListMultimap<K, E> extends Multimap<K, E, List<E>> {
      */
     @SuppressWarnings("rawtypes")
     @Beta
-    public static <K, E, V extends List<E>> ListMultimap<K, E> wrap(final Map<K, V> map) throws IllegalArgumentException {
+    public static <K, E> ListMultimap<K, E> wrap(final Map<K, ? extends List<E>> map) throws IllegalArgumentException {
         N.checkArgNotNull(map);
         N.checkArgument(map.values().stream().noneMatch(v -> v == null || v.isEmpty()), "The specified map contains null or empty value: %s", map);
 

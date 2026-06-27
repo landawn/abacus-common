@@ -1786,7 +1786,6 @@ public final class Maps {
      *
      * @param <K> the type of keys maintained by the map.
      * @param <E> the type of elements in the list.
-     * @param <V> the type of list values maintained by the map.
      * @param map the map from which to retrieve the value.
      * @param key the key whose associated value is to be returned.
      * @return the List value mapped by the key, or an empty <b>immutable</b> List if the key is absent.
@@ -1794,12 +1793,12 @@ public final class Maps {
      * @see #getOrPutListIfAbsent(Map, Object)
      */
     // @ai-ignore getOrEmpty*IfAbsent variants - return empty immutable collection (List/Set/Map) when key is absent. Do not suggest consolidation.
-    public static <K, E, V extends List<E>> List<E> getOrEmptyListIfAbsent(final Map<K, V> map, final K key) {
+    public static <K, E> List<E> getOrEmptyListIfAbsent(final Map<K, ? extends List<E>> map, final K key) {
         if (N.isEmpty(map)) {
             return N.emptyList();
         }
 
-        final V val = map.get(key);
+        final List<E> val = map.get(key);
 
         if (val == null) {
             return N.emptyList();
@@ -1829,19 +1828,18 @@ public final class Maps {
      *
      * @param <K> the type of keys maintained by the map.
      * @param <E> the type of elements in the set.
-     * @param <V> the type of set values maintained by the map.
      * @param map the map from which to retrieve the value.
      * @param key the key whose associated value is to be returned.
      * @return the Set value mapped by the key, or an empty <b>immutable</b> Set if the key is absent.
      * @see N#emptySet()
      * @see #getOrPutSetIfAbsent(Map, Object)
      */
-    public static <K, E, V extends Set<E>> Set<E> getOrEmptySetIfAbsent(final Map<K, V> map, final K key) {
+    public static <K, E> Set<E> getOrEmptySetIfAbsent(final Map<K, ? extends Set<E>> map, final K key) {
         if (N.isEmpty(map)) {
             return N.emptySet();
         }
 
-        final V val = map.get(key);
+        final Set<E> val = map.get(key);
 
         if (val == null) {
             return N.emptySet();
@@ -1875,19 +1873,18 @@ public final class Maps {
      * @param <K> the type of keys maintained by the outer map.
      * @param <KK> the type of keys maintained by the inner map.
      * @param <VV> the type of values maintained by the inner map.
-     * @param <V> the type of map values maintained by the outer map.
      * @param map the map from which to retrieve the value.
      * @param key the key whose associated value is to be returned.
      * @return the Map value mapped by the key, or an empty <b>immutable</b> Map if the key is absent.
      * @see N#emptyMap()
      * @see #getOrPutMapIfAbsent(Map, Object)
      */
-    public static <K, KK, VV, V extends Map<KK, VV>> Map<KK, VV> getOrEmptyMapIfAbsent(final Map<K, V> map, final K key) {
+    public static <K, KK, VV> Map<KK, VV> getOrEmptyMapIfAbsent(final Map<K, ? extends Map<KK, VV>> map, final K key) {
         if (N.isEmpty(map)) {
             return N.emptyMap();
         }
 
-        final V val = map.get(key);
+        final Map<KK, VV> val = map.get(key);
 
         if (val == null) {
             return N.emptyMap();
@@ -2538,7 +2535,7 @@ public final class Maps {
      * Returns the mapped long value wrapped in {@code OptionalLong}.
      * Returns {@code OptionalLong.empty()} if the map is {@code null}/empty, the key is absent,
      * or the mapped value is {@code null}. Non-{@code null} values that are not {@link Number}
-     * are converted with {@link Numbers#toLong(Object)}.
+     * are converted with {@link Numbers#toLong(String)}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -2581,7 +2578,7 @@ public final class Maps {
     /**
      * Returns the mapped long value, or {@code defaultValue} if the map is {@code null}/empty,
      * the key is absent, or the mapped value is {@code null}.
-     * Non-{@code null} values that are not {@link Number} are converted with {@link Numbers#toLong(Object)}.
+     * Non-{@code null} values that are not {@link Number} are converted with {@link Numbers#toLong(String)}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -3051,7 +3048,6 @@ public final class Maps {
      * // values = [1, 2] (null value for "c" and missing "d" are not included)
      * }</pre>
      *
-     * @param <K> the key type.
      * @param <V> the value type.
      * @param map the map to read from; may be {@code null} or empty
      * @param keys the keys to read, in result order; may be {@code null} or empty
@@ -3059,7 +3055,7 @@ public final class Maps {
      *         an empty list if {@code map} or {@code keys} is {@code null} or empty
      */
     // @ai-ignore getValues* variants - batch retrieval of values by a collection of keys, with present-only or default-value semantics. Do not suggest consolidation.
-    public static <K, V> List<V> getValuesIfPresent(final Map<K, ? extends V> map, final Collection<?> keys) {
+    public static <V> List<V> getValuesIfPresent(final Map<?, ? extends V> map, final Collection<?> keys) {
         if (N.isEmpty(map) || N.isEmpty(keys)) {
             return new ArrayList<>();
         }
@@ -3095,7 +3091,6 @@ public final class Maps {
      * // values = [1, 2, -1, -1] ("c" has null value, "d" is missing)
      * }</pre>
      *
-     * @param <K> the key type.
      * @param <V> the value type.
      * @param map the map to read from; may be {@code null} or empty
      * @param keys the keys to read, in result order; may be {@code null} or empty
@@ -3106,8 +3101,7 @@ public final class Maps {
      *         contains {@code defaultValue} repeated {@code keys.size()} times.
      * @throws IllegalArgumentException if {@code defaultValue} is {@code null}.
      */
-    public static <K, V> List<V> getValuesOrDefaultIfAbsent(final Map<K, V> map, final Collection<?> keys, final V defaultValue)
-            throws IllegalArgumentException {
+    public static <V> List<V> getValuesOrDefaultIfAbsent(final Map<?, V> map, final Collection<?> keys, final V defaultValue) throws IllegalArgumentException {
         N.checkArgNotNull(defaultValue, cs.defaultValue); // NOSONAR
 
         if (N.isEmpty(keys)) {
@@ -3456,6 +3450,7 @@ public final class Maps {
      * @throws NullPointerException if {@code map} is {@code null}.
      * @see Map#putIfAbsent(Object, Object)
      */
+    @MayReturnNull
     public static <K, V> V putIfAbsent(final Map<K, V> map, final K key, final V value) {
         V v = map.get(key);
 
@@ -3508,6 +3503,7 @@ public final class Maps {
      * @see Map#putIfAbsent(Object, Object)
      * @see #getOrPutIfAbsent(Map, Object, Supplier)
      */
+    @MayReturnNull
     public static <K, V> V putIfAbsent(final Map<K, V> map, final K key, final Supplier<V> supplier) throws IllegalArgumentException {
         N.checkArgNotNull(supplier, cs.supplier);
 
@@ -3693,15 +3689,13 @@ public final class Maps {
      *
      * }</pre>
      *
-     * @param <K> the type of keys maintained by the map.
-     * @param <V> the type of mapped values.
      * @param map the map from which the entry is to be removed.
      * @param entry the entry to be removed from the map, may be {@code null}.
      * @return {@code true} if the entry was removed, {@code false} otherwise, including when
      *         {@code map} or {@code entry} is {@code null}.
      * @see Map#remove(Object, Object)
      */
-    public static <K, V> boolean removeEntry(final Map<K, V> map, final Map.Entry<?, ?> entry) {
+    public static boolean removeEntry(final Map<?, ?> map, final Map.Entry<?, ?> entry) {
         if (entry == null) {
             return false;
         }
@@ -3726,15 +3720,13 @@ public final class Maps {
      *
      * }</pre>
      *
-     * @param <K> the type of keys maintained by the map.
-     * @param <V> the type of mapped values.
      * @param map the map from which the entry is to be removed.
      * @param key the key whose associated value is to be removed.
      * @param value the value to be removed.
      * @return {@code true} if the entry was removed, {@code false} otherwise.
      * @see Map#remove(Object, Object)
      */
-    public static <K, V> boolean removeEntry(final Map<K, V> map, final Object key, final Object value) {
+    public static boolean removeEntry(final Map<?, ?> map, final Object key, final Object value) {
         if (N.isEmpty(map)) {
             return false;
         }
@@ -3956,13 +3948,12 @@ public final class Maps {
      * }</pre>
      *
      * @param <K> the type of keys maintained by the map.
-     * @param <V> the type of mapped values.
      * @param map the map from which entries are to be removed.
      * @param filter the predicate used to determine which keys to remove.
      * @return {@code true} if one or more entries were removed, {@code false} otherwise.
      * @throws IllegalArgumentException if {@code filter} is {@code null}.
      */
-    public static <K, V> boolean removeIfKey(final Map<K, V> map, final Predicate<? super K> filter) throws IllegalArgumentException {
+    public static <K> boolean removeIfKey(final Map<K, ?> map, final Predicate<? super K> filter) throws IllegalArgumentException {
         N.checkArgNotNull(filter, cs.filter); // NOSONAR
 
         if (N.isEmpty(map)) {
@@ -3971,7 +3962,7 @@ public final class Maps {
 
         List<K> keysToRemove = null;
 
-        for (final Map.Entry<K, V> entry : map.entrySet()) {
+        for (final Map.Entry<K, ?> entry : map.entrySet()) {
             if (filter.test(entry.getKey())) {
                 if (keysToRemove == null) {
                     keysToRemove = new ArrayList<>(7);
@@ -4010,23 +4001,22 @@ public final class Maps {
      * // map: {a=1, c=3}
      * }</pre>
      *
-     * @param <K> the type of keys maintained by the map.
      * @param <V> the type of mapped values.
      * @param map the map from which entries are to be removed.
      * @param filter the predicate used to determine which values to remove.
      * @return {@code true} if one or more entries were removed, {@code false} otherwise.
      * @throws IllegalArgumentException if {@code filter} is {@code null}.
      */
-    public static <K, V> boolean removeIfValue(final Map<K, V> map, final Predicate<? super V> filter) throws IllegalArgumentException {
+    public static <V> boolean removeIfValue(final Map<?, V> map, final Predicate<? super V> filter) throws IllegalArgumentException {
         N.checkArgNotNull(filter, cs.filter); // NOSONAR
 
         if (N.isEmpty(map)) {
             return false;
         }
 
-        List<K> keysToRemove = null;
+        List<Object> keysToRemove = null;
 
-        for (final Map.Entry<K, V> entry : map.entrySet()) {
+        for (final Map.Entry<?, V> entry : map.entrySet()) {
             if (filter.test(entry.getValue())) {
                 if (keysToRemove == null) {
                     keysToRemove = new ArrayList<>(7);
@@ -4037,7 +4027,7 @@ public final class Maps {
         }
 
         if (N.notEmpty(keysToRemove)) {
-            for (final K key : keysToRemove) {
+            for (final Object key : keysToRemove) {
                 map.remove(key);
             }
 
@@ -4068,7 +4058,8 @@ public final class Maps {
      * @param map the map in which the entry is to be replaced.
      * @param key the key with which the specified value is associated.
      * @param newValue the new value to be associated with the specified key.
-     * @return the previous value associated with the specified key, or {@code null} if there was no mapping for the key.
+     * @return the previous value associated with the specified key, or {@code null} if the map is
+     *         {@code null}/empty, there was no mapping for the key, or the key was previously mapped to {@code null}.
      */
     @MayReturnNull
     public static <K, V> V replace(final Map<K, V> map, final K key, final V newValue) {

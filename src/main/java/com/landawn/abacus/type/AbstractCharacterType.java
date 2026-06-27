@@ -109,6 +109,7 @@ public abstract class AbstractCharacterType extends AbstractPrimaryType<Characte
      * @param len the number of characters to read
      * @return the {@code Character} value, or the default value if {@code cbuf} is {@code null} or {@code len} is {@code 0}
      * @throws NumberFormatException if a multi-character region cannot be parsed as a numeric character code
+     * @throws IllegalArgumentException if a multi-character region parses to a numeric value outside the {@code char} range
      */
     @Override
     public Character valueOf(final char[] cbuf, final int offset, final int len) {

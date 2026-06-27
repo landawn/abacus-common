@@ -2450,7 +2450,7 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
      * This method modifies the list in place.
      *
      * @param rnd the source of randomness to use to shuffle the list. Must not be {@code null}.
-     * @throws NullPointerException if the specified random source is {@code null}
+     * @throws IllegalArgumentException if the specified random source is {@code null}
      */
     @Override
     public void shuffle(final Random rnd) {

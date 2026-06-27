@@ -622,7 +622,9 @@ public final class Profiler {
                     "The input args must be null or size = 1 or size = threadNum. It's the input parameter for the every loop in each thread ");
         }
         // It takes about 250MB memory to save 1 million test results.
-        if (threadNum * loopNum > IOUtil.MAX_MEMORY_IN_MB * 1000) {
+        // Use long arithmetic: threadNum * loopNum can overflow int (e.g. 100 threads * 21,474,837 loops),
+        // wrapping negative and silently suppressing this very warning for large runs.
+        if ((long) threadNum * loopNum > (long) IOUtil.MAX_MEMORY_IN_MB * 1000) {
             if (IOUtil.MAX_MEMORY_IN_MB < 1024) {
                 logger.warn(
                         "Saving big number loop result in small memory may slow down the performance of target method. Consider increasing the maximum JVM memory size.");

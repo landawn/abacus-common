@@ -3069,8 +3069,8 @@ final class XmlParserImpl extends AbstractXmlParser {
         }
     }
 
-    private <T> Object getPropValue(Node propNode, final XmlDeserConfig config, final String propName, Type<?> propType, final PropInfo propInfo,
-            final boolean checkedAttr, final boolean isTagByPropertyName, final boolean ignoreTypeInfo, final boolean isProp, final Type<T> inputType) {
+    private Object getPropValue(Node propNode, final XmlDeserConfig config, final String propName, Type<?> propType, final PropInfo propInfo,
+            final boolean checkedAttr, final boolean isTagByPropertyName, final boolean ignoreTypeInfo, final boolean isProp, final Type<?> inputType) {
         Object propValue = null;
 
         if (XmlUtil.isTextElement(propNode)) {

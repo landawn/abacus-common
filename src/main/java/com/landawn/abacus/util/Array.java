@@ -327,6 +327,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * @param dimensions the dimensions of the new array. Must not be {@code null} or empty.
      * @return a new multi-dimensional array of the specified component type and dimensions.
      * @throws IllegalArgumentException if the component type or dimensions are not valid for array creation.
+     * @throws NullPointerException if {@code dimensions} is {@code null}.
      * @throws NegativeArraySizeException if any of the specified dimensions is negative.
      * @see java.lang.reflect.Array#newInstance(Class, int...)
      */
@@ -376,12 +377,13 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * @param <T> the type of the array.
      * @param array the array from which to retrieve the element.
      * @param index the index of the element to be retrieved.
-     * @return the element at the specified index.
+     * @return the element at the specified index, or {@code null} if the array is an object array whose element at that index is {@code null}.
      * @throws NullPointerException if the specified {@code array} is {@code null}.
      * @throws IllegalArgumentException if the provided object is not an array.
      * @throws ArrayIndexOutOfBoundsException if the index is out of the array's bounds.
      * @see java.lang.reflect.Array#get(Object, int)
      */
+    @MayReturnNull
     public static <T> T get(final Object array, final int index) throws IllegalArgumentException, ArrayIndexOutOfBoundsException {
         return (T) java.lang.reflect.Array.get(array, index);
     }
@@ -881,8 +883,9 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * }</pre>
      *
      * @param a the input array of booleans.
-     * @return the same input array.
+     * @return the same input array, or {@code null} if {@code a} is {@code null}.
      */
+    @MayReturnNull
     public static boolean[] of(final boolean... a) {
         return a;
     }
@@ -897,8 +900,9 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * }</pre>
      *
      * @param a the input array of characters.
-     * @return the same input array.
+     * @return the same input array, or {@code null} if {@code a} is {@code null}.
      */
+    @MayReturnNull
     public static char[] of(final char... a) {
         return a;
     }
@@ -913,8 +917,9 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * }</pre>
      *
      * @param a the input array of bytes.
-     * @return the same input array.
+     * @return the same input array, or {@code null} if {@code a} is {@code null}.
      */
+    @MayReturnNull
     public static byte[] of(final byte... a) {
         return a;
     }
@@ -929,8 +934,9 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * }</pre>
      *
      * @param a the input array of shorts.
-     * @return the same input array.
+     * @return the same input array, or {@code null} if {@code a} is {@code null}.
      */
+    @MayReturnNull
     public static short[] of(final short... a) {
         return a;
     }
@@ -945,8 +951,9 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * }</pre>
      *
      * @param a the input array of integers.
-     * @return the same input array.
+     * @return the same input array, or {@code null} if {@code a} is {@code null}.
      */
+    @MayReturnNull
     public static int[] of(final int... a) {
         return a;
     }
@@ -961,8 +968,9 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * }</pre>
      *
      * @param a the input array of longs.
-     * @return the same input array.
+     * @return the same input array, or {@code null} if {@code a} is {@code null}.
      */
+    @MayReturnNull
     public static long[] of(final long... a) {
         return a;
     }
@@ -977,8 +985,9 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * }</pre>
      *
      * @param a the input array of floats.
-     * @return the same input array.
+     * @return the same input array, or {@code null} if {@code a} is {@code null}.
      */
+    @MayReturnNull
     public static float[] of(final float... a) {
         return a;
     }
@@ -993,8 +1002,9 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * }</pre>
      *
      * @param a the input array of doubles.
-     * @return the same input array.
+     * @return the same input array, or {@code null} if {@code a} is {@code null}.
      */
+    @MayReturnNull
     public static double[] of(final double... a) {
         return a;
     }
@@ -1012,9 +1022,10 @@ public abstract sealed class Array permits Array.ArrayUtil {
      *
      * @param <T> the type of the elements, which must extend {@code CharSequence}.
      * @param a the input array.
-     * @return the same input array.
+     * @return the same input array, or {@code null} if {@code a} is {@code null}.
      * @see N#asArray(Object...)
      */
+    @MayReturnNull
     @SafeVarargs
     public static <T extends CharSequence> T[] of(final T... a) {
         return a;
@@ -1033,9 +1044,10 @@ public abstract sealed class Array permits Array.ArrayUtil {
      *
      * @param <T> the type of the elements in the array.
      * @param a the input array.
-     * @return the same input array.
+     * @return the same input array, or {@code null} if {@code a} is {@code null}.
      * @see N#asArray(Object...)
      */
+    @MayReturnNull
     @SafeVarargs
     public static <T extends java.util.Date> T[] of(final T... a) {
         return a;
@@ -1054,9 +1066,10 @@ public abstract sealed class Array permits Array.ArrayUtil {
      *
      * @param <T> the type of the elements in the array.
      * @param a the input array.
-     * @return the same input array.
+     * @return the same input array, or {@code null} if {@code a} is {@code null}.
      * @see N#asArray(Object...)
      */
+    @MayReturnNull
     @SafeVarargs
     public static <T extends java.util.Calendar> T[] of(final T... a) {
         return a;
@@ -1075,9 +1088,10 @@ public abstract sealed class Array permits Array.ArrayUtil {
      *
      * @param <T> the type of the elements in the array.
      * @param a the input array.
-     * @return the same input array.
+     * @return the same input array, or {@code null} if {@code a} is {@code null}.
      * @see N#asArray(Object...)
      */
+    @MayReturnNull
     @SafeVarargs
     public static <T extends java.time.temporal.Temporal> T[] of(final T... a) {
         return a;
@@ -1096,9 +1110,10 @@ public abstract sealed class Array permits Array.ArrayUtil {
      *
      * @param <T> the type of the elements in the array.
      * @param a the input array.
-     * @return the same input array.
+     * @return the same input array, or {@code null} if {@code a} is {@code null}.
      * @see N#asArray(Object...)
      */
+    @MayReturnNull
     @SafeVarargs
     public static <T extends Enum<?>> T[] of(final T... a) {
         return a;
@@ -1115,12 +1130,13 @@ public abstract sealed class Array permits Array.ArrayUtil {
      *
      * @param <T> the type of the elements in the array.
      * @param a the input array.
-     * @return the same input array.
+     * @return the same input array, or {@code null} if {@code a} is {@code null}.
      * @deprecated replaced by {@link N#asArray(Object...)}.
      * @see #ofValues(Object...)
      * @see N#asArray(Object...)
      */
     @Deprecated
+    @MayReturnNull
     @SafeVarargs
     public static <T> T[] oF(final T... a) { //NOSONAR
         return a;
@@ -1137,10 +1153,11 @@ public abstract sealed class Array permits Array.ArrayUtil {
      *
      * @param <T> the type of the elements in the array.
      * @param a the input array.
-     * @return the same input array.
+     * @return the same input array, or {@code null} if {@code a} is {@code null}.
      * @see N#asArray(Object...)
      */
     @Beta
+    @MayReturnNull
     @SafeVarargs
     public static <T> T[] ofValues(final T... a) { //NOSONAR
         return a;

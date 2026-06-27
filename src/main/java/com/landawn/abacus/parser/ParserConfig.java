@@ -180,9 +180,10 @@ public abstract class ParserConfig<C extends ParserConfig<C>> implements Cloneab
     /**
      * Creates a copy of this configuration.
      *
-     * <p>The copy is a shallow clone - the ignored property map and sets are
-     * shared with the original. Modifications to the configuration itself are
-     * independent, but modifications to the property sets affect both instances.</p>
+     * <p>The copy is a shallow clone: the ignored-property map (and the sets it holds) is shared
+     * with the original. Replacing the whole map via {@link #setIgnoredPropNames(Map)} affects only
+     * the instance it is called on, but mutating the shared map via {@link #setIgnoredPropNames(Class, Set)}
+     * / {@link #setIgnoredPropNames(Set)} — or mutating a shared set — affects both instances.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code

@@ -2514,7 +2514,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * assuming the provided Random instance produces uniformly distributed values.</p>
      *
      * @param rnd the random number generator to use for shuffling; must not be {@code null}
-     * @throws NullPointerException if {@code rnd} is {@code null}
+     * @throws IllegalArgumentException if {@code rnd} is {@code null}
      */
     @Override
     public void shuffle(final Random rnd) {

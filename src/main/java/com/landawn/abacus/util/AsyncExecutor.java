@@ -669,7 +669,7 @@ public class AsyncExecutor {
      * <pre>{@code
      * AsyncExecutor executor = new AsyncExecutor(10, 20, 60L, TimeUnit.SECONDS);
      * System.out.println(executor.toString());
-     * // Output: {coreThreadPoolSize: 10, maxThreadPoolSize: 20, activeCount: 0, keepAliveTime: 60000ms, Executor: ...}
+     * // Output: {coreThreadPoolSize: 10, maxThreadPoolSize: 20, activeCount: ?, keepAliveTime: 60000ms, Executor: null}
      * }</pre>
      *
      * @return a string representation containing the configuration and state of this AsyncExecutor.

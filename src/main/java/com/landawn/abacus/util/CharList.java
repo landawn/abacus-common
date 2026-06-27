@@ -2649,7 +2649,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * }</pre>
      *
      * @param rnd the source of randomness to use for shuffling; must not be {@code null}
-     * @throws NullPointerException if {@code rnd} is {@code null}
+     * @throws IllegalArgumentException if {@code rnd} is {@code null}
      */
     @Override
     public void shuffle(final Random rnd) {

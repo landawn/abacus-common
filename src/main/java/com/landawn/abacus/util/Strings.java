@@ -2649,7 +2649,7 @@ public final class Strings {
      *
      * @param str the String to check, may be {@code null}
      * @param maxWidth maximum length of result String, must be at least 4
-     * @return abbreviated String
+     * @return the abbreviated String, or {@code null} if the input String is {@code null}
      * @throws IllegalArgumentException if the width is too small
      */
     public static String abbreviate(final String str, final int maxWidth) {
@@ -2689,7 +2689,7 @@ public final class Strings {
      * @param str the String to check, may be {@code null}
      * @param abbrevMarker the String used as replacement marker
      * @param maxWidth maximum length of result String, must be at least {@code abbrevMarker.length() + 1}
-     * @return abbreviated String
+     * @return the abbreviated String, or {@code null} if the input String is {@code null}
      * @throws IllegalArgumentException if the width is too small
      */
     public static String abbreviate(final String str, final String abbrevMarker, final int maxWidth) {
@@ -2723,8 +2723,9 @@ public final class Strings {
      * @param str the String to abbreviate, may be {@code null}
      * @param middle the String to replace the middle characters with, may be {@code null}
      * @param length the length to abbreviate {@code str} to.
-     * @return the abbreviated String if the above criteria is met, or the original String supplied for abbreviation.
+     * @return the abbreviated String if the above criteria is met, or the original {@code str} (which may be {@code null}) otherwise.
      */
+    @MayReturnNull
     public static String abbreviateMiddle(final String str, final String middle, final int length) {
         if (isAnyEmpty(str, middle) || length >= str.length() || length < middle.length() + 2) {
             return str;
@@ -3470,6 +3471,7 @@ public final class Strings {
      * @param str the String to lower case, may be {@code null}
      * @return the lower case String, or the specified String if it's {@code null} or empty.
      */
+    @MayReturnNull
     public static String toLowerCase(final String str) {
         if (str == null || str.isEmpty()) {
             return str;
@@ -3502,6 +3504,7 @@ public final class Strings {
      * @param locale the locale that defines the case transformation rules, must not be null
      * @return the lower case String, or the specified String if it's {@code null} or empty.
      */
+    @MayReturnNull
     public static String toLowerCase(final String str, final Locale locale) {
         if (str == null || str.isEmpty()) {
             return str;
@@ -3560,6 +3563,7 @@ public final class Strings {
      * @param str the String to upper case, may be {@code null}
      * @return the upper case String, or the specified String if it's {@code null} or empty.
      */
+    @MayReturnNull
     public static String toUpperCase(final String str) {
         if (str == null || str.isEmpty()) {
             return str;
@@ -3591,6 +3595,7 @@ public final class Strings {
      * @param locale the locale that defines the case transformation rules, must not be null
      * @return the upper case String, or the specified String if it's {@code null} or empty.
      */
+    @MayReturnNull
     public static String toUpperCase(final String str, final Locale locale) {
         if (str == null || str.isEmpty()) {
             return str;
@@ -3637,6 +3642,7 @@ public final class Strings {
      * @see #toUpperCamelCase(String)
      * @see #toSnakeCase(String)
      */
+    @MayReturnNull
     public static String toCamelCase(final String str) {
         if (str == null || str.isEmpty()) {
             return str;
@@ -3673,6 +3679,7 @@ public final class Strings {
      * @see #toUpperCamelCase(String, char)
      * @see #toSnakeCase(String)
      */
+    @MayReturnNull
     public static String toCamelCase(final String str, final char splitChar) {
         if (str == null || str.isEmpty()) {
             return str;
@@ -3752,6 +3759,7 @@ public final class Strings {
      * @see #toCamelCase(String)
      * @see #toScreamingSnakeCase(String)
      */
+    @MayReturnNull
     public static String toUpperCamelCase(final String str) {
         if (str == null || str.isEmpty()) {
             return str;
@@ -3788,6 +3796,7 @@ public final class Strings {
      * @see #toCamelCase(String, char)
      * @see #toScreamingSnakeCase(String)
      */
+    @MayReturnNull
     public static String toUpperCamelCase(final String str, final char splitChar) {
         if (str == null || str.isEmpty()) {
             return str;
@@ -3821,6 +3830,7 @@ public final class Strings {
      * @see #toUpperCamelCase(String)
      * @see #toUpperCamelCase(String, char)
      */
+    @MayReturnNull
     public static String toPascalCase(final String str) {
         return toUpperCamelCase(str);
     }
@@ -3852,6 +3862,7 @@ public final class Strings {
      * @see #toUpperCamelCase(String)
      * @see #toUpperCamelCase(String, char)
      */
+    @MayReturnNull
     public static String toPascalCase(final String str, final char splitChar) {
         return toUpperCamelCase(str, splitChar);
     }
@@ -3883,13 +3894,14 @@ public final class Strings {
      * Strings.toSnakeCase("");                // returns ""
      * }</pre>
      *
-     * @param str the input string to be converted
-     * @return the converted string in lower case with underscores
+     * @param str the input string to be converted, may be {@code null} or empty
+     * @return the converted string in lower case with underscores, or the original string if it is {@code null} or empty.
      * @see #toSnakeCase(String, char)
      * @see #toScreamingSnakeCase(String)
      * @see #toCamelCase(String)
      * @see #toUpperCamelCase(String)
      */
+    @MayReturnNull
     public static String toSnakeCase(final String str) {
         if (str == null || str.isEmpty()) {
             return str;
@@ -3950,6 +3962,7 @@ public final class Strings {
      * @see #toSnakeCase(String)
      * @see #toCamelCase(String, char)
      */
+    @MayReturnNull
     public static String toSnakeCase(final String str, final char splitChar) {
         if (str == null || str.isEmpty()) {
             return str;
@@ -3992,6 +4005,7 @@ public final class Strings {
      * @see #toCamelCase(String)
      * @see #toUpperCamelCase(String)
      */
+    @MayReturnNull
     public static String toScreamingSnakeCase(final String str) {
         if (str == null || str.isEmpty()) {
             return str;
@@ -4049,6 +4063,7 @@ public final class Strings {
      * @see #toSnakeCase(String, char)
      * @see #toCamelCase(String, char)
      */
+    @MayReturnNull
     public static String toScreamingSnakeCase(final String str, final char splitChar) {
         if (str == null || str.isEmpty()) {
             return str;
@@ -4083,11 +4098,12 @@ public final class Strings {
      * Strings.toKebabCase("");                // returns ""
      * }</pre>
      *
-     * @param str the input string to be converted
-     * @return the converted string in lower case with hyphens
+     * @param str the input string to be converted, may be {@code null} or empty
+     * @return the converted string in lower case with hyphens, or the original string if it is {@code null} or empty.
      * @see #toKebabCase(String, char)
      * @see #toSnakeCase(String)
      */
+    @MayReturnNull
     public static String toKebabCase(final String str) {
         if (str == null || str.isEmpty()) {
             return str;
@@ -4148,6 +4164,7 @@ public final class Strings {
      * @see #toKebabCase(String)
      * @see #toCamelCase(String, char)
      */
+    @MayReturnNull
     public static String toKebabCase(final String str, final char splitChar) {
         if (str == null || str.isEmpty()) {
             return str;
@@ -4205,6 +4222,7 @@ public final class Strings {
      * @return the case-swapped String, {@code null} if the input is {@code null}
      * @see #swapCase(char)
      */
+    @MayReturnNull
     public static String swapCase(final String str) {
         if (isEmpty(str)) {
             return str;
@@ -4257,6 +4275,7 @@ public final class Strings {
      * @see #capitalize(String)
      * @see #capitalizeFully(String)
      */
+    @MayReturnNull
     public static String uncapitalize(final String str) {
         if (str == null || str.isEmpty()) {
             return str;
@@ -4311,6 +4330,7 @@ public final class Strings {
      * @see #uncapitalize(String)
      * @see #capitalizeFully(String)
      */
+    @MayReturnNull
     public static String capitalize(final String str) {
         if (str == null || str.isEmpty()) {
             return str;
@@ -4361,6 +4381,7 @@ public final class Strings {
      * @see #capitalizeFully(String, String)
      * @see #capitalize(String)
      */
+    @MayReturnNull
     public static String capitalizeFully(final String str) {
         return capitalizeFully(str, " ");
     }
@@ -4390,6 +4411,7 @@ public final class Strings {
      * @see #capitalizeFully(String, String, String...)
      * @see #convertWords(String, String, Collection, Function)
      */
+    @MayReturnNull
     public static String capitalizeFully(final String str, final String delimiter) throws IllegalArgumentException {
         N.checkArgNotEmpty(delimiter, cs.delimiter); // NOSONAR
 
@@ -4427,11 +4449,12 @@ public final class Strings {
      * @param str the string to be processed, may be {@code null} or empty. If it's {@code null} or empty, the method will return the input string.
      * @param delimiter the delimiter used to split the string into words. It must not be empty.
      * @param excludedWords an array of words to be excluded from capitalization. If it's {@code null} or empty, all words will be capitalized.
-     * @return the processed string with all non-excluded words capitalized.
+     * @return the processed string with all non-excluded words capitalized, or the original string if it's {@code null} or empty.
      * @throws IllegalArgumentException if the provided delimiter is empty.
      * @see #capitalizeFully(String, String)
      * @see #capitalizeFully(String, String, Collection)
      */
+    @MayReturnNull
     public static String capitalizeFully(final String str, final String delimiter, final String... excludedWords) throws IllegalArgumentException {
         N.checkArgNotEmpty(delimiter, cs.delimiter); // NOSONAR
 
@@ -4467,12 +4490,13 @@ public final class Strings {
      * @param str the string to be processed, may be {@code null} or empty. If it's {@code null} or empty, the method will return the input string.
      * @param delimiter the delimiter used to split the string into words. It must not be empty.
      * @param excludedWords a collection of words to be excluded from capitalization. If it's {@code null} or empty, all words will be capitalized.
-     * @return the processed string with all non-excluded words capitalized.
+     * @return the processed string with all non-excluded words capitalized, or the original string if it's {@code null} or empty.
      * @throws IllegalArgumentException if the provided delimiter is empty.
      * @see #capitalizeFully(String, String)
      * @see #capitalizeFully(String, String, String...)
      * @see #convertWords(String, String, Collection, Function)
      */
+    @MayReturnNull
     public static String capitalizeFully(final String str, final String delimiter, final Collection<String> excludedWords) throws IllegalArgumentException {
         N.checkArgNotEmpty(delimiter, cs.delimiter); // NOSONAR
 
@@ -4512,10 +4536,11 @@ public final class Strings {
      *
      * @param str the string to be processed, may be {@code null} or empty. If it's {@code null} or empty, the method will return the input string.
      * @param converter the function used to convert each word. This function should accept a string and return a string.
-     * @return the processed string with all words converted using the provided converter function.
+     * @return the processed string with all words converted using the provided converter function, or the original string if it's {@code null} or empty.
      * @see #convertWords(String, String, Function)
      * @see #convertWords(String, String, Collection, Function)
      */
+    @MayReturnNull
     public static String convertWords(final String str, final Function<? super String, String> converter) {
         return convertWords(str, " ", converter);
     }
@@ -4538,11 +4563,12 @@ public final class Strings {
      * @param str the string to be processed, may be {@code null} or empty. If it's {@code null} or empty, the method will return the input string.
      * @param delimiter the delimiter used to split the string into words. It must not be empty.
      * @param converter the function used to convert each word.
-     * @return the processed string with all words converted using the provided converter function.
+     * @return the processed string with all words converted using the provided converter function, or the original string if it's {@code null} or empty.
      * @throws IllegalArgumentException if the provided delimiter is empty.
      * @see #convertWords(String, Function)
      * @see #convertWords(String, String, Collection, Function)
      */
+    @MayReturnNull
     public static String convertWords(final String str, final String delimiter, final Function<? super String, String> converter)
             throws IllegalArgumentException {
         N.checkArgNotEmpty(delimiter, cs.delimiter); // NOSONAR
@@ -4581,11 +4607,12 @@ public final class Strings {
      * @param delimiter the delimiter used to split the string into words. It must not be empty.
      * @param excludedWords a collection of words to be excluded from conversion. If it's {@code null} or empty, all words will be converted.
      * @param converter the function used to convert each word. If a word is in the excludedWords collection, it will not be converted.
-     * @return the processed string with all non-excluded words converted using the provided converter function.
+     * @return the processed string with all non-excluded words converted using the provided converter function, or the original string if it's {@code null} or empty.
      * @throws IllegalArgumentException if the provided delimiter is empty.
      * @see #convertWords(String, Function)
      * @see #convertWords(String, String, Function)
      */
+    @MayReturnNull
     public static String convertWords(final String str, final String delimiter, final Collection<String> excludedWords,
             final Function<? super String, String> converter) throws IllegalArgumentException {
         N.checkArgNotEmpty(delimiter, cs.delimiter); // NOSONAR
@@ -4631,6 +4658,7 @@ public final class Strings {
      * @return the string with all unescaped single and double quotes escaped, or the original string if it's {@code null} or empty.
      * @see #quoteEscaped(String, char)
      */
+    @MayReturnNull
     public static String quoteEscaped(final String str) {
         if (str == null || str.isEmpty()) {
             return str;
@@ -4683,6 +4711,7 @@ public final class Strings {
      * @return the processed string with the specified quotation character escaped, or the original string if it is {@code null} or empty
      * @see #quoteEscaped(String)
      */
+    @MayReturnNull
     public static String quoteEscaped(final String str, final char quoteChar) {
         if (str == null || str.isEmpty()) {
             return str;
@@ -4770,6 +4799,7 @@ public final class Strings {
      * @see #trim(String)
      * @see <a href="http://www.w3.org/TR/xpath/#function-normalize-space">http://www.w3.org/TR/xpath/#function-normalize-space</a>
      */
+    @MayReturnNull
     public static String normalizeSpace(final String str) {
         if (str == null || str.isEmpty()) {
             return str;
@@ -4805,6 +4835,7 @@ public final class Strings {
      * @return the text with all occurrences of the target string replaced, {@code null} if the input is {@code null}
      * @see RegExUtil#replaceAll(String, String, String)
      */
+    @MayReturnNull
     public static String replaceAll(final String str, final String target, final String replacement) {
         return replaceAll(str, 0, target, replacement);
     }
@@ -4834,6 +4865,7 @@ public final class Strings {
      * @return the text with all occurrences of the target string replaced starting from the specified index, {@code null} if the input is {@code null}
      *         A negative {@code fromIndex} is treated as {@code 0}; a {@code fromIndex} at or beyond the string length returns the original string unchanged (no exception is thrown).
      */
+    @MayReturnNull
     public static String replaceAll(final String str, final int fromIndex, final String target, final String replacement) {
         return replace(str, fromIndex, target, replacement, -1);
     }
@@ -4865,6 +4897,7 @@ public final class Strings {
      * @return the text with the first occurrence of the target string replaced, {@code null} if the input is {@code null}
      * @see RegExUtil#replaceFirst(String, String, String)
      */
+    @MayReturnNull
     public static String replaceFirst(final String str, final String target, final String replacement) {
         return replaceFirst(str, 0, target, replacement);
     }
@@ -4894,6 +4927,7 @@ public final class Strings {
      * @return the text with the first occurrence of the target string replaced starting from the specified index, {@code null} if the input is {@code null}
      *         A negative {@code fromIndex} is treated as {@code 0}; a {@code fromIndex} at or beyond the string length returns the original string unchanged (no exception is thrown).
      */
+    @MayReturnNull
     public static String replaceFirst(final String str, final int fromIndex, final String target, final String replacement) {
         return replace(str, fromIndex, target, replacement, 1);
     }
@@ -4922,6 +4956,7 @@ public final class Strings {
      * @deprecated Use {@link #replaceFirst(String, String, String)} instead
      */
     @Deprecated
+    @MayReturnNull
     public static String replaceOnce(final String str, final String target, final String replacement) {
         return replaceFirst(str, target, replacement);
     }
@@ -4941,9 +4976,11 @@ public final class Strings {
      * @param target the string to be replaced, may be {@code null} or empty
      * @param replacement the string to replace the target string, may be {@code null}
      * @return a new string with the first occurrence of the target string replaced with the replacement string, starting from the specified index.
+     *         If the input string is {@code null}, the method returns {@code null}. If the input string is empty, or the target string is not found, the input string is returned unchanged.
      * @deprecated Use {@link #replaceFirst(String, int, String, String)} instead
      */
     @Deprecated
+    @MayReturnNull
     public static String replaceOnce(final String str, final int fromIndex, final String target, final String replacement) {
         return replaceFirst(str, fromIndex, target, replacement);
     }
@@ -4978,6 +5015,7 @@ public final class Strings {
      * @see #replaceLastIgnoreCase(String, String, String)
      * @see RegExUtil#replaceLast(String, String, String)
      */
+    @MayReturnNull
     public static String replaceLast(final String str, final String target, final String replacement) {
         return replaceLast(str, N.len(str), target, replacement);
     }
@@ -5012,6 +5050,7 @@ public final class Strings {
      * @see #replaceLastIgnoreCase(String, int, String, String)
      * @see RegExUtil#replaceLast(String, String, String)
      */
+    @MayReturnNull
     public static String replaceLast(final String str, final int startIndexFromBack, final String target, final String replacement) {
         if (isEmpty(str) || isEmpty(target) || startIndexFromBack < 0) {
             return str;
@@ -5052,6 +5091,7 @@ public final class Strings {
      * @see #replaceLast(String, String, String)
      * @see #replaceFirstIgnoreCase(String, String, String)
      */
+    @MayReturnNull
     public static String replaceLastIgnoreCase(final String str, final String target, final String replacement) {
         return replaceLastIgnoreCase(str, N.len(str), target, replacement);
     }
@@ -5083,6 +5123,7 @@ public final class Strings {
      * @see #replaceLast(String, int, String, String)
      * @see #replaceFirstIgnoreCase(String, int, String, String)
      */
+    @MayReturnNull
     public static String replaceLastIgnoreCase(final String str, final int startIndexFromBack, final String target, final String replacement) {
         if (isEmpty(str) || isEmpty(target) || startIndexFromBack < 0) {
             return str;
@@ -5130,6 +5171,7 @@ public final class Strings {
      *         If the input string is {@code null}, the method returns {@code null}. If the input string is empty, or the target string is not found, the input string is returned unchanged.
      *         A negative {@code fromIndex} is treated as {@code 0}; a {@code fromIndex} at or beyond the string length returns the original string unchanged (no exception is thrown).
      */
+    @MayReturnNull
     public static String replace(final String str, final int fromIndex, final String target, final String replacement, final int max) {
         return replace(str, fromIndex, target, replacement, max, false);
     }
@@ -5161,6 +5203,7 @@ public final class Strings {
      * @return a new string with all occurrences of the target string replaced with the replacement string, ignoring case considerations.
      *         If the input string is {@code null}, the method returns {@code null}. If the input string is empty, or the target string is not found, the input string is returned unchanged.
      */
+    @MayReturnNull
     public static String replaceAllIgnoreCase(final String str, final String target, final String replacement) {
         return replaceAllIgnoreCase(str, 0, target, replacement);
     }
@@ -5191,6 +5234,7 @@ public final class Strings {
      *         If the input string is {@code null}, the method returns {@code null}. If the input string is empty, or the target string is not found, the input string is returned unchanged.
      *         A negative {@code fromIndex} is treated as {@code 0}; a {@code fromIndex} at or beyond the string length returns the original string unchanged (no exception is thrown).
      */
+    @MayReturnNull
     public static String replaceAllIgnoreCase(final String str, final int fromIndex, final String target, final String replacement) {
         return replaceIgnoreCase(str, fromIndex, target, replacement, -1);
     }
@@ -5224,6 +5268,7 @@ public final class Strings {
      * @see #replaceFirst(String, String, String)
      * @see #replaceLastIgnoreCase(String, String, String)
      */
+    @MayReturnNull
     public static String replaceFirstIgnoreCase(final String str, final String target, final String replacement) {
         return replaceFirstIgnoreCase(str, 0, target, replacement);
     }
@@ -5257,6 +5302,7 @@ public final class Strings {
      * @see #replaceFirst(String, int, String, String)
      * @see #replaceLastIgnoreCase(String, int, String, String)
      */
+    @MayReturnNull
     public static String replaceFirstIgnoreCase(final String str, final int fromIndex, final String target, final String replacement) {
         return replaceIgnoreCase(str, fromIndex, target, replacement, 1);
     }
@@ -5291,6 +5337,7 @@ public final class Strings {
      *         If the input string is {@code null}, the method returns {@code null}. If the input string is empty, or the target string is not found, the input string is returned unchanged.
      *         A negative {@code fromIndex} is treated as {@code 0}; a {@code fromIndex} at or beyond the string length returns the original string unchanged (no exception is thrown).
      */
+    @MayReturnNull
     public static String replaceIgnoreCase(final String str, final int fromIndex, final String target, final String replacement, final int max) {
         return replace(str, fromIndex, target, replacement, max, true);
     }
@@ -5398,6 +5445,7 @@ public final class Strings {
      *         If the input string is {@code null} or either of the delimiters is {@code null}, the original string is returned.
      * @see #substringBetween(String, String, String)
      */
+    @MayReturnNull
     public static String replaceBetween(final String str, final String delimiterOfExclusiveBeginIndex, final String delimiterOfExclusiveEndIndex,
             final String replacement) {
         if (str == null || delimiterOfExclusiveBeginIndex == null || delimiterOfExclusiveEndIndex == null) {
@@ -5443,6 +5491,7 @@ public final class Strings {
      * @return the processed string with the substring after the delimiter replaced with the replacement string.
      *         If the input string is {@code null} or the delimiter is {@code null}, the original string is returned.
      */
+    @MayReturnNull
     public static String replaceAfter(final String str, final String delimiterOfExclusiveBeginIndex, final String replacement) {
         if (str == null || delimiterOfExclusiveBeginIndex == null) {
             return str;
@@ -5481,6 +5530,7 @@ public final class Strings {
      * @return the processed string with the substring before the delimiter replaced with the replacement string.
      *         If the input string is {@code null} or the delimiter is {@code null}, the original string is returned.
      */
+    @MayReturnNull
     public static String replaceBefore(final String str, final String delimiterOfExclusiveEndIndex, final String replacement) {
         if (str == null || delimiterOfExclusiveEndIndex == null) {
             return str;
@@ -5519,6 +5569,7 @@ public final class Strings {
      * @param removeStr the String to search for and remove, may be {@code null}
      * @return the string with the prefix removed if found, or the original string. Returns {@code null} if the input is {@code null}.
      */
+    @MayReturnNull
     public static String removeStart(final String str, final String removeStr) {
         if (isEmpty(str) || isEmpty(removeStr)) {
             return str;
@@ -5553,6 +5604,7 @@ public final class Strings {
      * @param removeStr the String to search for (case insensitive) and remove, may be {@code null}
      * @return the string with the prefix removed if found (ignoring case), or the original string. Returns {@code null} if the input is {@code null}.
      */
+    @MayReturnNull
     public static String removeStartIgnoreCase(final String str, final String removeStr) {
         if (isEmpty(str) || isEmpty(removeStr)) {
             return str;
@@ -5586,6 +5638,7 @@ public final class Strings {
      * @param removeStr the String to search for and remove, may be {@code null}
      * @return the string with the suffix removed if found, or the original string. Returns {@code null} if the input is {@code null}.
      */
+    @MayReturnNull
     public static String removeEnd(final String str, final String removeStr) {
         if (isEmpty(str) || isEmpty(removeStr)) {
             return str;
@@ -5621,6 +5674,7 @@ public final class Strings {
      * @param removeStr the String to search for (case insensitive) and remove, may be {@code null}
      * @return the string with the suffix removed if found (ignoring case), or the original string. Returns {@code null} if the input is {@code null}.
      */
+    @MayReturnNull
     public static String removeEndIgnoreCase(final String str, final String removeStr) {
         if (isEmpty(str) || isEmpty(removeStr)) {
             return str;
@@ -5653,6 +5707,7 @@ public final class Strings {
      * @return a new string with all occurrences of the specified character removed.
      *         If the input string is {@code null}, the method returns {@code null}. If the input string is empty, or the character is not found, the input string is returned unchanged.
      */
+    @MayReturnNull
     public static String removeAll(final String str, final char removeChar) {
         return removeAll(str, 0, removeChar);
     }
@@ -5681,6 +5736,7 @@ public final class Strings {
      * @return a new string with all occurrences of the specified character removed, starting from the specified index.
      *         If the input string is {@code null}, the method returns {@code null}. If the input string is empty, or the character is not found, the input string is returned unchanged.
      */
+    @MayReturnNull
     public static String removeAll(final String str, final int fromIndex, final char removeChar) {
         // N.checkIndex(fromIndex, N.len(str));
 
@@ -5738,6 +5794,7 @@ public final class Strings {
      * @return the source string with all occurrences of {@code removeStr} removed, or the original string if it's {@code null}, empty, or {@code removeStr} is {@code null} or empty.
      * @see RegExUtil#removeAll(String, String)
      */
+    @MayReturnNull
     public static String removeAll(final String str, final String removeStr) {
         return removeAll(str, 0, removeStr);
     }
@@ -5767,6 +5824,7 @@ public final class Strings {
      * @return a new string with all occurrences of the specified string removed, starting from the specified index.
      *         If the input string is {@code null}, the method returns {@code null}. If the input string is empty, or the string to be removed is not found, the input string is returned unchanged.
      */
+    @MayReturnNull
     public static String removeAll(final String str, final int fromIndex, final String removeStr) {
         if (isEmpty(str) || isEmpty(removeStr) || fromIndex >= str.length()) {
             return str;
@@ -5800,6 +5858,7 @@ public final class Strings {
      * @see #removeAll(String, String)
      * @see #replaceAllIgnoreCase(String, String, String)
      */
+    @MayReturnNull
     public static String removeAllIgnoreCase(final String str, final String removeStr) {
         return removeAllIgnoreCase(str, 0, removeStr);
     }
@@ -5829,6 +5888,7 @@ public final class Strings {
      * @see #removeAll(String, int, String)
      * @see #replaceAllIgnoreCase(String, String, String)
      */
+    @MayReturnNull
     public static String removeAllIgnoreCase(final String str, final int fromIndex, final String removeStr) {
         if (isEmpty(str) || isEmpty(removeStr) || fromIndex >= str.length()) {
             return str;
@@ -6752,6 +6812,7 @@ public final class Strings {
      * @param str the String to remove whitespace from, may be {@code null}
      * @return the stripped String, {@code null} if {@code null} String input
      */
+    @MayReturnNull
     public static String strip(final String str) {
         return strip(str, null);
     }
@@ -6920,6 +6981,7 @@ public final class Strings {
      * @param stripChars the characters to remove, {@code null} treated as whitespace
      * @return the stripped string, or the original string if it's {@code null} or empty.
      */
+    @MayReturnNull
     public static String strip(final String str, final String stripChars) {
         if (str == null || str.isEmpty()) {
             return str;
@@ -6976,6 +7038,7 @@ public final class Strings {
      * @param str the String to remove whitespace from, may be {@code null}
      * @return the stripped String, {@code null} if {@code null} String input
      */
+    @MayReturnNull
     public static String stripStart(final String str) {
         return stripStart(str, null);
     }
@@ -7004,6 +7067,7 @@ public final class Strings {
      * @param stripChars the characters to remove, {@code null} treated as whitespace
      * @return the string with leading characters stripped, or the original string if it's {@code null} or empty.
      */
+    @MayReturnNull
     public static String stripStart(final String str, final String stripChars) {
         if (isEmpty(str) || (stripChars != null && stripChars.isEmpty())) {
             return str;
@@ -7073,6 +7137,7 @@ public final class Strings {
      * @param str the String to remove whitespace from, may be {@code null}
      * @return the stripped String, {@code null} if {@code null} String input
      */
+    @MayReturnNull
     public static String stripEnd(final String str) {
         return stripEnd(str, null);
     }
@@ -7102,6 +7167,7 @@ public final class Strings {
      * @param stripChars the set of characters to remove, {@code null} treated as whitespace
      * @return the string with trailing characters stripped, or the original string if it's {@code null} or empty.
      */
+    @MayReturnNull
     public static String stripEnd(final String str, final String stripChars) {
         if (isEmpty(str) || (stripChars != null && stripChars.isEmpty())) {
             return str;
@@ -7264,6 +7330,7 @@ public final class Strings {
      * @return string without newline at the end, {@code null} if {@code null} String input
      * @see #chop(String)
      */
+    @MayReturnNull
     public static String chomp(final String str) {
         if (str == null || str.isEmpty()) {
             return str;
@@ -7352,6 +7419,7 @@ public final class Strings {
      * @return string without last character, {@code null} if {@code null} String input
      * @see #chomp(String)
      */
+    @MayReturnNull
     public static String chop(final String str) {
         if (str == null || str.isEmpty()) {
             return str;
@@ -7427,6 +7495,7 @@ public final class Strings {
      * @see #truncate(String, int, int)
      * @see #truncate(String[], int)
      */
+    @MayReturnNull
     public static String truncate(final String str, final int maxWidth) {
         return truncate(str, 0, maxWidth);
     }
@@ -7577,6 +7646,7 @@ public final class Strings {
      * @deprecated Use {@link #removeWhitespace(String)} instead
      */
     @Deprecated
+    @MayReturnNull
     public static String deleteWhitespace(final String str) {
         return removeWhitespace(str);
     }
@@ -7627,6 +7697,7 @@ public final class Strings {
      * @return the String without whitespaces, {@code null} if {@code null} String input
      * @see #removeWhitespace(String[])
      */
+    @MayReturnNull
     public static String removeWhitespace(final String str) {
         if (str == null || str.isEmpty()) {
             return str;
@@ -8039,10 +8110,11 @@ public final class Strings {
      *
      * @param str the string to be unwrapped. May be {@code null} or empty.
      * @param prefixSuffix the string used as both the prefix and suffix for unwrapping. Must not be empty.
-     * @return the input string with the prefixSuffix removed from both ends if they were present; otherwise, the original string.
+     * @return the input string with the prefixSuffix removed from both ends if they were present; otherwise, the original string (which is {@code null} if the input string is {@code null}).
      * @throws IllegalArgumentException if the prefixSuffix is empty.
      * @see #unwrap(String, String, String)
      */
+    @MayReturnNull
     public static String unwrap(final String str, final String prefixSuffix) throws IllegalArgumentException {
         N.checkArgNotEmpty(prefixSuffix, cs.prefixSuffix);
 
@@ -8078,10 +8150,11 @@ public final class Strings {
      * @param str the string to be unwrapped. May be {@code null} or empty.
      * @param prefix the string used as the prefix for unwrapping. Must not be empty.
      * @param suffix the string used as the suffix for unwrapping. Must not be empty.
-     * @return the input string with the prefix and suffix removed from both ends if they were present; otherwise, the original string.
+     * @return the input string with the prefix and suffix removed from both ends if they were present; otherwise, the original string (which is {@code null} if the input string is {@code null}).
      * @throws IllegalArgumentException if the prefix or suffix is empty.
      * @see #unwrap(String, String)
      */
+    @MayReturnNull
     public static String unwrap(final String str, final String prefix, final String suffix) throws IllegalArgumentException {
         N.checkArgNotEmpty(prefix, cs.prefix);
         N.checkArgNotEmpty(suffix, cs.suffix);
@@ -13131,6 +13204,7 @@ public final class Strings {
      * @see #truncate(String, int)
      */
     @Beta
+    @MayReturnNull
     public static String firstChars(final String str, final int n) throws IllegalArgumentException {
         N.checkArgNotNegative(n, cs.n);
 
@@ -13170,6 +13244,7 @@ public final class Strings {
      * @see #truncate(String, int)
      */
     @Beta
+    @MayReturnNull
     public static String lastChars(final String str, final int n) throws IllegalArgumentException {
         N.checkArgNotNegative(n, cs.n);
 
@@ -19771,6 +19846,7 @@ public final class Strings {
      * @param str the string to be reversed. May be {@code null} or empty.
      * @return a new string with the characters reversed. If the input string is {@code null} or empty or its length &lt;= 1, the input string is returned.
      */
+    @MayReturnNull
     public static String reverse(final String str) {
         if (N.len(str) <= 1) {
             return str;
@@ -19809,6 +19885,7 @@ public final class Strings {
      * @param delimiter the delimiter character to use for splitting and joining.
      * @return the string with its delimited segments reversed. If the input string is {@code null} or empty or its length &lt;= 1, the input string is returned.
      */
+    @MayReturnNull
     public static String reverseDelimited(final String str, final char delimiter) {
         if (N.len(str) <= 1) {
             return str;
@@ -19845,6 +19922,7 @@ public final class Strings {
      * @param delimiter the delimiter that separates the elements in the string.
      * @return the reversed string. If the input string is {@code null} or empty or its length &lt;= 1, the input string is returned.
      */
+    @MayReturnNull
     public static String reverseDelimited(final String str, final String delimiter) {
         if (N.len(str) <= 1) {
             return str;
@@ -19881,6 +19959,7 @@ public final class Strings {
      * @param str the string whose characters are to be sorted. May be {@code null} or empty.
      * @return a new string with the characters sorted in ascending order. If the input string is {@code null} or empty or its length &lt;= 1, the input string is returned.
      */
+    @MayReturnNull
     public static String sort(final String str) {
         if (N.len(str) <= 1) {
             return str;
@@ -19923,6 +20002,7 @@ public final class Strings {
      *          or the original String if it has length 0 or 1 or {@code shift} is a multiple of the string length (including {@code shift == 0}),
      *          or {@code null} if {@code null} String input
      */
+    @MayReturnNull
     public static String rotate(final String str, final int shift) {
         final int strLen = N.len(str);
 
@@ -19964,6 +20044,7 @@ public final class Strings {
      * @param str the string to be shuffled. May be {@code null} or empty.
      * @return a new string with the characters shuffled. If the input string is {@code null} or empty, the input string is returned.
      */
+    @MayReturnNull
     public static String shuffle(final String str) {
         return shuffle(str, N.RAND);
     }
@@ -19991,6 +20072,7 @@ public final class Strings {
      * @param rnd the Random instance used to shuffle the characters.
      * @return a new string with the characters shuffled. If the input string is {@code null} or empty, the input string is returned.
      */
+    @MayReturnNull
     public static String shuffle(final String str, final Random rnd) {
         final int strLen = N.len(str);
 
@@ -21251,6 +21333,7 @@ public final class Strings {
      * @see RegExUtil#NUMBER_FINDER
      * @see RegExUtil#SCIENTIFIC_NUMBER_FINDER
      */
+    @MayReturnNull
     public static String extractFirstDouble(final String str) {
         return extractFirstDouble(str, false);
     }
@@ -21344,6 +21427,7 @@ public final class Strings {
      * @see RegExUtil#replaceLast(String, Pattern, String)
      * @see RegExUtil#INTEGER_FINDER
      */
+    @MayReturnNull
     public static String replaceFirstInteger(final String str, final String replacement) {
         if (Strings.isEmpty(str)) {
             return str;
@@ -21387,6 +21471,7 @@ public final class Strings {
      * @see RegExUtil#replaceLast(String, Pattern, String)
      * @see RegExUtil#NUMBER_FINDER
      */
+    @MayReturnNull
     public static String replaceFirstDouble(final String str, final String replacement) {
         if (Strings.isEmpty(str)) {
             return str;
@@ -21431,6 +21516,7 @@ public final class Strings {
      * @see RegExUtil#NUMBER_FINDER
      * @see RegExUtil#SCIENTIFIC_NUMBER_FINDER
      */
+    @MayReturnNull
     public static String replaceFirstDouble(final String str, final String replacement, final boolean includingScientificNumber) {
         if (Strings.isEmpty(str)) {
             return str;
@@ -22666,10 +22752,11 @@ public final class Strings {
          *
          * @param str the string from which to extract the substring, can be {@code null}.
          * @param inclusiveBeginIndex the starting index (inclusive) of the substring.
-         * @return the substring if it exists, otherwise {@code str} itself.
+         * @return the substring if it exists, otherwise {@code str} itself, or {@code null} if {@code str} is {@code null}.
          * @see Strings#substring(String, int)
          */
         @Beta
+        @MayReturnNull
         public static String substringOrElseItself(final String str, final int inclusiveBeginIndex) {
             final String ret = Strings.substring(str, inclusiveBeginIndex);
 
@@ -22695,10 +22782,11 @@ public final class Strings {
          * @param str the string from which to extract the substring, can be {@code null}.
          * @param inclusiveBeginIndex the starting index (inclusive) of the substring.
          * @param exclusiveEndIndex the ending index (exclusive) of the substring.
-         * @return the substring if it exists, otherwise {@code str} itself.
+         * @return the substring if it exists, otherwise {@code str} itself, or {@code null} if {@code str} is {@code null}.
          * @see Strings#substring(String, int, int)
          */
         @Beta
+        @MayReturnNull
         public static String substringOrElseItself(final String str, final int inclusiveBeginIndex, final int exclusiveEndIndex) {
             final String ret = Strings.substring(str, inclusiveBeginIndex, exclusiveEndIndex);
 
@@ -22722,10 +22810,11 @@ public final class Strings {
          * @param str the string from which to extract the substring, can be {@code null}.
          * @param inclusiveBeginIndex the starting index (inclusive) of the substring.
          * @param funcOfExclusiveEndIndex a function that takes {@code inclusiveBeginIndex} and returns the exclusive end index.
-         * @return the substring if it exists, otherwise {@code str} itself.
+         * @return the substring if it exists, otherwise {@code str} itself, or {@code null} if {@code str} is {@code null}.
          * @see Strings#substring(String, int, IntUnaryOperator)
          */
         @Beta
+        @MayReturnNull
         public static String substringOrElseItself(final String str, final int inclusiveBeginIndex, final IntUnaryOperator funcOfExclusiveEndIndex) {
             final String ret = Strings.substring(str, inclusiveBeginIndex, funcOfExclusiveEndIndex);
 
@@ -22749,10 +22838,11 @@ public final class Strings {
          * @param str the string from which to extract the substring, can be {@code null}.
          * @param funcOfInclusiveBeginIndex a function that takes the exclusive end index and returns the inclusive begin index.
          * @param exclusiveEndIndex the ending index (exclusive) of the substring.
-         * @return the substring if it exists, otherwise {@code str} itself.
+         * @return the substring if it exists, otherwise {@code str} itself, or {@code null} if {@code str} is {@code null}.
          * @see Strings#substring(String, IntUnaryOperator, int)
          */
         @Beta
+        @MayReturnNull
         public static String substringOrElseItself(final String str, final IntUnaryOperator funcOfInclusiveBeginIndex, final int exclusiveEndIndex) {
             final String ret = Strings.substring(str, funcOfInclusiveBeginIndex, exclusiveEndIndex);
 
@@ -23320,10 +23410,11 @@ public final class Strings {
          *
          * @param str the string to search in, can be {@code null}.
          * @param delimiterOfExclusiveBeginIndex the character delimiter marking the beginning of the substring (exclusive).
-         * @return the substring after the delimiter if found, otherwise {@code str} itself.
+         * @return the substring after the delimiter if found, otherwise {@code str} itself, or {@code null} if {@code str} is {@code null}.
          * @see Strings#substringAfter(String, char)
          */
         @Beta
+        @MayReturnNull
         public static String substringAfterOrElseItself(final String str, final char delimiterOfExclusiveBeginIndex) {
             final String ret = Strings.substringAfter(str, delimiterOfExclusiveBeginIndex);
 
@@ -23348,10 +23439,11 @@ public final class Strings {
          *
          * @param str the string to search in, can be {@code null}.
          * @param delimiterOfExclusiveBeginIndex the string delimiter marking the beginning of the substring (exclusive).
-         * @return the substring after the delimiter if found, otherwise {@code str} itself.
+         * @return the substring after the delimiter if found, otherwise {@code str} itself, or {@code null} if {@code str} is {@code null}.
          * @see Strings#substringAfter(String, String)
          */
         @Beta
+        @MayReturnNull
         public static String substringAfterOrElseItself(final String str, final String delimiterOfExclusiveBeginIndex) {
             final String ret = Strings.substringAfter(str, delimiterOfExclusiveBeginIndex);
 
@@ -23377,10 +23469,11 @@ public final class Strings {
          * @param str the string to search in, can be {@code null}.
          * @param delimiterOfExclusiveBeginIndex the delimiter marking the beginning of the substring (exclusive).
          * @param exclusiveEndIndex the index marking the end of the substring (exclusive).
-         * @return the substring after the delimiter if found, otherwise {@code str} itself.
+         * @return the substring after the delimiter if found, otherwise {@code str} itself, or {@code null} if {@code str} is {@code null}.
          * @see Strings#substringAfter(String, String, int)
          */
         @Beta
+        @MayReturnNull
         public static String substringAfterOrElseItself(final String str, final String delimiterOfExclusiveBeginIndex, final int exclusiveEndIndex) {
             final String ret = Strings.substringAfter(str, delimiterOfExclusiveBeginIndex, exclusiveEndIndex);
 
@@ -23405,10 +23498,11 @@ public final class Strings {
          *
          * @param str the string to search in, can be {@code null}.
          * @param delimiterOfExclusiveBeginIndex the character delimiter marking the beginning of the substring (exclusive).
-         * @return the substring after the last delimiter if found, otherwise {@code str} itself.
+         * @return the substring after the last delimiter if found, otherwise {@code str} itself, or {@code null} if {@code str} is {@code null}.
          * @see Strings#substringAfterLast(String, char)
          */
         @Beta
+        @MayReturnNull
         public static String substringAfterLastOrElseItself(final String str, final char delimiterOfExclusiveBeginIndex) {
             final String ret = Strings.substringAfterLast(str, delimiterOfExclusiveBeginIndex);
 
@@ -23433,10 +23527,11 @@ public final class Strings {
          *
          * @param str the string to search in, can be {@code null}.
          * @param delimiterOfExclusiveBeginIndex the string delimiter marking the beginning of the substring (exclusive).
-         * @return the substring after the last delimiter if found, otherwise {@code str} itself.
+         * @return the substring after the last delimiter if found, otherwise {@code str} itself, or {@code null} if {@code str} is {@code null}.
          * @see Strings#substringAfterLast(String, String)
          */
         @Beta
+        @MayReturnNull
         public static String substringAfterLastOrElseItself(final String str, final String delimiterOfExclusiveBeginIndex) {
             final String ret = Strings.substringAfterLast(str, delimiterOfExclusiveBeginIndex);
 
@@ -23462,10 +23557,11 @@ public final class Strings {
          * @param str the string to search in, can be {@code null}.
          * @param delimiterOfExclusiveBeginIndex the delimiter marking the beginning of the substring (exclusive).
          * @param exclusiveEndIndex the index marking the end of the substring (exclusive).
-         * @return the substring after the last delimiter if found, otherwise {@code str} itself.
+         * @return the substring after the last delimiter if found, otherwise {@code str} itself, or {@code null} if {@code str} is {@code null}.
          * @see Strings#substringAfterLast(String, String, int)
          */
         @Beta
+        @MayReturnNull
         public static String substringAfterLastOrElseItself(final String str, final String delimiterOfExclusiveBeginIndex, final int exclusiveEndIndex) {
             final String ret = Strings.substringAfterLast(str, delimiterOfExclusiveBeginIndex, exclusiveEndIndex);
 
@@ -23490,10 +23586,11 @@ public final class Strings {
          *
          * @param str the string to search in, can be {@code null}.
          * @param delimiterOfExclusiveEndIndex the character delimiter marking the end of the substring (exclusive).
-         * @return the substring before the delimiter if found, otherwise {@code str} itself.
+         * @return the substring before the delimiter if found, otherwise {@code str} itself, or {@code null} if {@code str} is {@code null}.
          * @see Strings#substringBefore(String, char)
          */
         @Beta
+        @MayReturnNull
         public static String substringBeforeOrElseItself(final String str, final char delimiterOfExclusiveEndIndex) {
             final String ret = Strings.substringBefore(str, delimiterOfExclusiveEndIndex);
 
@@ -23518,10 +23615,11 @@ public final class Strings {
          *
          * @param str the string to search in, can be {@code null}.
          * @param delimiterOfExclusiveEndIndex the string delimiter marking the end of the substring (exclusive).
-         * @return the substring before the delimiter if found, otherwise {@code str} itself.
+         * @return the substring before the delimiter if found, otherwise {@code str} itself, or {@code null} if {@code str} is {@code null}.
          * @see Strings#substringBefore(String, String)
          */
         @Beta
+        @MayReturnNull
         public static String substringBeforeOrElseItself(final String str, final String delimiterOfExclusiveEndIndex) {
             final String ret = Strings.substringBefore(str, delimiterOfExclusiveEndIndex);
 
@@ -23548,10 +23646,11 @@ public final class Strings {
          * @param str the string to search in, can be {@code null}.
          * @param inclusiveBeginIndex the index from which to start searching (inclusive).
          * @param delimiterOfExclusiveEndIndex the delimiter marking the end of the substring (exclusive).
-         * @return the substring before the delimiter if found, otherwise {@code str} itself.
+         * @return the substring before the delimiter if found, otherwise {@code str} itself, or {@code null} if {@code str} is {@code null}.
          * @see Strings#substringBefore(String, int, String)
          */
         @Beta
+        @MayReturnNull
         public static String substringBeforeOrElseItself(final String str, final int inclusiveBeginIndex, final String delimiterOfExclusiveEndIndex) {
             final String ret = Strings.substringBefore(str, inclusiveBeginIndex, delimiterOfExclusiveEndIndex);
 
@@ -23576,10 +23675,11 @@ public final class Strings {
          *
          * @param str the string to search in, can be {@code null}.
          * @param delimiterOfExclusiveEndIndex the character delimiter marking the end of the substring (exclusive).
-         * @return the substring before the last delimiter if found, otherwise {@code str} itself.
+         * @return the substring before the last delimiter if found, otherwise {@code str} itself, or {@code null} if {@code str} is {@code null}.
          * @see Strings#substringBeforeLast(String, char)
          */
         @Beta
+        @MayReturnNull
         public static String substringBeforeLastOrElseItself(final String str, final char delimiterOfExclusiveEndIndex) {
             final String ret = Strings.substringBeforeLast(str, delimiterOfExclusiveEndIndex);
 
@@ -23604,10 +23704,11 @@ public final class Strings {
          *
          * @param str the string to search in, can be {@code null}.
          * @param delimiterOfExclusiveEndIndex the string delimiter marking the end of the substring (exclusive).
-         * @return the substring before the last delimiter if found, otherwise {@code str} itself.
+         * @return the substring before the last delimiter if found, otherwise {@code str} itself, or {@code null} if {@code str} is {@code null}.
          * @see Strings#substringBeforeLast(String, String)
          */
         @Beta
+        @MayReturnNull
         public static String substringBeforeLastOrElseItself(final String str, final String delimiterOfExclusiveEndIndex) {
             final String ret = Strings.substringBeforeLast(str, delimiterOfExclusiveEndIndex);
 
@@ -23636,10 +23737,11 @@ public final class Strings {
          *        (which is included in the result). It is passed to
          *        {@link Strings#substringBeforeLast(String, int, String)} as its {@code inclusiveBeginIndex}.
          * @param delimiterOfExclusiveEndIndex the delimiter marking the end of the substring (exclusive).
-         * @return the substring from the given index up to the last delimiter if found, otherwise {@code str} itself.
+         * @return the substring from the given index up to the last delimiter if found, otherwise {@code str} itself, or {@code null} if {@code str} is {@code null}.
          * @see Strings#substringBeforeLast(String, int, String)
          */
         @Beta
+        @MayReturnNull
         public static String substringBeforeLastOrElseItself(final String str, final int inclusiveBeginIndex, final String delimiterOfExclusiveEndIndex) {
             final String ret = Strings.substringBeforeLast(str, inclusiveBeginIndex, delimiterOfExclusiveEndIndex);
 

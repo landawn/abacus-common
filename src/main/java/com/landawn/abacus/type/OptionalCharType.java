@@ -181,7 +181,7 @@ public class OptionalCharType extends AbstractOptionalType<OptionalChar> {
      *
      * @param rs the ResultSet to read from
      * @param columnIndex the column index (1-based) to retrieve the value from
-     * @return an OptionalChar containing the character value, or empty if the column value is SQL NULL
+     * @return an OptionalChar containing the character value, or empty if the column value is SQL NULL or an empty string
      * @throws SQLException if a database access error occurs or the columnIndex is invalid
      */
     @Override
@@ -225,7 +225,7 @@ public class OptionalCharType extends AbstractOptionalType<OptionalChar> {
      *
      * @param rs the ResultSet to read from
      * @param columnName the label for the column specified with the SQL AS clause
-     * @return an OptionalChar containing the character value, or empty if the column value is SQL NULL
+     * @return an OptionalChar containing the character value, or empty if the column value is SQL NULL or an empty string
      * @throws SQLException if a database access error occurs or the columnName is invalid
      */
     @Override

@@ -435,6 +435,7 @@ public class EventBus {
      * @return this {@code EventBus} instance for method chaining
      * @throws IllegalArgumentException if {@code subscriber} is {@code null}
      * @throws IllegalArgumentException if no subscriber methods are found in the subscriber class
+     * @throws RuntimeException if a {@code @Subscribe} method is {@code static} or does not declare exactly one parameter
      * @throws IllegalStateException if the subscriber is identified as a lambda subscriber (an event ID is required for lambda subscribers)
      */
     public EventBus register(final Object subscriber) {
@@ -456,6 +457,7 @@ public class EventBus {
      * @return this {@code EventBus} instance for method chaining
      * @throws IllegalArgumentException if {@code subscriber} is {@code null}
      * @throws IllegalArgumentException if no subscriber methods are found in the subscriber class
+     * @throws RuntimeException if a {@code @Subscribe} method is {@code static} or does not declare exactly one parameter
      * @throws IllegalStateException if the subscriber is identified as a lambda subscriber and {@code eventId} is empty or {@code null}
      */
     public EventBus register(final Object subscriber, final String eventId) {
@@ -479,6 +481,7 @@ public class EventBus {
      * @return this {@code EventBus} instance for method chaining
      * @throws IllegalArgumentException if {@code subscriber} is {@code null}
      * @throws IllegalArgumentException if the thread mode is not supported or no subscriber methods are found in the subscriber class
+     * @throws RuntimeException if a {@code @Subscribe} method is {@code static} or does not declare exactly one parameter
      * @throws IllegalStateException if the subscriber is identified as a lambda subscriber (an event ID is required for lambda subscribers)
      */
     public EventBus register(final Object subscriber, final ThreadMode threadMode) {
@@ -516,6 +519,7 @@ public class EventBus {
      * @return this {@code EventBus} instance for method chaining
      * @throws IllegalArgumentException if {@code subscriber} is {@code null}
      * @throws IllegalArgumentException if the thread mode is not supported or no subscriber methods are found in the subscriber class
+     * @throws RuntimeException if a {@code @Subscribe} method is {@code static} or does not declare exactly one parameter
      * @throws IllegalStateException if the subscriber is identified as a lambda subscriber and {@code eventId} is empty or {@code null}
      */
     public EventBus register(final Object subscriber, final String eventId, final ThreadMode threadMode) {
@@ -719,7 +723,6 @@ public class EventBus {
      * }, "stringEvents");
      * }</pre>
      *
-     * @param <T> the type of events the subscriber will receive
      * @param subscriber the {@code Subscriber} implementation to register
      * @param eventId the event ID to filter events; must be non-empty when the subscriber is identified as a lambda subscriber
      * @return this {@code EventBus} instance for method chaining
@@ -727,7 +730,7 @@ public class EventBus {
      * @throws IllegalArgumentException if no subscriber methods are found
      * @throws IllegalStateException if the subscriber is identified as a lambda subscriber and {@code eventId} is empty or {@code null}
      */
-    public <T> EventBus register(final Subscriber<T> subscriber, final String eventId) {
+    public EventBus register(final Subscriber<?> subscriber, final String eventId) {
         return register(subscriber, eventId, null);
     }
 
@@ -743,7 +746,6 @@ public class EventBus {
      * }, "userUpdates", ThreadMode.THREAD_POOL_EXECUTOR);
      * }</pre>
      *
-     * @param <T> the type of events the subscriber will receive
      * @param subscriber the {@code Subscriber} implementation to register
      * @param eventId the event ID to filter events; must be non-empty when the subscriber is identified as a lambda subscriber
      * @param threadMode the thread mode override for event delivery, or {@code null} to use the thread mode declared in each subscriber method's {@link Subscribe} annotation
@@ -752,7 +754,7 @@ public class EventBus {
      * @throws IllegalArgumentException if the thread mode is not supported or no subscriber methods are found
      * @throws IllegalStateException if the subscriber is identified as a lambda subscriber and {@code eventId} is empty or {@code null}
      */
-    public <T> EventBus register(final Subscriber<T> subscriber, final String eventId, final ThreadMode threadMode) {
+    public EventBus register(final Subscriber<?> subscriber, final String eventId, final ThreadMode threadMode) {
         final Object tmp = subscriber;
         return register(tmp, eventId, threadMode);
     }

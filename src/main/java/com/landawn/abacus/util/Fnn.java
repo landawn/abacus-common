@@ -3915,14 +3915,13 @@ public final class Fnn {
      * }</pre>
      *
      * @param <T> the type of the input to the function/consumer
-     * @param <R> the type of the result of the function (ignored)
      * @param <E> the type of the checked exception that may be thrown
      * @param func the function to convert to a consumer
      * @return a Throwables.Consumer that executes the function and ignores its result
      * @throws IllegalArgumentException if func is null
      */
     @Beta
-    public static <T, R, E extends Throwable> Throwables.Consumer<T, E> f2c(final Throwables.Function<T, ? extends R, E> func) throws IllegalArgumentException {
+    public static <T, E extends Throwable> Throwables.Consumer<T, E> f2c(final Throwables.Function<T, ?, E> func) throws IllegalArgumentException {
         N.checkArgNotNull(func);
 
         return func::apply;
@@ -3943,15 +3942,13 @@ public final class Fnn {
      *
      * @param <T> the type of the first argument to the function/consumer
      * @param <U> the type of the second argument to the function/consumer
-     * @param <R> the type of the result of the function (ignored)
      * @param <E> the type of the checked exception that may be thrown
      * @param func the BiFunction to convert to a BiConsumer
      * @return a Throwables.BiConsumer that executes the BiFunction and ignores its result
      * @throws IllegalArgumentException if func is null
      */
     @Beta
-    public static <T, U, R, E extends Throwable> Throwables.BiConsumer<T, U, E> f2c(final Throwables.BiFunction<T, U, ? extends R, E> func)
-            throws IllegalArgumentException {
+    public static <T, U, E extends Throwable> Throwables.BiConsumer<T, U, E> f2c(final Throwables.BiFunction<T, U, ?, E> func) throws IllegalArgumentException {
         N.checkArgNotNull(func);
 
         return func::apply;
@@ -3973,14 +3970,13 @@ public final class Fnn {
      * @param <A> the type of the first argument to the function/consumer
      * @param <B> the type of the second argument to the function/consumer
      * @param <C> the type of the third argument to the function/consumer
-     * @param <R> the type of the result of the function (ignored)
      * @param <E> the type of the checked exception that may be thrown
      * @param func the TriFunction to convert to a TriConsumer
      * @return a Throwables.TriConsumer that executes the TriFunction and ignores its result
      * @throws IllegalArgumentException if func is null
      */
     @Beta
-    public static <A, B, C, R, E extends Throwable> Throwables.TriConsumer<A, B, C, E> f2c(final Throwables.TriFunction<A, B, C, ? extends R, E> func)
+    public static <A, B, C, E extends Throwable> Throwables.TriConsumer<A, B, C, E> f2c(final Throwables.TriFunction<A, B, C, ?, E> func)
             throws IllegalArgumentException {
         N.checkArgNotNull(func);
 
@@ -4094,13 +4090,12 @@ public final class Fnn {
      * Throwables.Runnable<IOException> runnable = Fnn.c2r(callable);
      * }</pre>
      *
-     * @param <R> the type of the result of the callable (ignored)
      * @param <E> the type of the checked exception that may be thrown
      * @param callable the callable to convert to a runnable
      * @return a Throwables.Runnable that executes the callable and ignores its result
      * @throws IllegalArgumentException if callable is null
      */
-    public static <R, E extends Throwable> Throwables.Runnable<E> c2r(final Throwables.Callable<? extends R, E> callable) throws IllegalArgumentException {
+    public static <E extends Throwable> Throwables.Runnable<E> c2r(final Throwables.Callable<?, E> callable) throws IllegalArgumentException {
         N.checkArgNotNull(callable);
 
         return callable::call;
@@ -4191,13 +4186,12 @@ public final class Fnn {
      * executor.execute(javaRunnable);
      * }</pre>
      *
-     * @param <E> the type of the exception that the input runnable may throw
      * @param runnable the Throwables.Runnable to convert; must not be {@code null}
      * @return a standard {@code java.lang.Runnable} that wraps the provided {@code Throwables.Runnable},
      *         re-throwing any exception as an unchecked {@code RuntimeException}
      * @throws IllegalArgumentException if runnable is null
      */
-    public static <E extends Throwable> java.lang.Runnable r2jr(final Throwables.Runnable<E> runnable) throws IllegalArgumentException {
+    public static java.lang.Runnable r2jr(final Throwables.Runnable<?> runnable) throws IllegalArgumentException {
         N.checkArgNotNull(runnable);
 
         if (runnable instanceof java.lang.Runnable) {

@@ -53,6 +53,13 @@ package com.landawn.abacus.pool;
  *     (stats.getCount() > 0 ? (double) stats.missCount() / stats.getCount() * 100 : 0) + "%");
  * }</pre>
  *
+ * <p><b>Accessor naming:</b> Because {@code PoolStats} is a {@code record}, its accessors are the
+ * compiler-generated bare-noun methods ({@code capacity()}, {@code size()}, {@code hitCount()}, …)
+ * — record syntax forces this convention; {@code getXxx} accessors are not available. This
+ * intentionally differs from {@link ActivityPrint}, a hand-written mutable class in the same package
+ * that uses JavaBean {@code getXxx} accessors. The split is by design (record-forced vs. JavaBean),
+ * not an oversight; the bare-noun and {@code getXxx} forms are kept as-is rather than mass-renamed.</p>
+ *
  * @param capacity the maximum number of objects the pool can hold
  * @param size the current number of objects in the pool
  * @param putCount the total number of put/add operations performed
@@ -62,13 +69,6 @@ package com.landawn.abacus.pool;
  * @param evictionCount the total number of objects evicted from the pool
  * @param maxMemory the maximum memory size in bytes (-1 if no memory limit)
  * @param dataSize the current total size of data in bytes (-1 if memory tracking is disabled)
- *
- * <p><b>Accessor naming:</b> Because {@code PoolStats} is a {@code record}, its accessors are the
- * compiler-generated bare-noun methods ({@code capacity()}, {@code size()}, {@code hitCount()}, …)
- * — record syntax forces this convention; {@code getXxx} accessors are not available. This
- * intentionally differs from {@link ActivityPrint}, a hand-written mutable class in the same package
- * that uses JavaBean {@code getXxx} accessors. The split is by design (record-forced vs. JavaBean),
- * not an oversight; the bare-noun and {@code getXxx} forms are kept as-is rather than mass-renamed.</p>
  *
  * @see Pool#stats()
  * @see ObjectPool

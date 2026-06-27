@@ -2007,14 +2007,13 @@ public final class Iterables {
      * OptionalInt sum = Iterables.sumInt(numbers);   // OptionalInt[15]
      * }</pre>
      *
-     * @param <T> the type of the elements, which must extend {@code Number}.
      * @param c the iterable of elements to evaluate.
      * @return an {@code OptionalInt} containing the sum if the iterable is not {@code null} or empty, otherwise an empty {@code OptionalInt}.
      * @throws ArithmeticException if the sum overflows an {@code int}.
      * @see #sumIntToLong(Iterable)
      * @see N#sumInt(Iterable)
      */
-    public static <T extends Number> OptionalInt sumInt(final Iterable<? extends T> c) {
+    public static OptionalInt sumInt(final Iterable<? extends Number> c) {
         return sumInt(c, Fn.numToInt());
     }
 
@@ -2067,12 +2066,11 @@ public final class Iterables {
      * OptionalLong sum = Iterables.sumIntToLong(numbers);   // OptionalLong[2147483650]
      * }</pre>
      *
-     * @param <T> the type of the elements, which must extend {@code Number}.
      * @param c the iterable of elements to evaluate.
      * @return an {@code OptionalLong} containing the sum if the iterable is not {@code null} or empty, otherwise an empty {@code OptionalLong}.
      * @see N#sumIntToLong(Iterable)
      */
-    public static <T extends Number> OptionalLong sumIntToLong(final Iterable<? extends T> c) {
+    public static OptionalLong sumIntToLong(final Iterable<? extends Number> c) {
         return sumIntToLong(c, Fn.numToInt());
     }
 
@@ -2118,12 +2116,11 @@ public final class Iterables {
      * OptionalLong sum = Iterables.sumLong(numbers);   // OptionalLong[15]
      * }</pre>
      *
-     * @param <T> the type of the elements, which must extend {@code Number}.
      * @param c the iterable of elements to evaluate.
      * @return an {@code OptionalLong} containing the sum if the iterable is not {@code null} or empty, otherwise an empty {@code OptionalLong}.
      * @see N#sumLong(Iterable)
      */
-    public static <T extends Number> OptionalLong sumLong(final Iterable<? extends T> c) {
+    public static OptionalLong sumLong(final Iterable<? extends Number> c) {
         return sumLong(c, Fn.numToLong());
     }
 
@@ -2168,12 +2165,11 @@ public final class Iterables {
      * OptionalDouble sum = Iterables.sumDouble(numbers);   // OptionalDouble[15.0]
      * }</pre>
      *
-     * @param <T> the type of the elements, which must extend {@code Number}.
      * @param c the iterable of elements to evaluate.
      * @return an {@code OptionalDouble} containing the sum if the iterable is not {@code null} or empty, otherwise an empty {@code OptionalDouble}.
      * @see N#sumDouble(Iterable)
      */
-    public static <T extends Number> OptionalDouble sumDouble(final Iterable<? extends T> c) {
+    public static OptionalDouble sumDouble(final Iterable<? extends Number> c) {
         return sumDouble(c, Fn.numToDouble());
     }
 
@@ -2433,7 +2429,6 @@ public final class Iterables {
      * Iterables.averageInt(list, 0, 5);   // throws IndexOutOfBoundsException (toIndex > size)
      * }</pre>
      *
-     * @param <T> the type of the elements, which must extend {@code Number}.
      * @param c the collection of elements to evaluate.
      * @param fromIndex the start index of the range, inclusive.
      * @param toIndex the end index of the range, exclusive.
@@ -2441,8 +2436,7 @@ public final class Iterables {
      * @throws IndexOutOfBoundsException if the range is invalid: ({@code fromIndex < 0 || fromIndex > toIndex || toIndex > c.size()}).
      * @see N#averageInt(Collection, int, int)
      */
-    public static <T extends Number> OptionalDouble averageInt(final Collection<? extends T> c, final int fromIndex, final int toIndex)
-            throws IndexOutOfBoundsException {
+    public static OptionalDouble averageInt(final Collection<? extends Number> c, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         return averageInt(c, fromIndex, toIndex, Fn.numToInt());
     }
 
@@ -2495,12 +2489,11 @@ public final class Iterables {
      * OptionalDouble avg3 = Iterables.averageInt(empty);   // OptionalDouble.empty()
      * }</pre>
      *
-     * @param <T> the type of the elements.
      * @param c the iterable of elements to evaluate.
      * @return an {@code OptionalDouble} containing the average if the iterable is not {@code null} or empty, otherwise an empty {@code OptionalDouble}.
      * @see N#averageInt(Iterable)
      */
-    public static <T extends Number> OptionalDouble averageInt(final Iterable<? extends T> c) {
+    public static OptionalDouble averageInt(final Iterable<? extends Number> c) {
         return averageInt(c, Fn.numToInt());
     }
 
@@ -2658,7 +2651,6 @@ public final class Iterables {
      * Iterables.averageLong(list, 0, 5);   // throws IndexOutOfBoundsException (toIndex > size)
      * }</pre>
      *
-     * @param <T> the type of the elements.
      * @param c the collection of elements to evaluate.
      * @param fromIndex the start index of the range, inclusive.
      * @param toIndex the end index of the range, exclusive.
@@ -2666,8 +2658,7 @@ public final class Iterables {
      * @throws IndexOutOfBoundsException if the range is invalid: ({@code fromIndex < 0 || fromIndex > toIndex || toIndex > c.size()}).
      * @see N#averageLong(Collection, int, int)
      */
-    public static <T extends Number> OptionalDouble averageLong(final Collection<? extends T> c, final int fromIndex, final int toIndex)
-            throws IndexOutOfBoundsException {
+    public static OptionalDouble averageLong(final Collection<? extends Number> c, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         return averageLong(c, fromIndex, toIndex, Fn.numToLong());
     }
 
@@ -2717,12 +2708,11 @@ public final class Iterables {
      * OptionalDouble avg2 = Iterables.averageLong(ints);   // OptionalDouble[200.0]
      * }</pre>
      *
-     * @param <T> the type of the elements.
      * @param c the iterable of elements to evaluate.
      * @return an {@code OptionalDouble} containing the average if the iterable is not {@code null} or empty, otherwise an empty {@code OptionalDouble}.
      * @see N#averageLong(Iterable)
      */
-    public static <T extends Number> OptionalDouble averageLong(final Iterable<? extends T> c) {
+    public static OptionalDouble averageLong(final Iterable<? extends Number> c) {
         return averageLong(c, Fn.numToLong());
     }
 
@@ -2887,7 +2877,6 @@ public final class Iterables {
      * Iterables.averageDouble(list, 0, 5);   // throws IndexOutOfBoundsException (toIndex > size)
      * }</pre>
      *
-     * @param <T> the type of the elements.
      * @param c the collection of elements to evaluate.
      * @param fromIndex the start index of the range, inclusive.
      * @param toIndex the end index of the range, exclusive.
@@ -2895,8 +2884,7 @@ public final class Iterables {
      * @throws IndexOutOfBoundsException if the range is invalid: ({@code fromIndex < 0 || fromIndex > toIndex || toIndex > c.size()}).
      * @see N#averageDouble(Collection, int, int)
      */
-    public static <T extends Number> OptionalDouble averageDouble(final Collection<? extends T> c, final int fromIndex, final int toIndex)
-            throws IndexOutOfBoundsException {
+    public static OptionalDouble averageDouble(final Collection<? extends Number> c, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         return averageDouble(c, fromIndex, toIndex, Fn.numToDouble());
     }
 
@@ -2971,12 +2959,11 @@ public final class Iterables {
      * OptionalDouble avg2 = Iterables.averageDouble(floats);   // OptionalDouble[2.200000007947286]
      * }</pre>
      *
-     * @param <T> the type of the elements, which must extend {@code Number}.
      * @param c the iterable of elements to evaluate.
      * @return an {@code OptionalDouble} containing the average (computed with Kahan compensated summation) if the iterable is not {@code null} or empty, otherwise an empty {@code OptionalDouble}.
      * @see N#averageDouble(Iterable)
      */
-    public static <T extends Number> OptionalDouble averageDouble(final Iterable<? extends T> c) {
+    public static OptionalDouble averageDouble(final Iterable<? extends Number> c) {
         return averageDouble(c, Fn.numToDouble());
     }
 

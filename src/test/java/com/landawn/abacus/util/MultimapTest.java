@@ -2270,6 +2270,21 @@ public class MultimapTest extends AbstractTest {
         assertFalse(listMultimap.replaceValues("key1", N.toList(99)));
     }
 
+    @Test
+    public void testReplaceAll_nullFunction_throwsIAE() {
+        // replaceAll declares it rejects a null function; honor it eagerly like the compute/merge/
+        // computeIfAbsent/computeIfPresent siblings so an EMPTY multimap also rejects null instead of
+        // silently returning (the documented @throws was previously unhonored on the empty path).
+        final BiFunction<String, List<Integer>, List<Integer>> nullFn = null;
+
+        // empty multimap: previously iterated zero entries and returned normally; now throws eagerly.
+        assertThrows(IllegalArgumentException.class, () -> listMultimap.replaceAll(nullFn));
+
+        // non-empty multimap also throws IllegalArgumentException (previously an NPE from function.apply).
+        listMultimap.put("k", 1);
+        assertThrows(IllegalArgumentException.class, () -> listMultimap.replaceAll(nullFn));
+    }
+
     //
     //
     //    @Test

@@ -64,51 +64,6 @@ import lombok.experimental.Accessors;
  */
 public final class CodeGenerationUtil {
 
-    //    If by “english directory” you mean the English dictionary (i.e., all English words), then there is no single exact number—it depends heavily on which dictionary and what you count as a word (inflections, archaic words, technical terms, proper nouns, etc.).
-    //
-    //    That said, here are widely cited approximate ranges based on large modern dictionaries (Oxford / Merriam-Webster–scale):
-    //
-    //    Approximate counts (modern English)
-    //    Starting letter Approx. number of words
-    //    S   ≈ 70,000 – 80,000
-    //    X   ≈ 300 – 500
-    //    Why the difference is so extreme
-    //
-    //    S
-    //
-    //    Extremely productive letter in English
-    //
-    //    Used for:
-    //
-    //    plurals (s, es)
-    //
-    //    verbs (see, say, stand, …)
-    //
-    //    prefixes (sub-, super-, semi-, self-, syn-)
-    //
-    //    Massive Latin + Germanic overlap
-    //
-    //    X
-    //
-    //    Rare initial letter in native English
-    //
-    //    Mostly comes from:
-    //
-    //    Greek (xeno-, xyl-)
-    //
-    //    Modern borrowings (x-ray, xenophobia)
-    //
-    //    Almost no inflectional families
-    //
-    //    Order-of-magnitude takeaway
-    //
-    //    Words starting with “s” outnumber “x” by ~200×
-    //
-    //    Roughly:
-    //
-    //    1 out of every 10 English words starts with “s”
-    //    1 out of every 2,000 starts with “x”
-
     /** Default inner interface name ({@code "x"}) for single-entity property constants. */
     public static final String X = "x";
 

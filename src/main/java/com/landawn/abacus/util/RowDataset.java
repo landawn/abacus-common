@@ -6523,6 +6523,7 @@ public final class RowDataset implements Dataset, Cloneable {
 
     private RowDataset copy(final int fromRowIndex, final int toRowIndex, final Collection<String> columnNames, final int[] columnIndexes,
             final boolean copyProperties) {
+        checkRowIndex(fromRowIndex, toRowIndex);
 
         final List<String> newColumnNameList = new ArrayList<>(columnNames);
         final List<List<Object>> newColumnList = new ArrayList<>(newColumnNameList.size());

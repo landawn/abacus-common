@@ -1923,13 +1923,15 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
      * @param function the function applied to each key and its current value collection; it should
      *                 return the new collection of values for that key (or {@code null}/empty to
      *                 remove the key)
-     * @throws NullPointerException if {@code function} is {@code null}
+     * @throws IllegalArgumentException if {@code function} is {@code null}
      * @throws IllegalStateException if the returned non-empty collection of values cannot be added
      *         back into the existing value collection for a key
      * @see #compute(Object, BiFunction)
      * @see #replaceValuesIf(BiPredicate, Collection)
      */
-    public void replaceAll(final BiFunction<? super K, ? super V, ? extends V> function) throws IllegalStateException {
+    public void replaceAll(final BiFunction<? super K, ? super V, ? extends V> function) throws IllegalArgumentException, IllegalStateException {
+        N.checkArgNotNull(function);
+
         List<K> keyToRemove = null;
         V value = null;
         V newValue = null;

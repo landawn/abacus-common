@@ -3727,10 +3727,10 @@ public class Builder<T> {
          * <pre>{@code
          * datasetBuilder.divideColumn("rgb", Tuple.of("red", "green", "blue"),
          *     (String color, Triple<Object, Object, Object> output) -> {
-         *         // Parse RGB values and populate triple
-         *         output.setLeft(red);
-         *         output.setMiddle(green);
-         *         output.setRight(blue);
+         *         String[] parts = color.split(",");
+         *         output.setLeft(parts[0]);
+         *         output.setMiddle(parts[1]);
+         *         output.setRight(parts[2]);
          *     });
          * }</pre>
          *
@@ -3908,6 +3908,8 @@ public class Builder<T> {
      * @param right the second object to compare
      * @param comparator the comparator to use for comparison
      * @return a new ComparisonBuilder for method chaining
+     * @throws ClassCastException if {@code comparator} is {@code null} and the compared objects are not mutually {@link Comparable}
+     * @throws IllegalArgumentException if the comparator itself throws this exception
      */
     public static <T> ComparisonBuilder compare(final T left, final T right, final Comparator<T> comparator) {
         return new ComparisonBuilder().compare(left, right, comparator);
@@ -4425,6 +4427,7 @@ public class Builder<T> {
      * @param value the object to hash
      * @param func the function that computes the hash code for the value
      * @return a new HashCodeBuilder for method chaining
+     * @throws IllegalArgumentException if {@code func} is {@code null}
      */
     public static <T> HashCodeBuilder hash(final T value, final ToIntFunction<? super T> func) {
         return new HashCodeBuilder().hash(value, func);

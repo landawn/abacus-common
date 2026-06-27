@@ -1158,6 +1158,7 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
      *
      * @param rnd the source of randomness to use for shuffling.
      *            Must not be {@code null}.
+     * @throws IllegalArgumentException if {@code rnd} is {@code null}
      */
     public abstract void shuffle(final Random rnd);
 

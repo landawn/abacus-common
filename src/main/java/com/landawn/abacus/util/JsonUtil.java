@@ -706,7 +706,7 @@ public final class JsonUtil {
         } else if (targetType.javaType().isAssignableFrom(JSONArray.class)) {
             return (T) jsonArray;
         } else {
-            throw new IllegalArgumentException(targetType.name() + " is not a array or collection type");
+            throw new IllegalArgumentException(targetType.name() + " is not an array or collection type");
         }
     }
 

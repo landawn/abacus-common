@@ -222,10 +222,12 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
      * Associates the specified element with the specified key in this pool.
      * If the pool previously contained a mapping for the key, the old element is removed and
      * destroyed with {@link Caller#REMOVE_REPLACE_CLEAR} <em>before</em> the new value is
-     * inserted; this happens even when the subsequent insertion fails (so a failing {@code put}
-     * can still evict the previous mapping for {@code key}). The old element is <em>not</em>
-     * destroyed when it is the same instance as {@code value} (re-pooling the same instance
-     * simply re-inserts it).
+     * inserted; this happens even when the subsequent in-lock insertion fails (capacity/memory
+     * rejection, so a failing {@code put} can still evict the previous mapping for {@code key}).
+     * The one exception is an already-expired {@code value}, which is rejected up front (before the
+     * lock) without removing or destroying any existing mapping for {@code key}. The old element is
+     * <em>not</em> destroyed when it is the same instance as {@code value} (re-pooling the same
+     * instance simply re-inserts it).
      *
      * <p>The put operation will fail if:</p>
      * <ul>
@@ -340,6 +342,13 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
                     }
                 }
 
+                // Re-check expiry inside the lock: time spent in sizeOf()/evict() above may have
+                // expired the value; pooling it would corrupt hit/miss accounting and expose a
+                // doomed entry to the next get()er (mirrors the timed put variant).
+                if (value.activityPrint().isExpired()) {
+                    return false;
+                }
+
                 oldValue = pool.put(key, value);
 
                 if (oldValue != null && oldValue != value) {
@@ -348,6 +357,12 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
 
                 totalDataSize.addAndGet(keyValueMemorySize);
             } else {
+                // Re-check expiry inside the lock (the in-lock evict() above may run slow destroy
+                // callbacks), mirroring the timed put variant.
+                if (value.activityPrint().isExpired()) {
+                    return false;
+                }
+
                 oldValue = pool.put(key, value);
 
                 if (oldValue != null && oldValue != value) {

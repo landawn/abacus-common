@@ -358,11 +358,10 @@ public final class PrimitiveLongArrayType extends AbstractPrimitiveArrayType<lon
      *
      * @param x the long array to convert
      * @param output the Collection to add the array elements to
-     * @param <E> the element type accepted by the output collection
      * @throws ClassCastException if the output collection cannot accept Long objects
      */
     @Override
-    public <E> void arrayToCollection(final long[] x, final Collection<E> output) {
+    public void arrayToCollection(final long[] x, final Collection<?> output) {
         if (N.notEmpty(x)) {
             final Collection<Object> c = (Collection<Object>) output;
 

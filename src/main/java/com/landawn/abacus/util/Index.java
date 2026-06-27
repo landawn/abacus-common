@@ -165,13 +165,15 @@ import com.landawn.abacus.util.u.OptionalInt;
  * double target = 2.0;
  * double tolerance = 0.01;
  *
- * OptionalInt closeMatch = Index.of(measurements, target, tolerance);    // returns OptionalInt[1]
- * OptionalInt lastMatch = Index.last(measurements, target, tolerance);   // returns OptionalInt[3]
- * BitSet allMatches = Index.allOf(measurements, target, tolerance);      // returns BitSet with bits 1, 3 set
+ * // Tolerance searches use the 4-arg overloads; of/allOf take a fromIndex (0 = whole array forward),
+ * // last takes a startIndexFromBack (length-1 = whole array backward).
+ * OptionalInt closeMatch = Index.of(measurements, target, 0, tolerance);       // returns OptionalInt[1]
+ * OptionalInt lastMatch = Index.last(measurements, target, 4, tolerance);      // returns OptionalInt[3]
+ * BitSet allMatches = Index.allOf(measurements, target, 0, tolerance);         // returns BitSet with bits 1, 3 set
  *
  * // High precision requirements
  * double strictTolerance = 0.001;
- * BitSet strictMatches = Index.allOf(measurements, target, strictTolerance);   // returns BitSet with bit 1 set (2.001 matches; 2.002 - 2.0 > 0.001 does not)
+ * BitSet strictMatches = Index.allOf(measurements, target, 0, strictTolerance);   // returns BitSet with bit 1 set (2.001 matches; 2.002 - 2.0 > 0.001 does not)
  * }</pre>
  *
  * <p><b>Performance Characteristics:</b>
@@ -679,7 +681,7 @@ public final class Index {
      * <pre>{@code
      * float[] arr = {1.0f, 2.1f, 3.0f, 2.2f, 4.0f};
      * Index.of(arr, 2.0f, 0, 0.2f).get();          // returns 1
-     * Index.of(arr, 2.0f, 2, 0.2f).get();          // returns 3
+     * Index.of(arr, 2.0f, 2, 0.2f).isPresent();    // returns false (2.2f - 2.0f > 0.2f)
      * Index.of(arr, 5.0f, 0, 0.1f).isPresent();    // returns false
      * Index.of(arr, 2.0f, 5, 0.2f).isPresent();    // returns false
      * }</pre>
@@ -2930,7 +2932,7 @@ public final class Index {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * float[] arr = {1.0f, 2.1f, 3.0f, 2.2f, 4.0f};
-     * Index.last(arr, 2.0f, 4, 0.2f).get();          // returns 3
+     * Index.last(arr, 2.0f, 4, 0.2f).get();          // returns 1 (2.2f at index 3 excluded: 2.2f - 2.0f > 0.2f)
      * Index.last(arr, 2.0f, 2, 0.2f).get();          // returns 1
      * Index.last(arr, 5.0f, 3, 0.1f).isPresent();    // returns false
      * Index.last((float[]) null, 2.0f, 4, 0.1f).isPresent(); // returns false
@@ -5114,8 +5116,8 @@ public final class Index {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * float[] arr = {1.0f, 2.1f, 3.0f, 2.2f, 4.0f};
-     * Index.allOf(arr, 2.0f, 0, 0.2f).cardinality(); // returns 2
-     * Index.allOf(arr, 2.0f, 2, 0.2f).toString();    // returns "{3}"
+     * Index.allOf(arr, 2.0f, 0, 0.2f).cardinality(); // returns 1  (only 2.1f matches; 2.2f - 2.0f > 0.2f)
+     * Index.allOf(arr, 2.0f, 2, 0.2f).isEmpty();     // returns true (no match from index 2)
      * Index.allOf(arr, 5.0f, 0, 0.1f).isEmpty();     // returns true
      * }</pre>
      *

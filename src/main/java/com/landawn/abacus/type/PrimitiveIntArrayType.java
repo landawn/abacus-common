@@ -354,11 +354,10 @@ public final class PrimitiveIntArrayType extends AbstractPrimitiveArrayType<int[
      *
      * @param x the int array to convert
      * @param output the Collection to add the array elements to
-     * @param <E> the element type accepted by the output collection
      * @throws ClassCastException if the output collection cannot accept Integer objects
      */
     @Override
-    public <E> void arrayToCollection(final int[] x, final Collection<E> output) {
+    public void arrayToCollection(final int[] x, final Collection<?> output) {
         if (N.notEmpty(x)) {
             final Collection<Object> c = (Collection<Object>) output;
 

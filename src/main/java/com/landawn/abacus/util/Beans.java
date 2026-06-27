@@ -1003,6 +1003,7 @@ public final class Beans {
      * @param getSetMethod the method whose property name is to be retrieved.
      * @return the property name associated with the specified method, or the raw method name itself
      *         if the method does not look like a getter/setter and no backing field matches.
+     * @throws NullPointerException if {@code getSetMethod} is {@code null}
      */
     public static String getPropNameByMethod(final Method getSetMethod) {
         String propName = methodPropNamePool.get(getSetMethod);
@@ -1801,7 +1802,7 @@ public final class Beans {
         return fieldMap.get(fieldName);
     }
 
-    private static <T> Map<String, String> getPublicStaticStringFields(final Class<T> cls) {
+    private static Map<String, String> getPublicStaticStringFields(final Class<?> cls) {
         final Map<String, String> staticFinalFields = new HashMap<>();
 
         for (final Field field : cls.getFields()) {
@@ -2129,6 +2130,7 @@ public final class Beans {
      *         if the method cannot be invoked.
      */
     @SuppressWarnings("unchecked")
+    @MayReturnNull
     public static <T> T getPropValue(final Object bean, final Method propGetMethod) {
         try {
             return (T) propGetMethod.invoke(bean);
@@ -2161,6 +2163,7 @@ public final class Beans {
      * @see #getPropValue(Object, Method)
      * @see #getPropValue(Object, String, boolean)
      */
+    @MayReturnNull
     public static <T> T getPropValue(final Object bean, final String propName) {
         return getPropValue(bean, propName, false);
     }
@@ -2173,7 +2176,8 @@ public final class Beans {
      *
      * <p>For nested paths, if an intermediate property resolves to {@code null}, this method returns
      * the default value of the final getter's return type (e.g., {@code 0} for primitive numeric types,
-     * {@code false} for {@code boolean}), not {@code null}.</p>
+     * {@code false} for {@code boolean}); this is non-{@code null} only when the final getter's return
+     * type is a primitive type &mdash; for a wrapper or reference leaf type the default is {@code null}.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -2403,10 +2407,13 @@ public final class Beans {
      * @param bean the object on which the property value is to be set.
      * @param propSetMethod the setter method to be invoked on the bean.
      * @param propValue the value to be set; if {@code null}, the type's default value is used instead.
-     * @return the actual value that was passed to the setter (after any type conversion).
+     * @return the actual value that was passed to the setter (after any type conversion); may be {@code null}
+     *         when {@code propValue} is {@code null} and the setter's parameter type has a {@code null} default
+     *         value (e.g. an object/reference type).
      * @throws RuntimeException wrapping {@link IllegalAccessException} or {@link InvocationTargetException}
      *         if the method cannot be invoked and conversion also fails.
      */
+    @MayReturnNull
     public static Object setPropValue(final Object bean, final Method propSetMethod, Object propValue) {
         final Class<?>[] paramTypes = propSetMethod.getParameterTypes();
 
@@ -2581,8 +2588,10 @@ public final class Beans {
      * }</pre>
      *
      * @param str the property name to be normalized; returned as-is if {@code null} or empty.
-     * @return the normalized (camelCase, keyword-mapped) property name, or the original string if empty.
+     * @return the normalized (camelCase, keyword-mapped) property name, or the original string unchanged
+     *         if {@code str} is {@code null} or empty (so {@code null} in yields {@code null} out).
      */
+    @MayReturnNull
     public static String normalizePropName(final String str) {
         if (Strings.isEmpty(str)) {
             return str;
@@ -2623,9 +2632,11 @@ public final class Beans {
      * }</pre>
      *
      * @param str the string to be converted; returned as-is if {@code null} or empty.
-     * @return the camelCase version of the input string, or the original string if empty.
+     * @return the camelCase version of the input string, or the original string unchanged if {@code str}
+     *         is {@code null} or empty (so {@code null} in yields {@code null} out).
      * @see Strings#toCamelCase(String)
      */
+    @MayReturnNull
     public static String toCamelCase(final String str) {
         if (Strings.isEmpty(str)) {
             return str;
@@ -2658,9 +2669,11 @@ public final class Beans {
      * }</pre>
      *
      * @param str the string to be converted; returned as-is if {@code null} or empty.
-     * @return the snake_case (lowercase with underscores) version of the string, or the original string if empty.
+     * @return the snake_case (lowercase with underscores) version of the string, or the original string
+     *         unchanged if {@code str} is {@code null} or empty (so {@code null} in yields {@code null} out).
      * @see Strings#toSnakeCase(String)
      */
+    @MayReturnNull
     public static String toSnakeCase(final String str) {
         if (Strings.isEmpty(str)) {
             return str;
@@ -2692,9 +2705,11 @@ public final class Beans {
      * }</pre>
      *
      * @param str the string to be converted; returned as-is if {@code null} or empty.
-     * @return the SCREAMING_SNAKE_CASE (uppercase with underscores) version of the string, or the original string if empty.
+     * @return the SCREAMING_SNAKE_CASE (uppercase with underscores) version of the string, or the original
+     *         string unchanged if {@code str} is {@code null} or empty (so {@code null} in yields {@code null} out).
      * @see Strings#toScreamingSnakeCase(String)
      */
+    @MayReturnNull
     public static String toScreamingSnakeCase(final String str) {
         if (Strings.isEmpty(str)) {
             return str;
@@ -2759,6 +2774,7 @@ public final class Beans {
      * @see #beanToFlatMap(Object)
      * @see #beanToMap(Object)
      */
+    @MayReturnNull
     public static <T> T mapToBean(final Map<String, Object> map, final Class<? extends T> targetType) {
         return mapToBean(map, true, targetType);
     }
@@ -4315,7 +4331,7 @@ public final class Beans {
      * @param <M> the type of Map to be returned.
      * @param bean the bean object to be converted into a flat map; if {@code null}, an empty map is returned.
      * @param mapSupplier a function that creates a new Map instance. The function argument is the initial capacity.
-     * @return a map of the specified type with nested properties flattened.
+     * @return a map of the specified type with nested properties flattened; never {@code null}.
      * @see #beanToFlatMap(Object, Collection, NamingPolicy, IntFunction)
      */
     public static <M extends Map<String, Object>> M beanToFlatMap(final Object bean, final IntFunction<? extends M> mapSupplier) {
@@ -4347,7 +4363,7 @@ public final class Beans {
      *        If {@code null}, all non-{@code null} properties are included. If empty, no properties
      *        are included. In selection mode, selected top-level properties are included
      *        even when {@code null}, while {@code null} properties inside nested beans are always omitted.
-     * @return a map with only the selected properties flattened.
+     * @return a map with only the selected properties flattened; never {@code null}.
      * @throws IllegalArgumentException if a selected property does not exist
      */
     public static Map<String, Object> beanToFlatMap(final Object bean, final Collection<String> selectPropNames) {
@@ -4378,7 +4394,7 @@ public final class Beans {
      *        are included. In selection mode, selected top-level properties are included
      *        even when {@code null}, while {@code null} properties inside nested beans are always omitted.
      * @param mapSupplier a function that creates a new Map instance. The function argument is the initial capacity.
-     * @return a map of the specified type with selected properties flattened.
+     * @return a map of the specified type with selected properties flattened; never {@code null}.
      * @throws IllegalArgumentException if a selected property does not exist
      * @see #beanToFlatMap(Object, Collection, NamingPolicy, IntFunction)
      */
@@ -4637,7 +4653,7 @@ public final class Beans {
      *        Applies to TOP-LEVEL property names only; properties inside nested beans are not
      *        matched (dotted names such as {@code "address.city"} are not supported).
      * @param mapSupplier a function that creates a new Map instance. The function argument is the initial capacity.
-     * @return a map of the specified type with filtering applied.
+     * @return a map of the specified type with filtering applied; never {@code null}.
      * @see #beanToFlatMap(Object, Collection, NamingPolicy, IntFunction)
      */
     public static <M extends Map<String, Object>> M beanToFlatMap(final Object bean, final boolean ignoreNullProperty, final Set<String> ignoredPropNames,
@@ -5645,12 +5661,14 @@ public final class Beans {
      * when a property exists in the source but not in the target.</p>
      *
      * <p><b>Note:</b> unlike the other {@code copyAs} overloads, source properties whose value is
-     * {@code null} or equal to its type's default value are skipped: for those properties the new
-     * instance keeps the value assigned by its constructor/initializer. (This includes primitive
-     * properties equal to their default &mdash; e.g. an {@code int} of {@code 0} or a {@code boolean}
-     * of {@code false} is not copied.) The unmatched-property check (and the resulting exception when
+     * {@code null} (or equal to its runtime type's default value) are skipped: for those properties the
+     * new instance keeps the value assigned by its constructor/initializer. Because primitive property
+     * values are read as their boxed wrapper types (e.g. {@code Integer}/{@code Boolean}), whose default
+     * value is {@code null}, a primitive equal to its default &mdash; e.g. an {@code int} of {@code 0}
+     * or a {@code boolean} of {@code false} &mdash; is <b>not</b> treated as default here and <em>is</em>
+     * copied. The unmatched-property check (and the resulting exception when
      * {@code ignoreUnmatchedProperty} is {@code false}) is therefore only applied to source properties
-     * whose value is non-{@code null} and non-default.</p>
+     * whose value is non-{@code null} (and non-default).</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -6461,6 +6479,7 @@ public final class Beans {
      *
      * @param bean the bean object whose properties are to be cleared; if {@code null}, the method does nothing.
      * @param propNames the names of the properties to clear; if empty, the method does nothing.
+     * @throws IllegalArgumentException if any name in {@code propNames} is not a property of the bean.
      */
     public static void clearProps(final Object bean, final String... propNames) {
         if (bean == null || N.isEmpty(propNames)) {
@@ -6494,6 +6513,7 @@ public final class Beans {
      *
      * @param bean the bean object whose properties are to be cleared; if {@code null}, the method does nothing.
      * @param propNames the collection of property names to clear; if empty, the method does nothing.
+     * @throws IllegalArgumentException if any name in {@code propNames} is not a property of the bean.
      */
     public static void clearProps(final Object bean, final Collection<String> propNames) {
         if (bean == null || N.isEmpty(propNames)) {

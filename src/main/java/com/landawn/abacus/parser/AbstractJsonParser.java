@@ -434,7 +434,7 @@ abstract class AbstractJsonParser extends AbstractParser<JsonSerConfig, JsonDese
      * }</pre>
      *
      * @param <T> the type of elements in the stream
-     * @param source the JSON array string to stream; must not be {@code null}
+     * @param source the JSON array string to stream; may be {@code null} or empty (in which case an empty stream is returned)
      * @param elementType the type of elements to deserialize; must not be {@code null}
      * @return a Stream of deserialized elements; never {@code null}
      */

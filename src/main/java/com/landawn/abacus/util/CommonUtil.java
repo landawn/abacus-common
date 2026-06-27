@@ -4119,7 +4119,7 @@ sealed class CommonUtil permits N {
         }
     }
 
-    static <T> void checkBeanClass(final Class<T> cls) {
+    static void checkBeanClass(final Class<?> cls) {
         if (!Beans.isBeanClass(cls)) {
             throw new IllegalArgumentException(
                     "Bean class is required. No property getter/setter method is found in the specified class: " + ClassUtil.getCanonicalClassName(cls));
@@ -4209,7 +4209,9 @@ sealed class CommonUtil permits N {
      *
      * @param <T> the type of the object
      * @param obj the object reference to check for nullity
-     * @param errorMessageSupplier the supplier of the detail message to be used in the event that a {@code NullPointerException} is thrown
+     * @param errorMessageSupplier supplies the detail message. Like {@link #requireNonNull(Object, String)}, the
+     *            supplied string is interpreted as an <i>argument name</i> when it is short and contains no spaces
+     *            (rendered as {@code "'<name>' cannot be null"}); otherwise it is used verbatim as the message.
      * @return the {@code non-null} object reference that was validated
      * @throws NullPointerException if {@code obj} is {@code null}
      * @see #checkArgNotNull(Object, String)
@@ -6783,7 +6785,7 @@ sealed class CommonUtil permits N {
      *
      * @param obj the object to be represented as a string
      * @param defaultIfNull the default value to be returned if the object is {@code null}
-     * @return the String representation of the object, or the default value if the object is {@code null}
+     * @return the String representation of the object, or {@code defaultIfNull} if the object is {@code null} (which may itself be {@code null} if {@code defaultIfNull} is {@code null})
      */
     public static String toString(final Object obj, final String defaultIfNull) {
         return obj == null ? defaultIfNull : toString(obj);
@@ -7737,8 +7739,8 @@ sealed class CommonUtil permits N {
      * }</pre>
      *
      * @param a the Object array to be represented as a string
-     * @param defaultIfNull the default value to be returned if the object is {@code null}
-     * @return the String representation of the object, or the default value if the object is {@code null}
+     * @param defaultIfNull the default value to be returned if the array is {@code null}
+     * @return the deep String representation of the array, or {@code defaultIfNull} if the array is {@code null} (which may itself be {@code null} if {@code defaultIfNull} is {@code null})
      * @see Arrays#deepToString(Object[])
      */
     public static String deepToString(final Object[] a, final String defaultIfNull) {
@@ -11151,12 +11153,14 @@ sealed class CommonUtil permits N {
      * @param <T> the type of the target object after conversion.
      * @param str the string to be converted.
      * @param targetType the class of the target type to which the string is to be converted.
-     * @return the converted value of the specified target type. If the input string is {@code null}, it returns the default value of the target type.
+     * @return the converted value of the specified target type. If the input string is {@code null}, it returns the default value of the target type,
+     *         which is {@code null} for reference types (e.g. {@code String}, {@code Integer}) and the primitive default (e.g. {@code 0}, {@code false}) for primitive types.
      * @throws IllegalArgumentException if the specified target type is {@code null}.
      * @see #stringOf(Object)
      * @see Type#valueOf(String)
      */
     @SuppressWarnings("unchecked")
+    @MayReturnNull
     public static <T> T valueOf(final String str, final Class<? extends T> targetType) {
         return (str == null) ? defaultValueOf(targetType) : (T) typeOf(targetType).valueOf(str);
     }
@@ -11229,7 +11233,8 @@ sealed class CommonUtil permits N {
      * @param <T> the type of the target object after conversion.
      * @param srcObj the source object to be converted. If {@code null}, the default value of the target type is returned.
      * @param targetType the class of the target type to which the source object is to be converted.
-     * @return an instance of the target type converted from the source object, or the default value of the target type if the source object is {@code null}.
+     * @return an instance of the target type converted from the source object, or the default value of the target type if the source object is {@code null}
+     *         (which is {@code null} for reference target types and the primitive default such as {@code 0}/{@code false} for primitive target types).
      * @throws ArithmeticException if the value overflows the target integer type ({@code byte}/{@code short}/{@code int}/{@code long})
      *         — whether the source is a {@code Number} or a numeric {@code String}. A {@code float}/{@code double} target instead
      *         saturates to {@code ±Infinity} (consistent with {@link Numbers#convert(Number, Class)} / {@link Numbers#toDouble(Object)}).
@@ -11238,6 +11243,7 @@ sealed class CommonUtil permits N {
      * @throws RuntimeException if any other error occurs during the conversion.
      * @see Numbers#convert(Number, Class)
      */
+    @MayReturnNull
     public static <T> T convert(final Object srcObj, final Class<? extends T> targetType)
             throws IllegalArgumentException, NumberFormatException, RuntimeException {
         if (srcObj == null) {
@@ -11275,7 +11281,8 @@ sealed class CommonUtil permits N {
      * @param <T> the type of the target object after conversion.
      * @param srcObj the source object to be converted.
      * @param targetType the Type instance of the target type to which the source object is to be converted.
-     * @return an instance of the target type converted from the source object, or the default value of the target type if the source object is {@code null}.
+     * @return an instance of the target type converted from the source object, or the default value of the target type if the source object is {@code null}
+     *         (which is {@code null} for reference target types and the primitive default such as {@code 0}/{@code false} for primitive target types).
      * @throws ArithmeticException if the value overflows the target integer type ({@code byte}/{@code short}/{@code int}/{@code long})
      *         — whether the source is a {@code Number} or a numeric {@code String}. A {@code float}/{@code double} target instead
      *         saturates to {@code ±Infinity} (consistent with {@link Numbers#convert(Number, Type)} / {@link Numbers#toDouble(Object)}).
@@ -11284,6 +11291,7 @@ sealed class CommonUtil permits N {
      * @throws RuntimeException if any other error occurs during the conversion.
      * @see Numbers#convert(Number, Type)
      */
+    @MayReturnNull
     public static <T> T convert(final Object srcObj, final Type<? extends T> targetType)
             throws IllegalArgumentException, NumberFormatException, RuntimeException {
         if (srcObj == null) {
@@ -14781,7 +14789,6 @@ sealed class CommonUtil permits N {
      * Dataset empty = N.newDataset(N.newLinkedHashMap());
      * }</pre>
      *
-     * @param <C> the type of the Collection values in the Map.
      * @param map the Map to convert into a Dataset. The keys of the map represent the column names and the values (which are collections) represent the data in the columns.
      *             Can be {@code null} or empty.
      * @return a new Dataset with columns created from the Map. Returns an empty Dataset if {@code map} is {@code null} or empty.
@@ -14791,14 +14798,14 @@ sealed class CommonUtil permits N {
      * @see #newDataset(String, Collection)
      */
     @SuppressWarnings("deprecation")
-    public static <C extends Collection<?>> Dataset newDataset(final Map<String, C> map) {
+    public static Dataset newDataset(final Map<String, ? extends Collection<?>> map) {
         if (isEmpty(map)) {
             return newEmptyDataset();
         }
 
         int maxColumnLen = 0;
 
-        for (final C v : map.values()) {
+        for (final Collection<?> v : map.values()) {
             maxColumnLen = N.max(maxColumnLen, size(v));
         }
 
@@ -14806,7 +14813,7 @@ sealed class CommonUtil permits N {
         final List<List<Object>> columnList = new ArrayList<>(columnNameList.size());
         List<Object> column = null;
 
-        for (final C v : map.values()) {
+        for (final Collection<?> v : map.values()) {
             column = new ArrayList<>(maxColumnLen);
 
             if (notEmpty(v)) {
@@ -15236,13 +15243,12 @@ sealed class CommonUtil permits N {
      * }</pre>
      *
      * @param <A> the type of the array.
-     * @param <T> the type of the elements in the collection. It must extend or be the same as the type of the array.
      * @param c the collection to be converted into an array.
      * @param a the array into which the elements of the collection are to be stored, if it is big enough; otherwise, a new array of the same runtime type is allocated for this purpose.
      * @return the array containing the elements of the collection. If the provided array was large enough to hold the collection's elements, it is the same as the provided array.
      * @throws IllegalArgumentException if the specified {@code array} is {@code null}.
      */
-    public static <A, T extends A> A[] toArray(final Collection<? extends T> c, @NotNull final A[] a) throws IllegalArgumentException {
+    public static <A> A[] toArray(final Collection<? extends A> c, @NotNull final A[] a) throws IllegalArgumentException {
         checkArgNotNull(a);
 
         if (isEmpty(c)) {
@@ -15268,7 +15274,6 @@ sealed class CommonUtil permits N {
      * }</pre>
      *
      * @param <A> the type of the array.
-     * @param <T> the type of the elements in the collection. It must extend or be the same as the type of the array.
      * @param c the collection to be converted into an array.
      * @param fromIndex the starting (inclusive) index of the range to be converted.
      * @param toIndex the ending (exclusive) index of the range to be converted.
@@ -15277,7 +15282,7 @@ sealed class CommonUtil permits N {
      * @throws IllegalArgumentException if the specified array {@code a} is {@code null}.
      * @throws IndexOutOfBoundsException if the specified {@code fromIndex} or {@code toIndex} is out of the collection's range.
      */
-    public static <A, T extends A> A[] toArray(final Collection<? extends T> c, final int fromIndex, final int toIndex, @NotNull final A[] a)
+    public static <A> A[] toArray(final Collection<? extends A> c, final int fromIndex, final int toIndex, @NotNull final A[] a)
             throws IllegalArgumentException {
         checkFromToIndex(fromIndex, toIndex, size(c));
         checkArgNotNull(a);
@@ -15291,11 +15296,11 @@ sealed class CommonUtil permits N {
         } else if (fromIndex == 0 && toIndex == c.size()) {
             return c.toArray(a);
         } else if (c instanceof List) {
-            return ((List<T>) c).subList(fromIndex, toIndex).toArray(a);
+            return ((List<A>) c).subList(fromIndex, toIndex).toArray(a);
         } else {
             final int size = toIndex - fromIndex;
             final A[] res = a.length >= size ? a : (A[]) newArray(a.getClass().getComponentType(), size);
-            final Iterator<? extends T> iter = c.iterator();
+            final Iterator<? extends A> iter = c.iterator();
             int idx = 0;
 
             while (idx < fromIndex && iter.hasNext()) {
@@ -15328,12 +15333,11 @@ sealed class CommonUtil permits N {
      * }</pre>
      *
      * @param <A> the type of the array.
-     * @param <T> the type of the elements in the collection. It must extend or be the same as the type of the array.
      * @param c the collection to be converted into an array.
      * @param arraySupplier the function to generate a new array of the appropriate type and size.
      * @return an array containing the elements of the collection
      */
-    public static <A, T extends A> A[] toArray(final Collection<? extends T> c, final IntFunction<A[]> arraySupplier) {
+    public static <A> A[] toArray(final Collection<? extends A> c, final IntFunction<A[]> arraySupplier) {
         if (isEmpty(c)) {
             return arraySupplier.apply(0);
         }
@@ -15352,7 +15356,6 @@ sealed class CommonUtil permits N {
      * }</pre>
      *
      * @param <A> the type of the array.
-     * @param <T> the type of the elements in the collection. It must extend or be the same as the type of the array.
      * @param c the collection to be converted into an array.
      * @param fromIndex the starting (inclusive) index of the portion to be converted.
      * @param toIndex the ending (exclusive) index of the portion to be converted.
@@ -15360,7 +15363,7 @@ sealed class CommonUtil permits N {
      * @return the array containing the elements of the specified portion of the collection.
      * @throws IndexOutOfBoundsException if the specified {@code fromIndex} or {@code toIndex} is out of the collection's range.
      */
-    public static <A, T extends A> A[] toArray(final Collection<? extends T> c, final int fromIndex, final int toIndex, final IntFunction<A[]> arraySupplier)
+    public static <A> A[] toArray(final Collection<? extends A> c, final int fromIndex, final int toIndex, final IntFunction<A[]> arraySupplier)
             throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, size(c));
 
@@ -15369,10 +15372,10 @@ sealed class CommonUtil permits N {
         } else if (fromIndex == 0 && toIndex == c.size()) {
             return c.toArray(arraySupplier.apply(c.size()));
         } else if (c instanceof List) {
-            return ((List<T>) c).subList(fromIndex, toIndex).toArray(arraySupplier.apply(toIndex - fromIndex));
+            return ((List<A>) c).subList(fromIndex, toIndex).toArray(arraySupplier.apply(toIndex - fromIndex));
         } else {
             final A[] res = arraySupplier.apply(toIndex - fromIndex);
-            final Iterator<? extends T> iter = c.iterator();
+            final Iterator<? extends A> iter = c.iterator();
             int idx = 0;
 
             while (idx < fromIndex && iter.hasNext()) {
@@ -15399,13 +15402,12 @@ sealed class CommonUtil permits N {
      * }</pre>
      *
      * @param <A> the type of the array.
-     * @param <T> the type of the elements in the collection. It must extend or be the same as the type of the array.
      * @param c the collection to be converted into an array.
      * @param targetType the Class object representing the type of the array to be returned.
      * @return the array containing the elements of the collection.
      * @throws IllegalArgumentException if the specified {@code Class} is {@code null}.
      */
-    public static <A, T extends A> A[] toArray(final Collection<? extends T> c, @NotNull final Class<A[]> targetType) throws IllegalArgumentException {
+    public static <A> A[] toArray(final Collection<? extends A> c, @NotNull final Class<A[]> targetType) throws IllegalArgumentException {
         checkArgNotNull(targetType);
 
         if (isEmpty(c)) {
@@ -15425,7 +15427,6 @@ sealed class CommonUtil permits N {
      * }</pre>
      *
      * @param <A> the type of the array.
-     * @param <T> the type of the elements in the collection. It must extend or be the same as the type of the array.
      * @param c the collection to be converted into an array.
      * @param fromIndex the starting (inclusive) index of the range to be converted.
      * @param toIndex the ending (exclusive) index of the range to be converted.
@@ -15434,7 +15435,7 @@ sealed class CommonUtil permits N {
      * @throws IllegalArgumentException if the specified {@code Class} is {@code null}.
      * @throws IndexOutOfBoundsException if the specified {@code fromIndex} or {@code toIndex} is out of the collection's range.
      */
-    public static <A, T extends A> A[] toArray(final Collection<? extends T> c, final int fromIndex, final int toIndex, @NotNull final Class<A[]> targetType)
+    public static <A> A[] toArray(final Collection<? extends A> c, final int fromIndex, final int toIndex, @NotNull final Class<A[]> targetType)
             throws IllegalArgumentException {
         checkArgNotNull(targetType);
         checkFromToIndex(fromIndex, toIndex, size(c));
@@ -15446,9 +15447,9 @@ sealed class CommonUtil permits N {
         } else if (fromIndex == 0 && toIndex == c.size()) {
             return c.toArray(res);
         } else if (c instanceof List) {
-            return ((List<T>) c).subList(fromIndex, toIndex).toArray(res);
+            return ((List<A>) c).subList(fromIndex, toIndex).toArray(res);
         } else {
-            final Iterator<? extends T> iter = c.iterator();
+            final Iterator<? extends A> iter = c.iterator();
             int idx = 0;
 
             while (idx < fromIndex && iter.hasNext()) {
@@ -30150,13 +30151,12 @@ sealed class CommonUtil permits N {
      * }</pre>
      *
      * @param <T> the type of the left and right elements in the triple
-     * @param <M> the type of the middle element in the triple
      * @param triple the triple whose elements are to be swapped
      * @see #swapIf(Triple, Predicate)
      * @see Triple#swap()
      */
     @Beta
-    public static <T, M> void swap(final Triple<T, M, T> triple) {
+    public static <T> void swap(final Triple<T, ?, T> triple) {
         final T left = triple.left();
         triple.setLeft(triple.right());
         triple.setRight(left);
@@ -39550,7 +39550,7 @@ sealed class CommonUtil permits N {
     /**
      * Returns the indices of all occurrences of the specified value in the given array.
      * <p>This method searches the entire array and returns the positions (indices) of all elements
-     * that are equal to the specified value. Equality is determined using {@link Objects#equals(Object, Object)},
+     * that are equal to the specified value. Equality is determined using {@link N#equals(Object, Object)} (deep/array-aware),
      * which handles {@code null} values correctly.
      *
      * <p>The indices are returned in ascending order (the order they appear in the array).
@@ -39585,7 +39585,7 @@ sealed class CommonUtil permits N {
     /**
      * Returns the indices of all occurrences of the specified value in the given array, starting the search from the specified index.
      * <p>This method searches the array from {@code fromIndex} (inclusive) onwards and returns the positions (indices)
-     * of all elements that are equal to the specified value. Equality is determined using {@link Objects#equals(Object, Object)},
+     * of all elements that are equal to the specified value. Equality is determined using {@link N#equals(Object, Object)} (deep/array-aware),
      * which handles {@code null} values correctly.
      *
      * <p>If {@code fromIndex} is negative, the search starts from index 0. If {@code fromIndex} is greater than or equal

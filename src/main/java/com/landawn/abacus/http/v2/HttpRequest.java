@@ -40,6 +40,7 @@ import com.landawn.abacus.http.HttpMethod;
 import com.landawn.abacus.http.HttpUtil;
 import com.landawn.abacus.util.Charsets;
 import com.landawn.abacus.util.ExceptionUtil;
+import com.landawn.abacus.util.IOUtil;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Strings;
 import com.landawn.abacus.util.URLEncodedUtil;
@@ -2198,7 +2199,21 @@ public final class HttpRequest {
 
     private <T> T getBody(final HttpResponse<?> httpResponse, final Class<T> resultClass) {
         if (!HttpUtil.isSuccessfulResponseCode(httpResponse.statusCode())) {
-            throw new UncheckedIOException(new IOException(httpResponse.statusCode() + ": " + httpResponse.body()));
+            final Object errorBody = httpResponse.body();
+
+            // For an InputStream result type the body is a deferred-cleanup stream (see
+            // prepareResponseForClientCleanup): closing it triggers doAfterExecution, releasing the
+            // per-request HttpClient and connection that this throw would otherwise leak. Its
+            // toString() is also useless (a stream identity), so report only the status code.
+            if (errorBody instanceof InputStream is) {
+                try (is) {
+                    throw new UncheckedIOException(new IOException(httpResponse.statusCode() + ": " + IOUtil.readAllToString(is)));
+                } catch (final IOException ignored) {
+                    // best-effort cleanup; the thrown exception below is the primary signal
+                }
+            }
+
+            throw new UncheckedIOException(new IOException(httpResponse.statusCode() + ": " + errorBody));
         }
 
         if (resultClass == null || Void.class.equals(resultClass)) {

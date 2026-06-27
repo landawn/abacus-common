@@ -282,7 +282,7 @@ import com.landawn.abacus.util.Tuple.Tuple4;
  * <p><b>Debugging and Monitoring:</b>
  * <ul>
  *   <li><b>Exception Stack Traces:</b> Preserves original exception information through chains</li>
- *   <li><b>Logging Integration:</b> Built-in logger for debugging asynchronous execution</li>
+ *   <li><b>Cancellation Propagation:</b> {@code cancelAll()} cancels the entire upstream chain</li>
  *   <li><b>State Inspection:</b> Standard Future methods for checking completion and cancellation state</li>
  *   <li><b>Chain Visualization:</b> Upstream future tracking enables dependency analysis</li>
  * </ul>

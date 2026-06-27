@@ -8299,13 +8299,12 @@ public final class Fn {
      * Fn.c2r(() -> "ignored").run()                             // invokes the callable, result discarded
      * }</pre>
      *
-     * @param <R> the type of the callable's result
      * @param callable the callable to convert to a runnable
      * @return a runnable that executes the callable and discards its return value
      * @throws IllegalArgumentException if the callable is null
      * @see #r2c(java.lang.Runnable)
      */
-    public static <R> Runnable c2r(final Callable<? extends R> callable) throws IllegalArgumentException {
+    public static Runnable c2r(final Callable<?> callable) throws IllegalArgumentException {
         N.checkArgNotNull(callable);
 
         return callable::call;

@@ -3543,7 +3543,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param <T> the type of elements in the arrays
      * @param a the first array
      * @param b the second array
-     * @return a new array containing elements from both arrays
+     * @return a new array containing elements from both arrays, or {@code null} if both {@code a} and {@code b} are {@code null}
      * @throws IllegalArgumentException if the combined array length would exceed {@code Integer.MAX_VALUE}
      * @see #concat(Object[]...)
      * @see #merge(Object[], Object[], BiFunction)
@@ -3590,7 +3590,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * @param <T> the type of elements in the arrays
      * @param aa the arrays to concatenate
-     * @return a new array containing all elements from all input arrays
+     * @return a new array containing all elements from all input arrays, or {@code null} if {@code aa} is {@code null}
      * @throws IllegalArgumentException if the combined array length would exceed {@code Integer.MAX_VALUE}
      * @see #concat(Object[], Object[])
      * @see System#arraycopy(Object, int, Object, int, int)
@@ -8341,7 +8341,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param <T> the type of elements in the array
      * @param a the array to be copied and modified
      * @param generator the function used to generate new values for the array elements
-     * @return a new array with elements copied from the specified array and modified by the generator function
+     * @return a new array with elements copied from the specified array and modified by the generator function,
+     *         or {@code null} if {@code a} is {@code null}
      * @see #copyThenSetAll(Object[], Throwables.IntObjFunction)
      * @see #copyThenReplaceAll(Object[], UnaryOperator)
      */
@@ -8389,7 +8390,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param <E> the type of exception that the converter may throw
      * @param a the array to be copied and modified
      * @param converter the function used to generate new values for the array elements with the index of the element as the first parameter and the original element as the second parameter
-     * @return a new array with elements copied from the specified array and modified by the converter function
+     * @return a new array with elements copied from the specified array and modified by the converter function,
+     *         or {@code null} if {@code a} is {@code null}
      * @throws E if the converter function throws an exception
      * @see #copyThenSetAll(Object[], IntFunction)
      * @see #copyThenReplaceAll(Object[], UnaryOperator)
@@ -8437,7 +8439,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param <T> the type of elements in the array
      * @param a the array to be copied and modified
      * @param operator the UnaryOperator to apply to each element. The operator takes a value of type <i>T</i> and returns a value of type <i>T</i>.
-     * @return a new array with elements copied from the specified array and modified by provided {@code UnaryOperator}
+     * @return a new array with elements copied from the specified array and modified by provided {@code UnaryOperator},
+     *         or {@code null} if {@code a} is {@code null}
      * @see #copyThenSetAll(Object[], IntFunction)
      * @see #copyThenSetAll(Object[], Throwables.IntObjFunction)
      */
@@ -8488,7 +8491,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param <E> the type of exception that the operator may throw
      * @param a the array to be copied and modified
      * @param operator the UnaryOperator to apply to each element. The operator takes a value of type <i>T</i> and returns a value of type <i>T</i>.
-     * @return a new array with elements copied from the specified array and modified by provided {@code UnaryOperator}
+     * @return a new array with elements copied from the specified array and modified by provided {@code UnaryOperator},
+     *         or {@code null} if {@code a} is {@code null}
      * @throws E if the operator function throws an exception
      * @see #copyThenSetAll(Object[], IntFunction)
      * @see #copyThenSetAll(Object[], Throwables.IntObjFunction)
@@ -12015,12 +12019,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * // changed = true, list = [1, 3, 5]
      * }</pre>
      *
-     * @param <T> the type of elements in the collection.
      * @param c the collection from which the values should be removed.
      * @param valuesToRemove the collection of values to be removed from the collection.
      * @return {@code true} if the collection changed as a result of this call, {@code false} otherwise.
      */
-    public static <T> boolean removeAll(final Collection<T> c, final Iterable<?> valuesToRemove) {
+    public static boolean removeAll(final Collection<?> c, final Iterable<?> valuesToRemove) {
         if (isEmpty(c) || valuesToRemove == null) {
             return false;
         }
@@ -12059,17 +12062,16 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * // changed = true, list = ["y"]
      * }</pre>
      *
-     * @param <T> the type of elements in the collection.
      * @param c the collection from which the elements should be removed.
      * @param valuesToRemove the iterator of values to be removed from the collection.
      * @return {@code true} if the collection changed as a result of this call, {@code false} otherwise.
      */
-    public static <T> boolean removeAll(final Collection<T> c, final Iterator<?> valuesToRemove) {
+    public static boolean removeAll(final Collection<?> c, final Iterator<?> valuesToRemove) {
         if (isEmpty(c) || valuesToRemove == null) {
             return false;
         }
 
-        if (c instanceof final Set<T> set) {
+        if (c instanceof final Set<?> set) {
             final int originalSize = set.size();
 
             while (valuesToRemove.hasNext()) {
@@ -13514,9 +13516,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * @param <T> the type of elements in the array
      * @param a the array from which duplicates should be removed.
-     * @return a new array with all duplicates removed. The input array itself is returned if the specified array is {@code null} or empty.
+     * @return a new array with all duplicates removed; the input array itself - which is {@code null} if {@code a} is
+     *         {@code null} - is returned if the specified array is {@code null} or empty.
      * @see #distinct(Object[])
      */
+    @MayReturnNull
     public static <T> T[] removeDuplicates(final T[] a) {
         if (isEmpty(a)) {
             return a;
@@ -13545,10 +13549,12 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param <T> the type of elements in the array
      * @param a the array from which duplicates should be removed.
      * @param isSorted {@code true} if the array is already sorted, {@code false} otherwise. If true, a more efficient algorithm is used.
-     * @return a new array with all duplicates removed. The input array itself is returned if the specified array is {@code null} or empty.
+     * @return a new array with all duplicates removed; the input array itself - which is {@code null} if {@code a} is
+     *         {@code null} - is returned if the specified array is {@code null} or empty.
      * @see #distinct(Object[])
      * @see #removeDuplicates(Object[], int, int, boolean)
      */
+    @MayReturnNull
     public static <T> T[] removeDuplicates(final T[] a, final boolean isSorted) {
         if (isEmpty(a)) {
             return a;
@@ -13576,9 +13582,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param fromIndex the initial index of the range to be considered for duplicate removal.
      * @param toIndex the final index of the range to be considered for duplicate removal.
      * @param isSorted {@code true} if the array is already sorted, {@code false} otherwise. If true, a more efficient algorithm is used.
-     * @return a new array with distinct elements within the specified range.
+     * @return a new array with distinct elements within the specified range, or {@code null} if {@code a} is {@code null}
+     *         (with {@code fromIndex} and {@code toIndex} both {@code 0})
      * @throws IndexOutOfBoundsException if the range is out of the array bounds.
      */
+    @MayReturnNull
     public static <T> T[] removeDuplicates(final T[] a, final int fromIndex, final int toIndex, final boolean isSorted) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
 
@@ -17316,7 +17324,6 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * int sum = N.sumInt(numbers, 1, 4);   // returns 90 (20 + 30 + 40)
      * }</pre>
      *
-     * @param <T> the type of the elements in the collection, which must extend Number.
      * @param c the collection of numbers to be summed.
      * @param fromIndex the starting index (inclusive) of the range to be summed.
      * @param toIndex the ending index (exclusive) of the range to be summed.
@@ -17325,7 +17332,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws ArithmeticException if the result overflows an {@code int}
      * @see Iterables#sumInt(Iterable)
      */
-    public static <T extends Number> int sumInt(final Collection<? extends T> c, final int fromIndex, final int toIndex) {
+    public static int sumInt(final Collection<? extends Number> c, final int fromIndex, final int toIndex) {
         return sumInt(c, fromIndex, toIndex, Fn.numToInt());
     }
 
@@ -17394,13 +17401,12 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * int sum = N.sumInt(numbers);   // returns 60
      * }</pre>
      *
-     * @param <T> the type of the elements in the iterable, which must extend Number.
      * @param c the iterable of elements to be summed.
      * @return the sum of all elements in the iterable as an integer.
      * @throws ArithmeticException if the result overflows an {@code int}
      * @see Iterables#sumInt(Iterable)
      */
-    public static <T extends Number> int sumInt(final Iterable<? extends T> c) {
+    public static int sumInt(final Iterable<? extends Number> c) {
         return sumInt(c, Fn.numToInt());
     }
 
@@ -17435,12 +17441,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * N.sumIntToLong(N.<Integer> emptyList());                                // returns 0L
      * }</pre>
      *
-     * @param <T> the type of the elements in the iterable, which must extend Number.
      * @param c the iterable of numbers to be summed.
      * @return the sum of all elements in the iterable as a long.
      * @see Iterables#sumIntToLong(Iterable)
      */
-    public static <T extends Number> long sumIntToLong(final Iterable<? extends T> c) {
+    public static long sumIntToLong(final Iterable<? extends Number> c) {
         return sumIntToLong(c, Fn.numToInt());
     }
 
@@ -17585,7 +17590,6 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * N.sumLong(c, 2, 2);   // returns 0L (empty range)
      * }</pre>
      *
-     * @param <T> the type of the elements in the collection, which must extend Number.
      * @param c the collection of numbers to be summed.
      * @param fromIndex the starting index (inclusive) of the range to be summed.
      * @param toIndex the ending index (exclusive) of the range to be summed.
@@ -17593,7 +17597,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IndexOutOfBoundsException if the specified range is out of bounds for the given collection.
      * @see Iterables#sumLong(Iterable)
      */
-    public static <T extends Number> long sumLong(final Collection<? extends T> c, final int fromIndex, final int toIndex) {
+    public static long sumLong(final Collection<? extends Number> c, final int fromIndex, final int toIndex) {
         return sumLong(c, fromIndex, toIndex, Fn.numToLong());
     }
 
@@ -17661,12 +17665,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * N.sumLong(N.<Long> emptyList());           // returns 0L
      * }</pre>
      *
-     * @param <T> the type of the elements in the iterable, which must extend Number.
      * @param c the iterable of numbers to be summed.
      * @return the sum of all elements in the iterable as a long.
      * @see Iterables#sumLong(Iterable)
      */
-    public static <T extends Number> long sumLong(final Iterable<? extends T> c) {
+    public static long sumLong(final Iterable<? extends Number> c) {
         return sumLong(c, Fn.numToLong());
     }
 
@@ -17810,7 +17813,6 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * N.sumDouble(c, 2, 2);   // returns 0.0 (empty range)
      * }</pre>
      *
-     * @param <T> the type of the elements in the collection, which must extend Number.
      * @param c the collection of numbers to be summed.
      * @param fromIndex the starting index (inclusive) of the range to be summed.
      * @param toIndex the ending index (exclusive) of the range to be summed.
@@ -17818,7 +17820,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IndexOutOfBoundsException if the specified range is out of bounds for the given collection.
      * @see Iterables#sumDouble(Iterable)
      */
-    public static <T extends Number> double sumDouble(final Collection<? extends T> c, final int fromIndex, final int toIndex) {
+    public static double sumDouble(final Collection<? extends Number> c, final int fromIndex, final int toIndex) {
         return sumDouble(c, fromIndex, toIndex, Fn.numToDouble());
     }
 
@@ -17886,12 +17888,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * N.sumDouble(N.<Double> emptyList());         // returns 0.0
      * }</pre>
      *
-     * @param <T> the type of the elements in the iterable, which must extend Number.
      * @param c the iterable of numbers to be summed.
      * @return the sum of all elements in the iterable as a double.
      * @see Iterables#sumDouble(Iterable)
      */
-    public static <T extends Number> double sumDouble(final Iterable<? extends T> c) {
+    public static double sumDouble(final Iterable<? extends Number> c) {
         return sumDouble(c, Fn.numToDouble());
     }
 
@@ -18158,7 +18159,6 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * N.averageInt(c, 2, 2);   // returns 0.0 (empty range)
      * }</pre>
      *
-     * @param <T> the type of the elements in the collection, which must extend Number.
      * @param c the collection of numbers to calculate the average.
      * @param fromIndex the starting index (inclusive) of the range.
      * @param toIndex the ending index (exclusive) of the range.
@@ -18166,7 +18166,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IndexOutOfBoundsException if the specified range is out of bounds.
      * @see Iterables#averageInt(Collection, int, int)
      */
-    public static <T extends Number> double averageInt(final Collection<? extends T> c, final int fromIndex, final int toIndex) {
+    public static double averageInt(final Collection<? extends Number> c, final int fromIndex, final int toIndex) {
         return averageInt(c, fromIndex, toIndex, Fn.numToInt());
     }
 
@@ -18234,12 +18234,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * N.averageInt(N.<Integer> emptyList());     // returns 0.0
      * }</pre>
      *
-     * @param <T> the type of the elements in the iterable, which must extend Number.
      * @param c the iterable of numbers to calculate the average.
      * @return the average of the elements in the iterable as a double.
      * @see Iterables#averageInt(Iterable)
      */
-    public static <T extends Number> double averageInt(final Iterable<? extends T> c) {
+    public static double averageInt(final Iterable<? extends Number> c) {
         return averageInt(c, Fn.numToInt());
     }
 
@@ -18379,7 +18378,6 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * N.averageLong(c, 2, 2);   // returns 0.0 (empty range)
      * }</pre>
      *
-     * @param <T> the type of the elements in the collection, which must extend Number.
      * @param c the collection of numbers to calculate the average.
      * @param fromIndex the starting index (inclusive) of the range.
      * @param toIndex the ending index (exclusive) of the range.
@@ -18387,7 +18385,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IndexOutOfBoundsException if the specified range is out of bounds.
      * @see Iterables#averageLong(Collection, int, int)
      */
-    public static <T extends Number> double averageLong(final Collection<? extends T> c, final int fromIndex, final int toIndex) {
+    public static double averageLong(final Collection<? extends Number> c, final int fromIndex, final int toIndex) {
         return averageLong(c, fromIndex, toIndex, Fn.numToLong());
     }
 
@@ -18430,12 +18428,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * N.averageLong(N.<Long> emptyList());           // returns 0.0
      * }</pre>
      *
-     * @param <T> the type of the elements in the iterable, which must extend Number.
      * @param c the iterable of numbers to calculate the average.
      * @return the average of the elements in the iterable as a double.
      * @see Iterables#averageLong(Iterable)
      */
-    public static <T extends Number> double averageLong(final Iterable<? extends T> c) {
+    public static double averageLong(final Iterable<? extends Number> c) {
         return averageLong(c, Fn.numToLong());
     }
 
@@ -18575,7 +18572,6 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * N.averageDouble(c, 2, 2);   // returns 0.0 (empty range)
      * }</pre>
      *
-     * @param <T> the type of the elements in the collection, which must extend Number.
      * @param c the collection of numbers to calculate the average.
      * @param fromIndex the starting index (inclusive) of the range.
      * @param toIndex the ending index (exclusive) of the range.
@@ -18583,7 +18579,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IndexOutOfBoundsException if the specified range is out of bounds.
      * @see Iterables#averageDouble(Collection, int, int)
      */
-    public static <T extends Number> double averageDouble(final Collection<? extends T> c, final int fromIndex, final int toIndex) {
+    public static double averageDouble(final Collection<? extends Number> c, final int fromIndex, final int toIndex) {
         return averageDouble(c, fromIndex, toIndex, Fn.numToDouble());
     }
 
@@ -18626,12 +18622,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * N.averageDouble(N.<Double> emptyList());         // returns 0.0
      * }</pre>
      *
-     * @param <T> the type of the elements in the iterable, which must extend Number.
      * @param c the iterable of numbers to calculate the average.
      * @return the average of the elements in the iterable as a double.
      * @see Iterables#averageDouble(Iterable)
      */
-    public static <T extends Number> double averageDouble(final Iterable<? extends T> c) {
+    public static double averageDouble(final Iterable<? extends Number> c) {
         return averageDouble(c, Fn.numToDouble());
     }
 
@@ -18981,10 +18976,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param a the first value to compare
      * @param b the second value to compare
      * @param cmp the Comparator to compare the values; if {@code null}, natural ordering with nulls last is used
-     * @return the smaller of the two values based on the comparator
+     * @return the smaller of the two values based on the comparator; may be {@code null} if the smaller value is itself {@code null} (for example, when both values are {@code null})
      * @see #min(Comparable, Comparable)
      * @see #max(Object, Object, Comparator)
      */
+    @MayReturnNull
     public static <T> T min(final T a, final T b, final Comparator<? super T> cmp) {
         if (cmp == null) {
             return ((Comparator<T>) NULL_MAX_COMPARATOR).compare(a, b) <= 0 ? a : b;
@@ -19178,11 +19174,12 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param a the first comparable value
      * @param b the second comparable value
      * @param c the third comparable value
-     * @return the smallest of the three values based on natural ordering.
+     * @return the smallest of the three values based on natural ordering; {@code null} if all three are {@code null}
      * @see #min(Comparable, Comparable)
      * @see #min(Object, Object, Object, Comparator)
      * @see #max(Comparable, Comparable, Comparable)
      */
+    @MayReturnNull
     public static <T extends Comparable<? super T>> T min(final T a, final T b, final T c) {
         return min(a, b, c, (Comparator<T>) NULL_MAX_COMPARATOR);
     }
@@ -19207,11 +19204,12 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param b the second value to compare
      * @param c the third value to compare
      * @param cmp the Comparator to compare the values; if {@code null}, natural ordering with nulls last is used
-     * @return the smallest of the three values based on the comparator.
+     * @return the smallest of the three values based on the comparator; may be {@code null} if the smallest value is itself {@code null} (for example, when all three values are {@code null})
      * @see #min(Object, Object, Comparator)
      * @see #min(Comparable, Comparable, Comparable)
      * @see #max(Object, Object, Object, Comparator)
      */
+    @MayReturnNull
     public static <T> T min(final T a, final T b, final T c, final Comparator<? super T> cmp) {
         return min(min(a, b, cmp), c, cmp);
     }
@@ -19694,13 +19692,14 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * @param <T> the type of elements in the array
      * @param a the array of values, must not be {@code null} or empty
-     * @return the smallest value in the array based on natural ordering
+     * @return the smallest value in the array based on natural ordering; {@code null} if every element is {@code null}
      * @throws IllegalArgumentException if the array is {@code null} or empty
      * @see #min(Comparable[], int, int)
      * @see #min(Object[], Comparator)
      * @see #max(Comparable[])
      * @see Iterables#min(Comparable[])
      */
+    @MayReturnNull
     public static <T extends Comparable<? super T>> T min(final T[] a) throws IllegalArgumentException {
         checkArgNotEmpty(a, "The specified array cannot be null or empty");
 
@@ -19723,7 +19722,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param a the array of values, must not be {@code null}
      * @param fromIndex the starting index (inclusive) of the range
      * @param toIndex the ending index (exclusive) of the range
-     * @return the smallest value within the specified range based on natural ordering
+     * @return the smallest value within the specified range based on natural ordering; {@code null} if every element in the range is {@code null}
      * @throws IndexOutOfBoundsException if the specified range is out of bounds
      * @throws IllegalArgumentException if the array is {@code null} or the range is empty
      * @see #min(Comparable[])
@@ -19731,6 +19730,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see #max(Comparable[], int, int)
      * @see Iterables#min(Object[], Comparator)
      */
+    @MayReturnNull
     public static <T extends Comparable<? super T>> T min(final T[] a, final int fromIndex, final int toIndex) throws IllegalArgumentException {
         return min(a, fromIndex, toIndex, (Comparator<T>) NULL_MAX_COMPARATOR);
     }
@@ -19754,12 +19754,13 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param <T> the type of elements in the array
      * @param a the array of values, must not be {@code null} or empty
      * @param cmp the Comparator to compare elements; if {@code null}, natural ordering with nulls last is used
-     * @return the smallest value in the array according to the comparator
+     * @return the smallest value in the array according to the comparator; may be {@code null} if the smallest value is itself {@code null} (for example, when every element is {@code null})
      * @throws IllegalArgumentException if the array is {@code null} or empty
      * @see #min(Object[], int, int, Comparator)
      * @see #max(Object[], Comparator)
      * @see Iterables#min(Object[], Comparator)
      */
+    @MayReturnNull
     public static <T> T min(final T[] a, final Comparator<? super T> cmp) throws IllegalArgumentException {
         checkArgNotEmpty(a, "The specified array cannot be null or empty");
 
@@ -19784,7 +19785,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param fromIndex the starting index (inclusive) of the range
      * @param toIndex the ending index (exclusive) of the range
      * @param cmp the Comparator to compare elements; if {@code null}, natural ordering with nulls last is used
-     * @return the smallest value within the specified range according to the comparator
+     * @return the smallest value within the specified range according to the comparator; may be {@code null} if the smallest value is itself {@code null} (for example, when every element in the range is {@code null})
      * @throws IndexOutOfBoundsException if the specified range is out of bounds
      * @throws IllegalArgumentException if the array is {@code null} or the range is empty
      * @see #min(Object[], Comparator)
@@ -19834,13 +19835,14 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param c the collection of comparable values, must not be {@code null} or empty
      * @param fromIndex the starting index (inclusive) of the range
      * @param toIndex the ending index (exclusive) of the range
-     * @return the smallest value within the specified range based on natural ordering
+     * @return the smallest value within the specified range based on natural ordering; {@code null} if every element in the range is {@code null}
      * @throws IndexOutOfBoundsException if the specified range is out of bounds
      * @throws IllegalArgumentException if the collection is {@code null} or the range is empty
      * @see #min(Collection, int, int, Comparator)
      * @see #max(Collection, int, int)
      * @see Iterables#min(Iterable)
      */
+    @MayReturnNull
     public static <T extends Comparable<? super T>> T min(final Collection<? extends T> c, final int fromIndex, final int toIndex)
             throws IllegalArgumentException {
         checkArgNotEmpty(c, "The specified collection cannot be null or empty");
@@ -19866,7 +19868,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param fromIndex the starting index (inclusive) of the range
      * @param toIndex the ending index (exclusive) of the range
      * @param cmp the Comparator to compare elements; if {@code null}, natural ordering with nulls last is used
-     * @return the smallest value within the specified range according to the comparator
+     * @return the smallest value within the specified range according to the comparator; may be {@code null} if the smallest value is itself {@code null} (for example, when every element in the range is {@code null})
      * @throws IndexOutOfBoundsException if the specified range is out of bounds
      * @throws IllegalArgumentException if the collection is {@code null} or the range is empty
      * @see #min(Collection, int, int)
@@ -19943,12 +19945,13 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * @param <T> the type of comparable elements in the iterable
      * @param c the iterable of comparable values, must not be {@code null} or empty
-     * @return the smallest value in the iterable based on natural ordering
+     * @return the smallest value in the iterable based on natural ordering; {@code null} if every element is {@code null}
      * @throws IllegalArgumentException if the iterable is {@code null} or empty
      * @see #min(Iterable, Comparator)
      * @see #max(Iterable)
      * @see Iterables#min(Iterable)
      */
+    @MayReturnNull
     public static <T extends Comparable<? super T>> T min(final Iterable<? extends T> c) throws IllegalArgumentException {
         return min(c, (Comparator<T>) NULL_MAX_COMPARATOR);
     }
@@ -19969,12 +19972,13 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param <T> the type of elements in the iterable
      * @param c the iterable of values, must not be {@code null} or empty
      * @param cmp the Comparator to compare elements; if {@code null}, natural ordering with nulls last is used
-     * @return the smallest value in the iterable according to the comparator
+     * @return the smallest value in the iterable according to the comparator; may be {@code null} if the smallest value is itself {@code null} (for example, when every element is {@code null})
      * @throws IllegalArgumentException if the iterable is {@code null} or empty
      * @see #min(Iterable)
      * @see #max(Iterable, Comparator)
      * @see Iterables#min(Iterable, Comparator)
      */
+    @MayReturnNull
     public static <T> T min(final Iterable<? extends T> c, final Comparator<? super T> cmp) throws IllegalArgumentException {
         if (c instanceof Collection) {
             final Collection<T> coll = (Collection<T>) c;
@@ -20001,12 +20005,13 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * @param <T> the type of comparable elements in the iterator
      * @param iter the iterator of comparable values, must not be {@code null} or empty
-     * @return the smallest value from the iterator based on natural ordering
+     * @return the smallest value from the iterator based on natural ordering; {@code null} if every element is {@code null}
      * @throws IllegalArgumentException if the iterator is {@code null} or empty
      * @see #min(Iterator, Comparator)
      * @see #max(Iterator)
      * @see Iterables#min(Iterator)
      */
+    @MayReturnNull
     public static <T extends Comparable<? super T>> T min(final Iterator<? extends T> iter) throws IllegalArgumentException {
         return min(iter, (Comparator<T>) NULL_MAX_COMPARATOR);
     }
@@ -20028,7 +20033,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param <T> the type of elements in the iterator
      * @param iter the iterator of values, must not be {@code null} or empty
      * @param cmp the Comparator to compare elements; if {@code null}, natural ordering with nulls last is used
-     * @return the smallest value from the iterator according to the comparator
+     * @return the smallest value from the iterator according to the comparator; may be {@code null} if the smallest value is itself {@code null} (for example, when every element is {@code null})
      * @throws IllegalArgumentException if the iterator is {@code null} or empty
      * @see #min(Iterator)
      * @see #max(Iterator, Comparator)
@@ -20075,7 +20080,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param <T> the type of elements in the array
      * @param a the array of values, must not be {@code null} or empty
      * @param keyExtractor the function to extract the comparable key from each element, must not be {@code null}
-     * @return the minimum element based on the extracted key
+     * @return the minimum element based on the extracted key; may be {@code null} if the selected element is itself {@code null} (for example, when every element is {@code null})
      * @throws IllegalArgumentException if the array is {@code null} or empty
      * @see #min(Object[], Comparator)
      * @see #maxBy(Object[], Function)
@@ -20083,6 +20088,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see Iterables#minBy(Object[], Function)
      */
     @SuppressWarnings("rawtypes")
+    @MayReturnNull
     public static <T> T minBy(final T[] a, final Function<? super T, ? extends Comparable> keyExtractor) throws IllegalArgumentException {
         return min(a, Comparators.nullsLastBy(keyExtractor));
     }
@@ -20104,7 +20110,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param <T> the type of elements in the iterable
      * @param c the iterable of values, must not be {@code null} or empty
      * @param keyExtractor the function to extract the comparable key from each element, must not be {@code null}
-     * @return the minimum element based on the extracted key
+     * @return the minimum element based on the extracted key; may be {@code null} if the selected element is itself {@code null} (for example, when every element is {@code null})
      * @throws IllegalArgumentException if the iterable is {@code null} or empty
      * @see #min(Iterable, Comparator)
      * @see #maxBy(Iterable, Function)
@@ -20112,6 +20118,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see Iterables#minBy(Iterable, Function)
      */
     @SuppressWarnings("rawtypes")
+    @MayReturnNull
     public static <T> T minBy(final Iterable<? extends T> c, final Function<? super T, ? extends Comparable> keyExtractor) throws IllegalArgumentException {
         return min(c, Comparators.nullsLastBy(keyExtractor));
     }
@@ -20133,7 +20140,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param <T> the type of elements in the iterator
      * @param iter the iterator of values, must not be {@code null} or empty
      * @param keyExtractor the function to extract the comparable key from each element, must not be {@code null}
-     * @return the minimum element based on the extracted key
+     * @return the minimum element based on the extracted key; may be {@code null} if the selected element is itself {@code null} (for example, when every element is {@code null})
      * @throws IllegalArgumentException if the iterator is {@code null} or empty
      * @see #min(Iterator, Comparator)
      * @see #maxBy(Iterator, Function)
@@ -20141,6 +20148,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see Iterables#minBy(Iterator, Function)
      */
     @SuppressWarnings("rawtypes")
+    @MayReturnNull
     public static <T> T minBy(final Iterator<? extends T> iter, final Function<? super T, ? extends Comparable> keyExtractor) throws IllegalArgumentException {
         return min(iter, Comparators.nullsLastBy(keyExtractor));
     }
@@ -21192,6 +21200,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see #max(Comparable, Comparable)
      * @see #min(Object, Object, Comparator)
      */
+    @MayReturnNull
     public static <T> T max(final T a, final T b, final Comparator<? super T> cmp) {
         if (cmp == null) {
             return ((Comparator<T>) NULL_MIN_COMPARATOR).compare(a, b) >= 0 ? a : b;
@@ -21377,11 +21386,12 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param a the first comparable value
      * @param b the second comparable value
      * @param c the third comparable value
-     * @return the largest of the three values based on natural ordering
+     * @return the largest of the three values based on natural ordering; {@code null} if all three are {@code null}
      * @see #max(Comparable, Comparable)
      * @see #max(Object, Object, Object, Comparator)
      * @see #min(Comparable, Comparable, Comparable)
      */
+    @MayReturnNull
     public static <T extends Comparable<? super T>> T max(final T a, final T b, final T c) {
         return max(a, b, c, (Comparator<T>) NULL_MIN_COMPARATOR);
     }
@@ -21406,11 +21416,12 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param b the second value
      * @param c the third value
      * @param cmp the Comparator to compare values; if {@code null}, natural ordering with nulls first is used
-     * @return the largest of the three values according to the comparator
+     * @return the largest of the three values according to the comparator; may be {@code null} if the largest value is itself {@code null} (for example, when all three values are {@code null})
      * @see #max(Comparable, Comparable, Comparable)
      * @see #max(Object, Object, Comparator)
      * @see #min(Object, Object, Object, Comparator)
      */
+    @MayReturnNull
     public static <T> T max(final T a, final T b, final T c, final Comparator<? super T> cmp) {
         return max(max(a, b, cmp), c, cmp);
     }
@@ -21892,13 +21903,14 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * @param <T> the type of comparable elements in the array
      * @param a the array of comparable values, must not be {@code null} or empty
-     * @return the largest element in the array based on natural ordering
+     * @return the largest element in the array based on natural ordering; {@code null} if every element is {@code null}
      * @throws IllegalArgumentException if the array is {@code null} or empty
      * @see #max(Comparable[], int, int)
      * @see #max(Object[], Comparator)
      * @see #min(Comparable[])
      * @see Iterables#max(Comparable[])
      */
+    @MayReturnNull
     public static <T extends Comparable<? super T>> T max(final T[] a) throws IllegalArgumentException {
         checkArgNotEmpty(a, "The specified array cannot be null or empty");
 
@@ -21922,7 +21934,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param a the array of comparable values, must not be {@code null} or empty
      * @param fromIndex the starting index (inclusive) of the range
      * @param toIndex the ending index (exclusive) of the range
-     * @return the largest element within the specified range based on natural ordering
+     * @return the largest element within the specified range based on natural ordering; {@code null} if every element in the range is {@code null}
      * @throws IndexOutOfBoundsException if the specified range is out of bounds
      * @throws IllegalArgumentException if the array is {@code null} or the range is empty
      * @see #max(Comparable[])
@@ -21930,6 +21942,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see #min(Comparable[], int, int)
      * @see Iterables#max(Comparable[])
      */
+    @MayReturnNull
     public static <T extends Comparable<? super T>> T max(final T[] a, final int fromIndex, final int toIndex) throws IllegalArgumentException {
         return max(a, fromIndex, toIndex, (Comparator<T>) NULL_MIN_COMPARATOR);
     }
@@ -21953,12 +21966,13 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param <T> the type of elements in the array
      * @param a the array of values, must not be {@code null} or empty
      * @param cmp the Comparator to compare elements; if {@code null}, natural ordering with nulls first is used
-     * @return the largest element in the array according to the comparator
+     * @return the largest element in the array according to the comparator; may be {@code null} if the largest value is itself {@code null} (for example, when every element is {@code null})
      * @throws IllegalArgumentException if the array is {@code null} or empty
      * @see #max(Object[], int, int, Comparator)
      * @see #min(Object[], Comparator)
      * @see Iterables#max(Object[], Comparator)
      */
+    @MayReturnNull
     public static <T> T max(final T[] a, final Comparator<? super T> cmp) throws IllegalArgumentException {
         checkArgNotEmpty(a, "The specified array cannot be null or empty");
 
@@ -21983,7 +21997,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param fromIndex the starting index (inclusive) of the range
      * @param toIndex the ending index (exclusive) of the range
      * @param cmp the Comparator to compare elements; if {@code null}, natural ordering with nulls first is used
-     * @return the largest element within the specified range according to the comparator
+     * @return the largest element within the specified range according to the comparator; may be {@code null} if the largest value is itself {@code null} (for example, when every element in the range is {@code null})
      * @throws IllegalArgumentException if the array is {@code null} or the range is empty
      * @throws IndexOutOfBoundsException if the specified range is out of bounds
      * @see #max(Object[], Comparator)
@@ -22033,13 +22047,14 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param c the collection of comparable values, must not be {@code null} or empty
      * @param fromIndex the starting index (inclusive) of the range
      * @param toIndex the ending index (exclusive) of the range
-     * @return the largest element within the specified range based on natural ordering
+     * @return the largest element within the specified range based on natural ordering; {@code null} if every element in the range is {@code null}
      * @throws IndexOutOfBoundsException if the specified range is out of bounds
      * @throws IllegalArgumentException if the collection is {@code null} or the range is empty
      * @see #max(Collection, int, int, Comparator)
      * @see #min(Collection, int, int)
      * @see Iterables#max(Iterable)
      */
+    @MayReturnNull
     public static <T extends Comparable<? super T>> T max(final Collection<? extends T> c, final int fromIndex, final int toIndex)
             throws IllegalArgumentException {
         checkArgNotEmpty(c, "The specified collection cannot be null or empty");
@@ -22065,7 +22080,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param fromIndex the starting index (inclusive) of the range
      * @param toIndex the ending index (exclusive) of the range
      * @param cmp the Comparator to compare elements; if {@code null}, natural ordering with nulls first is used
-     * @return the largest element within the specified range according to the comparator
+     * @return the largest element within the specified range according to the comparator; may be {@code null} if the largest value is itself {@code null} (for example, when every element in the range is {@code null})
      * @throws IndexOutOfBoundsException if the specified range is out of bounds
      * @throws IllegalArgumentException if the collection is {@code null} or the range is empty
      * @see #max(Collection, int, int)
@@ -22142,12 +22157,13 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * @param <T> the type of comparable elements in the iterable
      * @param c the iterable of comparable values, must not be {@code null} or empty
-     * @return the largest element in the iterable based on natural ordering
+     * @return the largest element in the iterable based on natural ordering; {@code null} if every element is {@code null}
      * @throws IllegalArgumentException if the iterable is {@code null} or empty
      * @see #max(Iterable, Comparator)
      * @see #min(Iterable)
      * @see Iterables#max(Iterable)
      */
+    @MayReturnNull
     public static <T extends Comparable<? super T>> T max(final Iterable<? extends T> c) throws IllegalArgumentException {
         return max(c, (Comparator<T>) NULL_MIN_COMPARATOR);
     }
@@ -22168,12 +22184,13 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param <T> the type of elements in the iterable
      * @param c the iterable of values, must not be {@code null} or empty
      * @param cmp the Comparator to compare elements; if {@code null}, natural ordering with nulls first is used
-     * @return the largest element in the iterable according to the comparator
+     * @return the largest element in the iterable according to the comparator; may be {@code null} if the largest value is itself {@code null} (for example, when every element is {@code null})
      * @throws IllegalArgumentException if the iterable is {@code null} or empty
      * @see #max(Iterable)
      * @see #min(Iterable, Comparator)
      * @see Iterables#max(Iterable, Comparator)
      */
+    @MayReturnNull
     public static <T> T max(final Iterable<? extends T> c, final Comparator<? super T> cmp) throws IllegalArgumentException {
         if (c instanceof Collection) {
             final Collection<T> coll = (Collection<T>) c;
@@ -22200,12 +22217,13 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * @param <T> the type of comparable elements in the iterator
      * @param iter the iterator of comparable values, must not be {@code null} or empty
-     * @return the largest element from the iterator based on natural ordering
+     * @return the largest element from the iterator based on natural ordering; {@code null} if every element is {@code null}
      * @throws IllegalArgumentException if the iterator is {@code null} or empty
      * @see #max(Iterator, Comparator)
      * @see #min(Iterator)
      * @see Iterables#max(Iterator)
      */
+    @MayReturnNull
     public static <T extends Comparable<? super T>> T max(final Iterator<? extends T> iter) throws IllegalArgumentException {
         return max(iter, (Comparator<T>) NULL_MIN_COMPARATOR);
     }
@@ -22227,7 +22245,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param <T> the type of elements in the iterator
      * @param iter the iterator of values, must not be {@code null} or empty
      * @param cmp the Comparator to compare elements; if {@code null}, natural ordering with nulls first is used
-     * @return the largest element from the iterator according to the comparator
+     * @return the largest element from the iterator according to the comparator; may be {@code null} if the largest value is itself {@code null} (for example, when every element is {@code null})
      * @throws IllegalArgumentException if the iterator is {@code null} or empty
      * @see #max(Iterator)
      * @see #min(Iterator, Comparator)
@@ -22274,7 +22292,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param <T> the type of elements in the array
      * @param a the array of values, must not be {@code null} or empty
      * @param keyExtractor the function to extract the comparable key from each element, must not be {@code null}
-     * @return the maximum element based on the extracted key
+     * @return the maximum element based on the extracted key; {@code null} if every element is {@code null}
      * @throws IllegalArgumentException if the array is {@code null} or empty
      * @see #max(Object[], Comparator)
      * @see #minBy(Object[], Function)
@@ -22282,6 +22300,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see Iterables#maxBy(Object[], Function)
      */
     @SuppressWarnings("rawtypes")
+    @MayReturnNull
     public static <T> T maxBy(final T[] a, final Function<? super T, ? extends Comparable> keyExtractor) throws IllegalArgumentException {
         return max(a, Comparators.nullsFirstBy(keyExtractor));
     }
@@ -22303,7 +22322,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param <T> the type of elements in the iterable
      * @param c the iterable of values, must not be {@code null} or empty
      * @param keyExtractor the function to extract the comparable key from each element, must not be {@code null}
-     * @return the maximum element based on the extracted key
+     * @return the maximum element based on the extracted key; {@code null} if every element is {@code null}
      * @throws IllegalArgumentException if the iterable is {@code null} or empty
      * @see #max(Iterable, Comparator)
      * @see #minBy(Iterable, Function)
@@ -22311,6 +22330,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see Iterables#maxBy(Iterable, Function)
      */
     @SuppressWarnings("rawtypes")
+    @MayReturnNull
     public static <T> T maxBy(final Iterable<? extends T> c, final Function<? super T, ? extends Comparable> keyExtractor) throws IllegalArgumentException {
         return max(c, Comparators.nullsFirstBy(keyExtractor));
     }
@@ -22332,7 +22352,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param <T> the type of elements in the iterator
      * @param iter the iterator of values, must not be {@code null} or empty
      * @param keyExtractor the function to extract the comparable key from each element, must not be {@code null}
-     * @return the maximum element based on the extracted key
+     * @return the maximum element based on the extracted key; {@code null} if every element is {@code null}
      * @throws IllegalArgumentException if the iterator is {@code null} or empty
      * @see #max(Iterator, Comparator)
      * @see #minBy(Iterator, Function)
@@ -22340,6 +22360,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see Iterables#maxBy(Iterator, Function)
      */
     @SuppressWarnings("rawtypes")
+    @MayReturnNull
     public static <T> T maxBy(final Iterator<? extends T> iter, final Function<? super T, ? extends Comparable> keyExtractor) throws IllegalArgumentException {
         return max(iter, Comparators.nullsFirstBy(keyExtractor));
     }
@@ -23188,12 +23209,13 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param a the first value
      * @param b the second value
      * @param c the third value
-     * @return the median of the three values
+     * @return the median of the three values; {@code null} if the median value is itself {@code null}
      * @see #median(Comparable[])
      * @see #median(Object, Object, Object, Comparator)
      * @see #min(Comparable, Comparable, Comparable)
      * @see #max(Comparable, Comparable, Comparable)
      */
+    @MayReturnNull
     public static <T extends Comparable<? super T>> T median(final T a, final T b, final T c) {
         return (T) median(a, b, c, NATURAL_COMPARATOR);
     }
@@ -23212,10 +23234,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param b the second value
      * @param c the third value
      * @param cmp the Comparator to compare values; if {@code null}, natural ordering with nulls first is used
-     * @return the median of the three values
+     * @return the median of the three values; {@code null} if the median value is itself {@code null}
      * @see #median(Comparable, Comparable, Comparable)
      * @see #median(Object[], Comparator)
      */
+    @MayReturnNull
     public static <T> T median(final T a, final T b, final T c, Comparator<? super T> cmp) {
         cmp = checkComparator(cmp);
 
@@ -23732,11 +23755,12 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * @param <T> the type of elements in the input array
      * @param a the array of values to find the median of
-     * @return the median in the specified array
+     * @return the median in the specified array; {@code null} if the median element is itself {@code null}
      * @throws IllegalArgumentException if the array is {@code null} or empty
      * @see #median(int[])
      * @see Median#of(Comparable[])
      */
+    @MayReturnNull
     public static <T extends Comparable<? super T>> T median(final T[] a) throws IllegalArgumentException {
         checkArgNotEmpty(a, "The specified array cannot be null or empty");
 
@@ -23762,12 +23786,13 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param a the array of values to find the median of
      * @param fromIndex the starting index (inclusive) of the range to calculate median for
      * @param toIndex the ending index (exclusive) of the range to calculate median for
-     * @return the median within the specified range in the input array
+     * @return the median within the specified range in the input array; {@code null} if the median element is itself {@code null}
      * @throws IllegalArgumentException if the specified array or range is {@code null} or empty
      * @throws IndexOutOfBoundsException if the range is out of the array bounds
      * @see #median(int[])
      * @see Median#of(Comparable[], int, int)
      */
+    @MayReturnNull
     public static <T extends Comparable<? super T>> T median(final T[] a, final int fromIndex, final int toIndex)
             throws IllegalArgumentException, IndexOutOfBoundsException {
         if (isEmpty(a) || toIndex - fromIndex < 1) {
@@ -23795,7 +23820,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param <T> the type of elements in the input array
      * @param a the array of values to find the median of
      * @param cmp the comparator to determine the order of the values
-     * @return the median in the specified array
+     * @return the median in the specified array; {@code null} if the median element is itself {@code null}
      * @throws IllegalArgumentException if the array is {@code null} or empty
      * @see #median(int[])
      * @see Iterables#median(Collection, Comparator)
@@ -23804,6 +23829,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see Median#of(Object[], Comparator)
      * @see Median#of(Object[], int, int, Comparator)
      */
+    @MayReturnNull
     public static <T> T median(final T[] a, final Comparator<? super T> cmp) throws IllegalArgumentException {
         checkArgNotEmpty(a, "The specified array cannot be null or empty");
 
@@ -23830,7 +23856,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param fromIndex the starting index (inclusive) of the range to calculate median for
      * @param toIndex the ending index (exclusive) of the range to calculate median for
      * @param cmp the comparator to determine the order of the values
-     * @return the median within the specified range in the input array
+     * @return the median within the specified range in the input array; {@code null} if the median element is itself {@code null}
      * @throws IllegalArgumentException if the specified array or range is {@code null} or empty
      * @throws IndexOutOfBoundsException if the range is out of the array bounds
      * @see #median(int[])
@@ -23839,6 +23865,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see Median#of(Object[], Comparator)
      * @see Median#of(Object[], int, int, Comparator)
      */
+    @MayReturnNull
     public static <T> T median(final T[] a, final int fromIndex, final int toIndex, Comparator<? super T> cmp)
             throws IllegalArgumentException, IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a));
@@ -23878,7 +23905,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * @param <T> the type of elements in the input collection
      * @param c the collection of values to find the median of
-     * @return the median in the specified collection
+     * @return the median in the specified collection; {@code null} if the median element is itself {@code null}
      * @throws IllegalArgumentException if the collection is {@code null} or empty
      * @see #median(int[])
      * @see Median#of(Collection)
@@ -23886,6 +23913,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see Median#of(Collection, Comparator)
      * @see Median#of(Collection, int, int, Comparator)
      */
+    @MayReturnNull
     public static <T extends Comparable<? super T>> T median(final Collection<? extends T> c) throws IllegalArgumentException {
         checkArgNotEmpty(c, "The specified collection cannot be null or empty");
 
@@ -23911,7 +23939,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param c the collection of values to find the median of
      * @param fromIndex the starting index (inclusive) of the range to calculate median for
      * @param toIndex the ending index (exclusive) of the range to calculate median for
-     * @return the median within the specified range in the input collection
+     * @return the median within the specified range in the input collection; {@code null} if the median element is itself {@code null}
      * @throws IllegalArgumentException if the specified collection or range is {@code null} or empty
      * @throws IndexOutOfBoundsException if the range is out of the collection bounds
      * @see #median(int[])
@@ -23920,6 +23948,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see Median#of(Collection, Comparator)
      * @see Median#of(Collection, int, int, Comparator)
      */
+    @MayReturnNull
     public static <T extends Comparable<? super T>> T median(final Collection<? extends T> c, final int fromIndex, final int toIndex)
             throws IllegalArgumentException, IndexOutOfBoundsException {
         return (T) median(c, fromIndex, toIndex, NATURAL_COMPARATOR);
@@ -23942,7 +23971,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param <T> the type of elements in the input collection
      * @param c the collection of values to find the median of
      * @param cmp the comparator to determine the order of the values
-     * @return the median in the specified collection
+     * @return the median in the specified collection; {@code null} if the median element is itself {@code null}
      * @throws IllegalArgumentException if the collection is {@code null} or empty
      * @see #median(int[])
      * @see Iterables#median(Collection, Comparator)
@@ -23951,6 +23980,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see Median#of(Collection, Comparator)
      * @see Median#of(Collection, int, int, Comparator)
      */
+    @MayReturnNull
     public static <T> T median(final Collection<? extends T> c, final Comparator<? super T> cmp) throws IllegalArgumentException {
         checkArgNotEmpty(c, "The specified collection cannot be null or empty");
 
@@ -23977,7 +24007,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param fromIndex the starting index (inclusive) of the range to calculate median for
      * @param toIndex the ending index (exclusive) of the range to calculate median for
      * @param cmp the comparator to determine the order of the values
-     * @return the median within the specified range in the input collection
+     * @return the median within the specified range in the input collection; {@code null} if the median element is itself {@code null}
      * @throws IllegalArgumentException if the specified collection or range is {@code null} or empty
      * @throws IndexOutOfBoundsException if the range is out of the collection bounds
      * @see #median(int[])
@@ -23987,6 +24017,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see Median#of(Collection, Comparator)
      * @see Median#of(Collection, int, int, Comparator)
      */
+    @MayReturnNull
     public static <T> T median(final Collection<? extends T> c, final int fromIndex, final int toIndex, Comparator<? super T> cmp)
             throws IllegalArgumentException, IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, size(c));
@@ -24713,10 +24744,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param <T> the type of elements in the array
      * @param a the array
      * @param k the position (1-based) of the largest element to find
-     * @return the k-th largest element
+     * @return the k-th largest element; {@code null} if that element is itself {@code null}
      * @throws IllegalArgumentException if the array is {@code null}/empty or k is out of range [1, array.length]
      * @see #kthLargest(Comparable[], int, int, int)
      */
+    @MayReturnNull
     public static <T extends Comparable<? super T>> T kthLargest(final T[] a, final int k) throws IllegalArgumentException {
         checkArgNotEmpty(a, "The specified array cannot be null or empty");
 
@@ -24738,11 +24770,12 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param fromIndex the start index (inclusive)
      * @param toIndex the end index (exclusive)
      * @param k the position (1-based) of the largest element to find
-     * @return the k-th largest element within the range
+     * @return the k-th largest element within the range; {@code null} if that element is itself {@code null}
      * @throws IllegalArgumentException if the array is {@code null}/empty or k is out of range [1, range length]
      * @throws IndexOutOfBoundsException if the range is invalid
      * @see #kthLargest(Comparable[], int)
      */
+    @MayReturnNull
     public static <T extends Comparable<? super T>> T kthLargest(final T[] a, final int fromIndex, final int toIndex, final int k)
             throws IllegalArgumentException, IndexOutOfBoundsException {
         if (isEmpty(a) || toIndex - fromIndex < 1) {
@@ -24766,10 +24799,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param a the array
      * @param k the position (1-based) of the largest element to find
      * @param cmp the comparator to determine ordering
-     * @return the k-th largest element
+     * @return the k-th largest element; {@code null} if that element is itself {@code null}
      * @throws IllegalArgumentException if the array is {@code null}/empty or k is out of range [1, array.length]
      * @see #kthLargest(Object[], int, int, int, Comparator)
      */
+    @MayReturnNull
     public static <T> T kthLargest(final T[] a, final int k, final Comparator<? super T> cmp) throws IllegalArgumentException {
         checkArgNotEmpty(a, "The specified array cannot be null or empty");
 
@@ -24792,11 +24826,12 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param toIndex the end index (exclusive)
      * @param k the position (1-based) of the largest element to find
      * @param cmp the comparator to determine ordering
-     * @return the k-th largest element within the range
+     * @return the k-th largest element within the range; {@code null} if that element is itself {@code null}
      * @throws IllegalArgumentException if the array is {@code null}/empty or k is out of range [1, range length]
      * @throws IndexOutOfBoundsException if the range is invalid
      * @see #kthLargest(Object[], int, Comparator)
      */
+    @MayReturnNull
     public static <T> T kthLargest(final T[] a, final int fromIndex, final int toIndex, int k, final Comparator<? super T> cmp)
             throws IllegalArgumentException, IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a));
@@ -24822,10 +24857,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param <T> the type of elements in the collection
      * @param c the collection
      * @param k the position (1-based) of the largest element to find
-     * @return the k-th largest element
+     * @return the k-th largest element; {@code null} if that element is itself {@code null}
      * @throws IllegalArgumentException if the collection is {@code null}/empty or k is out of range [1, collection.size()]
      * @see #kthLargest(Collection, int, int, int)
      */
+    @MayReturnNull
     public static <T extends Comparable<? super T>> T kthLargest(final Collection<? extends T> c, final int k) throws IllegalArgumentException {
         checkArgNotEmpty(c, "The specified collection cannot be null or empty");
 
@@ -24847,11 +24883,12 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param fromIndex the start index (inclusive)
      * @param toIndex the end index (exclusive)
      * @param k the position (1-based) of the largest element to find
-     * @return the k-th largest element within the range
+     * @return the k-th largest element within the range; {@code null} if that element is itself {@code null}
      * @throws IllegalArgumentException if the collection is {@code null}/empty or k is out of range [1, range length]
      * @throws IndexOutOfBoundsException if the range is invalid
      * @see #kthLargest(Collection, int)
      */
+    @MayReturnNull
     public static <T extends Comparable<? super T>> T kthLargest(final Collection<? extends T> c, final int fromIndex, final int toIndex, final int k)
             throws IllegalArgumentException, IndexOutOfBoundsException {
         return kthLargest(c, fromIndex, toIndex, k, (Comparator<T>) NULL_MIN_COMPARATOR);
@@ -24871,10 +24908,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param c the collection
      * @param k the position (1-based) of the largest element to find
      * @param cmp the comparator to determine ordering
-     * @return the k-th largest element
+     * @return the k-th largest element; {@code null} if that element is itself {@code null}
      * @throws IllegalArgumentException if the collection is {@code null}/empty or k is out of range [1, collection.size()]
      * @see #kthLargest(Collection, int, int, int, Comparator)
      */
+    @MayReturnNull
     public static <T> T kthLargest(final Collection<? extends T> c, final int k, final Comparator<? super T> cmp) throws IllegalArgumentException {
         checkArgNotEmpty(c, "The specified collection cannot be null or empty");
 
@@ -24897,11 +24935,12 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param toIndex the end index (exclusive)
      * @param k the position (1-based) of the largest element to find
      * @param cmp the comparator to determine ordering
-     * @return the k-th largest element within the range
+     * @return the k-th largest element within the range; {@code null} if that element is itself {@code null}
      * @throws IllegalArgumentException if the collection is {@code null}/empty or k is out of range [1, range length]
      * @throws IndexOutOfBoundsException if the range is invalid
      * @see #kthLargest(Collection, int, Comparator)
      */
+    @MayReturnNull
     public static <T> T kthLargest(final Collection<? extends T> c, final int fromIndex, final int toIndex, final int k, final Comparator<? super T> cmp)
             throws IllegalArgumentException, IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, size(c));
@@ -35146,7 +35185,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param json the JSON string to deserialize
      * @param defaultIfNull the value to return if deserialization produces {@code null}
      * @param targetType the target class type
-     * @return the deserialized object or the default value
+     * @return the deserialized object, or {@code defaultIfNull} if deserialization produces {@code null} (which itself may be {@code null} if a {@code null} default was supplied)
      * @throws IllegalArgumentException if targetType is {@code null}
      * @see #fromJson(String, Object, Type)
      * @see #fromJson(String, Class)
@@ -35175,7 +35214,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param json the JSON string to deserialize
      * @param defaultIfNull the value to return if deserialization produces {@code null}
      * @param targetType the target Type (supports generics like {@code List<String>})
-     * @return the deserialized object or the default value
+     * @return the deserialized object, or {@code defaultIfNull} if deserialization produces {@code null} (which itself may be {@code null} if a {@code null} default was supplied)
      * @throws IllegalArgumentException if targetType is {@code null}
      * @see #fromJson(String, Object, Class)
      * @see #fromJson(String, Type)
@@ -36837,7 +36876,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <pre>{@code
      * String xml = "<person><name>Alice</name><age>25</age></person>";
      * String result = N.xmlToJson(xml);
-     * // returns {"name": "Alice", "age": "25"} (values are strings since XML carries no type info)
+     * // returns {"name":"Alice","age":"25"} (values are strings since XML carries no type info)
      * }</pre>
      *
      * @param xml the XML string to convert
@@ -40340,12 +40379,13 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param retryTimes the number of retry attempts if execution fails
      * @param retryIntervalInMillis the interval in milliseconds between retries
      * @param retryCondition the condition checked after each attempt to decide whether to retry
-     * @return the result returned by the callable task
+     * @return the result returned by the callable task on the last (successful) attempt, which may be {@code null} if the task returns {@code null}
      * @throws RuntimeException if execution fails and no more retries are allowed
      * @see #runWithRetry(Throwables.Runnable, int, long, Predicate)
      * @see #asyncExecute(Callable, int, long, BiPredicate)
      * @see Retry#withFixedDelay(int, long, BiPredicate)
      */
+    @MayReturnNull
     public static <R> R callWithRetry(final Callable<? extends R> cmd, final int retryTimes, final long retryIntervalInMillis,
             final BiPredicate<? super R, ? super Exception> retryCondition) {
         try {
@@ -41728,10 +41768,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * @param <R> the type of result returned by the command
      * @param cmd the command to call uninterruptibly
-     * @return the result of the command
+     * @return the result of the command, which may be {@code null} if the command returns {@code null}
      * @see #callUninterruptibly(Throwables.LongFunction, long)
      * @see #runUninterruptibly(Throwables.Runnable)
      */
+    @MayReturnNull
     public static <R> R callUninterruptibly(final Throwables.Callable<? extends R, InterruptedException> cmd) throws IllegalArgumentException {
         checkArgNotNull(cmd, cs.cmd);
 
@@ -41774,10 +41815,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param <T> the type of result returned by the command
      * @param cmd the command to call with remaining time in milliseconds
      * @param timeoutInMillis the maximum time to wait in milliseconds
-     * @return the result of the command
+     * @return the result of the command, which may be {@code null} if the command returns {@code null}
      * @see #callUninterruptibly(Throwables.BiFunction, long, TimeUnit)
      * @see #callUninterruptibly(Throwables.Callable)
      */
+    @MayReturnNull
     public static <T> T callUninterruptibly(final Throwables.LongFunction<? extends T, InterruptedException> cmd, final long timeoutInMillis)
             throws IllegalArgumentException {
         checkArgNotNull(cmd, cs.cmd);
@@ -41829,11 +41871,12 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param cmd the command to call with remaining time and unit (nanoseconds)
      * @param timeout the maximum time to wait
      * @param unit the time unit of the timeout argument
-     * @return the result of the command
+     * @return the result of the command, which may be {@code null} if the command returns {@code null}
      * @throws IllegalArgumentException if {@code unit} is {@code null}
      * @see #callUninterruptibly(Throwables.LongFunction, long)
      * @see #callUninterruptibly(Throwables.Callable)
      */
+    @MayReturnNull
     public static <T> T callUninterruptibly(@NotNull final Throwables.BiFunction<Long, TimeUnit, T, InterruptedException> cmd, final long timeout,
             @NotNull final TimeUnit unit) throws IllegalArgumentException {
         checkArgNotNull(cmd, cs.cmd);
@@ -41958,12 +42001,13 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param <R> the type of result returned by the callable
      * @param cmd the callable to execute
      * @param supplierForDefaultIfExceptionOccurred the supplier to provide default value on exception
-     * @return the result of the callable, or the result from the supplier on exception
+     * @return the result of the callable, or the result from the supplier on exception; may be {@code null} if the callable (or, on exception, the supplier) returns {@code null}
      * @see #tryOrDefaultIfExceptionOccurred(Callable, Comparable)
      * @see #tryOrEmptyIfExceptionOccurred(Callable)
      * @see Try#call(Callable, Supplier)
      */
     @Beta
+    @MayReturnNull
     public static <R> R tryOrDefaultIfExceptionOccurred(final Callable<? extends R> cmd, final Supplier<R> supplierForDefaultIfExceptionOccurred) {
         try {
             return cmd.call();
@@ -42000,12 +42044,13 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param <R> the type of result returned by the callable (must extend Comparable to avoid ambiguity)
      * @param cmd the callable to execute
      * @param defaultIfExceptionOccurred the default value to return on exception
-     * @return the result of the callable, or the default value on exception
+     * @return the result of the callable, or the default value on exception; may be {@code null} if the callable (or, on exception, {@code defaultIfExceptionOccurred}) is {@code null}
      * @see #tryOrDefaultIfExceptionOccurred(Callable, Supplier)
      * @see #tryOrEmptyIfExceptionOccurred(Callable)
      * @see Try#call(Callable, Comparable)
      */
     @Beta
+    @MayReturnNull
     public static <R extends Comparable<? super R>> R tryOrDefaultIfExceptionOccurred(final Callable<? extends R> cmd, final R defaultIfExceptionOccurred) {
         try {
             return cmd.call();
@@ -42043,12 +42088,13 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param init the initial value to pass to the function
      * @param func the function to apply
      * @param supplierForDefaultIfExceptionOccurred the supplier to provide default value on exception
-     * @return the result of the function, or the result from the supplier on exception
+     * @return the result of the function, or the result from the supplier on exception; may be {@code null} if the function (or, on exception, the supplier) returns {@code null}
      * @see #tryOrDefaultIfExceptionOccurred(Object, Throwables.Function, Comparable)
      * @see #tryOrEmptyIfExceptionOccurred(Object, Throwables.Function)
      * @see Try#call(Callable, Supplier)
      */
     @Beta
+    @MayReturnNull
     public static <T, R> R tryOrDefaultIfExceptionOccurred(final T init, final Throwables.Function<? super T, ? extends R, ? extends Exception> func,
             final Supplier<R> supplierForDefaultIfExceptionOccurred) {
         try {
@@ -42090,12 +42136,13 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param init the initial value to pass to the function
      * @param func the function to apply
      * @param defaultIfExceptionOccurred the default value to return on exception
-     * @return the result of the function, or the default value on exception
+     * @return the result of the function, or the default value on exception; may be {@code null} if the function (or, on exception, {@code defaultIfExceptionOccurred}) is {@code null}
      * @see #tryOrDefaultIfExceptionOccurred(Object, Throwables.Function, Supplier)
      * @see #tryOrEmptyIfExceptionOccurred(Object, Throwables.Function)
      * @see Try#call(Callable, Comparable)
      */
     @Beta
+    @MayReturnNull
     public static <T, R extends Comparable<? super R>> R tryOrDefaultIfExceptionOccurred(final T init,
             final Throwables.Function<? super T, ? extends R, ? extends Exception> func, final R defaultIfExceptionOccurred) {
         try {
@@ -42774,12 +42821,13 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * @param <T> the type of the object to be printed
      * @param obj the object to be printed, may be null
-     * @return the same object that was printed, enabling method chaining
+     * @return the same object that was printed (which is {@code null} if {@code obj} is {@code null}), enabling method chaining
      * @see #toString(Object)
      * @see #fprintln(String, Object...)
      * @see System#out
      */
     @SuppressWarnings("rawtypes")
+    @MayReturnNull
     public static <T> T println(final T obj) {
         if (obj instanceof Collection) {
             //noinspection resource

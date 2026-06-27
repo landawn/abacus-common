@@ -384,12 +384,11 @@ public class ObjectArrayType<T> extends AbstractArrayType<T[]> { //NOSONAR
     /**
      * Converts an array to a Collection by adding all array elements to the provided collection.
      *
-     * @param <E> the element type of the collection
      * @param x the array to convert
      * @param output the collection to add elements to
      */
     @Override
-    public <E> void arrayToCollection(final T[] x, final Collection<E> output) {
+    public void arrayToCollection(final T[] x, final Collection<?> output) {
         if (N.notEmpty(x)) {
             final Collection<Object> c = (Collection<Object>) output;
 

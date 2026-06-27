@@ -358,11 +358,10 @@ public final class PrimitiveShortArrayType extends AbstractPrimitiveArrayType<sh
      *
      * @param x the short array to convert
      * @param output the Collection to add the array elements to
-     * @param <E> the element type accepted by the output collection
      * @throws ClassCastException if the output collection cannot accept Short objects
      */
     @Override
-    public <E> void arrayToCollection(final short[] x, final Collection<E> output) {
+    public void arrayToCollection(final short[] x, final Collection<?> output) {
         if (N.notEmpty(x)) {
             final Collection<Object> c = (Collection<Object>) output;
 

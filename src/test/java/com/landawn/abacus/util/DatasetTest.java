@@ -8841,4 +8841,25 @@ public class DatasetTest extends AbstractTest {
         assertThrows(IllegalStateException.class, () -> frozen.renameColumn("name", "renamed"));
     }
 
+    @Test
+    public void testCopyOutOfRangeRowIndexThrowsIndexOutOfBounds() {
+        // Dataset.copy(int,int) is contractually documented to throw IndexOutOfBoundsException for an
+        // invalid row-index range, consistent with slice(int,int)/stream(int,int). The private copy()
+        // previously skipped validation: from>to surfaced an IllegalArgumentException from List.subList,
+        // and an out-of-range range on a column-less Dataset was silently a no-op.
+        final Dataset ds = Dataset.rows(Arrays.asList("id", "name"), new Object[][] { { 1, "Alice" }, { 2, "Bob" }, { 3, "Charlie" } });
+
+        assertThrows(IndexOutOfBoundsException.class, () -> ds.copy(2, 1)); // from > to (was IllegalArgumentException)
+        assertThrows(IndexOutOfBoundsException.class, () -> ds.copy(0, ds.size() + 1));
+        assertThrows(IndexOutOfBoundsException.class, () -> ds.copy(-1, 2));
+
+        // A column-less / empty Dataset must still validate the range (was silently a no-op).
+        final Dataset empty = N.newEmptyDataset();
+        assertThrows(IndexOutOfBoundsException.class, () -> empty.copy(5, 10));
+
+        // Valid ranges keep working.
+        assertEquals(2, ds.copy(1, 3).size());
+        assertEquals(0, empty.copy(0, 0).size());
+    }
+
 }

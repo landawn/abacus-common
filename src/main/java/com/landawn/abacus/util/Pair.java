@@ -1077,8 +1077,9 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
      *
      * <p>The format is: {@code (left, right)}</p>
      *
-     * <p>This format is compatible with Apache Commons Lang's Pair.toString()
-     * for consistency across libraries.</p>
+     * <p>This parenthesized, comma-separated format is similar to Apache Commons Lang's
+     * {@code Pair.toString()}, but not character-identical: this implementation includes a space
+     * after the comma ({@code (left, right)}) whereas Commons Lang uses none ({@code (left,right)}).</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1093,6 +1094,6 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
      */
     @Override
     public String toString() {
-        return "(" + N.toString(left) + ", " + N.toString(right) + ")"; // To align with Pair.toString() in Apache Commons Lang
+        return "(" + N.toString(left) + ", " + N.toString(right) + ")"; // parenthesized, comma+space form (similar to Apache Commons Lang Pair, which uses no space)
     }
 }

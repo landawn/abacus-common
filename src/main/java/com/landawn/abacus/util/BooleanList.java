@@ -2268,6 +2268,7 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * the source of randomness is fair.
      *
      * @param rnd the random number generator to use for shuffling; must not be {@code null}
+     * @throws IllegalArgumentException if {@code rnd} is {@code null}
      */
     @Override
     public void shuffle(final Random rnd) {

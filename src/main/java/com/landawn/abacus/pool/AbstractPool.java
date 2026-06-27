@@ -306,6 +306,7 @@ public abstract class AbstractPool implements Pool {
      * }</pre>
      *
      * @return a PoolStats object containing current pool statistics
+     * @throws IllegalStateException if the pool has been closed
      */
     @Override
     public PoolStats stats() {
@@ -329,6 +330,7 @@ public abstract class AbstractPool implements Pool {
      * }</pre>
      *
      * @return {@code true} if the pool contains no objects, {@code false} otherwise
+     * @throws IllegalStateException if the pool has been closed
      */
     @Override
     public boolean isEmpty() {

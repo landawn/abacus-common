@@ -36,9 +36,9 @@ import java.lang.annotation.Target;
  * <p>This annotation helps maintain clear boundaries between production and test code,
  * making it easier to identify code that should not be used in production contexts.</p>
  *
- * <p>Because {@code @Target} includes {@link ElementType#ANNOTATION_TYPE}, it may also be applied
- * to other annotation declarations as a meta-annotation flagging that the annotation API itself is
- * still experimental and may change; for that purpose prefer the dedicated {@link Beta} marker.
+ * <p>Because {@code @Target} includes {@link ElementType#ANNOTATION_TYPE}, it may also annotate
+ * other annotation declarations. To instead mark an API as experimental or subject to change,
+ * prefer the dedicated {@link Beta} marker.
  * Retention is {@link RetentionPolicy#CLASS} so the marker survives in bytecode for tooling without
  * occupying runtime reflection metadata.</p>
  *

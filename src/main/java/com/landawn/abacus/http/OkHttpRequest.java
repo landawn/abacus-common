@@ -28,7 +28,6 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
 
 import com.landawn.abacus.annotation.Beta;
-import com.landawn.abacus.annotation.SuppressFBWarnings;
 import com.landawn.abacus.exception.UncheckedIOException;
 import com.landawn.abacus.parser.KryoParser;
 import com.landawn.abacus.parser.ParserFactory;
@@ -110,7 +109,6 @@ public final class OkHttpRequest {
     private final Request.Builder requestBuilder;
     private RequestBody body;
 
-    @SuppressFBWarnings("URF_UNREAD_FIELD")
     private boolean closeHttpClientAfterExecution = false;
 
     OkHttpRequest(final String url, final HttpUrl httpUrl, final OkHttpClient httpClient) {
@@ -582,7 +580,7 @@ public final class OkHttpRequest {
     }
 
     /**
-     * Merges the given header entries into the headers already on this settings object.
+     * Merges the given header entries into the headers already on this request.
      * For each entry in the map, a header with the same name is overwritten with the new value,
      * while any existing headers whose names are <i>not</i> present in the map are kept unchanged.
      * This is a merge, not a replace-all: use {@link #setHeaders(HttpHeaders)} if you want to

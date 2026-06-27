@@ -3090,7 +3090,7 @@ public final class ParserUtil {
          * }</pre>
          *
          * @param strValue the string value to parse
-         * @return the parsed value in the appropriate type, or {@code null} if {@code strValue} is {@code null} and a number format is configured
+         * @return the parsed value in the appropriate type, or {@code null} when {@code strValue} is {@code null} (number/date formats and most types pass {@code null} through; the primitive {@code long} "long"-format reader instead returns {@code 0L})
          * @throws UnsupportedOperationException if a date format is specified for an unsupported type
          * @throws RuntimeException if a number format is specified and {@code strValue} cannot be parsed against it
          */

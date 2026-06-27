@@ -997,13 +997,12 @@ public abstract class AbstractType<T> implements Type<T> {
      * Converts an array to a collection by adding elements to the output collection.
      * Default implementation throws UnsupportedOperationException.
      *
-     * @param <E> the element type
      * @param array the array to convert
      * @param output the collection to add elements to
      * @throws UnsupportedOperationException if not supported by this type
      */
     @Override
-    public <E> void arrayToCollection(final T array, final Collection<E> output) {
+    public void arrayToCollection(final T array, final Collection<?> output) {
         throw new UnsupportedOperationException(name() + " does not support arrayToCollection operation");
     }
 

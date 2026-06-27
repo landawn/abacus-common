@@ -253,12 +253,11 @@ public final class PrimitiveDoubleArrayType extends AbstractPrimitiveArrayType<d
      * Each primitive double value is boxed to a Double object and added to the output collection.
      * Does nothing if the input array is {@code null} or empty.
      *
-     * @param <E> the type of elements in the output collection
      * @param x the double array to convert
      * @param output the Collection to add the boxed Double values to
      */
     @Override
-    public <E> void arrayToCollection(final double[] x, final Collection<E> output) {
+    public void arrayToCollection(final double[] x, final Collection<?> output) {
         if (N.notEmpty(x)) {
             final Collection<Object> c = (Collection<Object>) output;
 

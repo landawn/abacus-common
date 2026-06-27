@@ -174,6 +174,35 @@ public class GenericKeyedObjectPoolTest extends TestBase {
     }
 
     @Test
+    public void testPut_valueExpiringDuringInLockMeasure_isRejected() {
+        // GenericKeyedObjectPool.put(K,E) calls memoryMeasure.sizeOf(...) inside the lock, AFTER the
+        // pre-lock expiry check. A value with little life left can therefore expire during that in-lock
+        // work and must NOT be pooled (mirrors GenericObjectPool.add and the timed put, both of which
+        // re-check expiry in-lock). Make sizeOf() sleep longer than the value's liveTime.
+        final KeyedObjectPool.MemoryMeasure<String, TestPoolable> slowMeasure = (k, v) -> {
+            try {
+                Thread.sleep(200);
+            } catch (final InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+            return 1L;
+        };
+        final GenericKeyedObjectPool<String, TestPoolable> memPool = new GenericKeyedObjectPool<>(10, 0, EvictionPolicy.LAST_ACCESS_TIME, 1_000_000L,
+                slowMeasure);
+
+        try {
+            // liveTime 50ms: not expired when put() is called, but expires during the 200ms in-lock sizeOf().
+            final TestPoolable shortLived = new TestPoolable("v", 50, 50);
+
+            assertFalse(memPool.put("k", shortLived), "a value that expired during the in-lock measure must be rejected, not pooled");
+            assertEquals(0, memPool.size());
+            assertNull(memPool.get("k"));
+        } finally {
+            memPool.close();
+        }
+    }
+
+    @Test
     public void testPutWithMemoryMeasureAndUnlimitedMemory() {
         KeyedObjectPool.MemoryMeasure<String, TestPoolable> measure = (k, v) -> k.length() + 100;
         GenericKeyedObjectPool<String, TestPoolable> memPool = new GenericKeyedObjectPool<>(10, 0, EvictionPolicy.LAST_ACCESS_TIME, 0, measure);

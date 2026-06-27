@@ -1169,7 +1169,7 @@ public class TypeFactoryTest extends TestBase {
                 }
 
                 @Override
-                public <E> void arrayToCollection(CustomClass3 x, Collection<E> output) {
+                public void arrayToCollection(CustomClass3 x, Collection<?> output) {
                     throw new UnsupportedOperationException();
                 }
 
@@ -1488,7 +1488,7 @@ public class TypeFactoryTest extends TestBase {
                 }
 
                 @Override
-                public <E> void arrayToCollection(Object x, Collection<E> output) {
+                public void arrayToCollection(Object x, Collection<?> output) {
                     throw new UnsupportedOperationException();
                 }
 

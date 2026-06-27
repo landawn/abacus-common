@@ -1386,12 +1386,11 @@ public interface Type<T> {
      * Converts an array to a collection by adding elements to the output collection.
      * Only supported for array types.
      *
-     * @param <E> the element type
      * @param x the array to convert
      * @param output the collection to add elements to
      * @throws UnsupportedOperationException if not an array type
      */
-    <E> void arrayToCollection(T x, Collection<E> output);
+    void arrayToCollection(T x, Collection<?> output);
 
     /**
      * Calculates the hash code for a value of this type.

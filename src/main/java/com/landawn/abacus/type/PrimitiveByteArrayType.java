@@ -409,12 +409,11 @@ public final class PrimitiveByteArrayType extends AbstractPrimitiveArrayType<byt
      * Each primitive byte value is boxed to a Byte object and added to the output collection.
      * Does nothing if the input array is {@code null} or empty.
      *
-     * @param <E> the type of elements in the output collection
      * @param x the byte array to convert
      * @param output the Collection to add the boxed Byte values to
      */
     @Override
-    public <E> void arrayToCollection(final byte[] x, final Collection<E> output) {
+    public void arrayToCollection(final byte[] x, final Collection<?> output) {
         if (N.notEmpty(x)) {
             final Collection<Object> c = (Collection<Object>) output;
 

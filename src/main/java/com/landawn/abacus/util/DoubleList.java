@@ -2550,7 +2550,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * <p>If the list contains fewer than 2 elements, no shuffling is performed.</p>
      *
      * @param rnd the source of randomness to use to shuffle the list. Must not be {@code null}.
-     * @throws NullPointerException if {@code rnd} is {@code null}
+     * @throws IllegalArgumentException if {@code rnd} is {@code null}
      */
     @Override
     public void shuffle(final Random rnd) {

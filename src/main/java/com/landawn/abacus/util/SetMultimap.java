@@ -730,7 +730,6 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
      *
      * @param <K> the type of the keys in the map
      * @param <E> the type of the elements in the set
-     * @param <V> the type of the value set, which must extend {@code Set<E>}
      * @param map the map to be wrapped into a SetMultimap; must not be {@code null} and must not contain {@code null} or empty values
      * @return a SetMultimap instance backed by the provided map
      * @throws IllegalArgumentException if the provided map is {@code null} or contains a {@code null} or empty value
@@ -738,7 +737,7 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
      */
     @SuppressWarnings("rawtypes")
     @Beta
-    public static <K, E, V extends Set<E>> SetMultimap<K, E> wrap(final Map<K, V> map) throws IllegalArgumentException {
+    public static <K, E> SetMultimap<K, E> wrap(final Map<K, ? extends Set<E>> map) throws IllegalArgumentException {
         N.checkArgNotNull(map);
         N.checkArgument(map.values().stream().noneMatch(v -> v == null || v.isEmpty()), "The specified map contains null or empty value: %s", map);
 

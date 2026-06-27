@@ -97,7 +97,7 @@ import com.landawn.abacus.util.stream.IntStream;
  * IntList set2 = IntList.of(3, 4, 5, 6);
  * IntList intersection = set1.intersection(set2);   // returns [3, 4]
  * IntList difference = set1.difference(set2);       // returns [1, 2]
- * IntList union = set1.symmetricDifference(set2);   // returns [1, 2, 5, 6]
+ * IntList symDiff = set1.symmetricDifference(set2); // returns [1, 2, 5, 6] (elements in exactly one list)
  * // Or for full union: IntList u = set1.copy(); u.addAll(set2); u.removeDuplicates();
  *
  * // Sorting and searching
@@ -2637,7 +2637,7 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
      * }</pre>
      *
      * @param rnd the source of randomness to use for shuffling; must not be {@code null}
-     * @throws NullPointerException if {@code rnd} is {@code null}
+     * @throws IllegalArgumentException if {@code rnd} is {@code null}
      */
     @Override
     public void shuffle(final Random rnd) {

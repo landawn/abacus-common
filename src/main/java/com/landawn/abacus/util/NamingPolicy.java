@@ -239,14 +239,16 @@ public enum NamingPolicy {
      *   <li>Underscores (_)</li>
      *   <li>Hyphens (-)</li>
      *   <li>Whitespace</li>
-     *   <li>Case transitions (a lower-case letter or digit followed by an upper-case letter)</li>
+     *   <li>Case transitions (an upper-case letter that is preceded or followed by a lower-case letter)</li>
      * </ul>
      * <p>Because the camel-case policies also split on case transitions, the remainder of each detected
      * word is lower-cased. For example {@code CAMEL_CASE.convert("helloWorldAPI")} yields
      * {@code "helloWorldApi"} and {@code UPPER_CAMEL_CASE.convert("XMLParser")} yields {@code "XmlParser"}.</p>
-     * <p>The {@link #SNAKE_CASE}, {@link #SCREAMING_SNAKE_CASE}, and {@link #KEBAB_CASE} policies
-     * insert their separator only at case transitions and preserve any existing underscores, hyphens,
-     * or spaces in the input. The {@link #NO_CHANGE} policy performs no transformation at all.</p>
+     * <p>The {@link #SNAKE_CASE}, {@link #SCREAMING_SNAKE_CASE}, and {@link #KEBAB_CASE} policies insert
+     * their separator at case transitions and also normalize any existing underscores, hyphens, or whitespace
+     * to that separator (for example {@code SNAKE_CASE.convert("first-name")} yields {@code "first_name"}, and
+     * {@code KEBAB_CASE} normalizes underscores to hyphens). The {@link #NO_CHANGE} policy performs no
+     * transformation at all.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code

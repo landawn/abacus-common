@@ -329,12 +329,11 @@ public final class PrimitiveFloatArrayType extends AbstractPrimitiveArrayType<fl
      * // list now contains: [1.5f, 2.7f, 3.14f]
      * }</pre>
      *
-     * @param <E> the type of elements in the output collection
      * @param x the float array to convert
      * @param output the Collection to add the boxed Float values to
      */
     @Override
-    public <E> void arrayToCollection(final float[] x, final Collection<E> output) {
+    public void arrayToCollection(final float[] x, final Collection<?> output) {
         if (N.notEmpty(x)) {
             final Collection<Object> c = (Collection<Object>) output;
 

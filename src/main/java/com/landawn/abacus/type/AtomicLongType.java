@@ -209,12 +209,14 @@ public class AtomicLongType extends AbstractAtomicType<AtomicLong> {
 
     /**
      * Writes an {@link java.util.concurrent.atomic.AtomicLong} value to a {@link CharacterWriter}.
-     * Writes the literal {@code "null"} character array if {@code x} is {@code null}; otherwise
-     * uses the writer's optimized {@code write(long)} method with the contained long value.
-     * {@code config} is not used.
+     * If {@code x} is {@code null}, writes the literal {@code "null"} character array unless
+     * {@code config.isWriteNullNumberAsZero()} is set (in which case {@code 0} is written); otherwise writes the
+     * contained long value via the writer's optimized {@code write(long)} method. When
+     * {@code config.isWriteLongAsString()} is set with a non-zero {@code stringQuotation}, the value is wrapped
+     * in that quotation character.
      * <p>
      * This method is specifically designed for JSON/XML serialization: it writes this type's literal form to the
-     * {@code CharacterWriter}. String quotation/escaping config is ignored.
+     * {@code CharacterWriter}.
      * <p>
      * <b>serializeTo vs. appendTo:</b> {@code serializeTo} produces machine-readable JSON/XML literal output,
      * whereas {@code appendTo} produces a plain, human-readable {@code toString()}-style rendering without JSON/XML
@@ -222,7 +224,8 @@ public class AtomicLongType extends AbstractAtomicType<AtomicLong> {
      *
      * @param writer the {@code CharacterWriter} to write to
      * @param x the {@code AtomicLong} value to write; may be {@code null}
-     * @param config the serialization configuration (unused for long values); may be {@code null}
+     * @param config the serialization configuration (honors {@code writeNullNumberAsZero} and
+     *               {@code writeLongAsString}/{@code stringQuotation}); may be {@code null}
      * @throws IOException if an I/O error occurs during writing
      */
     @Override
