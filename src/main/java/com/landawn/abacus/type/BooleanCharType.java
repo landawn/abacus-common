@@ -84,9 +84,9 @@ public final class BooleanCharType extends AbstractType<Boolean> {
      * Maps {@code true} to {@code "Y"} and {@code false} / {@code null} to {@code "N"}.
      *
      * <p>The returned string is a serializable representation designed to be parsed back into an equivalent value
-     * via {@link #valueOf(String)}; {@code stringOf} and {@code valueOf} are inverse operations that round-trip. This
-     * is the key distinction from {@link Object#toString()}, whose result is not guaranteed to be convertible back
-     * into the original value.</p>
+     * via {@link #valueOf(String)}. Non-null boolean values round-trip exactly; {@code null} is encoded as {@code "N"}
+     * and decodes as {@link Boolean#FALSE}. This is the key distinction from {@link Object#toString()}, whose result is
+     * not guaranteed to be convertible back into the original value.</p>
      *
      * @param b the {@code Boolean} value to convert; may be {@code null}
      * @return {@code "Y"} if {@code b} is {@code Boolean.TRUE}, {@code "N"} otherwise
@@ -103,9 +103,9 @@ public final class BooleanCharType extends AbstractType<Boolean> {
      * The comparison is case-insensitive; {@code "Y"} or {@code "y"} yields {@code true}.
      * Any other value (including {@code null}) yields {@code false}.
      *
-     * <p>This method is the inverse of {@code stringOf} and round-trips with it: it parses the string produced by
-     * {@code stringOf} back into a value of this type. Strings produced by {@link Object#toString()} are not
-     * guaranteed to be parseable in this way.</p>
+     * <p>This method parses strings produced by {@code stringOf} back into values of this type. Non-null boolean
+     * values round-trip exactly; the {@code "N"} produced for {@code null} decodes as {@link Boolean#FALSE}. Strings
+     * produced by {@link Object#toString()} are not guaranteed to be parseable in this way.</p>
      *
      * @param str the string to parse; may be {@code null}
      * @return {@link Boolean#TRUE} if {@code str} equals {@code "Y"} (case-insensitive),

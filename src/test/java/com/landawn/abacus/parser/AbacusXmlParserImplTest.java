@@ -339,7 +339,7 @@ public class AbacusXmlParserImplTest extends TestBase {
             return;
         }
 
-        XmlSerConfig config = new XmlSerConfig().setSupportCircularReference(true);
+        XmlSerConfig config = new XmlSerConfig().setCircularReferenceSupported(true);
         XmlParser parser = new AbacusXmlParserImpl(XmlParserType.StAX, config, null);
         CircularRefBean bean = new CircularRefBean();
         bean.setName("cycle");
@@ -1233,7 +1233,7 @@ public class AbacusXmlParserImplTest extends TestBase {
         root.put("a1", shared);
         root.put("a2", shared);
 
-        final com.landawn.abacus.parser.XmlSerConfig xsc = new com.landawn.abacus.parser.XmlSerConfig().setSupportCircularReference(true);
+        final com.landawn.abacus.parser.XmlSerConfig xsc = new com.landawn.abacus.parser.XmlSerConfig().setCircularReferenceSupported(true);
         final String xml = new AbacusXmlParserImpl(XmlParserType.StAX).serialize(root, xsc);
 
         final int first = xml.indexOf("name");

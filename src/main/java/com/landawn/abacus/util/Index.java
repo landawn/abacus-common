@@ -281,9 +281,26 @@ import com.landawn.abacus.util.u.OptionalInt;
  * }
  * }</pre>
  *
+ * <p><b>Three index-finding APIs, two "not found" conventions:</b> the same "find the position of an element"
+ * operation appears in three places in this library, and the method name signals which convention applies:
+ * <ul>
+ *   <li>{@code Index.of(...)} / {@code Index.last(...)} (this class) return an {@link OptionalInt} that is
+ *       <i>empty</i> when nothing matches. Note that {@code of} reads like a factory method but here means
+ *       <i>index of the first occurrence</i>, and {@code last} the index of the last occurrence.</li>
+ *   <li>{@link N#indexOf} / {@link N#lastIndexOf} (arrays and collections) return a primitive {@code int}, using
+ *       {@code -1} for "not found".</li>
+ *   <li>{@link Strings#indexOf(String, String)} / {@link Strings#lastIndexOf(String, String)} (strings) likewise
+ *       return an {@code int} with {@code -1} for "not found".</li>
+ * </ul>
+ * <p>Prefer {@code Index} for {@link OptionalInt} ergonomics; prefer {@code N}/{@code Strings} when a bare
+ * {@code int}/{@code -1} result is wanted.</p>
+ *
  * @see OptionalInt
  * @see BitSet
  * @see N#indexOf
+ * @see N#lastIndexOf
+ * @see Strings#indexOf(String, String)
+ * @see Strings#lastIndexOf(String, String)
  * @see String#indexOf(String)
  * @see Collections#indexOfSubList
  * @see Arrays#binarySearch

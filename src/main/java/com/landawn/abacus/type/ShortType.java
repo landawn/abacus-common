@@ -68,7 +68,7 @@ public final class ShortType extends AbstractShortType {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<Short> type = TypeFactory.getType(Short.class);
-     * ResultSet rs = org.mockito.Mockito.mock(ResultSet.class);
+     * ResultSet rs = Mockito.mock(ResultSet.class);
      * Short value = type.get(rs, 1);   // retrieves Short from column 1
      * }</pre>
      *
@@ -92,7 +92,7 @@ public final class ShortType extends AbstractShortType {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<Short> type = TypeFactory.getType(Short.class);
-     * ResultSet rs = org.mockito.Mockito.mock(ResultSet.class);
+     * ResultSet rs = Mockito.mock(ResultSet.class);
      * Short value = type.get(rs, "value");   // retrieves Short from "value" column
      * }</pre>
      *

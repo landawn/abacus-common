@@ -516,8 +516,9 @@ public class ImmutableSortedMap<K, V> extends ImmutableMap<K, V> implements Sort
      * If the provided Map is {@code null} or empty, an empty ImmutableSortedMap is returned.
      * Otherwise, a new ImmutableSortedMap is created with the elements of the provided Map.
      *
-     * <p>If the source is a {@link SortedMap}, the returned map uses the same {@link Comparator}
-     * (or natural ordering) as the source. Otherwise, the entries are inserted into a new
+     * <p>If a non-empty source is a {@link SortedMap}, the returned map uses the same {@link Comparator}
+     * (or natural ordering) as the source. Empty sources return the shared empty map.
+     * Otherwise, the entries are inserted into a new
      * {@link TreeMap} using the natural ordering of the keys.</p>
      *
      * <p><b>Usage Examples:</b></p>

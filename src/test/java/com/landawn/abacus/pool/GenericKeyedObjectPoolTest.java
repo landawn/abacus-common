@@ -103,6 +103,17 @@ public class GenericKeyedObjectPoolTest extends TestBase {
     }
 
     @Test
+    public void testPutClosedPoolRejectsExpiredValueWithIllegalState() throws InterruptedException {
+        GenericKeyedObjectPool<String, TestPoolable> closedPool = new GenericKeyedObjectPool<>(1, 0, EvictionPolicy.LAST_ACCESS_TIME);
+        TestPoolable expired = new TestPoolable("expired", 1, 1);
+
+        Thread.sleep(20);
+        closedPool.close();
+
+        assertThrows(IllegalStateException.class, () -> closedPool.put("key", expired));
+    }
+
+    @Test
     public void testPutToFullPoolWithoutAutoBalance() {
         GenericKeyedObjectPool<String, TestPoolable> noBalancePool = new GenericKeyedObjectPool<>(3, 0, EvictionPolicy.LAST_ACCESS_TIME, false, 0.2f);
 
@@ -195,6 +206,30 @@ public class GenericKeyedObjectPoolTest extends TestBase {
             final TestPoolable shortLived = new TestPoolable("v", 50, 50);
 
             assertFalse(memPool.put("k", shortLived), "a value that expired during the in-lock measure must be rejected, not pooled");
+            assertEquals(0, memPool.size());
+            assertNull(memPool.get("k"));
+        } finally {
+            memPool.close();
+        }
+    }
+
+    @Test
+    public void testTimedPut_valueExpiringDuringInLockMeasure_isRejected() throws InterruptedException {
+        final KeyedObjectPool.MemoryMeasure<String, TestPoolable> slowMeasure = (k, v) -> {
+            try {
+                Thread.sleep(200);
+            } catch (final InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+            return 1L;
+        };
+        final GenericKeyedObjectPool<String, TestPoolable> memPool = new GenericKeyedObjectPool<>(10, 0, EvictionPolicy.LAST_ACCESS_TIME, 1_000_000L,
+                slowMeasure);
+
+        try {
+            final TestPoolable shortLived = new TestPoolable("v", 50, 50);
+
+            assertFalse(memPool.put("k", shortLived, 1, TimeUnit.SECONDS), "timed put must reject a value that expires during the in-lock memory measure");
             assertEquals(0, memPool.size());
             assertNull(memPool.get("k"));
         } finally {
@@ -807,6 +842,28 @@ public class GenericKeyedObjectPoolTest extends TestBase {
         assertEquals(1, fifoPool.size());
         assertTrue(v1.isDestroyed());
         assertFalse(v2.isDestroyed());
+
+        fifoPool.close();
+    }
+
+    @Test
+    public void testFifoEvictsFirstPutNotOldestCreated() throws InterruptedException {
+        GenericKeyedObjectPool<String, TestPoolable> fifoPool = new GenericKeyedObjectPool<>(10, 0, EvictionPolicy.FIFO, true, 0.5f);
+
+        TestPoolable older = new TestPoolable("older");
+        Thread.sleep(10);
+        TestPoolable newer = new TestPoolable("newer");
+
+        fifoPool.put("newer", newer);
+        fifoPool.put("older", older);
+
+        fifoPool.vacate(1);
+
+        assertEquals(1, fifoPool.size());
+        assertTrue(newer.isDestroyed());
+        assertFalse(older.isDestroyed());
+        assertFalse(fifoPool.containsKey("newer"));
+        assertTrue(fifoPool.containsKey("older"));
 
         fifoPool.close();
     }

@@ -68,7 +68,7 @@ public final class EscapeUtil {
      * as the foundation for a custom translator.
      */
     public static final CharSequenceTranslator ESCAPE_JAVA = new LookupTranslator(new String[][] { { "\"", "\\\"" }, { "\\", "\\\\" }, })
-            .with(new LookupTranslator(BeanArrays.JAVA_CTRL_CHARS_ESCAPE()))
+            .with(new LookupTranslator(BeanArrays.javaCtrlCharsEscape()))
             .with(JavaUnicodeEscaper.outsideOf(32, 0x7f));
 
     /**
@@ -80,7 +80,7 @@ public final class EscapeUtil {
      */
     public static final CharSequenceTranslator ESCAPE_ECMASCRIPT = new AggregateTranslator(
             new LookupTranslator(new String[][] { { "'", "\\'" }, { "\"", "\\\"" }, { "\\", "\\\\" }, { "/", "\\/" } }),
-            new LookupTranslator(BeanArrays.JAVA_CTRL_CHARS_ESCAPE()), JavaUnicodeEscaper.outsideOf(32, 0x7f));
+            new LookupTranslator(BeanArrays.javaCtrlCharsEscape()), JavaUnicodeEscaper.outsideOf(32, 0x7f));
 
     /**
      * Translator object for escaping JSON.
@@ -90,8 +90,8 @@ public final class EscapeUtil {
      * as the foundation for a custom translator.
      */
     public static final CharSequenceTranslator ESCAPE_JSON = new AggregateTranslator(
-            new LookupTranslator(new String[][] { { "\"", "\\\"" }, { "\\", "\\\\" }, { "/", "\\/" } }),
-            new LookupTranslator(BeanArrays.JAVA_CTRL_CHARS_ESCAPE()), JavaUnicodeEscaper.outsideOf(32, 0x7f));
+            new LookupTranslator(new String[][] { { "\"", "\\\"" }, { "\\", "\\\\" }, { "/", "\\/" } }), new LookupTranslator(BeanArrays.javaCtrlCharsEscape()),
+            JavaUnicodeEscaper.outsideOf(32, 0x7f));
 
     /**
      * Translator object for escaping XML 1.0.
@@ -100,8 +100,8 @@ public final class EscapeUtil {
      * object allows the XML escaping functionality to be used
      * as the foundation for a custom translator.
      */
-    public static final CharSequenceTranslator ESCAPE_XML10 = new AggregateTranslator(new LookupTranslator(BeanArrays.BASIC_ESCAPE()),
-            new LookupTranslator(BeanArrays.APOS_ESCAPE()),
+    public static final CharSequenceTranslator ESCAPE_XML10 = new AggregateTranslator(new LookupTranslator(BeanArrays.basicEscape()),
+            new LookupTranslator(BeanArrays.aposEscape()),
             new LookupTranslator(new String[][] { { "\u0000", Strings.EMPTY }, { "\u0001", Strings.EMPTY }, { "\u0002", Strings.EMPTY },
                     { "\u0003", Strings.EMPTY }, { "\u0004", Strings.EMPTY }, { "\u0005", Strings.EMPTY }, { "\u0006", Strings.EMPTY },
                     { "\u0007", Strings.EMPTY }, { "\u0008", Strings.EMPTY }, { "\u000b", Strings.EMPTY }, { "\u000c", Strings.EMPTY },
@@ -119,8 +119,8 @@ public final class EscapeUtil {
      * object allows the XML escaping functionality to be used
      * as the foundation for a custom translator.
      */
-    public static final CharSequenceTranslator ESCAPE_XML11 = new AggregateTranslator(new LookupTranslator(BeanArrays.BASIC_ESCAPE()),
-            new LookupTranslator(BeanArrays.APOS_ESCAPE()),
+    public static final CharSequenceTranslator ESCAPE_XML11 = new AggregateTranslator(new LookupTranslator(BeanArrays.basicEscape()),
+            new LookupTranslator(BeanArrays.aposEscape()),
             new LookupTranslator(new String[][] { { "\u0000", Strings.EMPTY }, { "\u000b", "&#11;" }, { "\u000c", "&#12;" }, { "\ufffe", Strings.EMPTY },
                     { "\uffff", Strings.EMPTY } }),
             NumericBeanEscaper.between(0x1, 0x8), NumericBeanEscaper.between(0xe, 0x1f), NumericBeanEscaper.between(0x7f, 0x84),
@@ -133,8 +133,8 @@ public final class EscapeUtil {
      * object allows the HTML escaping functionality to be used
      * as the foundation for a custom translator.
      */
-    public static final CharSequenceTranslator ESCAPE_HTML3 = new AggregateTranslator(new LookupTranslator(BeanArrays.BASIC_ESCAPE()),
-            new LookupTranslator(BeanArrays.ISO8859_1_ESCAPE()));
+    public static final CharSequenceTranslator ESCAPE_HTML3 = new AggregateTranslator(new LookupTranslator(BeanArrays.basicEscape()),
+            new LookupTranslator(BeanArrays.iso8859_1Escape()));
 
     /**
      * Translator object for escaping HTML version 4.0.
@@ -143,8 +143,8 @@ public final class EscapeUtil {
      * object allows the HTML escaping functionality to be used
      * as the foundation for a custom translator.
      */
-    public static final CharSequenceTranslator ESCAPE_HTML4 = new AggregateTranslator(new LookupTranslator(BeanArrays.BASIC_ESCAPE()),
-            new LookupTranslator(BeanArrays.ISO8859_1_ESCAPE()), new LookupTranslator(BeanArrays.HTML40_EXTENDED_ESCAPE()));
+    public static final CharSequenceTranslator ESCAPE_HTML4 = new AggregateTranslator(new LookupTranslator(BeanArrays.basicEscape()),
+            new LookupTranslator(BeanArrays.iso8859_1Escape()), new LookupTranslator(BeanArrays.html40ExtendedEscape()));
 
     /**
      * Translator object for escaping individual Comma Separated Values.
@@ -166,7 +166,7 @@ public final class EscapeUtil {
      */
     // TODO: throw "illegal character: \92" as an Exception if a \ on the end of the Java (as per the compiler)?
     public static final CharSequenceTranslator UNESCAPE_JAVA = new AggregateTranslator(new OctalUnescaper(), // .between('\1', '\377'),
-            new UnicodeUnescaper(), new LookupTranslator(BeanArrays.JAVA_CTRL_CHARS_UNESCAPE()),
+            new UnicodeUnescaper(), new LookupTranslator(BeanArrays.javaCtrlCharsUnescape()),
             new LookupTranslator(new String[][] { { "\\\\", "\\" }, { "\\\"", "\"" }, { "\\'", "'" }, { "\\", "" } }));
 
     /**
@@ -194,8 +194,8 @@ public final class EscapeUtil {
      * object allows the HTML unescaping functionality to be used
      * as the foundation for a custom translator.
      */
-    public static final CharSequenceTranslator UNESCAPE_HTML3 = new AggregateTranslator(new LookupTranslator(BeanArrays.BASIC_UNESCAPE()),
-            new LookupTranslator(BeanArrays.ISO8859_1_UNESCAPE()), new NumericBeanUnescaper());
+    public static final CharSequenceTranslator UNESCAPE_HTML3 = new AggregateTranslator(new LookupTranslator(BeanArrays.basicUnescape()),
+            new LookupTranslator(BeanArrays.iso8859_1Unescape()), new NumericBeanUnescaper());
 
     /**
      * Translator object for unescaping escaped HTML 4.0.
@@ -204,8 +204,8 @@ public final class EscapeUtil {
      * object allows the HTML unescaping functionality to be used
      * as the foundation for a custom translator.
      */
-    public static final CharSequenceTranslator UNESCAPE_HTML4 = new AggregateTranslator(new LookupTranslator(BeanArrays.BASIC_UNESCAPE()),
-            new LookupTranslator(BeanArrays.ISO8859_1_UNESCAPE()), new LookupTranslator(BeanArrays.HTML40_EXTENDED_UNESCAPE()), new NumericBeanUnescaper());
+    public static final CharSequenceTranslator UNESCAPE_HTML4 = new AggregateTranslator(new LookupTranslator(BeanArrays.basicUnescape()),
+            new LookupTranslator(BeanArrays.iso8859_1Unescape()), new LookupTranslator(BeanArrays.html40ExtendedUnescape()), new NumericBeanUnescaper());
 
     /**
      * Translator object for unescaping escaped XML.
@@ -214,8 +214,8 @@ public final class EscapeUtil {
      * object allows the XML unescaping functionality to be used
      * as the foundation for a custom translator.
      */
-    public static final CharSequenceTranslator UNESCAPE_XML = new AggregateTranslator(new LookupTranslator(BeanArrays.BASIC_UNESCAPE()),
-            new LookupTranslator(BeanArrays.APOS_UNESCAPE()), new NumericBeanUnescaper());
+    public static final CharSequenceTranslator UNESCAPE_XML = new AggregateTranslator(new LookupTranslator(BeanArrays.basicUnescape()),
+            new LookupTranslator(BeanArrays.aposUnescape()), new NumericBeanUnescaper());
 
     /**
      * Translator object for unescaping escaped Comma Separated Value entries.
@@ -990,7 +990,7 @@ public final class EscapeUtil {
     }
 
     /**
-     * Translates codepoints to their XML numeric bean escaped value.
+     * Translates codepoints to their XML numeric character reference.
      */
     static class NumericBeanEscaper extends CodePointTranslator {
 
@@ -1367,7 +1367,10 @@ public final class EscapeUtil {
 
         /**
          * Options controlling how a trailing semicolon on a numeric character entity is handled
-         * during unescaping.
+         * during unescaping. One or more values are supplied to the enclosing unescaper's constructor
+         * to select the semicolon-handling policy.
+         *
+         * @see NumericBeanUnescaper#NumericBeanUnescaper(OPTION...)
          */
         public enum OPTION {
 
@@ -1743,7 +1746,7 @@ public final class EscapeUtil {
          * characters to their named HTML 3.x equivalents.
          * @return the mapping array for ISO-8859-1 character escape sequences
          */
-        public static String[][] ISO8859_1_ESCAPE() {
+        public static String[][] iso8859_1Escape() {
             return ISO8859_1_ESCAPE.clone();
         }
 
@@ -1847,10 +1850,10 @@ public final class EscapeUtil {
         };
 
         /**
-         * Reverse of {@link #ISO8859_1_ESCAPE()} for unescaping purposes.
+         * Reverse of {@link #iso8859_1Escape()} for unescaping purposes.
          * @return the mapping array for ISO-8859-1 character unescape sequences
          */
-        public static String[][] ISO8859_1_UNESCAPE() {
+        public static String[][] iso8859_1Unescape() {
             return ISO8859_1_UNESCAPE.clone();
         }
 
@@ -1859,11 +1862,11 @@ public final class EscapeUtil {
 
         /**
          * Mapping to escape additional <a href="http://www.w3.org/TR/REC-html40/sgml/entities.html">character bean
-         * references</a>. Note that this must be used with {@link #ISO8859_1_ESCAPE()} to get the full list of
+         * references</a>. Note that this must be used with {@link #iso8859_1Escape()} to get the full list of
          * HTML 4.0 character entities.
          * @return the mapping array for HTML 4.0 extended character escape sequences
          */
-        public static String[][] HTML40_EXTENDED_ESCAPE() {
+        public static String[][] html40ExtendedEscape() {
             return HTML40_EXTENDED_ESCAPE.clone();
         }
 
@@ -2066,10 +2069,10 @@ public final class EscapeUtil {
         };
 
         /**
-         * Reverse of {@link #HTML40_EXTENDED_ESCAPE()} for unescaping purposes.
+         * Reverse of {@link #html40ExtendedEscape()} for unescaping purposes.
          * @return the mapping array for HTML 4.0 extended character unescape sequences
          */
-        public static String[][] HTML40_EXTENDED_UNESCAPE() {
+        public static String[][] html40ExtendedUnescape() {
             return HTML40_EXTENDED_UNESCAPE.clone();
         }
 
@@ -2082,7 +2085,7 @@ public final class EscapeUtil {
          * Namely: {@code " & < >}.
          * @return the mapping array for basic XML and HTML character escape sequences
          */
-        public static String[][] BASIC_ESCAPE() {
+        public static String[][] basicEscape() {
             return BASIC_ESCAPE.clone();
         }
 
@@ -2094,10 +2097,10 @@ public final class EscapeUtil {
         };
 
         /**
-         * Reverse of {@link #BASIC_ESCAPE()} for unescaping purposes.
+         * Reverse of {@link #basicEscape()} for unescaping purposes.
          * @return the mapping array for basic XML and HTML character unescape sequences
          */
-        public static String[][] BASIC_UNESCAPE() {
+        public static String[][] basicUnescape() {
             return BASIC_UNESCAPE.clone();
         }
 
@@ -2108,7 +2111,7 @@ public final class EscapeUtil {
          * Mapping to escape the apostrophe character to its XML character bean.
          * @return the mapping array for apostrophe character escape sequences
          */
-        public static String[][] APOS_ESCAPE() {
+        public static String[][] aposEscape() {
             return APOS_ESCAPE.clone();
         }
 
@@ -2117,10 +2120,10 @@ public final class EscapeUtil {
         };
 
         /**
-         * Reverse of {@link #APOS_ESCAPE()} for unescaping purposes.
+         * Reverse of {@link #aposEscape()} for unescaping purposes.
          * @return the mapping array for apostrophe character unescape sequences
          */
-        public static String[][] APOS_UNESCAPE() {
+        public static String[][] aposUnescape() {
             return APOS_UNESCAPE.clone();
         }
 
@@ -2133,7 +2136,7 @@ public final class EscapeUtil {
          * Namely: {@code \b \n \t \f \r}.
          * @return the mapping array for Java control character escape sequences
          */
-        public static String[][] JAVA_CTRL_CHARS_ESCAPE() {
+        public static String[][] javaCtrlCharsEscape() {
             return JAVA_CTRL_CHARS_ESCAPE.clone();
         }
 
@@ -2141,10 +2144,10 @@ public final class EscapeUtil {
         private static final String[][] JAVA_CTRL_CHARS_ESCAPE = { { "\b", "\\b" }, { "\n", "\\n" }, { "\t", "\\t" }, { "\f", "\\f" }, { "\r", "\\r" } };
 
         /**
-         * Reverse of {@link #JAVA_CTRL_CHARS_ESCAPE()} for unescaping purposes.
+         * Reverse of {@link #javaCtrlCharsEscape()} for unescaping purposes.
          * @return the mapping array for Java control character unescape sequences
          */
-        public static String[][] JAVA_CTRL_CHARS_UNESCAPE() {
+        public static String[][] javaCtrlCharsUnescape() {
             return JAVA_CTRL_CHARS_UNESCAPE.clone();
         }
 

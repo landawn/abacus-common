@@ -160,7 +160,9 @@ public class OptionalBooleanType extends AbstractOptionalType<OptionalBoolean> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<OptionalBoolean> type = TypeFactory.getType(OptionalBoolean.class);
-     * ResultSet rs = org.mockito.Mockito.mock(ResultSet.class);
+     * ResultSet rs = Mockito.mock(ResultSet.class);
+     * Mockito.when(rs.getObject(1)).thenReturn(Boolean.TRUE);
+     * Mockito.when(rs.getObject(2)).thenReturn(null);
      *
      * // Column contains boolean value true
      * OptionalBoolean opt = type.get(rs, 1);
@@ -190,7 +192,9 @@ public class OptionalBooleanType extends AbstractOptionalType<OptionalBoolean> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<OptionalBoolean> type = TypeFactory.getType(OptionalBoolean.class);
-     * ResultSet rs = org.mockito.Mockito.mock(ResultSet.class);
+     * ResultSet rs = Mockito.mock(ResultSet.class);
+     * Mockito.when(rs.getObject("is_active")).thenReturn(Boolean.TRUE);
+     * Mockito.when(rs.getObject("is_deleted")).thenReturn(null);
      *
      * // Column "is_active" contains boolean value true
      * OptionalBoolean opt = type.get(rs, "is_active");
@@ -220,7 +224,7 @@ public class OptionalBooleanType extends AbstractOptionalType<OptionalBoolean> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<OptionalBoolean> type = TypeFactory.getType(OptionalBoolean.class);
-     * PreparedStatement stmt = org.mockito.Mockito.mock(PreparedStatement.class);
+     * PreparedStatement stmt = Mockito.mock(PreparedStatement.class);
      *
      * OptionalBoolean opt = OptionalBoolean.of(true);
      * type.set(stmt, 2, opt);
@@ -252,7 +256,7 @@ public class OptionalBooleanType extends AbstractOptionalType<OptionalBoolean> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<OptionalBoolean> type = TypeFactory.getType(OptionalBoolean.class);
-     * CallableStatement stmt = org.mockito.Mockito.mock(CallableStatement.class);
+     * CallableStatement stmt = Mockito.mock(CallableStatement.class);
      *
      * OptionalBoolean opt = OptionalBoolean.of(true);
      * type.set(stmt, "p_is_active", opt);

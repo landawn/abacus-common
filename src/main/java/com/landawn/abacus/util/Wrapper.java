@@ -226,12 +226,12 @@ public abstract class Wrapper<T> implements Immutable {
      * map.put(wrapper, "value");
      * System.out.println(wrapper);  // prints using custom toString
      *
-     * // Wrapper for records/tuples with specific formatting
-     * Tuple<String, Integer> tuple = new Tuple<>("key", 100);
-     * Wrapper<Tuple<String, Integer>> tupleWrapper = Wrapper.of(tuple,
-     *     t -> Objects.hash(t.first, t.second),
-     *     (t1, t2) -> Objects.equals(t1.first, t2.first) && Objects.equals(t1.second, t2.second),
-     *     t -> String.format("(%s: %d)", t.first, t.second)
+     * // Wrapper for tuples with specific formatting
+     * Tuple.Tuple2<String, Integer> tuple = Tuple.of("key", 100);
+     * Wrapper<Tuple.Tuple2<String, Integer>> tupleWrapper = Wrapper.of(tuple,
+     *     t -> Objects.hash(t._1, t._2),
+     *     (t1, t2) -> Objects.equals(t1._1, t2._1) && Objects.equals(t1._2, t2._2),
+     *     t -> String.format("(%s: %d)", t._1, t._2)
      * );
      * }</pre>
      *

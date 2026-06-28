@@ -8481,7 +8481,11 @@ public final class IOUtil {
 
         final File[] files = dir.listFiles();
 
-        if (N.isEmpty(files)) {
+        if (files == null) {
+            return false;
+        }
+
+        if (files.length == 0) {
             return true;
         }
 
@@ -9084,6 +9088,10 @@ public final class IOUtil {
      */
     public static BigInteger sizeOfDirectoryAsBigInteger(final File directory) {
         N.checkArgNotNull(directory, cs.directory);
+
+        if (directory.exists() && !directory.isDirectory()) {
+            throw new IllegalArgumentException("'" + directory.getAbsolutePath() + "' is not a directory");
+        }
 
         return sizeOfDirectoryAsBigInteger0(directory);
     }

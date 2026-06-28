@@ -257,7 +257,7 @@ public sealed interface Dataset permits RowDataset {
      * @see #size()
      */
     static Dataset empty() {
-        return RowDataset.EMPTY_DATA_SET;
+        return RowDataset.EMPTY_DATASET;
     }
 
     /**
@@ -1565,11 +1565,16 @@ public sealed interface Dataset permits RowDataset {
      * List<Integer> removedIds = dataset.removeColumn("id");
      * }</pre>
      *
+     * <p><b>Note:</b> unlike the {@code void}-returning row-removal methods ({@link #removeRow(int)},
+     * {@link #removeRows(int, int)}) and the other column-removal methods ({@link #removeColumns(Collection)}),
+     * this method returns the removed column's values.</p>
+     *
      * @param <T> the type of the values in the column.
      * @param columnName the name of the column to be removed. It should be a name that exists in the Dataset.
      * @return a List containing the values of the removed column.
      * @throws IllegalStateException if the Dataset is frozen (read-only).
      * @throws IllegalArgumentException if the specified column name does not exist in the Dataset.
+     * @see #removeRow(int)
      */
     <T> List<T> removeColumn(String columnName) throws IllegalStateException, IllegalArgumentException;
 
@@ -2104,9 +2109,13 @@ public sealed interface Dataset permits RowDataset {
      * dataset.removeRow(2);   // removes the third row (0-based index)
      * }</pre>
      *
+     * <p><b>Note:</b> this row-removal method returns {@code void}; to instead obtain the removed values,
+     * use the column-removal {@link #removeColumn(String)}, which returns the removed column's data.</p>
+     *
      * @param rowIndex the index of the row to be removed. It should be a valid index within the current row range.
      * @throws IllegalStateException if the Dataset is frozen (read-only).
      * @throws IndexOutOfBoundsException if the specified {@code rowIndex} is out of bounds.
+     * @see #removeColumn(String)
      */
     void removeRow(int rowIndex) throws IllegalStateException, IndexOutOfBoundsException;
 

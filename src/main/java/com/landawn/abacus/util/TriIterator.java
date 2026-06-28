@@ -19,6 +19,7 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Objects;
 import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.function.BooleanSupplier;
@@ -1435,9 +1436,11 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
      * @see #unzipToCollections(Supplier, Supplier, Supplier)
      */
     public Triple<List<A>, List<B>, List<C>> unzipToLists(@SuppressWarnings("rawtypes") final Supplier<? extends List> supplier) {
-        final List<A> listA = supplier.get();
-        final List<B> listB = supplier.get();
-        final List<C> listC = supplier.get();
+        Objects.requireNonNull(supplier);
+
+        final List<A> listA = Objects.requireNonNull(supplier.get());
+        final List<B> listB = Objects.requireNonNull(supplier.get());
+        final List<C> listC = Objects.requireNonNull(supplier.get());
 
         this.foreachRemaining((a, b, c) -> {
             listA.add(a);
@@ -1516,9 +1519,11 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
      * @see #unzipToCollections(Supplier, Supplier, Supplier)
      */
     public Triple<Set<A>, Set<B>, Set<C>> unzipToSets(@SuppressWarnings("rawtypes") final Supplier<? extends Set> supplier) {
-        final Set<A> setA = supplier.get();
-        final Set<B> setB = supplier.get();
-        final Set<C> setC = supplier.get();
+        Objects.requireNonNull(supplier);
+
+        final Set<A> setA = Objects.requireNonNull(supplier.get());
+        final Set<B> setB = Objects.requireNonNull(supplier.get());
+        final Set<C> setC = Objects.requireNonNull(supplier.get());
 
         this.foreachRemaining((a, b, c) -> {
             setA.add(a);

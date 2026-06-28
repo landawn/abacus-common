@@ -85,9 +85,9 @@ public final class BooleanIntType extends AbstractType<Boolean> {
      * Maps {@code true} to {@code "1"} and {@code false} / {@code null} to {@code "0"}.
      *
      * <p>The returned string is a serializable representation designed to be parsed back into an equivalent value
-     * via {@link #valueOf(String)}; {@code stringOf} and {@code valueOf} are inverse operations that round-trip. This
-     * is the key distinction from {@link Object#toString()}, whose result is not guaranteed to be convertible back
-     * into the original value.</p>
+     * via {@link #valueOf(String)}. Non-null boolean values round-trip exactly; {@code null} is encoded as {@code "0"}
+     * and decodes as {@link Boolean#FALSE}. This is the key distinction from {@link Object#toString()}, whose result is
+     * not guaranteed to be convertible back into the original value.</p>
      *
      * @param b the {@code Boolean} value to convert; may be {@code null}
      * @return {@code "1"} if {@code b} is {@link Boolean#TRUE}, {@code "0"} otherwise
@@ -104,9 +104,9 @@ public final class BooleanIntType extends AbstractType<Boolean> {
      * Only the exact string {@code "1"} yields {@code true}; any other value (including
      * {@code null}) yields {@code false}.
      *
-     * <p>This method is the inverse of {@code stringOf} and round-trips with it: it parses the string produced by
-     * {@code stringOf} back into a value of this type. Strings produced by {@link Object#toString()} are not
-     * guaranteed to be parseable in this way.</p>
+     * <p>This method parses strings produced by {@code stringOf} back into values of this type. Non-null boolean
+     * values round-trip exactly; the {@code "0"} produced for {@code null} decodes as {@link Boolean#FALSE}. Strings
+     * produced by {@link Object#toString()} are not guaranteed to be parseable in this way.</p>
      *
      * @param str the string to parse (typically {@code "0"} or {@code "1"}); may be {@code null}
      * @return {@link Boolean#TRUE} if {@code str} equals {@code "1"},

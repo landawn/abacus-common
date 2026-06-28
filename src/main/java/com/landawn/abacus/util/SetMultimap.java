@@ -751,6 +751,7 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
      * will be reflected in the SetMultimap and vice versa, as they share the same underlying storage.
      *
      * <p>The provided value supplier will be used to create new sets when new keys are added to the multimap.
+     * Existing map values must be non-null, non-empty {@link Set} instances.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -762,15 +763,19 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
      * mm.get("a").iterator().next();                     // returns 1 (smallest, sorted order)
      *
      * SetMultimap.wrap((Map<String, TreeSet<Integer>>) null, TreeSet::new); // throws IllegalArgumentException (null map)
+     *
+     * Map<String, TreeSet<Integer>> bad = new HashMap<>();
+     * bad.put("x", new TreeSet<>());                    // empty value not allowed
+     * SetMultimap.wrap(bad, TreeSet::new);               // throws IllegalArgumentException (empty value)
      * }</pre>
      *
      * @param <K> the type of the keys in the map
      * @param <E> the type of the elements in the set
      * @param <V> the type of the value set, which must extend {@code Set<E>}
-     * @param map the map to be wrapped into a SetMultimap; must not be {@code null}
+     * @param map the map to be wrapped into a SetMultimap; must not be {@code null} and must not contain {@code null} or empty values
      * @param valueSupplier the supplier that provides the set to be used as the value collection; must not be {@code null}
      * @return a SetMultimap instance backed by the provided map
-     * @throws IllegalArgumentException if the provided map or {@code valueSupplier} is {@code null}
+     * @throws IllegalArgumentException if the provided map or {@code valueSupplier} is {@code null}, or if the map contains a {@code null} or empty value
      * @see #wrap(Map)
      */
     @Beta
@@ -778,6 +783,7 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
             throws IllegalArgumentException {
         N.checkArgNotNull(map, cs.map);
         N.checkArgNotNull(valueSupplier, cs.valueSupplier);
+        N.checkArgument(map.values().stream().noneMatch(v -> v == null || v.isEmpty()), "The specified map contains null or empty value: %s", map);
 
         return new SetMultimap<>((Map<K, Set<E>>) map, valueSupplier);
     }

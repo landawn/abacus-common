@@ -3376,11 +3376,11 @@ public final class CsvUtil {
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * // Enable backslash escaping for CSV-to-JSON conversion
+         * // Enable backslash escaping for JSON-to-CSV conversion
          * CsvUtil.converter()
          *     .setEscapeCharToBackSlashForWrite()
-         *     .source(new File("data.csv"))
-         *     .csvToJson(new File("output.json"));
+         *     .source(new File("data.json"))
+         *     .jsonToCsv(new File("output.csv"));
          *
          * // Note: this setting only affects CSV WRITING (e.g. jsonToCsv); it has no
          * // effect on how input is parsed by load().

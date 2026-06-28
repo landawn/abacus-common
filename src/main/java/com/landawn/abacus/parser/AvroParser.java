@@ -360,7 +360,7 @@ public final class AvroParser extends AbstractParser<AvroSerConfig, AvroDeserCon
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String base64Data = "...";  // base64Data is Base64-encoded Avro data
-     * AvroDeserConfig config = new AvroDeserConfig()
+     * AvroDeserConfig config = AvroDeserConfig.create()
      *     .setSchema(User.getSchema());
      * User user = parser.deserialize(base64Data, config, User.class);
      * }</pre>
@@ -385,7 +385,7 @@ public final class AvroParser extends AbstractParser<AvroSerConfig, AvroDeserCon
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String base64Data = "...";  // base64Data is Base64-encoded Avro data
-     * AvroDeserConfig config = new AvroDeserConfig()
+     * AvroDeserConfig config = AvroDeserConfig.create()
      *     .setSchema(User.getSchema());
      * User user = parser.deserialize(base64Data, config, User.class);
      * }</pre>
@@ -489,7 +489,7 @@ public final class AvroParser extends AbstractParser<AvroSerConfig, AvroDeserCon
      * }
      *
      * // Deserialize to regular bean with schema
-     * AvroDeserConfig config = new AvroDeserConfig()
+     * AvroDeserConfig config = AvroDeserConfig.create()
      *     .setSchema(schema)
      *     .setElementType(Person.class);
      * List<Person> people = parser.deserialize(inputStream, config, List.class);
@@ -621,7 +621,7 @@ public final class AvroParser extends AbstractParser<AvroSerConfig, AvroDeserCon
      * }
      *
      * // Deserialize to regular bean with schema
-     * AvroDeserConfig config = new AvroDeserConfig()
+     * AvroDeserConfig config = AvroDeserConfig.create()
      *     .setSchema(schema)
      *     .setElementType(Person.class);
      * List<Person> people = parser.deserialize(inputStream, config, List.class);

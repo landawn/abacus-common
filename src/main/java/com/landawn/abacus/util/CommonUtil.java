@@ -502,7 +502,7 @@ sealed class CommonUtil permits N {
     //    /**
     //     * An empty immutable {@code Dataset}.
     //     */
-    //    public static final Dataset EMPTY_DATA_SET = RowDataset.EMPTY_DATA_SET;
+    //    public static final Dataset EMPTY_DATASET = RowDataset.EMPTY_DATASET;
 
     /**
      * An empty immutable {@code Class} array.
@@ -23604,6 +23604,9 @@ sealed class CommonUtil permits N {
     /**
      * Retrieves the element at the specified position in the given Iterable.
      *
+     * <p><b>Note:</b> this throws {@link IndexOutOfBoundsException} when {@code index} is out of range; the related
+     * {@link #getOnlyElement(Iterable)} instead returns an empty {@link u.Nullable} for the absent case.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<String> list = Arrays.asList("a", "b", "c");
@@ -23618,6 +23621,7 @@ sealed class CommonUtil permits N {
      * @return the element at the specified position in the iterable
      * @throws IllegalArgumentException if the iterable is {@code null} or the index is negative
      * @throws IndexOutOfBoundsException if the index is bigger than the maximum index of the specified Iterable
+     * @see #getOnlyElement(Iterable)
      */
     public static <T> T getElement(@NotNull final Iterable<? extends T> c, final int index) throws IllegalArgumentException, IndexOutOfBoundsException {
         checkArgNotNull(c, cs.c);
@@ -23716,6 +23720,9 @@ sealed class CommonUtil permits N {
      * <p>Note: unlike Guava's {@code Iterables.getOnlyElement}, an empty input returns an empty {@code Nullable}
      * rather than throwing; more than one element throws {@code TooManyElementsException}.
      *
+     * <p><b>Note:</b> the related {@link #getElement(Iterable, int)} instead throws {@link IndexOutOfBoundsException}
+     * for an out-of-range index, whereas this method returns an empty {@link u.Nullable} for the absent case.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<String> singleElement = Arrays.asList("only");
@@ -23732,6 +23739,7 @@ sealed class CommonUtil permits N {
      * @param c the Iterable to get the element from
      * @return a {@code Nullable} containing the only element in the Iterable if it exists, otherwise an empty Nullable
      * @throws TooManyElementsException if the Iterable contains more than one element
+     * @see #getElement(Iterable, int)
      */
     public static <T> Nullable<T> getOnlyElement(final Iterable<? extends T> c) throws TooManyElementsException {
         if (isEmptyCollection(c)) {
@@ -23786,6 +23794,10 @@ sealed class CommonUtil permits N {
      * <p>Note: a non-{@code Collection} {@code Iterable} may be iterated more than once by this method
      * (an emptiness check precedes the iteration) - do not pass single-use {@code Iterable}s (e.g., {@code stream::iterator}).
      *
+     * <p><b>Note:</b> this returns a {@link u.Nullable} rather than a {@link u.Optional} because a {@code null} first
+     * element is a legitimate value that must be representable; the {@code non-null} sibling {@link #firstNonNull(Iterable)}
+     * skips {@code null}s and so can return a guaranteed-present {@link u.Optional}.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<String> list = Arrays.asList("a", "b", "c");
@@ -23798,6 +23810,7 @@ sealed class CommonUtil permits N {
      * @param <T> the type of elements in the Iterable
      * @param c the Iterable to get the first element from
      * @return a {@code Nullable} containing the first element in the Iterable if it exists, otherwise an empty Nullable
+     * @see #firstNonNull(Iterable)
      */
     public static <T> Nullable<T> firstElement(final Iterable<? extends T> c) {
         if (isEmptyCollection(c)) {
@@ -24149,6 +24162,10 @@ sealed class CommonUtil permits N {
      * Returns the first {@code non-null} value among the two provided values.
      * If both values are {@code null}, it returns an empty Optional.
      *
+     * <p><b>Note:</b> this returns a {@link u.Optional} because a matched result is guaranteed {@code non-null}; by contrast
+     * the plain first-element methods such as {@link #firstElement(Iterable)} return a {@link u.Nullable} since they can
+     * legitimately hold a {@code null} element.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * N.firstNonNull("value", null);   // returns Optional.of("value")
@@ -24161,6 +24178,7 @@ sealed class CommonUtil permits N {
      * @param b the second value to check
      * @return an Optional containing the first {@code non-null} value if it exists, otherwise an empty Optional
      * @see Nulls#firstNonNull(Object, Object)
+     * @see #firstElement(Iterable)
      */
     public static <T> Optional<T> firstNonNull(final T a, final T b) {
         return a != null ? Optional.of(a) : (b != null ? Optional.of(b) : Optional.empty());
@@ -25473,6 +25491,10 @@ sealed class CommonUtil permits N {
     /**
      * Returns the first element in the given array that matches the specified predicate.
      *
+     * <p><b>Note:</b> this returns a {@link u.Nullable} rather than a {@link u.Optional} because a matched element may
+     * itself be {@code null}; the {@code non-null} sibling {@link #findFirstNonNull(Object[], Predicate)} only matches
+     * {@code non-null} elements and so returns an {@link u.Optional}.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String[] arr = {"apple", "banana", "cherry"};
@@ -25484,6 +25506,7 @@ sealed class CommonUtil permits N {
      * @param a the array to search
      * @param predicate the predicate to apply to elements of the array
      * @return a {@code Nullable} containing the first element that matches the predicate, or an empty {@code Nullable} if no such element is found
+     * @see #findFirstNonNull(Object[], Predicate)
      */
     public static <T> Nullable<T> findFirst(final T[] a, final Predicate<? super T> predicate) {
         if (isEmpty(a)) {
@@ -25718,6 +25741,9 @@ sealed class CommonUtil permits N {
     /**
      * Returns the first {@code non-null} element in the given array that matches the specified predicate.
      *
+     * <p><b>Note:</b> this returns a {@link u.Optional} because a matched element is guaranteed {@code non-null}; the
+     * plain {@link #findFirst(Object[], Predicate)} can match a {@code null} element and so returns a {@link u.Nullable}.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String[] arr = {null, "apple", "banana", null, "cherry"};
@@ -25729,6 +25755,7 @@ sealed class CommonUtil permits N {
      * @param a the array to search
      * @param predicate the predicate to apply to elements of the array
      * @return an Optional containing the first {@code non-null} element that matches the predicate, or an empty Optional if no such element is found
+     * @see #findFirst(Object[], Predicate)
      */
     public static <T> Optional<T> findFirstNonNull(final T[] a, final Predicate<? super T> predicate) {
         if (isEmpty(a)) {
@@ -37433,10 +37460,14 @@ sealed class CommonUtil permits N {
      * int index2 = N.indexOf(array, false);   // returns 0
      * }</pre>
      *
+     * <p>Returns {@code -1} when the value is not found. For an {@code OptionalInt}-returning alternative
+     * (empty instead of {@code -1}), see {@link Index#of(boolean[], boolean)}.</p>
+     *
      * @param a the array to be searched
      * @param valueToFind the value to be searched for
      * @return the index of the first occurrence of the specified value in the array,
      *         or -1 if the array is {@code null} or empty or does not contain the value
+     * @see Index#of(boolean[], boolean)
      */
     public static int indexOf(final boolean[] a, final boolean valueToFind) {
         return indexOf(a, valueToFind, 0);
@@ -38183,9 +38214,13 @@ sealed class CommonUtil permits N {
      * N.lastIndexOf(a, false);   // returns 2
      * }</pre>
      *
+     * <p>Returns {@code -1} when the value is not found. For an {@code OptionalInt}-returning alternative
+     * (empty instead of {@code -1}), see {@link Index#last(boolean[], boolean)}.</p>
+     *
      * @param a the array to search within
      * @param valueToFind the value to search for
      * @return the index of the last occurrence of the specified value, or -1 if there is no such occurrence
+     * @see Index#last(boolean[], boolean)
      */
     public static int lastIndexOf(final boolean[] a, final boolean valueToFind) {
         if (isEmpty(a)) {

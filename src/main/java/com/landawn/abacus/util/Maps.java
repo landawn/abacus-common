@@ -252,6 +252,13 @@ import com.landawn.abacus.util.u.OptionalShort;
  * {@code null} and missing into "absent"; and {@code getValuesIfPresent} keeps only the keys that
  * resolve to a non-{@code null} value.</p>
  *
+ * <p><b>Cross-class accessor naming:</b> the existence-aware lookups here that return a {@link Nullable}
+ * rather than throwing — {@code getIfExists} and {@code getByPathIfExists} — carry the {@code *IfExists}
+ * suffix. The sibling utility classes spell the same "look up a possibly-absent value without throwing"
+ * idea with different verbs: {@link Iterables} uses {@code find*} (e.g.&nbsp;{@code findFirstOrLast}) and
+ * {@link Beans} uses {@code *IfPresent} (e.g.&nbsp;{@code getPropValueIfPresent}), while plain {@code get*}
+ * methods return a default or throw.</p>
+ *
  * <p><b>Core Functional Categories:</b>
  * <ul>
  *   <li><b>Map Creation:</b> {@code zip} for combining separate key/value collections</li>

@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.SortedSet;
+import java.util.TreeSet;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -83,6 +84,16 @@ public class HBaseColumnTest extends TestBase {
         SortedSet<HBaseColumn<String>> set = HBaseColumn.asSortedSet("test", cmp);
         Assertions.assertEquals(1, set.size());
         Assertions.assertEquals("test", set.first().value());
+    }
+
+    @Test
+    public void testDescComparatorKeepsSameVersionDifferentValues() {
+        SortedSet<HBaseColumn<String>> set = new TreeSet<>(HBaseColumn.DESC_HBASE_COLUMN_COMPARATOR);
+
+        set.add(HBaseColumn.valueOf("b", 10L));
+        set.add(HBaseColumn.valueOf("a", 10L));
+
+        Assertions.assertEquals(2, set.size());
     }
 
     @Test

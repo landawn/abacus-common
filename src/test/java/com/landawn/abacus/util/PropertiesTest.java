@@ -554,6 +554,19 @@ public class PropertiesTest extends AbstractTest {
     }
 
     @Test
+    public void testEqualsAndHashCodeMatchMapContract() {
+        Properties<String, Object> props = new Properties<>();
+        props.put("key", "value");
+
+        Map<String, Object> map = new HashMap<>();
+        map.put("key", "value");
+
+        assertEquals(map, props);
+        assertEquals(props, map);
+        assertEquals(map.hashCode(), props.hashCode());
+    }
+
+    @Test
     public void testEqualsNotEqual() {
         Properties<String, Object> props1 = new Properties<>();
         props1.put("key1", "value");
@@ -567,7 +580,7 @@ public class PropertiesTest extends AbstractTest {
     @Test
     public void testEqualsDifferentType() {
         Properties<String, Object> props = new Properties<>();
-        assertNotEquals(props, new HashMap<>());
+        assertNotEquals(props, "not a map");
     }
 
     @Test

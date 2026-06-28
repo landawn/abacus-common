@@ -522,7 +522,7 @@ public class XmlParserImplTest extends TestBase {
 
     @Test
     public void testSerializeUsesDefaultConfigForCircularReference() {
-        XmlSerConfig config = new XmlSerConfig().setSupportCircularReference(true);
+        XmlSerConfig config = new XmlSerConfig().setCircularReferenceSupported(true);
         XmlParserImpl parser = new XmlParserImpl(XmlParserType.StAX, config, null);
         CircularRefBean bean = new CircularRefBean();
         bean.setName("cycle");
@@ -635,7 +635,7 @@ public class XmlParserImplTest extends TestBase {
         });
 
         XmlSerConfig config = new XmlSerConfig();
-        config.setSupportCircularReference(true);
+        config.setCircularReferenceSupported(true);
         String xml = staxParser.serialize(bean1, config);
         Assertions.assertNotNull(xml);
     }
@@ -1468,7 +1468,7 @@ public class XmlParserImplTest extends TestBase {
         root.put("a1", shared);
         root.put("a2", shared);
 
-        final XmlSerConfig xsc = new XmlSerConfig().setSupportCircularReference(true);
+        final XmlSerConfig xsc = new XmlSerConfig().setCircularReferenceSupported(true);
         final String xml = staxParser.serialize(root, xsc);
 
         // Both sibling references must carry the full nested map; with the bug the second was emitted

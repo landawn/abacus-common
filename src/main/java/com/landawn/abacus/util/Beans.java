@@ -341,6 +341,14 @@ import com.landawn.abacus.util.stream.Stream;
  * treats {@code null} and empty alike as "exclude nothing". This follows the library's null/empty
  * selection convention.</p>
  *
+ * <p><b>Optional-returning accessor:</b> {@link #getPropValueIfPresent(Object, String)} returns a
+ * {@link Nullable} (empty when the property is absent or a nested intermediate is {@code null}) rather than
+ * throwing, and carries the {@code *IfPresent} suffix. The sibling utility classes spell the same
+ * "look up a possibly-absent value without throwing" idea with different verbs: {@code *IfExists} in
+ * {@link Maps} (e.g.&nbsp;{@code getIfExists}) and {@code find*} in {@link Iterables}
+ * (e.g.&nbsp;{@code findFirstOrLast}); plain {@code getPropValue} returns the raw value, or
+ * {@code null}/throws for an unmatched property.</p>
+ *
  * <p><b>Attribution:</b>
  * This class includes code adapted from Apache Commons BeanUtils, Spring Framework, and other open
  * source projects under the Apache License 2.0. Methods from these libraries may have been modified

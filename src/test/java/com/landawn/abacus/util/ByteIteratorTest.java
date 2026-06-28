@@ -15,7 +15,6 @@ import java.util.function.Supplier;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
-import com.landawn.abacus.util.u.OptionalByte;
 import com.landawn.abacus.util.function.BytePredicate;
 import com.landawn.abacus.util.function.ByteSupplier;
 import com.landawn.abacus.util.stream.ByteStream;
@@ -626,70 +625,6 @@ public class ByteIteratorTest extends TestBase {
         ByteIterator iter = ByteIterator.of((byte) 1, (byte) 3, (byte) 5).filter(b -> b % 2 == 0);
         assertFalse(iter.hasNext());
         assertThrows(NoSuchElementException.class, () -> iter.nextByte());
-    }
-
-    // =================================================
-    // first()
-    // =================================================
-
-    @Test
-    public void testFirst() {
-        ByteIterator iter = ByteIterator.of((byte) 7, (byte) 8, (byte) 9);
-
-        OptionalByte first = iter.first();
-
-        assertTrue(first.isPresent());
-        assertEquals((byte) 7, first.get());
-        assertEquals((byte) 8, iter.nextByte());
-    }
-
-    @Test
-    public void testFirst_EmptyInput() {
-        OptionalByte first = ByteIterator.empty().first();
-
-        assertFalse(first.isPresent());
-    }
-
-    @Test
-    public void testFirst_CachesResult() {
-        ByteIterator iter = ByteIterator.of((byte) 1, (byte) 2);
-        OptionalByte first = iter.first();
-
-        assertSame(first, iter.first());
-        assertEquals((byte) 1, first.get());
-        assertEquals((byte) 2, iter.nextByte());
-    }
-
-    // =================================================
-    // last()
-    // =================================================
-
-    @Test
-    public void testLast() {
-        ByteIterator iter = ByteIterator.of((byte) 7, (byte) 8, (byte) 9);
-
-        OptionalByte last = iter.last();
-
-        assertTrue(last.isPresent());
-        assertEquals((byte) 9, last.get());
-        assertFalse(iter.hasNext());
-    }
-
-    @Test
-    public void testLast_EmptyInput() {
-        OptionalByte last = ByteIterator.empty().last();
-
-        assertFalse(last.isPresent());
-    }
-
-    @Test
-    public void testLast_CachesResult() {
-        ByteIterator iter = ByteIterator.of((byte) 1, (byte) 2);
-        OptionalByte last = iter.last();
-
-        assertSame(last, iter.last());
-        assertEquals((byte) 2, last.get());
-        assertFalse(iter.hasNext());
     }
 
     // =================================================

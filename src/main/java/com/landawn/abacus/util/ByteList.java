@@ -1250,9 +1250,13 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * list.removeAt(5);   // throws IndexOutOfBoundsException
      * }</pre>
      *
+     * <p><b>Note:</b> this single-index form returns the removed {@code byte} value; the varargs
+     * {@link #removeAt(int...)} form removes several elements in place and returns {@code void}.</p>
+     *
      * @param index the index of the element to remove
      * @return the removed element
      * @throws IndexOutOfBoundsException if the index is out of range ({@code index < 0 || index >= size()})
+     * @see #removeAt(int...)
      */
     public byte removeAt(final int index) {
         rangeCheck(index);
@@ -1279,8 +1283,12 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * // list now contains: [10, 30, 50]
      * }</pre>
      *
+     * <p><b>Note:</b> this varargs form removes several elements in place and returns {@code void}; the
+     * single-index {@link #removeAt(int)} form returns the removed {@code byte} value.</p>
+     *
      * @param indices the indices of elements to remove. Can be {@code null} or empty.
      * @throws IndexOutOfBoundsException if any index is negative or &gt;= size()
+     * @see #removeAt(int)
      */
     @Override
     public void removeAt(final int... indices) {

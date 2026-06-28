@@ -790,7 +790,7 @@ public final class TypeFactory {
                 } else if (EntityId.class.isAssignableFrom(cls)) {
                     type = getType(EntityIdType.ENTITY_ID);
                 } else if (Dataset.class.isAssignableFrom(cls)) {
-                    type = getType(DatasetType.DATA_SET);
+                    type = getType(DatasetType.DATASET);
                 } else if (Sheet.class.isAssignableFrom(cls)) {
                     if ((typeParameters.length != 3) && (typeParameters.length != 0)) {
                         throw new IllegalArgumentException(
@@ -1672,13 +1672,15 @@ public final class TypeFactory {
             return;
         }
 
-        // Distinct alias name: register the type under its intrinsic name() first (atomic), then claim
-        // the alias name. The atomic putIfAbsent closes the check-then-act race so a concurrent
-        // registration for the same name cannot silently overwrite an existing mapping.
-        registerType(type);
-
         if (typePool.putIfAbsent(typeName, type) != null) {
             throw new IllegalArgumentException("A type has already registered with name: " + typeName);
+        }
+
+        try {
+            registerType(type);
+        } catch (final RuntimeException e) {
+            typePool.remove(typeName, type);
+            throw e;
         }
     }
 

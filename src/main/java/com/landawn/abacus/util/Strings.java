@@ -376,7 +376,7 @@ import com.landawn.abacus.util.stream.Stream;
  *     <tr><td>{@code removeStart}, {@code removeEnd}, {@code removeAll} (and {@code *IgnoreCase})</td><td>{@code null}</td><td>{@code ""}</td></tr>
  *     <tr><td>{@code replaceAll}, {@code replaceFirst}, {@code replaceLast}, {@code replaceIgnoreCase}, {@code replaceOnce} (and {@code *IgnoreCase})</td><td>{@code null}</td><td>{@code ""}</td></tr>
  *     <tr><td>{@code replaceAfter}, {@code replaceBefore}, {@code replaceBetween}</td><td>{@code null}</td><td>{@code ""}, or the replacement when empty delimiter(s) select an empty range (&#9888;&#65039; a {@code null} replacement is normalized to {@code ""})</td></tr>
- *     <tr><td>{@code replaceFirstInteger}, {@code replaceFirstDouble}</td><td>{@code null}</td><td>{@code ""}</td></tr>
+ *     <tr><td>{@code replaceFirstInteger}, {@code replaceFirstDouble} (replacement must be non-null)</td><td>{@code null}</td><td>{@code ""}</td></tr>
  *     <tr><td colspan="3"><b>Range edit</b></td></tr>
  *     <tr><td>{@code replaceRange}</td><td>the replacement, or {@code ""} if the replacement is {@code null} (&#9888;&#65039; Apache Commons Lang's analogous {@code overlay(null, *, *, *)} returns {@code null})</td><td>the replacement, or {@code ""} if the replacement is {@code null}</td></tr>
  *     <tr><td>{@code moveRange}, {@code removeRange}</td><td>{@code ""}</td><td>{@code ""}</td></tr>
@@ -4834,6 +4834,7 @@ public final class Strings {
      * @param replacement the String to replace it with, may be {@code null}
      * @return the text with all occurrences of the target string replaced, {@code null} if the input is {@code null}
      * @see RegExUtil#replaceAll(String, String, String)
+     * @see #replace(String, int, String, String, int)
      */
     @MayReturnNull
     public static String replaceAll(final String str, final String target, final String replacement) {
@@ -4846,7 +4847,7 @@ public final class Strings {
      * <p>This method searches for all occurrences of the target string starting from the given index and replaces them with the replacement string.
      * Occurrences before the specified index are not replaced.</p>
      *
-     * <p><b>Note:</b> the {@code target} is matched as a literal string, not a regular expression.
+     * <p><b>Note:</b> unlike {@link String#replaceAll(String, String)}, the {@code target} is matched as a literal string, not a regular expression.
      * For regex-based replacement, use {@link RegExUtil#replaceAll(String, String, String)}.</p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -4864,6 +4865,8 @@ public final class Strings {
      * @param replacement the string to replace the target string, may be {@code null}
      * @return the text with all occurrences of the target string replaced starting from the specified index, {@code null} if the input is {@code null}
      *         A negative {@code fromIndex} is treated as {@code 0}; a {@code fromIndex} at or beyond the string length returns the original string unchanged (no exception is thrown).
+     * @see RegExUtil
+     * @see #replace(String, int, String, String, int)
      */
     @MayReturnNull
     public static String replaceAll(final String str, final int fromIndex, final String target, final String replacement) {
@@ -4896,6 +4899,7 @@ public final class Strings {
      * @param replacement the string to replace the target string, may be {@code null}
      * @return the text with the first occurrence of the target string replaced, {@code null} if the input is {@code null}
      * @see RegExUtil#replaceFirst(String, String, String)
+     * @see #replace(String, int, String, String, int)
      */
     @MayReturnNull
     public static String replaceFirst(final String str, final String target, final String replacement) {
@@ -4908,7 +4912,7 @@ public final class Strings {
      * <p>This method searches for the first occurrence of the target string starting from the given index and replaces it with the replacement string.
      * Occurrences before the specified index are not replaced.</p>
      *
-     * <p><b>Note:</b> the {@code target} is matched as a literal string, not a regular expression.
+     * <p><b>Note:</b> unlike {@link String#replaceFirst(String, String)}, the {@code target} is matched as a literal string, not a regular expression.
      * For regex-based replacement, use {@link RegExUtil#replaceFirst(String, String, String)}.</p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -4926,6 +4930,8 @@ public final class Strings {
      * @param replacement the string to replace the target string, may be {@code null}
      * @return the text with the first occurrence of the target string replaced starting from the specified index, {@code null} if the input is {@code null}
      *         A negative {@code fromIndex} is treated as {@code 0}; a {@code fromIndex} at or beyond the string length returns the original string unchanged (no exception is thrown).
+     * @see RegExUtil
+     * @see #replace(String, int, String, String, int)
      */
     @MayReturnNull
     public static String replaceFirst(final String str, final int fromIndex, final String target, final String replacement) {
@@ -9306,6 +9312,8 @@ public final class Strings {
      * @see Character#isDigit(char)
      * @see #isAsciiNumeric(CharSequence)
      * @see #isNumber(String)
+     * @see Numbers#isParsable(String)
+     * @see Numbers#isCreatable(String)
      */
     public static boolean isNumeric(final CharSequence cs) {
         if (isEmpty(cs)) {
@@ -9475,6 +9483,8 @@ public final class Strings {
      * @see RegExUtil#POSITIVE_INTEGER_MATCHER
      * @see RegExUtil#NEGATIVE_INTEGER_MATCHER
      * @see RegExUtil#NUMBER_MATCHER
+     * @see Numbers#isParsable(String)
+     * @see Numbers#isCreatable(String)
      */
     public static boolean isInteger(final String str) {
         return RegExUtil.matches(str, RegExUtil.INTEGER_MATCHER);
@@ -9894,12 +9904,16 @@ public final class Strings {
      * Strings.indexOf("", "test");               // returns -1 (substring longer than string)
      * }</pre>
      *
+     * <p>Returns {@code -1} when the substring is not found. For an {@code OptionalInt}-returning alternative
+     * (empty instead of {@code -1}), see {@link Index#of(String, String)}.</p>
+     *
      * @param str the string to be checked, may be {@code null} or empty.
      * @param valueToFind the substring to be found.
      * @return the index of the first occurrence of the substring in the character sequence represented by this object,
      *         or -1 if the substring does not occur.
      * @see String#indexOf(String)
      * @see StrUtil#indexOf(String, String, String)
+     * @see Index#of(String, String)
      */
     public static int indexOf(final String str, final String valueToFind) {
         if (str == null || valueToFind == null || valueToFind.length() > str.length()) {
@@ -10460,10 +10474,14 @@ public final class Strings {
      * Strings.lastIndexOf("test", null);                   // returns -1
      * }</pre>
      *
+     * <p>Returns {@code -1} when the substring is not found. For an {@code OptionalInt}-returning alternative
+     * (empty instead of {@code -1}), see {@link Index#last(String, String)}.</p>
+     *
      * @param str the string to be checked, may be {@code null} or empty.
      * @param valueToFind the substring to be found, may be {@code null}.
      * @return the index of the last occurrence of the substring in the character sequence represented by this object,
      *         or -1 if the substring does not occur or if either parameter is {@code null}.
+     * @see Index#last(String, String)
      */
     public static int lastIndexOf(final String str, final String valueToFind) {
         if (str == null || valueToFind == null || valueToFind.length() > str.length()) {

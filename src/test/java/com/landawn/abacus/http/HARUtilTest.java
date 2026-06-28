@@ -605,6 +605,24 @@ public class HARUtilTest extends TestBase {
     }
 
     @Test
+    public void testGetBodyAndMimeTypeByRequestEntryWithParams() {
+        Map<String, Object> requestEntry = new HashMap<>();
+        Map<String, Object> postData = new HashMap<>();
+        List<Map<String, String>> params = new ArrayList<>();
+        params.add(Map.of("name", "a", "value", "1"));
+        params.add(Map.of("name", "b", "value", "two words"));
+        postData.put("params", params);
+        postData.put("mimeType", "application/x-www-form-urlencoded");
+
+        requestEntry.put("postData", postData);
+
+        Tuple2<String, String> result = HARUtil.getBodyAndMimeTypeByRequestEntry(requestEntry);
+        assertNotNull(result);
+        assertEquals("a=1&b=two+words", result._1);
+        assertEquals("application/x-www-form-urlencoded", result._2);
+    }
+
+    @Test
     public void testGetBodyAndMimeTypeByRequestEntryEmpty() {
         Map<String, Object> requestEntry = new HashMap<>();
 

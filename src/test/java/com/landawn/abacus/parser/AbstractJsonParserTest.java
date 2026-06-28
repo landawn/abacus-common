@@ -1,6 +1,7 @@
 package com.landawn.abacus.parser;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.ByteArrayInputStream;
@@ -133,6 +134,15 @@ public abstract class AbstractJsonParserTest extends AbstractParserTest {
         json.parse("{\"name\":\"beta\"}", JsonDeserConfig.create(), output);
 
         assertEquals("beta", output.get("name"));
+    }
+
+    @Test
+    public void testParseEmptySourceRejectsNullOutput() {
+        JsonParser json = (JsonParser) parser;
+
+        assertThrows(IllegalArgumentException.class, () -> json.parse("", JsonDeserConfig.create(), (Object[]) null));
+        assertThrows(IllegalArgumentException.class, () -> json.parse("", JsonDeserConfig.create(), (List<?>) null));
+        assertThrows(IllegalArgumentException.class, () -> json.parse("", JsonDeserConfig.create(), (Map<?, ?>) null));
     }
 
     @Test

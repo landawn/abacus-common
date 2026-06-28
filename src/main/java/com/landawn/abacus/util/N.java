@@ -7132,6 +7132,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * Returns 0 if the array is {@code null} or empty.
      * The array is modified in place.
      *
+     * <p><b>Note:</b> this value-matching form returns the number of elements replaced; the operator form
+     * {@link #replaceAll(boolean[], BooleanUnaryOperator)} instead transforms each element in place and returns {@code void}.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * boolean[] flags = {true, false, true, false};
@@ -7169,6 +7172,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * Returns the number of replacements made.
      * Returns 0 if the array is {@code null} or empty.
      * The array is modified in place.
+     *
+     * <p><b>Note:</b> this value-matching form returns the number of elements replaced; the operator form
+     * {@link #replaceAll(char[], CharUnaryOperator)} instead transforms each element in place and returns {@code void}.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -7208,6 +7214,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * Returns 0 if the array is {@code null} or empty.
      * The array is modified in place.
      *
+     * <p><b>Note:</b> this value-matching form returns the number of elements replaced; the operator form
+     * {@link #replaceAll(byte[], ByteUnaryOperator)} instead transforms each element in place and returns {@code void}.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * byte[] data = {1, 2, 1, 3, 1};
@@ -7245,6 +7254,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * Returns the number of replacements made.
      * Returns 0 if the array is {@code null} or empty.
      * The array is modified in place.
+     *
+     * <p><b>Note:</b> this value-matching form returns the number of elements replaced; the operator form
+     * {@link #replaceAll(short[], ShortUnaryOperator)} instead transforms each element in place and returns {@code void}.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -7284,6 +7296,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * Returns 0 if the array is {@code null} or empty.
      * The array is modified in place.
      *
+     * <p><b>Note:</b> this value-matching form returns the number of elements replaced; the operator form
+     * {@link #replaceAll(int[], IntUnaryOperator)} instead transforms each element in place and returns {@code void}.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * int[] numbers = {1, 2, 1, 3, 1};
@@ -7321,6 +7336,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * Returns the number of replacements made.
      * Returns 0 if the array is {@code null} or empty.
      * The array is modified in place.
+     *
+     * <p><b>Note:</b> this value-matching form returns the number of elements replaced; the operator form
+     * {@link #replaceAll(long[], LongUnaryOperator)} instead transforms each element in place and returns {@code void}.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -7360,6 +7378,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * Returns 0 if the array is {@code null} or empty.
      * The array is modified in place.
      *
+     * <p><b>Note:</b> this value-matching form returns the number of elements replaced; the operator form
+     * {@link #replaceAll(float[], FloatUnaryOperator)} instead transforms each element in place and returns {@code void}.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * float[] values = {1.5f, 2.5f, 1.5f, 3.5f};
@@ -7398,6 +7419,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * Returns 0 if the array is {@code null} or empty.
      * The array is modified in place.
      *
+     * <p><b>Note:</b> this value-matching form returns the number of elements replaced; the operator form
+     * {@link #replaceAll(double[], DoubleUnaryOperator)} instead transforms each element in place and returns {@code void}.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * double[] values = {1.5, 2.5, 1.5, 3.5};
@@ -7435,6 +7459,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * Returns the number of replacements made.
      * Returns 0 if the array is {@code null} or empty.
      * The array is modified in place.
+     *
+     * <p><b>Note:</b> this value-matching form returns the number of elements replaced; the operator form
+     * {@link #replaceAll(Object[], UnaryOperator)} instead transforms each element in place and returns {@code void}.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -7484,6 +7511,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * Returns the number of replacements made.
      * Returns 0 if the list is {@code null} or empty.
      * The list is modified in place.
+     *
+     * <p><b>Note:</b> this value-matching form returns the number of elements replaced; the operator form
+     * {@link #replaceAll(List, UnaryOperator)} instead transforms each element in place and returns {@code void}.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -7557,6 +7587,10 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * Returns without modification if the array is {@code null} or empty.
      * The array is modified in place.
      *
+     * <p><b>Note:</b> this operator form replaces each element in place using the operator and returns {@code void}
+     * (mirrors {@link java.util.List#replaceAll(java.util.function.UnaryOperator)}); the value-matching form
+     * {@link #replaceAll(boolean[], boolean, boolean)} instead returns the number of elements replaced.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * boolean[] flags = {true, false, true};
@@ -7583,6 +7617,10 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * Replaces all elements in the array by applying the operator function to each element.
      * Returns without modification if the array is {@code null} or empty.
      * The array is modified in place.
+     *
+     * <p><b>Note:</b> this operator form replaces each element in place using the operator and returns {@code void}
+     * (mirrors {@link java.util.List#replaceAll(java.util.function.UnaryOperator)}); the value-matching form
+     * {@link #replaceAll(char[], char, char)} instead returns the number of elements replaced.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -7611,6 +7649,10 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * Returns without modification if the array is {@code null} or empty.
      * The array is modified in place.
      *
+     * <p><b>Note:</b> this operator form replaces each element in place using the operator and returns {@code void}
+     * (mirrors {@link java.util.List#replaceAll(java.util.function.UnaryOperator)}); the value-matching form
+     * {@link #replaceAll(byte[], byte, byte)} instead returns the number of elements replaced.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * byte[] data = {1, 2, 3};
@@ -7638,6 +7680,10 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * Returns without modification if the array is {@code null} or empty.
      * The array is modified in place.
      *
+     * <p><b>Note:</b> this operator form replaces each element in place using the operator and returns {@code void}
+     * (mirrors {@link java.util.List#replaceAll(java.util.function.UnaryOperator)}); the value-matching form
+     * {@link #replaceAll(short[], short, short)} instead returns the number of elements replaced.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * short[] numbers = {10, 20, 30};
@@ -7664,6 +7710,10 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * Replaces all elements in the array by applying the operator function to each element.
      * Returns without modification if the array is {@code null} or empty.
      * The array is modified in place.
+     *
+     * <p><b>Note:</b> this operator form replaces each element in place using the operator and returns {@code void}
+     * (mirrors {@link java.util.List#replaceAll(java.util.function.UnaryOperator)}); the value-matching form
+     * {@link #replaceAll(int[], int, int)} instead returns the number of elements replaced.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -7694,6 +7744,10 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * Returns without modification if the array is {@code null} or empty.
      * The array is modified in place.
      *
+     * <p><b>Note:</b> this operator form replaces each element in place using the operator and returns {@code void}
+     * (mirrors {@link java.util.List#replaceAll(java.util.function.UnaryOperator)}); the value-matching form
+     * {@link #replaceAll(long[], long, long)} instead returns the number of elements replaced.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * long[] numbers = {100L, 200L, 300L};
@@ -7723,6 +7777,10 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * Returns without modification if the array is {@code null} or empty.
      * The array is modified in place.
      *
+     * <p><b>Note:</b> this operator form replaces each element in place using the operator and returns {@code void}
+     * (mirrors {@link java.util.List#replaceAll(java.util.function.UnaryOperator)}); the value-matching form
+     * {@link #replaceAll(float[], float, float)} instead returns the number of elements replaced.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * float[] values = {1.5f, 2.5f, 3.5f};
@@ -7749,6 +7807,10 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * Replaces all elements in the array by applying the operator function to each element.
      * Returns without modification if the array is {@code null} or empty.
      * The array is modified in place.
+     *
+     * <p><b>Note:</b> this operator form replaces each element in place using the operator and returns {@code void}
+     * (mirrors {@link java.util.List#replaceAll(java.util.function.UnaryOperator)}); the value-matching form
+     * {@link #replaceAll(double[], double, double)} instead returns the number of elements replaced.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -7778,6 +7840,10 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * Replaces all elements in the array by applying the operator function to each element.
      * Returns without modification if the array is {@code null} or empty.
      * The array is modified in place.
+     *
+     * <p><b>Note:</b> this operator form replaces each element in place using the operator and returns {@code void}
+     * (mirrors {@link java.util.List#replaceAll(java.util.function.UnaryOperator)}); the value-matching form
+     * {@link #replaceAll(Object[], Object, Object)} instead returns the number of elements replaced.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -7809,6 +7875,10 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * Replaces all elements in the list by applying the operator function to each element.
      * Returns without modification if the list is {@code null} or empty.
      * The list is modified in place.
+     *
+     * <p><b>Note:</b> this operator form replaces each element in place using the operator and returns {@code void}
+     * (mirrors {@link java.util.List#replaceAll(java.util.function.UnaryOperator)}); the value-matching form
+     * {@link #replaceAll(List, Object, Object)} instead returns the number of elements replaced.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -18058,10 +18128,15 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * N.averageInt(new Integer[] {});             // returns 0.0 (empty array)
      * }</pre>
      *
+     * <p>This averages a collection/array of {@link Number} elements and returns {@code 0d} for {@code null} or empty
+     * input. For the arithmetic mean of a fixed series of scalar values, see {@link Numbers#mean(int...)} (which throws
+     * an {@code IllegalArgumentException} on empty input rather than returning {@code 0d}).</p>
+     *
      * @param <T> the type of the elements in the array, which must extend Number.
      * @param a the array of numbers to calculate the average.
      * @return the average of the elements in the array as a double.
      * @see Iterables#averageInt(Number[])
+     * @see Numbers#mean(int...)
      */
     public static <T extends Number> double averageInt(final T[] a) {
         return averageInt(a, Fn.numToInt());
@@ -18283,10 +18358,15 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * N.averageLong(new Long[] {});                // returns 0.0 (empty array)
      * }</pre>
      *
+     * <p>This averages a collection/array of {@link Number} elements and returns {@code 0d} for {@code null} or empty
+     * input. For the arithmetic mean of a fixed series of scalar values, see {@link Numbers#mean(long...)} (which throws
+     * an {@code IllegalArgumentException} on empty input rather than returning {@code 0d}).</p>
+     *
      * @param <T> the type of the elements in the array, which must extend Number.
      * @param a the array of numbers to calculate the average.
      * @return the average of the elements in the array as a double.
      * @see Iterables#averageLong(Number[])
+     * @see Numbers#mean(long...)
      */
     public static <T extends Number> double averageLong(final T[] a) {
         return averageLong(a, Fn.numToLong());
@@ -18477,10 +18557,15 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * N.averageDouble(new Double[] {});                // returns 0.0 (empty array)
      * }</pre>
      *
+     * <p>This averages a collection/array of {@link Number} elements and returns {@code 0d} for {@code null} or empty
+     * input. For the arithmetic mean of a fixed series of scalar values, see {@link Numbers#mean(double...)} (which
+     * throws an {@code IllegalArgumentException} on empty input rather than returning {@code 0d}).</p>
+     *
      * @param <T> the type of the elements in the array, which must extend Number.
      * @param a the array of numbers to calculate the average.
      * @return the average of the elements in the array as a double.
      * @see Iterables#averageDouble(Number[])
+     * @see Numbers#mean(double...)
      */
     public static <T extends Number> double averageDouble(final T[] a) {
         return averageDouble(a, Fn.numToDouble());

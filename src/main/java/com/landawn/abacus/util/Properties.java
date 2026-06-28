@@ -617,8 +617,8 @@ public class Properties<K, V> implements Map<K, V> {
     }
 
     /**
-     * Returns a hash code value for this Properties object.
-     * The hash code is computed based on the underlying map of key-value mappings.
+     * Returns the map-compatible hash code for this Properties object.
+     * The hash code is computed from the underlying key-value mappings.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -627,35 +627,34 @@ public class Properties<K, V> implements Map<K, V> {
      * int hash = props.hashCode();
      * }</pre>
      *
-     * @return a hash code value for this Properties object
+     * @return the hash code of this instance's key-value mappings
      */
     @Override
     public int hashCode() {
-        return 31 + ((values == null) ? 0 : values.hashCode());
+        return values == null ? 0 : values.hashCode();
     }
 
     /**
      * Compares the specified object with this Properties for equality.
-     * Returns {@code true} if the given object is also a {@code Properties} instance
-     * and the two instances' underlying maps are equal.
+     * Returns {@code true} if the given object is a {@link Map} with the same key-value mappings.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Properties<String, Object> props1 = new Properties<>();
      * props1.put("key", "value");
      *
-     * Properties<String, Object> props2 = new Properties<>();
+     * Map<String, Object> props2 = new java.util.HashMap<>();
      * props2.put("key", "value");
      *
      * boolean same = props1.equals(props2);   // returns true
      * }</pre>
      *
      * @param obj the object to be compared for equality with this Properties
-     * @return {@code true} if the specified object is a {@code Properties} instance with the same key-value mappings
+     * @return {@code true} if the specified object is a {@link Map} with the same key-value mappings
      */
     @Override
     public boolean equals(final Object obj) {
-        return this == obj || (obj instanceof Properties && N.equals(((Properties<K, V>) obj).values, values));
+        return this == obj || (obj instanceof Map && N.equals(values, obj));
     }
 
     /**

@@ -1134,9 +1134,13 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * list.removeAt(5);   // throws IndexOutOfBoundsException
      * }</pre>
      *
+     * <p><b>Note:</b> this single-index form returns the removed {@code double} value; the varargs
+     * {@link #removeAt(int...)} form removes several elements in place and returns {@code void}.</p>
+     *
      * @param index the index of the element to remove
      * @return the removed element
      * @throws IndexOutOfBoundsException if the index is out of range ({@code index < 0 || index >= size()})
+     * @see #removeAt(int...)
      */
     public double removeAt(final int index) {
         rangeCheck(index);
@@ -1153,9 +1157,13 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * The indices array is processed to handle removal correctly even for duplicate or unordered indices.
      * After removal, remaining elements are shifted to fill gaps, maintaining their relative order.
      *
+     * <p><b>Note:</b> this varargs form removes several elements in place and returns {@code void}; the
+     * single-index {@link #removeAt(int)} form returns the removed {@code double} value.</p>
+     *
      * @param indices the indices of elements to be removed. If {@code null} or empty, this list remains unchanged.
      *                May be unordered and may contain duplicates.
      * @throws IndexOutOfBoundsException if any index is out of range ({@code index < 0 || index >= size()})
+     * @see #removeAt(int)
      */
     @Override
     public void removeAt(final int... indices) {

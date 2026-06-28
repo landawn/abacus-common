@@ -870,7 +870,8 @@ public class CollectorsTest extends TestBase {
 
     @Test
     public void testOnlyOne_MultipleElements_ThrowsException() {
-        assertThrows(TooManyElementsException.class, () -> stringList.stream().collect(Collectors.onlyOne()));
+        final TooManyElementsException e = assertThrows(TooManyElementsException.class, () -> stringList.stream().collect(Collectors.onlyOne()));
+        assertEquals("More than one element", e.getMessage());
     }
 
     @Test

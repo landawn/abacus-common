@@ -160,7 +160,7 @@ final class XmlParserImpl extends AbstractXmlParser {
 
         final XmlSerConfig configToUse = check(config);
         final BufferedXmlWriter bw = Objectory.createBufferedXmlWriter();
-        final IdentityHashSet<Object> serializedObjects = !configToUse.isSupportCircularReference() ? null : new IdentityHashSet<>();
+        final IdentityHashSet<Object> serializedObjects = !configToUse.isCircularReferenceSupported() ? null : new IdentityHashSet<>();
 
         try {
             write(obj, configToUse, null, serializedObjects, bw, false);
@@ -243,7 +243,7 @@ final class XmlParserImpl extends AbstractXmlParser {
     public void serialize(final Object obj, final XmlSerConfig config, final OutputStream output) {
         final XmlSerConfig configToUse = check(config);
         final BufferedXmlWriter bw = Objectory.createBufferedXmlWriter(output);
-        final IdentityHashSet<Object> serializedObjects = !configToUse.isSupportCircularReference() ? null : new IdentityHashSet<>();
+        final IdentityHashSet<Object> serializedObjects = !configToUse.isCircularReferenceSupported() ? null : new IdentityHashSet<>();
 
         try {
             write(obj, configToUse, null, serializedObjects, bw, true);
@@ -285,7 +285,7 @@ final class XmlParserImpl extends AbstractXmlParser {
         final XmlSerConfig configToUse = check(config);
         final boolean isBufferedWriter = output instanceof BufferedXmlWriter;
         final BufferedXmlWriter bw = isBufferedWriter ? (BufferedXmlWriter) output : Objectory.createBufferedXmlWriter(output);
-        final IdentityHashSet<Object> serializedObjects = !configToUse.isSupportCircularReference() ? null : new IdentityHashSet<>();
+        final IdentityHashSet<Object> serializedObjects = !configToUse.isCircularReferenceSupported() ? null : new IdentityHashSet<>();
 
         try {
             write(obj, configToUse, null, serializedObjects, bw, true);

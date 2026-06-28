@@ -119,7 +119,7 @@ public class RefType extends AbstractType<Ref> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<Ref> type = TypeFactory.getType(Ref.class);
-     * Ref ref = org.mockito.Mockito.mock(Ref.class);
+     * Ref ref = Mockito.mock(Ref.class);
      * try {
      *     String str = type.stringOf(ref);
      * } catch (UnsupportedOperationException e) {
@@ -217,8 +217,8 @@ public class RefType extends AbstractType<Ref> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<Ref> type = TypeFactory.getType(Ref.class);
-     * PreparedStatement stmt = org.mockito.Mockito.mock(PreparedStatement.class);
-     * Ref ref = org.mockito.Mockito.mock(Ref.class);
+     * PreparedStatement stmt = Mockito.mock(PreparedStatement.class);
+     * Ref ref = Mockito.mock(Ref.class);
      * type.set(stmt, 1, ref);
      * stmt.setInt(2, 123);
      * stmt.executeUpdate();
@@ -242,8 +242,8 @@ public class RefType extends AbstractType<Ref> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<Ref> type = TypeFactory.getType(Ref.class);
-     * CallableStatement stmt = org.mockito.Mockito.mock(CallableStatement.class);
-     * Ref ref = org.mockito.Mockito.mock(Ref.class);
+     * CallableStatement stmt = Mockito.mock(CallableStatement.class);
+     * Ref ref = Mockito.mock(Ref.class);
      * type.set(stmt, "ref_param", ref);
      * stmt.setInt("id_param", 123);
      * stmt.execute();

@@ -194,7 +194,7 @@ abstract class AbstractJsonParser extends AbstractParser<JsonSerConfig, JsonDese
      * @param output the array to populate with deserialized elements; must not be {@code null}
      * @throws UncheckedIOException if an I/O error occurs during deserialization
      * @throws ParsingException if the JSON structure is invalid or not an array
-     * @throws IndexOutOfBoundsException if the JSON array size doesn't match the output array size
+     * @throws IndexOutOfBoundsException if the JSON array contains more elements than the output array can hold
      */
     @Override
     public void parse(final String source, final Object[] output) throws UncheckedIOException, ParsingException, IndexOutOfBoundsException {

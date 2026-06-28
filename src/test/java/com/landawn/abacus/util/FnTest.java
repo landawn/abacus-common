@@ -224,6 +224,11 @@ public class FnTest extends TestBase {
     }
 
     @Test
+    public void testMemoizeFunctionRejectsNullFunction() {
+        assertThrows(IllegalArgumentException.class, () -> Fn.memoize((java.util.function.Function<Object, Object>) null));
+    }
+
+    @Test
     public void testMemoizeFunction() {
         AtomicInteger counter = new AtomicInteger(0);
         java.util.function.Function<String, Integer> func = (s) -> {

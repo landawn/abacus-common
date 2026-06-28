@@ -72,9 +72,9 @@ public interface Subscriber<E> {
      * Called when an event of type {@code E} is posted to the {@link EventBus}.
      * This method is invoked by the {@code EventBus} when a matching event is posted.
      *
-     * <p>The method will be called on the thread determined by the thread mode specified during
-     * registration (see {@link Subscribe#threadMode()}), or on the posting thread if no thread
-     * mode was specified.</p>
+     * <p>The method will be called on the thread determined by the
+     * {@link com.landawn.abacus.util.ThreadMode} supplied during registration, or by
+     * {@link com.landawn.abacus.util.ThreadMode#DEFAULT} if no thread mode was specified.</p>
      *
      * <p>Implementations should handle the event and should avoid throwing unchecked exceptions.
      * Any exceptions thrown will be caught and logged by the {@code EventBus}.</p>

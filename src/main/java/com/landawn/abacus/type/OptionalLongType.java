@@ -162,7 +162,9 @@ public class OptionalLongType extends AbstractOptionalType<OptionalLong> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<OptionalLong> type = TypeFactory.getType(OptionalLong.class);
-     * ResultSet rs = org.mockito.Mockito.mock(ResultSet.class);
+     * ResultSet rs = Mockito.mock(ResultSet.class);
+     * Mockito.when(rs.getObject(1)).thenReturn(123456789L);
+     * Mockito.when(rs.getObject(2)).thenReturn(null);
      *
      * // Column contains long value 123456789
      * OptionalLong opt = type.get(rs, 1);
@@ -193,7 +195,9 @@ public class OptionalLongType extends AbstractOptionalType<OptionalLong> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<OptionalLong> type = TypeFactory.getType(OptionalLong.class);
-     * ResultSet rs = org.mockito.Mockito.mock(ResultSet.class);
+     * ResultSet rs = Mockito.mock(ResultSet.class);
+     * Mockito.when(rs.getObject("user_id")).thenReturn(987654321L);
+     * Mockito.when(rs.getObject("last_login")).thenReturn(null);
      *
      * // Column "user_id" contains long value 987654321
      * OptionalLong opt = type.get(rs, "user_id");
@@ -224,7 +228,7 @@ public class OptionalLongType extends AbstractOptionalType<OptionalLong> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<OptionalLong> type = TypeFactory.getType(OptionalLong.class);
-     * PreparedStatement stmt = org.mockito.Mockito.mock(PreparedStatement.class);
+     * PreparedStatement stmt = Mockito.mock(PreparedStatement.class);
      *
      * OptionalLong opt = OptionalLong.of(123456789L);
      * type.set(stmt, 2, opt);
@@ -256,7 +260,7 @@ public class OptionalLongType extends AbstractOptionalType<OptionalLong> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<OptionalLong> type = TypeFactory.getType(OptionalLong.class);
-     * CallableStatement stmt = org.mockito.Mockito.mock(CallableStatement.class);
+     * CallableStatement stmt = Mockito.mock(CallableStatement.class);
      *
      * OptionalLong opt = OptionalLong.of(987654321L);
      * type.set(stmt, "p_user_id", opt);

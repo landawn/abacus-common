@@ -508,7 +508,7 @@ public class JsonSerConfig extends JsonXmlSerConfig<JsonSerConfig> {
         h = 31 * h + N.hashCode(writeColumnType);
         h = 31 * h + N.hashCode(isWriteBigDecimalAsPlain());
         h = 31 * h + N.hashCode(isFailOnEmptyBean());
-        h = 31 * h + N.hashCode(isSupportCircularReference());
+        h = 31 * h + N.hashCode(isCircularReferenceSupported());
         h = 31 * h + N.hashCode(getIndentation());
         h = 31 * h + N.hashCode(getPropNamingPolicy());
         h = 31 * h + N.hashCode(quotePropName);
@@ -539,7 +539,7 @@ public class JsonSerConfig extends JsonXmlSerConfig<JsonSerConfig> {
                     && N.equals(writeNullStringAsEmpty, other.writeNullStringAsEmpty) && N.equals(writeNullNumberAsZero, other.writeNullNumberAsZero)
                     && N.equals(writeNullBooleanAsFalse, other.writeNullBooleanAsFalse)
                     && N.equals(isWriteBigDecimalAsPlain(), other.isWriteBigDecimalAsPlain()) && N.equals(isFailOnEmptyBean(), other.isFailOnEmptyBean())
-                    && N.equals(isSupportCircularReference(), other.isSupportCircularReference()) && N.equals(getIndentation(), other.getIndentation())
+                    && N.equals(isCircularReferenceSupported(), other.isCircularReferenceSupported()) && N.equals(getIndentation(), other.getIndentation())
                     && N.equals(getPropNamingPolicy(), other.getPropNamingPolicy()) && N.equals(writeNullToEmpty, other.writeNullToEmpty)
                     && N.equals(writeDatasetAsRows, other.writeDatasetAsRows) && N.equals(writeRowColumnKeyType, other.writeRowColumnKeyType)
                     && N.equals(writeColumnType, other.writeColumnType) && N.equals(quotePropName, other.quotePropName)
@@ -565,8 +565,8 @@ public class JsonSerConfig extends JsonXmlSerConfig<JsonSerConfig> {
                 + N.toString(writeNullNumberAsZero) + ", writeNullBooleanAsFalse=" + N.toString(writeNullBooleanAsFalse) + ", writeNullToEmpty="
                 + N.toString(writeNullToEmpty) + ", writeDatasetAsRows=" + N.toString(writeDatasetAsRows) + ", writeRowColumnKeyType="
                 + N.toString(writeRowColumnKeyType) + ", writeColumnType=" + N.toString(writeColumnType) + ", writeBigDecimalAsPlain="
-                + N.toString(isWriteBigDecimalAsPlain()) + ", failOnEmptyBean=" + N.toString(isFailOnEmptyBean()) + ", supportCircularReference="
-                + N.toString(isSupportCircularReference()) + ", indentation=" + N.toString(getIndentation()) + ", propNamingPolicy="
+                + N.toString(isWriteBigDecimalAsPlain()) + ", failOnEmptyBean=" + N.toString(isFailOnEmptyBean()) + ", circularReferenceSupported="
+                + N.toString(isCircularReferenceSupported()) + ", indentation=" + N.toString(getIndentation()) + ", propNamingPolicy="
                 + N.toString(getPropNamingPolicy()) + ", quotePropName=" + N.toString(quotePropName) + ", quoteMapKey=" + N.toString(quoteMapKey)
                 + ", bracketRootValue=" + N.toString(bracketRootValue) + ", wrapRootValue=" + N.toString(wrapRootValue) + "}";
     }

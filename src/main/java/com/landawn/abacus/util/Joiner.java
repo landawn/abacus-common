@@ -3114,7 +3114,7 @@ public final class Joiner implements Closeable {
 
     private void assertNotClosed() {
         if (isClosed) {
-            throw new IllegalStateException();
+            throw new IllegalStateException("Joiner has been closed");
         }
     }
 }

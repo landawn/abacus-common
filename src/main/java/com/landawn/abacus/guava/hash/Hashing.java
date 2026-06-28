@@ -440,6 +440,7 @@ public final class Hashing {
      * @param key the secret key for HMAC computation
      * @return a hash function implementing HMAC-SHA1 with the given key
      * @throws IllegalArgumentException if the given key is inappropriate for initializing this MAC
+     * @throws NullPointerException if {@code key} is {@code null}
      */
     public static HashFunction hmacSha1(final Key key) {
         return GuavaHashFunction.wrap(com.google.common.hash.Hashing.hmacSha1(key));
@@ -479,6 +480,7 @@ public final class Hashing {
      * @param key the secret key for HMAC computation
      * @return a hash function implementing HMAC-SHA256 with the given key
      * @throws IllegalArgumentException if the given key is inappropriate for initializing this MAC
+     * @throws NullPointerException if {@code key} is {@code null}
      */
     public static HashFunction hmacSha256(final Key key) {
         return GuavaHashFunction.wrap(com.google.common.hash.Hashing.hmacSha256(key));
@@ -519,6 +521,7 @@ public final class Hashing {
      * @param key the secret key for HMAC computation
      * @return a hash function implementing HMAC-SHA512 with the given key
      * @throws IllegalArgumentException if the given key is inappropriate for initializing this MAC
+     * @throws NullPointerException if {@code key} is {@code null}
      */
     public static HashFunction hmacSha512(final Key key) {
         return GuavaHashFunction.wrap(com.google.common.hash.Hashing.hmacSha512(key));

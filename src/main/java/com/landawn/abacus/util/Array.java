@@ -1128,6 +1128,11 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * String[] b = Array.oF("x", "y");   // returns ["x", "y"]
      * }</pre>
      *
+     * <p>This method is an alias of {@link #ofValues(Object...)}, retained to disambiguate generic
+     * varargs from the many typed {@code of(...)} overloads (for example {@code of(int...)} or
+     * {@code of(CharSequence...)}). For readability, prefer {@link #ofValues(Object...)} or a suitably
+     * typed {@code of(...)} overload.
+     *
      * @param <T> the type of the elements in the array.
      * @param a the input array.
      * @return the same input array, or {@code null} if {@code a} is {@code null}.
@@ -1151,9 +1156,14 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * String[] b = Array.ofValues("x", "y");   // returns ["x", "y"]
      * }</pre>
      *
+     * <p>This is the readable equivalent of {@link #oF(Object...)}; the distinct name avoids generic
+     * varargs ambiguity with the typed {@code of(...)} overloads. Use it for element types not covered
+     * by any typed {@code of(...)} overload (for example {@code UUID} or {@code BigDecimal}).
+     *
      * @param <T> the type of the elements in the array.
      * @param a the input array.
      * @return the same input array, or {@code null} if {@code a} is {@code null}.
+     * @see #oF(Object...)
      * @see N#asArray(Object...)
      */
     @Beta

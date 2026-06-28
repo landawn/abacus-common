@@ -19,7 +19,6 @@ import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
 
 import com.landawn.abacus.annotation.Beta;
-import com.landawn.abacus.util.u.OptionalByte;
 import com.landawn.abacus.util.function.BytePredicate;
 import com.landawn.abacus.util.function.ByteSupplier;
 import com.landawn.abacus.util.stream.ByteStream;
@@ -50,10 +49,6 @@ import com.landawn.abacus.util.stream.ByteStream;
  */
 @SuppressWarnings({ "java:S6548" })
 public abstract class ByteIterator extends ImmutableIterator<Byte> {
-
-    private OptionalByte cachedFirst = null;
-
-    private OptionalByte cachedLast = null;
 
     /**
      * Constructs a new {@code ByteIterator}.
@@ -519,78 +514,6 @@ public abstract class ByteIterator extends ImmutableIterator<Byte> {
                 return next;
             }
         };
-    }
-
-    /**
-     * Returns the first element wrapped in an {@code OptionalByte}, or an empty
-     * {@code OptionalByte} if no elements are available.
-     *
-     * <p>On the first call this method consumes the first element from this iterator,
-     * advancing it past that element. The result is then cached; subsequent calls return
-     * the same cached value without further advancing the iterator. If the iterator is
-     * empty, an empty {@code OptionalByte} is returned and cached.</p>
-     *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * ByteIterator iter = ByteIterator.of((byte)1, (byte)2, (byte)3);
-     * OptionalByte first = iter.first();   // returns OptionalByte.of(1)
-     * byte second = iter.nextByte();       // returns 2 — iterator advanced past first element
-     * }</pre>
-     *
-     * @return an {@code OptionalByte} containing the first element if present, otherwise empty
-     * @deprecated the result is cached on the first call, so subsequent calls return the same
-     *             (potentially stale) value even though the iterator has been advanced; this
-     *             inconsistent behavior makes the method unreliable
-     */
-    @Deprecated
-    public OptionalByte first() {
-        if (cachedFirst == null) {
-            cachedFirst = hasNext() ? OptionalByte.of(nextByte()) : OptionalByte.empty();
-        }
-
-        return cachedFirst;
-    }
-
-    /**
-     * Returns the last element wrapped in an OptionalByte, or an empty OptionalByte if no elements are available.
-     *
-     * <p>This method consumes all remaining elements from this iterator to find the last one.
-     * After calling this method, the iterator is completely exhausted ({@code hasNext()} will
-     * return {@code false}). If the iterator is empty when this method is called, an empty
-     * {@code OptionalByte} is returned.</p>
-     *
-     * <p>The result is cached after the first call; subsequent invocations are idempotent and
-     * return the same cached value regardless of the iterator's current state. In particular,
-     * calling {@code last()} again on the now-exhausted iterator returns the cached element
-     * rather than an empty {@code OptionalByte}.</p>
-     *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * ByteIterator iter = ByteIterator.of((byte)1, (byte)2, (byte)3);
-     * OptionalByte last = iter.last();    // returns OptionalByte.of(3)
-     * boolean hasMore = iter.hasNext();   // returns false - iterator exhausted
-     * OptionalByte again = iter.last();   // returns OptionalByte.of(3) again - cached, not empty
-     * }</pre>
-     *
-     * @return an {@code OptionalByte} containing the last element if present, otherwise empty
-     */
-    @Beta
-    public OptionalByte last() {
-        if (cachedLast == null) {
-            if (hasNext()) {
-                byte next = nextByte();
-
-                while (hasNext()) {
-                    next = nextByte();
-                }
-
-                cachedLast = OptionalByte.of(next);
-            } else {
-                cachedLast = OptionalByte.empty();
-            }
-        }
-
-        return cachedLast;
     }
 
     /**

@@ -1072,6 +1072,19 @@ public class JsonUtilTest extends TestBase {
     }
 
     @Test
+    public void testUnwrapJSONArrayToTypedCollectionConvertsScalarElements() {
+        JSONArray json = new JSONArray();
+        json.put(123);
+        json.put(true);
+
+        Type<List<String>> type = N.typeOf("List<String>");
+        List<String> result = JsonUtil.unwrap(json, type);
+
+        assertEquals(Arrays.asList("123", "true"), result);
+        assertEquals(String.class, result.get(0).getClass());
+    }
+
+    @Test
     public void testUnwrapJSONArrayToDoubleArray() {
         JSONArray json = new JSONArray();
         json.put(1.1);

@@ -37,7 +37,7 @@ public class DatasetTypeTest extends TestBase {
 
     @Test
     public void testGetSerializationType() {
-        assertEquals(Type.SerializationType.DATA_SET, datasetType.serializationType());
+        assertEquals(Type.SerializationType.DATASET, datasetType.serializationType());
     }
 
     @Test

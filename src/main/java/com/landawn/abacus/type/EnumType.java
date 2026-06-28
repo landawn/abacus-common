@@ -105,6 +105,13 @@ public final class EnumType<T extends Enum<T>> extends SingleValueType<T> {
 
             for (final T enumConstant : typeClass.getEnumConstants()) {
                 int code = ClassUtil.invokeMethod(enumConstant, getCodeMethod);
+                final T previous = numberEnum.get(code);
+
+                if (previous != null) {
+                    throw new IllegalArgumentException("Duplicate code " + code + " in enum class " + ClassUtil.getCanonicalClassName(typeClass) + ": "
+                            + previous.name() + " and " + enumConstant.name());
+                }
+
                 numberEnum.put(code, enumConstant);
 
                 final String jsonXmlName = getJsonXmlName(enumConstant);

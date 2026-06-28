@@ -1909,6 +1909,13 @@ public class BiIteratorTest extends TestBase {
         Assertions.assertTrue(multiList.right().isEmpty());
     }
 
+    @Test
+    public void testUnzipToLists_emptyRejectsNullSuppliedList() {
+        BiIterator<String, Integer> iter = BiIterator.empty();
+
+        assertThrows(NullPointerException.class, () -> iter.unzipToLists(() -> null));
+    }
+
     // =====================================================================
     // unzipToSets(Supplier)
     // =====================================================================
@@ -1975,6 +1982,13 @@ public class BiIteratorTest extends TestBase {
 
         assertTrue(sets.left().isEmpty());
         assertTrue(sets.right().isEmpty());
+    }
+
+    @Test
+    public void testUnzipToSets_emptyRejectsNullSuppliedSet() {
+        BiIterator<String, Integer> iter = BiIterator.empty();
+
+        assertThrows(NullPointerException.class, () -> iter.unzipToSets(() -> null));
     }
 
     // =====================================================================

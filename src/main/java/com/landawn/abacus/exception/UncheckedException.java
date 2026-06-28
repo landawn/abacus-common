@@ -70,7 +70,7 @@ public class UncheckedException extends RuntimeException {
     private static final long serialVersionUID = -1973552812345999717L;
 
     /**
-     * Constructs a new {@code UncheckedException} by wrapping the specified checked exception.
+     * Constructs a new {@code UncheckedException} by wrapping the specified throwable.
      * This constructor preserves all information from the original exception including its
      * stack trace and any suppressed exceptions.
      *
@@ -86,7 +86,7 @@ public class UncheckedException extends RuntimeException {
      * }
      * }</pre>
      *
-     * @param cause the checked exception to wrap. Must not be {@code null}.
+     * @param cause the throwable to wrap. Must not be {@code null}.
      * @throws IllegalArgumentException if {@code cause} is {@code null}
      */
     public UncheckedException(final Throwable cause) {
@@ -96,7 +96,7 @@ public class UncheckedException extends RuntimeException {
     }
 
     /**
-     * Constructs a new {@code UncheckedException} with the specified detail message and checked exception.
+     * Constructs a new {@code UncheckedException} with the specified detail message and cause.
      * This constructor allows you to provide additional context while preserving all information
      * from the original exception.
      *
@@ -117,7 +117,7 @@ public class UncheckedException extends RuntimeException {
      *
      * @param message the detail message. The detail message is saved for later retrieval
      *                by the {@link #getMessage()} method.
-     * @param cause the checked exception to wrap. Must not be {@code null}.
+     * @param cause the throwable to wrap. Must not be {@code null}.
      * @throws IllegalArgumentException if {@code cause} is {@code null}
      */
     public UncheckedException(final String message, final Throwable cause) {

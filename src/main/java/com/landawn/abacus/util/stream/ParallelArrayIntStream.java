@@ -1,0 +1,1864 @@
+/*
+ * Copyright (C) 2016, 2017, 2018, 2019 HaiYang Li
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License. You may obtain a copy of the License at
+ *
+ * https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed under the License
+ * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ * or implied. See the License for the specific language governing permissions and limitations under
+ * the License.
+ */
+
+package com.landawn.abacus.util.stream;
+
+import static com.landawn.abacus.util.function.ToIntFunction.UNBOX;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ExecutionException;
+import java.util.function.BiConsumer;
+import java.util.function.BinaryOperator;
+import java.util.function.IntBinaryOperator;
+import java.util.function.IntConsumer;
+import java.util.function.IntFunction;
+import java.util.function.IntPredicate;
+import java.util.function.IntToDoubleFunction;
+import java.util.function.IntToLongFunction;
+import java.util.function.IntUnaryOperator;
+import java.util.function.ObjIntConsumer;
+import java.util.function.Supplier;
+import java.util.stream.Collector;
+
+import com.landawn.abacus.util.AsyncExecutor;
+import com.landawn.abacus.util.ContinuableFuture;
+import com.landawn.abacus.util.Holder;
+import com.landawn.abacus.util.MutableBoolean;
+import com.landawn.abacus.util.MutableInt;
+import com.landawn.abacus.util.N;
+import com.landawn.abacus.util.Pair;
+import com.landawn.abacus.util.Throwables;
+import com.landawn.abacus.util.u.OptionalInt;
+import com.landawn.abacus.util.function.IntTernaryOperator;
+import com.landawn.abacus.util.function.IntToByteFunction;
+import com.landawn.abacus.util.function.IntToCharFunction;
+import com.landawn.abacus.util.function.IntToFloatFunction;
+import com.landawn.abacus.util.function.IntToShortFunction;
+
+/**
+ * A parallel implementation of IntStream backed by an array that enables concurrent processing
+ * of int elements across multiple threads. This class extends ArrayIntStream and overrides
+ * key operations to execute them in parallel using a configurable thread pool.
+ *
+ * <p>The parallel execution model distributes work across multiple threads using a splitor strategy:
+ * <ul>
+ * <li>{@code ARRAY} - Divides the array into fixed-size slices assigned to each thread</li>
+ * <li>{@code ITERATOR} - Uses shared cursor with synchronized access for load balancing</li>
+ * </ul>
+ *
+ * <p><b>Usage Examples:</b></p>
+ * <pre>{@code
+ * // Create a parallel int stream
+ * IntStream stream = IntStream.of(largeIntArray).parallel();
+ *
+ * // Process elements in parallel
+ * int sum = stream.filter(i -> i > 0).sum();
+ * }</pre>
+ *
+ * <p><b>Thread Safety:</b> Operations on this stream are thread-safe and properly synchronized
+ * when accessing shared state during parallel execution.
+ *
+ * @see ArrayIntStream
+ * @see IntStream#parallel()
+ */
+final class ParallelArrayIntStream extends ArrayIntStream {
+    private final int maxThreadNum;
+    private final Splitor splitor;
+    private final AsyncExecutor asyncExecutor;
+    private final boolean cancelUncompletedThreads;
+    private volatile ArrayIntStream sequential;
+
+    /**
+     * Constructs a ParallelArrayIntStream with the specified configuration for parallel processing.
+     * This constructor initializes all parameters for controlling parallel execution behavior.
+     *
+     * @param values the int array to stream
+     * @param fromIndex the start index (inclusive) of the range to process
+     * @param toIndex the end index (exclusive) of the range to process
+     * @param sorted whether the array elements in the range are in sorted order
+     * @param maxThreadNum the maximum number of threads to use for parallel operations (0 uses default)
+     * @param splitor the strategy for dividing work among threads (null uses default)
+     * @param asyncExecutor the executor for running parallel tasks (null uses default)
+     * @param cancelUncompletedThreads whether to cancel uncompleted threads when the stream is closed
+     * @param closeHandlers handlers to execute when the stream is closed
+     */
+    ParallelArrayIntStream(final int[] values, final int fromIndex, final int toIndex, final boolean sorted, final int maxThreadNum, final Splitor splitor,
+            final AsyncExecutor asyncExecutor, final boolean cancelUncompletedThreads, final Collection<LocalRunnable> closeHandlers) {
+        super(values, fromIndex, toIndex, sorted, closeHandlers);
+
+        this.maxThreadNum = maxThreadNum == 0 ? DEFAULT_MAX_THREAD_NUM : maxThreadNum;
+        this.splitor = splitor == null ? DEFAULT_SPLITOR : splitor;
+        this.asyncExecutor = asyncExecutor == null ? DEFAULT_ASYNC_EXECUTOR : asyncExecutor;
+        this.cancelUncompletedThreads = cancelUncompletedThreads;
+    }
+
+    /**
+     * Returns a parallel stream consisting of elements that match the given predicate.
+     * If the stream can be processed sequentially (e.g., few elements), delegates to the
+     * sequential implementation; otherwise boxes elements and uses the parallel object stream.
+     *
+     * @param predicate a non-interfering, stateless predicate to apply to each element
+     * @return a new parallel {@code IntStream} of matching elements
+     * @throws IllegalStateException if the stream is already closed
+     */
+    @Override
+    public IntStream filter(final IntPredicate predicate) throws IllegalStateException {
+        assertNotClosed();
+
+        if (canBeSequential(maxThreadNum, fromIndex, toIndex)) {
+            return super.filter(predicate);
+        }
+
+        final Stream<Integer> stream = boxed().filter(predicate::test);
+
+        return new ParallelIteratorIntStream(stream, false, maxThreadNum, splitor, asyncExecutor, cancelUncompletedThreads, closeHandlers());
+    }
+
+    /**
+     * Returns a parallel stream of elements that match the predicate until a worker observes
+     * a non-matching element.
+     * If the stream can be processed sequentially, delegates to the sequential implementation;
+     * otherwise boxes elements and delegates to the parallel object stream's {@code takeWhile}.
+     *
+     * <p><b>&#9888; Parallel streams:</b> this operation does not guarantee encounter-order prefix
+     * semantics; later matching elements may be returned.
+     *
+     * @param predicate a non-interfering, stateless predicate to apply to each element
+     * @return a new parallel {@code IntStream} of the elements selected by the parallel {@code takeWhile} operation
+     * @throws IllegalStateException if the stream is already closed
+     */
+    @Override
+    public IntStream takeWhile(final IntPredicate predicate) throws IllegalStateException {
+        assertNotClosed();
+
+        if (canBeSequential(maxThreadNum, fromIndex, toIndex)) {
+            return super.takeWhile(predicate);
+        }
+
+        final Stream<Integer> stream = boxed().takeWhile(predicate::test);
+
+        return new ParallelIteratorIntStream(stream, false, maxThreadNum, splitor, asyncExecutor, cancelUncompletedThreads, closeHandlers());
+    }
+
+    /**
+     * Returns a parallel stream after dropping matching elements until a worker observes a
+     * non-matching element. If the stream can be processed sequentially,
+     * delegates to the sequential implementation; otherwise boxes elements and delegates to
+     * the parallel object stream's {@code dropWhile}.
+     *
+     * <p><b>&#9888; Parallel streams:</b> this operation does not guarantee encounter-order prefix/suffix
+     * semantics; later matching elements may be dropped.
+     *
+     * @param predicate a non-interfering, stateless predicate to apply to each element
+     * @return a new parallel {@code IntStream} of the elements selected by the parallel {@code dropWhile} operation
+     * @throws IllegalStateException if the stream is already closed
+     */
+    @Override
+    public IntStream dropWhile(final IntPredicate predicate) throws IllegalStateException {
+        assertNotClosed();
+
+        if (canBeSequential(maxThreadNum, fromIndex, toIndex)) {
+            return super.dropWhile(predicate);
+        }
+
+        final Stream<Integer> stream = boxed().dropWhile(predicate::test);
+
+        return new ParallelIteratorIntStream(stream, false, maxThreadNum, splitor, asyncExecutor, cancelUncompletedThreads, closeHandlers());
+    }
+
+    /**
+     * Returns a parallel stream consisting of results of applying the given mapper to each element.
+     * If the stream can be processed sequentially, delegates to the sequential implementation;
+     * otherwise boxes elements and maps using the parallel object stream.
+     *
+     * @param mapper a non-interfering, stateless function to apply to each element
+     * @return a new parallel {@code IntStream} of mapped values
+     * @throws IllegalStateException if the stream is already closed
+     */
+    @Override
+    public IntStream map(final IntUnaryOperator mapper) throws IllegalStateException {
+        assertNotClosed();
+
+        if (canBeSequential(maxThreadNum, fromIndex, toIndex)) {
+            return super.map(mapper);
+        }
+
+        @SuppressWarnings("resource")
+        final IntStream stream = boxed().mapToInt(mapper::applyAsInt);
+
+        return new ParallelIteratorIntStream(stream, false, maxThreadNum, splitor, asyncExecutor, cancelUncompletedThreads, closeHandlers());
+    }
+
+    /**
+     * Returns a parallel {@code CharStream} consisting of results of applying the given mapper
+     * to each element. If the stream can be processed sequentially, delegates to the sequential
+     * implementation; otherwise boxes elements and maps using the parallel object stream.
+     *
+     * @param mapper a non-interfering, stateless function to apply to each element
+     * @return a new parallel {@code CharStream} of mapped values
+     * @throws IllegalStateException if the stream is already closed
+     */
+    @Override
+    public CharStream mapToChar(final IntToCharFunction mapper) throws IllegalStateException {
+        assertNotClosed();
+
+        if (canBeSequential(maxThreadNum, fromIndex, toIndex)) {
+            return super.mapToChar(mapper);
+        }
+
+        @SuppressWarnings("resource")
+        final CharStream stream = boxed().mapToChar(mapper::applyAsChar);
+
+        return new ParallelIteratorCharStream(stream, false, maxThreadNum, splitor, asyncExecutor, cancelUncompletedThreads, closeHandlers());
+    }
+
+    /**
+     * Returns a parallel {@code ByteStream} consisting of results of applying the given mapper
+     * to each element. If the stream can be processed sequentially, delegates to the sequential
+     * implementation; otherwise boxes elements and maps using the parallel object stream.
+     *
+     * @param mapper a non-interfering, stateless function to apply to each element
+     * @return a new parallel {@code ByteStream} of mapped values
+     * @throws IllegalStateException if the stream is already closed
+     */
+    @Override
+    public ByteStream mapToByte(final IntToByteFunction mapper) throws IllegalStateException {
+        assertNotClosed();
+
+        if (canBeSequential(maxThreadNum, fromIndex, toIndex)) {
+            return super.mapToByte(mapper);
+        }
+
+        @SuppressWarnings("resource")
+        final ByteStream stream = boxed().mapToByte(mapper::applyAsByte);
+
+        return new ParallelIteratorByteStream(stream, false, maxThreadNum, splitor, asyncExecutor, cancelUncompletedThreads, closeHandlers());
+    }
+
+    /**
+     * Returns a parallel {@code ShortStream} consisting of results of applying the given mapper
+     * to each element. If the stream can be processed sequentially, delegates to the sequential
+     * implementation; otherwise boxes elements and maps using the parallel object stream.
+     *
+     * @param mapper a non-interfering, stateless function to apply to each element
+     * @return a new parallel {@code ShortStream} of mapped values
+     * @throws IllegalStateException if the stream is already closed
+     */
+    @Override
+    public ShortStream mapToShort(final IntToShortFunction mapper) throws IllegalStateException {
+        assertNotClosed();
+
+        if (canBeSequential(maxThreadNum, fromIndex, toIndex)) {
+            return super.mapToShort(mapper);
+        }
+
+        @SuppressWarnings("resource")
+        final ShortStream stream = boxed().mapToShort(mapper::applyAsShort);
+
+        return new ParallelIteratorShortStream(stream, false, maxThreadNum, splitor, asyncExecutor, cancelUncompletedThreads, closeHandlers());
+    }
+
+    /**
+     * Returns a parallel {@code LongStream} consisting of results of applying the given mapper
+     * to each element. If the stream can be processed sequentially, delegates to the sequential
+     * implementation; otherwise boxes elements and maps using the parallel object stream.
+     *
+     * @param mapper a non-interfering, stateless function to apply to each element
+     * @return a new parallel {@code LongStream} of mapped values
+     * @throws IllegalStateException if the stream is already closed
+     */
+    @Override
+    public LongStream mapToLong(final IntToLongFunction mapper) throws IllegalStateException {
+        assertNotClosed();
+
+        if (canBeSequential(maxThreadNum, fromIndex, toIndex)) {
+            return super.mapToLong(mapper);
+        }
+
+        @SuppressWarnings("resource")
+        final LongStream stream = boxed().mapToLong(mapper::applyAsLong);
+
+        return new ParallelIteratorLongStream(stream, false, maxThreadNum, splitor, asyncExecutor, cancelUncompletedThreads, closeHandlers());
+    }
+
+    /**
+     * Returns a parallel {@code FloatStream} consisting of results of applying the given mapper
+     * to each element. If the stream can be processed sequentially, delegates to the sequential
+     * implementation; otherwise boxes elements and maps using the parallel object stream.
+     *
+     * @param mapper a non-interfering, stateless function to apply to each element
+     * @return a new parallel {@code FloatStream} of mapped values
+     * @throws IllegalStateException if the stream is already closed
+     */
+    @Override
+    public FloatStream mapToFloat(final IntToFloatFunction mapper) throws IllegalStateException {
+        assertNotClosed();
+
+        if (canBeSequential(maxThreadNum, fromIndex, toIndex)) {
+            return super.mapToFloat(mapper);
+        }
+
+        @SuppressWarnings("resource")
+        final FloatStream stream = boxed().mapToFloat(mapper::applyAsFloat);
+
+        return new ParallelIteratorFloatStream(stream, false, maxThreadNum, splitor, asyncExecutor, cancelUncompletedThreads, closeHandlers());
+    }
+
+    /**
+     * Returns a parallel {@code DoubleStream} consisting of results of applying the given mapper
+     * to each element. If the stream can be processed sequentially, delegates to the sequential
+     * implementation; otherwise boxes elements and maps using the parallel object stream.
+     *
+     * @param mapper a non-interfering, stateless function to apply to each element
+     * @return a new parallel {@code DoubleStream} of mapped values
+     * @throws IllegalStateException if the stream is already closed
+     */
+    @Override
+    public DoubleStream mapToDouble(final IntToDoubleFunction mapper) throws IllegalStateException {
+        assertNotClosed();
+
+        if (canBeSequential(maxThreadNum, fromIndex, toIndex)) {
+            return super.mapToDouble(mapper);
+        }
+
+        @SuppressWarnings("resource")
+        final DoubleStream stream = boxed().mapToDouble(mapper::applyAsDouble);
+
+        return new ParallelIteratorDoubleStream(stream, false, maxThreadNum, splitor, asyncExecutor, cancelUncompletedThreads, closeHandlers());
+    }
+
+    /**
+     * Returns a parallel object {@code Stream} consisting of results of applying the given mapper
+     * to each element. If the stream can be processed sequentially, delegates to the sequential
+     * implementation; otherwise boxes elements and maps using the parallel object stream.
+     *
+     * @param <T> the element type of the new stream
+     * @param mapper a non-interfering, stateless function to apply to each element
+     * @return a new parallel {@code Stream} of mapped objects
+     * @throws IllegalStateException if the stream is already closed
+     */
+    @Override
+    public <T> Stream<T> mapToObj(final IntFunction<? extends T> mapper) throws IllegalStateException {
+        assertNotClosed();
+
+        if (canBeSequential(maxThreadNum, fromIndex, toIndex)) {
+            return super.mapToObj(mapper);
+        }
+
+        //noinspection resource
+        return boxed().map(mapper::apply);
+    }
+
+    /**
+     * Returns a parallel stream consisting of the results of replacing each element with the
+     * contents of the mapped stream. If the stream can be processed sequentially, delegates to
+     * the sequential {@code flatMap} wrapped in a parallel iterator stream; otherwise boxes
+     * elements and flat-maps using the parallel object stream.
+     *
+     * @param mapper a non-interfering, stateless function that returns an {@code IntStream} for each element
+     * @return a new parallel {@code IntStream} of the flattened mapped streams
+     * @throws IllegalStateException if the stream is already closed
+     */
+    @Override
+    public IntStream flatMap(final IntFunction<? extends IntStream> mapper) throws IllegalStateException {
+        assertNotClosed();
+
+        if (canBeSequential(maxThreadNum, fromIndex, toIndex)) {
+            //noinspection resource
+            return new ParallelIteratorIntStream(sequential().flatMap(mapper), false, maxThreadNum, splitor, asyncExecutor, cancelUncompletedThreads, null);
+        }
+
+        @SuppressWarnings("resource")
+        final IntStream stream = boxed().flatMapToInt(mapper::apply);
+
+        return new ParallelIteratorIntStream(stream, false, maxThreadNum, splitor, asyncExecutor, cancelUncompletedThreads, null);
+    }
+
+    /**
+     * Returns a parallel stream consisting of the results of replacing each element with the
+     * elements from the mapped collection. If the stream can be processed sequentially, delegates
+     * to the sequential {@code flatmap} wrapped in a parallel iterator stream; otherwise boxes
+     * elements, flat-maps collections, and unboxes back to ints.
+     *
+     * @param mapper a non-interfering, stateless function that returns a {@code Collection<Integer>} for each element
+     * @return a new parallel {@code IntStream} of the flattened collection contents
+     * @throws IllegalStateException if the stream is already closed
+     */
+    @Override
+    public IntStream flatmap(final IntFunction<? extends Collection<Integer>> mapper) throws IllegalStateException {
+        assertNotClosed();
+
+        if (canBeSequential(maxThreadNum, fromIndex, toIndex)) {
+            //noinspection resource
+            return new ParallelIteratorIntStream(sequential().flatmap(mapper), false, maxThreadNum, splitor, asyncExecutor, cancelUncompletedThreads, null);
+        }
+
+        @SuppressWarnings("resource")
+        final IntStream stream = boxed().flatmap(mapper::apply).mapToInt(UNBOX);
+
+        return new ParallelIteratorIntStream(stream, false, maxThreadNum, splitor, asyncExecutor, cancelUncompletedThreads, null);
+    }
+
+    /**
+     * Returns a parallel stream consisting of the results of replacing each element with the
+     * contents of the mapped int array. If the stream can be processed sequentially, delegates
+     * to the sequential {@code flatMapArray} wrapped in a parallel iterator stream; otherwise
+     * boxes elements and flat-maps using {@code IntStream.of(array)}.
+     *
+     * @param mapper a non-interfering, stateless function that returns an {@code int[]} for each element
+     * @return a new parallel {@code IntStream} of the flattened array contents
+     * @throws IllegalStateException if the stream is already closed
+     */
+    @Override
+    public IntStream flatMapArray(final IntFunction<int[]> mapper) throws IllegalStateException {
+        assertNotClosed();
+
+        if (canBeSequential(maxThreadNum, fromIndex, toIndex)) {
+            //noinspection resource
+            return new ParallelIteratorIntStream(sequential().flatMapArray(mapper), false, maxThreadNum, splitor, asyncExecutor, cancelUncompletedThreads,
+                    null);
+        }
+
+        @SuppressWarnings("resource")
+        final IntStream stream = boxed().flatMapToInt(value -> IntStream.of(mapper.apply(value)));
+
+        return new ParallelIteratorIntStream(stream, false, maxThreadNum, splitor, asyncExecutor, cancelUncompletedThreads, null);
+    }
+
+    /**
+     * Returns a parallel {@code CharStream} consisting of the results of replacing each element
+     * with the contents of the mapped {@code CharStream}. If the stream can be processed
+     * sequentially, delegates to the sequential {@code flatMapToChar} wrapped in a parallel iterator
+     * stream; otherwise boxes elements and flat-maps using the parallel object stream.
+     *
+     * @param mapper a non-interfering, stateless function that returns a {@code CharStream} for each element
+     * @return a new parallel {@code CharStream} of the flattened mapped streams
+     * @throws IllegalStateException if the stream is already closed
+     */
+    @Override
+    public CharStream flatMapToChar(final IntFunction<? extends CharStream> mapper) throws IllegalStateException {
+        assertNotClosed();
+
+        if (canBeSequential(maxThreadNum, fromIndex, toIndex)) {
+            //noinspection resource
+            return new ParallelIteratorCharStream(sequential().flatMapToChar(mapper), false, maxThreadNum, splitor, asyncExecutor, cancelUncompletedThreads,
+                    null);
+        }
+
+        @SuppressWarnings("resource")
+        final CharStream stream = boxed().flatMapToChar(mapper::apply);
+
+        return new ParallelIteratorCharStream(stream, false, maxThreadNum, splitor, asyncExecutor, cancelUncompletedThreads, null);
+    }
+
+    /**
+     * Returns a parallel {@code ByteStream} consisting of the results of replacing each element
+     * with the contents of the mapped {@code ByteStream}. If the stream can be processed
+     * sequentially, delegates to the sequential {@code flatMapToByte} wrapped in a parallel iterator
+     * stream; otherwise boxes elements and flat-maps using the parallel object stream.
+     *
+     * @param mapper a non-interfering, stateless function that returns a {@code ByteStream} for each element
+     * @return a new parallel {@code ByteStream} of the flattened mapped streams
+     * @throws IllegalStateException if the stream is already closed
+     */
+    @Override
+    public ByteStream flatMapToByte(final IntFunction<? extends ByteStream> mapper) throws IllegalStateException {
+        assertNotClosed();
+
+        if (canBeSequential(maxThreadNum, fromIndex, toIndex)) {
+            //noinspection resource
+            return new ParallelIteratorByteStream(sequential().flatMapToByte(mapper), false, maxThreadNum, splitor, asyncExecutor, cancelUncompletedThreads,
+                    null);
+        }
+
+        @SuppressWarnings("resource")
+        final ByteStream stream = boxed().flatMapToByte(mapper::apply);
+
+        return new ParallelIteratorByteStream(stream, false, maxThreadNum, splitor, asyncExecutor, cancelUncompletedThreads, null);
+    }
+
+    /**
+     * Returns a parallel {@code ShortStream} consisting of the results of replacing each element
+     * with the contents of the mapped {@code ShortStream}. If the stream can be processed
+     * sequentially, delegates to the sequential {@code flatMapToShort} wrapped in a parallel iterator
+     * stream; otherwise boxes elements and flat-maps using the parallel object stream.
+     *
+     * @param mapper a non-interfering, stateless function that returns a {@code ShortStream} for each element
+     * @return a new parallel {@code ShortStream} of the flattened mapped streams
+     * @throws IllegalStateException if the stream is already closed
+     */
+    @Override
+    public ShortStream flatMapToShort(final IntFunction<? extends ShortStream> mapper) throws IllegalStateException {
+        assertNotClosed();
+
+        if (canBeSequential(maxThreadNum, fromIndex, toIndex)) {
+            //noinspection resource
+            return new ParallelIteratorShortStream(sequential().flatMapToShort(mapper), false, maxThreadNum, splitor, asyncExecutor, cancelUncompletedThreads,
+                    null);
+        }
+
+        @SuppressWarnings("resource")
+        final ShortStream stream = boxed().flatMapToShort(mapper::apply);
+
+        return new ParallelIteratorShortStream(stream, false, maxThreadNum, splitor, asyncExecutor, cancelUncompletedThreads, null);
+    }
+
+    /**
+     * Returns a parallel {@code LongStream} consisting of the results of replacing each element
+     * with the contents of the mapped {@code LongStream}. If the stream can be processed
+     * sequentially, delegates to the sequential {@code flatMapToLong} wrapped in a parallel iterator
+     * stream; otherwise boxes elements and flat-maps using the parallel object stream.
+     *
+     * @param mapper a non-interfering, stateless function that returns a {@code LongStream} for each element
+     * @return a new parallel {@code LongStream} of the flattened mapped streams
+     * @throws IllegalStateException if the stream is already closed
+     */
+    @Override
+    public LongStream flatMapToLong(final IntFunction<? extends LongStream> mapper) throws IllegalStateException {
+        assertNotClosed();
+
+        if (canBeSequential(maxThreadNum, fromIndex, toIndex)) {
+            //noinspection resource
+            return new ParallelIteratorLongStream(sequential().flatMapToLong(mapper), false, maxThreadNum, splitor, asyncExecutor, cancelUncompletedThreads,
+                    null);
+        }
+
+        @SuppressWarnings("resource")
+        final LongStream stream = boxed().flatMapToLong(mapper::apply);
+
+        return new ParallelIteratorLongStream(stream, false, maxThreadNum, splitor, asyncExecutor, cancelUncompletedThreads, null);
+    }
+
+    /**
+     * Returns a parallel {@code FloatStream} consisting of the results of replacing each element
+     * with the contents of the mapped {@code FloatStream}. If the stream can be processed
+     * sequentially, delegates to the sequential {@code flatMapToFloat} wrapped in a parallel iterator
+     * stream; otherwise boxes elements and flat-maps using the parallel object stream.
+     *
+     * @param mapper a non-interfering, stateless function that returns a {@code FloatStream} for each element
+     * @return a new parallel {@code FloatStream} of the flattened mapped streams
+     * @throws IllegalStateException if the stream is already closed
+     */
+    @Override
+    public FloatStream flatMapToFloat(final IntFunction<? extends FloatStream> mapper) throws IllegalStateException {
+        assertNotClosed();
+
+        if (canBeSequential(maxThreadNum, fromIndex, toIndex)) {
+            //noinspection resource
+            return new ParallelIteratorFloatStream(sequential().flatMapToFloat(mapper), false, maxThreadNum, splitor, asyncExecutor, cancelUncompletedThreads,
+                    null);
+        }
+
+        @SuppressWarnings("resource")
+        final FloatStream stream = boxed().flatMapToFloat(mapper::apply);
+
+        return new ParallelIteratorFloatStream(stream, false, maxThreadNum, splitor, asyncExecutor, cancelUncompletedThreads, null);
+    }
+
+    /**
+     * Returns a parallel {@code DoubleStream} consisting of the results of replacing each element
+     * with the contents of the mapped {@code DoubleStream}. If the stream can be processed
+     * sequentially, delegates to the sequential {@code flatMapToDouble} wrapped in a parallel iterator
+     * stream; otherwise boxes elements and flat-maps using the parallel object stream.
+     *
+     * @param mapper a non-interfering, stateless function that returns a {@code DoubleStream} for each element
+     * @return a new parallel {@code DoubleStream} of the flattened mapped streams
+     * @throws IllegalStateException if the stream is already closed
+     */
+    @Override
+    public DoubleStream flatMapToDouble(final IntFunction<? extends DoubleStream> mapper) throws IllegalStateException {
+        assertNotClosed();
+
+        if (canBeSequential(maxThreadNum, fromIndex, toIndex)) {
+            //noinspection resource
+            return new ParallelIteratorDoubleStream(sequential().flatMapToDouble(mapper), false, maxThreadNum, splitor, asyncExecutor, cancelUncompletedThreads,
+                    null);
+        }
+
+        @SuppressWarnings("resource")
+        final DoubleStream stream = boxed().flatMapToDouble(mapper::apply);
+
+        return new ParallelIteratorDoubleStream(stream, false, maxThreadNum, splitor, asyncExecutor, cancelUncompletedThreads, null);
+    }
+
+    /**
+     * Returns a parallel object {@code Stream} consisting of the results of replacing each element
+     * with the contents of the mapped {@code Stream}. If the stream can be processed sequentially,
+     * delegates to the sequential {@code flatMapToObj} wrapped in a parallel iterator stream;
+     * otherwise boxes elements and flat-maps using the parallel object stream.
+     *
+     * @param <T> the element type of the new stream
+     * @param mapper a non-interfering, stateless function that returns a {@code Stream<T>} for each element
+     * @return a new parallel object {@code Stream} of the flattened mapped streams
+     * @throws IllegalStateException if the stream is already closed
+     */
+    @Override
+    public <T> Stream<T> flatMapToObj(final IntFunction<? extends Stream<? extends T>> mapper) throws IllegalStateException {
+        assertNotClosed();
+
+        if (canBeSequential(maxThreadNum, fromIndex, toIndex)) {
+            //noinspection resource
+            return new ParallelIteratorStream<>(sequential().flatMapToObj(mapper), false, null, maxThreadNum, splitor, asyncExecutor, cancelUncompletedThreads,
+                    null);
+        }
+
+        //noinspection resource
+        return boxed().flatMap(mapper::apply);
+    }
+
+    /**
+     * Returns a parallel object {@code Stream} consisting of the results of replacing each element
+     * with the contents of the mapped collection. If the stream can be processed sequentially,
+     * delegates to the sequential {@code flatmapToObj} wrapped in a parallel iterator stream;
+     * otherwise boxes elements and flat-maps collections using the parallel object stream.
+     *
+     * @param <T> the element type of the new stream
+     * @param mapper a non-interfering, stateless function that returns a {@code Collection<T>} for each element
+     * @return a new parallel object {@code Stream} of the flattened collection contents
+     * @throws IllegalStateException if the stream is already closed
+     */
+    @Override
+    public <T> Stream<T> flatmapToObj(final IntFunction<? extends Collection<? extends T>> mapper) throws IllegalStateException {
+        assertNotClosed();
+
+        if (canBeSequential(maxThreadNum, fromIndex, toIndex)) {
+            //noinspection resource
+            return new ParallelIteratorStream<>(sequential().flatmapToObj(mapper), false, null, maxThreadNum, splitor, asyncExecutor, cancelUncompletedThreads,
+                    null);
+        }
+
+        //noinspection resource
+        return boxed().flatmap(mapper::apply);
+    }
+
+    /**
+     * Returns a parallel stream that applies the given action to each element as elements are
+     * consumed. The action is applied sequentially within the internal object stream before
+     * the result is mapped back to ints. This method is primarily used for debugging.
+     *
+     * <p>If the stream can be processed sequentially, delegates to the sequential implementation.
+     *
+     * @param action a non-interfering action to perform on each element
+     * @return a new parallel {@code IntStream} with the side-effecting action attached
+     * @throws IllegalStateException if the stream is already closed
+     */
+    @Override
+    public IntStream onEach(final IntConsumer action) throws IllegalStateException {
+        assertNotClosed();
+
+        if (canBeSequential(maxThreadNum, fromIndex, toIndex)) {
+            return super.onEach(action);
+        }
+
+        @SuppressWarnings("resource")
+        final IntStream stream = boxed().onEach(action::accept).sequential().mapToInt(UNBOX);
+
+        return new ParallelIteratorIntStream(stream, false, maxThreadNum, splitor, asyncExecutor, cancelUncompletedThreads, closeHandlers());
+    }
+
+    /**
+     * Performs the given action on each element of this stream in parallel. The array is
+     * divided into slices (when using {@code ARRAY} splitor) or elements are consumed via a
+     * shared synchronized cursor (when using {@code ITERATOR} splitor), with each thread
+     * processing its assigned elements concurrently.
+     *
+     * <p>The encounter order of action invocations is not guaranteed. Exceptions thrown by
+     * the action are collected and re-thrown after all threads complete.
+     *
+     * @param <E> the type of exception the action may throw
+     * @param action a non-interfering action to perform on each element
+     * @throws IllegalStateException if the stream is already closed
+     * @throws E if the action throws an exception
+     */
+    @Override
+    public <E extends Exception> void forEach(final Throwables.IntConsumer<E> action) throws IllegalStateException, E {
+        assertNotClosed();
+
+        if (canBeSequential(maxThreadNum, fromIndex, toIndex)) {
+            super.forEach(action);
+            return;
+        }
+
+        final int threadNum = N.min(maxThreadNum, (toIndex - fromIndex));
+        final List<ContinuableFuture<Void>> futureList = new ArrayList<>(threadNum);
+        final Holder<Throwable> eHolder = new Holder<>();
+        AsyncExecutor asyncExecutorToUse = checkAsyncExecutor(asyncExecutor, threadNum);
+
+        if (splitor == Splitor.ARRAY) {
+            final int sliceSize = (toIndex - fromIndex) / threadNum + ((toIndex - fromIndex) % threadNum == 0 ? 0 : 1);
+
+            for (int i = 0; i < threadNum; i++) {
+                final int sliceIndex = i;
+
+                asyncExecutorToUse = execute(asyncExecutorToUse, threadNum, i, futureList, () -> {
+                    int cursor = fromIndex + sliceIndex * sliceSize;
+                    final int to = toIndex - cursor > sliceSize ? cursor + sliceSize : toIndex;
+
+                    try {
+                        while (cursor < to && eHolder.value() == null) {
+                            action.accept(elements[cursor++]);
+                        }
+                    } catch (final Exception e) {
+                        setError(eHolder, e);
+                    }
+                });
+            }
+        } else {
+            final MutableInt cursor = MutableInt.of(fromIndex);
+
+            for (int i = 0; i < threadNum; i++) {
+                asyncExecutorToUse = execute(asyncExecutorToUse, threadNum, i, futureList, () -> {
+                    int next = 0;
+
+                    try {
+                        while (eHolder.value() == null) {
+                            synchronized (elements) {
+                                if (cursor.value() < toIndex) {
+                                    next = elements[cursor.getAndIncrement()];
+                                } else {
+                                    break;
+                                }
+                            }
+
+                            action.accept(next);
+                        }
+                    } catch (final Exception e) {
+                        setError(eHolder, e);
+                    }
+                });
+            }
+        }
+
+        completeAndShutdownTempExecutor(futureList, eHolder, this, asyncExecutor, asyncExecutorToUse);
+    }
+
+    /**
+     * Collects elements of this stream into a {@link Map} in parallel by applying the given key and value
+     * mappers to each element. If the stream can be processed sequentially, delegates to the sequential
+     * implementation; otherwise boxes elements and uses the parallel object stream.
+     *
+     * <p>If multiple elements map to the same key, the {@code mergeFunction} is used to resolve collisions.
+     *
+     * @param <K> the type of map keys
+     * @param <V> the type of map values
+     * @param <M> the type of the resulting map
+     * @param <E> the type of exception the key mapper may throw
+     * @param <E2> the type of exception the value mapper may throw
+     * @param keyMapper a non-interfering, stateless function to produce map keys
+     * @param valueMapper a non-interfering, stateless function to produce map values
+     * @param mergeFunction a merge function used to resolve key collisions
+     * @param mapFactory a supplier providing a new empty map into which results are inserted
+     * @return a {@code Map} whose keys and values are derived from this stream's elements
+     * @throws IllegalStateException if the stream is already closed
+     * @throws E if the key mapper throws an exception
+     * @throws E2 if the value mapper throws an exception
+     */
+    @Override
+    public <K, V, M extends Map<K, V>, E extends Exception, E2 extends Exception> M toMap(final Throwables.IntFunction<? extends K, E> keyMapper,
+            final Throwables.IntFunction<? extends V, E2> valueMapper, final BinaryOperator<V> mergeFunction, final Supplier<? extends M> mapFactory)
+            throws IllegalStateException, E, E2 {
+        assertNotClosed();
+
+        if (canBeSequential(maxThreadNum, fromIndex, toIndex)) {
+            return super.toMap(keyMapper, valueMapper, mergeFunction, mapFactory);
+        }
+
+        final Throwables.Function<? super Integer, ? extends K, E> keyMapper2 = keyMapper::apply;
+
+        final Throwables.Function<? super Integer, ? extends V, E2> valueMapper2 = valueMapper::apply;
+
+        //noinspection resource
+        return boxed().toMap(keyMapper2, valueMapper2, mergeFunction, mapFactory);
+    }
+
+    /**
+     * Groups elements of this stream into a {@link Map} in parallel by applying the given classifier
+     * and collecting values with the downstream {@link Collector}. If the stream can be processed
+     * sequentially, delegates to the sequential implementation; otherwise boxes elements and uses
+     * the parallel object stream.
+     *
+     * @param <K> the type of the keys in the resulting map
+     * @param <D> the type of the downstream reduction result
+     * @param <M> the type of the resulting map
+     * @param <E> the type of exception the key mapper may throw
+     * @param keyMapper a non-interfering, stateless function to classify elements into groups
+     * @param downstream a {@code Collector} used to collect elements in each group
+     * @param mapFactory a supplier providing a new empty map into which results are inserted
+     * @return a {@code Map} grouping elements by the classifier with values aggregated by the downstream collector
+     * @throws IllegalStateException if the stream is already closed
+     * @throws E if the key mapper throws an exception
+     */
+    @Override
+    public <K, D, M extends Map<K, D>, E extends Exception> M groupTo(final Throwables.IntFunction<? extends K, E> keyMapper,
+            final Collector<? super Integer, ?, D> downstream, final Supplier<? extends M> mapFactory) throws IllegalStateException, E {
+        assertNotClosed();
+
+        if (canBeSequential(maxThreadNum, fromIndex, toIndex)) {
+            return super.groupTo(keyMapper, downstream, mapFactory);
+        }
+
+        final Throwables.Function<? super Integer, ? extends K, E> keyMapper2 = keyMapper::apply;
+
+        //noinspection resource
+        return boxed().groupTo(keyMapper2, downstream, mapFactory);
+    }
+
+    /**
+     * Performs a parallel reduction on elements of this stream using the provided identity value
+     * and associative accumulation function. The array is partitioned across threads, each thread
+     * computes a partial result, and the partial results are combined using the same accumulator.
+     *
+     * <p>The accumulator function must be associative to produce correct results when run in
+     * parallel across multiple threads.
+     *
+     * @param identity the identity value for the accumulation function (also the result for empty streams)
+     * @param accumulator an associative, non-interfering, stateless function for combining two values
+     * @return the result of the parallel reduction
+     * @throws IllegalStateException if the stream is already closed
+     */
+    @Override
+    public int reduce(final int identity, final IntBinaryOperator accumulator) throws IllegalStateException {
+        assertNotClosed();
+
+        if (canBeSequential(maxThreadNum, fromIndex, toIndex)) {
+            return super.reduce(identity, accumulator);
+        }
+
+        final int threadNum = N.min(maxThreadNum, (toIndex - fromIndex));
+        final List<ContinuableFuture<Integer>> futureList = new ArrayList<>(threadNum);
+        final Holder<Throwable> eHolder = new Holder<>();
+        AsyncExecutor asyncExecutorToUse = checkAsyncExecutor(asyncExecutor, threadNum);
+
+        if (splitor == Splitor.ARRAY) {
+            final int sliceSize = (toIndex - fromIndex) / threadNum + ((toIndex - fromIndex) % threadNum == 0 ? 0 : 1);
+
+            for (int i = 0; i < threadNum; i++) {
+                final int sliceIndex = i;
+
+                asyncExecutorToUse = execute(asyncExecutorToUse, threadNum, i, futureList, () -> {
+                    int cursor = fromIndex + sliceIndex * sliceSize;
+                    final int to = toIndex - cursor > sliceSize ? cursor + sliceSize : toIndex;
+
+                    int result = identity;
+
+                    try {
+                        while (cursor < to && eHolder.value() == null) {
+                            result = accumulator.applyAsInt(result, elements[cursor++]);
+                        }
+                    } catch (final Exception e) {
+                        setError(eHolder, e);
+                    }
+
+                    return result;
+                });
+            }
+        } else {
+            final MutableInt cursor = MutableInt.of(fromIndex);
+
+            for (int i = 0; i < threadNum; i++) {
+                asyncExecutorToUse = execute(asyncExecutorToUse, threadNum, i, futureList, () -> {
+                    int result = identity;
+                    int next = 0;
+
+                    try {
+                        while (eHolder.value() == null) {
+                            synchronized (elements) {
+                                if (cursor.value() < toIndex) {
+                                    next = elements[cursor.getAndIncrement()];
+                                } else {
+                                    break;
+                                }
+                            }
+
+                            result = accumulator.applyAsInt(result, next);
+                        }
+                    } catch (final Exception e) {
+                        setError(eHolder, e);
+                    }
+
+                    return result;
+                });
+            }
+        }
+
+        // checkRuntimeException(eHolder, asyncExecutor, asyncExecutorToUse);
+
+        Integer result = null;
+
+        try {
+            for (final ContinuableFuture<Integer> future : futureList) {
+                if (eHolder.value() != null) {
+                    break;
+                }
+
+                if (result == null) {
+                    result = future.get();
+                } else {
+                    result = accumulator.applyAsInt(result, future.get());
+                }
+            }
+        } catch (InterruptedException | ExecutionException e) {
+            if (eHolder.value() != null) {
+                throwRuntimeException(eHolder);
+            }
+
+            throw toRuntimeException(e);
+        } finally {
+            try {
+                shutdownTempExecutor(asyncExecutorToUse, asyncExecutor);
+            } finally {
+                close();
+            }
+        }
+
+        if (eHolder.value() != null) {
+            throwRuntimeException(eHolder);
+        }
+
+        return result == null ? identity : result;
+    }
+
+    /**
+     * Performs a parallel reduction on elements of this stream using the provided associative
+     * accumulation function, with no identity value. The array is partitioned across threads,
+     * each thread computes a partial result, and the partial results are combined using the same
+     * accumulator. Returns an empty {@code OptionalInt} if the stream is empty.
+     *
+     * <p>The accumulator function must be associative to produce correct results when run in
+     * parallel across multiple threads.
+     *
+     * @param accumulator an associative, non-interfering, stateless function for combining two values
+     * @return an {@code OptionalInt} with the result, or empty if the stream contains no elements
+     * @throws IllegalStateException if the stream is already closed
+     */
+    @Override
+    public OptionalInt reduce(final IntBinaryOperator accumulator) throws IllegalStateException {
+        assertNotClosed();
+
+        if (canBeSequential(maxThreadNum, fromIndex, toIndex)) {
+            return super.reduce(accumulator);
+        }
+
+        final int threadNum = N.min(maxThreadNum, (toIndex - fromIndex));
+        final List<ContinuableFuture<Integer>> futureList = new ArrayList<>(threadNum);
+        final Holder<Throwable> eHolder = new Holder<>();
+        AsyncExecutor asyncExecutorToUse = checkAsyncExecutor(asyncExecutor, threadNum);
+
+        if (splitor == Splitor.ARRAY) {
+            final int sliceSize = (toIndex - fromIndex) / threadNum + ((toIndex - fromIndex) % threadNum == 0 ? 0 : 1);
+
+            for (int i = 0; i < threadNum; i++) {
+                final int sliceIndex = i;
+
+                asyncExecutorToUse = execute(asyncExecutorToUse, threadNum, i, futureList, () -> {
+                    int cursor = fromIndex + sliceIndex * sliceSize;
+                    final int to = toIndex - cursor > sliceSize ? cursor + sliceSize : toIndex;
+
+                    if (cursor >= to) {
+                        return null;
+                    }
+
+                    int result = elements[cursor++];
+
+                    try {
+                        while (cursor < to && eHolder.value() == null) {
+                            result = accumulator.applyAsInt(result, elements[cursor++]);
+                        }
+                    } catch (final Exception e) {
+                        setError(eHolder, e);
+                    }
+
+                    return result;
+                });
+            }
+        } else {
+            final MutableInt cursor = MutableInt.of(fromIndex);
+
+            for (int i = 0; i < threadNum; i++) {
+                asyncExecutorToUse = execute(asyncExecutorToUse, threadNum, i, futureList, () -> {
+                    int result = 0;
+
+                    synchronized (elements) {
+                        if (cursor.value() < toIndex) {
+                            result = elements[cursor.getAndIncrement()];
+                        } else {
+                            return null;
+                        }
+                    }
+
+                    int next = 0;
+
+                    try {
+                        while (eHolder.value() == null) {
+                            synchronized (elements) {
+                                if (cursor.value() < toIndex) {
+                                    next = elements[cursor.getAndIncrement()];
+                                } else {
+                                    break;
+                                }
+                            }
+
+                            result = accumulator.applyAsInt(result, next);
+                        }
+                    } catch (final Exception e) {
+                        setError(eHolder, e);
+                    }
+
+                    return result;
+                });
+            }
+        }
+
+        // checkRuntimeException(eHolder, asyncExecutor, asyncExecutorToUse);
+
+        Integer result = null;
+
+        try {
+            for (final ContinuableFuture<Integer> future : futureList) {
+                if (eHolder.value() != null) {
+                    break;
+                }
+
+                final Integer tmp = future.get();
+
+                if (tmp == null) {
+                    // continue;
+                } else if (result == null) {
+                    result = tmp;
+                } else {
+                    result = accumulator.applyAsInt(result, tmp);
+                }
+            }
+        } catch (InterruptedException | ExecutionException e) {
+            if (eHolder.value() != null) {
+                throwRuntimeException(eHolder);
+            }
+
+            throw toRuntimeException(e);
+        } finally {
+            try {
+                shutdownTempExecutor(asyncExecutorToUse, asyncExecutor);
+            } finally {
+                close();
+            }
+        }
+
+        if (eHolder.value() != null) {
+            throwRuntimeException(eHolder);
+        }
+
+        return result == null ? OptionalInt.empty() : OptionalInt.of(result);
+    }
+
+    /**
+     * Performs a mutable parallel reduction on elements of this stream. Each thread accumulates
+     * elements into its own container created by the {@code supplier}, and the per-thread containers
+     * are merged using the {@code combiner} after all threads complete.
+     *
+     * @param <R> the type of the mutable result container
+     * @param supplier a function that creates a new mutable result container
+     * @param accumulator a non-interfering, stateless function that folds an element into a container
+     * @param combiner a non-interfering, stateless function that merges two containers (used in parallel execution)
+     * @return the result of the parallel mutable reduction
+     * @throws IllegalStateException if the stream is already closed
+     */
+    @Override
+    public <R> R collect(final Supplier<R> supplier, final ObjIntConsumer<? super R> accumulator, final BiConsumer<R, R> combiner)
+            throws IllegalStateException {
+        assertNotClosed();
+
+        if (canBeSequential(maxThreadNum, fromIndex, toIndex)) {
+            return super.collect(supplier, accumulator, combiner);
+        }
+
+        final int threadNum = N.min(maxThreadNum, (toIndex - fromIndex));
+        final List<ContinuableFuture<R>> futureList = new ArrayList<>(threadNum);
+        final Holder<Throwable> eHolder = new Holder<>();
+        AsyncExecutor asyncExecutorToUse = checkAsyncExecutor(asyncExecutor, threadNum);
+
+        if (splitor == Splitor.ARRAY) {
+            final int sliceSize = (toIndex - fromIndex) / threadNum + ((toIndex - fromIndex) % threadNum == 0 ? 0 : 1);
+
+            for (int i = 0; i < threadNum; i++) {
+                final int sliceIndex = i;
+
+                asyncExecutorToUse = execute(asyncExecutorToUse, threadNum, i, futureList, () -> {
+                    int cursor = fromIndex + sliceIndex * sliceSize;
+                    final int to = toIndex - cursor > sliceSize ? cursor + sliceSize : toIndex;
+
+                    final R container = supplier.get();
+
+                    try {
+                        while (cursor < to && eHolder.value() == null) {
+                            accumulator.accept(container, elements[cursor++]);
+                        }
+                    } catch (final Exception e) {
+                        setError(eHolder, e);
+                    }
+
+                    return container;
+                });
+            }
+        } else {
+            final MutableInt cursor = MutableInt.of(fromIndex);
+
+            for (int i = 0; i < threadNum; i++) {
+                asyncExecutorToUse = execute(asyncExecutorToUse, threadNum, i, futureList, () -> {
+                    final R container = supplier.get();
+                    int next = 0;
+
+                    try {
+                        while (eHolder.value() == null) {
+                            synchronized (elements) {
+                                if (cursor.value() < toIndex) {
+                                    next = elements[cursor.getAndIncrement()];
+                                } else {
+                                    break;
+                                }
+                            }
+
+                            accumulator.accept(container, next);
+                        }
+                    } catch (final Exception e) {
+                        setError(eHolder, e);
+                    }
+
+                    return container;
+                });
+            }
+        }
+
+        return completeAndCollectResult(futureList, eHolder, supplier, combiner, this, asyncExecutor, asyncExecutorToUse);
+    }
+
+    /**
+     * Returns {@code true} if any element of this stream matches the given predicate, evaluated
+     * in parallel. Threads stop as soon as a matching element is found. Returns {@code false} if
+     * the stream is empty.
+     *
+     * @param <E> the type of exception the predicate may throw
+     * @param predicate a non-interfering, stateless predicate to apply to elements
+     * @return {@code true} if any element matches the predicate, {@code false} otherwise
+     * @throws IllegalStateException if the stream is already closed
+     * @throws E if the predicate throws an exception
+     */
+    @Override
+    public <E extends Exception> boolean anyMatch(final Throwables.IntPredicate<E> predicate) throws IllegalStateException, E {
+        assertNotClosed();
+
+        if (canBeSequential(maxThreadNum, fromIndex, toIndex)) {
+            return super.anyMatch(predicate);
+        }
+
+        final int threadNum = N.min(maxThreadNum, (toIndex - fromIndex));
+        final List<ContinuableFuture<Void>> futureList = new ArrayList<>(threadNum);
+        final Holder<Throwable> eHolder = new Holder<>();
+        final MutableBoolean result = MutableBoolean.of(false);
+        AsyncExecutor asyncExecutorToUse = checkAsyncExecutor(asyncExecutor, threadNum);
+
+        if (splitor == Splitor.ARRAY) {
+            final int sliceSize = (toIndex - fromIndex) / threadNum + ((toIndex - fromIndex) % threadNum == 0 ? 0 : 1);
+
+            for (int i = 0; i < threadNum; i++) {
+                final int sliceIndex = i;
+
+                asyncExecutorToUse = execute(asyncExecutorToUse, threadNum, i, futureList, () -> {
+                    int cursor = fromIndex + sliceIndex * sliceSize;
+                    final int to = toIndex - cursor > sliceSize ? cursor + sliceSize : toIndex;
+
+                    try {
+                        while (cursor < to && result.isFalse() && eHolder.value() == null) {
+                            if (predicate.test(elements[cursor++])) {
+                                result.setTrue();
+                                break;
+                            }
+                        }
+                    } catch (final Exception e) {
+                        setError(eHolder, e);
+                    }
+                });
+            }
+        } else {
+            final MutableInt cursor = MutableInt.of(fromIndex);
+
+            for (int i = 0; i < threadNum; i++) {
+                asyncExecutorToUse = execute(asyncExecutorToUse, threadNum, i, futureList, () -> {
+                    int next = 0;
+
+                    try {
+                        while (result.isFalse() && eHolder.value() == null) {
+                            synchronized (elements) {
+                                if (cursor.value() < toIndex) {
+                                    next = elements[cursor.getAndIncrement()];
+                                } else {
+                                    break;
+                                }
+                            }
+
+                            if (predicate.test(next)) {
+                                result.setTrue();
+                                break;
+                            }
+                        }
+                    } catch (final Exception e) {
+                        setError(eHolder, e);
+                    }
+                });
+            }
+        }
+
+        completeAndShutdownTempExecutor(futureList, eHolder, this, asyncExecutor, asyncExecutorToUse);
+
+        return result.value();
+    }
+
+    /**
+     * Returns {@code true} if all elements of this stream match the given predicate, evaluated
+     * in parallel. Threads stop as soon as a non-matching element is found. Returns {@code true}
+     * if the stream is empty.
+     *
+     * @param <E> the type of exception the predicate may throw
+     * @param predicate a non-interfering, stateless predicate to apply to elements
+     * @return {@code true} if all elements match the predicate, {@code false} otherwise
+     * @throws IllegalStateException if the stream is already closed
+     * @throws E if the predicate throws an exception
+     */
+    @Override
+    public <E extends Exception> boolean allMatch(final Throwables.IntPredicate<E> predicate) throws IllegalStateException, E {
+        assertNotClosed();
+
+        if (canBeSequential(maxThreadNum, fromIndex, toIndex)) {
+            return super.allMatch(predicate);
+        }
+
+        final int threadNum = N.min(maxThreadNum, (toIndex - fromIndex));
+        final List<ContinuableFuture<Void>> futureList = new ArrayList<>(threadNum);
+        final Holder<Throwable> eHolder = new Holder<>();
+        final MutableBoolean result = MutableBoolean.of(true);
+        AsyncExecutor asyncExecutorToUse = checkAsyncExecutor(asyncExecutor, threadNum);
+
+        if (splitor == Splitor.ARRAY) {
+            final int sliceSize = (toIndex - fromIndex) / threadNum + ((toIndex - fromIndex) % threadNum == 0 ? 0 : 1);
+
+            for (int i = 0; i < threadNum; i++) {
+                final int sliceIndex = i;
+
+                asyncExecutorToUse = execute(asyncExecutorToUse, threadNum, i, futureList, () -> {
+                    int cursor = fromIndex + sliceIndex * sliceSize;
+                    final int to = toIndex - cursor > sliceSize ? cursor + sliceSize : toIndex;
+
+                    try {
+                        while (cursor < to && result.isTrue() && eHolder.value() == null) {
+                            if (!predicate.test(elements[cursor++])) {
+                                result.setFalse();
+                                break;
+                            }
+                        }
+                    } catch (final Exception e) {
+                        setError(eHolder, e);
+                    }
+                });
+            }
+        } else {
+            final MutableInt cursor = MutableInt.of(fromIndex);
+
+            for (int i = 0; i < threadNum; i++) {
+                asyncExecutorToUse = execute(asyncExecutorToUse, threadNum, i, futureList, () -> {
+                    int next = 0;
+
+                    try {
+                        while (result.isTrue() && eHolder.value() == null) {
+                            synchronized (elements) {
+                                if (cursor.value() < toIndex) {
+                                    next = elements[cursor.getAndIncrement()];
+                                } else {
+                                    break;
+                                }
+                            }
+
+                            if (!predicate.test(next)) {
+                                result.setFalse();
+                                break;
+                            }
+                        }
+                    } catch (final Exception e) {
+                        setError(eHolder, e);
+                    }
+                });
+            }
+        }
+
+        completeAndShutdownTempExecutor(futureList, eHolder, this, asyncExecutor, asyncExecutorToUse);
+
+        return result.value();
+    }
+
+    /**
+     * Returns {@code true} if no elements of this stream match the given predicate, evaluated
+     * in parallel. Threads stop as soon as a matching element is found. Returns {@code true}
+     * if the stream is empty.
+     *
+     * @param <E> the type of exception the predicate may throw
+     * @param predicate a non-interfering, stateless predicate to apply to elements
+     * @return {@code true} if no elements match the predicate, {@code false} otherwise
+     * @throws IllegalStateException if the stream is already closed
+     * @throws E if the predicate throws an exception
+     */
+    @Override
+    public <E extends Exception> boolean noneMatch(final Throwables.IntPredicate<E> predicate) throws IllegalStateException, E {
+        assertNotClosed();
+
+        if (canBeSequential(maxThreadNum, fromIndex, toIndex)) {
+            return super.noneMatch(predicate);
+        }
+
+        final int threadNum = N.min(maxThreadNum, (toIndex - fromIndex));
+        final List<ContinuableFuture<Void>> futureList = new ArrayList<>(threadNum);
+        final Holder<Throwable> eHolder = new Holder<>();
+        final MutableBoolean result = MutableBoolean.of(true);
+        AsyncExecutor asyncExecutorToUse = checkAsyncExecutor(asyncExecutor, threadNum);
+
+        if (splitor == Splitor.ARRAY) {
+            final int sliceSize = (toIndex - fromIndex) / threadNum + ((toIndex - fromIndex) % threadNum == 0 ? 0 : 1);
+
+            for (int i = 0; i < threadNum; i++) {
+                final int sliceIndex = i;
+
+                asyncExecutorToUse = execute(asyncExecutorToUse, threadNum, i, futureList, () -> {
+                    int cursor = fromIndex + sliceIndex * sliceSize;
+                    final int to = toIndex - cursor > sliceSize ? cursor + sliceSize : toIndex;
+
+                    try {
+                        while (cursor < to && result.isTrue() && eHolder.value() == null) {
+                            if (predicate.test(elements[cursor++])) {
+                                result.setFalse();
+                                break;
+                            }
+                        }
+                    } catch (final Exception e) {
+                        setError(eHolder, e);
+                    }
+                });
+            }
+        } else {
+            final MutableInt cursor = MutableInt.of(fromIndex);
+
+            for (int i = 0; i < threadNum; i++) {
+                asyncExecutorToUse = execute(asyncExecutorToUse, threadNum, i, futureList, () -> {
+                    int next = 0;
+
+                    try {
+                        while (result.isTrue() && eHolder.value() == null) {
+                            synchronized (elements) {
+                                if (cursor.value() < toIndex) {
+                                    next = elements[cursor.getAndIncrement()];
+                                } else {
+                                    break;
+                                }
+                            }
+
+                            if (predicate.test(next)) {
+                                result.setFalse();
+                                break;
+                            }
+                        }
+                    } catch (final Exception e) {
+                        setError(eHolder, e);
+                    }
+                });
+            }
+        }
+
+        completeAndShutdownTempExecutor(futureList, eHolder, this, asyncExecutor, asyncExecutorToUse);
+
+        return result.value();
+    }
+
+    /**
+     * Returns an {@code OptionalInt} with the first element (in encounter order) matching the
+     * predicate, evaluated in parallel. Multiple threads search concurrently; the element with
+     * the lowest array index among all matches found by any thread is returned.
+     *
+     * <p>Returns an empty {@code OptionalInt} if no element matches.
+     *
+     * @param <E> the type of exception the predicate may throw
+     * @param predicate a non-interfering, stateless predicate to apply to elements
+     * @return an {@code OptionalInt} with the first matching element, or empty if none match
+     * @throws IllegalStateException if the stream is already closed
+     * @throws E if the predicate throws an exception
+     */
+    @Override
+    public <E extends Exception> OptionalInt findFirst(final Throwables.IntPredicate<E> predicate) throws IllegalStateException, E {
+        assertNotClosed();
+
+        if (canBeSequential(maxThreadNum, fromIndex, toIndex)) {
+            return super.findFirst(predicate);
+        }
+
+        final int threadNum = N.min(maxThreadNum, (toIndex - fromIndex));
+        final List<ContinuableFuture<Void>> futureList = new ArrayList<>(threadNum);
+        final Holder<Throwable> eHolder = new Holder<>();
+        final Holder<Pair<Integer, Integer>> resultHolder = new Holder<>();
+        AsyncExecutor asyncExecutorToUse = checkAsyncExecutor(asyncExecutor, threadNum);
+
+        if (splitor == Splitor.ARRAY) {
+            final int sliceSize = (toIndex - fromIndex) / threadNum + ((toIndex - fromIndex) % threadNum == 0 ? 0 : 1);
+
+            for (int i = 0; i < threadNum; i++) {
+                final int sliceIndex = i;
+
+                asyncExecutorToUse = execute(asyncExecutorToUse, threadNum, i, futureList, () -> {
+                    int cursor = fromIndex + sliceIndex * sliceSize;
+                    final int to = toIndex - cursor > sliceSize ? cursor + sliceSize : toIndex;
+                    final Pair<Integer, Integer> pair = new Pair<>();
+
+                    try {
+                        while (cursor < to && (resultHolder.value() == null || cursor < resultHolder.value().left()) && eHolder.value() == null) {
+                            pair.setLeft(cursor);
+                            pair.setRight(elements[cursor++]);
+
+                            if (predicate.test(pair.right())) {
+                                synchronized (resultHolder) {
+                                    if (resultHolder.value() == null || pair.left() < resultHolder.value().left()) {
+                                        resultHolder.setValue(pair.copy());
+                                    }
+                                }
+
+                                break;
+                            }
+                        }
+                    } catch (final Exception e) {
+                        setError(eHolder, e);
+                    }
+                });
+            }
+        } else {
+            final MutableInt cursor = MutableInt.of(fromIndex);
+
+            for (int i = 0; i < threadNum; i++) {
+                asyncExecutorToUse = execute(asyncExecutorToUse, threadNum, i, futureList, () -> {
+                    final Pair<Integer, Integer> pair = new Pair<>();
+
+                    try {
+                        while (resultHolder.value() == null && eHolder.value() == null) {
+                            synchronized (elements) {
+                                if (cursor.value() < toIndex) {
+                                    pair.setLeft(cursor.value());
+                                    pair.setRight(elements[cursor.getAndIncrement()]);
+                                } else {
+                                    break;
+                                }
+                            }
+
+                            if (predicate.test(pair.right())) {
+                                synchronized (resultHolder) {
+                                    if (resultHolder.value() == null || pair.left() < resultHolder.value().left()) {
+                                        resultHolder.setValue(pair.copy());
+                                    }
+                                }
+
+                                break;
+                            }
+                        }
+                    } catch (final Exception e) {
+                        setError(eHolder, e);
+                    }
+                });
+            }
+        }
+
+        completeAndShutdownTempExecutor(futureList, eHolder, this, asyncExecutor, asyncExecutorToUse);
+
+        return resultHolder.value() == null ? OptionalInt.empty() : OptionalInt.of(resultHolder.value().right());
+    }
+
+    /**
+     * Returns an {@code OptionalInt} with any element matching the predicate, evaluated in
+     * parallel. The first match found by any thread is returned with no guarantee of encounter
+     * order. Threads stop as soon as a match is recorded.
+     *
+     * <p>Returns an empty {@code OptionalInt} if no element matches.
+     *
+     * @param <E> the type of exception the predicate may throw
+     * @param predicate a non-interfering, stateless predicate to apply to elements
+     * @return an {@code OptionalInt} with any matching element, or empty if none match
+     * @throws IllegalStateException if the stream is already closed
+     * @throws E if the predicate throws an exception
+     */
+    @Override
+    public <E extends Exception> OptionalInt findAny(final Throwables.IntPredicate<E> predicate) throws IllegalStateException, E {
+        assertNotClosed();
+
+        if (canBeSequential(maxThreadNum, fromIndex, toIndex)) {
+            return super.findAny(predicate);
+        }
+
+        final int threadNum = N.min(maxThreadNum, (toIndex - fromIndex));
+        final List<ContinuableFuture<Void>> futureList = new ArrayList<>(threadNum);
+        final Holder<Throwable> eHolder = new Holder<>();
+        final Holder<Integer> resultHolder = new Holder<>();
+        AsyncExecutor asyncExecutorToUse = checkAsyncExecutor(asyncExecutor, threadNum);
+
+        if (splitor == Splitor.ARRAY) {
+            final int sliceSize = (toIndex - fromIndex) / threadNum + ((toIndex - fromIndex) % threadNum == 0 ? 0 : 1);
+
+            for (int i = 0; i < threadNum; i++) {
+                final int sliceIndex = i;
+
+                asyncExecutorToUse = execute(asyncExecutorToUse, threadNum, i, futureList, () -> {
+                    int cursor = fromIndex + sliceIndex * sliceSize;
+                    final int to = toIndex - cursor > sliceSize ? cursor + sliceSize : toIndex;
+                    int next = 0;
+
+                    try {
+                        while (cursor < to && resultHolder.value() == null && eHolder.value() == null) {
+                            next = elements[cursor++];
+
+                            if (predicate.test(next)) {
+                                synchronized (resultHolder) {
+                                    if (resultHolder.value() == null) {
+                                        resultHolder.setValue(next);
+                                    }
+                                }
+
+                                break;
+                            }
+                        }
+                    } catch (final Exception e) {
+                        setError(eHolder, e);
+                    }
+                });
+            }
+        } else {
+            final MutableInt cursor = MutableInt.of(fromIndex);
+
+            for (int i = 0; i < threadNum; i++) {
+                asyncExecutorToUse = execute(asyncExecutorToUse, threadNum, i, futureList, () -> {
+                    int next = 0;
+
+                    try {
+                        while (resultHolder.value() == null && eHolder.value() == null) {
+                            synchronized (elements) {
+                                if (cursor.value() < toIndex) {
+                                    next = elements[cursor.getAndIncrement()];
+                                } else {
+                                    break;
+                                }
+                            }
+
+                            if (predicate.test(next)) {
+                                synchronized (resultHolder) {
+                                    if (resultHolder.value() == null) {
+                                        resultHolder.setValue(next);
+                                    }
+                                }
+
+                                break;
+                            }
+                        }
+                    } catch (final Exception e) {
+                        setError(eHolder, e);
+                    }
+                });
+            }
+        }
+
+        completeAndShutdownTempExecutor(futureList, eHolder, this, asyncExecutor, asyncExecutorToUse);
+
+        return resultHolder.value() == null ? OptionalInt.empty() : OptionalInt.of(resultHolder.value());
+    }
+
+    /**
+     * Returns an {@code OptionalInt} with the last element (in encounter order) matching the
+     * predicate, evaluated in parallel. Multiple threads search from the end of the array
+     * concurrently; the element with the highest array index among all matches is returned.
+     *
+     * <p>Returns an empty {@code OptionalInt} if no element matches.
+     *
+     * @param <E> the type of exception the predicate may throw
+     * @param predicate a non-interfering, stateless predicate to apply to elements
+     * @return an {@code OptionalInt} with the last matching element, or empty if none match
+     * @throws IllegalStateException if the stream is already closed
+     * @throws E if the predicate throws an exception
+     */
+    @Override
+    public <E extends Exception> OptionalInt findLast(final Throwables.IntPredicate<E> predicate) throws IllegalStateException, E {
+        assertNotClosed();
+
+        if (canBeSequential(maxThreadNum, fromIndex, toIndex)) {
+            return super.findLast(predicate);
+        }
+
+        final int threadNum = N.min(maxThreadNum, (toIndex - fromIndex));
+        final List<ContinuableFuture<Void>> futureList = new ArrayList<>(threadNum);
+        final Holder<Throwable> eHolder = new Holder<>();
+        final Holder<Pair<Integer, Integer>> resultHolder = new Holder<>();
+        AsyncExecutor asyncExecutorToUse = checkAsyncExecutor(asyncExecutor, threadNum);
+
+        if (splitor == Splitor.ARRAY) {
+            final int sliceSize = (toIndex - fromIndex) / threadNum + ((toIndex - fromIndex) % threadNum == 0 ? 0 : 1);
+
+            for (int i = 0; i < threadNum; i++) {
+                final int sliceIndex = i;
+
+                asyncExecutorToUse = execute(asyncExecutorToUse, threadNum, i, futureList, () -> {
+                    final int from = fromIndex + sliceIndex * sliceSize;
+                    int cursor = toIndex - from > sliceSize ? from + sliceSize : toIndex;
+                    final Pair<Integer, Integer> pair = new Pair<>();
+
+                    try {
+                        while (cursor > from && (resultHolder.value() == null || cursor > resultHolder.value().left()) && eHolder.value() == null) {
+                            pair.setLeft(cursor);
+                            pair.setRight(elements[--cursor]);
+
+                            if (predicate.test(pair.right())) {
+                                synchronized (resultHolder) {
+                                    if (resultHolder.value() == null || pair.left() > resultHolder.value().left()) {
+                                        resultHolder.setValue(pair.copy());
+                                    }
+                                }
+
+                                break;
+                            }
+                        }
+                    } catch (final Exception e) {
+                        setError(eHolder, e);
+                    }
+                });
+            }
+        } else {
+            final MutableInt cursor = MutableInt.of(toIndex);
+
+            for (int i = 0; i < threadNum; i++) {
+                asyncExecutorToUse = execute(asyncExecutorToUse, threadNum, i, futureList, () -> {
+                    final Pair<Integer, Integer> pair = new Pair<>();
+
+                    try {
+                        while (resultHolder.value() == null && eHolder.value() == null) {
+                            synchronized (elements) {
+                                if (cursor.value() > fromIndex) {
+                                    pair.setLeft(cursor.value());
+                                    pair.setRight(elements[cursor.decrementAndGet()]);
+                                } else {
+                                    break;
+                                }
+                            }
+
+                            if (predicate.test(pair.right())) {
+                                synchronized (resultHolder) {
+                                    if (resultHolder.value() == null || pair.left() > resultHolder.value().left()) {
+                                        resultHolder.setValue(pair.copy());
+                                    }
+                                }
+
+                                break;
+                            }
+                        }
+                    } catch (final Exception e) {
+                        setError(eHolder, e);
+                    }
+                });
+            }
+        }
+
+        completeAndShutdownTempExecutor(futureList, eHolder, this, asyncExecutor, asyncExecutorToUse);
+
+        return resultHolder.value() == null ? OptionalInt.empty() : OptionalInt.of(resultHolder.value().right());
+    }
+
+    /**
+     * Returns a parallel {@code IntStream} formed by zipping this stream with stream {@code b},
+     * applying the given function to corresponding element pairs. If the stream can be processed
+     * sequentially, uses {@code IntStream.zip}; otherwise uses {@code Stream.parallelZip} for
+     * concurrent element-pair processing. The zipped stream length equals the shorter input stream.
+     *
+     * @param b the second stream to zip with
+     * @param zipFunction a function applied to corresponding elements of the two streams
+     * @return a new parallel {@code IntStream} of zipped results
+     * @throws IllegalStateException if the stream is already closed
+     */
+    @Override
+    public IntStream zipWith(final IntStream b, final IntBinaryOperator zipFunction) throws IllegalStateException {
+        assertNotClosed();
+
+        if (canBeSequential(maxThreadNum, fromIndex, toIndex)) {
+            return new ParallelIteratorIntStream(IntStream.zip(this, b, zipFunction), false, maxThreadNum, splitor, asyncExecutor, cancelUncompletedThreads,
+                    null);
+        }
+
+        return new ParallelIteratorIntStream(Stream.parallelZip(boxed(), b.boxed(), zipFunction::applyAsInt, maxThreadNum), false, maxThreadNum, splitor,
+                asyncExecutor, cancelUncompletedThreads, null);
+    }
+
+    /**
+     * Returns a parallel {@code IntStream} formed by zipping this stream with streams {@code b}
+     * and {@code c}, applying the given function to corresponding element triples. If the stream
+     * can be processed sequentially, uses {@code IntStream.zip}; otherwise uses
+     * {@code Stream.parallelZip} for concurrent element-triple processing. The zipped stream
+     * length equals the shortest input stream.
+     *
+     * @param b the second stream to zip with
+     * @param c the third stream to zip with
+     * @param zipFunction a function applied to corresponding elements of the three streams
+     * @return a new parallel {@code IntStream} of zipped results
+     * @throws IllegalStateException if the stream is already closed
+     */
+    @Override
+    public IntStream zipWith(final IntStream b, final IntStream c, final IntTernaryOperator zipFunction) throws IllegalStateException {
+        assertNotClosed();
+
+        if (canBeSequential(maxThreadNum, fromIndex, toIndex)) {
+            return new ParallelIteratorIntStream(IntStream.zip(this, b, c, zipFunction), false, maxThreadNum, splitor, asyncExecutor, cancelUncompletedThreads,
+                    null);
+        }
+
+        return new ParallelIteratorIntStream(Stream.parallelZip(boxed(), b.boxed(), c.boxed(), zipFunction::applyAsInt, maxThreadNum), false, maxThreadNum,
+                splitor, asyncExecutor, cancelUncompletedThreads, null);
+    }
+
+    /**
+     * Returns a parallel {@code IntStream} formed by zipping this stream with stream {@code b}
+     * using padding values when one stream is shorter than the other. If the stream can be
+     * processed sequentially, uses {@code IntStream.zip}; otherwise uses {@code Stream.parallelZip}.
+     * The zipped stream length equals the longer input stream.
+     *
+     * @param b the second stream to zip with
+     * @param valueForNoneA the padding value used when this stream is exhausted before {@code b}
+     * @param valueForNoneB the padding value used when {@code b} is exhausted before this stream
+     * @param zipFunction a function applied to corresponding elements (with padding as needed)
+     * @return a new parallel {@code IntStream} of zipped results
+     * @throws IllegalStateException if the stream is already closed
+     */
+    @Override
+    public IntStream zipWith(final IntStream b, final int valueForNoneA, final int valueForNoneB, final IntBinaryOperator zipFunction)
+            throws IllegalStateException {
+        assertNotClosed();
+
+        if (canBeSequential(maxThreadNum, fromIndex, toIndex)) {
+            return new ParallelIteratorIntStream(IntStream.zip(this, b, valueForNoneA, valueForNoneB, zipFunction), false, maxThreadNum, splitor, asyncExecutor,
+                    cancelUncompletedThreads, null);
+        }
+
+        return new ParallelIteratorIntStream(Stream.parallelZip(boxed(), b.boxed(), valueForNoneA, valueForNoneB, zipFunction::applyAsInt, maxThreadNum), false,
+                maxThreadNum, splitor, asyncExecutor, cancelUncompletedThreads, null);
+    }
+
+    /**
+     * Returns a parallel {@code IntStream} formed by zipping this stream with streams {@code b}
+     * and {@code c} using padding values when streams have unequal lengths. If the stream can be
+     * processed sequentially, uses {@code IntStream.zip}; otherwise uses {@code Stream.parallelZip}.
+     * The zipped stream length equals the longest input stream.
+     *
+     * @param b the second stream to zip with
+     * @param c the third stream to zip with
+     * @param valueForNoneA the padding value used when this stream is exhausted
+     * @param valueForNoneB the padding value used when {@code b} is exhausted
+     * @param valueForNoneC the padding value used when {@code c} is exhausted
+     * @param zipFunction a function applied to corresponding elements (with padding as needed)
+     * @return a new parallel {@code IntStream} of zipped results
+     * @throws IllegalStateException if the stream is already closed
+     */
+    @Override
+    public IntStream zipWith(final IntStream b, final IntStream c, final int valueForNoneA, final int valueForNoneB, final int valueForNoneC,
+            final IntTernaryOperator zipFunction) throws IllegalStateException {
+        assertNotClosed();
+
+        if (canBeSequential(maxThreadNum, fromIndex, toIndex)) {
+            return new ParallelIteratorIntStream(IntStream.zip(this, b, c, valueForNoneA, valueForNoneB, valueForNoneC, zipFunction), false, maxThreadNum,
+                    splitor, asyncExecutor, cancelUncompletedThreads, null);
+        }
+
+        return new ParallelIteratorIntStream(
+                Stream.parallelZip(boxed(), b.boxed(), c.boxed(), valueForNoneA, valueForNoneB, valueForNoneC, zipFunction::applyAsInt, maxThreadNum), false,
+                maxThreadNum, splitor, asyncExecutor, cancelUncompletedThreads, null);
+    }
+
+    /**
+     * Returns {@code true}, indicating this is a parallel stream.
+     *
+     * @return {@code true} always
+     */
+    @Override
+    public boolean isParallel() {
+        return true;
+    }
+
+    /**
+     * Returns a sequential {@code IntStream} view of this parallel stream backed by the same
+     * underlying array. The sequential stream is lazily created and cached for reuse. The
+     * returned stream shares the same close handlers as this stream.
+     *
+     * @return a sequential {@code IntStream} over the same elements
+     * @throws IllegalStateException if the stream is already closed
+     */
+    @Override
+    public IntStream sequential() throws IllegalStateException {
+        assertNotClosed();
+
+        ArrayIntStream tmp = sequential;
+
+        if (tmp == null) {
+            synchronized (this) {
+                tmp = sequential;
+                if (tmp == null) {
+                    tmp = new ArrayIntStream(elements, fromIndex, toIndex, isSorted(), closeHandlers());
+                    sequential = tmp;
+                }
+            }
+        }
+
+        return tmp;
+    }
+
+    /**
+     * Returns the maximum number of threads used for parallel execution of this stream.
+     *
+     * @return the maximum thread count configured for this parallel stream
+     */
+    @Override
+    protected int maxThreadNum() {
+        // assertNotClosed();
+
+        return maxThreadNum;
+    }
+
+    /**
+     * Returns the {@link BaseStream.Splitor} strategy used to partition elements across threads.
+     * {@code ARRAY} divides the backing array into fixed slices; {@code ITERATOR} uses a shared
+     * synchronized cursor for dynamic load balancing.
+     *
+     * @return the splitor strategy for this parallel stream
+     */
+    @Override
+    protected BaseStream.Splitor splitor() {
+        // assertNotClosed();
+
+        return splitor;
+    }
+
+    /**
+     * Returns the {@link AsyncExecutor} used to submit parallel tasks for this stream.
+     *
+     * @return the async executor for this parallel stream
+     */
+    @Override
+    protected AsyncExecutor asyncExecutor() {
+        // assertNotClosed();
+
+        return asyncExecutor;
+    }
+}

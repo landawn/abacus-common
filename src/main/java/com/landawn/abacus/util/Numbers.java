@@ -4464,11 +4464,20 @@ public final class Numbers {
      *   <tr><td>{@code "abc"}, {@code ""}, {@code null}</td><td>{@code false}</td><td>{@code false}</td><td>{@code false}</td><td>not numeric</td></tr>
      * </table>
      *
+     * <p>The {@link Strings} class provides a parallel family of string-number predicates operating from the
+     * {@code Strings} side, each with a Unicode-aware and an ASCII-only flavor: {@link Strings#isNumeric(CharSequence)}
+     * (digit characters only), {@link Strings#isInteger(String)} (optional sign followed by digits) and
+     * {@link Strings#isAsciiNumber(String)} (a numeric literal with decimal point and exponent). See those methods for
+     * a side-by-side comparison table.</p>
+     *
      * @param str the string to check
      * @return {@code true} if the string is a correctly formatted number
      * @see #isParsable(String)
      * @see #isDigits(String)
      * @see #createNumber(String)
+     * @see Strings#isNumeric(CharSequence)
+     * @see Strings#isInteger(String)
+     * @see Strings#isAsciiNumber(String)
      */
     public static boolean isCreatable(final String str) {
         if (!quickCheckForisCreatable(str)) {
@@ -4674,11 +4683,18 @@ public final class Numbers {
      *   <tr><td>{@code "abc"}, {@code ""}, {@code null}</td><td>{@code false}</td><td>{@code false}</td><td>{@code false}</td><td>not numeric</td></tr>
      * </table>
      *
+     * <p>The {@link Strings} class provides a parallel family of string-number predicates operating from the
+     * {@code Strings} side, each with a Unicode-aware and an ASCII-only flavor: {@link Strings#isNumeric(CharSequence)}
+     * (digit characters only), {@link Strings#isInteger(String)} (optional sign followed by digits) and
+     * {@link Strings#isAsciiNumber(String)} (a numeric literal with decimal point and exponent). See those methods for
+     * a side-by-side comparison table.</p>
+     *
      * @param str the String to check
      * @return {@code true} if the string is a parsable number.
      * @see #isCreatable(String)
      * @see #isDigits(String)
      * @see Strings#isNumeric(CharSequence)
+     * @see Strings#isInteger(String)
      * @see Strings#isAsciiNumber(String)
      * @see Strings#isAsciiInteger(String)
      */

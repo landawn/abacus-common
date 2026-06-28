@@ -460,7 +460,7 @@ abstract class AbstractParser<SC extends SerializationConfig<?>, DC extends Dese
      * Checks whether the given object creates a circular reference in the serialization graph.
      *
      * <p>If a circular reference is detected and the configuration does not enable
-     * {@link JsonXmlSerConfig#isSupportCircularReference() supportCircularReference},
+     * {@link JsonXmlSerConfig#isCircularReferenceSupported() circularReferenceSupported},
      * a {@link ParsingException} is thrown. When circular-reference support is enabled, this
      * method returns {@code true} so the caller can skip re-serializing the object (typically
      * by writing {@code null} in its place).</p>
@@ -477,7 +477,7 @@ abstract class AbstractParser<SC extends SerializationConfig<?>, DC extends Dese
      * @return {@code true} if {@code obj} was already encountered (circular reference detected and
      *         allowed by config), {@code false} otherwise
      * @throws ParsingException if a circular reference is detected and
-     *         {@code config.isSupportCircularReference()} is {@code false}
+     *         {@code config.isCircularReferenceSupported()} is {@code false}
      */
     protected static boolean hasCircularReference(final Object obj, final IdentityHashSet<Object> serializedObjects, final JsonXmlSerConfig<?> config,
             @SuppressWarnings("unused") final CharacterWriter bw) {
@@ -485,7 +485,7 @@ abstract class AbstractParser<SC extends SerializationConfig<?>, DC extends Dese
         if (obj != null && serializedObjects != null //
                 && (type.isBean() || type.isMap() || type.isCollection() || type.isObjectArray() || type.isMapEntity())) {
             if (serializedObjects.contains(obj)) {
-                if (config == null || !config.isSupportCircularReference()) {
+                if (config == null || !config.isCircularReferenceSupported()) {
                     throw new ParsingException("Self reference found in obj: " + ClassUtil.getClassName(obj.getClass()));
                 }
 

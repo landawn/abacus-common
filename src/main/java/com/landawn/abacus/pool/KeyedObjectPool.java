@@ -92,8 +92,10 @@ public interface KeyedObjectPool<K, E extends Poolable> extends Pool {
      * Associates the specified poolable element with the specified key in this pool.
      * If the pool previously contained an element for the key, the old element is removed and
      * destroyed (with {@link Poolable.Caller#REMOVE_REPLACE_CLEAR}) <em>before</em> the new value
-     * is inserted; this happens even when the subsequent insertion of the new value fails — unless
-     * the old element is the same instance as {@code value}, in which case it is not destroyed.
+     * is inserted; this happens even when the subsequent insertion of the new value fails. The one
+     * exception is an already-expired {@code value}, which is rejected before any previous mapping
+     * for {@code key} is removed. The old element is not destroyed when it is the same instance as
+     * {@code value}.
      *
      * <p>The put operation returns {@code false} (does not insert) if:</p>
      * <ul>

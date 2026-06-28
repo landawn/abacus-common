@@ -401,11 +401,14 @@ public final class Fnn {
      * @param <E> the type of exception that may be thrown by the function
      * @param func the function to memoize; must not be {@code null}
      * @return a memoized version of the function that caches results by input value
+     * @throws IllegalArgumentException if {@code func} is {@code null}
      * @see #memoize(Throwables.Supplier)
      * @see #memoizeWithExpiration(Throwables.Supplier, long, TimeUnit)
      * @see ConcurrentHashMap
      */
     public static <T, R, E extends Throwable> Throwables.Function<T, R, E> memoize(final Throwables.Function<? super T, ? extends R, E> func) {
+        N.checkArgNotNull(func, cs.func);
+
         return new Throwables.Function<>() {
             private final R none = (R) Fn.NONE;
             private final Map<T, R> resultMap = new ConcurrentHashMap<>();

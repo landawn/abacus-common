@@ -266,7 +266,7 @@ public class XmlSerConfig extends JsonXmlSerConfig<XmlSerConfig> {
         h = 31 * h + N.hashCode(writeNullBooleanAsFalse);
         h = 31 * h + N.hashCode(isWriteBigDecimalAsPlain());
         h = 31 * h + N.hashCode(isFailOnEmptyBean());
-        h = 31 * h + N.hashCode(isSupportCircularReference());
+        h = 31 * h + N.hashCode(isCircularReferenceSupported());
         h = 31 * h + N.hashCode(getIndentation());
         h = 31 * h + N.hashCode(getPropNamingPolicy());
         h = 31 * h + N.hashCode(tagByPropertyName);
@@ -297,7 +297,7 @@ public class XmlSerConfig extends JsonXmlSerConfig<XmlSerConfig> {
                     && N.equals(writeNullStringAsEmpty, other.writeNullStringAsEmpty) && N.equals(writeNullNumberAsZero, other.writeNullNumberAsZero)
                     && N.equals(writeNullBooleanAsFalse, other.writeNullBooleanAsFalse)
                     && N.equals(isWriteBigDecimalAsPlain(), other.isWriteBigDecimalAsPlain()) && N.equals(isFailOnEmptyBean(), other.isFailOnEmptyBean())
-                    && N.equals(isSupportCircularReference(), other.isSupportCircularReference()) && N.equals(getIndentation(), other.getIndentation())
+                    && N.equals(isCircularReferenceSupported(), other.isCircularReferenceSupported()) && N.equals(getIndentation(), other.getIndentation())
                     && N.equals(getPropNamingPolicy(), other.getPropNamingPolicy()) && N.equals(tagByPropertyName, other.tagByPropertyName)
                     && N.equals(writeTypeInfo, other.writeTypeInfo);
         }
@@ -318,8 +318,8 @@ public class XmlSerConfig extends JsonXmlSerConfig<XmlSerConfig> {
                 + ", skipTransientField=" + N.toString(isSkipTransientField()) + ", prettyFormat=" + N.toString(isPrettyFormat()) + ", writeLongAsString="
                 + N.toString(isWriteLongAsString()) + ", writeNullStringAsEmpty=" + N.toString(writeNullStringAsEmpty) + ", writeNullNumberAsZero="
                 + N.toString(writeNullNumberAsZero) + ", writeNullBooleanAsFalse=" + N.toString(writeNullBooleanAsFalse) + ", writeBigDecimalAsPlain="
-                + N.toString(isWriteBigDecimalAsPlain()) + ", failOnEmptyBean=" + N.toString(isFailOnEmptyBean()) + ", supportCircularReference="
-                + N.toString(isSupportCircularReference()) + ", indentation=" + N.toString(getIndentation()) + ", propNamingPolicy="
+                + N.toString(isWriteBigDecimalAsPlain()) + ", failOnEmptyBean=" + N.toString(isFailOnEmptyBean()) + ", circularReferenceSupported="
+                + N.toString(isCircularReferenceSupported()) + ", indentation=" + N.toString(getIndentation()) + ", propNamingPolicy="
                 + N.toString(getPropNamingPolicy()) + ", tagByPropertyName=" + N.toString(tagByPropertyName) + ", writeTypeInfo=" + N.toString(writeTypeInfo)
                 + "}";
     }

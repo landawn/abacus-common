@@ -92,7 +92,7 @@ public abstract class JsonXmlSerConfig<C extends JsonXmlSerConfig<C>> extends Se
     boolean writeBigDecimalAsPlain = defaultWriteBigDecimalAsPlain;
 
     /** Whether to support circular references during serialization. */
-    boolean supportCircularReference = false;
+    boolean circularReferenceSupported = false;
 
     /** Whether to fail when an empty bean is encountered. */
     boolean failOnEmptyBean = true;
@@ -616,14 +616,14 @@ public abstract class JsonXmlSerConfig<C extends JsonXmlSerConfig<C>> extends Se
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * JsonSerConfig config = new JsonSerConfig();
-     * config.isSupportCircularReference();                                     // returns false (default)
-     * config.setSupportCircularReference(true).isSupportCircularReference();   // returns true
+     * config.isCircularReferenceSupported();                                     // returns false (default)
+     * config.setCircularReferenceSupported(true).isCircularReferenceSupported();   // returns true
      * }</pre>
      *
      * @return {@code true} if circular references are supported, {@code false} otherwise
      */
-    public boolean isSupportCircularReference() {
-        return supportCircularReference;
+    public boolean isCircularReferenceSupported() {
+        return circularReferenceSupported;
     }
 
     /**
@@ -632,15 +632,15 @@ public abstract class JsonXmlSerConfig<C extends JsonXmlSerConfig<C>> extends Se
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * JsonSerConfig config = new JsonSerConfig();
-     * config.setSupportCircularReference(true).isSupportCircularReference();    // returns true
-     * config.setSupportCircularReference(false).isSupportCircularReference();   // returns false
+     * config.setCircularReferenceSupported(true).isCircularReferenceSupported();    // returns true
+     * config.setCircularReferenceSupported(false).isCircularReferenceSupported();   // returns false
      * }</pre>
      *
-     * @param supportCircularReference {@code true} to support circular references, {@code false} otherwise
+     * @param circularReferenceSupported {@code true} to support circular references, {@code false} otherwise
      * @return this instance for method chaining
      */
-    public C setSupportCircularReference(final boolean supportCircularReference) {
-        this.supportCircularReference = supportCircularReference;
+    public C setCircularReferenceSupported(final boolean circularReferenceSupported) {
+        this.circularReferenceSupported = circularReferenceSupported;
 
         return (C) this;
     }

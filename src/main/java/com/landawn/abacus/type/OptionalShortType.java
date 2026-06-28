@@ -163,7 +163,9 @@ public class OptionalShortType extends AbstractOptionalType<OptionalShort> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<OptionalShort> type = TypeFactory.getType(OptionalShort.class);
-     * ResultSet rs = org.mockito.Mockito.mock(ResultSet.class);
+     * ResultSet rs = Mockito.mock(ResultSet.class);
+     * Mockito.when(rs.getObject(1)).thenReturn((short) 100);
+     * Mockito.when(rs.getObject(2)).thenReturn(null);
      *
      * // Column contains short value 100
      * OptionalShort opt = type.get(rs, 1);
@@ -194,7 +196,9 @@ public class OptionalShortType extends AbstractOptionalType<OptionalShort> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<OptionalShort> type = TypeFactory.getType(OptionalShort.class);
-     * ResultSet rs = org.mockito.Mockito.mock(ResultSet.class);
+     * ResultSet rs = Mockito.mock(ResultSet.class);
+     * Mockito.when(rs.getObject("quantity")).thenReturn((short) 50);
+     * Mockito.when(rs.getObject("level")).thenReturn(null);
      *
      * // Column "quantity" contains short value 50
      * OptionalShort opt = type.get(rs, "quantity");
@@ -225,7 +229,7 @@ public class OptionalShortType extends AbstractOptionalType<OptionalShort> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<OptionalShort> type = TypeFactory.getType(OptionalShort.class);
-     * PreparedStatement stmt = org.mockito.Mockito.mock(PreparedStatement.class);
+     * PreparedStatement stmt = Mockito.mock(PreparedStatement.class);
      *
      * OptionalShort opt = OptionalShort.of((short) 50);
      * type.set(stmt, 2, opt);
@@ -257,7 +261,7 @@ public class OptionalShortType extends AbstractOptionalType<OptionalShort> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<OptionalShort> type = TypeFactory.getType(OptionalShort.class);
-     * CallableStatement stmt = org.mockito.Mockito.mock(CallableStatement.class);
+     * CallableStatement stmt = Mockito.mock(CallableStatement.class);
      *
      * OptionalShort opt = OptionalShort.of((short) 75);
      * type.set(stmt, "p_quantity", opt);

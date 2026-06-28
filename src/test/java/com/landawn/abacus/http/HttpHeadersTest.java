@@ -157,6 +157,15 @@ public class HttpHeadersTest extends TestBase {
     }
 
     @Test
+    public void testCopyOfImmutableMap() {
+        HttpHeaders headers = HttpHeaders.copyOf(Map.of("Accept", "application/json"));
+
+        assertEquals("application/json", headers.get("Accept"));
+        headers.set("User-Agent", "test");
+        assertEquals("test", headers.get("User-Agent"));
+    }
+
+    @Test
     public void testCopyOfWithNull() {
         assertThrows(IllegalArgumentException.class, () -> HttpHeaders.copyOf(null));
     }
@@ -590,6 +599,18 @@ public class HttpHeadersTest extends TestBase {
         copy.set("Header1", "modified");
         assertEquals("value1", original.get("Header1"));
         assertEquals("modified", copy.get("Header1"));
+    }
+
+    @Test
+    public void testCopyWrappedImmutableMap() {
+        HttpHeaders original = HttpHeaders.wrap(Map.of("Accept", "application/json"));
+
+        HttpHeaders copy = original.copy();
+
+        assertEquals("application/json", copy.get("Accept"));
+        copy.set("User-Agent", "test");
+        assertEquals("test", copy.get("User-Agent"));
+        assertNull(original.get("User-Agent"));
     }
 
     // --- hashCode ---

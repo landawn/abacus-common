@@ -1480,8 +1480,10 @@ public final class IntFunctions {
     private static final Map<Class<?>, IntFunction> mapCreatorPool = new ConcurrentHashMap<>();
 
     /**
-     * Returns an {@code IntFunction} that creates {@link Map} instances of the specified target type
-     * with the given initial capacity.
+     * Returns an {@code IntFunction} that creates {@link Map} instances compatible with the specified
+     * target type with the given initial capacity.
+     * {@code Map}, {@code AbstractMap}, {@code HashMap}, {@code EnumMap}, and {@code ImmutableMap}
+     * targets use a {@code HashMap} creator.
      *
      * <p>This method supports all standard {@code Map} implementations and uses reflection to find
      * an appropriate constructor or factory for custom types. The returned function is cached per

@@ -51,6 +51,15 @@ public class KahanSummationTest extends TestBase {
     }
 
     @Test
+    public void testCombineRejectsNegativeCount() {
+        KahanSummation sum = new KahanSummation();
+
+        Assertions.assertThrows(IllegalArgumentException.class, () -> sum.combine(-1, 5.0));
+        Assertions.assertEquals(0, sum.count());
+        Assertions.assertEquals(0.0, sum.sum(), 0.0001);
+    }
+
+    @Test
     public void testCombineWithOtherSummation() {
         KahanSummation sum1 = new KahanSummation();
         sum1.add(1.0);

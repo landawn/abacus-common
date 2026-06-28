@@ -163,7 +163,9 @@ public class OptionalDoubleType extends AbstractOptionalType<OptionalDouble> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<OptionalDouble> type = TypeFactory.getType(OptionalDouble.class);
-     * ResultSet rs = org.mockito.Mockito.mock(ResultSet.class);
+     * ResultSet rs = Mockito.mock(ResultSet.class);
+     * Mockito.when(rs.getObject(1)).thenReturn(3.14159d);
+     * Mockito.when(rs.getObject(2)).thenReturn(null);
      *
      * // Column contains double value 3.14159
      * OptionalDouble opt = type.get(rs, 1);
@@ -195,7 +197,9 @@ public class OptionalDoubleType extends AbstractOptionalType<OptionalDouble> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<OptionalDouble> type = TypeFactory.getType(OptionalDouble.class);
-     * ResultSet rs = org.mockito.Mockito.mock(ResultSet.class);
+     * ResultSet rs = Mockito.mock(ResultSet.class);
+     * Mockito.when(rs.getObject("price")).thenReturn(99.99d);
+     * Mockito.when(rs.getObject("discount")).thenReturn(null);
      *
      * // Column "price" contains double value 99.99
      * OptionalDouble opt = type.get(rs, "price");
@@ -227,8 +231,8 @@ public class OptionalDoubleType extends AbstractOptionalType<OptionalDouble> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<OptionalDouble> type = TypeFactory.getType(OptionalDouble.class);
-     * Connection connection = org.mockito.Mockito.mock(Connection.class);
-     * PreparedStatement stmt = org.mockito.Mockito.mock(PreparedStatement.class);
+     * Connection connection = Mockito.mock(Connection.class);
+     * PreparedStatement stmt = Mockito.mock(PreparedStatement.class);
      *
      * OptionalDouble opt = OptionalDouble.of(99.99);
      * type.set(stmt, 2, opt);
@@ -260,8 +264,8 @@ public class OptionalDoubleType extends AbstractOptionalType<OptionalDouble> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<OptionalDouble> type = TypeFactory.getType(OptionalDouble.class);
-     * Connection connection = org.mockito.Mockito.mock(Connection.class);
-     * CallableStatement stmt = org.mockito.Mockito.mock(CallableStatement.class);
+     * Connection connection = Mockito.mock(Connection.class);
+     * CallableStatement stmt = Mockito.mock(CallableStatement.class);
      *
      * OptionalDouble opt = OptionalDouble.of(149.99);
      * type.set(stmt, "p_price", opt);

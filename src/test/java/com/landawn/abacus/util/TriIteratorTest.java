@@ -1627,6 +1627,13 @@ public class TriIteratorTest extends TestBase {
         assertTrue(result.right().isEmpty());
     }
 
+    @Test
+    public void testUnzipToLists_emptyRejectsNullSuppliedList() {
+        TriIterator<String, Integer, Boolean> iter = TriIterator.empty();
+
+        assertThrows(NullPointerException.class, () -> iter.unzipToLists(() -> null));
+    }
+
     // =====================================================================
     // unzipToSets(Supplier)
     // =====================================================================
@@ -1678,6 +1685,13 @@ public class TriIteratorTest extends TestBase {
         assertTrue(result.left().isEmpty());
         assertTrue(result.middle().isEmpty());
         assertTrue(result.right().isEmpty());
+    }
+
+    @Test
+    public void testUnzipToSets_emptyRejectsNullSuppliedSet() {
+        TriIterator<String, Integer, Boolean> iter = TriIterator.empty();
+
+        assertThrows(NullPointerException.class, () -> iter.unzipToSets(() -> null));
     }
 
     @Test

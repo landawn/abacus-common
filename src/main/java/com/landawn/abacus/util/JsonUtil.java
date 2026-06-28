@@ -650,6 +650,8 @@ public final class JsonUtil {
                         element = unwrap((JSONObject) element, elementType);
                     } else if (element instanceof JSONArray) {
                         element = unwrap((JSONArray) element, elementType);
+                    } else if (!elementType.javaType().isAssignableFrom(element.getClass())) {
+                        element = elementType.valueOf(element);
                     }
                 }
 

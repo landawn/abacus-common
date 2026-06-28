@@ -632,7 +632,7 @@ public final class HttpHeaders {
 
     /**
      * Creates a new {@code HttpHeaders} instance with a copy of the provided headers map.
-     * The headers are copied into a new map of the same type as the input.
+     * The headers are copied into a new mutable map.
      * Unlike {@link #wrap(Map)}, this method creates a copy rather than using the original map.
      *
      * <p><b>Usage Examples:</b></p>
@@ -651,7 +651,7 @@ public final class HttpHeaders {
     public static HttpHeaders copyOf(final Map<String, ?> headers) throws IllegalArgumentException {
         N.checkArgNotNull(headers);
 
-        final Map<String, Object> copyMap = N.newMap(headers.getClass(), headers.size());
+        final Map<String, Object> copyMap = newMutableCopyMap(headers);
 
         return new HttpHeaders(copyMap).setAll(headers);
     }
@@ -1286,9 +1286,13 @@ public final class HttpHeaders {
      * @return a new HttpHeaders instance with a copy of all headers
      */
     public HttpHeaders copy() {
-        final Map<String, Object> copyMap = N.newMap(map.getClass(), map.size());
+        final Map<String, Object> copyMap = newMutableCopyMap(map);
 
         return new HttpHeaders(copyMap).setAll(map);
+    }
+
+    private static Map<String, Object> newMutableCopyMap(final Map<String, ?> source) {
+        return source instanceof LinkedHashMap || source instanceof SortedMap ? new LinkedHashMap<>(source.size()) : new HashMap<>(source.size());
     }
 
     /**

@@ -166,7 +166,7 @@ public @interface Subscribe {
      * }
      * }</pre>
      *
-     * @return the event ID to filter on, or empty string for no filtering
+     * @return the event ID to filter on, or an empty string to match events posted without an event ID
      */
     String eventId() default "";
 

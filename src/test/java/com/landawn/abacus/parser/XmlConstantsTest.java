@@ -296,11 +296,11 @@ public class XmlConstantsTest extends TestBase {
     }
 
     @Test
-    public void test_DATA_SET_constants() {
-        assertEquals("dataset", XmlConstants.DATA_SET);
-        assertEquals("<dataset>", XmlConstants.DATA_SET_ELE_START);
-        assertEquals("</dataset>", XmlConstants.DATA_SET_ELE_END);
-        assertEquals("<dataset isNull=\"true\" />", XmlConstants.DATA_SET_NULL_ELE);
+    public void test_DATASET_constants() {
+        assertEquals("dataset", XmlConstants.DATASET);
+        assertEquals("<dataset>", XmlConstants.DATASET_ELE_START);
+        assertEquals("</dataset>", XmlConstants.DATASET_ELE_END);
+        assertEquals("<dataset isNull=\"true\" />", XmlConstants.DATASET_NULL_ELE);
     }
 
     @Test
@@ -457,10 +457,10 @@ public class XmlConstantsTest extends TestBase {
         assertEquals("</result>", XmlConstants.RESULT_ELE_END);
         assertEquals("<result isNull=\"true\" />", XmlConstants.RESULT_NULL_ELE);
 
-        assertEquals("dataset", XmlConstants.DATA_SET);
-        assertEquals("<dataset>", XmlConstants.DATA_SET_ELE_START);
-        assertEquals("</dataset>", XmlConstants.DATA_SET_ELE_END);
-        assertEquals("<dataset isNull=\"true\" />", XmlConstants.DATA_SET_NULL_ELE);
+        assertEquals("dataset", XmlConstants.DATASET);
+        assertEquals("<dataset>", XmlConstants.DATASET_ELE_START);
+        assertEquals("</dataset>", XmlConstants.DATASET_ELE_END);
+        assertEquals("<dataset isNull=\"true\" />", XmlConstants.DATASET_NULL_ELE);
 
         assertEquals("Envelope", XmlConstants.ENVELOPE);
         assertEquals("<soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">", XmlConstants.SOAP_ENVELOPE_ELE_START);

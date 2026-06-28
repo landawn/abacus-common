@@ -1114,9 +1114,13 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
      * list.removeAt(5);                   // throws IndexOutOfBoundsException
      * }</pre>
      *
+     * <p><b>Note:</b> this single-index form returns the removed {@code float} value; the varargs
+     * {@link #removeAt(int...)} form removes several elements in place and returns {@code void}.</p>
+     *
      * @param index the index of the element to remove
      * @return the removed element
      * @throws IndexOutOfBoundsException if the index is out of range ({@code index < 0 || index >= size()})
+     * @see #removeAt(int...)
      */
     public float removeAt(final int index) {
         rangeCheck(index);
@@ -1133,9 +1137,13 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
      * to remove elements efficiently, with remaining elements shifted to fill gaps. The indices
      * must be valid positions within the list.
      *
+     * <p><b>Note:</b> this varargs form removes several elements in place and returns {@code void}; the
+     * single-index {@link #removeAt(int)} form returns the removed {@code float} value.</p>
+     *
      * @param indices the array of indices at which elements should be removed. May be {@code null} or empty.
      *                Duplicate indices are handled correctly.
      * @throws IndexOutOfBoundsException if any index is out of range (index &lt; 0 || index &gt;= size())
+     * @see #removeAt(int)
      */
     @Override
     public void removeAt(final int... indices) {

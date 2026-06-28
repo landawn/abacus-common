@@ -793,9 +793,12 @@ public final class Fn {
      * @param <R> the type of the result of the function
      * @param func the function whose results should be memoized (must not be null)
      * @return a memoized version of the function that caches results based on input values
+     * @throws IllegalArgumentException if {@code func} is {@code null}
      * @see ConcurrentHashMap
      */
     public static <T, R> Function<T, R> memoize(final java.util.function.Function<? super T, ? extends R> func) {
+        N.checkArgNotNull(func, cs.func);
+
         return new Function<>() {
             private final R none = (R) NONE;
             private final Map<T, R> resultMap = new ConcurrentHashMap<>();

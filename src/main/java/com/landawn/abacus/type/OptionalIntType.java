@@ -162,7 +162,9 @@ public class OptionalIntType extends AbstractOptionalType<OptionalInt> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<OptionalInt> type = TypeFactory.getType(OptionalInt.class);
-     * ResultSet rs = org.mockito.Mockito.mock(ResultSet.class);
+     * ResultSet rs = Mockito.mock(ResultSet.class);
+     * Mockito.when(rs.getObject(1)).thenReturn(42);
+     * Mockito.when(rs.getObject(2)).thenReturn(null);
      *
      * // Column contains integer value 42
      * OptionalInt opt = type.get(rs, 1);
@@ -193,7 +195,9 @@ public class OptionalIntType extends AbstractOptionalType<OptionalInt> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<OptionalInt> type = TypeFactory.getType(OptionalInt.class);
-     * ResultSet rs = org.mockito.Mockito.mock(ResultSet.class);
+     * ResultSet rs = Mockito.mock(ResultSet.class);
+     * Mockito.when(rs.getObject("age")).thenReturn(25);
+     * Mockito.when(rs.getObject("rank")).thenReturn(null);
      *
      * // Column "age" contains integer value 25
      * OptionalInt opt = type.get(rs, "age");
@@ -224,8 +228,8 @@ public class OptionalIntType extends AbstractOptionalType<OptionalInt> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<OptionalInt> type = TypeFactory.getType(OptionalInt.class);
-     * Connection connection = org.mockito.Mockito.mock(Connection.class);
-     * PreparedStatement stmt = org.mockito.Mockito.mock(PreparedStatement.class);
+     * Connection connection = Mockito.mock(Connection.class);
+     * PreparedStatement stmt = Mockito.mock(PreparedStatement.class);
      *
      * OptionalInt opt = OptionalInt.of(25);
      * type.set(stmt, 2, opt);
@@ -257,8 +261,8 @@ public class OptionalIntType extends AbstractOptionalType<OptionalInt> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<OptionalInt> type = TypeFactory.getType(OptionalInt.class);
-     * Connection connection = org.mockito.Mockito.mock(Connection.class);
-     * CallableStatement stmt = org.mockito.Mockito.mock(CallableStatement.class);
+     * Connection connection = Mockito.mock(Connection.class);
+     * CallableStatement stmt = Mockito.mock(CallableStatement.class);
      *
      * OptionalInt opt = OptionalInt.of(30);
      * type.set(stmt, "p_age", opt);

@@ -92,11 +92,20 @@ public final class HBaseColumn<T> implements Comparable<HBaseColumn<T>> {
         emptyColumnPool.put(String.class, EMPTY_OBJECT_COLUMN);
     }
 
-    /** Comparator that sorts {@code HBaseColumn} instances by version in descending order. */
-    public static final Comparator<HBaseColumn<?>> DESC_HBASE_COLUMN_COMPARATOR = (o1, o2) -> Long.compare(o2.version, o1.version);
+    /** Comparator that sorts {@code HBaseColumn} instances by version in descending order, then by value. */
+    public static final Comparator<HBaseColumn<?>> DESC_HBASE_COLUMN_COMPARATOR = (o1, o2) -> {
+        final int result = Long.compare(o2.version, o1.version);
+
+        return result == 0 ? compareByValue(o1, o2) : result;
+    };
 
     /** Comparator that sorts version numbers ({@code Long}) in descending order. */
     public static final Comparator<Long> DESC_HBASE_VERSION_COMPARATOR = Comparator.comparing(Long::longValue).reversed();
+
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    private static int compareByValue(final HBaseColumn<?> o1, final HBaseColumn<?> o2) {
+        return ((HBaseColumn) o1).compareTo(o2);
+    }
 
     private final T value;
 

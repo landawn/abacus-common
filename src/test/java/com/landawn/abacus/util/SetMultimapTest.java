@@ -854,6 +854,14 @@ public class SetMultimapTest extends TestBase {
     }
 
     @Test
+    public void test_wrap_withSupplier_emptyValueSet() {
+        Map<String, TreeSet<Integer>> map = new HashMap<>();
+        map.put("a", new TreeSet<>());
+
+        assertThrows(IllegalArgumentException.class, () -> SetMultimap.wrap(map, TreeSet::new));
+    }
+
+    @Test
     public void test_invert() {
         SetMultimap<String, Integer> original = SetMultimap.of("a", 1, "a", 2, "b", 1, "c", 3);
         SetMultimap<Integer, String> inverted = original.invert();

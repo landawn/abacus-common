@@ -1695,7 +1695,7 @@ public class JsonParserTest extends AbstractJsonParserTest {
             // expected
         }
 
-        final JsonSerConfig jsc = JsonSerConfig.create().setSupportCircularReference(true);
+        final JsonSerConfig jsc = JsonSerConfig.create().setCircularReferenceSupported(true);
 
         String json = N.toJson(list, jsc);
         N.println(json);

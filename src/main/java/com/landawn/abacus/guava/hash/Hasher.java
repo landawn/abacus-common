@@ -254,7 +254,8 @@ public interface Hasher {
 
     /**
      * Adds all characters from the given array to this hasher's internal state.
-     * This is equivalent to {@code put(chars, 0, chars.length)}.
+     * This is equivalent to {@code put(chars, 0, chars.length)} for non-null arrays.
+     * A {@code null} array is treated as empty, equivalent to {@code put(null, 0, 0)}.
      *
      * <p>Each character is processed in little-endian order (low byte first, then high byte).
      *
@@ -264,7 +265,7 @@ public interface Hasher {
      * hasher.put(password);
      * }</pre>
      *
-     * @param chars the character array containing data to add to the hash computation
+     * @param chars the character array containing data to add to the hash computation; {@code null} is treated as empty
      * @return this hasher instance for method chaining
      */
     Hasher put(char[] chars);

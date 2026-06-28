@@ -2174,7 +2174,8 @@ public class HttpRequestTest extends TestBase {
             final String msg = ex.getCause() != null ? ex.getCause().getMessage() : ex.getMessage();
             assertEquals(true, msg.contains("404"), "message should report the status code: " + msg);
             assertEquals(true, msg.contains("not found"), "the error response body content should be read out and surfaced: " + msg);
-            assertEquals(false, msg.contains("CleanupInputStream"), "the raw response body stream must be read & closed, not rendered into the message: " + msg);
+            assertEquals(false, msg.contains("CleanupInputStream"),
+                    "the raw response body stream must be read & closed, not rendered into the message: " + msg);
         } finally {
             server.stop(0);
         }

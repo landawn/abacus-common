@@ -22,6 +22,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.PriorityQueue;
 import java.util.Queue;
@@ -38,7 +40,7 @@ import com.landawn.abacus.util.Objectory;
 
 /**
  * A generic implementation of KeyedObjectPool that manages poolable objects by keys.
- * This implementation uses a HashMap internally to store key-value mappings.
+ * This implementation stores key-value mappings in insertion order.
  *
  * <p>Features:
  * <ul>
@@ -162,7 +164,7 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
         super(capacity, evictDelayInMillis, evictionPolicy, autoBalance, balanceFactor, maxMemorySize);
 
         this.memoryMeasure = memoryMeasure;
-        pool = new HashMap<>(Math.min(capacity, 1000));
+        pool = new LinkedHashMap<>(Math.min(capacity, 1000));
 
         cmp = createComparator();
         scheduleEvictionTask();
@@ -184,9 +186,9 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
                 return Comparator.comparingLong(o -> o.getValue().activityPrint().getExpirationTime());
 
             case CREATED_TIME:
+                return Comparator.comparingLong(o -> o.getValue().activityPrint().getCreatedTime());
+
             case FIFO:
-                // FIFO == CREATED_TIME for pool entries: the ActivityPrint is created when the object
-                // enters the pool, so creation order equals insertion order. Earliest-created evicts first.
                 return Comparator.comparingLong(o -> o.getValue().activityPrint().getCreatedTime());
 
             default:
@@ -259,6 +261,8 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
         if (key == null || value == null) {
             throw new IllegalArgumentException("Key and value cannot be null");
         }
+
+        assertNotClosed();
 
         if (value.activityPrint().isExpired()) {
             return false;
@@ -532,6 +536,10 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
                                 // ignore.
                                 return false;
                             }
+                        }
+
+                        if (value.activityPrint().isExpired()) {
+                            return false;
                         }
 
                         pool.put(key, value);
@@ -1144,6 +1152,20 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
             destroyAll(new HashMap<>(pool), Caller.VACATE);
             pool.clear();
         } else if (numberToEvict > 0) {
+            if (evictionPolicy == EvictionPolicy.FIFO) {
+                final Map<K, E> removingObjects = new LinkedHashMap<>(numberToEvict);
+                final Iterator<Map.Entry<K, E>> it = pool.entrySet().iterator();
+
+                while (it.hasNext() && removingObjects.size() < numberToEvict) {
+                    final Map.Entry<K, E> entry = it.next();
+                    removingObjects.put(entry.getKey(), entry.getValue());
+                    it.remove();
+                }
+
+                destroyAll(removingObjects, Caller.VACATE);
+                return;
+            }
+
             final Comparator<Map.Entry<K, E>> reversedCmp = cmp.reversed();
             final Queue<Map.Entry<K, E>> heap = new PriorityQueue<>(numberToEvict, reversedCmp);
 

@@ -656,25 +656,25 @@ public class XmlConstants {
      * XML element name for data set structures.
      * Value: {@code "dataset"}.
      */
-    public static final String DATA_SET = "dataset";
+    public static final String DATASET = "dataset";
 
     /**
      * Opening tag for data set XML elements.
      * Value: {@code "<dataset>"}.
      */
-    public static final String DATA_SET_ELE_START = "<dataset>";
+    public static final String DATASET_ELE_START = "<dataset>";
 
     /**
      * Closing tag for data set XML elements.
      * Value: {@code "</dataset>"}.
      */
-    public static final String DATA_SET_ELE_END = "</dataset>";
+    public static final String DATASET_ELE_END = "</dataset>";
 
     /**
      * Self-closing XML element representing a {@code null} data set.
      * Value: {@code "<dataset isNull=\"true\" />"}.
      */
-    public static final String DATA_SET_NULL_ELE = "<dataset isNull=\"true\" />";
+    public static final String DATASET_NULL_ELE = "<dataset isNull=\"true\" />";
 
     /**
      * XML element name for SOAP envelope elements.

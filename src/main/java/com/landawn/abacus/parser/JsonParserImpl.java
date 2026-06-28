@@ -284,6 +284,7 @@ final class JsonParserImpl extends AbstractJsonParser {
     @Override
     public void parse(final String source, final JsonDeserConfig config, final Object[] output) {
         final JsonDeserConfig configToUse = check(config);
+        N.checkArgNotNull(output, cs.output);
 
         // Empty-source guard like the Map overload: an empty source would otherwise reach the
         // EOF readValue path and fabricate a spurious "" element.
@@ -329,6 +330,7 @@ final class JsonParserImpl extends AbstractJsonParser {
     @Override
     public void parse(final String source, final JsonDeserConfig config, final Collection<?> output) {
         final JsonDeserConfig configToUse = check(config);
+        N.checkArgNotNull(output, cs.output);
 
         // Empty-source guard like the Map overload: an empty source would otherwise reach the
         // EOF readValue path and add a spurious "" element to the output collection.
@@ -374,6 +376,7 @@ final class JsonParserImpl extends AbstractJsonParser {
     @Override
     public void parse(final String source, final JsonDeserConfig config, final Map<?, ?> output) {
         final JsonDeserConfig configToUse = check(config);
+        N.checkArgNotNull(output, cs.output);
 
         if (Strings.isEmpty(source)) {
             return;
@@ -449,7 +452,7 @@ final class JsonParserImpl extends AbstractJsonParser {
             case MAP_ENTITY:
                 return readMapEntity(jr, config, true, targetClass, targetType);
 
-            case DATA_SET:
+            case DATASET:
                 return readDataset(jr, UNDEFINED, config, true, targetClass, targetType);
 
             case SHEET:
@@ -523,7 +526,7 @@ final class JsonParserImpl extends AbstractJsonParser {
         }
 
         final BufferedJsonWriter bw = Objectory.createBufferedJsonWriter();
-        final IdentityHashSet<Object> serializedObjects = !configToUse.isSupportCircularReference() ? null : new IdentityHashSet<>();
+        final IdentityHashSet<Object> serializedObjects = !configToUse.isCircularReferenceSupported() ? null : new IdentityHashSet<>();
 
         try {
             write(obj, configToUse, serializedObjects, type, bw, false);
@@ -654,7 +657,7 @@ final class JsonParserImpl extends AbstractJsonParser {
         }
 
         final BufferedJsonWriter bw = Objectory.createBufferedJsonWriter(output);
-        final IdentityHashSet<Object> serializedObjects = !configToUse.isSupportCircularReference() ? null : new IdentityHashSet<>();
+        final IdentityHashSet<Object> serializedObjects = !configToUse.isCircularReferenceSupported() ? null : new IdentityHashSet<>();
 
         try {
             write(obj, configToUse, serializedObjects, type, bw, true);
@@ -718,7 +721,7 @@ final class JsonParserImpl extends AbstractJsonParser {
 
         final boolean isBufferedWriter = output instanceof BufferedJsonWriter;
         final BufferedJsonWriter bw = isBufferedWriter ? (BufferedJsonWriter) output : Objectory.createBufferedJsonWriter(output);
-        final IdentityHashSet<Object> serializedObjects = !configToUse.isSupportCircularReference() ? null : new IdentityHashSet<>();
+        final IdentityHashSet<Object> serializedObjects = !configToUse.isCircularReferenceSupported() ? null : new IdentityHashSet<>();
 
         try {
             write(obj, configToUse, serializedObjects, type, bw, true);
@@ -794,7 +797,7 @@ final class JsonParserImpl extends AbstractJsonParser {
 
                     break;
 
-                case DATA_SET:
+                case DATASET:
                     writeDataset((Dataset) obj, config, isFirstCall, indentation, serializedObjects, type, bw);
 
                     break;
@@ -2611,7 +2614,7 @@ final class JsonParserImpl extends AbstractJsonParser {
             case MAP_ENTITY:
                 return readMapEntity(jr, config, isFirstCall, targetClass, targetType);
 
-            case DATA_SET:
+            case DATASET:
                 return readDataset(jr, lastToken, config, isFirstCall, targetClass, targetType);
 
             case SHEET:
@@ -4823,7 +4826,7 @@ final class JsonParserImpl extends AbstractJsonParser {
 
     private void checkStreamSupportedType(final Type<?> elementType) {
         switch (elementType.serializationType()) { // NOSONAR
-            case ENTITY, MAP, ARRAY, COLLECTION, MAP_ENTITY, DATA_SET, SHEET, ENTITY_ID:
+            case ENTITY, MAP, ARRAY, COLLECTION, MAP_ENTITY, DATASET, SHEET, ENTITY_ID:
                 break;
 
             default:

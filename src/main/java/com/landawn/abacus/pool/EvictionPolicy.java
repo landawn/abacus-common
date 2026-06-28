@@ -128,10 +128,8 @@ public enum EvictionPolicy {
      *   <li>Cases where every object should get a roughly equal lifetime in the pool</li>
      * </ul>
      *
-     * <p>Implemented using {@link ActivityPrint#getCreatedTime()} (the {@code ActivityPrint} is
-     * created when the object enters the pool, so creation order equals insertion order); objects
-     * with the earliest creation time are evicted first. It therefore selects the same victims as
-     * {@link #CREATED_TIME}, but is provided as a distinct, intent-revealing name.
+     * <p>This policy is based on the order entries are added to the pool, not on the creation time
+     * of the pooled object or its {@link ActivityPrint}.
      */
     FIFO
 }

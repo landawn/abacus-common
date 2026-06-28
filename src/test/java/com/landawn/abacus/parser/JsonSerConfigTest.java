@@ -456,7 +456,7 @@ public class JsonSerConfigTest extends TestBase {
         Assertions.assertTrue(str.contains("writeLongAsString="));
         Assertions.assertTrue(str.contains("writeBigDecimalAsPlain="));
         Assertions.assertTrue(str.contains("failOnEmptyBean="));
-        Assertions.assertTrue(str.contains("supportCircularReference="));
+        Assertions.assertTrue(str.contains("circularReferenceSupported="));
         Assertions.assertTrue(str.contains("indentation="));
         Assertions.assertTrue(str.contains("propNamingPolicy="));
     }

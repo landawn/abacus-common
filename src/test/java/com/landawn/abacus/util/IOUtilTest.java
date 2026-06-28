@@ -48,6 +48,34 @@ public class IOUtilTest extends TestBase {
     private static final Charset UTF_16 = StandardCharsets.UTF_16;
     private static final Charset ISO_8859_1 = StandardCharsets.ISO_8859_1;
 
+    private static final class ListingFailureFile extends File {
+        private static final long serialVersionUID = 1L;
+
+        ListingFailureFile(final File file) {
+            super(file.getPath());
+        }
+
+        @Override
+        public boolean exists() {
+            return true;
+        }
+
+        @Override
+        public boolean isFile() {
+            return false;
+        }
+
+        @Override
+        public boolean isDirectory() {
+            return true;
+        }
+
+        @Override
+        public File[] listFiles() {
+            return null;
+        }
+    }
+
     private static final class ZeroThenEofInputStream extends InputStream {
         private int arrayReads = 0;
 
@@ -5859,6 +5887,13 @@ public class IOUtilTest extends TestBase {
     }
 
     @Test
+    public void testDeleteFilesFromDirectory_ReturnsFalseWhenListingFails() throws Exception {
+        File dir = new ListingFailureFile(new File(tempFolder.toFile(), "listing_failure_dir"));
+
+        assertFalse(IOUtil.deleteFilesFromDirectory(dir));
+    }
+
+    @Test
     public void testCleanDirectory_WithFiles() throws Exception {
         File dir = Files.createTempDirectory(tempFolder, "clean_dir").toFile();
         File file1 = new File(dir, "file1.txt");
@@ -6423,6 +6458,11 @@ public class IOUtilTest extends TestBase {
 
         java.math.BigInteger size = IOUtil.sizeOfDirectoryAsBigInteger(dir);
         assertEquals(java.math.BigInteger.ZERO, size);
+    }
+
+    @Test
+    public void testSizeOfDirectoryAsBigInteger_FileNotDirectory() {
+        assertThrows(IllegalArgumentException.class, () -> IOUtil.sizeOfDirectoryAsBigInteger(tempFile));
     }
 
     // ===== sizeOfDirectoryAsBigInteger =====

@@ -6990,8 +6990,8 @@ public final class Sheet<R, C, V> implements Cloneable {
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + ((_rowKeySet == null) ? 0 : _rowKeySet.hashCode());
-        result = prime * result + ((_columnKeySet == null) ? 0 : _columnKeySet.hashCode());
+        result = prime * result + orderedKeyHashCode(_rowKeySet);
+        result = prime * result + orderedKeyHashCode(_columnKeySet);
         // Note: when uninitialized, all cells are conceptually null. An initialized but all-null
         // _columnList must hash the same as an uninitialized sheet to keep equals/hashCode consistent.
         if (_isInitialized && hasAnyNonNullValue()) {
@@ -7000,6 +7000,14 @@ public final class Sheet<R, C, V> implements Cloneable {
             result = prime * result;
         }
         return result;
+    }
+
+    private static int orderedKeyHashCode(final Collection<?> keys) {
+        return keys == null ? 0 : new ArrayList<>(keys).hashCode();
+    }
+
+    private static boolean orderedKeysEqual(final Collection<?> keys1, final Collection<?> keys2) {
+        return N.equals(keys1 == null ? null : new ArrayList<>(keys1), keys2 == null ? null : new ArrayList<>(keys2));
     }
 
     private boolean hasAnyNonNullValue() {
@@ -7019,10 +7027,8 @@ public final class Sheet<R, C, V> implements Cloneable {
     /**
      * Indicates whether some other object is "equal to" this Sheet.
      * <p>
-     * Two Sheets are considered equal if they have the same row keys, column keys,
-     * and identical values at corresponding positions. Key sets are compared as sets (key order is
-     * not significant by itself); values are compared with {@code equals} position by position, so a
-     * differing key order typically results in inequality only when the corresponding values differ.
+     * Two Sheets are considered equal if they have the same ordered row keys, ordered column keys, and
+     * identical values at corresponding positions. Values are compared with {@code equals} position by position.
      * </p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -7058,7 +7064,7 @@ public final class Sheet<R, C, V> implements Cloneable {
 
         final Sheet<R, C, V> other = (Sheet<R, C, V>) obj;
 
-        if (!N.equals(other._rowKeySet, _rowKeySet) || !N.equals(other._columnKeySet, _columnKeySet)) {
+        if (!orderedKeysEqual(_rowKeySet, other._rowKeySet) || !orderedKeysEqual(_columnKeySet, other._columnKeySet)) {
             return false;
         }
 

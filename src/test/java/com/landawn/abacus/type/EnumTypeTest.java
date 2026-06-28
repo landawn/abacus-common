@@ -36,6 +36,20 @@ public class EnumTypeTest extends TestBase {
         VALUE
     }
 
+    public enum DuplicateCodeEnum {
+        FIRST(7), SECOND(7);
+
+        private final int code;
+
+        DuplicateCodeEnum(final int code) {
+            this.code = code;
+        }
+
+        public int code() {
+            return code;
+        }
+    }
+
     private EnumType<TestEnum> enumTypeByName;
     private EnumType<TestEnum> enumTypeByOrdinal;
     private CharacterWriter characterWriter;
@@ -64,6 +78,11 @@ public class EnumTypeTest extends TestBase {
     public void testEnumerated() {
         assertEquals(com.landawn.abacus.util.EnumType.NAME, enumTypeByName.enumerated());
         assertEquals(com.landawn.abacus.util.EnumType.ORDINAL, enumTypeByOrdinal.enumerated());
+    }
+
+    @Test
+    public void testCodeRepresentationRejectsDuplicateCodes() {
+        assertThrows(IllegalArgumentException.class, () -> createType(DuplicateCodeEnum.class.getName() + "(CODE)"));
     }
 
     @Test

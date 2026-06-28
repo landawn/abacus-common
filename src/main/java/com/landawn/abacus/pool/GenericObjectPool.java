@@ -189,9 +189,9 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
                 return Comparator.comparingLong(o -> o.activityPrint().getExpirationTime());
 
             case CREATED_TIME:
+                return Comparator.comparingLong(o -> o.activityPrint().getCreatedTime());
+
             case FIFO:
-                // FIFO == CREATED_TIME for pool entries: the ActivityPrint is created when the object
-                // enters the pool, so creation order equals insertion order. Earliest-created evicts first.
                 return Comparator.comparingLong(o -> o.activityPrint().getCreatedTime());
 
             default:
@@ -256,6 +256,8 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
         if (element == null) {
             throw new IllegalArgumentException("Element cannot be null");
         }
+
+        assertNotClosed();
 
         if (element.activityPrint().isExpired()) {
             return false;
@@ -907,6 +909,19 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
             destroyAll(new ArrayList<>(pool), Caller.VACATE);
             pool.clear();
         } else if (numberToEvict > 0) {
+            if (evictionPolicy == EvictionPolicy.FIFO) {
+                final List<E> removingObjects = new ArrayList<>(numberToEvict);
+                final Iterator<E> it = pool.descendingIterator();
+
+                while (it.hasNext() && removingObjects.size() < numberToEvict) {
+                    removingObjects.add(it.next());
+                    it.remove();
+                }
+
+                destroyAll(removingObjects, Caller.VACATE);
+                return;
+            }
+
             final Comparator<E> reversedCmp = cmp.reversed();
             final Queue<E> heap = new PriorityQueue<>(numberToEvict, reversedCmp);
 

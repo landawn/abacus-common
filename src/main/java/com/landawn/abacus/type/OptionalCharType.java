@@ -168,7 +168,9 @@ public class OptionalCharType extends AbstractOptionalType<OptionalChar> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<OptionalChar> type = TypeFactory.getType(OptionalChar.class);
-     * ResultSet rs = org.mockito.Mockito.mock(ResultSet.class);
+     * ResultSet rs = Mockito.mock(ResultSet.class);
+     * Mockito.when(rs.getString(1)).thenReturn("A");
+     * Mockito.when(rs.getString(2)).thenReturn(null);
      *
      * // Column contains character 'A'
      * OptionalChar opt = type.get(rs, 1);
@@ -212,7 +214,9 @@ public class OptionalCharType extends AbstractOptionalType<OptionalChar> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<OptionalChar> type = TypeFactory.getType(OptionalChar.class);
-     * ResultSet rs = org.mockito.Mockito.mock(ResultSet.class);
+     * ResultSet rs = Mockito.mock(ResultSet.class);
+     * Mockito.when(rs.getString("grade")).thenReturn("A");
+     * Mockito.when(rs.getString("middle_initial")).thenReturn(null);
      *
      * // Column "grade" contains character 'A'
      * OptionalChar opt = type.get(rs, "grade");
@@ -257,7 +261,7 @@ public class OptionalCharType extends AbstractOptionalType<OptionalChar> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<OptionalChar> type = TypeFactory.getType(OptionalChar.class);
-     * PreparedStatement stmt = org.mockito.Mockito.mock(PreparedStatement.class);
+     * PreparedStatement stmt = Mockito.mock(PreparedStatement.class);
      *
      * OptionalChar opt = OptionalChar.of('A');
      * type.set(stmt, 2, opt);
@@ -295,7 +299,7 @@ public class OptionalCharType extends AbstractOptionalType<OptionalChar> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<OptionalChar> type = TypeFactory.getType(OptionalChar.class);
-     * CallableStatement stmt = org.mockito.Mockito.mock(CallableStatement.class);
+     * CallableStatement stmt = Mockito.mock(CallableStatement.class);
      *
      * OptionalChar opt = OptionalChar.of('B');
      * type.set(stmt, "p_grade", opt);

@@ -1201,9 +1201,13 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * list.removeAt(5);                   // throws IndexOutOfBoundsException (index >= size)
      * }</pre>
      *
+     * <p><b>Note:</b> this single-index form returns the removed {@code short} value; the varargs
+     * {@link #removeAt(int...)} form removes several elements in place and returns {@code void}.</p>
+     *
      * @param index the index of the element to remove
      * @return the removed element
      * @throws IndexOutOfBoundsException if the index is out of range ({@code index < 0 || index >= size()})
+     * @see #removeAt(int...)
      */
     public short removeAt(final int index) {
         rangeCheck(index);
@@ -1219,8 +1223,12 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * Removes all elements at the specified indices from this list. The indices array may contain
      * duplicates and does not need to be sorted. Elements are removed efficiently in a single pass.
      *
+     * <p><b>Note:</b> this varargs form removes several elements in place and returns {@code void}; the
+     * single-index {@link #removeAt(int)} form returns the removed {@code short} value.</p>
+     *
      * @param indices the indices of elements to be removed; may be empty or {@code null} (no-op), may contain duplicates
      * @throws IndexOutOfBoundsException if any index is out of range ({@code index < 0 || index >= size()})
+     * @see #removeAt(int)
      */
     @Override
     public void removeAt(final int... indices) {

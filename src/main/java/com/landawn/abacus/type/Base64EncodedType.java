@@ -62,9 +62,9 @@ public class Base64EncodedType extends AbstractType<byte[]> {
      * to {@link com.landawn.abacus.util.Strings#EMPTY} for both cases.</p>
      *
      * <p>The returned string is a serializable representation designed to be parsed back into an equivalent value
-     * via {@link #valueOf(String)}; {@code stringOf} and {@code valueOf} are inverse operations that round-trip. This
-     * is the key distinction from {@link Object#toString()}, whose result is not guaranteed to be convertible back
-     * into the original value.</p>
+     * via {@link #valueOf(String)}. Non-empty arrays round-trip exactly; {@code null} and empty arrays both encode
+     * to an empty string and decode to an empty array. This is the key distinction from {@link Object#toString()},
+     * whose result is not guaranteed to be convertible back into the original value.</p>
      *
      * @param x the byte array to encode; may be {@code null}
      * @return the Base64-encoded string representation of the byte array;
@@ -81,9 +81,9 @@ public class Base64EncodedType extends AbstractType<byte[]> {
      * Decodes a Base64-encoded string back to a byte array.
      * Uses {@link com.landawn.abacus.util.Strings#base64Decode(String)} internally.
      *
-     * <p>This method is the inverse of {@code stringOf} and round-trips with it: it parses the string produced by
-     * {@code stringOf} back into a value of this type. Strings produced by {@link Object#toString()} are not
-     * guaranteed to be parseable in this way.</p>
+     * <p>This method parses strings produced by {@code stringOf} back into values of this type. Non-empty arrays
+     * round-trip exactly; {@code null} and empty inputs decode to an empty array. Strings produced by
+     * {@link Object#toString()} are not guaranteed to be parseable in this way.</p>
      *
      * @param base64String the Base64-encoded string to decode; may be {@code null} or empty
      * @return the decoded byte array; an empty byte array if the input is {@code null} or empty

@@ -14,6 +14,7 @@
 package com.landawn.abacus.http;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.function.BiPredicate;
@@ -22,14 +23,17 @@ import java.util.function.Predicate;
 
 import com.landawn.abacus.logging.Logger;
 import com.landawn.abacus.logging.LoggerFactory;
+import com.landawn.abacus.util.Charsets;
 import com.landawn.abacus.util.Fn;
 import com.landawn.abacus.util.IOUtil;
 import com.landawn.abacus.util.Maps;
 import com.landawn.abacus.util.N;
+import com.landawn.abacus.util.NamingPolicy;
 import com.landawn.abacus.util.Strings;
 import com.landawn.abacus.util.Tuple;
 import com.landawn.abacus.util.Tuple.Tuple2;
 import com.landawn.abacus.util.Tuple.Tuple3;
+import com.landawn.abacus.util.URLEncodedUtil;
 import com.landawn.abacus.util.cs;
 import com.landawn.abacus.util.u.Optional;
 import com.landawn.abacus.util.stream.Stream;
@@ -473,9 +477,8 @@ public final class HARUtil {
     /**
      * Creates a stream of HTTP requests and their responses from a HAR string.
      *
-     * <p>This method provides a streaming interface for processing HAR entries. The stream
-     * is lazy - requests are only sent when the stream is consumed. This allows for
-     * efficient processing of large HAR files.</p>
+     * <p>This method parses the HAR content eagerly to locate {@code log.entries}. Request replay
+     * remains lazy: matching requests are only sent when the returned stream is consumed.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -545,8 +548,9 @@ public final class HARUtil {
 
         final HttpHeaders httpHeaders = getHeadersByRequestEntry(requestEntry);
 
-        final String requestBody = Maps.getByPath(requestEntry, "postData.text");
-        final String bodyContentType = Maps.getByPath(requestEntry, "postData.mimeType");
+        final Tuple2<String, String> bodyAndMimeType = getBodyAndMimeTypeByRequestEntry(requestEntry);
+        final String requestBody = bodyAndMimeType._1;
+        final String bodyContentType = bodyAndMimeType._2;
 
         if (Strings.isNotEmpty(requestBody)) {
             WebUtil.setContentTypeByRequestBodyType(bodyContentType, httpHeaders);
@@ -715,8 +719,9 @@ public final class HARUtil {
      * Extracts the request body and MIME type from a HAR request entry.
      *
      * <p>This method retrieves the POST data from the request entry, including both
-     * the text content and the MIME type. These values are typically found at
-     * {@code "postData.text"} and {@code "postData.mimeType"} paths in the HAR structure.</p>
+     * the text content and the MIME type. If {@code postData.text} is absent or empty and HAR
+     * {@code postData.params} are present, the params are encoded as
+     * {@code application/x-www-form-urlencoded} form data.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -734,7 +739,39 @@ public final class HARUtil {
         final String requestBody = Maps.getByPath(requestEntry, "postData.text");
         final String bodyContentType = Maps.getByPath(requestEntry, "postData.mimeType");
 
+        if (Strings.isEmpty(requestBody)) {
+            final String requestBodyFromParams = getRequestBodyFromPostDataParams(requestEntry);
+
+            if (Strings.isNotEmpty(requestBodyFromParams)) {
+                return Tuple.of(requestBodyFromParams, Strings.isNotEmpty(bodyContentType) ? bodyContentType : HttpHeaders.Values.APPLICATION_URL_ENCODED);
+            }
+        }
+
         return Tuple.of(requestBody, bodyContentType);
+    }
+
+    @SuppressWarnings("unchecked")
+    private static String getRequestBodyFromPostDataParams(final Map<String, Object> requestEntry) {
+        final List<Map<String, ?>> params = Maps.getByPath(requestEntry, "postData.params");
+
+        if (N.isEmpty(params)) {
+            return null;
+        }
+
+        final List<Object> pairs = new ArrayList<>(params.size() * 2);
+
+        for (final Map<String, ?> param : params) {
+            final Object name = param.get("name");
+
+            if (name == null) {
+                continue;
+            }
+
+            pairs.add(N.stringOf(name));
+            pairs.add(N.defaultIfNull(param.get("value"), Strings.EMPTY));
+        }
+
+        return pairs.isEmpty() ? null : URLEncodedUtil.encode(pairs.toArray(), Charsets.UTF_8, NamingPolicy.NO_CHANGE);
     }
 
     private HARUtil() {

@@ -2,6 +2,7 @@ package com.landawn.abacus.type;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -43,6 +44,30 @@ public class TypeFactoryTest extends TestBase {
     public void testGetTypeWithString() {
         Type<String> type = TypeFactory.getType("String");
         assertNotNull(type);
+    }
+
+    @Test
+    public void testRegisterTypeAliasConflictDoesNotRegisterIntrinsicName() {
+        final String intrinsicName = "TypeFactoryAliasPartial_" + System.nanoTime();
+        final Type<Object> customType = new AbstractType<Object>(intrinsicName) {
+            @Override
+            public Class<Object> javaType() {
+                return Object.class;
+            }
+
+            @Override
+            public String stringOf(final Object x) {
+                return x == null ? null : x.toString();
+            }
+
+            @Override
+            public Object valueOf(final String str) {
+                return str;
+            }
+        };
+
+        assertThrows(IllegalArgumentException.class, () -> TypeFactory.registerType("String", customType));
+        assertNotSame(customType, TypeFactory.getType(intrinsicName));
     }
 
     @Test

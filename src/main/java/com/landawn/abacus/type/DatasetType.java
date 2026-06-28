@@ -25,7 +25,7 @@ import com.landawn.abacus.util.Strings;
  * names, row data, and the overall tabular structure.
  *
  * <p>Note: {@link #isSerializable()} returns {@code false}; the type system routes Dataset
- * serialization through {@link SerializationType#DATA_SET} rather than the generic serializable path.
+ * serialization through {@link SerializationType#DATASET} rather than the generic serializable path.
  *
  * @see AbstractType
  * @see Dataset
@@ -34,7 +34,7 @@ import com.landawn.abacus.util.Strings;
 public class DatasetType extends AbstractType<Dataset> {
 
     /** The type name constant for Dataset type identification, equal to {@code "Dataset"}. */
-    public static final String DATA_SET = Dataset.class.getSimpleName();
+    public static final String DATASET = Dataset.class.getSimpleName();
 
     private final Class<Dataset> typeClass;
 
@@ -43,7 +43,7 @@ public class DatasetType extends AbstractType<Dataset> {
      * Instances are created by the {@code TypeFactory}.
      */
     DatasetType() {
-        super(DATA_SET);
+        super(DATASET);
 
         typeClass = Dataset.class;
     }
@@ -70,7 +70,7 @@ public class DatasetType extends AbstractType<Dataset> {
 
     /**
      * Indicates whether this type is handled by the generic serializable path.
-     * {@link Dataset} uses a dedicated serialization path ({@link SerializationType#DATA_SET}).
+     * {@link Dataset} uses a dedicated serialization path ({@link SerializationType#DATASET}).
      *
      * @return {@code false}, always
      */
@@ -82,11 +82,11 @@ public class DatasetType extends AbstractType<Dataset> {
     /**
      * Returns the serialization type category for {@link Dataset} objects.
      *
-     * @return {@link SerializationType#DATA_SET}
+     * @return {@link SerializationType#DATASET}
      */
     @Override
     public SerializationType serializationType() {
-        return SerializationType.DATA_SET;
+        return SerializationType.DATASET;
     }
 
     /**

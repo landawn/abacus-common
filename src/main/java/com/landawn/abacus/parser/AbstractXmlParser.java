@@ -79,13 +79,15 @@ abstract class AbstractXmlParser extends AbstractParser<XmlSerConfig, XmlDeserCo
     protected static final JsonSerConfig jscWithEmptyBeanSupported = JsonSerConfig.create().setCharQuotation(SK.CHAR_ZERO).setFailOnEmptyBean(false);
 
     @SuppressWarnings("deprecation")
-    protected static final JsonSerConfig jscWithCircularRefSupported = JsonSerConfig.create().setCharQuotation(SK.CHAR_ZERO).setSupportCircularReference(true);
+    protected static final JsonSerConfig jscWithCircularRefSupported = JsonSerConfig.create()
+            .setCharQuotation(SK.CHAR_ZERO)
+            .setCircularReferenceSupported(true);
 
     @SuppressWarnings("deprecation")
     protected static final JsonSerConfig jscWithCircularRefAndEmptyBeanSupported = JsonSerConfig.create()
             .setCharQuotation(SK.CHAR_ZERO)
             .setFailOnEmptyBean(false)
-            .setSupportCircularReference(true);
+            .setCircularReferenceSupported(true);
 
     protected static final Type<?> defaultKeyType = objType;
 
@@ -626,7 +628,7 @@ abstract class AbstractXmlParser extends AbstractParser<XmlSerConfig, XmlDeserCo
      *
      * <p>Usage Examples:</p>
      * <pre>{@code
-     * XmlSerConfig xmlConfig = new XmlSerConfig().setSupportCircularReference(true);
+     * XmlSerConfig xmlConfig = new XmlSerConfig().setCircularReferenceSupported(true);
      * JsonSerConfig jsonConfig = getJSC(xmlConfig);
      * }</pre>
      *
@@ -638,7 +640,7 @@ abstract class AbstractXmlParser extends AbstractParser<XmlSerConfig, XmlDeserCo
             return jsc;
         }
 
-        if (config.isSupportCircularReference()) {
+        if (config.isCircularReferenceSupported()) {
             if (!config.isFailOnEmptyBean()) {
                 return jscWithCircularRefAndEmptyBeanSupported;
             } else {

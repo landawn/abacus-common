@@ -90,8 +90,9 @@ public interface Logger {
     /**
      * The name of the root logger.
      *
-     * <p>This constant can be passed to {@link LoggerFactory#getLogger(String)} to obtain
-     * the root logger instance.</p>
+     * <p>This conventional root logger name can be passed to
+     * {@link LoggerFactory#getLogger(String)}. The exact backend logger selected is
+     * implementation-dependent.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code

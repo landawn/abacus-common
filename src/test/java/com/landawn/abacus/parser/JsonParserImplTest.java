@@ -695,7 +695,7 @@ public class JsonParserImplTest extends TestBase {
 
     @Test
     public void testSpecialCases_CircularReference() {
-        JsonSerConfig config = JsonSerConfig.create().setSupportCircularReference(true);
+        JsonSerConfig config = JsonSerConfig.create().setCircularReferenceSupported(true);
 
         Map<String, Object> map = new HashMap<>();
         map.put("self", map);
@@ -2012,7 +2012,7 @@ public class JsonParserImplTest extends TestBase {
         m.put("name", "x");
         m.put("self", m);
 
-        final String json = parser.serialize(m, new JsonSerConfig().setSupportCircularReference(true));
+        final String json = parser.serialize(m, new JsonSerConfig().setCircularReferenceSupported(true));
 
         Assertions.assertTrue(json.contains("null"), json);
         Assertions.assertFalse(json.matches(".*:\\s*[,}].*"), json); // every name has a value

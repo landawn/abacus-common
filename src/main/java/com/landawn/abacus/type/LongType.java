@@ -68,7 +68,7 @@ public final class LongType extends AbstractLongType {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<Long> type = TypeFactory.getType(Long.class);
-     * ResultSet rs = org.mockito.Mockito.mock(ResultSet.class);
+     * ResultSet rs = Mockito.mock(ResultSet.class);
      * Long userId = type.get(rs, 1);   // retrieves Long from column 1
      * }</pre>
      *
@@ -100,7 +100,7 @@ public final class LongType extends AbstractLongType {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<Long> type = TypeFactory.getType(Long.class);
-     * ResultSet rs = org.mockito.Mockito.mock(ResultSet.class);
+     * ResultSet rs = Mockito.mock(ResultSet.class);
      * Long userId = type.get(rs, "user_id");   // retrieves Long from "user_id" column
      * }</pre>
      *

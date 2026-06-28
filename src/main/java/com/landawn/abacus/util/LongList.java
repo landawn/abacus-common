@@ -1233,9 +1233,13 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * list.removeAt(5);                  // throws IndexOutOfBoundsException
      * }</pre>
      *
+     * <p><b>Note:</b> this single-index form returns the removed {@code long} value; the varargs
+     * {@link #removeAt(int...)} form removes several elements in place and returns {@code void}.</p>
+     *
      * @param index the index of the element to remove
      * @return the removed element
      * @throws IndexOutOfBoundsException if the index is out of range ({@code index < 0 || index >= size()})
+     * @see #removeAt(int...)
      * @see #remove(long)
      */
     public long removeAt(final int index) {
@@ -1254,8 +1258,12 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * <p>The indices array may contain duplicate values and does not need to be sorted.
      * The remaining elements maintain their relative order.
      *
+     * <p><b>Note:</b> this varargs form removes several elements in place and returns {@code void}; the
+     * single-index {@link #removeAt(int)} form returns the removed {@code long} value.</p>
+     *
      * @param indices the indices of elements to be removed. If {@code null} or empty, this list remains unchanged.
      * @throws IndexOutOfBoundsException if any index is out of range ({@code index < 0 || index >= size()})
+     * @see #removeAt(int)
      */
     @Override
     public void removeAt(final int... indices) {

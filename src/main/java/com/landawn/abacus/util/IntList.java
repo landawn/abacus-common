@@ -1242,9 +1242,13 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
      * a.removeAt(5);    // throws IndexOutOfBoundsException (index >= size)
      * }</pre>
      *
+     * <p><b>Note:</b> this single-index form returns the removed {@code int} value; the varargs
+     * {@link #removeAt(int...)} form removes several elements in place and returns {@code void}.</p>
+     *
      * @param index the index of the element to remove
      * @return the removed element
      * @throws IndexOutOfBoundsException if the index is out of range ({@code index < 0 || index >= size()})
+     * @see #removeAt(int...)
      */
     public int removeAt(final int index) {
         rangeCheck(index);
@@ -1261,9 +1265,13 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
      * The indices array is processed to remove elements efficiently, handling
      * duplicate indices and maintaining the correct element positions during removal.
      *
+     * <p><b>Note:</b> this varargs form removes several elements in place and returns {@code void}; the
+     * single-index {@link #removeAt(int)} form returns the removed {@code int} value.</p>
+     *
      * @param indices the indices of elements to be removed. If {@code null} or empty, this list remains unchanged.
      * @throws IndexOutOfBoundsException if any of the specified indices is out of range
      *         ({@code index < 0 || index >= size()})
+     * @see #removeAt(int)
      */
     @Override
     public void removeAt(final int... indices) {

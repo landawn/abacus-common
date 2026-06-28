@@ -1465,8 +1465,8 @@ public interface Type<T> {
         MAP_ENTITY,
         /** EntityId types */
         ENTITY_ID,
-        /** Dataset types */
-        DATA_SET,
+        /** Denotes the dedicated {@link DatasetType Dataset} serialization path; the sibling {@link #SHEET} category denotes {@link SheetType Sheet}. */
+        DATASET,
         /** Sheet types */
         SHEET,
         /** Unknown or unsupported serialization */

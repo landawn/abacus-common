@@ -164,7 +164,9 @@ public class OptionalFloatType extends AbstractOptionalType<OptionalFloat> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<OptionalFloat> type = TypeFactory.getType(OptionalFloat.class);
-     * ResultSet rs = org.mockito.Mockito.mock(ResultSet.class);
+     * ResultSet rs = Mockito.mock(ResultSet.class);
+     * Mockito.when(rs.getObject(1)).thenReturn(3.14f);
+     * Mockito.when(rs.getObject(2)).thenReturn(null);
      *
      * // Column contains float value 3.14
      * OptionalFloat opt = type.get(rs, 1);
@@ -195,7 +197,9 @@ public class OptionalFloatType extends AbstractOptionalType<OptionalFloat> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<OptionalFloat> type = TypeFactory.getType(OptionalFloat.class);
-     * ResultSet rs = org.mockito.Mockito.mock(ResultSet.class);
+     * ResultSet rs = Mockito.mock(ResultSet.class);
+     * Mockito.when(rs.getObject("temperature")).thenReturn(98.6f);
+     * Mockito.when(rs.getObject("humidity")).thenReturn(null);
      *
      * // Column "temperature" contains float value 98.6
      * OptionalFloat opt = type.get(rs, "temperature");
@@ -226,7 +230,7 @@ public class OptionalFloatType extends AbstractOptionalType<OptionalFloat> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<OptionalFloat> type = TypeFactory.getType(OptionalFloat.class);
-     * PreparedStatement stmt = org.mockito.Mockito.mock(PreparedStatement.class);
+     * PreparedStatement stmt = Mockito.mock(PreparedStatement.class);
      *
      * OptionalFloat opt = OptionalFloat.of(98.6f);
      * type.set(stmt, 2, opt);
@@ -258,7 +262,7 @@ public class OptionalFloatType extends AbstractOptionalType<OptionalFloat> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<OptionalFloat> type = TypeFactory.getType(OptionalFloat.class);
-     * CallableStatement stmt = org.mockito.Mockito.mock(CallableStatement.class);
+     * CallableStatement stmt = Mockito.mock(CallableStatement.class);
      *
      * OptionalFloat opt = OptionalFloat.of(37.5f);
      * type.set(stmt, "p_temperature", opt);

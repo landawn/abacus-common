@@ -3569,7 +3569,7 @@ public class JoinerTest extends AbstractTest {
         joiner.append("a").append("b");
         joiner.close();
 
-        assertThrows(IllegalStateException.class, () -> joiner.append("c"));
+        assertEquals("Joiner has been closed", assertThrows(IllegalStateException.class, () -> joiner.append("c")).getMessage());
     }
 
     @Test

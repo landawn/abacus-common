@@ -323,11 +323,19 @@ import com.landawn.abacus.util.u.OptionalShort;
  *   </tr>
  * </table>
  *
+ * <p><b>Optional-returning accessors:</b> methods that search for an element that may be absent and
+ * return a {@link Nullable}/{@link OptionalInt} (or a {@link Pair} of them) rather than throwing are named
+ * with the {@code find*} prefix in this class (e.g.&nbsp;{@code findFirstOrLast}, {@code findFirstAndLast},
+ * {@code findFirstOrLastIndex}). The sibling utility classes use different verbs for the same idea —
+ * {@code *IfExists} in {@link Maps} (e.g.&nbsp;{@code getIfExists}) and {@code *IfPresent} in {@link Beans}
+ * (e.g.&nbsp;{@code getPropValueIfPresent}).</p>
+ *
  * @see com.landawn.abacus.util.N
  * @see com.landawn.abacus.util.Iterators
  * @see com.landawn.abacus.util.CommonUtil
  * @see com.landawn.abacus.util.stream.Stream
  * @see com.landawn.abacus.util.Maps
+ * @see com.landawn.abacus.util.Beans
  * @see com.landawn.abacus.util.Array
  * @see com.landawn.abacus.util.Strings
  * @see com.landawn.abacus.util.Numbers

@@ -488,14 +488,14 @@ public class XmlSerConfigTest extends TestBase {
         assertFalse(config.isFailOnEmptyBean());
     }
 
-    // isSupportCircularReference / setSupportCircularReference
+    // isCircularReferenceSupported / setCircularReferenceSupported
     @Test
-    public void testSetSupportCircularReference() {
-        assertFalse(config.isSupportCircularReference());
+    public void testSetCircularReferenceSupported() {
+        assertFalse(config.isCircularReferenceSupported());
 
-        XmlSerConfig result = config.setSupportCircularReference(true);
+        XmlSerConfig result = config.setCircularReferenceSupported(true);
         assertSame(config, result);
-        assertTrue(config.isSupportCircularReference());
+        assertTrue(config.isCircularReferenceSupported());
     }
 
     // getIndentation / setIndentation

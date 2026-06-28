@@ -2201,10 +2201,6 @@ public final class HttpRequest {
         if (!HttpUtil.isSuccessfulResponseCode(httpResponse.statusCode())) {
             final Object errorBody = httpResponse.body();
 
-            // For an InputStream result type the body is a deferred-cleanup stream (see
-            // prepareResponseForClientCleanup): closing it triggers doAfterExecution, releasing the
-            // per-request HttpClient and connection that this throw would otherwise leak. Its
-            // toString() is also useless (a stream identity), so report only the status code.
             if (errorBody instanceof InputStream is) {
                 try (is) {
                     throw new UncheckedIOException(new IOException(httpResponse.statusCode() + ": " + IOUtil.readAllToString(is)));
@@ -2213,7 +2209,7 @@ public final class HttpRequest {
                 }
             }
 
-            throw new UncheckedIOException(new IOException(httpResponse.statusCode() + ": " + errorBody));
+            throw new UncheckedIOException(new IOException(httpResponse.statusCode() + ": " + N.toString(errorBody)));
         }
 
         if (resultClass == null || Void.class.equals(resultClass)) {

@@ -2534,7 +2534,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
 
     private static final BiConsumer<Holder<Object>, Object> onlyOne_accumulator = (holder, val) -> {
         if (holder.value() != NONE) {
-            throw new TooManyElementsException("Duplicate values");
+            throw new TooManyElementsException("More than one element");
         }
 
         holder.setValue(val);
@@ -2542,7 +2542,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
 
     private static final BinaryOperator<Holder<Object>> onlyOne_combiner = (t, u) -> {
         if (t.value() != NONE && u.value() != NONE) {
-            throw new TooManyElementsException("Duplicate values");
+            throw new TooManyElementsException("More than one element");
         }
 
         return t.value() != NONE ? t : u;
@@ -2552,8 +2552,8 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
             : Optional.ofNullable(h.value());
 
     /**
-     * Returns a {@code Collector} that expects exactly one element and returns it wrapped
-     * in an {@code Optional}.
+     * Returns a {@code Collector} that returns the only collected element, if one is present,
+     * wrapped in an {@code Optional}.
      *
      * <p>This collector throws a {@code TooManyElementsException} if more than one element
      * is encountered in the stream. It returns an empty {@code Optional} if the stream
@@ -2593,13 +2593,13 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     }
 
     /**
-     * Returns a {@code Collector} that expects exactly one element matching the given
-     * predicate and returns it wrapped in an {@code Optional}.
+     * Returns a {@code Collector} that returns the only element matching the given
+     * predicate, if one is present, wrapped in an {@code Optional}.
      *
-     * <p>This collector filters elements using the provided predicate, then expects
-     * exactly one element to pass the filter. It throws a {@code TooManyElementsException}
-     * if more than one element matches the predicate. It returns an empty {@code Optional}
-     * if no elements match.</p>
+     * <p>This collector filters elements using the provided predicate, then returns the
+     * single matching element if present. It throws a {@code TooManyElementsException} if
+     * more than one element matches the predicate. It returns an empty {@code Optional} if
+     * no elements match.</p>
      *
      * <p>This is a combination of filtering and the onlyOne collector, useful for
      * finding a unique element matching specific criteria.</p>
@@ -3728,6 +3728,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @return a {@code Collector} that produces the minimal element according to the
      *         comparator, wrapped in an {@code Optional}
      * @throws IllegalArgumentException if the comparator is null
+     * @see #minBy(java.util.function.Function)
      */
     public static <T> Collector<T, ?, Optional<T>> min(final Comparator<? super T> comparator) throws IllegalArgumentException {
         N.checkArgNotNull(comparator);
@@ -3953,6 +3954,10 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * <p>The returned collector handles {@code null} keys by placing them last in the
      * ordering (null keys are considered greater than {@code non-null} keys).</p>
      *
+     * <p><b>Note:</b> the argument is a sort-<i>key extractor</i> ({@link Function}), not a
+     * {@link java.util.Comparator}. This differs from {@link java.util.stream.Collectors#minBy(java.util.Comparator)},
+     * whose argument IS a Comparator. For the comparator-based form in this class use {@link #min(java.util.Comparator)}.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Find person with minimum age
@@ -3963,6 +3968,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param <T> the type of input elements
      * @param keyMapper a function extracting a {@code Comparable} key from each element
      * @return a {@code Collector} which finds the element with the minimum key
+     * @see #min(java.util.Comparator)
      */
     @SuppressWarnings("rawtypes")
     public static <T> Collector<T, ?, Optional<T>> minBy(final Function<? super T, ? extends Comparable> keyMapper) {
@@ -4096,6 +4102,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param comparator a {@code Comparator} for comparing elements
      * @return a {@code Collector} which finds the maximum element
      * @throws IllegalArgumentException if the comparator is null
+     * @see #maxBy(java.util.function.Function)
      */
     public static <T> Collector<T, ?, Optional<T>> max(final Comparator<? super T> comparator) throws IllegalArgumentException {
         N.checkArgNotNull(comparator);
@@ -4314,6 +4321,10 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * <p>The returned collector handles {@code null} keys by placing them first in the
      * ordering (null keys are considered less than {@code non-null} keys).</p>
      *
+     * <p><b>Note:</b> the argument is a sort-<i>key extractor</i> ({@link Function}), not a
+     * {@link java.util.Comparator}. This differs from {@link java.util.stream.Collectors#maxBy(java.util.Comparator)},
+     * whose argument IS a Comparator. For the comparator-based form in this class use {@link #max(java.util.Comparator)}.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Find person with maximum age
@@ -4324,6 +4335,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param <T> the type of input elements
      * @param keyMapper a function extracting a {@code Comparable} key from each element
      * @return a {@code Collector} which finds the element with the maximum key
+     * @see #max(java.util.Comparator)
      */
     @SuppressWarnings("rawtypes")
     public static <T> Collector<T, ?, Optional<T>> maxBy(final Function<? super T, ? extends Comparable> keyMapper) {

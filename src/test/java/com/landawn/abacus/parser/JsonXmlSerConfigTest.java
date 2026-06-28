@@ -55,7 +55,7 @@ public class JsonXmlSerConfigTest extends TestBase {
         assertFalse(newConfig.isWriteNullBooleanAsFalse());
         assertFalse(newConfig.isWriteBigDecimalAsPlain());
         assertTrue(newConfig.isFailOnEmptyBean());
-        assertFalse(newConfig.isSupportCircularReference());
+        assertFalse(newConfig.isCircularReferenceSupported());
     }
 
     @Test
@@ -438,22 +438,22 @@ public class JsonXmlSerConfigTest extends TestBase {
     }
 
     @Test
-    public void testSupportCircularReferenceToggle() {
-        assertFalse(config.isSupportCircularReference());
-        config.setSupportCircularReference(true);
-        assertTrue(config.isSupportCircularReference());
-        config.setSupportCircularReference(false);
-        assertFalse(config.isSupportCircularReference());
+    public void testCircularReferenceSupportedToggle() {
+        assertFalse(config.isCircularReferenceSupported());
+        config.setCircularReferenceSupported(true);
+        assertTrue(config.isCircularReferenceSupported());
+        config.setCircularReferenceSupported(false);
+        assertFalse(config.isCircularReferenceSupported());
     }
 
     @Test
-    public void test_supportCircularReference() {
+    public void test_circularReferenceSupported() {
         TestConfig config = new TestConfig();
-        assertFalse(config.isSupportCircularReference());
+        assertFalse(config.isCircularReferenceSupported());
 
-        TestConfig result = config.setSupportCircularReference(true);
+        TestConfig result = config.setCircularReferenceSupported(true);
         assertSame(config, result);
-        assertTrue(config.isSupportCircularReference());
+        assertTrue(config.isCircularReferenceSupported());
     }
 
     @Test
@@ -470,7 +470,7 @@ public class JsonXmlSerConfigTest extends TestBase {
                 .setWriteNullBooleanAsFalse(true)
                 .setWriteBigDecimalAsPlain(true)
                 .setFailOnEmptyBean(false)
-                .setSupportCircularReference(true);
+                .setCircularReferenceSupported(true);
 
         assertSame(config, result);
         assertEquals('\'', config.getCharQuotation());
@@ -485,7 +485,7 @@ public class JsonXmlSerConfigTest extends TestBase {
         assertTrue(config.isWriteNullBooleanAsFalse());
         assertTrue(config.isWriteBigDecimalAsPlain());
         assertFalse(config.isFailOnEmptyBean());
-        assertTrue(config.isSupportCircularReference());
+        assertTrue(config.isCircularReferenceSupported());
     }
 
     @Test

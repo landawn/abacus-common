@@ -1102,70 +1102,70 @@ public class EscapeUtilTest extends TestBase {
 
     @Test
     public void testBeanArrays_ISO8859_1_ESCAPE_NotNull() {
-        String[][] result = EscapeUtil.BeanArrays.ISO8859_1_ESCAPE();
+        String[][] result = EscapeUtil.BeanArrays.iso8859_1Escape();
         Assertions.assertNotNull(result);
         Assertions.assertTrue(result.length > 0);
     }
 
     @Test
     public void testBeanArrays_ISO8859_1_UNESCAPE_NotNull() {
-        String[][] result = EscapeUtil.BeanArrays.ISO8859_1_UNESCAPE();
+        String[][] result = EscapeUtil.BeanArrays.iso8859_1Unescape();
         Assertions.assertNotNull(result);
         Assertions.assertTrue(result.length > 0);
     }
 
     @Test
     public void testBeanArrays_HTML40_EXTENDED_ESCAPE_NotNull() {
-        String[][] result = EscapeUtil.BeanArrays.HTML40_EXTENDED_ESCAPE();
+        String[][] result = EscapeUtil.BeanArrays.html40ExtendedEscape();
         Assertions.assertNotNull(result);
         Assertions.assertTrue(result.length > 0);
     }
 
     @Test
     public void testBeanArrays_HTML40_EXTENDED_UNESCAPE_NotNull() {
-        String[][] result = EscapeUtil.BeanArrays.HTML40_EXTENDED_UNESCAPE();
+        String[][] result = EscapeUtil.BeanArrays.html40ExtendedUnescape();
         Assertions.assertNotNull(result);
         Assertions.assertTrue(result.length > 0);
     }
 
     @Test
     public void testBeanArrays_BASIC_ESCAPE_NotNull() {
-        String[][] result = EscapeUtil.BeanArrays.BASIC_ESCAPE();
+        String[][] result = EscapeUtil.BeanArrays.basicEscape();
         Assertions.assertNotNull(result);
         Assertions.assertEquals(4, result.length);
     }
 
     @Test
     public void testBeanArrays_BASIC_UNESCAPE_NotNull() {
-        String[][] result = EscapeUtil.BeanArrays.BASIC_UNESCAPE();
+        String[][] result = EscapeUtil.BeanArrays.basicUnescape();
         Assertions.assertNotNull(result);
         Assertions.assertEquals(4, result.length);
     }
 
     @Test
     public void testBeanArrays_APOS_ESCAPE_NotNull() {
-        String[][] result = EscapeUtil.BeanArrays.APOS_ESCAPE();
+        String[][] result = EscapeUtil.BeanArrays.aposEscape();
         Assertions.assertNotNull(result);
         Assertions.assertEquals(1, result.length);
     }
 
     @Test
     public void testBeanArrays_APOS_UNESCAPE_NotNull() {
-        String[][] result = EscapeUtil.BeanArrays.APOS_UNESCAPE();
+        String[][] result = EscapeUtil.BeanArrays.aposUnescape();
         Assertions.assertNotNull(result);
         Assertions.assertEquals(1, result.length);
     }
 
     @Test
     public void testBeanArrays_JAVA_CTRL_CHARS_ESCAPE_NotNull() {
-        String[][] result = EscapeUtil.BeanArrays.JAVA_CTRL_CHARS_ESCAPE();
+        String[][] result = EscapeUtil.BeanArrays.javaCtrlCharsEscape();
         Assertions.assertNotNull(result);
         Assertions.assertTrue(result.length > 0);
     }
 
     @Test
     public void testBeanArrays_JAVA_CTRL_CHARS_UNESCAPE_NotNull() {
-        String[][] result = EscapeUtil.BeanArrays.JAVA_CTRL_CHARS_UNESCAPE();
+        String[][] result = EscapeUtil.BeanArrays.javaCtrlCharsUnescape();
         Assertions.assertNotNull(result);
         Assertions.assertTrue(result.length > 0);
     }
@@ -2017,11 +2017,11 @@ public class EscapeUtilTest extends TestBase {
         assertEquals("a\rb", writer.toString());
     }
 
-    // --- BeanArrays: verify BASIC_ESCAPE content ---
+    // --- BeanArrays: verify basicEscape content ---
 
     @Test
     public void testBeanArrays_BASIC_ESCAPE_Content() {
-        String[][] result = EscapeUtil.BeanArrays.BASIC_ESCAPE();
+        String[][] result = EscapeUtil.BeanArrays.basicEscape();
         // Verify it contains the 4 basic entities: " & < >
         assertEquals("\"", result[0][0]);
         assertEquals("&quot;", result[0][1]);
@@ -2033,20 +2033,20 @@ public class EscapeUtilTest extends TestBase {
         assertEquals("&gt;", result[3][1]);
     }
 
-    // --- BeanArrays: verify APOS_ESCAPE content ---
+    // --- BeanArrays: verify aposEscape content ---
 
     @Test
     public void testBeanArrays_APOS_ESCAPE_Content() {
-        String[][] result = EscapeUtil.BeanArrays.APOS_ESCAPE();
+        String[][] result = EscapeUtil.BeanArrays.aposEscape();
         assertEquals("'", result[0][0]);
         assertEquals("&apos;", result[0][1]);
     }
 
-    // --- BeanArrays: verify JAVA_CTRL_CHARS_ESCAPE content ---
+    // --- BeanArrays: verify javaCtrlCharsEscape content ---
 
     @Test
     public void testBeanArrays_JAVA_CTRL_CHARS_ESCAPE_Content() {
-        String[][] result = EscapeUtil.BeanArrays.JAVA_CTRL_CHARS_ESCAPE();
+        String[][] result = EscapeUtil.BeanArrays.javaCtrlCharsEscape();
         assertEquals(5, result.length);
         // Should contain \b, \n, \t, \f, \r
         assertEquals("\b", result[0][0]);
@@ -2070,8 +2070,8 @@ public class EscapeUtilTest extends TestBase {
 
     @Test
     public void testBeanArrays_ISO8859_1_ESCAPE_DefensiveCopy() {
-        String[][] first = EscapeUtil.BeanArrays.ISO8859_1_ESCAPE();
-        String[][] second = EscapeUtil.BeanArrays.ISO8859_1_ESCAPE();
+        String[][] first = EscapeUtil.BeanArrays.iso8859_1Escape();
+        String[][] second = EscapeUtil.BeanArrays.iso8859_1Escape();
         assertFalse(first == second); // different array instances
         assertEquals(first.length, second.length);
     }
@@ -2080,8 +2080,8 @@ public class EscapeUtilTest extends TestBase {
 
     @Test
     public void testBeanArrays_HTML40_EXTENDED_ESCAPE_DefensiveCopy() {
-        String[][] first = EscapeUtil.BeanArrays.HTML40_EXTENDED_ESCAPE();
-        String[][] second = EscapeUtil.BeanArrays.HTML40_EXTENDED_ESCAPE();
+        String[][] first = EscapeUtil.BeanArrays.html40ExtendedEscape();
+        String[][] second = EscapeUtil.BeanArrays.html40ExtendedEscape();
         assertFalse(first == second);
         assertEquals(first.length, second.length);
     }

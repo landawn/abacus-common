@@ -56,6 +56,11 @@ public class FnnTest extends TestBase {
     }
 
     @Test
+    public void testMemoizeFunctionRejectsNullFunction() {
+        assertThrows(IllegalArgumentException.class, () -> Fnn.memoize((Throwables.Function<Object, Object, Exception>) null));
+    }
+
+    @Test
     public void testMemoizeWithExpiration_TimeUnit() throws Exception {
         int[] callCount = { 0 };
         Throwables.Supplier<String, Exception> supplier = Fnn.memoizeWithExpiration(() -> {

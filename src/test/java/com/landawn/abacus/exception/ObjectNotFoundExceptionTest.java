@@ -3,6 +3,7 @@ package com.landawn.abacus.exception;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
@@ -45,6 +46,17 @@ public class ObjectNotFoundExceptionTest extends TestBase {
         assertNotNull(exception);
         assertEquals(cause.toString(), exception.getMessage());
         assertEquals(cause, exception.getCause());
+    }
+
+    @Test
+    public void testNullCauseConstructorsLockCauseSlot() {
+        ObjectNotFoundException withMessage = new ObjectNotFoundException("Object not found", null);
+        ObjectNotFoundException causeOnly = new ObjectNotFoundException((Throwable) null);
+
+        assertNull(withMessage.getCause());
+        assertNull(causeOnly.getCause());
+        assertThrows(IllegalStateException.class, () -> withMessage.initCause(new RuntimeException("later")));
+        assertThrows(IllegalStateException.class, () -> causeOnly.initCause(new RuntimeException("later")));
     }
 
     @Test

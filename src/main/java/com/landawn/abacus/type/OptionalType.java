@@ -213,7 +213,8 @@ public class OptionalType<T> extends AbstractOptionalType<Optional<T>> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<Optional<String>> type = TypeFactory.getType("Optional<String>");
-     * ResultSet rs = org.mockito.Mockito.mock(ResultSet.class);
+     * ResultSet rs = Mockito.mock(ResultSet.class);
+     * Mockito.when(rs.getString(1)).thenReturn("hello");
      *
      * // Column 1 contains the value "hello"
      * Optional<String> name = type.get(rs, 1);

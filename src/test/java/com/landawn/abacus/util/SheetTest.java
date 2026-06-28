@@ -5550,6 +5550,17 @@ public class SheetTest extends AbstractTest {
     }
 
     @Test
+    public void testEquals_DifferentRowKeyOrder() {
+        Sheet<String, String, Integer> first = Sheet.rows(Arrays.asList("r1", "r2"), Arrays.asList("c"), new Integer[][] { { 1 }, { 2 } });
+        Sheet<String, String, Integer> second = Sheet.rows(Arrays.asList("r2", "r1"), Arrays.asList("c"), new Integer[][] { { 1 }, { 2 } });
+
+        assertEquals(Integer.valueOf(1), first.get("r1", "c"));
+        assertEquals(Integer.valueOf(2), second.get("r1", "c"));
+        assertNotEquals(first, second);
+        assertNotEquals(first.hashCode(), second.hashCode());
+    }
+
+    @Test
     public void testEquals_DifferentColumnKeys() {
         Sheet<String, String, Integer> other = Sheet.rows(rowKeys, Arrays.asList("a", "b", "c"), sampleData);
         assertFalse(sheet.equals(other));

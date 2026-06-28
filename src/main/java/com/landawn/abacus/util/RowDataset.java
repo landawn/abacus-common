@@ -96,10 +96,10 @@ import com.landawn.abacus.util.stream.Stream;
 @SuppressWarnings({ "java:S1192", "java:S1698", "java:S1854", "java:S6539" })
 public final class RowDataset implements Dataset, Cloneable {
 
-    static final Dataset EMPTY_DATA_SET = new RowDataset(N.emptyList(), N.emptyList());
+    static final Dataset EMPTY_DATASET = new RowDataset(N.emptyList(), N.emptyList());
 
     static {
-        EMPTY_DATA_SET.freeze();
+        EMPTY_DATASET.freeze();
     }
 
     static final Map<String, Object> EMPTY_PROPERTIES = N.emptyMap();
@@ -4126,8 +4126,8 @@ public final class RowDataset implements Dataset, Cloneable {
 
         if (N.isEmpty(columnNames)) {
             try {
-                IOUtil.write(XmlConstants.DATA_SET_ELE_START, output);
-                IOUtil.write(XmlConstants.DATA_SET_ELE_END, output);
+                IOUtil.write(XmlConstants.DATASET_ELE_START, output);
+                IOUtil.write(XmlConstants.DATASET_ELE_END, output);
             } catch (final IOException e) {
                 throw new UncheckedIOException(e);
             }
@@ -4152,7 +4152,7 @@ public final class RowDataset implements Dataset, Cloneable {
         final BufferedXmlWriter bw = isBufferedWriter ? (BufferedXmlWriter) output : Objectory.createBufferedXmlWriter(output);
 
         try {
-            bw.write(XmlConstants.DATA_SET_ELE_START);
+            bw.write(XmlConstants.DATASET_ELE_START);
 
             Type<Object> type = null;
             Object element = null;
@@ -4194,7 +4194,7 @@ public final class RowDataset implements Dataset, Cloneable {
                 bw.write(rowElementNameTail);
             }
 
-            bw.write(XmlConstants.DATA_SET_ELE_END);
+            bw.write(XmlConstants.DATASET_ELE_END);
 
             bw.flush();
         } catch (final IOException e) {

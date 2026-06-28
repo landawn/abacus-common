@@ -273,30 +273,6 @@ public class ByteIteratorExTest extends TestBase {
         Assertions.assertSame(original, wrapped);
     }
 
-    // ---- first() ----
-
-    @Test
-    public void testFirst() {
-        ByteIteratorEx iter = ByteIteratorEx.of((byte) 10, (byte) 20, (byte) 30);
-        Assertions.assertTrue(iter.first().isPresent());
-        Assertions.assertEquals((byte) 10, iter.first().orElse((byte) 0));
-
-        ByteIteratorEx emptyIter = ByteIteratorEx.empty();
-        Assertions.assertFalse(emptyIter.first().isPresent());
-    }
-
-    // ---- last() ----
-
-    @Test
-    public void testLast() {
-        ByteIteratorEx iter = ByteIteratorEx.of((byte) 10, (byte) 20, (byte) 30);
-        Assertions.assertTrue(iter.last().isPresent());
-        Assertions.assertEquals((byte) 30, iter.last().orElse((byte) 0));
-
-        ByteIteratorEx emptyIter = ByteIteratorEx.empty();
-        Assertions.assertFalse(emptyIter.last().isPresent());
-    }
-
     // ---- stream() ----
 
     @Test

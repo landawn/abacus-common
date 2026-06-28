@@ -1112,9 +1112,13 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * list.removeAt(5);   // throws IndexOutOfBoundsException
      * }</pre>
      *
+     * <p><b>Note:</b> this single-index form returns the removed {@code boolean} value; the varargs
+     * {@link #removeAt(int...)} form removes several elements in place and returns {@code void}.</p>
+     *
      * @param index the index of the element to remove
      * @return the removed element
      * @throws IndexOutOfBoundsException if the index is out of range ({@code index < 0 || index >= size()})
+     * @see #removeAt(int...)
      */
     public boolean removeAt(final int index) {
         rangeCheck(index);
@@ -1141,10 +1145,14 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * // list is now [true, true, true]
      * }</pre>
      *
+     * <p><b>Note:</b> this varargs form removes several elements in place and returns {@code void}; the
+     * single-index {@link #removeAt(int)} form returns the removed {@code boolean} value.</p>
+     *
      * @param indices the indices of elements to be removed. Duplicate indices are allowed
      *                and will be handled appropriately.
      *                If {@code null} or empty, this list remains unchanged
      * @throws IndexOutOfBoundsException if any index is out of range ({@code index < 0 || index >= size()})
+     * @see #removeAt(int)
      */
     @Override
     public void removeAt(final int... indices) {

@@ -1030,6 +1030,11 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
             return false;
         }
 
+        if (m == this) {
+            clear();
+            return true;
+        }
+
         boolean wasModified = false;
         Collection<?> v = null;
         V val = null;

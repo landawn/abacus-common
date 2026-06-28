@@ -101,6 +101,17 @@ public class GenericObjectPoolTest extends TestBase {
     }
 
     @Test
+    public void testAddClosedPoolRejectsExpiredElementWithIllegalState() throws InterruptedException {
+        GenericObjectPool<TestPoolable> closedPool = new GenericObjectPool<>(1, 0, EvictionPolicy.LAST_ACCESS_TIME);
+        TestPoolable expired = new TestPoolable("expired", 1, 1);
+
+        Thread.sleep(20);
+        closedPool.close();
+
+        assertThrows(IllegalStateException.class, () -> closedPool.add(expired));
+    }
+
+    @Test
     public void testAddToFullPoolWithoutAutoBalance() {
         GenericObjectPool<TestPoolable> noBalancePool = new GenericObjectPool<>(3, 0, EvictionPolicy.LAST_ACCESS_TIME, false, 0.2f);
 
@@ -796,6 +807,28 @@ public class GenericObjectPoolTest extends TestBase {
         assertFalse(fifoPool.contains(p1));
         assertTrue(fifoPool.contains(p2));
         assertTrue(fifoPool.contains(p3));
+
+        fifoPool.close();
+    }
+
+    @Test
+    public void testFifoEvictsFirstAddedNotOldestCreated() throws InterruptedException {
+        GenericObjectPool<TestPoolable> fifoPool = new GenericObjectPool<>(10, 0, EvictionPolicy.FIFO, true, 0.5f);
+
+        TestPoolable older = new TestPoolable("older");
+        Thread.sleep(10);
+        TestPoolable newer = new TestPoolable("newer");
+
+        fifoPool.add(newer);
+        fifoPool.add(older);
+
+        fifoPool.vacate(1);
+
+        assertEquals(1, fifoPool.size());
+        assertFalse(fifoPool.contains(newer));
+        assertTrue(fifoPool.contains(older));
+        assertTrue(newer.isDestroyed());
+        assertFalse(older.isDestroyed());
 
         fifoPool.close();
     }

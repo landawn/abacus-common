@@ -803,6 +803,16 @@ public class MultimapTest extends AbstractTest {
     }
 
     @Test
+    public void testRemoveManySelfClearsWithoutConcurrentModification() {
+        Multimap<String, Integer, List<Integer>> mm = getTestMultimap();
+        mm.putValues("a", Arrays.asList(1, 2));
+        mm.putValues("b", Arrays.asList(3, 4));
+
+        assertTrue(mm.removeValues(mm));
+        assertTrue(mm.isEmpty());
+    }
+
+    @Test
     public void testRemoveOneIf_value_keyPredicate() {
         Multimap<String, Integer, List<Integer>> mm = getTestMultimap();
         mm.putValues("apple", Arrays.asList(1, 2, 1));

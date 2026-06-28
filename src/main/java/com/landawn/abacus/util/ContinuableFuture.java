@@ -2235,7 +2235,7 @@ public class ContinuableFuture<T> implements Future<T> {
      * }</pre>
      *
      * @param delay the delay duration before the next action is executed; values &lt;= 0 mean no delay.
-     * @param unit the time unit of the delay parameter; must not be null.
+     * @param unit the time unit of the delay parameter; must not be null when {@code delay > 0}.
      * @return a new ContinuableFuture configured with the specified delay if delay &gt; 0, or this future if delay &lt;= 0.
      */
     @SuppressWarnings("deprecation")

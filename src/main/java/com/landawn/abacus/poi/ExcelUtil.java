@@ -70,7 +70,7 @@ import lombok.Data;
  *
  * <p>The primary operations are:
  * <ul>
- *   <li>{@link #loadDatasetFromSheet(File)} reads a sheet into a {@link Dataset} for column-oriented access</li>
+ *   <li>{@link #readDatasetFromSheet(File)} reads a sheet into a {@link Dataset} for column-oriented access</li>
  *   <li>{@link #readRowsFromSheet(File)} reads a sheet as row lists, or maps rows to caller-defined objects</li>
  *   <li>{@link #streamRowsFromSheet(File, int, boolean)} iterates over rows through a closeable {@link Stream}</li>
  *   <li>{@link #writeRowsToSheet(String, List, List, File)} writes explicit headers and row collections</li>
@@ -94,7 +94,7 @@ import lombok.Data;
  * <p>{@link #CELL_TO_STRING} uses the same mapping except that NUMERIC and BOOLEAN cells are
  * normalized to their {@code String} representation.
  *
- * <p><b>Sources and sinks:</b> the {@code loadDatasetFromSheet}, {@code readRowsFromSheet}, and
+ * <p><b>Sources and sinks:</b> the {@code readDatasetFromSheet}, {@code readRowsFromSheet}, and
  * {@code streamRowsFromSheet} readers accept an Excel source as a {@link File}, an
  * {@link InputStream}, or a {@link Path}; writers accept a {@link File}, an {@link OutputStream}
  * (with an explicit {@link ExcelFormat}), or a {@link Path}. {@code exportSheetToCsv} reads its
@@ -105,13 +105,13 @@ import lombok.Data;
  * explicitly. {@code InputStream}/{@code OutputStream} overloads do not close the supplied stream;
  * the caller owns it. {@code File}/{@code Path} overloads manage their own file resources internally.
  *
- * <p><b>Header-handling divergence between read families:</b> the {@code loadDatasetFromSheet}
+ * <p><b>Header-handling divergence between read families:</b> the {@code readDatasetFromSheet}
  * family always consumes row 0 as the header row and uses those cell values as the {@link Dataset}
  * column names (synthesizing {@code "Column_i"} for blank/empty header cells), and therefore has no
  * {@code skipFirstRow} parameter. In contrast, the {@code readRowsFromSheet} and
  * {@code streamRowsFromSheet} families never interpret row 0 as headers; they expose a raw
  * {@code skipFirstRow} boolean and simply discard the first row when it is {@code true}. Choose
- * {@code loadDatasetFromSheet} when the first row holds column names, and the row/stream families
+ * {@code readDatasetFromSheet} when the first row holds column names, and the row/stream families
  * for header-agnostic row processing.
  *
  * <p>Streams returned by {@code streamRowsFromSheet} carry an {@code onClose()} handler that closes
@@ -135,10 +135,10 @@ import lombok.Data;
  * <p><b>Usage Examples:</b>
  * <pre>{@code
  * // Load the first sheet into a Dataset
- * Dataset firstSheet = ExcelUtil.loadDatasetFromSheet(new File("sales_data.xlsx"));
+ * Dataset firstSheet = ExcelUtil.readDatasetFromSheet(new File("sales_data.xlsx"));
  *
  * // Load a named sheet with a custom row extractor
- * Dataset salesSheet = ExcelUtil.loadDatasetFromSheet(
+ * Dataset salesSheet = ExcelUtil.readDatasetFromSheet(
  *     new File("report.xlsx"), "Q1_Sales", ExcelUtil.RowExtractors.DEFAULT);
  *
  * // Write a Dataset to Excel with formatting
@@ -252,7 +252,7 @@ public final class ExcelUtil {
      * <p>The method automatically handles Excel file format detection and resource cleanup.
      * The resulting Dataset provides column-based access to the data with type preservation.</p>
      *
-     * <p><b>Header handling:</b> the {@code loadDatasetFromSheet} family always consumes row 0 as the
+     * <p><b>Header handling:</b> the {@code readDatasetFromSheet} family always consumes row 0 as the
      * header row and uses those cell values as column names (synthesizing {@code "Column_i"} for
      * blank/empty header cells); it has no {@code skipFirstRow} parameter. This differs from the
      * {@link #readRowsFromSheet(File, int, boolean, Function)} and
@@ -262,7 +262,7 @@ public final class ExcelUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Dataset dataset = ExcelUtil.loadDatasetFromSheet(new File("sales_data.xlsx"));
+     * Dataset dataset = ExcelUtil.readDatasetFromSheet(new File("sales_data.xlsx"));
      * // Access data by column name
      * List<String> productNames = dataset.getColumn("Product");
      * }</pre>
@@ -271,8 +271,8 @@ public final class ExcelUtil {
      * @return a Dataset containing the sheet data with the first row as column names, or an empty Dataset if the sheet is empty.
      * @throws UncheckedException if an I/O error occurs while reading the file, or if the file is not a valid Excel file.
      */
-    public static Dataset loadDatasetFromSheet(final File excelFile) {
-        return loadDatasetFromSheet(excelFile, 0, RowExtractors.DEFAULT);
+    public static Dataset readDatasetFromSheet(final File excelFile) {
+        return readDatasetFromSheet(excelFile, 0, RowExtractors.DEFAULT);
     }
 
     /**
@@ -292,7 +292,7 @@ public final class ExcelUtil {
      *         output[i] = cell == null ? null : cell.getStringCellValue();
      *     }
      * };
-     * Dataset dataset = ExcelUtil.loadDatasetFromSheet(new File("data.xlsx"), 0, customExtractor);
+     * Dataset dataset = ExcelUtil.readDatasetFromSheet(new File("data.xlsx"), 0, customExtractor);
      * }</pre>
      *
      * @param excelFile the Excel file to read, must exist and be a valid Excel file.
@@ -303,10 +303,10 @@ public final class ExcelUtil {
      * @throws UncheckedException if an I/O error occurs while reading the file, or if the file is not a valid Excel file.
      * @throws IllegalArgumentException if the sheet index is out of bounds.
      */
-    public static Dataset loadDatasetFromSheet(final File excelFile, final int sheetIndex,
+    public static Dataset readDatasetFromSheet(final File excelFile, final int sheetIndex,
             final TriConsumer<? super String[], ? super Row, ? super Object[]> rowExtractor) {
         try (InputStream is = new FileInputStream(excelFile)) {
-            return loadDatasetFromSheet(is, sheetIndex, rowExtractor);
+            return readDatasetFromSheet(is, sheetIndex, rowExtractor);
         } catch (IOException e) {
             throw new UncheckedException(e);
         }
@@ -327,10 +327,10 @@ public final class ExcelUtil {
      * @throws UncheckedException if an I/O error occurs while reading the stream, or if the content is not a valid Excel stream.
      * @throws IllegalArgumentException if the sheet index is out of bounds.
      */
-    public static Dataset loadDatasetFromSheet(final InputStream excelInputStream, final int sheetIndex,
+    public static Dataset readDatasetFromSheet(final InputStream excelInputStream, final int sheetIndex,
             final TriConsumer<? super String[], ? super Row, ? super Object[]> rowExtractor) {
         try (Workbook workbook = WorkbookFactory.create(excelInputStream)) {
-            return loadDatasetFromSheet(workbook.getSheetAt(sheetIndex), rowExtractor);
+            return readDatasetFromSheet(workbook.getSheetAt(sheetIndex), rowExtractor);
         } catch (IOException e) {
             throw new UncheckedException(e);
         }
@@ -338,7 +338,7 @@ public final class ExcelUtil {
 
     /**
      * Loads the specified sheet from the Excel file located at the given path into a Dataset using a custom row extractor.
-     * This is a thin {@link Path}-based delegate to {@link #loadDatasetFromSheet(File, int, TriConsumer)}.
+     * This is a thin {@link Path}-based delegate to {@link #readDatasetFromSheet(File, int, TriConsumer)}.
      * The first row is always treated as column headers.
      *
      * @param excelPath the path of the Excel file to read, must exist and be a valid Excel file.
@@ -349,9 +349,9 @@ public final class ExcelUtil {
      * @throws UncheckedException if an I/O error occurs while reading the file, or if the file is not a valid Excel file.
      * @throws IllegalArgumentException if the sheet index is out of bounds.
      */
-    public static Dataset loadDatasetFromSheet(final Path excelPath, final int sheetIndex,
+    public static Dataset readDatasetFromSheet(final Path excelPath, final int sheetIndex,
             final TriConsumer<? super String[], ? super Row, ? super Object[]> rowExtractor) {
-        return loadDatasetFromSheet(excelPath.toFile(), sheetIndex, rowExtractor);
+        return readDatasetFromSheet(excelPath.toFile(), sheetIndex, rowExtractor);
     }
 
     /**
@@ -365,7 +365,7 @@ public final class ExcelUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Dataset dataset = ExcelUtil.loadDatasetFromSheet(
+     * Dataset dataset = ExcelUtil.readDatasetFromSheet(
      *     new File("workbook.xlsx"),
      *     "Sales2024",
      *     ExcelUtil.RowExtractors.DEFAULT
@@ -380,10 +380,10 @@ public final class ExcelUtil {
      * @throws UncheckedException if an I/O error occurs or if the file is not a valid Excel file.
      * @throws IllegalArgumentException if the sheet name is not found in the workbook.
      */
-    public static Dataset loadDatasetFromSheet(final File excelFile, final String sheetName,
+    public static Dataset readDatasetFromSheet(final File excelFile, final String sheetName,
             final TriConsumer<? super String[], ? super Row, ? super Object[]> rowExtractor) {
         try (InputStream is = new FileInputStream(excelFile)) {
-            return loadDatasetFromSheet(is, sheetName, rowExtractor);
+            return readDatasetFromSheet(is, sheetName, rowExtractor);
         } catch (IOException e) {
             throw new UncheckedException(e);
         }
@@ -404,11 +404,11 @@ public final class ExcelUtil {
      * @throws UncheckedException if an I/O error occurs or if the content is not a valid Excel stream.
      * @throws IllegalArgumentException if the sheet name is not found in the workbook.
      */
-    public static Dataset loadDatasetFromSheet(final InputStream excelInputStream, final String sheetName,
+    public static Dataset readDatasetFromSheet(final InputStream excelInputStream, final String sheetName,
             final TriConsumer<? super String[], ? super Row, ? super Object[]> rowExtractor) {
         try (Workbook workbook = WorkbookFactory.create(excelInputStream)) {
             final Sheet sheet = getRequiredSheet(workbook, sheetName);
-            return loadDatasetFromSheet(sheet, rowExtractor);
+            return readDatasetFromSheet(sheet, rowExtractor);
         } catch (IOException e) {
             throw new UncheckedException(e);
         }
@@ -416,7 +416,7 @@ public final class ExcelUtil {
 
     /**
      * Loads the sheet with the specified name from the Excel file located at the given path into a Dataset.
-     * This is a thin {@link Path}-based delegate to {@link #loadDatasetFromSheet(File, String, TriConsumer)}.
+     * This is a thin {@link Path}-based delegate to {@link #readDatasetFromSheet(File, String, TriConsumer)}.
      *
      * @param excelPath the path of the Excel file to read, must exist and be a valid Excel file.
      * @param sheetName the name of the sheet to read, case-sensitive.
@@ -424,11 +424,12 @@ public final class ExcelUtil {
      *                     column headers array, current row, and output array to populate with extracted values.
      * @return a Dataset containing the extracted sheet data with the first row as column names.
      * @throws UncheckedException if an I/O error occurs or if the file is not a valid Excel file.
-     * @throws IllegalArgumentException if the sheet name is not found in the workbook.
+     * @throws IllegalArgumentException if the sheet name is not found in the workbook, or if the
+     *                                  header row contains duplicate non-blank column names.
      */
-    public static Dataset loadDatasetFromSheet(final Path excelPath, final String sheetName,
+    public static Dataset readDatasetFromSheet(final Path excelPath, final String sheetName,
             final TriConsumer<? super String[], ? super Row, ? super Object[]> rowExtractor) {
-        return loadDatasetFromSheet(excelPath.toFile(), sheetName, rowExtractor);
+        return readDatasetFromSheet(excelPath.toFile(), sheetName, rowExtractor);
     }
 
     private static Sheet getRequiredSheet(final Workbook workbook, final String sheetName) {
@@ -442,7 +443,7 @@ public final class ExcelUtil {
     }
 
     @SuppressWarnings("deprecation")
-    private static Dataset loadDatasetFromSheet(final Sheet sheet, final TriConsumer<? super String[], ? super Row, ? super Object[]> rowExtractor) {
+    private static Dataset readDatasetFromSheet(final Sheet sheet, final TriConsumer<? super String[], ? super Row, ? super Object[]> rowExtractor) {
         final Iterator<Row> rowIter = sheet.rowIterator();
 
         if (!rowIter.hasNext()) {
@@ -487,7 +488,7 @@ public final class ExcelUtil {
      * each row as a list of cell values. Cell types are preserved as appropriate Java objects
      * (String, Double, Boolean, etc.) using the default row mapper.
      *
-     * <p>Unlike loadDatasetFromSheet methods, this does not create a Dataset structure and instead
+     * <p>Unlike readDatasetFromSheet methods, this does not create a Dataset structure and instead
      * provides direct access to row data. Useful for simple row-by-row processing without
      * column-based access requirements.</p>
      *
@@ -516,7 +517,7 @@ public final class ExcelUtil {
      * cells, formatting information, and row metadata. This enables sophisticated mapping logic
      * including conditional processing based on cell types or values.</p>
      *
-     * <p><b>Header handling:</b> unlike the {@link #loadDatasetFromSheet(File, int, TriConsumer)}
+     * <p><b>Header handling:</b> unlike the {@link #readDatasetFromSheet(File, int, TriConsumer)}
      * family (which always treats row 0 as headers and derives column names from it), this family
      * never interprets row 0 as headers. The {@code skipFirstRow} flag merely discards the first row
      * when {@code true}; its cell values are not used as names. See the class-level documentation for
@@ -556,7 +557,7 @@ public final class ExcelUtil {
      * file, or an in-memory {@code byte[]}) instead of a {@link File}. The stream is read fully but
      * <b>not closed</b> by this method; the caller retains ownership of it.
      *
-     * <p>Unlike the {@code loadDatasetFromSheet} family, row 0 is never interpreted as a header row;
+     * <p>Unlike the {@code readDatasetFromSheet} family, row 0 is never interpreted as a header row;
      * the {@code skipFirstRow} flag simply discards the first row when {@code true}.</p>
      *
      * @param <T> the type of objects to map rows to.
@@ -642,7 +643,7 @@ public final class ExcelUtil {
      * file, or an in-memory {@code byte[]}) instead of a {@link File}. The stream is read fully but
      * <b>not closed</b> by this method; the caller retains ownership of it.
      *
-     * <p>Unlike the {@code loadDatasetFromSheet} family, row 0 is never interpreted as a header row;
+     * <p>Unlike the {@code readDatasetFromSheet} family, row 0 is never interpreted as a header row;
      * the {@code skipFirstRow} flag simply discards the first row when {@code true}.</p>
      *
      * @param <T> the type of objects to map rows to.
@@ -756,7 +757,7 @@ public final class ExcelUtil {
      * <p><strong>Important:</strong> The returned Stream must be closed after use. Closing the Stream
      * closes the underlying workbook but <b>does not</b> close the supplied {@code excelInputStream};
      * the caller retains ownership of the stream and must close it (typically after the Stream).
-     * Unlike the {@code loadDatasetFromSheet} family, row 0 is never interpreted as a header row; the
+     * Unlike the {@code readDatasetFromSheet} family, row 0 is never interpreted as a header row; the
      * {@code skipFirstRow} flag simply discards the first row when {@code true}.</p>
      *
      * @param excelInputStream the input stream of the Excel content, must be a valid Excel stream. It is not closed by the returned Stream.
@@ -794,7 +795,7 @@ public final class ExcelUtil {
      *
      * <p><b>Note:</b> The entire workbook is still loaded into memory via {@code WorkbookFactory.create()}.
      * The Stream API provides convenient iteration and early termination support, but does not
-     * reduce memory usage compared to {@code loadDatasetFromSheet()}.</p>
+     * reduce memory usage compared to {@code readDatasetFromSheet()}.</p>
      *
      * <p><strong>Important:</strong> The Stream must be closed after use to release file handles
      * and workbook resources. Always use try-with-resources or explicitly call {@code close()}
@@ -842,7 +843,7 @@ public final class ExcelUtil {
      * <p><strong>Important:</strong> The returned Stream must be closed after use. Closing the Stream
      * closes the underlying workbook but <b>does not</b> close the supplied {@code excelInputStream};
      * the caller retains ownership of the stream and must close it (typically after the Stream).
-     * Unlike the {@code loadDatasetFromSheet} family, row 0 is never interpreted as a header row; the
+     * Unlike the {@code readDatasetFromSheet} family, row 0 is never interpreted as a header row; the
      * {@code skipFirstRow} flag simply discards the first row when {@code true}.</p>
      *
      * @param excelInputStream the input stream of the Excel content, must be a valid Excel stream. It is not closed by the returned Stream.
@@ -1325,6 +1326,8 @@ public final class ExcelUtil {
     }
 
     private static Workbook newWorkbookForOutput(final ExcelFormat format) {
+        N.checkArgNotNull(format, "format");
+
         return format == ExcelFormat.XLS ? new HSSFWorkbook() : new XSSFWorkbook();
     }
 
@@ -1820,7 +1823,7 @@ public final class ExcelUtil {
     }
 
     /**
-     * Collection of row extraction functions specifically designed for use with {@code loadDatasetFromSheet} methods.
+     * Collection of row extraction functions specifically designed for use with {@code readDatasetFromSheet} methods.
      * Row extractors are specialized consumers that process Excel {@code Row} objects and populate output
      * arrays with extracted data, which is then used to construct {@code Dataset} objects. Unlike
      * {@link RowMappers} which transform rows to various types, extractors focus on efficient data
@@ -1835,14 +1838,14 @@ public final class ExcelUtil {
      *   <li><b>Purpose:</b> Extractors are for Dataset creation; mappers are for general row transformation</li>
      *   <li><b>Output:</b> Extractors populate pre-allocated arrays; mappers return new objects</li>
      *   <li><b>Performance:</b> Extractors are optimized for bulk data loading with minimal object allocation</li>
-     *   <li><b>Use Case:</b> Extractors with {@code loadDatasetFromSheet()}; mappers with {@code readRowsFromSheet()}</li>
+     *   <li><b>Use Case:</b> Extractors with {@code readDatasetFromSheet()}; mappers with {@code readRowsFromSheet()}</li>
      * </ul>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Use default extractor for standard Dataset loading
      * File file = new File("data.xlsx");
-     * Dataset defaultDataset = ExcelUtil.loadDatasetFromSheet(
+     * Dataset defaultDataset = ExcelUtil.readDatasetFromSheet(
      *     file,
      *     0,
      *     ExcelUtil.RowExtractors.DEFAULT
@@ -1855,13 +1858,13 @@ public final class ExcelUtil {
      *             ? cell.getStringCellValue().toUpperCase()
      *             : ExcelUtil.CELL_GETTER.apply(cell)
      *     );
-     * Dataset uppercaseDataset = ExcelUtil.loadDatasetFromSheet(file, 0, uppercaseExtractor);
+     * Dataset uppercaseDataset = ExcelUtil.readDatasetFromSheet(file, 0, uppercaseExtractor);
      *
      * // The extractor short-circuits null cells (writing null to the output) — the mapper
      * // itself is only invoked for non-null cells.
      * TriConsumer<String[], Row, Object[]> safeExtractor =
      *     ExcelUtil.RowExtractors.create(ExcelUtil.CELL_GETTER);
-     * Dataset safeDataset = ExcelUtil.loadDatasetFromSheet(file, "Sheet1", safeExtractor);
+     * Dataset safeDataset = ExcelUtil.readDatasetFromSheet(file, "Sheet1", safeExtractor);
      * }</pre>
      *
      * @see #DEFAULT
@@ -1889,7 +1892,7 @@ public final class ExcelUtil {
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * // Load Excel sheet into Dataset with type preservation
-         * Dataset dataset = ExcelUtil.loadDatasetFromSheet(
+         * Dataset dataset = ExcelUtil.readDatasetFromSheet(
          *     new File("sales.xlsx"),
          *     0,  // first sheet
          *     ExcelUtil.RowExtractors.DEFAULT
@@ -1906,7 +1909,7 @@ public final class ExcelUtil {
         /**
          * Creates a custom row extractor with the specified cell mapping function.
          * The extractor processes each cell in a row and populates the output array with
-         * transformed values. This is used with loadDatasetFromSheet methods to control how Excel
+         * transformed values. This is used with readDatasetFromSheet methods to control how Excel
          * cell data is extracted and converted for Dataset creation.
          *
          * <p>The cell mapper function receives each non-null {@link Cell} from the row and returns
@@ -1921,7 +1924,7 @@ public final class ExcelUtil {
          *     ExcelUtil.RowExtractors.create(ExcelUtil.CELL_TO_STRING);
          *
          * File file = new File("data.xlsx");
-         * Dataset stringDataset = ExcelUtil.loadDatasetFromSheet(file, "Sheet1", stringExtractor);
+         * Dataset stringDataset = ExcelUtil.readDatasetFromSheet(file, "Sheet1", stringExtractor);
          * }</pre>
          *
          * @param cellMapper function to convert each cell to the desired output type
