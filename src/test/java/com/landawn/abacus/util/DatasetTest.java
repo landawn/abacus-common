@@ -4824,13 +4824,13 @@ public class DatasetTest extends AbstractTest {
                 Collectors.mappingToList(N::toString));
         sheet.println();
 
-        sheet.toDatasetByRow().println();
-        sheet.toDatasetByColumn().println();
+        sheet.toDataset().println();
+        sheet.toTransposedDataset().println();
 
         N.println(Strings.repeat("=", 80));
-        N.forEach(sheet.toArrayByRow(), Fn.println());
+        N.forEach(sheet.toArray(), Fn.println());
         N.println(Strings.repeat("=", 80));
-        N.forEach(sheet.toArrayByColumn(), Fn.println());
+        N.forEach(sheet.toTransposedArray(), Fn.println());
         N.println(Strings.repeat("=", 80));
         assertNotNull(dataset);
     }

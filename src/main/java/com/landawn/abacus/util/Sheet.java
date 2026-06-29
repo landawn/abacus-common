@@ -114,15 +114,15 @@ import com.landawn.abacus.util.stream.Stream;
  * Sheet<String, String, Integer> transposed = scores.transpose();
  *
  * // Stream operations for functional programming
- * double averageScore = scores.streamByRow()
+ * double averageScore = scores.rowMajorStream()
  *     .filter(Objects::nonNull)
  *     .mapToInt(Integer::intValue)
  *     .average()
  *     .orElse(0.0);
  *
  * // Export and conversion
- * Dataset dataset = scores.toDatasetByRow();
- * Object[][] array = scores.toArrayByRow();
+ * Dataset dataset = scores.toDataset();
+ * Object[][] array = scores.toArray();
  * scores.println();   // Pretty-print to console
  *
  * // Creating immutable snapshots
@@ -156,8 +156,8 @@ import com.landawn.abacus.util.stream.Stream;
  *
  * <p><b>Stream Operations:</b>
  * <ul>
- *   <li><b>Horizontal Streaming:</b> {@code streamByRow()}, {@code cellsByRow()} - Row-by-row processing</li>
- *   <li><b>Vertical Streaming:</b> {@code streamByColumn()}, {@code cellsByColumn()} - Column-by-column processing</li>
+ *   <li><b>Horizontal Streaming:</b> {@code rowMajorStream()}, {@code rowMajorCells()} - Row-by-row processing</li>
+ *   <li><b>Vertical Streaming:</b> {@code columnMajorStream()}, {@code columnMajorCells()} - Column-by-column processing</li>
  *   <li><b>Row Streaming:</b> {@code rowStreams()}, {@code rows()} - Stream of rows</li>
  *   <li><b>Column Streaming:</b> {@code columnStreams()}, {@code columns()} - Stream of columns</li>
  * </ul>
@@ -3051,6 +3051,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      *
      * @param cmp the comparator to determine row key ordering; {@code null} for natural ordering
      * @throws IllegalStateException if this Sheet is frozen
+     * @throws ClassCastException if {@code cmp} is {@code null} and the row keys are not mutually comparable, or if comparing two row keys throws a ClassCastException
      * @see #sortByRowKey()
      * @see #sortByColumnKey(Comparator)
      */
@@ -3149,6 +3150,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * @param cmp the comparator to determine the order of values; {@code null} for natural ordering
      * @throws IllegalStateException if this Sheet is frozen
      * @throws IllegalArgumentException if the column key does not exist in this Sheet
+     * @throws ClassCastException if {@code cmp} is {@code null} and the column's values are not mutually comparable
      * @see #sortColumnsByRowValues(Object, Comparator)
      * @see #sortRowsByColumnValues(Collection, Comparator)
      */
@@ -3419,6 +3421,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      *
      * @param cmp the comparator to determine the order of the column keys; {@code null} for natural ordering
      * @throws IllegalStateException if this Sheet is frozen
+     * @throws ClassCastException if {@code cmp} is {@code null} and the column keys are not mutually comparable, or if comparing two column keys throws a ClassCastException
      * @see #sortByColumnKey()
      * @see #sortByRowKey(Comparator)
      */
@@ -3482,7 +3485,8 @@ public final class Sheet<R, C, V> implements Cloneable {
      * Sorts the columns in the Sheet based on the values in the specified row.
      * <p>
      * Reorders the columns according to the values in the specified row using the specified comparator.
-     * This effectively sorts the "vertical" arrangement of data based on a "horizontal" slice.
+     * This effectively sorts the "vertical" arrangement of data based on a "horizontal" slice. If the
+     * comparator is {@code null}, natural ordering is used (values must implement {@code Comparable}).
      * </p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -3503,9 +3507,10 @@ public final class Sheet<R, C, V> implements Cloneable {
      * }</pre>
      *
      * @param rowKey the key of the row whose values will determine the column ordering
-     * @param cmp the comparator to apply to values in the specified row
+     * @param cmp the comparator to apply to values in the specified row; {@code null} for natural ordering
      * @throws IllegalStateException if this Sheet is frozen
      * @throws IllegalArgumentException if the row key does not exist in this Sheet
+     * @throws ClassCastException if {@code cmp} is {@code null} and the row's values are not mutually comparable
      * @see #sortRowsByColumnValues(Object, Comparator)
      * @see #sortColumnsByRowValues(Collection, Comparator)
      */
@@ -3903,8 +3908,9 @@ public final class Sheet<R, C, V> implements Cloneable {
     /**
      * Merges this Sheet with another Sheet using a merge function.
      * <p>
-     * Creates a new Sheet containing the union of all row and column keys from both Sheets.
-     * For each cell position, applies the merge function with values from both Sheets.
+     * Creates a new Sheet containing the union of all row and column keys from both Sheets. The keys of
+     * this Sheet come first, in their existing order, followed by any keys that appear only in the other
+     * Sheet. For each cell position, applies the merge function with values from both Sheets.
      * Missing values are represented as {@code null} in the merge function.
      * </p>
      *
@@ -4242,7 +4248,7 @@ public final class Sheet<R, C, V> implements Cloneable {
     }
 
     /**
-     * Performs the given action for each cell in the Sheet in horizontal order (row by row).
+     * Performs the given action for each cell in the Sheet in row-major order (horizontal, row by row).
      * <p>
      * Iterates through cells row by row, calling the action for each cell including {@code null} values.
      * The action receives the row key, column key, and value for each cell.
@@ -4256,17 +4262,17 @@ public final class Sheet<R, C, V> implements Cloneable {
      *     new Integer[][] {{1, 2}, {3, 4}}
      * );
      *
-     * sheet.forEachByRow((r, c, v) -> System.out.println(r + "," + c + "=" + v));
+     * sheet.forEachRowMajor((r, c, v) -> System.out.println(r + "," + c + "=" + v));
      * // Prints: row1,col1=1  row1,col2=2  row2,col1=3  row2,col2=4
      * }</pre>
      *
      * @param <E> the type of exception the action may throw
      * @param action the action to perform on each cell; receives row key, column key, and value
      * @throws E if the action throws an exception
-     * @see #forEachByColumn(Throwables.TriConsumer)
-     * @see #forEachNonNullByRow(Throwables.TriConsumer)
+     * @see #forEachColumnMajor(Throwables.TriConsumer)
+     * @see #forEachNonNullRowMajor(Throwables.TriConsumer)
      */
-    public <E extends Exception> void forEachByRow(final Throwables.TriConsumer<? super R, ? super C, ? super V, E> action) throws E {
+    public <E extends Exception> void forEachRowMajor(final Throwables.TriConsumer<? super R, ? super C, ? super V, E> action) throws E {
         if (_isInitialized) {
             for (final R rowKey : _rowKeySet) {
                 for (final C columnKey : _columnKeySet) {
@@ -4283,7 +4289,7 @@ public final class Sheet<R, C, V> implements Cloneable {
     }
 
     /**
-     * Performs the given action for each cell in the Sheet in vertical order (column by column).
+     * Performs the given action for each cell in the Sheet in column-major order (vertical, column by column).
      * <p>
      * Iterates through cells column by column, calling the action for each cell including {@code null} values.
      * The action receives the row key, column key, and value for each cell.
@@ -4297,17 +4303,17 @@ public final class Sheet<R, C, V> implements Cloneable {
      *     new Integer[][] {{1, 2}, {3, 4}}
      * );
      *
-     * sheet.forEachByColumn((r, c, v) -> System.out.println(r + "," + c + "=" + v));
+     * sheet.forEachColumnMajor((r, c, v) -> System.out.println(r + "," + c + "=" + v));
      * // Prints: row1,col1=1  row2,col1=3  row1,col2=2  row2,col2=4
      * }</pre>
      *
      * @param <E> the type of exception the action may throw
      * @param action the action to perform on each cell; receives row key, column key, and value
      * @throws E if the action throws an exception
-     * @see #forEachByRow(Throwables.TriConsumer)
-     * @see #forEachNonNullByColumn(Throwables.TriConsumer)
+     * @see #forEachRowMajor(Throwables.TriConsumer)
+     * @see #forEachNonNullColumnMajor(Throwables.TriConsumer)
      */
-    public <E extends Exception> void forEachByColumn(final Throwables.TriConsumer<? super R, ? super C, ? super V, E> action) throws E {
+    public <E extends Exception> void forEachColumnMajor(final Throwables.TriConsumer<? super R, ? super C, ? super V, E> action) throws E {
         if (_isInitialized) {
             for (final C columnKey : _columnKeySet) {
                 for (final R rowKey : _rowKeySet) {
@@ -4324,7 +4330,7 @@ public final class Sheet<R, C, V> implements Cloneable {
     }
 
     /**
-     * Performs the given action for each {@code non-null} cell in the Sheet in horizontal order (row by row).
+     * Performs the given action for each {@code non-null} cell in the Sheet in row-major order (horizontal, row by row).
      * <p>
      * Iterates through cells row by row, calling the action only for cells containing {@code non-null} values.
      * Skips {@code null} and uninitialized cells. The action is guaranteed to receive {@code non-null} values.
@@ -4338,17 +4344,17 @@ public final class Sheet<R, C, V> implements Cloneable {
      *     new Integer[][] {{1, null}, {3, 4}}
      * );
      *
-     * sheet.forEachNonNullByRow((r, c, v) -> System.out.println(r + "," + c + "=" + v));
+     * sheet.forEachNonNullRowMajor((r, c, v) -> System.out.println(r + "," + c + "=" + v));
      * // Prints: row1,col1=1  row2,col1=3  row2,col2=4 (skips null)
      * }</pre>
      *
      * @param <E> the type of exception the action may throw
      * @param action the action to perform on each {@code non-null} cell; receives row key, column key, and {@code non-null} value
      * @throws E if the action throws an exception
-     * @see #forEachByRow(Throwables.TriConsumer)
-     * @see #forEachNonNullByColumn(Throwables.TriConsumer)
+     * @see #forEachRowMajor(Throwables.TriConsumer)
+     * @see #forEachNonNullColumnMajor(Throwables.TriConsumer)
      */
-    public <E extends Exception> void forEachNonNullByRow(final Throwables.TriConsumer<? super R, ? super C, ? super V, E> action) throws E {
+    public <E extends Exception> void forEachNonNullRowMajor(final Throwables.TriConsumer<? super R, ? super C, ? super V, E> action) throws E {
         if (_isInitialized) {
             V value = null;
 
@@ -4365,7 +4371,7 @@ public final class Sheet<R, C, V> implements Cloneable {
     }
 
     /**
-     * Performs the given action for each {@code non-null} cell in the Sheet in vertical order (column by column).
+     * Performs the given action for each {@code non-null} cell in the Sheet in column-major order (vertical, column by column).
      * <p>
      * Iterates through cells column by column, calling the action only for cells containing {@code non-null} values.
      * Skips {@code null} and uninitialized cells. The action is guaranteed to receive {@code non-null} values.
@@ -4379,17 +4385,17 @@ public final class Sheet<R, C, V> implements Cloneable {
      *     new Integer[][] {{1, null}, {3, 4}}
      * );
      *
-     * sheet.forEachNonNullByColumn((r, c, v) -> System.out.println(r + "," + c + "=" + v));
+     * sheet.forEachNonNullColumnMajor((r, c, v) -> System.out.println(r + "," + c + "=" + v));
      * // Prints: row1,col1=1  row2,col1=3  row2,col2=4 (skips null)
      * }</pre>
      *
      * @param <E> the type of exception the action may throw
      * @param action the action to perform on each {@code non-null} cell; receives row key, column key, and {@code non-null} value
      * @throws E if the action throws an exception
-     * @see #forEachByColumn(Throwables.TriConsumer)
-     * @see #forEachNonNullByRow(Throwables.TriConsumer)
+     * @see #forEachColumnMajor(Throwables.TriConsumer)
+     * @see #forEachNonNullRowMajor(Throwables.TriConsumer)
      */
-    public <E extends Exception> void forEachNonNullByColumn(final Throwables.TriConsumer<? super R, ? super C, ? super V, E> action) throws E {
+    public <E extends Exception> void forEachNonNullColumnMajor(final Throwables.TriConsumer<? super R, ? super C, ? super V, E> action) throws E {
         if (_isInitialized) {
             V value = null;
 
@@ -4406,7 +4412,7 @@ public final class Sheet<R, C, V> implements Cloneable {
     }
 
     /**
-     * Returns a stream of all cells in the Sheet in horizontal order (row by row).
+     * Returns a stream of all cells in the Sheet in row-major order (horizontal, row by row).
      * <p>
      * Creates a stream that iterates through all cells row by row. Each cell is represented
      * as a Cell object containing the row key, column key, and value.
@@ -4420,20 +4426,20 @@ public final class Sheet<R, C, V> implements Cloneable {
      *     new Integer[][] {{1, 2}, {3, 4}}
      * );
      *
-     * sheet.cellsByRow().forEach(cell ->
+     * sheet.rowMajorCells().forEach(cell ->
      *     System.out.println(cell.rowKey() + "," + cell.columnKey() + "=" + cell.value()));
      * }</pre>
      *
      * @return a Stream of Cell objects representing all cells, ordered by rows
-     * @see #cellsByRow(int, int)
-     * @see #cellsByColumn()
+     * @see #rowMajorCells(int, int)
+     * @see #columnMajorCells()
      */
-    public Stream<Sheet.Cell<R, C, V>> cellsByRow() {
-        return cellsByRow(0, rowCount());
+    public Stream<Sheet.Cell<R, C, V>> rowMajorCells() {
+        return rowMajorCells(0, rowCount());
     }
 
     /**
-     * Returns a stream of cells from a range of rows in horizontal order.
+     * Returns a stream of cells from a range of rows in row-major order (horizontal, row by row).
      * <p>
      * Creates a stream containing cells from the specified row range [fromRowIndex, toRowIndex),
      * ordered row by row. The toRowIndex is exclusive.
@@ -4448,7 +4454,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * );
      *
      * // Get cells from rows 0 and 1 (excluding row 2)
-     * sheet.cellsByRow(0, 2).forEach(cell -> System.out.println(cell.value()));
+     * sheet.rowMajorCells(0, 2).forEach(cell -> System.out.println(cell.value()));
      * // Prints: 1, 2, 3, 4
      * }</pre>
      *
@@ -4456,10 +4462,10 @@ public final class Sheet<R, C, V> implements Cloneable {
      * @param toRowIndex the ending row index (exclusive)
      * @return a Stream of Cell objects from the specified row range
      * @throws IndexOutOfBoundsException if indices are out of bounds or fromRowIndex &gt; toRowIndex
-     * @see #cellsByRow()
-     * @see #cellsByColumn(int, int)
+     * @see #rowMajorCells()
+     * @see #columnMajorCells(int, int)
      */
-    public Stream<Sheet.Cell<R, C, V>> cellsByRow(final int fromRowIndex, final int toRowIndex) throws IndexOutOfBoundsException {
+    public Stream<Sheet.Cell<R, C, V>> rowMajorCells(final int fromRowIndex, final int toRowIndex) throws IndexOutOfBoundsException {
         checkRowFromToIndex(fromRowIndex, toRowIndex, rowCount());
 
         if (rowCount() == 0 || columnCount() == 0) {
@@ -4511,7 +4517,7 @@ public final class Sheet<R, C, V> implements Cloneable {
     }
 
     /**
-     * Returns a stream of all cells in the Sheet in vertical order (column by column).
+     * Returns a stream of all cells in the Sheet in column-major order (vertical, column by column).
      * <p>
      * Creates a stream that iterates through all cells column by column. Each cell is represented
      * as a Cell object containing the row key, column key, and value.
@@ -4525,21 +4531,21 @@ public final class Sheet<R, C, V> implements Cloneable {
      *     new Integer[][] {{1, 2}, {3, 4}}
      * );
      *
-     * sheet.cellsByColumn().forEach(cell ->
+     * sheet.columnMajorCells().forEach(cell ->
      *     System.out.println(cell.rowKey() + "," + cell.columnKey() + "=" + cell.value()));
      * // Prints: row1,col1=1  row2,col1=3  row1,col2=2  row2,col2=4
      * }</pre>
      *
      * @return a Stream of Cell objects representing all cells, ordered by columns
-     * @see #cellsByColumn(int, int)
-     * @see #cellsByRow()
+     * @see #columnMajorCells(int, int)
+     * @see #rowMajorCells()
      */
-    public Stream<Sheet.Cell<R, C, V>> cellsByColumn() {
-        return cellsByColumn(0, columnCount());
+    public Stream<Sheet.Cell<R, C, V>> columnMajorCells() {
+        return columnMajorCells(0, columnCount());
     }
 
     /**
-     * Returns a stream of cells from a range of columns in vertical order.
+     * Returns a stream of cells from a range of columns in column-major order (vertical, column by column).
      * <p>
      * Creates a stream containing cells from the specified column range [fromColumnIndex, toColumnIndex),
      * ordered column by column. The toColumnIndex is exclusive.
@@ -4554,7 +4560,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * );
      *
      * // Get cells from columns 0 and 1 (excluding column 2)
-     * sheet.cellsByColumn(0, 2).forEach(cell -> System.out.println(cell.value()));
+     * sheet.columnMajorCells(0, 2).forEach(cell -> System.out.println(cell.value()));
      * // Prints: 1, 4, 2, 5
      * }</pre>
      *
@@ -4562,10 +4568,10 @@ public final class Sheet<R, C, V> implements Cloneable {
      * @param toColumnIndex the ending column index (exclusive)
      * @return a Stream of Cell objects from the specified column range
      * @throws IndexOutOfBoundsException if indices are out of bounds or fromColumnIndex &gt; toColumnIndex
-     * @see #cellsByColumn()
-     * @see #cellsByRow(int, int)
+     * @see #columnMajorCells()
+     * @see #rowMajorCells(int, int)
      */
-    public Stream<Sheet.Cell<R, C, V>> cellsByColumn(final int fromColumnIndex, final int toColumnIndex) throws IndexOutOfBoundsException {
+    public Stream<Sheet.Cell<R, C, V>> columnMajorCells(final int fromColumnIndex, final int toColumnIndex) throws IndexOutOfBoundsException {
         checkColumnFromToIndex(fromColumnIndex, toColumnIndex, columnCount());
 
         if (rowCount() == 0 || columnCount() == 0) {
@@ -4873,7 +4879,7 @@ public final class Sheet<R, C, V> implements Cloneable {
     }
 
     /**
-     * Returns a stream of all coordinate points in the Sheet in horizontal order (row by row).
+     * Returns a stream of all coordinate points in the Sheet in row-major order (horizontal, row by row).
      * <p>
      * Creates a stream of Point objects representing cell coordinates. Each Point contains
      * zero-based row and column indices. Points are ordered row by row.
@@ -4886,21 +4892,21 @@ public final class Sheet<R, C, V> implements Cloneable {
      *     List.of("col1", "col2")
      * );
      *
-     * sheet.pointsByRow().forEach(point ->
+     * sheet.rowMajorPoints().forEach(point ->
      *     System.out.println("(" + point.rowIndex() + "," + point.columnIndex() + ")"));
      * // Prints: (0,0) (0,1) (1,0) (1,1)
      * }</pre>
      *
      * @return a Stream of Point objects representing all cell coordinates, ordered by rows
-     * @see #pointsByRow(int, int)
-     * @see #pointsByColumn()
+     * @see #rowMajorPoints(int, int)
+     * @see #columnMajorPoints()
      */
-    public Stream<Point> pointsByRow() {
-        return pointsByRow(0, rowCount());
+    public Stream<Point> rowMajorPoints() {
+        return rowMajorPoints(0, rowCount());
     }
 
     /**
-     * Returns a stream of coordinate points for a range of rows in horizontal order.
+     * Returns a stream of coordinate points for a range of rows in row-major order (horizontal, row by row).
      * <p>
      * Creates a stream of Point objects representing cell coordinates in the specified row range
      * [fromRowIndex, toRowIndex). Each Point contains zero-based row and column indices. Points are
@@ -4916,7 +4922,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * );
      *
      * // Get points for rows 0 and 1 (excluding row 2)
-     * sheet.pointsByRow(0, 2).forEach(point ->
+     * sheet.rowMajorPoints(0, 2).forEach(point ->
      *     System.out.println("(" + point.rowIndex() + "," + point.columnIndex() + ")"));
      * // Prints: (0,0) (0,1) (1,0) (1,1)
      * }</pre>
@@ -4925,11 +4931,11 @@ public final class Sheet<R, C, V> implements Cloneable {
      * @param toRowIndex the ending row index (exclusive)
      * @return a Stream of Point objects for the specified row range, ordered by rows
      * @throws IndexOutOfBoundsException if indices are out of bounds or fromRowIndex &gt; toRowIndex
-     * @see #pointsByRow()
-     * @see #pointsByColumn(int, int)
+     * @see #rowMajorPoints()
+     * @see #columnMajorPoints(int, int)
      * @see #rowPoints(int, int)
      */
-    public Stream<Point> pointsByRow(final int fromRowIndex, final int toRowIndex) throws IndexOutOfBoundsException {
+    public Stream<Point> rowMajorPoints(final int fromRowIndex, final int toRowIndex) throws IndexOutOfBoundsException {
         checkRowFromToIndex(fromRowIndex, toRowIndex, rowCount());
 
         final int columnLength = columnCount();
@@ -4940,7 +4946,7 @@ public final class Sheet<R, C, V> implements Cloneable {
     }
 
     /**
-     * Returns a stream of all coordinate points in the Sheet in vertical order (column by column).
+     * Returns a stream of all coordinate points in the Sheet in column-major order (vertical, column by column).
      * <p>
      * Creates a stream of Point objects representing cell coordinates. Each Point contains
      * zero-based row and column indices. Points are ordered column by column.
@@ -4953,22 +4959,22 @@ public final class Sheet<R, C, V> implements Cloneable {
      *     List.of("col1", "col2")
      * );
      *
-     * sheet.pointsByColumn().forEach(point ->
+     * sheet.columnMajorPoints().forEach(point ->
      *     System.out.println("(" + point.rowIndex() + "," + point.columnIndex() + ")"));
      * // Prints: (0,0) (1,0) (0,1) (1,1)
      * }</pre>
      *
      * @return a Stream of Point objects representing all cell coordinates, ordered by columns
-     * @see #pointsByColumn(int, int)
-     * @see #pointsByRow()
+     * @see #columnMajorPoints(int, int)
+     * @see #rowMajorPoints()
      * @see #columnPoints()
      */
-    public Stream<Point> pointsByColumn() {
-        return pointsByColumn(0, columnCount());
+    public Stream<Point> columnMajorPoints() {
+        return columnMajorPoints(0, columnCount());
     }
 
     /**
-     * Returns a stream of coordinate points for a range of columns in vertical order.
+     * Returns a stream of coordinate points for a range of columns in column-major order (vertical, column by column).
      * <p>
      * Creates a stream of Point objects representing cell coordinates in the specified column range
      * [fromColumnIndex, toColumnIndex). Each Point contains zero-based row and column indices. Points are
@@ -4984,7 +4990,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * );
      *
      * // Get points for columns 0 and 1 (excluding column 2)
-     * sheet.pointsByColumn(0, 2).forEach(point ->
+     * sheet.columnMajorPoints(0, 2).forEach(point ->
      *     System.out.println("(" + point.rowIndex() + "," + point.columnIndex() + ")"));
      * // Prints: (0,0) (1,0) (0,1) (1,1)
      * }</pre>
@@ -4993,11 +4999,11 @@ public final class Sheet<R, C, V> implements Cloneable {
      * @param toColumnIndex the ending column index (exclusive)
      * @return a Stream of Point objects for the specified column range, ordered by columns
      * @throws IndexOutOfBoundsException if indices are out of bounds or fromColumnIndex &gt; toColumnIndex
-     * @see #pointsByColumn()
-     * @see #pointsByRow(int, int)
+     * @see #columnMajorPoints()
+     * @see #rowMajorPoints(int, int)
      * @see #columnPoints(int, int)
      */
-    public Stream<Point> pointsByColumn(final int fromColumnIndex, final int toColumnIndex) throws IndexOutOfBoundsException {
+    public Stream<Point> columnMajorPoints(final int fromColumnIndex, final int toColumnIndex) throws IndexOutOfBoundsException {
         checkColumnFromToIndex(fromColumnIndex, toColumnIndex, columnCount());
 
         final int rowLength = rowCount();
@@ -5033,7 +5039,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * @return a Stream of Streams where each inner stream represents a row's coordinate points
      * @see #rowPoints(int, int)
      * @see #columnPoints()
-     * @see #pointsByRow()
+     * @see #rowMajorPoints()
      */
     public Stream<Stream<Point>> rowPoints() {
         return rowPoints(0, rowCount());
@@ -5069,7 +5075,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * @throws IndexOutOfBoundsException if indices are out of bounds or fromRowIndex &gt; toRowIndex
      * @see #rowPoints()
      * @see #columnPoints(int, int)
-     * @see #pointsByRow(int, int)
+     * @see #rowMajorPoints(int, int)
      */
     public Stream<Stream<Point>> rowPoints(final int fromRowIndex, final int toRowIndex) throws IndexOutOfBoundsException {
         checkRowFromToIndex(fromRowIndex, toRowIndex, rowCount());
@@ -5107,7 +5113,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * @return a Stream of Streams where each inner stream represents a column's coordinate points
      * @see #columnPoints(int, int)
      * @see #rowPoints()
-     * @see #pointsByColumn()
+     * @see #columnMajorPoints()
      */
     public Stream<Stream<Point>> columnPoints() {
         return columnPoints(0, columnCount());
@@ -5143,7 +5149,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * @throws IndexOutOfBoundsException if indices are out of bounds or fromColumnIndex &gt; toColumnIndex
      * @see #columnPoints()
      * @see #rowPoints(int, int)
-     * @see #pointsByColumn(int, int)
+     * @see #columnMajorPoints(int, int)
      */
     public Stream<Stream<Point>> columnPoints(final int fromColumnIndex, final int toColumnIndex) throws IndexOutOfBoundsException {
         checkColumnFromToIndex(fromColumnIndex, toColumnIndex, columnCount());
@@ -5156,7 +5162,7 @@ public final class Sheet<R, C, V> implements Cloneable {
     }
 
     /**
-     * Returns a stream of all values in the Sheet in horizontal order (row by row).
+     * Returns a stream of all values in the Sheet in row-major order (horizontal, row by row).
      * <p>
      * Creates a stream containing all cell values, ordered row by row. Includes {@code null} values
      * from empty or uninitialized cells.
@@ -5170,20 +5176,20 @@ public final class Sheet<R, C, V> implements Cloneable {
      *     new Integer[][] {{1, 2}, {3, null}}
      * );
      *
-     * sheet.streamByRow().forEach(System.out::println);
+     * sheet.rowMajorStream().forEach(System.out::println);
      * // Prints: 1, 2, 3, null
      * }</pre>
      *
      * @return a Stream of values from all cells, ordered by rows
-     * @see #streamByRow(int, int)
-     * @see #streamByColumn()
+     * @see #rowMajorStream(int, int)
+     * @see #columnMajorStream()
      */
-    public Stream<V> streamByRow() {
-        return streamByRow(0, rowCount());
+    public Stream<V> rowMajorStream() {
+        return rowMajorStream(0, rowCount());
     }
 
     /**
-     * Returns a stream of values from a range of rows in horizontal order.
+     * Returns a stream of values from a range of rows in row-major order (horizontal, row by row).
      * <p>
      * Creates a stream containing values from the specified row range [fromRowIndex, toRowIndex),
      * ordered row by row. The toRowIndex is exclusive. Includes {@code null} values from empty or uninitialized cells.
@@ -5198,7 +5204,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * );
      *
      * // Get values from rows 0 and 1 (excluding row 2)
-     * sheet.streamByRow(0, 2).forEach(System.out::println);
+     * sheet.rowMajorStream(0, 2).forEach(System.out::println);
      * // Prints: 1, 2, 3, null
      * }</pre>
      *
@@ -5206,11 +5212,11 @@ public final class Sheet<R, C, V> implements Cloneable {
      * @param toRowIndex the ending row index (exclusive)
      * @return a Stream of values from the specified row range
      * @throws IndexOutOfBoundsException if indices are out of bounds or fromRowIndex &gt; toRowIndex
-     * @see #streamByRow()
-     * @see #streamByColumn(int, int)
+     * @see #rowMajorStream()
+     * @see #columnMajorStream(int, int)
      * @see #rowStreams(int, int)
      */
-    public Stream<V> streamByRow(final int fromRowIndex, final int toRowIndex) throws IndexOutOfBoundsException {
+    public Stream<V> rowMajorStream(final int fromRowIndex, final int toRowIndex) throws IndexOutOfBoundsException {
         checkRowFromToIndex(fromRowIndex, toRowIndex, rowCount());
 
         if (rowCount() == 0 || columnCount() == 0) {
@@ -5260,7 +5266,7 @@ public final class Sheet<R, C, V> implements Cloneable {
     }
 
     /**
-     * Returns a stream of all values in the Sheet in vertical order (column by column).
+     * Returns a stream of all values in the Sheet in column-major order (vertical, column by column).
      * <p>
      * Creates a stream containing all cell values, ordered column by column. Includes {@code null} values
      * from empty or uninitialized cells.
@@ -5274,21 +5280,21 @@ public final class Sheet<R, C, V> implements Cloneable {
      *     new Integer[][] {{1, 2}, {3, null}}
      * );
      *
-     * sheet.streamByColumn().forEach(System.out::println);
+     * sheet.columnMajorStream().forEach(System.out::println);
      * // Prints: 1, 3, 2, null
      * }</pre>
      *
      * @return a Stream of values from all cells, ordered by columns
-     * @see #streamByColumn(int, int)
-     * @see #streamByRow()
+     * @see #columnMajorStream(int, int)
+     * @see #rowMajorStream()
      * @see #columnStreams()
      */
-    public Stream<V> streamByColumn() {
-        return streamByColumn(0, columnCount());
+    public Stream<V> columnMajorStream() {
+        return columnMajorStream(0, columnCount());
     }
 
     /**
-     * Returns a stream of values from a range of columns in vertical order.
+     * Returns a stream of values from a range of columns in column-major order (vertical, column by column).
      * <p>
      * Creates a stream containing values from the specified column range [fromColumnIndex, toColumnIndex),
      * ordered column by column. The toColumnIndex is exclusive. Includes {@code null} values from empty or uninitialized cells.
@@ -5303,7 +5309,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * );
      *
      * // Get values from columns 0 and 1 (excluding column 2)
-     * sheet.streamByColumn(0, 2).forEach(System.out::println);
+     * sheet.columnMajorStream(0, 2).forEach(System.out::println);
      * // Prints: 1, 4, 2, null
      * }</pre>
      *
@@ -5311,10 +5317,10 @@ public final class Sheet<R, C, V> implements Cloneable {
      * @param toColumnIndex the ending column index (exclusive)
      * @return a Stream of values from the specified column range
      * @throws IndexOutOfBoundsException if indices are out of bounds or fromColumnIndex &gt; toColumnIndex
-     * @see #streamByColumn()
-     * @see #streamByRow(int, int)
+     * @see #columnMajorStream()
+     * @see #rowMajorStream(int, int)
      */
-    public Stream<V> streamByColumn(final int fromColumnIndex, final int toColumnIndex) throws IndexOutOfBoundsException {
+    public Stream<V> columnMajorStream(final int fromColumnIndex, final int toColumnIndex) throws IndexOutOfBoundsException {
         checkColumnFromToIndex(fromColumnIndex, toColumnIndex, columnCount());
 
         if (rowCount() == 0 || columnCount() == 0) {
@@ -6153,18 +6159,18 @@ public final class Sheet<R, C, V> implements Cloneable {
      *     new Integer[][] {{1, 2}, {3, 4}}
      * );
      *
-     * Dataset dataset = sheet.toDatasetByRow();
+     * Dataset dataset = sheet.toDataset();
      * // Dataset has 2 rows and 2 columns (col1, col2)
      * // Row 0: [1, 2]
      * // Row 1: [3, 4]
      * }</pre>
      *
      * @return a Dataset object with rows corresponding to Sheet rows and columns named by Sheet column keys
-     * @see #toDatasetByColumn()
-     * @see #toArrayByRow()
+     * @see #toTransposedDataset()
+     * @see #toArray()
      */
     @SuppressWarnings("deprecation")
-    public Dataset toDatasetByRow() {
+    public Dataset toDataset() {
         final int rowLength = rowCount();
         final int columnLength = columnCount();
         final List<String> datasetColumnNameList = new ArrayList<>(columnLength);
@@ -6206,18 +6212,18 @@ public final class Sheet<R, C, V> implements Cloneable {
      *     new Integer[][] {{1, 2}, {3, 4}}
      * );
      *
-     * Dataset dataset = sheet.toDatasetByColumn();
+     * Dataset dataset = sheet.toTransposedDataset();
      * // Dataset has 2 rows and 2 columns (row1, row2)
      * // Row 0: [1, 3] (col1 transposed)
      * // Row 1: [2, 4] (col2 transposed)
      * }</pre>
      *
      * @return a Dataset object with rows corresponding to Sheet columns and columns named by Sheet row keys (transposed)
-     * @see #toDatasetByRow()
-     * @see #toArrayByColumn()
+     * @see #toDataset()
+     * @see #toTransposedArray()
      */
     @SuppressWarnings("deprecation")
-    public Dataset toDatasetByColumn() {
+    public Dataset toTransposedDataset() {
         final int rowLength = rowCount();
         final int columnLength = columnCount();
         final List<String> datasetColumnNameList = new ArrayList<>(rowLength);
@@ -6264,16 +6270,16 @@ public final class Sheet<R, C, V> implements Cloneable {
      *     new Integer[][] {{1, 2}, {3, 4}}
      * );
      *
-     * Object[][] array = sheet.toArrayByRow();
+     * Object[][] array = sheet.toArray();
      * // array[0] = [1, 2] (row1)
      * // array[1] = [3, 4] (row2)
      * }</pre>
      *
      * @return a two-dimensional Object array with row-major ordering
-     * @see #toArrayByRow(Class)
-     * @see #toArrayByColumn()
+     * @see #toArray(Class)
+     * @see #toTransposedArray()
      */
-    public Object[][] toArrayByRow() {
+    public Object[][] toArray() {
         final int rowLength = rowCount();
         final int columnLength = columnCount();
         final Object[][] copy = new Object[rowLength][columnLength];
@@ -6306,7 +6312,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      *     new Integer[][] {{1, 2}, {3, 4}}
      * );
      *
-     * Integer[][] array = sheet.toArrayByRow(Integer.class);
+     * Integer[][] array = sheet.toArray(Integer.class);
      * // array[0] = [1, 2] (row1)
      * // array[1] = [3, 4] (row2)
      * }</pre>
@@ -6315,10 +6321,10 @@ public final class Sheet<R, C, V> implements Cloneable {
      * @param componentType the Class object representing the element type
      * @return a two-dimensional typed array with row-major ordering
      * @throws ArrayStoreException if any value is not assignable to the specified component type
-     * @see #toArrayByRow()
-     * @see #toArrayByColumn(Class)
+     * @see #toArray()
+     * @see #toTransposedArray(Class)
      */
-    public <T> T[][] toArrayByRow(final Class<T> componentType) {
+    public <T> T[][] toArray(final Class<T> componentType) {
         final int rowLength = rowCount();
         final int columnLength = columnCount();
         final T[][] copy = N.newArray(N.newArray(componentType, 0).getClass(), rowLength);
@@ -6344,7 +6350,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * Converts the Sheet into a two-dimensional array with column-major ordering.
      * <p>
      * Returns an {@code Object[][]} where {@code array[i][j]} corresponds to the value at
-     * column {@code i} and row {@code j} in the Sheet. This transposes the data compared to {@link #toArrayByRow()}.
+     * column {@code i} and row {@code j} in the Sheet. This transposes the data compared to {@link #toArray()}.
      * </p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -6355,16 +6361,16 @@ public final class Sheet<R, C, V> implements Cloneable {
      *     new Integer[][] {{1, 2}, {3, 4}}
      * );
      *
-     * Object[][] array = sheet.toArrayByColumn();
+     * Object[][] array = sheet.toTransposedArray();
      * // array[0] = [1, 3] (col1)
      * // array[1] = [2, 4] (col2)
      * }</pre>
      *
      * @return a two-dimensional Object array with column-major ordering
-     * @see #toArrayByColumn(Class)
-     * @see #toArrayByRow()
+     * @see #toTransposedArray(Class)
+     * @see #toArray()
      */
-    public Object[][] toArrayByColumn() {
+    public Object[][] toTransposedArray() {
         final int rowLength = rowCount();
         final int columnLength = columnCount();
         final Object[][] copy = new Object[columnLength][rowLength];
@@ -6383,7 +6389,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * <p>
      * Returns a {@code T[][]} where {@code array[i][j]} corresponds to the value at
      * column {@code i} and row {@code j} in the Sheet. Values are cast to the specified type.
-     * This transposes the data compared to {@link #toArrayByRow(Class)}.
+     * This transposes the data compared to {@link #toArray(Class)}.
      * </p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -6394,7 +6400,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      *     new Integer[][] {{1, 2}, {3, 4}}
      * );
      *
-     * Integer[][] array = sheet.toArrayByColumn(Integer.class);
+     * Integer[][] array = sheet.toTransposedArray(Integer.class);
      * // array[0] = [1, 3] (col1)
      * // array[1] = [2, 4] (col2)
      * }</pre>
@@ -6403,10 +6409,10 @@ public final class Sheet<R, C, V> implements Cloneable {
      * @param componentType the Class object representing the element type
      * @return a two-dimensional typed array with column-major ordering
      * @throws ArrayStoreException if any value is not assignable to the specified component type
-     * @see #toArrayByColumn()
-     * @see #toArrayByRow(Class)
+     * @see #toTransposedArray()
+     * @see #toArray(Class)
      */
-    public <T> T[][] toArrayByColumn(final Class<T> componentType) {
+    public <T> T[][] toTransposedArray(final Class<T> componentType) {
         final int rowLength = rowCount();
         final int columnLength = columnCount();
         final T[][] copy = N.newArray(N.newArray(componentType, 0).getClass(), columnLength);
@@ -6442,7 +6448,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      *
      * // Calculate sum of all values
      * Integer sum = sheet.apply(s ->
-     *     s.streamByRow().filter(Objects::nonNull).mapToInt(Integer::intValue).sum());
+     *     s.rowMajorStream().filter(Objects::nonNull).mapToInt(Integer::intValue).sum());
      * }</pre>
      *
      * @param <T> the type of the result produced by the function
@@ -6472,7 +6478,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * );
      *
      * Optional<Integer> result = sheet.applyIfNotEmpty(s ->
-     *     s.streamByRow().mapToInt(Integer::intValue).max().orElse(0));
+     *     s.rowMajorStream().mapToInt(Integer::intValue).max().orElse(0));
      * // result.isPresent() = true, result.get() = 42
      *
      * Sheet<String, String, Integer> empty = new Sheet<>();
