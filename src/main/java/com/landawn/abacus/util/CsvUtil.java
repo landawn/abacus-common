@@ -3210,11 +3210,11 @@ public final class CsvUtil {
     }
 
     /**
-     * Creates a new {@link CSVLoader} instance for fluent-style CSV loading operations.
+     * Creates a new {@link CsvLoader} instance for fluent-style CSV loading operations.
      * The loader provides a builder pattern for configuring and executing CSV loading operations
      * with customizable parsing options, column selection, filtering, and type conversion.
      *
-     * <p>The CSVLoader supports configuration of:
+     * <p>The CsvLoader supports configuration of:
      * <ul>
      *   <li>Custom header and line parsers</li>
      *   <li>Source file or reader</li>
@@ -3238,20 +3238,20 @@ public final class CsvUtil {
      *     .load();
      * }</pre>
      *
-     * @return a new CSVLoader instance for configuring and executing CSV load operations
-     * @see CSVLoader
+     * @return a new CsvLoader instance for configuring and executing CSV load operations
+     * @see CsvLoader
      * @see #converter()
      */
-    public static CSVLoader loader() {
-        return new CSVLoader();
+    public static CsvLoader loader() {
+        return new CsvLoader();
     }
 
     /**
-     * Creates a new {@link CSVConverter} instance for fluent-style CSV conversion operations.
+     * Creates a new {@link CsvConverter} instance for fluent-style CSV conversion operations.
      * The converter provides a builder pattern for configuring and executing conversions
      * between CSV and JSON formats with customizable options.
      *
-     * <p>The CSVConverter supports configuration of:
+     * <p>The CsvConverter supports configuration of:
      * <ul>
      *   <li>Custom header and line parsers</li>
      *   <li>Source file or reader</li>
@@ -3277,12 +3277,12 @@ public final class CsvUtil {
      *     .jsonToCsv(new File("output.csv"));
      * }</pre>
      *
-     * @return a new CSVConverter instance for configuring and executing format conversions
-     * @see CSVConverter
+     * @return a new CsvConverter instance for configuring and executing format conversions
+     * @see CsvConverter
      * @see #loader()
      */
-    public static CSVConverter converter() {
-        return new CSVConverter();
+    public static CsvConverter converter() {
+        return new CsvConverter();
     }
 
     static abstract class CSVCommon<This extends CSVCommon<This>> {
@@ -3625,7 +3625,7 @@ public final class CsvUtil {
          * // Null class throws IllegalArgumentException
          * // CsvUtil.loader().beanClassForColumnTypeInference(null);
          *
-         * // Cannot be used together with columnTypeMap (CSVLoader) or repeated conflicting type configs
+         * // Cannot be used together with columnTypeMap (CsvLoader) or repeated conflicting type configs
          * }</pre>
          *
          * @param beanClassForColumnTypeInference the bean class defining property types
@@ -3690,15 +3690,15 @@ public final class CsvUtil {
      *
      * @see CsvUtil#loader()
      */
-    public static final class CSVLoader extends CSVCommon<CSVLoader> {
+    public static final class CsvLoader extends CSVCommon<CsvLoader> {
         private Predicate<? super String[]> rowFilter;
         private Map<String, ? extends Type<?>> columnTypeMap;
 
         /**
-         * Creates a new CSVLoader instance.
+         * Creates a new CsvLoader instance.
          * Use {@link CsvUtil#loader()} to obtain an instance.
          */
-        CSVLoader() {
+        CsvLoader() {
             // package-private constructor
         }
 
@@ -3733,7 +3733,7 @@ public final class CsvUtil {
          * @throws IllegalArgumentException if beanClassForColumnTypeInference is {@code null} or if columnTypeMap is already set
          */
         @Override
-        public CSVLoader beanClassForColumnTypeInference(final Class<?> beanClassForColumnTypeInference) {
+        public CsvLoader beanClassForColumnTypeInference(final Class<?> beanClassForColumnTypeInference) {
             N.checkArgNotNull(beanClassForColumnTypeInference, "beanClassForColumnTypeInference");
 
             if (columnTypeMap != null) {
@@ -3780,7 +3780,7 @@ public final class CsvUtil {
          * @return this instance for method chaining
          * @throws IllegalArgumentException if columnTypeMap is {@code null} or if beanClassForColumnTypeInference is already set
          */
-        public CSVLoader columnTypeMap(final Map<String, ? extends Type<?>> columnTypeMap) {
+        public CsvLoader columnTypeMap(final Map<String, ? extends Type<?>> columnTypeMap) {
             N.checkArgNotNull(columnTypeMap, "columnTypeMap");
 
             if (beanClassForColumnTypeInference != null) {
@@ -3827,7 +3827,7 @@ public final class CsvUtil {
          * @return this instance for method chaining
          * @throws IllegalArgumentException if rowFilter is {@code null}
          */
-        public CSVLoader rowFilter(final Predicate<? super String[]> rowFilter) {
+        public CsvLoader rowFilter(final Predicate<? super String[]> rowFilter) {
             N.checkArgNotNull(rowFilter, "rowFilter");
 
             this.rowFilter = rowFilter;
@@ -4132,13 +4132,13 @@ public final class CsvUtil {
      *
      * @see CsvUtil#converter()
      */
-    public static final class CSVConverter extends CSVCommon<CSVConverter> {
+    public static final class CsvConverter extends CSVCommon<CsvConverter> {
 
         /**
-         * Creates a new CSVConverter instance.
+         * Creates a new CsvConverter instance.
          * Use {@link CsvUtil#converter()} to obtain an instance.
          */
-        CSVConverter() {
+        CsvConverter() {
             // package-private constructor
         }
 

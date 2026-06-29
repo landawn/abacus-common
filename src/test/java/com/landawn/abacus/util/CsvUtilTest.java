@@ -307,9 +307,9 @@ public class CsvUtilTest extends TestBase {
         assertTrue(ageValue instanceof Integer);
     }
 
-    // CSVLoader.load() with reader, no beanClass, no columnTypeMap -> L3403
+    // CsvLoader.load() with reader, no beanClass, no columnTypeMap -> L3403
     @Test
-    public void testCSVLoader_ReaderLoadWithoutBeanClassOrColumnTypeMap() {
+    public void testCsvLoader_ReaderLoadWithoutBeanClassOrColumnTypeMap() {
         Reader reader = new StringReader("id,name\n1,John\n2,Jane");
         Dataset ds = CsvUtil.loader().source(reader).load();
         assertEquals(2, ds.columnCount());
@@ -1066,8 +1066,8 @@ public class CsvUtilTest extends TestBase {
     }
 
     @Test
-    @DisplayName("Test CSVLoader load(TriConsumer) with Reader source")
-    public void testCSVLoaderLoadWithRowExtractorFromReader() {
+    @DisplayName("Test CsvLoader load(TriConsumer) with Reader source")
+    public void testCsvLoaderLoadWithRowExtractorFromReader() {
         Reader reader = new StringReader(testCsvContent);
         TriConsumer<List<String>, DisposableArray<String>, Object[]> extractor = (columns, row, output) -> {
             for (int i = 0; i < row.length(); i++) {
@@ -1082,8 +1082,8 @@ public class CsvUtilTest extends TestBase {
     }
 
     @Test
-    @DisplayName("Test CSVLoader load(TriConsumer) without source throws exception")
-    public void testCSVLoaderLoadRowExtractorWithoutSource() {
+    @DisplayName("Test CsvLoader load(TriConsumer) without source throws exception")
+    public void testCsvLoaderLoadRowExtractorWithoutSource() {
         TriConsumer<List<String>, DisposableArray<String>, Object[]> extractor = (columns, row, output) -> {
         };
         assertThrows(IllegalArgumentException.class, () -> CsvUtil.loader().load(extractor));
@@ -1129,7 +1129,7 @@ public class CsvUtilTest extends TestBase {
         assertThrows(IllegalArgumentException.class, () -> CsvUtil.load(reader, List.of("nonexistent"), 0, Long.MAX_VALUE, null, Person.class));
     }
 
-    // CSVLoader.load() with invalid selectColumnNames from reader -> exercises L1340
+    // CsvLoader.load() with invalid selectColumnNames from reader -> exercises L1340
     @Test
     public void testLoad_FileWithSelectColumnNamesAndBeanClass_InvalidColumns_ThrowsIllegalArgument() throws IOException {
         assertThrows(IllegalArgumentException.class, () -> CsvUtil.load(testCsvFile, List.of("nonexistent"), 0, Long.MAX_VALUE, null, Person.class));
@@ -1657,8 +1657,8 @@ public class CsvUtilTest extends TestBase {
     }
 
     @Test
-    @DisplayName("Test CSVLoader stream() without source throws exception")
-    public void testCSVLoaderStreamWithoutSource() {
+    @DisplayName("Test CsvLoader stream() without source throws exception")
+    public void testCsvLoaderStreamWithoutSource() {
         BiFunction<List<String>, DisposableArray<String>, String> mapper = (columns, row) -> row.get(0);
         assertThrows(IllegalArgumentException.class, () -> CsvUtil.loader().stream(mapper));
     }
@@ -1827,8 +1827,8 @@ public class CsvUtilTest extends TestBase {
     }
 
     @Test
-    @DisplayName("Test CSVConverter jsonToCsv with File output")
-    public void testCSVConverterJson2CsvFile() throws IOException {
+    @DisplayName("Test CsvConverter jsonToCsv with File output")
+    public void testCsvConverterJson2CsvFile() throws IOException {
         File jsonFile = tempDir.resolve("input.json").toFile();
         CsvUtil.csvToJson(testCsvFile, jsonFile);
 
@@ -1841,8 +1841,8 @@ public class CsvUtilTest extends TestBase {
     }
 
     @Test
-    @DisplayName("Test CSVConverter jsonToCsv with Writer output")
-    public void testCSVConverterJson2CsvWriter() throws IOException {
+    @DisplayName("Test CsvConverter jsonToCsv with Writer output")
+    public void testCsvConverterJson2CsvWriter() throws IOException {
         File jsonFile = tempDir.resolve("input.json").toFile();
         CsvUtil.csvToJson(testCsvFile, jsonFile);
 
@@ -1912,8 +1912,8 @@ public class CsvUtilTest extends TestBase {
     }
 
     @Test
-    @DisplayName("Test CSVConverter jsonToCsv with Writer")
-    public void testCSVConverterJson2CsvWriterDirect() throws IOException {
+    @DisplayName("Test CsvConverter jsonToCsv with Writer")
+    public void testCsvConverterJson2CsvWriterDirect() throws IOException {
         File jsonFile = tempDir.resolve("test_converter_direct.json").toFile();
         CsvUtil.csvToJson(testCsvFile, jsonFile);
 
@@ -1950,8 +1950,8 @@ public class CsvUtilTest extends TestBase {
     }
 
     @Test
-    @DisplayName("Test CSVConverter with offset and count for jsonToCsv")
-    public void testCSVConverterJsonToCsvWithOffsetCount() throws IOException {
+    @DisplayName("Test CsvConverter with offset and count for jsonToCsv")
+    public void testCsvConverterJsonToCsvWithOffsetCount() throws IOException {
         File jsonFile = tempDir.resolve("test_j2c_offset.json").toFile();
         CsvUtil.csvToJson(testCsvFile, jsonFile);
 
@@ -1961,8 +1961,8 @@ public class CsvUtilTest extends TestBase {
     }
 
     @Test
-    @DisplayName("Test CSVConverter jsonToCsv with selectColumns via builder")
-    public void testCSVConverterJsonToCsvWithSelectColumns() throws IOException {
+    @DisplayName("Test CsvConverter jsonToCsv with selectColumns via builder")
+    public void testCsvConverterJsonToCsvWithSelectColumns() throws IOException {
         File jsonFile = tempDir.resolve("test_conv_j2c_select.json").toFile();
         CsvUtil.csvToJson(testCsvFile, jsonFile);
 
@@ -1991,9 +1991,9 @@ public class CsvUtilTest extends TestBase {
         assertThrows(IllegalArgumentException.class, () -> CsvUtil.csvToJson(csvReader, List.of("nonexistent"), writer, null));
     }
 
-    // CSVConverter.csvToJson with invalid selectColumns -> exercises builder path
+    // CsvConverter.csvToJson with invalid selectColumns -> exercises builder path
     @Test
-    public void testCSVConverter_CsvToJson_WithSelectColumnNames_InvalidColumns_ThrowsIllegalArgument() {
+    public void testCsvConverter_CsvToJson_WithSelectColumnNames_InvalidColumns_ThrowsIllegalArgument() {
         StringWriter writer = new StringWriter();
         assertThrows(IllegalArgumentException.class,
                 () -> CsvUtil.converter().source(new StringReader("id,name\n1,John")).selectColumns(List.of("nonexistent")).csvToJson(writer));
@@ -2042,8 +2042,8 @@ public class CsvUtilTest extends TestBase {
     }
 
     @Test
-    @DisplayName("Test CSVLoader stream with closeReaderWhenStreamIsClosed")
-    public void testCSVLoaderStreamCloseReader() {
+    @DisplayName("Test CsvLoader stream with closeReaderWhenStreamIsClosed")
+    public void testCsvLoaderStreamCloseReader() {
         Reader reader = new StringReader(testCsvContent);
         BiFunction<List<String>, DisposableArray<String>, String> mapper = (columns, row) -> row.get(1);
 
@@ -2054,8 +2054,8 @@ public class CsvUtilTest extends TestBase {
     }
 
     @Test
-    @DisplayName("Test CSVLoader stream from Reader source")
-    public void testCSVLoaderStreamFromReader() {
+    @DisplayName("Test CsvLoader stream from Reader source")
+    public void testCsvLoaderStreamFromReader() {
         Reader reader = new StringReader(testCsvContent);
         BiFunction<List<String>, DisposableArray<String>, String> mapper = (columns, row) -> row.get(1);
 
@@ -2067,8 +2067,8 @@ public class CsvUtilTest extends TestBase {
     }
 
     @Test
-    @DisplayName("Test CSVLoader stream with selectColumns, offset, count, rowFilter from File")
-    public void testCSVLoaderStreamWithAllOptions() {
+    @DisplayName("Test CsvLoader stream with selectColumns, offset, count, rowFilter from File")
+    public void testCsvLoaderStreamWithAllOptions() {
         Predicate<String[]> filter = row -> "true".equals(row[3]);
         BiFunction<List<String>, DisposableArray<String>, String> mapper = (columns, row) -> row.get(1);
 
@@ -2086,7 +2086,7 @@ public class CsvUtilTest extends TestBase {
 
     // CSVCommon.apply() with escapeCharToBackSlashForWrite=true, previous state=false -> L3294-3295 (finally restores to non-backslash)
     @Test
-    public void testCSVLoader_EscapeCharBackSlash_RestoredAfterLoad() {
+    public void testCsvLoader_EscapeCharBackSlash_RestoredAfterLoad() {
         // Default escape is false. Set to backslash via builder -> in finally, currentBackSlash=false -> else branch L3295-3296
         Dataset ds = CsvUtil.loader().source(new StringReader("id,name\n1,John")).setEscapeCharToBackSlashForWrite().load();
         assertEquals(2, ds.columnCount());
@@ -2094,18 +2094,18 @@ public class CsvUtilTest extends TestBase {
         assertFalse(CsvUtil.isBackSlashEscapeCharForWrite());
     }
 
-    // ===================== Tests for loader() and CSVLoader =====================
+    // ===================== Tests for loader() and CsvLoader =====================
 
     @Test
-    @DisplayName("Test loader() returns CSVLoader instance")
+    @DisplayName("Test loader() returns CsvLoader instance")
     public void testLoader() {
-        CsvUtil.CSVLoader loader = CsvUtil.loader();
+        CsvUtil.CsvLoader loader = CsvUtil.loader();
         assertNotNull(loader);
     }
 
     @Test
-    @DisplayName("Test CSVLoader with columnTypeMap")
-    public void testCSVLoaderWithColumnTypeMap() {
+    @DisplayName("Test CsvLoader with columnTypeMap")
+    public void testCsvLoaderWithColumnTypeMap() {
         Map<String, Type<?>> typeMap = new HashMap<>();
         typeMap.put("id", Type.of(String.class));
         typeMap.put("age", Type.of(Integer.class));
@@ -2118,8 +2118,8 @@ public class CsvUtilTest extends TestBase {
     }
 
     @Test
-    @DisplayName("Test CSVLoader with beanClassForTypeReading")
-    public void testCSVLoaderWithBeanClass() {
+    @DisplayName("Test CsvLoader with beanClassForTypeReading")
+    public void testCsvLoaderWithBeanClass() {
         Dataset ds = CsvUtil.loader().source(testCsvFile).beanClassForColumnTypeInference(Person.class).load();
 
         assertNotNull(ds);
@@ -2128,8 +2128,8 @@ public class CsvUtilTest extends TestBase {
     }
 
     @Test
-    @DisplayName("Test CSVLoader chained methods")
-    public void testCSVLoaderChainedMethods() {
+    @DisplayName("Test CsvLoader chained methods")
+    public void testCsvLoaderChainedMethods() {
         List<String> selectColumns = List.of("name", "age");
         Predicate<String[]> filter = row -> Integer.parseInt(row[2]) > 25;
 
@@ -2147,8 +2147,8 @@ public class CsvUtilTest extends TestBase {
     }
 
     @Test
-    @DisplayName("Test CSVLoader from Reader source")
-    public void testCSVLoaderFromReader() {
+    @DisplayName("Test CsvLoader from Reader source")
+    public void testCsvLoaderFromReader() {
         Reader reader = new StringReader(testCsvContent);
 
         Dataset ds = CsvUtil.loader().source(reader).beanClassForColumnTypeInference(Person.class).load();
@@ -2159,7 +2159,7 @@ public class CsvUtilTest extends TestBase {
     }
 
     @Test
-    @DisplayName("Test CSVLoader selectColumns, offset, count")
+    @DisplayName("Test CsvLoader selectColumns, offset, count")
     public void testLoaderSelectColumnsOffsetCount() {
         Dataset ds = CsvUtil.loader()
                 .source(testCsvFile)
@@ -2175,8 +2175,8 @@ public class CsvUtilTest extends TestBase {
     }
 
     @Test
-    @DisplayName("Test CSVLoader supports loading without type config")
-    public void testCSVLoaderWithoutTypeConfig() {
+    @DisplayName("Test CsvLoader supports loading without type config")
+    public void testCsvLoaderWithoutTypeConfig() {
         Dataset ds = CsvUtil.loader().source(testCsvFile).load();
         assertNotNull(ds);
         assertEquals(5, ds.size());
@@ -2184,8 +2184,8 @@ public class CsvUtilTest extends TestBase {
     }
 
     @Test
-    @DisplayName("Test CSVLoader with selectColumns and offset/count and beanClass")
-    public void testCSVLoaderWithSelectColumnsOffsetCountBeanClass() {
+    @DisplayName("Test CsvLoader with selectColumns and offset/count and beanClass")
+    public void testCsvLoaderWithSelectColumnsOffsetCountBeanClass() {
         Dataset ds = CsvUtil.loader()
                 .source(testCsvFile)
                 .selectColumns(List.of("id", "name"))
@@ -2199,8 +2199,8 @@ public class CsvUtilTest extends TestBase {
     }
 
     @Test
-    @DisplayName("Test CSVLoader with custom line parser")
-    public void testCSVLoaderWithCustomLineParser() {
+    @DisplayName("Test CsvLoader with custom line parser")
+    public void testCsvLoaderWithCustomLineParser() {
         BiConsumer<String, String[]> customLineParser = (line, output) -> {
             String[] parts = line.split(",");
             System.arraycopy(parts, 0, output, 0, Math.min(parts.length, output.length));
@@ -2212,8 +2212,8 @@ public class CsvUtilTest extends TestBase {
     }
 
     @Test
-    @DisplayName("Test CSVLoader with custom header parser")
-    public void testCSVLoaderWithCustomHeaderParserDirect() {
+    @DisplayName("Test CsvLoader with custom header parser")
+    public void testCsvLoaderWithCustomHeaderParserDirect() {
         Function<String, String[]> customHeaderParser = line -> line.split(",");
 
         Dataset ds = CsvUtil.loader().source(testCsvFile).setHeaderParser(customHeaderParser).load();
@@ -2222,9 +2222,9 @@ public class CsvUtilTest extends TestBase {
     }
 
     @Test
-    @DisplayName("Test CSVLoader setEscapeCharToBackSlashForWrite")
-    public void testCSVLoaderSetEscapeChar() {
-        CsvUtil.CSVLoader loader = CsvUtil.loader().source(testCsvFile).setEscapeCharToBackSlashForWrite();
+    @DisplayName("Test CsvLoader setEscapeCharToBackSlashForWrite")
+    public void testCsvLoaderSetEscapeChar() {
+        CsvUtil.CsvLoader loader = CsvUtil.loader().source(testCsvFile).setEscapeCharToBackSlashForWrite();
         assertNotNull(loader);
         Dataset ds = loader.load();
         assertNotNull(ds);
@@ -2233,16 +2233,16 @@ public class CsvUtilTest extends TestBase {
     @Test
     @DisplayName("Test loader() returns new instance each time")
     public void testLoader_NewInstance() {
-        CsvUtil.CSVLoader loader1 = CsvUtil.loader();
-        CsvUtil.CSVLoader loader2 = CsvUtil.loader();
+        CsvUtil.CsvLoader loader1 = CsvUtil.loader();
+        CsvUtil.CsvLoader loader2 = CsvUtil.loader();
         assertNotNull(loader1);
         assertNotNull(loader2);
         assertTrue(loader1 != loader2);
     }
 
     @Test
-    @DisplayName("Test CSVLoader with columnTypeMap from Reader source")
-    public void testCSVLoaderWithColumnTypeMapFromReader() {
+    @DisplayName("Test CsvLoader with columnTypeMap from Reader source")
+    public void testCsvLoaderWithColumnTypeMapFromReader() {
         Reader reader = new StringReader(testCsvContent);
         Map<String, Type<?>> typeMap = new HashMap<>();
         typeMap.put("age", Type.of(Integer.class));
@@ -2256,8 +2256,8 @@ public class CsvUtilTest extends TestBase {
     }
 
     @Test
-    @DisplayName("Test CSVLoader with columnTypeMap and selectColumns")
-    public void testCSVLoaderWithColumnTypeMapAndSelectColumns() {
+    @DisplayName("Test CsvLoader with columnTypeMap and selectColumns")
+    public void testCsvLoaderWithColumnTypeMapAndSelectColumns() {
         Map<String, Type<?>> typeMap = new HashMap<>();
         typeMap.put("age", Type.of(Integer.class));
 
@@ -2267,8 +2267,8 @@ public class CsvUtilTest extends TestBase {
     }
 
     @Test
-    @DisplayName("Test CSVLoader stream with custom parsers from File")
-    public void testCSVLoaderStreamWithCustomParsersFromFile() {
+    @DisplayName("Test CsvLoader stream with custom parsers from File")
+    public void testCsvLoaderStreamWithCustomParsersFromFile() {
         Function<String, String[]> customHeaderParser = line -> line.split(",");
         BiConsumer<String, String[]> customLineParser = (line, output) -> {
             String[] parts = line.split(",");
@@ -2284,8 +2284,8 @@ public class CsvUtilTest extends TestBase {
     }
 
     @Test
-    @DisplayName("CSVLoader stream restores custom parsers if lazy creation fails")
-    public void testCSVLoaderStreamRestoresParsersWhenLazyCreationFails() {
+    @DisplayName("CsvLoader stream restores custom parsers if lazy creation fails")
+    public void testCsvLoaderStreamRestoresParsersWhenLazyCreationFails() {
         Function<String, String[]> defaultHeaderParser = CsvUtil.getCurrentHeaderParser();
         Function<String, String[]> customHeaderParser = line -> line.split(";");
         BiFunction<List<String>, DisposableArray<String>, String> mapper = (columns, row) -> row.get(0);
@@ -2298,8 +2298,8 @@ public class CsvUtilTest extends TestBase {
     }
 
     @Test
-    @DisplayName("Test CSVLoader with beanClassForColumnTypeInference from Reader and rowFilter")
-    public void testCSVLoaderBeanClassReaderWithFilter() {
+    @DisplayName("Test CsvLoader with beanClassForColumnTypeInference from Reader and rowFilter")
+    public void testCsvLoaderBeanClassReaderWithFilter() {
         Reader reader = new StringReader(testCsvContent);
         Predicate<String[]> filter = row -> Integer.parseInt(row[2]) > 28;
 
@@ -2309,8 +2309,8 @@ public class CsvUtilTest extends TestBase {
     }
 
     @Test
-    @DisplayName("Test CSVLoader with rowFilter")
-    public void testCSVLoaderWithRowFilter() {
+    @DisplayName("Test CsvLoader with rowFilter")
+    public void testCsvLoaderWithRowFilter() {
         Predicate<String[]> filter = row -> Integer.parseInt(row[2]) >= 30;
 
         Dataset ds = CsvUtil.loader().source(testCsvFile).beanClassForColumnTypeInference(Person.class).rowFilter(filter).load();
@@ -2320,8 +2320,8 @@ public class CsvUtilTest extends TestBase {
     }
 
     @Test
-    @DisplayName("Test CSVLoader with rowExtractor")
-    public void testCSVLoaderWithRowExtractor() {
+    @DisplayName("Test CsvLoader with rowExtractor")
+    public void testCsvLoaderWithRowExtractor() {
         TriConsumer<List<String>, DisposableArray<String>, Object[]> extractor = (columns, row, output) -> {
             output[0] = row.get(0);
             output[1] = row.get(1).toUpperCase();
@@ -2339,7 +2339,7 @@ public class CsvUtilTest extends TestBase {
     }
 
     @Test
-    @DisplayName("Test CSVLoader with custom header parser")
+    @DisplayName("Test CsvLoader with custom header parser")
     public void testLoaderWithCustomHeaderParser() {
         String customCsv = "id;name;age;active\n1;John;25;true\n2;Jane;30;false";
         File customFile;
@@ -2369,8 +2369,8 @@ public class CsvUtilTest extends TestBase {
     }
 
     @Test
-    @DisplayName("Test CSVLoader stream method with rowMapper")
-    public void testCSVLoaderStreamWithRowMapper() {
+    @DisplayName("Test CsvLoader stream method with rowMapper")
+    public void testCsvLoaderStreamWithRowMapper() {
         BiFunction<List<String>, DisposableArray<String>, String> mapper = (columns, row) -> row.get(1) + ":" + row.get(2);
 
         try (Stream<String> stream = CsvUtil.loader().source(testCsvFile).stream(mapper)) {
@@ -2381,14 +2381,14 @@ public class CsvUtilTest extends TestBase {
     }
 
     @Test
-    @DisplayName("Test CSVLoader throws exception without source")
-    public void testCSVLoaderWithoutSource() {
+    @DisplayName("Test CsvLoader throws exception without source")
+    public void testCsvLoaderWithoutSource() {
         assertThrows(IllegalArgumentException.class, () -> CsvUtil.loader().beanClassForColumnTypeInference(Person.class).load());
     }
 
     @Test
-    @DisplayName("Test CSVLoader cannot set both columnTypeMap and beanClass")
-    public void testCSVLoaderMutuallyExclusiveTypeConfig() {
+    @DisplayName("Test CsvLoader cannot set both columnTypeMap and beanClass")
+    public void testCsvLoaderMutuallyExclusiveTypeConfig() {
         Map<String, Type<?>> typeMap = new HashMap<>();
         typeMap.put("id", Type.of(String.class));
 
@@ -2397,16 +2397,16 @@ public class CsvUtilTest extends TestBase {
     }
 
     @Test
-    @DisplayName("Test CSVLoader cannot set both file and reader source")
-    public void testCSVLoaderCannotSetBothSources() {
+    @DisplayName("Test CsvLoader cannot set both file and reader source")
+    public void testCsvLoaderCannotSetBothSources() {
         Reader reader = new StringReader(testCsvContent);
 
         assertThrows(IllegalArgumentException.class, () -> CsvUtil.loader().source(testCsvFile).source(reader));
     }
 
     @Test
-    @DisplayName("Test CSVLoader load with TriConsumer rowExtractor")
-    public void testCSVLoaderWithRowExtractorLoad() {
+    @DisplayName("Test CsvLoader load with TriConsumer rowExtractor")
+    public void testCsvLoaderWithRowExtractorLoad() {
         TriConsumer<List<String>, DisposableArray<String>, Object[]> extractor = (columns, row, output) -> {
             for (int i = 0; i < row.length(); i++) {
                 output[i] = row.get(i);
@@ -2420,8 +2420,8 @@ public class CsvUtilTest extends TestBase {
     }
 
     @Test
-    @DisplayName("Test CSVLoader with rowFilter")
-    public void testCSVLoaderWithRowFilterOnly() {
+    @DisplayName("Test CsvLoader with rowFilter")
+    public void testCsvLoaderWithRowFilterOnly() {
         Predicate<String[]> filter = row -> "true".equals(row[3]);
 
         Dataset ds = CsvUtil.loader().source(testCsvFile).beanClassForColumnTypeInference(Person.class).rowFilter(filter).load();
@@ -2430,8 +2430,8 @@ public class CsvUtilTest extends TestBase {
     }
 
     @Test
-    @DisplayName("Test CSVLoader cannot set both beanClass and columnTypeMap (reverse order)")
-    public void testCSVLoaderMutuallyExclusiveTypeConfig_ReverseOrder() {
+    @DisplayName("Test CsvLoader cannot set both beanClass and columnTypeMap (reverse order)")
+    public void testCsvLoaderMutuallyExclusiveTypeConfig_ReverseOrder() {
         Map<String, Type<?>> typeMap = new HashMap<>();
         typeMap.put("id", Type.of(String.class));
 
@@ -2440,22 +2440,22 @@ public class CsvUtilTest extends TestBase {
     }
 
     @Test
-    @DisplayName("Test CSVLoader cannot set reader then file source")
-    public void testCSVLoaderCannotSetReaderThenFile() {
+    @DisplayName("Test CsvLoader cannot set reader then file source")
+    public void testCsvLoaderCannotSetReaderThenFile() {
         Reader reader = new StringReader(testCsvContent);
         assertThrows(IllegalArgumentException.class, () -> CsvUtil.loader().source(reader).source(testCsvFile));
     }
 
     @Test
-    @DisplayName("Test CSVLoader load without source throws exception")
-    public void testCSVLoaderLoad_WithoutSource() {
+    @DisplayName("Test CsvLoader load without source throws exception")
+    public void testCsvLoaderLoad_WithoutSource() {
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> CsvUtil.loader().load());
         assertTrue(exception.getMessage().contains("sourceFile"));
     }
 
     @Test
-    @DisplayName("Test CSVLoader stream without source throws exception")
-    public void testCSVLoaderStream_WithoutSource() {
+    @DisplayName("Test CsvLoader stream without source throws exception")
+    public void testCsvLoaderStream_WithoutSource() {
         BiFunction<List<String>, DisposableArray<String>, String> mapper = (columns, row) -> row.get(0);
 
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> CsvUtil.loader().stream(mapper));
@@ -2463,8 +2463,8 @@ public class CsvUtilTest extends TestBase {
     }
 
     @Test
-    @DisplayName("Test CSVConverter csvToJson with Writer output")
-    public void testCSVConverterCsv2JsonWriter() {
+    @DisplayName("Test CsvConverter csvToJson with Writer output")
+    public void testCsvConverterCsv2JsonWriter() {
         StringWriter writer = new StringWriter();
 
         long count = CsvUtil.converter().source(testCsvFile).csvToJson(writer);
@@ -2477,8 +2477,8 @@ public class CsvUtilTest extends TestBase {
     }
 
     @Test
-    @DisplayName("Test CSVConverter with Reader source")
-    public void testCSVConverterWithReaderSource() {
+    @DisplayName("Test CsvConverter with Reader source")
+    public void testCsvConverterWithReaderSource() {
         Reader reader = new StringReader(testCsvContent);
         StringWriter writer = new StringWriter();
 
@@ -2488,8 +2488,8 @@ public class CsvUtilTest extends TestBase {
     }
 
     @Test
-    @DisplayName("Test CSVConverter csvToJson with Writer")
-    public void testCSVConverterCsv2JsonWriterDirect() {
+    @DisplayName("Test CsvConverter csvToJson with Writer")
+    public void testCsvConverterCsv2JsonWriterDirect() {
         StringWriter writer = new StringWriter();
         long count = CsvUtil.converter().source(testCsvFile).csvToJson(writer);
         assertTrue(count > 0);
@@ -2497,8 +2497,8 @@ public class CsvUtilTest extends TestBase {
     }
 
     @Test
-    @DisplayName("Test CSVConverter csvToJson from Reader with Writer")
-    public void testCSVConverterCsvToJsonFromReaderWithWriter() {
+    @DisplayName("Test CsvConverter csvToJson from Reader with Writer")
+    public void testCsvConverterCsvToJsonFromReaderWithWriter() {
         Reader reader = new StringReader(testCsvContent);
         StringWriter writer = new StringWriter();
 
@@ -2508,8 +2508,8 @@ public class CsvUtilTest extends TestBase {
     }
 
     @Test
-    @DisplayName("Test CSVConverter csvToJson with offset and count from Reader")
-    public void testCSVConverterCsvToJsonFromReaderWithOffsetCount() {
+    @DisplayName("Test CsvConverter csvToJson with offset and count from Reader")
+    public void testCsvConverterCsvToJsonFromReaderWithOffsetCount() {
         Reader reader = new StringReader(testCsvContent);
         StringWriter writer = new StringWriter();
 
@@ -2517,28 +2517,28 @@ public class CsvUtilTest extends TestBase {
         assertEquals(2, count);
     }
 
-    // ===================== Tests for converter() and CSVConverter =====================
+    // ===================== Tests for converter() and CsvConverter =====================
 
     @Test
-    @DisplayName("Test converter() returns CSVConverter instance")
+    @DisplayName("Test converter() returns CsvConverter instance")
     public void testConverter() {
-        CsvUtil.CSVConverter converter = CsvUtil.converter();
+        CsvUtil.CsvConverter converter = CsvUtil.converter();
         assertNotNull(converter);
     }
 
     @Test
     @DisplayName("Test converter() returns new instance each time")
     public void testConverter_NewInstance() {
-        CsvUtil.CSVConverter conv1 = CsvUtil.converter();
-        CsvUtil.CSVConverter conv2 = CsvUtil.converter();
+        CsvUtil.CsvConverter conv1 = CsvUtil.converter();
+        CsvUtil.CsvConverter conv2 = CsvUtil.converter();
         assertNotNull(conv1);
         assertNotNull(conv2);
         assertTrue(conv1 != conv2);
     }
 
     @Test
-    @DisplayName("Test CSVConverter csvToJson with File output")
-    public void testCSVConverterCsv2JsonFile() throws IOException {
+    @DisplayName("Test CsvConverter csvToJson with File output")
+    public void testCsvConverterCsv2JsonFile() throws IOException {
         File jsonFile = tempDir.resolve("output.json").toFile();
 
         long count = CsvUtil.converter().source(testCsvFile).csvToJson(jsonFile);
@@ -2554,8 +2554,8 @@ public class CsvUtilTest extends TestBase {
     }
 
     @Test
-    @DisplayName("Test CSVConverter with beanClassForTypeWriting")
-    public void testCSVConverterWithBeanClassForTypeWriting() throws IOException {
+    @DisplayName("Test CsvConverter with beanClassForTypeWriting")
+    public void testCsvConverterWithBeanClassForTypeWriting() throws IOException {
         File jsonFile = tempDir.resolve("typed_output.json").toFile();
 
         long count = CsvUtil.converter()
@@ -2573,8 +2573,8 @@ public class CsvUtilTest extends TestBase {
     }
 
     @Test
-    @DisplayName("Test CSVConverter with selectColumns and offset/count")
-    public void testCSVConverterWithSelectColumnsOffsetCount() throws IOException {
+    @DisplayName("Test CsvConverter with selectColumns and offset/count")
+    public void testCsvConverterWithSelectColumnsOffsetCount() throws IOException {
         File jsonFile = tempDir.resolve("partial.json").toFile();
 
         long count = CsvUtil.converter().source(testCsvFile).selectColumns(List.of("name", "age")).offset(1).count(2).csvToJson(jsonFile);
@@ -2583,16 +2583,16 @@ public class CsvUtilTest extends TestBase {
     }
 
     @Test
-    @DisplayName("Test CSVConverter throws exception without source")
-    public void testCSVConverterWithoutSource() throws IOException {
+    @DisplayName("Test CsvConverter throws exception without source")
+    public void testCsvConverterWithoutSource() throws IOException {
         File jsonFile = tempDir.resolve("output.json").toFile();
 
         assertThrows(IllegalArgumentException.class, () -> CsvUtil.converter().csvToJson(jsonFile));
     }
 
     @Test
-    @DisplayName("Test CSVConverter setEscapeCharToBackSlashForWrite")
-    public void testCSVConverterSetEscapeChar() throws IOException {
+    @DisplayName("Test CsvConverter setEscapeCharToBackSlashForWrite")
+    public void testCsvConverterSetEscapeChar() throws IOException {
         File jsonFile = tempDir.resolve("escaped.json").toFile();
 
         long count = CsvUtil.converter().source(testCsvFile).setEscapeCharToBackSlashForWrite().csvToJson(jsonFile);
@@ -2601,8 +2601,8 @@ public class CsvUtilTest extends TestBase {
     }
 
     @Test
-    @DisplayName("Test CSVConverter with selectColumns")
-    public void testCSVConverterWithSelectColumns() throws IOException {
+    @DisplayName("Test CsvConverter with selectColumns")
+    public void testCsvConverterWithSelectColumns() throws IOException {
         File jsonFile = tempDir.resolve("test_conv_select.json").toFile();
         long count = CsvUtil.converter().source(testCsvFile).selectColumns(List.of("id", "name")).csvToJson(jsonFile);
         assertTrue(count > 0);
@@ -2610,8 +2610,8 @@ public class CsvUtilTest extends TestBase {
     }
 
     @Test
-    @DisplayName("Test CSVConverter with custom header parser")
-    public void testCSVConverterWithCustomHeaderParser() throws IOException {
+    @DisplayName("Test CsvConverter with custom header parser")
+    public void testCsvConverterWithCustomHeaderParser() throws IOException {
         Function<String, String[]> customHeaderParser = line -> line.split(",");
 
         File jsonFile = tempDir.resolve("test_conv_custom_parser.json").toFile();
@@ -2620,8 +2620,8 @@ public class CsvUtilTest extends TestBase {
     }
 
     @Test
-    @DisplayName("Test CSVConverter with custom line parser")
-    public void testCSVConverterWithCustomLineParser() throws IOException {
+    @DisplayName("Test CsvConverter with custom line parser")
+    public void testCsvConverterWithCustomLineParser() throws IOException {
         BiConsumer<String, String[]> customLineParser = (line, output) -> {
             String[] parts = line.split(",");
             System.arraycopy(parts, 0, output, 0, Math.min(parts.length, output.length));
@@ -2633,16 +2633,16 @@ public class CsvUtilTest extends TestBase {
     }
 
     @Test
-    @DisplayName("Test CSVConverter setEscapeCharToBackSlashForWrite via builder")
-    public void testCSVConverterSetEscapeCharViaBuilder() throws IOException {
+    @DisplayName("Test CsvConverter setEscapeCharToBackSlashForWrite via builder")
+    public void testCsvConverterSetEscapeCharViaBuilder() throws IOException {
         File jsonFile = tempDir.resolve("test_conv_escape.json").toFile();
         long count = CsvUtil.converter().source(testCsvFile).setEscapeCharToBackSlashForWrite().csvToJson(jsonFile);
         assertTrue(count > 0);
     }
 
     @Test
-    @DisplayName("Test CSVConverter csvToJson with beanClass and selectColumns via builder")
-    public void testCSVConverterCsvToJsonWithBeanClassSelectColumns() throws IOException {
+    @DisplayName("Test CsvConverter csvToJson with beanClass and selectColumns via builder")
+    public void testCsvConverterCsvToJsonWithBeanClassSelectColumns() throws IOException {
         File jsonFile = tempDir.resolve("conv_bean_select.json").toFile();
         long count = CsvUtil.converter()
                 .source(testCsvFile)
@@ -2655,36 +2655,36 @@ public class CsvUtilTest extends TestBase {
     }
 
     @Test
-    @DisplayName("Test CSVConverter jsonToCsv throws exception without source")
-    public void testCSVConverterJsonToCsvWithoutSource() throws IOException {
+    @DisplayName("Test CsvConverter jsonToCsv throws exception without source")
+    public void testCsvConverterJsonToCsvWithoutSource() throws IOException {
         File csvFile = tempDir.resolve("no_source.csv").toFile();
         assertThrows(IllegalArgumentException.class, () -> CsvUtil.converter().jsonToCsv(csvFile));
     }
 
     @Test
-    @DisplayName("Test CSVConverter jsonToCsv with Writer throws exception without source")
-    public void testCSVConverterJsonToCsvWriterWithoutSource() {
+    @DisplayName("Test CsvConverter jsonToCsv with Writer throws exception without source")
+    public void testCsvConverterJsonToCsvWriterWithoutSource() {
         StringWriter writer = new StringWriter();
         assertThrows(IllegalArgumentException.class, () -> CsvUtil.converter().jsonToCsv(writer));
     }
 
     @Test
-    @DisplayName("Test CSVConverter csvToJson with Writer throws exception without source")
-    public void testCSVConverterCsvToJsonWriterWithoutSource() {
+    @DisplayName("Test CsvConverter csvToJson with Writer throws exception without source")
+    public void testCsvConverterCsvToJsonWriterWithoutSource() {
         StringWriter writer = new StringWriter();
         assertThrows(IllegalArgumentException.class, () -> CsvUtil.converter().csvToJson(writer));
     }
 
     @Test
-    @DisplayName("Test CSVConverter cannot set both file and reader source")
-    public void testCSVConverterCannotSetBothSources() {
+    @DisplayName("Test CsvConverter cannot set both file and reader source")
+    public void testCsvConverterCannotSetBothSources() {
         Reader reader = new StringReader(testCsvContent);
         assertThrows(IllegalArgumentException.class, () -> CsvUtil.converter().source(testCsvFile).source(reader));
     }
 
     @Test
-    @DisplayName("Test CSVConverter cannot set reader then file source")
-    public void testCSVConverterCannotSetReaderThenFile() {
+    @DisplayName("Test CsvConverter cannot set reader then file source")
+    public void testCsvConverterCannotSetReaderThenFile() {
         Reader reader = new StringReader(testCsvContent);
         assertThrows(IllegalArgumentException.class, () -> CsvUtil.converter().source(reader).source(testCsvFile));
     }
@@ -3277,7 +3277,7 @@ public class CsvUtilTest extends TestBase {
     }
 
     @Test
-    @DisplayName("CSVLoader builder: empty selectColumns selects NO columns (zero-column result)")
+    @DisplayName("CsvLoader builder: empty selectColumns selects NO columns (zero-column result)")
     public void testLoaderBuilder_EmptySelectColumns_ZeroColumns() {
         Dataset ds = CsvUtil.loader().source(testCsvFile).selectColumns(List.<String> of()).load();
         assertEquals(0, ds.columnCount());
