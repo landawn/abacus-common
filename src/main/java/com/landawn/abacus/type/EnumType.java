@@ -26,7 +26,6 @@ import java.sql.Types;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
 
 import com.landawn.abacus.annotation.JsonXmlField;
 import com.landawn.abacus.annotation.SuppressFBWarnings;
@@ -40,8 +39,9 @@ import com.landawn.abacus.util.Strings;
 /**
  * Type handler for Enum types.
  * This class provides serialization, deserialization, and database operations for Java Enum types.
- * It supports name (string), ordinal (numeric), and code (numeric, via a public {@code int code()} method)
- * representations of enums, and handles custom JSON/XML field names through annotations.
+ * It supports name (string), ordinal (numeric), and code (numeric, via a public {@code int code()} method,
+ * or a public {@code int intValue()} method when {@code code()} is absent) representations of enums, and
+ * handles custom JSON/XML field names through annotations.
  *
  * <p>EnumType instances are typically obtained through the TypeFactory and support conversion
  * between enum values and their string/numeric representations. The type handler can be configured
@@ -89,19 +89,21 @@ public final class EnumType<T extends Enum<T>> extends SingleValueType<T> {
         jsonXmlNameEnumMap = new HashMap<>();
 
         if (enumRepresentation == com.landawn.abacus.util.EnumType.CODE) {
-            final Method getCodeMethod = ClassUtil.getDeclaredMethod(typeClass, "code");
+            // Prefer a public int code() accessor. Fall back to public int intValue(): the numeric enums in
+            // com.landawn.abacus.util (Color/Gender/MediaType/OperationType/LockMode/Month/DayOfWeek/WeekDay/
+            // CalendarField/YesNo) expose their numeric code via intValue() rather than code(), yet are exactly
+            // the enums CODE representation is meant for. Without this fallback every one of them threw at
+            // construction time when configured with EnumType.CODE.
+            Method getCodeMethod = ClassUtil.getDeclaredMethod(typeClass, "code");
 
             if (getCodeMethod == null || !Modifier.isPublic(getCodeMethod.getModifiers()) || !int.class.equals(getCodeMethod.getReturnType())) {
-                throw new RuntimeException("No method: public int code() found in enum class: " + ClassUtil.getCanonicalClassName(typeClass));
+                getCodeMethod = ClassUtil.getDeclaredMethod(typeClass, "intValue");
             }
 
-            //    final Method fromCodeMethod = ClassUtil.getDeclaredMethod(typeClass, "fromCode", int.class);
-            //
-            //    if (fromCodeMethod == null || !Modifier.isPublic(fromCodeMethod.getModifiers()) || !Modifier.isStatic(fromCodeMethod.getModifiers())
-            //            || !typeClass.equals(fromCodeMethod.getReturnType())) {
-            //        throw new RuntimeException("No method: public static " + typeClass.getSimpleName() + " fromCode(int) found in enum class: "
-            //                + ClassUtil.getCanonicalClassName(typeClass));
-            //    }
+            if (getCodeMethod == null || !Modifier.isPublic(getCodeMethod.getModifiers()) || !int.class.equals(getCodeMethod.getReturnType())) {
+                throw new RuntimeException(
+                        "No method: public int code() (or public int intValue()) found in enum class: " + ClassUtil.getCanonicalClassName(typeClass));
+            }
 
             for (final T enumConstant : typeClass.getEnumConstants()) {
                 int code = ClassUtil.invokeMethod(enumConstant, getCodeMethod);
@@ -237,7 +239,8 @@ public final class EnumType<T extends Enum<T>> extends SingleValueType<T> {
             if (Strings.isAsciiInteger(str)) {
                 return valueOf(Numbers.toInt(str));
             } else {
-                return Objects.requireNonNullElseGet(value, () -> Enum.valueOf(typeClass, str));
+                // 'value' is guaranteed null here (the non-null case already returned above).
+                return Enum.valueOf(typeClass, str);
             }
         } else {
             return super.valueOf(str);
@@ -246,7 +249,7 @@ public final class EnumType<T extends Enum<T>> extends SingleValueType<T> {
 
     /**
      * Converts an integer ordinal or code value to its corresponding enum constant.
-     * For {@code CODE} representation, the value is matched against the {@code code()} values;
+     * For {@code CODE} representation, the value is matched against the {@code code()} (or {@code intValue()}) values;
      * otherwise it is matched against ordinal values.
      * Returns {@code null} when {@code value} is {@code 0} and no constant is mapped to {@code 0}.
      *

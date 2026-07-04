@@ -267,9 +267,8 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
      * Creates a ShortIterator that generates values using the provided supplier while the hasNext condition is {@code true}.
      * This allows for creating finite iterators with custom termination conditions.
      *
-     * <p>Note: The {@code hasNext} supplier may be called multiple times for the same element
-     * (once by the user, once internally for validation), so it should be idempotent or
-     * designed to handle multiple calls.</p>
+     * <p>The {@code hasNext} supplier is called at most once per element; its result is cached
+     * until the next call to {@code nextShort()}.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -292,9 +291,16 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
         N.checkArgNotNull(supplier);
 
         return new ShortIterator() {
+            private boolean hasNextCached = false;
+            private boolean hasNextValue = false;
+
             @Override
             public boolean hasNext() {
-                return hasNext.getAsBoolean();
+                if (!hasNextCached) {
+                    hasNextValue = hasNext.getAsBoolean();
+                    hasNextCached = true;
+                }
+                return hasNextValue;
             }
 
             @Override
@@ -303,6 +309,7 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
                     throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
+                hasNextCached = false;
                 return supplier.getAsShort();
             }
         };

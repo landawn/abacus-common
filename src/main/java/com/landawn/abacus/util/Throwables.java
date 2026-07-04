@@ -357,7 +357,7 @@ public final class Throwables {
      * @param <R> the type of the result returned by the callable
      * @param cmd the callable command to execute that may throw a checked exception
      * @return the result returned by the callable command
-     * @throws RuntimeException if the command throws an exception; a checked exception is wrapped in a RuntimeException, while a runtime exception is rethrown as-is
+     * @throws RuntimeException if the command throws an exception; a checked exception (or an {@link Error}) is wrapped in a RuntimeException, while a runtime exception is rethrown as-is
      * @throws IllegalArgumentException if cmd is null
      * @see Try#call(java.util.concurrent.Callable)
      */
@@ -4026,6 +4026,10 @@ public final class Throwables {
      * Represents an operation that accepts two int-valued arguments and returns no result.
      * This is the {@code int} primitive specialization of {@code BiConsumer}.
      *
+     * <p>Extends {@link IntIntConsumer} (whose two {@code int} parameters are conventionally an
+     * index and a value) since the two interfaces share the same {@code accept(int, int)} shape,
+     * allowing an {@code IntBiConsumer} to be used wherever an {@code IntIntConsumer} is expected.
+     *
      * @param <E> the type of exception that the consumer may throw
      */
     @FunctionalInterface
@@ -4665,10 +4669,10 @@ public final class Throwables {
          * Performs this operation on the given arguments.
          *
          * @param t the object input argument
-         * @param u the int input argument
+         * @param value the int input argument
          * @throws E if an error occurs during operation execution
          */
-        void accept(T t, int u) throws E;
+        void accept(T t, int value) throws E;
     }
 
     /**
@@ -4685,11 +4689,11 @@ public final class Throwables {
          * Applies this function to the given arguments.
          *
          * @param t the object function argument
-         * @param u the int function argument
+         * @param value the int function argument
          * @return the function result
          * @throws E if an error occurs during function execution
          */
-        R apply(T t, int u) throws E;
+        R apply(T t, int value) throws E;
     }
 
     /**
@@ -4705,11 +4709,11 @@ public final class Throwables {
          * Evaluates this predicate on the given arguments.
          *
          * @param t the object input argument
-         * @param u the int input argument
+         * @param value the int input argument
          * @return {@code true} if the input arguments match the predicate, otherwise {@code false}
          * @throws E if an error occurs during predicate evaluation
          */
-        boolean test(T t, int u) throws E;
+        boolean test(T t, int value) throws E;
     }
 
     /**
@@ -4725,10 +4729,10 @@ public final class Throwables {
          * Performs this operation on the given arguments.
          *
          * @param t the object input argument
-         * @param u the long input argument
+         * @param value the long input argument
          * @throws E if an error occurs during operation execution
          */
-        void accept(T t, long u) throws E;
+        void accept(T t, long value) throws E;
     }
 
     /**
@@ -4745,11 +4749,11 @@ public final class Throwables {
          * Applies this function to the given arguments.
          *
          * @param t the object function argument
-         * @param u the long function argument
+         * @param value the long function argument
          * @return the function result
          * @throws E if an error occurs during function execution
          */
-        R apply(T t, long u) throws E;
+        R apply(T t, long value) throws E;
     }
 
     /**
@@ -4765,11 +4769,11 @@ public final class Throwables {
          * Evaluates this predicate on the given arguments.
          *
          * @param t the object input argument
-         * @param u the long input argument
+         * @param value the long input argument
          * @return {@code true} if the input arguments match the predicate, otherwise {@code false}
          * @throws E if an error occurs during predicate evaluation
          */
-        boolean test(T t, long u) throws E;
+        boolean test(T t, long value) throws E;
     }
 
     /**
@@ -4804,10 +4808,10 @@ public final class Throwables {
          * Performs this operation on the given arguments.
          *
          * @param t the object input argument
-         * @param u the double input argument
+         * @param value the double input argument
          * @throws E if an error occurs during operation execution
          */
-        void accept(T t, double u) throws E;
+        void accept(T t, double value) throws E;
     }
 
     /**
@@ -4824,11 +4828,11 @@ public final class Throwables {
          * Applies this function to the given arguments.
          *
          * @param t the object function argument
-         * @param u the double function argument
+         * @param value the double function argument
          * @return the function result
          * @throws E if an error occurs during function execution
          */
-        R apply(T t, double u) throws E;
+        R apply(T t, double value) throws E;
     }
 
     /**
@@ -4844,11 +4848,11 @@ public final class Throwables {
          * Evaluates this predicate on the given arguments.
          *
          * @param t the object input argument
-         * @param u the double input argument
+         * @param value the double input argument
          * @return {@code true} if the input arguments match the predicate, otherwise {@code false}
          * @throws E if an error occurs during predicate evaluation
          */
-        boolean test(T t, double u) throws E;
+        boolean test(T t, double value) throws E;
     }
 
     /**
@@ -4951,13 +4955,13 @@ public final class Throwables {
         /**
          * Applies this function to the given arguments.
          *
-         * @param e the first object function argument
+         * @param t the first object function argument
          * @param u the second object function argument
          * @param i the int index argument
          * @return the function result
          * @throws E if an error occurs during function execution
          */
-        R apply(T e, U u, int i) throws E;
+        R apply(T t, U u, int i) throws E;
     }
 
     /**
@@ -6544,7 +6548,7 @@ public final class Throwables {
          * @throws IllegalArgumentException if supplier is null
          */
         public static <T, E extends Throwable> LazyInitializer<T, E> of(final Throwables.Supplier<T, E> supplier) {
-            N.checkArgNotNull(supplier);
+            N.checkArgNotNull(supplier, cs.supplier);
 
             if (supplier instanceof LazyInitializer) {
                 return (LazyInitializer<T, E>) supplier;

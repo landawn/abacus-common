@@ -139,7 +139,7 @@ public abstract class FloatIterator extends ImmutableIterator<Float> {
      * @param fromIndex the start index (inclusive)
      * @param toIndex the end index (exclusive)
      * @return a new {@code FloatIterator} over the specified range, or an empty iterator if the array is {@code null} or {@code fromIndex == toIndex}
-     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code toIndex > a.length}, or {@code fromIndex > toIndex}
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code toIndex > (a == null ? 0 : a.length)}, or {@code fromIndex > toIndex}
      */
     public static FloatIterator of(final float[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
@@ -282,9 +282,8 @@ public abstract class FloatIterator extends ImmutableIterator<Float> {
      * conditions. {@link #nextFloat()} throws {@link NoSuchElementException} when {@code hasNext}
      * returns {@code false}.
      *
-     * <p>Note: The {@code hasNext} supplier may be called multiple times for the same element
-     * (once by the user, once internally for validation), so it should be idempotent or
-     * designed to handle multiple calls.</p>
+     * <p>The {@code hasNext} supplier is called at most once per element; its result is cached
+     * until the next call to {@code nextFloat()}.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -306,9 +305,16 @@ public abstract class FloatIterator extends ImmutableIterator<Float> {
         N.checkArgNotNull(supplier);
 
         return new FloatIterator() {
+            private boolean hasNextCached = false;
+            private boolean hasNextValue = false;
+
             @Override
             public boolean hasNext() {
-                return hasNext.getAsBoolean();
+                if (!hasNextCached) {
+                    hasNextValue = hasNext.getAsBoolean();
+                    hasNextCached = true;
+                }
+                return hasNextValue;
             }
 
             @Override
@@ -317,6 +323,7 @@ public abstract class FloatIterator extends ImmutableIterator<Float> {
                     throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
+                hasNextCached = false;
                 return supplier.getAsFloat();
             }
         };

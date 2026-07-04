@@ -242,7 +242,7 @@ public sealed class Difference<L, R> permits KeyValueDifference {
      * @param b the second boolean array to compare. Can be {@code null}, which is treated as an empty array.
      * @return a {@code Difference} object containing {@code BooleanList} instances for common elements,
      *         elements only in the first array, and elements only in the second array.
-     * @see IntList#difference(IntList)
+     * @see BooleanList#difference(BooleanList)
      * @see N#difference(Collection, Collection)
      */
     public static Difference<BooleanList, BooleanList> of(final boolean[] a, final boolean[] b) {
@@ -277,7 +277,7 @@ public sealed class Difference<L, R> permits KeyValueDifference {
      * @param b the second char array to compare. Can be {@code null}, which is treated as an empty array.
      * @return a {@code Difference} object containing {@code CharList} instances for common elements,
      *         elements only in the first array, and elements only in the second array.
-     * @see IntList#difference(IntList)
+     * @see CharList#difference(CharList)
      * @see N#difference(Collection, Collection)
      */
     public static Difference<CharList, CharList> of(final char[] a, final char[] b) {
@@ -312,7 +312,7 @@ public sealed class Difference<L, R> permits KeyValueDifference {
      * @param b the second byte array to compare. Can be {@code null}, which is treated as an empty array.
      * @return a {@code Difference} object containing {@code ByteList} instances for common elements,
      *         elements only in the first array, and elements only in the second array.
-     * @see IntList#difference(IntList)
+     * @see ByteList#difference(ByteList)
      * @see N#difference(Collection, Collection)
      */
     public static Difference<ByteList, ByteList> of(final byte[] a, final byte[] b) {
@@ -347,7 +347,7 @@ public sealed class Difference<L, R> permits KeyValueDifference {
      * @param b the second short array to compare. Can be {@code null}, which is treated as an empty array.
      * @return a {@code Difference} object containing {@code ShortList} instances for common elements,
      *         elements only in the first array, and elements only in the second array.
-     * @see IntList#difference(IntList)
+     * @see ShortList#difference(ShortList)
      * @see N#difference(Collection, Collection)
      */
     public static Difference<ShortList, ShortList> of(final short[] a, final short[] b) {
@@ -417,7 +417,7 @@ public sealed class Difference<L, R> permits KeyValueDifference {
      * @param b the second long array to compare. Can be {@code null}, which is treated as an empty array.
      * @return a {@code Difference} object containing {@code LongList} instances for common elements,
      *         elements only in the first array, and elements only in the second array.
-     * @see IntList#difference(IntList)
+     * @see LongList#difference(LongList)
      * @see N#difference(Collection, Collection)
      */
     public static Difference<LongList, LongList> of(final long[] a, final long[] b) {
@@ -457,7 +457,7 @@ public sealed class Difference<L, R> permits KeyValueDifference {
      * @param b the second float array to compare. Can be {@code null}, which is treated as an empty array.
      * @return a {@code Difference} object containing {@code FloatList} instances for common elements,
      *         elements only in the first array, and elements only in the second array.
-     * @see IntList#difference(IntList)
+     * @see FloatList#difference(FloatList)
      * @see N#difference(Collection, Collection)
      */
     public static Difference<FloatList, FloatList> of(final float[] a, final float[] b) {
@@ -497,7 +497,7 @@ public sealed class Difference<L, R> permits KeyValueDifference {
      * @param b the second double array to compare. Can be {@code null}, which is treated as an empty array.
      * @return a {@code Difference} object containing {@code DoubleList} instances for common elements,
      *         elements only in the first array, and elements only in the second array.
-     * @see IntList#difference(IntList)
+     * @see DoubleList#difference(DoubleList)
      * @see N#difference(Collection, Collection)
      */
     public static Difference<DoubleList, DoubleList> of(final double[] a, final double[] b) {
@@ -667,7 +667,7 @@ public sealed class Difference<L, R> permits KeyValueDifference {
      * @param b the second BooleanList to compare. Can be {@code null} or empty.
      * @return a {@code Difference} object containing BooleanLists for common elements,
      *         elements only in the first list, and elements only in the second list.
-     * @see IntList#difference(IntList)
+     * @see BooleanList#difference(BooleanList)
      * @see N#difference(Collection, Collection)
      */
     public static Difference<BooleanList, BooleanList> of(final BooleanList a, final BooleanList b) {
@@ -741,7 +741,7 @@ public sealed class Difference<L, R> permits KeyValueDifference {
      * @param b the second CharList to compare. Can be {@code null} or empty.
      * @return a {@code Difference} object containing CharLists for common elements,
      *         elements only in the first list, and elements only in the second list.
-     * @see IntList#difference(IntList)
+     * @see CharList#difference(CharList)
      * @see N#difference(Collection, Collection)
      */
     public static Difference<CharList, CharList> of(final CharList a, final CharList b) {
@@ -815,7 +815,7 @@ public sealed class Difference<L, R> permits KeyValueDifference {
      * @param b the second ByteList to compare. Can be {@code null} or empty.
      * @return a {@code Difference} object containing ByteLists for common elements,
      *         elements only in the first list, and elements only in the second list.
-     * @see IntList#difference(IntList)
+     * @see ByteList#difference(ByteList)
      * @see N#difference(Collection, Collection)
      */
     public static Difference<ByteList, ByteList> of(final ByteList a, final ByteList b) {
@@ -889,7 +889,7 @@ public sealed class Difference<L, R> permits KeyValueDifference {
      * @param b the second ShortList to compare. Can be {@code null} or empty.
      * @return a {@code Difference} object containing ShortLists for common elements,
      *         elements only in the first list, and elements only in the second list.
-     * @see IntList#difference(IntList)
+     * @see ShortList#difference(ShortList)
      * @see N#difference(Collection, Collection)
      */
     public static Difference<ShortList, ShortList> of(final ShortList a, final ShortList b) {
@@ -1037,7 +1037,7 @@ public sealed class Difference<L, R> permits KeyValueDifference {
      * @param b the second LongList to compare. Can be {@code null} or empty.
      * @return a {@code Difference} object containing LongLists for common elements,
      *         elements only in the first list, and elements only in the second list.
-     * @see IntList#difference(IntList)
+     * @see LongList#difference(LongList)
      * @see N#difference(Collection, Collection)
      */
     public static Difference<LongList, LongList> of(final LongList a, final LongList b) {
@@ -1117,7 +1117,7 @@ public sealed class Difference<L, R> permits KeyValueDifference {
      * @param b the second FloatList to compare. Can be {@code null} or empty.
      * @return a {@code Difference} object containing FloatLists for common elements,
      *         elements only in the first list, and elements only in the second list.
-     * @see IntList#difference(IntList)
+     * @see FloatList#difference(FloatList)
      * @see N#difference(Collection, Collection)
      */
     public static Difference<FloatList, FloatList> of(final FloatList a, final FloatList b) {
@@ -1197,7 +1197,7 @@ public sealed class Difference<L, R> permits KeyValueDifference {
      * @param b the second DoubleList to compare. Can be {@code null} or empty.
      * @return a {@code Difference} object containing DoubleLists for common elements,
      *         elements only in the first list, and elements only in the second list.
-     * @see IntList#difference(IntList)
+     * @see DoubleList#difference(DoubleList)
      * @see N#difference(Collection, Collection)
      */
     public static Difference<DoubleList, DoubleList> of(final DoubleList a, final DoubleList b) {

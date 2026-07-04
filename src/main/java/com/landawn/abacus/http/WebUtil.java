@@ -492,8 +492,7 @@ public final class WebUtil {
                 }
 
                 cursor = i + 1;
-            } else if (ch == '/' && i + 1 < len && str.charAt(i + 1) == '/'
-                    && (i == 0 || (Character.isWhitespace(str.charAt(i - 1)) && str.charAt(i - 1) != ':'))) {
+            } else if (ch == '/' && i + 1 < len && str.charAt(i + 1) == '/' && (i == 0 || Character.isWhitespace(str.charAt(i - 1)))) {
                 if (cursor < i) {
                     tokens.add(str.substring(cursor, i));
                 }

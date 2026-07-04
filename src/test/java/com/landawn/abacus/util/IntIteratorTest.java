@@ -439,6 +439,29 @@ public class IntIteratorTest extends TestBase {
         assertThrows(NoSuchElementException.class, () -> iter.nextInt());
     }
 
+    @Test
+    public void testGenerate_statefulHasNext_notConsumedTwicePerElement() {
+        // Regression: a stateful hasNext (here a decrementing budget) must be consumed at most once per
+        // element, so nextInt() always succeeds immediately after hasNext() returned true and the standard
+        // while(hasNext()) nextInt() idiom yields exactly the budgeted number of elements. The previous
+        // implementation re-invoked hasNext inside nextInt(), consuming the budget twice and throwing
+        // NoSuchElementException even though hasNext() had just returned true.
+        final AtomicInteger budget = new AtomicInteger(3);
+        final IntIterator iter = IntIterator.generate(() -> budget.getAndDecrement() > 0, () -> 42);
+
+        assertTrue(iter.hasNext());
+        assertEquals(42, iter.nextInt());
+
+        int count = 1;
+        while (iter.hasNext()) {
+            assertEquals(42, iter.nextInt());
+            count++;
+        }
+
+        assertEquals(3, count);
+        assertThrows(NoSuchElementException.class, iter::nextInt);
+    }
+
     // =================================================
     // next() [deprecated]
     // =================================================

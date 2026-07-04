@@ -263,9 +263,8 @@ public abstract class LongIterator extends ImmutableIterator<Long> {
      * while the {@link BooleanSupplier} returns {@code true}.
      * This allows for creating finite iterators with dynamic termination conditions.
      *
-     * <p>Note: The {@code hasNext} supplier may be called multiple times for the same element
-     * (once by the user, once internally for validation), so it should be idempotent or
-     * designed to handle multiple calls.</p>
+     * <p>The {@code hasNext} supplier is called at most once per element; its result is cached
+     * until the next call to {@code nextLong()}.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -288,9 +287,16 @@ public abstract class LongIterator extends ImmutableIterator<Long> {
         N.checkArgNotNull(supplier);
 
         return new LongIterator() {
+            private boolean hasNextCached = false;
+            private boolean hasNextValue = false;
+
             @Override
             public boolean hasNext() {
-                return hasNext.getAsBoolean();
+                if (!hasNextCached) {
+                    hasNextValue = hasNext.getAsBoolean();
+                    hasNextCached = true;
+                }
+                return hasNextValue;
             }
 
             @Override
@@ -299,6 +305,7 @@ public abstract class LongIterator extends ImmutableIterator<Long> {
                     throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
+                hasNextCached = false;
                 return supplier.getAsLong();
             }
         };

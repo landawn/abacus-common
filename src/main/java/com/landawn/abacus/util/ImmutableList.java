@@ -335,6 +335,33 @@ public sealed class ImmutableList<E> extends ImmutableCollection<E> implements L
         return new ImmutableList<>(Array.asList(e1, e2, e3, e4, e5, e6, e7, e8, e9), false);
     }
 
+    /**
+     * Returns an ImmutableList containing exactly ten elements in the order provided.
+     * The returned list is immutable and will have a size of 10.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * ImmutableList<Integer> digits = ImmutableList.of(0, 1, 2, 3, 4, 5, 6, 7, 8, 9);
+     * }</pre>
+     *
+     * @param <E> the type of the elements.
+     * @param e1 the first element.
+     * @param e2 the second element.
+     * @param e3 the third element.
+     * @param e4 the fourth element.
+     * @param e5 the fifth element.
+     * @param e6 the sixth element.
+     * @param e7 the seventh element.
+     * @param e8 the eighth element.
+     * @param e9 the ninth element.
+     * @param e10 the tenth element.
+     * @return an ImmutableList containing the specified elements in order.
+     */
+    public static <E> ImmutableList<E> of(final E e1, final E e2, final E e3, final E e4, final E e5, final E e6, final E e7, final E e8, final E e9,
+            final E e10) {
+        return new ImmutableList<>(Array.asList(e1, e2, e3, e4, e5, e6, e7, e8, e9, e10), false);
+    }
+
     //    /**
     //     * Returns an ImmutableList containing all elements from the provided array in the same order.
     //     * The returned list is independent of the input array; changes to the array after this call
@@ -389,7 +416,7 @@ public sealed class ImmutableList<E> extends ImmutableCollection<E> implements L
      *         or an empty list if {@code elements} is {@code null} or empty
      * @see #copyOf(Collection)
      */
-    public static <E> ImmutableList<E> copyOf(E[] elements) {
+    public static <E> ImmutableList<E> copyOf(final E[] elements) {
         if (N.isEmpty(elements)) {
             return empty();
         } else if (elements.length == 1) {

@@ -1423,7 +1423,7 @@ public final class IntFunctions {
                     final Constructor<?> constructor = ClassUtil.getDeclaredConstructor(targetType, int.class);
 
                     //noinspection ConstantValue
-                    if (constructor != null && N.invoke(constructor, 9) != null) { // magic number?
+                    if (constructor != null && N.invoke(constructor, 9) != null) { // probe with an arbitrary small positive capacity to confirm the constructor works
                         ret = size -> {
                             try {
                                 return (Collection<T>) N.invoke(constructor, size);
@@ -1540,7 +1540,7 @@ public final class IntFunctions {
                     final Constructor<?> constructor = ClassUtil.getDeclaredConstructor(targetType, int.class);
 
                     //noinspection ConstantValue
-                    if (constructor != null && N.invoke(constructor, 9) != null) { // magic number?
+                    if (constructor != null && N.invoke(constructor, 9) != null) { // probe with an arbitrary small positive capacity to confirm the constructor works
                         ret = size -> {
                             try {
                                 return (Map<K, V>) N.invoke(constructor, size);

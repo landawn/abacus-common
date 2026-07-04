@@ -953,7 +953,7 @@ public final class Holder<T> implements Mutable {
      */
     @Override
     public int hashCode() {
-        return (value == null) ? 0 : value.hashCode();
+        return N.hashCode(value);
     }
 
     /**

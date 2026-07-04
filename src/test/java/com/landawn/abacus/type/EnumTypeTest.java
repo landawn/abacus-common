@@ -50,6 +50,20 @@ public class EnumTypeTest extends TestBase {
         }
     }
 
+    public enum IntValueEnum {
+        A(10), B(20);
+
+        private final int intValue;
+
+        IntValueEnum(final int intValue) {
+            this.intValue = intValue;
+        }
+
+        public int intValue() {
+            return intValue;
+        }
+    }
+
     private EnumType<TestEnum> enumTypeByName;
     private EnumType<TestEnum> enumTypeByOrdinal;
     private CharacterWriter characterWriter;
@@ -83,6 +97,25 @@ public class EnumTypeTest extends TestBase {
     @Test
     public void testCodeRepresentationRejectsDuplicateCodes() {
         assertThrows(IllegalArgumentException.class, () -> createType(DuplicateCodeEnum.class.getName() + "(CODE)"));
+    }
+
+    @Test
+    public void testCodeRepresentationFallsBackToIntValue() {
+        // Enums that expose their numeric code via intValue() rather than code() (all the numeric enums in
+        // com.landawn.abacus.util: Color/Gender/MediaType/OperationType/LockMode/Month/DayOfWeek/WeekDay/
+        // CalendarField/YesNo, plus this IntValueEnum) must still work with CODE representation. Before the
+        // intValue() fallback, constructing any of them with "(CODE)" threw at construction time.
+        final EnumType<IntValueEnum> type = (EnumType<IntValueEnum>) createType(IntValueEnum.class.getName() + "(CODE)");
+        assertEquals(com.landawn.abacus.util.EnumType.CODE, type.enumerated());
+        assertEquals(IntValueEnum.A, type.valueOf(10));
+        assertEquals(IntValueEnum.B, type.valueOf(20));
+
+        // A real numeric enum from the util package (Color.intValue()); previously threw at construction.
+        final EnumType<com.landawn.abacus.util.Color> colorType = (EnumType<com.landawn.abacus.util.Color>) createType(
+                com.landawn.abacus.util.Color.class.getName() + "(CODE)");
+        assertEquals(com.landawn.abacus.util.EnumType.CODE, colorType.enumerated());
+        assertEquals(com.landawn.abacus.util.Color.RED, colorType.valueOf(2));
+        assertEquals(com.landawn.abacus.util.Color.PURPLE, colorType.valueOf(8));
     }
 
     @Test

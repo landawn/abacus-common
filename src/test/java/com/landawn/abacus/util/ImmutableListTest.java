@@ -112,6 +112,14 @@ public class ImmutableListTest extends TestBase {
     }
 
     @Test
+    public void testOf_TenElements() {
+        ImmutableList<Integer> list = ImmutableList.of(1, 2, 3, 4, 5, 6, 7, 8, 9, 10);
+        Assertions.assertEquals(10, list.size());
+        Assertions.assertEquals(1, list.get(0));
+        Assertions.assertEquals(10, list.get(9));
+    }
+
+    @Test
     public void testOf_VarArgs() {
         ImmutableList<String> list = ImmutableList.of("one", "two", "three", "four");
         Assertions.assertEquals(4, list.size());

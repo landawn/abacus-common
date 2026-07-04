@@ -6717,15 +6717,11 @@ sealed class CommonUtil permits N {
             return typeOf(obj.getClass()).toString(obj);
         }
 
-        // 3.8 [Medium] toString(Object) (6400) consumes Iterators and overrides Iterable.toString.
-        //    An Iterator argument is joined element-wise (6410-6411, Strings.join iterates it),
-        //    so N.toString(iter) EXHAUSTS the iterator - a side-effecting toString that also
-        //    feeds the checkArgument/checkState/format(...) message pipeline (3066+, which
-        //    stringifies arguments with this method): passing an Iterator as a message arg
-        //    silently drains it. Any Iterable is likewise rendered as "[a, b]" even when it
-        //    defines a meaningful custom toString. Recommendation: document both behaviors
-        //    prominently on toString(Object) and on checkArgument's errorMessageArgs (2280
-        //    already hints "rendered element-wise" - extend with the consumption warning).
+        // NOTE: Iterator/Iterable are intentionally NOT rendered element-wise here. Doing so would
+        //    (a) EXHAUST an Iterator argument as a side effect - problematic because this method also
+        //    stringifies arguments for the checkArgument/checkState/format(...) message pipeline - and
+        //    (b) override any meaningful custom toString() defined by an Iterable. Only Collection is
+        //    rendered element-wise (below); a bare Iterable/Iterator falls through to obj.toString().
         //
         //    if (obj instanceof final Iterator<?> iter) { // NOSONAR
         //        return Strings.join(iter, ", ", "[", "]");
@@ -10997,7 +10993,7 @@ sealed class CommonUtil permits N {
      * @param val the byte value to be converted
      * @return the String representation of the given byte value
      */
-    @SuppressFBWarnings({ "INT_BAD_COMPARISON_WITH_SIGNED_BYTE", "INT_BAD_COMPARISON_WITH_SIGNED_BYTE" })
+    @SuppressFBWarnings("INT_BAD_COMPARISON_WITH_SIGNED_BYTE")
     public static String stringOf(final byte val) {
 
         //noinspection ConstantValue
@@ -13285,7 +13281,7 @@ sealed class CommonUtil permits N {
      * @return a new instance of an ArrayDeque containing the elements from the specified collection
      */
     public static <E> ArrayDeque<E> newArrayDeque(final Collection<? extends E> c) { //NOSONAR
-        return new ArrayDeque<>(c);
+        return isEmpty(c) ? new ArrayDeque<>() : new ArrayDeque<>(c);
     }
 
     /**
@@ -14358,7 +14354,6 @@ sealed class CommonUtil permits N {
      * @return  a new empty Dataset.
      * @see Dataset#empty()
      */
-    @SuppressWarnings("deprecation")
     public static Dataset newEmptyDataset() {
         return new RowDataset(new ArrayList<>(), new ArrayList<>());
     }
@@ -14373,7 +14368,6 @@ sealed class CommonUtil permits N {
      * @return a new empty Dataset with the specified properties.
      * @see Dataset#empty()
      */
-    @SuppressWarnings("deprecation")
     static Dataset newEmptyDataset(final Map<String, Object> properties) {
         return new RowDataset(new ArrayList<>(), new ArrayList<>(), properties);
     }
@@ -14415,7 +14409,6 @@ sealed class CommonUtil permits N {
      * @return a new empty Dataset with the specified column names and properties.
      * @see Dataset#empty()
      */
-    @SuppressWarnings("deprecation")
     public static Dataset newEmptyDataset(final Collection<String> columnNames, final Map<String, Object> properties) {
         if (isEmpty(columnNames)) {
             return newEmptyDataset(properties);
@@ -14563,7 +14556,6 @@ sealed class CommonUtil permits N {
      * @see Dataset#columns(Collection, Object[][])
      * @see Dataset#columns(Collection, Collection)
      */
-    @SuppressWarnings("deprecation")
     public static Dataset newDataset(final Collection<String> columnNames, final Collection<?> rows, final Map<String, Object> properties)
             throws IllegalArgumentException {
         checkArgNotEmpty(columnNames, cs.columnNames);
@@ -14708,7 +14700,7 @@ sealed class CommonUtil permits N {
         for (int i = 0; i < rows.length; i++) {
             if (len(rows[i]) != columnCount) {
                 throw new IllegalArgumentException(
-                        "The length of column name list (" + columnCount + ") does not match the length of rowList[" + i + "] (" + len(rows[i]) + ")");
+                        "The length of column name list (" + columnCount + ") does not match the length of rows[" + i + "] (" + len(rows[i]) + ")");
             }
         }
 
@@ -14742,7 +14734,6 @@ sealed class CommonUtil permits N {
      * @see #newDataset(String, Collection)
      * @see Dataset#columns(Collection, Collection)
      */
-    @SuppressWarnings("deprecation")
     public static Dataset newDataset(final String keyColumnName, final String valueColumnName, final Map<?, ?> m) {
         final List<String> columnNameList = new ArrayList<>(2);
         columnNameList.add(keyColumnName);
@@ -14797,7 +14788,6 @@ sealed class CommonUtil permits N {
      * @see #newDataset(Collection, Collection)
      * @see #newDataset(String, Collection)
      */
-    @SuppressWarnings("deprecation")
     public static Dataset newDataset(final Map<String, ? extends Collection<?>> map) {
         if (isEmpty(map)) {
             return newEmptyDataset();
@@ -14856,7 +14846,6 @@ sealed class CommonUtil permits N {
      * @see #newDataset(Map)
      * @see #newDataset(String, String, Map)
      */
-    @SuppressWarnings("deprecation")
     public static Dataset newDataset(final String columnName, final Collection<?> column) throws IllegalArgumentException {
         checkArgNotEmpty(columnName, cs.columnName);
 
@@ -14955,7 +14944,6 @@ sealed class CommonUtil permits N {
      * @return a new Dataset which is the result of merging all the Datasets in the provided collection; an empty Dataset if {@code dss} is {@code null} or empty.
      * @throws IllegalArgumentException if {@code requiresSameColumns} is {@code true} and the {@code Datasets} in {@code dss} don't have the same column names.
      */
-    @SuppressWarnings("deprecation")
     public static Dataset merge(final Collection<? extends Dataset> dss, final boolean requiresSameColumns) throws IllegalArgumentException {
         if (isEmpty(dss)) {
             return newEmptyDataset();
@@ -21199,6 +21187,7 @@ sealed class CommonUtil permits N {
      * @return an immutable empty iterator
      * @see Collections#emptyIterator()
      */
+    @com.landawn.abacus.annotation.Immutable
     public static <T> Iterator<T> emptyIterator() {
         return EMPTY_ITERATOR;
     }
@@ -22859,8 +22848,7 @@ sealed class CommonUtil permits N {
     /**
      * Compares two iterables using the specified comparator.
      *
-     * <p>Note: a non-{@code Collection} {@code Iterable} may be iterated more than once by this method
-     * (an emptiness check precedes the iteration) - do not pass single-use {@code Iterable}s (e.g., {@code stream::iterator}).
+     * <p>Note: each iterable is iterated at most once, so single-use {@code Iterable}s (e.g., {@code stream::iterator}) are supported.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -23820,7 +23808,11 @@ sealed class CommonUtil permits N {
         if (c instanceof List && c instanceof RandomAccess) {
             return Nullable.of(((List<T>) c).get(0));
         } else {
-            return Nullable.of(c.iterator().next());
+            final Iterator<? extends T> iter = c.iterator();
+
+            // A non-Collection Iterable can be empty even though isEmptyCollection(c) returned false
+            // (that check only inspects Collection instances), so guard next() with hasNext().
+            return iter.hasNext() ? Nullable.of(iter.next()) : Nullable.empty();
         }
     }
 

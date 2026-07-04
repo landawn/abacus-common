@@ -160,7 +160,7 @@ public final class Timed<T> implements Immutable {
     @Override
     public int hashCode() {
         int result = Long.hashCode(timeInMillis);
-        result = 31 * result + (value == null ? 0 : value.hashCode());
+        result = 31 * result + N.hashCode(value);
         return result;
     }
 

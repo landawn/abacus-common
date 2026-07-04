@@ -25,6 +25,7 @@ import com.google.common.collect.ImmutableMultiset;
 import com.google.common.collect.ImmutableSortedMultiset;
 import com.google.common.collect.LinkedHashMultiset;
 import com.google.common.collect.Multiset;
+import com.google.common.collect.SortedMultiset;
 import com.google.common.collect.TreeMultiset;
 import com.landawn.abacus.parser.JsonDeserConfig;
 import com.landawn.abacus.util.ClassUtil;
@@ -241,9 +242,9 @@ public class GuavaMultisetType<E, T extends Multiset<E>> extends AbstractType<T>
      * Creates a new instance of the appropriate multiset implementation.
      * Selects the concrete implementation based on the type class:
      * <ul>
-     *   <li>{@link HashMultiset} for unordered multisets and abstract types</li>
+     *   <li>{@link TreeMultiset} for sorted multisets, including abstract {@link SortedMultiset} subtypes</li>
      *   <li>{@link LinkedHashMultiset} for ordered multisets</li>
-     *   <li>{@link TreeMultiset} for sorted multisets</li>
+     *   <li>{@link HashMultiset} for unordered multisets and other abstract types</li>
      * </ul>
      * Falls back to reflection-based instantiation for custom implementations.
      *
@@ -252,12 +253,16 @@ public class GuavaMultisetType<E, T extends Multiset<E>> extends AbstractType<T>
      * @throws IllegalArgumentException if no suitable constructor or factory method is found
      */
     protected T newInstance(int size) {
-        if (HashMultiset.class.isAssignableFrom(typeClass) || Modifier.isAbstract(typeClass.getModifiers())) {
-            return (T) HashMultiset.create(size);
+        if (TreeMultiset.class.isAssignableFrom(typeClass)
+                || (Modifier.isAbstract(typeClass.getModifiers()) && SortedMultiset.class.isAssignableFrom(typeClass))) {
+            // Mirrors GuavaMultimapType.newInstance: scope the abstract-type fallback to the sorted
+            // family first, so an abstract SortedMultiset request (e.g. ImmutableSortedMultiset,
+            // which is abstract) doesn't fall through to the unordered HashMultiset default below.
+            return (T) TreeMultiset.create();
         } else if (LinkedHashMultiset.class.isAssignableFrom(typeClass)) {
             return (T) LinkedHashMultiset.create(size);
-        } else if (TreeMultiset.class.isAssignableFrom(typeClass)) {
-            return (T) TreeMultiset.create();
+        } else if (HashMultiset.class.isAssignableFrom(typeClass) || Modifier.isAbstract(typeClass.getModifiers())) {
+            return (T) HashMultiset.create(size);
         } else {
             Constructor<T> constructor = ClassUtil.getDeclaredConstructor(typeClass);
 

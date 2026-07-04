@@ -902,6 +902,7 @@ public final class ListMultimap<K, E> extends Multimap<K, E, List<E>> {
             throws IllegalArgumentException {
         N.checkArgNotNull(map, cs.map);
         N.checkArgNotNull(valueSupplier, cs.valueSupplier);
+        N.checkArgument(map.values().stream().noneMatch(v -> v == null || v.isEmpty()), "The specified map contains null or empty value: %s", map);
 
         return new ListMultimap<>((Map<K, List<E>>) map, valueSupplier);
     }
@@ -1185,6 +1186,7 @@ public final class ListMultimap<K, E> extends Multimap<K, E, List<E>> {
      * @param mapSupplier the supplier function that provides a {@link Map} instance; the integer argument passed to it is
      *                    the number of keys in this multimap (i.e., {@code backingMap.size()})
      * @return an ImmutableMap where each key is associated with an ImmutableList of values from the original ListMultimap
+     * @throws NullPointerException if {@code mapSupplier} is {@code null}
      * @see #toImmutableMap()
      */
     public ImmutableMap<K, ImmutableList<E>> toImmutableMap(final IntFunction<? extends Map<K, ImmutableList<E>>> mapSupplier) {

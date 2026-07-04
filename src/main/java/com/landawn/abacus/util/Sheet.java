@@ -2067,12 +2067,15 @@ public final class Sheet<R, C, V> implements Cloneable {
      * @see #columnAsMap(Object)
      */
     public ImmutableList<V> columnValues(final C columnKey) throws IllegalArgumentException {
+        // Validate the key before materializing storage: init() eagerly allocates every column's
+        // backing list (O(rowCount * columnCount)), so an invalid key must fail before that happens.
+        final int columnIndex = getColumnIndex(columnKey);
 
         if (!_isInitialized) {
             init();
         }
 
-        final List<V> column = _columnList.get(getColumnIndex(columnKey));
+        final List<V> column = _columnList.get(columnIndex);
 
         return ImmutableList.wrap(column); // ImmutableList.wrap(new ArrayList<>(column));
     }
@@ -6169,7 +6172,6 @@ public final class Sheet<R, C, V> implements Cloneable {
      * @see #toTransposedDataset()
      * @see #toArray()
      */
-    @SuppressWarnings("deprecation")
     public Dataset toDataset() {
         final int rowLength = rowCount();
         final int columnLength = columnCount();
@@ -6222,7 +6224,6 @@ public final class Sheet<R, C, V> implements Cloneable {
      * @see #toDataset()
      * @see #toTransposedArray()
      */
-    @SuppressWarnings("deprecation")
     public Dataset toTransposedDataset() {
         final int rowLength = rowCount();
         final int columnLength = columnCount();
@@ -6641,7 +6642,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * @see #println()
      * @see #println(Collection, Collection, String, Appendable)
      */
-    public void println(String prefix) throws UncheckedIOException {
+    public void println(final String prefix) throws UncheckedIOException {
         println(_rowKeySet, _columnKeySet, prefix, System.out); // NOSONAR);
     }
 

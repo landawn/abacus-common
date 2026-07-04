@@ -102,6 +102,7 @@ public class DigestUtil {
      * @param messageDigest the MessageDigest algorithm to use (must not be {@code null})
      * @param data the ByteBuffer containing data to digest; position is advanced to the limit
      * @return The computed digest as a byte array; length depends on the algorithm used
+     * @throws NullPointerException if {@code messageDigest} or {@code data} is {@code null}
      */
     public static byte[] digest(final MessageDigest messageDigest, final ByteBuffer data) {
         messageDigest.update(data);
@@ -110,8 +111,8 @@ public class DigestUtil {
 
     /**
      * Reads through a File and computes the digest for its contents.
-     * The file is read using a buffered input stream for efficiency (1024-byte buffer).
-     * The entire file content is processed regardless of size.
+     * The file is read using a buffered input stream (default JDK buffer size), and the data
+     * is fed to the digest in 1024-byte chunks. The entire file content is processed regardless of size.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -125,6 +126,7 @@ public class DigestUtil {
      * @return The computed digest as a byte array; length depends on the algorithm used
      * @throws IOException if an I/O error occurs while reading the file
      * @throws java.io.FileNotFoundException if the file does not exist or cannot be opened
+     * @throws NullPointerException if {@code messageDigest} or {@code data} is {@code null}
      */
     public static byte[] digest(final MessageDigest messageDigest, final File data) throws IOException {
         return updateDigest(messageDigest, data).digest();
@@ -147,6 +149,7 @@ public class DigestUtil {
      * @param data the InputStream to read and digest (not closed by this method)
      * @return The computed digest as a byte array; length depends on the algorithm used
      * @throws IOException if an I/O error occurs while reading from the stream
+     * @throws NullPointerException if {@code messageDigest} or {@code data} is {@code null}
      */
     public static byte[] digest(final MessageDigest messageDigest, final InputStream data) throws IOException {
         return updateDigest(messageDigest, data).digest();
@@ -171,6 +174,7 @@ public class DigestUtil {
      *                if not specified, default options are used
      * @return The computed digest as a byte array; length depends on the algorithm used
      * @throws IOException if an I/O error occurs while reading the file
+     * @throws NullPointerException if {@code messageDigest} or {@code data} is {@code null}
      */
     public static byte[] digest(final MessageDigest messageDigest, final Path data, final OpenOption... options) throws IOException {
         return updateDigest(messageDigest, data, options).digest();

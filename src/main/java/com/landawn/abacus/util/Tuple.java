@@ -1334,30 +1334,29 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
         }
 
         /**
-         * Returns the specified array, setting {@code a[0]} to {@code null} if the array is non-empty.
+         * Returns the specified array unchanged.
          *
-         * <p>For Tuple0 (empty tuple), no elements need to be stored. If the provided array
-         * has length greater than 0, index 0 is set to {@code null} following the
-         * {@link java.util.Collection#toArray(Object[])} contract for marking the end of elements.
-         * The provided array is always returned; a new array is never created.</p>
+         * <p>{@code Tuple0} has no elements to store, so &mdash; consistent with the
+         * {@link Tuple#toArray(Object[])} contract, under which positions beyond a tuple's elements are
+         * left unchanged &mdash; every position of {@code a} is left untouched and the same array
+         * instance is returned; a new array is never created.</p>
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * Tuple.Tuple0 empty = Tuple.Tuple0.EMPTY;
-         * String[] arr = empty.toArray(new String[5]);   // arr[0] is null, arr is same instance
+         * String[] arr = empty.toArray(new String[5]);   // returns the same array, all elements untouched
          * }</pre>
          *
          * @param <A> the component type of the array.
-         * @param a the array to return; if its length is greater than 0, {@code a[0]} is set to {@code null}.
-         * @return the same array {@code a}, with {@code a[0]} set to {@code null} if {@code a.length > 0}.
+         * @param a the array to return unchanged.
+         * @return the same array {@code a}, unchanged.
          * @throws NullPointerException if the specified array is {@code null}.
          */
         @Override
         public <A> A[] toArray(final A[] a) {
-            if (a.length > 0) {
-                a[0] = null;
-            }
-            return a;
+            // Tuple0 has no elements to store; per Tuple#toArray(A[]) the supplied array is returned
+            // unchanged. requireNonNull preserves the NullPointerException-on-null contract shared with Tuple1..Tuple9.
+            return java.util.Objects.requireNonNull(a);
         }
 
         /**

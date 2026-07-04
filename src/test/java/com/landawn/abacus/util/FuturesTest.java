@@ -954,6 +954,20 @@ public class FuturesTest extends TestBase {
     }
 
     @Test
+    @Timeout(10)
+    public void testAnyOfReturnsSiblingSuccessWhenOneFutureFailsWithInterruptedCause() throws Exception {
+        // An input future that FAILED with an InterruptedException cause must not be mistaken for a
+        // caller-side interruption: anyOf must still return a sibling future's successful result.
+        // ('failed' is registered first, so its result is enqueued and observed before 'ok'.)
+        final CompletableFuture<String> failed = CompletableFuture.failedFuture(new InterruptedException("boom"));
+        final CompletableFuture<String> ok = CompletableFuture.completedFuture("ok");
+
+        final String result = Futures.anyOf(failed, ok).get();
+        assertEquals("ok", result);
+        assertFalse(Thread.currentThread().isInterrupted(), "caller thread must not be left interrupted");
+    }
+
+    @Test
     public void testAnyOfVarargsIsCancelled() {
         CompletableFuture<Integer> cf1 = new CompletableFuture<>();
         CompletableFuture<Integer> cf2 = new CompletableFuture<>();

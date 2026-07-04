@@ -117,10 +117,6 @@ import com.landawn.abacus.util.stream.Stream;
 @SuppressWarnings("deprecation")
 final class JsonParserImpl extends AbstractJsonParser {
 
-    private static final String ENTITY_NAME = "beanName";
-
-    private static final String ENTITY_TYPE = "beanType";
-
     private static final String COLUMN_NAMES = "columnNames";
 
     private static final String COLUMN_TYPES = "columnTypes";
@@ -139,8 +135,6 @@ final class JsonParserImpl extends AbstractJsonParser {
     private static final Map<String, Integer> datasetSheetPropOrder = new HashMap<>();
 
     static {
-        datasetSheetPropOrder.put(ENTITY_NAME, 1);
-        datasetSheetPropOrder.put(ENTITY_TYPE, 2);
         datasetSheetPropOrder.put(COLUMN_NAMES, 3);
         datasetSheetPropOrder.put(COLUMN_TYPES, 4);
         datasetSheetPropOrder.put(PROPERTIES, 5);
@@ -473,7 +467,7 @@ final class JsonParserImpl extends AbstractJsonParser {
                 }
 
                 throw new ParsingException("Unsupported class: " + ClassUtil.getCanonicalClassName(targetType.javaType()) //NOSONAR
-                        + ". Only Array/List/Map and Bean class with getter/setter methods are supported"); //NOSONAR
+                        + ". Only Array/List/Map and Bean class with getter/setter methods are supported", firstToken); //NOSONAR
         }
     }
 
@@ -1744,8 +1738,11 @@ final class JsonParserImpl extends AbstractJsonParser {
         bw.write(_BRACE_L);
 
         if (columnNames.size() > 0) {
-            final String doubleIndentation = Strings.nullToEmpty(indentation) + Strings.nullToEmpty(config.getIndentation())
-                    + Strings.nullToEmpty(config.getIndentation());
+            // Only build the (never-read-when-compact) indentation string in pretty mode, matching the
+            // isPrettyFormat ? ... : null convention used for nextIndentation elsewhere in this class.
+            final String doubleIndentation = isPrettyFormat
+                    ? Strings.nullToEmpty(indentation) + Strings.nullToEmpty(config.getIndentation()) + Strings.nullToEmpty(config.getIndentation())
+                    : null;
             String columnName = null;
             List<Object> column = null;
 
@@ -2082,8 +2079,11 @@ final class JsonParserImpl extends AbstractJsonParser {
         bw.write(_BRACE_L);
 
         if (sheet.columnKeySet().size() > 0) {
-            final String doubleIndentation = Strings.nullToEmpty(indentation) + Strings.nullToEmpty(config.getIndentation())
-                    + Strings.nullToEmpty(config.getIndentation());
+            // Only build the (never-read-when-compact) indentation string in pretty mode, matching the
+            // isPrettyFormat ? ... : null convention used for nextIndentation elsewhere in this class.
+            final String doubleIndentation = isPrettyFormat
+                    ? Strings.nullToEmpty(indentation) + Strings.nullToEmpty(config.getIndentation()) + Strings.nullToEmpty(config.getIndentation())
+                    : null;
             String columnName = null;
             List column = null;
             int i = 0;
@@ -3557,9 +3557,15 @@ final class JsonParserImpl extends AbstractJsonParser {
                     break;
 
                 case START_BRACE:
+                    // Guard against malformed input like "{{...}}" where the entity name was never set:
+                    // without this check, mapEntity.set(props) below would NPE instead of raising the
+                    // same ParsingException already thrown for a missing name in the branch above.
+                    if (mapEntity == null) {
+                        throw new ParsingException("Bean name cannot be null or empty", token);
+                    }
+
                     final Map<String, Object> props = readMap(jr, config, null, false, Map.class, null, null);
 
-                    //noinspection DataFlowIssue
                     mapEntity.set(props);
 
                     break;
@@ -3629,9 +3635,15 @@ final class JsonParserImpl extends AbstractJsonParser {
                     break;
 
                 case START_BRACE:
+                    // Guard against malformed input like "{{...}}" where the entity name was never set:
+                    // without this check, entityId.set(props) below would NPE instead of raising the
+                    // same ParsingException already thrown for a missing name in the branch above.
+                    if (entityId == null) {
+                        throw new ParsingException("Bean name cannot be null or empty", token);
+                    }
+
                     final Map<String, Object> props = readMap(jr, config, null, false, Map.class, null, null);
 
-                    //noinspection DataFlowIssue
                     entityId.set(props);
 
                     break;

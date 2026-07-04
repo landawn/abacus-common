@@ -34,6 +34,7 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 
 import com.landawn.abacus.annotation.SuppressFBWarnings;
+import com.landawn.abacus.exception.ParsingException;
 import com.landawn.abacus.exception.UncheckedIOException;
 import com.landawn.abacus.parser.JsonDeserConfig;
 import com.landawn.abacus.parser.JsonParser;
@@ -348,6 +349,20 @@ public final class CsvUtil {
     }
 
     /**
+     * Parses a single CSV data line into {@code output} using the given line parser, translating a
+     * ragged-row overflow (a data row with more fields than the header/output array) from a raw
+     * {@link IndexOutOfBoundsException} into a {@link ParsingException} that names the offending line and
+     * the expected column count. All other parser exceptions propagate unchanged.
+     */
+    private static void parseRow(final BiConsumer<String, String[]> lineParser, final String line, final String[] output) {
+        try {
+            lineParser.accept(line, output);
+        } catch (final IndexOutOfBoundsException e) {
+            throw new ParsingException("CSV data row has more fields than the expected " + output.length + " column(s): " + line, e);
+        }
+    }
+
+    /**
      * Configures CSV write operations in the current thread to use backslash ({@code \}) as the
      * escape character instead of the default RFC 4180 doubling of the quote character.
      * This setting is thread-local and remains active until {@link #resetEscapeCharForWrite()} is called.
@@ -658,7 +673,6 @@ public final class CsvUtil {
      * @see #load(File, Collection, long, long, Predicate)
      * @see #load(Reader, Collection, long, long, Predicate, Class)
      */
-    @SuppressWarnings("deprecation")
     @SuppressFBWarnings("RV_DONT_JUST_NULL_CHECK_READLINE")
     public static Dataset load(final Reader source, final Collection<String> selectColumnNames, long offset, long count,
             final Predicate<? super String[]> rowFilter) throws IllegalArgumentException, UncheckedIOException {
@@ -715,7 +729,7 @@ public final class CsvUtil {
 
                 while ((line = br.readLine()) != null) {
                     N.fill(row, null);
-                    lineParser.accept(line, row);
+                    parseRow(lineParser, line, row);
 
                     if (rowFilter != null && !rowFilter.test(row)) {
                         continue;
@@ -1019,7 +1033,6 @@ public final class CsvUtil {
      * @see #load(Reader, Collection, long, long, Class)
      * @see #load(File, Collection, long, long, Predicate, Class)
      */
-    @SuppressWarnings("deprecation")
     @SuppressFBWarnings("RV_DONT_JUST_NULL_CHECK_READLINE")
     public static Dataset load(final Reader source, final Collection<String> selectColumnNames, long offset, long count,
             final Predicate<? super String[]> rowFilter, final Class<?> beanClassForColumnType) throws IllegalArgumentException, UncheckedIOException {
@@ -1084,7 +1097,7 @@ public final class CsvUtil {
 
                 while ((line = br.readLine()) != null) {
                     N.fill(row, null);
-                    lineParser.accept(line, row);
+                    parseRow(lineParser, line, row);
 
                     if (rowFilter != null && !rowFilter.test(row)) {
                         continue;
@@ -1328,7 +1341,6 @@ public final class CsvUtil {
      *         {@code null} or empty
      * @throws UncheckedIOException if an I/O error occurs
      */
-    @SuppressWarnings("deprecation")
     @SuppressFBWarnings("RV_DONT_JUST_NULL_CHECK_READLINE")
     public static Dataset load(final Reader source, final Collection<String> selectColumnNames, long offset, long count,
             final Predicate<? super String[]> rowFilter, final Map<String, ? extends Type<?>> columnTypeMap)
@@ -1397,7 +1409,7 @@ public final class CsvUtil {
 
                 while ((line = br.readLine()) != null) {
                     N.fill(row, null);
-                    lineParser.accept(line, row);
+                    parseRow(lineParser, line, row);
 
                     if (rowFilter != null && !rowFilter.test(row)) {
                         continue;
@@ -1714,7 +1726,6 @@ public final class CsvUtil {
      *         {@code selectColumnNames} is not present in the CSV header
      * @throws UncheckedIOException if an I/O error occurs
      */
-    @SuppressWarnings("deprecation")
     @SuppressFBWarnings("RV_DONT_JUST_NULL_CHECK_READLINE")
     public static Dataset load(final Reader source, final Collection<String> selectColumnNames, long offset, long count,
             final Predicate<? super String[]> rowFilter,
@@ -1778,7 +1789,7 @@ public final class CsvUtil {
 
                 while ((line = br.readLine()) != null) {
                     N.fill(rowData, null);
-                    lineParser.accept(line, rowData);
+                    parseRow(lineParser, line, rowData);
 
                     if (rowFilter != null && !rowFilter.test(rowData)) {
                         continue;
@@ -2225,12 +2236,12 @@ public final class CsvUtil {
                 final Stream<T> ret = ((rowFilter == null || N.equals(rowFilter, Fn.alwaysTrue()) || N.equals(rowFilter, Fnn.alwaysTrue())) //
                         ? Stream.ofLines(br).skip(offset).map(it -> {
                             N.fill(rowData, null);
-                            lineParser.accept(it, rowData);
+                            parseRow(lineParser, it, rowData);
                             return rowData;
                         }) //
                         : Stream.ofLines(br).skip(offset).map(it -> {
                             N.fill(rowData, null);
-                            lineParser.accept(it, rowData);
+                            parseRow(lineParser, it, rowData);
                             return rowData;
                         }).filter(Fn.from(rowFilter))) //
                                 .limit(count)
@@ -2624,12 +2635,12 @@ public final class CsvUtil {
                 final Stream<T> ret = ((rowFilter == null || N.equals(rowFilter, Fn.alwaysTrue()) || N.equals(rowFilter, Fnn.alwaysTrue())) //
                         ? Stream.ofLines(br).skip(offset).map(it -> {
                             N.fill(rowData, null);
-                            lineParser.accept(it, rowData);
+                            parseRow(lineParser, it, rowData);
                             return rowData;
                         }) //
                         : Stream.ofLines(br).skip(offset).map(it -> {
                             N.fill(rowData, null);
-                            lineParser.accept(it, rowData);
+                            parseRow(lineParser, it, rowData);
                             return rowData;
                         }).filter(Fn.from(rowFilter))) //
                                 .limit(count)
@@ -2889,7 +2900,10 @@ public final class CsvUtil {
                 return 0;
             }
 
-            final Type<Object> strType = Type.of(String.class);
+            // Note: a locally-typed Type<Object> handle is needed here (rather than reusing the
+            // class-level Type<String> strType field directly) so it can populate the Type<Object>[]
+            // columnType array below; the variable is named objStrType to avoid shadowing the field.
+            final Type<Object> objStrType = Type.of(String.class);
 
             final String[] titles = headerParser.apply(line);
             final int columnCount = titles.length;
@@ -2915,15 +2929,15 @@ public final class CsvUtil {
             final Type<Object>[] columnType = new Type[columnCount];
 
             if (beanClassForColumnTypeInference == null) {
-                Arrays.fill(columnType, strType);
+                Arrays.fill(columnType, objStrType);
             } else {
                 final BeanInfo beanInfo = ParserUtil.getBeanInfo(beanClassForColumnTypeInference);
 
                 for (int i = 0; i < columnCount; i++) {
                     final PropInfo propInfo = beanInfo.getPropInfo(titles[i]);
 
-                    if (propInfo == null || propInfo.type.equals(strType)) {
-                        columnType[i] = strType;
+                    if (propInfo == null || propInfo.type.equals(objStrType)) {
+                        columnType[i] = objStrType;
                     } else {
                         columnType[i] = propInfo.type;
                     }
@@ -2952,7 +2966,7 @@ public final class CsvUtil {
                 }
 
                 N.fill(rowData, null);
-                lineParser.accept(line, rowData);
+                parseRow(lineParser, line, rowData);
 
                 bw.write("{");
                 boolean firstColumn = true;
@@ -2971,7 +2985,7 @@ public final class CsvUtil {
                         // escaping serializer.
                         bw.writeCharacter(titles[i]);
                         bw.write("\":");
-                        if (columnType[i] == strType) {
+                        if (columnType[i] == objStrType) {
                             columnType[i].serializeTo(bw, rowData[i], config);
                         } else {
                             columnType[i].serializeTo(bw, columnType[i].valueOf(rowData[i]), config);

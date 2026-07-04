@@ -147,7 +147,7 @@ public @interface JsonXmlField {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * @JsonXmlField(numberFormat = "#.##")
-     * private Double price;  // "19.99" with 2 decimal places
+     * private Double price;  // up to 2 decimal places, trailing zeros omitted (e.g. 19.99, 19.9, 19)
      *
      * @JsonXmlField(numberFormat = "###,###.00")
      * private BigDecimal amount;  // "1,234.56" with comma separators

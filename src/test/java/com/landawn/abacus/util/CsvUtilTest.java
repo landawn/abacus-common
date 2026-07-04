@@ -30,6 +30,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
 import com.landawn.abacus.TestBase;
+import com.landawn.abacus.exception.ParsingException;
 import com.landawn.abacus.type.Type;
 import com.landawn.abacus.util.NoCachingNoUpdating.DisposableArray;
 import com.landawn.abacus.util.function.TriConsumer;
@@ -79,6 +80,17 @@ public class CsvUtilTest extends TestBase {
         CsvUtil.resetHeaderParser();
         CsvUtil.resetLineParser();
         CsvUtil.resetEscapeCharForWrite();
+    }
+
+    @Test
+    @DisplayName("Ragged row (more fields than header) throws a clear ParsingException")
+    public void testLoadRaggedRowThrowsParsingException() throws IOException {
+        final File raggedFile = tempDir.resolve("ragged.csv").toFile();
+        // header has 3 columns; the second data row has 4 fields
+        Files.writeString(raggedFile.toPath(), "a,b,c\n1,2,3\n4,5,6,7\n");
+
+        final ParsingException ex = assertThrows(ParsingException.class, () -> CsvUtil.load(raggedFile));
+        assertTrue(ex.getMessage().contains("3 column"), "message should name the expected column count: " + ex.getMessage());
     }
 
     @Test

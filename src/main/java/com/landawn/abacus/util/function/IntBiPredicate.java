@@ -83,6 +83,13 @@ public interface IntBiPredicate extends Throwables.IntBiPredicate<RuntimeExcepti
     /**
      * Returns a predicate that represents the logical negation of this predicate.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * IntBiPredicate equal = IntBiPredicate.EQUAL;
+     * IntBiPredicate notEqual = equal.negate();
+     * boolean result = notEqual.test(3, 7);   // Returns true
+     * }</pre>
+     *
      * @return a predicate that represents the logical negation of this predicate
      */
     default IntBiPredicate negate() {
@@ -96,6 +103,14 @@ public interface IntBiPredicate extends Throwables.IntBiPredicate<RuntimeExcepti
      *
      * <p>Any exceptions thrown during evaluation of either predicate are relayed to the caller;
      * if evaluation of this predicate throws an exception, the {@code other} predicate will not be evaluated.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * IntBiPredicate bothPositive = (a, b) -> a > 0 && b > 0;
+     * IntBiPredicate sumUnder100 = (a, b) -> a + b < 100;
+     * IntBiPredicate combined = bothPositive.and(sumUnder100);
+     * boolean result = combined.test(10, 20);   // Returns true
+     * }</pre>
      *
      * @param other a predicate that will be logically-ANDed with this predicate. Must not be {@code null}.
      * @return a composed predicate that represents the short-circuiting logical AND of this predicate and
@@ -114,6 +129,14 @@ public interface IntBiPredicate extends Throwables.IntBiPredicate<RuntimeExcepti
      *
      * <p>Any exceptions thrown during evaluation of either predicate are relayed to the caller;
      * if evaluation of this predicate throws an exception, the {@code other} predicate will not be evaluated.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * IntBiPredicate eitherZero = (a, b) -> a == 0 || b == 0;
+     * IntBiPredicate eitherNegative = (a, b) -> a < 0 || b < 0;
+     * IntBiPredicate combined = eitherZero.or(eitherNegative);
+     * boolean result = combined.test(0, 5);   // Returns true
+     * }</pre>
      *
      * @param other a predicate that will be logically-ORed with this predicate. Must not be {@code null}.
      * @return a composed predicate that represents the short-circuiting logical OR of this predicate and

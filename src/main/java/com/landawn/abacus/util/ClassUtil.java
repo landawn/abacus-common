@@ -600,8 +600,6 @@ public final class ClassUtil {
         BUILT_IN_TYPE.put(java.util.OptionalLong.class.getCanonicalName(), java.util.OptionalLong.class);
         BUILT_IN_TYPE.put(java.util.OptionalDouble.class.getCanonicalName(), java.util.OptionalDouble.class);
 
-        BUILT_IN_TYPE.put(Type.class.getCanonicalName(), Type.class);
-
         List<Class<?>> classes = new ArrayList<>(BUILT_IN_TYPE.values());
         for (final Class<?> cls : classes) {
             Class<?> arrayClass = cls;
@@ -701,7 +699,7 @@ public final class ClassUtil {
 
     private static final Map<Class<?>, String> simpleClassNamePool = new ObjectPool<>(POOL_SIZE);
 
-    private static final Map<Class<?>, String> nameClassPool = new ObjectPool<>(POOL_SIZE);
+    private static final Map<Class<?>, String> fullClassNamePool = new ObjectPool<>(POOL_SIZE);
 
     private static final Map<Class<?>, String> canonicalClassNamePool = new ObjectPool<>(POOL_SIZE);
 
@@ -805,7 +803,9 @@ public final class ClassUtil {
                             try {
                                 cls = Class.forName(newClassName); // NOSONAR
 
-                                BUILT_IN_TYPE.put(clsName, cls);
+                                if (cacheResult) {
+                                    BUILT_IN_TYPE.put(clsName, cls);
+                                }
                             } catch (final ClassNotFoundException e1) {
                                 // ignore.
                             }
@@ -835,7 +835,9 @@ public final class ClassUtil {
                                     try {
                                         cls = Class.forName(prefixOfArray + symbolOfPrimitiveArrayClassName); // NOSONAR
 
-                                        BUILT_IN_TYPE.put(clsName, cls);
+                                        if (cacheResult) {
+                                            BUILT_IN_TYPE.put(clsName, cls);
+                                        }
                                     } catch (final ClassNotFoundException e2) {
                                         // ignore.
                                     }
@@ -958,7 +960,7 @@ public final class ClassUtil {
      */
     public static String getClassName(final Class<?> cls) {
 
-        return nameClassPool.computeIfAbsent(cls, k -> cls.getName());
+        return fullClassNamePool.computeIfAbsent(cls, k -> cls.getName());
     }
 
     /**
@@ -1245,8 +1247,8 @@ public final class ClassUtil {
      */
     public static List<Class<?>> findClassesInPackage(final String pkgName, final boolean isRecursive, final boolean skipClassLoadingException,
             final Predicate<? super Class<?>> predicate) throws IllegalArgumentException, UncheckedIOException {
-        if (logger.isInfoEnabled()) {
-            logger.info("Looking for classes in package: " + pkgName);
+        if (logger.isDebugEnabled()) {
+            logger.debug("Looking for classes in package: " + pkgName);
         }
 
         final String pkgPath = packageNameToFilePath(pkgName);
@@ -1262,8 +1264,8 @@ public final class ClassUtil {
             // Get a File object for the package
             final String fullPath = resource.getPath().replace("%20", " ").replaceFirst("[.]jar[!].*", JAR_POSTFIX).replaceFirst("file:", "");//NOSONAR
 
-            if (logger.isInfoEnabled()) {
-                logger.info("ClassDiscovery: FullPath = " + fullPath);
+            if (logger.isDebugEnabled()) {
+                logger.debug("ClassDiscovery: FullPath = " + fullPath);
             }
 
             final File file = new File(fullPath);
@@ -1294,11 +1296,11 @@ public final class ClassUtil {
                             }
                         } catch (final Throwable e) {
                             if (logger.isWarnEnabled()) {
-                                logger.warn(e, "Failed to load class: " + className);
+                                logger.warn("Failed to load class: " + className, e);
                             }
 
                             if (!skipClassLoadingException) {
-                                throw new RuntimeException("ClassNotFoundException loading " + className); //NOSONAR
+                                throw new RuntimeException("ClassNotFoundException loading " + className, e); //NOSONAR
                             }
                         }
                     } else if (file2.isDirectory() && isRecursive) {
@@ -1343,7 +1345,7 @@ public final class ClassUtil {
                                     if (!skipClassLoadingException) {
                                         IOUtil.close(jarFile);
                                         jarFile = null;
-                                        throw new RuntimeException("ClassNotFoundException loading " + className);
+                                        throw new RuntimeException("ClassNotFoundException loading " + className, e);
                                     }
                                 }
                             } else if (entry.isDirectory() && (entryName.length() > (pkgPath.length() + 1)) && isRecursive) {
@@ -1408,8 +1410,8 @@ public final class ClassUtil {
             throw new UncheckedIOException(e);
         }
 
-        if (logger.isInfoEnabled()) {
-            logger.info("Found resources: " + resourceList + " by package name(" + pkgName + ")");
+        if (logger.isDebugEnabled()) {
+            logger.debug("Found resources: " + resourceList + " by package name(" + pkgName + ")");
         }
 
         return resourceList;
@@ -1484,7 +1486,9 @@ public final class ClassUtil {
 
     /**
      * Returns all interfaces and superclasses that the specified class implements or extends, excluding {@code Object.class}.
-     * This combines the results of {@link #getAllInterfaces(Class)} and {@link #getAllSuperclasses(Class)}.
+     * The resulting set is equivalent to the union of what {@link #getAllInterfaces(Class)} and {@link #getAllSuperclasses(Class)}
+     * would return for a {@code non-null} class, though this method uses its own traversal rather than calling either of them
+     * (and, unlike {@link #getAllSuperclasses(Class)}, tolerates a {@code null} {@code cls} instead of throwing).
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1532,11 +1536,14 @@ public final class ClassUtil {
 
             final Class<?> superclass = cls.getSuperclass();
 
-            if (superclass != null && !superclass.equals(Object.class) && superTypesFound.add(superclass)) {
-                getAllSuperTypes(superclass, superTypesFound);
+            // No need to recurse into the superclass chain here: this while-loop already advances
+            // through it (see "cls = superclass" below), so a recursive call would just re-walk
+            // the same chain a second time.
+            if (superclass != null && !superclass.equals(Object.class)) {
+                superTypesFound.add(superclass);
             }
 
-            cls = cls.getSuperclass();
+            cls = superclass;
         }
     }
 

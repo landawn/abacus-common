@@ -2441,9 +2441,11 @@ public final class Beans {
             } catch (IllegalAccessException | InvocationTargetException e) {
                 throw ExceptionUtil.toRuntimeException(e, true);
             } catch (final Exception e) {
-                if (logger.isWarnEnabled()) {
-                    logger.warn("Failed to set value for field by method: {} in class: {} with value type {}", propSetMethod.getName(),
-                            propSetMethod.getDeclaringClass().getName(), propValue.getClass().getName());
+                if (logger.isDebugEnabled()) {
+                    // Recoverable: falls through to a type-converting retry below, so this is a routine
+                    // fallback, not a failure worth a WARN.
+                    logger.debug("Failed to set value for field by method: {} in class: {} with value type {}; will retry after type conversion",
+                            propSetMethod.getName(), propSetMethod.getDeclaringClass().getName(), propValue.getClass().getName());
                 }
 
                 final PropInfo propInfo = ParserUtil.getBeanInfo(bean.getClass()).getPropInfo(getPropNameByMethod(propSetMethod));
@@ -5296,7 +5298,7 @@ public final class Beans {
         final Class<?> srcCls = obj.getClass();
         Object copy = null;
 
-        if (Utils.kryoParser != null && targetType.equals(obj.getClass()) && !notKryoCompatible.contains(srcCls)) {
+        if (Utils.kryoParser != null && targetType.equals(srcCls) && !notKryoCompatible.contains(srcCls)) {
             try {
                 copy = Utils.kryoParser.deepCopy(obj);
             } catch (final Exception e) {
@@ -5706,24 +5708,9 @@ public final class Beans {
             @NotNull final Class<? extends T> targetType) throws IllegalArgumentException {
         N.checkArgNotNull(targetType, cs.targetType);
 
-        if (sourceBean != null) {
-            final Class<?> srcCls = sourceBean.getClass();
-
-            if (ignoredPropNames == null && Utils.kryoParser != null && targetType.equals(srcCls) && !notKryoCompatible.contains(srcCls)) {
-                try {
-                    final T copy = (T) Utils.kryoParser.shallowCopy(sourceBean);
-
-                    if (copy != null) {
-                        return copy;
-                    }
-                } catch (final Exception e) {
-                    notKryoCompatible.add(srcCls);
-
-                    // ignore
-                }
-            }
-        }
-
+        // No Kryo shallowCopy fast-path here: this overload skips null/default-valued source properties
+        // (see javadoc), but shallowCopy clones verbatim including nulls, which would violate that contract
+        // whenever Kryo is present and targetType == source class (making the result Kryo-presence dependent).
         final BeanInfo targetBeanInfo = ParserUtil.getBeanInfo(targetType);
         Object result = targetBeanInfo.createBeanResult();
 
@@ -6429,7 +6416,6 @@ public final class Beans {
 
         final boolean isIdentityPropNameConverter = propNameConverter == Fn.<String> identity();
         final BeanInfo srcBeanInfo = ParserUtil.getBeanInfo(sourceBean.getClass());
-        final BiPredicate<? super String, Object> objPropFilter = propFilter;
         final BinaryOperator<Object> objPropMergeFunc = (BinaryOperator<Object>) mergeFunc;
 
         Object propValue = null;
@@ -6439,7 +6425,7 @@ public final class Beans {
         for (final PropInfo propInfo : srcBeanInfo.propInfoList) {
             propValue = propInfo.getPropValue(sourceBean);
 
-            if (objPropFilter.test(propInfo.name, propValue)) {
+            if (propFilter.test(propInfo.name, propValue)) {
                 if (isIdentityPropNameConverter) {
                     targetPropInfo = targetBeanInfo.getPropInfo(propInfo);
                 } else {

@@ -3885,6 +3885,55 @@ public class AbstractStreamTest extends TestBase {
         assertTrue(result.contains("]"));
     }
 
+    // Regression: persist*(OutputStream) must write the data to the caller's stream but must NOT close it
+    // (the caller owns the stream, as shown by the try-with-resources usage in the Javadoc examples).
+    // persist(...,OutputStream) already uses Objectory.recycle(bw) (no close); persistToCsv/persistToJson
+    // must behave the same. See review 2026-06-30 finding S06-06.
+    private static final class CloseCountingOutputStream extends java.io.FilterOutputStream {
+        final AtomicInteger closeCount = new AtomicInteger();
+
+        CloseCountingOutputStream(final java.io.OutputStream out) {
+            super(out);
+        }
+
+        @Override
+        public void close() throws IOException {
+            closeCount.incrementAndGet();
+            super.close();
+        }
+    }
+
+    @Test
+    public void testPersistToOutputStream_doesNotCloseCallerStream() throws IOException {
+        // control: persist(toLine, OutputStream) — established behavior (Objectory.recycle, no close)
+        {
+            final java.io.ByteArrayOutputStream sink = new java.io.ByteArrayOutputStream();
+            final CloseCountingOutputStream os = new CloseCountingOutputStream(sink);
+            final long cnt = createStream(1, 2, 3).persist(String::valueOf, os);
+            assertEquals(3, cnt);
+            assertTrue(sink.size() > 0, "persist must write data to the OutputStream");
+            assertEquals(0, os.closeCount.get(), "persist(OutputStream) must NOT close the caller's stream");
+        }
+        // persistToJson(OutputStream)
+        {
+            final java.io.ByteArrayOutputStream sink = new java.io.ByteArrayOutputStream();
+            final CloseCountingOutputStream os = new CloseCountingOutputStream(sink);
+            final long cnt = createStream(1, 2, 3).persistToJson(os);
+            assertEquals(3, cnt);
+            assertTrue(sink.size() > 0, "persistToJson must write data to the OutputStream");
+            assertEquals(0, os.closeCount.get(), "persistToJson(OutputStream) must NOT close the caller's stream");
+        }
+        // persistToCsv(OutputStream)
+        {
+            final java.io.ByteArrayOutputStream sink = new java.io.ByteArrayOutputStream();
+            final CloseCountingOutputStream os = new CloseCountingOutputStream(sink);
+            final long cnt = createStream(new TestBean("John", 25)).persistToCsv(os);
+            assertEquals(1, cnt);
+            assertTrue(sink.size() > 0, "persistToCsv must write data to the OutputStream");
+            assertEquals(0, os.closeCount.get(), "persistToCsv(OutputStream) must NOT close the caller's stream");
+        }
+    }
+
     @Test
     public void testPersistToJSONWriter() throws IOException {
         StringWriter writer = new StringWriter();

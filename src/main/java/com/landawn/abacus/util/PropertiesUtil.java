@@ -177,8 +177,8 @@ public final class PropertiesUtil {
                             final long lastLoadTime = file.lastModified();
                             InputStream is = null;
 
-                            if (logger.isWarnEnabled()) {
-                                logger.warn("Start to refresh properties with the updated file: {}; propertyCount={}", file.getAbsolutePath(),
+                            if (logger.isDebugEnabled()) {
+                                logger.debug("Start to refresh properties with the updated file: {}; propertyCount={}", file.getAbsolutePath(),
                                         properties.size());
                             }
 
@@ -198,8 +198,9 @@ public final class PropertiesUtil {
                                 IOUtil.close(is);
                             }
 
-                            if (logger.isWarnEnabled()) {
-                                logger.warn("End to refresh properties with the updated file: {}; propertyCount={}", file.getAbsolutePath(), properties.size());
+                            if (logger.isDebugEnabled()) {
+                                logger.debug("End to refresh properties with the updated file: {}; propertyCount={}", file.getAbsolutePath(),
+                                        properties.size());
                             }
                         }
                     }
@@ -377,8 +378,8 @@ public final class PropertiesUtil {
         File configurationFile = new File(configFileName);
 
         if (configurationFile.exists()) {
-            if (logger.isWarnEnabled()) {
-                logger.warn("found file " + configurationFile.getAbsolutePath());
+            if (logger.isInfoEnabled()) {
+                logger.info("Found configuration file: " + configurationFile.getAbsolutePath());
             }
 
             return configurationFile;
@@ -563,8 +564,8 @@ public final class PropertiesUtil {
                 if (file.getName().equalsIgnoreCase(configFileName)) {
                     if ((isDir && file.isDirectory()) || (!isDir && !file.isDirectory())) { //NOSONAR
 
-                        if (logger.isWarnEnabled()) {
-                            logger.warn("found file [" + file.getAbsolutePath() + "]");
+                        if (logger.isInfoEnabled()) {
+                            logger.info("Found configuration file [" + file.getAbsolutePath() + "]");
                         }
 
                         return file;

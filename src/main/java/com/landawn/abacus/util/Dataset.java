@@ -338,7 +338,6 @@ public sealed interface Dataset permits RowDataset {
      * @return a new Dataset with the specified column names and columns
      * @throws IllegalArgumentException if {@code columnNames} length differs from {@code columns} length, or {@code columnNames} contains duplicate column names, or any column has a length different from the first column
      */
-    @SuppressWarnings("deprecation")
     static Dataset columns(final Collection<String> columnNames, final Object[][] columns) throws IllegalArgumentException {
         if (N.size(columnNames) != N.len(columns)) {
             throw new IllegalArgumentException("The length of 'columnNames'(" + N.size(columnNames)
@@ -387,7 +386,6 @@ public sealed interface Dataset permits RowDataset {
      * @return a new Dataset with the specified column names and columns
      * @throws IllegalArgumentException if {@code columnNames} length differs from {@code columns} length, or {@code columnNames} contains duplicate column names, or any column has a length different from the first column
      */
-    @SuppressWarnings("deprecation")
     static Dataset columns(final Collection<String> columnNames, final Collection<? extends Collection<?>> columns) throws IllegalArgumentException {
         if (N.size(columnNames) != N.size(columns)) {
             throw new IllegalArgumentException("The length of 'columnNames' is not equal to the length of the sub-collections in 'columns'.");
@@ -1550,7 +1548,7 @@ public sealed interface Dataset permits RowDataset {
      *                                  or if any collection in {@code newColumns} is not empty and its size does not match the number of rows in the Dataset.
      */
     void addColumns(int newColumnPosition, List<String> newColumnNames, List<? extends Collection<?>> newColumns)
-            throws IllegalStateException, IllegalArgumentException;
+            throws IllegalStateException, IndexOutOfBoundsException, IllegalArgumentException;
 
     /**
      * Removes a column from the Dataset.

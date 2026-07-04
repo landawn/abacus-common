@@ -144,7 +144,7 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
      * @param toIndex the ending index (exclusive)
      * @return a new {@code DoubleIterator} over the specified range, or an empty iterator if
      *         the array is {@code null} or {@code fromIndex == toIndex}
-     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code toIndex > a.length},
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code toIndex > (a == null ? 0 : a.length)},
      *         or {@code fromIndex > toIndex}
      */
     public static DoubleIterator of(final double[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {

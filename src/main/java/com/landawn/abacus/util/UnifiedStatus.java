@@ -14,6 +14,8 @@
 
 package com.landawn.abacus.util;
 
+import com.landawn.abacus.annotation.MayReturnNull;
+
 /**
  * Enumeration representing various status states for entities, services, processes, and operations.
  * Each status has an associated numeric code for efficient storage and comparison.
@@ -406,6 +408,7 @@ public enum UnifiedStatus {
      *         {@code UnifiedStatus} is mapped to that code
      * @see #code()
      */
+    @MayReturnNull
     public static UnifiedStatus fromCode(final int code) {
         return code < 0 || code >= MAX_CODE ? null : cache[code];
     }

@@ -135,7 +135,7 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
      * @param fromIndex the starting index (inclusive)
      * @param toIndex the ending index (exclusive)
      * @return a new {@code BooleanIterator} over the specified range, or an empty iterator if the array is {@code null} or {@code fromIndex == toIndex}
-     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code toIndex > a.length}, or {@code fromIndex > toIndex}
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code toIndex > (a == null ? 0 : a.length)}, or {@code fromIndex > toIndex}
      */
     public static BooleanIterator of(final boolean[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
@@ -261,10 +261,8 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
 
     /**
      * Returns a {@code BooleanIterator} that generates values while a condition is {@code true}.
-     *
-     * <p>Note: The {@code hasNext} supplier may be called multiple times for the same element
-     * (once by the user, once internally for validation), so it should be idempotent or
-     * designed to handle multiple calls.</p>
+     * The {@code hasNext} supplier is called at most once per element; its result is cached
+     * until the next call to {@code nextBoolean()}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -287,9 +285,16 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
         N.checkArgNotNull(supplier);
 
         return new BooleanIterator() {
+            private boolean hasNextCached = false;
+            private boolean hasNextValue = false;
+
             @Override
             public boolean hasNext() {
-                return hasNext.getAsBoolean();
+                if (!hasNextCached) {
+                    hasNextValue = hasNext.getAsBoolean();
+                    hasNextCached = true;
+                }
+                return hasNextValue;
             }
 
             @Override
@@ -298,6 +303,7 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
                     throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
+                hasNextCached = false;
                 return supplier.getAsBoolean();
             }
         };

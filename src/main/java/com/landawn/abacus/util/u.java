@@ -4806,17 +4806,6 @@ public class u { // NOSONAR
             }
         }
 
-        //    /**
-        //     * Converts this OptionalInt to a java.util.OptionalInt.
-        //     *
-        //     * @return a java.util.OptionalInt containing the value if present, otherwise an empty java.util.OptionalInt
-        //     * @deprecated to be removed in a future version.
-        //     */
-        //    @Deprecated
-        //    public java.util.OptionalInt __() {//NOSONAR
-        //        return toJdkOptional();
-        //    }
-
         /**
          * Compares this {@code OptionalInt} with another {@code OptionalInt} for ordering.
          * Empty instances are considered less than non-empty ones.
@@ -5764,17 +5753,6 @@ public class u { // NOSONAR
                 return java.util.OptionalLong.empty();
             }
         }
-
-        //    /**
-        //     * Converts this OptionalLong to a java.util.OptionalLong.
-        //     *
-        //     * @return a java.util.OptionalLong containing the value if present, otherwise an empty java.util.OptionalLong
-        //     * @deprecated to be removed in a future version.
-        //     */
-        //    @Deprecated
-        //    public java.util.OptionalLong __() {//NOSONAR
-        //        return toJdkOptional();
-        //    }
 
         /**
          * Compares this {@code OptionalLong} with another {@code OptionalLong} for ordering.
@@ -7558,20 +7536,6 @@ public class u { // NOSONAR
             }
         }
 
-        //    /**
-        //     * Converts this {@code OptionalDouble} to a {@code java.util.OptionalDouble}.
-        //     *
-        //     * <p><b>Note:</b> This is a deprecated convenience method. Use {@link #toJdkOptional()} instead.
-        //     *
-        //     * @return a {@code java.util.OptionalDouble} containing the value if present, otherwise an empty {@code java.util.OptionalDouble}
-        //     * @deprecated Use {@link #toJdkOptional()} instead. This method will be removed in a future version.
-        //     * @see #toJdkOptional()
-        //     */
-        //    @Deprecated
-        //    public java.util.OptionalDouble __() {//NOSONAR
-        //        return toJdkOptional();
-        //    }
-
         /**
          * Compares this {@code OptionalDouble} with the specified {@code OptionalDouble} for order.
          * Empty {@code OptionalDouble}s are considered less than non-empty ones.
@@ -8666,18 +8630,6 @@ public class u { // NOSONAR
                 return java.util.Optional.empty();
             }
         }
-
-        //    /**
-        //     * Converts this {@code Optional} to a {@code java.util.Optional}.
-        //     * This is a shorthand method for {@link #toJdkOptional()}.
-        //     *
-        //     * @return a {@code java.util.Optional} containing the value if present, otherwise an empty {@code java.util.Optional}
-        //     * @deprecated to be removed in a future version.
-        //     */
-        //    @Deprecated
-        //    public java.util.Optional<T> __() {//NOSONAR
-        //        return toJdkOptional();
-        //    }
 
         /**
          * Indicates whether some other object is "equal to" this {@code Optional}.
@@ -10219,8 +10171,8 @@ public class u { // NOSONAR
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * Nullable.of("test").orElseThrowIfNull();          // returns "test"
-         * Nullable.of((String) null).orElseThrowIfNull();   // throws NoSuchElementException
+         * Nullable.of("test").orElseThrowIfNull("No value present");          // returns "test"
+         * Nullable.of((String) null).orElseThrowIfNull("No value present");   // throws NoSuchElementException("No value present")
          * }</pre>
          *
          * @param errorMessage the error message to use if the value is {@code null}
@@ -10242,8 +10194,8 @@ public class u { // NOSONAR
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * Nullable.of("test").orElseThrowIfNull();          // returns "test"
-         * Nullable.of((String) null).orElseThrowIfNull();   // throws NoSuchElementException
+         * Nullable.of("test").orElseThrowIfNull("Missing %s", "value");          // returns "test"
+         * Nullable.of((String) null).orElseThrowIfNull("Missing %s", "value");   // throws NoSuchElementException("Missing value")
          * }</pre>
          *
          * @param errorMessage the error message template to use if the value is {@code null}
@@ -10266,8 +10218,8 @@ public class u { // NOSONAR
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * Nullable.of("test").orElseThrowIfNull();          // returns "test"
-         * Nullable.of((String) null).orElseThrowIfNull();   // throws NoSuchElementException
+         * Nullable.of("test").orElseThrowIfNull("Missing %s for %s", "value", "id");          // returns "test"
+         * Nullable.of((String) null).orElseThrowIfNull("Missing %s for %s", "value", "id"); // throws NoSuchElementException("Missing value for id")
          * }</pre>
          *
          * @param errorMessage the error message template to use if the value is {@code null}
@@ -10291,8 +10243,8 @@ public class u { // NOSONAR
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * Nullable.of("test").orElseThrowIfNull();          // returns "test"
-         * Nullable.of((String) null).orElseThrowIfNull();   // throws NoSuchElementException
+         * Nullable.of("test").orElseThrowIfNull("%s/%s/%s missing", "a", "b", "c");          // returns "test"
+         * Nullable.of((String) null).orElseThrowIfNull("%s/%s/%s missing", "a", "b", "c"); // throws NoSuchElementException("a/b/c missing")
          * }</pre>
          *
          * @param errorMessage the error message template to use if the value is {@code null}
@@ -10317,8 +10269,8 @@ public class u { // NOSONAR
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * Nullable.of("test").orElseThrowIfNull();          // returns "test"
-         * Nullable.of((String) null).orElseThrowIfNull();   // throws NoSuchElementException
+         * Nullable.of("test").orElseThrowIfNull("Missing %s and %s", "x", "y");          // returns "test"
+         * Nullable.of((String) null).orElseThrowIfNull("Missing %s and %s", "x", "y"); // throws NoSuchElementException("Missing x and y")
          * }</pre>
          *
          * @param errorMessage the error message template to use if the value is {@code null}
@@ -10340,8 +10292,8 @@ public class u { // NOSONAR
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * Nullable.of("test").orElseThrowIfNull();          // returns "test"
-         * Nullable.of((String) null).orElseThrowIfNull();   // throws NoSuchElementException
+         * Nullable.of("test").orElseThrowIfNull(() -> new IllegalStateException("No value"));          // returns "test"
+         * Nullable.of((String) null).orElseThrowIfNull(() -> new IllegalStateException("No value")); // throws IllegalStateException("No value")
          * }</pre>
          *
          * @param <E> the type of exception to be thrown

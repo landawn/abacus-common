@@ -133,6 +133,6 @@ public final class IndexedKeyed<K, T> extends Keyed<K, T> {
      */
     @Override
     public String toString() {
-        return "{index=" + index + ", key=" + key + ", val=" + val + "}";
+        return "{index=" + index + ", key=" + N.toString(key) + ", val=" + N.toString(val) + "}";
     }
 }

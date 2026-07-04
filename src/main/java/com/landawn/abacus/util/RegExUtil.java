@@ -1827,6 +1827,8 @@ public final class RegExUtil {
     /**
      * Replaces the first substring of the source string that matches the given regular expression
      * with the result of applying the given function to the matched substring.
+     * The string returned by the replacer is used as a literal replacement: dollar signs and backslashes
+     * in it are not treated as group references or escapes.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1844,12 +1846,18 @@ public final class RegExUtil {
     public static String replaceFirst(final String source, final String regex, final Function<String, String> replacer) throws IllegalArgumentException {
         N.checkArgNotEmpty(regex, cs.regex);
 
+        if (Strings.isEmpty(source)) {
+            return Strings.EMPTY;
+        }
+
         return replaceFirst(source, Pattern.compile(regex), replacer);
     }
 
     /**
      * Replaces the first substring of the source string that matches the given regular expression
      * with the result of applying the given function to the start and end indices of the match.
+     * The string returned by the replacer is used as a literal replacement: dollar signs and backslashes
+     * in it are not treated as group references or escapes.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1866,6 +1874,10 @@ public final class RegExUtil {
      */
     public static String replaceFirst(final String source, final String regex, final IntBiFunction<String> replacer) throws IllegalArgumentException {
         N.checkArgNotEmpty(regex, cs.regex);
+
+        if (Strings.isEmpty(source)) {
+            return Strings.EMPTY;
+        }
 
         return replaceFirst(source, Pattern.compile(regex), replacer);
     }
@@ -1995,6 +2007,10 @@ public final class RegExUtil {
     public static String replaceLast(final String source, final String regex, final String replacement) throws IllegalArgumentException {
         N.checkArgNotEmpty(regex, cs.regex);
 
+        if (Strings.isEmpty(source)) {
+            return Strings.EMPTY;
+        }
+
         return replaceLast(source, Pattern.compile(regex), replacement);
     }
 
@@ -2019,6 +2035,10 @@ public final class RegExUtil {
     @Beta
     public static String replaceLast(final String source, final String regex, final Function<String, String> replacer) throws IllegalArgumentException {
         N.checkArgNotEmpty(regex, cs.regex);
+
+        if (Strings.isEmpty(source)) {
+            return Strings.EMPTY;
+        }
 
         return replaceLast(source, Pattern.compile(regex), replacer);
     }
@@ -2217,6 +2237,8 @@ public final class RegExUtil {
     /**
      * Replaces each substring of the source string that matches the given regular expression
      * with the result of applying the given function to the matched substring.
+     * The string returned by the replacer is used as a literal replacement: dollar signs and backslashes
+     * in it are not treated as group references or escapes.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -2240,6 +2262,8 @@ public final class RegExUtil {
     /**
      * Replaces each substring of the source string that matches the given regular expression
      * with the result of applying the given function to the start and end indices of the match.
+     * The string returned by the replacer is used as a literal replacement: dollar signs and backslashes
+     * in it are not treated as group references or escapes.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code

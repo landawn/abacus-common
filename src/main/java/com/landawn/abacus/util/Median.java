@@ -351,13 +351,13 @@ public final class Median {
      * @throws IllegalArgumentException if the specified array is {@code null} or empty, or if
      *                                  {@code toIndex - fromIndex} is less than 1.
      * @throws IndexOutOfBoundsException if {@code fromIndex} is negative, {@code toIndex} is greater than
-     *                                   the length of the array, or {@code fromIndex} is greater than {@code toIndex}
+     *                                   the length of the array
      * @see #of(char...)
      * @see N#median(char[], int, int)
      */
     public static Pair<Character, OptionalChar> of(final char[] source, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         if (N.isEmpty(source) || toIndex - fromIndex < 1) {
-            throw new IllegalArgumentException("The length of array cannot be null or empty"); //NOSONAR
+            throw new IllegalArgumentException("Source array is null/empty, or the range is empty: toIndex - fromIndex must be >= 1"); //NOSONAR
         }
 
         N.checkFromToIndex(fromIndex, toIndex, source.length);
@@ -464,13 +464,13 @@ public final class Median {
      * @throws IllegalArgumentException if the specified array is {@code null} or empty, or if
      *                                  {@code toIndex - fromIndex} is less than 1.
      * @throws IndexOutOfBoundsException if {@code fromIndex} is negative, {@code toIndex} is greater than
-     *                                   the length of the array, or {@code fromIndex} is greater than {@code toIndex}
+     *                                   the length of the array
      * @see #of(byte...)
      * @see N#median(byte[], int, int)
      */
     public static Pair<Byte, OptionalByte> of(final byte[] source, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         if (N.isEmpty(source) || toIndex - fromIndex < 1) {
-            throw new IllegalArgumentException("The length of array cannot be null or empty");
+            throw new IllegalArgumentException("Source array is null/empty, or the range is empty: toIndex - fromIndex must be >= 1");
         }
 
         N.checkFromToIndex(fromIndex, toIndex, source.length);
@@ -577,13 +577,13 @@ public final class Median {
      * @throws IllegalArgumentException if the specified array is {@code null} or empty, or if
      *                                  {@code toIndex - fromIndex} is less than 1.
      * @throws IndexOutOfBoundsException if {@code fromIndex} is negative, {@code toIndex} is greater than
-     *                                   the length of the array, or {@code fromIndex} is greater than {@code toIndex}
+     *                                   the length of the array
      * @see #of(short...)
      * @see N#median(short[], int, int)
      */
     public static Pair<Short, OptionalShort> of(final short[] source, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         if (N.isEmpty(source) || toIndex - fromIndex < 1) {
-            throw new IllegalArgumentException("The length of array cannot be null or empty");
+            throw new IllegalArgumentException("Source array is null/empty, or the range is empty: toIndex - fromIndex must be >= 1");
         }
 
         N.checkFromToIndex(fromIndex, toIndex, source.length);
@@ -691,13 +691,13 @@ public final class Median {
      * @throws IllegalArgumentException if the specified array is {@code null} or empty, or if
      *                                  {@code toIndex - fromIndex} is less than 1.
      * @throws IndexOutOfBoundsException if {@code fromIndex} is negative, {@code toIndex} is greater than
-     *                                   the length of the array, or {@code fromIndex} is greater than {@code toIndex}
+     *                                   the length of the array
      * @see #of(int...)
      * @see N#median(int[], int, int)
      */
     public static Pair<Integer, OptionalInt> of(final int[] source, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         if (N.isEmpty(source) || toIndex - fromIndex < 1) {
-            throw new IllegalArgumentException("The length of array cannot be null or empty");
+            throw new IllegalArgumentException("Source array is null/empty, or the range is empty: toIndex - fromIndex must be >= 1");
         }
 
         N.checkFromToIndex(fromIndex, toIndex, source.length);
@@ -805,13 +805,13 @@ public final class Median {
      * @throws IllegalArgumentException if the specified array is {@code null} or empty, or if
      *                                  {@code toIndex - fromIndex} is less than 1.
      * @throws IndexOutOfBoundsException if {@code fromIndex} is negative, {@code toIndex} is greater than
-     *                                   the length of the array, or {@code fromIndex} is greater than {@code toIndex}
+     *                                   the length of the array
      * @see #of(long...)
      * @see N#median(long[], int, int)
      */
     public static Pair<Long, OptionalLong> of(final long[] source, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         if (N.isEmpty(source) || toIndex - fromIndex < 1) {
-            throw new IllegalArgumentException("The length of array cannot be null or empty");
+            throw new IllegalArgumentException("Source array is null/empty, or the range is empty: toIndex - fromIndex must be >= 1");
         }
 
         N.checkFromToIndex(fromIndex, toIndex, source.length);
@@ -921,13 +921,13 @@ public final class Median {
      * @throws IllegalArgumentException if the specified array is {@code null} or empty, or if
      *                                  {@code toIndex - fromIndex} is less than 1.
      * @throws IndexOutOfBoundsException if {@code fromIndex} is negative, {@code toIndex} is greater than
-     *                                   the length of the array, or {@code fromIndex} is greater than {@code toIndex}
+     *                                   the length of the array
      * @see #of(float...)
      * @see N#median(float[], int, int)
      */
     public static Pair<Float, OptionalFloat> of(final float[] source, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         if (N.isEmpty(source) || toIndex - fromIndex < 1) {
-            throw new IllegalArgumentException("The length of array cannot be null or empty");
+            throw new IllegalArgumentException("Source array is null/empty, or the range is empty: toIndex - fromIndex must be >= 1");
         }
 
         N.checkFromToIndex(fromIndex, toIndex, source.length);
@@ -1040,13 +1040,13 @@ public final class Median {
      * @throws IllegalArgumentException if the specified array is {@code null} or empty, or if
      *                                  {@code toIndex - fromIndex} is less than 1.
      * @throws IndexOutOfBoundsException if {@code fromIndex} is negative, {@code toIndex} is greater than
-     *                                   the length of the array, or {@code fromIndex} is greater than {@code toIndex}
+     *                                   the length of the array
      * @see #of(double...)
      * @see N#median(double[], int, int)
      */
     public static Pair<Double, OptionalDouble> of(final double[] source, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         if (N.isEmpty(source) || toIndex - fromIndex < 1) {
-            throw new IllegalArgumentException("The length of array cannot be null or empty");
+            throw new IllegalArgumentException("Source array is null/empty, or the range is empty: toIndex - fromIndex must be >= 1");
         }
 
         N.checkFromToIndex(fromIndex, toIndex, source.length);
@@ -1156,7 +1156,7 @@ public final class Median {
      * @throws IllegalArgumentException if the specified array is {@code null} or empty, or if
      *                                  {@code toIndex - fromIndex} is less than 1.
      * @throws IndexOutOfBoundsException if {@code fromIndex} is negative, {@code toIndex} is greater than
-     *                                   the length of the array, or {@code fromIndex} is greater than {@code toIndex}
+     *                                   the length of the array
      * @see #of(Comparable[])
      * @see #of(Object[], int, int, Comparator)
      * @see N#median(Comparable[], int, int)
@@ -1251,7 +1251,7 @@ public final class Median {
      * @throws IllegalArgumentException if the specified array is {@code null} or empty, or if
      *                                  {@code toIndex - fromIndex} is less than 1.
      * @throws IndexOutOfBoundsException if {@code fromIndex} is negative, {@code toIndex} is greater than
-     *                                   the length of the array, or {@code fromIndex} is greater than {@code toIndex}
+     *                                   the length of the array
      * @see #of(Object[], Comparator)
      * @see #of(Comparable[], int, int)
      * @see N#median(Object[], int, int, Comparator)
@@ -1260,7 +1260,7 @@ public final class Median {
     public static <T> Pair<T, Optional<T>> of(final T[] source, final int fromIndex, final int toIndex, Comparator<? super T> cmp)
             throws IndexOutOfBoundsException {
         if (N.isEmpty(source) || toIndex - fromIndex < 1) {
-            throw new IllegalArgumentException("The length of array cannot be null or empty");
+            throw new IllegalArgumentException("Source array is null/empty, or the range is empty: toIndex - fromIndex must be >= 1");
         }
 
         N.checkFromToIndex(fromIndex, toIndex, source.length);
@@ -1397,7 +1397,7 @@ public final class Median {
     @SuppressWarnings("rawtypes")
     public static <T> Pair<T, Optional<T>> of(final Collection<? extends T> source, Comparator<? super T> cmp) {
         if (N.isEmpty(source)) {
-            throw new IllegalArgumentException("The size of collection cannot be null or empty");
+            throw new IllegalArgumentException("Source collection is null or empty");
         }
 
         cmp = cmp == null ? (Comparator) Comparators.naturalOrder() : cmp;
@@ -1492,7 +1492,7 @@ public final class Median {
      * @throws IllegalArgumentException if the specified collection is {@code null} or empty, or if
      *                                  {@code toIndex - fromIndex} is less than 1.
      * @throws IndexOutOfBoundsException if {@code fromIndex} is negative, {@code toIndex} is greater than
-     *                                   the size of the collection, or {@code fromIndex} is greater than {@code toIndex}
+     *                                   the size of the collection
      * @see #of(Collection)
      * @see #of(Collection, int, int, Comparator)
      * @see N#median(Collection, int, int)
@@ -1544,14 +1544,14 @@ public final class Median {
      * @throws IllegalArgumentException if the specified collection is {@code null} or empty, or if
      *                                  {@code toIndex - fromIndex} is less than 1.
      * @throws IndexOutOfBoundsException if {@code fromIndex} is negative, {@code toIndex} is greater than
-     *                                   the size of the collection, or {@code fromIndex} is greater than {@code toIndex}
+     *                                   the size of the collection
      * @see #of(Collection, Comparator)
      * @see #of(Collection, int, int)
      * @see N#median(Collection, int, int, Comparator)
      */
     public static <T> Pair<T, Optional<T>> of(final Collection<? extends T> source, final int fromIndex, final int toIndex, final Comparator<? super T> cmp) {
         if (N.isEmpty(source) || toIndex - fromIndex < 1) {
-            throw new IllegalArgumentException("The length of collection cannot be null or empty"); //NOSONAR
+            throw new IllegalArgumentException("Source collection is null/empty, or the range is empty: toIndex - fromIndex must be >= 1"); //NOSONAR
         }
 
         N.checkFromToIndex(fromIndex, toIndex, source.size());

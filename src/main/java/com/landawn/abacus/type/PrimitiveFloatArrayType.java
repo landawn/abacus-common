@@ -165,7 +165,7 @@ public final class PrimitiveFloatArrayType extends AbstractPrimitiveArrayType<fl
      */
     @Override
     public float[] valueOf(final String str) {
-        if (Strings.isEmpty(str) || Strings.isBlank(str)) {
+        if (Strings.isBlank(str)) {
             return null; // NOSONAR
         } else if (STR_FOR_EMPTY_ARRAY.equals(str)) {
             return N.EMPTY_FLOAT_ARRAY;

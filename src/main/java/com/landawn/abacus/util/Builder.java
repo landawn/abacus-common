@@ -250,7 +250,7 @@ public class Builder<T> {
      * @throws IllegalArgumentException if {@code val} is {@code null}
      */
     Builder(final T val) {
-        N.checkArgNotNull(val);
+        N.checkArgNotNull(val, "val");
 
         this.val = val;
     }
@@ -651,7 +651,7 @@ public class Builder<T> {
      */
     @SuppressWarnings("rawtypes")
     public static <T> Builder<T> of(final T val) throws IllegalArgumentException {
-        N.checkArgNotNull(val);
+        N.checkArgNotNull(val, "val");
 
         final Function<Object, Builder> func = creatorMap.get(val.getClass());
 
@@ -2809,8 +2809,6 @@ public class Builder<T> {
          * @see Map#putIfAbsent(Object, Object)
          */
         public MapBuilder<K, V, M> putIfAbsent(final K key, final V value) {
-
-            // if (v == null && val.containsKey(key) == false) {
             val.putIfAbsent(key, value);
 
             return this;
@@ -2840,7 +2838,6 @@ public class Builder<T> {
         public MapBuilder<K, V, M> putIfAbsent(final K key, final Supplier<V> supplier) {
             final V v = val.get(key);
 
-            // if (v == null && val.containsKey(key) == false) {
             if (v == null) {
                 val.put(key, supplier.get());
             }

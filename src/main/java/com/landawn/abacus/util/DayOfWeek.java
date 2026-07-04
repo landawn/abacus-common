@@ -50,7 +50,12 @@ package com.landawn.abacus.util;
  * }
  * }</pre>
  *
+ * @deprecated this enum is an exact duplicate of {@link WeekDay} (same constants, same {@code 0}=SUNDAY..{@code 6}=SATURDAY
+ *             numbering, same {@code intValue()}/{@code valueOf(int)} API); use {@link WeekDay} instead. Note that neither
+ *             matches {@link java.time.DayOfWeek}, whose numbering is {@code 1}=MONDAY..{@code 7}=SUNDAY.
+ * @see WeekDay
  */
+@Deprecated
 public enum DayOfWeek {
 
     /** Represents Sunday (integer value: 0). */

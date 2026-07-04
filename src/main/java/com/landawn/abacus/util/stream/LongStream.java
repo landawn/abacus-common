@@ -2102,13 +2102,17 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      *     .reduce(BigInteger.ZERO, BigInteger::add);
      * }</pre>
      *
+     * <p>Note: the sum is accumulated in a {@code long}. Unlike {@link IntStream#sum()} (which accumulates
+     * in a wider type and throws {@link ArithmeticException} on overflow), if the true sum exceeds
+     * {@link Long#MAX_VALUE} this silently wraps around.
+     *
      * @return the sum of elements in this stream. Returns 0 if the stream is empty.
      * @see #average()
      * @see #reduce(long, LongBinaryOperator)
      */
     @SequentialOnly
     @TerminalOp
-    public abstract long sum();
+    public abstract long sum() throws ArithmeticException;
 
     /**
      * Returns an OptionalDouble describing the arithmetic mean of elements of this stream,
@@ -2127,6 +2131,10 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * // Safe retrieval with default value
      * double avg = LongStream.of(100L, 200L).average().orElse(0.0);   // returns 150.0
      * }</pre>
+     *
+     * <p>Note: the running total is accumulated in a {@code long} before the division, so for very large
+     * magnitudes it can overflow and wrap (unlike {@link DoubleStream#average()}, which sums in floating
+     * point); the returned mean is inaccurate in that case.
      *
      * @return an OptionalDouble containing the arithmetic mean of elements of this stream,
      *         or an empty optional if the stream is empty
@@ -4431,13 +4439,6 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * // Countdown from 10 to 1
      * LongStream.iterate(10L, n -> n > 0, n -> n - 1)
      *     .forEach(System.out::println);   // prints 10, 9, 8, ..., 1
-     *
-     * // Fibonacci sequence up to a limit
-     * long limit = 1000L;
-     * LongStream.iterate(1L, n -> n < limit, n -> {
-     *     // This is simplified; actual Fibonacci needs state
-     *     return n * 2; // returns a value for illustration only
-     * }).toArray();
      *
      * // Generate sequence with custom termination
      * LongStream.iterate(100L, n -> n >= 10, n -> n / 2)

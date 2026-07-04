@@ -1369,11 +1369,6 @@ public abstract sealed class Array permits Array.ArrayUtil {
             return N.EMPTY_CHAR_ARRAY;
         }
 
-        //        if (endExclusive > startInclusive != by > 0) {
-        //            throw new IllegalArgumentException(
-        //                    "The input 'startInclusive' (" + startInclusive + ") and 'endExclusive' (" + endExclusive + ") are not consistent with by (" + by + ").");
-        //        }
-
         final int len = (endExclusive - startInclusive) / by + ((endExclusive - startInclusive) % by == 0 ? 0 : 1);
         final char[] a = new char[len];
         final char byChar = (char) by;
@@ -1414,11 +1409,6 @@ public abstract sealed class Array permits Array.ArrayUtil {
             return N.EMPTY_BYTE_ARRAY;
         }
 
-        //        if (endExclusive > startInclusive != by > 0) {
-        //            throw new IllegalArgumentException(
-        //                    "The input 'startInclusive' (" + startInclusive + ") and 'endExclusive' (" + endExclusive + ") are not consistent with by (" + by + ").");
-        //        }
-
         final int len = (endExclusive - startInclusive) / by + ((endExclusive - startInclusive) % by == 0 ? 0 : 1);
         final byte[] a = new byte[len];
 
@@ -1458,11 +1448,6 @@ public abstract sealed class Array permits Array.ArrayUtil {
             return N.EMPTY_SHORT_ARRAY;
         }
 
-        //        if (endExclusive > startInclusive != by > 0) {
-        //            throw new IllegalArgumentException(
-        //                    "The input 'startInclusive' (" + startInclusive + ") and 'endExclusive' (" + endExclusive + ") are not consistent with by (" + by + ").");
-        //        }
-
         final int len = (endExclusive - startInclusive) / by + ((endExclusive - startInclusive) % by == 0 ? 0 : 1);
         final short[] a = new short[len];
 
@@ -1501,11 +1486,6 @@ public abstract sealed class Array permits Array.ArrayUtil {
         if (endExclusive == startInclusive || endExclusive > startInclusive != by > 0) {
             return N.EMPTY_INT_ARRAY;
         }
-
-        //        if (endExclusive > startInclusive != by > 0) {
-        //            throw new IllegalArgumentException(
-        //                    "The input 'startInclusive' (" + startInclusive + ") and 'endExclusive' (" + endExclusive + ") are not consistent with by (" + by + ").");
-        //        }
 
         final long len = ((long) endExclusive - startInclusive) / by + (((long) endExclusive - startInclusive) % by == 0 ? 0 : 1);
 
@@ -1551,11 +1531,6 @@ public abstract sealed class Array permits Array.ArrayUtil {
         if (endExclusive == startInclusive || endExclusive > startInclusive != by > 0) {
             return N.EMPTY_LONG_ARRAY;
         }
-
-        //        if (endExclusive > startInclusive != by > 0) {
-        //            throw new IllegalArgumentException(
-        //                    "The input 'startInclusive' (" + startInclusive + ") and 'endExclusive' (" + endExclusive + ") are not consistent with by (" + by + ").");
-        //        }
 
         long len = 0;
 
@@ -1802,11 +1777,6 @@ public abstract sealed class Array permits Array.ArrayUtil {
             return N.EMPTY_CHAR_ARRAY;
         }
 
-        //        if (endInclusive > startInclusive != by > 0) {
-        //            throw new IllegalArgumentException(
-        //                    "The input 'startInclusive' (" + startInclusive + ") and 'endInclusive' (" + endInclusive + ") are not consistent with by (" + by + ").");
-        //        }
-
         final int len = (endInclusive - startInclusive) / by + 1;
         final char[] a = new char[len];
         final char byChar = (char) by;
@@ -1850,11 +1820,6 @@ public abstract sealed class Array permits Array.ArrayUtil {
             return N.EMPTY_BYTE_ARRAY;
         }
 
-        //        if (endInclusive > startInclusive != by > 0) {
-        //            throw new IllegalArgumentException(
-        //                    "The input 'startInclusive' (" + startInclusive + ") and 'endInclusive' (" + endInclusive + ") are not consistent with by (" + by + ").");
-        //        }
-
         final int len = (endInclusive - startInclusive) / by + 1;
         final byte[] a = new byte[len];
 
@@ -1897,11 +1862,6 @@ public abstract sealed class Array permits Array.ArrayUtil {
             return N.EMPTY_SHORT_ARRAY;
         }
 
-        //        if (endInclusive > startInclusive != by > 0) {
-        //            throw new IllegalArgumentException(
-        //                    "The input 'startInclusive' (" + startInclusive + ") and 'endInclusive' (" + endInclusive + ") are not consistent with by (" + by + ").");
-        //        }
-
         final int len = (endInclusive - startInclusive) / by + 1;
         final short[] a = new short[len];
 
@@ -1943,11 +1903,6 @@ public abstract sealed class Array permits Array.ArrayUtil {
         } else if (endInclusive > startInclusive != by > 0) {
             return N.EMPTY_INT_ARRAY;
         }
-
-        //        if (endInclusive > startInclusive != by > 0) {
-        //            throw new IllegalArgumentException(
-        //                    "The input 'startInclusive' (" + startInclusive + ") and 'endInclusive' (" + endInclusive + ") are not consistent with by (" + by + ").");
-        //        }
 
         final long len = ((long) endInclusive - startInclusive) / by + 1;
 
@@ -1996,11 +1951,6 @@ public abstract sealed class Array permits Array.ArrayUtil {
         } else if (endInclusive > startInclusive != by > 0) {
             return N.EMPTY_LONG_ARRAY;
         }
-
-        //        if (endInclusive > startInclusive != by > 0) {
-        //            throw new IllegalArgumentException(
-        //                    "The input 'startInclusive' (" + startInclusive + ") and 'endInclusive' (" + endInclusive + ") are not consistent with by (" + by + ").");
-        //        }
 
         long len = 0;
 

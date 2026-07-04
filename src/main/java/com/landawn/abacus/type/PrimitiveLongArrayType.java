@@ -62,9 +62,8 @@ public final class PrimitiveLongArrayType extends AbstractPrimitiveArrayType<lon
      *
      * @return the Class object for long[] type
      */
-    @SuppressWarnings({ "rawtypes", "unchecked" })
     @Override
-    public Class javaType() {
+    public Class<long[]> javaType() {
         return long[].class;
     }
 
@@ -176,7 +175,7 @@ public final class PrimitiveLongArrayType extends AbstractPrimitiveArrayType<lon
      */
     @Override
     public long[] valueOf(final String str) {
-        if (Strings.isEmpty(str) || Strings.isBlank(str)) {
+        if (Strings.isBlank(str)) {
             return null; // NOSONAR
         } else if (STR_FOR_EMPTY_ARRAY.equals(str)) {
             return N.EMPTY_LONG_ARRAY;

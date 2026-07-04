@@ -646,7 +646,7 @@ public final class Iterators {
      * @see #cycle(Object...)
      */
     public static <T> ObjIterator<T> repeat(final T e, final int n) throws IllegalArgumentException {
-        N.checkArgument(n >= 0, "'n' cannot be negative: %s", n); //NOSONAR
+        N.checkArgNotNegative(n, cs.n);
 
         if (n == 0) {
             return ObjIterator.empty();
@@ -694,7 +694,7 @@ public final class Iterators {
      * @see #cycle(Object...)
      */
     public static <T> ObjIterator<T> repeat(final T e, final long n) throws IllegalArgumentException {
-        N.checkArgument(n >= 0, "'n' cannot be negative: %s", n); //NOSONAR
+        N.checkArgNotNegative(n, cs.n);
 
         if (n == 0) {
             return ObjIterator.empty();
@@ -745,7 +745,7 @@ public final class Iterators {
      * @see N#repeatElements(Collection, int)
      */
     public static <T> ObjIterator<T> repeatElements(final Iterable<? extends T> c, final long n) throws IllegalArgumentException {
-        N.checkArgument(n >= 0, "'n' cannot be negative: %s", n);
+        N.checkArgNotNegative(n, cs.n);
 
         if (n == 0 || N.isEmptyCollection(c)) {
             return ObjIterator.empty();
@@ -810,10 +810,10 @@ public final class Iterators {
      * @see N#repeatElementsToSize(Collection, int)
      */
     public static <T> ObjIterator<T> repeatElementsToSize(final Collection<? extends T> c, final long size) throws IllegalArgumentException {
-        N.checkArgument(size >= 0, "'size' cannot be negative: %s", size);
+        N.checkArgNotNegative(size, cs.size);
         N.checkArgument(size == 0 || N.notEmpty(c), "Collection cannot be empty or null when size > 0");
 
-        if (N.isEmpty(c) || size == 0) {
+        if (size == 0) {
             return ObjIterator.empty();
         }
 
@@ -1078,10 +1078,10 @@ public final class Iterators {
      * @see N#cycleToSize(Collection, int)
      */
     public static <T> ObjIterator<T> cycleToSize(final Collection<? extends T> c, final long size) throws IllegalArgumentException {
-        N.checkArgument(size >= 0, "'size' cannot be negative: %s", size);
+        N.checkArgNotNegative(size, cs.size);
         N.checkArgument(size == 0 || N.notEmpty(c), "Collection cannot be empty or null when size > 0");
 
-        if (N.isEmpty(c) || size == 0) {
+        if (size == 0) {
             return ObjIterator.empty();
         }
 
@@ -1500,7 +1500,7 @@ public final class Iterators {
      * // result.nextBoolean() => true
      * }</pre>
      *
-     * @param a the BooleanIterators to be concatenated.
+     * @param a the BooleanIterators to be concatenated. {@code null} or exhausted iterators within {@code a} are skipped.
      * @return a BooleanIterator that will iterate over the elements of each provided BooleanIterator in order, or {@code BooleanIterator.EMPTY} if {@code a} is {@code null} or empty.
      */
     public static BooleanIterator concat(final BooleanIterator... a) {
@@ -1545,7 +1545,7 @@ public final class Iterators {
      * // result.nextChar() => 'c'
      * }</pre>
      *
-     * @param a the CharIterators to be concatenated.
+     * @param a the CharIterators to be concatenated. {@code null} or exhausted iterators within {@code a} are skipped.
      * @return a CharIterator that will iterate over the elements of each provided CharIterator in order, or {@code CharIterator.EMPTY} if {@code a} is {@code null} or empty.
      */
     public static CharIterator concat(final CharIterator... a) {
@@ -1590,7 +1590,7 @@ public final class Iterators {
      * // result.nextByte() => 3
      * }</pre>
      *
-     * @param a the ByteIterators to be concatenated.
+     * @param a the ByteIterators to be concatenated. {@code null} or exhausted iterators within {@code a} are skipped.
      * @return a ByteIterator that will iterate over the elements of each provided ByteIterator in order, or {@code ByteIterator.EMPTY} if {@code a} is {@code null} or empty.
      */
     public static ByteIterator concat(final ByteIterator... a) {
@@ -1635,7 +1635,7 @@ public final class Iterators {
      * // result.nextShort() => 3
      * }</pre>
      *
-     * @param a the ShortIterators to be concatenated.
+     * @param a the ShortIterators to be concatenated. {@code null} or exhausted iterators within {@code a} are skipped.
      * @return a ShortIterator that will iterate over the elements of each provided ShortIterator in order, or {@code ShortIterator.EMPTY} if {@code a} is {@code null} or empty.
      */
     public static ShortIterator concat(final ShortIterator... a) {
@@ -1680,7 +1680,7 @@ public final class Iterators {
      * // result.nextInt() => 3
      * }</pre>
      *
-     * @param a the IntIterators to be concatenated.
+     * @param a the IntIterators to be concatenated. {@code null} or exhausted iterators within {@code a} are skipped.
      * @return an IntIterator that will iterate over the elements of each provided IntIterator in order, or {@code IntIterator.EMPTY} if {@code a} is {@code null} or empty.
      */
     public static IntIterator concat(final IntIterator... a) {
@@ -1725,7 +1725,7 @@ public final class Iterators {
      * // result.nextLong() => 3L
      * }</pre>
      *
-     * @param a the LongIterators to be concatenated.
+     * @param a the LongIterators to be concatenated. {@code null} or exhausted iterators within {@code a} are skipped.
      * @return a LongIterator that will iterate over the elements of each provided LongIterator in order, or {@code LongIterator.EMPTY} if {@code a} is {@code null} or empty.
      */
     public static LongIterator concat(final LongIterator... a) {
@@ -1770,7 +1770,7 @@ public final class Iterators {
      * // result.nextFloat() => 3.3f
      * }</pre>
      *
-     * @param a the FloatIterators to be concatenated.
+     * @param a the FloatIterators to be concatenated. {@code null} or exhausted iterators within {@code a} are skipped.
      * @return a FloatIterator that will iterate over the elements of each provided FloatIterator in order, or {@code FloatIterator.EMPTY} if {@code a} is {@code null} or empty.
      */
     public static FloatIterator concat(final FloatIterator... a) {
@@ -1815,7 +1815,7 @@ public final class Iterators {
      * // result.nextDouble() => 3.3
      * }</pre>
      *
-     * @param a the DoubleIterators to be concatenated.
+     * @param a the DoubleIterators to be concatenated. {@code null} or exhausted iterators within {@code a} are skipped.
      * @return a DoubleIterator that will iterate over the elements of each provided DoubleIterator in order, or {@code DoubleIterator.EMPTY} if {@code a} is {@code null} or empty.
      */
     public static DoubleIterator concat(final DoubleIterator... a) {
@@ -2576,7 +2576,8 @@ public final class Iterators {
      * @return an {@code ObjIterator} that will iterate over the elements of the provided {@code Iterable} objects in a sorted order.
      * @throws IllegalArgumentException if {@code cmp} is {@code null}.
      */
-    public static <T> ObjIterator<T> mergeSorted(final Iterable<? extends T> sortedA, final Iterable<? extends T> sortedB, final Comparator<? super T> cmp) {
+    public static <T> ObjIterator<T> mergeSorted(final Iterable<? extends T> sortedA, final Iterable<? extends T> sortedB, final Comparator<? super T> cmp)
+            throws IllegalArgumentException {
         final Iterator<? extends T> iterA = N.iterate(sortedA);
         final Iterator<? extends T> iterB = N.iterate(sortedB);
 
@@ -4206,7 +4207,7 @@ public final class Iterators {
             }
 
             @Override
-            public U next() throws IllegalArgumentException {
+            public U next() {
                 if (!hasNext()) {
                     throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -5085,20 +5086,6 @@ public final class Iterators {
         final IterateOptions opts = options == null ? IterateOptions.builder().build() : options;
 
         forEach(iterators, opts.offset(), opts.count(), opts.readThreads(), opts.processThreads(), opts.queueSize(), elementConsumer, onComplete);
-    }
-
-    /**
-     * Validates that the offset and count parameters are non-negative.
-     * This is a package-private utility method used internally for parameter validation.
-     *
-     * @param offset the offset value to check.
-     * @param count the count value to check.
-     * @throws IllegalArgumentException if {@code offset} or {@code count} is negative.
-     */
-    static void checkOffsetCount(final int offset, final int count) throws IllegalArgumentException {
-        if (offset < 0 || count < 0) {
-            throw new IllegalArgumentException("offset: " + offset + " and count: " + count + " cannot be negative");
-        }
     }
 
     /**

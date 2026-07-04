@@ -209,7 +209,7 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
         }
 
         final Runnable evictTask = () -> {
-            // Evict from the pool
+            // Periodically remove expired objects from the pool
             try {
                 removeExpired();
             } catch (final Exception e) {

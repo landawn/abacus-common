@@ -437,6 +437,8 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
      * {@code hasNext} condition evaluates to {@code true}. This allows for
      * finite generated sequences. Calling {@code next()} when {@code hasNext}
      * is {@code false} throws {@link NoSuchElementException}.
+     * The {@code hasNext} supplier is called at most once per element; its result is cached
+     * until the next call to {@code next()}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -459,9 +461,16 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
         N.checkArgNotNull(supplier);
 
         return new ObjIterator<>() {
+            private boolean hasNextCached = false;
+            private boolean hasNextValue = false;
+
             @Override
             public boolean hasNext() {
-                return hasNext.getAsBoolean();
+                if (!hasNextCached) {
+                    hasNextValue = hasNext.getAsBoolean();
+                    hasNextCached = true;
+                }
+                return hasNextValue;
             }
 
             @Override
@@ -470,6 +479,7 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
                     throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
+                hasNextCached = false;
                 return supplier.get();
             }
         };
@@ -519,7 +529,7 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
             @Override
             public T next() {
                 if (!hasNext()) {
-                    throw new NoSuchElementException();
+                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
                 return supplier.apply(init);
@@ -571,7 +581,7 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
             @Override
             public T next() {
                 if (!hasNext()) {
-                    throw new NoSuchElementException();
+                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
                 return (prev = supplier.apply(init, prev));

@@ -3485,6 +3485,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @return a collector which returns the collected result, or throws if no elements
      *         were collected
      * @throws IllegalArgumentException if collector is null
+     * @throws RuntimeException the exception supplied by {@code exceptionSupplier} if no elements are collected
      */
     @Beta
     public static <T, A, R> Collector<T, ?, R> collectingOrElseThrowIfEmpty(final Collector<T, A, R> collector,
@@ -8012,7 +8013,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * accumulates them into a map instance created by the provided factory function.
      * If duplicate keys are encountered, an {@code IllegalStateException} is thrown.</p>
      *
-     * <p>The returned collector produces an unordered map.</p>
+     * <p>The iteration order of the returned map is determined by the map created by {@code mapFactory}.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -8044,7 +8045,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * accumulates them into a map instance created by the provided factory function.
      * When duplicate keys are encountered, the merge function is used to combine the values.</p>
      *
-     * <p>The returned collector produces an unordered map.</p>
+     * <p>The iteration order of the returned map is determined by the map created by {@code mapFactory}.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -8741,12 +8742,13 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * // Create a specific type of BiMap
-     * BiMap<String, Integer> result = Stream.of("apple", "banana", "cherry")
+     * // Create a specific type of BiMap (keys and values must both be unique)
+     * BiMap<String, Integer> result = Stream.of("apple", "fig", "banana")
      *     .collect(Collectors.toBiMap(
      *         Function.identity(),
      *         String::length,
      *         BiMap::new));
+     * // {apple=5, fig=3, banana=6}
      * }</pre>
      *
      * @param <T> the type of input elements
@@ -11044,7 +11046,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
          */
         public static <T, R> Collector<T, ?, R> combine(final Collection<? extends Collector<? super T, ?, ?>> downstreams,
                 final Function<Object[], R> merger) { //NOSONAR
-            N.checkArgument(N.notEmpty(downstreams), "The specified 'collectors' cannot be null or empty");
+            N.checkArgument(N.notEmpty(downstreams), "The specified 'downstreams' cannot be null or empty");
             N.checkArgNotNull(merger, cs.merger);
 
             final int size = downstreams.size();

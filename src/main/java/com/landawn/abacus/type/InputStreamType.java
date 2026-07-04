@@ -139,7 +139,7 @@ public class InputStreamType extends AbstractType<InputStream> {
     }
 
     /**
-     * Converts a string to an {@link InputStream} by encoding it with the default charset.
+     * Converts a string to an {@link InputStream} by encoding it with UTF-8.
      * Creates the appropriate subclass based on the constructors discovered at construction time;
      * falls back to {@link ByteArrayInputStream} if no suitable constructor is available.
      *

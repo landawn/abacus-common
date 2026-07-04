@@ -3404,12 +3404,6 @@ public final class Numbers {
      * @see #saturatedCastToInt(long)
      */
     public static int toIntExact(final long value) {
-        //    if (value < Integer.MIN_VALUE || value > Integer.MAX_VALUE) {
-        //        throw new ArithmeticException("integer overflow: " + value);
-        //    }
-        //
-        //    return (int) value;
-
         return Math.toIntExact(value);
     }
 
@@ -4338,39 +4332,21 @@ public final class Numbers {
         alphanumerics['x'] = true;
         alphanumerics['X'] = true;
 
-        //noinspection OverwrittenKey
-        alphanumerics['e'] = true;
-        //noinspection OverwrittenKey
-        alphanumerics['E'] = true;
-
         alphanumerics['a'] = true;
         alphanumerics['A'] = true;
         alphanumerics['b'] = true;
         alphanumerics['B'] = true;
         alphanumerics['c'] = true;
         alphanumerics['C'] = true;
-        //noinspection OverwrittenKey
         alphanumerics['d'] = true;
         alphanumerics['D'] = true;
-        //noinspection OverwrittenKey,DataFlowIssue
         alphanumerics['e'] = true;
-        //noinspection OverwrittenKey
         alphanumerics['E'] = true;
-        //noinspection OverwrittenKey
         alphanumerics['f'] = true;
-        //noinspection OverwrittenKey
         alphanumerics['F'] = true;
 
         alphanumerics['l'] = true;
         alphanumerics['L'] = true;
-        //noinspection OverwrittenKey,DataFlowIssue
-        alphanumerics['f'] = true;
-        //noinspection OverwrittenKey
-        alphanumerics['F'] = true;
-        //noinspection OverwrittenKey,DataFlowIssue
-        alphanumerics['d'] = true;
-        //noinspection OverwrittenKey
-        alphanumerics['D'] = true;
     }
 
     static boolean quickCheckForisCreatable(final String str) {
@@ -4746,8 +4722,6 @@ public final class Numbers {
 
         return true;
     }
-
-    //    /**
 
     /**
      * Returns {@code true} if {@code n} is a <a href="http://mathworld.wolfram.com/PrimeNumber.html">prime number</a>.

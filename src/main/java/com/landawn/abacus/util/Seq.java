@@ -4872,7 +4872,10 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
         assertNotClosed();
         checkArgNotNull(mapper, cs.mapper);
 
-        final Deque<R> queue = new ArrayDeque<>();
+        // LinkedList (not ArrayDeque) so the mapper may emit null elements, consistent with
+        // flatmap/flatMapArray and JDK Stream.mapMulti. size()/poll() stay correct because poll()
+        // is only called after a size() check confirms the queue is non-empty.
+        final Deque<R> queue = new LinkedList<>();
 
         final Consumer<R> consumer = queue::offer;
 

@@ -280,7 +280,10 @@ public final class ByteArrayOutputStream extends OutputStream {
     }
 
     /**
-     * Converts the buffer contents to a string using the platform's default charset.
+     * Converts the buffer contents to a string using UTF-8 ({@code IOUtil.DEFAULT_CHARSET}).
+     *
+     * <p>Note: unlike {@link java.io.ByteArrayOutputStream#toString()}, which uses the platform's default
+     * charset, this always decodes as UTF-8.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -289,7 +292,7 @@ public final class ByteArrayOutputStream extends OutputStream {
      * String result = baos.toString();   // returns "Hello World"
      * }</pre>
      *
-     * @return a String decoded from the buffer contents
+     * @return a String decoded from the buffer contents using UTF-8
      */
     @Override
     public String toString() {

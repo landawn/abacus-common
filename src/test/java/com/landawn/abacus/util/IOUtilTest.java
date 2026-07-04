@@ -7942,6 +7942,29 @@ public class IOUtilTest extends TestBase {
     }
 
     @Test
+    public void testForLines_Directory_LazyOpen() throws Exception {
+        // A directory with many files: forLines now opens each file lazily (LazyFileLineIterator) rather than
+        // holding every file descriptor open up front. Verify all lines from all files are still read.
+        File dir = Files.createTempDirectory(tempFolder, "forlines-dir").toFile();
+        final int fileCount = 20;
+        final int linesPerFile = 5;
+
+        for (int f = 0; f < fileCount; f++) {
+            File file = new File(dir, "f" + f + ".txt");
+            StringBuilder sb = new StringBuilder();
+            for (int l = 0; l < linesPerFile; l++) {
+                sb.append("f").append(f).append("L").append(l).append("\n");
+            }
+            Files.write(file.toPath(), sb.toString().getBytes(UTF_8));
+        }
+
+        java.util.List<String> lines = new java.util.ArrayList<>();
+        IOUtil.forLines(dir, line -> lines.add(line));
+
+        assertEquals(fileCount * linesPerFile, lines.size());
+    }
+
+    @Test
     public void testForLines_Collection_WithCallback() throws Exception {
         File file1 = Files.createTempFile(tempFolder, "coll-cb1", ".txt").toFile();
         Files.write(file1.toPath(), "Line1\n".getBytes(UTF_8));

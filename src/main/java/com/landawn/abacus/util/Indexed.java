@@ -375,7 +375,7 @@ public final class Indexed<T> extends AbstractIndexed {
      */
     @Override
     public int hashCode() {
-        return (int) (index * 31 + (value == null ? 0 : value.hashCode()));
+        return (int) (index * 31 + N.hashCode(value));
     }
 
     /**

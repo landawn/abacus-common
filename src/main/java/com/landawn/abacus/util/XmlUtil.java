@@ -417,9 +417,10 @@ public final class XmlUtil {
             }
 
             final Unmarshaller unmarshaller = jc.createUnmarshaller();
-            final StringReader reader = new StringReader(xml);
-
-            return (T) unmarshaller.unmarshal(reader);
+            // Parse through the hardened StAX factory (DTD and external entities disabled) instead of
+            // handing a raw Reader to JAXB, whose default unmarshaller would otherwise create its own
+            // XXE-vulnerable parser and bypass the hardening every other parse path in this class uses.
+            return (T) unmarshaller.unmarshal(createXMLStreamReader(new StringReader(xml)));
         } catch (final JAXBException e) {
             throw ExceptionUtil.toRuntimeException(e, true);
         }
@@ -984,10 +985,15 @@ public final class XmlUtil {
      * @see TransformerFactory#newTransformer()
      */
     public static Transformer createXMLTransformer() {
-        try {
-            return transferFactory.newTransformer();
-        } catch (final TransformerConfigurationException e) {
-            throw ExceptionUtil.toRuntimeException(e, true);
+        // TransformerFactory instances are not guaranteed thread-safe for concurrent factory-method
+        // calls (mirrors the synchronized(docBuilderFactory) / synchronized(saxParserPool) guards
+        // used above for DocumentBuilderFactory/SAXParserFactory, for the same reason).
+        synchronized (transferFactory) {
+            try {
+                return transferFactory.newTransformer();
+            } catch (final TransformerConfigurationException e) {
+                throw ExceptionUtil.toRuntimeException(e, true);
+            }
         }
     }
 

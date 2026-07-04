@@ -347,7 +347,8 @@ abstract class AbstractParser<SC extends SerializationConfig<?>, DC extends Dese
             return (T) N.newInstance(propClass);
         }
 
-        throw new ParsingException("Failed to create property instance with property class by attribute " + attributeTypeClass);
+        throw new ParsingException(
+                "Failed to create property instance: no property class is available and the type attribute is missing or unusable: " + attributeTypeClass);
     }
 
     /**

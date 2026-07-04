@@ -206,7 +206,7 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
         }
 
         final Runnable evictTask = () -> {
-            // Evict from the pool
+            // Periodically remove expired entries from the pool
             try {
                 removeExpired();
             } catch (final Exception e) {
@@ -328,7 +328,7 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
                 }
 
                 if (keyValueMemorySize < 0) {
-                    logger.warn("Memory measure returned negative size for key/value: {}", keyValueMemorySize);
+                    logger.warn("Memory measure returned negative size for key/value: " + keyValueMemorySize);
                     return false;
                 }
 
@@ -520,7 +520,7 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
                         }
 
                         if (keyValueMemorySize < 0) {
-                            logger.warn("Memory measure returned negative size for key/value: {}", keyValueMemorySize);
+                            logger.warn("Memory measure returned negative size for key/value: " + keyValueMemorySize);
                             return false;
                         }
 
@@ -1067,19 +1067,15 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
     }
 
     /**
-     * Returns the hash code value for this pool.
-     * The hash code is based on the internal pool map.
+     * Returns the hash code value for this pool. The hash code is computed from a snapshot of the
+     * pool's key-value mappings taken under the pool lock, using {@link java.util.Map#hashCode()}
+     * semantics on that snapshot (order-independent, sum of entry hash codes).
      *
      * @return a hash code value for this pool
      */
     @Override
     public int hashCode() {
-        lock.lock();
-        try {
-            return pool.hashCode();
-        } finally {
-            lock.unlock();
-        }
+        return snapshot().hashCode();
     }
 
     /**
@@ -1254,7 +1250,7 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
 
         if (value != null) {
             if (logger.isDebugEnabled()) {
-                logger.debug("Destroying cached object {} with activity print: {}", ClassUtil.getSimpleClassName(value.getClass()), value.activityPrint());
+                logger.debug("Destroying cached object " + ClassUtil.getSimpleClassName(value.getClass()) + " with activity print: " + value.activityPrint());
             }
 
             if (memoryMeasure != null) {

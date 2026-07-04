@@ -126,9 +126,8 @@ public final class LZ4BlockInputStream extends InputStream {
      *         because the end of the stream has been reached
      * @throws IOException if an I/O error occurs
      * @throws NullPointerException if {@code b} is {@code null}
-     * @throws IllegalArgumentException if {@code len} is negative
-     * @throws IndexOutOfBoundsException if {@code off} is negative or
-     *         {@code off + len} is greater than {@code b.length}
+     * @throws IndexOutOfBoundsException if {@code off} or {@code len} is negative,
+     *         or {@code off + len} is greater than {@code b.length}
      */
     @Override
     public int read(final byte[] b, final int off, final int len) throws IOException {

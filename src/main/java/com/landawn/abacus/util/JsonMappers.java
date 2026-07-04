@@ -100,6 +100,14 @@ public final class JsonMappers {
         temp.enable(SerializationFeature.INDENT_OUTPUT);
         defaultJsonMapperForPretty = temp;
 
+        // Jackson's MapperConfigBase#with()/#without() returns "this" (the same shared instance) when the
+        // requested feature already has that value, instead of a new copy. To hand callers of
+        // createSerializationConfig()/createDeserializationConfig() a genuinely independent config instance
+        // (rather than the shared defaultSerializationConfig/defaultDeserializationConfig singleton), find a
+        // feature that is disabled by default, flip it on here, then flip it back off in
+        // createSerializationConfig()/createDeserializationConfig(); the round trip forces Jackson to build a
+        // real copy. If every feature happens to already be enabled by default, no such feature exists and the
+        // shared singleton is used as-is (no copy needed).
         {
             SerializationFeature tmp = null;
             for (final SerializationFeature serializationFeature : SerializationFeature.values()) {
@@ -1702,8 +1710,6 @@ public final class JsonMappers {
      * @see SerializationFeature
      */
     public static SerializationConfig createSerializationConfig() {
-        // final SerializationConfig copy = defaultSerializationConfigForCopy.without(serializationFeatureNotEnabledByDefault);
-
         return defaultSerializationConfigForCopy.without(serializationFeatureNotEnabledByDefault);
     }
 
@@ -1725,8 +1731,6 @@ public final class JsonMappers {
      * @see DeserializationFeature
      */
     public static DeserializationConfig createDeserializationConfig() {
-        // final DeserializationConfig copy = defaultDeserializationConfigForCopy.without(deserializationFeatureNotEnabledByDefault);
-
         return defaultDeserializationConfigForCopy.without(deserializationFeatureNotEnabledByDefault);
     }
 

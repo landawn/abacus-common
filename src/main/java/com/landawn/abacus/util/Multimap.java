@@ -3776,7 +3776,7 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
      * @see #applyIfNotEmpty(Throwables.Function)
      */
     public <X extends Exception> OrElse acceptIfNotEmpty(final Throwables.Consumer<? super Multimap<K, E, V>, X> action) throws X {
-        return If.is(totalValueCount() > 0).then(this, action);
+        return If.is(!isEmpty()).then(this, action);
     }
 
     /**

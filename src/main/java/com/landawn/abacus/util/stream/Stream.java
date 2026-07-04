@@ -4068,7 +4068,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
     /**
      * Splits the elements of the stream into sub-streams based on consecutive equal predicate results.
      * Each sub-stream is collected into a List. A new sub-stream begins when the predicate result changes
-     * from one element to the next (either {@code true} to {@code false}, or {@code false} to true).
+     * from one element to the next (either {@code true} to {@code false}, or {@code false} to {@code true}).
      *
      * <p>This operation is sequential only and cannot be parallelized, even in parallel streams.
      * Elements with the same predicate result are grouped together in the same sub-stream.
@@ -4117,7 +4117,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
     /**
      * Splits the elements of the stream into separate groups based on consecutive equal predicate results.
      * Each group is reduced using the provided collector. A new group begins when the predicate result changes
-     * from one element to the next (either {@code true} to {@code false}, or {@code false} to true).
+     * from one element to the next (either {@code true} to {@code false}, or {@code false} to {@code true}).
      *
      * <p>This operation is sequential only and cannot be parallelized, even in parallel streams.
      * Elements with the same predicate result are grouped together and processed by the collector.
@@ -7388,7 +7388,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
     //            BiPredicate<? super U, ? super T> conditionToBreak);
 
     /**
-     * Performs a mutable reduction operation on the elements of this stream using a Collector.
+     * Performs a mutable reduction operation on the elements of this stream.
      * This is a terminal operation.
      *
      * <p>This operation can be parallelized if the stream supports parallel processing.
@@ -7424,7 +7424,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
     public abstract <R> R collect(Supplier<R> supplier, BiConsumer<? super R, ? super T> accumulator, BiConsumer<R, R> combiner);
 
     /**
-     * Performs a mutable reduction operation on the elements of this stream using a Collector.
+     * Performs a mutable reduction operation on the elements of this stream.
      * This is a terminal operation.
      *
      * <p>Only call this method when the returned type {@code R} is one of these types: {@code Collection/Map/StringBuilder/Multiset/Multimap/BooleanList/IntList/.../DoubleList}.
@@ -9754,7 +9754,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p>The first element is used to determine field names: if it's a bean or map, the property/key names become
      * headers. Array/collection elements are only supported by the overloads that take explicit {@code csvHeaders};
      * otherwise a RuntimeException is thrown.
-     * Note: The output stream is closed by this operation.
+     * Note: The output stream is not closed by this operation.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -9787,7 +9787,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * <p>The provided headers are written as the first line.
      * Each subsequent line contains the element data formatted as CSV with proper escaping.
-     * Note: The output stream is closed by this operation.
+     * Note: The output stream is not closed by this operation.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -9917,7 +9917,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p>The JSON output is written as a single array containing all stream elements.
      * Each element is serialized to JSON format. The operation is sequential and cannot be parallelized.
      *
-     * <p>Note: The output stream is closed by this operation.</p>
+     * <p>Note: The output stream is not closed by this operation.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -22020,7 +22020,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
                     if (iters[i] != null) {
                         if (iters[i].hasNext()) {
                             return true;
-                        } else if (iters[i] != null) {
+                        } else {
                             iters[i] = null;
                         }
                     }

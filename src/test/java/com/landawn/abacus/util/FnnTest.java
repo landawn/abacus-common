@@ -73,6 +73,19 @@ public class FnnTest extends TestBase {
     }
 
     @Test
+    public void testMemoizeWithExpiration_Duration() throws Exception {
+        int[] callCount = { 0 };
+        Throwables.Supplier<String, Exception> supplier = Fnn.memoizeWithExpiration(() -> {
+            callCount[0]++;
+            return "value";
+        }, java.time.Duration.ofHours(1));
+        assertEquals("value", supplier.get());
+        assertEquals("value", supplier.get()); // should be cached
+        assertEquals(1, callCount[0]); // only called once
+        assertThrows(IllegalArgumentException.class, () -> Fnn.memoizeWithExpiration(() -> "x", (java.time.Duration) null));
+    }
+
+    @Test
     public void testMemoizeWithExpiration_expiredEntry() throws Exception {
         int[] callCount = { 0 };
         // Use very short duration so it expires

@@ -347,7 +347,14 @@ public final class WSSecurityUtil {
      *
      * <p>This method internally calls {@link #computePasswordDigest(byte[], byte[], byte[])} after
      * converting all string parameters to byte arrays using UTF-8 (as mandated by the WS-Security
-     * UsernameToken Profile). The resulting digest follows the WS-Security UsernameToken specification.</p>
+     * UsernameToken Profile).</p>
+     *
+     * <p><b>Important — nonce encoding:</b> This overload hashes the {@code nonce} <i>string's</i> UTF-8 bytes
+     * verbatim; it does <b>not</b> Base64-decode it. The WS-Security UsernameToken digest is defined over the
+     * <i>raw</i> nonce bytes, so passing a Base64-encoded nonce string here produces a digest that a
+     * spec-compliant peer (which Base64-decodes the nonce before hashing) will not match. For interoperable
+     * WS-Security digests, use {@link #computePasswordDigest(byte[], byte[], byte[])} with the raw nonce bytes.
+     * This string overload is a convenience for callers whose nonce is genuinely text.</p>
      *
      * <p><b>Security Note:</b> This method uses SHA-1, which is cryptographically broken for
      * collision resistance. For new applications or when the WS-Security peer supports it,
@@ -356,16 +363,14 @@ public final class WSSecurityUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * // Using string inputs
+     * // For WS-Security interop, hash the RAW nonce bytes (not the Base64 text):
      * byte[] nonceBytes = WSSecurityUtil.generateNonce(16);
-     * String nonce = Base64.getEncoder().encodeToString(nonceBytes);
      * String created = Instant.now().toString();
-     * String password = "secretPassword";
+     * String passwordDigest = WSSecurityUtil.computePasswordDigest(
+     *         nonceBytes, created.getBytes(StandardCharsets.UTF_8), "secretPassword".getBytes(StandardCharsets.UTF_8));
      *
-     * String passwordDigest = WSSecurityUtil.computePasswordDigest(nonce, created, password);
-     *
-     * // Use in WS-Security header
-     * wsSecurityHeader.setPasswordDigest(passwordDigest);
+     * // This string overload is for text nonces only (it hashes the nonce text as-is):
+     * String textDigest = WSSecurityUtil.computePasswordDigest(textNonce, created, "secretPassword");
      * }</pre>
      *
      * @param nonce the nonce string, a cryptographically random value that should only be

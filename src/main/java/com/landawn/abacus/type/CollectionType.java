@@ -310,7 +310,7 @@ public class CollectionType<E, T extends Collection<E>> extends AbstractType<T> 
      */
     @Override
     public T valueOf(final String str) {
-        if (Strings.isEmpty(str) || Strings.isBlank(str)) {
+        if (Strings.isBlank(str)) {
             return null; // NOSONAR
         } else if (STR_FOR_EMPTY_ARRAY.equals(str)) {
             return (T) N.newCollection(typeClass);

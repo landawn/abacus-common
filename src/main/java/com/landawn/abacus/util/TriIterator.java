@@ -19,7 +19,6 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.Objects;
 import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.function.BooleanSupplier;
@@ -1111,6 +1110,8 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
 
             @Override
             public <R> ObjIterator<R> map(final TriFunction<? super A, ? super B, ? super C, ? extends R> mapper) {
+                N.checkArgNotNull(mapper, cs.mapper);
+
                 if (!skipped) {
                     skip();
                 }
@@ -1432,15 +1433,15 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
      *
      * @param supplier a supplier invoked three times to create the left, middle, and right lists; each call must return a non-null {@code List}
      * @return a {@code Triple} whose left, middle, and right lists contain all first, second, and third components, respectively
-     * @throws NullPointerException if {@code supplier} is {@code null} or any call returns {@code null}
+     * @throws IllegalArgumentException if {@code supplier} is {@code null} or any call returns {@code null}
      * @see #unzipToCollections(Supplier, Supplier, Supplier)
      */
     public Triple<List<A>, List<B>, List<C>> unzipToLists(@SuppressWarnings("rawtypes") final Supplier<? extends List> supplier) {
-        Objects.requireNonNull(supplier);
+        N.checkArgNotNull(supplier, cs.supplier);
 
-        final List<A> listA = Objects.requireNonNull(supplier.get());
-        final List<B> listB = Objects.requireNonNull(supplier.get());
-        final List<C> listC = Objects.requireNonNull(supplier.get());
+        final List<A> listA = N.checkArgNotNull(supplier.get(), cs.supplier);
+        final List<B> listB = N.checkArgNotNull(supplier.get(), cs.supplier);
+        final List<C> listC = N.checkArgNotNull(supplier.get(), cs.supplier);
 
         this.foreachRemaining((a, b, c) -> {
             listA.add(a);
@@ -1515,15 +1516,15 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
      *
      * @param supplier a supplier invoked three times to create the left, middle, and right sets; each call must return a non-null {@code Set}
      * @return a {@code Triple} whose left, middle, and right sets contain the distinct first, second, and third components, respectively
-     * @throws NullPointerException if {@code supplier} is {@code null} or any call returns {@code null}
+     * @throws IllegalArgumentException if {@code supplier} is {@code null} or any call returns {@code null}
      * @see #unzipToCollections(Supplier, Supplier, Supplier)
      */
     public Triple<Set<A>, Set<B>, Set<C>> unzipToSets(@SuppressWarnings("rawtypes") final Supplier<? extends Set> supplier) {
-        Objects.requireNonNull(supplier);
+        N.checkArgNotNull(supplier, cs.supplier);
 
-        final Set<A> setA = Objects.requireNonNull(supplier.get());
-        final Set<B> setB = Objects.requireNonNull(supplier.get());
-        final Set<C> setC = Objects.requireNonNull(supplier.get());
+        final Set<A> setA = N.checkArgNotNull(supplier.get(), cs.supplier);
+        final Set<B> setB = N.checkArgNotNull(supplier.get(), cs.supplier);
+        final Set<C> setC = N.checkArgNotNull(supplier.get(), cs.supplier);
 
         this.foreachRemaining((a, b, c) -> {
             setA.add(a);

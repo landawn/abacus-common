@@ -261,13 +261,13 @@ public class BigDecimalSummaryStatistics implements Consumer<BigDecimal> {
         return count == 0L ? BigDecimal.ZERO : getSum().divide(BigDecimal.valueOf(count), MathContext.DECIMAL128);
     }
 
-    private static final String DECIMAL_FORMAT_PATTERN = "#,###.000000";
+    private static final String DECIMAL_FORMAT_PATTERN = "#,##0.000000";
 
     /**
      * Returns a string representation of this summary statistics object.
      *
      * <p>The representation includes min, max, count, sum, and average formatted
-     * using the {@code DecimalFormat} pattern {@code "#,###.000000"}, which applies
+     * using the {@code DecimalFormat} pattern {@code "#,##0.000000"}, which applies
      * grouping separators for thousands and six decimal places. If min or max is
      * {@code null} (no values recorded), it is shown as {@code null}.</p>
      *

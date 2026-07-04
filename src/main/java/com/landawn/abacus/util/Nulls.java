@@ -63,8 +63,8 @@ import com.landawn.abacus.annotation.MayReturnNull;
  * }</pre>
  *
  * @see N
- * @see com.landawn.abacus.util.u.Optional
  * @see Iterables
+ * @see com.landawn.abacus.util.u.Optional
  */
 @Beta
 public final class Nulls {

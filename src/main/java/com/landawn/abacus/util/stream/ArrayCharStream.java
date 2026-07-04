@@ -1484,6 +1484,7 @@ class ArrayCharStream extends AbstractCharStream {
      *
      * @return the integer sum of all elements in this stream
      * @throws IllegalStateException if the stream is already closed
+     * @throws ArithmeticException if the sum overflows the {@code int} range
      */
     @Override
     public int sum() throws IllegalStateException {

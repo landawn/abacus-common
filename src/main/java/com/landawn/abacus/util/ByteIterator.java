@@ -134,7 +134,7 @@ public abstract class ByteIterator extends ImmutableIterator<Byte> {
      * @param fromIndex the starting index (inclusive)
      * @param toIndex the ending index (exclusive)
      * @return a new {@code ByteIterator} over the specified range, or an empty iterator if the array is {@code null} or {@code fromIndex == toIndex}
-     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code toIndex > a.length}, or {@code fromIndex > toIndex}
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code toIndex > (a == null ? 0 : a.length)}, or {@code fromIndex > toIndex}
      */
     public static ByteIterator of(final byte[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
@@ -268,10 +268,8 @@ public abstract class ByteIterator extends ImmutableIterator<Byte> {
     /**
      * Returns a {@code ByteIterator} that generates values using the provided supplier
      * while the hasNext condition returns {@code true}.
-     *
-     * <p>Note: The {@code hasNext} supplier may be called multiple times for the same element
-     * (once by the user, once internally for validation), so it should be idempotent or
-     * designed to handle multiple calls.</p>
+     * The {@code hasNext} supplier is called at most once per element; its result is cached
+     * until the next call to {@code nextByte()}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -293,9 +291,16 @@ public abstract class ByteIterator extends ImmutableIterator<Byte> {
         N.checkArgNotNull(supplier);
 
         return new ByteIterator() {
+            private boolean hasNextCached = false;
+            private boolean hasNextValue = false;
+
             @Override
             public boolean hasNext() {
-                return hasNext.getAsBoolean();
+                if (!hasNextCached) {
+                    hasNextValue = hasNext.getAsBoolean();
+                    hasNextCached = true;
+                }
+                return hasNextValue;
             }
 
             @Override
@@ -304,6 +309,7 @@ public abstract class ByteIterator extends ImmutableIterator<Byte> {
                     throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
+                hasNextCached = false;
                 return supplier.getAsByte();
             }
         };

@@ -748,6 +748,7 @@ public final class Fn {
      *         within the expiration window and fetch fresh values when the cache expires
      * @throws IllegalArgumentException if the duration converts to a non-positive number of
      *                                  milliseconds (i.e., duration.toMillis() ≤ 0)
+     * @throws NullPointerException if {@code duration} is {@code null}
      * @see #memoizeWithExpiration(java.util.function.Supplier, long, TimeUnit)
      * @see Duration
      */
@@ -3030,9 +3031,9 @@ public final class Fn {
     public static <T> Predicate<T> notIn(final Collection<?> c) throws IllegalArgumentException {
         N.checkArgNotNull(c);
 
-        final boolean isEmpty = N.isEmpty(c);
-
-        return value -> isEmpty || !c.contains(value);
+        // Evaluate containment live: freezing emptiness at construction would make an
+        // initially-empty-then-populated collection silently mis-test.
+        return value -> !c.contains(value);
     }
 
     /**
@@ -4902,10 +4903,6 @@ public final class Fn {
     @Beta
     @Stateful
     public static <T> Predicate<T> atMost(final int count) throws IllegalArgumentException {
-        // TODO cnt or atMost? skip(atMost(n)/limit(atMost(n)/dropWhile(atMost(n)/takeWhile(atMost(n)
-        // TODO cnt or atMost? skip(cnt(n)/limit(cnt(n)/dropWhile(cnt(n)/takeWhile(cnt(n)
-        // public static <T> Predicate<T> cnt(final int count) {
-
         N.checkArgNotNegative(count, cs.count);
 
         return new Predicate<>() {

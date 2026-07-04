@@ -175,7 +175,7 @@ public final class PrimitiveIntArrayType extends AbstractPrimitiveArrayType<int[
      */
     @Override
     public int[] valueOf(final String str) {
-        if (Strings.isEmpty(str) || Strings.isBlank(str)) {
+        if (Strings.isBlank(str)) {
             return null; // NOSONAR
         } else if (STR_FOR_EMPTY_ARRAY.equals(str)) {
             return N.EMPTY_INT_ARRAY;

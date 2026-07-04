@@ -85,7 +85,7 @@ import com.landawn.abacus.util.Splitter.MapSplitter;
  *
  * <p><b>Supported Character Sets:</b>
  * <ul>
- *   <li><b>Platform Default:</b> Used when no charset is specified (the JVM's default {@link Charset#defaultCharset()})</li>
+ *   <li><b>Default (UTF-8):</b> Used when no charset is specified. This library always defaults to UTF-8 ({@code IOUtil.DEFAULT_CHARSET}), <b>not</b> the JVM's {@link Charset#defaultCharset()}, for cross-platform consistency</li>
  *   <li><b>UTF-8:</b> Recommended charset for modern web applications</li>
  *   <li><b>ISO-8859-1:</b> Legacy charset support for older systems</li>
  *   <li><b>Custom Charsets:</b> Any Charset supported by the JVM</li>
@@ -200,7 +200,7 @@ import com.landawn.abacus.util.Splitter.MapSplitter;
  *   <li><b>UncheckedIOException:</b> Wraps IOException from Appendable operations</li>
  *   <li><b>IllegalArgumentException:</b> Thrown for invalid parameters or malformed input</li>
  *   <li><b>NullPointerException:</b> Appropriate null checks with descriptive messages</li>
- *   <li><b>Charset Fallback:</b> A {@code null} charset is handled gracefully with a fallback to the platform default charset</li>
+ *   <li><b>Charset Fallback:</b> A {@code null} charset is handled gracefully with a fallback to UTF-8</li>
  * </ul>
  *
  * <p><b>RFC Compliance and Standards:</b>
@@ -450,7 +450,7 @@ public final class URLEncodedUtil {
     }
 
     /**
-     * Encodes the provided parameters into a URL-encoded query string using the platform default charset ({@link Charset#defaultCharset()}).
+     * Encodes the provided parameters into a URL-encoded query string using UTF-8.
      * <p>
      * This method accepts various parameter formats:
      * <ul>
@@ -504,7 +504,7 @@ public final class URLEncodedUtil {
      * {@link #encode(Object, Charset, NamingPolicy)} with {@link NamingPolicy#NO_CHANGE}.
      *
      * @param parameters the parameters to encode (Map, bean, Object array pairs, or String); may be {@code null}.
-     * @param charset the charset to use for percent-encoding; if {@code null}, defaults to the platform default charset.
+     * @param charset the charset to use for percent-encoding; if {@code null}, defaults to UTF-8.
      * @return a URL-encoded query string; returns empty string if {@code parameters} is {@code null}.
      * @throws IllegalArgumentException if {@code parameters} is an {@code Object[]} with an odd length.
      * @see #encode(Object)
@@ -536,7 +536,7 @@ public final class URLEncodedUtil {
      * }</pre>
      *
      * @param parameters the parameters to encode (Map, bean, Object array pairs, or String); may be {@code null}.
-     * @param charset the charset to use for percent-encoding; if {@code null}, defaults to the platform default charset.
+     * @param charset the charset to use for percent-encoding; if {@code null}, defaults to UTF-8.
      * @param namingPolicy the naming policy to transform property/key names (e.g., CAMEL_CASE, SCREAMING_SNAKE_CASE);
      *                     if {@code null} or NO_CHANGE, names are not transformed.
      * @return a URL-encoded query string; returns empty string if {@code parameters} is {@code null}.
@@ -560,7 +560,7 @@ public final class URLEncodedUtil {
     }
 
     /**
-     * Encodes parameters and appends them to a URL as a query string using the platform default charset ({@link Charset#defaultCharset()}).
+     * Encodes parameters and appends them to a URL as a query string using UTF-8.
      * <p>
      * This method takes a base URL and parameters, encodes the parameters according to
      * application/x-www-form-urlencoded rules, and appends them to the URL with a '?' separator.
@@ -611,7 +611,7 @@ public final class URLEncodedUtil {
      *
      * @param url the base URL to which the query string will be appended.
      * @param parameters the parameters to encode and append (Map, bean, Object array pairs, or String); may be {@code null}.
-     * @param charset the charset to use for percent-encoding; if {@code null}, defaults to the platform default charset.
+     * @param charset the charset to use for percent-encoding; if {@code null}, defaults to UTF-8.
      * @return the URL with the encoded query string appended;
      *         returns the original URL if {@code parameters} is {@code null} or an empty {@code Map}.
      * @throws IllegalArgumentException if {@code parameters} is an {@code Object[]} with an odd length.
@@ -646,7 +646,7 @@ public final class URLEncodedUtil {
      *
      * @param url the base URL to which the query string will be appended.
      * @param parameters the parameters to encode and append (Map, bean, Object array pairs, or String); may be {@code null}.
-     * @param charset the charset to use for percent-encoding; if {@code null}, defaults to the platform default charset.
+     * @param charset the charset to use for percent-encoding; if {@code null}, defaults to UTF-8.
      * @param namingPolicy the naming policy to transform property/key names (e.g., CAMEL_CASE, SCREAMING_SNAKE_CASE);
      *                     if {@code null} or NO_CHANGE, names are not transformed.
      * @return the URL with the encoded query string appended;
@@ -696,7 +696,7 @@ public final class URLEncodedUtil {
     }
 
     /**
-     * Encodes the provided parameters into a URL-encoded query string and appends the result to an {@code Appendable} using the platform default charset ({@link Charset#defaultCharset()}).
+     * Encodes the provided parameters into a URL-encoded query string and appends the result to an {@code Appendable} using UTF-8.
      * <p>
      * This method is useful for streaming or building query strings without creating intermediate String objects.
      * The parameters are encoded according to application/x-www-form-urlencoded rules and directly appended
@@ -741,7 +741,7 @@ public final class URLEncodedUtil {
      * {@link #encode(Object, Charset, NamingPolicy, Appendable)} with {@link NamingPolicy#NO_CHANGE}.
      *
      * @param parameters the parameters to encode (Map, bean, Object array pairs, or String); may be {@code null}.
-     * @param charset the charset to use for percent-encoding; if {@code null}, defaults to the platform default charset.
+     * @param charset the charset to use for percent-encoding; if {@code null}, defaults to UTF-8.
      * @param output the {@code Appendable} to which the encoded query string will be appended.
      * @throws IllegalArgumentException if {@code parameters} is an {@code Object[]} with an odd length.
      * @throws UncheckedIOException if an I/O error occurs while appending to the output.
@@ -777,7 +777,7 @@ public final class URLEncodedUtil {
      * }</pre>
      *
      * @param parameters the parameters to encode (Map, bean, Object array pairs, or String); may be {@code null}.
-     * @param charset the charset to use for percent-encoding; if {@code null}, defaults to the platform default charset.
+     * @param charset the charset to use for percent-encoding; if {@code null}, defaults to UTF-8.
      * @param namingPolicy the naming policy to transform property/key names (e.g., CAMEL_CASE, SCREAMING_SNAKE_CASE);
      *                     if {@code null} or NO_CHANGE, names are not transformed.
      * @param output the {@code Appendable} to which the encoded query string will be appended.
@@ -860,7 +860,7 @@ public final class URLEncodedUtil {
      *
      * @param content the string to encode; {@code null} is written as the literal text {@code "null"}.
      * @param charset the charset used to convert characters to bytes before percent-encoding;
-     *                if {@code null}, defaults to the platform default charset.
+     *                if {@code null}, defaults to UTF-8.
      * @param output the {@code Appendable} to which the encoded content is appended.
      * @throws IOException if an I/O error occurs while appending to the output.
      */
@@ -949,7 +949,7 @@ public final class URLEncodedUtil {
     }
 
     /**
-     * Decodes a URL-encoded query string into a {@code Map<String, String>} using the platform default charset ({@link Charset#defaultCharset()}).
+     * Decodes a URL-encoded query string into a {@code Map<String, String>} using UTF-8.
      * <p>
      * This method parses a URL query string (e.g., "name=value&amp;foo=bar") and converts it into a map
      * where keys are parameter names and values are parameter values. Both '+' characters and <i>%XX</i> sequences
@@ -998,7 +998,7 @@ public final class URLEncodedUtil {
      * }</pre>
      *
      * @param urlQuery the URL query string to decode, may be {@code null} or empty.
-     * @param charset the charset to use for decoding percent-encoded characters; if {@code null}, defaults to the platform default charset.
+     * @param charset the charset to use for decoding percent-encoded characters; if {@code null}, defaults to UTF-8.
      * @return a {@code LinkedHashMap} containing parameter names as keys and decoded parameter values as values;
      *         returns an empty map if {@code urlQuery} is {@code null} or empty.
      * @see #decode(String)
@@ -1030,7 +1030,7 @@ public final class URLEncodedUtil {
      *
      * @param <M> the type of the Map to return, must extend {@code Map<String, String>}.
      * @param urlQuery the URL query string to decode, may be {@code null} or empty.
-     * @param charset the charset to use for decoding percent-encoded characters; if {@code null}, defaults to the platform default charset.
+     * @param charset the charset to use for decoding percent-encoded characters; if {@code null}, defaults to UTF-8.
      * @param mapSupplier a supplier that provides an instance of the desired Map implementation; must not be {@code null}.
      * @return a Map of type M containing parameter names as keys and decoded parameter values as values;
      *         returns an empty map (from supplier) if {@code urlQuery} is {@code null} or empty.
@@ -1078,7 +1078,7 @@ public final class URLEncodedUtil {
     }
 
     /**
-     * Decodes a URL-encoded query string into a {@code ListMultimap<String, String>} using the platform default charset ({@link Charset#defaultCharset()}).
+     * Decodes a URL-encoded query string into a {@code ListMultimap<String, String>} using UTF-8.
      * <p>
      * This method parses a URL query string and converts it into a multimap where keys are parameter names
      * and values are lists of parameter values. Unlike {@link #decode(String)}, this method preserves all
@@ -1126,7 +1126,7 @@ public final class URLEncodedUtil {
      * }</pre>
      *
      * @param urlQuery the URL query string to decode, may be {@code null} or empty.
-     * @param charset the charset to use for decoding percent-encoded characters; if {@code null}, defaults to the platform default charset.
+     * @param charset the charset to use for decoding percent-encoded characters; if {@code null}, defaults to UTF-8.
      * @return a {@code ListMultimap} containing parameter names as keys and lists of decoded parameter values;
      *         returns an empty multimap if {@code urlQuery} is {@code null} or empty.
      * @see #decodeToMultimap(String)
@@ -1173,7 +1173,7 @@ public final class URLEncodedUtil {
     }
 
     /**
-     * Decodes a URL-encoded query string into a bean or Map of the specified type using the platform default charset ({@link Charset#defaultCharset()}).
+     * Decodes a URL-encoded query string into a bean or Map of the specified type using UTF-8.
      * <p>
      * This method parses a URL query string and populates a JavaBean or Map instance with the decoded parameters.
      * Parameter names are matched to bean property names (exact match first, falling back to case-insensitive matching). Values are automatically converted
@@ -1230,7 +1230,7 @@ public final class URLEncodedUtil {
      *
      * @param <T> the type of the object to decode into (JavaBean or Map).
      * @param urlQuery the URL query string to decode, may be {@code null} or empty.
-     * @param charset the charset to use for decoding percent-encoded characters; if {@code null}, defaults to the platform default charset.
+     * @param charset the charset to use for decoding percent-encoded characters; if {@code null}, defaults to UTF-8.
      * @param targetType the class of the bean or Map to create and populate; must not be {@code null}.
      * @return an instance of type T populated with the decoded parameter values;
      *         returns an empty instance if {@code urlQuery} is {@code null} or empty.

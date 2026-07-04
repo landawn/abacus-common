@@ -571,6 +571,7 @@ public final class Duration implements Comparable<Duration>, Immutable {
      * @throws IllegalArgumentException if either temporal is {@code null}.
      * @throws java.time.DateTimeException if the duration cannot be calculated (e.g., the temporal types are incompatible
      *         or do not support {@link ChronoUnit#MILLIS}).
+     * @throws ArithmeticException if the calculated number of milliseconds overflows a {@code long}.
      * @see #between(java.util.Date, java.util.Date)
      * @see #between(java.util.Calendar, java.util.Calendar)
      * @see Temporal#until(java.time.temporal.Temporal, java.time.temporal.TemporalUnit)
@@ -1011,7 +1012,8 @@ public final class Duration implements Comparable<Duration>, Immutable {
      *
      * @param divisor the value to divide the duration by, positive or negative but not zero.
      * @return a Duration based on this duration divided by the specified divisor.
-     * @throws ArithmeticException if the divisor is zero.
+     * @throws ArithmeticException if the divisor is zero, or if the divisor is {@code -1} and this
+     *         duration equals {@code Long.MIN_VALUE} milliseconds (negation would overflow).
      */
     public Duration dividedBy(final long divisor) {
         if (divisor == 0) {

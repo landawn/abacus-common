@@ -501,6 +501,7 @@ abstract class StreamBase<T, A, P, C, OT, IT, ITER extends Iterator<T>, S extend
      * @param offset the number of leading elements to skip; must be non-negative
      * @param maxSize the maximum number of elements to include; must be non-negative
      * @return a new stream with at most {@code maxSize} elements, starting after skipping {@code offset} elements
+     * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if {@code offset} or {@code maxSize} is negative
      */
     @Override

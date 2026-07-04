@@ -1631,7 +1631,7 @@ public class TriIteratorTest extends TestBase {
     public void testUnzipToLists_emptyRejectsNullSuppliedList() {
         TriIterator<String, Integer, Boolean> iter = TriIterator.empty();
 
-        assertThrows(NullPointerException.class, () -> iter.unzipToLists(() -> null));
+        assertThrows(IllegalArgumentException.class, () -> iter.unzipToLists(() -> null));
     }
 
     // =====================================================================
@@ -1691,7 +1691,7 @@ public class TriIteratorTest extends TestBase {
     public void testUnzipToSets_emptyRejectsNullSuppliedSet() {
         TriIterator<String, Integer, Boolean> iter = TriIterator.empty();
 
-        assertThrows(NullPointerException.class, () -> iter.unzipToSets(() -> null));
+        assertThrows(IllegalArgumentException.class, () -> iter.unzipToSets(() -> null));
     }
 
     @Test

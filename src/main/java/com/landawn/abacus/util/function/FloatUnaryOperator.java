@@ -61,6 +61,14 @@ public interface FloatUnaryOperator extends Throwables.FloatUnaryOperator<Runtim
      * If evaluation of either operator throws an exception, it is relayed to
      * the caller of the composed operator.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * FloatUnaryOperator negate = x -> -x;
+     * FloatUnaryOperator square = x -> x * x;
+     * FloatUnaryOperator negateThenSquare = square.compose(negate);
+     * float result = negateThenSquare.applyAsFloat(3.0f);   // Returns 9.0f
+     * }</pre>
+     *
      * @param before the operator to apply before this operator is applied
      * @return a composed operator that first applies the {@code before}
      *         operator and then applies this operator
@@ -79,6 +87,14 @@ public interface FloatUnaryOperator extends Throwables.FloatUnaryOperator<Runtim
      * If evaluation of either operator throws an exception, it is relayed to
      * the caller of the composed operator.
      *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * FloatUnaryOperator square = x -> x * x;
+     * FloatUnaryOperator negate = x -> -x;
+     * FloatUnaryOperator squareThenNegate = square.andThen(negate);
+     * float result = squareThenNegate.applyAsFloat(3.0f);   // Returns -9.0f
+     * }</pre>
+     *
      * @param after the operator to apply after this operator is applied
      * @return a composed operator that first applies this operator and then
      *         applies the {@code after} operator
@@ -93,6 +109,12 @@ public interface FloatUnaryOperator extends Throwables.FloatUnaryOperator<Runtim
 
     /**
      * Returns a unary operator that always returns its input argument unchanged.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * FloatUnaryOperator identity = FloatUnaryOperator.identity();
+     * float result = identity.applyAsFloat(42.5f);   // Returns 42.5f
+     * }</pre>
      *
      * @return a unary operator that always returns its input argument
      */

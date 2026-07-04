@@ -18,6 +18,7 @@ package com.landawn.abacus.util;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Comparator;
+import java.time.Duration;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
@@ -365,6 +366,34 @@ public final class Fnn {
                 return value;
             }
         };
+    }
+
+    /**
+     * Returns a memoized (caching) version of the given exception-throwing supplier whose cached value
+     * expires after the specified {@link Duration}. This is a convenience overload of
+     * {@link #memoizeWithExpiration(Throwables.Supplier, long, TimeUnit)} that accepts a {@code Duration}
+     * instead of a {@code (long, TimeUnit)} pair (mirroring {@link Fn#memoizeWithExpiration(java.util.function.Supplier, Duration)}).
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Throwables.Supplier<Config, IOException> config =
+     *     Fnn.memoizeWithExpiration(() -> loadConfig(), Duration.ofMinutes(10));
+     * }</pre>
+     *
+     * @param <T> the type of results supplied by this supplier
+     * @param <E> the type of exception that may be thrown by the supplier
+     * @param supplier the delegate supplier whose results should be memoized; must not be null
+     * @param duration the length of time after a value is created before it expires and must be recomputed;
+     *                 must not be null and must be positive (its millisecond value must be {@code > 0})
+     * @return a supplier that caches results with time-based expiration
+     * @throws IllegalArgumentException if supplier or duration is null, or the duration is not positive
+     * @see #memoizeWithExpiration(Throwables.Supplier, long, TimeUnit)
+     */
+    public static <T, E extends Throwable> Throwables.Supplier<T, E> memoizeWithExpiration(final Throwables.Supplier<T, E> supplier, final Duration duration)
+            throws IllegalArgumentException {
+        N.checkArgNotNull(duration, cs.duration);
+
+        return memoizeWithExpiration(supplier, duration.toMillis(), TimeUnit.MILLISECONDS);
     }
 
     /**

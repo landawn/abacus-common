@@ -2336,6 +2336,7 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * }</pre>
      *
      * @return the sum of elements in this stream. Returns 0 if the stream is empty.
+     * @throws ArithmeticException if the sum overflows the {@code int} range
      * @see #average()
      * @see #reduce(int, IntBinaryOperator)
      */

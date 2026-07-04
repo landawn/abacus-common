@@ -2002,7 +2002,7 @@ public final class HttpClient implements AutoCloseable {
      * @param is the response input stream to close
      * @param connection the connection associated with the completed request
      */
-    void close(final OutputStream os, final InputStream is, @SuppressWarnings("unused") final HttpURLConnection connection) { //NOSONAR
+    void close(final OutputStream os, final InputStream is, final HttpURLConnection connection) { //NOSONAR
         try {
             IOUtil.closeQuietly(os);
             IOUtil.closeQuietly(is);

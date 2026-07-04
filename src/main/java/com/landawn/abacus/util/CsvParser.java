@@ -519,7 +519,17 @@ public class CsvParser {
         final StringBuilder sb = Objectory.createStringBuilder();
 
         try {
-            for (int i = 0; i < len; i++) {
+            int i = 0;
+
+            // Skip leading whitespace of the first field (mirrors the post-separator skip below), but
+            // never skip the separator itself (a whitespace separator marks an empty first field). Without
+            // this, leading whitespace before a quoted first field lands in sb and makes the opening quote
+            // be mis-classified as embedded (see the isEmbedded check), corrupting or failing the parse.
+            while (ignoreLeadingWhiteSpace && i < len && nextLine.charAt(i) != separator && Character.isWhitespace(nextLine.charAt(i))) {
+                i++;
+            }
+
+            for (; i < len; i++) {
                 final char c = nextLine.charAt(i);
 
                 if (c == escape) {

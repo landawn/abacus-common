@@ -702,10 +702,13 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
      * @param <E> the type of exception that the consumer may throw.
      * @param consumer the action to be performed on each element; must accept a common
      *                 supertype of both L and R (typically {@code Object}); must not be {@code null}.
+     * @throws IllegalArgumentException if {@code consumer} is {@code null}.
      * @throws E if the consumer throws an exception.
      * @throws ClassCastException if the consumer cannot accept the runtime types of the elements.
      */
-    public <E extends Exception> void forEach(final Throwables.Consumer<?, E> consumer) throws E {
+    public <E extends Exception> void forEach(final Throwables.Consumer<?, E> consumer) throws IllegalArgumentException, E {
+        N.checkArgNotNull(consumer);
+
         final Throwables.Consumer<Object, E> objConsumer = (Throwables.Consumer<Object, E>) consumer;
 
         objConsumer.accept(left);

@@ -22,9 +22,11 @@ import com.landawn.abacus.util.cs;
  * arguments and returns no result. This is the primitive type specialization of
  * {@link java.util.function.BiConsumer} for {@code short}.
  *
- * <p>Unlike the JDK which only provides primitive specializations for int, long, and
- * double, this interface extends support to short primitives for better type safety
- * and performance when working with short values.
+ * <p>The JDK itself has no two-argument primitive specialization of {@link java.util.function.BiConsumer}
+ * for any type (only single-argument forms like {@link java.util.function.IntConsumer} and object+primitive
+ * forms like {@link java.util.function.ObjIntConsumer}); this project fills that gap for all eight primitive
+ * types, and this interface is the {@code short} member of that family, offering better type safety and
+ * performance than the boxed generic {@code BiConsumer<Short, Short>}.
  *
  * <p>This is a functional interface whose functional method is {@link #accept(short, short)}.
  *

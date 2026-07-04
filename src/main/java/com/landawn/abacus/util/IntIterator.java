@@ -267,10 +267,8 @@ public abstract class IntIterator extends ImmutableIterator<Integer> {
 
     /**
      * Creates an IntIterator that generates values while a condition is {@code true}.
-     *
-     * <p>Note: The {@code hasNext} supplier may be called multiple times for the same element
-     * (once by the user, once internally for validation), so it should be idempotent or
-     * designed to handle multiple calls.</p>
+     * The {@code hasNext} supplier is called at most once per element; its result is cached
+     * until the next call to {@code nextInt()}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -292,9 +290,16 @@ public abstract class IntIterator extends ImmutableIterator<Integer> {
         N.checkArgNotNull(supplier);
 
         return new IntIterator() {
+            private boolean hasNextCached = false;
+            private boolean hasNextValue = false;
+
             @Override
             public boolean hasNext() {
-                return hasNext.getAsBoolean();
+                if (!hasNextCached) {
+                    hasNextValue = hasNext.getAsBoolean();
+                    hasNextCached = true;
+                }
+                return hasNextValue;
             }
 
             @Override
@@ -303,6 +308,7 @@ public abstract class IntIterator extends ImmutableIterator<Integer> {
                     throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
+                hasNextCached = false;
                 return supplier.getAsInt();
             }
         };

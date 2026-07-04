@@ -188,17 +188,6 @@ public class OptionalCharType extends AbstractOptionalType<OptionalChar> {
      */
     @Override
     public OptionalChar get(final ResultSet rs, final int columnIndex) throws SQLException {
-        //    final Object result = rs.getObject(columnIndex);
-        //
-        //    if (result instanceof Character) {
-        //        return OptionalChar.of((Character) result);
-        //    } else if (result instanceof Integer) {
-        //        return OptionalChar.of((char) ((Integer) result).intValue());
-        //    } else {
-        //        final String str = result == null ? null : result.toString();
-        //        return Strings.isEmpty(str) ? OptionalChar.empty() : OptionalChar.of(Strings.parseChar(str));
-        //    }
-
         final String result = rs.getString(columnIndex);
 
         if (result == null || result.isEmpty()) {
@@ -234,17 +223,6 @@ public class OptionalCharType extends AbstractOptionalType<OptionalChar> {
      */
     @Override
     public OptionalChar get(final ResultSet rs, final String columnName) throws SQLException {
-        //    final Object result = rs.getObject(columnName);
-        //
-        //    if (result instanceof Character) {
-        //        return OptionalChar.of((Character) result);
-        //    } else if (result instanceof Integer) {
-        //        return OptionalChar.of((char) ((Integer) result).intValue());
-        //    } else {
-        //        final String str = result == null ? null : result.toString();
-        //        return Strings.isEmpty(str) ? OptionalChar.empty() : OptionalChar.of(Strings.parseChar(str));
-        //    }
-
         final String result = rs.getString(columnName);
 
         if (result == null || result.isEmpty()) {
@@ -279,12 +257,6 @@ public class OptionalCharType extends AbstractOptionalType<OptionalChar> {
      */
     @Override
     public void set(final PreparedStatement stmt, final int columnIndex, final OptionalChar x) throws SQLException {
-        //    if (x == null || x.isEmpty()) {
-        //        stmt.setNull(columnIndex, java.sql.Types.CHAR);
-        //    } else {
-        //        stmt.setInt(columnIndex, x.get());
-        //    }
-
         if (x == null || x.isEmpty()) {
             stmt.setNull(columnIndex, Types.VARCHAR);
         } else {
@@ -317,12 +289,6 @@ public class OptionalCharType extends AbstractOptionalType<OptionalChar> {
      */
     @Override
     public void set(final CallableStatement stmt, final String parameterName, final OptionalChar x) throws SQLException {
-        //    if (x == null || x.isEmpty()) {
-        //        stmt.setNull(parameterName, java.sql.Types.CHAR);
-        //    } else {
-        //        stmt.setInt(parameterName, x.get());
-        //    }
-
         if (x == null || x.isEmpty()) {
             stmt.setNull(parameterName, Types.VARCHAR);
         } else {

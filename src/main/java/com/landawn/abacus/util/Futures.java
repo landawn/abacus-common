@@ -1760,11 +1760,13 @@ public final class Futures {
 
                     if (result.isSuccess()) {
                         return result.orElseIfFailure(null);
-                    } else if (result.getException() instanceof InterruptedException) {
-                        // A synthetic interruption from the iterator (the thread calling get() was
-                        // interrupted while waiting), not an input-future failure: rethrow per the
-                        // Future.get() contract (allOf does the same, and the timed overload below
-                        // already rethrows it) instead of wrapping it in an unchecked exception.
+                    } else if (result.getException() instanceof InterruptedException && Thread.currentThread().isInterrupted()) {
+                        // Caller-side interruption only: the consumer thread was interrupted while waiting, and
+                        // the iterator sets THIS thread's interrupt flag before surfacing the InterruptedException
+                        // (see iterate02). Rethrow per the Future.get() contract instead of wrapping it. An input
+                        // future that merely FAILED with an InterruptedException cause does not set this thread's
+                        // interrupt flag, so it falls through to the failure branch below — anyOf returns the first
+                        // SUCCESS, so a still-pending sibling must be allowed to complete.
                         final InterruptedException cause = (InterruptedException) result.getException();
 
                         if (exception != null) {
@@ -1795,10 +1797,13 @@ public final class Futures {
 
                     if (result.isSuccess()) {
                         return result.orElseIfFailure(null);
-                    } else if (result.getException() instanceof TimeoutException || result.getException() instanceof InterruptedException) {
-                        // A synthetic total-timeout/interruption from the iterator, not an input-future
-                        // failure: rethrow per the Future.get(timeout, unit) contract (allOf does the
-                        // same) instead of wrapping it in an unchecked exception.
+                    } else if (result.getException() instanceof TimeoutException
+                            || (result.getException() instanceof InterruptedException && Thread.currentThread().isInterrupted())) {
+                        // A synthetic total-timeout, or a caller-side interruption (the iterator sets THIS thread's
+                        // interrupt flag before surfacing it) — not an input-future failure: rethrow per the
+                        // Future.get(timeout, unit) contract instead of wrapping it. An input future that merely
+                        // failed with an InterruptedException cause does not set the interrupt flag and falls
+                        // through to the failure branch below so a still-pending sibling can complete.
                         final Exception cause = result.getException();
 
                         if (exception != null) {

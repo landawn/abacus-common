@@ -56,16 +56,15 @@ public final class PrimitiveShortArrayType extends AbstractPrimitiveArrayType<sh
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<short[]> type = TypeFactory.getType(short[].class);
-     * Class clazz = type.javaType();
+     * Class<short[]> clazz = type.javaType();
      * System.out.println(clazz.getName());   // Output: [S
      * System.out.println(clazz.isArray());   // Output: true
      * }</pre>
      *
      * @return the Class object for short[] type
      */
-    @SuppressWarnings({ "rawtypes", "unchecked" })
     @Override
-    public Class javaType() {
+    public Class<short[]> javaType() {
         return short[].class;
     }
 
@@ -176,7 +175,7 @@ public final class PrimitiveShortArrayType extends AbstractPrimitiveArrayType<sh
      */
     @Override
     public short[] valueOf(final String str) {
-        if (Strings.isEmpty(str) || Strings.isBlank(str)) {
+        if (Strings.isBlank(str)) {
             return null; // NOSONAR
         } else if (STR_FOR_EMPTY_ARRAY.equals(str)) {
             return N.EMPTY_SHORT_ARRAY;

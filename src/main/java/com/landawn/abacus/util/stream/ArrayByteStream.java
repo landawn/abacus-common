@@ -1540,6 +1540,7 @@ class ArrayByteStream extends AbstractByteStream {
      *
      * @return the sum of all elements
      * @throws IllegalStateException if the stream is already closed
+     * @throws ArithmeticException if the sum overflows the {@code int} range
      */
     @Override
     public int sum() throws IllegalStateException {

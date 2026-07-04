@@ -294,6 +294,9 @@ class JdkLogger extends AbstractLogger {
      * this instance's JDK logger. The caller information is determined by walking
      * the stack trace to find the first frame outside of the logging framework.</p>
      *
+     * <p>The level is checked upfront so that the (relatively expensive) stack trace walk in
+     * {@link #fillCallerData(String, LogRecord)} is skipped entirely when the level is disabled.</p>
+     *
      * <p>See SLF4J bug report #13 for more details about why this approach is necessary.</p>
      *
      * @param callerFQCN the fully qualified class name of the caller
@@ -302,6 +305,10 @@ class JdkLogger extends AbstractLogger {
      * @param t the exception or error to log
      */
     private void log(final String callerFQCN, final Level level, final String msg, final Throwable t) {
+        if (!loggerImpl.isLoggable(level)) {
+            return;
+        }
+
         // millis and thread are filled by the constructor
         final LogRecord logRecord = new LogRecord(level, msg);
         logRecord.setLoggerName(getName());

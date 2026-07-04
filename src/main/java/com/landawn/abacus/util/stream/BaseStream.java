@@ -1075,6 +1075,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * @param maxSize the maximum number of elements to include in the new stream
      * @return a new stream consisting of at most {@code maxSize} elements after skipping the first
      *         {@code offset} elements from this stream
+     * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if {@code offset} or {@code maxSize} is negative
      * @see #skip(long)
      * @see #limit(long)
@@ -1367,7 +1368,6 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * @see #delay(Duration)
      * @see #rateLimited(double)
      * @see #rateLimited(RateLimiter)
-     * @see <a href="http://reactivex.io/documentation/operators/debounce.html">ReactiveX#debounce</a>
      */
     @SequentialOnly
     @IntermediateOp

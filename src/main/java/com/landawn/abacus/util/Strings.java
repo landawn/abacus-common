@@ -755,8 +755,6 @@ public final class Strings {
 
     static final char[] FALSE_CHAR_ARRAY = FALSE.toCharArray();
 
-    static final String BACKSLASH_ASTERISK = "*";
-
     static final String STR_FOR_EMPTY_ARRAY = "[]";
 
     // java.lang.ExceptionInInitializerError: Exception java.lang.NoClassDefFoundError: Could not initialize class com.landawn.abacus.util.WD [in thread "main"]
@@ -836,7 +834,7 @@ public final class Strings {
      * @see #uuid()
      * @see UUID#randomUUID()
      */
-    public static String uuidWithoutHyphens() { // uuid32() is better or not
+    public static String uuidWithoutHyphens() {
         return uuid().replace("-", "");
     }
 
@@ -8007,7 +8005,7 @@ public final class Strings {
         if (isEmpty(str)) {
             return concatNullToEmpty(prefix, suffix);
         } else if (str.startsWith(prefix)) {
-            return (str.length() - prefix.length() >= suffix.length() && str.endsWith(suffix)) ? str : concatNullToEmpty(str + suffix);
+            return (str.length() - prefix.length() >= suffix.length() && str.endsWith(suffix)) ? str : concatNullToEmpty(str, suffix);
         } else if (str.endsWith(suffix)) {
             return concatNullToEmpty(prefix, str);
         } else {
@@ -13546,7 +13544,7 @@ public final class Strings {
 
         final int index = str.indexOf(delimiterOfExclusiveEndIndex, inclusiveBeginIndex + 1);
 
-        // inconsistant behavior
+        // inconsistent behavior
         //    if (index < 0 && str.charAt(inclusiveBeginIndex) == delimiterOfExclusiveEndIndex) {
         //        return EMPTY_STRING;
         //    }
@@ -19469,6 +19467,12 @@ public final class Strings {
             case 7:
                 return concatNullToEmpty(a[0], a[1], a[2], a[3], a[4], a[5], a[6]);
 
+            case 8:
+                return concatNullToEmpty(a[0], a[1], a[2], a[3], a[4], a[5], a[6], a[7]);
+
+            case 9:
+                return concatNullToEmpty(a[0], a[1], a[2], a[3], a[4], a[5], a[6], a[7], a[8]);
+
             default: {
                 final String[] b = N.copyThenReplaceAll(a, Fn.nullToEmpty());
 
@@ -19782,7 +19786,6 @@ public final class Strings {
      * @return the formatted string with placeholders replaced by arguments.
      */
     public static String lenientFormat(String template, Object... args) {
-        // TODO(diamondm): consider using Arrays.toString() for array parameters.
         template = String.valueOf(template); // null -> "null"
 
         if (args == null) {
@@ -19830,12 +19833,9 @@ public final class Strings {
 
     private static String lenientToString(final Object obj) {
         try {
-            return String.valueOf(obj);
+            return N.deepToString(obj);
         } catch (final Exception e) {
-            // Default toString() behavior - see Object.toString()
             final String objectToString = obj.getClass().getName() + '@' + Integer.toHexString(System.identityHashCode(obj));
-            // Logger is created inline with fixed name to avoid forcing Proguard to create another class.
-            // Logger.getLogger("com.google.common.base.Strings").log(WARNING, "Exception during lenientFormat for " + objectToString, e);
 
             LOGGER.warn("Exception during lenientFormat for " + objectToString, e); //NOSONAR
 
@@ -20555,6 +20555,7 @@ public final class Strings {
      * @param base64String the Base64 encoded string to be decoded.
      * @return the decoded UTF-8 string, or an empty String {@code ""} if the input string is {@code null} or empty.
      * @throws IllegalArgumentException if {@code base64String} is not in valid Base64 scheme
+     * @see #base64DecodeToString(String, Charset)
      */
     public static String base64DecodeToUtf8String(final String base64String) {
         return base64DecodeToString(base64String, Charsets.UTF_8);
@@ -20681,7 +20682,7 @@ public final class Strings {
      *
      * @param base64String the Base64 URL encoded string to be decoded.
      * @return the decoded string, or an empty String {@code ""} if the input string is {@code null} or empty.
-     * @throws  IllegalArgumentException if {@code base64String} is not in valid Base64 scheme
+     * @throws IllegalArgumentException if {@code base64String} is not in valid Base64 scheme
      */
     public static String base64UrlDecodeToString(final String base64String) {
         if (Strings.isEmpty(base64String)) {
@@ -20714,6 +20715,7 @@ public final class Strings {
      * @param base64String the Base64 URL encoded string to be decoded.
      * @return the decoded UTF-8 string, or an empty String {@code ""} if the input string is {@code null} or empty.
      * @throws IllegalArgumentException if {@code base64String} is not in valid Base64 scheme
+     * @see #base64UrlDecodeToString(String, Charset)
      */
     public static String base64UrlDecodeToUtf8String(final String base64String) {
         return base64UrlDecodeToString(base64String, Charsets.UTF_8);
@@ -20744,13 +20746,14 @@ public final class Strings {
      * @param charset the charset to be used to decode the decoded {@code bytes}.
      * @return the decoded string, or an empty String {@code ""} if the input string is {@code null} or empty.
      * @throws IllegalArgumentException if {@code base64String} is not in valid Base64 scheme
+     * @see String#String(byte[], Charset)
      */
     public static String base64UrlDecodeToString(final String base64String, final Charset charset) {
         if (Strings.isEmpty(base64String)) {
             return Strings.EMPTY;
         }
 
-        return new String(BASE64_URL_DECODER.decode(base64String), charset);
+        return new String(BASE64_URL_DECODER.decode(base64String), charset); // NOSONAR
     }
 
     /**
@@ -21733,6 +21736,7 @@ public final class Strings {
      * @return the padded string, or the original string if it already meets or exceeds the target width
      * @throws IllegalArgumentException if {@code minDisplayWidth} is negative
      * @see #displayWidth(String)
+     * @see #padStartByDisplayWidth(String, int)
      */
     public static String padEndByDisplayWidth(String str, final int minDisplayWidth) {
         N.checkArgNotNegative(minDisplayWidth, cs.minDisplayWidth);

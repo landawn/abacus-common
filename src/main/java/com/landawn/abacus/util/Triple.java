@@ -750,6 +750,10 @@ public final class Triple<L, M, R> implements Mutable {
      * the elements are stored in it; otherwise, a new array of the same type with length 3
      * is created and returned.
      *
+     * <p>Note: Unlike {@link java.util.Collection#toArray(Object[])}, this method does not
+     * null-terminate the returned array when the supplied array has length &gt; 3; any elements
+     * at indices &gt;= 3 are left untouched.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Triple<String, String, String> triple = Triple.of("one", "two", "three");
@@ -794,10 +798,13 @@ public final class Triple<L, M, R> implements Mutable {
      *
      * @param <E> the type of exception that the consumer may throw.
      * @param consumer the consumer function to apply to each element; must accept
-     *                 a common supertype of L, M, and R
+     *                 a common supertype of L, M, and R; must not be {@code null}.
+     * @throws IllegalArgumentException if {@code consumer} is {@code null}.
      * @throws E if the consumer throws an exception.
      */
-    public <E extends Exception> void forEach(final Throwables.Consumer<?, E> consumer) throws E {
+    public <E extends Exception> void forEach(final Throwables.Consumer<?, E> consumer) throws IllegalArgumentException, E {
+        N.checkArgNotNull(consumer);
+
         final Throwables.Consumer<Object, E> objConsumer = (Throwables.Consumer<Object, E>) consumer;
 
         objConsumer.accept(left);

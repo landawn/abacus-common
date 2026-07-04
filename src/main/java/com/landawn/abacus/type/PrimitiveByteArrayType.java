@@ -145,7 +145,7 @@ public final class PrimitiveByteArrayType extends AbstractPrimitiveArrayType<byt
      */
     @Override
     public byte[] valueOf(final String str) {
-        if (Strings.isEmpty(str) || Strings.isBlank(str)) {
+        if (Strings.isBlank(str)) {
             return null; // NOSONAR
         } else if (STR_FOR_EMPTY_ARRAY.equals(str)) {
             return N.EMPTY_BYTE_ARRAY;

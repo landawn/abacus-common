@@ -701,10 +701,6 @@ public final class HttpHeaders {
      * @return This HttpHeaders instance for method chaining
      */
     public HttpHeaders setContentType(final String contentType) {
-        //    if (hasHeader(HTTP.CONTENT_FORMAT)) {
-        //        throw new IllegalArgumentException("The parameter 'contentFormat' has already been set");
-        //    }
-
         set(Names.CONTENT_TYPE, contentType);
 
         return this;

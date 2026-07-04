@@ -643,7 +643,7 @@ abstract class AbstractStream<T> extends Stream<T> {
             @Override
             public U next() {
                 if (!hasNext()) {
-                    throw new NoSuchElementException("No more elements available in stream iterator");
+                    throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
                 left = hasNext ? next : iter.next();
@@ -2733,11 +2733,19 @@ abstract class AbstractStream<T> extends Stream<T> {
                     init();
                 }
 
-                a = a.length >= cursor ? a : (A[]) N.newArray(a.getClass().getComponentType(), cursor - fromIndex);
+                final int len = cursor - fromIndex;
 
-                for (int i = 0, len = cursor - fromIndex; i < len; i++) {
+                a = a.length >= len ? a : (A[]) N.newArray(a.getClass().getComponentType(), len);
+
+                for (int i = 0; i < len; i++) {
                     a[i] = (A) elements[cursor - i - 1];
                 }
+
+                if (a.length > len) {
+                    a[len] = null;
+                }
+
+                cursor = fromIndex; // Move cursor to the end after copying.
 
                 return a;
             }
@@ -2821,11 +2829,19 @@ abstract class AbstractStream<T> extends Stream<T> {
                     init();
                 }
 
-                a = a.length >= len - cnt ? a : (A[]) N.newArray(a.getClass().getComponentType(), len - cnt);
+                final int remaining = len - cnt;
+
+                a = a.length >= remaining ? a : (A[]) N.newArray(a.getClass().getComponentType(), remaining);
 
                 for (int i = cnt; i < len; i++) {
                     a[i - cnt] = (A) elements[((start + i) % len) + fromIndex];
                 }
+
+                if (a.length > remaining) {
+                    a[remaining] = null;
+                }
+
+                cnt = len; // Move cursor to the end after copying.
 
                 return a;
             }
@@ -3076,7 +3092,7 @@ abstract class AbstractStream<T> extends Stream<T> {
                     @Override
                     public List<T> next() {
                         if (!hasNext()) {
-                            throw new NoSuchElementException("No more elements available in stream iterator");
+                            throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                         }
 
                         final List<T> result = new ArrayList<>(len);
@@ -4130,6 +4146,7 @@ abstract class AbstractStream<T> extends Stream<T> {
              *
              * @return {@code true} if another element is available
              */
+            @Override
             public boolean hasNext() {
                 return iter.hasNext();
             }
@@ -4141,6 +4158,7 @@ abstract class AbstractStream<T> extends Stream<T> {
              * @throws java.util.NoSuchElementException if the iteration has no more elements
              * @throws RuntimeException wrapping any {@link java.sql.SQLException} thrown during statement execution
              */
+            @Override
             public T next() {
                 final T next = iter.next();
 
@@ -4210,6 +4228,7 @@ abstract class AbstractStream<T> extends Stream<T> {
              *
              * @return {@code true} if another element is available
              */
+            @Override
             public boolean hasNext() {
                 return iter.hasNext();
             }
@@ -4221,6 +4240,7 @@ abstract class AbstractStream<T> extends Stream<T> {
              * @throws java.util.NoSuchElementException if the iteration has no more elements
              * @throws RuntimeException wrapping any {@link java.sql.SQLException} thrown during statement preparation or execution
              */
+            @Override
             public T next() {
                 final T next = iter.next();
 
@@ -4309,6 +4329,7 @@ abstract class AbstractStream<T> extends Stream<T> {
              *
              * @return {@code true} if another element is available
              */
+            @Override
             public boolean hasNext() {
                 return iter.hasNext();
             }
@@ -4320,6 +4341,7 @@ abstract class AbstractStream<T> extends Stream<T> {
              * @throws java.util.NoSuchElementException if the iteration has no more elements
              * @throws RuntimeException wrapping any {@link java.sql.SQLException} thrown during connection acquisition, statement preparation, or execution
              */
+            @Override
             public T next() {
                 final T next = iter.next();
 
@@ -4691,7 +4713,7 @@ abstract class AbstractStream<T> extends Stream<T> {
         try {
             return persistToCsv(bw);
         } finally {
-            IOUtil.close(bw);
+            Objectory.recycle(bw);
         }
     }
 
@@ -4702,7 +4724,7 @@ abstract class AbstractStream<T> extends Stream<T> {
         try {
             return persistToCsv(headers, bw);
         } finally {
-            IOUtil.close(bw);
+            Objectory.recycle(bw);
         }
     }
 
@@ -4973,7 +4995,7 @@ abstract class AbstractStream<T> extends Stream<T> {
         try {
             return persistToJson(bw);
         } finally {
-            IOUtil.close(bw);
+            Objectory.recycle(bw);
         }
     }
 

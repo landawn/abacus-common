@@ -97,6 +97,10 @@ public class AsyncExecutor {
 
     private volatile boolean isShutdown = false;
 
+    // The JVM shutdown hook registered when the executor is lazily created; kept so shutdown() can
+    // remove it — otherwise every created-then-discarded AsyncExecutor leaks a hook (and its executor).
+    private volatile Thread shutdownHook;
+
     /**
      * Constructs an AsyncExecutor with default configuration.
      *
@@ -523,13 +527,16 @@ public class AsyncExecutor {
 
                     executor = threadPoolExecutor;
 
-                    Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+                    final Thread hook = new Thread(() -> {
                         try {
                             shutdownAndAwait(120, TimeUnit.SECONDS);
                         } catch (Exception e) {
                             logger.warn("Error during shutdown: " + e.getMessage(), e);
                         }
-                    }));
+                    });
+
+                    Runtime.getRuntime().addShutdownHook(hook);
+                    shutdownHook = hook;
                 }
             }
         }
@@ -588,6 +595,18 @@ public class AsyncExecutor {
      *                 {@code null} when {@code terminationTimeout} is greater than 0
      */
     public synchronized void shutdownAndAwait(final long terminationTimeout, final TimeUnit timeUnit) {
+        final Thread hook = shutdownHook;
+
+        if (hook != null) {
+            shutdownHook = null;
+
+            try {
+                Runtime.getRuntime().removeShutdownHook(hook);
+            } catch (final IllegalStateException e) {
+                // The JVM is already shutting down (this call is the hook itself running) — nothing to remove.
+            }
+        }
+
         if (executor == null || !(executor instanceof ExecutorService executorService)) {
             isShutdown = true; // Mark as shutdown even if executor is null
             executor = null;

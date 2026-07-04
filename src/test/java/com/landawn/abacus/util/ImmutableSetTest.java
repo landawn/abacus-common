@@ -135,6 +135,13 @@ public class ImmutableSetTest extends TestBase {
     }
 
     @Test
+    public void testOf_TenElements() {
+        ImmutableSet<Integer> set = ImmutableSet.of(1, 2, 3, 4, 5, 6, 7, 8, 9, 10);
+        Assertions.assertEquals(10, set.size());
+        Assertions.assertTrue(set.contains(10));
+    }
+
+    @Test
     public void testIterator() {
         ImmutableSet<String> set = ImmutableSet.of("a", "b", "c");
         ObjIterator<String> iter = set.iterator();

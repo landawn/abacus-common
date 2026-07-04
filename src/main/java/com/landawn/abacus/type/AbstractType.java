@@ -459,18 +459,11 @@ public abstract class AbstractType<T> implements Type<T> {
         return false;
     }
 
-    /**
-     * Checks if this type represents any kind of array.
-     * <p>
-     * Default implementation returns {@code false}.
-     * </p>
-     *
-     * @return {@code true} if this is an array type, {@code false} otherwise
-     */
-    @Override
-    public boolean isArray() {
-        return false;
-    }
+    // isArray() intentionally NOT overridden here: it inherits Type's default, which derives the
+    // answer from isPrimitiveArray() || isObjectArray(). Hardcoding false here would shadow that
+    // formula for any direct AbstractType subclass that overrides isPrimitiveArray()/isObjectArray()
+    // without also going through AbstractArrayType (which does override isArray() explicitly).
+    // See the analogous isComparable() note above and Type#isArray().
 
     /**
      * Checks if this type represents a {@code List}.

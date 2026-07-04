@@ -345,6 +345,21 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
         }
     }
 
+    /**
+     * Writes an object to XML using the specified configuration and writer.
+     * This is the main internal method that handles the serialization logic, including
+     * circular-reference detection and raw-JSON-value passthrough for properties marked as such.
+     *
+     * @param obj the object to write
+     * @param propInfo the property metadata for {@code obj} when it is being written as a bean
+     *        property (used to detect {@code isJsonRawValue}/format handling), or {@code null} at the root
+     * @param config the serialization configuration
+     * @param indentation the current indentation string for pretty printing, or {@code null}
+     * @param serializedObjects set of already serialized objects for circular reference detection, or {@code null}
+     * @param bw the buffered XML writer
+     * @param flush whether to flush the writer after writing
+     * @throws IOException if an I/O error occurs
+     */
     void write(final Object obj, final PropInfo propInfo, final XmlSerConfig config, final String indentation, final IdentityHashSet<Object> serializedObjects,
             final BufferedXmlWriter bw, final boolean flush) throws IOException {
         final XmlSerConfig configToUse = check(config);
@@ -421,6 +436,19 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
         }
     }
 
+    /**
+     * Writes a bean object to XML, emitting the enclosing element and serializing each
+     * serializable property.
+     *
+     * @param obj the bean to write
+     * @param config the serialization configuration
+     * @param indentation the current indentation string for pretty printing, or {@code null}
+     * @param serializedObjects set of already serialized objects for circular reference detection, or {@code null}
+     * @param type the type information for the bean
+     * @param bw the buffered XML writer
+     * @throws IOException if an I/O error occurs
+     * @throws ParsingException if no serializable property is found in the bean class
+     */
     void writeBean(final Object obj, final XmlSerConfig config, final String indentation, final IdentityHashSet<Object> serializedObjects,
             final Type<Object> type, final BufferedXmlWriter bw) throws IOException {
         //    if (hasCircularReference(obj, serializedObjects, bw)) {
@@ -478,6 +506,17 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
         }
     }
 
+    /**
+     * Writes the serializable properties of a bean object to XML.
+     *
+     * @param obj the bean whose properties are to be written
+     * @param config the serialization configuration
+     * @param propIndentation the indentation string applied to each property, or {@code null}
+     * @param serializedObjects set of already serialized objects for circular reference detection, or {@code null}
+     * @param type the type information for the bean
+     * @param bw the buffered XML writer
+     * @throws IOException if an I/O error occurs
+     */
     void writeProperties(final Object obj, final XmlSerConfig config, final String propIndentation, final IdentityHashSet<Object> serializedObjects,
             final Type<Object> type, final BufferedXmlWriter bw) throws IOException {
         //    if (hasCircularReference(obj, serializedObjects, bw)) {
@@ -587,6 +626,18 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
         }
     }
 
+    /**
+     * Writes a map to XML, emitting an enclosing map element and, for each entry, an
+     * {@code <entry>} element containing a {@code <key>} element followed by a {@code <value>} element.
+     *
+     * @param m the map to write
+     * @param config the serialization configuration
+     * @param indentation the current indentation string for pretty printing, or {@code null}
+     * @param serializedObjects set of already serialized objects for circular reference detection, or {@code null}
+     * @param type the type information for the map
+     * @param bw the buffered XML writer
+     * @throws IOException if an I/O error occurs
+     */
     void writeMap(final Map<?, ?> m, final XmlSerConfig config, final String indentation, final IdentityHashSet<Object> serializedObjects,
             final Type<Object> type, final BufferedXmlWriter bw) throws IOException {
         //    if (hasCircularReference(m, serializedObjects, bw)) {
@@ -748,6 +799,19 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
         bw.write(XmlConstants.MAP_ELE_END);
     }
 
+    /**
+     * Writes an array to XML via reflection, emitting an enclosing array element and an
+     * {@code <e>} element for each array element. Using {@link java.lang.reflect.Array} to access
+     * elements allows this method to handle both object and primitive arrays.
+     *
+     * @param obj the array to write (may be a primitive or object array)
+     * @param config the serialization configuration
+     * @param indentation the current indentation string for pretty printing, or {@code null}
+     * @param serializedObjects set of already serialized objects for circular reference detection, or {@code null}
+     * @param type the type information for the array
+     * @param bw the buffered XML writer
+     * @throws IOException if an I/O error occurs
+     */
     void writeArray(final Object obj, final XmlSerConfig config, final String indentation, final IdentityHashSet<Object> serializedObjects,
             final Type<Object> type, final BufferedXmlWriter bw) throws IOException {
         //    if (hasCircularReference(obj, serializedObjects, bw)) {
@@ -829,6 +893,18 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
         bw.write(XmlConstants.ARRAY_ELE_END);
     }
 
+    /**
+     * Writes a collection to XML, emitting an enclosing element appropriate to the collection
+     * kind (list, set, or generic collection) and an {@code <e>} element for each collection element.
+     *
+     * @param c the collection to write
+     * @param config the serialization configuration
+     * @param indentation the current indentation string for pretty printing, or {@code null}
+     * @param serializedObjects set of already serialized objects for circular reference detection, or {@code null}
+     * @param type the type information for the collection
+     * @param bw the buffered XML writer
+     * @throws IOException if an I/O error occurs
+     */
     void writeCollection(final Collection<?> c, final XmlSerConfig config, final String indentation, final IdentityHashSet<Object> serializedObjects,
             final Type<Object> type, final BufferedXmlWriter bw) throws IOException {
         //    if (hasCircularReference(c, serializedObjects, bw)) {

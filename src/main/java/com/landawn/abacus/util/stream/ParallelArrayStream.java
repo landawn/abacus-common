@@ -503,10 +503,11 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
         final int windowSize = 2;
         checkArgPositive(increment, "increment"); //NOSONAR
 
-        final List<Iterator<R>> iters = new ArrayList<>(maxThreadNum);
+        final int threadNum = N.min(maxThreadNum, (toIndex - fromIndex));
+        final List<Iterator<R>> iters = new ArrayList<>(threadNum);
         final MutableInt curIndex = MutableInt.of(fromIndex);
 
-        for (int i = 0; i < maxThreadNum; i++) {
+        for (int i = 0; i < threadNum; i++) {
             iters.add(new ObjIteratorEx<>() {
                 private int cursor = -1;
 
@@ -568,10 +569,11 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
         final int windowSize = 3;
         checkArgPositive(increment, cs.increment);
 
-        final List<Iterator<R>> iters = new ArrayList<>(maxThreadNum);
+        final int threadNum = N.min(maxThreadNum, (toIndex - fromIndex));
+        final List<Iterator<R>> iters = new ArrayList<>(threadNum);
         final MutableInt curIndex = MutableInt.of(fromIndex);
 
-        for (int i = 0; i < maxThreadNum; i++) {
+        for (int i = 0; i < threadNum; i++) {
             iters.add(new ObjIteratorEx<>() {
                 private int cursor = -1;
 
@@ -4585,7 +4587,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
         }
 
         final int threadNum = N.min(maxThreadNum, (toIndex - fromIndex));
-        final List<ContinuableFuture<Void>> futureList = new ArrayList<>(maxThreadNum);
+        final List<ContinuableFuture<Void>> futureList = new ArrayList<>(threadNum);
         final Holder<Throwable> eHolder = new Holder<>();
         final AtomicLong cnt = new AtomicLong(0);
         AsyncExecutor asyncExecutorToUse = checkAsyncExecutor(asyncExecutor, threadNum);

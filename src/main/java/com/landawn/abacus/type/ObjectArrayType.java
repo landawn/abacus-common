@@ -230,7 +230,7 @@ public class ObjectArrayType<T> extends AbstractArrayType<T[]> { //NOSONAR
      */
     @Override
     public T[] valueOf(final String str) {
-        if (Strings.isEmpty(str) || Strings.isBlank(str)) {
+        if (Strings.isBlank(str)) {
             return null; // NOSONAR
         } else if (STR_FOR_EMPTY_ARRAY.equals(str)) {
             return Array.newInstance(elementType.javaType(), 0);

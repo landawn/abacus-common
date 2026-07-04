@@ -421,6 +421,7 @@ import com.landawn.abacus.util.stream.Stream;
  * @see com.landawn.abacus.util.Array
  * @see com.landawn.abacus.util.Iterables
  * @see com.landawn.abacus.util.Iterators
+ * @see com.landawn.abacus.util.Nulls
  * @see com.landawn.abacus.util.Strings
  * @see com.landawn.abacus.util.Numbers
  * @see com.landawn.abacus.util.Maps
@@ -1721,7 +1722,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see #split(boolean[], int, int, int)
      */
     public static List<boolean[]> split(final boolean[] a, final int chunkSize) throws IllegalArgumentException {
-        checkArgPositive(chunkSize, "chunkSize"); //NOSONAR
+        checkArgPositive(chunkSize, cs.chunkSize); //NOSONAR
 
         if (isEmpty(a)) {
             return new ArrayList<>();
@@ -4470,7 +4471,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param b the second array
      * @return a new array containing elements present in both arrays
      * @see BooleanList#intersection(BooleanList)
-     * @see #intersection(char[], char[])
+     * @see #intersection(int[], int[])
      */
     @SuppressWarnings("deprecation")
     public static boolean[] intersection(final boolean[] a, final boolean[] b) {
@@ -5039,7 +5040,6 @@ public final class N extends CommonUtil { // public final class N extends π imp
         return removeOccurrences(a, b, keyColumnNames, requiresSameColumns, true);
     }
 
-    @SuppressWarnings("deprecation")
     private static Dataset removeOccurrences(final Dataset a, final Dataset b, final Collection<String> keyColumnNames, final boolean requiresSameColumns,
             final boolean retain) {
         N.checkArgNotNull(a, "The first specified Dataset is null");
@@ -8304,11 +8304,10 @@ public final class N extends CommonUtil { // public final class N extends π imp
             }
         } else {
             final ListIterator<T> iter = list.listIterator();
-            final MutableInt idx = MutableInt.of(0);
 
             for (int i = 0; i < size; i++) {
                 iter.next();
-                iter.set(generator.apply(idx.getAndIncrement()));
+                iter.set(generator.apply(i));
             }
         }
     }
@@ -10289,10 +10288,6 @@ public final class N extends CommonUtil { // public final class N extends π imp
         checkArgNotNull(a, cs.a);
         checkElementIndex(index, len(a));
 
-        if (isEmpty(a)) {
-            return EMPTY_BOOLEAN_ARRAY;
-        }
-
         final boolean[] result = new boolean[a.length - 1];
 
         if (index > 0) {
@@ -10336,10 +10331,6 @@ public final class N extends CommonUtil { // public final class N extends π imp
     public static char[] removeAt(@NotNull final char[] a, final int index) throws IllegalArgumentException, IndexOutOfBoundsException {
         checkArgNotNull(a, cs.a);
         checkElementIndex(index, len(a));
-
-        if (isEmpty(a)) {
-            return EMPTY_CHAR_ARRAY;
-        }
 
         final char[] result = new char[a.length - 1];
 
@@ -10385,10 +10376,6 @@ public final class N extends CommonUtil { // public final class N extends π imp
         checkArgNotNull(a, cs.a);
         checkElementIndex(index, len(a));
 
-        if (isEmpty(a)) {
-            return EMPTY_BYTE_ARRAY;
-        }
-
         final byte[] result = new byte[a.length - 1];
 
         if (index > 0) {
@@ -10432,10 +10419,6 @@ public final class N extends CommonUtil { // public final class N extends π imp
     public static short[] removeAt(@NotNull final short[] a, final int index) throws IllegalArgumentException, IndexOutOfBoundsException {
         checkArgNotNull(a, cs.a);
         checkElementIndex(index, len(a));
-
-        if (isEmpty(a)) {
-            return EMPTY_SHORT_ARRAY;
-        }
 
         final short[] result = new short[a.length - 1];
 
@@ -10481,10 +10464,6 @@ public final class N extends CommonUtil { // public final class N extends π imp
         checkArgNotNull(a, cs.a);
         checkElementIndex(index, len(a));
 
-        if (isEmpty(a)) {
-            return EMPTY_INT_ARRAY;
-        }
-
         final int[] result = new int[a.length - 1];
 
         if (index > 0) {
@@ -10520,10 +10499,6 @@ public final class N extends CommonUtil { // public final class N extends π imp
     public static long[] removeAt(@NotNull final long[] a, final int index) throws IllegalArgumentException, IndexOutOfBoundsException {
         checkArgNotNull(a, cs.a);
         checkElementIndex(index, len(a));
-
-        if (isEmpty(a)) {
-            return EMPTY_LONG_ARRAY;
-        }
 
         final long[] result = new long[a.length - 1];
 
@@ -10561,10 +10536,6 @@ public final class N extends CommonUtil { // public final class N extends π imp
         checkArgNotNull(a, cs.a);
         checkElementIndex(index, len(a));
 
-        if (isEmpty(a)) {
-            return EMPTY_FLOAT_ARRAY;
-        }
-
         final float[] result = new float[a.length - 1];
 
         if (index > 0) {
@@ -10600,10 +10571,6 @@ public final class N extends CommonUtil { // public final class N extends π imp
     public static double[] removeAt(@NotNull final double[] a, final int index) throws IllegalArgumentException, IndexOutOfBoundsException {
         checkArgNotNull(a, cs.a);
         checkElementIndex(index, len(a));
-
-        if (isEmpty(a)) {
-            return EMPTY_DOUBLE_ARRAY;
-        }
 
         final double[] result = new double[a.length - 1];
 
@@ -11257,7 +11224,6 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *         is known and can be fabricated; this generic overload cannot.
      * @throws IndexOutOfBoundsException if any index is out of the array's range
      */
-    @MayReturnNull
     public static <T> T[] removeAt(@NotNull final T[] a, final int... indices) throws IllegalArgumentException, IndexOutOfBoundsException {
         checkArgNotNull(a, cs.a);
 
@@ -11707,7 +11673,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param a the array from which the values should be removed.
      * @param valuesToRemove the values to be removed from the array.
      * @return a new array with all occurrences of the specified values removed. An empty array is returned if the specified array is {@code null} or empty.
-     * @see N#difference(int[], int[])
+     * @see #difference(boolean[], boolean[])
      * @see #removeAllOccurrences(boolean[], boolean)
      * @see #remove(boolean[], boolean)
      */
@@ -11742,7 +11708,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param a the array from which the values should be removed.
      * @param valuesToRemove the values to be removed from the array.
      * @return a new array with all occurrences of the specified values removed. An empty array is returned if the specified array is {@code null} or empty.
-     * @see N#difference(int[], int[])
+     * @see #difference(char[], char[])
      * @see #removeAllOccurrences(char[], char)
      * @see #remove(char[], char)
      */
@@ -11777,7 +11743,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param a the array from which the values should be removed.
      * @param valuesToRemove the values to be removed from the array.
      * @return a new array with all occurrences of the specified values removed. An empty array is returned if the specified array is {@code null} or empty.
-     * @see N#difference(int[], int[])
+     * @see #difference(byte[], byte[])
      * @see #removeAllOccurrences(byte[], byte)
      * @see #remove(byte[], byte)
      */
@@ -11812,7 +11778,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param a the array from which the values should be removed.
      * @param valuesToRemove the values to be removed from the array.
      * @return a new array with all occurrences of the specified values removed. An empty array is returned if the specified array is {@code null} or empty.
-     * @see N#difference(int[], int[])
+     * @see #difference(short[], short[])
      * @see #removeAllOccurrences(short[], short)
      * @see #remove(short[], short)
      */
@@ -11847,7 +11813,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param a the array from which the values should be removed.
      * @param valuesToRemove the values to be removed from the array.
      * @return a new array with all occurrences of the specified values removed. An empty array is returned if the specified array is {@code null} or empty.
-     * @see N#difference(int[], int[])
+     * @see #difference(int[], int[])
      * @see #removeAllOccurrences(int[], int)
      * @see #remove(int[], int)
      */
@@ -11882,7 +11848,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param a the array from which the values should be removed.
      * @param valuesToRemove the values to be removed from the array.
      * @return a new array with all occurrences of the specified values removed. An empty array is returned if the specified array is {@code null} or empty.
-     * @see N#difference(int[], int[])
+     * @see #difference(long[], long[])
      * @see #removeAllOccurrences(long[], long)
      * @see #remove(long[], long)
      */
@@ -11917,7 +11883,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param a the array from which the values should be removed.
      * @param valuesToRemove the values to be removed from the array.
      * @return a new array with all occurrences of the specified values removed. An empty array is returned if the specified array is {@code null} or empty.
-     * @see N#difference(int[], int[])
+     * @see #difference(float[], float[])
      * @see #removeAllOccurrences(float[], float)
      * @see #remove(float[], float)
      */
@@ -11952,7 +11918,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param a the array from which the values should be removed.
      * @param valuesToRemove the values to be removed from the array.
      * @return a new array with all occurrences of the specified values removed. An empty array is returned if the specified array is {@code null} or empty.
-     * @see N#difference(int[], int[])
+     * @see #difference(double[], double[])
      * @see #removeAllOccurrences(double[], double)
      * @see #remove(double[], double)
      */
@@ -11987,7 +11953,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param a the array from which the values should be removed.
      * @param valuesToRemove the values to be removed from the array.
      * @return a new array with all occurrences of the specified values removed. An empty array is returned if the specified array is {@code null} or empty.
-     * @see N#difference(int[], int[])
+     * @see #difference(Object[], Object[])
      */
     public static String[] removeAll(final String[] a, final String... valuesToRemove) {
         if (isEmpty(a)) {
@@ -12029,7 +11995,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return a new array with all occurrences of the specified values removed. The input array itself - possibly
      *         {@code null} - is returned if the specified array is {@code null} or empty (unlike the
      *         {@link #removeAll(String[], String...)} overload, which returns an empty array for a {@code null} array).
-     * @see N#difference(int[], int[])
+     * @see #difference(Object[], Object[])
      */
     @MayReturnNull
     @SafeVarargs
@@ -16481,7 +16447,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see #sumToLong(int[], int, int)
      * @see #average(int[], int, int)
      */
-    public static int sum(final int[] a, final int fromIndex, final int toIndex) {
+    public static int sum(final int[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         return Numbers.toIntExact(sumToLong(a, fromIndex, toIndex));
     }
 
@@ -16747,7 +16713,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     public static double sumToDouble(final float... a) {
         if (isEmpty(a)) {
-            return 0f;
+            return 0d;
         }
 
         return sumToDouble(a, 0, a.length);
@@ -16775,7 +16741,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
 
         if (isEmpty(a) || fromIndex == toIndex) {
-            return 0f;
+            return 0d;
         }
 
         final KahanSummation summation = new KahanSummation();
@@ -18269,7 +18235,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         checkFromToIndex(fromIndex, toIndex, size(c));
 
         if (fromIndex == toIndex) {
-            return 0;
+            return 0d;
         }
 
         long sum = 0;
@@ -20907,6 +20873,10 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * // caseInsensitive.left is "Apple", caseInsensitive.right is "cherry"
      * }</pre>
      *
+     * <p>Note: unlike the natural-ordering overload {@link #minMax(Comparable[])}, {@code null} elements are
+     * <i>not</i> skipped here - they are passed directly to {@code cmp}, so a non-null-safe comparator may throw
+     * {@code NullPointerException} if the array contains {@code null} elements.
+     *
      * @param <T> the type of elements in the input array.
      * @param a the array to find the minimum and maximum values from.
      * @param cmp the comparator to be used to compare the elements; if {@code null}, natural ordering with nulls first is used
@@ -20983,6 +20953,10 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * // caseInsensitive.left is "Apple", caseInsensitive.right is "cherry"
      * }</pre>
      *
+     * <p>Note: unlike the natural-ordering overload {@link #minMax(Iterable)}, {@code null} elements are
+     * <i>not</i> skipped here - they are passed directly to {@code cmp}, so a non-null-safe comparator may throw
+     * {@code NullPointerException} if the iterable contains {@code null} elements.
+     *
      * @param <T> the type of elements in the input iterable.
      * @param c the iterable to find the minimum and maximum values from.
      * @param cmp the comparator to be used to compare the elements; if {@code null}, natural ordering with nulls first is used
@@ -20990,7 +20964,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IllegalArgumentException if the iterable is {@code null} or empty.
      * @see Iterables#minMax(Iterable, Comparator)
      */
-    public static <T> Pair<T, T> minMax(@NotNull final Iterable<? extends T> c, final Comparator<? super T> cmp) throws IllegalArgumentException {
+    public static <T> Pair<T, T> minMax(final Iterable<? extends T> c, final Comparator<? super T> cmp) throws IllegalArgumentException {
         checkArgNotNull(c, "The specified iterable cannot be null or empty");
 
         return minMax(c.iterator(), cmp);
@@ -35739,7 +35713,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see #fromJson(String, int, int, JsonDeserConfig, Type)
      * @see #fromJson(String, int, int, Class)
      */
-    public static <T> T fromJson(final String json, final int fromIndex, final int toIndex, final JsonDeserConfig config, final Class<? extends T> targetType) {
+    public static <T> T fromJson(final String json, final int fromIndex, final int toIndex, final JsonDeserConfig config, final Class<? extends T> targetType)
+            throws IndexOutOfBoundsException {
         return Utils.jsonParser.deserialize(json, fromIndex, toIndex, config, targetType);
     }
 
@@ -39465,7 +39440,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
         final Iterator<? extends T> iteratorII = iter == null ? ObjIterator.empty() : iter;
         final CountDownLatch countDownLatch = new CountDownLatch(processThreadNum);
-        final Holder<Exception> errorHolder = new Holder<>();
+        final Holder<Throwable> errorHolder = new Holder<>();
 
         for (int i = 0; i < processThreadNum; i++) {
             executor.execute(() -> {
@@ -39483,7 +39458,10 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
                         elementConsumer.accept(element);
                     }
-                } catch (final Exception e) {
+                } catch (final Throwable e) { // catch Throwable (not just Exception) so an Error thrown by
+                                              // the action is recorded and surfaced, instead of leaking to
+                                              // the executor while the other workers keep running and this
+                                              // method returns as if it had succeeded.
                     synchronized (errorHolder) {
                         if (errorHolder.value() == null) {
                             errorHolder.setValue(e);
@@ -39504,7 +39482,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         }
 
         if (errorHolder.value() != null) {
-            throw ExceptionUtil.toRuntimeException(errorHolder.value(), true);
+            throw ExceptionUtil.toRuntimeException(errorHolder.value(), true, true);
         }
     }
 
@@ -39630,7 +39608,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         final Iterator<? extends T> iteratorII = iter == null ? ObjIterator.empty() : iter;
         final CountDownLatch countDownLatch = new CountDownLatch(processThreadNum);
         final AtomicInteger index = new AtomicInteger(0);
-        final Holder<Exception> errorHolder = new Holder<>();
+        final Holder<Throwable> errorHolder = new Holder<>();
 
         for (int i = 0; i < processThreadNum; i++) {
             executor.execute(() -> {
@@ -39650,7 +39628,10 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
                         elementConsumer.accept(idx, element);
                     }
-                } catch (final Exception e) {
+                } catch (final Throwable e) { // catch Throwable (not just Exception) so an Error thrown by
+                                              // the action is recorded and surfaced, instead of leaking to
+                                              // the executor while the other workers keep running and this
+                                              // method returns as if it had succeeded.
                     synchronized (errorHolder) {
                         if (errorHolder.value() == null) {
                             errorHolder.setValue(e);
@@ -39671,7 +39652,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         }
 
         if (errorHolder.value() != null) {
-            throw ExceptionUtil.toRuntimeException(errorHolder.value(), true);
+            throw ExceptionUtil.toRuntimeException(errorHolder.value(), true, true);
         }
     }
 
@@ -42580,7 +42561,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param timeout the time to sleep. If zero or negative, the method returns immediately without sleeping
      * @param unit the time unit for the timeout parameter. Must not be null
      * @throws IllegalArgumentException if the specified {@code unit} is {@code null}
-     * @see #sleepUninterruptibly(long) for detailed documentation and usage examples
+     * @see #sleepUninterruptibly(long)
      * @see #sleep(long, TimeUnit)
      * @see TimeUnit
      * @see Thread#interrupt()

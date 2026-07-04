@@ -117,30 +117,23 @@ public abstract class Wrapper<T> implements Immutable {
      * }</pre>
      *
      * @param <T> the type of the value to be wrapped.
-     * @param array the value to be wrapped; may be any array type (primitive or object arrays),
+     * @param value the value to be wrapped; may be any array type (primitive or object arrays),
      *              any non-array object, or {@code null}.
      * @return a {@code Wrapper} instance for the given value with deep equality semantics.
      */
-    public static <T> Wrapper<T> of(final T array) {
-        if (array == null) {
+    public static <T> Wrapper<T> of(final T value) {
+        if (value == null) {
             return ArrayWrapper.WRAPPER_FOR_NULL_ARRAY;
         }
 
-        Wrapper<T> result = null;
-
-        if (array.getClass().isArray() && java.lang.reflect.Array.getLength(array) == 0) {
-            result = ArrayWrapper.WRAPPER_POOL.get(array.getClass().getComponentType());
-
-            if (result == null) {
-                result = new ArrayWrapper<>(array);
-                ArrayWrapper.WRAPPER_POOL.put(array.getClass().getComponentType(), result);
-            }
-
-            return result;
+        if (value.getClass().isArray() && java.lang.reflect.Array.getLength(value) == 0) {
+            // Cache one shared wrapper per component type for zero-length arrays. computeIfAbsent makes the
+            // check-and-create atomic so concurrent first access cannot hand out distinct instances.
+            return ArrayWrapper.WRAPPER_POOL.computeIfAbsent(value.getClass().getComponentType(), k -> new ArrayWrapper<>(value));
         }
 
-        // return new Wrapper<T>(checkArray(array), arrayHashFunction, arrayEqualsFunction);
-        return new ArrayWrapper<>(array);
+        // return new Wrapper<T>(checkArray(value), arrayHashFunction, arrayEqualsFunction);
+        return new ArrayWrapper<>(value);
     }
 
     /**

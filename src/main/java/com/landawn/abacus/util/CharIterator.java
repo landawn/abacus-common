@@ -134,7 +134,7 @@ public abstract class CharIterator extends ImmutableIterator<Character> {
      * @param fromIndex the starting index (inclusive)
      * @param toIndex the ending index (exclusive)
      * @return a new {@code CharIterator} over the specified range, or an empty iterator if the array is {@code null} or {@code fromIndex == toIndex}
-     * @throws IndexOutOfBoundsException if {@code fromIndex < 0} or {@code toIndex > a.length} or {@code fromIndex > toIndex}
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0} or {@code toIndex > (a == null ? 0 : a.length)} or {@code fromIndex > toIndex}
      */
     public static CharIterator of(final char[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
@@ -283,9 +283,8 @@ public abstract class CharIterator extends ImmutableIterator<Character> {
      * {@code hasNext} supplier to determine if more elements are available. If it returns
      * {@code true}, the {@code supplier} will be invoked to generate the next value.</p>
      *
-     * <p>Note: The {@code hasNext} supplier may be called multiple times for the same element
-     * (once by the user, once internally for validation), so it should be idempotent or
-     * designed to handle multiple calls.</p>
+     * <p>The {@code hasNext} supplier is called at most once per element; its result is cached
+     * until the next call to {@code nextChar()}.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -307,9 +306,16 @@ public abstract class CharIterator extends ImmutableIterator<Character> {
         N.checkArgNotNull(supplier);
 
         return new CharIterator() {
+            private boolean hasNextCached = false;
+            private boolean hasNextValue = false;
+
             @Override
             public boolean hasNext() {
-                return hasNext.getAsBoolean();
+                if (!hasNextCached) {
+                    hasNextValue = hasNext.getAsBoolean();
+                    hasNextCached = true;
+                }
+                return hasNextValue;
             }
 
             @Override
@@ -318,6 +324,7 @@ public abstract class CharIterator extends ImmutableIterator<Character> {
                     throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
+                hasNextCached = false;
                 return supplier.getAsChar();
             }
         };

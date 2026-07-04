@@ -699,8 +699,8 @@ public class Seid implements EntityId {
      * }</pre>
      *
      * @param obj the object to compare with
-     * @return {@code true} if {@code obj} is an {@link EntityId} with the same string representation as this Seid,
-     *         {@code false} otherwise
+     * @return {@code true} if {@code obj} is a {@code Seid} with the same entity name and the same
+     *         property name/value pairs (compared by value and type), {@code false} otherwise
      */
     @Override
     public boolean equals(final Object obj) {
@@ -708,18 +708,21 @@ public class Seid implements EntityId {
             return true;
         }
 
-        return obj instanceof EntityId && toString().equals(obj.toString());
+        // Compare structurally (entity name + property map) rather than by toString(): the rendered
+        // string is ambiguous — a single value containing ", "/"=" collides with a two-property id,
+        // and 123 renders identically to "123" despite being a different value.
+        return obj instanceof Seid other && entityName.equals(other.entityName) && values.equals(other.values);
     }
 
     /**
-     * Returns a hash code value for this Seid.
-     * The hash code is based on the string representation.
+     * Returns a hash code value for this Seid, derived from its entity name and property name/value pairs
+     * (consistent with {@link #equals(Object)}).
      *
      * @return a hash code value
      */
     @Override
     public int hashCode() {
-        return toString().hashCode();
+        return 31 * entityName.hashCode() + values.hashCode();
     }
 
     /**

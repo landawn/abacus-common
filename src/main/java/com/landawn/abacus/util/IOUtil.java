@@ -2916,13 +2916,8 @@ public final class IOUtil {
                 }
             }
 
-            // String result = br.readLine();   //NOSONAR
-            //
-            // Has trouble for reading first/last line from empty file? // TODO
-            //    if (result == null) {
-            //        throw new IndexOutOfBoundsException("lineIndex: " + lineIndex + " exceeded the total line count of the specified reader/file");   // Should throw IllegalArgumentException
-            //    }
-
+            // Intentionally returns null (rather than throwing) when lineIndex exceeds the total
+            // line count of the reader/file; see the @return doc above and @MayReturnNull.
             return br.readLine(); //NOSONAR
         } finally {
             if (!isBufferedReader) {
@@ -7804,9 +7799,6 @@ public final class IOUtil {
             // Fallback: Only set modified time to match source file
             return targetFile.setLastModified(sourceFile.lastModified());
         }
-
-        // TODO: (Help!) Determine historically why setLastModified(File, File) needed PathUtils.setLastModifiedTime() if
-        //  sourceFile.isFile() was true, but needed setLastModifiedTime(File, long) if sourceFile.isFile() was false
     }
 
     /**
@@ -11144,6 +11136,60 @@ public final class IOUtil {
     }
 
     /**
+     * An {@link ObjIterator} over the lines of a single file that opens the file lazily (on the first
+     * {@link #hasNext()} call) and closes the underlying reader as soon as the file is exhausted, or when
+     * {@link #close()} is invoked. Opening lazily is what lets {@code forLines} process a directory holding a
+     * very large number of files without holding one file descriptor per file open up front (which would
+     * exhaust the process's file-descriptor limit before a single line had been read).
+     */
+    private static final class LazyFileLineIterator extends ObjIterator<String> implements AutoCloseable {
+        private final File file;
+        private LineIterator lineIterator;
+        private boolean opened = false;
+        private boolean closed = false;
+
+        LazyFileLineIterator(final File file) {
+            this.file = file;
+        }
+
+        @Override
+        public boolean hasNext() {
+            if (closed) {
+                return false;
+            }
+
+            if (!opened) {
+                opened = true;
+                lineIterator = new LineIterator(newBufferedReader(file));
+            }
+
+            if (lineIterator.hasNext()) {
+                return true;
+            }
+
+            close(); // release the file descriptor as soon as this file is fully read
+            return false;
+        }
+
+        @Override
+        public String next() {
+            if (!opened) {
+                hasNext();
+            }
+
+            return lineIterator.next();
+        }
+
+        @Override
+        public void close() {
+            if (!closed) {
+                closed = true;
+                closeQuietly(lineIterator);
+            }
+        }
+    }
+
+    /**
      * Parses the given collection of file line by line using the provided lineAction.
      *
      * <p><b>Usage Examples:</b></p>
@@ -11181,29 +11227,26 @@ public final class IOUtil {
             return;
         }
 
-        final List<Reader> readers = new ArrayList<>(files.size());
+        // Iterators open their file lazily (see LazyFileLineIterator): with single-threaded reading only one
+        // file is open at a time, so a directory with a very large number of files no longer exhausts the
+        // process's file descriptors up front.
+        final List<LazyFileLineIterator> iterators = new ArrayList<>(files.size());
 
         try { //NOSONAR
             for (final File subFile : files) {
                 if (subFile.isFile()) {
-                    readers.add(newBufferedReader(subFile));
+                    iterators.add(new LazyFileLineIterator(subFile));
                 } else {
                     for (final File subSubFile : listFiles(subFile, true, true)) {
-                        readers.add(newBufferedReader(subSubFile));
+                        iterators.add(new LazyFileLineIterator(subSubFile));
                     }
                 }
             }
 
-            final List<Iterator<String>> iterators = new ArrayList<>(readers.size());
-
-            for (final Reader reader : readers) {
-                iterators.add(new LineIterator(reader));
-            }
-
             Iterators.forEach(iterators, lineOffset, count, 0, processThreadNum, queueSize, lineAction, onComplete);
         } finally {
-            for (final Reader reader : readers) {
-                closeQuietly(reader);
+            for (final LazyFileLineIterator iter : iterators) {
+                closeQuietly(iter);
             }
         }
     }
@@ -11467,29 +11510,26 @@ public final class IOUtil {
             return;
         }
 
-        final List<Reader> readers = new ArrayList<>(files.size());
+        // Iterators open their file lazily (see LazyFileLineIterator): at most readThreadNum files are open
+        // concurrently instead of one descriptor per file up front, so a directory with a very large number
+        // of files no longer exhausts the process's file descriptors.
+        final List<LazyFileLineIterator> iterators = new ArrayList<>(files.size());
 
         try { //NOSONAR
             for (final File subFile : files) {
                 if (subFile.isFile()) {
-                    readers.add(newBufferedReader(subFile));
+                    iterators.add(new LazyFileLineIterator(subFile));
                 } else {
                     for (final File subSubFile : listFiles(subFile, true, true)) {
-                        readers.add(newBufferedReader(subSubFile));
+                        iterators.add(new LazyFileLineIterator(subSubFile));
                     }
                 }
             }
 
-            final List<Iterator<String>> iterators = new ArrayList<>(readers.size());
-
-            for (final Reader reader : readers) {
-                iterators.add(new LineIterator(reader));
-            }
-
             Iterators.forEach(iterators, lineOffset, count, readThreadNum, processThreadNum, queueSize, lineAction, onComplete);
         } finally {
-            for (final Reader reader : readers) {
-                closeQuietly(reader);
+            for (final LazyFileLineIterator iter : iterators) {
+                closeQuietly(iter);
             }
         }
     }

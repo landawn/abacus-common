@@ -82,9 +82,7 @@ public final class LineIterator extends ObjIterator<String> implements AutoClose
      * @throws IllegalArgumentException if the reader is null
      */
     public LineIterator(final Reader reader) throws IllegalArgumentException {
-        if (reader == null) {
-            throw new IllegalArgumentException("Reader must not be null");
-        }
+        N.checkArgNotNull(reader, cs.reader);
 
         if (reader instanceof BufferedReader) {
             br = (BufferedReader) reader;
@@ -333,7 +331,7 @@ public final class LineIterator extends ObjIterator<String> implements AutoClose
     @Override
     public String next() {
         if (!hasNext()) {
-            throw new NoSuchElementException("No more lines");
+            throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
         }
         final String res = cachedLine;
         cachedLine = null;

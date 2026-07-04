@@ -1113,7 +1113,6 @@ public final class ParserUtil {
          */
         @SuppressWarnings("deprecation")
         BeanInfo(final Class<?> beanClass, final java.lang.reflect.Type beanType, final boolean isASMSupported) {
-            // Constructor implementation remains the same...
             annotations = ImmutableMap.wrap(getAnnotations(beanClass));
             simpleClassName = ClassUtil.getSimpleClassName(beanClass);
             canonicalClassName = ClassUtil.getCanonicalClassName(beanClass);
@@ -1439,7 +1438,6 @@ public final class ParserUtil {
          */
         @Override
         public PropInfo getPropInfo(final String propName) {
-            // Implementation remains the same...
             Optional<PropInfo> propInfoOpt = propInfoMap.get(propName);
 
             if (propInfoOpt == null) {
@@ -2415,7 +2413,6 @@ public final class ParserUtil {
                 final ImmutableMap<Class<? extends Annotation>, Annotation> classAnnotations, final int fieldOrder, final boolean isImmutableBean,
                 final boolean isByBuilder, final List<String> idPropNames, final List<String> readOnlyIdPropNames,
                 final Map<TypeVariable<?>, java.lang.reflect.Type> typeParamArgMap) {
-            // Constructor implementation remains the same...
             declaringClass = (Class<Object>) (field != null ? field.getDeclaringClass() : getMethod.getDeclaringClass());
             this.field = field;
             this.name = propName;
@@ -2741,7 +2738,6 @@ public final class ParserUtil {
         static final Map<Class<?>, DateTimeReaderWriter<?>> propFuncMap = new HashMap<>();
 
         static {
-            // Static initializer block remains the same...
             propFuncMap.put(String.class, new DateTimeReaderWriter<String>() {
                 @Override
                 public String read(final PropInfo propInfo, final String strValue) {
@@ -2782,7 +2778,6 @@ public final class ParserUtil {
                 }
             });
 
-            // Static initializer block remains the same...
             propFuncMap.put(java.util.Date.class, new DateTimeReaderWriter<java.util.Date>() {
                 @Override
                 public java.util.Date read(final PropInfo propInfo, final String strValue) {
@@ -3549,7 +3544,7 @@ public final class ParserUtil {
          */
         @Override
         public boolean equals(final Object obj) {
-            return this == obj || ((obj instanceof PropInfo) && ((PropInfo) obj).name.equals(name)) && N.equals(((PropInfo) obj).field, field);
+            return this == obj || ((obj instanceof PropInfo) && ((PropInfo) obj).name.equals(name) && N.equals(((PropInfo) obj).field, field));
         }
 
         /**

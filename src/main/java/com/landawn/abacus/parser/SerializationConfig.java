@@ -176,14 +176,19 @@ public abstract class SerializationConfig<C extends SerializationConfig<C>> exte
             return true;
         }
 
-        if (obj instanceof SerializationConfig) {
-            final SerializationConfig<C> other = (SerializationConfig<C>) obj;
-
-            return N.equals(getIgnoredPropNames(), other.getIgnoredPropNames()) && N.equals(exclusion, other.exclusion)
-                    && N.equals(skipTransientField, other.skipTransientField);
+        // Require exact same class to keep equals symmetric. Concrete subclasses (JsonSerConfig,
+        // XmlSerConfig, ...) each override equals() with a narrower `instanceof <OwnType>` check, so this
+        // base method must also reject cross-subclass comparisons; otherwise xml.equals(json) could be
+        // true (via this base implementation) while json.equals(xml) is false, violating the
+        // Object.equals contract. Mirrors DeserializationConfig#equals.
+        if (obj == null || obj.getClass() != getClass()) {
+            return false;
         }
 
-        return false;
+        final SerializationConfig<C> other = (SerializationConfig<C>) obj;
+
+        return N.equals(getIgnoredPropNames(), other.getIgnoredPropNames()) && N.equals(exclusion, other.exclusion)
+                && N.equals(skipTransientField, other.skipTransientField);
     }
 
     /**

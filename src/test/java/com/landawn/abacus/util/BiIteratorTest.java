@@ -1913,7 +1913,7 @@ public class BiIteratorTest extends TestBase {
     public void testUnzipToLists_emptyRejectsNullSuppliedList() {
         BiIterator<String, Integer> iter = BiIterator.empty();
 
-        assertThrows(NullPointerException.class, () -> iter.unzipToLists(() -> null));
+        assertThrows(IllegalArgumentException.class, () -> iter.unzipToLists(() -> null));
     }
 
     // =====================================================================
@@ -1988,7 +1988,7 @@ public class BiIteratorTest extends TestBase {
     public void testUnzipToSets_emptyRejectsNullSuppliedSet() {
         BiIterator<String, Integer> iter = BiIterator.empty();
 
-        assertThrows(NullPointerException.class, () -> iter.unzipToSets(() -> null));
+        assertThrows(IllegalArgumentException.class, () -> iter.unzipToSets(() -> null));
     }
 
     // =====================================================================

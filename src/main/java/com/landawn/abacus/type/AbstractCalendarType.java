@@ -165,7 +165,7 @@ public abstract class AbstractCalendarType<T extends Calendar> extends AbstractT
      *   <li>{@link DateTimeFormat#LONG} - writes the time in milliseconds.</li>
      *   <li>{@link DateTimeFormat#ISO_8601_DATE_TIME} - writes ISO 8601 date-time format.</li>
      *   <li>{@link DateTimeFormat#ISO_8601_TIMESTAMP} - writes ISO 8601 timestamp format.</li>
-     *   <li>Default - uses the standard date format.</li>
+     *   <li>{@code config} is {@code null} or {@code config.getDateTimeFormat()} is {@code null} - uses the standard date format.</li>
      * </ul>
      * String quotation is applied based on configuration unless using {@code LONG} format.
      * <p>

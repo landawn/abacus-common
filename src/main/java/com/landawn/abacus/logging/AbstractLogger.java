@@ -1964,7 +1964,6 @@ public abstract class AbstractLogger implements Logger {
      *     are converted to strings using {@code N.toString(Object)}. Arguments can be {@code null}.
      * @return the formatted message
      */
-    // Note that this is somewhat-improperly used from Verify.java as well.
     static String format(String template, final Object... args) {
         template = String.valueOf(template); // null -> "null"
 

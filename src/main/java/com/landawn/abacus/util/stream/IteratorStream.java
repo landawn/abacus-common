@@ -337,7 +337,7 @@ class IteratorStream<T> extends AbstractStream<T> {
         assertNotClosed();
 
         final int windowSize = 2;
-        checkArgPositive(increment, "increment"); //NOSONAR
+        checkArgPositive(increment, cs.increment); //NOSONAR
 
         return newStream(new ObjIteratorEx<>() {
             @SuppressWarnings("unchecked")

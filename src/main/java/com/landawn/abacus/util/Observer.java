@@ -1488,15 +1488,15 @@ public abstract class Observer<T> implements Immutable {
 
             asyncExecutor.execute(() -> {
                 T next = null;
+                // isOnError stays true for the whole emission (queue.poll in the loop condition + dispatch)
+                // so an exception from polling or the action is delivered to onError; it is cleared only
+                // just before onComplete, whose failures propagate instead. (Previously it was reset false
+                // after each dispatch, so a mid-stream poll() failure was rethrown rather than routed.)
                 boolean isOnError = true;
 
                 try {
                     while (hasMore && (next = queue.poll(Long.MAX_VALUE, TimeUnit.MILLISECONDS)) != COMPLETE_FLAG) {
-                        isOnError = true;
-
                         dispatcher.onNext(next);
-
-                        isOnError = false;
                     }
 
                     isOnError = false;
@@ -1553,15 +1553,15 @@ public abstract class Observer<T> implements Immutable {
             });
 
             asyncExecutor.execute(() -> {
+                // isOnError stays true for the whole emission (iter.hasNext()/next() in the loop condition +
+                // dispatch) so an exception from advancing the iterator or the action is delivered to onError;
+                // it is cleared only just before onComplete, whose failures propagate instead. (Previously it
+                // was reset false after each dispatch, so a mid-stream hasNext() failure was rethrown.)
                 boolean isOnError = true;
 
                 try {
                     while (hasMore && iter.hasNext()) {
-                        isOnError = true;
-
                         dispatcher.onNext(iter.next());
-
-                        isOnError = false;
                     }
 
                     isOnError = false;

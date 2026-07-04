@@ -245,6 +245,7 @@ public final class Objectory {
      * @see #recycle(Map)
      */
     @Deprecated
+    @SuppressWarnings("unchecked")
     public static <K, V> Map<K, V> createMap() {
         final Map<K, V> map = (Map<K, V>) mapPool.poll();
 
@@ -275,6 +276,7 @@ public final class Objectory {
      * @see #recycle(Map)
      */
     @Deprecated
+    @SuppressWarnings("unchecked")
     public static <K, V> Map<K, V> createLinkedHashMap() {
         final Map<K, V> linkedHashMap = (Map<K, V>) linkedHashMapPool.poll();
 

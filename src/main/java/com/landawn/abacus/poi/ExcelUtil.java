@@ -270,6 +270,7 @@ public final class ExcelUtil {
      * @param excelFile the Excel file to read, must exist and be a valid Excel file.
      * @return a Dataset containing the sheet data with the first row as column names, or an empty Dataset if the sheet is empty.
      * @throws UncheckedException if an I/O error occurs while reading the file, or if the file is not a valid Excel file.
+     * @throws IllegalArgumentException if the header row contains duplicate non-blank column names.
      */
     public static Dataset readDatasetFromSheet(final File excelFile) {
         return readDatasetFromSheet(excelFile, 0, RowExtractors.DEFAULT);
@@ -301,7 +302,8 @@ public final class ExcelUtil {
      *                     column headers array, current row, and output array to populate with extracted values.
      * @return a Dataset containing the extracted sheet data with the first row as column names.
      * @throws UncheckedException if an I/O error occurs while reading the file, or if the file is not a valid Excel file.
-     * @throws IllegalArgumentException if the sheet index is out of bounds.
+     * @throws IllegalArgumentException if the sheet index is out of bounds, or if the header row contains
+     *                                   duplicate non-blank column names.
      */
     public static Dataset readDatasetFromSheet(final File excelFile, final int sheetIndex,
             final TriConsumer<? super String[], ? super Row, ? super Object[]> rowExtractor) {
@@ -325,7 +327,8 @@ public final class ExcelUtil {
      *                     column headers array, current row, and output array to populate with extracted values.
      * @return a Dataset containing the extracted sheet data with the first row as column names.
      * @throws UncheckedException if an I/O error occurs while reading the stream, or if the content is not a valid Excel stream.
-     * @throws IllegalArgumentException if the sheet index is out of bounds.
+     * @throws IllegalArgumentException if the sheet index is out of bounds, or if the header row contains
+     *                                   duplicate non-blank column names.
      */
     public static Dataset readDatasetFromSheet(final InputStream excelInputStream, final int sheetIndex,
             final TriConsumer<? super String[], ? super Row, ? super Object[]> rowExtractor) {
@@ -347,7 +350,8 @@ public final class ExcelUtil {
      *                     column headers array, current row, and output array to populate with extracted values.
      * @return a Dataset containing the extracted sheet data with the first row as column names.
      * @throws UncheckedException if an I/O error occurs while reading the file, or if the file is not a valid Excel file.
-     * @throws IllegalArgumentException if the sheet index is out of bounds.
+     * @throws IllegalArgumentException if the sheet index is out of bounds, or if the header row contains
+     *                                   duplicate non-blank column names.
      */
     public static Dataset readDatasetFromSheet(final Path excelPath, final int sheetIndex,
             final TriConsumer<? super String[], ? super Row, ? super Object[]> rowExtractor) {
@@ -378,7 +382,8 @@ public final class ExcelUtil {
      *                     column headers array, current row, and output array to populate with extracted values.
      * @return a Dataset containing the extracted sheet data with the first row as column names.
      * @throws UncheckedException if an I/O error occurs or if the file is not a valid Excel file.
-     * @throws IllegalArgumentException if the sheet name is not found in the workbook.
+     * @throws IllegalArgumentException if the sheet name is not found in the workbook, or if the
+     *                                   header row contains duplicate non-blank column names.
      */
     public static Dataset readDatasetFromSheet(final File excelFile, final String sheetName,
             final TriConsumer<? super String[], ? super Row, ? super Object[]> rowExtractor) {
@@ -402,7 +407,8 @@ public final class ExcelUtil {
      *                     column headers array, current row, and output array to populate with extracted values.
      * @return a Dataset containing the extracted sheet data with the first row as column names.
      * @throws UncheckedException if an I/O error occurs or if the content is not a valid Excel stream.
-     * @throws IllegalArgumentException if the sheet name is not found in the workbook.
+     * @throws IllegalArgumentException if the sheet name is not found in the workbook, or if the
+     *                                   header row contains duplicate non-blank column names.
      */
     public static Dataset readDatasetFromSheet(final InputStream excelInputStream, final String sheetName,
             final TriConsumer<? super String[], ? super Row, ? super Object[]> rowExtractor) {
@@ -442,7 +448,6 @@ public final class ExcelUtil {
         return sheet;
     }
 
-    @SuppressWarnings("deprecation")
     private static Dataset readDatasetFromSheet(final Sheet sheet, final TriConsumer<? super String[], ? super Row, ? super Object[]> rowExtractor) {
         final Iterator<Row> rowIter = sheet.rowIterator();
 
@@ -877,8 +882,9 @@ public final class ExcelUtil {
      * Shared worker that opens a workbook from the given input stream and returns a row Stream whose
      * {@code onClose} handler closes the workbook (and, when {@code closeInputStream} is {@code true},
      * the supplied input stream as well). Exactly one of {@code sheetIndex >= 0} or {@code sheetName != null}
-     * selects the sheet. If wiring fails, the workbook (and, when owned, the stream) is closed before
-     * rethrowing so nothing leaks.
+     * selects the sheet. If wiring fails before the Stream is created, this method closes the workbook
+     * before rethrowing; it never closes {@code is} itself; a caller that owns {@code is} is responsible
+     * for closing it on that path (see the {@code finally} blocks in the {@code File}-based callers).
      */
     private static Stream<Row> streamFromSource(final InputStream is, final boolean closeInputStream, final int sheetIndex, final String sheetName,
             final boolean skipFirstRow) {
@@ -920,8 +926,8 @@ public final class ExcelUtil {
      * with the provided headers and data rows.
      *
      * <p>Cell values are automatically converted based on their Java types: String, Boolean,
-     * Date, LocalDate, LocalDateTime, Calendar, Integer, and other Number types (set as double)
-     * are set using type-specific cell methods, while other types are converted to strings.
+     * Date, LocalDate, LocalDateTime, Calendar, and Number types (set as double) are set using
+     * type-specific cell methods, while other types are converted to strings.
      * {@code null} values result in blank cells.</p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -1077,6 +1083,7 @@ public final class ExcelUtil {
      * @param outputStream the stream to write the Excel data to; it is not closed by this method.
      * @param format the workbook format to produce ({@link ExcelFormat#XLS} or {@link ExcelFormat#XLSX}), must not be null.
      * @throws UncheckedException if an I/O error occurs while writing.
+     * @throws IllegalArgumentException if {@code format} is null.
      */
     public static void writeRowsToSheet(final String sheetName, final List<?> headers, final List<? extends Collection<?>> rows,
             final Consumer<? super Sheet> sheetSetter, final OutputStream outputStream, final ExcelFormat format) {
@@ -1251,6 +1258,7 @@ public final class ExcelUtil {
      * @param outputStream the stream to write the Excel data to; it is not closed by this method.
      * @param format the workbook format to produce ({@link ExcelFormat#XLS} or {@link ExcelFormat#XLSX}), must not be null.
      * @throws UncheckedException if an I/O error occurs while writing.
+     * @throws IllegalArgumentException if {@code format} is null.
      */
     public static void writeDatasetToSheet(final String sheetName, final Dataset dataset, final Consumer<? super Sheet> sheetSetter,
             final OutputStream outputStream, final ExcelFormat format) {
@@ -1315,8 +1323,6 @@ public final class ExcelUtil {
         } else if (cellValue instanceof LocalDateTime val) {
             cell.setCellValue(val);
         } else if (cellValue instanceof java.util.Calendar val) {
-            cell.setCellValue(val);
-        } else if (cellValue instanceof Integer val) {
             cell.setCellValue(val);
         } else if (cellValue instanceof Number val) {
             cell.setCellValue(val.doubleValue());

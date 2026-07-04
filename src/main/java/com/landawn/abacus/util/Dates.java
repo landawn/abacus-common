@@ -3719,8 +3719,6 @@ public abstract sealed class Dates permits Dates.DateUtil {
         }
     }
 
-    //    /**
-
     //-----------------------------------------------------------------------
 
     /**
@@ -8507,7 +8505,5 @@ public abstract sealed class Dates permits Dates.DateUtil {
             // Utility class - prevent instantiation
         }
     }
-
-    //    /**
 
 }

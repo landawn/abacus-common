@@ -22,9 +22,10 @@ import com.landawn.abacus.util.cs;
  * arguments and produces a result. This is the primitive type specialization of
  * {@link java.util.function.BiFunction} for {@code short} arguments.
  *
- * <p>Unlike the JDK which only provides primitive specializations for int, long, and
- * double, this interface extends support to short primitives for better type safety
- * and performance when working with short values.
+ * <p>The JDK itself has no two-argument, primitive-to-object function specialization at all
+ * (only single-argument forms like {@link java.util.function.IntFunction}); this project fills that
+ * gap for all eight primitive types, and this interface is the {@code short} member of that family,
+ * offering better type safety and performance than the boxed generic {@code BiFunction<Short, Short, R>}.
  *
  * <p>This is a functional interface whose functional method is {@link #apply(short, short)}.
  *

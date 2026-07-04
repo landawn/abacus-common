@@ -1450,7 +1450,7 @@ public final class EntryStream<K, V> extends
      * @see Stream#flatMap(Function)
      * @see Stream#flatmap(Function)
      */
-    // @ai-ignore flatmap/flatMap/flattMap naming - intentional: flatMap maps to EntryStream via Stream, flatmap maps to Map, flattMap maps to JDK java.util.stream.Stream of entries. Do not suggest renaming.
+    // @ai-ignore flatmap/flatMap/flattMap naming - intentional: flatMap maps to EntryStream via Stream, flatmap maps to Map, flattMap maps to Abacus Stream of entries. Do not suggest renaming.
     @ParallelSupported
     @IntermediateOp
     public <KK, VV> EntryStream<KK, VV> flatmap(final Function<? super Map.Entry<K, V>, ? extends Map<? extends KK, ? extends VV>> mapper) { //NOSONAR
@@ -3063,7 +3063,7 @@ public final class EntryStream<K, V> extends
      *     .reverseSortedBy(Map.Entry::getValue);
      * }</pre>
      *
-     * @param keyMapper the function to extract the comparable value for comparison
+     * @param sortKeyExtractor the function to extract the comparable value for comparison
      * @return a new EntryStream with entries reverse sorted by the extracted values
      * @see #reverseSorted(Comparator)
      * @see #sortedBy(Function)
@@ -3072,8 +3072,8 @@ public final class EntryStream<K, V> extends
     @ParallelSupported
     @IntermediateOp
     @TerminalOpTriggered
-    public EntryStream<K, V> reverseSortedBy(@SuppressWarnings("rawtypes") final Function<? super Map.Entry<K, V>, ? extends Comparable> keyMapper) {
-        return of(_stream.reverseSortedBy(keyMapper));
+    public EntryStream<K, V> reverseSortedBy(@SuppressWarnings("rawtypes") final Function<? super Map.Entry<K, V>, ? extends Comparable> sortKeyExtractor) {
+        return of(_stream.reverseSortedBy(sortKeyExtractor));
     }
 
     /**
@@ -3228,14 +3228,14 @@ public final class EntryStream<K, V> extends
     @SequentialOnly
     @IntermediateOp
     public EntryStream<K, V> distinctByValue() {
-        final Function<? super Map.Entry<K, V>, V> keyMapper = Fn.value();
+        final Function<? super Map.Entry<K, V>, V> valueMapper = Fn.value();
 
         if (isParallel()) {
             return of(_stream.sequential()
-                    .distinctBy(keyMapper)
+                    .distinctBy(valueMapper)
                     .parallel(_stream.maxThreadNum(), _stream.splitor(), _stream.asyncExecutor(), _stream.cancelUncompletedThreads()));
         } else {
-            return of(_stream.distinctBy(keyMapper));
+            return of(_stream.distinctBy(valueMapper));
         }
     }
 
@@ -5192,14 +5192,9 @@ public final class EntryStream<K, V> extends
 
         final BooleanSupplier hasNext = iter::hasNext;
 
-        final Consumer<Pair<K, V>> output = new Consumer<>() {
-            private Map.Entry<K, V> entry = null;
-
-            @Override
-            public void accept(final Pair<K, V> t) {
-                entry = iter.next();
-                t.set(entry.getKey(), entry.getValue());
-            }
+        final Consumer<Pair<K, V>> output = t -> {
+            final Map.Entry<K, V> entry = iter.next();
+            t.set(entry.getKey(), entry.getValue());
         };
 
         return BiIterator.generate(hasNext, output);
@@ -7232,7 +7227,7 @@ public final class EntryStream<K, V> extends
      *
      * @param <T> the type of elements in the collection
      * @param <K> the type of keys in the EntryStream
-     * @param c the collection to be converted into an EntryStream
+     * @param c the iterable to be converted into an EntryStream
      * @param keyMapper the function to map collection elements to keys
      * @return an EntryStream containing the entries from the provided collection
      */
@@ -7269,7 +7264,7 @@ public final class EntryStream<K, V> extends
      * @param <T> the type of elements in the collection
      * @param <K> the type of keys in the EntryStream
      * @param <V> the type of values in the EntryStream
-     * @param c the collection to be converted into an EntryStream
+     * @param c the iterable to be converted into an EntryStream
      * @param keyMapper the function to map collection elements to keys
      * @param valueMapper the function to map collection elements to values
      * @return an EntryStream containing the entries from the provided collection

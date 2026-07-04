@@ -594,7 +594,6 @@ public final class Fraction extends Number implements Comparable<Fraction>, Immu
             return of(wholeNumber * sign, 1);
         }
 
-        //        System.out.println("---");
         do {
             delta1 = delta2;
             a2 = (int) (x1 / y1);
@@ -604,7 +603,6 @@ public final class Fraction extends Number implements Comparable<Fraction>, Immu
             denom2 = a1 * denom1 + denom0;
             fraction = (double) numer2 / (double) denom2;
             delta2 = Math.abs(value - fraction);
-            //            System.out.println(numer2 + " " + denom2 + " " + fraction + " " + delta2 + " " + y1);
             a1 = a2;
             x1 = x2;
             y1 = y2;
@@ -613,7 +611,6 @@ public final class Fraction extends Number implements Comparable<Fraction>, Immu
             numer1 = numer2;
             denom1 = denom2;
             i++;
-            //            System.out.println(">>" + delta1 +" "+ delta2+" "+(delta1 > delta2)+" "+i+" "+denom2);
         } while (delta1 > delta2 && denom2 <= 10000 && denom2 > 0 && i < 25);
         if (i == 25) {
             throw new ArithmeticException("Unable to convert double to fraction");

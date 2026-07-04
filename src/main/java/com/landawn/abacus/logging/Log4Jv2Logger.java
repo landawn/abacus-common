@@ -50,7 +50,7 @@ class Log4Jv2Logger extends AbstractLogger {
     /**
      * Fully qualified class name used for accurate caller location detection.
      */
-    public static final String FQCN = Log4Jv2Logger.class.getName();
+    static final String FQCN = Log4Jv2Logger.class.getName();
 
     private final ExtendedLogger loggerImpl;
 

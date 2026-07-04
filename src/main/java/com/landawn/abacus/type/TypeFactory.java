@@ -471,7 +471,7 @@ public final class TypeFactory {
                     }
                 } catch (final Throwable e) {
                     if (logger.isInfoEnabled()) {
-                        logger.info(getClassName(cls) + " is not initialized as built-in type.");
+                        logger.info(getClassName(cls) + " is not initialized as built-in type. Reason: " + e);
                     }
                 }
             }
@@ -488,7 +488,7 @@ public final class TypeFactory {
                 typePool.put(type.javaType().getCanonicalName(), type);
             } catch (final Throwable e) {
                 if (logger.isInfoEnabled()) {
-                    logger.info(getClassName(cls) + " is not initialized as built-in type.");
+                    logger.info(getClassName(cls) + " is not initialized as built-in type. Reason: " + e);
                 }
             }
         }
@@ -518,7 +518,7 @@ public final class TypeFactory {
         for (final Type<?> type : typePool.values()) {
             if (typeClassMultiset.getCount(type.javaType()) > 1 && !builtinType.contains(type.getClass())) {
                 if (type.getClass().getPackage() == null || !type.getClass().getPackageName().startsWith("com.landawn.abacus.type")) {
-                    logger.info("More than one types are defined for class: " + getClassName(type.javaType()) + ". Ignore type: " + type.name());
+                    logger.info("More than one type is defined for class: " + getClassName(type.javaType()) + ". Ignore type: " + type.name());
                 }
 
                 continue;
