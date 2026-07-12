@@ -674,6 +674,17 @@ public class AbstractStreamTest extends TestBase {
     }
 
     @Test
+    public void testMapMulti_emitsNullElement() {
+        // A mapper emitting a null element must be handled by the sequential path (regression: the
+        // old ArrayDeque buffer threw NPE on offer(null); parallel path and JDK mapMulti allow null).
+        List<String> result = Stream.of(1, 2).<String> mapMulti((i, consumer) -> {
+            consumer.accept(null);
+            consumer.accept("v" + i);
+        }).toList();
+        assertEquals(Arrays.asList(null, "v1", null, "v2"), result);
+    }
+
+    @Test
     public void test_mapMultiToInt() {
         List<Integer> result = Stream.of("1", "2").mapMultiToInt((s, consumer) -> consumer.accept(Integer.parseInt(s))).boxed().toList();
         assertEquals(Arrays.asList(1, 2), result);
@@ -3644,6 +3655,14 @@ public class AbstractStreamTest extends TestBase {
         assertEquals(2, count);
         String expected = "\"h1\",\"h2\"" + IOUtil.LINE_SEPARATOR_UNIX + "\"a\",\"b\"" + IOUtil.LINE_SEPARATOR_UNIX + "\"c\",\"d\"";
         assertEquals(expected, writer.toString().trim());
+    }
+
+    @Test
+    public void test_persistToCsv_unsupportedRowType_throwsIAE() {
+        // regression: an unsupported row type threw a bare RuntimeException while the sibling
+        // unmatched-header check in the same method throws IllegalArgumentException.
+        StringWriter writer = new StringWriter();
+        assertThrows(IllegalArgumentException.class, () -> Stream.of(1, 2, 3).persistToCsv(List.of("col1"), writer));
     }
 
     @Test

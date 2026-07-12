@@ -3,8 +3,11 @@ package com.landawn.abacus.logging;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotSame;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import java.lang.reflect.Field;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -40,6 +43,17 @@ public class LogJvLoggerTest extends TestBase {
     public void testConstructorAndGetName() {
         Log4Jv2Logger logger = new Log4Jv2Logger("test.log4j2.logger");
         assertEquals("test.log4j2.logger", logger.getName());
+    }
+
+    @Test
+    @EnabledIf("isLog4j2Available")
+    public void testRootNameUsesNativeRootLogger() throws Exception {
+        Log4Jv2Logger logger = new Log4Jv2Logger(Logger.ROOT_LOGGER_NAME);
+        Field loggerImplField = Log4Jv2Logger.class.getDeclaredField("loggerImpl");
+        loggerImplField.setAccessible(true);
+
+        assertSame(org.apache.logging.log4j.LogManager.getRootLogger(), loggerImplField.get(logger));
+        assertEquals(Logger.ROOT_LOGGER_NAME, logger.getName());
     }
 
     @Test

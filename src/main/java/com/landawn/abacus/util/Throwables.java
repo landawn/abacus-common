@@ -1427,6 +1427,11 @@ public final class Throwables {
          * Performs the given action for each remaining element in this iterator.
          * This method will consume all remaining elements.
          *
+         * <p><b>Naming note:</b> this is the JDK-cased {@code forEachRemaining} that takes an unchecked
+         * {@code java.util.function.Consumer}. Its case-twin {@link #foreachRemaining(Throwables.Consumer)}
+         * (all-lowercase {@code foreach}) takes a checked {@link Throwables.Consumer} instead; the two
+         * differ only by the capital {@code E}.</p>
+         *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * Iterator<String, RuntimeException> iter = Iterator.of("a", "b", "c");
@@ -1435,6 +1440,7 @@ public final class Throwables {
          *
          * @param action the action to be performed for each element
          * @throws E if an exception occurs while iterating through the elements
+         * @see #foreachRemaining(Throwables.Consumer)
          */
         public void forEachRemaining(final java.util.function.Consumer<? super T> action) throws E { // NOSONAR
             while (hasNext()) {
@@ -1445,6 +1451,11 @@ public final class Throwables {
         /**
          * Performs the given action for each remaining element in this iterator.
          * This method will consume all remaining elements.
+         *
+         * <p><b>Naming note:</b> the all-lowercase {@code foreach} spelling marks the library variant
+         * that accepts a checked {@link Throwables.Consumer}. It differs only by one letter's case from
+         * the JDK-cased {@link #forEachRemaining(java.util.function.Consumer)}, which takes an unchecked
+         * {@code java.util.function.Consumer}.</p>
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
@@ -1462,6 +1473,8 @@ public final class Throwables {
          * @param action the action to be performed for each element
          * @throws E if an exception occurs while iterating through the elements
          * @throws E2 if the action throws an exception
+         * @see #forEachRemaining(java.util.function.Consumer)
+         * @see #foreachIndexed(Throwables.IntObjConsumer)
          */
         public <E2 extends Throwable> void foreachRemaining(final Throwables.Consumer<? super T, E2> action) throws E, E2 { // NOSONAR
             while (hasNext()) {
@@ -1473,6 +1486,10 @@ public final class Throwables {
          * Performs the given action for each remaining element in this iterator,
          * providing both the element and its index (starting from 0).
          * This method will consume all remaining elements.
+         *
+         * <p><b>Naming note:</b> like {@link #foreachRemaining(Throwables.Consumer)}, the all-lowercase
+         * {@code foreach} spelling marks a library variant that accepts a checked action; there is no
+         * JDK-cased {@code forEachIndexed} counterpart.</p>
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
@@ -1487,6 +1504,7 @@ public final class Throwables {
          * @throws E if an exception occurs while iterating through the elements
          * @throws E2 if the action throws an exception
          * @throws IllegalStateException if the iterator has more than {@code Integer.MAX_VALUE} elements
+         * @see #foreachRemaining(Throwables.Consumer)
          */
         public <E2 extends Throwable> void foreachIndexed(final Throwables.IntObjConsumer<? super T, E2> action) throws E, E2 {
             int idx = 0;
@@ -2978,6 +2996,111 @@ public final class Throwables {
          * @throws E if an error occurs during function execution
          */
         double applyAsDouble(T t) throws E;
+    }
+
+    /**
+     * Represents a function that accepts two arguments and produces a boolean-valued result.
+     *
+     * @param <A> the type of the first argument to the function
+     * @param <B> the type of the second argument to the function
+     * @param <E> the type of exception that the function may throw
+     */
+    @FunctionalInterface
+    public interface ToBooleanBiFunction<A, B, E extends Throwable> {
+
+        /**
+         * Applies this function to the given arguments and returns a boolean result.
+         *
+         * @param a the first function argument
+         * @param b the second function argument
+         * @return the boolean result
+         * @throws E if an error occurs during function execution
+         */
+        boolean applyAsBoolean(A a, B b) throws E;
+    }
+
+    /**
+     * Represents a function that accepts two arguments and produces a byte-valued result.
+     *
+     * @param <A> the type of the first argument to the function
+     * @param <B> the type of the second argument to the function
+     * @param <E> the type of exception that the function may throw
+     */
+    @FunctionalInterface
+    public interface ToByteBiFunction<A, B, E extends Throwable> {
+
+        /**
+         * Applies this function to the given arguments and returns a byte result.
+         *
+         * @param a the first function argument
+         * @param b the second function argument
+         * @return the byte result
+         * @throws E if an error occurs during function execution
+         */
+        byte applyAsByte(A a, B b) throws E;
+    }
+
+    /**
+     * Represents a function that accepts two arguments and produces a char-valued result.
+     *
+     * @param <A> the type of the first argument to the function
+     * @param <B> the type of the second argument to the function
+     * @param <E> the type of exception that the function may throw
+     */
+    @FunctionalInterface
+    public interface ToCharBiFunction<A, B, E extends Throwable> {
+
+        /**
+         * Applies this function to the given arguments and returns a char result.
+         *
+         * @param a the first function argument
+         * @param b the second function argument
+         * @return the char result
+         * @throws E if an error occurs during function execution
+         */
+        char applyAsChar(A a, B b) throws E;
+    }
+
+    /**
+     * Represents a function that accepts two arguments and produces a float-valued result.
+     *
+     * @param <A> the type of the first argument to the function
+     * @param <B> the type of the second argument to the function
+     * @param <E> the type of exception that the function may throw
+     */
+    @FunctionalInterface
+    public interface ToFloatBiFunction<A, B, E extends Throwable> {
+
+        /**
+         * Applies this function to the given arguments and returns a float result.
+         *
+         * @param a the first function argument
+         * @param b the second function argument
+         * @return the float result
+         * @throws E if an error occurs during function execution
+         */
+        float applyAsFloat(A a, B b) throws E;
+    }
+
+    /**
+     * Represents a function that accepts two arguments and produces a short-valued result.
+     *
+     * @param <A> the type of the first argument to the function
+     * @param <B> the type of the second argument to the function
+     * @param <E> the type of exception that the function may throw
+     */
+    @FunctionalInterface
+    public interface ToShortBiFunction<A, B, E extends Throwable> {
+
+        /**
+         * Applies this function to the given arguments and returns a short result.
+         *
+         * @param a the first function argument
+         * @param b the second function argument
+         * @return the short result
+         * @throws E if an error occurs during function execution
+         */
+        short applyAsShort(A a, B b) throws E;
     }
 
     /**

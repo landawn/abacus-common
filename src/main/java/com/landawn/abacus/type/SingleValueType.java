@@ -666,6 +666,15 @@ abstract class SingleValueType<T> extends AbstractType<T> { //NOSONAR
             }
         }
 
+        // The matchedFields pre-filter accepts a field when ANY public static one-arg method takes the
+        // field's type, without checking that method's return type. If neither a real factory method nor
+        // a one-arg constructor exists, the object cannot be reconstructed - advertising only a value
+        // extractor would break the documented stringOf/valueOf round-trip (the value would serialize as
+        // the single field but deserialize as a raw String). Treat such classes as plain object types.
+        if (factoryMethod == null && constructor == null) {
+            return Tuple.of(null, null, null);
+        }
+
         Method getMethod = null;
 
         for (final String methodName : getValueMethodNames) {

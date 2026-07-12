@@ -28,7 +28,7 @@ package com.landawn.abacus.util;
  * int intValue = opType.intValue();   // returns 4
  *
  * // Convert from int value
- * OperationType retrieved = OperationType.valueOf(4);   // returns UPDATE
+ * OperationType retrieved = OperationType.of(4);   // returns UPDATE
  * }</pre>
  *
  */
@@ -68,7 +68,7 @@ public enum OperationType {
     /**
      * Returns the integer flag associated with this operation type.
      * The returned value can be combined with other flags in external code, but
-     * {@link #valueOf(int)} accepts only the exact values defined by this enum.
+     * {@link #of(int)} accepts only the exact values defined by this enum.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -88,7 +88,7 @@ public enum OperationType {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * OperationType op = OperationType.valueOf(2);
+     * OperationType op = OperationType.of(2);
      * // op = OperationType.ADD
      * }</pre>
      *
@@ -97,7 +97,7 @@ public enum OperationType {
      * @throws IllegalArgumentException if {@code intValue} does not match one of the defined
      *         enum constants exactly
      */
-    public static OperationType valueOf(final int intValue) {
+    public static OperationType of(final int intValue) {
         switch (intValue) {
             case 1:
                 return QUERY;

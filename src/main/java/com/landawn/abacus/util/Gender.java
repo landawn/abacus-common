@@ -24,7 +24,7 @@ package com.landawn.abacus.util;
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * // Get gender from integer value
- * Gender gender = Gender.valueOf(1);   // returns FEMALE
+ * Gender gender = Gender.of(1);   // returns FEMALE
  *
  * // Get integer value from gender
  * int maleValue = Gender.MALE.intValue();   // returns 2
@@ -95,17 +95,17 @@ public enum Gender {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Gender female = Gender.valueOf(1);   // returns FEMALE
-     * Gender male = Gender.valueOf(2);     // returns MALE
-     * Gender x = Gender.valueOf(3);        // returns X
-     * Gender blank = Gender.valueOf(0);    // returns BLANK
+     * Gender female = Gender.of(1);   // returns FEMALE
+     * Gender male = Gender.of(2);     // returns MALE
+     * Gender x = Gender.of(3);        // returns X
+     * Gender blank = Gender.of(0);    // returns BLANK
      * }</pre>
      *
      * @param intValue the integer value to convert to Gender (0, 1, 2 or 3)
      * @return the corresponding Gender enum constant
      * @throws IllegalArgumentException if the intValue is not 0, 1, 2 or 3
      */
-    public static Gender valueOf(final int intValue) {
+    public static Gender of(final int intValue) {
         switch (intValue) {
             case 0:
                 return BLANK;

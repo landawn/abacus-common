@@ -25,6 +25,7 @@ import okhttp3.Response;
 import okhttp3.ResponseBody;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
+import okio.BufferedSink;
 
 public class CurlInterceptorTest extends TestBase {
 
@@ -272,6 +273,44 @@ public class CurlInterceptorTest extends TestBase {
             assertTrue(curl.contains("curl -X POST"));
             assertTrue(curl.contains("-H 'content-type: application/json'"));
             assertTrue(curl.contains("-d '{\"name\":\"test\"}'"));
+        } finally {
+            server.shutdown();
+        }
+    }
+
+    @Test
+    public void testInterceptDoesNotConsumeOneShotRequestBody() throws IOException {
+        final int[] writeCount = { 0 };
+        final RequestBody body = new RequestBody() {
+            @Override
+            public MediaType contentType() {
+                return MediaType.get("text/plain");
+            }
+
+            @Override
+            public boolean isOneShot() {
+                return true;
+            }
+
+            @Override
+            public void writeTo(final BufferedSink sink) throws IOException {
+                writeCount[0]++;
+                sink.writeUtf8("payload");
+            }
+        };
+        final CurlInterceptor interceptor = new CurlInterceptor(curl -> {
+        });
+        final OkHttpClient client = new OkHttpClient.Builder().addInterceptor(interceptor).build();
+        final MockWebServer server = new MockWebServer();
+        server.enqueue(new MockResponse().setBody("OK"));
+        server.start();
+
+        try {
+            final Request request = new Request.Builder().url(server.url("/test")).post(body).build();
+
+            try (Response ignored = client.newCall(request).execute()) {
+                assertEquals(1, writeCount[0]);
+            }
         } finally {
             server.shutdown();
         }

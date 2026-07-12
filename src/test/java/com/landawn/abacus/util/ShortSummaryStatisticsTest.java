@@ -30,6 +30,12 @@ public class ShortSummaryStatisticsTest extends TestBase {
     }
 
     @Test
+    public void testConstructorValidatesEmptyState() {
+        Assertions.assertDoesNotThrow(() -> new ShortSummaryStatistics(0, Short.MAX_VALUE, Short.MIN_VALUE, 0));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> new ShortSummaryStatistics(0, (short) 0, (short) 0, 1));
+    }
+
+    @Test
     public void testAccept() {
         ShortSummaryStatistics stats = new ShortSummaryStatistics();
 

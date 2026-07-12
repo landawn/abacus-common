@@ -37,11 +37,11 @@ public class YesNoTest extends TestBase {
     @Test
     public void testRoundTripConversion() {
         int noValue = YesNo.NO.intValue();
-        YesNo noConverted = YesNo.valueOf(noValue);
+        YesNo noConverted = YesNo.of(noValue);
         Assertions.assertEquals(YesNo.NO, noConverted);
 
         int yesValue = YesNo.YES.intValue();
-        YesNo yesConverted = YesNo.valueOf(yesValue);
+        YesNo yesConverted = YesNo.of(yesValue);
         Assertions.assertEquals(YesNo.YES, yesConverted);
     }
 
@@ -53,21 +53,21 @@ public class YesNoTest extends TestBase {
         Assertions.assertEquals(1, dbValueForYes);
         Assertions.assertEquals(0, dbValueForNo);
 
-        YesNo retrievedYes = YesNo.valueOf(dbValueForYes);
-        YesNo retrievedNo = YesNo.valueOf(dbValueForNo);
+        YesNo retrievedYes = YesNo.of(dbValueForYes);
+        YesNo retrievedNo = YesNo.of(dbValueForNo);
 
         Assertions.assertEquals(YesNo.YES, retrievedYes);
         Assertions.assertEquals(YesNo.NO, retrievedNo);
     }
 
     @Test
-    public void testValueOf_0() {
-        assertEquals(YesNo.NO, YesNo.valueOf(0));
+    public void testOf_0() {
+        assertEquals(YesNo.NO, YesNo.of(0));
     }
 
     @Test
-    public void testValueOf_1() {
-        assertEquals(YesNo.YES, YesNo.valueOf(1));
+    public void testOf_1() {
+        assertEquals(YesNo.YES, YesNo.of(1));
     }
 
     @Test
@@ -81,62 +81,62 @@ public class YesNoTest extends TestBase {
     }
 
     @Test
-    public void testValueOf_roundTrip_NO() {
+    public void testOf_roundTrip_NO() {
         YesNo original = YesNo.NO;
-        YesNo converted = YesNo.valueOf(original.intValue());
+        YesNo converted = YesNo.of(original.intValue());
         assertEquals(original, converted);
     }
 
     @Test
-    public void testValueOf_roundTrip_YES() {
+    public void testOf_roundTrip_YES() {
         YesNo original = YesNo.YES;
-        YesNo converted = YesNo.valueOf(original.intValue());
+        YesNo converted = YesNo.of(original.intValue());
         assertEquals(original, converted);
     }
 
     @Test
-    public void testValueOf() {
-        Assertions.assertEquals(YesNo.NO, YesNo.valueOf(0));
-        Assertions.assertEquals(YesNo.YES, YesNo.valueOf(1));
+    public void testOf() {
+        Assertions.assertEquals(YesNo.NO, YesNo.of(0));
+        Assertions.assertEquals(YesNo.YES, YesNo.of(1));
 
-        YesNo no = YesNo.valueOf(0);
+        YesNo no = YesNo.of(0);
         Assertions.assertSame(YesNo.NO, no);
 
-        YesNo yes = YesNo.valueOf(1);
+        YesNo yes = YesNo.of(1);
         Assertions.assertSame(YesNo.YES, yes);
     }
 
     @Test
-    public void testValueOf_invalid_negative() {
-        assertThrows(IllegalArgumentException.class, () -> YesNo.valueOf(-1));
+    public void testOf_invalid_negative() {
+        assertThrows(IllegalArgumentException.class, () -> YesNo.of(-1));
     }
 
     @Test
-    public void testValueOf_invalid_2() {
-        assertThrows(IllegalArgumentException.class, () -> YesNo.valueOf(2));
+    public void testOf_invalid_2() {
+        assertThrows(IllegalArgumentException.class, () -> YesNo.of(2));
     }
 
     @Test
-    public void testValueOf_invalid_100() {
-        assertThrows(IllegalArgumentException.class, () -> YesNo.valueOf(100));
+    public void testOf_invalid_100() {
+        assertThrows(IllegalArgumentException.class, () -> YesNo.of(100));
     }
 
     @Test
-    public void testValueOfInvalidValue() {
+    public void testOfInvalidValue() {
         Assertions.assertThrows(IllegalArgumentException.class, () -> {
-            YesNo.valueOf(-1);
+            YesNo.of(-1);
         });
 
         Assertions.assertThrows(IllegalArgumentException.class, () -> {
-            YesNo.valueOf(2);
+            YesNo.of(2);
         });
 
         Assertions.assertThrows(IllegalArgumentException.class, () -> {
-            YesNo.valueOf(Integer.MAX_VALUE);
+            YesNo.of(Integer.MAX_VALUE);
         });
 
         Assertions.assertThrows(IllegalArgumentException.class, () -> {
-            YesNo.valueOf(Integer.MIN_VALUE);
+            YesNo.of(Integer.MIN_VALUE);
         });
     }
 
@@ -156,7 +156,7 @@ public class YesNoTest extends TestBase {
     @Test
     public void testIntegration_databaseSimulation() {
         int dbValue = 1;
-        YesNo consent = YesNo.valueOf(dbValue);
+        YesNo consent = YesNo.of(dbValue);
         assertEquals(YesNo.YES, consent);
 
         int storedValue = consent.intValue();

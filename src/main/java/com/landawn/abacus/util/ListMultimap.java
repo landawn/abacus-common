@@ -870,8 +870,8 @@ public final class ListMultimap<K, E> extends Multimap<K, E, List<E>> {
      *
      * <p>This method creates a view of the provided map as a ListMultimap with a custom value supplier.
      * Any modifications made to the returned ListMultimap will be reflected in the underlying map and vice versa.
-     * The value supplier is used to create new list instances when adding entries to new keys. Unlike {@link #wrap(Map)},
-     * this method does not validate that the map contains non-empty lists, allowing wrapping of empty maps.
+     * The value supplier is used to create new list instances when adding entries to new keys. Like {@link #wrap(Map)},
+     * the map must not contain {@code null} or empty list values; an empty map (i.e. one with no entries) is allowed.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -882,7 +882,7 @@ public final class ListMultimap<K, E> extends Multimap<K, E, List<E>> {
      * mm.get("b");          // returns [3]
      * map.get("b");         // returns [3] (a LinkedList, written through)
      *
-     * // unlike wrap(Map), an empty map is allowed (no value validation)
+     * // an empty map (no entries) is allowed
      * ListMultimap<String, Integer> mm2 =
      *     ListMultimap.wrap(new HashMap<String, List<Integer>>(), ArrayList::new);
      * mm2.isEmpty();        // returns true
@@ -894,7 +894,7 @@ public final class ListMultimap<K, E> extends Multimap<K, E, List<E>> {
      * @param map The map to be wrapped into a ListMultimap, must not be {@code null}
      * @param valueSupplier The supplier that provides the list to be used as the value collection, must not be {@code null}
      * @return a new instance of ListMultimap backed by the provided map
-     * @throws IllegalArgumentException if the provided map or valueSupplier is {@code null}
+     * @throws IllegalArgumentException if the provided map or valueSupplier is {@code null}, or if the map contains a {@code null} or empty list value
      * @see #wrap(Map)
      */
     @Beta
@@ -959,6 +959,10 @@ public final class ListMultimap<K, E> extends Multimap<K, E, List<E>> {
 
     /**
      * Inverts the ListMultimap, swapping keys with values.
+     *
+     * <p>The verb <i>invert</i> denotes a copy-producing transformation: the returned
+     * {@code ListMultimap} is independent of this one. In contrast, {@link BiMap#inverse()}
+     * returns a live view backed by the same mappings.</p>
      *
      * <p>This method creates a new ListMultimap where each value from the original multimap becomes a key,
      * and the associated original key becomes a value in the new multimap. If multiple keys in the original

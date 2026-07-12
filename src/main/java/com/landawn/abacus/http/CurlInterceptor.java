@@ -41,7 +41,7 @@ import okio.Buffer;
  * <p>The interceptor processes the request headers, method, URL, and body content to generate
  * a complete cURL command that can be executed from the command line.</p>
  *
- * <p><b>&#9888;</b> The generated cURL command includes every request header (e.g. {@code Authorization},
+ * <p><b>&#9888;&#65039;</b> The generated cURL command includes every request header (e.g. {@code Authorization},
  * {@code Cookie}, {@code X-Api-Key}) and the request body verbatim, with no masking. Ensure the
  * {@code logHandler} destination is trusted before logging requests that carry credentials.</p>
  *
@@ -141,13 +141,21 @@ class CurlInterceptor implements Interceptor {
                 charset = HttpUtil.getCharset(contentType, charset);
             }
 
-            final Buffer buffer = new Buffer();
-            try {
-                requestBody.writeTo(buffer);
-                buffer.flush();
-                bodyString = buffer.readString(charset);
-            } finally {
-                IOUtil.close(buffer);
+            // A one-shot or duplex body can be written only once, and that single write must be the
+            // actual network transmission. Reading it here to render the cURL body would consume it and
+            // corrupt (or fail) the request, so omit the body content in that case. This mirrors OkHttp's
+            // own HttpLoggingInterceptor, which skips logging one-shot/duplex bodies.
+            if (requestBody.isDuplex() || requestBody.isOneShot()) {
+                // bodyString = null;
+            } else {
+                final Buffer buffer = new Buffer();
+                try {
+                    requestBody.writeTo(buffer);
+                    buffer.flush();
+                    bodyString = buffer.readString(charset);
+                } finally {
+                    IOUtil.close(buffer);
+                }
             }
         }
 

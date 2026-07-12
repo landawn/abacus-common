@@ -99,7 +99,7 @@ public interface ShortTriPredicate extends Throwables.ShortTriPredicate<RuntimeE
      * boolean result = combined.test((short) 10, (short) 20, (short) 30);   // returns true
      * }</pre>
      *
-     * @param other a predicate that will be logically-ANDed with this predicate
+     * @param other a predicate that will be logically-ANDed with this predicate. Must not be {@code null}.
      * @return a composed predicate that represents the short-circuiting logical AND of this predicate and the {@code other} predicate
      * @throws IllegalArgumentException if {@code other} is null
      */
@@ -124,7 +124,7 @@ public interface ShortTriPredicate extends Throwables.ShortTriPredicate<RuntimeE
      * boolean result = combined.test((short) 1, (short) 0, (short) 3);   // returns true
      * }</pre>
      *
-     * @param other a predicate that will be logically-ORed with this predicate
+     * @param other a predicate that will be logically-ORed with this predicate. Must not be {@code null}.
      * @return a composed predicate that represents the short-circuiting logical OR of this predicate and the {@code other} predicate
      * @throws IllegalArgumentException if {@code other} is null
      */

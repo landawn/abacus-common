@@ -13,6 +13,8 @@
  */
 package com.landawn.abacus.util.function;
 
+import com.landawn.abacus.util.Throwables;
+
 /**
  * Represents a function that accepts two arguments and produces a float-valued result.
  * This is the float-producing primitive specialization for {@link java.util.function.BiFunction}.
@@ -30,7 +32,7 @@ package com.landawn.abacus.util.function;
  * @param <U> the type of the second argument to the function
  */
 @FunctionalInterface
-public interface ToFloatBiFunction<T, U> {
+public interface ToFloatBiFunction<T, U> extends Throwables.ToFloatBiFunction<T, U, RuntimeException> {
     /**
      * Applies this function to the given arguments and returns a float result.
      *
@@ -47,5 +49,16 @@ public interface ToFloatBiFunction<T, U> {
      * @param u the second function argument
      * @return the function result as a primitive float
      */
+    @Override
     float applyAsFloat(T t, U u);
+
+    /**
+     * Returns this object as a {@link Throwables.ToFloatBiFunction} view.
+     *
+     * @param <E> the target exception type for compatibility with {@code Throwables.ToFloatBiFunction}
+     * @return a {@link Throwables.ToFloatBiFunction} view of this object
+     */
+    default <E extends Throwable> Throwables.ToFloatBiFunction<T, U, E> toThrowable() {
+        return (Throwables.ToFloatBiFunction<T, U, E>) this;
+    }
 }

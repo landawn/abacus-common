@@ -23169,4 +23169,31 @@ public class CommonUtilTest extends TestBase {
         }
     }
 
+    @Test
+    public void test_initHashCapacity_noRehashForExpectedSize() {
+        // newHashMap(expectedSize) & friends promise the expected number of entries can be
+        // added without rehashing. HashMap resizes when size exceeds threshold
+        // = tableSizeFor(initialCapacity) * 0.75, so that threshold must be >= expectedSize.
+        for (int n = 1; n <= 4096; n++) {
+            final int cap = CommonUtil.initHashCapacity(n);
+            final int table = hashMapTableSizeFor(cap);
+            final int threshold = (int) (table * 0.75f);
+            assertTrue(threshold >= n, "expectedSize=" + n + " -> capacity=" + cap + ", table=" + table + ", threshold=" + threshold);
+        }
+    }
+
+    // mirrors java.util.HashMap.tableSizeFor
+    private static int hashMapTableSizeFor(final int cap) {
+        final int n = -1 >>> Integer.numberOfLeadingZeros(cap - 1);
+        return (n < 0) ? 1 : (n >= (1 << 30)) ? (1 << 30) : n + 1;
+    }
+
+    @Test
+    public void test_checkArgNotNull_messageWithLeadingSpace_usedVerbatim() {
+        // documented contract: a token longer than 9 chars that contains a space is used
+        // verbatim as the error message - including when the first space is at index 0.
+        final IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () -> N.checkArgNotNull(null, " must not be null (custom message)"));
+        assertEquals(" must not be null (custom message)", ex.getMessage());
+    }
+
 }

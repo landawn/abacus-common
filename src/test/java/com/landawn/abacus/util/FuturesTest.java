@@ -1052,6 +1052,25 @@ public class FuturesTest extends TestBase {
     }
 
     @Test
+    public void testAnyOfNonPositiveTimeoutPollsImmediately() throws Exception {
+        ContinuableFuture<String> completed = Futures.anyOf(CompletableFuture.completedFuture("ok"));
+        assertEquals("ok", completed.get(0, TimeUnit.NANOSECONDS));
+        assertEquals("ok", completed.get(-1, TimeUnit.NANOSECONDS));
+
+        java.util.concurrent.FutureTask<String> completedTask = new java.util.concurrent.FutureTask<>(() -> "plain");
+        completedTask.run();
+        assertEquals("plain", Futures.anyOf(completedTask).get(0, TimeUnit.NANOSECONDS));
+
+        ContinuableFuture<String> pending = Futures.anyOf(new CompletableFuture<>());
+        assertThrows(TimeoutException.class, () -> pending.get(0, TimeUnit.NANOSECONDS));
+        assertThrows(TimeoutException.class, () -> pending.get(-1, TimeUnit.NANOSECONDS));
+
+        ContinuableFuture<String> allFailed = Futures.anyOf(CompletableFuture.<String> failedFuture(new IllegalStateException("first")),
+                CompletableFuture.<String> failedFuture(new IllegalArgumentException("second")));
+        assertThrows(RuntimeException.class, () -> allFailed.get(0, TimeUnit.NANOSECONDS));
+    }
+
+    @Test
     public void testAnyOf() throws Exception {
         CompletableFuture<String> f1 = new CompletableFuture<>();
         CompletableFuture<String> f2 = new CompletableFuture<>();

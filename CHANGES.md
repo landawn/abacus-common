@@ -1,3 +1,7 @@
+## 7.8.6
+* Naming convention improvements
+* Improvements and bug fixes
+
 ## 7.8.5
 * Naming convention improvements
 * Improvements and bug fixes

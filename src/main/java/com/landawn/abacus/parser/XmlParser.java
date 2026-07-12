@@ -50,8 +50,7 @@ import com.landawn.abacus.type.Type;
  *
  * // Deserialize from DOM Node
  * try {
- *     Document doc = DocumentBuilderFactory.newInstance()
- *         .newDocumentBuilder().parse(xmlFile);
+ *     Document doc = XmlUtil.createDOMParser().parse(xmlFile);
  *     MyBean fromNode = parser.deserialize(doc.getFirstChild(), MyBean.class);
  * } catch (Exception e) {
  *     // Handle parsing exception
@@ -80,8 +79,7 @@ public interface XmlParser extends Parser<XmlSerConfig, XmlDeserConfig> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * try {
-     *     Document doc = DocumentBuilderFactory.newInstance()
-     *         .newDocumentBuilder().parse(xmlFile);
+     *     Document doc = XmlUtil.createDOMParser().parse(xmlFile);
      *     Type<MyBean> type = Type.of(MyBean.class);
      *     MyBean bean = parser.deserialize(doc.getFirstChild(), type);
      * } catch (Exception e) {
@@ -107,8 +105,7 @@ public interface XmlParser extends Parser<XmlSerConfig, XmlDeserConfig> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * try {
-     *     Document doc = DocumentBuilderFactory.newInstance()
-     *         .newDocumentBuilder().parse(xmlFile);
+     *     Document doc = XmlUtil.createDOMParser().parse(xmlFile);
      *     MyBean bean = parser.deserialize(doc.getFirstChild(), MyBean.class);
      * } catch (Exception e) {
      *     // Handle parsing exception
@@ -136,8 +133,7 @@ public interface XmlParser extends Parser<XmlSerConfig, XmlDeserConfig> {
      *     .setIgnoreUnmatchedProperty(true);
      *
      * try {
-     *     Document doc = DocumentBuilderFactory.newInstance()
-     *         .newDocumentBuilder().parse(xmlFile);
+     *     Document doc = XmlUtil.createDOMParser().parse(xmlFile);
      *     Type<MyBean> type = Type.of(MyBean.class);
      *     MyBean bean = parser.deserialize(doc.getFirstChild(), config, type);
      * } catch (Exception e) {
@@ -167,8 +163,7 @@ public interface XmlParser extends Parser<XmlSerConfig, XmlDeserConfig> {
      *     .setIgnoreUnmatchedProperty(true);
      *
      * try {
-     *     Document doc = DocumentBuilderFactory.newInstance()
-     *         .newDocumentBuilder().parse(xmlFile);
+     *     Document doc = XmlUtil.createDOMParser().parse(xmlFile);
      *     MyBean bean = parser.deserialize(doc.getFirstChild(), config, MyBean.class);
      * } catch (Exception e) {
      *     // Handle parsing exception
@@ -310,8 +305,7 @@ public interface XmlParser extends Parser<XmlSerConfig, XmlDeserConfig> {
      * nodeTypes.put("category", Type.of(Category.class));
      *
      * try {
-     *     Document doc = DocumentBuilderFactory.newInstance()
-     *         .newDocumentBuilder().parse(xmlFile);
+     *     Document doc = XmlUtil.createDOMParser().parse(xmlFile);
      *     Object result = parser.deserialize(doc.getFirstChild(), config, nodeTypes);
      * } catch (Exception e) {
      *     // Handle parsing exception

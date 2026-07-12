@@ -399,7 +399,7 @@ public final class HttpRequest {
      *     .setAuthorization("Bearer token123")
      *     .setAccept("application/json");
      * HttpRequest.url("http://localhost:18080")
-     *     .headers(headers)
+     *     .setHeaders(headers)
      *     .get();
      * }</pre>
      *

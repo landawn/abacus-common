@@ -516,6 +516,19 @@ public class SeqTest extends AbstractTest {
     }
 
     @Test
+    public void testSkipLastTakeLastSliding_tolerateNullElements() throws Exception {
+        // Regression: skipLast/takeLast/sliding are value-agnostic structural ops and must not NPE on a
+        // null element (they previously buffered into a null-rejecting ArrayDeque).
+        assertEquals(Arrays.asList("a", null), Seq.of("a", null, "c").skipLast(1).toList());
+        assertEquals(Arrays.asList(null, "c"), Seq.of("a", null, "c").takeLast(2).toList());
+
+        List<List<String>> windows = Seq.of("a", null, "c").sliding(2).toList();
+        assertEquals(2, windows.size());
+        assertEquals(Arrays.asList("a", null), windows.get(0));
+        assertEquals(Arrays.asList(null, "c"), windows.get(1));
+    }
+
+    @Test
     public void testFlattmap() throws Exception {
         List<Integer> result = Seq.of(1, 2, 3).flatMapArray(x -> new Integer[] { x, x * 10 }).toList();
         assertEquals(Arrays.asList(1, 10, 2, 20, 3, 30), result);

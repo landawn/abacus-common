@@ -36,6 +36,11 @@ public class ShortListTest extends TestBase {
     }
 
     @Test
+    public void testRangedForEachRejectsNullActionForEmptyRange() {
+        assertThrows(IllegalArgumentException.class, () -> list.forEach(0, 0, (com.landawn.abacus.util.function.ShortConsumer) null));
+    }
+
+    @Test
     public void testConstructorWithArray() {
         short[] arr = { (short) 1, (short) 2, (short) 3 };
         ShortList list = new ShortList(arr);
@@ -3203,15 +3208,16 @@ public class ShortListTest extends TestBase {
 
     @Test
     public void test_forEach_removeIf_replaceIf_null_func() {
-        // Regression: a null functional argument must throw NullPointerException even on an
-        // EMPTY list (previously silently no-op'd; now matches IntList's fail-fast guard).
+        // Regression: a null functional argument is rejected up-front even on an EMPTY list
+        // (previously silently no-op'd). forEach throws IllegalArgumentException (N.checkArgNotNull);
+        // removeIf/replaceIf throw NullPointerException (N.requireNonNull).
         final ShortList empty = new ShortList();
-        assertThrows(NullPointerException.class, () -> empty.forEach((com.landawn.abacus.util.function.ShortConsumer) null));
+        assertThrows(IllegalArgumentException.class, () -> empty.forEach((com.landawn.abacus.util.function.ShortConsumer) null));
         assertThrows(NullPointerException.class, () -> empty.removeIf((com.landawn.abacus.util.function.ShortPredicate) null));
         assertThrows(NullPointerException.class, () -> empty.replaceIf((com.landawn.abacus.util.function.ShortPredicate) null, (short) 0));
 
         final ShortList nonEmpty = ShortList.of((short) 1, (short) 2);
-        assertThrows(NullPointerException.class, () -> nonEmpty.forEach((com.landawn.abacus.util.function.ShortConsumer) null));
+        assertThrows(IllegalArgumentException.class, () -> nonEmpty.forEach((com.landawn.abacus.util.function.ShortConsumer) null));
         assertThrows(NullPointerException.class, () -> nonEmpty.removeIf((com.landawn.abacus.util.function.ShortPredicate) null));
         assertThrows(NullPointerException.class, () -> nonEmpty.replaceIf((com.landawn.abacus.util.function.ShortPredicate) null, (short) 0));
     }

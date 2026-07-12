@@ -2317,10 +2317,10 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * }</pre>
      *
      * @param action the action to be performed for each element. Must not be {@code null}.
-     * @throws NullPointerException if the specified action is {@code null}
+     * @throws IllegalArgumentException if {@code action} is {@code null}
      */
     public void forEach(final LongConsumer action) {
-        N.requireNonNull(action, cs.action);
+        N.checkArgNotNull(action, cs.action);
 
         forEach(0, size, action);
     }
@@ -2356,10 +2356,11 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * @param toIndex the ending index (exclusive), or -1 for reverse iteration to index 0
      * @param action the action to be performed for each element. Must not be {@code null}.
      * @throws IndexOutOfBoundsException if the range is out of bounds
-     * @throws NullPointerException if the specified action is {@code null}
+     * @throws IllegalArgumentException if {@code action} is {@code null}
      */
     public void forEach(final int fromIndex, final int toIndex, final LongConsumer action) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), Math.max(fromIndex, toIndex), size);
+        N.checkArgNotNull(action, cs.action);
 
         if (size > 0) {
             if (fromIndex <= toIndex) {

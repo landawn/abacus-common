@@ -429,6 +429,20 @@ public class ShortIteratorTest extends TestBase {
     }
 
     @Test
+    @DisplayName("Test defer() null result failure is stable")
+    public void testDeferNullResultFailureIsStable() {
+        int[] callCount = { 0 };
+        ShortIterator iter = ShortIterator.defer(() -> {
+            callCount[0]++;
+            return null;
+        });
+
+        assertThrows(IllegalStateException.class, iter::hasNext);
+        assertThrows(IllegalStateException.class, iter::hasNext);
+        assertEquals(1, callCount[0]);
+    }
+
+    @Test
     @DisplayName("Test generate() infinite iterator")
     public void testGenerateInfinite() {
         AtomicInteger counter = new AtomicInteger(0);

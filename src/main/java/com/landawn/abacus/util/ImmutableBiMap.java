@@ -562,6 +562,10 @@ public final class ImmutableBiMap<K, V> extends AbstractImmutableMap<K, V> {
      * Returns an inverse view of this {@code ImmutableBiMap}, in which each value
      * of this map becomes a key, and each key becomes the corresponding value.
      *
+     * <p>The noun <i>inverse</i> denotes this shared, bidirectional view. Copy-producing key/value
+     * transformations are instead named <i>invert</i>; see {@link Maps#invert(Map)} and
+     * {@link Multimap#invert(java.util.function.IntFunction)}.</p>
+     *
      * <p>The returned map is also an {@code ImmutableBiMap} and is backed by the
      * inverse view of the same underlying {@code BiMap} as this instance, so it
      * shares the same storage and requires no copying. Calling {@code inverse()}

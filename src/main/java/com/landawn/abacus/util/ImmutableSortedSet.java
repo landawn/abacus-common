@@ -359,6 +359,19 @@ public class ImmutableSortedSet<E> extends ImmutableSet<E> implements SortedSet<
     }
 
     /**
+     * Returns an ImmutableSortedSet containing the elements of the specified array in natural order.
+     * Duplicate elements are removed. If the array is {@code null} or empty, the cached empty set is returned.
+     *
+     * @param <E> the type of elements, which must be mutually comparable
+     * @param a the array whose elements are to be copied
+     * @return an ImmutableSortedSet containing the array elements
+     * @throws NullPointerException if the array contains a {@code null} element
+     */
+    public static <E> ImmutableSortedSet<E> copyOf(final E[] a) {
+        return N.isEmpty(a) ? empty() : new ImmutableSortedSet<>(new TreeSet<>(Arrays.asList(a)));
+    }
+
+    /**
      * Returns an ImmutableSortedSet containing the elements of the specified collection.
      * If the provided collection is already an instance of ImmutableSortedSet, it is directly returned.
      * If the provided collection is {@code null} or empty, an empty ImmutableSortedSet is returned.

@@ -81,7 +81,7 @@ public interface ShortFunction<R> extends Throwables.ShortFunction<R, RuntimeExc
      * }</pre>
      *
      * @param <V> the type of output of the {@code after} function, and of the composed function
-     * @param after the function to apply after this function is applied
+     * @param after the function to apply after this function is applied. Must not be {@code null}.
      * @return a composed function that first applies this function and then applies the {@code after} function
      * @throws IllegalArgumentException if {@code after} is null
      */

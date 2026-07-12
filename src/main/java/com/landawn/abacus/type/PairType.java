@@ -209,6 +209,8 @@ public class PairType<L, R> extends AbstractType<Pair<L, R>> {
             if (appendable instanceof Writer writer) {
                 final boolean isBufferedWriter = IOUtil.isBufferedWriter(writer);
                 final Writer bw = isBufferedWriter ? writer : Objectory.createBufferedWriter(writer); //NOSONAR
+                IOException ioException = null;
+                RuntimeException recycleException = null;
 
                 try {
                     bw.write(SK._BRACKET_L);
@@ -223,11 +225,31 @@ public class PairType<L, R> extends AbstractType<Pair<L, R>> {
                         bw.flush();
                     }
                 } catch (final IOException e) {
-                    throw new UncheckedIOException(e);
+                    ioException = e;
                 } finally {
                     if (!isBufferedWriter) {
-                        Objectory.recycle((BufferedWriter) bw);
+                        try {
+                            Objectory.recycle((BufferedWriter) bw);
+                        } catch (final UncheckedIOException e) {
+                            if (ioException == null) {
+                                ioException = e.getCause();
+                            } else if (ioException != e.getCause()) {
+                                ioException.addSuppressed(e.getCause());
+                            }
+                        } catch (final RuntimeException e) {
+                            if (ioException == null) {
+                                recycleException = e;
+                            } else {
+                                ioException.addSuppressed(e);
+                            }
+                        }
                     }
+                }
+
+                if (ioException != null) {
+                    throw ioException;
+                } else if (recycleException != null) {
+                    throw recycleException;
                 }
             } else {
                 appendable.append(SK._BRACKET_L);
@@ -265,18 +287,13 @@ public class PairType<L, R> extends AbstractType<Pair<L, R>> {
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {
-            try {
-                writer.write(SK._BRACKET_L);
+            writer.write(SK._BRACKET_L);
 
-                leftType.serializeTo(writer, x.left(), config);
-                writer.write(ELEMENT_SEPARATOR_CHAR_ARRAY);
-                rightType.serializeTo(writer, x.right(), config);
+            leftType.serializeTo(writer, x.left(), config);
+            writer.write(ELEMENT_SEPARATOR_CHAR_ARRAY);
+            rightType.serializeTo(writer, x.right(), config);
 
-                writer.write(SK._BRACKET_R);
-
-            } catch (final IOException e) {
-                throw new UncheckedIOException(e);
-            }
+            writer.write(SK._BRACKET_R);
         }
     }
 

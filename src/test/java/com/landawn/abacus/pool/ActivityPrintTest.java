@@ -18,7 +18,7 @@ public class ActivityPrintTest extends TestBase {
         ActivityPrint print = new ActivityPrint(10000, 5000);
 
         assertNotNull(print);
-        assertEquals(10000, print.getLiveTime());
+        assertEquals(10000, print.getMaxLiveTime());
         assertEquals(5000, print.getMaxIdleTime());
         assertTrue(print.getCreatedTime() > 0);
         assertTrue(print.getLastAccessTime() > 0);
@@ -30,7 +30,7 @@ public class ActivityPrintTest extends TestBase {
         ActivityPrint print = new ActivityPrint(Long.MAX_VALUE, Long.MAX_VALUE);
 
         assertNotNull(print);
-        assertEquals(Long.MAX_VALUE, print.getLiveTime());
+        assertEquals(Long.MAX_VALUE, print.getMaxLiveTime());
         assertEquals(Long.MAX_VALUE, print.getMaxIdleTime());
     }
 
@@ -59,7 +59,7 @@ public class ActivityPrintTest extends TestBase {
         ActivityPrint print = ActivityPrint.of(10000, 5000);
 
         assertNotNull(print);
-        assertEquals(10000, print.getLiveTime());
+        assertEquals(10000, print.getMaxLiveTime());
         assertEquals(5000, print.getMaxIdleTime());
     }
 
@@ -73,32 +73,32 @@ public class ActivityPrintTest extends TestBase {
     public void testGetLiveTime() {
         ActivityPrint print = new ActivityPrint(12345, 6789);
 
-        assertEquals(12345, print.getLiveTime());
+        assertEquals(12345, print.getMaxLiveTime());
     }
 
     @Test
     public void testSetLiveTime() {
         ActivityPrint print = new ActivityPrint(10000, 5000);
 
-        ActivityPrint result = print.setLiveTime(15000);
+        ActivityPrint result = print.setMaxLiveTime(15000);
 
         assertEquals(print, result); // returns this for chaining
-        assertEquals(15000, print.getLiveTime());
+        assertEquals(15000, print.getMaxLiveTime());
     }
 
     @Test
     public void testSetLiveTimeToZero() {
         ActivityPrint print = new ActivityPrint(10000, 5000);
 
-        assertThrows(IllegalArgumentException.class, () -> print.setLiveTime(0));
+        assertThrows(IllegalArgumentException.class, () -> print.setMaxLiveTime(0));
     }
 
     @Test
     public void testSetLiveTimeWithNegativeValue() {
         ActivityPrint print = new ActivityPrint(10000, 5000);
 
-        assertThrows(IllegalArgumentException.class, () -> print.setLiveTime(-1));
-        assertThrows(IllegalArgumentException.class, () -> print.setLiveTime(-100));
+        assertThrows(IllegalArgumentException.class, () -> print.setMaxLiveTime(-1));
+        assertThrows(IllegalArgumentException.class, () -> print.setMaxLiveTime(-100));
     }
 
     @Test
@@ -333,12 +333,12 @@ public class ActivityPrintTest extends TestBase {
         ActivityPrint cloned = (ActivityPrint) original.clone();
 
         original.updateAccessCount();
-        original.setLiveTime(15000);
+        original.setMaxLiveTime(15000);
 
         assertEquals(1, original.getAccessCount());
         assertEquals(0, cloned.getAccessCount());
-        assertEquals(15000, original.getLiveTime());
-        assertEquals(10000, cloned.getLiveTime());
+        assertEquals(15000, original.getMaxLiveTime());
+        assertEquals(10000, cloned.getMaxLiveTime());
     }
 
     @Test
@@ -350,7 +350,7 @@ public class ActivityPrintTest extends TestBase {
         ActivityPrint cloned = (ActivityPrint) original.clone();
 
         assertNotNull(cloned);
-        assertEquals(original.getLiveTime(), cloned.getLiveTime());
+        assertEquals(original.getMaxLiveTime(), cloned.getMaxLiveTime());
         assertEquals(original.getMaxIdleTime(), cloned.getMaxIdleTime());
         assertEquals(original.getCreatedTime(), cloned.getCreatedTime());
         assertEquals(original.getLastAccessTime(), cloned.getLastAccessTime());
@@ -404,7 +404,7 @@ public class ActivityPrintTest extends TestBase {
         ActivityPrint print1 = new ActivityPrint(10000, 5000);
         ActivityPrint print2 = (ActivityPrint) print1.clone();
 
-        print2.setLiveTime(15000);
+        print2.setMaxLiveTime(15000);
 
         assertFalse(print1.equals(print2));
     }
@@ -464,10 +464,10 @@ public class ActivityPrintTest extends TestBase {
     public void testChainingSetter() {
         ActivityPrint print = new ActivityPrint(10000, 5000);
 
-        ActivityPrint result = print.setLiveTime(15000).setMaxIdleTime(7500);
+        ActivityPrint result = print.setMaxLiveTime(15000).setMaxIdleTime(7500);
 
         assertEquals(print, result);
-        assertEquals(15000, print.getLiveTime());
+        assertEquals(15000, print.getMaxLiveTime());
         assertEquals(7500, print.getMaxIdleTime());
     }
 

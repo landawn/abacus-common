@@ -66,7 +66,7 @@ public class PatternType extends AbstractType<Pattern> {
      * Returns {@code null} if the input Pattern is {@code null}.
      *
      * <p>The returned string is a serializable representation designed to be parsed by {@link #valueOf(String)}.
-     * <p><b>&#9888;</b> Pattern flags are not included in this representation. A pattern compiled with flags such as
+     * <p><b>&#9888;&#65039;</b> Pattern flags are not included in this representation. A pattern compiled with flags such as
      * {@link Pattern#CASE_INSENSITIVE} will be parsed back with default flags unless the flags are embedded directly
      * in the pattern text (for example, {@code "(?i)abc"}).</p>
      *

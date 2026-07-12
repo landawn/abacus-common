@@ -1508,8 +1508,8 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
      * Integer[] ages = {25, 30, 25};
      * Boolean[] active = {true, false, true};
      * Triple<Set<String>, Set<Integer>, Set<Boolean>> result =
-     *     TriIterator.zip(names, ages, active).unzipToSets(HashSet::new);
-     * Set<String> nameSet = result.left();       // returns [Alice, Bob] (duplicates removed)
+     *     TriIterator.zip(names, ages, active).unzipToSets(LinkedHashSet::new);
+     * Set<String> nameSet = result.left();       // returns [Alice, Bob] (duplicates removed, insertion order)
      * Set<Integer> ageSet = result.middle();     // returns [25, 30]
      * Set<Boolean> activeSet = result.right();   // returns [true, false]
      * }</pre>

@@ -29,11 +29,11 @@ public class OperationTypeTest extends AbstractTest {
     }
 
     @Test
-    public void testValueOf_withValidIntValues() {
-        assertEquals(OperationType.QUERY, OperationType.valueOf(1));
-        assertEquals(OperationType.ADD, OperationType.valueOf(2));
-        assertEquals(OperationType.UPDATE, OperationType.valueOf(4));
-        assertEquals(OperationType.DELETE, OperationType.valueOf(8));
+    public void testOf_withValidIntValues() {
+        assertEquals(OperationType.QUERY, OperationType.of(1));
+        assertEquals(OperationType.ADD, OperationType.of(2));
+        assertEquals(OperationType.UPDATE, OperationType.of(4));
+        assertEquals(OperationType.DELETE, OperationType.of(8));
     }
 
     @Test
@@ -45,16 +45,16 @@ public class OperationTypeTest extends AbstractTest {
     }
 
     @Test
-    public void test_valueOf() {
-        assertEquals(OperationType.QUERY, OperationType.valueOf(1));
-        assertEquals(OperationType.ADD, OperationType.valueOf(2));
-        assertEquals(OperationType.UPDATE, OperationType.valueOf(4));
-        assertEquals(OperationType.DELETE, OperationType.valueOf(8));
+    public void test_of() {
+        assertEquals(OperationType.QUERY, OperationType.of(1));
+        assertEquals(OperationType.ADD, OperationType.of(2));
+        assertEquals(OperationType.UPDATE, OperationType.of(4));
+        assertEquals(OperationType.DELETE, OperationType.of(8));
 
         assertEquals(8, OperationType.DELETE.intValue());
 
         try {
-            OperationType.valueOf(3);
+            OperationType.of(3);
             fail("Should throw IllegalArgumentException");
         } catch (IllegalArgumentException e) {
 
@@ -62,10 +62,10 @@ public class OperationTypeTest extends AbstractTest {
     }
 
     @Test
-    public void testValueOf_withInvalidIntValue() {
-        assertThrows(IllegalArgumentException.class, () -> OperationType.valueOf(0));
-        assertThrows(IllegalArgumentException.class, () -> OperationType.valueOf(3));
-        assertThrows(IllegalArgumentException.class, () -> OperationType.valueOf(16));
+    public void testOf_withInvalidIntValue() {
+        assertThrows(IllegalArgumentException.class, () -> OperationType.of(0));
+        assertThrows(IllegalArgumentException.class, () -> OperationType.of(3));
+        assertThrows(IllegalArgumentException.class, () -> OperationType.of(16));
     }
 
     @Test

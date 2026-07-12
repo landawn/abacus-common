@@ -44,7 +44,7 @@ package com.landawn.abacus.util;
  * int code = type.intValue();   // returns 3
  *
  * // Converting from numeric code to MediaType
- * MediaType decoded = MediaType.valueOf(2);   // returns VIDEO
+ * MediaType decoded = MediaType.of(2);   // returns VIDEO
  *
  * // Using in switch statements
  * switch (contentType) {
@@ -150,7 +150,7 @@ public enum MediaType {
      * }</pre>
      *
      * @return the numeric value of this media type (0-5)
-     * @see #valueOf(int)
+     * @see #of(int)
      */
     public int intValue() {
         return intValue;
@@ -171,10 +171,10 @@ public enum MediaType {
      * <pre>{@code
      * // Reading from database
      * int typeCode = resultSet.getInt("media_type");
-     * MediaType type = MediaType.valueOf(typeCode);
+     * MediaType type = MediaType.of(typeCode);
      *
      * // Deserializing from network protocol
-     * MediaType received = MediaType.valueOf(buffer.readInt());
+     * MediaType received = MediaType.of(buffer.readInt());
      * }</pre>
      *
      * @param intValue the numeric value of the media type (must be between 0 and 5 inclusive)
@@ -183,7 +183,7 @@ public enum MediaType {
      *         (i.e., if intValue is not in the range 0-5)
      * @see #intValue()
      */
-    public static MediaType valueOf(final int intValue) {
+    public static MediaType of(final int intValue) {
         switch (intValue) {
             case 0:
                 return BINARY;

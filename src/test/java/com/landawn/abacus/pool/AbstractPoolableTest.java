@@ -75,7 +75,7 @@ public class AbstractPoolableTest extends TestBase {
 
         assertNotNull(poolable);
         assertNotNull(poolable.activityPrint());
-        assertEquals(10000, poolable.activityPrint().getLiveTime());
+        assertEquals(10000, poolable.activityPrint().getMaxLiveTime());
         assertEquals(5000, poolable.activityPrint().getMaxIdleTime());
     }
 
@@ -84,7 +84,7 @@ public class AbstractPoolableTest extends TestBase {
         TestPoolable poolable = new TestPoolable(Long.MAX_VALUE, Long.MAX_VALUE);
 
         assertNotNull(poolable);
-        assertEquals(Long.MAX_VALUE, poolable.activityPrint().getLiveTime());
+        assertEquals(Long.MAX_VALUE, poolable.activityPrint().getMaxLiveTime());
         assertEquals(Long.MAX_VALUE, poolable.activityPrint().getMaxIdleTime());
     }
 
@@ -116,7 +116,7 @@ public class AbstractPoolableTest extends TestBase {
 
         ActivityPrint print = poolable.activityPrint();
 
-        assertEquals(liveTime, print.getLiveTime());
+        assertEquals(liveTime, print.getMaxLiveTime());
         assertEquals(maxIdleTime, print.getMaxIdleTime());
         assertEquals(0, print.getAccessCount());
         assertTrue(print.getCreatedTime() > 0);
@@ -155,7 +155,7 @@ public class AbstractPoolableTest extends TestBase {
 
         assertNotNull(poolable);
         assertNotNull(poolable.activityPrint());
-        assertEquals(10000, poolable.activityPrint().getLiveTime());
+        assertEquals(10000, poolable.activityPrint().getMaxLiveTime());
         assertEquals(5000, poolable.activityPrint().getMaxIdleTime());
 
         // Should not throw

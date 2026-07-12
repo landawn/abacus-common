@@ -213,7 +213,7 @@ public class HolderType<T> extends AbstractType<Holder<T>> {
      * <pre>{@code
      * Type<Holder<String>> type = TypeFactory.getType("Holder<String>");
      * ResultSet rs = Mockito.mock(ResultSet.class);
-     * Mockito.when(rs.getObject(1)).thenReturn("Alice");
+     * Mockito.when(rs.getString(1)).thenReturn("Alice");
      *
      * Holder<String> name = type.get(rs, 1);
      * if (!name.isNull()) {

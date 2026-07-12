@@ -41,7 +41,7 @@ import com.landawn.abacus.annotation.SuppressFBWarnings;
  * </ul>
  *
  * <p><b>Accessor naming:</b> {@code ActivityPrint} is a hand-written mutable class and intentionally
- * uses JavaBean {@code getXxx} accessors ({@link #getLiveTime()}, {@link #getLastAccessTime()}, …)
+ * uses JavaBean {@code getXxx} accessors ({@link #getMaxLiveTime()}, {@link #getLastAccessTime()}, …)
  * with fluent {@code setXxx} setters. This differs from the sibling {@link PoolStats}, which is a
  * {@code record} whose accessors are compiler-forced bare nouns. The convention split (JavaBean vs.
  * record-forced) is by design and the existing getter names are kept rather than renamed.</p>
@@ -102,7 +102,7 @@ public final class ActivityPrint implements Cloneable, Serializable {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ActivityPrint activity = new ActivityPrint(3600000, 600000); // 1 hour live, 10 min idle
-     * activity.getLiveTime();                                      // returns 3600000
+     * activity.getMaxLiveTime();                                      // returns 3600000
      * activity.getMaxIdleTime();                                   // returns 600000
      * new ActivityPrint(0, 600000);                                // throws IllegalArgumentException (liveTime not positive)
      * new ActivityPrint(3600000, -1);                              // throws IllegalArgumentException (maxIdleTime not positive)
@@ -154,12 +154,12 @@ public final class ActivityPrint implements Cloneable, Serializable {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ActivityPrint activity = new ActivityPrint(3600000, 600000);
-     * activity.getLiveTime();   // returns 3600000
+     * activity.getMaxLiveTime();   // returns 3600000
      * }</pre>
      *
      * @return the maximum lifetime in milliseconds
      */
-    public long getLiveTime() {
+    public long getMaxLiveTime() {
         return liveTime;
     }
 
@@ -168,14 +168,14 @@ public final class ActivityPrint implements Cloneable, Serializable {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * activity.setLiveTime(7200000);   // 7200000 ms is 2 hours
+     * activity.setMaxLiveTime(7200000);   // 7200000 ms is 2 hours
      * }</pre>
      *
      * @param liveTime the new maximum lifetime in milliseconds (must be positive)
      * @return this ActivityPrint instance for method chaining
      * @throws IllegalArgumentException if liveTime is not positive
      */
-    public ActivityPrint setLiveTime(final long liveTime) throws IllegalArgumentException {
+    public ActivityPrint setMaxLiveTime(final long liveTime) throws IllegalArgumentException {
         if (liveTime <= 0) {
             throw new IllegalArgumentException("liveTime must be positive, got: " + liveTime);
         }
@@ -271,7 +271,7 @@ public final class ActivityPrint implements Cloneable, Serializable {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * E pooledObject = pool.take();
+     * E pooledObject = pool.poll();
      * if (pooledObject != null) {
      *     pooledObject.activityPrint().updateLastAccessTime();
      * }

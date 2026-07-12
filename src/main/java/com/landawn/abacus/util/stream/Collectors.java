@@ -334,10 +334,6 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     @Deprecated
     static final Characteristics[] CH_CONCURRENT_NOID = { Characteristics.CONCURRENT, Characteristics.UNORDERED };
 
-    /**
-     * @deprecated This field is not intended to be used.
-     */
-    @Deprecated
     static final Characteristics[] CH_CONCURRENT_ID = { Characteristics.CONCURRENT, Characteristics.UNORDERED, Characteristics.IDENTITY_FINISH };
 
     // ============================================================================================================
@@ -3211,7 +3207,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * collected data.</p>
      *
      * <p>The characteristics of the returned collector are derived from the downstream
-     * collector, with {@code IDENTITY_FINISH} removed if present.</p>
+     * collector, with {@code IDENTITY_FINISH} and {@code CONCURRENT} removed if present.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -3714,7 +3710,8 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * <p>This collector finds the minimum element using the provided comparator.
      * The result is wrapped in an {@code Optional} which is empty if the stream is empty.
      * The comparator is used for all comparisons, including handling of {@code null} values
-     * if present.</p>
+     * if present. If multiple elements are considered equal according to the comparator,
+     * the first encountered element is returned.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -6888,7 +6885,9 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
         final BinaryOperator<OptHolder<T>> combiner = (BinaryOperator) Reducing_Combiner;
         final Function<OptHolder<T>, Optional<T>> finisher = (Function) Reducing_Finisher;
 
-        return create(supplier, accumulator, combiner, finisher, CH_UNORDERED_NOID);
+        // must NOT be UNORDERED: min/max are built on this operator and document first-encountered
+        // tie-breaking, which an order-discarding parallel pipeline would break (JDK parity: CH_NOID).
+        return create(supplier, accumulator, combiner, finisher, CH_NOID);
     }
 
     /**
@@ -7110,7 +7109,9 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
         final BiConsumer<NaturalMinMaxHolder<T>, T> accumulator = NaturalMinMaxHolder::accept;
         final BinaryOperator<NaturalMinMaxHolder<T>> combiner = NaturalMinMaxHolder::combine;
 
-        return create(supplier, accumulator, combiner, finisher, CH_UNORDERED_NOID);
+        // must NOT be UNORDERED: minMax() documents that the first-encountered minimal/maximal
+        // element is selected, which an order-discarding parallel pipeline would break.
+        return create(supplier, accumulator, combiner, finisher, CH_NOID);
     }
 
     private static final class NaturalMinMaxHolder<T extends Comparable<? super T>> implements Consumer<T> {

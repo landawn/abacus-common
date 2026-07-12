@@ -145,6 +145,14 @@ import com.landawn.abacus.util.stream.Stream;
  * {@code Dataset} instead provides a separate no-argument overload of each operation for the "all columns"
  * case. See the library's null/empty selection convention documentation for the rationale.
  *
+ * <p><b>Cursor-relative access:</b> all one-coordinate cell methods operate on the row selected by
+ * {@link #moveToRow(int)} and reported by {@link #currentRowIndex()}. This family includes
+ * {@link #get(int)}/{@link #get(String)}, {@link #isNull(int)}/{@link #isNull(String)}, the typed
+ * {@code getBoolean}, {@code getInt}, and other primitive/object getter overloads, and
+ * {@link #set(int, Object)}/{@link #set(String, Object)}. Their single argument identifies a column,
+ * not a row. Use the two-coordinate overloads such as {@link #get(int, int)},
+ * {@link #isNull(int, int)}, and {@link #set(int, int, Object)} for stateless row-and-column access.
+ *
  * <p><b>Performance Characteristics:</b>
  * <ul>
  *   <li>Columnar storage for memory efficiency and cache locality</li>
@@ -753,6 +761,10 @@ public sealed interface Dataset permits RowDataset {
      * <br />
      * There is NO underlying auto-conversion from column value to target type: {@code T}.
      * So the column values must be the type which is assignable to target type.
+     * <br />
+     * <b>Note:</b> this is a <i>cursor-relative</i> accessor that reads from the <i>current row</i>
+     * (see {@link #currentRowIndex()}), <b>not</b> a stateless positional lookup like {@code Map.get}/{@code List.get}.
+     * Position the cursor with {@link #moveToRow(int)} first; prefer the stateless {@link #get(int, int)} when the row index is known.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -764,11 +776,16 @@ public sealed interface Dataset permits RowDataset {
      * @param columnIndex the index of the column.
      * @return the value at the specified column index.
      * @throws IndexOutOfBoundsException if the specified column index is out of bounds.
+     * @see #get(int, int)
+     * @see #moveToRow(int)
+     * @see #currentRowIndex()
      */
     <T> T get(int columnIndex) throws IndexOutOfBoundsException;
 
     /**
      * Retrieves the value at the specified column in the Dataset for the current row.
+     * <br />
+     * <b>Note:</b> cursor-relative accessor — reads from the <i>current row</i> (see {@link #currentRowIndex()}), <b>not</b> a stateless positional lookup like {@code List.get}/{@code Map.get}. Position the cursor with {@link #moveToRow(int)} first; prefer the stateless {@link #get(int, int)} when the row index is known.
      * <br />
      * There is NO underlying auto-conversion from column value to target type: {@code T}.
      * So the column values must be the type which is assignable to target type.
@@ -792,6 +809,8 @@ public sealed interface Dataset permits RowDataset {
     /**
      * Retrieves the boolean value at the specified column index in the Dataset for the current row.
      * <br />
+     * <b>Note:</b> cursor-relative accessor — reads from the <i>current row</i> (see {@link #currentRowIndex()}), <b>not</b> a stateless positional lookup like {@code List.get}/{@code Map.get}. Position the cursor with {@link #moveToRow(int)} first; prefer the stateless {@link #get(int, int)} when the row index is known.
+     * <br />
      * There is NO underlying auto-conversion from column value to target type: {@code Boolean}.
      * So the column values must be the type which is assignable to {@code Boolean}.
      * <br />
@@ -811,6 +830,8 @@ public sealed interface Dataset permits RowDataset {
 
     /**
      * Retrieves the boolean value at the specified column in the Dataset for the current row.
+     * <br />
+     * <b>Note:</b> cursor-relative accessor — reads from the <i>current row</i> (see {@link #currentRowIndex()}), <b>not</b> a stateless positional lookup like {@code List.get}/{@code Map.get}. Position the cursor with {@link #moveToRow(int)} first; prefer the stateless {@link #get(int, int)} when the row index is known.
      * <br />
      * There is NO underlying auto-conversion from column value to target type: {@code Boolean}.
      * So the column values must be the type which is assignable to {@code Boolean}.
@@ -835,6 +856,8 @@ public sealed interface Dataset permits RowDataset {
     /**
      * Retrieves the char value at the specified column index in the Dataset for the current row.
      * <br />
+     * <b>Note:</b> cursor-relative accessor — reads from the <i>current row</i> (see {@link #currentRowIndex()}), <b>not</b> a stateless positional lookup like {@code List.get}/{@code Map.get}. Position the cursor with {@link #moveToRow(int)} first; prefer the stateless {@link #get(int, int)} when the row index is known.
+     * <br />
      * There is NO underlying auto-conversion from column value to target type: {@code Character}.
      * So the column values must be the type which is assignable to {@code Character}.
      * <br />
@@ -854,6 +877,8 @@ public sealed interface Dataset permits RowDataset {
 
     /**
      * Retrieves the char value at the specified column in the Dataset for the current row.
+     * <br />
+     * <b>Note:</b> cursor-relative accessor — reads from the <i>current row</i> (see {@link #currentRowIndex()}), <b>not</b> a stateless positional lookup like {@code List.get}/{@code Map.get}. Position the cursor with {@link #moveToRow(int)} first; prefer the stateless {@link #get(int, int)} when the row index is known.
      * <br />
      * There is NO underlying auto-conversion from column value to target type: {@code Character}.
      * So the column values must be the type which is assignable to {@code Character}.
@@ -878,6 +903,8 @@ public sealed interface Dataset permits RowDataset {
     /**
      * Retrieves the byte value at the specified column index in the Dataset for the current row.
      * <br />
+     * <b>Note:</b> cursor-relative accessor — reads from the <i>current row</i> (see {@link #currentRowIndex()}), <b>not</b> a stateless positional lookup like {@code List.get}/{@code Map.get}. Position the cursor with {@link #moveToRow(int)} first; prefer the stateless {@link #get(int, int)} when the row index is known.
+     * <br />
      * There is NO underlying auto-conversion from column value to target type: {@code Byte}.
      * So the column values must be the type which is assignable to {@code Number}.
      * <br />
@@ -897,6 +924,8 @@ public sealed interface Dataset permits RowDataset {
 
     /**
      * Retrieves the byte value at the specified column in the Dataset for the current row.
+     * <br />
+     * <b>Note:</b> cursor-relative accessor — reads from the <i>current row</i> (see {@link #currentRowIndex()}), <b>not</b> a stateless positional lookup like {@code List.get}/{@code Map.get}. Position the cursor with {@link #moveToRow(int)} first; prefer the stateless {@link #get(int, int)} when the row index is known.
      * <br />
      * There is NO underlying auto-conversion from column value to target type: {@code Byte}.
      * So the column values must be the type which is assignable to {@code Number}.
@@ -921,6 +950,8 @@ public sealed interface Dataset permits RowDataset {
     /**
      * Retrieves the short value at the specified column index in the Dataset for the current row.
      * <br />
+     * <b>Note:</b> cursor-relative accessor — reads from the <i>current row</i> (see {@link #currentRowIndex()}), <b>not</b> a stateless positional lookup like {@code List.get}/{@code Map.get}. Position the cursor with {@link #moveToRow(int)} first; prefer the stateless {@link #get(int, int)} when the row index is known.
+     * <br />
      * There is NO underlying auto-conversion from column value to target type: {@code Short}.
      * So the column values must be the type which is assignable to {@code Number}.
      * <br />
@@ -940,6 +971,8 @@ public sealed interface Dataset permits RowDataset {
 
     /**
      * Retrieves the short value at the specified column in the Dataset for the current row.
+     * <br />
+     * <b>Note:</b> cursor-relative accessor — reads from the <i>current row</i> (see {@link #currentRowIndex()}), <b>not</b> a stateless positional lookup like {@code List.get}/{@code Map.get}. Position the cursor with {@link #moveToRow(int)} first; prefer the stateless {@link #get(int, int)} when the row index is known.
      * <br />
      * There is NO underlying auto-conversion from column value to target type: {@code Short}.
      * So the column values must be the type which is assignable to {@code Number}.
@@ -964,6 +997,8 @@ public sealed interface Dataset permits RowDataset {
     /**
      * Retrieves the integer value at the specified column index in the Dataset for the current row.
      * <br />
+     * <b>Note:</b> cursor-relative accessor — reads from the <i>current row</i> (see {@link #currentRowIndex()}), <b>not</b> a stateless positional lookup like {@code List.get}/{@code Map.get}. Position the cursor with {@link #moveToRow(int)} first; prefer the stateless {@link #get(int, int)} when the row index is known.
+     * <br />
      * There is NO underlying auto-conversion from column value to target type: {@code Integer}.
      * So the column values must be the type which is assignable to {@code Number}.
      * <br />
@@ -983,6 +1018,8 @@ public sealed interface Dataset permits RowDataset {
 
     /**
      * Retrieves the integer value at the specified column in the Dataset for the current row.
+     * <br />
+     * <b>Note:</b> cursor-relative accessor — reads from the <i>current row</i> (see {@link #currentRowIndex()}), <b>not</b> a stateless positional lookup like {@code List.get}/{@code Map.get}. Position the cursor with {@link #moveToRow(int)} first; prefer the stateless {@link #get(int, int)} when the row index is known.
      * <br />
      * There is NO underlying auto-conversion from column value to target type: {@code Integer}.
      * So the column values must be the type which is assignable to {@code Number}.
@@ -1007,6 +1044,8 @@ public sealed interface Dataset permits RowDataset {
     /**
      * Retrieves the long value at the specified column index in the Dataset for the current row.
      * <br />
+     * <b>Note:</b> cursor-relative accessor — reads from the <i>current row</i> (see {@link #currentRowIndex()}), <b>not</b> a stateless positional lookup like {@code List.get}/{@code Map.get}. Position the cursor with {@link #moveToRow(int)} first; prefer the stateless {@link #get(int, int)} when the row index is known.
+     * <br />
      * There is NO underlying auto-conversion from column value to target type: {@code Long}.
      * So the column values must be the type which is assignable to {@code Number}.
      * <br />
@@ -1026,6 +1065,8 @@ public sealed interface Dataset permits RowDataset {
 
     /**
      * Retrieves the long value at the specified column in the Dataset for the current row.
+     * <br />
+     * <b>Note:</b> cursor-relative accessor — reads from the <i>current row</i> (see {@link #currentRowIndex()}), <b>not</b> a stateless positional lookup like {@code List.get}/{@code Map.get}. Position the cursor with {@link #moveToRow(int)} first; prefer the stateless {@link #get(int, int)} when the row index is known.
      * <br />
      * There is NO underlying auto-conversion from column value to target type: {@code Long}.
      * So the column values must be the type which is assignable to {@code Number}.
@@ -1050,6 +1091,8 @@ public sealed interface Dataset permits RowDataset {
     /**
      * Retrieves the float value at the specified column index in the Dataset for the current row.
      * <br />
+     * <b>Note:</b> cursor-relative accessor — reads from the <i>current row</i> (see {@link #currentRowIndex()}), <b>not</b> a stateless positional lookup like {@code List.get}/{@code Map.get}. Position the cursor with {@link #moveToRow(int)} first; prefer the stateless {@link #get(int, int)} when the row index is known.
+     * <br />
      * There is NO underlying auto-conversion from column value to target type: {@code Float}.
      * So the column values must be the type which is assignable to {@code Number}.
      * <br />
@@ -1069,6 +1112,8 @@ public sealed interface Dataset permits RowDataset {
 
     /**
      * Retrieves the float value at the specified column in the Dataset for the current row.
+     * <br />
+     * <b>Note:</b> cursor-relative accessor — reads from the <i>current row</i> (see {@link #currentRowIndex()}), <b>not</b> a stateless positional lookup like {@code List.get}/{@code Map.get}. Position the cursor with {@link #moveToRow(int)} first; prefer the stateless {@link #get(int, int)} when the row index is known.
      * <br />
      * There is NO underlying auto-conversion from column value to target type: {@code Float}.
      * So the column values must be the type which is assignable to {@code Number}.
@@ -1093,6 +1138,8 @@ public sealed interface Dataset permits RowDataset {
     /**
      * Retrieves the double value at the specified column index in the Dataset for the current row.
      * <br />
+     * <b>Note:</b> cursor-relative accessor — reads from the <i>current row</i> (see {@link #currentRowIndex()}), <b>not</b> a stateless positional lookup like {@code List.get}/{@code Map.get}. Position the cursor with {@link #moveToRow(int)} first; prefer the stateless {@link #get(int, int)} when the row index is known.
+     * <br />
      * There is NO underlying auto-conversion from column value to target type: {@code Double}.
      * So the column values must be the type which is assignable to {@code Number}.
      * <br />
@@ -1112,6 +1159,8 @@ public sealed interface Dataset permits RowDataset {
 
     /**
      * Retrieves the double value at the specified column in the Dataset for the current row.
+     * <br />
+     * <b>Note:</b> cursor-relative accessor — reads from the <i>current row</i> (see {@link #currentRowIndex()}), <b>not</b> a stateless positional lookup like {@code List.get}/{@code Map.get}. Position the cursor with {@link #moveToRow(int)} first; prefer the stateless {@link #get(int, int)} when the row index is known.
      * <br />
      * There is NO underlying auto-conversion from column value to target type: {@code Double}.
      * So the column values must be the type which is assignable to {@code Number}.
@@ -1136,6 +1185,8 @@ public sealed interface Dataset permits RowDataset {
     /**
      * Checks if the value at the specified column index in the Dataset for the current row is {@code null}.
      * <br />
+     * <b>Note:</b> cursor-relative accessor — reads from the <i>current row</i> (see {@link #currentRowIndex()}), <b>not</b> a stateless positional lookup like {@code List.get}/{@code Map.get}. Position the cursor with {@link #moveToRow(int)} first; prefer the stateless {@link #get(int, int)} when the row index is known.
+     * <br />
      * This method can be used to validate the data before performing operations that do not support {@code null} values.
      *
      * <p><b>Usage Examples:</b></p>
@@ -1152,6 +1203,8 @@ public sealed interface Dataset permits RowDataset {
 
     /**
      * Checks if the value at the specified column in the Dataset for the current row is {@code null}.
+     * <br />
+     * <b>Note:</b> cursor-relative accessor — reads from the <i>current row</i> (see {@link #currentRowIndex()}), <b>not</b> a stateless positional lookup like {@code List.get}/{@code Map.get}. Position the cursor with {@link #moveToRow(int)} first; prefer the stateless {@link #get(int, int)} when the row index is known.
      * <br />
      * This method can be used to validate the data before performing operations that do not support {@code null} values.
      * <br />
@@ -1172,6 +1225,12 @@ public sealed interface Dataset permits RowDataset {
 
     /**
      * Sets the value at the specified column index in the Dataset for the current row.
+     * <br />
+     * <b>Note:</b> cursor-relative accessor — writes to the <i>current row</i> (see {@link #currentRowIndex()}), <b>not</b> a stateless positional write like {@code List.set}. Position the cursor with {@link #moveToRow(int)} first; prefer the stateless {@link #set(int, int, Object)} when the row index is known.
+     * <br />
+     * <b>Note:</b> this is a <i>cursor-relative</i> mutator that writes to the <i>current row</i>
+     * (see {@link #currentRowIndex()}), <b>not</b> a stateless positional {@code set} like {@code List.set}.
+     * Position the cursor with {@link #moveToRow(int)} first; prefer the stateless {@link #set(int, int, Object)} when the row index is known.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1183,11 +1242,16 @@ public sealed interface Dataset permits RowDataset {
      * @param value the new value to be set at the specified column index.
      * @throws IllegalStateException if the Dataset is frozen (read-only).
      * @throws IndexOutOfBoundsException if the specified column index is out of bounds.
+     * @see #set(int, int, Object)
+     * @see #moveToRow(int)
+     * @see #currentRowIndex()
      */
     void set(int columnIndex, Object value) throws IllegalStateException, IndexOutOfBoundsException;
 
     /**
      * Sets the value at the specified column in the Dataset for the current row.
+     * <br />
+     * <b>Note:</b> cursor-relative accessor — writes to the <i>current row</i> (see {@link #currentRowIndex()}), <b>not</b> a stateless positional write like {@code List.set}. Position the cursor with {@link #moveToRow(int)} first; prefer the stateless {@link #set(int, int, Object)} when the row index is known.
      * <br />
      * Using {@code set(int, Object)} for better performance.
      *
@@ -5531,7 +5595,7 @@ public sealed interface Dataset permits RowDataset {
      * @return a CSV string representing the specified range of rows and columns in the Dataset.
      * @throws IndexOutOfBoundsException if the specified {@code fromRowIndex} or {@code toRowIndex} is out of the range of the Dataset
      * @throws IllegalArgumentException if any of the specified column names does not exist in the Dataset.
-     * @see #toCsv(int, int, Collection)
+     * @see #toCsv()
      * @see CsvUtil#setEscapeCharToBackSlashForWrite()
      * @see CsvUtil#resetEscapeCharForWrite()
      * @see CsvUtil#writeField(BufferedCsvWriter, com.landawn.abacus.type.Type, Object)
@@ -5598,7 +5662,7 @@ public sealed interface Dataset permits RowDataset {
      * @throws IndexOutOfBoundsException if the specified {@code fromRowIndex} or {@code toRowIndex} is out of the range of the Dataset
      * @throws IllegalArgumentException if any of the specified column names does not exist in the Dataset.
      * @throws UncheckedIOException if an I/O error occurs.
-     * @see #toCsv(int, int, Collection, File)
+     * @see #toCsv(File)
      * @see CsvUtil#setEscapeCharToBackSlashForWrite()
      * @see CsvUtil#resetEscapeCharForWrite()
      * @see CsvUtil#writeField(BufferedCsvWriter, com.landawn.abacus.type.Type, Object)
@@ -5666,7 +5730,7 @@ public sealed interface Dataset permits RowDataset {
      * @throws IndexOutOfBoundsException if the specified {@code fromRowIndex} or {@code toRowIndex} is out of the range of the Dataset
      * @throws IllegalArgumentException if any of the specified column names does not exist in the Dataset.
      * @throws UncheckedIOException if an I/O error occurs.
-     * @see #toCsv(int, int, Collection, OutputStream)
+     * @see #toCsv(OutputStream)
      * @see CsvUtil#setEscapeCharToBackSlashForWrite()
      * @see CsvUtil#resetEscapeCharForWrite()
      * @see CsvUtil#writeField(BufferedCsvWriter, com.landawn.abacus.type.Type, Object)
@@ -5734,7 +5798,7 @@ public sealed interface Dataset permits RowDataset {
      * @throws IndexOutOfBoundsException if the specified {@code fromRowIndex} or {@code toRowIndex} is out of the range of the Dataset
      * @throws IllegalArgumentException if any of the specified column names does not exist in the Dataset.
      * @throws UncheckedIOException if an I/O error occurs.
-     * @see #toCsv(int, int, Collection, Writer)
+     * @see #toCsv(Writer)
      * @see CsvUtil#setEscapeCharToBackSlashForWrite()
      * @see CsvUtil#resetEscapeCharForWrite()
      * @see CsvUtil#writeField(BufferedCsvWriter, com.landawn.abacus.type.Type, Object)
@@ -11655,8 +11719,21 @@ public sealed interface Dataset permits RowDataset {
      * }</pre>
      *
      * @return the number of rows in the Dataset.
+     * @see #rowCount()
      */
     int size();
+
+    /**
+     * Returns the number of rows in the Dataset.
+     *
+     * <p>This is an alias for {@link #size()}.</p>
+     *
+     * @return the number of rows in the Dataset
+     * @see #size()
+     */
+    default int rowCount() {
+        return size();
+    }
 
     /**
      * Retrieves the properties of the Dataset as a Map.

@@ -66,6 +66,33 @@ public class FractionTest extends TestBase {
     }
 
     @Test
+    public void testPredicates() {
+        Fraction unreducedZero = Fraction.of(0, 5);
+        assertTrue(unreducedZero.isZero());
+        assertFalse(unreducedZero.isPositive());
+        assertFalse(unreducedZero.isNegative());
+        assertTrue(unreducedZero.isInteger());
+
+        Fraction positive = Fraction.of(3, 4);
+        assertFalse(positive.isZero());
+        assertTrue(positive.isPositive());
+        assertFalse(positive.isNegative());
+        assertFalse(positive.isInteger());
+
+        Fraction negative = Fraction.of(-3, 4);
+        assertFalse(negative.isZero());
+        assertFalse(negative.isPositive());
+        assertTrue(negative.isNegative());
+        assertFalse(negative.isInteger());
+
+        Fraction unreducedInteger = Fraction.of(6, 3);
+        assertFalse(unreducedInteger.isZero());
+        assertTrue(unreducedInteger.isPositive());
+        assertFalse(unreducedInteger.isNegative());
+        assertTrue(unreducedInteger.isInteger());
+    }
+
+    @Test
     public void test_of_threeArgs_withoutReduce() {
         Fraction f = Fraction.of(2, 4, false);
         assertEquals(2, f.numerator());

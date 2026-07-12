@@ -68,7 +68,7 @@ public abstract class Observer<T> implements Immutable {
     /**
      * Multiplier applied to the configured interval duration when deciding whether to schedule
      * a new debounce/throttle task. A new task is scheduled only if no task has been scheduled
-     * within the last {@code interval * INTERVAL_FACTOR} milliseconds, preventing runaway
+     * within the last {@code interval * INTERVAL_FACTOR}, preventing runaway
      * task accumulation under high event rates.
      */
     protected static final double INTERVAL_FACTOR = 3;
@@ -446,7 +446,7 @@ public abstract class Observer<T> implements Immutable {
             return this;
         }
 
-        final long intervalDurationInMillis = unit.toMillis(intervalDuration);
+        final long intervalDurationInNanos = unit.toNanos(intervalDuration);
 
         dispatcher.append(new Dispatcher<>() {
             // volatile: written under synchronized(holder) in onNext but read off-lock in the scheduler
@@ -458,9 +458,9 @@ public abstract class Observer<T> implements Immutable {
             @Override
             public void onNext(final Object param) {
                 synchronized (holder) {
-                    final long now = System.currentTimeMillis();
+                    final long now = System.nanoTime();
 
-                    if (holder.value() == NONE || now - lastScheduledTime > intervalDurationInMillis * INTERVAL_FACTOR) {
+                    if (holder.value() == NONE || now - lastScheduledTime > intervalDurationInNanos * INTERVAL_FACTOR) {
                         holder.setValue(param);
                         prevTimestamp = now;
 
@@ -475,9 +475,9 @@ public abstract class Observer<T> implements Immutable {
             private void schedule(final long delay, final TimeUnit unit) {
                 try {
                     schedulerForIntermediateOp.schedule(() -> {
-                        final long pastIntervalInMills = System.currentTimeMillis() - prevTimestamp;
+                        final long pastIntervalInNanos = System.nanoTime() - prevTimestamp;
 
-                        if (pastIntervalInMills >= intervalDurationInMillis) {
+                        if (pastIntervalInNanos >= intervalDurationInNanos) {
                             Object lastParam = null;
 
                             synchronized (holder) {
@@ -489,11 +489,11 @@ public abstract class Observer<T> implements Immutable {
                                 downDispatcher.onNext(lastParam);
                             }
                         } else {
-                            schedule(intervalDurationInMillis - pastIntervalInMills, TimeUnit.MILLISECONDS);
+                            schedule(intervalDurationInNanos - pastIntervalInNanos, TimeUnit.NANOSECONDS);
                         }
                     }, delay, unit);
 
-                    lastScheduledTime = System.currentTimeMillis();
+                    lastScheduledTime = System.nanoTime();
                 } catch (final Exception e) {
                     holder.setValue(NONE);
 
@@ -556,7 +556,7 @@ public abstract class Observer<T> implements Immutable {
             return this;
         }
 
-        final long intervalDurationInMillis = unit.toMillis(intervalDuration);
+        final long intervalDurationInNanos = unit.toNanos(intervalDuration);
 
         dispatcher.append(new Dispatcher<>() {
             private long lastScheduledTime = 0;
@@ -564,9 +564,9 @@ public abstract class Observer<T> implements Immutable {
             @Override
             public void onNext(final Object param) {
                 synchronized (holder) {
-                    final long now = System.currentTimeMillis();
+                    final long now = System.nanoTime();
 
-                    if (holder.value() == NONE || now - lastScheduledTime > intervalDurationInMillis * INTERVAL_FACTOR) {
+                    if (holder.value() == NONE || now - lastScheduledTime > intervalDurationInNanos * INTERVAL_FACTOR) {
                         holder.setValue(param);
 
                         try {
@@ -648,7 +648,7 @@ public abstract class Observer<T> implements Immutable {
             return this;
         }
 
-        final long intervalDurationInMillis = unit.toMillis(intervalDuration);
+        final long intervalDurationInNanos = unit.toNanos(intervalDuration);
 
         dispatcher.append(new Dispatcher<>() {
             private long lastScheduledTime = 0;
@@ -656,9 +656,9 @@ public abstract class Observer<T> implements Immutable {
             @Override
             public void onNext(final Object param) {
                 synchronized (holder) {
-                    final long now = System.currentTimeMillis();
+                    final long now = System.nanoTime();
 
-                    if (holder.value() == NONE || now - lastScheduledTime > intervalDurationInMillis * INTERVAL_FACTOR) {
+                    if (holder.value() == NONE || now - lastScheduledTime > intervalDurationInNanos * INTERVAL_FACTOR) {
                         holder.setValue(param);
 
                         try {
@@ -744,13 +744,14 @@ public abstract class Observer<T> implements Immutable {
         }
 
         dispatcher.append(new Dispatcher<>() {
-            private final long startTime = System.currentTimeMillis();
+            private final long startTimeInNanos = System.nanoTime();
             private volatile boolean isDelayed = false;
 
             @Override
             public void onNext(final Object param) {
                 if (!isDelayed) {
-                    N.sleepUninterruptibly(Math.max(0, unit.toMillis(delay) - (System.currentTimeMillis() - startTime)));
+                    final long elapsedTimeInMillis = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - startTimeInNanos);
+                    N.sleepUninterruptibly(Math.max(0, unit.toMillis(delay) - elapsedTimeInMillis));
                     isDelayed = true;
                 }
 
@@ -784,14 +785,14 @@ public abstract class Observer<T> implements Immutable {
      */
     public Observer<Timed<T>> timeInterval() {
         dispatcher.append(new Dispatcher<>() {
-            private long startTime = System.currentTimeMillis();
+            private long startTimeInNanos = System.nanoTime();
 
             @Override
             public synchronized void onNext(final Object param) {
                 if (downDispatcher != null) {
-                    final long now = System.currentTimeMillis();
-                    final long intervalInMillis = now - startTime;
-                    startTime = now;
+                    final long now = System.nanoTime();
+                    final long intervalInMillis = TimeUnit.NANOSECONDS.toMillis(now - startTimeInNanos);
+                    startTimeInNanos = now;
 
                     downDispatcher.onNext(Timed.of(param, intervalInMillis));
                 }
@@ -1451,7 +1452,8 @@ public abstract class Observer<T> implements Immutable {
     /**
      * Observer implementation that emits items from a BlockingQueue.
      * Items are pulled from the queue asynchronously until a completion flag is encountered
-     * or the queue is empty.
+     * or emission is stopped by a downstream operator such as {@link #limit(long)}; an empty
+     * queue does not stop emission.
      *
      * @param <T> the type of items in the queue
      */

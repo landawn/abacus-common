@@ -104,7 +104,7 @@ import com.landawn.abacus.logging.LoggerFactory;
  * <p><b>Profiler Configuration and Control:</b>
  * <ul>
  *   <li><b>Thread Pool Management:</b> Custom ExecutorService support for specialized threading models</li>
- *   <li><b>Suspension Control:</b> {@code suspend(boolean)} for debugging and conditional execution</li>
+ *   <li><b>Suspension Control:</b> {@code suspend()}/{@code resume()} for debugging and conditional execution</li>
  *   <li><b>Output Customization:</b> Multiple output formats and custom result processors</li>
  *   <li><b>Memory Optimization:</b> Configurable result collection strategies for large-scale testing</li>
  *   <li><b>Error Handling:</b> Comprehensive exception handling with detailed error reporting</li>
@@ -819,14 +819,14 @@ public final class Profiler {
     private static volatile boolean suspended = false;
 
     /**
-     * Controls the suspension state of the profiler, enabling or disabling full-scale performance testing.
+     * Suspends the profiler, enabling minimal-mode execution and disabling full-scale performance testing.
      * When suspended, all profiler operations run in minimal mode (single thread, single loop, single round)
      * regardless of the parameters specified in test method calls. This feature is invaluable during
      * development and debugging when you want to verify test logic without incurring the time and resource
-     * overhead of comprehensive performance testing.
+     * overhead of comprehensive performance testing. Call {@link #resume()} to restore normal operation.
      *
      * <p><b>Suspension Behavior:</b>
-     * When the profiler is suspended ({@code suspend(true)}):
+     * When the profiler is suspended:
      * <ul>
      *   <li>All tests execute with exactly 1 thread, 1 loop, and 1 round</li>
      *   <li>Thread delays and loop delays are completely bypassed</li>
@@ -848,55 +848,61 @@ public final class Profiler {
      * <ul>
      *   <li>Suspension is a global state affecting all profiler operations across all threads</li>
      *   <li>Statistics from suspended runs are NOT representative of actual performance</li>
-     *   <li>Always resume the profiler before running actual performance tests</li>
+     *   <li>Always {@link #resume()} the profiler before running actual performance tests</li>
      *   <li>Suspension state is not persisted; it resets when the JVM restarts</li>
      *   <li>This is a volatile variable, so changes are immediately visible across threads</li>
      * </ul>
      *
      * <p><b>Best Practices:</b>
      * <ul>
-     *   <li>Use try-finally blocks to ensure profiler is resumed after debugging sessions</li>
-     *   <li>Never leave profiler suspended in production environments</li>
+     *   <li>Use try-finally blocks to ensure the profiler is resumed after debugging sessions</li>
+     *   <li>Never leave the profiler suspended in production environments</li>
      *   <li>Document suspension state changes in test code comments</li>
-     *   <li>Consider using environment variables or system properties to control suspension</li>
      * </ul>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Basic suspension for debugging
-     * Profiler.suspend(true);
+     * Profiler.suspend();
      * try {
      *     // This runs with just 1 thread, 1 loop regardless of parameters
      *     Profiler.run(100, 1000, 10, () -> {
      *         complexMethod();
      *     });
      * } finally {
-     *     Profiler.suspend(false); // Always resume
+     *     Profiler.resume(); // Always resume
      * }
      *
      * // Conditional suspension based on environment
      * boolean isDebugMode = System.getProperty("debug.mode", "false").equals("true");
-     * Profiler.suspend(isDebugMode);
+     * if (isDebugMode) {
+     *     Profiler.suspend();
+     * }
      *
      * // Quick smoke test of multiple profiler calls
-     * Profiler.suspend(true);
+     * Profiler.suspend();
      * testSuite.runAllProfilerTests(); // Fast execution
-     * Profiler.suspend(false);
-     *
-     * // Integration test scenario
-     * if (!"production".equals(environment)) {
-     *     Profiler.suspend(true);
-     * }
-     * performanceTestSuite.run();
+     * Profiler.resume();
      * }</pre>
      *
-     * @param yesOrNo {@code true} to suspend the profiler (minimal execution mode), {@code false} to resume
-     *                normal profiler operation with full performance testing capabilities.
-     *                The suspension state affects all subsequent profiler operations until changed again
+     * @see #resume()
      * @see #isSuspended()
      */
-    public static void suspend(final boolean yesOrNo) {
-        suspended = yesOrNo;
+    public static void suspend() {
+        suspended = true;
+    }
+
+    /**
+     * Resumes the profiler, restoring normal operation with full performance testing capabilities.
+     *
+     * <p>This reverses a previous {@link #suspend()} call so that subsequent profiler runs honor the
+     * thread/loop/round parameters passed to the test method calls.</p>
+     *
+     * @see #suspend()
+     * @see #isSuspended()
+     */
+    public static void resume() {
+        suspended = false;
     }
 
     /**
@@ -916,7 +922,8 @@ public final class Profiler {
      * }</pre>
      *
      * @return {@code true} if the profiler is suspended, {@code false} if it is running normally
-     * @see #suspend(boolean)
+     * @see #suspend()
+     * @see #resume()
      */
     public static boolean isSuspended() {
         return suspended;
@@ -1103,12 +1110,12 @@ public final class Profiler {
         double getTotalElapsedTimeInMillis();
 
         /**
-         * Gets the number of times the specified method was executed.
+         * Gets the number of times the specified method was invoked.
          *
          * @param methodName the name of the method
-         * @return the execution count
+         * @return the invocation count
          */
-        int getMethodSize(String methodName);
+        int getMethodInvocationCount(String methodName);
 
         /**
          * Gets all statistics for executions of the specified method.
@@ -1533,7 +1540,7 @@ public final class Profiler {
          *
          * @param methodStatistics the method statistics to add
          */
-        public void addMethodStatisticsList(final MethodStatistics methodStatistics) {
+        public void addMethodStatistics(final MethodStatistics methodStatistics) {
             getMethodStatisticsList().add(methodStatistics);
         }
 
@@ -1655,7 +1662,7 @@ public final class Profiler {
         }
 
         @Override
-        public int getMethodSize(final String methodName) {
+        public int getMethodInvocationCount(final String methodName) {
             int methodSize = 0;
             if (methodStatisticsList != null) {
                 for (final MethodStatistics methodStatistics : methodStatisticsList) {
@@ -1669,7 +1676,7 @@ public final class Profiler {
 
         @Override
         public List<MethodStatistics> getMethodStatisticsList(final String methodName) {
-            final List<MethodStatistics> result = new ArrayList<>(getMethodSize(methodName));
+            final List<MethodStatistics> result = new ArrayList<>(getMethodInvocationCount(methodName));
             if (methodStatisticsList != null) {
                 for (final MethodStatistics methodStatistics : methodStatisticsList) {
                     if (methodStatistics.getMethodName().equals(methodName)) {
@@ -1852,21 +1859,18 @@ public final class Profiler {
         /**
          * Adds the given loop statistics to this object's list of loop statistics.
          *
-         * <p><b>Note:</b> Despite the method name, this method adds a {@link LoopStatistics} entry
-         * (not a method statistics list) to the internal {@code loopStatisticsList}.</p>
-         *
          * <p><b>Usage Example:</b></p>
          * <pre>{@code
          * MultiLoopsStatistics stats = Profiler.run(1, 100, 1, "test", () -> doWork());
          * MultiLoopsStatistics merged = new MultiLoopsStatistics(startMillis, endMillis, startNano, endNano, 4, new ArrayList<>());
          * for (LoopStatistics loopStat : stats.getLoopStatisticsList()) {
-         *     merged.addMethodStatisticsList(loopStat);
+         *     merged.addLoopStatistics(loopStat);
          * }
          * }</pre>
          *
          * @param loopStatistics the loop statistics to add; must not be {@code null}
          */
-        public void addMethodStatisticsList(final LoopStatistics loopStatistics) {
+        public void addLoopStatistics(final LoopStatistics loopStatistics) {
             getLoopStatisticsList().add(loopStatistics);
         }
 
@@ -2000,7 +2004,7 @@ public final class Profiler {
             if (loopStatisticsList != null) {
                 for (final LoopStatistics loopStatistics : loopStatisticsList) {
                     final double loopMethodTotalTime = loopStatistics.getMethodTotalElapsedTimeInMillis(methodName);
-                    final int loopMethodSize = loopStatistics.getMethodSize(methodName);
+                    final int loopMethodSize = loopStatistics.getMethodInvocationCount(methodName);
                     totalTime += loopMethodTotalTime;
                     methodNum += loopMethodSize;
                 }
@@ -2020,11 +2024,11 @@ public final class Profiler {
         }
 
         @Override
-        public int getMethodSize(final String methodName) {
+        public int getMethodInvocationCount(final String methodName) {
             int result = 0;
             if (loopStatisticsList != null) {
                 for (final LoopStatistics loopStatistics : loopStatisticsList) {
-                    result += loopStatistics.getMethodSize(methodName);
+                    result += loopStatistics.getMethodInvocationCount(methodName);
                 }
             }
             return result;
@@ -2032,7 +2036,7 @@ public final class Profiler {
 
         @Override
         public List<MethodStatistics> getMethodStatisticsList(final String methodName) {
-            final List<MethodStatistics> methodStatisticsList = new ArrayList<>(getMethodSize(methodName));
+            final List<MethodStatistics> methodStatisticsList = new ArrayList<>(getMethodInvocationCount(methodName));
             if (loopStatisticsList != null) {
                 for (final LoopStatistics loopStatistics : loopStatisticsList) {
                     methodStatisticsList.addAll(loopStatistics.getMethodStatisticsList(methodName));
@@ -2713,8 +2717,7 @@ public final class Profiler {
          * stats.writeXmlResult(xmlWriter);
          * String xmlContent = xmlWriter.toString();
          *
-         * DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
-         * Document doc = builder.parse(new InputSource(new StringReader(xmlContent)));
+         * Document doc = XmlUtil.createDOMParser().parse(new InputSource(new StringReader(xmlContent)));
          * NodeList methods = doc.getElementsByTagName("method");
          * // Process XML data...
          *

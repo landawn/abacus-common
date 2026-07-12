@@ -320,6 +320,11 @@ final class XmlParserImpl extends AbstractXmlParser {
 
         if (obj == null) {
             IOUtil.write(Strings.EMPTY, bw);
+
+            if (flush) {
+                bw.flush();
+            }
+
             return;
         }
 
@@ -1344,9 +1349,7 @@ final class XmlParserImpl extends AbstractXmlParser {
      * XmlParser parser = new XmlParserImpl(XmlParserType.DOM);
      *
      * // Parse XML to DOM
-     * Document doc = DocumentBuilderFactory.newInstance()
-     *     .newDocumentBuilder()
-     *     .parse(new File("user.xml"));
+     * Document doc = XmlUtil.createDOMParser().parse(new File("user.xml"));
      *
      * // Deserialize from root node
      * Type<User> userType = Type.of(User.class);
@@ -1379,9 +1382,7 @@ final class XmlParserImpl extends AbstractXmlParser {
      * <pre>{@code
      * XmlParser parser = new XmlParserImpl(XmlParserType.DOM);
      *
-     * Document doc = DocumentBuilderFactory.newInstance()
-     *     .newDocumentBuilder()
-     *     .parse(new File("user.xml"));
+     * Document doc = XmlUtil.createDOMParser().parse(new File("user.xml"));
      *
      * User user = parser.deserialize(doc.getDocumentElement(), null, User.class);
      * }</pre>
@@ -1521,9 +1522,7 @@ final class XmlParserImpl extends AbstractXmlParser {
      * nodeTypes.put("product", Type.of(Product.class));
      * nodeTypes.put("service", Type.of(Service.class));
      *
-     * Document doc = DocumentBuilderFactory.newInstance()
-     *     .newDocumentBuilder()
-     *     .parse(new File("items.xml"));
+     * Document doc = XmlUtil.createDOMParser().parse(new File("items.xml"));
      *
      * Object item = parser.deserialize(doc.getDocumentElement(), null, nodeTypes);
      * }</pre>
@@ -1551,7 +1550,7 @@ final class XmlParserImpl extends AbstractXmlParser {
         }
 
         if (targetType == null) {
-            throw new ParsingException("No target type is specified"); //NOSONAR
+            throw new ParsingException("No target type is specified for xml node: " + source.getNodeName()); //NOSONAR
         }
 
         return readByDOMParser(source, config, targetType);
@@ -1603,7 +1602,7 @@ final class XmlParserImpl extends AbstractXmlParser {
                     }
 
                     if (targetType == null) {
-                        throw new ParsingException("No target type is specified");
+                        throw new ParsingException("No target type is specified for xml node: " + xmlReader.getLocalName());
                     }
 
                     return readByStreamParser(xmlReader, configToUse, targetType);
@@ -1641,7 +1640,7 @@ final class XmlParserImpl extends AbstractXmlParser {
                     }
 
                     if (targetType == null) {
-                        throw new ParsingException("No target type is specified");
+                        throw new ParsingException("No target type is specified for xml node: " + node.getNodeName());
                     }
 
                     return readByDOMParser(node, configToUse, targetType);
@@ -1704,7 +1703,7 @@ final class XmlParserImpl extends AbstractXmlParser {
                     }
 
                     if (targetType == null) {
-                        throw new ParsingException("No target type is specified");
+                        throw new ParsingException("No target type is specified for xml node: " + xmlReader.getLocalName());
                     }
 
                     return readByStreamParser(xmlReader, configToUse, targetType);
@@ -1742,7 +1741,7 @@ final class XmlParserImpl extends AbstractXmlParser {
                     }
 
                     if (targetType == null) {
-                        throw new ParsingException("No target type is specified");
+                        throw new ParsingException("No target type is specified for xml node: " + node.getNodeName());
                     }
 
                     return readByDOMParser(node, configToUse, targetType);
@@ -2032,7 +2031,7 @@ final class XmlParserImpl extends AbstractXmlParser {
                     }
                 }
 
-                throw new ParsingException("Unknown parser error"); //NOSONAR
+                throw new ParsingException("Unknown parser error: unexpected end of XML stream"); //NOSONAR
             }
 
             case MAP: {
@@ -2223,7 +2222,7 @@ final class XmlParserImpl extends AbstractXmlParser {
                     }
                 }
 
-                throw new ParsingException("Unknown parser error");
+                throw new ParsingException("Unknown parser error: unexpected end of XML stream");
             }
 
             case MAP_ENTITY: {
@@ -2400,7 +2399,7 @@ final class XmlParserImpl extends AbstractXmlParser {
                     }
                 }
 
-                throw new ParsingException("Unknown parser error");
+                throw new ParsingException("Unknown parser error: unexpected end of XML stream");
             }
 
             case ARRAY: {
@@ -2495,7 +2494,7 @@ final class XmlParserImpl extends AbstractXmlParser {
                     Objectory.recycle(list);
                 }
 
-                throw new ParsingException("Unknown parser error");
+                throw new ParsingException("Unknown parser error: unexpected end of XML stream");
             }
 
             case COLLECTION: {
@@ -2586,7 +2585,7 @@ final class XmlParserImpl extends AbstractXmlParser {
                     }
                 }
 
-                throw new ParsingException("Unknown parser error");
+                throw new ParsingException("Unknown parser error: unexpected end of XML stream");
             }
 
             default:

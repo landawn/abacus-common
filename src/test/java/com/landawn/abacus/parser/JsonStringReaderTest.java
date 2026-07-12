@@ -903,4 +903,19 @@ public class JsonStringReaderTest extends TestBase {
         assertEquals("falsehood", reader.getText());
     }
 
+    @Test
+    public void testUnterminatedDoubleQuotedString_throws() {
+        // regression: missing closing quote previously returned EOF instead of a parse error.
+        final JsonReader reader = JsonStringReader.parse("\"abc", cbuf);
+        assertEquals(JsonReader.START_DOUBLE_QUOTE, reader.nextToken());
+        assertThrows(com.landawn.abacus.exception.ParsingException.class, reader::nextToken);
+    }
+
+    @Test
+    public void testUnterminatedSingleQuotedString_throws() {
+        final JsonReader reader = JsonStringReader.parse("'abc", cbuf);
+        assertEquals(JsonReader.START_SINGLE_QUOTE, reader.nextToken());
+        assertThrows(com.landawn.abacus.exception.ParsingException.class, reader::nextToken);
+    }
+
 }

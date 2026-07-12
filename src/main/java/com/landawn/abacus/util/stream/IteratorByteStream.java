@@ -921,6 +921,7 @@ class IteratorByteStream extends AbstractByteStream {
      *
      * @param closeStream {@code true} to close the stream after the array is collected
      * @return a new {@code byte[]} containing the elements of this stream
+     * @throws IllegalStateException if the stream is already closed
      */
     @Override
     protected byte[] toArray(final boolean closeStream) {
@@ -1803,6 +1804,7 @@ class IteratorByteStream extends AbstractByteStream {
      * @param asyncExecutor the executor to use for parallel tasks
      * @param cancelUncompletedThreads whether to cancel incomplete threads when the stream is closed
      * @return a parallel {@code ByteStream} wrapping the same iterator
+     * @throws IllegalStateException if the stream is already closed
      */
     @Override
     protected ByteStream parallel(final int maxThreadNum, final Splitor splitor, final AsyncExecutor asyncExecutor, final boolean cancelUncompletedThreads) {

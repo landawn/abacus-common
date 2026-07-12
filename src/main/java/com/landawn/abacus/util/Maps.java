@@ -3833,6 +3833,9 @@ public final class Maps {
      * This method iterates through all entries in the map and removes those that satisfy the filter condition.
      * The map is modified in place.
      *
+     * <p>For a non-mutating snapshot containing the matching entries, use
+     * {@link #filter(Map, Predicate)}.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Map<String, Integer> map = new HashMap<>();
@@ -3886,6 +3889,9 @@ public final class Maps {
      * Removes entries from the specified map that match the given filter predicate based on key and value.
      * This method iterates through all entries in the map and removes those whose key and value satisfy the filter condition.
      * The map is modified in place.
+     *
+     * <p>For a non-mutating snapshot containing the matching entries, use
+     * {@link #filter(Map, BiPredicate)}.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -3941,6 +3947,9 @@ public final class Maps {
      * This method iterates through all entries in the map and removes those whose keys satisfy the filter condition.
      * The map is modified in place.
      *
+     * <p>For a non-mutating snapshot containing entries with matching keys, use
+     * {@link #filterByKey(Map, Predicate)}.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Map<String, Integer> map = new HashMap<>();
@@ -3958,6 +3967,7 @@ public final class Maps {
      * @param filter the predicate used to determine which keys to remove.
      * @return {@code true} if one or more entries were removed, {@code false} otherwise.
      * @throws IllegalArgumentException if {@code filter} is {@code null}.
+     * @see #filterByKey(Map, Predicate)
      */
     public static <K> boolean removeIfKey(final Map<K, ?> map, final Predicate<? super K> filter) throws IllegalArgumentException {
         N.checkArgNotNull(filter, cs.filter); // NOSONAR
@@ -3994,6 +4004,9 @@ public final class Maps {
      * This method iterates through all entries in the map and removes those whose values satisfy the filter condition.
      * The map is modified in place.
      *
+     * <p>For a non-mutating snapshot containing entries with matching values, use
+     * {@link #filterByValue(Map, Predicate)}.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Map<String, Integer> map = new HashMap<>();
@@ -4012,6 +4025,7 @@ public final class Maps {
      * @param filter the predicate used to determine which values to remove.
      * @return {@code true} if one or more entries were removed, {@code false} otherwise.
      * @throws IllegalArgumentException if {@code filter} is {@code null}.
+     * @see #filterByValue(Map, Predicate)
      */
     public static <V> boolean removeIfValue(final Map<?, V> map, final Predicate<? super V> filter) throws IllegalArgumentException {
         N.checkArgNotNull(filter, cs.filter); // NOSONAR
@@ -4176,6 +4190,9 @@ public final class Maps {
      * The predicate is tested against each Map.Entry in the original map.
      * The returned map is of the same type as the input map if possible.
      *
+     * <p>This method leaves the input map unchanged. To remove matching entries from the supplied
+     * map in place, use {@link #removeIf(Map, Predicate)}.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Map<String, Integer> map = new HashMap<>();
@@ -4219,6 +4236,9 @@ public final class Maps {
      * This method creates a new map containing only the entries whose key and value satisfy the predicate condition.
      * The predicate receives both the key and value as separate parameters.
      * The returned map is of the same type as the input map if possible.
+     *
+     * <p>This method leaves the input map unchanged. To remove matching entries from the supplied
+     * map in place, use {@link #removeIf(Map, BiPredicate)}.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -4314,6 +4334,9 @@ public final class Maps {
      * This method creates a new map containing only the entries whose keys satisfy the predicate condition.
      * The returned map is of the same type as the input map if possible.
      *
+     * <p>This method leaves the input map unchanged. To remove entries with matching keys from the
+     * supplied map in place, use {@link #removeIfKey(Map, Predicate)}.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Map<String, Integer> map = new HashMap<>();
@@ -4331,6 +4354,7 @@ public final class Maps {
      * @param predicate the predicate used to filter the keys.
      * @return a new map containing only the entries with keys that match the predicate.
      * @throws IllegalArgumentException if {@code predicate} is {@code null}.
+     * @see #removeIfKey(Map, Predicate)
      * @see N#filter(Iterable, Predicate)
      * @see Iterators#filter(Iterator, Predicate)
      */
@@ -4357,6 +4381,9 @@ public final class Maps {
      * This method creates a new map containing only the entries whose values satisfy the predicate condition.
      * The returned map is of the same type as the input map if possible.
      *
+     * <p>This method leaves the input map unchanged. To remove entries with matching values from the
+     * supplied map in place, use {@link #removeIfValue(Map, Predicate)}.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Map<String, Integer> map = new HashMap<>();
@@ -4374,6 +4401,7 @@ public final class Maps {
      * @param predicate the predicate used to filter the values.
      * @return a new map containing only the entries with values that match the predicate.
      * @throws IllegalArgumentException if {@code predicate} is {@code null}.
+     * @see #removeIfValue(Map, Predicate)
      * @see N#filter(Iterable, Predicate)
      * @see Iterators#filter(Iterator, Predicate)
      */
@@ -4400,6 +4428,10 @@ public final class Maps {
      * The resulting map's keys are the input map's values and its values are the input map's keys.
      * Note: This method does not check for duplicate values in the input map. If there are duplicate values,
      * some information may be lost in the inversion process as each value in the resulting map must be unique.
+     *
+     * <p>The verb <i>invert</i> denotes a copy-producing transformation: the returned map is
+     * independent of the input map. In contrast, {@link BiMap#inverse()} returns a live view backed
+     * by the same mappings.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -4442,6 +4474,9 @@ public final class Maps {
      * Inverts the given map by swapping its keys with its values.
      * The resulting map's keys are the input map's values and its values are the input map's keys.
      * If there are duplicate values in the input map, the merging operation specified by mergeFunction is applied.
+     *
+     * <p>Like {@link #invert(Map)}, this is a copy-producing transformation; the returned map is
+     * independent of the input. It is not an {@link BiMap#inverse() inverse view}.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -4607,15 +4642,16 @@ public final class Maps {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Map<String, Object> map = new HashMap<>();
+     * Map<String, Object> map = new LinkedHashMap<>();
      * map.put("name", "John");
-     * Map<String, Object> address = new HashMap<>();
+     * Map<String, Object> address = new LinkedHashMap<>();
      * address.put("city", "New York");
      * address.put("zip", "10001");
      * map.put("address", address);
      *
      * Map<String, Object> flattened = Maps.flatten(map);
-     * // flattened = {name=John, address.city=New York, address.zip=10001}
+     * // flattened contains {name=John, address.city=New York, address.zip=10001}
+     * // (entry order may vary - the returned map is a HashMap)
      * }</pre>
      *
      * @param map the map to be flattened.
@@ -4633,9 +4669,9 @@ public final class Maps {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Map<String, Object> map = new HashMap<>();
+     * Map<String, Object> map = new LinkedHashMap<>();
      * map.put("name", "John");
-     * Map<String, Object> address = new HashMap<>();
+     * Map<String, Object> address = new LinkedHashMap<>();
      * address.put("city", "New York");
      * address.put("zip", "10001");
      * map.put("address", address);
@@ -4661,14 +4697,14 @@ public final class Maps {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Map<String, Object> map = new HashMap<>();
+     * Map<String, Object> map = new LinkedHashMap<>();
      * map.put("name", "John");
-     * Map<String, Object> address = new HashMap<>();
+     * Map<String, Object> address = new LinkedHashMap<>();
      * address.put("city", "New York");
      * address.put("zip", "10001");
      * map.put("address", address);
      * // Use underscore as delimiter instead of dot
-     * Map<String, Object> flattened = Maps.flatten(map, "_", HashMap::new);
+     * Map<String, Object> flattened = Maps.flatten(map, "_", LinkedHashMap::new);
      * // flattened = {name=John, address_city=New York, address_zip=10001}
      * }</pre>
      *
@@ -4717,13 +4753,14 @@ public final class Maps {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Map<String, Object> flattened = new HashMap<>();
+     * Map<String, Object> flattened = new LinkedHashMap<>();
      * flattened.put("name", "John");
      * flattened.put("address.city", "New York");
      * flattened.put("address.zip", "10001");
      *
      * Map<String, Object> unflattened = Maps.unflatten(flattened);
-     * // unflattened = {name=John, address={city=New York, zip=10001}}
+     * // unflattened contains {name=John, address={city=New York, zip=10001}}
+     * // (entry order may vary - the returned/nested maps are HashMaps)
      * }</pre>
      *
      * @param map the flattened map to be unflattened.
@@ -4740,7 +4777,7 @@ public final class Maps {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Map<String, Object> flattened = new HashMap<>();
+     * Map<String, Object> flattened = new LinkedHashMap<>();
      * flattened.put("name", "John");
      * flattened.put("address.city", "New York");
      * flattened.put("address.zip", "10001");
@@ -4765,12 +4802,12 @@ public final class Maps {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Map<String, Object> flattened = new HashMap<>();
+     * Map<String, Object> flattened = new LinkedHashMap<>();
      * flattened.put("name", "John");
      * flattened.put("address_city", "New York");
      * flattened.put("address_zip", "10001");
      * // Use underscore as delimiter
-     * Map<String, Object> unflattened = Maps.unflatten(flattened, "_", HashMap::new);
+     * Map<String, Object> unflattened = Maps.unflatten(flattened, "_", LinkedHashMap::new);
      * // unflattened = {name=John, address={city=New York, zip=10001}}
      * }</pre>
      *
@@ -4839,7 +4876,7 @@ public final class Maps {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Convert keys to uppercase
-     * Map<String, Integer> map = new HashMap<>();
+     * Map<String, Integer> map = new LinkedHashMap<>();
      * map.put("name", 1);
      * map.put("age", 2);
      * map.put("city", 3);
@@ -5041,7 +5078,7 @@ public final class Maps {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Convert snake_case keys to camelCase
-     * Map<String, Object> map = new HashMap<>();
+     * Map<String, Object> map = new LinkedHashMap<>();
      * map.put("user_name", "John");
      * map.put("first_name", "Jane");
      * map.put("email_address", "john@example.com");
@@ -5097,7 +5134,7 @@ public final class Maps {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Convert camelCase keys to snake_case
-     * Map<String, Object> map = new HashMap<>();
+     * Map<String, Object> map = new LinkedHashMap<>();
      * map.put("userName", "John");
      * map.put("firstName", "Jane");
      * map.put("emailAddress", "john@example.com");

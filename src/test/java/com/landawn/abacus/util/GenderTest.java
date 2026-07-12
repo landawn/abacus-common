@@ -18,11 +18,11 @@ public class GenderTest extends TestBase {
     }
 
     @Test
-    public void testValueOf_withValidIntValues() {
-        assertEquals(Gender.BLANK, Gender.valueOf(0));
-        assertEquals(Gender.FEMALE, Gender.valueOf(1));
-        assertEquals(Gender.MALE, Gender.valueOf(2));
-        assertEquals(Gender.X, Gender.valueOf(3));
+    public void testOf_withValidIntValues() {
+        assertEquals(Gender.BLANK, Gender.of(0));
+        assertEquals(Gender.FEMALE, Gender.of(1));
+        assertEquals(Gender.MALE, Gender.of(2));
+        assertEquals(Gender.X, Gender.of(3));
     }
 
     @Test
@@ -34,10 +34,10 @@ public class GenderTest extends TestBase {
     }
 
     @Test
-    public void testValueOf_withInvalidIntValue() {
-        assertThrows(IllegalArgumentException.class, () -> Gender.valueOf(-1));
-        assertThrows(IllegalArgumentException.class, () -> Gender.valueOf(4));
-        assertThrows(IllegalArgumentException.class, () -> Gender.valueOf(100));
+    public void testOf_withInvalidIntValue() {
+        assertThrows(IllegalArgumentException.class, () -> Gender.of(-1));
+        assertThrows(IllegalArgumentException.class, () -> Gender.of(4));
+        assertThrows(IllegalArgumentException.class, () -> Gender.of(100));
     }
 
     @Test

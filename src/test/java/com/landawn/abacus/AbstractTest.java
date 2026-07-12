@@ -48,7 +48,20 @@ public abstract class AbstractTest extends TestBase {
 
         if (suspendPerformanceTest) {
             N.println("Performane tests by Profiler have been suspended!!!");
-            Profiler.suspend(suspendPerformanceTest);
+            Profiler.suspend();
+        }
+    }
+
+    /**
+     * Restores a previously-captured profiler suspension state.
+     *
+     * @param suspended {@code true} to suspend, {@code false} to resume
+     */
+    protected static void setProfilerSuspended(final boolean suspended) {
+        if (suspended) {
+            Profiler.suspend();
+        } else {
+            Profiler.resume();
         }
     }
 

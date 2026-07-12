@@ -2263,6 +2263,77 @@ public class ParserUtilTest extends AbstractTest {
         }
     }
 
+    @JsonXmlConfig(dateFormat = "yyyy-MM-dd")
+    public static class ClassDateFormatBean {
+        private int count;
+        private Date createdOn;
+
+        public int getCount() {
+            return count;
+        }
+
+        public void setCount(final int count) {
+            this.count = count;
+        }
+
+        public Date getCreatedOn() {
+            return createdOn;
+        }
+
+        public void setCreatedOn(final Date createdOn) {
+            this.createdOn = createdOn;
+        }
+    }
+
+    @JsonXmlConfig(numberFormat = "0.00")
+    public static class ClassNumberFormatBean {
+        private String name;
+        private double price;
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(final String name) {
+            this.name = name;
+        }
+
+        public double getPrice() {
+            return price;
+        }
+
+        public void setPrice(final double price) {
+            this.price = price;
+        }
+    }
+
+    @Test
+    public void testClassLevelDateFormatAppliesOnlyToCompatibleProperties() {
+        final ClassDateFormatBean dateBean = new ClassDateFormatBean();
+        dateBean.setCount(7);
+        dateBean.setCreatedOn(new Date(0));
+
+        final String dateJson = Assertions.assertDoesNotThrow(() -> N.toJson(dateBean));
+        assertTrue(dateJson.contains("\"count\""));
+    }
+
+    @Test
+    public void testClassLevelNumberFormatAppliesOnlyToCompatibleProperties() {
+        final ClassNumberFormatBean numberBean = new ClassNumberFormatBean();
+        numberBean.setName("widget");
+        numberBean.setPrice(12.5d);
+
+        final String numberJson = Assertions.assertDoesNotThrow(() -> N.toJson(numberBean));
+        assertTrue(numberJson.contains("\"name\""));
+    }
+
+    @Test
+    public void test_numberFormat_rejectsTrailingCharacters() {
+        final PropInfo propInfo = ParserUtil.getBeanInfo(NumberFormatBean.class).getPropInfo("price");
+
+        assertThrows(RuntimeException.class, () -> propInfo.readPropValue("12oops"));
+    }
+
     /**
      * Verifies that {@code @JsonXmlField(numberFormat=...)} produces locale-independent output.
      * Without an explicit locale, {@code new DecimalFormat(pattern)} uses the JVM default locale,

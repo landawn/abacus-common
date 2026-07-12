@@ -30,6 +30,12 @@ public class ByteSummaryStatisticsTest extends TestBase {
     }
 
     @Test
+    public void testConstructorValidatesEmptyState() {
+        org.junit.jupiter.api.Assertions.assertDoesNotThrow(() -> new ByteSummaryStatistics(0, Byte.MAX_VALUE, Byte.MIN_VALUE, 0));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> new ByteSummaryStatistics(0, (byte) 0, (byte) 0, 1));
+    }
+
+    @Test
     public void testExtremeValues() {
         ByteSummaryStatistics stats = new ByteSummaryStatistics();
         stats.accept(Byte.MIN_VALUE);

@@ -465,7 +465,7 @@ public final class EscapeUtil {
      *
      * <p>Unrecognized entities are left unchanged in the output string.</p>
      *
-     * <p><b>&#9888; Note:</b> Numeric character references that parse to an integer above
+     * <p><b>&#9888;&#65039; Note:</b> Numeric character references that parse to an integer above
      * Unicode's maximum code point ({@code 0x10FFFF}) throw {@link IllegalArgumentException}
      * during code point conversion; non-numeric or overflowing numeric references are left unchanged.</p>
      *
@@ -495,7 +495,7 @@ public final class EscapeUtil {
      * It supports only HTML 3.0 entities (basic entities and ISO-8859-1 entities) and
      * numeric character references. For extended HTML 4.0 entities, use {@link #unescapeHtml4(String)}.</p>
      *
-     * <p><b>&#9888; Note:</b> Numeric character references that parse to an integer above
+     * <p><b>&#9888;&#65039; Note:</b> Numeric character references that parse to an integer above
      * Unicode's maximum code point ({@code 0x10FFFF}) throw {@link IllegalArgumentException}
      * during code point conversion; non-numeric or overflowing numeric references are left unchanged.</p>
      *
@@ -596,7 +596,7 @@ public final class EscapeUtil {
      *
      * <p>Note: This method does not support DTDs or external entities for security reasons.</p>
      *
-     * <p><b>&#9888; Note:</b> Numeric character references that parse to an integer above
+     * <p><b>&#9888;&#65039; Note:</b> Numeric character references that parse to an integer above
      * Unicode's maximum code point ({@code 0x10FFFF}) throw {@link IllegalArgumentException}
      * during code point conversion; non-numeric or overflowing numeric references are left unchanged.</p>
      *

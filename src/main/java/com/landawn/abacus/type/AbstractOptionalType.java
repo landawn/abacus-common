@@ -26,7 +26,7 @@ public abstract class AbstractOptionalType<T> extends AbstractType<T> {
     protected static final String VALUE = "value";
 
     /** Lazily-initialized cached instance of the {@code Map<Object, Object>} type used for internal serialization operations */
-    private static Type<Map<Object, Object>> mapType = null;
+    private static volatile Type<Map<Object, Object>> mapType = null;
 
     /**
      * Constructs an {@code AbstractOptionalType} with the specified type name.
@@ -40,19 +40,27 @@ public abstract class AbstractOptionalType<T> extends AbstractType<T> {
     /**
      * Returns the cached {@code Map} type instance used for internal serialization operations.
      * <p>
-     * This method uses lazy initialization with synchronization to ensure thread-safe access.
-     * The {@code Map} type is used internally to convert Optional values to/from
+     * This method uses double-checked locking so the common (already-initialized) path is
+     * lock-free. The {@code Map} type is used internally to convert Optional values to/from
      * {@code Map<Object, Object>} representations during serialization.
      * </p>
      *
      * @return the shared {@code Type} instance for {@code Map<Object, Object>}
      */
-    protected static synchronized Type<Map<Object, Object>> getMapType() {
-        if (mapType == null) {
-            mapType = TypeFactory.getType("Map<Object, Object>");
+    protected static Type<Map<Object, Object>> getMapType() {
+        Type<Map<Object, Object>> local = mapType;
+
+        if (local == null) {
+            synchronized (AbstractOptionalType.class) {
+                local = mapType;
+
+                if (local == null) {
+                    mapType = local = TypeFactory.getType("Map<Object, Object>");
+                }
+            }
         }
 
-        return mapType;
+        return local;
     }
 
     /**

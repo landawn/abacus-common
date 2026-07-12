@@ -94,7 +94,7 @@ public final class LoggerFactory {
      * @return a Logger instance for the specified class
      * @throws NullPointerException if {@code clazz} is {@code null}
      */
-    public static synchronized Logger getLogger(final Class<?> clazz) {
+    public static Logger getLogger(final Class<?> clazz) {
         return getLogger(clazz.getName());
     }
 
@@ -104,6 +104,9 @@ public final class LoggerFactory {
      * <p>This method returns a cached logger if one exists for the given name, otherwise
      * it creates a new logger using the detected logging framework. The detection happens
      * only once during the first logger creation.</p>
+     *
+     * <p>Cache hits are lock-free. Creation of a missing logger uses double-checked locking
+     * so concurrent callers do not serialize on the common (already-cached) path.</p>
      *
      * <p>The logging framework detection order is:</p>
      * <ol>
@@ -125,12 +128,22 @@ public final class LoggerFactory {
      */
     @SuppressFBWarnings("SF_SWITCH_FALLTHROUGH")
     @SuppressWarnings("fallthrough")
-    public static synchronized Logger getLogger(final String name) {
+    public static Logger getLogger(final String name) {
         N.checkArgNotNull(name, cs.name);
 
         Logger logger = namedLoggers.get(name);
 
-        if (logger == null) {
+        if (logger != null) {
+            return logger;
+        }
+
+        synchronized (LoggerFactory.class) {
+            logger = namedLoggers.get(name);
+
+            if (logger != null) {
+                return logger;
+            }
+
             switch (logType) {
                 case 0:
                     if (IS_ANDROID_PLATFORM) {
@@ -207,8 +220,7 @@ public final class LoggerFactory {
             }
 
             namedLoggers.put(name, logger);
+            return logger;
         }
-
-        return logger;
     }
 }

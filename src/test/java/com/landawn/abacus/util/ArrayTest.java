@@ -8903,7 +8903,7 @@ public class ArrayTest extends TestBase {
 
         N.println(strs[0] instanceof String);
 
-        N.println(Array.of(WeekDay.MONDAY, WeekDay.TUESDAY, WeekDay.WEDNESDAY).clone());
+        N.println(Array.of(java.time.DayOfWeek.MONDAY, java.time.DayOfWeek.TUESDAY, java.time.DayOfWeek.WEDNESDAY).clone());
     }
 
     @Test

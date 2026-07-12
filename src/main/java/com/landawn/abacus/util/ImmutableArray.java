@@ -50,12 +50,25 @@ import com.landawn.abacus.util.stream.Stream;
  */
 @com.landawn.abacus.annotation.Immutable
 public final class ImmutableArray<T> implements Iterable<T>, Immutable {
+    @SuppressWarnings("rawtypes")
+    private static final ImmutableArray EMPTY = new ImmutableArray(N.EMPTY_OBJECT_ARRAY);
+
     private final T[] elements;
     private final int length;
 
     ImmutableArray(final T[] elements) {
         this.elements = elements == null ? (T[]) N.EMPTY_OBJECT_ARRAY : elements;
         length = N.len(this.elements);
+    }
+
+    /**
+     * Returns the cached empty ImmutableArray.
+     *
+     * @param <T> the type of elements in the array
+     * @return the empty ImmutableArray
+     */
+    public static <T> ImmutableArray<T> empty() {
+        return EMPTY;
     }
 
     /**
@@ -282,7 +295,7 @@ public final class ImmutableArray<T> implements Iterable<T>, Immutable {
      *         or an empty {@code ImmutableArray} if the input is {@code null}
      */
     public static <T> ImmutableArray<T> copyOf(final T[] elements) {
-        return new ImmutableArray<>(elements == null ? null : elements.clone());
+        return N.isEmpty(elements) ? empty() : new ImmutableArray<>(elements.clone());
     }
 
     /**

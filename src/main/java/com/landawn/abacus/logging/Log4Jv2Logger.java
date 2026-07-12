@@ -58,7 +58,8 @@ class Log4Jv2Logger extends AbstractLogger {
      * Constructs a {@code Log4Jv2Logger} with the specified name.
      *
      * <p>This constructor obtains a Log4j 2 logger instance from the {@code LogManager}
-     * and casts it to {@link ExtendedLogger} for access to advanced features.</p>
+     * and casts it to {@link ExtendedLogger} for access to advanced features.
+     * {@link Logger#ROOT_LOGGER_NAME} selects Log4j's native root logger.</p>
      *
      * <p><b>Note:</b> The enclosing class is package-private, so this constructor cannot be invoked
      * from outside the {@code com.landawn.abacus.logging} package. Use
@@ -76,7 +77,8 @@ class Log4Jv2Logger extends AbstractLogger {
      */
     public Log4Jv2Logger(final String name) {
         super(name);
-        loggerImpl = (ExtendedLogger) org.apache.logging.log4j.LogManager.getLogger(name);
+        loggerImpl = (ExtendedLogger) (Logger.ROOT_LOGGER_NAME.equals(name) ? org.apache.logging.log4j.LogManager.getRootLogger()
+                : org.apache.logging.log4j.LogManager.getLogger(name));
     }
 
     /**

@@ -206,7 +206,7 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
      * not match the predicate, an {@link AtomicBoolean} flag signals all threads to stop producing
      * further elements. The output order is not guaranteed to match the input order.
      *
-     * <p><b>&#9888; Parallel streams:</b> this operation does not guarantee encounter-order prefix
+     * <p><b>&#9888;&#65039; Parallel streams:</b> this operation does not guarantee encounter-order prefix
      * semantics; later matching elements may be returned.
      *
      * @param predicate a non-interfering, stateless predicate to apply to each element; the stream
@@ -275,7 +275,7 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
      * remainder of the stream. The output order of post-drop elements is not guaranteed to match the
      * input order.
      *
-     * <p><b>&#9888; Parallel streams:</b> this operation does not guarantee encounter-order prefix/suffix
+     * <p><b>&#9888;&#65039; Parallel streams:</b> this operation does not guarantee encounter-order prefix/suffix
      * semantics; later matching elements may be dropped.
      *
      * @param predicate a non-interfering, stateless predicate; elements are dropped while it returns
@@ -3435,7 +3435,7 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
         assertNotClosed();
         checkArgNotNegative(atLeast, cs.atLeast);
         checkArgNotNegative(atMost, cs.atMost);
-        checkArgument(atLeast <= atMost, "'atLeast' must be <= 'atMost'");
+        checkArgument(atLeast <= atMost, "'atLeast' (%s) must be <= 'atMost' (%s)", atLeast, atMost);
 
         if (canBeSequential(maxThreadNum)) {
             return super.hasMatchCountBetween(atLeast, atMost, predicate);

@@ -5172,4 +5172,70 @@ public class MultimapTest extends AbstractTest {
         assertEquals(2, ms.getCount(k));
     }
 
+    @Test
+    public void testReplaceEntry_setMultimapDuplicateNewValue_restoresOldValue() {
+        // regression: Set-backed replace removed oldValue before add(newValue); when newValue was
+        // already present, add failed and the old value was permanently lost.
+        final SetMultimap<String, Integer> mm = N.newSetMultimap();
+        mm.putValues("k", Arrays.asList(1, 2));
+
+        final IllegalStateException ex = assertThrows(IllegalStateException.class, () -> mm.replaceEntry("k", 1, 2));
+        assertTrue(ex.getMessage().contains("Failed to add"));
+
+        assertTrue(mm.containsKey("k"));
+        assertEquals(new HashSet<>(Arrays.asList(1, 2)), mm.get("k"));
+    }
+
+    @Test
+    public void testPut_rejectedValueDoesNotLeaveEmptyMapping() {
+        // Rejecting Set (null into TreeSet) must not leave key -> empty collection.
+        final Multimap<String, Integer, java.util.NavigableSet<Integer>> mm = N.newMultimap(HashMap::new, TreeSet::new);
+
+        assertThrows(NullPointerException.class, () -> mm.put("k", null));
+        assertFalse(mm.containsKey("k"));
+        assertNull(mm.get("k"));
+    }
+
+    @Test
+    public void testReplaceValues_emptyNewValues_removesKey() {
+        final SetMultimap<String, Integer> mm = N.newSetMultimap();
+        mm.put("k", 1);
+        mm.put("k", 2);
+
+        assertTrue(mm.replaceValues("k", Collections.emptyList()));
+        assertFalse(mm.containsKey("k"));
+        assertNull(mm.get("k"));
+    }
+
+    @Test
+    public void testReplaceValues_noValuesAccepted_removesEmptyMapping() {
+        // Value collection that accepts only the first add; after clear()+addAll in replaceValues
+        // nothing is accepted and the empty mapping must be removed.
+        final Multimap<String, Integer, Set<Integer>> rejecting = N.newMultimap(HashMap::new, () -> new HashSet<Integer>() {
+            private boolean allowOne = true;
+
+            @Override
+            public boolean add(final Integer e) {
+                if (allowOne) {
+                    allowOne = false;
+                    return super.add(e);
+                }
+                return false;
+            }
+
+            @Override
+            public boolean addAll(final Collection<? extends Integer> c) {
+                boolean changed = false;
+                for (final Integer e : c) {
+                    changed |= add(e);
+                }
+                return changed;
+            }
+        });
+        assertTrue(rejecting.put("k", 1)); // first add allowed
+        assertTrue(rejecting.replaceValues("k", Arrays.asList(2, 3))); // clear + rejected adds → empty → remove
+        assertFalse(rejecting.containsKey("k"));
+        assertNull(rejecting.get("k"));
+    }
+
 }

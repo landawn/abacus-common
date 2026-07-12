@@ -28,6 +28,31 @@ import com.landawn.abacus.util.function.BiPredicate;
 
 public class DifferenceTest extends AbstractTest {
 
+    public static class DiffIncludedBean {
+        private String value;
+
+        public String getValue() {
+            return value;
+        }
+
+        public void setValue(final String value) {
+            this.value = value;
+        }
+    }
+
+    public static class DiffIgnoredBean {
+        @com.landawn.abacus.annotation.DiffIgnore
+        private String value;
+
+        public String getValue() {
+            return value;
+        }
+
+        public void setValue(final String value) {
+            this.value = value;
+        }
+    }
+
     @Test
     public void testDifferenceWithDuplicates() {
         List<String> a = Arrays.asList("a", "a", "a", "b");
@@ -1345,6 +1370,20 @@ public class DifferenceTest extends AbstractTest {
     }
 
     @Test
+    public void testBeanDifferenceOf_DiffIgnoreAcrossDifferentBeanClasses() {
+        DiffIncludedBean included = new DiffIncludedBean();
+        included.setValue("left");
+        DiffIgnoredBean ignored = new DiffIgnoredBean();
+        ignored.setValue("right");
+
+        BeanDifference<Map<String, Object>, Map<String, Object>, Map<String, Pair<Object, Object>>> forward = BeanDifference.of(included, ignored);
+        BeanDifference<Map<String, Object>, Map<String, Object>, Map<String, Pair<Object, Object>>> reverse = BeanDifference.of(ignored, included);
+
+        assertFalse(forward.differentValues().containsKey("value"));
+        assertFalse(reverse.differentValues().containsKey("value"));
+    }
+
+    @Test
     public void testMapDifferenceOfEmptyMaps() {
         Map<String, Integer> map1 = new HashMap<>();
         Map<String, Integer> map2 = new HashMap<>();
@@ -2631,6 +2670,15 @@ public class DifferenceTest extends AbstractTest {
         List<String> anotherList = Arrays.asList("also not a bean");
 
         assertThrows(IllegalArgumentException.class, () -> BeanDifference.of(stringList, anotherList, Function.identity()));
+    }
+
+    @Test
+    public void testBeanDifferenceCollectionValidatesEveryElement() {
+        List<Object> validThenInvalid = Arrays.asList(new Account(), "not a bean");
+        List<Object> nullThenInvalid = Arrays.asList(null, "not a bean");
+
+        assertThrows(IllegalArgumentException.class, () -> BeanDifference.of(validThenInvalid, Collections.emptyList(), Function.identity()));
+        assertThrows(IllegalArgumentException.class, () -> BeanDifference.of(nullThenInvalid, Collections.emptyList(), Function.identity()));
     }
 
     @Test

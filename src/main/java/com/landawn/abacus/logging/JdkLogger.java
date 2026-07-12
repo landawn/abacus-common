@@ -54,7 +54,8 @@ class JdkLogger extends AbstractLogger {
     /**
      * Constructs a {@code JdkLogger} with the specified name.
      *
-     * <p>The name is passed directly to the underlying {@code java.util.logging.Logger}.</p>
+     * <p>The name is passed to the underlying {@code java.util.logging.Logger}, except that
+     * {@link Logger#ROOT_LOGGER_NAME} selects JUL's native root logger.</p>
      *
      * <p><b>Note:</b> The enclosing class is package-private, so this constructor cannot be invoked
      * from outside the {@code com.landawn.abacus.logging} package. Use
@@ -72,7 +73,7 @@ class JdkLogger extends AbstractLogger {
      */
     public JdkLogger(final String name) {
         super(name);
-        loggerImpl = java.util.logging.Logger.getLogger(name);
+        loggerImpl = Logger.ROOT_LOGGER_NAME.equals(name) ? java.util.logging.Logger.getLogger("") : java.util.logging.Logger.getLogger(name);
     }
 
     /**

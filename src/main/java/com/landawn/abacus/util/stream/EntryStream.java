@@ -284,6 +284,18 @@ public final class EntryStream<K, V> extends
      *                                 .toList();   // returns ["a", "b", "c"]
      * }</pre>
      *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
+     *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
+     *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     * </table>
+     *
      * @return a new Stream consisting of the keys from the entries in this EntryStream
      * @see #values()
      * @see Stream#map(Function)
@@ -318,6 +330,18 @@ public final class EntryStream<K, V> extends
      *                                    .values()
      *                                    .toList();   // returns [1, 2, 3]
      * }</pre>
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
+     *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
+     *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @return a new Stream consisting of the values from the entries in this EntryStream
      * @see #keys()
@@ -356,6 +380,18 @@ public final class EntryStream<K, V> extends
      * // returns list of Map.Entry objects
      * }</pre>
      *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
+     *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
+     *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     * </table>
+     *
      * @return a new Stream consisting of the entries in this EntryStream
      */
     @SequentialOnly
@@ -378,6 +414,18 @@ public final class EntryStream<K, V> extends
      *                                             .invert()
      *                                             .toMap();   // returns {1="a", 2="b", 3="c"}
      * }</pre>
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
+     *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
+     *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @return a new EntryStream with inverted key-value pairs
      * @see #map(Function)
@@ -413,6 +461,18 @@ public final class EntryStream<K, V> extends
      *                                                .toMap();   // returns {1="integer key"}
      * }</pre>
      *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
+     *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
+     *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     * </table>
+     *
      * @param <KK> the type of keys to select
      * @param clazz the class to filter the keys by
      * @return a new EntryStream with keys filtered by the specified class
@@ -446,6 +506,18 @@ public final class EntryStream<K, V> extends
      *                                                  .selectByValue(Integer.class)
      *                                                  .toMap();   // returns {"b"=42}
      * }</pre>
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
+     *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
+     *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @param <VV> the type of values to select
      * @param clazz the class to filter the values by
@@ -498,6 +570,18 @@ public final class EntryStream<K, V> extends
      *                                             .toMap();   // returns {"cherry"=7}
      * }</pre>
      *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
+     *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
+     *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     * </table>
+     *
      * @param predicate a non-interfering, stateless bi-predicate to apply to each key-value pair
      * @return a new EntryStream consisting of entries that match the given predicate
      * @see Stream#filter(Predicate)
@@ -543,11 +627,23 @@ public final class EntryStream<K, V> extends
      * Map<String, Integer> map = Map.of("apple", 1, "banana", 2, "apricot", 3);
      * Map<String, Integer> filtered = EntryStream.of(map)
      *                                             .filterByKey(k -> k.startsWith("a"))
-     *                                             .toMap();   // returns {"apple"=1, "apricot"=3}
+     *                                             .toMap();   // returns {"apple"=1, "apricot"=3} (entry order may vary)
      * }</pre>
      *
      * <p><b>Note:</b> By design there is no {@code (keyPredicate, onDrop)} overload; to capture dropped entries,
      * use the entry-level {@link #filter(Predicate, Consumer)} with a key-based predicate.
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
+     *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
+     *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @param keyPredicate a non-interfering, stateless predicate to apply to each key
      * @return a new EntryStream consisting of entries whose keys match the given predicate
@@ -577,6 +673,18 @@ public final class EntryStream<K, V> extends
      * <p><b>Note:</b> By design there is no {@code (valuePredicate, onDrop)} overload; to capture dropped entries,
      * use the entry-level {@link #filter(Predicate, Consumer)} with a value-based predicate.
      *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
+     *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
+     *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     * </table>
+     *
      * @param valuePredicate a non-interfering, stateless predicate to apply to each value
      * @return a new EntryStream consisting of entries whose values match the given predicate
      * @see #filterByKey(Predicate)
@@ -599,9 +707,26 @@ public final class EntryStream<K, V> extends
      * For sorted data, this acts as a logical "take while condition is true" operation.
      *
      * <p><b>Notes on parallel streams:</b><br>
-     * In parallel Streams, elements beyond the first non-matching element might still be evaluated
-     * and may appear in the result if they individually satisfy the predicate.
-     * In parallel streams, there is no guarantee of encounter-order prefix semantics.
+     * ⚠️ In a parallel stream, elements after the first unmatched element (the first element for which
+     * the predicate returns {@code false}) may still be processed and included in the result if they
+     * individually satisfy the predicate.<br>
+     * There is no guarantee of encounter-order prefix semantics in parallel streams.
+     *
+     * <p>Parallel-stream behavior of these related short-circuiting operations:</p>
+     * <pre>
+     * ┌─────────────────┬─────────────────────────┬────────────────────────────────────────────────────────────────┐
+     * │     Method      │        Boundary         │                            Warning                             │
+     * ├─────────────────┼─────────────────────────┼────────────────────────────────────────────────────────────────┤
+     * │ takeWhile       │ first unmatched         │ elements after it may still be processed and included if they  │
+     * │                 │ (predicate false)       │ individually satisfy the predicate                             │
+     * ├─────────────────┼─────────────────────────┼────────────────────────────────────────────────────────────────┤
+     * │ dropWhile (+    │ first unmatched         │ elements after it may still be processed and dropped if they   │
+     * │ onDrop)         │ (predicate false)       │ individually satisfy the predicate                             │
+     * ├─────────────────┼─────────────────────────┼────────────────────────────────────────────────────────────────┤
+     * │ skipUntil       │ first matched           │ elements after it may still be processed and skipped if they   │
+     * │                 │ (predicate true)        │ do not satisfy the predicate                                   │
+     * └─────────────────┴─────────────────────────┴────────────────────────────────────────────────────────────────┘
+     * </pre>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -632,9 +757,26 @@ public final class EntryStream<K, V> extends
      * For sorted data, this acts as a logical "take while condition is true" operation.
      *
      * <p><b>Notes on parallel streams:</b><br>
-     * In parallel Streams, elements beyond the first non-matching element might still be evaluated
-     * and may appear in the result if they individually satisfy the predicate.
-     * In parallel streams, there is no guarantee of encounter-order prefix semantics.
+     * ⚠️ In a parallel stream, elements after the first unmatched element (the first element for which
+     * the predicate returns {@code false}) may still be processed and included in the result if they
+     * individually satisfy the predicate.<br>
+     * There is no guarantee of encounter-order prefix semantics in parallel streams.
+     *
+     * <p>Parallel-stream behavior of these related short-circuiting operations:</p>
+     * <pre>
+     * ┌─────────────────┬─────────────────────────┬────────────────────────────────────────────────────────────────┐
+     * │     Method      │        Boundary         │                            Warning                             │
+     * ├─────────────────┼─────────────────────────┼────────────────────────────────────────────────────────────────┤
+     * │ takeWhile       │ first unmatched         │ elements after it may still be processed and included if they  │
+     * │                 │ (predicate false)       │ individually satisfy the predicate                             │
+     * ├─────────────────┼─────────────────────────┼────────────────────────────────────────────────────────────────┤
+     * │ dropWhile (+    │ first unmatched         │ elements after it may still be processed and dropped if they   │
+     * │ onDrop)         │ (predicate false)       │ individually satisfy the predicate                             │
+     * ├─────────────────┼─────────────────────────┼────────────────────────────────────────────────────────────────┤
+     * │ skipUntil       │ first matched           │ elements after it may still be processed and skipped if they   │
+     * │                 │ (predicate true)        │ do not satisfy the predicate                                   │
+     * └─────────────────┴─────────────────────────┴────────────────────────────────────────────────────────────────┘
+     * </pre>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -646,6 +788,18 @@ public final class EntryStream<K, V> extends
      *                                           .takeWhile((k, v) -> v.length() < 3)
      *                                           .toMap();   // returns {1="a", 2="bb"}
      * }</pre>
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
+     *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
+     *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @param predicate a non-interfering, stateless bi-predicate to apply to each key-value pair
      * @return a new EntryStream consisting of elements taken while the predicate returns true
@@ -668,10 +822,27 @@ public final class EntryStream<K, V> extends
      * operation that preserves encounter order in sequential streams.
      *
      * <p><b>Notes on parallel streams:</b><br>
-     * In sequential streams, behavior is well-defined and deterministic.
-     * However, in parallel, elements beyond the first non-matching element
-     * may still be evaluated, and those satisfying the predicate may be dropped.
-     * In parallel streams, there is no guarantee of encounter-order prefix/suffix semantics.
+     * ⚠️ In a parallel stream, elements after the first unmatched element (the first element for which
+     * the predicate returns {@code false}) may still be processed and dropped if they individually
+     * satisfy the predicate.<br>
+     * In sequential streams the behavior is well-defined and deterministic; in parallel streams there
+     * is no guarantee of encounter-order prefix/suffix semantics.
+     *
+     * <p>Parallel-stream behavior of these related short-circuiting operations:</p>
+     * <pre>
+     * ┌─────────────────┬─────────────────────────┬────────────────────────────────────────────────────────────────┐
+     * │     Method      │        Boundary         │                            Warning                             │
+     * ├─────────────────┼─────────────────────────┼────────────────────────────────────────────────────────────────┤
+     * │ takeWhile       │ first unmatched         │ elements after it may still be processed and included if they  │
+     * │                 │ (predicate false)       │ individually satisfy the predicate                             │
+     * ├─────────────────┼─────────────────────────┼────────────────────────────────────────────────────────────────┤
+     * │ dropWhile (+    │ first unmatched         │ elements after it may still be processed and dropped if they   │
+     * │ onDrop)         │ (predicate false)       │ individually satisfy the predicate                             │
+     * ├─────────────────┼─────────────────────────┼────────────────────────────────────────────────────────────────┤
+     * │ skipUntil       │ first matched           │ elements after it may still be processed and skipped if they   │
+     * │                 │ (predicate true)        │ do not satisfy the predicate                                   │
+     * └─────────────────┴─────────────────────────┴────────────────────────────────────────────────────────────────┘
+     * </pre>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -704,10 +875,27 @@ public final class EntryStream<K, V> extends
      * operation that preserves encounter order in sequential streams.
      *
      * <p><b>Notes on parallel streams:</b><br>
-     * In sequential streams, behavior is well-defined and deterministic.
-     * However, in parallel, elements beyond the first non-matching element
-     * may still be evaluated, and those satisfying the predicate may be dropped.
-     * In parallel streams, there is no guarantee of encounter-order prefix/suffix semantics.
+     * ⚠️ In a parallel stream, elements after the first unmatched element (the first element for which
+     * the predicate returns {@code false}) may still be processed and dropped if they individually
+     * satisfy the predicate.<br>
+     * In sequential streams the behavior is well-defined and deterministic; in parallel streams there
+     * is no guarantee of encounter-order prefix/suffix semantics.
+     *
+     * <p>Parallel-stream behavior of these related short-circuiting operations:</p>
+     * <pre>
+     * ┌─────────────────┬─────────────────────────┬────────────────────────────────────────────────────────────────┐
+     * │     Method      │        Boundary         │                            Warning                             │
+     * ├─────────────────┼─────────────────────────┼────────────────────────────────────────────────────────────────┤
+     * │ takeWhile       │ first unmatched         │ elements after it may still be processed and included if they  │
+     * │                 │ (predicate false)       │ individually satisfy the predicate                             │
+     * ├─────────────────┼─────────────────────────┼────────────────────────────────────────────────────────────────┤
+     * │ dropWhile (+    │ first unmatched         │ elements after it may still be processed and dropped if they   │
+     * │ onDrop)         │ (predicate false)       │ individually satisfy the predicate                             │
+     * ├─────────────────┼─────────────────────────┼────────────────────────────────────────────────────────────────┤
+     * │ skipUntil       │ first matched           │ elements after it may still be processed and skipped if they   │
+     * │                 │ (predicate true)        │ do not satisfy the predicate                                   │
+     * └─────────────────┴─────────────────────────┴────────────────────────────────────────────────────────────────┘
+     * </pre>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -719,6 +907,18 @@ public final class EntryStream<K, V> extends
      *                                           .dropWhile((k, v) -> v.length() < 3)
      *                                           .toMap();   // returns {3="ccc", 4="dddd"}
      * }</pre>
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
+     *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
+     *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @param predicate a non-interfering, stateless bi-predicate to apply to each key-value pair
      * @return a new EntryStream consisting of the remaining elements after dropping
@@ -742,10 +942,27 @@ public final class EntryStream<K, V> extends
      * operation that preserves encounter order in sequential streams.
      *
      * <p><b>Notes on parallel streams:</b><br>
-     * In sequential streams, behavior is well-defined and deterministic.
-     * However, in parallel, elements beyond the first non-matching element
-     * may still be evaluated, and those satisfying the predicate may be dropped.
-     * In parallel streams, there is no guarantee of encounter-order prefix/suffix semantics.
+     * ⚠️ In a parallel stream, elements after the first unmatched element (the first element for which
+     * the predicate returns {@code false}) may still be processed and dropped if they individually
+     * satisfy the predicate.<br>
+     * In sequential streams the behavior is well-defined and deterministic; in parallel streams there
+     * is no guarantee of encounter-order prefix/suffix semantics.
+     *
+     * <p>Parallel-stream behavior of these related short-circuiting operations:</p>
+     * <pre>
+     * ┌─────────────────┬─────────────────────────┬────────────────────────────────────────────────────────────────┐
+     * │     Method      │        Boundary         │                            Warning                             │
+     * ├─────────────────┼─────────────────────────┼────────────────────────────────────────────────────────────────┤
+     * │ takeWhile       │ first unmatched         │ elements after it may still be processed and included if they  │
+     * │                 │ (predicate false)       │ individually satisfy the predicate                             │
+     * ├─────────────────┼─────────────────────────┼────────────────────────────────────────────────────────────────┤
+     * │ dropWhile (+    │ first unmatched         │ elements after it may still be processed and dropped if they   │
+     * │ onDrop)         │ (predicate false)       │ individually satisfy the predicate                             │
+     * ├─────────────────┼─────────────────────────┼────────────────────────────────────────────────────────────────┤
+     * │ skipUntil       │ first matched           │ elements after it may still be processed and skipped if they   │
+     * │                 │ (predicate true)        │ do not satisfy the predicate                                   │
+     * └─────────────────┴─────────────────────────┴────────────────────────────────────────────────────────────────┘
+     * </pre>
      *
      * <p>In parallel streams, the action may be performed concurrently for multiple dropped elements.
      * The implementation should ensure the action is thread-safe when used with parallel streams.</p>
@@ -779,14 +996,28 @@ public final class EntryStream<K, V> extends
      * included without further predicate checks. This is an intermediate operation.
      *
      * <p><b>Notes on parallel streams:</b><br>
-     * For sequential or ordered streams, the operation is deterministic — elements
-     * are skipped until the first element for which the predicate returns {@code true},
-     * and the rest are passed through unchanged.
+     * ⚠️ In a parallel stream, elements after the first matched element (the first element for which
+     * the predicate returns {@code true}) may still be processed and skipped if they do not satisfy
+     * the predicate.<br>
+     * For sequential or ordered streams the operation is deterministic — elements are skipped until the
+     * first element for which the predicate returns {@code true}, and the rest are passed through
+     * unchanged; in unordered parallel streams the result may appear unintuitive.
      *
-     * <p>For parallel unordered streams, elements beyond the first matching element
-     * may still be evaluated, and elements that do not satisfy the predicate may also
-     * be skipped. This can produce results that appear unintuitive when the stream does
-     * not define an encounter order.
+     * <p>Parallel-stream behavior of these related short-circuiting operations:</p>
+     * <pre>
+     * ┌─────────────────┬─────────────────────────┬────────────────────────────────────────────────────────────────┐
+     * │     Method      │        Boundary         │                            Warning                             │
+     * ├─────────────────┼─────────────────────────┼────────────────────────────────────────────────────────────────┤
+     * │ takeWhile       │ first unmatched         │ elements after it may still be processed and included if they  │
+     * │                 │ (predicate false)       │ individually satisfy the predicate                             │
+     * ├─────────────────┼─────────────────────────┼────────────────────────────────────────────────────────────────┤
+     * │ dropWhile (+    │ first unmatched         │ elements after it may still be processed and dropped if they   │
+     * │ onDrop)         │ (predicate false)       │ individually satisfy the predicate                             │
+     * ├─────────────────┼─────────────────────────┼────────────────────────────────────────────────────────────────┤
+     * │ skipUntil       │ first matched           │ elements after it may still be processed and skipped if they   │
+     * │                 │ (predicate true)        │ do not satisfy the predicate                                   │
+     * └─────────────────┴─────────────────────────┴────────────────────────────────────────────────────────────────┘
+     * </pre>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -813,14 +1044,28 @@ public final class EntryStream<K, V> extends
      * included without further predicate checks. This is an intermediate operation.
      *
      * <p><b>Notes on parallel streams:</b><br>
-     * For sequential or ordered streams, the operation is deterministic — elements
-     * are skipped until the first element for which the predicate returns {@code true},
-     * and the rest are passed through unchanged.
+     * ⚠️ In a parallel stream, elements after the first matched element (the first element for which
+     * the predicate returns {@code true}) may still be processed and skipped if they do not satisfy
+     * the predicate.<br>
+     * For sequential or ordered streams the operation is deterministic — elements are skipped until the
+     * first element for which the predicate returns {@code true}, and the rest are passed through
+     * unchanged; in unordered parallel streams the result may appear unintuitive.
      *
-     * <p>For parallel unordered streams, elements beyond the first matching element
-     * may still be evaluated, and elements that do not satisfy the predicate may also
-     * be skipped. This can produce results that appear unintuitive when the stream does
-     * not define an encounter order.
+     * <p>Parallel-stream behavior of these related short-circuiting operations:</p>
+     * <pre>
+     * ┌─────────────────┬─────────────────────────┬────────────────────────────────────────────────────────────────┐
+     * │     Method      │        Boundary         │                            Warning                             │
+     * ├─────────────────┼─────────────────────────┼────────────────────────────────────────────────────────────────┤
+     * │ takeWhile       │ first unmatched         │ elements after it may still be processed and included if they  │
+     * │                 │ (predicate false)       │ individually satisfy the predicate                             │
+     * ├─────────────────┼─────────────────────────┼────────────────────────────────────────────────────────────────┤
+     * │ dropWhile (+    │ first unmatched         │ elements after it may still be processed and dropped if they   │
+     * │ onDrop)         │ (predicate false)       │ individually satisfy the predicate                             │
+     * ├─────────────────┼─────────────────────────┼────────────────────────────────────────────────────────────────┤
+     * │ skipUntil       │ first matched           │ elements after it may still be processed and skipped if they   │
+     * │                 │ (predicate true)        │ do not satisfy the predicate                                   │
+     * └─────────────────┴─────────────────────────┴────────────────────────────────────────────────────────────────┘
+     * </pre>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -831,6 +1076,18 @@ public final class EntryStream<K, V> extends
      *                                           .skipUntil((k, v) -> v.length() >= 3)
      *                                           .toMap();   // returns {3="ccc", 4="dddd"}
      * }</pre>
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
+     *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
+     *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @param predicate a non-interfering, stateless bi-predicate to apply to each key-value pair
      * @return a new EntryStream consisting of the remaining elements after skipping
@@ -855,6 +1112,18 @@ public final class EntryStream<K, V> extends
      *                                               String.valueOf(e.getValue())))
      *                                           .toMap();   // returns {"A"="1", "B"="2"}
      * }</pre>
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
+     *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
+     *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @param <KK> the type of keys in the resulting entries
      * @param <VV> the type of values in the resulting entries
@@ -882,6 +1151,18 @@ public final class EntryStream<K, V> extends
      *                                           )
      *                                           .toMap();   // returns {"A"="Value: 1", "B"="Value: 2"}
      * }</pre>
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
+     *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
+     *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @param <KK> the type of keys in the resulting entries
      * @param <VV> the type of values in the resulting entries
@@ -914,6 +1195,18 @@ public final class EntryStream<K, V> extends
      *                                           .toMap();   // returns {"A"="a:1", "B"="b:2"}
      * }</pre>
      *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
+     *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
+     *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     * </table>
+     *
      * @param <KK> the type of keys in the resulting entries
      * @param <VV> the type of values in the resulting entries
      * @param mapper a non-interfering, stateless bi-function that transforms each key-value pair into a new entry
@@ -942,6 +1235,18 @@ public final class EntryStream<K, V> extends
      *                                           )
      *                                           .toMap();   // returns {10="hello has value 5", 15="world has value 10"}
      * }</pre>
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
+     *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
+     *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @param <KK> the type of keys in the resulting entries
      * @param <VV> the type of values in the resulting entries
@@ -979,8 +1284,20 @@ public final class EntryStream<K, V> extends
      *                                                   ));
      *                                               }
      *                                           })
-     *                                           .toMap();   // returns {"a0"=0, "a1"=1, "b0"=0, "b1"=1, "b2"=2}
+     *                                           .toMap();   // returns {"a0"=0, "a1"=1, "b0"=0, "b1"=1, "b2"=2} (entry order may vary)
      * }</pre>
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
+     *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
+     *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @param <KK> the type of keys in the resulting entries
      * @param <VV> the type of values in the resulting entries
@@ -1012,6 +1329,18 @@ public final class EntryStream<K, V> extends
      *                                           .toMap();   // returns {"B"=20, "C"=30}
      * }</pre>
      *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
+     *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
+     *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     * </table>
+     *
      * @param <KK> the type of keys in the resulting entries
      * @param <VV> the type of values in the resulting entries
      * @param mapper a non-interfering, stateless function that transforms each entry to an optional entry
@@ -1040,6 +1369,18 @@ public final class EntryStream<K, V> extends
      *                                           .toMap();   // returns {"B"=20, "C"=30}
      * }</pre>
      *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
+     *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
+     *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     * </table>
+     *
      * @param <KK> the type of keys in the resulting entries
      * @param <VV> the type of values in the resulting entries
      * @param mapper a non-interfering, stateless bi-function that transforms each key-value pair to an optional entry
@@ -1064,6 +1405,18 @@ public final class EntryStream<K, V> extends
      *                                           .mapKey(String::toUpperCase)
      *                                           .toMap();   // returns {"HELLO"=1, "WORLD"=2}
      * }</pre>
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
+     *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
+     *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @param <KK> the type of keys in the resulting entries
      * @param keyMapper a non-interfering, stateless function to transform each key
@@ -1094,6 +1447,18 @@ public final class EntryStream<K, V> extends
      *                                           .toMap();   // returns {"a1"=1, "b2"=2, "c3"=3}
      * }</pre>
      *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
+     *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
+     *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     * </table>
+     *
      * @param <KK> the type of keys in the resulting entries
      * @param keyMapper a non-interfering, stateless bi-function to transform each key using both key and value
      * @return a new EntryStream with transformed keys
@@ -1123,6 +1488,18 @@ public final class EntryStream<K, V> extends
      *                                           .toMap();   // returns {"a"=1, "b"=4, "c"=9}
      * }</pre>
      *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
+     *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
+     *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     * </table>
+     *
      * @param <VV> the type of values in the resulting entries
      * @param valueMapper a non-interfering, stateless function to transform each value
      * @return a new EntryStream with transformed values
@@ -1151,6 +1528,18 @@ public final class EntryStream<K, V> extends
      *                                           .mapValue((k, v) -> k + " has value " + v)
      *                                           .toMap();   // returns {"a"="a has value 1", "b"="b has value 2", "c"="c has value 3"}
      * }</pre>
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
+     *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
+     *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @param <VV> the type of values in the resulting entries
      * @param valueMapper a non-interfering, stateless bi-function to transform each value using both key and value
@@ -1188,6 +1577,18 @@ public final class EntryStream<K, V> extends
      *                                            })
      *                                            .toMap();   // returns {1=10, 3=30}
      * }</pre>
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
+     *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
+     *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @param <KK> the type of keys in the resulting entries
      * @param keyMapper a non-interfering, stateless function to transform each key to an optional key
@@ -1231,6 +1632,18 @@ public final class EntryStream<K, V> extends
      *                                               : Optional.empty())
      *                                           .toMap();   // returns {"B"=2, "C"=3}
      * }</pre>
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
+     *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
+     *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @param <KK> the type of keys in the resulting entries
      * @param keyMapper a non-interfering, stateless bi-function to transform each key-value pair to an optional key
@@ -1279,6 +1692,18 @@ public final class EntryStream<K, V> extends
      *                                            .toMap();   // returns {"a"=1, "c"=3}
      * }</pre>
      *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
+     *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
+     *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     * </table>
+     *
      * @param <VV> the type of values in the resulting entries
      * @param valueMapper a non-interfering, stateless function to transform each value to an optional value
      * @return a new EntryStream with transformed values, excluding entries with empty optional values
@@ -1321,6 +1746,18 @@ public final class EntryStream<K, V> extends
      *                                               : Optional.of(k + ":" + v))
      *                                           .toMap();   // returns {"a"="a:1", "c"="c:3"}
      * }</pre>
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
+     *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
+     *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @param <VV> the type of values in the resulting entries
      * @param valueMapper a non-interfering, stateless bi-function to transform each key-value pair to an optional value
@@ -1372,8 +1809,20 @@ public final class EntryStream<K, V> extends
      *                                               }
      *                                               return EntryStream.of(expanded);
      *                                           })
-     *                                           .toMap();   // returns {"a0"=0, "a1"=1, "b0"=0}
+     *                                           .toMap();   // returns {"a0"=0, "a1"=1, "b0"=0} (entry order may vary)
      * }</pre>
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
+     *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
+     *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @param <KK> the type of keys in the resulting entries
      * @param <VV> the type of values in the resulting entries
@@ -1400,8 +1849,20 @@ public final class EntryStream<K, V> extends
      *                                           .flatMap((k, v) -> {
      *                                               return EntryStream.of(k + "1", v, k + "2", v * 2);
      *                                           })
-     *                                           .toMap();   // returns {"a1"=2, "a2"=4, "b1"=1, "b2"=2}
+     *                                           .toMap();   // returns {"a1"=2, "a2"=4, "b1"=1, "b2"=2} (entry order may vary)
      * }</pre>
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
+     *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
+     *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @param <KK> the type of keys in the resulting entries
      * @param <VV> the type of values in the resulting entries
@@ -1440,8 +1901,20 @@ public final class EntryStream<K, V> extends
      *                                               }
      *                                               return expanded;
      *                                           })
-     *                                           .toMap();   // returns {"group1_item1"=1, "group1_item2"=2, "group2_item1"=1}
+     *                                           .toMap();   // returns {"group1_item1"=1, "group1_item2"=2, "group2_item1"=1} (entry order may vary)
      * }</pre>
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
+     *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
+     *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @param <KK> the type of keys in the resulting entries
      * @param <VV> the type of values in the resulting entries
@@ -1479,6 +1952,18 @@ public final class EntryStream<K, V> extends
      * // Result: {group1_item1=1, group1_item2=2, group2_item1=1}
      * }</pre>
      *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
+     *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
+     *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     * </table>
+     *
      * @param <KK> the type of the keys in the resulting entries
      * @param <VV> the type of the values in the resulting entries
      * @param mapper a non-interfering, stateless BiFunction that transforms each key-value pair into a Map
@@ -1509,6 +1994,18 @@ public final class EntryStream<K, V> extends
      *     .toMap();
      * // Result: {a1=1, a2=2, b3=3, b4=4}
      * }</pre>
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
+     *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
+     *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @param <KK> the type of the keys in the resulting entries
      * @param <VV> the type of the values in the resulting entries
@@ -1543,6 +2040,18 @@ public final class EntryStream<K, V> extends
      * // Result: {prefix-a=1, prefix-b=1, suffix-c=1, suffix-d=1}
      * }</pre>
      *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
+     *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
+     *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     * </table>
+     *
      * @param <KK> the type of the keys in the resulting entries
      * @param <VV> the type of the values in the resulting entries
      * @param mapper a non-interfering, stateless BiFunction that transforms each key-value pair into a Stream of new entries
@@ -1572,8 +2081,20 @@ public final class EntryStream<K, V> extends
      * EntryStream.of("word", 1, "hello", 2)
      *     .flatMapKey(k -> Stream.of(k.toUpperCase(), k.toLowerCase()))
      *     .toMap();
-     * // Result: {WORD=1, word=1, HELLO=2, hello=2}
+     * // Result (entry order may vary): {WORD=1, word=1, HELLO=2, hello=2}
      * }</pre>
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
+     *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
+     *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @param <KK> the type of the keys in the resulting entries
      * @param keyMapper a non-interfering, stateless function to apply to each key to transform it into a Stream of new keys
@@ -1606,8 +2127,20 @@ public final class EntryStream<K, V> extends
      * EntryStream.of("a", 1, "b", 2)
      *     .flatMapKey((k, v) -> Stream.of(k + v, k + "-" + v))
      *     .toMap();
-     * // Result: {a1=1, a-1=1, b2=2, b-2=2}
+     * // Result (entry order may vary): {a1=1, a-1=1, b2=2, b-2=2}
      * }</pre>
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
+     *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
+     *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @param <KK> the type of the keys in the resulting entries
      * @param keyMapper a non-interfering, stateless bi-function to apply to each key-value pair to transform it into a Stream of new keys
@@ -1640,8 +2173,20 @@ public final class EntryStream<K, V> extends
      * EntryStream.of("word", 1, "hello", 2)
      *     .flatmapKey(k -> Arrays.asList(k.toUpperCase(), k.toLowerCase()))
      *     .toMap();
-     * // Result: {WORD=1, word=1, HELLO=2, hello=2}
+     * // Result (entry order may vary): {WORD=1, word=1, HELLO=2, hello=2}
      * }</pre>
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
+     *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
+     *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @param <KK> the type of the keys in the resulting entries
      * @param keyMapper a non-interfering, stateless function to apply to each key to transform it into a Collection of new keys
@@ -1672,8 +2217,20 @@ public final class EntryStream<K, V> extends
      * EntryStream.of("a", 1, "b", 2)
      *     .flatmapKey((k, v) -> Arrays.asList(k + v, k + "-" + v))
      *     .toMap();
-     * // Result: {a1=1, a-1=1, b2=2, b-2=2}
+     * // Result (entry order may vary): {a1=1, a-1=1, b2=2, b-2=2}
      * }</pre>
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
+     *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
+     *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @param <KK> the type of the keys in the resulting entries
      * @param keyMapper a non-interfering, stateless bi-function to apply to each key-value pair to transform it into a Collection of new keys
@@ -1706,6 +2263,18 @@ public final class EntryStream<K, V> extends
      *     .toMultimap();
      * // Result: {a=[1, 2], b=[3, 4]}
      * }</pre>
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
+     *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
+     *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @param <VV> the type of the values in the resulting entries
      * @param valueMapper a non-interfering, stateless function to apply to each value to transform it into a Stream of new values
@@ -1741,6 +2310,18 @@ public final class EntryStream<K, V> extends
      * // Result: {prefix=[prefix-a, prefix-b], suffix=[suffix-c, suffix-d]}
      * }</pre>
      *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
+     *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
+     *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     * </table>
+     *
      * @param <VV> the type of the values in the resulting entries
      * @param valueMapper a non-interfering, stateless bi-function to apply to each key-value pair to transform it into a Stream of new values
      * @return a new EntryStream with transformed values
@@ -1775,6 +2356,18 @@ public final class EntryStream<K, V> extends
      * // Result: {a=[1, 2], b=[3, 4]}
      * }</pre>
      *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
+     *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
+     *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     * </table>
+     *
      * @param <VV> the type of the values in the resulting entries
      * @param valueMapper a non-interfering, stateless function to apply to each value to transform it into a Collection of new values
      * @return a new EntryStream with transformed values
@@ -1806,6 +2399,18 @@ public final class EntryStream<K, V> extends
      *     .toMultimap();
      * // Result: {prefix=[prefix-a, prefix-b], suffix=[suffix-c, suffix-d]}
      * }</pre>
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
+     *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
+     *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @param <VV> the type of the values in the resulting entries
      * @param valueMapper a non-interfering, stateless bi-function to apply to each key-value pair to transform it into a Collection of new values
@@ -1842,6 +2447,18 @@ public final class EntryStream<K, V> extends
      * <p><b>Note:</b> By design, the no-argument {@code groupBy()} overloads (regrouping by the stream's
      * existing key) are {@code @SequentialOnly}, while the key-mapper and {@code Collector} overloads are
      * {@code @ParallelSupported}.
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>Yes</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
+     *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
+     *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>Yes</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @return a new EntryStream with keys and their associated list of values
      * @see Stream#groupBy(Function, Function)
@@ -1880,6 +2497,18 @@ public final class EntryStream<K, V> extends
      * // Result: {a=[1, 3], b=[2, 4]} (backed by HashMap)
      * }</pre>
      *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>Yes</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
+     *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
+     *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>Yes</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     * </table>
+     *
      * @param mapFactory the supplier providing a new empty Map into which the results will be inserted
      * @return a new EntryStream with keys and their associated list of values
      * @see Stream#groupBy(Function, Function, Supplier)
@@ -1916,6 +2545,18 @@ public final class EntryStream<K, V> extends
      * // Result: {a=[5, 7], b=[6]}
      * }</pre>
      *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>Yes</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
+     *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
+     *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>Yes</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     * </table>
+     *
      * @param <KK> the type of the key in the resulting Map.Entry.
      * @param <VV> the type of the value in the resulting Map.Entry.
      * @param keyMapper the function to be applied to each element in the stream to determine the group it belongs to
@@ -1951,6 +2592,18 @@ public final class EntryStream<K, V> extends
      * // Result: {a=[5, 7], b=[6]} (backed by TreeMap)
      * }</pre>
      *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>Yes</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
+     *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
+     *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>Yes</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     * </table>
+     *
      * @param <KK> the type of the key in the resulting Map.Entry.
      * @param <VV> the type of the value in the resulting Map.Entry.
      * @param keyMapper the function to be applied to each element in the stream to determine the group it belongs to
@@ -1982,6 +2635,18 @@ public final class EntryStream<K, V> extends
      * // Result: {a=4, b=6}
      * }</pre>
      *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>Yes</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
+     *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
+     *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>Yes</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     * </table>
+     *
      * @param <D> the type of the result of the downstream collector
      * @param downstream the collector to use for grouping the entries
      * @return a new EntryStream with keys and their associated collected results
@@ -2012,6 +2677,18 @@ public final class EntryStream<K, V> extends
      *     .toMap();
      * // Result: {a=4, b=6} (backed by TreeMap)
      * }</pre>
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>Yes</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
+     *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
+     *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>Yes</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @param <D> the type of the result of the downstream collector
      * @param downstream the collector to use for grouping the entries
@@ -2045,6 +2722,18 @@ public final class EntryStream<K, V> extends
      *     .toMap();
      * // Result: {a=12, b=6}
      * }</pre>
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>Yes</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
+     *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
+     *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>Yes</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @param <KK> the type of the key in the resulting Map.Entry.
      * @param <D> the type of the result of the downstream collector.
@@ -2081,6 +2770,18 @@ public final class EntryStream<K, V> extends
      * // Result: {a=12, b=6} (backed by TreeMap)
      * }</pre>
      *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>Yes</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
+     *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
+     *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>Yes</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     * </table>
+     *
      * @param <KK> the type of the key in the resulting Map.Entry.
      * @param <D> the type of the result of the downstream collector.
      * @param keyMapper the function to be applied to each element in the stream to determine the group it belongs to
@@ -2114,6 +2815,18 @@ public final class EntryStream<K, V> extends
      *     .toMap();
      * // Result: {a=4, b=6}
      * }</pre>
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>Yes</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
+     *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
+     *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>Yes</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @param mergeFunction the function to merge values associated with the same key
      * @return a new EntryStream with keys and their associated merged values
@@ -2151,6 +2864,18 @@ public final class EntryStream<K, V> extends
      *     .toMap();
      * // Result: {a=4, b=6} (backed by TreeMap)
      * }</pre>
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>Yes</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
+     *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
+     *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>Yes</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @param mergeFunction the function to merge values associated with the same key
      * @param mapFactory the supplier providing a new empty Map into which the results will be inserted
@@ -2193,6 +2918,18 @@ public final class EntryStream<K, V> extends
      * // Result: {a=15, b=6}
      * }</pre>
      *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>Yes</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
+     *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
+     *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>Yes</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     * </table>
+     *
      * @param <KK> the type of the key in the resulting Map.Entry.
      * @param <VV> the type of the value in the resulting Map.Entry.
      * @param keyMapper the function to be applied to each element in the stream to determine the group it belongs to
@@ -2229,6 +2966,18 @@ public final class EntryStream<K, V> extends
      *     .toMap();
      * // Result: {a=15, b=6} (backed by TreeMap)
      * }</pre>
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>Yes</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
+     *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
+     *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>Yes</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @param <KK> the type of the key in the resulting Map.Entry.
      * @param <VV> the type of the value in the resulting Map.Entry.
@@ -2268,6 +3017,18 @@ public final class EntryStream<K, V> extends
      * overload; perform merge-style collapsing via the {@code (collapsible, mapper, Collector)} overload with
      * {@code Collectors.reducing(...)}.
      *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
+     *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
+     *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     * </table>
+     *
      * @param collapsible a predicate that determines if two consecutive elements should be collapsed into the same group;
      *        the first parameter is the key of the last (not the first) element of the current group, and the second parameter is the key of the next element to check
      * @return a new Stream with lists of values whose keys are collapsible
@@ -2298,6 +3059,18 @@ public final class EntryStream<K, V> extends
      *     .toList();
      * // Result: [3, 7, 5]
      * }</pre>
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
+     *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
+     *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @param <U> the type of the mapped elements
      * @param <R> the type of the result
@@ -2336,6 +3109,18 @@ public final class EntryStream<K, V> extends
      * overload; perform merge-style collapsing via the {@code (collapsible, mapper, Collector)} overload with
      * {@code Collectors.reducing(...)}.
      *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
+     *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
+     *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     * </table>
+     *
      * @param collapsible a predicate that determines if two consecutive elements should be collapsed into the same group;
      *        the first parameter is the value of the last (not the first) element of the current group, and the second parameter is the value of the next element to check
      * @return a new Stream with lists of keys whose values are collapsible
@@ -2366,6 +3151,18 @@ public final class EntryStream<K, V> extends
      *     .toList();
      * // Result: ["a-b", "c-d", "e"]
      * }</pre>
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
+     *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
+     *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @param <U> the type of the mapped elements
      * @param <R> the type of the result
@@ -2400,6 +3197,18 @@ public final class EntryStream<K, V> extends
      * // Result: [[a=1, b=2], [c=3, d=4], [e=5]]
      * }</pre>
      *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
+     *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
+     *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     * </table>
+     *
      * @param chunkSize the size of each chunk
      * @return a new Stream consisting of Lists of Map.Entry objects, each representing a chunk of the original Stream.
      * @see Stream#split(int)
@@ -2424,6 +3233,18 @@ public final class EntryStream<K, V> extends
      *     .toList();
      * // Result: [[a=1, b=2], [c=3, d=4], [e=5]] (each chunk is a LinkedList)
      * }</pre>
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
+     *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
+     *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @param <C> the type of the collection to store the chunks.
      * @param chunkSize the size of each chunk
@@ -2453,6 +3274,18 @@ public final class EntryStream<K, V> extends
      * // Result: [[a=1, b=2, c=3], [b=2, c=3, d=4]]
      * }</pre>
      *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
+     *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
+     *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     * </table>
+     *
      * @param windowSize the size of the window to be used for sliding over the Stream elements
      * @return a new Stream where each element is a List of Map.Entry objects from the original Stream, representing a window.
      */
@@ -2477,6 +3310,18 @@ public final class EntryStream<K, V> extends
      *     .toList();
      * // Result: [[a=1, b=2, c=3], [b=2, c=3, d=4]] (each window is a LinkedList)
      * }</pre>
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
+     *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
+     *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @param <C> the type of the collection to store the windows.
      * @param windowSize the size of the window to be used for sliding over the Stream elements
@@ -2505,6 +3350,18 @@ public final class EntryStream<K, V> extends
      * // Result: [[a=1, b=2, c=3], [c=3, d=4, e=5]]
      * }</pre>
      *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
+     *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
+     *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     * </table>
+     *
      * @param windowSize the size of the window to be used for sliding over the Stream elements
      * @param increment the number of elements to move the window forward after each step
      * @return a new Stream where each element is a List of Map.Entry objects from the original Stream, representing a window.
@@ -2530,6 +3387,18 @@ public final class EntryStream<K, V> extends
      *     .toList();
      * // Result: [[a=1, b=2, c=3], [c=3, d=4, e=5]] (each window is a LinkedList)
      * }</pre>
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
+     *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
+     *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @param <C> the type of the collection to store the windows.
      * @param windowSize the size of the window to be used for sliding over the Stream elements
@@ -2595,6 +3464,18 @@ public final class EntryStream<K, V> extends
      * // result contains entries: ("b", 2), ("c", 3)
      * }</pre>
      *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
+     *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
+     *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     * </table>
+     *
      * @param map the map to find common elements with this stream
      * @return a new EntryStream containing entries present in both this stream and the specified map,
      *         considering the minimum number of occurrences in either source
@@ -2658,6 +3539,18 @@ public final class EntryStream<K, V> extends
      * EntryStream<String, Integer> result = EntryStream.of(map1).difference(map2);
      * // result contains entries: ("a", 1), ("c", 3)
      * }</pre>
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
+     *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
+     *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @param map the map to compare against this stream
      * @return a new EntryStream containing the elements that are present in this stream but not in the specified map,
@@ -2732,6 +3625,18 @@ public final class EntryStream<K, V> extends
      * // result contains entries: ("a", 1), ("d", 4)
      * }</pre>
      *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
+     *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
+     *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     * </table>
+     *
      * @param map the map to compare with this stream for symmetric difference
      * @return a new EntryStream containing entries that are present in either this stream or the map,
      *         but not in both, considering the number of occurrences
@@ -2795,6 +3700,18 @@ public final class EntryStream<K, V> extends
      *     .sorted(Map.Entry.<String, Integer>comparingByValue().reversed());
      * }</pre>
      *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>Yes</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
+     *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
+     *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>Yes</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     * </table>
+     *
      * @param comparator the comparator to compare the entries
      * @return a new EntryStream with entries sorted by the specified comparator
      * @see #reverseSorted(Comparator)
@@ -2823,6 +3740,18 @@ public final class EntryStream<K, V> extends
      * EntryStream<String, Integer> sorted = EntryStream.of(map)
      *     .sortedByKey(String.CASE_INSENSITIVE_ORDER);
      * }</pre>
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>Yes</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
+     *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
+     *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>Yes</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @param keyComparator the comparator to compare the keys
      * @return a new EntryStream with entries sorted by the specified key comparator
@@ -2854,6 +3783,18 @@ public final class EntryStream<K, V> extends
      *     .sortedByValue(Comparator.reverseOrder());
      * }</pre>
      *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>Yes</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
+     *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
+     *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>Yes</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     * </table>
+     *
      * @param valueComparator the comparator to compare the values
      * @return a new EntryStream with entries sorted by the specified value comparator
      * @see #sortedByKey(Comparator)
@@ -2884,6 +3825,18 @@ public final class EntryStream<K, V> extends
      *     .sortedBy(entry -> entry.getKey().length());
      * }</pre>
      *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>Yes</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
+     *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
+     *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>Yes</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     * </table>
+     *
      * @param sortKeyExtractor the function to extract the comparable value for comparison
      * @return a new EntryStream with entries sorted by the extracted values
      * @see #sorted(Comparator)
@@ -2911,6 +3864,18 @@ public final class EntryStream<K, V> extends
      * EntryStream<Integer, Integer> sorted = EntryStream.of(map)
      *     .sortedByInt(entry -> entry.getKey() + entry.getValue());
      * }</pre>
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>Yes</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
+     *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
+     *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>Yes</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @param sortKeyExtractor the function to extract the integer value for comparison
      * @return a new EntryStream with entries sorted by the extracted integer values
@@ -2942,6 +3907,18 @@ public final class EntryStream<K, V> extends
      *     .sortedByLong(entry -> entry.getValue().getTimestamp());
      * }</pre>
      *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>Yes</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
+     *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
+     *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>Yes</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     * </table>
+     *
      * @param sortKeyExtractor the function to extract the long value for comparison
      * @return a new EntryStream with entries sorted by the extracted long values
      * @see #sortedByInt(ToIntFunction)
@@ -2971,6 +3948,18 @@ public final class EntryStream<K, V> extends
      * EntryStream<String, Double> sorted = EntryStream.of(scoreMap)
      *     .sortedByDouble(entry -> entry.getValue() * 0.8);
      * }</pre>
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>Yes</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
+     *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
+     *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>Yes</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @param sortKeyExtractor the function to extract the double value for comparison
      * @return a new EntryStream with entries sorted by the extracted double values
@@ -3034,6 +4023,18 @@ public final class EntryStream<K, V> extends
      *     .reverseSorted(cmp);
      * }</pre>
      *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>Yes</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
+     *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
+     *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>Yes</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     * </table>
+     *
      * @param comparator the comparator to compare the entries
      * @return a new EntryStream with entries reverse sorted by the specified comparator
      * @see #sorted(Comparator)
@@ -3062,6 +4063,18 @@ public final class EntryStream<K, V> extends
      * EntryStream<String, Integer> sorted = EntryStream.of(map)
      *     .reverseSortedBy(Map.Entry::getValue);
      * }</pre>
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>Yes</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
+     *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
+     *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>Yes</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @param sortKeyExtractor the function to extract the comparable value for comparison
      * @return a new EntryStream with entries reverse sorted by the extracted values
@@ -3148,6 +4161,18 @@ public final class EntryStream<K, V> extends
      *     .toList();
      * }</pre>
      *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>Yes</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
+     *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
+     *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>Yes</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     * </table>
+     *
      * @param mergeFunction the function to merge duplicate elements
      * @return a new EntryStream with distinct elements
      * @see Stream#distinct(BinaryOperator)
@@ -3181,6 +4206,18 @@ public final class EntryStream<K, V> extends
      *     .distinctByKey()
      *     .toList();   // returns entries for ("a", 1), ("b", 2)
      * }</pre>
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
+     *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
+     *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>Yes</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @return a new EntryStream with distinct elements based on the keys
      * @see Stream#distinctBy(Function)
@@ -3222,6 +4259,18 @@ public final class EntryStream<K, V> extends
      *     .toList();   // returns entries for ("a", 1), ("b", 2)
      * }</pre>
      *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
+     *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
+     *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>Yes</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     * </table>
+     *
      * @return a new EntryStream with distinct elements based on the values
      * @see Stream#distinctBy(Function)
      */
@@ -3254,6 +4303,18 @@ public final class EntryStream<K, V> extends
      *       .toList();   // keeps first entry for each unique key length
      * }</pre>
      *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
+     *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
+     *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>Yes</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     * </table>
+     *
      * @param keyMapper the function to extract the key for comparison
      * @return a new EntryStream with distinct elements based on the extracted keys
      * @see Stream#distinctBy(Function)
@@ -3282,6 +4343,18 @@ public final class EntryStream<K, V> extends
      *                   (e1, e2) -> e1.getValue() > e2.getValue() ? e1 : e2)
      *       .toList();
      * }</pre>
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>Yes</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
+     *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
+     *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>Yes</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @param keyMapper the function to extract the key for comparison
      * @param mergeFunction the function to merge duplicate elements
@@ -3434,7 +4507,9 @@ public final class EntryStream<K, V> extends
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Repeat entries 3 times
-     * Map<String, Integer> map = Map.of("a", 1, "b", 2);
+     * Map<String, Integer> map = new LinkedHashMap<>();
+     * map.put("a", 1);
+     * map.put("b", 2);
      * EntryStream.of(map)
      *     .cycled(3)
      *     .toList();   // returns [("a", 1), ("b", 2), ("a", 1), ("b", 2), ("a", 1), ("b", 2)]
@@ -3464,6 +4539,18 @@ public final class EntryStream<K, V> extends
      *     .prepend(prefix)
      *     .toList();   // returns [("x", 10), ("y", 20), ("a", 1), ("b", 2)]
      * }</pre>
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
+     *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
+     *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @param <M> the type of the map to prepend
      * @param map the map to prepend to the stream
@@ -3546,6 +4633,18 @@ public final class EntryStream<K, V> extends
      *     .append(suffix)
      *     .toList();   // returns [("a", 1), ("b", 2), ("x", 10), ("y", 20)]
      * }</pre>
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
+     *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
+     *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @param <M> the type of the map to append
      * @param map the map to append to the stream
@@ -3635,6 +4734,18 @@ public final class EntryStream<K, V> extends
      *     .toList();   // returns [("a", 1)]
      * }</pre>
      *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
+     *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
+     *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     * </table>
+     *
      * @param <M> the type of the map to append
      * @param map the map to append to the stream if the stream is empty
      * @return a new EntryStream with the elements of the specified map appended if the stream is empty
@@ -3721,6 +4832,18 @@ public final class EntryStream<K, V> extends
      *     .toList();   // returns [("c", 3), ("d", 4)]
      * }</pre>
      *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
+     *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
+     *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     * </table>
+     *
      * @param n the number of elements to skip
      * @return a new EntryStream with the first <i>n</i> elements skipped
      * @throws IllegalArgumentException if n is negative
@@ -3769,6 +4892,18 @@ public final class EntryStream<K, V> extends
      *     .limit(2)
      *     .toList();   // returns [("a", 1), ("b", 2)]
      * }</pre>
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
+     *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
+     *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @param maxSize the maximum number of elements to include in the stream
      * @return a new EntryStream with at most <i>maxSize</i> elements
@@ -4017,6 +5152,18 @@ public final class EntryStream<K, V> extends
      *     .toList();
      * }</pre>
      *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
+     *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
+     *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     * </table>
+     *
      * @param action the action to be performed on the entries pulled by downstream/terminal operation
      * @return a new EntryStream consisting of the elements of this stream with the provided action applied to each element
      * @see #onEach(Consumer)
@@ -4064,6 +5211,18 @@ public final class EntryStream<K, V> extends
      *     .toList();
      * }</pre>
      *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
+     *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
+     *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     * </table>
+     *
      * @param action the action to be performed on the entries pulled by downstream/terminal operation
      * @return a new EntryStream consisting of the elements of this stream with the provided action applied to each element
      * @see #peek(Consumer)
@@ -4097,6 +5256,18 @@ public final class EntryStream<K, V> extends
      *     .forEach(entry -> processEntry(entry));   // invokes processEntry, which may throw a checked exception
      * }</pre>
      *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
+     *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
+     *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     * </table>
+     *
      * @param <E> the type of exception that may be thrown by the action
      * @param action the action to be performed for each entry
      * @throws E if the action throws an exception
@@ -4129,6 +5300,18 @@ public final class EntryStream<K, V> extends
      * EntryStream.of(userScores)
      *     .forEach((userId, score) -> updateUserScore(userId, score));
      * }</pre>
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
+     *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
+     *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @param <E> the type of exception that may be thrown by the action
      * @param action the action to be performed for each key-value pair
@@ -4164,6 +5347,18 @@ public final class EntryStream<K, V> extends
      * // 2: c = 3
      * }</pre>
      *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
+     *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
+     *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     * </table>
+     *
      * @param <E> the type of exception that may be thrown by the action
      * @param action the action to be performed for each entry with its index
      * @throws E if the action throws an exception
@@ -4192,6 +5387,18 @@ public final class EntryStream<K, V> extends
      * Optional<Map.Entry<String, Person>> youngest = EntryStream.of(personMap)
      *     .min((e1, e2) -> Integer.compare(e1.getValue().getAge(), e2.getValue().getAge()));
      * }</pre>
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
+     *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
+     *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @param comparator the comparator to compare the entries
      * @return an {@code Optional} containing the minimum entry of this EntryStream, or an empty {@code Optional} if the stream is empty
@@ -4223,6 +5430,18 @@ public final class EntryStream<K, V> extends
      *     .minByKey(Comparator.comparingInt(String::length));
      * }</pre>
      *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
+     *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
+     *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     * </table>
+     *
      * @param keyComparator the comparator to compare the keys
      * @return an {@code Optional} containing the minimum entry of this EntryStream, or an empty {@code Optional} if the stream is empty
      * @see #min(Comparator)
@@ -4251,6 +5470,18 @@ public final class EntryStream<K, V> extends
      * Optional<Map.Entry<String, Person>> youngest = EntryStream.of(persons)
      *     .minByValue(Comparator.comparingInt(Person::getAge));
      * }</pre>
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
+     *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
+     *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @param valueComparator the comparator to compare the values
      * @return an {@code Optional} containing the minimum entry of this EntryStream, or an empty {@code Optional} if the stream is empty
@@ -4282,6 +5513,18 @@ public final class EntryStream<K, V> extends
      *     .minBy(entry -> entry.getValue().getDate());
      * }</pre>
      *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
+     *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
+     *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     * </table>
+     *
      * @param keyMapper the function to extract the comparable key for comparison
      * @return an {@code Optional} containing the minimum entry of this EntryStream, or an empty {@code Optional} if the stream is empty
      * @see #min(Comparator)
@@ -4311,6 +5554,18 @@ public final class EntryStream<K, V> extends
      * Optional<Map.Entry<String, Person>> oldest = EntryStream.of(personMap)
      *     .max((e1, e2) -> Integer.compare(e1.getValue().getAge(), e2.getValue().getAge()));
      * }</pre>
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
+     *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
+     *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @param comparator the comparator to compare the entries
      * @return an {@code Optional} containing the maximum entry of this EntryStream, or an empty {@code Optional} if the stream is empty
@@ -4342,6 +5597,18 @@ public final class EntryStream<K, V> extends
      *     .maxByKey(Comparator.comparingInt(String::length));
      * }</pre>
      *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
+     *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
+     *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     * </table>
+     *
      * @param keyComparator the comparator to compare the keys
      * @return an {@code Optional} containing the maximum entry of this EntryStream, or an empty {@code Optional} if the stream is empty
      * @see #max(Comparator)
@@ -4370,6 +5637,18 @@ public final class EntryStream<K, V> extends
      * Optional<Map.Entry<String, Person>> oldest = EntryStream.of(persons)
      *     .maxByValue(Comparator.comparingInt(Person::getAge));
      * }</pre>
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
+     *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
+     *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @param valueComparator the comparator to compare the values
      * @return an {@code Optional} containing the maximum entry of this EntryStream, or an empty {@code Optional} if the stream is empty
@@ -4401,6 +5680,18 @@ public final class EntryStream<K, V> extends
      *     .maxBy(entry -> entry.getValue().getDate());
      * }</pre>
      *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
+     *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
+     *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     * </table>
+     *
      * @param keyMapper the function to extract the comparable key for comparison
      * @return an {@code Optional} containing the maximum entry of this EntryStream, or an empty {@code Optional} if the stream is empty
      * @see #max(Comparator)
@@ -4430,6 +5721,18 @@ public final class EntryStream<K, V> extends
      * boolean hasTestKey = EntryStream.of(map)
      *     .anyMatch(entry -> entry.getKey().startsWith("test"));
      * }</pre>
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
+     *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
+     *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @param <E> the type of exception that may be thrown by the predicate
      * @param predicate a non-interfering, stateless predicate to apply to elements of this stream
@@ -4464,6 +5767,18 @@ public final class EntryStream<K, V> extends
      *     .anyMatch((key, value) -> key.equals(value));
      * }</pre>
      *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
+     *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
+     *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     * </table>
+     *
      * @param <E> the type of exception that may be thrown by the predicate
      * @param predicate a non-interfering, stateless bi-predicate to apply to key-value pairs of this stream
      * @return {@code true} if any elements match the predicate, otherwise {@code false}
@@ -4495,6 +5810,18 @@ public final class EntryStream<K, V> extends
      * boolean allNonEmpty = EntryStream.of(map)
      *     .allMatch(entry -> !entry.getKey().isEmpty());
      * }</pre>
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
+     *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
+     *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @param <E> the type of exception that may be thrown by the predicate
      * @param predicate a non-interfering, stateless predicate to apply to elements of this stream
@@ -4530,6 +5857,18 @@ public final class EntryStream<K, V> extends
      *     .allMatch((key, value) -> key.length() < value.length());
      * }</pre>
      *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
+     *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
+     *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     * </table>
+     *
      * @param <E> the type of exception that may be thrown by the predicate
      * @param predicate a non-interfering, stateless bi-predicate to apply to key-value pairs of this stream
      * @return {@code true} if all elements match the predicate or this EntryStream is empty, otherwise {@code false}
@@ -4561,6 +5900,18 @@ public final class EntryStream<K, V> extends
      * boolean noSpaces = EntryStream.of(map)
      *     .noneMatch(entry -> entry.getKey().contains(" "));
      * }</pre>
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
+     *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
+     *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @param <E> the type of exception that may be thrown by the predicate
      * @param predicate a non-interfering, stateless predicate to apply to elements of this stream
@@ -4596,6 +5947,18 @@ public final class EntryStream<K, V> extends
      *     .noneMatch((key, value) -> key.equals(value));
      * }</pre>
      *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
+     *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
+     *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     * </table>
+     *
      * @param <E> the type of exception that may be thrown by the predicate
      * @param predicate a non-interfering, stateless bi-predicate to apply to key-value pairs of this stream
      * @return {@code true} if no elements match the predicate or this EntryStream is empty, otherwise {@code false}
@@ -4627,6 +5990,18 @@ public final class EntryStream<K, V> extends
      * boolean exactlyThree = EntryStream.of(map)
      *     .hasMatchCountBetween(3, 3, entry -> entry.getKey().startsWith("test"));
      * }</pre>
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
+     *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
+     *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @param <E> the type of the exception that can be thrown when processing elements
      * @param atLeast the minimum number of elements that need to match the predicate
@@ -4664,6 +6039,18 @@ public final class EntryStream<K, V> extends
      *     .hasMatchCountBetween(5, Long.MAX_VALUE, (key, value) -> key.length() == value.length());
      * }</pre>
      *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
+     *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
+     *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     * </table>
+     *
      * @param <E> the type of the exception that can be thrown when processing elements
      * @param atLeast the minimum number of elements that need to match the predicate
      * @param atMost the maximum number of elements that need to match the predicate
@@ -4696,6 +6083,18 @@ public final class EntryStream<K, V> extends
      *                               .findFirst();   // returns Optional.of(entry("a", 1)) (always the first entry)
      * }</pre>
      *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
+     *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
+     *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     * </table>
+     *
      * @return an {@code Optional} containing the first entry of the stream, or an empty {@code Optional} if the stream is empty
      * @see #first()
      * @see #findAny()
@@ -4722,6 +6121,18 @@ public final class EntryStream<K, V> extends
      * Optional<Map.Entry<String, Integer>> any = EntryStream.of("a", 1, "b", 2, "c", 3)
      *                               .findAny();   // returns Optional.of(entry("a", 1))
      * }</pre>
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
+     *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
+     *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @return an {@code Optional} containing the first entry of the stream, or an empty {@code Optional} if the stream is empty
      * @see #first()
@@ -4752,6 +6163,18 @@ public final class EntryStream<K, V> extends
      * Optional<Map.Entry<String, User>> admin = EntryStream.of(users)
      *     .findFirst(entry -> entry.getKey().contains("admin"));
      * }</pre>
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
+     *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
+     *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @param <E> the type of exception that may be thrown by the predicate
      * @param predicate a non-interfering, stateless predicate to apply to elements of this stream
@@ -4786,6 +6209,18 @@ public final class EntryStream<K, V> extends
      *     .findFirst((key, value) -> key.length() == value);
      * }</pre>
      *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
+     *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
+     *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     * </table>
+     *
      * @param <E> the type of exception that may be thrown by the predicate
      * @param predicate a non-interfering, stateless bi-predicate to apply to key-value pairs of this stream
      * @return an {@code Optional} containing the first entry that matches the predicate, or an empty {@code Optional} if no match is found
@@ -4818,6 +6253,18 @@ public final class EntryStream<K, V> extends
      *     .parallel()
      *     .findAny(entry -> entry.getValue() > 95);
      * }</pre>
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
+     *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
+     *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @param <E> the type of exception that may be thrown by the predicate
      * @param predicate a non-interfering, stateless predicate to apply to elements of this stream
@@ -4853,6 +6300,18 @@ public final class EntryStream<K, V> extends
      *     .findAny((key, value) -> key.equals(value));
      * }</pre>
      *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
+     *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
+     *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     * </table>
+     *
      * @param <E> the type of exception that may be thrown by the predicate
      * @param predicate a non-interfering, stateless bi-predicate to apply to key-value pairs of this stream
      * @return an {@code Optional} containing any entry that matches the predicate, or an empty {@code Optional} if no match is found
@@ -4883,6 +6342,18 @@ public final class EntryStream<K, V> extends
      * Optional<Map.Entry<String, Object>> lastZ = EntryStream.of(map)
      *     .findLast(entry -> entry.getKey().startsWith("z"));
      * }</pre>
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
+     *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
+     *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @param <E> the type of exception that may be thrown by the predicate
      * @param predicate a non-interfering, stateless predicate to apply to elements of this stream
@@ -4916,6 +6387,18 @@ public final class EntryStream<K, V> extends
      * Optional<Map.Entry<String, String>> lastLonger = EntryStream.of(stringMap)
      *     .findLast((key, value) -> value.length() > key.length());
      * }</pre>
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
+     *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
+     *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @param <E> the type of exception that may be thrown by the predicate
      * @param predicate a non-interfering, stateless bi-predicate to apply to key-value pairs of this stream
@@ -5091,6 +6574,18 @@ public final class EntryStream<K, V> extends
      *         .percentiles((e1, e2) -> Integer.compare(e1.getKey().length(), e2.getKey().length()));
      * }</pre>
      *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
+     *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
+     *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>Yes</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     * </table>
+     *
      * @param comparator the comparator to determine the order of the entries
      * @return an {@code Optional} containing a map of percentiles to entries, or an empty {@code Optional} if the stream is empty
      * @see N#percentilesOfSorted(int[])
@@ -5182,6 +6677,18 @@ public final class EntryStream<K, V> extends
      *     }
      * }
      * }</pre>
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
+     *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
+     *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @return a BiIterator over the key-value pairs in this EntryStream
      * @see #iterator()
@@ -5349,6 +6856,18 @@ public final class EntryStream<K, V> extends
      * // Result: {"a"=1, "b"=2, "c"=3}
      * }</pre>
      *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
+     *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
+     *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>Yes</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     * </table>
+     *
      * @return a {@code Map} containing all key-value pairs from this stream
      * @throws IllegalStateException if duplicate keys are encountered
      * @see Stream#toMap(Throwables.Function, Throwables.Function)
@@ -5387,6 +6906,18 @@ public final class EntryStream<K, V> extends
      *     .toMap((v1, v2) -> v2);
      * // Result: {"a"="second"}
      * }</pre>
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
+     *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
+     *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>Yes</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @param mergeFunction a function used to resolve collisions between values associated
      *                      with the same key, as supplied to {@link Map#merge(Object, Object, BiFunction)}
@@ -5427,6 +6958,18 @@ public final class EntryStream<K, V> extends
      * Map<String, Integer> result2 = EntryStream.of("a", 1, "b", 2, "c", 3)
      *     .toMap(LinkedHashMap::new);
      * }</pre>
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
+     *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
+     *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>Yes</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @param <M> the type of the resulting {@code Map}
      * @param mapFactory a function which returns a new, empty {@code Map} into which the
@@ -5469,6 +7012,18 @@ public final class EntryStream<K, V> extends
      *     .toMap(Integer::max, ConcurrentHashMap::new);
      * // Result: ConcurrentHashMap {"a"=5, "b"=3}
      * }</pre>
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
+     *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
+     *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>Yes</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @param <M> the type of the resulting {@code Map}
      * @param mergeFunction a function used to resolve collisions between values associated
@@ -5514,6 +7069,18 @@ public final class EntryStream<K, V> extends
      * // Result: 2
      * }</pre>
      *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
+     *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
+     *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>Yes</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     * </table>
+     *
      * @param <R> the type of the result
      * @param <E> the type of exception that may be thrown by the function
      * @param func the function to apply to the resulting map
@@ -5552,6 +7119,18 @@ public final class EntryStream<K, V> extends
      *     .toMapThenAccept(external::putAll);
      * }</pre>
      *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
+     *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
+     *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>Yes</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     * </table>
+     *
      * @param <E> the type of exception that may be thrown by the consumer
      * @param consumer the consumer to accept the resulting map
      * @throws IllegalStateException if duplicate keys are encountered during map collection
@@ -5585,6 +7164,18 @@ public final class EntryStream<K, V> extends
      * // Attempting to modify throws UnsupportedOperationException
      * // result.put("d", 4);   // Throws exception
      * }</pre>
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
+     *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
+     *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>Yes</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @return an {@code ImmutableMap} containing all key-value pairs from this stream
      * @throws IllegalStateException if duplicate keys are encountered
@@ -5622,6 +7213,18 @@ public final class EntryStream<K, V> extends
      * // Result: ImmutableMap {"a"="first"}
      * }</pre>
      *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
+     *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
+     *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>Yes</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     * </table>
+     *
      * @param mergeFunction a function used to resolve collisions between values associated
      *                      with the same key
      * @return an {@code ImmutableMap} containing all key-value pairs from this stream
@@ -5658,6 +7261,18 @@ public final class EntryStream<K, V> extends
      *
      * <p><b>Note:</b> If this stream is parallel, this operation internally switches to sequential
      * processing, so any upstream parallelism is silently lost for this terminal step.
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
+     *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
+     *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>Yes</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @return a {@code ListMultimap} containing all key-value pairs from this stream
      * @see Stream#toMultimap(Throwables.Function, Throwables.Function)
@@ -5697,6 +7312,18 @@ public final class EntryStream<K, V> extends
      *
      * <p><b>Note:</b> If this stream is parallel, this operation internally switches to sequential
      * processing, so any upstream parallelism is silently lost for this terminal step.
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
+     *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
+     *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>Yes</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @param <C> the type of collection used to store values in the multimap
      * @param <M> the type of the resulting multimap
@@ -5741,6 +7368,18 @@ public final class EntryStream<K, V> extends
      * <p><b>Note:</b> If this stream is parallel, this operation internally switches to sequential
      * processing, so any upstream parallelism is silently lost for this terminal step.
      *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
+     *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
+     *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>Yes</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     * </table>
+     *
      * @return a {@code Map} where each key maps to a {@code List} of all values associated
      *         with that key in this stream
      * @see Stream#groupTo(Throwables.Function, Throwables.Function)
@@ -5779,6 +7418,18 @@ public final class EntryStream<K, V> extends
      *
      * <p><b>Note:</b> If this stream is parallel, this operation internally switches to sequential
      * processing, so any upstream parallelism is silently lost for this terminal step.
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
+     *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
+     *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>Yes</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @param <M> the type of the resulting {@code Map}
      * @param mapFactory a function which returns a new, empty {@code Map} into which the
@@ -5823,6 +7474,18 @@ public final class EntryStream<K, V> extends
      * // Result: 3 (for key "a" which has 3 values)
      * }</pre>
      *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
+     *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
+     *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>Yes</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     * </table>
+     *
      * @param <R> the type of the result
      * @param <E> the type of exception that may be thrown by the function
      * @param func the function to apply to the grouped map
@@ -5859,6 +7522,18 @@ public final class EntryStream<K, V> extends
      *     });
      * }</pre>
      *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
+     *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
+     *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>Yes</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     * </table>
+     *
      * @param <E> the type of exception that may be thrown by the consumer
      * @param consumer the consumer to accept the grouped map
      * @throws E if the consumer throws an exception
@@ -5893,6 +7568,18 @@ public final class EntryStream<K, V> extends
      * // Result: Entry("abc", "123")
      * }</pre>
      *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
+     *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
+     *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     * </table>
+     *
      * @param identity the identity value for the accumulating function
      * @param accumulator an associative, non-interfering, stateless function for combining two values
      * @return the result of the reduction
@@ -5926,6 +7613,18 @@ public final class EntryStream<K, V> extends
      *                                               e1.getValue() + e2.getValue()));
      * // Result: Optional[Entry("total", 60)]
      * }</pre>
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
+     *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
+     *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @param accumulator an associative, non-interfering, stateless function for combining two values
      * @return an {@code Optional} describing the result of the reduction, or empty if the stream is empty
@@ -5964,6 +7663,18 @@ public final class EntryStream<K, V> extends
      *     .toString();
      * // Result: "x=10; y=20; "
      * }</pre>
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
+     *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
+     *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @param <R> the type of the result
      * @param supplier a function that creates a new result container
@@ -6011,6 +7722,18 @@ public final class EntryStream<K, V> extends
      * // Result: "x:10,y:20,"
      * }</pre>
      *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
+     *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
+     *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     * </table>
+     *
      * @param <R> the type of the mutable result container
      * @param supplier a function that creates a new mutable result container
      * @param accumulator an associative, non-interfering, stateless function that adds an
@@ -6050,6 +7773,18 @@ public final class EntryStream<K, V> extends
      *     EntryStream.of("a", 1, "b", 2, "c", 3, "d", 4)
      *         .collect(Collectors.partitioningBy(e -> e.getValue() % 2 == 0));
      * }</pre>
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
+     *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
+     *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @param <R> the type of the result
      * @param collector the {@code Collector} describing the reduction
@@ -6097,6 +7832,18 @@ public final class EntryStream<K, V> extends
      * // Result: [Entry("a", 1), Entry("b", 1), Entry("d", 1)]
      * }</pre>
      *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
+     *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
+     *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     * </table>
+     *
      * @param <R> the type of the intermediate result from the collector
      * @param <RR> the type of the final result after applying the function
      * @param <E> the type of exception that may be thrown by the function
@@ -6141,6 +7888,18 @@ public final class EntryStream<K, V> extends
      * // Value 1 has 2 entries
      * // Value 2 has 2 entries
      * }</pre>
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
+     *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
+     *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @param <R> the type of the result from the collector
      * @param <E> the type of exception that may be thrown by the consumer
@@ -6233,6 +7992,18 @@ public final class EntryStream<K, V> extends
      * // Result: "name -> John; age -> 30"
      * }</pre>
      *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
+     *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
+     *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     * </table>
+     *
      * @param delimiter the delimiter to be used between each entry
      * @param keyValueDelimiter the delimiter to be used between key and value in each entry
      * @return a string representation of the entries
@@ -6268,6 +8039,18 @@ public final class EntryStream<K, V> extends
      *     .join(" ", "='", "<item ", "' />");
      * // Result: <item id='123 name='Product' />
      * }</pre>
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
+     *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
+     *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @param delimiter the delimiter to be used between each entry
      * @param keyValueDelimiter the delimiter to be used between key and value in each entry
@@ -6318,6 +8101,18 @@ public final class EntryStream<K, V> extends
      * // Result: "{a=1, b=null, c=3}" (a null value is rendered as "null", not skipped)
      * }</pre>
      *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
+     *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
+     *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     * </table>
+     *
      * @param joiner the {@code Joiner} to use for formatting the entries
      * @return the same {@code Joiner} instance after all entries have been appended
      * @throws IllegalStateException if the stream has already been operated upon or closed
@@ -6326,6 +8121,7 @@ public final class EntryStream<K, V> extends
      * @see #join(CharSequence, CharSequence, CharSequence, CharSequence)
      * @see Joiner
      */
+    @SequentialOnly
     @TerminalOp
     @Override
     public Joiner joinTo(final Joiner joiner) throws IllegalStateException, IllegalArgumentException {
@@ -6366,6 +8162,18 @@ public final class EntryStream<K, V> extends
      *     );
      * }</pre>
      *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
+     *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
+     *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     * </table>
+     *
      * @param <KK> the type of the keys in the resulting EntryStream
      * @param <VV> the type of the values in the resulting EntryStream
      * @param transfer the function to be applied on the current stream to produce a new stream.
@@ -6403,6 +8211,18 @@ public final class EntryStream<K, V> extends
      *         true  // uses deferred execution
      *     );
      * }</pre>
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
+     *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
+     *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @param <KK> the type of the keys in the resulting EntryStream
      * @param <VV> the type of the values in the resulting EntryStream
@@ -6547,12 +8367,25 @@ public final class EntryStream<K, V> extends
      *     .forEach(e -> System.out.println(e.getKey() + " -> " + e.getValue()));
      * }</pre>
      *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
+     *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
+     *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     * </table>
+     *
      * @return a new EntryStream with inverted keys and values as DisposableEntry
      * @throws IllegalStateException if the stream is parallel
      * @deprecated Use {@link #invert()} instead, which returns a standard (non-disposable) inverted EntryStream.
      * @see #invert()
      */
     @SequentialOnly
+    @IntermediateOp
     @Deprecated
     @Beta
     public EntryStream<V, K> invertToDisposableEntry() {
@@ -7358,7 +9191,8 @@ public final class EntryStream<K, V> extends
      *
      * EntryStream<String, Integer> stream = EntryStream.concat(map1, map2, map3);
      * List<Map.Entry<String, Integer>> entries = stream.toList();
-     * // Result contains all entries: [a=1, b=2, c=3, d=4, e=5, a=6]
+     * // Result contains all 6 entries: a=1, b=2, c=3, d=4, e=5, a=6
+     * // (maps are concatenated in the given order; entry order within each Map.of is unspecified)
      * }</pre>
      *
      * @param <K> the type of keys in the maps
@@ -7453,7 +9287,7 @@ public final class EntryStream<K, V> extends
      */
     public static <K, V> EntryStream<K, V> merge(final Map<? extends K, ? extends V> a, final Map<? extends K, ? extends V> b,
             final BiFunction<? super Map.Entry<K, V>, ? super Map.Entry<K, V>, MergeResult> nextSelector) throws IllegalArgumentException {
-        N.checkArgNotNull(nextSelector);
+        N.checkArgNotNull(nextSelector, cs.nextSelector);
 
         if (N.isEmpty(a)) {
             return of(b);
@@ -7515,7 +9349,7 @@ public final class EntryStream<K, V> extends
     public static <K, V> EntryStream<K, V> merge(final Map<? extends K, ? extends V> a, final Map<? extends K, ? extends V> b,
             final Map<? extends K, ? extends V> c, final BiFunction<? super Map.Entry<K, V>, ? super Map.Entry<K, V>, MergeResult> nextSelector)
             throws IllegalArgumentException {
-        N.checkArgNotNull(nextSelector);
+        N.checkArgNotNull(nextSelector, cs.nextSelector);
 
         if (N.isEmpty(a)) {
             return merge(b, c, nextSelector);
@@ -7575,7 +9409,7 @@ public final class EntryStream<K, V> extends
     public static <K, V> EntryStream<K, V> merge(final Collection<? extends Map<? extends K, ? extends V>> maps,
             final BiFunction<? super Map.Entry<? extends K, ? extends V>, ? super Map.Entry<? extends K, ? extends V>, MergeResult> nextSelector)
             throws IllegalArgumentException {
-        N.checkArgNotNull(nextSelector);
+        N.checkArgNotNull(nextSelector, cs.nextSelector);
 
         if (N.isEmpty(maps)) {
             return EntryStream.empty();

@@ -72,7 +72,7 @@ public class PoolableAdapterTest extends TestBase {
 
         assertNotNull(wrapper);
         assertEquals(value, wrapper.value());
-        assertEquals(Long.MAX_VALUE, wrapper.activityPrint().getLiveTime());
+        assertEquals(Long.MAX_VALUE, wrapper.activityPrint().getMaxLiveTime());
         assertEquals(Long.MAX_VALUE, wrapper.activityPrint().getMaxIdleTime());
     }
 
@@ -86,7 +86,7 @@ public class PoolableAdapterTest extends TestBase {
 
         assertNotNull(wrapper);
         assertEquals(value, wrapper.value());
-        assertEquals(liveTime, wrapper.activityPrint().getLiveTime());
+        assertEquals(liveTime, wrapper.activityPrint().getMaxLiveTime());
         assertEquals(maxIdleTime, wrapper.activityPrint().getMaxIdleTime());
     }
 
@@ -104,7 +104,7 @@ public class PoolableAdapterTest extends TestBase {
         ActivityPrint print = wrapper.activityPrint();
 
         assertNotNull(print);
-        assertEquals(10000, print.getLiveTime());
+        assertEquals(10000, print.getMaxLiveTime());
         assertEquals(5000, print.getMaxIdleTime());
     }
 
@@ -148,7 +148,7 @@ public class PoolableAdapterTest extends TestBase {
 
         assertNotNull(wrapper);
         assertEquals(testObject, wrapper.value());
-        assertEquals(Long.MAX_VALUE, wrapper.activityPrint().getLiveTime());
+        assertEquals(Long.MAX_VALUE, wrapper.activityPrint().getMaxLiveTime());
         assertEquals(Long.MAX_VALUE, wrapper.activityPrint().getMaxIdleTime());
     }
 
@@ -162,7 +162,7 @@ public class PoolableAdapterTest extends TestBase {
 
         assertNotNull(wrapper);
         assertEquals(testObject, wrapper.value());
-        assertEquals(liveTime, wrapper.activityPrint().getLiveTime());
+        assertEquals(liveTime, wrapper.activityPrint().getMaxLiveTime());
         assertEquals(maxIdleTime, wrapper.activityPrint().getMaxIdleTime());
     }
 
@@ -203,7 +203,7 @@ public class PoolableAdapterTest extends TestBase {
         assertNotNull(wrapper);
         assertEquals(value, wrapper.value());
         assertNotNull(wrapper.activityPrint());
-        assertEquals(Long.MAX_VALUE, wrapper.activityPrint().getLiveTime());
+        assertEquals(Long.MAX_VALUE, wrapper.activityPrint().getMaxLiveTime());
         assertEquals(Long.MAX_VALUE, wrapper.activityPrint().getMaxIdleTime());
     }
 
@@ -217,7 +217,7 @@ public class PoolableAdapterTest extends TestBase {
 
         assertNotNull(wrapper);
         assertEquals(value, wrapper.value());
-        assertEquals(liveTime, wrapper.activityPrint().getLiveTime());
+        assertEquals(liveTime, wrapper.activityPrint().getMaxLiveTime());
         assertEquals(maxIdleTime, wrapper.activityPrint().getMaxIdleTime());
     }
 
@@ -245,7 +245,7 @@ public class PoolableAdapterTest extends TestBase {
         assertNotNull(wrapper);
         assertEquals(testObject, wrapper.value());
         assertNotNull(wrapper.activityPrint());
-        assertEquals(Long.MAX_VALUE, wrapper.activityPrint().getLiveTime());
+        assertEquals(Long.MAX_VALUE, wrapper.activityPrint().getMaxLiveTime());
         assertEquals(Long.MAX_VALUE, wrapper.activityPrint().getMaxIdleTime());
     }
 
@@ -260,7 +260,7 @@ public class PoolableAdapterTest extends TestBase {
         assertNotNull(wrapper);
         assertEquals(testObject, wrapper.value());
         assertNotNull(wrapper.activityPrint());
-        assertEquals(liveTime, wrapper.activityPrint().getLiveTime());
+        assertEquals(liveTime, wrapper.activityPrint().getMaxLiveTime());
         assertEquals(maxIdleTime, wrapper.activityPrint().getMaxIdleTime());
     }
 

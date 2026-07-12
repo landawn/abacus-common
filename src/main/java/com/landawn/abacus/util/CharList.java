@@ -667,7 +667,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      */
     public static CharList random(final char startInclusive, final char endExclusive, final int len) {
         if (startInclusive >= endExclusive) {
-            throw new IllegalArgumentException("'startInclusive' must be less than 'endExclusive'");
+            throw new IllegalArgumentException("'startInclusive' (" + startInclusive + ") must be less than 'endExclusive' (" + endExclusive + ")");
         }
 
         final char[] a = new char[len];
@@ -2296,10 +2296,10 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * }</pre>
      *
      * @param action the action to be performed for each element; must not be {@code null}
-     * @throws NullPointerException if {@code action} is {@code null}
+     * @throws IllegalArgumentException if {@code action} is {@code null}
      */
     public void forEach(final CharConsumer action) {
-        N.requireNonNull(action, cs.action);
+        N.checkArgNotNull(action, cs.action);
 
         forEach(0, size, action);
     }
@@ -2328,9 +2328,11 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * @param toIndex the ending index (exclusive), or {@code -1} for backward iteration to the start
      * @param action the action to be performed for each element; must not be {@code null}
      * @throws IndexOutOfBoundsException if the specified range is out of bounds
+     * @throws IllegalArgumentException if {@code action} is {@code null}
      */
     public void forEach(final int fromIndex, final int toIndex, final CharConsumer action) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), Math.max(fromIndex, toIndex), size);
+        N.checkArgNotNull(action, cs.action);
 
         if (size > 0) {
             if (fromIndex <= toIndex) {
@@ -2783,7 +2785,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * <p>Each returned sublist is a new independent CharList instance. Modifications to
      * the returned sublists do not affect this list or each other.</p>
      *
-     * <p><b>Usage Examples:</b> Splitting [1,2,3,4,5,6,7,8,9] with chunkSize 3 returns [[1,2,3], [4,5,6], [7,8,9]]</p>
+     * <p><b>Usage Examples:</b> Splitting [a,b,c,d,e,f,g,h,i] with chunkSize 3 returns [[a,b,c], [d,e,f], [g,h,i]]</p>
      *
      * @param fromIndex the index of the first element (inclusive) to be included
      * @param toIndex the index after the last element (exclusive) to be included

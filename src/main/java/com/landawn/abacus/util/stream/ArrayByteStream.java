@@ -1950,6 +1950,10 @@ class ArrayByteStream extends AbstractByteStream {
 
                 @Override
                 public void advance(final long n) {
+                    if (n <= 0) {
+                        return;
+                    }
+
                     if (!executed) {
                         executed = true;
                         action.run();
@@ -2002,7 +2006,7 @@ class ArrayByteStream extends AbstractByteStream {
      *
      * <pre>{@code
      * byte[] data = {1, 2, 3};
-     * // yields: 1, 2, 3, 1, 2, 3, 1, 2, 3, ...
+     * // limit(7) yields: 1, 2, 3, 1, 2, 3, 1
      * ByteStream.of(data).cycled().limit(7).forEach(System.out::println);
      * }</pre>
      *

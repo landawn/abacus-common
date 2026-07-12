@@ -175,6 +175,7 @@ public interface Type<T> {
      * @param <T> the Java type represented by the returned {@code Type} instance
      * @param javaType the Java reflection type
      * @return the corresponding Type instance
+     * @throws IllegalArgumentException if {@code javaType} is {@code null}
      */
     static <T> Type<T> of(final java.lang.reflect.Type javaType) {
         return TypeFactory.getType(javaType);
@@ -196,9 +197,10 @@ public interface Type<T> {
      * @param <T> the Java type represented by the returned {@code Type} instance
      * @param typeRef the type reference
      * @return the corresponding Type instance
+     * @throws IllegalArgumentException if {@code typeRef} is {@code null}
      */
     static <T> Type<T> of(final TypeReference<T> typeRef) {
-        return typeRef.type();
+        return N.checkArgNotNull(typeRef, "typeRef").type();
     }
 
     /**
@@ -220,6 +222,7 @@ public interface Type<T> {
      * @param <T> the Java type represented by the returned {@code Type} instance
      * @param cls the class
      * @return the corresponding Type instance
+     * @throws IllegalArgumentException if {@code cls} is {@code null}
      */
     static <T> Type<T> of(final Class<? extends T> cls) {
         return TypeFactory.getType(cls);
@@ -244,6 +247,7 @@ public interface Type<T> {
      * @param <T> the Java type represented by the returned {@code Type} instance
      * @param typeName the type name string
      * @return the corresponding Type instance
+     * @throws IllegalArgumentException if {@code typeName} is {@code null}
      */
     static <T> Type<T> of(final String typeName) {
         return TypeFactory.getType(typeName);

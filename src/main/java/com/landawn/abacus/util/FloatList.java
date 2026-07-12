@@ -2166,10 +2166,10 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
      * }</pre>
      *
      * @param action the action to be performed for each element. Must not be {@code null}.
-     * @throws NullPointerException if the specified action is {@code null}
+     * @throws IllegalArgumentException if {@code action} is {@code null}
      */
     public void forEach(final FloatConsumer action) {
-        N.requireNonNull(action, cs.action);
+        N.checkArgNotNull(action, cs.action);
 
         forEach(0, size, action);
     }
@@ -2197,10 +2197,11 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
      * @param toIndex the ending index (exclusive), or -1 for backward iteration to the start
      * @param action the action to be performed for each element. Must not be {@code null}.
      * @throws IndexOutOfBoundsException if the indices are out of range
-     * @throws NullPointerException if the specified action is {@code null}
+     * @throws IllegalArgumentException if {@code action} is {@code null}
      */
     public void forEach(final int fromIndex, final int toIndex, final FloatConsumer action) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), Math.max(fromIndex, toIndex), size);
+        N.checkArgNotNull(action, cs.action);
 
         if (size > 0) {
             if (fromIndex <= toIndex) {

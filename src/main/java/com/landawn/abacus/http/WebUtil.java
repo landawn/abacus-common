@@ -649,7 +649,7 @@ public final class WebUtil {
      *   <li>The command is formatted with line separators at the beginning and end</li>
      * </ul>
      *
-     * <p><b>&#9888;</b> Prefer single-quote ({@code '}) mode for untrusted values: inside double
+     * <p><b>&#9888;&#65039;</b> Prefer single-quote ({@code '}) mode for untrusted values: inside double
      * quotes the shell still performs variable/command expansion ({@code $(...)}, {@code `...`},
      * {@code ${...}}), which is only safe if you intend that expansion.</p>
      *

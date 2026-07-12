@@ -240,11 +240,12 @@ public class JdkOptionalLongType extends AbstractOptionalType<OptionalLong> {
 
     /**
      * Writes the character representation of an OptionalLong to a CharacterWriter.
-     * Empty optionals are written as {@code null}.
-     * Present values are written as numeric values without quotes.
+     * Empty optionals are written as {@code null}. Otherwise, the contained long value is written via the
+     * writer's optimized {@code write(long)} method; when {@code config.isWriteLongAsString()} is set with a
+     * non-zero {@code stringQuotation}, the value is wrapped in that quotation character.
      * <p>
      * This method is specifically designed for JSON/XML serialization: it writes this type's literal form to the
-     * {@code CharacterWriter}. String quotation/escaping config is ignored.
+     * {@code CharacterWriter}.
      * <p>
      * <b>serializeTo vs. appendTo:</b> {@code serializeTo} produces machine-readable JSON/XML literal output,
      * whereas {@code appendTo} produces a plain, human-readable {@code toString()}-style rendering without JSON/XML
@@ -252,7 +253,7 @@ public class JdkOptionalLongType extends AbstractOptionalType<OptionalLong> {
      *
      * @param writer the CharacterWriter to write to
      * @param x the OptionalLong to write
-     * @param config the serialization configuration (not used for numeric values)
+     * @param config the serialization configuration (honors {@code writeLongAsString}/{@code stringQuotation}); may be {@code null}
      * @throws IOException if an I/O error occurs during writing
      */
     @Override
@@ -260,7 +261,16 @@ public class JdkOptionalLongType extends AbstractOptionalType<OptionalLong> {
         if (x == null || x.isEmpty()) {
             writer.write(NULL_CHAR_ARRAY);
         } else {
-            writer.write(x.getAsLong());
+            final long value = x.getAsLong();
+
+            if (config != null && config.isWriteLongAsString() && config.getStringQuotation() != 0) {
+                final char quotation = config.getStringQuotation();
+                writer.write(quotation);
+                writer.write(value);
+                writer.write(quotation);
+            } else {
+                writer.write(value);
+            }
         }
     }
 }

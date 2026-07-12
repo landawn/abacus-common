@@ -372,7 +372,7 @@ public final class Fnn {
      * Returns a memoized (caching) version of the given exception-throwing supplier whose cached value
      * expires after the specified {@link Duration}. This is a convenience overload of
      * {@link #memoizeWithExpiration(Throwables.Supplier, long, TimeUnit)} that accepts a {@code Duration}
-     * instead of a {@code (long, TimeUnit)} pair (mirroring {@link Fn#memoizeWithExpiration(java.util.function.Supplier, Duration)}).
+     * instead of a {@code (long, TimeUnit)} pair (mirroring {@link Fn#memoizeWithExpiration(java.util.function.Supplier, com.landawn.abacus.util.Duration)}).
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1083,6 +1083,7 @@ public final class Fnn {
      */
     @Stateful
     public static <T, E extends Exception> Throwables.Consumer<T, E> rateLimiter(final RateLimiter rateLimiter) {
+        N.checkArgNotNull(rateLimiter);
         return t -> rateLimiter.acquire();
     }
 
@@ -2913,7 +2914,7 @@ public final class Fnn {
      */
     @Beta
     public static <T, U, E extends Throwable> Throwables.BiConsumer<T, java.util.function.Consumer<U>, E> mc(
-            final Throwables.BiConsumer<? super T, ? extends java.util.function.Consumer<U>, E> mapper) {
+            final Throwables.BiConsumer<? super T, ? super java.util.function.Consumer<U>, E> mapper) {
         N.checkArgNotNull(mapper);
 
         return (Throwables.BiConsumer<T, java.util.function.Consumer<U>, E>) mapper;

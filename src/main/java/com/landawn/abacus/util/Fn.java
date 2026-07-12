@@ -1381,6 +1381,7 @@ public final class Fn {
      */
     @Stateful
     public static <T> Consumer<T> rateLimiter(final RateLimiter rateLimiter) {
+        N.checkArgNotNull(rateLimiter);
         return t -> rateLimiter.acquire();
     }
 
@@ -3007,9 +3008,10 @@ public final class Fn {
     public static <T> Predicate<T> in(final Collection<?> c) throws IllegalArgumentException {
         N.checkArgNotNull(c);
 
-        final boolean isNotEmpty = N.notEmpty(c);
-
-        return value -> isNotEmpty && c.contains(value);
+        // Evaluate containment live (like notIn): freezing emptiness at construction would make an
+        // initially-empty-then-populated collection silently mis-test, and contains() on an empty
+        // collection is already O(1) false, so the short-circuit saved nothing.
+        return value -> c.contains(value);
     }
 
     /**
@@ -4018,6 +4020,7 @@ public final class Fn {
      * @throws IllegalArgumentException if predicate is null
      * @see #acceptKeyVal(java.util.function.BiConsumer)
      * @see #applyKeyVal(java.util.function.BiFunction)
+     * @see Entries#p(java.util.function.BiPredicate)
      */
     public static <K, V> Predicate<Map.Entry<K, V>> testKeyVal(final java.util.function.BiPredicate<? super K, ? super V> predicate)
             throws IllegalArgumentException {
@@ -4029,6 +4032,8 @@ public final class Fn {
     /**
      * Returns a Consumer for Map.Entry that accepts both key and value using a BiConsumer.
      *
+     * <p>This is the top-level equivalent of the compact {@link Entries#c(java.util.function.BiConsumer)}.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Fn.acceptKeyVal((k,v)->println(k+"="+v)).accept(Map.entry("age",25)) // prints age=25
@@ -4039,6 +4044,9 @@ public final class Fn {
      * @param consumer the bi-consumer to accept key and value
      * @return a Consumer that operates on Map.Entry key and value
      * @throws IllegalArgumentException if consumer is null
+     * @see #testKeyVal(java.util.function.BiPredicate)
+     * @see #applyKeyVal(java.util.function.BiFunction)
+     * @see Entries#c(java.util.function.BiConsumer)
      */
     public static <K, V> Consumer<Map.Entry<K, V>> acceptKeyVal(final java.util.function.BiConsumer<? super K, ? super V> consumer)
             throws IllegalArgumentException {
@@ -4081,6 +4089,7 @@ public final class Fn {
      * @throws IllegalArgumentException if func is null
      * @see #testKeyVal(java.util.function.BiPredicate)
      * @see #acceptKeyVal(java.util.function.BiConsumer)
+     * @see Entries#f(java.util.function.BiFunction)
      */
     public static <K, V, R> Function<Map.Entry<K, V>, R> applyKeyVal(final java.util.function.BiFunction<? super K, ? super V, ? extends R> func)
             throws IllegalArgumentException {
@@ -4228,6 +4237,7 @@ public final class Fn {
      */
     @Beta
     public static <T, R> Function<T, Collection<R>> applyIfNotNullOrEmpty(final java.util.function.Function<T, ? extends Collection<R>> mapper) {
+        N.checkArgNotNull(mapper);
         return t -> t == null ? N.emptyList() : mapper.apply(t);
     }
 
@@ -6619,7 +6629,7 @@ public final class Fn {
      */
     @Beta
     public static <T, U> java.util.function.BiConsumer<T, java.util.function.Consumer<U>> mc(
-            final java.util.function.BiConsumer<? super T, ? extends java.util.function.Consumer<U>> mapper) {
+            final java.util.function.BiConsumer<? super T, ? super java.util.function.Consumer<U>> mapper) {
         N.checkArgNotNull(mapper);
 
         final java.util.function.BiConsumer<T, java.util.function.Consumer<U>> jdkMapper = (java.util.function.BiConsumer<T, java.util.function.Consumer<U>>) mapper;
@@ -8726,6 +8736,8 @@ public final class Fn {
         @SequentialOnly
         @Stateful
         public static <T> Predicate<T> distinctBy(final java.util.function.Function<? super T, ?> mapper) {
+            N.checkArgNotNull(mapper, cs.mapper);
+
             return new Predicate<>() {
                 private final Set<Object> set = N.newHashSet();
 
@@ -8782,6 +8794,8 @@ public final class Fn {
         @Beta
         @Stateful
         public static <T> Predicate<T> concurrentDistinctBy(final java.util.function.Function<? super T, ?> mapper) {
+            N.checkArgNotNull(mapper, cs.mapper);
+
             return new Predicate<>() {
                 private final Map<Object, Object> map = new ConcurrentHashMap<>();
 
@@ -10230,6 +10244,7 @@ public final class Fn {
          * @param f the BiFunction to adapt
          * @return a Function that extracts key and value from an entry and applies the BiFunction
          * @throws IllegalArgumentException if f is null
+         * @see Fn#applyKeyVal(java.util.function.BiFunction)
          */
         public static <K, V, T> Function<Map.Entry<K, V>, T> f(final java.util.function.BiFunction<? super K, ? super V, ? extends T> f)
                 throws IllegalArgumentException {
@@ -10252,6 +10267,7 @@ public final class Fn {
          * @param p the BiPredicate to adapt
          * @return a Predicate that extracts key and value from an entry and applies the BiPredicate
          * @throws IllegalArgumentException if p is null
+         * @see Fn#testKeyVal(java.util.function.BiPredicate)
          */
         public static <K, V> Predicate<Map.Entry<K, V>> p(final java.util.function.BiPredicate<? super K, ? super V> p) throws IllegalArgumentException {
             N.checkArgNotNull(p, cs.BiPredicate);
@@ -10273,6 +10289,7 @@ public final class Fn {
          * @param c the BiConsumer to adapt
          * @return a Consumer that extracts key and value from an entry and applies the BiConsumer
          * @throws IllegalArgumentException if c is null
+         * @see Fn#acceptKeyVal(java.util.function.BiConsumer)
          */
         public static <K, V> Consumer<Map.Entry<K, V>> c(final java.util.function.BiConsumer<? super K, ? super V> c) throws IllegalArgumentException {
             N.checkArgNotNull(c, cs.BiConsumer);

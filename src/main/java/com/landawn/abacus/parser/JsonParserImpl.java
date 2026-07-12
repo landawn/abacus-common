@@ -2429,9 +2429,9 @@ final class JsonParserImpl extends AbstractJsonParser {
      */
     @Override
     public <T> T deserialize(InputStream source, JsonDeserConfig config, Type<? extends T> targetType) {
-        // RFC 8259 mandates UTF-8 for JSON over the wire. IOUtil.newInputStreamReader(InputStream)
-        // falls back to the JVM default charset, which silently corrupts non-ASCII content on
-        // Windows (cp1252) or any non-UTF-8 default-charset host.
+        // RFC 8259 mandates UTF-8 for JSON over the wire, so the charset is pinned explicitly here.
+        // (IOUtil.newInputStreamReader(InputStream) already defaults to UTF-8 - the library-wide
+        // default, not the JVM platform charset - so this only makes the intent explicit.)
         // Reader is intentionally not closed here; the caller owns the InputStream lifecycle.
         final Reader reader = IOUtil.newInputStreamReader(source, Charsets.UTF_8); // NOSONAR
 

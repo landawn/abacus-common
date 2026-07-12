@@ -46,22 +46,22 @@ public class LockModeTest extends AbstractTest {
     }
 
     @Test
-    public void testValueOf_withValidIntValues() {
-        assertEquals(LockMode.R, LockMode.valueOf(1));
-        assertEquals(LockMode.A, LockMode.valueOf(2));
-        assertEquals(LockMode.U, LockMode.valueOf(4));
-        assertEquals(LockMode.D, LockMode.valueOf(8));
-        assertEquals(LockMode.RA, LockMode.valueOf(3));
-        assertEquals(LockMode.RU, LockMode.valueOf(5));
-        assertEquals(LockMode.RD, LockMode.valueOf(9));
-        assertEquals(LockMode.AU, LockMode.valueOf(6));
-        assertEquals(LockMode.AD, LockMode.valueOf(10));
-        assertEquals(LockMode.UD, LockMode.valueOf(12));
-        assertEquals(LockMode.RAU, LockMode.valueOf(7));
-        assertEquals(LockMode.RAD, LockMode.valueOf(11));
-        assertEquals(LockMode.RUD, LockMode.valueOf(13));
-        assertEquals(LockMode.AUD, LockMode.valueOf(14));
-        assertEquals(LockMode.RAUD, LockMode.valueOf(15));
+    public void testOf_withValidIntValues() {
+        assertEquals(LockMode.R, LockMode.of(1));
+        assertEquals(LockMode.A, LockMode.of(2));
+        assertEquals(LockMode.U, LockMode.of(4));
+        assertEquals(LockMode.D, LockMode.of(8));
+        assertEquals(LockMode.RA, LockMode.of(3));
+        assertEquals(LockMode.RU, LockMode.of(5));
+        assertEquals(LockMode.RD, LockMode.of(9));
+        assertEquals(LockMode.AU, LockMode.of(6));
+        assertEquals(LockMode.AD, LockMode.of(10));
+        assertEquals(LockMode.UD, LockMode.of(12));
+        assertEquals(LockMode.RAU, LockMode.of(7));
+        assertEquals(LockMode.RAD, LockMode.of(11));
+        assertEquals(LockMode.RUD, LockMode.of(13));
+        assertEquals(LockMode.AUD, LockMode.of(14));
+        assertEquals(LockMode.RAUD, LockMode.of(15));
     }
 
     @Test
@@ -75,24 +75,24 @@ public class LockModeTest extends AbstractTest {
     }
 
     @Test
-    public void testValueOf() {
+    public void testOf() {
         for (LockMode e : LockMode.values()) {
-            assertEquals(e, LockMode.valueOf(e.intValue()));
+            assertEquals(e, LockMode.of(e.intValue()));
         }
 
         try {
-            LockMode.valueOf(-1000);
+            LockMode.of(-1000);
             fail("should throw IllegalArgumentException");
         } catch (IllegalArgumentException e) {
         }
     }
 
     @Test
-    public void testValueOf_withInvalidIntValue() {
-        assertThrows(IllegalArgumentException.class, () -> LockMode.valueOf(0));
-        assertThrows(IllegalArgumentException.class, () -> LockMode.valueOf(16));
-        assertThrows(IllegalArgumentException.class, () -> LockMode.valueOf(-1));
-        assertThrows(IllegalArgumentException.class, () -> LockMode.valueOf(100));
+    public void testOf_withInvalidIntValue() {
+        assertThrows(IllegalArgumentException.class, () -> LockMode.of(0));
+        assertThrows(IllegalArgumentException.class, () -> LockMode.of(16));
+        assertThrows(IllegalArgumentException.class, () -> LockMode.of(-1));
+        assertThrows(IllegalArgumentException.class, () -> LockMode.of(100));
     }
 
     @Test

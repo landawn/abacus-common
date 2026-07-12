@@ -197,32 +197,45 @@ public abstract class LongIterator extends ImmutableIterator<Long> {
         return new LongIterator() {
             private LongIterator iter = null;
             private volatile boolean isInitialized = false;
+            private Throwable initializationFailure = null;
 
             @Override
             public boolean hasNext() {
-                if (!isInitialized) {
-                    init();
-                }
+                init();
 
                 return iter.hasNext();
             }
 
             @Override
             public long nextLong() {
-                if (!isInitialized) {
-                    init();
-                }
+                init();
 
                 return iter.nextLong();
             }
 
-            private synchronized void init() {
+            private void init() {
                 if (!isInitialized) {
-                    isInitialized = true;
-                    iter = iteratorSupplier.get();
-                    if (iter == null) {
-                        throw new IllegalStateException("Iterator supplier returned null");
+                    synchronized (this) {
+                        if (!isInitialized) {
+                            try {
+                                iter = iteratorSupplier.get();
+
+                                if (iter == null) {
+                                    throw new IllegalStateException("Iterator supplier returned null");
+                                }
+                            } catch (RuntimeException | Error e) {
+                                initializationFailure = e;
+                            } finally {
+                                isInitialized = true;
+                            }
+                        }
                     }
+                }
+
+                if (initializationFailure instanceof RuntimeException) {
+                    throw (RuntimeException) initializationFailure;
+                } else if (initializationFailure != null) {
+                    throw (Error) initializationFailure;
                 }
             }
         };

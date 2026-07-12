@@ -131,7 +131,8 @@ import com.landawn.abacus.util.u.Optional;
  * <p><b>Configuration Methods:</b>
  * <ul>
  *   <li>{@link #setEmptyValue(CharSequence)} - Value returned when no elements are appended</li>
- *   <li>{@link #trimBeforeAppend()} - Trim whitespace from elements before appending</li>
+ *   <li>{@link #trimBeforeAppend()} - Remove leading and trailing characters handled by {@link String#trim()}</li>
+ *   <li>{@link #stripBeforeAppend()} - Remove leading and trailing Unicode whitespace</li>
  *   <li>{@link #skipNulls()} - Skip null elements instead of converting to text</li>
  *   <li>{@link #useForNull(String)} - Custom text for null values (default: "null")</li>
  *   <li>{@link #reuseBuffer()} - Enable buffer reuse for performance optimization</li>
@@ -252,6 +253,8 @@ public final class Joiner implements Closeable {
     private final boolean isEmptyKeyValueDelimiter;
 
     private boolean trimBeforeAppend = false;
+
+    private boolean stripBeforeAppend = false;
 
     private boolean skipNulls = false;
 
@@ -452,9 +455,10 @@ public final class Joiner implements Closeable {
     }
 
     /**
-     * Configures the joiner to trim whitespace from the beginning and end of each string element before appending.
-     * This affects String, CharSequence, and the string representation of objects.
-     * Primitive values are not affected.
+     * Configures the joiner to remove leading and trailing characters handled by {@link String#trim()}
+     * from each string element before appending. This affects String, CharSequence, and the string
+     * representation of objects. Primitive values are not affected. Calling this method after
+     * {@link #stripBeforeAppend()} switches the joiner back to trim mode.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -463,9 +467,37 @@ public final class Joiner implements Closeable {
      * }</pre>
      *
      * @return this Joiner instance for method chaining.
+     * @see #stripBeforeAppend()
      */
     public Joiner trimBeforeAppend() {
         trimBeforeAppend = true;
+        stripBeforeAppend = false;
+
+        return this;
+    }
+
+    /**
+     * Configures the joiner to remove leading and trailing Unicode whitespace, as defined by
+     * {@link Character#isWhitespace(char)}, from each string element before appending. This affects
+     * String, CharSequence, and the string representation of objects. Primitive values are not
+     * affected. Calling this method after {@link #trimBeforeAppend()} switches the joiner to strip mode.
+     *
+     * <p>Unlike {@link #trimBeforeAppend()}, this method removes Unicode whitespace such as the
+     * em space ({@code U+2003}).</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Joiner.with(", ").stripBeforeAppend().append(" a ").append(" b ").toString();
+     * // Returns: "a, b"
+     * }</pre>
+     *
+     * @return this Joiner instance for method chaining.
+     * @see #trimBeforeAppend()
+     * @see Strings#strip(String)
+     */
+    public Joiner stripBeforeAppend() {
+        stripBeforeAppend = true;
+        trimBeforeAppend = false;
 
         return this;
     }
@@ -641,7 +673,7 @@ public final class Joiner implements Closeable {
     /**
      * Appends a String to the joiner.
      * If the string is {@code null}, it will be handled according to the skipNulls and useForNull settings.
-     * If trimBeforeAppend is enabled, the string will be trimmed before appending.
+     * If trimBeforeAppend or stripBeforeAppend is enabled, the string will be processed before appending.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -654,7 +686,7 @@ public final class Joiner implements Closeable {
      */
     public Joiner append(final String element) {
         if (element != null || !skipNulls) {
-            prepareBuilder().append(element == null ? nullText : (trimBeforeAppend ? element.trim() : element));
+            prepareBuilder().append(format(element));
         }
 
         return this;
@@ -663,7 +695,7 @@ public final class Joiner implements Closeable {
     /**
      * Appends a CharSequence to the joiner.
      * If the CharSequence is {@code null}, it will be handled according to the skipNulls and useForNull settings.
-     * If trimBeforeAppend is enabled, the CharSequence will be converted to string and trimmed before appending.
+     * If trimBeforeAppend or stripBeforeAppend is enabled, the CharSequence will be converted to a string and processed before appending.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -676,7 +708,7 @@ public final class Joiner implements Closeable {
      */
     public Joiner append(final CharSequence element) {
         if (element != null || !skipNulls) {
-            prepareBuilder().append(element == null ? nullText : (trimBeforeAppend ? element.toString().trim() : element));
+            prepareBuilder().append(format(element));
         }
 
         return this;
@@ -703,8 +735,8 @@ public final class Joiner implements Closeable {
         if (element != null || !skipNulls) {
             if (element == null) {
                 prepareBuilder().append(nullText);
-            } else if (trimBeforeAppend) {
-                prepareBuilder().append(element.subSequence(start, end).toString().trim());
+            } else if (trimBeforeAppend || stripBeforeAppend) {
+                prepareBuilder().append(format(element.subSequence(start, end)));
             } else {
                 prepareBuilder().append(element, start, end);
             }
@@ -716,7 +748,8 @@ public final class Joiner implements Closeable {
     /**
      * Appends a StringBuilder to the joiner.
      * If the StringBuilder is {@code null}, it will be handled according to the skipNulls and useForNull settings.
-     * Note: The contents of the StringBuilder are appended directly without trimming even if trimBeforeAppend is enabled.
+     * Note: The contents of the StringBuilder are appended directly without trimming or stripping even if
+     * trimBeforeAppend or stripBeforeAppend is enabled.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -743,7 +776,7 @@ public final class Joiner implements Closeable {
      * Appends an Object to the joiner.
      * The object will be converted to string using its toString() method.
      * If the object is {@code null}, it will be handled according to the skipNulls and useForNull settings.
-     * If trimBeforeAppend is enabled, the string representation will be trimmed before appending.
+     * If trimBeforeAppend or stripBeforeAppend is enabled, the string representation will be processed before appending.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -2001,7 +2034,7 @@ public final class Joiner implements Closeable {
     /**
      * Appends a key-value pair with a boolean value to the joiner.
      * The key and value are separated by the configured keyValueDelimiter.
-     * The key is formatted according to trimBeforeAppend setting.
+     * The key is formatted according to the trimBeforeAppend or stripBeforeAppend setting.
      * If multiple entries are appended, they are separated by the configured separator.
      *
      * <p><b>Usage Examples:</b></p>
@@ -2026,7 +2059,7 @@ public final class Joiner implements Closeable {
     /**
      * Appends a key-value pair with a char value to the joiner.
      * The key and value are separated by the configured keyValueDelimiter.
-     * The key is formatted according to trimBeforeAppend setting.
+     * The key is formatted according to the trimBeforeAppend or stripBeforeAppend setting.
      * If multiple entries are appended, they are separated by the configured separator.
      *
      * <p><b>Usage Examples:</b></p>
@@ -2051,7 +2084,7 @@ public final class Joiner implements Closeable {
     /**
      * Appends a key-value pair with an int value to the joiner.
      * The key and value are separated by the configured keyValueDelimiter.
-     * The key is formatted according to trimBeforeAppend setting.
+     * The key is formatted according to the trimBeforeAppend or stripBeforeAppend setting.
      * If multiple entries are appended, they are separated by the configured separator.
      *
      * <p><b>Usage Examples:</b></p>
@@ -2076,7 +2109,7 @@ public final class Joiner implements Closeable {
     /**
      * Appends a key-value pair with a long value to the joiner.
      * The key and value are separated by the configured keyValueDelimiter.
-     * The key is formatted according to trimBeforeAppend setting.
+     * The key is formatted according to the trimBeforeAppend or stripBeforeAppend setting.
      * If multiple entries are appended, they are separated by the configured separator.
      *
      * <p><b>Usage Examples:</b></p>
@@ -2101,7 +2134,7 @@ public final class Joiner implements Closeable {
     /**
      * Appends a key-value pair with a float value to the joiner.
      * The key and value are separated by the configured keyValueDelimiter.
-     * The key is formatted according to trimBeforeAppend setting.
+     * The key is formatted according to the trimBeforeAppend or stripBeforeAppend setting.
      * If multiple entries are appended, they are separated by the configured separator.
      *
      * <p><b>Usage Examples:</b></p>
@@ -2126,7 +2159,7 @@ public final class Joiner implements Closeable {
     /**
      * Appends a key-value pair with a double value to the joiner.
      * The key and value are separated by the configured keyValueDelimiter.
-     * The key is formatted according to trimBeforeAppend setting.
+     * The key is formatted according to the trimBeforeAppend or stripBeforeAppend setting.
      * If multiple entries are appended, they are separated by the configured separator.
      *
      * <p><b>Usage Examples:</b></p>
@@ -2151,7 +2184,7 @@ public final class Joiner implements Closeable {
     /**
      * Appends a key-value pair with a String value to the joiner.
      * The key and value are separated by the configured keyValueDelimiter.
-     * Both key and value are formatted according to trimBeforeAppend and nullText settings.
+     * Both key and value are formatted according to the trimBeforeAppend, stripBeforeAppend, and nullText settings.
      * If multiple entries are appended, they are separated by the configured separator.
      *
      * <p><b>Usage Examples:</b></p>
@@ -2176,7 +2209,7 @@ public final class Joiner implements Closeable {
     /**
      * Appends a key-value pair with a CharSequence value to the joiner.
      * The key and value are separated by the configured keyValueDelimiter.
-     * Both key and value are formatted according to trimBeforeAppend and nullText settings.
+     * Both key and value are formatted according to the trimBeforeAppend, stripBeforeAppend, and nullText settings.
      * If multiple entries are appended, they are separated by the configured separator.
      *
      * <p><b>Usage Examples:</b></p>
@@ -2202,7 +2235,7 @@ public final class Joiner implements Closeable {
     /**
      * Appends a key-value pair with a StringBuilder value to the joiner.
      * The key and value are separated by the configured keyValueDelimiter.
-     * Both key and value are formatted according to trimBeforeAppend and nullText settings.
+     * Both key and value are formatted according to the trimBeforeAppend, stripBeforeAppend, and nullText settings.
      * If multiple entries are appended, they are separated by the configured separator.
      *
      * <p><b>Usage Examples:</b></p>
@@ -2224,14 +2257,14 @@ public final class Joiner implements Closeable {
             }
         } else {
             if (isEmptyKeyValueDelimiter) {
-                if (trimBeforeAppend) {
-                    prepareBuilder().append(format(key)).append(value.toString().trim());
+                if (trimBeforeAppend || stripBeforeAppend) {
+                    prepareBuilder().append(format(key)).append(format(value));
                 } else {
                     prepareBuilder().append(format(key)).append(value);
                 }
             } else {
-                if (trimBeforeAppend) {
-                    prepareBuilder().append(format(key)).append(keyValueDelimiter).append(value.toString().trim());
+                if (trimBeforeAppend || stripBeforeAppend) {
+                    prepareBuilder().append(format(key)).append(keyValueDelimiter).append(format(value));
                 } else {
                     prepareBuilder().append(format(key)).append(keyValueDelimiter).append(value);
                 }
@@ -2815,9 +2848,9 @@ public final class Joiner implements Closeable {
                 //noinspection resource
                 append(newString);
             }
-        } else if (n > 0) {
+        } else {
             // Bypass append(): newString is already formatted element-wise, and re-formatting the
-            // whole joined block would let trimBeforeAppend eat whitespace separators.
+            // whole joined block would let trimBeforeAppend/stripBeforeAppend eat whitespace separators.
             prepareBuilder().append(Strings.repeat(newString, n, separator));
         }
 
@@ -3073,15 +3106,15 @@ public final class Joiner implements Closeable {
     }
 
     private String format(final String text) {
-        return text == null ? nullText : (trimBeforeAppend ? text.trim() : text);
+        return text == null ? nullText : (stripBeforeAppend ? Strings.strip(text) : (trimBeforeAppend ? text.trim() : text));
     }
 
     private String format(final CharSequence text) {
-        return text == null ? nullText : (trimBeforeAppend ? text.toString().trim() : text.toString());
+        return text == null ? nullText : format(text.toString());
     }
 
     private String toString(final Object obj) {
-        return obj == null ? nullText : (trimBeforeAppend ? N.toString(obj).trim() : N.toString(obj));
+        return obj == null ? nullText : format(N.toString(obj));
     }
 
     private StringBuilder prepareBuilder() {

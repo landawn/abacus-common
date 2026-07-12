@@ -143,6 +143,9 @@ class JsonStreamReader extends JsonStringReader {
                     refill();
                 }
             }
+
+            // Reached end of input (after refill) while still inside a quoted string.
+            throw new ParsingException("Unterminated string");
         } else {
             for (int ch = 0; strBeginIndex < strEndIndex;) {
                 ch = strValue[strBeginIndex++];

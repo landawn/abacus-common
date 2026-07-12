@@ -165,6 +165,18 @@ public class PrimitiveLongArrayTypeTest extends TestBase {
     }
 
     @Test
+    public void testSerializeToHonorsWriteLongAsString() throws IOException {
+        BufferedJsonWriter writer = com.landawn.abacus.util.Objectory.createBufferedJsonWriter();
+
+        try {
+            type.serializeTo(writer, new long[] { 9007199254740993L }, com.landawn.abacus.parser.JsonSerConfig.create().setWriteLongAsString(true));
+            assertEquals("[\"9007199254740993\"]", writer.toString());
+        } finally {
+            com.landawn.abacus.util.Objectory.recycle(writer);
+        }
+    }
+
+    @Test
     public void testCollection2ArrayEmpty() {
         Collection<Long> collection = new ArrayList<>();
         long[] result = type.collectionToArray(collection);

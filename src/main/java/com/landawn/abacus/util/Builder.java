@@ -2142,6 +2142,26 @@ public class Builder<T> {
         }
 
         /**
+         * Replaces the element at the specified position in the list with the specified element.
+         *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * ListBuilder<String, ArrayList<String>> lb = Builder.of(new ArrayList<>(Arrays.asList("Alice", "Bob")));
+         * List<String> result = lb.set(1, "Charlie").val();   // returns [Alice, Charlie]
+         * }</pre>
+         *
+         * @param index the index of the element to replace
+         * @param e the element to store at the specified position
+         * @return this builder instance for method chaining
+         * @throws IndexOutOfBoundsException if the index is out of range
+         */
+        public ListBuilder<T, L> set(final int index, final T e) {
+            val.set(index, e);
+
+            return this;
+        }
+
+        /**
          * Appends the specified element to the end of the list.
          *
          * <p><b>Usage Examples:</b></p>
@@ -2389,7 +2409,7 @@ public class Builder<T> {
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * CollectionBuilder<String, HashSet<String>> cb = Builder.of(new HashSet<String>());
+         * CollectionBuilder<String, LinkedHashSet<String>> cb = Builder.of(new LinkedHashSet<String>());
          * Set<String> result = cb.add("apple").add("banana").val(); // returns [apple, banana]
          * cb.add("apple");
          * }</pre>
@@ -2409,7 +2429,7 @@ public class Builder<T> {
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * CollectionBuilder<String, HashSet<String>> cb = Builder.of(new HashSet<String>());
+         * CollectionBuilder<String, LinkedHashSet<String>> cb = Builder.of(new LinkedHashSet<String>());
          * cb.addAll(Arrays.asList("apple", "banana")).val();  // returns [apple, banana]
          * cb.addAll(null).val();                              // returns no change - null is ignored
          * }</pre>
@@ -2431,7 +2451,7 @@ public class Builder<T> {
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * CollectionBuilder<String, HashSet<String>> cb = Builder.of(new HashSet<String>());
+         * CollectionBuilder<String, LinkedHashSet<String>> cb = Builder.of(new LinkedHashSet<String>());
          * cb.addAll("apple", "banana").val();                 // returns [apple, banana]
          * cb.addAll((String[]) null).val();                   // returns no change - null is ignored
          * }</pre>
@@ -2453,7 +2473,7 @@ public class Builder<T> {
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * CollectionBuilder<String, HashSet<String>> cb = Builder.of(new HashSet<String>());
+         * CollectionBuilder<String, LinkedHashSet<String>> cb = Builder.of(new LinkedHashSet<String>());
          * cb.add("apple").add("banana");
          * cb.remove("apple").val();                           // returns [banana]
          * cb.remove("nope").val();                            // returns no change - not present
@@ -2477,7 +2497,7 @@ public class Builder<T> {
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * CollectionBuilder<String, HashSet<String>> cb = Builder.of(new HashSet<String>());
+         * CollectionBuilder<String, LinkedHashSet<String>> cb = Builder.of(new LinkedHashSet<String>());
          * cb.add("apple").add("banana").add("cherry");
          * cb.removeAll(Arrays.asList("apple", "cherry")).val(); // returns [banana]
          * cb.removeAll(null).val();                             // returns no change - null is ignored
@@ -2501,7 +2521,7 @@ public class Builder<T> {
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * CollectionBuilder<String, HashSet<String>> cb = Builder.of(new HashSet<String>());
+         * CollectionBuilder<String, LinkedHashSet<String>> cb = Builder.of(new LinkedHashSet<String>());
          * cb.add("apple").add("banana").add("cherry");
          * cb.removeAll("apple", "cherry").val();             // returns [banana]
          * cb.removeAll((String[]) null).val();               // returns no change - null is ignored
@@ -2747,7 +2767,7 @@ public class Builder<T> {
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * MapBuilder<String, Integer, HashMap<String, Integer>> mb = Builder.of(new HashMap<>());
+         * MapBuilder<String, Integer, LinkedHashMap<String, Integer>> mb = Builder.of(new LinkedHashMap<>());
          * mb.put("Alice", 95).put("Bob", 87).val();          // returns {Alice=95, Bob=87}
          * mb.put("Alice", 100).val();                        // replaces Alice -> 100
          * }</pre>
@@ -2770,8 +2790,10 @@ public class Builder<T> {
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * MapBuilder<String, Integer, HashMap<String, Integer>> mb = Builder.of(new HashMap<>());
-         * Map<String, Integer> data = Map.of("Alice", 95, "Bob", 87);
+         * MapBuilder<String, Integer, LinkedHashMap<String, Integer>> mb = Builder.of(new LinkedHashMap<>());
+         * Map<String, Integer> data = new LinkedHashMap<>();
+         * data.put("Alice", 95);
+         * data.put("Bob", 87);
          * mb.putAll(data).val();                             // returns {Alice=95, Bob=87}
          * mb.putAll(null).val();                             // returns no change - null is ignored
          * }</pre>
@@ -2796,7 +2818,7 @@ public class Builder<T> {
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * MapBuilder<String, Integer, HashMap<String, Integer>> mb = Builder.of(new HashMap<>());
+         * MapBuilder<String, Integer, LinkedHashMap<String, Integer>> mb = Builder.of(new LinkedHashMap<>());
          * mb.put("Alice", 95);
          * mb.putIfAbsent("Alice", 100).val();                // returns {Alice=95} - already present
          * mb.putIfAbsent("Bob", 87).val();                   // returns {Alice=95, Bob=87} - absent
@@ -2824,7 +2846,7 @@ public class Builder<T> {
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * MapBuilder<String, Integer, HashMap<String, Integer>> mb = Builder.of(new HashMap<>());
+         * MapBuilder<String, Integer, LinkedHashMap<String, Integer>> mb = Builder.of(new LinkedHashMap<>());
          * mb.put("Alice", 95);
          * mb.putIfAbsent("Alice", () -> 100).val();          // returns {Alice=95} - supplier not invoked
          * mb.putIfAbsent("Bob", () -> 87).val();             // returns {Alice=95, Bob=87}
@@ -2850,7 +2872,7 @@ public class Builder<T> {
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * MapBuilder<String, Integer, HashMap<String, Integer>> mb = Builder.of(new HashMap<>());
+         * MapBuilder<String, Integer, LinkedHashMap<String, Integer>> mb = Builder.of(new LinkedHashMap<>());
          * mb.put("Alice", 95).put("Bob", 87);
          * mb.remove("Alice").val();                          // returns {Bob=87}
          * mb.remove("Charlie").val();                        // returns no change - not present
@@ -2873,9 +2895,13 @@ public class Builder<T> {
          * provided collection, but with the added convenience of method chaining.
          * If the collection is empty or {@code null}, no changes are made to the map.
          *
+         * <p><b>Cardinality note:</b> this method accepts a collection of keys and removes each
+         * corresponding map entry. By contrast, {@link MultimapBuilder#removeAll(Object)} accepts
+         * one key and removes all values associated with that single key.</p>
+         *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * MapBuilder<String, Integer, HashMap<String, Integer>> mb = Builder.of(new HashMap<>());
+         * MapBuilder<String, Integer, LinkedHashMap<String, Integer>> mb = Builder.of(new LinkedHashMap<>());
          * mb.put("Alice", 95).put("Bob", 87).put("Charlie", 92);
          * mb.removeAll(Arrays.asList("Alice", "Charlie")).val(); // returns {Bob=87}
          * mb.removeAll(null).val();                              // returns no change - null is ignored
@@ -3018,7 +3044,8 @@ public class Builder<T> {
 
         /**
          * Removes a single occurrence of the specified key-value mapping from the multimap.
-         * If the key-value pair exists multiple times, only one occurrence is removed.
+         * If the key-value pair exists multiple times, only one occurrence is removed. To remove
+         * every value associated with one key, use {@link #removeAll(Object)}.
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
@@ -3056,7 +3083,13 @@ public class Builder<T> {
 
         /**
          * Removes all values associated with the specified key from the multimap.
-         * After this operation, the key will no longer be present in the multimap.
+         * After this operation, the key will no longer be present in the multimap. Unlike
+         * {@link #removeOne(Object, Object)}, the argument is only a key: this method removes
+         * every mapping for that one key, not one occurrence of a key-value pair.
+         *
+         * <p><b>Cardinality note:</b> this method accepts one key and removes all values associated
+         * with it. By contrast, {@link MapBuilder#removeAll(Collection)} accepts a collection of
+         * keys and removes one map entry for each key.</p>
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code

@@ -66,7 +66,7 @@ public interface ShortUnaryOperator extends Throwables.ShortUnaryOperator<Runtim
      * short result = doubleThenAddTen.applyAsShort((short) 5);   // returns 20 (5*2 + 10)
      * }</pre>
      *
-     * @param before the operator to apply before this operator is applied
+     * @param before the operator to apply before this operator is applied. Must not be {@code null}.
      * @return a composed operator that first applies the {@code before} operator and then applies this operator
      * @throws IllegalArgumentException if {@code before} is null
      *
@@ -90,7 +90,7 @@ public interface ShortUnaryOperator extends Throwables.ShortUnaryOperator<Runtim
      * short result = doubleThenAddTen.applyAsShort((short) 5);   // returns 20 (5*2 + 10)
      * }</pre>
      *
-     * @param after the operator to apply after this operator is applied
+     * @param after the operator to apply after this operator is applied. Must not be {@code null}.
      * @return a composed operator that first applies this operator and then applies the {@code after} operator
      * @throws IllegalArgumentException if {@code after} is null
      *

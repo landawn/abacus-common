@@ -12,6 +12,7 @@ import static org.mockito.Mockito.verify;
 
 import java.io.IOException;
 import java.io.StringWriter;
+import java.io.Writer;
 import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -166,6 +167,28 @@ public class PairTypeTest extends TestBase {
     }
 
     @Test
+    public void testAppendToPreservesCheckedIOException() {
+        Writer failingWriter = new Writer() {
+            @Override
+            public void write(final char[] cbuf, final int off, final int len) throws IOException {
+                throw new IOException("write failed");
+            }
+
+            @Override
+            public void flush() {
+                // No-op.
+            }
+
+            @Override
+            public void close() {
+                // No-op.
+            }
+        };
+
+        org.junit.jupiter.api.Assertions.assertThrows(IOException.class, () -> stringIntPairType.appendTo(failingWriter, Pair.of("a", 1)));
+    }
+
+    @Test
     public void testAppendToWithNullElements() throws IOException {
         StringBuilder sb = new StringBuilder();
         Pair<String, Integer> pair = Pair.of(null, null);
@@ -185,6 +208,14 @@ public class PairTypeTest extends TestBase {
         Pair<String, Integer> pair = Pair.of("test", 456);
         stringIntPairType.serializeTo(writer, pair, config);
         verify(writer, atLeastOnce()).write(anyChar());
+    }
+
+    @Test
+    public void testSerializeToPreservesCheckedIOException() throws IOException {
+        com.landawn.abacus.util.BufferedJsonWriter failingWriter = com.landawn.abacus.util.Objectory.createBufferedJsonWriter();
+        failingWriter.close();
+
+        org.junit.jupiter.api.Assertions.assertThrows(IOException.class, () -> stringIntPairType.serializeTo(failingWriter, Pair.of("a", 1), config));
     }
 
     @Test

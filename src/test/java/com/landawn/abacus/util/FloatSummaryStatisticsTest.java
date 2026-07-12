@@ -42,6 +42,12 @@ public class FloatSummaryStatisticsTest extends TestBase {
     }
 
     @Test
+    public void testConstructorValidatesEmptyState() {
+        Assertions.assertDoesNotThrow(() -> new FloatSummaryStatistics(0, Float.POSITIVE_INFINITY, Float.NEGATIVE_INFINITY, 0.0));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> new FloatSummaryStatistics(0, 0.0f, 0.0f, 1.0));
+    }
+
+    @Test
     public void testZeroValue() {
         FloatSummaryStatistics stats = new FloatSummaryStatistics();
         stats.accept(0.0f);

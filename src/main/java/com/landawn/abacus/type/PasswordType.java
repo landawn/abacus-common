@@ -88,7 +88,7 @@ public class PasswordType extends AbstractStringType {
      *
      * @param rs the ResultSet to read from
      * @param columnIndex the column index (1-based)
-     * @return the password string from the database
+     * @return the password string from the database, or {@code null} if the column value is SQL {@code NULL}
      * @throws SQLException if a database access error occurs
      */
     @Override
@@ -102,7 +102,7 @@ public class PasswordType extends AbstractStringType {
      *
      * @param rs the ResultSet to read from
      * @param columnName the column label/name
-     * @return the password string from the database
+     * @return the password string from the database, or {@code null} if the column value is SQL {@code NULL}
      * @throws SQLException if a database access error occurs
      */
     @Override
@@ -121,7 +121,7 @@ public class PasswordType extends AbstractStringType {
      */
     @Override
     public void set(final PreparedStatement stmt, final int columnIndex, final String x) throws SQLException {
-        stmt.setString(columnIndex, password.encrypt(x));
+        stmt.setString(columnIndex, password.digest(x));
     }
 
     /**
@@ -135,6 +135,6 @@ public class PasswordType extends AbstractStringType {
      */
     @Override
     public void set(final CallableStatement stmt, final String parameterName, final String x) throws SQLException {
-        stmt.setString(parameterName, password.encrypt(x));
+        stmt.setString(parameterName, password.digest(x));
     }
 }

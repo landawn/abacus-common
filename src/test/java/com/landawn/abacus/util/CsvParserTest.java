@@ -23,7 +23,7 @@ public class CsvParserTest extends TestBase {
         assertEquals('"', parser.getQuoteChar());
         assertEquals('\\', parser.getEscape());
         assertFalse(parser.isStrictQuotes());
-        assertTrue(parser.isIgnoreLeadingWhiteSpace());
+        assertTrue(parser.isIgnoreLeadingWhitespace());
         assertFalse(parser.isIgnoreQuotations());
     }
 
@@ -55,15 +55,15 @@ public class CsvParserTest extends TestBase {
     public void testConstructorWithStrictQuotes() {
         CsvParser parser = new CsvParser(',', '"', '\\', true);
         assertTrue(parser.isStrictQuotes());
-        assertTrue(parser.isIgnoreLeadingWhiteSpace());
+        assertTrue(parser.isIgnoreLeadingWhitespace());
         assertFalse(parser.isIgnoreQuotations());
     }
 
     @Test
-    public void testConstructorWithIgnoreLeadingWhiteSpace() {
+    public void testConstructorWithIgnoreLeadingWhitespace() {
         CsvParser parser = new CsvParser(',', '"', '\\', false, false);
         assertFalse(parser.isStrictQuotes());
-        assertFalse(parser.isIgnoreLeadingWhiteSpace());
+        assertFalse(parser.isIgnoreLeadingWhitespace());
         assertFalse(parser.isIgnoreQuotations());
     }
 
@@ -74,7 +74,7 @@ public class CsvParserTest extends TestBase {
         assertEquals('"', parser.getQuoteChar());
         assertEquals('\\', parser.getEscape());
         assertTrue(parser.isStrictQuotes());
-        assertFalse(parser.isIgnoreLeadingWhiteSpace());
+        assertFalse(parser.isIgnoreLeadingWhitespace());
         assertTrue(parser.isIgnoreQuotations());
     }
 
@@ -191,12 +191,12 @@ public class CsvParserTest extends TestBase {
     }
 
     @Test
-    public void testIsIgnoreLeadingWhiteSpace() {
+    public void testIsIgnoreLeadingWhitespace() {
         CsvParser defaultParser = new CsvParser();
-        assertTrue(defaultParser.isIgnoreLeadingWhiteSpace());
+        assertTrue(defaultParser.isIgnoreLeadingWhitespace());
 
         CsvParser noIgnoreParser = new CsvParser(',', '"', '\\', false, false);
-        assertFalse(noIgnoreParser.isIgnoreLeadingWhiteSpace());
+        assertFalse(noIgnoreParser.isIgnoreLeadingWhitespace());
     }
 
     @Test
@@ -610,7 +610,7 @@ public class CsvParserTest extends TestBase {
 
     @Test
     public void testParseIntFieldWithLeadingWhitespaceTrimmedByDefault() throws ParsingException {
-        // Default ignoreLeadingWhiteSpace=true -> "  42  " becomes "42" so Integer.parseInt works
+        // Default ignoreLeadingWhitespace=true -> "  42  " becomes "42" so Integer.parseInt works
         CsvParser parser = new CsvParser();
         List<String> result = parser.parseLine("  42  ,x");
         assertEquals(2, result.size());

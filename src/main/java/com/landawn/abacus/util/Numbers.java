@@ -1284,15 +1284,7 @@ public final class Numbers {
     public static String format(final int x, final String decimalFormat) throws IllegalArgumentException {
         N.checkArgNotNull(decimalFormat, cs.decimalFormat);
 
-        DecimalFormat df = decimalFormatPool.get(decimalFormat);
-
-        if (df == null) {
-            df = new DecimalFormat(decimalFormat);
-        } else {
-            df = (DecimalFormat) df.clone();
-        }
-
-        return df.format(x);
+        return getThreadLocalDecimalFormat(decimalFormat).format(x);
     }
 
     /**
@@ -1332,15 +1324,7 @@ public final class Numbers {
             return null;
         }
 
-        DecimalFormat df = decimalFormatPool.get(decimalFormat);
-
-        if (df == null) {
-            df = new DecimalFormat(decimalFormat);
-        } else {
-            df = (DecimalFormat) df.clone();
-        }
-
-        return df.format(x);
+        return getThreadLocalDecimalFormat(decimalFormat).format(x);
     }
 
     /**
@@ -1371,15 +1355,7 @@ public final class Numbers {
     public static String format(final long x, final String decimalFormat) throws IllegalArgumentException {
         N.checkArgNotNull(decimalFormat, cs.decimalFormat);
 
-        DecimalFormat df = decimalFormatPool.get(decimalFormat);
-
-        if (df == null) {
-            df = new DecimalFormat(decimalFormat);
-        } else {
-            df = (DecimalFormat) df.clone();
-        }
-
-        return df.format(x);
+        return getThreadLocalDecimalFormat(decimalFormat).format(x);
     }
 
     /**
@@ -1419,15 +1395,7 @@ public final class Numbers {
             return null;
         }
 
-        DecimalFormat df = decimalFormatPool.get(decimalFormat);
-
-        if (df == null) {
-            df = new DecimalFormat(decimalFormat);
-        } else {
-            df = (DecimalFormat) df.clone();
-        }
-
-        return df.format(x);
+        return getThreadLocalDecimalFormat(decimalFormat).format(x);
     }
 
     /**
@@ -1459,15 +1427,7 @@ public final class Numbers {
     public static String format(final float x, final String decimalFormat) throws IllegalArgumentException {
         N.checkArgNotNull(decimalFormat, cs.decimalFormat);
 
-        DecimalFormat df = decimalFormatPool.get(decimalFormat);
-
-        if (df == null) {
-            df = new DecimalFormat(decimalFormat);
-        } else {
-            df = (DecimalFormat) df.clone();
-        }
-
-        return df.format(x);
+        return getThreadLocalDecimalFormat(decimalFormat).format(x);
     }
 
     /**
@@ -1508,15 +1468,7 @@ public final class Numbers {
             return null;
         }
 
-        DecimalFormat df = decimalFormatPool.get(decimalFormat);
-
-        if (df == null) {
-            df = new DecimalFormat(decimalFormat);
-        } else {
-            df = (DecimalFormat) df.clone();
-        }
-
-        return df.format(x.doubleValue());
+        return getThreadLocalDecimalFormat(decimalFormat).format(x.doubleValue());
     }
 
     /**
@@ -1551,15 +1503,7 @@ public final class Numbers {
     public static String format(final double x, final String decimalFormat) throws IllegalArgumentException {
         N.checkArgNotNull(decimalFormat, cs.decimalFormat);
 
-        DecimalFormat df = decimalFormatPool.get(decimalFormat);
-
-        if (df == null) {
-            df = new DecimalFormat(decimalFormat);
-        } else {
-            df = (DecimalFormat) df.clone();
-        }
-
-        return df.format(x);
+        return getThreadLocalDecimalFormat(decimalFormat).format(x);
     }
 
     /**
@@ -1601,15 +1545,7 @@ public final class Numbers {
             return null;
         }
 
-        DecimalFormat df = decimalFormatPool.get(decimalFormat);
-
-        if (df == null) {
-            df = new DecimalFormat(decimalFormat);
-        } else {
-            df = (DecimalFormat) df.clone();
-        }
-
-        return df.format(x);
+        return getThreadLocalDecimalFormat(decimalFormat).format(x);
     }
 
     /**
@@ -8425,6 +8361,33 @@ public final class Numbers {
             .build();
 
     /**
+     * Per-thread {@link DecimalFormat} instances keyed by pattern.
+     * {@code DecimalFormat} is not thread-safe; ThreadLocal reuse avoids clone-on-every-call cost
+     * while remaining concurrent-safe.
+     */
+    private static final ThreadLocal<Map<String, DecimalFormat>> THREAD_LOCAL_DECIMAL_FORMATS = ThreadLocal.withInitial(HashMap::new);
+
+    /**
+     * Returns a thread-local {@link DecimalFormat} for the given pattern.
+     * Prefers cloning a pooled prototype so default locale/rounding settings stay consistent.
+     *
+     * @param decimalFormat the format pattern
+     * @return a DecimalFormat exclusive to the current thread
+     */
+    static DecimalFormat getThreadLocalDecimalFormat(final String decimalFormat) {
+        final Map<String, DecimalFormat> map = THREAD_LOCAL_DECIMAL_FORMATS.get();
+        DecimalFormat df = map.get(decimalFormat);
+
+        if (df == null) {
+            final DecimalFormat prototype = decimalFormatPool.get(decimalFormat);
+            df = prototype != null ? (DecimalFormat) prototype.clone() : new DecimalFormat(decimalFormat);
+            map.put(decimalFormat, df);
+        }
+
+        return df;
+    }
+
+    /**
      * Rounds the given float value using the specified DecimalFormat pattern.
      *
      * <p>This method formats the float value according to the specified DecimalFormat pattern
@@ -8457,11 +8420,10 @@ public final class Numbers {
     public static float round(final float x, final String decimalFormat) {
         N.checkArgNotNull(decimalFormat, cs.decimalFormat);
 
-        final DecimalFormat df = decimalFormatPool.get(decimalFormat);
-
         // Round-trip through the same DecimalFormat so '%', grouping separators and
         // locale-specific decimal separators parse back instead of failing in Float.parseFloat.
-        return round(x, df != null ? df : new DecimalFormat(decimalFormat));
+        // Thread-local instance: no defensive clone needed (unlike user-supplied DecimalFormat).
+        return roundInternal(x, getThreadLocalDecimalFormat(decimalFormat));
     }
 
     /**
@@ -8497,11 +8459,10 @@ public final class Numbers {
     public static double round(final double x, final String decimalFormat) {
         N.checkArgNotNull(decimalFormat, cs.decimalFormat);
 
-        final DecimalFormat df = decimalFormatPool.get(decimalFormat);
-
         // Round-trip through the same DecimalFormat so '%', grouping separators and
         // locale-specific decimal separators parse back instead of failing in Double.parseDouble.
-        return round(x, df != null ? df : new DecimalFormat(decimalFormat));
+        // Thread-local instance: no defensive clone needed (unlike user-supplied DecimalFormat).
+        return roundInternal(x, getThreadLocalDecimalFormat(decimalFormat));
     }
 
     /**
@@ -8536,12 +8497,15 @@ public final class Numbers {
     public static float round(final float x, final DecimalFormat decimalFormat) throws IllegalArgumentException {
         N.checkArgNotNull(decimalFormat, cs.decimalFormat);
 
+        // Defensive clone: caller-supplied DecimalFormat may be shared across threads.
+        return roundInternal(x, (DecimalFormat) decimalFormat.clone());
+    }
+
+    private static float roundInternal(final float x, final DecimalFormat df) {
         if (!Float.isFinite(x)) {
             // NaN / +-Infinity cannot be formatted-and-parsed back; return unchanged.
             return x;
         }
-
-        final DecimalFormat df = (DecimalFormat) decimalFormat.clone();
 
         try {
             return df.parse(df.format(x)).floatValue();
@@ -8582,12 +8546,15 @@ public final class Numbers {
     public static double round(final double x, final DecimalFormat decimalFormat) throws IllegalArgumentException {
         N.checkArgNotNull(decimalFormat, cs.decimalFormat);
 
+        // Defensive clone: caller-supplied DecimalFormat may be shared across threads.
+        return roundInternal(x, (DecimalFormat) decimalFormat.clone());
+    }
+
+    private static double roundInternal(final double x, final DecimalFormat df) {
         if (!Double.isFinite(x)) {
             // NaN / +-Infinity cannot be formatted-and-parsed back; return unchanged.
             return x;
         }
-
-        final DecimalFormat df = (DecimalFormat) decimalFormat.clone();
 
         try {
             return df.parse(df.format(x)).doubleValue();

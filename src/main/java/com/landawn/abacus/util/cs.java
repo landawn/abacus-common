@@ -229,6 +229,7 @@ public final class cs { // NOSONAR
     public static final String name2 = "name2";
     public static final String name3 = "name3";
     public static final String next = "next";
+    public static final String nextSelector = "nextSelector";
     public static final String newLength = "newLength";
     public static final String numberToAdvance = "numberToAdvance";
     public static final String numOfParts = "numOfParts";

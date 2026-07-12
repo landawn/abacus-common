@@ -1022,6 +1022,18 @@ public class RangeTest extends AbstractTest {
     }
 
     @Test
+    public void testOverlaps() {
+        Range<Integer> range = Range.closed(1, 5);
+
+        assertTrue(range.overlaps(Range.closed(3, 8)));
+        assertTrue(range.overlaps(Range.closed(5, 10)));
+        assertFalse(range.overlaps(Range.open(5, 10)));
+        assertFalse(range.overlaps(Range.closed(6, 10)));
+        assertFalse(range.overlaps(null));
+        assertFalse(Range.open(1, 1).overlaps(range));
+    }
+
+    @Test
     public void test_intersection_overlapping() {
         Range<Integer> range1 = Range.closed(1, 5);
         Range<Integer> range2 = Range.closed(3, 8);

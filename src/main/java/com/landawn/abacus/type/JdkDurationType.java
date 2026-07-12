@@ -85,7 +85,7 @@ public class JdkDurationType extends AbstractType<Duration> {
      * <p>The returned string is a serializable representation designed to be parsed back by {@link #valueOf(String)}
      * at millisecond precision. This is the key distinction from {@link Object#toString()}, whose result is not
      * guaranteed to be convertible back into the original value.</p>
-     * <p><b>&#9888;</b> Sub-millisecond precision is not preserved: for example, {@code Duration.ofNanos(1)}
+     * <p><b>&#9888;&#65039;</b> Sub-millisecond precision is not preserved: for example, {@code Duration.ofNanos(1)}
      * serializes as {@code "0"}.</p>
      *
      * @param x the Duration to convert to string

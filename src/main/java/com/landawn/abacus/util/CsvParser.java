@@ -145,7 +145,7 @@ public class CsvParser {
     /**
      * Whether to ignore any leading white space at the start of the field.
      */
-    private final boolean ignoreLeadingWhiteSpace;
+    private final boolean ignoreLeadingWhitespace;
     /**
      * Whether to skip over quotation characters when parsing.
      */
@@ -245,19 +245,19 @@ public class CsvParser {
      * <pre>{@code
      * CsvParser parser = new CsvParser(',', '"', '\\', false, true);
      * List<String> fields = parser.parseLine("  a  ,  b  ,  c  ");
-     * // With ignoreLeadingWhiteSpace=true: ["a", "b", "c"]
-     * // With ignoreLeadingWhiteSpace=false: ["  a  ", "  b  ", "  c  "]
+     * // With ignoreLeadingWhitespace=true: ["a", "b", "c"]
+     * // With ignoreLeadingWhitespace=false: ["  a  ", "  b  ", "  c  "]
      * }</pre>
      *
      * @param separator the delimiter to use for separating entries
      * @param quoteChar the character to use for quoted elements
      * @param escape the character to use for escaping a separator or quote
      * @param strictQuotes if {@code true}, characters outside the quotes are ignored
-     * @param ignoreLeadingWhiteSpace if {@code true}, surrounding whitespace is stripped from unquoted
+     * @param ignoreLeadingWhitespace if {@code true}, surrounding whitespace is stripped from unquoted
      *        fields and whitespace immediately after a separator is skipped
      */
-    public CsvParser(final char separator, final char quoteChar, final char escape, final boolean strictQuotes, final boolean ignoreLeadingWhiteSpace) {
-        this(separator, quoteChar, escape, strictQuotes, ignoreLeadingWhiteSpace, DEFAULT_IGNORE_QUOTATIONS);
+    public CsvParser(final char separator, final char quoteChar, final char escape, final boolean strictQuotes, final boolean ignoreLeadingWhitespace) {
+        this(separator, quoteChar, escape, strictQuotes, ignoreLeadingWhitespace, DEFAULT_IGNORE_QUOTATIONS);
     }
 
     /**
@@ -277,14 +277,14 @@ public class CsvParser {
      * @param quoteChar the character to use for quoted elements
      * @param escape the character to use for escaping a separator or quote
      * @param strictQuotes if {@code true}, characters outside the quotes are ignored
-     * @param ignoreLeadingWhiteSpace if {@code true}, surrounding whitespace is stripped from unquoted
+     * @param ignoreLeadingWhitespace if {@code true}, surrounding whitespace is stripped from unquoted
      *        fields and whitespace immediately after a separator is skipped
      * @param ignoreQuotations if {@code true}, quote characters are consumed but quoted regions do not
      *        protect separators or escapes
      * @throws UnsupportedOperationException if any two of separator, quoteChar, and escape are the same
      *         non-{@link #NULL_CHARACTER} characters, or if separator is {@link #NULL_CHARACTER}
      */
-    public CsvParser(final char separator, final char quoteChar, final char escape, final boolean strictQuotes, final boolean ignoreLeadingWhiteSpace,
+    public CsvParser(final char separator, final char quoteChar, final char escape, final boolean strictQuotes, final boolean ignoreLeadingWhitespace,
             final boolean ignoreQuotations) {
         if (anyCharactersAreTheSame(separator, quoteChar, escape)) {
             throw new UnsupportedOperationException("The separator, quote, and escape characters must be different!");
@@ -298,7 +298,7 @@ public class CsvParser {
         this.quoteChar = quoteChar;
         this.escape = escape;
         this.strictQuotes = strictQuotes;
-        this.ignoreLeadingWhiteSpace = ignoreLeadingWhiteSpace;
+        this.ignoreLeadingWhitespace = ignoreLeadingWhitespace;
         this.ignoreQuotations = ignoreQuotations;
     }
 
@@ -395,13 +395,13 @@ public class CsvParser {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * CsvParser parser = new CsvParser(',', '"', '\\', false, true);
-     * boolean ignoreWs = parser.isIgnoreLeadingWhiteSpace();   // returns true
+     * boolean ignoreWs = parser.isIgnoreLeadingWhitespace();   // returns true
      * }</pre>
      *
      * @return {@code true} if leading (and trailing) whitespace around unquoted fields is ignored
      */
-    public boolean isIgnoreLeadingWhiteSpace() {
-        return ignoreLeadingWhiteSpace;
+    public boolean isIgnoreLeadingWhitespace() {
+        return ignoreLeadingWhitespace;
     }
 
     /**
@@ -525,7 +525,7 @@ public class CsvParser {
             // never skip the separator itself (a whitespace separator marks an empty first field). Without
             // this, leading whitespace before a quoted first field lands in sb and makes the opening quote
             // be mis-classified as embedded (see the isEmbedded check), corrupting or failing the parse.
-            while (ignoreLeadingWhiteSpace && i < len && nextLine.charAt(i) != separator && Character.isWhitespace(nextLine.charAt(i))) {
+            while (ignoreLeadingWhitespace && i < len && nextLine.charAt(i) != separator && Character.isWhitespace(nextLine.charAt(i))) {
                 i++;
             }
 
@@ -551,7 +551,7 @@ public class CsvParser {
                         // A quote inside a quoted field followed by only whitespace up to the next
                         // separator (or end of line) is the CLOSING quote, not an embedded one:
                         // a,"b" ,c must parse like its end-of-line twin a,b,"c" (see the repair below).
-                        if (isEmbedded && inQuotes(inQuotes) && ignoreLeadingWhiteSpace) {
+                        if (isEmbedded && inQuotes(inQuotes) && ignoreLeadingWhitespace) {
                             int j = i + 1;
 
                             while (j < len && nextLine.charAt(j) != separator && Character.isWhitespace(nextLine.charAt(j))) {
@@ -572,7 +572,7 @@ public class CsvParser {
                         }
                     }
                 } else if (c == separator && !inQuotes(inQuotes)) {
-                    if (!quoted && ignoreLeadingWhiteSpace) {
+                    if (!quoted && ignoreLeadingWhitespace) {
                         if (isOutputNull) {
                             tokensOnThisLine.add(Strings.strip(sb.toString()));
                         } else {
@@ -589,7 +589,7 @@ public class CsvParser {
                     // Skip whitespace between the separator and the next field, but never skip the
                     // separator itself: when the separator is a whitespace character (e.g. tab),
                     // consuming it here would silently swallow empty fields ("a\t\tb" -> ["a","b"]).
-                    while (ignoreLeadingWhiteSpace && i < len - 1 && nextLine.charAt(i + 1) != separator && Character.isWhitespace(nextLine.charAt(i + 1))) {
+                    while (ignoreLeadingWhitespace && i < len - 1 && nextLine.charAt(i + 1) != separator && Character.isWhitespace(nextLine.charAt(i + 1))) {
                         i++;
                     }
 
@@ -611,11 +611,11 @@ public class CsvParser {
                     // Tested with: new CsvParser().parseLine("a,  b  ,  \"c\" ");
                     sb.setLength(lastQuoteIndex); // remove the last quote character
                 } else {
-                    throw new ParsingException("Un-terminated quoted field at end of CSV line");
+                    throw new ParsingException("Un-terminated quoted field at end of CSV line: " + nextLine);
                 }
             }
 
-            if (!quoted && ignoreLeadingWhiteSpace) {
+            if (!quoted && ignoreLeadingWhitespace) {
                 if (isOutputNull) {
                     tokensOnThisLine.add(Strings.strip(sb.toString()));
                 } else {

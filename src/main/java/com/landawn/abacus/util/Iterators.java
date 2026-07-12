@@ -2312,7 +2312,7 @@ public final class Iterators {
      */
     public static <T> ObjIterator<T> merge(final Iterator<? extends T> a, final Iterator<? extends T> b,
             final BiFunction<? super T, ? super T, MergeResult> nextSelector) throws IllegalArgumentException {
-        N.checkArgNotNull(nextSelector);
+        N.checkArgNotNull(nextSelector, cs.nextSelector);
 
         return new ObjIterator<>() {
             private final Iterator<? extends T> iterA = a == null ? ObjIterator.<T> empty() : a;
@@ -2397,7 +2397,7 @@ public final class Iterators {
      */
     public static <T> ObjIterator<T> merge(final Collection<? extends Iterator<? extends T>> c,
             final BiFunction<? super T, ? super T, MergeResult> nextSelector) throws IllegalArgumentException {
-        N.checkArgNotNull(nextSelector);
+        N.checkArgNotNull(nextSelector, cs.nextSelector);
 
         if (N.isEmpty(c)) {
             return ObjIterator.empty();
@@ -2468,7 +2468,7 @@ public final class Iterators {
      */
     public static <T> ObjIterator<T> mergeIterables(final Collection<? extends Iterable<? extends T>> iterables,
             final BiFunction<? super T, ? super T, MergeResult> nextSelector) throws IllegalArgumentException {
-        N.checkArgNotNull(nextSelector);
+        N.checkArgNotNull(nextSelector, cs.nextSelector);
 
         if (N.isEmpty(iterables)) {
             return ObjIterator.empty();

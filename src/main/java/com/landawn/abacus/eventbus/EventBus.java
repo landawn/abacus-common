@@ -295,6 +295,7 @@ public class EventBus {
      *
      * @param eventType the event type to search for
      * @return a snapshot list of subscribers registered for the specified event type
+     * @throws IllegalArgumentException if {@code eventType} is {@code null}
      */
     public List<Object> subscribers(final Class<?> eventType) {
         return subscribers(null, eventType);
@@ -312,8 +313,11 @@ public class EventBus {
      * @param eventId the event ID to match, or {@code null} for subscribers without event ID
      * @param eventType the event type to search for
      * @return a snapshot list of subscribers registered for the specified event type and ID
+     * @throws IllegalArgumentException if {@code eventType} is {@code null}
      */
     public List<Object> subscribers(final String eventId, final Class<?> eventType) {
+        N.checkArgNotNull(eventType, "eventType");
+
         final List<Object> eventSubs = new ArrayList<>();
 
         synchronized (registeredSubMap) {
@@ -1059,6 +1063,7 @@ public class EventBus {
      *
      * @param eventType the class type of sticky events to remove
      * @return {@code true} if one or more events were removed, {@code false} otherwise
+     * @throws IllegalArgumentException if {@code eventType} is {@code null}
      */
     public boolean removeStickyEvents(final Class<?> eventType) {
         return removeStickyEvents(null, eventType);
@@ -1077,8 +1082,11 @@ public class EventBus {
      * @param eventId the event ID to match, or {@code null} for events without ID
      * @param eventType the class type of sticky events to remove
      * @return {@code true} if one or more events were removed, {@code false} otherwise
+     * @throws IllegalArgumentException if {@code eventType} is {@code null}
      */
     public boolean removeStickyEvents(final String eventId, final Class<?> eventType) {
+        N.checkArgNotNull(eventType, "eventType");
+
         final String normalizedEventId = Strings.isEmpty(eventId) ? null : eventId;
         final List<Object> keyToRemove = new ArrayList<>();
 
@@ -1146,6 +1154,7 @@ public class EventBus {
      * @param <T> the event type
      * @param eventType the class type to search for
      * @return a list of sticky events that can be assigned to the specified type
+     * @throws IllegalArgumentException if {@code eventType} is {@code null}
      */
     public <T> List<T> stickyEvents(final Class<T> eventType) {
         return stickyEvents(null, eventType);
@@ -1164,8 +1173,11 @@ public class EventBus {
      * @param eventId the event ID to match, or {@code null} for events without ID
      * @param eventType the class type to search for
      * @return a list of sticky events matching both the type and event ID
+     * @throws IllegalArgumentException if {@code eventType} is {@code null}
      */
     public <T> List<T> stickyEvents(final String eventId, final Class<T> eventType) {
+        N.checkArgNotNull(eventType, "eventType");
+
         final String normalizedEventId = Strings.isEmpty(eventId) ? null : eventId;
         final List<T> result = new ArrayList<>();
 

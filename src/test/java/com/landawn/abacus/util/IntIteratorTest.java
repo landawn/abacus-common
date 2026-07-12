@@ -339,6 +339,19 @@ public class IntIteratorTest extends TestBase {
     }
 
     @Test
+    public void testDefer_NullResultFailureIsStable() {
+        int[] callCount = { 0 };
+        IntIterator iter = IntIterator.defer(() -> {
+            callCount[0]++;
+            return null;
+        });
+
+        assertThrows(IllegalStateException.class, iter::hasNext);
+        assertThrows(IllegalStateException.class, iter::hasNext);
+        assertEquals(1, callCount[0]);
+    }
+
+    @Test
     public void test_defer_null_supplier() {
         assertThrows(IllegalArgumentException.class, () -> IntIterator.defer(null));
     }

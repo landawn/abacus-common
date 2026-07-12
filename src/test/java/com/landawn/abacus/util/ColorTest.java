@@ -23,16 +23,16 @@ public class ColorTest extends TestBase {
     }
 
     @Test
-    public void testValueOfInt() {
-        assertEquals(Color.BLACK, Color.valueOf(0));
-        assertEquals(Color.WHITE, Color.valueOf(1));
-        assertEquals(Color.RED, Color.valueOf(2));
-        assertEquals(Color.ORANGE, Color.valueOf(3));
-        assertEquals(Color.YELLOW, Color.valueOf(4));
-        assertEquals(Color.GREEN, Color.valueOf(5));
-        assertEquals(Color.CYAN, Color.valueOf(6));
-        assertEquals(Color.BLUE, Color.valueOf(7));
-        assertEquals(Color.PURPLE, Color.valueOf(8));
+    public void testOfInt() {
+        assertEquals(Color.BLACK, Color.of(0));
+        assertEquals(Color.WHITE, Color.of(1));
+        assertEquals(Color.RED, Color.of(2));
+        assertEquals(Color.ORANGE, Color.of(3));
+        assertEquals(Color.YELLOW, Color.of(4));
+        assertEquals(Color.GREEN, Color.of(5));
+        assertEquals(Color.CYAN, Color.of(6));
+        assertEquals(Color.BLUE, Color.of(7));
+        assertEquals(Color.PURPLE, Color.of(8));
     }
 
     @Test
@@ -51,15 +51,15 @@ public class ColorTest extends TestBase {
     @Test
     public void testRoundTrip() {
         for (Color color : Color.values()) {
-            assertEquals(color, Color.valueOf(color.intValue()));
-            assertEquals(color.intValue(), Color.valueOf(color.intValue()).intValue());
+            assertEquals(color, Color.of(color.intValue()));
+            assertEquals(color.intValue(), Color.of(color.intValue()).intValue());
         }
     }
 
     @Test
-    public void testValueOf_intRoundTrip() {
+    public void testOf_intRoundTrip() {
         for (Color color : Color.values()) {
-            Color fromInt = Color.valueOf(color.intValue());
+            Color fromInt = Color.of(color.intValue());
             assertEquals(color, fromInt);
             assertEquals(color.intValue(), fromInt.intValue());
             assertEquals(color.name(), fromInt.name());
@@ -67,10 +67,10 @@ public class ColorTest extends TestBase {
     }
 
     @Test
-    public void testValueOfIntInvalid() {
-        assertThrows(IllegalArgumentException.class, () -> Color.valueOf(-1));
-        assertThrows(IllegalArgumentException.class, () -> Color.valueOf(9));
-        assertThrows(IllegalArgumentException.class, () -> Color.valueOf(100));
+    public void testOfIntInvalid() {
+        assertThrows(IllegalArgumentException.class, () -> Color.of(-1));
+        assertThrows(IllegalArgumentException.class, () -> Color.of(9));
+        assertThrows(IllegalArgumentException.class, () -> Color.of(100));
     }
 
     @Test
@@ -82,20 +82,20 @@ public class ColorTest extends TestBase {
     @Test
     public void testEquals() {
         assertEquals(Color.RED, Color.RED);
-        assertEquals(Color.valueOf(2), Color.RED);
+        assertEquals(Color.of(2), Color.RED);
         assertThrows(IllegalArgumentException.class, () -> Color.valueOf("red"));
         for (Color color : Color.values()) {
             assertEquals(color, Color.valueOf(color.name()));
-            assertEquals(color, Color.valueOf(color.intValue()));
+            assertEquals(color, Color.of(color.intValue()));
         }
     }
 
     @Test
-    public void testValueOf_intBoundary() {
-        assertEquals(Color.BLACK, Color.valueOf(0));
-        assertEquals(Color.PURPLE, Color.valueOf(8));
-        assertThrows(IllegalArgumentException.class, () -> Color.valueOf(Integer.MIN_VALUE));
-        assertThrows(IllegalArgumentException.class, () -> Color.valueOf(Integer.MAX_VALUE));
+    public void testOf_intBoundary() {
+        assertEquals(Color.BLACK, Color.of(0));
+        assertEquals(Color.PURPLE, Color.of(8));
+        assertThrows(IllegalArgumentException.class, () -> Color.of(Integer.MIN_VALUE));
+        assertThrows(IllegalArgumentException.class, () -> Color.of(Integer.MAX_VALUE));
     }
 
     @Test

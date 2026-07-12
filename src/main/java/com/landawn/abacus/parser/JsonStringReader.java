@@ -274,6 +274,9 @@ class JsonStringReader extends AbstractJsonReader {
                     }
                 }
             }
+
+            // Reached end of input while still inside a quoted string.
+            throw new ParsingException("Unterminated string");
         } else {
             for (int ch = 0; strBeginIndex < strEndIndex;) {
                 ch = strValue[strBeginIndex++];

@@ -984,7 +984,8 @@ public final class Splitter {
      * @param targetType the Class representing the type to convert each substring to. Must not be {@code null}.
      * @param supplier a Supplier that creates a new Collection instance to hold the results. Must not be {@code null}.
      * @return the Collection created by the supplier, populated with the converted results.
-     * @throws IllegalArgumentException if targetType or supplier is {@code null}
+     * @throws IllegalArgumentException if targetType is {@code null}
+     * @throws NullPointerException if the specified supplier is {@code null}
      */
     public <T, C extends Collection<T>> C split(final CharSequence source, final Class<? extends T> targetType, final Supplier<? extends C> supplier) {
         final C result = supplier.get();
@@ -1050,7 +1051,8 @@ public final class Splitter {
      * @param targetType the Type instance used for converting strings to the target type. Must not be {@code null}.
      * @param supplier a Supplier that creates a new Collection instance to hold the results. Must not be {@code null}.
      * @return the Collection created by the supplier, populated with the converted results.
-     * @throws IllegalArgumentException if targetType or supplier is {@code null}
+     * @throws IllegalArgumentException if targetType is {@code null}
+     * @throws NullPointerException if the specified supplier is {@code null}
      */
     public <T, C extends Collection<T>> C split(final CharSequence source, final Type<? extends T> targetType, final Supplier<? extends C> supplier) {
         final C result = supplier.get();
@@ -2096,7 +2098,7 @@ public final class Splitter {
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * Map<String, Integer> config = new HashMap<>();
+         * Map<String, Integer> config = new LinkedHashMap<>();
          * Type<String> strType = N.typeOf(String.class);
          * Type<Integer> intType = N.typeOf(Integer.class);
          *

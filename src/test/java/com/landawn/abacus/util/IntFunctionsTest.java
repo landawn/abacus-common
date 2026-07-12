@@ -45,6 +45,14 @@ import com.landawn.abacus.util.NoCachingNoUpdating.DisposableObjArray;
 
 public class IntFunctionsTest extends TestBase {
 
+    public static class CustomConcurrentSkipListSet<E> extends java.util.concurrent.ConcurrentSkipListSet<E> {
+        private static final long serialVersionUID = 1L;
+    }
+
+    public static class CustomConcurrentSkipListMap<K, V> extends java.util.concurrent.ConcurrentSkipListMap<K, V> {
+        private static final long serialVersionUID = 1L;
+    }
+
     @Test
     public void testOf() {
         IntFunction<String> result = IntFunctions.of(size -> "Size: " + size);
@@ -1012,6 +1020,17 @@ public class IntFunctionsTest extends TestBase {
         Assertions.assertNotNull(coll);
         Assertions.assertTrue(coll instanceof TreeSet);
         Assertions.assertEquals(0, coll.size());
+    }
+
+    @Test
+    public void testCustomConcurrentSortedTypesPreserveRequestedRuntimeType() {
+        IntFunction<? extends Collection<String>> setCreator = IntFunctions.<String> ofCollection(CustomConcurrentSkipListSet.class);
+        Collection<String> set = setCreator.apply(10);
+        Assertions.assertTrue(set instanceof CustomConcurrentSkipListSet, set.getClass().getName());
+
+        IntFunction<? extends Map<String, Integer>> mapCreator = IntFunctions.<String, Integer> ofMap(CustomConcurrentSkipListMap.class);
+        Map<String, Integer> map = mapCreator.apply(10);
+        Assertions.assertTrue(map instanceof CustomConcurrentSkipListMap, map.getClass().getName());
     }
 
     @Test

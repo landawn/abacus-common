@@ -4453,6 +4453,20 @@ public class CollectorsTest extends TestBase {
     }
 
     @Test
+    public void testMinMaxCollectorsAreNotUnordered() {
+        // regression: min/max/minMax document first-encountered tie-breaking, but were advertised
+        // UNORDERED, which permits a parallel pipeline to discard encounter order and break ties
+        // arbitrarily (JDK Collectors.minBy/maxBy/reducing(BinaryOperator) are not UNORDERED either).
+        assertFalse(Collectors.min(Comparator.<Integer> naturalOrder()).characteristics().contains(Characteristics.UNORDERED));
+        assertFalse(Collectors.max(Comparator.<Integer> naturalOrder()).characteristics().contains(Characteristics.UNORDERED));
+        assertFalse(Collectors.reducing((a, b) -> a).characteristics().contains(Characteristics.UNORDERED));
+        assertFalse(Collectors.<Integer> minMax().characteristics().contains(Characteristics.UNORDERED));
+        assertFalse(Collectors.minMax(Comparator.<Integer> naturalOrder()).characteristics().contains(Characteristics.UNORDERED));
+        // truly commutative reductions stay UNORDERED
+        assertTrue(Collectors.summingInt(i -> (Integer) i).characteristics().contains(Characteristics.UNORDERED));
+    }
+
+    @Test
     public void testEmptyAwareCollectorsStripConcurrentCharacteristic() {
         final Collector<String, ?, Optional<ConcurrentMap<String, String>>> optionalCollector = Collectors
                 .collectingOrEmpty(Collectors.toConcurrentMap(Function.identity(), Function.identity(), (a, b) -> a, ConcurrentHashMap::new));

@@ -543,7 +543,6 @@ public sealed class Difference<L, R> permits KeyValueDifference {
      * @param b the second array to compare. Can be {@code null}, which is treated as an empty array.
      * @return a non-{@code null} {@code Difference} object containing lists of common elements (type {@code L}),
      *         elements only in the first array (type {@code L}), and elements only in the second array (type {@code R})
-     * @see IntList#difference(IntList)
      * @see N#difference(Collection, Collection)
      * @see N#symmetricDifference(Collection, Collection)
      * @see N#excludeAll(Collection, Collection)
@@ -590,7 +589,6 @@ public sealed class Difference<L, R> permits KeyValueDifference {
      * @param b the second collection to compare. Can be {@code null} or empty.
      * @return a non-{@code null} {@code Difference} object containing lists of common elements (type {@code L}),
      *         elements only in the first collection (type {@code L}), and elements only in the second collection (type {@code R})
-     * @see IntList#difference(IntList)
      * @see N#difference(Collection, Collection)
      * @see N#symmetricDifference(Collection, Collection)
      * @see N#excludeAll(Collection, Collection)
@@ -2867,7 +2865,10 @@ public sealed class Difference<L, R> permits KeyValueDifference {
                         PropInfo propInfo2 = null;
 
                         for (final PropInfo propInfo1 : beanInfo1.propInfoList) {
-                            if (!diffIgnoredPropNamesForBean1.isEmpty() && diffIgnoredPropNamesForBean1.contains(propInfo1.name)) {
+                            // A property annotated @DiffIgnore on EITHER bean class is excluded from the diff,
+                            // mirroring the second-bean loop below (which already checks both ignore sets).
+                            if ((!diffIgnoredPropNamesForBean1.isEmpty() && diffIgnoredPropNamesForBean1.contains(propInfo1.name))
+                                    || (!diffIgnoredPropNamesForBean2.isEmpty() && diffIgnoredPropNamesForBean2.contains(propInfo1.name))) {
                                 continue;
                             }
 
@@ -3237,18 +3238,11 @@ public sealed class Difference<L, R> permits KeyValueDifference {
             N.checkArgNotNull(idExtractor1, cs.idExtractor1);
             N.checkArgNotNull(idExtractor2, cs.idExtractor2);
 
-            final T1 firstA = N.isEmpty(a) ? null : N.firstOrNullIfEmpty(a);
-            final T2 firstB = N.isEmpty(b) ? null : N.firstOrNullIfEmpty(b);
-            final Class<T1> clsA = firstA != null ? (Class<T1>) firstA.getClass() : null;
-            final Class<T2> clsB = firstB != null ? (Class<T2>) firstB.getClass() : null;
-
-            if (clsA != null && !Beans.isBeanClass(clsA)) {
-                throw new IllegalArgumentException(clsA.getCanonicalName() + " is not a bean class"); // NOSONAR
-            }
-
-            if (clsB != null && !Beans.isBeanClass(clsB)) {
-                throw new IllegalArgumentException(clsB.getCanonicalName() + " is not a bean class"); // NOSONAR
-            }
+            // Validate every (non-null) element in both collections, not just the first: a collection whose
+            // leading element is a bean (or null) can still hold a non-bean element later, which would
+            // otherwise slip through and be mishandled as a bean.
+            checkAllBeanElements(a);
+            checkAllBeanElements(b);
 
             final List<T1> common = new ArrayList<>();
             final List<T1> onlyOnLeft = new ArrayList<>();
@@ -3299,6 +3293,18 @@ public sealed class Difference<L, R> permits KeyValueDifference {
 
             return new BeanDifference<>((L) common, (L) onlyOnLeft, (R) onlyOnRight, differentValues);
 
+        }
+
+        private static void checkAllBeanElements(final Collection<?> c) {
+            if (N.isEmpty(c)) {
+                return;
+            }
+
+            for (final Object e : c) {
+                if (e != null && !Beans.isBeanClass(e.getClass())) {
+                    throw new IllegalArgumentException(e.getClass().getCanonicalName() + " is not a bean class"); // NOSONAR
+                }
+            }
         }
     }
 }

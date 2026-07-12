@@ -127,7 +127,8 @@ public class LocalDateType extends AbstractTemporalType<LocalDate> {
      * </ul>
      *
      * <p>Every string produced by {@link LocalDate#toString()} can be parsed back into an equivalent value
-     * (e.g. {@code "2021-01-01"}, including the zero-padded {@code yyyy-MM-dd} form for years 1000&ndash;9999).</p>
+     * (e.g. {@code "2021-01-01"}, including the zero-padded {@code yyyy-MM-dd} form used for years 0&ndash;999,
+     * e.g. {@code "0005-01-01"}).</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code

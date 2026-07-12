@@ -2232,9 +2232,10 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * }</pre>
      *
      * @param action the action to be performed for each element; must not be {@code null}
+     * @throws IllegalArgumentException if {@code action} is {@code null}
      */
     public void forEach(final ShortConsumer action) {
-        N.requireNonNull(action, cs.action);
+        N.checkArgNotNull(action, cs.action);
 
         forEach(0, size, action);
     }
@@ -2263,9 +2264,11 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * @param action the action to be performed for each element
      * @throws IndexOutOfBoundsException if {@code fromIndex} or {@code toIndex} is out of range,
      *         considering the supported forward and backward iteration semantics
+     * @throws IllegalArgumentException if {@code action} is {@code null}
      */
     public void forEach(final int fromIndex, final int toIndex, final ShortConsumer action) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), Math.max(fromIndex, toIndex), size);
+        N.checkArgNotNull(action, cs.action);
 
         if (size > 0) {
             if (fromIndex <= toIndex) {

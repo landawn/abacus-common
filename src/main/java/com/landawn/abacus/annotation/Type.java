@@ -128,7 +128,7 @@ public @interface Type {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * public class EncryptedStringType extends Type<String> {
+     * public class EncryptedStringType implements Type<String> {
      *     @Override
      *     public String valueOf(String value) {
      *         return decrypt(value);

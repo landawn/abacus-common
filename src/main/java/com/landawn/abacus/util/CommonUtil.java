@@ -1063,7 +1063,7 @@ sealed class CommonUtil permits N {
 
     private static boolean isArgNameOnly(final String argNameOrErrorMsg) {
         // shortest message: "it is null"
-        return !(argNameOrErrorMsg != null && argNameOrErrorMsg.length() > 9 && argNameOrErrorMsg.indexOf(SK._SPACE) > 0); //NOSONAR
+        return !(argNameOrErrorMsg != null && argNameOrErrorMsg.length() > 9 && argNameOrErrorMsg.indexOf(SK._SPACE) >= 0); //NOSONAR
     }
 
     /**
@@ -11722,7 +11722,7 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * ImmutableList<DayOfWeek> days = N.enumListOf(DayOfWeek.class);
+     * ImmutableList<java.time.DayOfWeek> days = N.enumListOf(java.time.DayOfWeek.class);
      * // returns [MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY, SUNDAY]
      * }</pre>
      *
@@ -11753,7 +11753,7 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * ImmutableSet<DayOfWeek> days = N.enumSetOf(DayOfWeek.class);
+     * ImmutableSet<java.time.DayOfWeek> days = N.enumSetOf(java.time.DayOfWeek.class);
      * // returns an ImmutableSet containing all DayOfWeek values
      * }</pre>
      *
@@ -11786,9 +11786,9 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * ImmutableBiMap<DayOfWeek, String> dayMap = N.enumNameMap(DayOfWeek.class);
-     * // dayMap.get(DayOfWeek.MONDAY) returns "MONDAY"
-     * // dayMap.inverse().get("MONDAY") returns DayOfWeek.MONDAY
+     * ImmutableBiMap<java.time.DayOfWeek, String> dayMap = N.enumNameMap(java.time.DayOfWeek.class);
+     * // dayMap.get(java.time.DayOfWeek.MONDAY) returns "MONDAY"
+     * // dayMap.inverse().get("MONDAY") returns java.time.DayOfWeek.MONDAY
      * }</pre>
      *
      * @param <E> the type of the enum constants. This should be an enum type.
@@ -11877,7 +11877,7 @@ sealed class CommonUtil permits N {
     /**
      * Probes whether the specified {@code Collection} is unmodifiable by attempting a mutation operation.
      *
-     * <p><b>&#9888; This is a {@code probe*}, not a pure {@code is*} predicate: it briefly MUTATES the argument.</b>
+     * <p><b>&#9888;&#65039; This is a {@code probe*}, not a pure {@code is*} predicate: it briefly MUTATES the argument.</b>
      * It attempts to add a temporary sentinel element and then remove it; if that throws
      * {@link UnsupportedOperationException}, the Collection is classified as unmodifiable. Because of the transient
      * mutation, do not call it on a collection that is concurrently shared with or published to other threads.
@@ -12025,7 +12025,7 @@ sealed class CommonUtil permits N {
     /**
      * Probes whether the specified {@code Map} is unmodifiable by attempting a mutation operation.
      *
-     * <p><b>&#9888; This is a {@code probe*}, not a pure {@code is*} predicate: it briefly MUTATES the argument.</b>
+     * <p><b>&#9888;&#65039; This is a {@code probe*}, not a pure {@code is*} predicate: it briefly MUTATES the argument.</b>
      * It attempts to put a temporary sentinel entry and then remove it; if that throws
      * {@link UnsupportedOperationException}, the Map is classified as unmodifiable. Because of the transient
      * mutation, do not call it on a map that is concurrently shared with or published to other threads.
@@ -12798,7 +12798,7 @@ sealed class CommonUtil permits N {
             return 0;
         }
 
-        return size < MAX_HASH_LENGTH ? (int) (size * 1.25) + 1 : MAX_ARRAY_SIZE;
+        return size < MAX_HASH_LENGTH ? (int) (size / 0.75) + 1 : MAX_ARRAY_SIZE;
     }
 
     /**
@@ -12909,7 +12909,7 @@ sealed class CommonUtil permits N {
      * Creates a new instance of a HashSet sized to hold the specified expected number of elements.
      *
      * <p>Note: the argument is treated as the <i>expected element count</i>, not the raw initial capacity:
-     * it is scaled up internally (approximately {@code expectedSize * 1.25 + 1}) before being passed to the
+     * it is scaled up internally (approximately {@code expectedSize / 0.75 + 1}) before being passed to the
      * {@code HashSet} constructor, so that the expected number of elements can be added without rehashing.
      *
      * <p><b>Usage Examples:</b></p>
@@ -12967,7 +12967,7 @@ sealed class CommonUtil permits N {
      * Creates a new instance of a LinkedHashSet sized to hold the specified expected number of elements.
      *
      * <p>Note: the argument is treated as the <i>expected element count</i>, not the raw initial capacity:
-     * it is scaled up internally (approximately {@code expectedSize * 1.25 + 1}) before being passed to the
+     * it is scaled up internally (approximately {@code expectedSize / 0.75 + 1}) before being passed to the
      * {@code LinkedHashSet} constructor, so that the expected number of elements can be added without rehashing.
      *
      * <p><b>Usage Examples:</b></p>
@@ -13347,7 +13347,7 @@ sealed class CommonUtil permits N {
      * Creates a new instance of a HashMap sized to hold the specified expected number of entries.
      *
      * <p>Note: the argument is treated as the <i>expected entry count</i>, not the raw initial capacity:
-     * it is scaled up internally (approximately {@code expectedSize * 1.25 + 1}) before being passed to the
+     * it is scaled up internally (approximately {@code expectedSize / 0.75 + 1}) before being passed to the
      * {@code HashMap} constructor, so that the expected number of entries can be added without rehashing.
      *
      * <p><b>Usage Examples:</b></p>
@@ -13445,7 +13445,7 @@ sealed class CommonUtil permits N {
      * Creates a new instance of a LinkedHashMap sized to hold the specified expected number of entries.
      *
      * <p>Note: the argument is treated as the <i>expected entry count</i>, not the raw initial capacity:
-     * it is scaled up internally (approximately {@code expectedSize * 1.25 + 1}) before being passed to the
+     * it is scaled up internally (approximately {@code expectedSize / 0.75 + 1}) before being passed to the
      * {@code LinkedHashMap} constructor, so that the expected number of entries can be added without rehashing.
      *
      * <p><b>Usage Examples:</b></p>
@@ -13591,7 +13591,7 @@ sealed class CommonUtil permits N {
      * Creates a new instance of an IdentityHashMap sized to hold the specified expected number of entries.
      *
      * <p>Note: the argument is treated as the <i>expected entry count</i>, not the raw initial capacity:
-     * it is scaled up internally (approximately {@code expectedSize * 1.25 + 1}) before being passed to the
+     * it is scaled up internally (approximately {@code expectedSize / 0.75 + 1}) before being passed to the
      * {@code IdentityHashMap(int expectedMaxSize)} constructor (which applies its own sizing on top).
      *
      * <p><b>Usage Examples:</b></p>
@@ -13650,7 +13650,7 @@ sealed class CommonUtil permits N {
      * Creates a new instance of a ConcurrentHashMap sized to hold the specified expected number of entries.
      *
      * <p>Note: the argument is treated as the <i>expected entry count</i>, not the raw initial capacity:
-     * it is scaled up internally (approximately {@code expectedSize * 1.25 + 1}) before being passed to the
+     * it is scaled up internally (approximately {@code expectedSize / 0.75 + 1}) before being passed to the
      * {@code ConcurrentHashMap} constructor, so that the expected number of entries can be added without rehashing.
      *
      * <p><b>Usage Examples:</b></p>
@@ -14336,7 +14336,7 @@ sealed class CommonUtil permits N {
 
     static final int MAX_ARRAY_SIZE = Integer.MAX_VALUE - 8;
 
-    static final int MAX_HASH_LENGTH = (int) (MAX_ARRAY_SIZE / 1.25) - 1;
+    static final int MAX_HASH_LENGTH = (int) (MAX_ARRAY_SIZE * 0.75) - 1;
 
     /**
      * Creates a new empty Dataset.
@@ -17770,7 +17770,7 @@ sealed class CommonUtil permits N {
      * Returns a modifiable {@code ArrayBlockingQueue} with specified elements. And it's not backed by the specified array.
      * If the specified array is {@code null} or empty, an empty {@code ArrayBlockingQueue} is returned.
      *
-     * <p><b>&#9888; Capacity warning &mdash; the returned queue is FULL AT BIRTH.</b> {@code ArrayBlockingQueue}
+     * <p><b>&#9888;&#65039; Capacity warning &mdash; the returned queue is FULL AT BIRTH.</b> {@code ArrayBlockingQueue}
      * is a <i>bounded</i> queue and this varargs overload reserves <b>no</b> extra headroom: the capacity equals
      * the number of specified elements (or {@code 1} for {@code null}/empty input). So a queue created from a
      * non-empty array cannot accept a single additional element &mdash; {@code add} throws
@@ -24719,7 +24719,7 @@ sealed class CommonUtil permits N {
      * @return an Optional containing the first non-empty collection, or an empty Optional if both collections are empty or null
      */
     public static <T extends Collection<?>> Optional<T> firstNonEmpty(final T a, final T b) {
-        return a != null && a.size() > 0 ? Optional.of(a) : (b != null && b.size() > 0 ? Optional.of(b) : Optional.empty());
+        return a != null && !a.isEmpty() ? Optional.of(a) : (b != null && !b.isEmpty() ? Optional.of(b) : Optional.empty());
     }
 
     /**
@@ -24742,8 +24742,8 @@ sealed class CommonUtil permits N {
      * @return an Optional containing the first non-empty collection, or an empty Optional if all collections are empty or null
      */
     public static <T extends Collection<?>> Optional<T> firstNonEmpty(final T a, final T b, final T c) {
-        return a != null && a.size() > 0 ? Optional.of(a)
-                : (b != null && b.size() > 0 ? Optional.of(b) : (c != null && c.size() > 0 ? Optional.of(c) : Optional.empty()));
+        return a != null && !a.isEmpty() ? Optional.of(a)
+                : (b != null && !b.isEmpty() ? Optional.of(b) : (c != null && !c.isEmpty() ? Optional.of(c) : Optional.empty()));
     }
 
     /**
@@ -30683,7 +30683,7 @@ sealed class CommonUtil permits N {
     /**
      * Fills the specified list with the specified value from the specified start index to the specified end index.
      *
-     * <p><b>&#9888; Warning - this method GROWS the list.</b> Unlike the array {@code fill(...,fromIndex,toIndex,...)}
+     * <p><b>&#9888;&#65039; Warning - this method GROWS the list.</b> Unlike the array {@code fill(...,fromIndex,toIndex,...)}
      * overloads (which throw {@code IndexOutOfBoundsException} when {@code toIndex} exceeds the array length), this
      * List overload silently extends the list so it reaches {@code toIndex}. Moreover, if {@code fromIndex} is greater
      * than the current size, the gap {@code [size, fromIndex)} is padded with {@code null} elements (NOT with
@@ -35010,7 +35010,8 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * N.sortByLong(arr, String::length);           // sorts by length
+     * String[] arr = {"bb", "a", "ccc"};
+     * N.sortByLong(arr, String::length);           // arr is now [a, bb, ccc]
      * N.sortByLong(new String[0], String::length); // empty array, no change
      * }</pre>
      *
@@ -35044,7 +35045,8 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * N.sortByFloat(arr, String::length);           // sorts by length
+     * String[] arr = {"bb", "a", "ccc"};
+     * N.sortByFloat(arr, String::length);           // arr is now [a, bb, ccc]
      * N.sortByFloat(new String[0], String::length); // empty array, no change
      * }</pre>
      *
@@ -35078,7 +35080,8 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * N.sortByDouble(arr, String::length);           // sorts by length
+     * String[] arr = {"bb", "a", "ccc"};
+     * N.sortByDouble(arr, String::length);           // arr is now [a, bb, ccc]
      * N.sortByDouble(new String[0], String::length); // empty array, no change
      * }</pre>
      *
@@ -35982,7 +35985,8 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * N.parallelSortByInt(arr, String::length);           // sorts by length
+     * String[] arr = {"bb", "a", "ccc"};
+     * N.parallelSortByInt(arr, String::length);           // arr is now [a, bb, ccc]
      * N.parallelSortByInt(new String[0], String::length); // empty array, no change
      * }</pre>
      *
@@ -36016,7 +36020,8 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * N.parallelSortByLong(arr, String::length);           // sorts by length
+     * String[] arr = {"bb", "a", "ccc"};
+     * N.parallelSortByLong(arr, String::length);           // arr is now [a, bb, ccc]
      * N.parallelSortByLong(new String[0], String::length); // empty array, no change
      * }</pre>
      *
@@ -36050,7 +36055,8 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * N.parallelSortByFloat(arr, String::length);           // sorts by length
+     * String[] arr = {"bb", "a", "ccc"};
+     * N.parallelSortByFloat(arr, String::length);           // arr is now [a, bb, ccc]
      * N.parallelSortByFloat(new String[0], String::length); // empty array, no change
      * }</pre>
      *
@@ -36084,7 +36090,8 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * N.parallelSortByDouble(arr, String::length);           // sorts by length
+     * String[] arr = {"bb", "a", "ccc"};
+     * N.parallelSortByDouble(arr, String::length);           // arr is now [a, bb, ccc]
      * N.parallelSortByDouble(new String[0], String::length); // empty array, no change
      * }</pre>
      *
@@ -36621,7 +36628,8 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * N.reverseSortByInt(arr, String::length);           // sorts by length
+     * String[] arr = {"bb", "a", "ccc"};
+     * N.reverseSortByInt(arr, String::length);    // arr is now [ccc, bb, a]
      * N.reverseSortByInt(new String[0], String::length); // empty array, no change
      * }</pre>
      *
@@ -36655,7 +36663,8 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * N.reverseSortByLong(arr, String::length);           // sorts by length
+     * String[] arr = {"bb", "a", "ccc"};
+     * N.reverseSortByLong(arr, String::length);    // arr is now [ccc, bb, a]
      * N.reverseSortByLong(new String[0], String::length); // empty array, no change
      * }</pre>
      *
@@ -36689,7 +36698,8 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * N.reverseSortByFloat(arr, String::length);           // sorts by length
+     * String[] arr = {"bb", "a", "ccc"};
+     * N.reverseSortByFloat(arr, String::length);    // arr is now [ccc, bb, a]
      * N.reverseSortByFloat(new String[0], String::length); // empty array, no change
      * }</pre>
      *
@@ -36723,7 +36733,8 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * N.reverseSortByDouble(arr, String::length);           // sorts by length
+     * String[] arr = {"bb", "a", "ccc"};
+     * N.reverseSortByDouble(arr, String::length);    // arr is now [ccc, bb, a]
      * N.reverseSortByDouble(new String[0], String::length); // empty array, no change
      * }</pre>
      *

@@ -166,6 +166,8 @@ class ArrayFloatStream extends AbstractFloatStream {
      * @param values the float array to stream over
      * @param fromIndex the start index (inclusive) of the range to stream
      * @param toIndex the end index (exclusive) of the range to stream
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code toIndex > values.length},
+     *         or {@code fromIndex > toIndex}
      */
     ArrayFloatStream(final float[] values, final int fromIndex, final int toIndex) {
         this(values, fromIndex, toIndex, null);
@@ -188,6 +190,8 @@ class ArrayFloatStream extends AbstractFloatStream {
      * @param fromIndex the start index (inclusive) of the range to stream
      * @param toIndex the end index (exclusive) of the range to stream
      * @param closeHandlers handlers to execute when the stream is closed, can be null
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code toIndex > values.length},
+     *         or {@code fromIndex > toIndex}
      */
     ArrayFloatStream(final float[] values, final int fromIndex, final int toIndex, final Collection<LocalRunnable> closeHandlers) {
         this(values, fromIndex, toIndex, false, closeHandlers);
@@ -2182,6 +2186,10 @@ class ArrayFloatStream extends AbstractFloatStream {
 
                 @Override
                 public void advance(final long n) {
+                    if (n <= 0) {
+                        return;
+                    }
+
                     if (!executed) {
                         executed = true;
                         action.run();

@@ -179,6 +179,14 @@ public class TypeAttrParserTest extends TestBase {
     }
 
     @Test
+    public void testParseTrimsBareClassName() {
+        // regression: a bare type name (no generics, no constructor parens) fell through to the
+        // untrimmed fallback assignment, unlike the generics/parens paths which both trim -
+        // a stray space then silently broke Class.forName resolution downstream.
+        Assertions.assertEquals("java.lang.String", TypeAttrParser.parse("  java.lang.String  ").getClassName());
+    }
+
+    @Test
     public void testParseMultipleTypeParameters() {
         TypeAttrParser parser = TypeAttrParser.parse("Map<String, Integer>");
 

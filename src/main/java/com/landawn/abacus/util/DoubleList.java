@@ -145,8 +145,9 @@ import com.landawn.abacus.util.stream.DoubleStream;
  *   <li><b>Precision:</b> ~15-17 decimal digits of precision (53-bit mantissa)</li>
  *   <li><b>Range:</b> Approximately ±1.8 × 10^308 with subnormal support</li>
  *   <li><b>Comparison:</b> NaN-aware comparison operations</li>
- *   <li><b>Aggregation:</b> {@code min()}, {@code max()}, and {@code median()} <i>propagate</i> NaN (they do not skip it);
- *       any NaN present makes the result NaN. Use {@code stream().filter(Double::isFinite)} first to ignore NaN.</li>
+ *   <li><b>Aggregation:</b> {@code min()} and {@code max()} <i>propagate</i> NaN (they do not skip it);
+ *       any NaN present makes the result NaN. Use {@code stream().filter(Double::isFinite)} first to ignore NaN.
+ *       ({@code median()} instead orders NaN as the largest value, so it is only NaN when NaN occupies the middle position.)</li>
  * </ul>
  *
  * <p><b>Double-Specific Operations:</b>
@@ -2179,10 +2180,10 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * }</pre>
      *
      * @param action the action to be performed for each element. Must not be {@code null}.
-     * @throws NullPointerException if the specified action is {@code null}
+     * @throws IllegalArgumentException if {@code action} is {@code null}
      */
     public void forEach(final DoubleConsumer action) {
-        N.requireNonNull(action, cs.action);
+        N.checkArgNotNull(action, cs.action);
 
         forEach(0, size, action);
     }
@@ -2215,10 +2216,11 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * @param action the action to be performed for each element. Must not be {@code null}.
      * @throws IndexOutOfBoundsException if fromIndex or toIndex is out of range
      *         ({@code min(fromIndex, toIndex == -1 ? 0 : toIndex) < 0 || max(fromIndex, toIndex) > size()})
-     * @throws NullPointerException if the specified action is {@code null}
+     * @throws IllegalArgumentException if {@code action} is {@code null}
      */
     public void forEach(final int fromIndex, final int toIndex, final DoubleConsumer action) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), Math.max(fromIndex, toIndex), size);
+        N.checkArgNotNull(action, cs.action);
 
         if (size > 0) {
             if (fromIndex <= toIndex) {

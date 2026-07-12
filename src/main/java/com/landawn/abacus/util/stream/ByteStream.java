@@ -191,9 +191,26 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
      * For sorted data, this acts as a logical "take while condition is true" operation.
      *
      * <p><b>Notes on parallel streams:</b><br>
-     * In parallel Streams, elements beyond the first non-matching element might still be evaluated
-     * and may appear in the result if they individually satisfy the predicate.
-     * In parallel streams, there is no guarantee of encounter-order prefix semantics.
+     * ⚠️ In a parallel stream, elements after the first unmatched element (the first element for which
+     * the predicate returns {@code false}) may still be processed and included in the result if they
+     * individually satisfy the predicate.<br>
+     * There is no guarantee of encounter-order prefix semantics in parallel streams.
+     *
+     * <p>Parallel-stream behavior of these related short-circuiting operations:</p>
+     * <pre>
+     * ┌─────────────────┬─────────────────────────┬────────────────────────────────────────────────────────────────┐
+     * │     Method      │        Boundary         │                            Warning                             │
+     * ├─────────────────┼─────────────────────────┼────────────────────────────────────────────────────────────────┤
+     * │ takeWhile       │ first unmatched         │ elements after it may still be processed and included if they  │
+     * │                 │ (predicate false)       │ individually satisfy the predicate                             │
+     * ├─────────────────┼─────────────────────────┼────────────────────────────────────────────────────────────────┤
+     * │ dropWhile (+    │ first unmatched         │ elements after it may still be processed and dropped if they   │
+     * │ onDrop)         │ (predicate false)       │ individually satisfy the predicate                             │
+     * ├─────────────────┼─────────────────────────┼────────────────────────────────────────────────────────────────┤
+     * │ skipUntil       │ first matched           │ elements after it may still be processed and skipped if they   │
+     * │                 │ (predicate true)        │ do not satisfy the predicate                                   │
+     * └─────────────────┴─────────────────────────┴────────────────────────────────────────────────────────────────┘
+     * </pre>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -201,6 +218,18 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
      *       .takeWhile(x -> x < 4)
      *       .toArray();   // returns [(byte) 1, (byte) 2, (byte) 3]
      * }</pre>
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
+     *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
+     *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @param predicate a non-interfering, stateless predicate that tests each element to determine when to stop taking elements
      * @return a new stream consisting of elements from this stream until an element is encountered that doesn't match the predicate
@@ -222,10 +251,27 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
      * operation that preserves encounter order in sequential streams.
      *
      * <p><b>Notes on parallel streams:</b><br>
-     * In sequential streams, behavior is well-defined and deterministic.
-     * However, in parallel, elements beyond the first non-matching element
-     * may still be evaluated, and those satisfying the predicate may be dropped.
-     * In parallel streams, there is no guarantee of encounter-order prefix/suffix semantics.
+     * ⚠️ In a parallel stream, elements after the first unmatched element (the first element for which
+     * the predicate returns {@code false}) may still be processed and dropped if they individually
+     * satisfy the predicate.<br>
+     * In sequential streams the behavior is well-defined and deterministic; in parallel streams there
+     * is no guarantee of encounter-order prefix/suffix semantics.
+     *
+     * <p>Parallel-stream behavior of these related short-circuiting operations:</p>
+     * <pre>
+     * ┌─────────────────┬─────────────────────────┬────────────────────────────────────────────────────────────────┐
+     * │     Method      │        Boundary         │                            Warning                             │
+     * ├─────────────────┼─────────────────────────┼────────────────────────────────────────────────────────────────┤
+     * │ takeWhile       │ first unmatched         │ elements after it may still be processed and included if they  │
+     * │                 │ (predicate false)       │ individually satisfy the predicate                             │
+     * ├─────────────────┼─────────────────────────┼────────────────────────────────────────────────────────────────┤
+     * │ dropWhile (+    │ first unmatched         │ elements after it may still be processed and dropped if they   │
+     * │ onDrop)         │ (predicate false)       │ individually satisfy the predicate                             │
+     * ├─────────────────┼─────────────────────────┼────────────────────────────────────────────────────────────────┤
+     * │ skipUntil       │ first matched           │ elements after it may still be processed and skipped if they   │
+     * │                 │ (predicate true)        │ do not satisfy the predicate                                   │
+     * └─────────────────┴─────────────────────────┴────────────────────────────────────────────────────────────────┘
+     * </pre>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -233,6 +279,18 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
      *       .dropWhile(x -> x < 4)
      *       .toArray();   // returns [(byte) 4, (byte) 5, (byte) 2, (byte) 1]
      * }</pre>
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
+     *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
+     *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @param predicate a non-interfering, stateless predicate that tests each element to determine when to stop dropping elements
      * @return a new stream consisting of the remaining elements of this stream after dropping elements
@@ -260,6 +318,18 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
      *
      * <p>This is an intermediate operation.
      *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
+     *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
+     *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     * </table>
+     *
      * @param mapper a non-interfering, stateless function that transforms each element from byte to byte
      * @return a new ByteStream consisting of the results of applying the mapper function to each element
      * @see Stream#map(Function)
@@ -286,6 +356,18 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
      *       .mapToInt(b -> b & 0xFF)
      *       .toArray();   // [255, 254]
      * }</pre>
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
+     *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
+     *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @param mapper a non-interfering, stateless function that transforms each element from byte to int
      * @return a new IntStream consisting of the results of applying the mapper function to each element
@@ -316,6 +398,18 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
      *       .toList();   // ["01", "0F", "7F"]
      * }</pre>
      *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
+     *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
+     *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     * </table>
+     *
      * @param <T> the element type of the new stream
      * @param mapper a non-interfering, stateless function that transforms each element from byte to T
      * @return a new Stream of objects resulting from applying the mapper function to each element
@@ -343,6 +437,18 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
      * }</pre>
      *
      * <p>This is an intermediate operation.
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
+     *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
+     *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @param mapper a non-interfering, stateless function that transforms each element from byte to ByteStream
      * @return a new {@link ByteStream} consisting of the flattened contents of the mapped streams
@@ -395,6 +501,18 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
      *
      * <p>This is an intermediate operation.
      *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
+     *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
+     *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     * </table>
+     *
      * @param mapper a non-interfering, stateless function that transforms each element from byte to {@code Collection<Byte>}
      * @return a new {@code ByteStream} consisting of the flattened contents of the collections produced by the mapper
      * @see #flatMap(ByteFunction)
@@ -421,6 +539,18 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
      * }</pre>
      *
      * <p>This is an intermediate operation.
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
+     *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
+     *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @param mapper a non-interfering, stateless function that transforms each element from byte to byte[]
      * @return a new {@code ByteStream} consisting of the flattened contents of the arrays produced by the mapper
@@ -450,6 +580,18 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
      * }</pre>
      *
      * <p>This is an intermediate operation.
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
+     *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
+     *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @param mapper a non-interfering, stateless function that transforms each element from byte to IntStream
      * @return a new {@link IntStream} consisting of the flattened contents of the mapped streams
@@ -483,6 +625,18 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
      *
      * <p>This is an intermediate operation.
      *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
+     *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
+     *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     * </table>
+     *
      * @param <T> the element type of the new stream
      * @param mapper a non-interfering, stateless function that transforms each element from byte to Stream&lt;T&gt;
      * @return a new object-valued {@link Stream} consisting of the flattened contents of the mapped streams
@@ -509,6 +663,18 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
      *
      * <p>This is an intermediate operation.
      *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
+     *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
+     *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     * </table>
+     *
      * @param <T> the element type of the new stream
      * @param mapper a non-interfering, stateless function that transforms each element from byte to Collection&lt;T&gt;
      * @return a new object-valued {@link Stream} consisting of the flattened contents of the collections produced by the mapper
@@ -534,6 +700,18 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
      * }</pre>
      *
      * <p>This is an intermediate operation.
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
+     *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
+     *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @param <T> the element type of the new stream
      * @param mapper a non-interfering, stateless function that transforms each element from byte to T[]
@@ -568,6 +746,18 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
      *
      * <p>Note: copied from StreamEx: <a href="https://github.com/amaembo/streamex">StreamEx</a> under Apache License 2.0 and may be modified.
      *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
+     *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
+     *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     * </table>
+     *
      * @param mapper a non-interfering, stateless function that transforms each element from byte to OptionalByte
      * @return a new ByteStream containing only values from non-empty OptionalByte results
      * @see #map(ByteUnaryOperator)
@@ -594,6 +784,18 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
      *     .rangeMap((first, next) -> next - first < 3, (first, last) -> (byte)(first + last))
      *     .toArray();   // [(byte)(1+3), (byte)(10+11)] = [4, 21]
      * }</pre>
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
+     *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
+     *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @param sameRange a predicate that determines if the next element belongs to the same range as the first element of the current range.
      *              The first argument tested by sameRange is the first(not the last) element of the current range, and the second argument is the next element to check.
@@ -625,6 +827,18 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
      *     .rangeMapToObj((first, next) -> next - first < 3, (first, last) -> first + ".." + last)
      *     .toList();   // ["1..3", "10..11"]
      * }</pre>
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
+     *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
+     *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @param <T> the element type of the new stream
      * @param sameRange a predicate that determines if the next element belongs to the same range as the first element of the current range.
@@ -666,6 +880,18 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
      *     .toList();   // []
      * }</pre>
      *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
+     *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
+     *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     * </table>
+     *
      * @param collapsible a predicate that determines if two consecutive elements should be collapsed into the same group.
      *        The first parameter is the last(not the first) element of the current group, and the second parameter is the next element to check.
      * @return a stream of lists, each containing a sequence of consecutive elements that are collapsible with each other
@@ -703,6 +929,18 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
      *     .toArray();   // [1, 10, 20]
      * }</pre>
      *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
+     *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
+     *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     * </table>
+     *
      * @param collapsible a predicate that determines if two consecutive elements should be collapsed into the same group.
      *        The first parameter is the last(not the first) element of the current group, and the second parameter is the next element to check.
      * @param mergeFunction a function to merge two collapsible elements into one
@@ -737,6 +975,18 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
      *     .toArray();   // [3, 21]
      * }</pre>
      *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
+     *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
+     *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     * </table>
+     *
      * @param collapsible a predicate that determines if the next element from this stream should be collapsed with the first and last elements of current group
      *          The collapsible predicate takes three elements: the first and last elements of current group, and the next element to check.
      * @param mergeFunction a function to merge two collapsible elements into one
@@ -765,6 +1015,18 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
      *     .toArray();   // [1, 3, 6, 10]
      * }</pre>
      *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
+     *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
+     *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     * </table>
+     *
      * @param accumulator a {@code ByteBinaryOperator} that takes two parameters: the current accumulated value and the current stream element, and returns a new accumulated value.
      * @return a new {@code ByteStream} consisting of the results of the scan operation on the elements of the original stream.
      *         Returns an empty stream if this stream is empty.
@@ -791,6 +1053,18 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
      *     .scan((byte)10, (a, b) -> (byte)(a + b))
      *     .toArray();   // [11, 13, 16, 20]
      * }</pre>
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
+     *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
+     *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @param init the initial value. It's only used once by the accumulator to calculate the first element in the returned stream.
      *        It will be ignored if this stream is empty and won't be the first element of the returned stream.
@@ -824,6 +1098,18 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
      *     .toArray();   // [11, 13, 16]
      * }</pre>
      *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
+     *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
+     *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     * </table>
+     *
      * @param init the initial value. It's only used once by the accumulator to calculate the first element in the returned stream.
      * @param initIncluded if {@code true}, the {@code init} value is included as the first element of the returned stream;
      *        if {@code false}, the scan starts from the first stream element combined with {@code init}, and {@code init} itself is not emitted.
@@ -849,6 +1135,18 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
      *     .toArray();   // returns [(byte)1, (byte)2, (byte)3, (byte)4]
      * }</pre>
      *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
+     *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
+     *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     * </table>
+     *
      * @param a the elements to prepend to this stream
      * @return a new stream with the specified elements prepended
      */
@@ -867,6 +1165,18 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
      *     .append((byte)3, (byte)4)
      *     .toArray();   // returns [(byte)1, (byte)2, (byte)3, (byte)4]
      * }</pre>
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
+     *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
+     *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @param a the elements to append to this stream
      * @return a new stream with the specified elements appended
@@ -894,6 +1204,18 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
      *     .toArray();   // returns [(byte)10, (byte)20]
      * }</pre>
      *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
+     *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
+     *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     * </table>
+     *
      * @param a the elements to append if this stream is empty
      * @return this stream if not empty, otherwise a new stream containing the specified elements
      */
@@ -910,6 +1232,18 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
      * <pre>{@code
      * ByteList list = ByteStream.of((byte)1, (byte)2, (byte)3).toByteList();
      * }</pre>
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
+     *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
+     *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>Yes</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @return a ByteList containing all elements of this stream
      */
@@ -928,6 +1262,18 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
      *     .toMap(b -> b, b -> "Value" + b);
      * // Result: {1=Value1, 2=Value2, 3=Value3}
      * }</pre>
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
+     *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
+     *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>Yes</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @param <K> the type of the map keys
      * @param <V> the type of the map values
@@ -956,6 +1302,18 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
      *     .toMap(b -> b, b -> "Value" + b, LinkedHashMap::new);
      * // Result: LinkedHashMap {3=Value3, 1=Value1, 2=Value2} (maintains insertion order)
      * }</pre>
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
+     *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
+     *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>Yes</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @param <K> the type of the map keys
      * @param <V> the type of the map values
@@ -991,6 +1349,18 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
      * // Result: {small=3, large=23}
      * }</pre>
      *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
+     *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
+     *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>Yes</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     * </table>
+     *
      * @param <K> the type of the map keys
      * @param <V> the type of the map values
      * @param <E> the type of exception thrown by the key mapper
@@ -1025,6 +1395,18 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
      * // Result: TreeMap {large=23, small=3} (sorted by key)
      * }</pre>
      *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
+     *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
+     *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>Yes</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     * </table>
+     *
      * @param <K> the type of the map keys
      * @param <V> the type of the map values
      * @param <M> the type of the resulting Map
@@ -1058,6 +1440,18 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
      * // Result: {small=2, large=3}
      * }</pre>
      *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
+     *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
+     *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>Yes</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     * </table>
+     *
      * @param <K> the type of the keys
      * @param <D> the result type of the downstream reduction
      * @param <E> the type of exception thrown by the classifier
@@ -1088,6 +1482,18 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
      * // Result: TreeMap {large=3, small=2} (sorted by key)
      * }</pre>
      *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
+     *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
+     *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>Yes</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     * </table>
+     *
      * @param <K> the type of the keys
      * @param <D> the result type of the downstream reduction
      * @param <M> the type of the resulting Map
@@ -1113,6 +1519,18 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
      * byte sum = ByteStream.of((byte)1, (byte)2, (byte)3).reduce((byte)0, (a, b) -> (byte)(a + b));   // 6
      * }</pre>
      *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
+     *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
+     *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     * </table>
+     *
      * @param identity the initial value of the reduction operation
      * @param accumulator the function for combining the current reduced value and the current stream element
      * @return the result of the reduction
@@ -1137,6 +1555,18 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
      * OptionalByte empty = ByteStream.empty().reduce((a, b) -> (byte)(a + b));   // OptionalByte.empty()
      * }</pre>
      *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
+     *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
+     *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     * </table>
+     *
      * @param accumulator the function for combining the current reduced value and the current stream element
      * @return an OptionalByte describing the result of the reduction. If the stream is empty, an empty {@code OptionalByte} is returned.
      */
@@ -1153,6 +1583,18 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
      *     .collect(ByteList::new, ByteList::add, ByteList::addAll);
      * // Result: ByteList [1, 2, 3]
      * }</pre>
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
+     *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
+     *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @param <R> The type of the result
      * @param supplier a function that creates a new result container. For a parallel execution, this function may be called multiple times and must return a fresh value each time.
@@ -1181,6 +1623,18 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
      *     .collect(ByteList::new, ByteList::add);
      * // Result: ByteList [1, 2, 3]
      * }</pre>
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
+     *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
+     *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @param <R> The type of the result. It must be  {@code Collection/Map/StringBuilder/Multiset/Multimap/BooleanList/IntList/.../DoubleList}.
      * @param supplier a function that creates a new result container. For a parallel execution, this function may be called multiple times and must return a fresh value each time.
@@ -1213,6 +1667,18 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
      * // prints: 1, 2, 3, 4, 5 (each on a new line)
      * }</pre>
      *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
+     *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
+     *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     * </table>
+     *
      * @param <E> the type of exception thrown by the action
      * @param action a non-interfering action to perform on the elements
      * @throws E if the action throws an exception
@@ -1241,6 +1707,18 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
      * // Element at index 2: 30
      * }</pre>
      *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
+     *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
+     *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     * </table>
+     *
      * @param <E> the type of exception thrown by the action
      * @param action a non-interfering action to perform on the elements, where the first parameter is the index and the second is the element
      * @throws E if the action throws an exception
@@ -1261,6 +1739,18 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
      * boolean hasNegative = ByteStream.of((byte)1, (byte)-2, (byte)3)
      *     .anyMatch(b -> b < 0);   // true
      * }</pre>
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
+     *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
+     *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @param <E> the type of exception thrown by the predicate
      * @param predicate a non-interfering, stateless predicate that tests each element
@@ -1284,6 +1774,18 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
      *     .allMatch(b -> b > 0);   // true
      * }</pre>
      *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
+     *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
+     *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     * </table>
+     *
      * @param <E> the type of exception thrown by the predicate
      * @param predicate a non-interfering, stateless predicate that tests each element
      * @return {@code true} if either all elements of the stream match the provided predicate or the stream is empty, otherwise {@code false}
@@ -1306,6 +1808,18 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
      *     .noneMatch(b -> b < 0);   // true
      * }</pre>
      *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
+     *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
+     *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     * </table>
+     *
      * @param <E> the type of exception thrown by the predicate
      * @param predicate a non-interfering, stateless predicate that tests each element
      * @return {@code true} if either no elements of the stream match the provided predicate or the stream is empty, otherwise {@code false}
@@ -1326,6 +1840,18 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
      * OptionalByte first = ByteStream.of((byte)1, (byte)2, (byte)3, (byte)4, (byte)5)
      *                                 .findFirst();   // returns OptionalByte.of(1)
      * }</pre>
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
+     *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
+     *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @return an {@code OptionalByte} containing the first element of the stream, or an empty {@code OptionalByte} if the stream is empty
      * @see #first()
@@ -1357,6 +1883,18 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
      *                              .findAny();   // returns OptionalByte.of(1)
      * }</pre>
      *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
+     *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
+     *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     * </table>
+     *
      * @return an {@code OptionalByte} containing the first element of the stream, or an empty {@code OptionalByte} if the stream is empty
      * @see #first()
      * @see #findFirst()
@@ -1380,6 +1918,18 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
      * OptionalByte firstNegative = ByteStream.of((byte)1, (byte)2, (byte)-3, (byte)4)
      *     .findFirst(b -> b < 0);   // OptionalByte[-3]
      * }</pre>
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
+     *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
+     *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @param <E> the type of exception thrown by the predicate
      * @param predicate a non-interfering, stateless predicate that tests each element
@@ -1406,6 +1956,18 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
      *     .findAny(b -> b < 0);   // OptionalByte[-3] (or -4 in parallel streams)
      * }</pre>
      *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
+     *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
+     *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     * </table>
+     *
      * @param <E> the type of exception thrown by the predicate
      * @param predicate a non-interfering, stateless predicate that tests each element
      * @return an {@code OptionalByte} describing some element of this stream that matches the given predicate,
@@ -1429,6 +1991,18 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
      * OptionalByte lastNegative = ByteStream.of((byte)1, (byte)-2, (byte)3, (byte)-4)
      *     .findLast(b -> b < 0);   // OptionalByte[-4]
      * }</pre>
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
+     *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
+     *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @param <E> the type of exception thrown by the predicate
      * @param predicate a non-interfering, stateless predicate that tests each element
@@ -1457,6 +2031,18 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
      * byte minValue = ByteStream.of((byte) 10, (byte) 20, (byte) 30).min().orElse((byte) 0);   // returns 10
      * }</pre>
      *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
+     *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
+     *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     * </table>
+     *
      * @return an {@code OptionalByte} containing the minimum element of this stream,
      *         or an empty {@code OptionalByte} if the stream is empty
      */
@@ -1479,6 +2065,18 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
      * // Safe retrieval with default value
      * byte maxValue = ByteStream.of((byte) 10, (byte) 20, (byte) 30).max().orElse((byte) 0);   // returns 30
      * }</pre>
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
+     *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
+     *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @return an {@code OptionalByte} containing the maximum element of this stream,
      *         or an empty {@code OptionalByte} if the stream is empty
@@ -1505,6 +2103,24 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
      * ByteStream.of((byte) 1, (byte) 2, (byte) 3).kthLargest(5);   // returns OptionalByte.empty()
      * }</pre>
      *
+     * <p><b>Note:</b> {@code ByteStream} (like {@code CharStream}) intentionally omits the {@code top(n)} /
+     * {@code top(n, Comparator)} family that {@code ShortStream}/{@code IntStream} provide — for the small
+     * {@code byte} domain the n largest elements are easily obtained otherwise: use {@code sorted()}
+     * (ascending) and take the tail, or {@code boxed().top(n)} on the resulting {@code Stream<Byte>}.
+     * This is by design.
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
+     *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
+     *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     * </table>
+     *
      * @param k the position (1-based) of the largest element to retrieve
      * @return an {@code OptionalByte} containing the k-th largest element, or an empty {@code OptionalByte}
      *         if the stream is empty or the count of elements is less than k
@@ -1517,7 +2133,7 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
     /**
      * Returns the sum of all elements in this stream as an int. This is a terminal operation.
      *
-     * <p>The sum is accumulated in a {@code long} and then narrowed to {@code int}. For empty streams, returns 0.
+     * <p>The sum is accumulated in a {@code long} and then converted to {@code int}. For empty streams, returns 0.
      *
      * <p><b>Note:</b> if the total sum exceeds {@link Integer#MAX_VALUE} (possible only when summing an
      * extremely large number of elements), an {@link ArithmeticException} is thrown rather than silently overflowing.
@@ -1530,6 +2146,18 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
      * byte[] data = {10, 20, 30, 40};
      * int sum = ByteStream.of(data).sum();   // returns 100
      * }</pre>
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
+     *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
+     *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @return the sum of elements in this stream as an int. Returns 0 if the stream is empty.
      * @throws ArithmeticException if the sum overflows an {@code int}
@@ -1558,6 +2186,18 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
      * double avg = ByteStream.of((byte) 100, (byte) 50).average().orElse(0.0);   // returns 75.0
      * }</pre>
      *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
+     *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
+     *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     * </table>
+     *
      * @return an OptionalDouble containing the arithmetic mean of the elements of this stream,
      *         or an empty optional if the stream is empty
      */
@@ -1581,6 +2221,18 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
      * System.out.println("Average: " + stats.getAverage());   // average is 3.0
      * }</pre>
      *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
+     *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
+     *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     * </table>
+     *
      * @return a {@code ByteSummaryStatistics} describing various summary data about the elements of this stream
      */
     @SequentialOnly
@@ -1602,6 +2254,18 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
      * Optional<Map<Percentage, Byte>> percentiles = result.right();
      * }</pre>
      *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
+     *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
+     *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>Yes</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     * </table>
+     *
      * @return a {@code Pair} containing a {@code ByteSummaryStatistics} describing various summary data
      *         and an {@code Optional<Map<Percentage, Byte>>} containing percentile values
      */
@@ -1621,6 +2285,18 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
      *     .mergeWith(ByteStream.of((byte)2, (byte)4, (byte)6), (a, b) -> a <= b ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND)
      *     .toArray();   // [1, 2, 3, 4, 5, 6]
      * }</pre>
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
+     *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
+     *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @param b the stream to merge with
      * @param nextSelector a function to determine which element should be selected as the next element.
@@ -1647,6 +2323,18 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
      *           .toArray();   // returns [(byte)11, (byte)22, (byte)33]
      * }</pre>
      *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
+     *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
+     *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     * </table>
+     *
      * @param b the ByteStream to be combined with the current ByteStream. Must be {@code non-null}.
      * @param zipFunction a ByteBinaryOperator that determines the combination of elements in the combined ByteStream. Must be {@code non-null}.
      * @return a new ByteStream that is the result of combining the current ByteStream with the given ByteStream
@@ -1671,6 +2359,18 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
      *           .toArray();   // returns [(byte)111, (byte)122]
      * }</pre>
      *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
+     *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
+     *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     * </table>
+     *
      * @param b the second ByteStream to be combined with the current ByteStream. Will be closed along with this ByteStream.
      * @param c the third ByteStream to be combined with the current ByteStream. Will be closed along with this ByteStream.
      * @param zipFunction a ByteTernaryOperator that determines the combination of elements in the combined ByteStream. Must be {@code non-null}.
@@ -1694,6 +2394,18 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
      *           .zipWith(ByteStream.of((byte)10), (byte)0, (byte)0, (a, b) -> (byte)(a + b))
      *           .toArray();   // returns [(byte)11, (byte)2, (byte)3]
      * }</pre>
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
+     *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
+     *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @param b the ByteStream to be combined with the current ByteStream. Will be closed along with this ByteStream.
      * @param valueForNoneA the default value to use for the current ByteStream when it runs out of elements
@@ -1720,6 +2432,18 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
      *                    (a, b, c) -> (byte)(a + b + c))
      *           .toArray();   // returns [(byte)111, (byte)2, (byte)3]
      * }</pre>
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
+     *   <tr><td>{@code @ParallelSupported}</td><td>Yes</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
+     *   <tr><td>{@code @SequentialOnly}</td><td>No</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @param b the second ByteStream to be combined with the current ByteStream. Will be closed along with this ByteStream.
      * @param c the third ByteStream to be combined with the current ByteStream. Will be closed along with this ByteStream.
@@ -1748,6 +2472,18 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
      * {@code asIntStream().asLongStream()}); {@code ByteStream} deliberately does not duplicate the full
      * widening ladder.
      *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
+     *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
+     *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     * </table>
+     *
      * @return an IntStream consisting of the elements of this stream, converted to int
      */
     @SequentialOnly
@@ -1764,6 +2500,18 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
      * Stream<Byte> boxedStream = ByteStream.of((byte)1, (byte)2, (byte)3)
      *     .boxed();   // returns Stream<Byte> containing [1, 2, 3]
      * }</pre>
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the stream and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new stream and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new stream. The upstream stream may be closed.</td></tr>
+     *   <tr><td>{@code @ParallelSupported}</td><td>No</td><td>May be executed on a parallelized stream (e.g. one created via {@code parallel()}).</td></tr>
+     *   <tr><td>{@code @SequentialOnly}</td><td>Yes</td><td>Will always be executed sequentially, even in a parallel stream.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this stream in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @return a Stream consisting of the elements of this stream, each boxed to a Byte
      */

@@ -83,6 +83,174 @@ import com.landawn.abacus.util.Tuple.Tuple4;
  *   <li><b>First Success:</b> {@code runAsyncAfterFirstSuccess()}, {@code callAsyncAfterFirstSuccess()} - Wait for first successful completion</li>
  * </ul>
  *
+ * <p><b>Naming map:</b> overloads sharing a {@code ContinuableFuture} method name can have
+ * materially different continuation behavior. The table below lists the continuation methods on
+ * {@code ContinuableFuture}, maps each to its closest {@link CompletableFuture} counterpart, and
+ * states in the last column whether the behavior matches that counterpart (&quot;Same.&quot;) or how it
+ * differs. The last column replaces what used to be a single vague &quot;Semantics&quot; column, splitting
+ * the plain description (<b>Behavior</b>) from the same-vs-different comparison so the distinction is
+ * explicit. A dash ({@code —}) in the {@code CompletableFuture} column means there is no direct
+ * counterpart.</p>
+ * <table border="1">
+ *   <caption>{@code ContinuableFuture} continuation naming map</caption>
+ *   <tr>
+ *     <th>{@code ContinuableFuture} method</th>
+ *     <th>Closest {@code CompletableFuture} operation</th>
+ *     <th>Behavior</th>
+ *     <th>Difference from {@code CompletableFuture}</th>
+ *   </tr>
+ *   <tr>
+ *     <td>{@code map(Function)}</td>
+ *     <td>{@code thenApply}</td>
+ *     <td>Transforms the successful result.</td>
+ *     <td>Applied <b>lazily and synchronously</b> on the thread that calls {@code get()}, not on an executor;
+ *         {@code thenApply} runs when the stage completes. Use {@code thenCallAsync(Function)} for the async form.</td>
+ *   </tr>
+ *   <tr>
+ *     <td>{@code thenRunAsync(Runnable)}</td>
+ *     <td>{@code thenRunAsync}</td>
+ *     <td>Runs after successful completion; ignores the upstream result.</td>
+ *     <td>Same.</td>
+ *   </tr>
+ *   <tr>
+ *     <td>{@code thenRunAsync(Consumer)}</td>
+ *     <td>{@code thenAcceptAsync}</td>
+ *     <td>Consumes the successful upstream result.</td>
+ *     <td>Same.</td>
+ *   </tr>
+ *   <tr>
+ *     <td>{@code thenRunAsync(BiConsumer)}</td>
+ *     <td>{@code whenCompleteAsync}</td>
+ *     <td>Receives the result and exception.</td>
+ *     <td>Produces a {@code Void} result instead of preserving the upstream value the way {@code whenComplete}
+ *         does; the callback receives {@link Exception}, not {@link Throwable}.</td>
+ *   </tr>
+ *   <tr>
+ *     <td>{@code thenCallAsync(Callable)}</td>
+ *     <td>{@code thenRunAsync} (returning a value)</td>
+ *     <td>Runs after success, ignores the upstream result, and produces a new result.</td>
+ *     <td>No exact counterpart: {@code thenRunAsync} returns {@code Void}; the nearest is
+ *         {@code thenApplyAsync(r -> ...)} that discards {@code r}.</td>
+ *   </tr>
+ *   <tr>
+ *     <td>{@code thenCallAsync(Function)}</td>
+ *     <td>{@code thenApplyAsync}</td>
+ *     <td>Transforms the successful upstream result.</td>
+ *     <td>Same, except the callback may throw checked exceptions.</td>
+ *   </tr>
+ *   <tr>
+ *     <td>{@code thenCallAsync(BiFunction)}</td>
+ *     <td>{@code handleAsync}</td>
+ *     <td>Receives the result and exception and produces the next result, including recovery values.</td>
+ *     <td>Same, except the callback receives {@link Exception} rather than {@link Throwable}.</td>
+ *   </tr>
+ *   <tr>
+ *     <td>{@code runAsyncAfterBoth(other, Runnable)}</td>
+ *     <td>{@code runAfterBothAsync}</td>
+ *     <td>Runs after both complete successfully; ignores both results.</td>
+ *     <td>Same.</td>
+ *   </tr>
+ *   <tr>
+ *     <td>{@code runAsyncAfterBoth(other, BiConsumer)}</td>
+ *     <td>{@code thenAcceptBothAsync}</td>
+ *     <td>Consumes both successful results.</td>
+ *     <td>Same.</td>
+ *   </tr>
+ *   <tr>
+ *     <td>{@code runAsyncAfterBoth(other, Consumer<Tuple4>)}<br>{@code runAsyncAfterBoth(other, QuadConsumer)}</td>
+ *     <td>{@code —}</td>
+ *     <td>Always runs after both complete; receives both results and both exceptions (bundled in a
+ *         {@link Tuple4}, or as four separate arguments).</td>
+ *     <td>No counterpart: {@code CompletableFuture}'s both-methods run only when both succeed.</td>
+ *   </tr>
+ *   <tr>
+ *     <td>{@code callAsyncAfterBoth(other, Callable)}</td>
+ *     <td>{@code runAfterBothAsync} (returning a value)</td>
+ *     <td>Runs after both succeed, ignores both results, and produces a new result.</td>
+ *     <td>{@code runAfterBoth} returns {@code Void}.</td>
+ *   </tr>
+ *   <tr>
+ *     <td>{@code callAsyncAfterBoth(other, BiFunction)}</td>
+ *     <td>{@code thenCombineAsync}</td>
+ *     <td>Combines both successful results into a new result.</td>
+ *     <td>Same.</td>
+ *   </tr>
+ *   <tr>
+ *     <td>{@code callAsyncAfterBoth(other, Function<Tuple4>)}<br>{@code callAsyncAfterBoth(other, QuadFunction)}</td>
+ *     <td>{@code —}</td>
+ *     <td>Always runs after both complete; transforms both results and both exceptions into a new result.</td>
+ *     <td>No counterpart: {@code CompletableFuture}'s both-methods run only when both succeed.</td>
+ *   </tr>
+ *   <tr>
+ *     <td>{@code runAsyncAfterEither(other, Runnable)}</td>
+ *     <td>{@code runAfterEitherAsync}</td>
+ *     <td>Runs after the first of the two to complete.</td>
+ *     <td>Same.</td>
+ *   </tr>
+ *   <tr>
+ *     <td>{@code runAsyncAfterEither(other, Consumer)}</td>
+ *     <td>{@code acceptEitherAsync}</td>
+ *     <td>Consumes the result of the first future to complete.</td>
+ *     <td>If that first future <b>failed</b>, the consumer receives {@code null} and still runs;
+ *         {@code acceptEither} instead completes exceptionally.</td>
+ *   </tr>
+ *   <tr>
+ *     <td>{@code runAsyncAfterEither(other, BiConsumer)}</td>
+ *     <td>{@code —}</td>
+ *     <td>Reacts to the first <b>successful</b> completion, surfacing an exception only if both fail;
+ *         receives (result, exception).</td>
+ *     <td>No counterpart; also differs from the other {@code *AfterEither} overloads, which react to the
+ *         first to <i>complete</i>.</td>
+ *   </tr>
+ *   <tr>
+ *     <td>{@code callAsyncAfterEither(other, Callable)}</td>
+ *     <td>{@code runAfterEitherAsync} (returning a value)</td>
+ *     <td>Runs after the first to complete, ignores its result, and produces a new result.</td>
+ *     <td>{@code runAfterEither} returns {@code Void}.</td>
+ *   </tr>
+ *   <tr>
+ *     <td>{@code callAsyncAfterEither(other, Function)}</td>
+ *     <td>{@code applyToEitherAsync}</td>
+ *     <td>Transforms the result of the first future to complete.</td>
+ *     <td>If that first future failed, the function receives {@code null} and still runs;
+ *         {@code applyToEither} instead completes exceptionally.</td>
+ *   </tr>
+ *   <tr>
+ *     <td>{@code callAsyncAfterEither(other, BiFunction)}</td>
+ *     <td>{@code —}</td>
+ *     <td>Transforms (result, exception) of the first future to complete.</td>
+ *     <td>No counterpart; reacts to the first to <i>complete</i>, not the first success.</td>
+ *   </tr>
+ *   <tr>
+ *     <td>{@code runAsyncAfterFirstSuccess(other, Runnable | Consumer | BiConsumer)}</td>
+ *     <td>{@code —}</td>
+ *     <td>Runs after the first <b>successful</b> completion (fails only if both fail).</td>
+ *     <td>No counterpart.</td>
+ *   </tr>
+ *   <tr>
+ *     <td>{@code callAsyncAfterFirstSuccess(other, Callable | Function | BiFunction)}</td>
+ *     <td>{@code —}</td>
+ *     <td>Produces a result after the first <b>successful</b> completion (fails only if both fail).</td>
+ *     <td>No counterpart.</td>
+ *   </tr>
+ *   <tr>
+ *     <td>{@code thenUse(Executor)}</td>
+ *     <td>the {@code executor} argument of the {@code *Async(fn, executor)} overloads</td>
+ *     <td>Selects the executor used by subsequent stages in the chain.</td>
+ *     <td>{@code CompletableFuture} takes an {@link Executor} per call rather than as a chain-wide setting.</td>
+ *   </tr>
+ *   <tr>
+ *     <td>{@code thenDelay(delay, unit)}</td>
+ *     <td>{@code —} (compare {@link CompletableFuture#delayedExecutor(long, TimeUnit)})</td>
+ *     <td>Inserts a delay before the next stage; applied lazily when {@code get()} is called.</td>
+ *     <td>No direct counterpart: {@code CompletableFuture} needs {@code delayedExecutor}/{@code orTimeout}.</td>
+ *   </tr>
+ * </table>
+ *
+ * <p>These are conceptual correspondences rather than signature-identical equivalents:
+ * the bi-argument callbacks receive {@link Exception} (not {@link Throwable}), callbacks may throw
+ * checked exceptions, and execution uses this future's configured executor.</p>
+ *
  * <p>For coordinating across an arbitrary number of futures (all/any of), see {@link Futures}.
  *
  * <p><b>Advanced Cancellation and Control:</b>
@@ -1882,6 +2050,12 @@ public class ContinuableFuture<T> implements Future<T> {
      * <p>This method is useful when you need to compute a new value as soon as either future completes,
      * regardless of which one finishes first or whether it succeeds or fails.
      *
+     * <p><b>Note:</b> unlike the similarly-shaped {@link #runAsyncAfterEither(ContinuableFuture, Throwables.BiConsumer)
+     * BiConsumer overload of runAsyncAfterEither} (which reacts to the first <i>successful</i> completion), this method
+     * reacts to the first future to <i>complete</i>, whether it succeeds or fails. If that first completion failed,
+     * the BiFunction receives {@code (null, exception)} even though the other future might still succeed. When you need
+     * the first successful result instead, use {@link #callAsyncAfterFirstSuccess(ContinuableFuture, Throwables.BiFunction)}.
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ContinuableFuture<Data> fastSource = ContinuableFuture.call(() -> fetchFromFastSource());
@@ -1901,6 +2075,7 @@ public class ContinuableFuture<T> implements Future<T> {
      * @param action the BiFunction to transform the result and exception; must not be null.
      * @return a new ContinuableFuture that completes with the transformed result.
      * @see #getAsResult()
+     * @see #callAsyncAfterFirstSuccess(ContinuableFuture, Throwables.BiFunction)
      */
     public <R> ContinuableFuture<R> callAsyncAfterEither(final ContinuableFuture<? extends T> other,
             final Throwables.BiFunction<? super T, ? super Exception, ? extends R, ? extends Exception> action) {
@@ -2293,7 +2468,7 @@ public class ContinuableFuture<T> implements Future<T> {
         //noinspection Convert2Diamond
         return new ContinuableFuture<>(new Future<T>() { //  java.util.concurrent.Future is abstract; cannot be instantiated
             private final long delayInMillis = unit.toMillis(delay);
-            private final long startTime = System.currentTimeMillis();
+            private final long startTimeInNanos = System.nanoTime();
             private volatile boolean isDelayed = false;
 
             @Override
@@ -2350,7 +2525,7 @@ public class ContinuableFuture<T> implements Future<T> {
                 if (!isDelayed) {
                     synchronized (this) {
                         if (!isDelayed) {
-                            final long elapsedTime = System.currentTimeMillis() - startTime;
+                            final long elapsedTime = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - startTimeInNanos);
                             final long remainingDelay = delayInMillis - elapsedTime;
                             if (remainingDelay > 0) {
                                 // Use interruptible Thread.sleep so blocked callers can be

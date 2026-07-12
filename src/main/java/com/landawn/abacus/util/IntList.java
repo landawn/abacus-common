@@ -666,7 +666,7 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
      */
     public static IntList random(final int startInclusive, final int endExclusive, final int len) {
         if (startInclusive >= endExclusive) {
-            throw new IllegalArgumentException("'startInclusive' must be less than 'endExclusive'");
+            throw new IllegalArgumentException("'startInclusive' (" + startInclusive + ") must be less than 'endExclusive' (" + endExclusive + ")");
         }
 
         final int[] a = new int[len];
@@ -2275,10 +2275,10 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
      * }</pre>
      *
      * @param action the action to be performed for each element; must not be {@code null}
-     * @throws NullPointerException if {@code action} is {@code null}
+     * @throws IllegalArgumentException if {@code action} is {@code null}
      */
     public void forEach(final IntConsumer action) {
-        N.requireNonNull(action, cs.action);
+        N.checkArgNotNull(action, cs.action);
 
         forEach(0, size, action);
     }
@@ -2308,9 +2308,11 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
      * @throws IndexOutOfBoundsException if the specified range is out of bounds, i.e. if
      *         {@code min(fromIndex, toIndex == -1 ? 0 : toIndex) < 0} or
      *         {@code max(fromIndex, toIndex) > size()} (except for the special {@code toIndex == -1} case)
+     * @throws IllegalArgumentException if {@code action} is {@code null}
      */
     public void forEach(final int fromIndex, final int toIndex, final IntConsumer action) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), Math.max(fromIndex, toIndex), size);
+        N.checkArgNotNull(action, cs.action);
 
         if (size > 0) {
             if (fromIndex <= toIndex) {

@@ -68,12 +68,18 @@ import okio.BufferedSource;
  * Each request should be configured and executed from a single thread; the underlying OkHttp
  * {@code OkHttpClient} is itself thread-safe and is reused across calls when possible.</p>
  *
+ * <p><b>Response ownership:</b> Methods that return a raw {@link Response} transfer ownership to the caller.
+ * The response must be closed, preferably with try-with-resources. This also applies to a raw response obtained
+ * from a completed asynchronous request.</p>
+ *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * // Simple GET request
- * Response response = OkHttpRequest.url("http://localhost:18080/users")
- *     .header("Accept", "application/json")
- *     .get();
+ * try (Response response = OkHttpRequest.url("http://localhost:18080/users")
+ *         .header("Accept", "application/json")
+ *         .get()) {
+ *     // Consume the response.
+ * }
  *
  * // POST request with JSON body
  * User user = new User("John", "Doe");
@@ -624,7 +630,7 @@ public final class OkHttpRequest {
      *         .build();
      *
      * OkHttpRequest req = OkHttpRequest.url("http://localhost:18080/data")
-     *         .headers(headers);
+     *         .setHeaders(headers);
      * // req.get();   // returns the response when executed (network)
      * }</pre>
      *
@@ -648,7 +654,7 @@ public final class OkHttpRequest {
      *                                      "Authorization", "Bearer token123");
      *
      * OkHttpRequest req = OkHttpRequest.url("http://localhost:18080/data")
-     *         .headers(headers);
+     *         .setHeaders(headers);
      * // req.get();   // returns the response when executed (network)
      * }</pre>
      *
@@ -1109,7 +1115,7 @@ public final class OkHttpRequest {
      * }
      * }</pre>
      *
-     * @return The HTTP response
+     * @return the HTTP response; the caller must close it
      * @throws UncheckedIOException if the request could not be executed
      */
     public Response get() throws UncheckedIOException {
@@ -1146,7 +1152,7 @@ public final class OkHttpRequest {
      *     .post();
      * }</pre>
      *
-     * @return The HTTP response
+     * @return the HTTP response; the caller must close it
      * @throws UncheckedIOException if the request could not be executed
      */
     public Response post() throws UncheckedIOException {
@@ -1186,7 +1192,7 @@ public final class OkHttpRequest {
      *     .put();
      * }</pre>
      *
-     * @return The HTTP response
+     * @return the HTTP response; the caller must close it
      * @throws UncheckedIOException if the request could not be executed
      */
     public Response put() throws UncheckedIOException {
@@ -1226,7 +1232,7 @@ public final class OkHttpRequest {
      *     .patch();
      * }</pre>
      *
-     * @return The HTTP response
+     * @return the HTTP response; the caller must close it
      * @throws UncheckedIOException if the request could not be executed
      */
     public Response patch() throws UncheckedIOException {
@@ -1264,7 +1270,7 @@ public final class OkHttpRequest {
      *     .delete();
      * }</pre>
      *
-     * @return The HTTP response
+     * @return the HTTP response; the caller must close it
      * @throws UncheckedIOException if the request could not be executed
      */
     public Response delete() throws UncheckedIOException {
@@ -1303,7 +1309,7 @@ public final class OkHttpRequest {
      * String contentLength = response.header("Content-Length");
      * }</pre>
      *
-     * @return The HTTP response (with no body)
+     * @return the HTTP response (with no body); the caller must close it
      * @throws UncheckedIOException if the request could not be executed
      */
     public Response head() throws UncheckedIOException {
@@ -1321,7 +1327,7 @@ public final class OkHttpRequest {
      * }</pre>
      *
      * @param httpMethod The HTTP method to use (GET, POST, PUT, PATCH, DELETE, HEAD)
-     * @return The HTTP response
+     * @return the HTTP response; the caller must close it
      * @throws UncheckedIOException if the request could not be executed
      */
     @Beta
@@ -1343,7 +1349,7 @@ public final class OkHttpRequest {
      * @param httpMethod The HTTP method to use (GET, POST, PUT, PATCH, DELETE, HEAD)
      * @param resultClass The class of the expected response object. Must not be {@code null}.
      *                    Use {@link Response Response.class} to receive the raw OkHttp response.
-     * @return The deserialized response body
+     * @return the deserialized response body. If {@code resultClass} is {@code Response.class}, the caller must close the returned response.
      * @throws IllegalArgumentException if {@code httpMethod} or {@code resultClass} is {@code null}, or {@code resultClass} is the abacus
      *                                  {@link HttpResponse} type (use OkHttp's {@code Response} class directly instead)
      * @throws UncheckedIOException if the request could not be executed or the response indicates a non-2xx status
@@ -1564,7 +1570,7 @@ public final class OkHttpRequest {
      * });
      * }</pre>
      *
-     * @return a ContinuableFuture that will complete with the HTTP response
+     * @return a ContinuableFuture that will complete with the HTTP response; the caller must close the completed response
      */
     public ContinuableFuture<Response> asyncGet() {
         return asyncGet(HttpUtil.DEFAULT_EXECUTOR);
@@ -1583,7 +1589,7 @@ public final class OkHttpRequest {
      * }</pre>
      *
      * @param executor the executor to use for the asynchronous operation
-     * @return a ContinuableFuture that will complete with the HTTP response when the request finishes
+     * @return a ContinuableFuture that will complete with the HTTP response when the request finishes; the caller must close the completed response
      */
     public ContinuableFuture<Response> asyncGet(final Executor executor) {
         return ContinuableFuture.call(this::get, executor);
@@ -1642,7 +1648,7 @@ public final class OkHttpRequest {
      * // Response response = future.get();   // blocks for the result when executed (network)
      * }</pre>
      *
-     * @return a ContinuableFuture that will complete with the HTTP response
+     * @return a ContinuableFuture that will complete with the HTTP response; the caller must close the completed response
      */
     public ContinuableFuture<Response> asyncPost() {
         return asyncPost(HttpUtil.DEFAULT_EXECUTOR);
@@ -1661,7 +1667,7 @@ public final class OkHttpRequest {
      * }</pre>
      *
      * @param executor The executor to use for the asynchronous operation
-     * @return A ContinuableFuture that will complete with the HTTP response
+     * @return a ContinuableFuture that will complete with the HTTP response; the caller must close the completed response
      */
     public ContinuableFuture<Response> asyncPost(final Executor executor) {
         return ContinuableFuture.call(this::post, executor);
@@ -1719,7 +1725,7 @@ public final class OkHttpRequest {
      * // Response response = future.get();   // blocks for the result when executed (network)
      * }</pre>
      *
-     * @return a ContinuableFuture that will complete with the HTTP response
+     * @return a ContinuableFuture that will complete with the HTTP response; the caller must close the completed response
      */
     public ContinuableFuture<Response> asyncPut() {
         return asyncPut(HttpUtil.DEFAULT_EXECUTOR);
@@ -1738,7 +1744,7 @@ public final class OkHttpRequest {
      * }</pre>
      *
      * @param executor The executor to use for the asynchronous operation
-     * @return A ContinuableFuture that will complete with the HTTP response
+     * @return a ContinuableFuture that will complete with the HTTP response; the caller must close the completed response
      */
     public ContinuableFuture<Response> asyncPut(final Executor executor) {
         return ContinuableFuture.call(this::put, executor);
@@ -1796,7 +1802,7 @@ public final class OkHttpRequest {
      * // Response response = future.get();   // blocks for the result when executed (network)
      * }</pre>
      *
-     * @return a ContinuableFuture that will complete with the HTTP response
+     * @return a ContinuableFuture that will complete with the HTTP response; the caller must close the completed response
      */
     public ContinuableFuture<Response> asyncPatch() {
         return asyncPatch(HttpUtil.DEFAULT_EXECUTOR);
@@ -1815,7 +1821,7 @@ public final class OkHttpRequest {
      * }</pre>
      *
      * @param executor The executor to use for the asynchronous operation
-     * @return A ContinuableFuture that will complete with the HTTP response
+     * @return a ContinuableFuture that will complete with the HTTP response; the caller must close the completed response
      */
     public ContinuableFuture<Response> asyncPatch(final Executor executor) {
         return ContinuableFuture.call(this::patch, executor);
@@ -1872,7 +1878,7 @@ public final class OkHttpRequest {
      * // Response response = future.get();   // blocks for the result when executed (network)
      * }</pre>
      *
-     * @return a ContinuableFuture that will complete with the HTTP response
+     * @return a ContinuableFuture that will complete with the HTTP response; the caller must close the completed response
      */
     public ContinuableFuture<Response> asyncDelete() {
         return asyncDelete(HttpUtil.DEFAULT_EXECUTOR);
@@ -1890,7 +1896,7 @@ public final class OkHttpRequest {
      * }</pre>
      *
      * @param executor The executor to use for the asynchronous operation
-     * @return A ContinuableFuture that will complete with the HTTP response
+     * @return a ContinuableFuture that will complete with the HTTP response; the caller must close the completed response
      */
     public ContinuableFuture<Response> asyncDelete(final Executor executor) {
         return ContinuableFuture.call(this::delete, executor);
@@ -1945,7 +1951,7 @@ public final class OkHttpRequest {
      * // Response response = future.get();   // blocks for the headers when executed (network)
      * }</pre>
      *
-     * @return a ContinuableFuture that will complete with the HTTP response
+     * @return a ContinuableFuture that will complete with the HTTP response; the caller must close the completed response
      */
     public ContinuableFuture<Response> asyncHead() {
         return asyncHead(HttpUtil.DEFAULT_EXECUTOR);
@@ -1963,7 +1969,7 @@ public final class OkHttpRequest {
      * }</pre>
      *
      * @param executor The executor to use for the asynchronous operation
-     * @return A ContinuableFuture that will complete with the HTTP response
+     * @return a ContinuableFuture that will complete with the HTTP response; the caller must close the completed response
      */
     public ContinuableFuture<Response> asyncHead(final Executor executor) {
         return ContinuableFuture.call(this::head, executor);
@@ -1980,7 +1986,7 @@ public final class OkHttpRequest {
      * }</pre>
      *
      * @param httpMethod The HTTP method to use (GET, POST, PUT, PATCH, DELETE, HEAD)
-     * @return A ContinuableFuture that will complete with the HTTP response
+     * @return a ContinuableFuture that will complete with the HTTP response; the caller must close the completed response
      */
     @Beta
     public ContinuableFuture<Response> asyncExecute(final HttpMethod httpMethod) {
@@ -2000,7 +2006,7 @@ public final class OkHttpRequest {
      *
      * @param httpMethod The HTTP method to use (GET, POST, PUT, PATCH, DELETE, HEAD)
      * @param executor The executor to use for the asynchronous operation
-     * @return A ContinuableFuture that will complete with the HTTP response
+     * @return a ContinuableFuture that will complete with the HTTP response; the caller must close the completed response
      */
     @Beta
     public ContinuableFuture<Response> asyncExecute(final HttpMethod httpMethod, final Executor executor) {

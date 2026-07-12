@@ -18,6 +18,7 @@ package com.landawn.abacus.poi;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -332,7 +333,7 @@ public final class ExcelUtil {
      */
     public static Dataset readDatasetFromSheet(final InputStream excelInputStream, final int sheetIndex,
             final TriConsumer<? super String[], ? super Row, ? super Object[]> rowExtractor) {
-        try (Workbook workbook = WorkbookFactory.create(excelInputStream)) {
+        try (Workbook workbook = WorkbookFactory.create(closeShield(excelInputStream))) {
             return readDatasetFromSheet(workbook.getSheetAt(sheetIndex), rowExtractor);
         } catch (IOException e) {
             throw new UncheckedException(e);
@@ -412,7 +413,7 @@ public final class ExcelUtil {
      */
     public static Dataset readDatasetFromSheet(final InputStream excelInputStream, final String sheetName,
             final TriConsumer<? super String[], ? super Row, ? super Object[]> rowExtractor) {
-        try (Workbook workbook = WorkbookFactory.create(excelInputStream)) {
+        try (Workbook workbook = WorkbookFactory.create(closeShield(excelInputStream))) {
             final Sheet sheet = getRequiredSheet(workbook, sheetName);
             return readDatasetFromSheet(sheet, rowExtractor);
         } catch (IOException e) {
@@ -576,7 +577,7 @@ public final class ExcelUtil {
      */
     public static <T> List<T> readRowsFromSheet(final InputStream excelInputStream, final int sheetIndex, final boolean skipFirstRow,
             final Function<? super Row, ? extends T> rowMapper) {
-        try (Workbook workbook = WorkbookFactory.create(excelInputStream)) {
+        try (Workbook workbook = WorkbookFactory.create(closeShield(excelInputStream))) {
             return readRowsFromSheet(workbook.getSheetAt(sheetIndex), skipFirstRow, rowMapper);
         } catch (IOException e) {
             throw new UncheckedException(e);
@@ -662,7 +663,7 @@ public final class ExcelUtil {
      */
     public static <T> List<T> readRowsFromSheet(final InputStream excelInputStream, final String sheetName, final boolean skipFirstRow,
             final Function<? super Row, ? extends T> rowMapper) {
-        try (Workbook workbook = WorkbookFactory.create(excelInputStream)) {
+        try (Workbook workbook = WorkbookFactory.create(closeShield(excelInputStream))) {
             final Sheet sheet = getRequiredSheet(workbook, sheetName);
             return readRowsFromSheet(sheet, skipFirstRow, rowMapper);
         } catch (IOException e) {
@@ -892,7 +893,7 @@ public final class ExcelUtil {
         Stream<Row> result = null;
 
         try {
-            workbook = WorkbookFactory.create(is);
+            workbook = WorkbookFactory.create(closeShield(is));
             final Sheet sheet = sheetName != null ? getRequiredSheet(workbook, sheetName) : workbook.getSheetAt(sheetIndex);
             final Workbook workbookToClose = workbook;
 
@@ -917,6 +918,15 @@ public final class ExcelUtil {
                 // Note: the caller's finally closes the input stream when it owns it.
             }
         }
+    }
+
+    private static InputStream closeShield(final InputStream inputStream) {
+        return new FilterInputStream(inputStream) {
+            @Override
+            public void close() {
+                // The caller owns the wrapped stream. Workbook.close() may close only this shield.
+            }
+        };
     }
 
     /**

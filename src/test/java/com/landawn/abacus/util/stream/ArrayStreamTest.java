@@ -1804,4 +1804,27 @@ public class ArrayStreamTest extends TestBase {
         assertEquals(5, result.get(0).size());
         assertEquals(5, result.get(1).size());
     }
+
+    @Test
+    public void testIfEmpty_advanceNonPositive_doesNotFireAction() {
+        // regression: the empty-stream iterator returned by ifEmpty(...) fired the action on
+        // advance(n) even for non-positive n, violating the documented iterator contract that
+        // non-positive n is a no-op (the appendIfEmpty iterator in the same classes guards n <= 0).
+        final AtomicBoolean fired = new AtomicBoolean(false);
+        new ArrayStream<>(new String[0]).ifEmpty(() -> fired.set(true)).iteratorEx().advance(0);
+        assertFalse(fired.get());
+
+        fired.set(false);
+        new ArrayByteStream(new byte[0]).ifEmpty(() -> fired.set(true)).iteratorEx().advance(0);
+        assertFalse(fired.get());
+
+        fired.set(false);
+        new ArrayDoubleStream(new double[0]).ifEmpty(() -> fired.set(true)).iteratorEx().advance(0);
+        assertFalse(fired.get());
+
+        // a positive advance on the empty stream is a consumption attempt and still fires
+        fired.set(false);
+        new ArrayStream<>(new String[0]).ifEmpty(() -> fired.set(true)).iteratorEx().advance(1);
+        assertTrue(fired.get());
+    }
 }

@@ -6534,7 +6534,7 @@ public final class Strings {
                     } else if (preserveAllTokens) {
                         substrs.add(EMPTY);
                     }
-                } else if (preserveAllTokens && idx >= 0 && i == len) {
+                } else if (preserveAllTokens) {
                     // The loop terminated because i advanced to the end of the string right after consuming
                     // a trailing delimiter (idx points at that final delimiter). The empty token following the
                     // final delimiter must still be preserved, mirroring the single-char splitWorker behavior.
@@ -10142,7 +10142,9 @@ public final class Strings {
      * {@link #minIndexOfAll(String, int, String[])} or {@link #maxIndexOfAll(String, int, String[])}.</p>
      *
      * <p>The method returns {@code -1} if none of the substrings are found, or if the input string
-     * is {@code null}, or if the substring array is {@code null} or empty. {@code null} elements are ignored; an empty ({@code ""}) element matches at the search start index.</p>
+     * is {@code null}, or if the substring array is {@code null} or empty, or if {@code fromIndex} is greater
+     * than the string length (even for an empty ({@code ""}) element). {@code null} elements are ignored; an
+     * empty ({@code ""}) element matches at the search start index.</p>
      *
      * <p>Note: Use the {@code Strings.indexOf(String, String, int)} method when searching for a single string to avoid ambiguous compilation errors.</p>
      *
@@ -20779,13 +20781,13 @@ public final class Strings {
      * Map<String, String> params = new HashMap<>();
      * params.put("name", "John Doe");
      * params.put("age", "30");
-     * Strings.encodeUrlQuery(params);   // returns "name=John+Doe&age=30"
+     * Strings.encodeUrlQuery(params);   // returns "name=John+Doe&age=30" (pair order may vary for a HashMap)
      *
      * // Encoding with special characters
      * Map<String, String> data = new HashMap<>();
      * data.put("email", "test@example.com");
      * data.put("info", "hello world!");
-     * Strings.encodeUrlQuery(data);   // returns "email=test%40example.com&info=hello+world%21"
+     * Strings.encodeUrlQuery(data);   // returns "email=test%40example.com&info=hello+world%21" (pair order may vary for a HashMap)
      *
      * Strings.encodeUrlQuery(null);   // returns ""
      * }</pre>
@@ -21640,7 +21642,7 @@ public final class Strings {
         }
 
         // Plane 2 and 3: supplementary/tertiary CJK ideographic ranges.
-        return codePoint >= 0x20000 && codePoint <= 0x3FFFD;
+        return codePoint <= 0x3FFFD;
     }
 
     /**
@@ -24345,8 +24347,8 @@ public final class Strings {
          * StrUtil.createFloat("123.45");     // returns OptionalFloat.of(123.45f)
          * StrUtil.createFloat("-67.89");     // returns OptionalFloat.of(-67.89f)
          * StrUtil.createFloat("1.23e4");     // returns OptionalFloat.of(12300.0f)
-         * StrUtil.createFloat("NaN");        // returns OptionalFloat.empty() (rejected by the quick validation check)
-         * StrUtil.createFloat("Infinity");   // returns OptionalFloat.empty() (rejected by the quick validation check)
+         * StrUtil.createFloat("NaN");        // returns OptionalFloat.of(Float.NaN)
+         * StrUtil.createFloat("Infinity");   // returns OptionalFloat.of(Float.POSITIVE_INFINITY)
          * StrUtil.createFloat("abc");        // returns OptionalFloat.empty()
          * StrUtil.createFloat("");           // returns OptionalFloat.empty()
          * StrUtil.createFloat(null);         // returns OptionalFloat.empty()
@@ -24383,8 +24385,8 @@ public final class Strings {
          * StrUtil.createDouble("123.456789");   // returns OptionalDouble.of(123.456789)
          * StrUtil.createDouble("-67.89012");    // returns OptionalDouble.of(-67.89012)
          * StrUtil.createDouble("1.23456e10");   // returns OptionalDouble.of(1.23456E10)
-         * StrUtil.createDouble("NaN");          // returns OptionalDouble.empty() (rejected by the quick validation check)
-         * StrUtil.createDouble("Infinity");     // returns OptionalDouble.empty() (rejected by the quick validation check)
+         * StrUtil.createDouble("NaN");          // returns OptionalDouble.of(Double.NaN)
+         * StrUtil.createDouble("Infinity");     // returns OptionalDouble.of(Double.POSITIVE_INFINITY)
          * StrUtil.createDouble("abc");          // returns OptionalDouble.empty()
          * StrUtil.createDouble("");             // returns OptionalDouble.empty()
          * StrUtil.createDouble(null);           // returns OptionalDouble.empty()
@@ -24458,7 +24460,7 @@ public final class Strings {
          * StrUtil.createBigDecimal("123.456789012345678901234567890");    // returns Optional of the BigDecimal
          * StrUtil.createBigDecimal("-999999999999999999999.999999999");   // returns Optional of the BigDecimal
          * StrUtil.createBigDecimal("1.23456E+10");                        // returns Optional of the BigDecimal
-         * StrUtil.createBigDecimal("NaN");                                // returns Optional.empty() (rejected by the quick validation check)
+         * StrUtil.createBigDecimal("NaN");                                // returns Optional.empty() (BigDecimal cannot parse "NaN")
          * StrUtil.createBigDecimal("abc");                                // returns Optional.empty()
          * StrUtil.createBigDecimal("");                                   // returns Optional.empty()
          * StrUtil.createBigDecimal(null);                                 // returns Optional.empty()

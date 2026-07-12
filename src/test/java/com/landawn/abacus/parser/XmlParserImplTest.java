@@ -304,6 +304,21 @@ public class XmlParserImplTest extends TestBase {
     }
 
     @Test
+    public void testSerializeNullFlushesCallerWriter() throws IOException {
+        final AtomicInteger flushCount = new AtomicInteger();
+        final StringWriter writer = new StringWriter() {
+            @Override
+            public void flush() {
+                flushCount.incrementAndGet();
+            }
+        };
+
+        staxParser.serialize(null, null, writer);
+
+        Assertions.assertEquals(1, flushCount.get());
+    }
+
+    @Test
     public void testSerializeSimpleBean() {
         TestBean bean = new TestBean("John", 30);
         bean.setActive(true);

@@ -1365,6 +1365,7 @@ public class StreamTest extends AbstractTest {
         assertEquals(N.toList(5), Stream.of(1, 2, 3, 4, 5).map(e -> e).takeLast(2).skip(1).toList());
     }
 
+
     @Test
     public void testStreamCreatedAfterOnFirst() {
         List<Integer> firstElements = new ArrayList<>();

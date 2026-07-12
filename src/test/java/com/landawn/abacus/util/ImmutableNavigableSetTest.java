@@ -145,6 +145,18 @@ public class ImmutableNavigableSetTest extends TestBase {
     }
 
     @Test
+    public void testCopyOf_Array() {
+        String[] values = { "c", "a", "b", "a" };
+        ImmutableNavigableSet<String> set = ImmutableNavigableSet.copyOf(values);
+
+        Assertions.assertEquals(Arrays.asList("a", "b", "c"), new ArrayList<>(set));
+        values[0] = "z";
+        Assertions.assertFalse(set.contains("z"));
+        Assertions.assertSame(ImmutableNavigableSet.empty(), ImmutableNavigableSet.copyOf(new String[0]));
+        Assertions.assertSame(ImmutableNavigableSet.empty(), ImmutableNavigableSet.copyOf((String[]) null));
+    }
+
+    @Test
     public void testCopyOf() {
         List<String> list = Arrays.asList("charlie", "alpha", "beta");
         ImmutableNavigableSet<String> set = ImmutableNavigableSet.copyOf(list);

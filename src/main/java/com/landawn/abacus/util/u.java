@@ -280,7 +280,7 @@ import com.landawn.abacus.util.stream.Stream;
  */
 public class u { // NOSONAR
 
-    private static final String NO_VALUE_PRESENT = "No value present"; // should change it to InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX
+    private static final String NO_VALUE_PRESENT = "No value present"; // deliberately matches java.util.Optional's message for the primitive optionals; Optional/Nullable use InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX
 
     private u() {
         // utility class
@@ -9871,7 +9871,7 @@ public class u { // NOSONAR
          * @throws NullPointerException if the value is {@code null} or not present and the supplying function returns {@code null}
          */
         public Nullable<T> orIfNull(final Supplier<? extends Nullable<? extends T>> supplier) throws IllegalArgumentException {
-            N.checkArgNotNull(supplier, cs.Supplier);
+            N.checkArgNotNull(supplier, cs.supplier);
 
             if (isNotNull()) {
                 return this;

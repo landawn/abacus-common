@@ -94,158 +94,158 @@ public class MonthTest extends TestBase {
     }
 
     @Test
-    public void testValueOf_1() {
-        Month month = Month.valueOf(1);
+    public void testOf_1() {
+        Month month = Month.of(1);
         assertEquals(Month.JANUARY, month);
     }
 
     @Test
-    public void testValueOf_2() {
-        Month month = Month.valueOf(2);
+    public void testOf_2() {
+        Month month = Month.of(2);
         assertEquals(Month.FEBRUARY, month);
     }
 
     @Test
-    public void testValueOf_3() {
-        Month month = Month.valueOf(3);
+    public void testOf_3() {
+        Month month = Month.of(3);
         assertEquals(Month.MARCH, month);
     }
 
     @Test
-    public void testValueOf_4() {
-        Month month = Month.valueOf(4);
+    public void testOf_4() {
+        Month month = Month.of(4);
         assertEquals(Month.APRIL, month);
     }
 
     @Test
-    public void testValueOf_5() {
-        Month month = Month.valueOf(5);
+    public void testOf_5() {
+        Month month = Month.of(5);
         assertEquals(Month.MAY, month);
     }
 
     @Test
-    public void testValueOf_6() {
-        Month month = Month.valueOf(6);
+    public void testOf_6() {
+        Month month = Month.of(6);
         assertEquals(Month.JUNE, month);
     }
 
     @Test
-    public void testValueOf_7() {
-        Month month = Month.valueOf(7);
+    public void testOf_7() {
+        Month month = Month.of(7);
         assertEquals(Month.JULY, month);
     }
 
     @Test
-    public void testValueOf_8() {
-        Month month = Month.valueOf(8);
+    public void testOf_8() {
+        Month month = Month.of(8);
         assertEquals(Month.AUGUST, month);
     }
 
     @Test
-    public void testValueOf_9() {
-        Month month = Month.valueOf(9);
+    public void testOf_9() {
+        Month month = Month.of(9);
         assertEquals(Month.SEPTEMBER, month);
     }
 
     @Test
-    public void testValueOf_10() {
-        Month month = Month.valueOf(10);
+    public void testOf_10() {
+        Month month = Month.of(10);
         assertEquals(Month.OCTOBER, month);
     }
 
     @Test
-    public void testValueOf_11() {
-        Month month = Month.valueOf(11);
+    public void testOf_11() {
+        Month month = Month.of(11);
         assertEquals(Month.NOVEMBER, month);
     }
 
     @Test
-    public void testValueOf_12() {
-        Month month = Month.valueOf(12);
+    public void testOf_12() {
+        Month month = Month.of(12);
         assertEquals(Month.DECEMBER, month);
     }
 
     @Test
-    public void testValueOf_roundTrip_JANUARY() {
+    public void testOf_roundTrip_JANUARY() {
         Month original = Month.JANUARY;
-        Month converted = Month.valueOf(original.intValue());
+        Month converted = Month.of(original.intValue());
         assertEquals(original, converted);
     }
 
     @Test
-    public void testValueOf_roundTrip_FEBRUARY() {
+    public void testOf_roundTrip_FEBRUARY() {
         Month original = Month.FEBRUARY;
-        Month converted = Month.valueOf(original.intValue());
+        Month converted = Month.of(original.intValue());
         assertEquals(original, converted);
     }
 
     @Test
-    public void testValueOf_roundTrip_MARCH() {
+    public void testOf_roundTrip_MARCH() {
         Month original = Month.MARCH;
-        Month converted = Month.valueOf(original.intValue());
+        Month converted = Month.of(original.intValue());
         assertEquals(original, converted);
     }
 
     @Test
-    public void testValueOf_roundTrip_APRIL() {
+    public void testOf_roundTrip_APRIL() {
         Month original = Month.APRIL;
-        Month converted = Month.valueOf(original.intValue());
+        Month converted = Month.of(original.intValue());
         assertEquals(original, converted);
     }
 
     @Test
-    public void testValueOf_roundTrip_MAY() {
+    public void testOf_roundTrip_MAY() {
         Month original = Month.MAY;
-        Month converted = Month.valueOf(original.intValue());
+        Month converted = Month.of(original.intValue());
         assertEquals(original, converted);
     }
 
     @Test
-    public void testValueOf_roundTrip_JUNE() {
+    public void testOf_roundTrip_JUNE() {
         Month original = Month.JUNE;
-        Month converted = Month.valueOf(original.intValue());
+        Month converted = Month.of(original.intValue());
         assertEquals(original, converted);
     }
 
     @Test
-    public void testValueOf_roundTrip_JULY() {
+    public void testOf_roundTrip_JULY() {
         Month original = Month.JULY;
-        Month converted = Month.valueOf(original.intValue());
+        Month converted = Month.of(original.intValue());
         assertEquals(original, converted);
     }
 
     @Test
-    public void testValueOf_roundTrip_AUGUST() {
+    public void testOf_roundTrip_AUGUST() {
         Month original = Month.AUGUST;
-        Month converted = Month.valueOf(original.intValue());
+        Month converted = Month.of(original.intValue());
         assertEquals(original, converted);
     }
 
     @Test
-    public void testValueOf_roundTrip_SEPTEMBER() {
+    public void testOf_roundTrip_SEPTEMBER() {
         Month original = Month.SEPTEMBER;
-        Month converted = Month.valueOf(original.intValue());
+        Month converted = Month.of(original.intValue());
         assertEquals(original, converted);
     }
 
     @Test
-    public void testValueOf_roundTrip_OCTOBER() {
+    public void testOf_roundTrip_OCTOBER() {
         Month original = Month.OCTOBER;
-        Month converted = Month.valueOf(original.intValue());
+        Month converted = Month.of(original.intValue());
         assertEquals(original, converted);
     }
 
     @Test
-    public void testValueOf_roundTrip_NOVEMBER() {
+    public void testOf_roundTrip_NOVEMBER() {
         Month original = Month.NOVEMBER;
-        Month converted = Month.valueOf(original.intValue());
+        Month converted = Month.of(original.intValue());
         assertEquals(original, converted);
     }
 
     @Test
-    public void testValueOf_roundTrip_DECEMBER() {
+    public void testOf_roundTrip_DECEMBER() {
         Month original = Month.DECEMBER;
-        Month converted = Month.valueOf(original.intValue());
+        Month converted = Month.of(original.intValue());
         assertEquals(original, converted);
     }
 
@@ -262,23 +262,23 @@ public class MonthTest extends TestBase {
     }
 
     @Test
-    public void testValueOf_invalid_0() {
-        assertThrows(IllegalArgumentException.class, () -> Month.valueOf(0));
+    public void testOf_invalid_0() {
+        assertThrows(IllegalArgumentException.class, () -> Month.of(0));
     }
 
     @Test
-    public void testValueOf_invalid_13() {
-        assertThrows(IllegalArgumentException.class, () -> Month.valueOf(13));
+    public void testOf_invalid_13() {
+        assertThrows(IllegalArgumentException.class, () -> Month.of(13));
     }
 
     @Test
-    public void testValueOf_invalid_negative() {
-        assertThrows(IllegalArgumentException.class, () -> Month.valueOf(-1));
+    public void testOf_invalid_negative() {
+        assertThrows(IllegalArgumentException.class, () -> Month.of(-1));
     }
 
     @Test
-    public void testValueOf_invalid_100() {
-        assertThrows(IllegalArgumentException.class, () -> Month.valueOf(100));
+    public void testOf_invalid_100() {
+        assertThrows(IllegalArgumentException.class, () -> Month.of(100));
     }
 
     @Test
@@ -286,7 +286,7 @@ public class MonthTest extends TestBase {
         Month[] months = Month.values();
         for (Month month : months) {
             int value = month.intValue();
-            Month decoded = Month.valueOf(value);
+            Month decoded = Month.of(value);
             assertEquals(month, decoded);
         }
     }
@@ -294,7 +294,7 @@ public class MonthTest extends TestBase {
     @Test
     public void testIntegration_monthRange() {
         for (int i = 1; i <= 12; i++) {
-            Month month = Month.valueOf(i);
+            Month month = Month.of(i);
             assertNotNull(month);
             assertEquals(i, month.intValue());
         }

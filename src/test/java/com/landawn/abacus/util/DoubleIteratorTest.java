@@ -428,6 +428,19 @@ public class DoubleIteratorTest extends TestBase {
     }
 
     @Test
+    public void test_defer_nullResultFailureIsStable() {
+        int[] callCount = { 0 };
+        DoubleIterator iter = DoubleIterator.defer(() -> {
+            callCount[0]++;
+            return null;
+        });
+
+        assertThrows(IllegalStateException.class, iter::hasNext);
+        assertThrows(IllegalStateException.class, iter::hasNext);
+        assertEquals(1, callCount[0]);
+    }
+
+    @Test
     public void testDefer() {
         AtomicBoolean initialized = new AtomicBoolean(false);
 

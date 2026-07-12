@@ -20047,6 +20047,23 @@ public class NTest extends AbstractParserTest {
     }
 
     @Test
+    public void testForEachCollectionRange_emptyReverseRangeAtEnd() {
+        // Regression: (size, size-1) is an empty reverse range and must process 0 elements for EVERY
+        // collection type. Previously non-RandomAccess collections (LinkedList/LinkedHashSet) spuriously
+        // emitted the last element because capping fromIndex collapsed it onto toIndex.
+        for (final java.util.Collection<String> c : Arrays.asList(new ArrayList<>(Arrays.asList("A", "B", "C")),
+                new java.util.LinkedList<>(Arrays.asList("A", "B", "C")), new java.util.LinkedHashSet<>(Arrays.asList("A", "B", "C")))) {
+            final List<String> got = new ArrayList<>();
+            N.forEach(c, c.size(), c.size() - 1, got::add);
+            assertTrue(got.isEmpty(), "forEach on " + c.getClass().getSimpleName() + " should process nothing");
+
+            got.clear();
+            N.forEachIndexed(c, c.size(), c.size() - 1, (i, e) -> got.add(e));
+            assertTrue(got.isEmpty(), "forEachIndexed on " + c.getClass().getSimpleName() + " should process nothing");
+        }
+    }
+
+    @Test
     public void testForEachWithStepLargerThanRange() {
         List<Integer> result = new ArrayList<>();
         N.forEach(0, 5, 10, result::add);

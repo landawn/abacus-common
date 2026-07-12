@@ -35,6 +35,11 @@ public class CharListTest extends TestBase {
     }
 
     @Test
+    public void testRangedForEachRejectsNullActionForEmptyRange() {
+        assertThrows(IllegalArgumentException.class, () -> list.forEach(0, 0, (com.landawn.abacus.util.function.CharConsumer) null));
+    }
+
+    @Test
     @DisplayName("Test constructor with array")
     public void testConstructorWithArray() {
         char[] arr = { 'a', 'b', 'c' };
@@ -3775,15 +3780,16 @@ public class CharListTest extends TestBase {
 
     @Test
     public void test_forEach_removeIf_replaceIf_null_func() {
-        // Regression: a null functional argument must throw NullPointerException even on an
-        // EMPTY list (previously silently no-op'd; now matches IntList's fail-fast guard).
+        // Regression: a null functional argument is rejected up-front even on an EMPTY list
+        // (previously silently no-op'd). forEach throws IllegalArgumentException (N.checkArgNotNull);
+        // removeIf/replaceIf throw NullPointerException (N.requireNonNull).
         final CharList empty = new CharList();
-        assertThrows(NullPointerException.class, () -> empty.forEach((com.landawn.abacus.util.function.CharConsumer) null));
+        assertThrows(IllegalArgumentException.class, () -> empty.forEach((com.landawn.abacus.util.function.CharConsumer) null));
         assertThrows(NullPointerException.class, () -> empty.removeIf((com.landawn.abacus.util.function.CharPredicate) null));
         assertThrows(NullPointerException.class, () -> empty.replaceIf((com.landawn.abacus.util.function.CharPredicate) null, 'x'));
 
         final CharList nonEmpty = CharList.of('a', 'b');
-        assertThrows(NullPointerException.class, () -> nonEmpty.forEach((com.landawn.abacus.util.function.CharConsumer) null));
+        assertThrows(IllegalArgumentException.class, () -> nonEmpty.forEach((com.landawn.abacus.util.function.CharConsumer) null));
         assertThrows(NullPointerException.class, () -> nonEmpty.removeIf((com.landawn.abacus.util.function.CharPredicate) null));
         assertThrows(NullPointerException.class, () -> nonEmpty.replaceIf((com.landawn.abacus.util.function.CharPredicate) null, 'x'));
     }

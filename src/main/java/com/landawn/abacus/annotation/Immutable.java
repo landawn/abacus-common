@@ -23,6 +23,13 @@ import java.lang.annotation.Target;
  * Indicates that the annotated type or method is immutable, meaning its state cannot be modified
  * after creation (for types) or that it does not modify any state (for methods).
  *
+ * <p><b>Name collision:</b> this annotation is {@code com.landawn.abacus.annotation.Immutable}.
+ * It is distinct from {@code com.landawn.abacus.util.Immutable}, which is a utility namespace,
+ * and from similarly named static-analysis annotations such as {@code net.jcip.annotations.Immutable},
+ * {@code javax.annotation.concurrent.Immutable}, and {@code com.google.errorprone.annotations.Immutable}.
+ * Those annotations are interpreted by their own tools and are not interchangeable with this declaration;
+ * check the fully qualified import when multiple immutability APIs are available.</p>
+ *
  * <p><b>When applied to types (classes/interfaces):</b></p>
  * <ul>
  *   <li>All fields should be final and initialized during construction.</li>

@@ -23,7 +23,6 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.AbstractMap.SimpleImmutableEntry;
-import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -31,6 +30,7 @@ import java.util.Comparator;
 import java.util.Deque;
 import java.util.IdentityHashMap;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -459,7 +459,9 @@ abstract class AbstractStream<T> extends Stream<T> {
 
             return flatmap(secondMapper);
         } else {
-            final Deque<R> queue = new ArrayDeque<>();
+            // LinkedList (not ArrayDeque) so that a mapper emitting a null element does not throw NPE,
+            // matching the parallel path above (SpinedBuffer permits null) and JDK Stream.mapMulti.
+            final Deque<R> queue = new LinkedList<>();
 
             final Consumer<R> consumer = queue::offer;
 
@@ -4948,7 +4950,7 @@ abstract class AbstractStream<T> extends Stream<T> {
                             }
                         }
                     } else {
-                        throw new RuntimeException(cls + " is not supported for CSV format. Only bean/Map types are supported");
+                        throw new IllegalArgumentException(cls + " is not supported for CSV format. Only bean/Map types are supported");
                     }
                 } else if (N.notEmpty(headers)) {
                     final int headSize = headers.size();

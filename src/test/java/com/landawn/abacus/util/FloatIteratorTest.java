@@ -336,6 +336,19 @@ public class FloatIteratorTest extends TestBase {
     }
 
     @Test
+    public void testDefer_NullResultFailureIsStable() {
+        int[] callCount = { 0 };
+        FloatIterator iter = FloatIterator.defer(() -> {
+            callCount[0]++;
+            return null;
+        });
+
+        assertThrows(IllegalStateException.class, iter::hasNext);
+        assertThrows(IllegalStateException.class, iter::hasNext);
+        assertEquals(1, callCount[0]);
+    }
+
+    @Test
     public void testGenerate_Infinite() {
         AtomicInteger counter = new AtomicInteger(0);
         FloatSupplier supplier = () -> counter.getAndIncrement() * 0.5f;

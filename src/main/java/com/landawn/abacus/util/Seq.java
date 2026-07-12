@@ -3725,6 +3725,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * // Result: [2, 4, 6]
      * }</pre>
      *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
+     *
      * @param predicate the predicate to apply to each element to determine if it should be included
      * @return a new sequence containing only the elements that match the predicate
      * @throws IllegalStateException if the sequence is already closed
@@ -3784,6 +3794,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * // Result: ["Bob"]
      * }</pre>
      *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
+     *
      * @param predicate the predicate to apply to each element to determine if it should be included
      * @param onDrop the action to perform on items that are dropped by the filter
      * @return a new sequence containing only the elements that match the predicate
@@ -3818,6 +3838,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * Seq<Integer, Exception> result = numbers.takeWhile(n -> n % 2 == 1);
      * // Result: [1, 3, 5] (stops at 2 because it's even)
      * }</pre>
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @param predicate the predicate to apply to each element to determine if it should be included
      * @return a new sequence containing the elements taken while the predicate is true
@@ -3874,6 +3904,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * Seq<Integer, Exception> result = numbers.dropWhile(n -> n % 2 == 1);
      * // Result: [2, 7, 9, 4] (drops 1, 3, 5, then includes everything after 2)
      * }</pre>
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @param predicate the predicate to apply to each element to determine if it should be dropped
      * @return a new sequence containing the elements after the predicate becomes false
@@ -3944,6 +3984,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * // Result: ["quick", "brown"]
      * }</pre>
      *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
+     *
      * @param predicate the predicate to apply to each element to determine if it should be dropped
      * @param onDrop the action to perform on items that are dropped
      * @return a new sequence containing the elements after the predicate becomes false
@@ -3980,6 +4030,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * // Result: [5, 7, 9] (skips until finding the first odd number)
      * }</pre>
      *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
+     *
      * @param predicate the predicate to apply to each element to determine when to stop skipping
      * @return a new sequence containing the elements after the predicate becomes true
      * @throws IllegalStateException if the sequence is already closed
@@ -4003,6 +4063,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * Seq<Integer, Exception> distinct = numbers.distinct();
      * // Result: [1, 2, 3, 4, 5]
      * }</pre>
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>Yes</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @return a new sequence containing distinct elements
      * @throws IllegalStateException if the sequence is already closed
@@ -4034,6 +4104,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * // 1 + 1 = 2, 2 + 2 = 4
      * // Result: [2, 4, 3, 4] (one entry per distinct element, in encounter order)
      * }</pre>
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>Yes</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>Yes</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @param mergeFunction the function to merge elements that are considered equal
      * @return a new sequence containing distinct elements
@@ -4069,6 +4149,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * Seq<Person, Exception> distinctByName = people.distinctBy(Person::getName);
      * // Result: [Person("Alice", 30), Person("Bob", 25)]
      * }</pre>
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>Yes</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @param keyMapper the function to extract the key from the elements
      * @return a new sequence containing distinct elements based on the extracted keys
@@ -4113,6 +4203,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * // Result: [Sale("Apple", 25), Sale("Banana", 5)]
      * }</pre>
      *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>Yes</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>Yes</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
+     *
      * @param keyMapper the function to extract the key from the elements
      * @param mergeFunction the function to merge elements that have the same key
      * @return a new sequence containing distinct elements based on the extracted keys
@@ -4146,6 +4246,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * Seq<String, Exception> strings = numbers.map(n -> "Number: " + n);
      * // Result: ["Number: 1", "Number: 2", "Number: 3", "Number: 4"]
      * }</pre>
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @param <R> the type of the elements in the new sequence
      * @param mapper the function to apply to each element
@@ -4182,6 +4292,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * // Result: [5, 3, 7] (nulls are skipped)
      * }</pre>
      *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
+     *
      * @param <R> the type of the elements in the new sequence
      * @param mapper the function to apply to each {@code non-null} element
      * @return a new sequence containing the transformed {@code non-null} elements
@@ -4211,6 +4331,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * Seq<Integer, Exception> result2 = numbers.mapFirst(n -> n * 100);
      * // Result: [100, 2, 3, 4]
      * }</pre>
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @param mapperForFirst a non-interfering, stateless function to apply to the first element of this sequence
      * @return a new sequence consisting of the transformed first element and the unchanged remaining elements of this sequence
@@ -4256,6 +4386,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * );
      * // Result: ["First: 1", "Other: 2", "Other: 3", "Other: 4"]
      * }</pre>
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @param <R> the type of the result elements
      * @param mapperForFirst a non-interfering, stateless function to apply to the first element of this sequence
@@ -4306,6 +4446,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * // Result: [1, 2, 3, 400]
      * }</pre>
      *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
+     *
      * @param mapperForLast a non-interfering, stateless function to apply to the last element of this sequence
      * @return a new sequence consisting of the unchanged preceding elements and the transformed last element
      * @throws IllegalStateException if the sequence is already closed
@@ -4352,6 +4502,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * );
      * // Result: ["Other: 1", "Other: 2", "Other: 3", "Last: 4"]
      * }</pre>
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @param <R> the type of the result elements
      * @param mapperForLast a non-interfering, stateless function to apply to the last element of this sequence
@@ -4412,6 +4572,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * Seq<String, Exception> words = sentences.flatMap(s -> Seq.of(s.split(" ")));
      * // Result: ["Hello", "world", "Java", "programming"]
      * }</pre>
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @param <R> the type of the elements in the new sequence
      * @param mapper the function to apply to each element, which returns a new sequence
@@ -4527,6 +4697,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * // Result: ['H', 'e', 'l', 'l', 'o', 'W', 'o', 'r', 'l', 'd']
      * }</pre>
      *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
+     *
      * @param <R> the type of the elements in the new sequence
      * @param mapper the function to apply to each element, which returns a collection of new elements
      * @return a new sequence containing the flattened elements
@@ -4582,6 +4762,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * // Result: ['H', 'e', 'l', 'l', 'o', 'W', 'o', 'r', 'l', 'd']
      * }</pre>
      *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
+     *
      * @param <R> the type of the elements in the new sequence
      * @param mapper the function to apply to each element, which returns an array of new elements
      * @return a new sequence containing the flattened elements
@@ -4634,6 +4824,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * // Result: ['H', 'e', 'l', 'l', 'o', 'W', 'o', 'r', 'l', 'd']
      * }</pre>
      *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
+     *
      * @param <R> the type of the elements in the new sequence
      * @param mapper the function to apply to each {@code non-null} element, which returns a collection of new elements
      * @return a new sequence containing the flattened elements from {@code non-null} source elements
@@ -4671,6 +4871,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * );
      * // Gets all employees from all teams in all non-null departments
      * }</pre>
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @param <U> the type of the intermediate elements in the new sequence
      * @param <R> the type of the final elements in the new sequence
@@ -4710,6 +4920,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * // Result: [1, 2, 3] ("abc" is filtered out)
      * }</pre>
      *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
+     *
      * @param <R> the type of the elements in the new sequence
      * @param mapper the function to apply to each element, which returns an Optional of new elements
      * @return a new sequence containing the transformed elements that are present
@@ -4743,6 +4963,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * });
      * // Result: [1, 2, 3] ("abc" is filtered out)
      * }</pre>
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @param mapper the function to apply to each element, which returns an OptionalInt of new elements
      * @return a new sequence containing the transformed elements that are present
@@ -4780,6 +5010,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * Seq<String, Exception> empty = Seq.<String, Exception>empty().mapPartialToLong(s -> OptionalLong.of(s.length()));
      * // empty.count() returns 0
      * }</pre>
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @param mapper the function to apply to each element, which returns an OptionalLong.
      *               The function should return OptionalLong.empty() for elements that should be filtered out.
@@ -4820,6 +5060,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * // empty.count() returns 0
      * }</pre>
      *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
+     *
      * @param mapper the function to apply to each element, which returns an OptionalDouble.
      *               The function should return OptionalDouble.empty() for elements that should be filtered out.
      * @return a new sequence containing Double values extracted from the present OptionalDouble results
@@ -4859,6 +5109,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      *     consumer.accept(n * 3);
      * })
      * }</pre>
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @param <R> the type of elements in the resulting sequence
      * @param mapper the function that accepts an element and a consumer. The function should call
@@ -4924,6 +5184,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * seq.slidingMap((a, b) -> String.valueOf(a) + "," + String.valueOf(b));   // Results: ["1,null"]
      * }</pre>
      *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
+     *
      * @param <R> the element type of the new sequence
      * @param mapper a non-interfering, stateless function to apply to each adjacent pair of this sequence's elements
      * @return a new sequence consisting of the results of applying the mapper function to each adjacent pair of elements
@@ -4950,6 +5220,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * // For sequence [1, 2, 3, 4, 5] with increment=2, produces: [f(1,2), f(3,4), f(5,null)]
      * seq.slidingMap(2, (a, b) -> a + "," + b);   // Results: ["1,2", "3,4", "5,null"]
      * }</pre>
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @param <R> the element type of the new sequence
      * @param increment the distance between the first elements of each pair (must be positive)
@@ -4979,6 +5259,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * // For sequence [1, 2, 3, 4, 5] with increment=2, ignoreNotPaired=true
      * seq.slidingMap(2, true, (a, b) -> a + b);   // Results: [3, 7] (element 5 is ignored)
      * }</pre>
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @param <R> the element type of the new sequence
      * @param increment the distance between the first elements of each pair (must be positive)
@@ -5064,6 +5354,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * seq.slidingMap((a, b, c) -> String.format("%s,%s,%s", a, b, c));   // Results: ["1,null,null"]
      * }</pre>
      *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
+     *
      * @param <R> the element type of the new sequence
      * @param mapper a non-interfering, stateless function to apply to each adjacent triple of this sequence's elements
      * @return a new sequence consisting of the results of applying the mapper function to each adjacent triple of elements
@@ -5090,6 +5390,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * // For sequence [1, 2, 3, 4, 5, 6, 7, 8] with increment=3, produces: [f(1,2,3), f(4,5,6), f(7,8,null)]
      * seq.slidingMap(3, (a, b, c) -> String.format("%s+%s+%s", a, b, c));   // Results: ["1+2+3", "4+5+6", "7+8+null"]
      * }</pre>
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @param <R> the element type of the new sequence
      * @param increment the distance between the first elements of each triple (must be positive)
@@ -5121,6 +5431,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * seq.slidingMap(3, true, (a, b, c) -> a + b + c);
      * // Results: [6, 15] (element 7 is ignored)
      * }</pre>
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @param <R> the element type of the new sequence
      * @param increment the distance between the first elements of each triple (must be positive)
@@ -5226,6 +5546,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      *    .forEach(entry -> System.out.println("Length " + entry.getKey() + ": " + entry.getValue()));
      * }</pre>
      *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>Yes</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>Yes</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
+     *
      * @param <K> the type of the keys
      * @param keyMapper the function to extract the key from each element
      * @return a new sequence containing Map.Entry objects where each key maps to a list of elements with that key
@@ -5251,6 +5581,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * seq.groupBy(String::length, TreeMap::new)
      *    .forEach(entry -> System.out.println("Length " + entry.getKey() + ": " + entry.getValue()));
      * }</pre>
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>Yes</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>Yes</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @param <K> the type of the keys
      * @param keyMapper the function to extract the key from each element
@@ -5279,6 +5619,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * seq.groupBy(Person::getAge, Person::getName)
      *    .forEach(entry -> System.out.println("Age " + entry.getKey() + ": " + entry.getValue()));
      * }</pre>
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>Yes</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>Yes</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @param <K> the type of the keys
      * @param <V> the type of the values after mapping
@@ -5309,6 +5659,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      *    .forEach(entry -> System.out.println("Dept " + entry.getKey() +
      *                                         " salaries: " + entry.getValue()));
      * }</pre>
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>Yes</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>Yes</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @param <K> the type of the keys
      * @param <V> the type of the values after mapping
@@ -5366,6 +5726,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      *                                         " sum: " + entry.getValue()));
      * }</pre>
      *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>Yes</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>Yes</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
+     *
      * @param <K> the type of the keys
      * @param <V> the type of the values after mapping
      * @param keyMapper the function to extract the key from each element
@@ -5398,6 +5768,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      *    .forEach(entry -> System.out.println("Dept " + entry.getKey() +
      *                                         " max salary: " + entry.getValue()));
      * }</pre>
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>Yes</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>Yes</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @param <K> the type of the keys
      * @param <V> the type of the values after mapping
@@ -5464,6 +5844,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      *                                         " avg salary: " + entry.getValue()));
      * }</pre>
      *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>Yes</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>Yes</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
+     *
      * @param <K> the type of the keys
      * @param <D> the type of the downstream result
      * @param keyMapper the function to extract the key from each element
@@ -5494,6 +5884,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      *    .forEach(entry -> System.out.println("Length " + entry.getKey() +
      *                                         ": " + entry.getValue()));
      * }</pre>
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>Yes</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>Yes</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @param <K> the type of the keys
      * @param <D> the type of the downstream result
@@ -5527,6 +5927,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      *    .forEach(entry -> System.out.println("Age group " + entry.getKey() +
      *                                         ": " + entry.getValue()));
      * }</pre>
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>Yes</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>Yes</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @param <K> the type of the keys
      * @param <V> the type of the values after mapping
@@ -5563,6 +5973,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      *    .forEach(entry -> System.out.println("Dept " + entry.getKey() +
      *                                         " total: " + entry.getValue()));
      * }</pre>
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>Yes</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>Yes</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @param <K> the type of the keys
      * @param <V> the type of the values after mapping
@@ -5621,6 +6041,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      *        (entry.getKey() ? "Even" : "Odd") + ": " + entry.getValue()));
      * }</pre>
      *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>Yes</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>Yes</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
+     *
      * @param predicate the predicate used to classify elements
      * @return a new sequence containing exactly two entries: true-&gt;matching elements, false-&gt;non-matching elements
      * @throws IllegalStateException if the sequence is already closed
@@ -5656,6 +6086,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      *    .forEach(entry -> System.out.println(
      *        (entry.getKey() ? "Empty" : "Non-empty") + ": " + entry.getValue()));
      * }</pre>
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>Yes</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>Yes</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @param <D> the type of the downstream result
      * @param predicate the predicate used to classify elements
@@ -5713,6 +6153,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      *                                         " has " + entry.getValue() + " employees"));
      * }</pre>
      *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>Yes</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>Yes</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
+     *
      * @param <K> the type of the keys
      * @param keyMapper the function to extract the key from each element
      * @return a new sequence containing Map.Entry objects where each key maps to its count
@@ -5738,6 +6188,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      *    .forEach(entry -> System.out.println("'" + entry.getKey() +
      *                                         "' appears " + entry.getValue() + " times"));
      * }</pre>
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>Yes</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>Yes</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @param <K> the type of the keys
      * @param keyMapper the function to extract the key from each element
@@ -5774,6 +6234,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * // result will be ["a"]
      * // One occurrence of 'a' (min of 2 in seq and 1 in set)
      * }</pre>
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @param c the collection to find common elements with this sequence
      * @return a new sequence containing elements present in both this sequence and the specified collection,
@@ -5820,6 +6290,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * // Only products with IDs in the set are included
      * }</pre>
      *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
+     *
      * @param <U> the type of the elements after mapping
      * @param mapper the function to apply to elements of this sequence for comparison
      * @param c the collection to find common elements with (after mapping)
@@ -5862,6 +6342,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * // No elements remain because list2 has at least as many occurrences of each value as seq2
      * }</pre>
      *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
+     *
      * @param c the collection to compare against this sequence
      * @return a new sequence containing the elements that are present in this sequence but not in the
      *         specified collection, considering the number of occurrences
@@ -5902,6 +6392,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * // result will be [] (empty)
      * // No elements remain because ids has at least as many occurrences of each mapped value
      * }</pre>
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @param <U> the type of the elements after mapping
      * @param mapper the function to apply to each element of this sequence for comparison
@@ -5944,6 +6444,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * // - 4 appears only in list, so it remains
      * }</pre>
      *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
+     *
      * @param c the collection to find symmetric difference with this sequence
      * @return a new sequence containing elements that are present in either this sequence or the specified
      *         collection, but not in both, considering the number of occurrences
@@ -5977,6 +6487,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * // result will be [1, 2, 3, 4, 5]
      * }</pre>
      *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
+     *
      * @param a the elements to be prepended to this sequence
      * @return a new Seq with the specified elements prepended
      * @throws IllegalStateException if the sequence is already closed
@@ -6002,6 +6522,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * // result contains: 1, 2, 3, 4, 5
      * }</pre>
      *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
+     *
      * @param c the collection of elements to be prepended to this sequence
      * @return a new Seq with the specified collection of elements prepended
      * @throws IllegalStateException if the sequence is already closed
@@ -6025,6 +6555,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * Seq<String, Exception> result = seq1.prepend(seq2);
      * // result contains: "hello", " ", "world"
      * }</pre>
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @param s the sequence to be prepended to this sequence
      * @return a new Seq with the specified sequence prepended
@@ -6056,6 +6596,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * // result2 contains: "world" (unchanged)
      * }</pre>
      *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
+     *
      * @param op the optional element to be prepended to this sequence
      * @return a new Seq with the specified optional element prepended if present, otherwise returns this sequence unchanged
      * @throws IllegalStateException if the sequence is already closed
@@ -6082,6 +6632,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * // result contains: 1, 2, 3, 4, 5
      * }</pre>
      *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
+     *
      * @param a the elements to be appended to this sequence
      * @return a new Seq with the specified elements appended
      * @throws IllegalStateException if the sequence is already closed
@@ -6107,6 +6667,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * // result contains: "a", "b", "c", "d"
      * }</pre>
      *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
+     *
      * @param c the collection of elements to be appended to this sequence
      * @return a new Seq with the specified collection of elements appended
      * @throws IllegalStateException if the sequence is already closed
@@ -6130,6 +6700,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * Seq<Integer, Exception> result = seq1.append(seq2);
      * // result contains: 1, 2, 3, 4
      * }</pre>
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @param s the sequence to be appended to this sequence
      * @return a new Seq with the specified sequence appended
@@ -6161,6 +6741,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * // result2 contains: "hello" (unchanged)
      * }</pre>
      *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
+     *
      * @param op the optional element to be appended to this sequence
      * @return a new Seq with the specified optional element appended if present, otherwise returns this sequence unchanged
      * @throws IllegalStateException if the sequence is already closed
@@ -6191,6 +6781,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * // result2 contains: 4, 5 (unchanged)
      * }</pre>
      *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
+     *
      * @param a the elements to be appended if this sequence is empty
      * @return a new Seq with the specified elements appended if this sequence is empty, otherwise returns this sequence unchanged
      * @throws IllegalStateException if the sequence is already closed
@@ -6218,6 +6818,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * Seq<String, Exception> result2 = nonEmptySeq.appendIfEmpty(defaults);
      * // result2 contains: "value" (unchanged)
      * }</pre>
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @param c the collection of elements to append if the Seq is empty
      * @return a new Seq with the elements from the specified collection appended if the Seq is empty, otherwise returns this sequence unchanged
@@ -6305,6 +6915,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * // result2 contains: 4, 5 (unchanged, supplier not invoked)
      * }</pre>
      *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
+     *
      * @param supplier the supplier that provides a Seq of elements to append if the Seq is empty
      * @return a new Seq with the elements from the Seq provided by the supplier appended if the Seq is empty, otherwise returns this sequence unchanged
      * @throws IllegalStateException if the sequence is already closed
@@ -6389,6 +7009,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * // result2 contains: "value" (unchanged)
      * }</pre>
      *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
+     *
      * @param defaultValue the default value to return if this Seq is empty
      * @return a new Seq containing the default value if this Seq is empty, otherwise returns this sequence unchanged
      * @throws IllegalStateException if the sequence is already closed
@@ -6418,6 +7048,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * // result2 contains: 4, 5 (unchanged, supplier not invoked)
      * }</pre>
      *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
+     *
      * @param supplier the supplier that provides a Seq of elements to return if this Seq is empty
      * @return a new Seq with the elements from the Seq provided by the supplier if this Seq is empty, otherwise returns this sequence unchanged
      * @throws IllegalStateException if the sequence is already closed
@@ -6441,6 +7081,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * // Throws NoSuchElementException if seq was empty
      * }</pre>
      *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
+     *
      * @return a new {@code Seq} that throws a {@code NoSuchElementException} when a terminal operation finds it empty
      * @throws IllegalStateException if the sequence is already closed
      * @throws NoSuchElementException if the sequence is empty (thrown when terminal operation is executed)
@@ -6463,6 +7113,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      *                    .join(", ");
      * // Throws IllegalStateException if seq was empty
      * }</pre>
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @param exceptionSupplier the supplier that provides the exception to throw if this {@code Seq} is empty
      * @return a new {@code Seq} that throws the supplied exception when a terminal operation finds it empty
@@ -6492,6 +7152,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      *    .forEach(System.out::println);
      * // Prints "Sequence is empty" if seq has no elements, otherwise prints each element
      * }</pre>
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @param action the action to be executed if the sequence is empty
      * @return a new {@code Seq} that executes the action if the sequence is empty
@@ -6580,6 +7250,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * // sideEffect contains: [1, 2, 3, 4, 5] (all elements were processed)
      * }</pre>
      *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
+     *
      * @param action the action to be performed on the elements pulled by downstream/terminal operation
      * @return a new {@code Seq} that performs the action on each element
      * @throws IllegalStateException if the sequence is already closed
@@ -6624,6 +7304,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * // second
      * // third
      * }</pre>
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @param action the action to be performed for the first element
      * @return a new {@code Seq} that performs the action on the first element
@@ -6675,6 +7365,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * // Processing last: last
      * // last
      * }</pre>
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @param action the action to be performed for the last element
      * @return a new {@code Seq} that performs the action on the last element
@@ -6730,6 +7430,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * // Processing: 5
      * }</pre>
      *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
+     *
      * @param action the action to be performed on the elements pulled by downstream/terminal operation
      * @return a new {@code Seq} that performs the action on each element
      * @throws IllegalStateException if the sequence is already closed
@@ -6759,6 +7469,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * // SECOND
      * // THIRD
      * }</pre>
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @param action the action to be performed on the first element pulled by downstream/terminal operation
      * @return a new {@code Seq} that performs the action on the first element
@@ -6790,6 +7510,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * // LAST
      * }</pre>
      *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
+     *
      * @param action the action to be performed on the last element pulled by downstream/terminal operation
      * @return a new {@code Seq} that performs the action on the last element
      * @throws IllegalStateException if the sequence is already closed
@@ -6816,6 +7546,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * // Even number found: 2
      * // Even number found: 4
      * }</pre>
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @param predicate the predicate to test each element
      * @param action the action to be performed on the elements pulled by downstream/terminal operation which matches the given predicate
@@ -6852,6 +7592,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * // Element at even position: d
      * }</pre>
      *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
+     *
      * @param predicate the predicate to test each element. The first parameter is the element, and the second parameter is the count of iterated elements, starting with 1.
      * @param action the action to be performed on the elements pulled by downstream/terminal operation which matches the given predicate
      * @return a new {@code Seq} that performs the action on each element matching the predicate
@@ -6887,6 +7637,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * // chunks contains: [[1, 2, 3], [4, 5, 6], [7]]
      * }</pre>
      *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
+     *
      * @param chunkSize the desired size of each chunk (the last chunk may be smaller)
      * @return a sequence of Lists, each containing a chunk of elements from the original sequence
      * @throws IllegalStateException if the sequence is already closed
@@ -6909,6 +7669,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * Seq<Set<String>, Exception> chunks = seq.split(2, HashSet::new);
      * // chunks contains: [{"a", "b"}, {"c", "d"}, {"e"}]
      * }</pre>
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @param <C> the type of the collection to hold the sub-sequences
      * @param chunkSize the desired size of each subsequence (the last subsequence may be smaller)
@@ -6975,6 +7745,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * Seq<String, Exception> joined = seq.split(2, Collectors.joining(","));
      * // joined contains: ["1,2", "3,4", "5,6"]
      * }</pre>
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @param <R> the type of the result
      * @param chunkSize the desired size of each subsequence (the last may be smaller)
@@ -7047,6 +7827,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * // groups contains: [[1, 3, 5], [2, 4, 6], [7, 9]]
      * }</pre>
      *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
+     *
      * @param predicate the predicate to determine the boundaries of the subsequences
      * @return a new Seq where each element is a List of consecutive elements having the same predicate result
      * @throws IllegalStateException if the sequence is already closed
@@ -7072,6 +7862,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * Seq<Set<String>, Exception> groups = seq.split(s -> s.length() > 1, HashSet::new);
      * // groups contains: [{"a"}, {"ab", "abc"}, {"d"}, {"de"}]
      * }</pre>
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @param <C> the type of the Collection to collect the subsequences
      * @param predicate the predicate to determine the boundaries of the subsequences
@@ -7142,6 +7942,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * Seq<String, Exception> joined = seq.split(n -> n % 2 == 0, Collectors.joining(","));
      * // joined contains: ["1,3,5", "2,4,6", "7,9"]
      * }</pre>
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @param <R> the type of the result
      * @param predicate the predicate to determine the boundaries of the subsequences
@@ -7219,6 +8029,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * // First sequence: [1, 2, 3]
      * // Second sequence: [4, 5]
      * }</pre>
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @param position the position at which to split the sequence
      * @return a new Seq containing two subsequences split at the specified position
@@ -7306,6 +8126,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * // First sequence: [1, 2, 3]
      * // Second sequence: [4, 5]
      * }</pre>
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @param where the predicate to determine the position at which to split the sequence
      * @return a new Seq containing two subsequences split at the position where the predicate returns true
@@ -7459,6 +8289,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * // windows contains: [[1, 2, 3], [2, 3, 4], [3, 4, 5]]
      * }</pre>
      *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
+     *
      * @param windowSize the size of the sliding window
      * @return a new Seq where each element is a list representing a sliding window of the original sequence
      * @throws IllegalStateException if the sequence is already closed
@@ -7482,6 +8322,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * Seq<Set<String>, Exception> windows = seq.sliding(2, HashSet::new);
      * // windows contains: [{"a", "b"}, {"b", "c"}, {"c", "d"}]
      * }</pre>
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @param <C> the type of the collection to be used for each window
      * @param windowSize the size of the sliding window
@@ -7509,6 +8359,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * Seq<String, Exception> windows = seq.sliding(3, Collectors.joining(","));
      * // windows contains: ["1,2,3", "2,3,4", "3,4,5"]
      * }</pre>
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @param <R> the type of the resulting elements
      * @param windowSize the size of the sliding window
@@ -7547,6 +8407,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      *
      * <p>This is an intermediate operation and will not close the sequence.</p>
      *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
+     *
      * @param windowSize the size of the sliding window, must be greater than 0
      * @param increment the increment by which the window moves forward, must be greater than 0
      * @return a new Seq where each element is a list representing a sliding window of the original sequence
@@ -7574,6 +8444,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * Seq.of(1, 2, 3, 4, 5).sliding(3, 2, size -> new LinkedList<Integer>()).toList();   // returns [[1, 2, 3], [3, 4, 5]] as LinkedLists
      * Seq.of(1, 2, 3, 4, 5).sliding(2, 1, size -> new ArrayList<Integer>()).toList();    // returns [[1, 2], [2, 3], [3, 4], [4, 5]]
      * }</pre>
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @param <C> the type of the collection to be returned for each window
      * @param windowSize the size of the sliding window, must be greater than 0
@@ -7624,7 +8504,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
                 }
 
                 if (queue == null) {
-                    queue = new ArrayDeque<>(N.max(0, windowSize - increment));
+                    queue = new LinkedList<>();
                 }
 
                 final C result = collectionSupplier.apply(windowSize);
@@ -7709,7 +8589,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
                 }
 
                 if (queue == null) {
-                    queue = new ArrayDeque<>(windowSize);
+                    queue = new LinkedList<>();
                 }
 
                 final int countToKeepInQueue = windowSize - increment;
@@ -7737,6 +8617,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * Seq.of("a", "b", "c", "d").sliding(2, 1, Collectors.joining("-")).toList();   // returns ["a-b", "b-c", "c-d"]
      * Seq.of(1, 2, 3, 4, 5).sliding(3, 2, Collectors.summingInt(i -> i)).toList();  // returns [6, 12] (sum of [1,2,3] and [3,4,5])
      * }</pre>
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @param <R> the type of the result produced by the collector
      * @param windowSize the size of the sliding window, must be greater than 0
@@ -7791,7 +8681,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
                 }
 
                 if (increment < windowSize && queue == null) {
-                    queue = new ArrayDeque<>(windowSize - increment);
+                    queue = new LinkedList<>();
                 }
 
                 final Object container = supplier.get();
@@ -7878,7 +8768,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
                 }
 
                 if (queue == null) {
-                    queue = new ArrayDeque<>(windowSize);
+                    queue = new LinkedList<>();
                 }
 
                 final int countToKeepInQueue = windowSize - increment;
@@ -7911,6 +8801,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * Seq<Integer, Exception> skipAll = seq.skip(10);
      * // skipAll.count() returns 0 (n exceeds size)
      * }</pre>
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @param n the number of elements to skip, must not be negative
      * @return a new sequence where the first <i>n</i> elements are skipped
@@ -7974,6 +8874,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * // Prints nothing (no elements skipped), skipZero contains: [1, 2, 3, 4, 5]
      * }</pre>
      *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
+     *
      * @param n the number of elements to skip, must not be negative
      * @param onSkip the action to be performed on each skipped element
      * @return a new sequence where the first <i>n</i> elements are skipped and the action is performed on each skipped element
@@ -8032,6 +8942,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * // allNulls.count() returns 0
      * }</pre>
      *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
+     *
      * @return a new {@code Seq} instance with {@code null} elements removed
      * @see #filter(Throwables.Predicate)
      */
@@ -8061,6 +8981,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * // skipAll.count() returns 0 (n exceeds size)
      * }</pre>
      *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
+     *
      * @param n the number of elements to skip from the end, must not be negative
      * @return a new sequence where the last <i>n</i> elements are skipped
      * @throws IllegalStateException if the sequence is already closed
@@ -8083,7 +9013,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
             @Override
             public boolean hasNext() throws E {
                 if (deque == null) {
-                    deque = new ArrayDeque<>(Math.min(1024, n));
+                    deque = new LinkedList<>();
 
                     while (deque.size() < n && elements.hasNext()) {
                         deque.offerLast(elements.next());
@@ -8127,6 +9057,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * Seq<Integer, Exception> limitExceed = seq.limit(10);
      * // limitExceed contains: [1, 2, 3, 4, 5] (maxSize exceeds actual size)
      * }</pre>
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @param maxSize the maximum number of elements to include in the sequence, must not be negative
      * @return a new sequence containing at most maxSize elements
@@ -8208,6 +9148,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * <br />
      * This is an intermediate operation and will not close the sequence.
      *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
+     *
      * @param offset the number of leading elements to skip before starting to include elements
      * @param maxSize the maximum number of elements to include in the new sequence
      * @return a new {@code Seq} consisting of at most {@code maxSize} elements after skipping
@@ -8249,6 +9199,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * // empty.count() returns 0
      * }</pre>
      *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
+     *
      * @param n the number of elements to retain from the end of the sequence
      * @return a new {@code Seq} consisting of the last {@code n} elements
      * @throws IllegalStateException if the sequence is already closed
@@ -8283,6 +9243,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * Seq<Integer, Exception> takeAll = seq.takeLast(10);
      * // takeAll contains: [1, 2, 3, 4, 5] (n exceeds size)
      * }</pre>
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @param n the number of elements to retain from the end of the sequence, must not be negative
      * @return a new {@code Seq} consisting of the last {@code n} elements
@@ -8327,7 +9297,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
                 if (!initialized) {
                     initialized = true;
 
-                    final Deque<T> deque = new ArrayDeque<>(Math.min(1024, n));
+                    final Deque<T> deque = new LinkedList<>();
 
                     try {
                         while (elements.hasNext()) {
@@ -8368,6 +9338,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * // topExceed contains all 6 elements (n exceeds actual size)
      * }</pre>
      *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>Yes</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
+     *
      * @param n the number of top elements to retain, must not be negative
      * @return a new {@code Seq} consisting of the top {@code n} elements
      * @throws IllegalStateException if the sequence is already closed
@@ -8404,6 +9384,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * Seq<String, Exception> customTop = seq.top(2, Comparator.<String>naturalOrder().reversed());
      * // customTop contains the 2 lexicographically largest strings
      * }</pre>
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>Yes</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @param n the number of top elements to retain, must be positive
      * @param comparator the comparator to compare the elements
@@ -8543,6 +9533,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * // empty.count() returns 0
      * }</pre>
      *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>Yes</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>Yes</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
+     *
      * @return a new {@code Seq} with the elements in reverse order
      * @throws IllegalStateException if the sequence is already closed
      * @see #reverseSorted()
@@ -8637,6 +9637,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      *
      * <p>This is an intermediate operation that triggers terminal evaluation. All elements will be
      * loaded into memory to perform the rotation.</p>
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>Yes</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>Yes</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @param distance the distance to rotate the elements. Positive values rotate to the
      *                 right, negative values rotate to the left
@@ -8740,6 +9750,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * // empty.count() returns 0
      * }</pre>
      *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>Yes</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>Yes</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
+     *
      * @return a new {@code Seq} with the elements shuffled
      * @throws IllegalStateException if the sequence is already closed
      * @see #shuffled(Random)
@@ -8766,6 +9786,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * Seq<Integer, Exception> empty = Seq.<Integer, Exception>empty().shuffled(new Random());
      * // empty.count() returns 0
      * }</pre>
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>Yes</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>Yes</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @param rnd the random number generator to use for shuffling the elements. Must not be {@code null}.
      * @return a new {@code Seq} with the elements shuffled
@@ -8808,6 +9838,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * // nullable contains: [null, "a", "b"] (nulls come first)
      * }</pre>
      *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>Yes</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>Yes</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
+     *
      * @return a new {@code Seq} with the elements sorted
      * @throws IllegalStateException if the sequence is already closed
      * @see #sorted(Comparator)
@@ -8839,6 +9879,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * Seq<Integer, Exception> natural = seq.sorted(null);
      * // natural contains: [1, 1, 3, 4, 5, 9] (null comparator = natural order)
      * }</pre>
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>Yes</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>Yes</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @param comparator the comparator to use for sorting the elements, or {@code null} for natural ordering
      * @return a new {@code Seq} with the elements sorted
@@ -8885,6 +9935,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * // nullable contains: [null, "a", "bb"] (nulls come first)
      * }</pre>
      *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>Yes</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>Yes</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
+     *
      * @param keyMapper a function that extracts an integer key from each element, which will be used for sorting
      * @return a new {@code Seq} with the elements sorted by the extracted integer key
      * @throws IllegalStateException if the sequence is already closed
@@ -8915,6 +9975,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * Seq<String, Exception> empty = Seq.<String, Exception>empty().sortedByLong(s -> (long) s.length());
      * // empty.count() returns 0
      * }</pre>
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>Yes</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>Yes</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @param keyMapper a function that extracts a long key from each element, which will be used for sorting
      * @return a new {@code Seq} with the elements sorted by the extracted long key
@@ -8947,6 +10017,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * // empty.count() returns 0
      * }</pre>
      *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>Yes</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>Yes</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
+     *
      * @param keyMapper a function that extracts a double key from each element, which will be used for sorting
      * @return a new {@code Seq} with the elements sorted by the extracted double key
      * @throws IllegalStateException if the sequence is already closed
@@ -8977,6 +10057,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * Seq<String, Exception> empty = Seq.<String, Exception>empty().sortedBy(String::length);
      * // empty.count() returns 0
      * }</pre>
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>Yes</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>Yes</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @param keyMapper a function that extracts a comparable key from each element, which will be used for sorting
      * @return a new {@code Seq} with the elements sorted by the extracted key
@@ -9012,6 +10102,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * // empty.count() returns 0
      * }</pre>
      *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>Yes</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>Yes</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
+     *
      * @return a new {@code Seq} with the elements sorted in reverse order
      * @throws IllegalStateException if the sequence is already closed
      * @see #sorted()
@@ -9039,6 +10139,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * Seq<String, Exception> empty = Seq.<String, Exception>empty().reverseSorted(Comparator.comparingInt(String::length));
      * // empty.count() returns 0
      * }</pre>
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>Yes</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>Yes</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @param comparator the comparator to use for sorting the elements in reverse order
      * @return a new {@code Seq} with the elements sorted in reverse order
@@ -9070,6 +10180,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * // empty.count() returns 0
      * }</pre>
      *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>Yes</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>Yes</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
+     *
      * @param keyMapper a function that extracts an integer key from each element, which will be used for sorting
      * @return a new {@code Seq} with the elements sorted in reverse order by the extracted integer key
      * @throws IllegalStateException if the sequence is already closed
@@ -9097,6 +10217,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * // result contains: ["banana", "apple", "kiwi"] (reverse of length order)
      * }</pre>
      *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>Yes</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>Yes</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
+     *
      * @param keyMapper a function that extracts a long key from each element, which will be used for sorting
      * @return a new {@code Seq} with the elements sorted in reverse order by the extracted long key
      * @throws IllegalStateException if the sequence is already closed
@@ -9123,6 +10253,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * Seq<String, Exception> result = seq.reverseSortedByDouble(s -> (double) s.length());
      * // result contains: ["banana", "apple", "kiwi"] (reverse of length order)
      * }</pre>
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>Yes</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>Yes</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @param keyMapper a function that extracts a double key from each element, which will be used for sorting
      * @return a new {@code Seq} with the elements sorted in reverse order by the extracted double key
@@ -9154,6 +10294,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * Seq<String, Exception> empty = Seq.<String, Exception>empty().reverseSortedBy(String::length);
      * // empty.count() returns 0
      * }</pre>
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>Yes</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>Yes</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @param keyMapper a function that extracts a comparable key from each element, which will be used for sorting
      * @return a new {@code Seq} with the elements sorted in reverse order by the extracted key
@@ -9251,6 +10401,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * // single.limit(3).toList() returns [1, 1, 1]
      * }</pre>
      *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>Yes</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
+     *
      * @return a new {@code Seq} that cycles through the elements indefinitely
      * @throws IllegalStateException if the sequence is already closed
      * @see #cycled(long)
@@ -9338,6 +10498,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * Seq<Integer, Exception> cycledOnce = seq.cycled(1);
      * // cycledOnce.toList() returns [1, 2, 3] (same as original)
      * }</pre>
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>Yes</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @param rounds the number of times to cycle through the elements, must not be negative
      * @return a new {@code Seq} that cycles through the elements for the specified number of rounds
@@ -9461,6 +10631,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      *   </tr>
      * </table>
      *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
+     *
      * @param permitsPerSecond the number of permits per second to allow, must be positive
      * @return a new {@code Seq} that is rate-limited to the specified number of permits per second
      * @throws IllegalStateException if the sequence is already closed
@@ -9520,6 +10700,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      *     <td>Yes (superseded elements)</td>
      *     <td>Collapse rapid bursts into a single trailing value</td>
      *   </tr>
+     * </table>
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
      * </table>
      *
      * @param rateLimiter the rate limiter to use
@@ -9583,6 +10773,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      *     <td>Yes (superseded elements)</td>
      *     <td>Collapse rapid bursts into a single trailing value</td>
      *   </tr>
+     * </table>
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
      * </table>
      *
      * @param duration the duration to delay each element
@@ -9658,6 +10858,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      *     <td>Yes (superseded elements)</td>
      *     <td>Collapse rapid bursts into a single trailing value</td>
      *   </tr>
+     * </table>
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
      * </table>
      *
      * @param duration the duration to delay each element
@@ -9740,6 +10950,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      *     <td>Yes (superseded elements)</td>
      *     <td>Collapse rapid bursts into a single trailing value</td>
      *   </tr>
+     * </table>
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
      * </table>
      *
      * @param duration the quiet period used to decide whether a pending element has been superseded.
@@ -9845,6 +11065,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * <br />
      * This is an intermediate operation and will not close the sequence.
      *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
+     *
      * @param delimiter the element to intersperse between each element of this {@code Seq}
      * @return a new {@code Seq} with the delimiter interspersed between each element
      * @throws IllegalStateException if the sequence is already closed
@@ -9893,6 +11123,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * // Returns [1, 4]
      * Seq.of(1, 2, 3, 4, 5).step(3).toList()
      * }</pre>
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @param step the step size to use when iterating through the elements. Must be greater than 0.
      * @return a new {@code Seq} that steps through the elements with the specified step size
@@ -9964,6 +11204,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * Seq.of("a", "b", "c").indexed().toList()
      * }</pre>
      *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
+     *
      * @return a new {@code Seq} where each element is wrapped in an {@link Indexed} object with its index
      * @throws IllegalStateException if the sequence is already closed
      */
@@ -9996,6 +11246,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * seq.buffered().forEach(element -> processSlowly(element));
      * }</pre>
      *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
+     *
      * @return a new {@code Seq} with elements read asynchronously into a buffer
      * @throws IllegalStateException if the sequence is already closed
      * @see #buffered(int)
@@ -10020,6 +11280,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * // Buffer up to 100 elements
      * seq.buffered(100).forEach(element -> processSlowly(element));
      * }</pre>
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @param bufferSize the size of the buffer queue. Must be greater than 0.
      * @return a new {@code Seq} with elements read asynchronously into a buffer of the specified size
@@ -10062,6 +11332,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * seq1.mergeWith(list2, (a, b) -> a <= b ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND)
      * }</pre>
      *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
+     *
      * @param b the collection to merge with this sequence
      * @param nextSelector a BiFunction that takes an element from this sequence and an element from the collection,
      *                     and returns a MergeResult indicating which element(s) to select
@@ -10097,6 +11377,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * seq1.mergeWith(seq2, (a, b) -> a <= b ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND)
      * }</pre>
      *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
+     *
      * @param b the sequence to merge with this sequence
      * @param nextSelector a BiFunction that takes an element from each sequence and returns a MergeResult
      *                     indicating which element(s) to select
@@ -10124,6 +11414,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      *             (s, i) -> s + i)
      *    .toList();   // returns ["a1", "b2", "c3"]
      * }</pre>
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @param <T2> the type of elements in the given Collection
      * @param <R> the type of elements in the resulting Seq
@@ -10158,6 +11458,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      *    .toList();   // returns ["a1", "b2", "z3"]
      * }</pre>
      *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
+     *
      * @param <T2> the type of elements in the given Collection
      * @param <R> the type of elements in the resulting Seq
      * @param b the Collection to be combined with the current Seq. Must be {@code non-null}.
@@ -10190,6 +11500,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      *             (s, i, b) -> s + i + b)
      *    .toList();   // returns ["a1true", "b2false"]
      * }</pre>
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @param <T2> the type of elements in the first given Collection
      * @param <T3> the type of elements in the second given Collection
@@ -10227,6 +11547,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      *    .toList();   // returns ["a1true", "b0false", "z0true"]
      * }</pre>
      *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
+     *
      * @param <T2> the type of elements in the first given Collection
      * @param <T3> the type of elements in the second given Collection
      * @param <R> the type of elements in the resulting Seq
@@ -10262,6 +11592,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      *    .toList();   // returns ["1a", "2b", "3c"]
      * }</pre>
      *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
+     *
      * @param <T2> the type of elements in the given Seq
      * @param <R> the type of elements in the resulting Seq
      * @param b the Seq to be combined with the current Seq. Must be {@code non-null}.
@@ -10292,6 +11632,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      *    .zipWith(Seq.of("a"), 0, "z", (i, s) -> i + s)
      *    .toList();   // returns ["1a", "2z", "3z"]
      * }</pre>
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @param <T2> the type of elements in the given Seq
      * @param <R> the type of elements in the resulting Seq
@@ -10325,6 +11675,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      *             (i, s, b) -> i + s + b)
      *    .toList();   // returns ["1atrue", "2bfalse"]
      * }</pre>
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @param <T2> the type of elements in the second Seq
      * @param <T3> the type of elements in the third Seq
@@ -10360,6 +11720,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      *             (i, s, b) -> i + s + b)
      *    .toList();   // returns ["1atrue", "2zfalse", "3zfalse"]
      * }</pre>
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @param <T2> the type of elements in the second Seq
      * @param <T3> the type of elements in the third Seq
@@ -10397,6 +11767,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * // Equivalent to:
      * seq.forEach(System.out::println);
      * }</pre>
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @param action a non-interfering action to perform on each element
      * @throws IllegalStateException if the sequence is already closed
@@ -10437,6 +11817,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * });
      * }</pre>
      *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
+     *
      * @param <E2> the type of exception that the action may throw
      * @param action a non-interfering action to perform on each element
      * @throws IllegalStateException if the sequence is already closed
@@ -10473,6 +11863,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      *     () -> System.out.println("Processed " + results.size() + " items")
      * );
      * }</pre>
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @param <E2> the type of exception that the action may throw
      * @param <E3> the type of exception that the onComplete action may throw
@@ -10516,6 +11916,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      *     (person, hobby) -> System.out.println(person.getName() + " enjoys " + hobby)
      * );
      * }</pre>
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @param <U> the type of elements in the iterable returned by the flat-mapper
      * @param <E2> the type of exception that the flat-mapper may throw
@@ -10576,6 +11986,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      *                          employee.getName())
      * );
      * }</pre>
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @param <T2> the type of elements in the first level iterable
      * @param <T3> the type of elements in the second level iterable
@@ -10643,6 +12063,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * // 2: c
      * }</pre>
      *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
+     *
      * @param <E2> the type of exception that the action may throw
      * @param action a non-interfering action that accepts an index and element
      * @throws IllegalStateException if the sequence is already closed
@@ -10687,6 +12117,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * });
      * }</pre>
      *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
+     *
      * @param <E2> the type of exception that the action may throw
      * @param action a BiConsumer that takes an element and a MutableBoolean flag.
      *               Set the flag to {@code true} to break the loop.
@@ -10728,6 +12168,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * });
      * }</pre>
      *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
+     *
      * @param <E2> the type of exception that the action may throw
      * @param flagToBreak a MutableBoolean flag to control iteration. Set to {@code true} to stop.
      * @param action a Consumer to be applied to each element while the flag is {@code false}
@@ -10766,6 +12216,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * // 6 - 3 = 3
      * // 10 - 6 = 4
      * }</pre>
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @param <E2> type of exception that might be thrown from the action
      * @param action a non-interfering action to perform on each adjacent pair of elements
@@ -10806,6 +12266,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      *     System.out.println("(" + a + "," + b + ")"));
      * // Output: (1,2), (3,4), (5,6)
      * }</pre>
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @param <E2> type of exception that might be thrown from the action
      * @param increment the distance between the first elements of each pair (must be positive)
@@ -10873,6 +12343,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * // (3,4,5) -> avg = 4.0
      * }</pre>
      *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
+     *
      * @param <E2> type of exception that might be thrown from the action
      * @param action a non-interfering action to perform on each adjacent triple of elements
      * @throws IllegalStateException if the sequence is already closed
@@ -10912,6 +12392,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      *     System.out.println("(" + a + "," + b + "," + c + ")"));
      * // Output: (1,2,3), (4,5,6), (7,8,9)
      * }</pre>
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @param <E2> type of exception that might be thrown from the action
      * @param increment the distance between the first elements of each triple (must be positive)
@@ -10985,6 +12475,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * // Returns Optional.empty()
      * }</pre>
      *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
+     *
      * @param comparator the comparator to determine the order of elements
      * @return an Optional containing the minimum element, or empty if the sequence is empty
      * @throws IllegalStateException if the sequence is already closed
@@ -11035,6 +12535,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * Optional<String> shortest = words.minBy(String::length);
      * }</pre>
      *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
+     *
      * @param keyMapper the function to extract the comparable key for comparison
      * @return an Optional containing the element with the minimum key, or empty if the sequence is empty
      * @throws IllegalStateException if the sequence is already closed
@@ -11070,6 +12580,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * Optional<Integer> max = seq.max(Integer::compare);
      * // max.get() == 5
      * }</pre>
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @param comparator a non-interfering, stateless {@code Comparator} to compare elements of this sequence.
      *                   If {@code null}, natural ordering is used
@@ -11119,6 +12639,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * // longest.get() == "banana"
      * }</pre>
      *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
+     *
      * @param keyMapper the function used to extract the {@code Comparable} sort key from each element
      * @return an {@code Optional} describing the element with the maximum extracted key value,
      *         or an empty {@code Optional} if the sequence is empty
@@ -11156,6 +12686,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * boolean hasEven = seq.anyMatch(n -> n % 2 == 0);
      * // hasEven == true
      * }</pre>
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @param <E2> the type of exception that the predicate may throw
      * @param predicate a non-interfering, stateless predicate to apply to elements of this sequence
@@ -11197,6 +12737,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * // allEven == true
      * }</pre>
      *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
+     *
      * @param <E2> the type of exception that the predicate may throw
      * @param predicate a non-interfering, stateless predicate to apply to elements of this sequence
      * @return {@code true} if either all elements of the sequence match the provided predicate or
@@ -11237,6 +12787,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * boolean noEven = seq.noneMatch(n -> n % 2 == 0);
      * // noEven == true
      * }</pre>
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @param <E2> the type of exception that the predicate may throw
      * @param predicate a non-interfering, stateless predicate to apply to elements of this sequence
@@ -11280,6 +12840,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * boolean has2to4Even = seq.isMatchCountBetween(2, 4, n -> n % 2 == 0);
      * // has2to4Even == true (there are 3 even numbers)
      * }</pre>
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @param <E2> the type of exception that the predicate may throw
      * @param atLeast the minimum number of elements that must match the predicate (inclusive)
@@ -11327,6 +12897,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * Optional<Integer> firstEven = seq.findFirst(n -> n % 2 == 0);
      * // firstEven.get() == 2
      * }</pre>
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @param <E2> the type of exception that the predicate may throw
      * @param predicate a non-interfering, stateless predicate to apply to elements of this sequence
@@ -11378,6 +12958,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * // notFound.isEmpty() == true
      * }</pre>
      *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
+     *
      * @param <E2> the type of exception that the predicate may throw
      * @param predicate a non-interfering, stateless predicate to apply to elements of this sequence
      * @return an {@code Optional} describing the first element that matches the predicate,
@@ -11406,6 +12996,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * Optional<Integer> lastEven = seq.findLast(n -> n % 2 == 0);
      * // lastEven.get() == 4
      * }</pre>
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @param <E2> the type of exception that the predicate may throw
      * @param predicate a non-interfering, stateless predicate to apply to elements of this sequence
@@ -11452,6 +13052,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * boolean hasAll = seq.containsAll(2, 4);
      * // hasAll == true
      * }</pre>
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @param a the elements to check for containment in this sequence
      * @return {@code true} if {@code a} is {@code null} or empty, or if this sequence contains all of the specified elements; {@code false} otherwise
@@ -11503,6 +13113,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * // hasAll == true
      * }</pre>
      *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
+     *
      * @param c the collection of elements to check for containment in this sequence
      * @return {@code true} if {@code c} is {@code null} or empty, or if this sequence contains all elements in the specified collection; {@code false} otherwise
      * @throws IllegalStateException if the sequence has already been operated upon or closed
@@ -11544,6 +13164,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * boolean hasAny = seq.containsAny(7, 3, 9);
      * // hasAny == true (contains 3)
      * }</pre>
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @param a the elements to check for containment in this sequence
      * @return {@code true} if this sequence contains any of the specified elements; {@code false} if {@code a} is {@code null} or empty, or if no match is found
@@ -11596,6 +13226,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * // hasAny == true (contains 3)
      * }</pre>
      *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
+     *
      * @param c the collection of elements to check for containment in this sequence
      * @return {@code true} if this sequence contains any element from the specified collection; {@code false} if {@code c} is {@code null} or empty, or if no match is found
      * @throws IllegalStateException if the sequence has already been operated upon or closed
@@ -11636,6 +13276,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * // hasNone == true
      * }</pre>
      *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
+     *
      * @param a the elements to check for non-containment in this sequence
      * @return {@code true} if {@code a} is {@code null} or empty, or if this sequence doesn't contain any of the specified elements; {@code false} otherwise
      * @throws IllegalStateException if the sequence has already been operated upon or closed
@@ -11671,6 +13321,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * boolean hasNone = seq.containsNone(list);
      * // hasNone == true
      * }</pre>
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @param c the collection of elements to check for non-containment in this sequence
      * @return {@code true} if {@code c} is {@code null} or empty, or if this sequence doesn't contain any element from the specified collection; {@code false} otherwise
@@ -11708,6 +13368,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * boolean hasDups2 = seq2.containsDuplicates();   // returns false
      * }</pre>
      *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>Yes</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
+     *
      * @return {@code true} if this sequence contains at least one duplicate element, otherwise {@code false}
      * @throws IllegalStateException if the sequence has already been operated upon or closed
      * @throws E if an exception occurs during iteration
@@ -11744,6 +13414,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * Optional<Integer> third = seq.kthLargest(3, Integer::compare);
      * // third.get() == 5 (the 3rd largest element)
      * }</pre>
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>Yes</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @param k the position (1-based) of the largest element to find. For example, k=1 finds the largest element,
      *          k=2 finds the second largest, etc.
@@ -11829,6 +13509,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * // {0.0001%=1, 25%=3, 50%=6, 75%=8, 99%=10}
      * }</pre>
      *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>Yes</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
+     *
      * @return an {@code Optional} containing a map where keys are {@code Percentage} values and values are the
      *         corresponding elements at those percentiles, or an empty {@code Optional} if the sequence is empty
      * @throws IllegalStateException if the sequence has already been operated upon or closed
@@ -11867,6 +13557,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * Optional<Map<Percentage, String>> percentiles = seq.percentiles(String::compareTo);
      * // percentiles.get() contains mappings based on alphabetical order
      * }</pre>
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>Yes</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @param comparator a comparator to determine the order of elements for percentile calculation
      * @return an {@code Optional} containing a map where keys are {@code Percentage} values and values are the
@@ -11908,6 +13608,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * // first.get() == "first"
      * }</pre>
      *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
+     *
      * @return an {@code Optional} describing the first element of this sequence,
      *         or an empty {@code Optional} if the sequence is empty
      * @throws IllegalStateException if the sequence has already been operated upon or closed
@@ -11942,6 +13652,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * Optional<String> last = seq.last();
      * // last.get() == "third"
      * }</pre>
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @return an {@code Optional} describing the last element of this sequence,
      *         or an empty {@code Optional} if the sequence is empty
@@ -11983,6 +13703,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * Optional<String> elem = seq.elementAt(2);
      * // elem.get() == "two"
      * }</pre>
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @param position the position of the element to return (0-based index)
      * @return an {@code Optional} describing the element at the specified position,
@@ -12027,6 +13757,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * seq2.onlyOne();   // throws TooManyElementsException
      * }</pre>
      *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
+     *
      * @return an {@code Optional} describing the only element of this sequence,
      *         or an empty {@code Optional} if the sequence is empty
      * @throws IllegalStateException if the sequence has already been operated upon or closed
@@ -12065,6 +13805,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * long count = seq.count();   // returns count == 4
      * }</pre>
      *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
+     *
      * @return the count of elements in this sequence
      * @throws IllegalStateException if the sequence has already been operated upon or closed
      * @throws E if an exception occurs during iteration
@@ -12091,6 +13841,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * Object[] array = seq.toArray();
      * // array = ["a", "b", "c"]
      * }</pre>
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>Yes</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @return an array containing all the elements of this sequence
      * @throws IllegalStateException if the sequence has already been operated upon or closed
@@ -12134,6 +13894,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * // array = ["a", "b", "c"]
      * }</pre>
      *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>Yes</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
+     *
      * @param <A> the component type of the resulting array
      * @param generator a function which produces a new array of the desired type and the provided length
      * @return an array containing all the elements of this sequence
@@ -12168,6 +13938,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * List<Integer> list = seq.toList();
      * // list = [1, 2, 3, 4, 5]
      * }</pre>
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>Yes</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @return a {@code List} containing all the elements of this sequence
      * @throws IllegalStateException if the sequence has already been operated upon or closed
@@ -12205,6 +13985,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * // set = [1, 2, 3, 4] (order may vary)
      * }</pre>
      *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>Yes</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
+     *
      * @return a {@code Set} containing all the distinct elements of this sequence
      * @throws IllegalStateException if the sequence has already been operated upon or closed
      * @throws E if an exception occurs during iteration
@@ -12240,6 +14030,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * LinkedList<String> list = seq.toCollection(LinkedList::new);
      * TreeSet<String> set = seq.toCollection(TreeSet::new);
      * }</pre>
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>Yes</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @param <C> the type of the resulting collection
      * @param supplier a function which returns a new, empty collection of the appropriate type
@@ -12281,6 +14081,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * // list.add("d");   // would throw UnsupportedOperationException
      * }</pre>
      *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>Yes</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
+     *
      * @return an immutable list containing all the elements of this sequence in encounter order
      * @throws IllegalStateException if the sequence has already been operated upon or closed
      * @throws E if an exception occurs during iteration
@@ -12306,6 +14116,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * // set contains [1, 2, 3, 4] and cannot be modified
      * }</pre>
      *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>Yes</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
+     *
      * @return an immutable set containing all the distinct elements of this sequence
      * @throws IllegalStateException if the sequence has already been operated upon or closed
      * @throws E if an exception occurs during iteration
@@ -12328,6 +14148,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * int sum = seq.toListThenApply(list -> list.stream().mapToInt(Integer::intValue).sum());
      * // sum == 15
      * }</pre>
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>Yes</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @param <R> the type of the result
      * @param <E2> the type of exception that may be thrown by the function
@@ -12363,6 +14193,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * });
      * }</pre>
      *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>Yes</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
+     *
      * @param <E2> the type of exception that may be thrown by the consumer
      * @param consumer the action to perform on the list of all elements
      * @throws IllegalStateException if the sequence has already been operated upon or closed
@@ -12392,6 +14232,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * int distinctCount = seq.toSetThenApply(Set::size);
      * // distinctCount == 4
      * }</pre>
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>Yes</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @param <R> the type of the result
      * @param <E2> the type of exception that may be thrown by the function
@@ -12427,6 +14277,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * });
      * }</pre>
      *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>Yes</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
+     *
      * @param <E2> the type of exception that may be thrown by the consumer
      * @param consumer the action to perform on the set of distinct elements
      * @throws IllegalStateException if the sequence has already been operated upon or closed
@@ -12459,6 +14319,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * );
      * // first == "apple"
      * }</pre>
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>Yes</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @param <R> the type of the result
      * @param <C> the type of the resulting collection
@@ -12496,6 +14366,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * );
      * }</pre>
      *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>Yes</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
+     *
      * @param <C> the type of the resulting collection
      * @param <E2> the type of exception that may be thrown by the consumer
      * @param supplier a function which returns a new, empty collection of the appropriate type
@@ -12531,6 +14411,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      *     person -> person.getAge()
      * );
      * }</pre>
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>Yes</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @param <K> the type of keys in the resulting map
      * @param <V> the type of values in the resulting map
@@ -12571,6 +14461,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * );
      * }</pre>
      *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>Yes</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
+     *
      * @param <K> the type of keys in the resulting map
      * @param <V> the type of values in the resulting map
      * @param <M> the type of the resulting map
@@ -12610,6 +14510,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      *     (oldAge, newAge) -> oldAge + newAge
      * );
      * }</pre>
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>Yes</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @param <K> the type of keys in the resulting map
      * @param <V> the type of values in the resulting map
@@ -12654,6 +14564,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      *     TreeMap::new
      * );
      * }</pre>
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>Yes</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @param <K> the type of keys in the resulting map
      * @param <V> the type of values in the resulting map
@@ -12716,6 +14636,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * );
      * }</pre>
      *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>Yes</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
+     *
      * @param <K> the type of keys in the resulting map
      * @param <V> the type of values in the resulting map
      * @param <E2> the type of exception that may be thrown by the key extractor
@@ -12754,6 +14684,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      *     (name1, name2) -> name1 + ", " + name2
      * );
      * }</pre>
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>Yes</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @param <K> the type of keys in the resulting map
      * @param <V> the type of values in the resulting map
@@ -12795,6 +14735,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * );
      * }</pre>
      *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>Yes</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
+     *
      * @param <K> the type of keys in the resulting map
      * @param <E2> the type of exception that may be thrown by the key extractor
      * @param keyMapper the function to extract keys from the elements. Must not be {@code null}.
@@ -12825,6 +14775,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      *     TreeMap::new
      * );
      * }</pre>
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>Yes</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @param <K> the type of keys in the resulting map
      * @param <M> the type of the resulting map
@@ -12860,6 +14820,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      *     person -> person.getName()
      * );
      * }</pre>
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>Yes</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @param <K> the type of keys in the resulting map
      * @param <V> the type of values in the resulting map
@@ -12897,6 +14867,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      *     LinkedHashMap::new
      * );
      * }</pre>
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>Yes</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @param <K> the type of keys in the resulting map
      * @param <V> the type of values in the resulting map
@@ -12962,6 +14942,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * );
      * }</pre>
      *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>Yes</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
+     *
      * @param <K> the type of keys in the resulting map
      * @param <D> the type of values in the resulting map after applying the downstream collector
      * @param <E2> the type of exception that may be thrown by the key extractor
@@ -12994,6 +14984,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      *     TreeMap::new
      * );
      * }</pre>
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>Yes</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @param <K> the type of keys in the resulting map
      * @param <D> the type of values in the resulting map after applying the downstream collector
@@ -13029,6 +15029,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      *     Collectors.joining(", ")
      * );
      * }</pre>
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>Yes</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @param <K> the type of keys in the resulting map
      * @param <V> the type of values extracted from elements
@@ -13069,6 +15079,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      *     LinkedHashMap::new
      * );
      * }</pre>
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>Yes</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @param <K> the type of keys in the resulting map
      * @param <V> the type of values extracted from elements
@@ -13148,6 +15168,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * List<Person> minors = adultPartition.get(false);
      * }</pre>
      *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>Yes</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
+     *
      * @param <E2> the type of exception that may be thrown by the predicate
      * @param predicate the predicate to test elements. Must not be {@code null}.
      * @return a Map with two entries: {@code true} for elements that match the predicate, and {@code false} for elements that do not
@@ -13180,6 +15210,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * long numberOfAdults = adultCount.get(true);
      * long numberOfMinors = adultCount.get(false);
      * }</pre>
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>Yes</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @param <D> the type of the downstream result
      * @param <E2> the type of exception that may be thrown by the predicate
@@ -13229,6 +15269,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * );
      * }</pre>
      *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>Yes</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
+     *
      * @param <K> the type of keys in the resulting multimap
      * @param <E2> the type of exception that may be thrown by the key extractor function
      * @param keyMapper the function to extract keys from the elements. Must not be {@code null}.
@@ -13258,6 +15308,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      *     Suppliers.ofSetMultimap()
      * );
      * }</pre>
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>Yes</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @param <K> the type of keys in the resulting multimap
      * @param <V> the collection type for values in the multimap
@@ -13294,6 +15354,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * );
      * }</pre>
      *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>Yes</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
+     *
      * @param <K> the type of keys in the resulting multimap
      * @param <V> the type of values in the resulting multimap
      * @param <E2> the type of exception that may be thrown by the key extractor function
@@ -13329,6 +15399,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      *     Suppliers.ofSetMultimap()
      * );
      * }</pre>
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>Yes</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @param <K> the type of keys in the resulting multimap
      * @param <V> the type of values in the resulting multimap
@@ -13385,6 +15465,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * int countOfHello = wordCounts.count("hello");
      * }</pre>
      *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>Yes</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
+     *
      * @return a Multiset containing all the elements from this sequence with their occurrence counts
      * @throws IllegalStateException if the sequence is already closed
      * @throws E if an exception occurs during iteration
@@ -13406,6 +15496,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * // Create a custom multiset implementation
      * Multiset<String> wordCounts = seq.toMultiset(MyMultiset::new);
      * }</pre>
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>Yes</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @param supplier the supplier to create the resulting multiset. Must not be {@code null}.
      * @return a Multiset containing all the elements from this sequence with their occurrence counts
@@ -13444,6 +15544,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * // The Dataset will have columns for each property of Person
      * }</pre>
      *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>Yes</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
+     *
      * @return a Dataset containing the elements from this sequence
      * @throws IllegalStateException if the sequence is already closed
      * @throws E if an exception occurs during the conversion
@@ -13468,6 +15578,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * Dataset dataset = seq.toDataset(columns);
      * }</pre>
      *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>Yes</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
+     *
      * @param columnNames the list of column names to be used in the Dataset. Must not be {@code null}.
      * @return a Dataset containing the elements from this sequence with the specified column names
      * @throws IllegalStateException if the sequence is already closed
@@ -13491,6 +15611,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * // Sum the ages of all persons
      * long totalAge = seq.sumInt(person -> person.getAge());
      * }</pre>
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @param <E2> the type of exception that the function may throw
      * @param func the function to extract integer values from the elements
@@ -13528,6 +15658,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * long totalIds = seq.sumLong(record -> record.getId());
      * }</pre>
      *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
+     *
      * @param <E2> the type of exception that the function may throw
      * @param func the function to extract long values from the elements
      * @return the sum of the long values
@@ -13563,6 +15703,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * // Sum the salaries of all employees
      * double totalSalary = seq.sumDouble(employee -> employee.getSalary());
      * }</pre>
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @param <E2> the type of exception that the function may throw
      * @param func the function to extract double values from the elements
@@ -13603,6 +15753,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      *     System.out.println("Average age: " + avgAge.getAsDouble());
      * }
      * }</pre>
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @param <E2> the type of exception that the function may throw
      * @param func the function to extract integer values from the elements
@@ -13647,6 +15807,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * OptionalDouble avgSize = seq.averageLong(file -> file.getSize());
      * }</pre>
      *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
+     *
      * @param <E2> the type of exception that the function may throw
      * @param func the function to extract long values from the elements
      * @return an OptionalDouble containing the average, or empty if the sequence is empty
@@ -13689,6 +15859,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * // Calculate average price
      * OptionalDouble avgPrice = seq.averageDouble(product -> product.getPrice());
      * }</pre>
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @param <E2> the type of exception that the function may throw
      * @param func the function to extract double values from the elements
@@ -13737,6 +15917,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      *     .reduce(Integer::max);
      * // Result: Optional[5]
      * }</pre>
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @param <E2> the type of exception that the accumulator function may throw
      * @param accumulator a function for combining two values, must be associative and stateless
@@ -13790,6 +15980,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * // Result: "Start:abc"
      * }</pre>
      *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
+     *
      * @param <U> the type of the result
      * @param <E2> the type of exception that the accumulator function may throw
      * @param identity the initial value for the accumulation
@@ -13838,6 +16038,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      *     .collect(StringBuilder::new, StringBuilder::append);
      * // Result: "Hello World"
      * }</pre>
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @param <R> the type of the mutable result container
      * @param <E2> the type of exception that the supplier may throw
@@ -13890,6 +16100,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      *              sb -> sb.toString().toUpperCase());
      * // Result: "HELLO WORLD"
      * }</pre>
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @param <R> the type of the mutable result container
      * @param <RR> the type of the final result
@@ -13948,6 +16168,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * // Result: {1=[a], 2=[bb, dd], 3=[ccc]}
      * }</pre>
      *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
+     *
      * @param <R> the type of the result
      * @param collector the Collector describing the reduction
      * @return the result of the reduction
@@ -13996,6 +16226,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * // Result: 3
      * }</pre>
      *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
+     *
      * @param <R> the type of the intermediate result collected
      * @param <RR> the type of the final result after applying the function
      * @param <E2> the type of exception that the function may throw
@@ -14038,6 +16278,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      *     );
      * }</pre>
      *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
+     *
      * @param <R> the type of the result collected
      * @param <E2> the type of exception that the consumer may throw
      * @param collector the Collector describing the reduction
@@ -14074,6 +16324,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * // Result: "1-2-3"
      * }</pre>
      *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
+     *
      * @param delimiter the delimiter to separate each element
      * @return a String containing all elements joined by the delimiter
      * @throws IllegalStateException if the sequence is already closed
@@ -14100,6 +16360,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * String sql = Seq.of(1, 2, 3).join(",", "WHERE id IN (", ")");
      * // Result: "WHERE id IN (1,2,3)"
      * }</pre>
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @param delimiter the delimiter to separate each element
      * @param prefix the string to be added at the beginning of the result
@@ -14139,6 +16409,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * Seq.of("a", "b", "c").joinTo(joiner);
      * String result = joiner.toString();   // result == "[a, b, c]"
      * }</pre>
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @param joiner the Joiner to append the elements to
      * @return the provided Joiner after appending all elements
@@ -14180,6 +16460,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * // Prints: []
      * }</pre>
      *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
+     *
      * @throws IllegalStateException if the sequence has already been closed
      * @throws E if an exception occurs during element processing
      */
@@ -14214,6 +16504,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * // alreadyFine is the same instance (no change needed)
      * }</pre>
      *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
+     *
      * @return this sequence cast to {@code Seq<T, Exception>}
      * @throws IllegalStateException if the sequence has already been closed
      */
@@ -14245,6 +16545,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * // emptyStream.count() returns 0
      * }</pre>
      *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
+     *
      * @return a sequential {@code Stream} containing the same elements as this sequence
      * @throws IllegalStateException if the sequence has already been closed
      */
@@ -14274,6 +16584,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * Seq<Integer, Exception> seq = Seq.of(1, 2, 3, 4);
      * Seq<Integer, Exception> squares = seq.transform(s -> Seq.defer(() -> s.filter(n -> n % 2 == 0).map(n -> n * n)));
      * }</pre>
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @param <U> the type of elements in the returned sequence
      * @param transfer the transformation function that takes this sequence and returns a new sequence.
@@ -14309,6 +16629,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * Seq.<Integer, Exception>of(1, 2, 3, 4).transformB(s -> s.filter(n -> n % 2 == 0).map(n -> n * 10)).toList();   // returns [20, 40]
      * }</pre>
      *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
+     *
      * @param <U> the type of elements in the returned sequence
      * @param transfer the transformation function that takes a Stream representation of this sequence
      *                 and returns a new Stream. Must not be {@code null}
@@ -14338,6 +16668,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * <pre>{@code
      * Seq.<Integer, Exception>of(1, 2, 3, 4).transformB(s -> s.map(n -> n * 2), true).toList();   // returns [2, 4, 6, 8] (transformation deferred until consumed)
      * }</pre>
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @param <U> the type of elements in the returned sequence
      * @param transfer the transformation function that takes a Stream representation of this sequence
@@ -14387,6 +16727,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      *                .filter(x -> x > threshold));
      * }</pre>
      *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
+     *
      * @param <R> the type of elements in the returned sequence
      * @param ops the function to be applied on the parallel stream. This function takes the
      *            current sequence converted to a parallel stream and returns a stream with
@@ -14428,6 +16778,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      *     .sps(4, s -> s.map(complexComputation)
      *                   .filter(Objects::nonNull));
      * }</pre>
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @param <R> the type of the elements in the resulting sequence
      * @param maxThreadNum the maximum number of threads to use for parallel processing. Must be
@@ -14479,6 +16839,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      *     .sps(4, customExecutor, s -> s.map(complexComputation)
      *                                   .filter(Objects::nonNull));
      * }</pre>
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @param <R> the type of the elements in the resulting sequence
      * @param maxThreadNum the maximum number of threads to use for parallel processing. Must be
@@ -14532,6 +16902,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * future.get();
      * }</pre>
      *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
+     *
      * @param terminalAction the terminal operation to be executed on this sequence. The consumer
      *                       receives this sequence as its parameter and may throw an exception
      * @return a ContinuableFuture representing the asynchronous computation. The future completes
@@ -14582,6 +16962,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * // Wait for completion
      * future.get();
      * }</pre>
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @param terminalAction the terminal operation to be executed on this sequence. The consumer
      *                       receives this sequence as its parameter and may throw an exception
@@ -14635,6 +17025,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * // Get the result
      * List<String> names = future.get();
      * }</pre>
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @param <R> the type of the result produced by the terminal operation
      * @param terminalAction the terminal operation to be executed on this sequence. The function
@@ -14690,6 +17090,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      *     );
      * });
      * }</pre>
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @param <R> the type of the result produced by the terminal operation
      * @param terminalAction the terminal operation to be executed on this sequence. The function
@@ -14749,6 +17159,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * );
      * }</pre>
      *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
+     *
      * @param <R> the type of the result produced by the function
      * @param <E2> the type of the exception the function may throw
      * @param func the function to be applied to this sequence if it's not empty. The function
@@ -14803,6 +17223,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      *     logger.info("Saved " + items.size() + " items");
      * }).orElse(() -> logger.info("No items to save"));
      * }</pre>
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @param <E2> the type of the exception the action may throw
      * @param action the action to be executed on this sequence if it's not empty. The consumer
@@ -14863,6 +17293,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * <p><b>Note:</b> Close handlers are executed in a synchronized manner to prevent concurrent
      * execution. If a close handler throws an exception, subsequent handlers will still be executed,
      * and all exceptions will be aggregated.</p>
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>No</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>Yes</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @param closeHandler the Runnable to be executed when the sequence is closed. Must not be {@code null}.
      * @return a sequence with the close handler registered. This may be the same sequence instance.
@@ -14937,6 +17377,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      *
      * <p><b>Note:</b> After closing, any attempt to perform operations on this sequence will result
      * in an {@link IllegalStateException}.</p>
+     *
+     * <p><b>Operation characteristics:</b></p>
+     * <table border="1">
+     *   <caption>Operation characteristics</caption>
+     *   <tr><th></th><th>Yes/No</th><th>Description</th></tr>
+     *   <tr><td>{@code @TerminalOp}</td><td>Yes</td><td>Consumes the sequence and produces a final result or side effect, triggering execution of the pipeline.</td></tr>
+     *   <tr><td>{@code @IntermediateOp}</td><td>No</td><td>Returns a new sequence and is evaluated lazily; the source is not consumed until a terminal operation runs.</td></tr>
+     *   <tr><td>{@code @TerminalOpTriggered}</td><td>No</td><td>Internally consumes and buffers the elements before returning a new sequence. The upstream sequence may be closed.</td></tr>
+     *   <tr><td>Loads all elements into memory</td><td>No</td><td>Buffers all elements of this sequence in memory in order to produce its result.</td></tr>
+     * </table>
      *
      * @see #onClose(Runnable)
      * @see AutoCloseable#close()

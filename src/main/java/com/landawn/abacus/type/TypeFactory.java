@@ -593,7 +593,7 @@ public final class TypeFactory {
                 type = new TypeType(typeName);
             } else if (clsName.equalsIgnoreCase(JSONType.JSON)) {
                 if (typeParameters.length > 1) {
-                    throw new IllegalArgumentException("Incorrect type parameters: " + typeName + ". JSON Type can only have one type parameter.");
+                    throw new IllegalArgumentException("Incorrect type parameters: " + typeName + ". JSON Type can only have zero or one type parameter.");
                 }
                 if (parameters.length > 0) {
                     throw new IllegalArgumentException("Incorrect parameters: " + typeName + ". JSON Type can only have zero parameter.");
@@ -606,7 +606,7 @@ public final class TypeFactory {
                 }
             } else if (clsName.equalsIgnoreCase(XMLType.XML)) {
                 if (typeParameters.length > 1) {
-                    throw new IllegalArgumentException("Incorrect type parameters: " + typeName + ". XML Type can only have one type parameter.");
+                    throw new IllegalArgumentException("Incorrect type parameters: " + typeName + ". XML Type can only have zero or one type parameter.");
                 }
                 if (parameters.length > 0) {
                     throw new IllegalArgumentException("Incorrect parameters: " + typeName + ". XML Type can only have zero parameter.");
@@ -670,6 +670,10 @@ public final class TypeFactory {
                 } else if (ByteBuffer.class.isAssignableFrom(cls)) {
                     type = new ByteBufferType(cls);
                 } else if (cls.isEnum() || Enum.class.isAssignableFrom(cls)) {
+                    if (typeParameters.length > 0) {
+                        throw new IllegalArgumentException("Incorrect type parameters: " + typeName + ". EnumType does not support type parameters.");
+                    }
+
                     if (parameters.length == 0) {
                         type = new EnumType(clsName);
                     } else if (parameters.length == 1) {
@@ -679,7 +683,7 @@ public final class TypeFactory {
                     }
                 } else if (java.util.Optional.class.isAssignableFrom(cls)) {
                     if (typeParameters.length > 1) {
-                        throw new IllegalArgumentException("Incorrect type parameters: " + typeName + ". Optional has one and only one type parameter.");
+                        throw new IllegalArgumentException("Incorrect type parameters: " + typeName + ". Optional can only have zero or one type parameter.");
                     }
                     if (parameters.length > 0) {
                         throw new IllegalArgumentException("Incorrect parameters: " + typeName + ". Optional Type can only have zero parameter.");
@@ -688,7 +692,7 @@ public final class TypeFactory {
                     type = new JdkOptionalType(typeParameters.length == 0 ? "Object" : typeParameters[0]);
                 } else if (Optional.class.isAssignableFrom(cls)) {
                     if (typeParameters.length > 1) {
-                        throw new IllegalArgumentException("Incorrect type parameters: " + typeName + ". Optional has one and only one type parameter.");
+                        throw new IllegalArgumentException("Incorrect type parameters: " + typeName + ". Optional can only have zero or one type parameter.");
                     }
                     if (parameters.length > 0) {
                         throw new IllegalArgumentException("Incorrect parameters: " + typeName + ". Optional Type can only have zero parameter.");
@@ -697,7 +701,7 @@ public final class TypeFactory {
                     type = new OptionalType(typeParameters.length == 0 ? "Object" : typeParameters[0]);
                 } else if (Nullable.class.isAssignableFrom(cls)) {
                     if (typeParameters.length > 1) {
-                        throw new IllegalArgumentException("Incorrect type parameters: " + typeName + ". Nullable has one and only one type parameter.");
+                        throw new IllegalArgumentException("Incorrect type parameters: " + typeName + ". Nullable can only have zero or one type parameter.");
                     }
                     if (parameters.length > 0) {
                         throw new IllegalArgumentException("Incorrect parameters: " + typeName + ". Nullable Type can only have zero parameter.");
@@ -706,7 +710,7 @@ public final class TypeFactory {
                     type = new NullableType(typeParameters.length == 0 ? "Object" : typeParameters[0]);
                 } else if (Holder.class.isAssignableFrom(cls)) {
                     if (typeParameters.length > 1) {
-                        throw new IllegalArgumentException("Incorrect type parameters: " + typeName + ". Holder has one and only one type parameter.");
+                        throw new IllegalArgumentException("Incorrect type parameters: " + typeName + ". Holder can only have zero or one type parameter.");
                     }
                     if (parameters.length > 0) {
                         throw new IllegalArgumentException("Incorrect parameters: " + typeName + ". Holder Type can only have zero parameter.");
@@ -808,7 +812,8 @@ public final class TypeFactory {
                     }
                 } else if (HBaseColumn.class.isAssignableFrom(cls)) {
                     if (typeParameters.length > 1) {
-                        throw new IllegalArgumentException("Incorrect type parameters: " + typeName + ". HBaseColumn Type can only have one type parameter.");
+                        throw new IllegalArgumentException(
+                                "Incorrect type parameters: " + typeName + ". HBaseColumn Type can only have zero or one type parameter.");
                     }
                     if (parameters.length > 0) {
                         throw new IllegalArgumentException("Incorrect parameters: " + typeName + ". HBaseColumn Type can only have zero parameter.");
@@ -1376,7 +1381,9 @@ public final class TypeFactory {
      * @see #registerType(String, Type)
      */
     public static <T> Type<T> getType(final String typeName) throws IllegalArgumentException {
-        N.checkArgNotNull(typeName, cs.typeName);
+        // Empty name (no class to derive from either) would otherwise NPE in the private overload;
+        // reject it as IAE to honor the documented contract (IAE on invalid name, never returns null).
+        N.checkArgNotEmpty(typeName, cs.typeName);
 
         return getType(typeName, null, null);
     }

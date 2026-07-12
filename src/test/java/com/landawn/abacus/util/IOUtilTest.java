@@ -48,6 +48,85 @@ public class IOUtilTest extends TestBase {
     private static final Charset UTF_16 = StandardCharsets.UTF_16;
     private static final Charset ISO_8859_1 = StandardCharsets.ISO_8859_1;
 
+    @Test
+    public void testSameFileGuardsRejectHardLinkAliases() throws IOException {
+        final byte[] original = "same-file-content".getBytes(UTF_8);
+
+        Path writeSource = tempFolder.resolve("write-source.txt");
+        Path writeAlias = tempFolder.resolve("write-alias.txt");
+        Files.write(writeSource, original);
+        Files.createLink(writeAlias, writeSource);
+        assertThrows(IllegalArgumentException.class, () -> IOUtil.write(writeSource.toFile(), 0, original.length, writeAlias.toFile()));
+        assertArrayEquals(original, Files.readAllBytes(writeSource));
+
+        Path appendSource = tempFolder.resolve("append-source.txt");
+        Path appendAlias = tempFolder.resolve("append-alias.txt");
+        Files.write(appendSource, original);
+        Files.createLink(appendAlias, appendSource);
+        assertThrows(IllegalArgumentException.class, () -> IOUtil.append(appendSource.toFile(), 0, 1, appendAlias.toFile()));
+        assertArrayEquals(original, Files.readAllBytes(appendSource));
+
+        Path mergeSource = tempFolder.resolve("merge-source.txt");
+        Path mergeAlias = tempFolder.resolve("merge-alias.txt");
+        Files.write(mergeSource, original);
+        Files.createLink(mergeAlias, mergeSource);
+        assertThrows(IllegalArgumentException.class, () -> IOUtil.merge(java.util.Collections.singletonList(mergeSource.toFile()), null, mergeAlias.toFile()));
+        assertArrayEquals(original, Files.readAllBytes(mergeSource));
+    }
+
+    @Test
+    public void testZipRejectsSameFileBeforeOpeningTarget() throws IOException {
+        final byte[] original = "zip-source-content".getBytes(UTF_8);
+        Path source = tempFolder.resolve("zip-source.txt");
+        Files.write(source, original);
+
+        assertThrows(IllegalArgumentException.class, () -> IOUtil.zip(source.toFile(), source.toFile()));
+        assertArrayEquals(original, Files.readAllBytes(source));
+
+        Path aliasSource = tempFolder.resolve("zip-alias-source.txt");
+        Path alias = tempFolder.resolve("zip-alias-target.txt");
+        Files.write(aliasSource, original);
+        Files.createLink(alias, aliasSource);
+        assertThrows(IllegalArgumentException.class, () -> IOUtil.zip(aliasSource.toFile(), alias.toFile()));
+        assertArrayEquals(original, Files.readAllBytes(aliasSource));
+    }
+
+    @Test
+    public void testContentEqualsRejectsIdenticalDirectory() throws IOException {
+        File directory = Files.createDirectory(tempFolder.resolve("content-directory")).toFile();
+
+        assertThrows(IllegalArgumentException.class, () -> IOUtil.contentEquals(directory, directory));
+        assertThrows(IllegalArgumentException.class, () -> IOUtil.contentEqualsIgnoreEOL(directory, directory, "UTF-8"));
+    }
+
+    @Test
+    public void testMissingFileIsNeverNewer() {
+        File missing = tempFolder.resolve("missing-file.txt").toFile();
+        File beforeEpochReference = new File("before-epoch-reference") {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public long lastModified() {
+                return -1;
+            }
+        };
+
+        assertFalse(IOUtil.isFileNewer(missing, new java.util.Date(-1)));
+        assertFalse(IOUtil.isFileNewer(missing, beforeEpochReference));
+    }
+
+    @Test
+    public void testEmptyFileCollectionsInvokeCompletion() throws Exception {
+        java.util.concurrent.atomic.AtomicInteger completions = new java.util.concurrent.atomic.AtomicInteger();
+
+        IOUtil.forLines(java.util.Collections.emptyList(), 0, Long.MAX_VALUE, 0, 1, line -> {
+        }, completions::incrementAndGet);
+        IOUtil.forLines(java.util.Collections.emptyList(), 0, Long.MAX_VALUE, 1, 0, 1, line -> {
+        }, completions::incrementAndGet);
+
+        assertEquals(2, completions.get());
+    }
+
     private static final class ListingFailureFile extends File {
         private static final long serialVersionUID = 1L;
 
@@ -2478,6 +2557,49 @@ public class IOUtilTest extends TestBase {
         String content = IOUtil.readAllToString(outputFile);
         assertEquals("World", content);
         assertEquals(5, bytesWritten);
+    }
+
+    @Test
+    public void testWrite_FileToItself_isRejectedWithoutDataLoss() throws IOException {
+        // Regression: a self-copy must not truncate/wipe the source. write(File, File) opens the output
+        // with a truncating FileOutputStream, so a same-file copy previously zeroed the file and returned 0.
+        // It is now rejected up front (IllegalArgumentException), consistent with copyFile(...).
+        final long originalLen = tempFile.length();
+        assertTrue(originalLen > 0);
+        assertThrows(IllegalArgumentException.class, () -> IOUtil.write(tempFile, tempFile));
+        assertThrows(IllegalArgumentException.class, () -> IOUtil.write(tempFile, 0, Long.MAX_VALUE, tempFile));
+        assertEquals(originalLen, tempFile.length());
+        assertEquals(TEST_CONTENT, IOUtil.readAllToString(tempFile));
+    }
+
+    @Test
+    public void testAppend_FileToItself_isRejectedWithoutGrowth() throws IOException {
+        // Regression: append(File, File) opens the target in append mode while reading the same
+        // file from position 0, so a self-append grows the file unboundedly (the reader keeps
+        // finding the bytes the writer just appended). It must be rejected up front like
+        // write(File, File) and copyFile(...).
+        final long originalLen = tempFile.length();
+        assertTrue(originalLen > 0);
+        // bounded-count overload first: on a regression this fails fast without unbounded growth
+        assertThrows(IllegalArgumentException.class, () -> IOUtil.append(tempFile, 0, 16, tempFile));
+        assertThrows(IllegalArgumentException.class, () -> IOUtil.append(tempFile, tempFile));
+        assertEquals(originalLen, tempFile.length());
+        assertEquals(TEST_CONTENT, IOUtil.readAllToString(tempFile));
+    }
+
+    @Test
+    public void testMerge_destAmongSources_isRejectedWithoutDataLoss() throws IOException {
+        // Regression: merge(...) truncates destFile up front (newFileOutputStream), so a source
+        // that is the same file as the destination was silently wiped (or read back the freshly
+        // merged bytes) instead of being merged. It must be rejected before the destination is opened.
+        final File other = Files.createTempFile(tempFolder, "mergeSrc", ".txt").toFile();
+        IOUtil.write("other-content", other);
+        final long originalLen = tempFile.length();
+        assertTrue(originalLen > 0);
+        assertThrows(IllegalArgumentException.class, () -> IOUtil.merge(N.asList(tempFile), new byte[0], tempFile));
+        assertThrows(IllegalArgumentException.class, () -> IOUtil.merge(N.asList(other, tempFile), new byte[0], tempFile));
+        assertEquals(originalLen, tempFile.length());
+        assertEquals(TEST_CONTENT, IOUtil.readAllToString(tempFile));
     }
 
     @Test
@@ -5602,7 +5724,7 @@ public class IOUtilTest extends TestBase {
 
         File destDir = Files.createTempDirectory(tempFolder, "move_dest").toFile();
 
-        IOUtil.move(srcFile, destDir);
+        IOUtil.moveToDirectory(srcFile, destDir);
 
         File movedFile = new File(destDir, srcFile.getName());
         assertTrue(movedFile.exists());
@@ -5617,7 +5739,7 @@ public class IOUtilTest extends TestBase {
 
         File destDir = Files.createTempDirectory(tempFolder, "move_dest").toFile();
 
-        IOUtil.move(srcFile, destDir, java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+        IOUtil.moveToDirectory(srcFile, destDir, java.nio.file.StandardCopyOption.REPLACE_EXISTING);
 
         File movedFile = new File(destDir, srcFile.getName());
         assertTrue(movedFile.exists());

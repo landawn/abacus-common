@@ -25,7 +25,8 @@ package com.landawn.abacus.pool;
  *
  * <p>Each policy uses different criteria from the object's {@link ActivityPrint} to determine
  * eviction priority. Objects with lower values according to the policy's criteria are
- * evicted first.
+ * evicted first. The sole exception is {@link #FIFO}, which ignores the {@code ActivityPrint}
+ * entirely and selects victims purely by the order in which entries were added to the pool.
  *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code

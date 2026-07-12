@@ -1340,6 +1340,10 @@ public final class BiMap<K, V> implements Map<K, V> {
      * The two BiMaps are backed by the same underlying data; any changes to one will appear in the other.
      * This provides an efficient way to perform reverse lookups without creating a separate copy.
      *
+     * <p>The noun <i>inverse</i> denotes this shared, bidirectional view. Copy-producing key/value
+     * transformations are instead named <i>invert</i>; see {@link Maps#invert(Map)} and
+     * {@link Multimap#invert(java.util.function.IntFunction)}.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BiMap<String, Integer> map = BiMap.of("one", 1, "two", 2);

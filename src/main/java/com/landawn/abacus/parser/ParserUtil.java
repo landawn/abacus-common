@@ -32,7 +32,7 @@ import java.sql.Timestamp;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.text.NumberFormat;
-import java.text.ParseException;
+import java.text.ParsePosition;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -2297,10 +2297,17 @@ public final class ParserUtil {
         final boolean isLongDateFormat;
 
         /**
-         * The number format for formatting/parsing numeric values.
-         * Null if no specific format is specified.
+         * Prototype number format for formatting/parsing numeric values.
+         * Null if no specific format is specified. Not used concurrently — callers must use
+         * {@link #numberFormatTL} (or clone) because {@link NumberFormat} is not thread-safe.
          */
         final NumberFormat numberFormat;
+
+        /**
+         * Per-thread clones of {@link #numberFormat} to avoid synchronized parse/format on the hot path.
+         * Null when {@link #numberFormat} is null.
+         */
+        private final ThreadLocal<NumberFormat> numberFormatTL;
 
         /**
          * Indicates whether any formatting (date or number) is specified for this property.
@@ -2459,7 +2466,7 @@ public final class ParserUtil {
             xmlNameTags = getXmlNameTags(propName, field, jsonXmlType.name(), false);
 
             final String timeZoneStr = Strings.trim(getTimeZone(field, jsonXmlConfig));
-            final String dateFormatStr = Strings.trim(getDateFormat(field, jsonXmlConfig));
+            final String dateFormatStr = Strings.trim(getDateFormat(field, propFuncMap.containsKey(clazz) ? jsonXmlConfig : null));
             dateFormat = Strings.isEmpty(dateFormatStr) ? null : dateFormatStr;
             timeZone = Strings.isEmpty(timeZoneStr) ? TimeZone.getDefault() : TimeZone.getTimeZone(timeZoneStr);
             zoneId = timeZone.toZoneId();
@@ -2471,12 +2478,18 @@ public final class ParserUtil {
 
             JodaDateTimeFormatterHolder tmpJodaDTFH = null;
 
-            try {
-                if (Class.forName("org.joda.time.DateTime") != null) {
-                    tmpJodaDTFH = new JodaDateTimeFormatterHolder(dateFormat, timeZone);
+            // Only build the Joda holder when an actual date format is present. Otherwise the holder's
+            // DateTimeFormat.forPattern(dateFormat) throws IllegalArgumentException that was silently
+            // caught below - one thrown+discarded exception per non-date property at bean-info build time.
+            // (An empty format left jodaDTFH == null anyway, so behavior is unchanged.)
+            if (Strings.isNotEmpty(dateFormat)) {
+                try {
+                    if (Class.forName("org.joda.time.DateTime") != null) {
+                        tmpJodaDTFH = new JodaDateTimeFormatterHolder(dateFormat, timeZone);
+                    }
+                } catch (final Throwable e) {
+                    // ignore.
                 }
-            } catch (final Throwable e) {
-                // ignore.
             }
 
             jodaDTFH = tmpJodaDTFH;
@@ -2485,12 +2498,13 @@ public final class ParserUtil {
                 throw new UnsupportedOperationException("Date format cannot be 'long' for type java.time.LocalTime/LocalDate");
             }
 
-            final String numberFormatStr = Strings.trim(getNumberFormat(field, jsonXmlConfig));
+            final String numberFormatStr = Strings.trim(getNumberFormat(field, type.isNumber() ? jsonXmlConfig : null));
             // Use Locale.ROOT-derived symbols so the wire format ("#,##0.00") parses/formats
             // identically on every JVM. Default-locale DecimalFormat would write "1.234,56" on
             // de_DE (German) and "1,234.56" elsewhere, breaking round-trips across systems.
             numberFormat = Strings.isEmpty(numberFormatStr) ? null
                     : new DecimalFormat(numberFormatStr, DecimalFormatSymbols.getInstance(java.util.Locale.ROOT));
+            numberFormatTL = numberFormat == null ? null : ThreadLocal.withInitial(() -> (NumberFormat) numberFormat.clone());
 
             hasFormat = Strings.isNotEmpty(dateFormat) || numberFormat != null;
 
@@ -3110,13 +3124,15 @@ public final class ParserUtil {
                         return null;
                     }
 
-                    try {
-                        synchronized (numberFormat) {
-                            return numberFormat.parse(strValue);
-                        }
-                    } catch (ParseException e) {
-                        throw new RuntimeException("Failed to parse number value: " + strValue + " with format: " + numberFormat, e);
+                    final ParsePosition position = new ParsePosition(0);
+                    final Number result = numberFormatTL.get().parse(strValue, position);
+
+                    if (result == null || position.getIndex() != strValue.length()) {
+                        throw new RuntimeException(
+                                "Failed to parse complete number value: " + strValue + " with format: " + numberFormat + " at index: " + position.getIndex());
                     }
+
+                    return result;
                 }
             } else {
                 return jsonXmlType.valueOf(strValue);
@@ -3175,9 +3191,7 @@ public final class ParserUtil {
                         writer.write(config.getStringQuotation());
                     }
                 } else {
-                    synchronized (numberFormat) {
-                        writer.write(numberFormat.format(x));
-                    }
+                    writer.write(numberFormatTL.get().format(x));
                 }
             } else if (isJsonRawValue) {
                 if (x == null) {

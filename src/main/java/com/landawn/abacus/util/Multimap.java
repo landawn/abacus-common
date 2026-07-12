@@ -481,10 +481,20 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
 
         if (val == null) {
             val = valueSupplier.get();
-            backingMap.put(key, val);
+            // Only retain the mapping after a successful add so empty value collections
+            // are never left in the backing map (get(key) must stay null for absent keys).
+            if (val.add(e)) {
+                backingMap.put(key, val);
+                return true;
+            }
+            return false;
         }
 
-        return val.add(e);
+        final boolean added = val.add(e);
+        if (!added && val.isEmpty()) {
+            backingMap.remove(key);
+        }
+        return added;
     }
 
     /**
@@ -562,12 +572,20 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
 
         if (val == null) {
             val = valueSupplier.get();
-            backingMap.put(key, val);
+            if (val.add(e)) {
+                backingMap.put(key, val);
+                return true;
+            }
+            return false;
         } else if (val.contains(e)) {
             return false;
         }
 
-        return val.add(e);
+        final boolean added = val.add(e);
+        if (!added && val.isEmpty()) {
+            backingMap.remove(key);
+        }
+        return added;
     }
 
     /**
@@ -598,9 +616,11 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
 
         if (val == null) {
             val = valueSupplier.get();
-            val.add(e);
-            backingMap.put(key, val);
-            return true;
+            if (val.add(e)) {
+                backingMap.put(key, val);
+                return true;
+            }
+            return false;
         }
 
         return false;
@@ -641,10 +661,18 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
 
         if (val == null) {
             val = valueSupplier.get();
-            backingMap.put(key, val);
+            final boolean added = val.addAll(c);
+            if (added) {
+                backingMap.put(key, val);
+            }
+            return added;
         }
 
-        return val.addAll(c);
+        final boolean added = val.addAll(c);
+        if (!added && val.isEmpty()) {
+            backingMap.remove(key);
+        }
+        return added;
     }
 
     /**
@@ -1485,19 +1513,21 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
             }
         } else {
             if (val.remove(oldValue)) {
-                addNewValueForReplacement(key, val, newValue);
+                if (!val.add(newValue)) {
+                    // Restore the previous value so a failed replace does not drop data
+                    // (e.g. SetMultimap when newValue is already present).
+                    val.add(oldValue);
+                    if (val.isEmpty()) {
+                        backingMap.remove(key);
+                    }
+                    throw new IllegalStateException("Failed to add the new value: " + newValue + " for key: " + key + " for replacement");
+                }
 
                 return true;
             }
         }
 
         return false;
-    }
-
-    private void addNewValueForReplacement(final K key, final V val, final E newValue) {
-        if (!val.add(newValue)) {
-            throw new IllegalStateException("Failed to add the new value: " + newValue + " for key: " + key + " for replacement");
-        }
     }
 
     /**
@@ -1637,6 +1667,11 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
 
         val.clear();
         val.addAll(copiedValues);
+
+        // Do not retain empty value collections after a full replace.
+        if (val.isEmpty()) {
+            backingMap.remove(key);
+        }
 
         return true;
     }
@@ -2344,6 +2379,10 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
     /**
      * Creates an inverted Multimap where keys and values are swapped.
      * This operation transforms a Multimap&lt;K, E, V&gt; into a Multimap&lt;E, K, VV&gt;.
+     *
+     * <p>The verb <i>invert</i> denotes a copy-producing transformation: the returned multimap is
+     * independent of this one. In contrast, {@link BiMap#inverse()} returns a live view backed by
+     * the same mappings.</p>
      *
      * <p>In the resulting Multimap:</p>
      * <ul>

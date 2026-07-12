@@ -34,7 +34,7 @@ package com.landawn.abacus.util;
  *
  * // Converting from database
  * int storedValue = resultSet.getInt("active");
- * YesNo isActive = YesNo.valueOf(storedValue);
+ * YesNo isActive = YesNo.of(storedValue);
  * }</pre>
  *
  */
@@ -88,7 +88,7 @@ public enum YesNo {
      * <pre>{@code
      * // Reading from database
      * int dbValue = resultSet.getInt("is_active");
-     * YesNo isActive = YesNo.valueOf(dbValue);
+     * YesNo isActive = YesNo.of(dbValue);
      *
      * if (isActive == YesNo.YES) {
      *     // Process active record
@@ -99,7 +99,7 @@ public enum YesNo {
      * @return NO for 0, YES for 1
      * @throws IllegalArgumentException if the integer value is not 0 or 1
      */
-    public static YesNo valueOf(final int intValue) {
+    public static YesNo of(final int intValue) {
         switch (intValue) {
             case 0:
                 return NO;

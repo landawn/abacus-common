@@ -362,7 +362,10 @@ final class FileSystemUtil {
             }
             j--;
         }
-        if (j < 0) {
+        // bytesEnd stays 0 only when innerLoop1 found no digit at all; j < 0 alone is not a valid
+        // discriminator because innerLoop2 also drives j below 0 when the digits reach index 0
+        // (a bare numeric line), which is a valid parse with bytesStart == 0.
+        if (bytesEnd == 0) {
             throw new IOException("Command line 'dir /-c' did not return valid info " + "for path '" + path + "'");
         }
 

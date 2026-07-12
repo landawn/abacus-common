@@ -104,12 +104,18 @@ public class BigIntegerSummaryStatistics implements Consumer<BigInteger> {
             throw new IllegalArgumentException("count must be non-negative");
         }
 
-        if (N.compare(min, max) > 0) {
-            throw new IllegalArgumentException("minimum is greater than maximum");
+        final BigInteger normalizedSum = sum == null ? BigInteger.ZERO : sum;
+
+        if (count == 0) {
+            if (min != null || max != null || normalizedSum.signum() != 0) {
+                throw new IllegalArgumentException("Invalid empty state: min and max must be null and sum must be zero");
+            }
+        } else if (min == null || max == null || min.compareTo(max) > 0) {
+            throw new IllegalArgumentException("Invalid non-empty state: min and max must be non-null and ordered");
         }
 
         this.count = count;
-        this.sum = sum == null ? BigInteger.ZERO : sum;
+        this.sum = normalizedSum;
         this.min = min;
         this.max = max;
     }

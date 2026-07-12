@@ -40,6 +40,13 @@ public class BigDecimalSummaryStatisticsTest extends TestBase {
     }
 
     @Test
+    public void testConstructorValidatesEmptyAndNonEmptyState() {
+        Assertions.assertDoesNotThrow(() -> new BigDecimalSummaryStatistics(0, null, null, BigDecimal.ZERO));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> new BigDecimalSummaryStatistics(0, BigDecimal.ONE, BigDecimal.ONE, BigDecimal.ONE));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> new BigDecimalSummaryStatistics(1, null, null, BigDecimal.ZERO));
+    }
+
+    @Test
     public void testLargeNumbers() {
         BigDecimalSummaryStatistics stats = new BigDecimalSummaryStatistics();
         BigDecimal large1 = new BigDecimal("999999999999999999.99");

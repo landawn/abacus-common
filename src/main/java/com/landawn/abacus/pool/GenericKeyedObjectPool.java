@@ -270,6 +270,9 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
 
         lock.lock();
 
+        boolean valueStored = false;
+        E removedValue = null;
+
         try {
             // Re-check inside the lock; a concurrent close() between an unlocked check and lock
             // acquisition would otherwise leak this entry.
@@ -277,6 +280,7 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
             // Make sure the old value is removed regardless if the new value will put successfully or not.
             // Use pool.remove() directly to avoid double memory subtraction (remove() subtracts memory, and destroy() also subtracts).
             E oldValue = pool.remove(key);
+            removedValue = oldValue;
 
             // Identity guard: get() does not remove the mapping, so the documented "put it back"
             // pattern re-puts the SAME instance - destroying it would close a live resource and
@@ -375,6 +379,7 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
             }
 
             putCount.incrementAndGet();
+            valueStored = true;
 
             // signalAll (not signal): waiters in get(K, timeout, unit) park on notEmpty for a
             // SPECIFIC key. Waking only one waiter could wake a get(B) waiter for this put of A;
@@ -385,6 +390,11 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
 
             return true;
         } finally {
+            // Mirror timed put: if we freed a same-key slot up-front but never stored the new value,
+            // wake notFull waiters so capacity is not silently withheld.
+            if (removedValue != null && !valueStored) {
+                notFull.signalAll();
+            }
             lock.unlock();
         }
     }
@@ -688,7 +698,7 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
     /**
      * Returns the element associated with the specified key, waiting up to the given timeout for a
      * non-expired mapping for that key to become available. Mirrors
-     * {@link GenericObjectPool#take(long, TimeUnit)} but keyed: it blocks on {@code notEmpty} until
+     * {@link GenericObjectPool#poll(long, TimeUnit)} but keyed: it blocks on {@code notEmpty} until
      * the specific {@code key} is populated (by another thread's put), an expired mapping for the key
      * is skipped (removed+destroyed), or the timeout expires. On success the element stays in the
      * pool (it is not removed) and its activity print is updated.

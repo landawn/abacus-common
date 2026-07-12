@@ -229,6 +229,19 @@ public class BooleanIteratorTest extends TestBase {
     }
 
     @Test
+    public void testDeferNullResultFailureIsStable() {
+        int[] callCount = { 0 };
+        BooleanIterator iter = BooleanIterator.defer(() -> {
+            callCount[0]++;
+            return null;
+        });
+
+        Assertions.assertThrows(IllegalStateException.class, iter::hasNext);
+        Assertions.assertThrows(IllegalStateException.class, iter::hasNext);
+        Assertions.assertEquals(1, callCount[0]);
+    }
+
+    @Test
     public void testDeferNullSupplier() {
         Assertions.assertThrows(IllegalArgumentException.class, () -> BooleanIterator.defer(null));
     }

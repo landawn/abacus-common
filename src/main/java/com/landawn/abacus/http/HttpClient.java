@@ -385,9 +385,7 @@ import com.landawn.abacus.util.URLEncodedUtil;
  *
  * <p><b>Monitoring and Debugging:</b>
  * <ul>
- *   <li><b>Request Logging:</b> Built-in logger for debugging HTTP request/response cycles</li>
- *   <li><b>Performance Metrics:</b> Connection pool statistics and timing information</li>
- *   <li><b>Error Diagnostics:</b> Detailed exception messages with request context</li>
+ *   <li><b>Error Diagnostics:</b> Detailed exception messages with request context (status code, response message and error body)</li>
  *   <li><b>Network Troubleshooting:</b> Support for network-level debugging and analysis</li>
  * </ul>
  *

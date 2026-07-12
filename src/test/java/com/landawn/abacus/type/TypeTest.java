@@ -42,7 +42,6 @@ import com.landawn.abacus.util.CharList;
 import com.landawn.abacus.util.Color;
 import com.landawn.abacus.util.DateTimeFormat;
 import com.landawn.abacus.util.Dates;
-import com.landawn.abacus.util.DayOfWeek;
 import com.landawn.abacus.util.DoubleList;
 import com.landawn.abacus.util.FloatList;
 import com.landawn.abacus.util.Gender;
@@ -354,23 +353,19 @@ public class TypeTest extends AbstractTest {
         }
 
         for (Gender gender : Gender.values()) {
-            assertEquals(gender, Gender.valueOf(gender.intValue()));
-        }
-
-        for (DayOfWeek dayOfWeek : DayOfWeek.values()) {
-            assertEquals(dayOfWeek, DayOfWeek.valueOf(dayOfWeek.intValue()));
+            assertEquals(gender, Gender.of(gender.intValue()));
         }
 
         for (Month month : Month.values()) {
-            assertEquals(month, Month.valueOf(month.intValue()));
+            assertEquals(month, Month.of(month.intValue()));
         }
 
         for (Color color : Color.values()) {
-            assertEquals(color, Color.valueOf(color.intValue()));
+            assertEquals(color, Color.of(color.intValue()));
         }
 
         for (MediaType mediaType : MediaType.values()) {
-            assertEquals(mediaType, MediaType.valueOf(mediaType.intValue()));
+            assertEquals(mediaType, MediaType.of(mediaType.intValue()));
         }
     }
 

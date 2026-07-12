@@ -2204,8 +2204,12 @@ public final class HttpRequest {
             if (errorBody instanceof InputStream is) {
                 try (is) {
                     throw new UncheckedIOException(new IOException(httpResponse.statusCode() + ": " + IOUtil.readAllToString(is)));
-                } catch (final IOException ignored) {
-                    // best-effort cleanup; the thrown exception below is the primary signal
+                } catch (final IOException unreachable) {
+                    // never delivered here: the try body always completes abruptly with an unchecked
+                    // exception, so an IOException from the implicit close() is attached to it as a
+                    // suppressed exception instead. This catch only satisfies the compiler's checked-
+                    // exception analysis for close().
+                    throw new UncheckedIOException(unreachable);
                 }
             }
 

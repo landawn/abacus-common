@@ -2221,6 +2221,10 @@ class ArrayDoubleStream extends AbstractDoubleStream {
 
                 @Override
                 public void advance(final long n) {
+                    if (n <= 0) {
+                        return;
+                    }
+
                     if (!executed) {
                         executed = true;
                         action.run();

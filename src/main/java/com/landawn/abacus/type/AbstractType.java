@@ -463,7 +463,7 @@ public abstract class AbstractType<T> implements Type<T> {
     // answer from isPrimitiveArray() || isObjectArray(). Hardcoding false here would shadow that
     // formula for any direct AbstractType subclass that overrides isPrimitiveArray()/isObjectArray()
     // without also going through AbstractArrayType (which does override isArray() explicitly).
-    // See the analogous isComparable() note above and Type#isArray().
+    // See the analogous isComparable() note below and Type#isArray().
 
     /**
      * Checks if this type represents a {@code List}.

@@ -434,8 +434,12 @@ public final class HttpSettings {
 
     /**
      * Sets whether this is a one-way request (fire-and-forget).
-     * When {@code true}, the request will be sent but the response will not be read.
-     * This can improve performance for requests where the response is not needed.
+     * When {@code true}, the request will be sent but the response body will not be read or
+     * deserialized on success, which can improve performance for requests where the response
+     * is not needed.
+     *
+     * <p><b>&#9888;&#65039;</b> The HTTP status is still checked: a non-successful response (non-2xx)
+     * raises an exception (with the error body included in the message) even for a one-way request.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code

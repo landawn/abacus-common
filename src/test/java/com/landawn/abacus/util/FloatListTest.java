@@ -32,6 +32,11 @@ public class FloatListTest extends TestBase {
     }
 
     @Test
+    public void testRangedForEachRejectsNullActionForEmptyRange() {
+        assertThrows(IllegalArgumentException.class, () -> list.forEach(0, 0, (com.landawn.abacus.util.function.FloatConsumer) null));
+    }
+
+    @Test
     public void testConstructor_default() {
         FloatList list = new FloatList();
         assertEquals(0, list.size());
@@ -2701,15 +2706,16 @@ public class FloatListTest extends TestBase {
 
     @Test
     public void test_forEach_removeIf_replaceIf_null_func() {
-        // Regression: a null functional argument must throw NullPointerException even on an
-        // EMPTY list (previously silently no-op'd; now matches IntList's fail-fast guard).
+        // Regression: a null functional argument is rejected up-front even on an EMPTY list
+        // (previously silently no-op'd). forEach throws IllegalArgumentException (N.checkArgNotNull);
+        // removeIf/replaceIf throw NullPointerException (N.requireNonNull).
         final FloatList empty = new FloatList();
-        assertThrows(NullPointerException.class, () -> empty.forEach((com.landawn.abacus.util.function.FloatConsumer) null));
+        assertThrows(IllegalArgumentException.class, () -> empty.forEach((com.landawn.abacus.util.function.FloatConsumer) null));
         assertThrows(NullPointerException.class, () -> empty.removeIf((com.landawn.abacus.util.function.FloatPredicate) null));
         assertThrows(NullPointerException.class, () -> empty.replaceIf((com.landawn.abacus.util.function.FloatPredicate) null, 0f));
 
         final FloatList nonEmpty = FloatList.of(1f, 2f);
-        assertThrows(NullPointerException.class, () -> nonEmpty.forEach((com.landawn.abacus.util.function.FloatConsumer) null));
+        assertThrows(IllegalArgumentException.class, () -> nonEmpty.forEach((com.landawn.abacus.util.function.FloatConsumer) null));
         assertThrows(NullPointerException.class, () -> nonEmpty.removeIf((com.landawn.abacus.util.function.FloatPredicate) null));
         assertThrows(NullPointerException.class, () -> nonEmpty.replaceIf((com.landawn.abacus.util.function.FloatPredicate) null, 0f));
     }

@@ -956,6 +956,16 @@ public class BuilderTest extends TestBase {
     }
 
     @Test
+    public void testListBuilder_set() {
+        List<String> list = new ArrayList<>(Arrays.asList("a", "b", "c"));
+        ListBuilder<String, List<String>> builder = Builder.of(list);
+
+        assertSame(builder, builder.set(1, "updated"));
+        assertEquals(Arrays.asList("a", "updated", "c"), list);
+        assertThrows(IndexOutOfBoundsException.class, () -> builder.set(3, "invalid"));
+    }
+
+    @Test
     public void testListBuilder_add() {
         List<String> list = new ArrayList<>();
         ListBuilder<String, List<String>> builder = Builder.of(list);

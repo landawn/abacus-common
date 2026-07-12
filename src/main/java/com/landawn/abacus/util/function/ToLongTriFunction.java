@@ -50,7 +50,9 @@ public interface ToLongTriFunction<A, B, C> extends Throwables.ToLongTriFunction
      *
      * ToLongTriFunction<Date, Date, TimeUnit> timeDifference =
      *     (start, end, unit) -> unit.convert(end.getTime() - start.getTime(), TimeUnit.MILLISECONDS);
-     * long days = timeDifference.applyAsLong(startDate, endDate, TimeUnit.DAYS);   // returns days between dates
+     * Date startDate = new Date(0);
+     * Date endDate = new Date(2 * 24 * 60 * 60 * 1000L);
+     * long days = timeDifference.applyAsLong(startDate, endDate, TimeUnit.DAYS);   // returns 2 (days between dates)
      *
      * ToLongTriFunction<String, Integer, Integer> hashCombiner =
      *     (str, seed1, seed2) -> str.hashCode() + seed1 * 31L + seed2;

@@ -14,7 +14,6 @@
 
 package com.landawn.abacus.util.stream;
 
-import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
@@ -1764,7 +1763,7 @@ class IteratorStream<T> extends AbstractStream<T> {
                 }
 
                 if (queue == null) {
-                    queue = new ArrayDeque<>(N.max(0, windowSize - increment));
+                    queue = new LinkedList<>();
                 }
 
                 final C result = collectionSupplier.apply(windowSize);
@@ -1844,7 +1843,7 @@ class IteratorStream<T> extends AbstractStream<T> {
                 }
 
                 if (queue == null) {
-                    queue = new ArrayDeque<>(windowSize);
+                    queue = new LinkedList<>();
                 }
 
                 final int countToKeepInQueue = windowSize - increment;
@@ -1901,7 +1900,7 @@ class IteratorStream<T> extends AbstractStream<T> {
                 }
 
                 if (increment < windowSize && queue == null) {
-                    queue = new ArrayDeque<>(windowSize - increment);
+                    queue = new LinkedList<>();
                 }
 
                 final Object container = supplier.get();
@@ -1983,7 +1982,7 @@ class IteratorStream<T> extends AbstractStream<T> {
                 }
 
                 if (queue == null) {
-                    queue = new ArrayDeque<>(windowSize);
+                    queue = new LinkedList<>();
                 }
 
                 final int countToKeepInQueue = windowSize - increment;
@@ -2899,7 +2898,7 @@ class IteratorStream<T> extends AbstractStream<T> {
                 if (!initialized) {
                     initialized = true;
 
-                    final Deque<T> deque = new ArrayDeque<>(Math.min(1024, n));
+                    final Deque<T> deque = new LinkedList<>();
 
                     try {
                         while (elements.hasNext()) {
@@ -2945,7 +2944,7 @@ class IteratorStream<T> extends AbstractStream<T> {
             @Override
             public boolean hasNext() {
                 if (deque == null) {
-                    deque = new ArrayDeque<>(Math.min(1024, n));
+                    deque = new LinkedList<>();
 
                     while (deque.size() < n && elements.hasNext()) {
                         deque.offerLast(elements.next());
@@ -3216,7 +3215,7 @@ class IteratorStream<T> extends AbstractStream<T> {
         assertNotClosed();
         checkArgNotNegative(atLeast, cs.atLeast);
         checkArgNotNegative(atMost, cs.atMost);
-        checkArgument(atLeast <= atMost, "'atLeast' must be <= 'atMost'");
+        checkArgument(atLeast <= atMost, "'atLeast' (%s) must be <= 'atMost' (%s)", atLeast, atMost);
 
         long cnt = 0;
 

@@ -41,6 +41,13 @@ public class BigIntegerSummaryStatisticsTest extends TestBase {
     }
 
     @Test
+    public void testConstructorValidatesEmptyAndNonEmptyState() {
+        Assertions.assertDoesNotThrow(() -> new BigIntegerSummaryStatistics(0, null, null, BigInteger.ZERO));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> new BigIntegerSummaryStatistics(0, BigInteger.ONE, BigInteger.ONE, BigInteger.ONE));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> new BigIntegerSummaryStatistics(1, null, null, BigInteger.ZERO));
+    }
+
+    @Test
     public void testLargeNumbers() {
         BigIntegerSummaryStatistics stats = new BigIntegerSummaryStatistics();
         BigInteger large1 = new BigInteger("999999999999999999999999");

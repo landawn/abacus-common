@@ -767,6 +767,13 @@ public class TypeFactoryTest extends TestBase {
     }
 
     @Test
+    public void testGetType_EnumWithTypeParams_Throws() {
+        // regression: the Enum branch was the only generic-capable branch that never validated
+        // typeParameters, silently accepting and discarding them (e.g. "java.time.DayOfWeek<String>").
+        assertThrows(IllegalArgumentException.class, () -> TypeFactory.getType("java.time.DayOfWeek<String>"));
+    }
+
+    @Test
     public void testGetType_ClazzRejectsParameters() {
         assertThrows(IllegalArgumentException.class, () -> TypeFactory.getType("Clazz<String>(foo)"));
     }

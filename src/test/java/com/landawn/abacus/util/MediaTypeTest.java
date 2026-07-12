@@ -56,80 +56,80 @@ public class MediaTypeTest extends TestBase {
     }
 
     @Test
-    public void testValueOf_0() {
-        MediaType type = MediaType.valueOf(0);
+    public void testOf_0() {
+        MediaType type = MediaType.of(0);
         assertEquals(MediaType.BINARY, type);
     }
 
     @Test
-    public void testValueOf_1() {
-        MediaType type = MediaType.valueOf(1);
+    public void testOf_1() {
+        MediaType type = MediaType.of(1);
         assertEquals(MediaType.AUDIO, type);
     }
 
     @Test
-    public void testValueOf_2() {
-        MediaType type = MediaType.valueOf(2);
+    public void testOf_2() {
+        MediaType type = MediaType.of(2);
         assertEquals(MediaType.VIDEO, type);
     }
 
     @Test
-    public void testValueOf_3() {
-        MediaType type = MediaType.valueOf(3);
+    public void testOf_3() {
+        MediaType type = MediaType.of(3);
         assertEquals(MediaType.IMAGE, type);
     }
 
     @Test
-    public void testValueOf_4() {
-        MediaType type = MediaType.valueOf(4);
+    public void testOf_4() {
+        MediaType type = MediaType.of(4);
         assertEquals(MediaType.TEXT, type);
     }
 
     @Test
-    public void testValueOf_5() {
-        MediaType type = MediaType.valueOf(5);
+    public void testOf_5() {
+        MediaType type = MediaType.of(5);
         assertEquals(MediaType.RECORD, type);
     }
 
     @Test
-    public void testValueOf_roundTrip_BINARY() {
+    public void testOf_roundTrip_BINARY() {
         MediaType original = MediaType.BINARY;
-        MediaType converted = MediaType.valueOf(original.intValue());
+        MediaType converted = MediaType.of(original.intValue());
         assertEquals(original, converted);
     }
 
     @Test
-    public void testValueOf_roundTrip_AUDIO() {
+    public void testOf_roundTrip_AUDIO() {
         MediaType original = MediaType.AUDIO;
-        MediaType converted = MediaType.valueOf(original.intValue());
+        MediaType converted = MediaType.of(original.intValue());
         assertEquals(original, converted);
     }
 
     @Test
-    public void testValueOf_roundTrip_VIDEO() {
+    public void testOf_roundTrip_VIDEO() {
         MediaType original = MediaType.VIDEO;
-        MediaType converted = MediaType.valueOf(original.intValue());
+        MediaType converted = MediaType.of(original.intValue());
         assertEquals(original, converted);
     }
 
     @Test
-    public void testValueOf_roundTrip_IMAGE() {
+    public void testOf_roundTrip_IMAGE() {
         MediaType original = MediaType.IMAGE;
-        MediaType converted = MediaType.valueOf(original.intValue());
+        MediaType converted = MediaType.of(original.intValue());
         assertEquals(original, converted);
     }
 
     @Test
-    public void testValueOf_roundTrip_TEXT() {
+    public void testOf_roundTrip_TEXT() {
         MediaType original = MediaType.TEXT;
-        MediaType converted = MediaType.valueOf(original.intValue());
+        MediaType converted = MediaType.of(original.intValue());
         assertEquals(original, converted);
     }
 
     @Test
-    public void testValueOf_roundTrip_RECORD() {
+    public void testOf_roundTrip_RECORD() {
         MediaType original = MediaType.RECORD;
-        MediaType converted = MediaType.valueOf(original.intValue());
+        MediaType converted = MediaType.of(original.intValue());
         assertEquals(original, converted);
     }
 
@@ -170,18 +170,18 @@ public class MediaTypeTest extends TestBase {
     }
 
     @Test
-    public void testValueOf_invalid_negative() {
-        assertThrows(IllegalArgumentException.class, () -> MediaType.valueOf(-1));
+    public void testOf_invalid_negative() {
+        assertThrows(IllegalArgumentException.class, () -> MediaType.of(-1));
     }
 
     @Test
-    public void testValueOf_invalid_tooLarge() {
-        assertThrows(IllegalArgumentException.class, () -> MediaType.valueOf(6));
+    public void testOf_invalid_tooLarge() {
+        assertThrows(IllegalArgumentException.class, () -> MediaType.of(6));
     }
 
     @Test
-    public void testValueOf_invalid_100() {
-        assertThrows(IllegalArgumentException.class, () -> MediaType.valueOf(100));
+    public void testOf_invalid_100() {
+        assertThrows(IllegalArgumentException.class, () -> MediaType.of(100));
     }
 
     @Test
@@ -189,7 +189,7 @@ public class MediaTypeTest extends TestBase {
         MediaType[] types = MediaType.values();
         for (MediaType type : types) {
             int serialized = type.intValue();
-            MediaType deserialized = MediaType.valueOf(serialized);
+            MediaType deserialized = MediaType.of(serialized);
             assertEquals(type, deserialized);
         }
     }

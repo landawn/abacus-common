@@ -1102,7 +1102,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * DayOfWeek[] days = Array.of(DayOfWeek.MONDAY, DayOfWeek.FRIDAY);
+     * java.time.DayOfWeek[] days = Array.of(java.time.DayOfWeek.MONDAY, java.time.DayOfWeek.FRIDAY);
      * TimeUnit[] units = Array.of(TimeUnit.SECONDS, TimeUnit.MINUTES, TimeUnit.HOURS);
      * }</pre>
      *
@@ -2849,7 +2849,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
     @Beta
     public static int[] random(final int startInclusive, final int endExclusive, final int len) {
         if (startInclusive >= endExclusive) {
-            throw new IllegalArgumentException("'startInclusive' must be less than 'endExclusive'");
+            throw new IllegalArgumentException("'startInclusive' (" + startInclusive + ") must be less than 'endExclusive' (" + endExclusive + ")");
         }
 
         final int[] a = new int[len];

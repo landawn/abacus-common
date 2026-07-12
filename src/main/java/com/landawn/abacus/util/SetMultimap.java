@@ -792,6 +792,10 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
      * Creates a new SetMultimap with inverted key-value relationships. Each value in the original multimap
      * becomes a key in the result, and each original key becomes a value associated with that new key.
      *
+     * <p>The verb <i>invert</i> denotes a copy-producing transformation: the returned
+     * {@code SetMultimap} is independent of this one. In contrast, {@link BiMap#inverse()}
+     * returns a live view backed by the same mappings.</p>
+     *
      * <p>This operation is useful for creating reverse mappings or index structures. For example, if you have
      * a mapping of users to roles, invert() will give you a mapping of roles to users.
      *

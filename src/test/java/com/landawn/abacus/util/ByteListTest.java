@@ -35,6 +35,11 @@ public class ByteListTest extends TestBase {
     }
 
     @Test
+    public void testRangedForEachRejectsNullActionForEmptyRange() {
+        assertThrows(IllegalArgumentException.class, () -> list.forEach(0, 0, (com.landawn.abacus.util.function.ByteConsumer) null));
+    }
+
+    @Test
     public void test_constructor_withArray() {
         byte[] arr = { 1, 2, 3 };
         ByteList list = new ByteList(arr);
@@ -3721,15 +3726,16 @@ public class ByteListTest extends TestBase {
 
     @Test
     public void test_forEach_removeIf_replaceIf_null_func() {
-        // Regression: a null functional argument must throw NullPointerException even on an
-        // EMPTY list (previously silently no-op'd; now matches IntList's fail-fast guard).
+        // Regression: a null functional argument is rejected up-front even on an EMPTY list
+        // (previously silently no-op'd). forEach throws IllegalArgumentException (N.checkArgNotNull);
+        // removeIf/replaceIf throw NullPointerException (N.requireNonNull).
         final ByteList empty = new ByteList();
-        assertThrows(NullPointerException.class, () -> empty.forEach((com.landawn.abacus.util.function.ByteConsumer) null));
+        assertThrows(IllegalArgumentException.class, () -> empty.forEach((com.landawn.abacus.util.function.ByteConsumer) null));
         assertThrows(NullPointerException.class, () -> empty.removeIf((com.landawn.abacus.util.function.BytePredicate) null));
         assertThrows(NullPointerException.class, () -> empty.replaceIf((com.landawn.abacus.util.function.BytePredicate) null, (byte) 0));
 
         final ByteList nonEmpty = ByteList.of((byte) 1, (byte) 2);
-        assertThrows(NullPointerException.class, () -> nonEmpty.forEach((com.landawn.abacus.util.function.ByteConsumer) null));
+        assertThrows(IllegalArgumentException.class, () -> nonEmpty.forEach((com.landawn.abacus.util.function.ByteConsumer) null));
         assertThrows(NullPointerException.class, () -> nonEmpty.removeIf((com.landawn.abacus.util.function.BytePredicate) null));
         assertThrows(NullPointerException.class, () -> nonEmpty.replaceIf((com.landawn.abacus.util.function.BytePredicate) null, (byte) 0));
     }

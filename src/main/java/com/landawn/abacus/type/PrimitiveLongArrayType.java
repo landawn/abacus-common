@@ -280,7 +280,9 @@ public final class PrimitiveLongArrayType extends AbstractPrimitiveArrayType<lon
      *
      * @param writer the CharacterWriter to write to
      * @param x the long array to write
-     * @param config the serialization configuration (currently unused for primitive arrays)
+     * @param config the serialization configuration; if {@link JsonXmlSerConfig#isWriteLongAsString()} is
+     *        {@code true} and a non-zero string quotation character is configured, each long value is quoted with
+     *        that character
      * @throws IOException if an I/O error occurs during the write operation
      */
     @Override
@@ -295,7 +297,14 @@ public final class PrimitiveLongArrayType extends AbstractPrimitiveArrayType<lon
                     writer.write(ELEMENT_SEPARATOR);
                 }
 
-                writer.write(x[i]);
+                if (config != null && config.isWriteLongAsString() && config.getStringQuotation() != 0) {
+                    final char quotation = config.getStringQuotation();
+                    writer.write(quotation);
+                    writer.write(x[i]);
+                    writer.write(quotation);
+                } else {
+                    writer.write(x[i]);
+                }
             }
 
             writer.write(SK._BRACKET_R);

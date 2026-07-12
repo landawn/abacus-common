@@ -151,7 +151,7 @@ public final class HARUtil {
      * <p><b>Note:</b> This method sets the logging configuration for the current thread only,
      * as the curl logging settings are stored in thread-local storage.</p>
      *
-     * <p><b>&#9888;</b> The logged curl command includes every request header (e.g. {@code Authorization},
+     * <p><b>&#9888;&#65039;</b> The logged curl command includes every request header (e.g. {@code Authorization},
      * {@code Cookie}, {@code X-Api-Key}) and the request body verbatim, with no masking. HAR files
      * captured from browsers routinely contain credentials and session tokens; avoid enabling this in
      * production or when the log destination is untrusted.</p>
@@ -178,7 +178,7 @@ public final class HARUtil {
      * <p><b>Note:</b> This method sets the logging configuration for the current thread only,
      * as the curl logging settings are stored in thread-local storage.</p>
      *
-     * <p><b>&#9888;</b> The logged curl command includes every request header (e.g. {@code Authorization},
+     * <p><b>&#9888;&#65039;</b> The logged curl command includes every request header (e.g. {@code Authorization},
      * {@code Cookie}, {@code X-Api-Key}) and the request body verbatim, with no masking. HAR files
      * captured from browsers routinely contain credentials and session tokens; avoid enabling this in
      * production or when the log destination is untrusted.</p>
@@ -206,7 +206,7 @@ public final class HARUtil {
      * <p><b>Note:</b> This method sets the logging configuration for the current thread only,
      * as the curl logging settings are stored in thread-local storage.</p>
      *
-     * <p><b>&#9888;</b> The generated curl command includes every request header (e.g. {@code Authorization},
+     * <p><b>&#9888;&#65039;</b> The generated curl command includes every request header (e.g. {@code Authorization},
      * {@code Cookie}, {@code X-Api-Key}) and the request body verbatim, with no masking. If your
      * {@code logHandler} persists or forwards these strings, ensure the destination is trusted.</p>
      *
@@ -707,7 +707,10 @@ public final class HARUtil {
             headerName = m.get("name");
             headerValue = m.get("value");
 
-            if (httpHeaderValidatorForHARRequest.test(headerName, headerValue)) {
+            // a malformed HAR header entry without a "name" is skipped defensively - even with a
+            // permissive custom filter installed, HttpHeaders.set(null, ...) would throw from deep
+            // inside without identifying the offending entry.
+            if (headerName != null && httpHeaderValidatorForHARRequest.test(headerName, headerValue)) {
                 httpHeaders.set(headerName, headerValue);
             }
         }

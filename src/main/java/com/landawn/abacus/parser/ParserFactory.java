@@ -524,10 +524,10 @@ public final class ParserFactory {
      * Creates a new JAXB parser instance with specified configurations.
      * JAXB (Jakarta XML Binding) provides annotation-based XML binding.
      *
-     * <p><b>&#9888; Note:</b> the JAXB parser marshals/unmarshals through the underlying JAXB runtime and
+     * <p><b>&#9888;&#65039; Note:</b> the JAXB parser marshals/unmarshals through the underlying JAXB runtime and
      * does <i>not</i> apply {@code XmlSerConfig}/{@code XmlDeserConfig} settings such as
-     * {@code prettyFormat}. The only configuration honored is a non-empty {@code ignoredPropNames}, which
-     * is rejected with a {@code ParsingException}.</p>
+     * {@code prettyFormat}. The only configuration setting acted upon is a non-empty {@code ignoredPropNames},
+     * which is rejected with a {@code ParsingException} (as JAXB does not support it).</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code

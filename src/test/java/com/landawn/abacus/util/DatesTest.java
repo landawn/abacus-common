@@ -4196,6 +4196,13 @@ public class DatesTest extends TestBase {
         assertThrows(IllegalArgumentException.class, () -> Dates.isBetween(date, start, end));
     }
 
+    @Test
+    public void testTimeUnitArithmeticRejectsOverflow() {
+        assertThrows(ArithmeticException.class, () -> Dates.addMilliseconds(new java.util.Date(Long.MAX_VALUE), 1L));
+        assertThrows(ArithmeticException.class, () -> Dates.addMilliseconds(new java.util.Date(Long.MIN_VALUE), -1L));
+        assertThrows(ArithmeticException.class, () -> Dates.currentTimeMillisPlus(Long.MAX_VALUE, TimeUnit.DAYS));
+    }
+
     // ===== Constants =====
 
     @Test

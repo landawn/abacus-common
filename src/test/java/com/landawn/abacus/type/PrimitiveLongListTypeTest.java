@@ -113,6 +113,18 @@ public class PrimitiveLongListTypeTest extends TestBase {
     }
 
     @Test
+    public void testSerializeToHonorsWriteLongAsString() throws IOException {
+        com.landawn.abacus.util.BufferedJsonWriter writer = com.landawn.abacus.util.Objectory.createBufferedJsonWriter();
+
+        try {
+            type.serializeTo(writer, LongList.of(9007199254740993L), com.landawn.abacus.parser.JsonSerConfig.create().setWriteLongAsString(true));
+            assertEquals("[\"9007199254740993\"]", writer.toString());
+        } finally {
+            com.landawn.abacus.util.Objectory.recycle(writer);
+        }
+    }
+
+    @Test
     public void test_get_ResultSet_byLabel() throws SQLException {
         ResultSet rs = mock(ResultSet.class);
         // Basic get test - actual implementation will vary by type

@@ -94,6 +94,12 @@ public class ImmutableArrayTest extends TestBase {
     }
 
     @Test
+    public void testEmptyReturnsCachedInstance() {
+        Assertions.assertSame(ImmutableArray.empty(), ImmutableArray.empty());
+        Assertions.assertSame(ImmutableArray.<String> empty(), ImmutableArray.<Integer> empty());
+    }
+
+    @Test
     public void testCopyOf() {
         String[] original = { "a", "b", "c" };
         ImmutableArray<String> array = ImmutableArray.copyOf(original);
@@ -112,6 +118,7 @@ public class ImmutableArrayTest extends TestBase {
         ImmutableArray<String> array = ImmutableArray.copyOf(null);
         Assertions.assertEquals(0, array.length());
         Assertions.assertTrue(array.isEmpty());
+        Assertions.assertSame(ImmutableArray.empty(), array);
     }
 
     @Test
@@ -119,6 +126,7 @@ public class ImmutableArrayTest extends TestBase {
         ImmutableArray<String> array = ImmutableArray.copyOf(new String[0]);
         Assertions.assertEquals(0, array.length());
         Assertions.assertTrue(array.isEmpty());
+        Assertions.assertSame(ImmutableArray.empty(), array);
     }
 
     @Test

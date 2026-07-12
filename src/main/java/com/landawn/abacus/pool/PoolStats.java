@@ -63,9 +63,11 @@ package com.landawn.abacus.pool;
  * @param capacity the maximum number of objects the pool can hold
  * @param size the current number of objects in the pool
  * @param putCount the total number of put/add operations performed
- * @param getCount the total number of get/take operations performed
- * @param hitCount the number of successful get/take operations (object was found)
- * @param missCount the number of unsuccessful get/take operations (object not found or pool empty)
+ * @param getCount the total number of get/poll (retrieval) operations performed. Despite the {@code get}
+ *        prefix, the accessor {@code getCount()} is <b>not</b> a JavaBean getter for a "count" field — it
+ *        returns the count of <i>get</i> operations (the retrieval counterpart of {@code putCount})
+ * @param hitCount the number of successful get/poll operations (object was found)
+ * @param missCount the number of unsuccessful get/poll operations (object not found or pool empty)
  * @param evictionCount the total number of objects evicted from the pool
  * @param maxMemory the maximum memory size in bytes (-1 if no memory limit)
  * @param dataSize the current total size of data in bytes (-1 if memory tracking is disabled)
@@ -81,11 +83,11 @@ public record PoolStats(int capacity, int size, long putCount, long getCount, lo
      * Returns the cache hit rate as a fraction in {@code [0.0, 1.0]}: {@code hitCount / getCount}.
      * This is a pure computed value (no state is read or modified).
      *
-     * <p>Returns {@code 0.0} when {@link #getCount()} is {@code 0} (no get/take operations have
+     * <p>Returns {@code 0.0} when {@link #getCount()} is {@code 0} (no get/poll operations have
      * been performed), avoiding the division-by-zero guard callers would otherwise write.</p>
      *
-     * @return the fraction of get/take operations that found an object, or {@code 0.0} if there
-     *         have been no get/take operations
+     * @return the fraction of get/poll operations that found an object, or {@code 0.0} if there
+     *         have been no get/poll operations
      */
     public double hitRate() {
         return getCount <= 0 ? 0.0 : (double) hitCount / getCount;
@@ -95,11 +97,11 @@ public record PoolStats(int capacity, int size, long putCount, long getCount, lo
      * Returns the cache miss rate as a fraction in {@code [0.0, 1.0]}: {@code missCount / getCount}.
      * This is a pure computed value (no state is read or modified).
      *
-     * <p>Returns {@code 0.0} when {@link #getCount()} is {@code 0} (no get/take operations have
+     * <p>Returns {@code 0.0} when {@link #getCount()} is {@code 0} (no get/poll operations have
      * been performed). Note {@code hitRate() + missRate() == 1.0} whenever {@code getCount > 0}.</p>
      *
-     * @return the fraction of get/take operations that did not find an object, or {@code 0.0} if
-     *         there have been no get/take operations
+     * @return the fraction of get/poll operations that did not find an object, or {@code 0.0} if
+     *         there have been no get/poll operations
      */
     public double missRate() {
         return getCount <= 0 ? 0.0 : (double) missCount / getCount;
@@ -109,7 +111,7 @@ public record PoolStats(int capacity, int size, long putCount, long getCount, lo
      * Returns the pool utilization as a fraction in {@code [0.0, 1.0]}: {@code size / capacity}.
      * This is a pure computed value (no state is read or modified).
      *
-     * <p>Returns {@code 0.0} when {@link #capacity()} is {@code 0} (an unbounded/zero-capacity pool
+     * <p>Returns {@code 0.0} when {@link #capacity()} is {@code 0} (a zero-capacity pool
      * configuration), avoiding the division-by-zero guard callers would otherwise write.</p>
      *
      * @return the fraction of capacity currently occupied, or {@code 0.0} if capacity is {@code 0}

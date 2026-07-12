@@ -52,6 +52,14 @@ import java.util.function.Supplier;
  * If there are more arguments than placeholders, the extra arguments are appended to the formatted
  * message in square brackets. Concrete formatting is performed by {@link AbstractLogger}.</p>
  *
+ * <p><b>Trailing {@code Throwable} caveat (differs from SLF4J):</b> unlike SLF4J, a {@code Throwable}
+ * passed as the last argument to the plain {@code xxx(String, Object...)} family is <b>not</b>
+ * special-cased &mdash; it is rendered into the message text like any other argument and its stack trace
+ * is lost. To log an exception with its stack trace, use the exception-first
+ * {@code xxx(Throwable, String, Object...)} overloads or the two-argument {@code xxx(String, Throwable)}
+ * overloads (e.g. {@code logger.error("Failed for id {}", id, ex)} loses the trace &mdash; use
+ * {@code logger.error(ex, "Failed for id {}", id)} instead).</p>
+ *
  * <p><b>Throwable-first template arity cap:</b> The plain template family
  * ({@code xxx(String, Object ...)}) offers fixed-arity overloads up to seven arguments
  * (plus a deprecated varargs overload). The exception-first template family

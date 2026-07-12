@@ -290,7 +290,7 @@ public class OptionalLongType extends AbstractOptionalType<OptionalLong> {
      * <p>
      * <b>appendTo vs. serializeTo:</b> {@code appendTo} produces a plain, {@code toString()}-style rendering with no
      * JSON/XML quoting or escaping (for general text output), whereas {@code serializeTo} writes this type's JSON/XML
-     * literal form and ignores string quotation/escaping config.
+     * literal form, honoring {@code writeLongAsString}/{@code stringQuotation} in the serialization config when set.
      *
      * @param appendable the Appendable to write to
      * @param x the OptionalLong value to append
@@ -316,10 +316,12 @@ public class OptionalLongType extends AbstractOptionalType<OptionalLong> {
 
     /**
      * Writes the character representation of an {@link OptionalLong} to a CharacterWriter.
-     * This method is typically used for JSON/XML serialization.
+     * This method is typically used for JSON/XML serialization. Writes the contained long value via the writer's
+     * optimized {@code write(long)} method; when {@code config.isWriteLongAsString()} is set with a non-zero
+     * {@code stringQuotation}, the value is wrapped in that quotation character.
      * <p>
      * This method is specifically designed for JSON/XML serialization: it writes this type's literal form to the
-     * {@code CharacterWriter}. String quotation/escaping config is ignored.
+     * {@code CharacterWriter}, honoring {@code writeLongAsString}/{@code stringQuotation} when configured.
      * <p>
      * <b>serializeTo vs. appendTo:</b> {@code serializeTo} produces machine-readable JSON/XML literal output,
      * whereas {@code appendTo} produces a plain, human-readable {@code toString()}-style rendering without JSON/XML
@@ -327,7 +329,7 @@ public class OptionalLongType extends AbstractOptionalType<OptionalLong> {
      *
      * @param writer the CharacterWriter to write to
      * @param x the OptionalLong value to write
-     * @param config the serialization configuration
+     * @param config the serialization configuration (honors {@code writeLongAsString}/{@code stringQuotation}); may be {@code null}
      * @throws IOException if an I/O error occurs during the write operation
      */
     @Override
@@ -335,7 +337,16 @@ public class OptionalLongType extends AbstractOptionalType<OptionalLong> {
         if (x == null || x.isEmpty()) {
             writer.write(NULL_CHAR_ARRAY);
         } else {
-            writer.write(x.get());
+            final long value = x.get();
+
+            if (config != null && config.isWriteLongAsString() && config.getStringQuotation() != 0) {
+                final char quotation = config.getStringQuotation();
+                writer.write(quotation);
+                writer.write(value);
+                writer.write(quotation);
+            } else {
+                writer.write(value);
+            }
         }
     }
 }

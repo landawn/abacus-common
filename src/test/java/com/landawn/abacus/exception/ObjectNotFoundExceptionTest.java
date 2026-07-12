@@ -3,6 +3,7 @@ package com.landawn.abacus.exception;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -11,6 +12,22 @@ import org.junit.jupiter.api.Test;
 import com.landawn.abacus.TestBase;
 
 public class ObjectNotFoundExceptionTest extends TestBase {
+
+    private static final class InitCauseSuppressingException extends ObjectNotFoundException {
+
+        InitCauseSuppressingException(final String message, final Throwable cause) {
+            super(message, cause);
+        }
+
+        InitCauseSuppressingException(final Throwable cause) {
+            super(cause);
+        }
+
+        @Override
+        public synchronized Throwable initCause(final Throwable cause) {
+            return this;
+        }
+    }
 
     @Test
     public void testDefaultConstructor() {
@@ -57,6 +74,14 @@ public class ObjectNotFoundExceptionTest extends TestBase {
         assertNull(causeOnly.getCause());
         assertThrows(IllegalStateException.class, () -> withMessage.initCause(new RuntimeException("later")));
         assertThrows(IllegalStateException.class, () -> causeOnly.initCause(new RuntimeException("later")));
+    }
+
+    @Test
+    public void testCauseConstructorsDoNotInvokeSubclassOverride() {
+        Throwable cause = new RuntimeException("Underlying cause");
+
+        assertSame(cause, new InitCauseSuppressingException("Object not found", cause).getCause());
+        assertSame(cause, new InitCauseSuppressingException(cause).getCause());
     }
 
     @Test

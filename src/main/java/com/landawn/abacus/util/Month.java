@@ -26,7 +26,7 @@ package com.landawn.abacus.util;
  * Month month = Month.JANUARY;
  * int monthNumber = month.intValue();   // returns 1
  *
- * Month decoded = Month.valueOf(3);   // returns MARCH
+ * Month decoded = Month.of(3);   // returns MARCH
  * }</pre>
  *
  */
@@ -131,15 +131,15 @@ public enum Month {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Month jan = Month.valueOf(1);    // returns JANUARY
-     * Month dec = Month.valueOf(12);   // returns DECEMBER
+     * Month jan = Month.of(1);    // returns JANUARY
+     * Month dec = Month.of(12);   // returns DECEMBER
      * }</pre>
      *
      * @param intValue the numeric value of the month (must be between 1 and 12 inclusive)
      * @return the corresponding {@code Month} enum constant; never {@code null}
      * @throws IllegalArgumentException if {@code intValue} is not between 1 and 12 inclusive
      */
-    public static Month valueOf(final int intValue) {
+    public static Month of(final int intValue) {
         switch (intValue) {
             case 1:
                 return JANUARY;

@@ -13,6 +13,8 @@
  */
 package com.landawn.abacus.util.function;
 
+import com.landawn.abacus.util.Throwables;
+
 /**
  * Represents a function that accepts two arguments and produces a boolean-valued result.
  * This is the {@code boolean}-producing primitive specialization for {@link java.util.function.BiFunction}.
@@ -28,7 +30,7 @@ package com.landawn.abacus.util.function;
  * @see ToBooleanFunction
  */
 @FunctionalInterface
-public interface ToBooleanBiFunction<T, U> {
+public interface ToBooleanBiFunction<T, U> extends Throwables.ToBooleanBiFunction<T, U, RuntimeException> {
     /**
      * Applies this function to the given arguments.
      *
@@ -49,5 +51,16 @@ public interface ToBooleanBiFunction<T, U> {
      * @param u the second function argument
      * @return the function result as a boolean value
      */
+    @Override
     boolean applyAsBoolean(T t, U u);
+
+    /**
+     * Returns this object as a {@link Throwables.ToBooleanBiFunction} view.
+     *
+     * @param <E> the target exception type for compatibility with {@code Throwables.ToBooleanBiFunction}
+     * @return a {@link Throwables.ToBooleanBiFunction} view of this object
+     */
+    default <E extends Throwable> Throwables.ToBooleanBiFunction<T, U, E> toThrowable() {
+        return (Throwables.ToBooleanBiFunction<T, U, E>) this;
+    }
 }

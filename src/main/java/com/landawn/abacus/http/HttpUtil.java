@@ -45,6 +45,7 @@ import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
 import com.landawn.abacus.annotation.Internal;
+import com.landawn.abacus.exception.UncheckedIOException;
 import com.landawn.abacus.parser.DeserializationConfig;
 import com.landawn.abacus.parser.JsonParser;
 import com.landawn.abacus.parser.KryoParser;
@@ -1127,7 +1128,17 @@ public final class HttpUtil {
         try {
             return N.defaultIfNull(wrapInputStream(connection.getInputStream(), contentFormat), N.emptyInputStream());
         } catch (final IOException e) {
-            return N.defaultIfNull(wrapInputStream(connection.getErrorStream(), contentFormat), N.emptyInputStream());
+            final InputStream errorStream = connection.getErrorStream();
+            if (errorStream == null) {
+                // Preserve the original failure when there is no error body to fall back to.
+                throw new UncheckedIOException(e);
+            }
+            try {
+                return N.defaultIfNull(wrapInputStream(errorStream, contentFormat), N.emptyInputStream());
+            } catch (final RuntimeException wrapEx) {
+                wrapEx.addSuppressed(e);
+                throw wrapEx;
+            }
         }
     }
 
@@ -1464,7 +1475,12 @@ public final class HttpUtil {
                 /* RI bug 6641315 claims a cookie of this format was once served by www.yahoo.com */
                 "EEE MMM d yyyy HH:mm:ss z", };
 
-        private static final DateFormat[] BROWSER_COMPATIBLE_DATE_FORMATS = new DateFormat[BROWSER_COMPATIBLE_DATE_FORMAT_STRINGS.length];
+        /**
+         * Per-thread cache of browser-compatible {@link DateFormat}s.
+         * Avoids a global lock (SimpleDateFormat is not thread-safe) while reusing parsers.
+         */
+        private static final ThreadLocal<DateFormat[]> BROWSER_COMPATIBLE_DATE_FORMATS = ThreadLocal.withInitial( //NOSONAR
+                () -> new DateFormat[BROWSER_COMPATIBLE_DATE_FORMAT_STRINGS.length]);
 
         /**
          * Parses an HTTP date string into a Date object.
@@ -1490,26 +1506,25 @@ public final class HttpUtil {
                 // non-standard trailing "+01:00". Those cases are covered below.
                 return result;
             }
-            synchronized (BROWSER_COMPATIBLE_DATE_FORMAT_STRINGS) {
-                for (int i = 0, count = BROWSER_COMPATIBLE_DATE_FORMAT_STRINGS.length; i < count; i++) {
-                    DateFormat format = BROWSER_COMPATIBLE_DATE_FORMATS[i];
-                    if (format == null) {
-                        format = new SimpleDateFormat(BROWSER_COMPATIBLE_DATE_FORMAT_STRINGS[i], Locale.US);
-                        // Set the timezone to use when interpreting formats that don't have a timezone. GMT is
-                        // specified by RFC 7231.
-                        format.setTimeZone(UTC);
-                        BROWSER_COMPATIBLE_DATE_FORMATS[i] = format;
-                    }
-                    position.setIndex(0);
-                    result = format.parse(value, position);
-                    if (position.getIndex() != 0) {
-                        // Something was parsed. It's possible the entire string was not consumed, but we ignore
-                        // that. If any of the BROWSER_COMPATIBLE_DATE_FORMAT_STRINGS ended in "'GMT'" we'd have
-                        // to also check that position.getIndex() == value.length() otherwise parsing might have
-                        // terminated early, ignoring things like "+01:00". Leaving this as != 0 means that any
-                        // trailing junk is ignored.
-                        return result;
-                    }
+            final DateFormat[] browserFormats = BROWSER_COMPATIBLE_DATE_FORMATS.get();
+            for (int i = 0, count = BROWSER_COMPATIBLE_DATE_FORMAT_STRINGS.length; i < count; i++) {
+                DateFormat format = browserFormats[i];
+                if (format == null) {
+                    format = new SimpleDateFormat(BROWSER_COMPATIBLE_DATE_FORMAT_STRINGS[i], Locale.US);
+                    // Set the timezone to use when interpreting formats that don't have a timezone. GMT is
+                    // specified by RFC 7231.
+                    format.setTimeZone(UTC);
+                    browserFormats[i] = format;
+                }
+                position.setIndex(0);
+                result = format.parse(value, position);
+                if (position.getIndex() != 0) {
+                    // Something was parsed. It's possible the entire string was not consumed, but we ignore
+                    // that. If any of the BROWSER_COMPATIBLE_DATE_FORMAT_STRINGS ended in "'GMT'" we'd have
+                    // to also check that position.getIndex() == value.length() otherwise parsing might have
+                    // terminated early, ignoring things like "+01:00". Leaving this as != 0 means that any
+                    // trailing junk is ignored.
+                    return result;
                 }
             }
             return null;

@@ -185,15 +185,15 @@ public abstract class AbstractPool implements Pool {
      * @param evictDelayInMillis the delay in milliseconds between eviction runs, or 0 to disable eviction (must be non-negative)
      * @param evictionPolicy the policy for determining which objects to evict
      * @param autoBalance whether to automatically remove objects when the pool is full
-     * @param balanceFactor the proportion of objects to remove during balancing, typically 0.1 to 0.5 (must be non-negative); a value of 0 selects the default factor (0.2)
+     * @param balanceFactor the finite proportion of objects to remove during balancing, in the range [0, 1]; a value of 0 selects the default factor (0.2)
      * @param maxMemorySize the maximum total memory in bytes, or 0 for no limit (must be non-negative)
-     * @throws IllegalArgumentException if any numeric parameter is negative
+     * @throws IllegalArgumentException if capacity, eviction delay, or maximum memory is negative, or if {@code balanceFactor} is non-finite or outside [0, 1]
      */
     protected AbstractPool(final int capacity, final long evictDelayInMillis, final EvictionPolicy evictionPolicy, final boolean autoBalance,
             final float balanceFactor, final long maxMemorySize) {
-        if (capacity < 0 || evictDelayInMillis < 0 || balanceFactor < 0 || maxMemorySize < 0) {
-            throw new IllegalArgumentException("Capacity(" + capacity + "), evict delay(" + evictDelayInMillis + "), balance factor(" + balanceFactor
-                    + "), max memory size(" + maxMemorySize + ") cannot be negative");
+        if (capacity < 0 || evictDelayInMillis < 0 || maxMemorySize < 0 || !Float.isFinite(balanceFactor) || balanceFactor < 0 || balanceFactor > 1) {
+            throw new IllegalArgumentException("Capacity(" + capacity + "), evict delay(" + evictDelayInMillis + "), and max memory size(" + maxMemorySize
+                    + ") must be non-negative; balance factor(" + balanceFactor + ") must be finite and between 0 and 1");
         }
 
         this.capacity = capacity;

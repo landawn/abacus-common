@@ -41,6 +41,12 @@ public class CharSummaryStatisticsTest extends TestBase {
     }
 
     @Test
+    public void testConstructorValidatesEmptyState() {
+        org.junit.jupiter.api.Assertions.assertDoesNotThrow(() -> new CharSummaryStatistics(0, Character.MAX_VALUE, Character.MIN_VALUE, 0));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> new CharSummaryStatistics(0, (char) 0, (char) 0, 1));
+    }
+
+    @Test
     public void testNumericCharacters() {
         CharSummaryStatistics stats = new CharSummaryStatistics();
         stats.accept('0');

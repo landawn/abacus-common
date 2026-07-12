@@ -17,23 +17,23 @@ import com.landawn.abacus.AbstractTest;
 public class PasswordTest extends AbstractTest {
 
     @Test
-    public void testMD5Encryption() {
+    public void testMD5Digestion() {
         Password pwd = new Password("MD5");
         String st = "abcksfe里飞×……￥%……&×（!@#$%^&*()_@#$^&*()_)(*&）23ro lseif";
-        String encryptedPassword = pwd.encrypt(st);
-        N.println(encryptedPassword);
-        assertTrue(pwd.isEqual(st, encryptedPassword));
-        assertFalse(pwd.isEqual(st + " ", encryptedPassword));
+        String encodedDigest = pwd.digest(st);
+        N.println(encodedDigest);
+        assertTrue(pwd.isEqual(st, encodedDigest));
+        assertFalse(pwd.isEqual(st + " ", encodedDigest));
     }
 
     @Test
-    public void testSHA256Encryption() {
+    public void testSHA256Digestion() {
         Password pwd = new Password("SHA-256");
         String st = "abcksfe里飞×……￥%……&×（!@#$%^&*()_@#$^&*()_)(*&）23ro lseif";
-        String encryptedPassword = pwd.encrypt(st);
-        N.println(encryptedPassword);
-        assertTrue(pwd.isEqual(st, encryptedPassword));
-        assertFalse(pwd.isEqual(st + " ", encryptedPassword));
+        String encodedDigest = pwd.digest(st);
+        N.println(encodedDigest);
+        assertTrue(pwd.isEqual(st, encodedDigest));
+        assertFalse(pwd.isEqual(st + " ", encodedDigest));
 
         N.println(pwd.toString());
 
@@ -57,39 +57,39 @@ public class PasswordTest extends AbstractTest {
     }
 
     @Test
-    public void testEncrypt_consistent() {
+    public void testDigest_consistent() {
         Password password = new Password("SHA-256");
-        String encrypted1 = password.encrypt("testPassword");
-        String encrypted2 = password.encrypt("testPassword");
-        assertEquals(encrypted1, encrypted2);
+        String digest1 = password.digest("testPassword");
+        String digest2 = password.digest("testPassword");
+        assertEquals(digest1, digest2);
     }
 
     @Test
-    public void testEncrypt_notNull() {
+    public void testDigest_notNull() {
         Password password = new Password("SHA-256");
-        String encrypted = password.encrypt("testPassword");
-        assertNotNull(encrypted);
+        String digest = password.digest("testPassword");
+        assertNotNull(digest);
     }
 
     @Test
-    public void testEncrypt_null() {
+    public void testDigest_null() {
         Password password = new Password("SHA-256");
-        String encrypted = password.encrypt(null);
-        assertNull(encrypted);
+        String digest = password.digest(null);
+        assertNull(digest);
     }
 
     @Test
     public void testIsEqual_match() {
         Password password = new Password("SHA-256");
-        String encrypted = password.encrypt("testPassword");
-        assertTrue(password.isEqual("testPassword", encrypted));
+        String digest = password.digest("testPassword");
+        assertTrue(password.isEqual("testPassword", digest));
     }
 
     @Test
     public void testIsEqual_noMatch() {
         Password password = new Password("SHA-256");
-        String encrypted = password.encrypt("testPassword");
-        assertFalse(password.isEqual("wrongPassword", encrypted));
+        String digest = password.digest("testPassword");
+        assertFalse(password.isEqual("wrongPassword", digest));
     }
 
     @Test
@@ -101,7 +101,7 @@ public class PasswordTest extends AbstractTest {
     @Test
     public void testIsEqual_plainNull() {
         Password password = new Password("SHA-256");
-        assertFalse(password.isEqual(null, "encrypted"));
+        assertFalse(password.isEqual(null, "digest"));
     }
 
     @Test
@@ -132,19 +132,19 @@ public class PasswordTest extends AbstractTest {
     }
 
     @Test
-    public void testIsEqual_encryptedNull() {
+    public void testIsEqual_digestNull() {
         Password password = new Password("SHA-256");
         assertFalse(password.isEqual("anything", null));
     }
 
     @Test
-    public void testEncrypt_unicodeUsesUtf8() {
+    public void testDigest_unicodeUsesUtf8() {
         // The same string must hash to the same value regardless of platform charset.
         // We verify this by hashing the UTF-8 bytes directly with a fresh digest and
-        // comparing to Password.encrypt's Base64 output.
+        // comparing to Password.digest's Base64 output.
         Password password = new Password("SHA-256");
         String input = "pässwörd-中文";
-        String encrypted = password.encrypt(input);
+        String digest = password.digest(input);
 
         java.security.MessageDigest md;
         try {
@@ -154,16 +154,16 @@ public class PasswordTest extends AbstractTest {
         }
         byte[] expected = md.digest(input.getBytes(java.nio.charset.StandardCharsets.UTF_8));
         String expectedBase64 = java.util.Base64.getEncoder().encodeToString(expected);
-        assertEquals(expectedBase64, encrypted);
+        assertEquals(expectedBase64, digest);
     }
 
     @Test
-    public void testEncrypt_threadSafety() throws InterruptedException {
-        // encrypt() reuses a single MessageDigest and is synchronized; concurrent
+    public void testDigest_threadSafety() throws InterruptedException {
+        // digest() reuses a single MessageDigest and is synchronized; concurrent
         // callers must still receive correct, deterministic Base64 hashes.
         final Password password = new Password("SHA-256");
         final String input = "concurrent-input-value";
-        final String expected = password.encrypt(input);
+        final String expected = password.digest(input);
 
         final int numThreads = 16;
         final int iterations = 200;
@@ -174,7 +174,7 @@ public class PasswordTest extends AbstractTest {
             final int idx = t;
             threads[t] = new Thread(() -> {
                 for (int i = 0; i < iterations; i++) {
-                    String got = password.encrypt(input);
+                    String got = password.digest(input);
                     if (!expected.equals(got)) {
                         failures[idx] = true;
                         return;
@@ -187,7 +187,7 @@ public class PasswordTest extends AbstractTest {
             th.join();
         }
         for (boolean f : failures) {
-            assertFalse(f, "encrypt() produced inconsistent output under concurrency");
+            assertFalse(f, "digest() produced inconsistent output under concurrency");
         }
     }
 
@@ -199,26 +199,26 @@ public class PasswordTest extends AbstractTest {
         // - returns false for any single-character difference, regardless of position.
         Password password = new Password("SHA-256");
         String correct = "correctHorseBatteryStaple";
-        String encrypted = password.encrypt(correct);
+        String digest = password.digest(correct);
 
         // differs in first char
-        assertFalse(password.isEqual("XorrectHorseBatteryStaple", encrypted));
+        assertFalse(password.isEqual("XorrectHorseBatteryStaple", digest));
         // differs in middle
-        assertFalse(password.isEqual("correctHorseBXtteryStaple", encrypted));
+        assertFalse(password.isEqual("correctHorseBXtteryStaple", digest));
         // differs in last char
-        assertFalse(password.isEqual("correctHorseBatteryStaplX", encrypted));
+        assertFalse(password.isEqual("correctHorseBatteryStaplX", digest));
         // exact match
-        assertTrue(password.isEqual(correct, encrypted));
+        assertTrue(password.isEqual(correct, digest));
     }
 
     @Test
-    public void testIsEqual_sameLengthDifferentEncrypted() {
+    public void testIsEqual_sameLengthDifferentDigested() {
         Password password = new Password("SHA-256");
-        String encrypted = password.encrypt("realPassword");
+        String digest = password.digest("realPassword");
         // Build a same-length but completely different Base64 string.
-        StringBuilder bogus = new StringBuilder(encrypted.length());
-        for (int i = 0; i < encrypted.length(); i++) {
-            char c = encrypted.charAt(i);
+        StringBuilder bogus = new StringBuilder(digest.length());
+        for (int i = 0; i < digest.length(); i++) {
+            char c = digest.charAt(i);
             // flip 'A' <-> 'B' to keep Base64 alphabet valid; '=' padding preserved.
             if (c == 'A') {
                 bogus.append('B');

@@ -463,7 +463,9 @@ public final class URLEncodedUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Map<String, Object> params = Map.of("name", "John Doe", "age", 30);
+     * Map<String, Object> params = new LinkedHashMap<>();
+     * params.put("name", "John Doe");
+     * params.put("age", 30);
      * String query = URLEncodedUtil.encode(params);
      * // query: "name=John+Doe&age=30"
      * }</pre>
@@ -573,7 +575,9 @@ public final class URLEncodedUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Map<String, Object> params = Map.of("q", "java url encoding", "page", 1);
+     * Map<String, Object> params = new LinkedHashMap<>();
+     * params.put("q", "java url encoding");
+     * params.put("page", 1);
      * String fullUrl = URLEncodedUtil.encode("http://search.example.com", params);
      * // fullUrl: "http://search.example.com?q=java+url+encoding&page=1"
      * }</pre>

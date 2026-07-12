@@ -160,7 +160,7 @@ final class ParallelIteratorShortStream extends IteratorShortStream {
      * non-matching element, evaluated in parallel. Falls back to sequential execution if the
      * thread count is insufficient to justify parallel overhead.
      *
-     * <p><b>&#9888; Parallel streams:</b> this operation does not guarantee encounter-order prefix
+     * <p><b>&#9888;&#65039; Parallel streams:</b> this operation does not guarantee encounter-order prefix
      * semantics; later matching elements may be returned.
      *
      * @param predicate a non-interfering, stateless predicate to apply to each element
@@ -185,7 +185,7 @@ final class ParallelIteratorShortStream extends IteratorShortStream {
      * non-matching element, evaluated in parallel. Falls
      * back to sequential execution if the thread count is insufficient to justify parallel overhead.
      *
-     * <p><b>&#9888; Parallel streams:</b> this operation does not guarantee encounter-order prefix/suffix
+     * <p><b>&#9888;&#65039; Parallel streams:</b> this operation does not guarantee encounter-order prefix/suffix
      * semantics; later matching elements may be dropped.
      *
      * @param predicate a non-interfering, stateless predicate to apply to each element

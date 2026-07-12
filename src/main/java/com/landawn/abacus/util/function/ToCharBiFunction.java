@@ -13,6 +13,8 @@
  */
 package com.landawn.abacus.util.function;
 
+import com.landawn.abacus.util.Throwables;
+
 /**
  * Represents a function that accepts two arguments and produces a char-valued result.
  * This is the {@code char}-producing primitive specialization for {@link java.util.function.BiFunction}.
@@ -28,7 +30,7 @@ package com.landawn.abacus.util.function;
  * @see ToCharFunction
  */
 @FunctionalInterface
-public interface ToCharBiFunction<T, U> {
+public interface ToCharBiFunction<T, U> extends Throwables.ToCharBiFunction<T, U, RuntimeException> {
     /**
      * Applies this function to the given arguments.
      *
@@ -51,5 +53,16 @@ public interface ToCharBiFunction<T, U> {
      * @param u the second function argument
      * @return the function result as a char value
      */
+    @Override
     char applyAsChar(T t, U u);
+
+    /**
+     * Returns this object as a {@link Throwables.ToCharBiFunction} view.
+     *
+     * @param <E> the target exception type for compatibility with {@code Throwables.ToCharBiFunction}
+     * @return a {@link Throwables.ToCharBiFunction} view of this object
+     */
+    default <E extends Throwable> Throwables.ToCharBiFunction<T, U, E> toThrowable() {
+        return (Throwables.ToCharBiFunction<T, U, E>) this;
+    }
 }

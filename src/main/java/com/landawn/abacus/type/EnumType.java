@@ -90,7 +90,7 @@ public final class EnumType<T extends Enum<T>> extends SingleValueType<T> {
 
         if (enumRepresentation == com.landawn.abacus.util.EnumType.CODE) {
             // Prefer a public int code() accessor. Fall back to public int intValue(): the numeric enums in
-            // com.landawn.abacus.util (Color/Gender/MediaType/OperationType/LockMode/Month/DayOfWeek/WeekDay/
+            // com.landawn.abacus.util (Color/Gender/MediaType/OperationType/LockMode/Month/
             // CalendarField/YesNo) expose their numeric code via intValue() rather than code(), yet are exactly
             // the enums CODE representation is meant for. Without this fallback every one of them threw at
             // construction time when configured with EnumType.CODE.

@@ -102,7 +102,7 @@ public class EnumTypeTest extends TestBase {
     @Test
     public void testCodeRepresentationFallsBackToIntValue() {
         // Enums that expose their numeric code via intValue() rather than code() (all the numeric enums in
-        // com.landawn.abacus.util: Color/Gender/MediaType/OperationType/LockMode/Month/DayOfWeek/WeekDay/
+        // com.landawn.abacus.util: Color/Gender/MediaType/OperationType/LockMode/Month/
         // CalendarField/YesNo, plus this IntValueEnum) must still work with CODE representation. Before the
         // intValue() fallback, constructing any of them with "(CODE)" threw at construction time.
         final EnumType<IntValueEnum> type = (EnumType<IntValueEnum>) createType(IntValueEnum.class.getName() + "(CODE)");

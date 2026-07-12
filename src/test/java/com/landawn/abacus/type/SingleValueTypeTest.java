@@ -475,4 +475,27 @@ public class SingleValueTypeTest extends TestBase {
 
         assertEquals("factory-value", tuple._3.apply(value));
     }
+
+    public static class UnrelatedStaticMethodValue {
+        public String label;
+
+        public static Integer parseSomethingUnrelated(final String s) {
+            return s.length();
+        }
+    }
+
+    @Test
+    public void testGetCreatorAndValueExtractor_UnrelatedStaticMethod_returnsSentinel() {
+        // regression: the matchedFields pre-filter accepts a field when ANY public static 1-arg
+        // method takes the field's type, without checking the method's return type. With no real
+        // factory/constructor the class ended up advertising a value extractor but no creator,
+        // breaking the documented stringOf/valueOf round-trip (serializes as the field value but
+        // deserializes as a raw String). Such classes must fall back to plain-object handling.
+        com.landawn.abacus.util.Tuple.Tuple3<Type<Object>, java.util.function.Function<String, UnrelatedStaticMethodValue>, java.util.function.Function<UnrelatedStaticMethodValue, Object>> tuple = SingleValueType
+                .getCreatorAndValueExtractor(UnrelatedStaticMethodValue.class);
+
+        assertNull(tuple._1);
+        assertNull(tuple._2);
+        assertNull(tuple._3);
+    }
 }

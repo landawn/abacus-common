@@ -84,7 +84,11 @@ import com.landawn.abacus.util.Tuple.Tuple7;
  *
  * <p><b>Method Categories:</b>
  * <ul>
- *   <li><b>Composition Methods:</b> {@code combine()} - Custom zip functions for flexible future combination</li>
+ *   <li><b>Composition Methods:</b> {@code compose()} - Custom zip functions that operate on the {@code Future}
+ *       objects themselves (calling {@code get()} within the zip function), with optional separate handling for
+ *       {@code get(timeout, unit)}</li>
+ *   <li><b>Combination Methods:</b> {@code combine()} - Combine the <i>completed results</i> of several futures,
+ *       either into a {@code Tuple2}..{@code Tuple7} or via a supplied function</li>
  *   <li><b>Coordination Methods:</b> {@code allOf()}, {@code anyOf()} - Standard parallel execution patterns</li>
  *   <li><b>Iteration Methods:</b> {@code iterate()} - Process futures as they complete with optional timeouts</li>
  *   <li><b>Tuple Methods:</b> Direct combination into Tuple2 through Tuple7 for structured results</li>
@@ -1597,14 +1601,15 @@ public final class Futures {
 
             @Override
             public List<T> get(final long timeout, final TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
-                final long timeoutInMillis = unit.toMillis(timeout);
-                final long startTime = System.currentTimeMillis();
-                final long endTime = timeoutInMillis > Long.MAX_VALUE - startTime ? Long.MAX_VALUE : startTime + timeoutInMillis;
+                final long timeoutInNanos = unit.toNanos(timeout);
+                final long startTimeInNanos = System.nanoTime();
 
                 final List<T> result = new ArrayList<>(cfs.size());
 
                 for (final Future<? extends T> future : cfs) {
-                    result.add(future.get(N.max(0, endTime - System.currentTimeMillis()), TimeUnit.MILLISECONDS));
+                    final long elapsedTimeInNanos = System.nanoTime() - startTimeInNanos;
+                    final long remainingTimeInNanos = timeoutInNanos <= 0 ? 0 : N.max(0L, timeoutInNanos - elapsedTimeInNanos);
+                    result.add(future.get(remainingTimeInNanos, TimeUnit.NANOSECONDS));
                 }
 
                 return result;
@@ -1788,6 +1793,41 @@ public final class Futures {
 
             @Override
             public T get(final long timeout, final TimeUnit unit) throws InterruptedException, TimeoutException {
+                if (timeout <= 0) {
+                    // Per the Future.get(timeout, unit) contract, a non-positive timeout means "poll without
+                    // blocking". Consult the input futures directly rather than going through iterate(...), whose
+                    // asynchronous relay queue may not be populated yet (for non-CompletableFuture inputs) and
+                    // which rejects a non-positive total timeout. Return the first already-completed success; if
+                    // every future is already done and failed, surface the aggregated failure; otherwise (a
+                    // sibling is still pending, or none was ready) time out immediately.
+                    RuntimeException exception = null;
+                    boolean anyIncomplete = false;
+
+                    for (final Future<? extends T> future : cfs) {
+                        if (future.isDone()) {
+                            try {
+                                return future.get();
+                            } catch (final CancellationException | ExecutionException e) {
+                                final RuntimeException re = ExceptionUtil.toRuntimeException(convertException(e), false);
+
+                                if (exception == null) {
+                                    exception = re;
+                                } else {
+                                    exception.addSuppressed(re);
+                                }
+                            }
+                        } else {
+                            anyIncomplete = true;
+                        }
+                    }
+
+                    if (anyIncomplete || exception == null) {
+                        throw new TimeoutException();
+                    }
+
+                    throw exception;
+                }
+
                 final Iterator<Result<T, Exception>> iter = iterate(cfs, timeout, unit, Fn.identity());
                 Result<T, Exception> result = null;
                 RuntimeException exception = null;
@@ -2082,8 +2122,8 @@ public final class Futures {
         N.checkArgNotNull(unit, cs.unit);
         N.checkArgNotNull(resultHandler, cs.resultHandler);
 
-        final long startTime = System.currentTimeMillis();
-        final long totalTimeoutForAllInMillis = totalTimeoutForAll == Long.MAX_VALUE ? Long.MAX_VALUE : unit.toMillis(totalTimeoutForAll);
+        final long startTimeInNanos = System.nanoTime();
+        final long totalTimeoutForAllInNanos = totalTimeoutForAll == Long.MAX_VALUE ? Long.MAX_VALUE : unit.toNanos(totalTimeoutForAll);
         final BlockingQueue<Result<T, Exception>> completedResults = new LinkedBlockingQueue<>();
         final int futureCount = cfs.size();
 
@@ -2133,14 +2173,14 @@ public final class Futures {
                     return false;
                 }
 
-                final long remainingTimeInMillis = totalTimeoutForAllInMillis == Long.MAX_VALUE ? Long.MAX_VALUE
-                        : totalTimeoutForAllInMillis - (System.currentTimeMillis() - startTime);
+                final long remainingTimeInNanos = totalTimeoutForAllInNanos == Long.MAX_VALUE ? Long.MAX_VALUE
+                        : totalTimeoutForAllInNanos - (System.nanoTime() - startTimeInNanos);
 
                 try {
-                    if (remainingTimeInMillis == Long.MAX_VALUE) {
+                    if (remainingTimeInNanos == Long.MAX_VALUE) {
                         nextResult = completedResults.take();
-                    } else if (remainingTimeInMillis > 0) {
-                        nextResult = completedResults.poll(remainingTimeInMillis, TimeUnit.MILLISECONDS);
+                    } else if (remainingTimeInNanos > 0) {
+                        nextResult = completedResults.poll(remainingTimeInNanos, TimeUnit.NANOSECONDS);
                     } else {
                         nextResult = null;
                     }

@@ -147,7 +147,7 @@ public class ObjectPoolTest extends TestBase {
         }
 
         @Override
-        public TestPoolable take() {
+        public TestPoolable poll() {
             if (closed)
                 throw new IllegalStateException("Pool is closed");
 
@@ -170,7 +170,7 @@ public class ObjectPoolTest extends TestBase {
         }
 
         @Override
-        public TestPoolable take(long timeout, TimeUnit unit) throws InterruptedException {
+        public TestPoolable poll(long timeout, TimeUnit unit) throws InterruptedException {
             if (closed)
                 throw new IllegalStateException("Pool is closed");
 
@@ -182,7 +182,7 @@ public class ObjectPoolTest extends TestBase {
                         return null;
                     lock.wait(waitTime);
                 }
-                return take();
+                return poll();
             }
         }
 
@@ -406,11 +406,11 @@ public class ObjectPoolTest extends TestBase {
     }
 
     @Test
-    public void testTake() {
+    public void testPoll() {
         TestPoolable poolable = new TestPoolable("test1");
         assertTrue(pool.add(poolable));
 
-        TestPoolable taken = pool.take();
+        TestPoolable taken = pool.poll();
         assertNotNull(taken);
         assertEquals("test1", taken.getId());
         assertEquals(0, pool.size());
@@ -432,7 +432,7 @@ public class ObjectPoolTest extends TestBase {
         assertTrue(memPool.add(poolable2));
         assertEquals(200, memPool.getTotalMemorySize());
 
-        TestPoolable taken = memPool.take();
+        TestPoolable taken = memPool.poll();
         assertNotNull(taken);
         assertEquals(100, memPool.getTotalMemorySize());
 
@@ -447,38 +447,38 @@ public class ObjectPoolTest extends TestBase {
         assertTrue(pool.isEmpty());
         pool.add(new TestPoolable("test1"));
         assertFalse(pool.isEmpty());
-        pool.take();
+        pool.poll();
         assertTrue(pool.isEmpty());
     }
 
     @Test
-    public void testTakeFromEmptyPool() {
-        assertNull(pool.take());
+    public void testPollFromEmptyPool() {
+        assertNull(pool.poll());
     }
 
     @Test
-    public void testTakeExpiredObject() throws InterruptedException {
+    public void testPollExpiredObject() throws InterruptedException {
         TestPoolable expired = new TestPoolable("expired", 50, 50);
         assertTrue(pool.add(expired));
 
         Thread.sleep(60);
 
-        TestPoolable taken = pool.take();
+        TestPoolable taken = pool.poll();
         assertNull(taken);
         assertTrue(expired.isDestroyed());
         assertEquals(Poolable.Caller.EVICT, expired.getDestroyedByCaller());
     }
 
     @Test
-    public void testTakeFromClosedPool() {
+    public void testPollFromClosedPool() {
         pool.close();
-        assertThrows(IllegalStateException.class, () -> pool.take());
+        assertThrows(IllegalStateException.class, () -> pool.poll());
     }
 
     @Test
-    public void testTakeWithTimeout() throws InterruptedException {
+    public void testPollWithTimeout() throws InterruptedException {
         long start = System.currentTimeMillis();
-        TestPoolable taken = pool.take(100, TimeUnit.MILLISECONDS);
+        TestPoolable taken = pool.poll(100, TimeUnit.MILLISECONDS);
         long elapsed = System.currentTimeMillis() - start;
 
         assertNull(taken);
@@ -486,7 +486,7 @@ public class ObjectPoolTest extends TestBase {
     }
 
     @Test
-    public void testTakeWithTimeoutSuccess() throws InterruptedException {
+    public void testPollWithTimeoutSuccess() throws InterruptedException {
         CountDownLatch latch = new CountDownLatch(1);
         AtomicBoolean success = new AtomicBoolean(false);
 
@@ -499,7 +499,7 @@ public class ObjectPoolTest extends TestBase {
             }
         }).start();
 
-        TestPoolable taken = pool.take(200, TimeUnit.MILLISECONDS);
+        TestPoolable taken = pool.poll(200, TimeUnit.MILLISECONDS);
         assertNotNull(taken);
         assertEquals("delayed", taken.getId());
 
@@ -507,7 +507,7 @@ public class ObjectPoolTest extends TestBase {
     }
 
     @Test
-    public void testConcurrentAddTake() throws InterruptedException {
+    public void testConcurrentAddPoll() throws InterruptedException {
         int numThreads = 10;
         int operationsPerThread = 100;
         CountDownLatch startLatch = new CountDownLatch(1);
@@ -538,7 +538,7 @@ public class ObjectPoolTest extends TestBase {
                 try {
                     startLatch.await();
                     for (int j = 0; j < operationsPerThread; j++) {
-                        if (pool.take() != null) {
+                        if (pool.poll() != null) {
                             takenCount.incrementAndGet();
                         }
                         Thread.yield();
@@ -559,9 +559,9 @@ public class ObjectPoolTest extends TestBase {
     }
 
     @Test
-    public void testTakeWithTimeoutOnClosedPool() {
+    public void testPollWithTimeoutOnClosedPool() {
         pool.close();
-        assertThrows(IllegalStateException.class, () -> pool.take(100, TimeUnit.MILLISECONDS));
+        assertThrows(IllegalStateException.class, () -> pool.poll(100, TimeUnit.MILLISECONDS));
     }
 
     @Test

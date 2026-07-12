@@ -26,10 +26,9 @@ package com.landawn.abacus.util;
  * <pre>{@code
  * Color myColor = Color.RED;
  * int colorCode = myColor.intValue();   // returns 2
- * Color fromCode = Color.valueOf(2);    // returns Color.RED
+ * Color fromCode = Color.of(2);    // returns Color.RED
  * }</pre>
  *
- * @see WeekDay
  * @see UnifiedStatus
  * @see ServiceStatus
  * @see AccountStatus
@@ -114,8 +113,8 @@ public enum Color {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Color red = Color.valueOf(2);     // returns Color.RED
-     * Color green = Color.valueOf(5);   // returns Color.GREEN
+     * Color red = Color.of(2);     // returns Color.RED
+     * Color green = Color.of(5);   // returns Color.GREEN
      * }</pre>
      *
      * @param intValue the integer value to look up; valid values are 0 through 8 inclusive
@@ -123,7 +122,7 @@ public enum Color {
      * @throws IllegalArgumentException if no {@code Color} is mapped to the specified value
      *         (i.e. {@code intValue} is outside the range 0 through 8)
      */
-    public static Color valueOf(final int intValue) {
+    public static Color of(final int intValue) {
         switch (intValue) {
             case 0:
                 return BLACK;

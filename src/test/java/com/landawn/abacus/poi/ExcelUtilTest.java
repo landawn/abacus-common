@@ -82,6 +82,13 @@ public class ExcelUtilTest extends TestBase {
     /** ByteArrayOutputStream that records whether {@link #close()} was invoked. */
     private static final class CloseTrackingOutputStream extends ByteArrayOutputStream {
         boolean closed = false;
+        boolean flushed = false;
+
+        @Override
+        public void flush() throws IOException {
+            flushed = true;
+            super.flush();
+        }
 
         @Override
         public void close() throws IOException {
@@ -1493,6 +1500,18 @@ public class ExcelUtilTest extends TestBase {
     }
 
     @Test
+    public void test_readDatasetFromSheet_InputStream_NotClosed() throws IOException {
+        byte[] bytes = writeXlsxToBytes("S", Arrays.asList("col"), Arrays.asList(Arrays.asList("value")));
+        CloseTrackingInputStream is = new CloseTrackingInputStream(bytes);
+
+        ExcelUtil.readDatasetFromSheet(is, 0, RowExtractors.DEFAULT);
+
+        Assertions.assertFalse(is.closed);
+        is.close();
+        Assertions.assertTrue(is.closed);
+    }
+
+    @Test
     public void test_readDatasetFromSheet_InputStream_SheetName() {
         byte[] bytes = writeXlsxToBytes("Named", Arrays.asList("h"), Arrays.asList(Arrays.asList("v")));
 
@@ -1582,17 +1601,14 @@ public class ExcelUtilTest extends TestBase {
         byte[] bytes = writeXlsxToBytes("S", Arrays.asList("n"), Arrays.asList(Arrays.asList(1)));
 
         // The InputStream overload's onClose closes the workbook, not the caller's stream.
-        // (POI's WorkbookFactory.create(InputStream) may itself consume/close the stream while
-        // building the in-memory package; either way the caller still owns it and closing it
-        // afterwards must be safe and not throw.)
         CloseTrackingInputStream is = new CloseTrackingInputStream(bytes);
 
         try (Stream<Row> stream = ExcelUtil.streamRowsFromSheet(is, 0, false)) {
             Assertions.assertEquals(2, stream.count());
         }
 
-        // Caller-owned: closing it (again) is safe.
-        Assertions.assertDoesNotThrow(is::close);
+        Assertions.assertFalse(is.closed);
+        is.close();
         Assertions.assertTrue(is.closed);
     }
 
@@ -1658,7 +1674,7 @@ public class ExcelUtilTest extends TestBase {
 
         ExcelUtil.writeRowsToSheet("S", Arrays.asList("a"), Arrays.asList(Arrays.asList("v")), (Consumer<Sheet>) null, os, ExcelFormat.XLSX);
 
-        // The OutputStream overload must NOT close the caller-owned stream.
+        Assertions.assertTrue(os.flushed);
         Assertions.assertFalse(os.closed);
     }
 
@@ -1666,8 +1682,11 @@ public class ExcelUtilTest extends TestBase {
     public void test_writeDatasetToSheet_OutputStream_Xlsx() throws Exception {
         Dataset dataset = N.newDataset(N.toList("A", "B"), N.toList(N.toList(1, 2), N.toList(3, 4)));
 
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        CloseTrackingOutputStream baos = new CloseTrackingOutputStream();
         ExcelUtil.writeDatasetToSheet("DS", dataset, (Consumer<Sheet>) null, baos, ExcelFormat.XLSX);
+
+        Assertions.assertTrue(baos.flushed);
+        Assertions.assertFalse(baos.closed);
 
         try (InputStream is = new ByteArrayInputStream(baos.toByteArray())) {
             Dataset loaded = ExcelUtil.readDatasetFromSheet(is, 0, RowExtractors.DEFAULT);

@@ -1303,4 +1303,24 @@ public class SuppliersTest extends TestBase {
         Assertions.assertEquals(java.util.concurrent.ConcurrentSkipListSet.class,
                 Suppliers.ofCollection(java.util.concurrent.ConcurrentSkipListSet.class).get().getClass());
     }
+
+    public static class CustomConcurrentSkipListSet<E> extends java.util.concurrent.ConcurrentSkipListSet<E> {
+        private static final long serialVersionUID = 1L;
+    }
+
+    public static class CustomConcurrentSkipListMap<K, V> extends java.util.concurrent.ConcurrentSkipListMap<K, V> {
+        private static final long serialVersionUID = 1L;
+    }
+
+    @Test
+    public void testCustomConcurrentSortedTypesPreserveRequestedRuntimeType() {
+        // regression: a concrete sorted subclass was caught by the greedy SortedSet/SortedMap branch and
+        // downgraded to TreeSet/TreeMap (losing the requested runtime type, and the thread-safety of these
+        // concurrent skip-list subclasses) instead of being instantiated directly.
+        final Collection<String> set = Suppliers.<String> ofCollection(CustomConcurrentSkipListSet.class).get();
+        Assertions.assertTrue(set instanceof CustomConcurrentSkipListSet, set.getClass().getName());
+
+        final Map<String, Integer> map = Suppliers.<String, Integer> ofMap(CustomConcurrentSkipListMap.class).get();
+        Assertions.assertTrue(map instanceof CustomConcurrentSkipListMap, map.getClass().getName());
+    }
 }

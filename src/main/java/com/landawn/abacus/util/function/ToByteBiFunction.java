@@ -13,6 +13,8 @@
  */
 package com.landawn.abacus.util.function;
 
+import com.landawn.abacus.util.Throwables;
+
 /**
  * Represents a function that accepts two arguments and produces a byte-valued result.
  * This is the {@code byte}-producing primitive specialization for {@link java.util.function.BiFunction}.
@@ -28,7 +30,7 @@ package com.landawn.abacus.util.function;
  * @see ToByteFunction
  */
 @FunctionalInterface
-public interface ToByteBiFunction<T, U> {
+public interface ToByteBiFunction<T, U> extends Throwables.ToByteBiFunction<T, U, RuntimeException> {
     /**
      * Applies this function to the given arguments.
      *
@@ -49,5 +51,16 @@ public interface ToByteBiFunction<T, U> {
      * @param u the second function argument
      * @return the function result as a byte value
      */
+    @Override
     byte applyAsByte(T t, U u);
+
+    /**
+     * Returns this object as a {@link Throwables.ToByteBiFunction} view.
+     *
+     * @param <E> the target exception type for compatibility with {@code Throwables.ToByteBiFunction}
+     * @return a {@link Throwables.ToByteBiFunction} view of this object
+     */
+    default <E extends Throwable> Throwables.ToByteBiFunction<T, U, E> toThrowable() {
+        return (Throwables.ToByteBiFunction<T, U, E>) this;
+    }
 }

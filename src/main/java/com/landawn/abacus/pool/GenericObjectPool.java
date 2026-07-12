@@ -69,8 +69,8 @@ import com.landawn.abacus.util.Objectory;
  * // Add resources
  * pool.add(new MyResource());
  *
- * // Take and use resources
- * MyResource resource = pool.take();
+ * // Poll and use resources
+ * MyResource resource = pool.poll();
  * try {
  *     // use resource
  * } finally {
@@ -307,7 +307,7 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
 
                     // Re-check expiry inside the lock: time spent in sizeOf()/evict() may have
                     // expired the element; pushing it would corrupt hit/miss accounting and expose
-                    // a doomed object to the next take()er (mirrors the timed add variant).
+                    // a doomed object to the next poller (mirrors the timed add variant).
                     if (element.activityPrint().isExpired()) {
                         return false;
                     }
@@ -435,7 +435,7 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
                 if (pool.size() < capacity) {
                     // Re-check expiry: the element may have expired during the awaitNanos wait
                     // below. Pushing an expired element corrupts hit/miss accounting and exposes
-                    // a doomed object to the next take()er.
+                    // a doomed object to the next poller.
                     if (element.activityPrint().isExpired()) {
                         return false;
                     }
@@ -471,7 +471,7 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
 
                         // Re-check expiry inside the lock: time spent in sizeOf()/evict() above (which
                         // may run slow destroy callbacks) could have expired the element; pushing it
-                        // would corrupt hit/miss accounting and expose a doomed object to the next take()er
+                        // would corrupt hit/miss accounting and expose a doomed object to the next poller
                         // (mirrors the non-timed add variant).
                         if (element.activityPrint().isExpired()) {
                             return false;
@@ -549,7 +549,7 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * E obj = pool.take();
+     * E obj = pool.poll();
      * if (obj != null) {
      *     try {
      *         // use the object
@@ -566,7 +566,7 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
      */
     @MayReturnNull
     @Override
-    public E take() throws IllegalStateException {
+    public E poll() throws IllegalStateException {
         assertNotClosed();
 
         E element = null;
@@ -576,7 +576,7 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
         try {
             // Re-check inside the lock: a concurrent close() could have set isClosed and
             // started removeAll() between the unlocked check above and our lock acquisition.
-            // Without this check, take() would happily pop and return an element that close()
+            // Without this check, poll() would happily pop and return an element that close()
             // will not destroy (since the snapshot was taken before our pop), leaking it and
             // handing a "live" element back from a closed pool.
             assertNotClosed();
@@ -595,7 +595,7 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
                     activityPrint.updateAccessCount();
 
                     if (memoryMeasure != null) {
-                        subtractTakenElementMemory(element);
+                        subtractPolledElementMemory(element);
                     }
 
                     notFull.signal();
@@ -634,7 +634,7 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
      */
     @MayReturnNull
     @Override
-    public E take(final long timeout, final TimeUnit unit) throws IllegalStateException, InterruptedException {
+    public E poll(final long timeout, final TimeUnit unit) throws IllegalStateException, InterruptedException {
         assertNotClosed();
 
         E element = null;
@@ -662,7 +662,7 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
                         activityPrint.updateAccessCount();
 
                         if (memoryMeasure != null) {
-                            subtractTakenElementMemory(element);
+                            subtractPolledElementMemory(element);
                         }
                     }
 
@@ -673,7 +673,7 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
                     }
 
                     // Just popped an expired element. Skip awaiting and re-check the
-                    // pool — there may still be valid elements ready to take. Otherwise
+                    // pool — there may still be valid elements ready to poll. Otherwise
                     // we would block on notEmpty even though no producer needs to signal.
                     continue;
                 }
@@ -702,7 +702,7 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
     }
 
     /**
-     * Subtracts the just-taken element's measured memory size from {@link #totalDataSize}.
+     * Subtracts the just-polled element's measured memory size from {@link #totalDataSize}.
      * <p>
      * Must be called while holding {@link #lock} and only when {@link #memoryMeasure} is non-{@code null}.
      * A user-supplied {@code sizeOf} that throws after the element has already been popped would otherwise
@@ -712,7 +712,7 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
      *
      * @param element the element that was just popped from the pool
      */
-    private void subtractTakenElementMemory(final E element) {
+    private void subtractPolledElementMemory(final E element) {
         try {
             final long elementMemorySize = memoryMeasure.sizeOf(element);
 
@@ -723,7 +723,7 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
             }
         } catch (final Exception ex) {
             if (logger.isWarnEnabled()) {
-                logger.warn("Error measuring memory size during take: " + ExceptionUtil.getErrorMessage(ex, true));
+                logger.warn("Error measuring memory size during poll: " + ExceptionUtil.getErrorMessage(ex, true));
             }
         }
     }
@@ -1012,7 +1012,7 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
         }
 
         // Phase 2: destroy outside the lock so user destroy() callbacks (which may close DB/TCP
-        // connections) can't stall the pool against unrelated take/add/etc.
+        // connections) can't stall the pool against unrelated poll/add/etc.
         try {
             if (N.notEmpty(removingObjects)) {
                 destroyAll(removingObjects, Caller.EVICT);
@@ -1091,7 +1091,7 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
             doomed = new ArrayList<>(pool);
             pool.clear();
             // Wake every waiter on either condition. notFull alone covered add(timeout) waiters,
-            // but take(timeout) waiters on notEmpty would otherwise hang until their own timeout
+            // but poll(timeout) waiters on notEmpty would otherwise hang until their own timeout
             // expired even though the pool is being torn down.
             notFull.signalAll();
             notEmpty.signalAll();

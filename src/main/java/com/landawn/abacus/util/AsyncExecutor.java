@@ -142,6 +142,9 @@ public class AsyncExecutor {
             throws IllegalArgumentException {
         N.checkArgNotNegative(coreThreadPoolSize, cs.coreThreadPoolSize);
         N.checkArgNotNegative(maxThreadPoolSize, cs.maxThreadPoolSize);
+        if (coreThreadPoolSize == 0 && maxThreadPoolSize == 0) {
+            throw new IllegalArgumentException("coreThreadPoolSize and maxThreadPoolSize cannot both be zero");
+        }
         N.checkArgNotNegative(keepAliveTime, cs.keepAliveTime);
         N.checkArgNotNull(unit, cs.unit);
 

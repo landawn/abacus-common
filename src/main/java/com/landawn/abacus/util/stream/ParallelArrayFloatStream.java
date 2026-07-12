@@ -130,7 +130,7 @@ final class ParallelArrayFloatStream extends ArrayFloatStream {
      * If the stream can be processed sequentially, delegates to the sequential implementation;
      * otherwise boxes elements and delegates to the parallel object stream's {@code takeWhile}.
      *
-     * <p><b>&#9888; Parallel streams:</b> this operation does not guarantee encounter-order prefix
+     * <p><b>&#9888;&#65039; Parallel streams:</b> this operation does not guarantee encounter-order prefix
      * semantics; later matching elements may be returned.
      *
      * @param predicate a non-interfering, stateless predicate to apply to each element
@@ -156,7 +156,7 @@ final class ParallelArrayFloatStream extends ArrayFloatStream {
      * delegates to the sequential implementation; otherwise boxes elements and delegates to
      * the parallel object stream's {@code dropWhile}.
      *
-     * <p><b>&#9888; Parallel streams:</b> this operation does not guarantee encounter-order prefix/suffix
+     * <p><b>&#9888;&#65039; Parallel streams:</b> this operation does not guarantee encounter-order prefix/suffix
      * semantics; later matching elements may be dropped.
      *
      * @param predicate a non-interfering, stateless predicate to apply to each element
@@ -561,7 +561,7 @@ final class ParallelArrayFloatStream extends ArrayFloatStream {
                         while (cursor < to && eHolder.value() == null) {
                             action.accept(elements[cursor++]);
                         }
-                    } catch (final Exception e) {
+                    } catch (final Throwable e) { // NOSONAR
                         setError(eHolder, e);
                     }
                 });
@@ -585,7 +585,7 @@ final class ParallelArrayFloatStream extends ArrayFloatStream {
 
                             action.accept(next);
                         }
-                    } catch (final Exception e) {
+                    } catch (final Throwable e) { // NOSONAR
                         setError(eHolder, e);
                     }
                 });
@@ -707,7 +707,7 @@ final class ParallelArrayFloatStream extends ArrayFloatStream {
                         while (cursor < to && eHolder.value() == null) {
                             result = accumulator.applyAsFloat(result, elements[cursor++]);
                         }
-                    } catch (final Exception e) {
+                    } catch (final Throwable e) { // NOSONAR
                         setError(eHolder, e);
                     }
 
@@ -734,7 +734,7 @@ final class ParallelArrayFloatStream extends ArrayFloatStream {
 
                             result = accumulator.applyAsFloat(result, next);
                         }
-                    } catch (final Exception e) {
+                    } catch (final Throwable e) { // NOSONAR
                         setError(eHolder, e);
                     }
 
@@ -826,7 +826,7 @@ final class ParallelArrayFloatStream extends ArrayFloatStream {
                         while (cursor < to && eHolder.value() == null) {
                             result = accumulator.applyAsFloat(result, elements[cursor++]);
                         }
-                    } catch (final Exception e) {
+                    } catch (final Throwable e) { // NOSONAR
                         setError(eHolder, e);
                     }
 
@@ -862,7 +862,7 @@ final class ParallelArrayFloatStream extends ArrayFloatStream {
 
                             result = accumulator.applyAsFloat(result, next);
                         }
-                    } catch (final Exception e) {
+                    } catch (final Throwable e) { // NOSONAR
                         setError(eHolder, e);
                     }
 
@@ -954,7 +954,7 @@ final class ParallelArrayFloatStream extends ArrayFloatStream {
                         while (cursor < to && eHolder.value() == null) {
                             accumulator.accept(container, elements[cursor++]);
                         }
-                    } catch (final Exception e) {
+                    } catch (final Throwable e) { // NOSONAR
                         setError(eHolder, e);
                     }
 
@@ -981,7 +981,7 @@ final class ParallelArrayFloatStream extends ArrayFloatStream {
 
                             accumulator.accept(container, next);
                         }
-                    } catch (final Exception e) {
+                    } catch (final Throwable e) { // NOSONAR
                         setError(eHolder, e);
                     }
 
@@ -1035,7 +1035,7 @@ final class ParallelArrayFloatStream extends ArrayFloatStream {
                                 break;
                             }
                         }
-                    } catch (final Exception e) {
+                    } catch (final Throwable e) { // NOSONAR
                         setError(eHolder, e);
                     }
                 });
@@ -1062,7 +1062,7 @@ final class ParallelArrayFloatStream extends ArrayFloatStream {
                                 break;
                             }
                         }
-                    } catch (final Exception e) {
+                    } catch (final Throwable e) { // NOSONAR
                         setError(eHolder, e);
                     }
                 });
@@ -1116,7 +1116,7 @@ final class ParallelArrayFloatStream extends ArrayFloatStream {
                                 break;
                             }
                         }
-                    } catch (final Exception e) {
+                    } catch (final Throwable e) { // NOSONAR
                         setError(eHolder, e);
                     }
                 });
@@ -1143,7 +1143,7 @@ final class ParallelArrayFloatStream extends ArrayFloatStream {
                                 break;
                             }
                         }
-                    } catch (final Exception e) {
+                    } catch (final Throwable e) { // NOSONAR
                         setError(eHolder, e);
                     }
                 });
@@ -1197,7 +1197,7 @@ final class ParallelArrayFloatStream extends ArrayFloatStream {
                                 break;
                             }
                         }
-                    } catch (final Exception e) {
+                    } catch (final Throwable e) { // NOSONAR
                         setError(eHolder, e);
                     }
                 });
@@ -1224,7 +1224,7 @@ final class ParallelArrayFloatStream extends ArrayFloatStream {
                                 break;
                             }
                         }
-                    } catch (final Exception e) {
+                    } catch (final Throwable e) { // NOSONAR
                         setError(eHolder, e);
                     }
                 });
@@ -1289,7 +1289,7 @@ final class ParallelArrayFloatStream extends ArrayFloatStream {
                                 break;
                             }
                         }
-                    } catch (final Exception e) {
+                    } catch (final Throwable e) { // NOSONAR
                         setError(eHolder, e);
                     }
                 });
@@ -1322,7 +1322,7 @@ final class ParallelArrayFloatStream extends ArrayFloatStream {
                                 break;
                             }
                         }
-                    } catch (final Exception e) {
+                    } catch (final Throwable e) { // NOSONAR
                         setError(eHolder, e);
                     }
                 });
@@ -1387,7 +1387,7 @@ final class ParallelArrayFloatStream extends ArrayFloatStream {
                                 break;
                             }
                         }
-                    } catch (final Exception e) {
+                    } catch (final Throwable e) { // NOSONAR
                         setError(eHolder, e);
                     }
                 });
@@ -1419,7 +1419,7 @@ final class ParallelArrayFloatStream extends ArrayFloatStream {
                                 break;
                             }
                         }
-                    } catch (final Exception e) {
+                    } catch (final Throwable e) { // NOSONAR
                         setError(eHolder, e);
                     }
                 });
@@ -1484,7 +1484,7 @@ final class ParallelArrayFloatStream extends ArrayFloatStream {
                                 break;
                             }
                         }
-                    } catch (final Exception e) {
+                    } catch (final Throwable e) { // NOSONAR
                         setError(eHolder, e);
                     }
                 });
@@ -1517,7 +1517,7 @@ final class ParallelArrayFloatStream extends ArrayFloatStream {
                                 break;
                             }
                         }
-                    } catch (final Exception e) {
+                    } catch (final Throwable e) { // NOSONAR
                         setError(eHolder, e);
                     }
                 });

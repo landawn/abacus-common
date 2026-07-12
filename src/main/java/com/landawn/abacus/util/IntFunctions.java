@@ -1398,7 +1398,9 @@ public final class IntFunctions {
                 // Must precede the SortedSet branch (like Suppliers.ofCollection):
                 // downgrading to TreeSet would silently lose thread-safety.
                 ret = size -> new ConcurrentSkipListSet<>();
-            } else if (SortedSet.class.isAssignableFrom(targetType)) {
+            } else if (SortedSet.class.isAssignableFrom(targetType) && (targetType.isInterface() || Modifier.isAbstract(targetType.getModifiers()))) {
+                // Only downgrade the SortedSet/NavigableSet interfaces (or an abstract sorted-set type) to
+                // TreeSet; a concrete sorted-set subclass is instantiated below to preserve its runtime type.
                 ret = ofSortedSet();
             } else if (Queue.class.equals(targetType) || AbstractQueue.class.equals(targetType) || Deque.class.equals(targetType)) {
                 return ofDeque();
@@ -1523,7 +1525,9 @@ public final class IntFunctions {
                 // Must precede the SortedMap branch (like Suppliers.ofMap):
                 // downgrading to TreeMap would silently lose thread-safety.
                 ret = size -> new ConcurrentSkipListMap<>();
-            } else if (SortedMap.class.isAssignableFrom(targetType)) {
+            } else if (SortedMap.class.isAssignableFrom(targetType) && (targetType.isInterface() || Modifier.isAbstract(targetType.getModifiers()))) {
+                // Only downgrade the SortedMap/NavigableMap interfaces (or an abstract sorted-map type) to
+                // TreeMap; a concrete sorted-map subclass is instantiated below to preserve its runtime type.
                 ret = ofSortedMap();
             } else if (IdentityHashMap.class.isAssignableFrom(targetType)) {
                 ret = ofIdentityHashMap();
@@ -1575,7 +1579,7 @@ public final class IntFunctions {
                     } else if (targetType.isAssignableFrom(HashMap.class)) {
                         ret = ofMap();
                     } else {
-                        throw new IllegalArgumentException("Not able to create instance for Map: " + ClassUtil.getCanonicalClassName(targetType));
+                        throw new IllegalArgumentException("Not able to create instance for Map: " + targetType);
                     }
                 }
             }

@@ -155,6 +155,16 @@ public class FileSystemUtilTest extends TestBase {
     }
 
     @Test
+    public void testParseDir_BareNumericLine() throws IOException {
+        // regression: a line that is nothing but the byte count (digits reaching index 0) was
+        // rejected as invalid because the "no digit found" check (j < 0) also fired when the
+        // backward scan for the count's start ran off the front of the line.
+        Assertions.assertEquals(12345678L, newFileSystemUtil().parseDir("12345678", "."));
+        // a line with no digits at all must still be rejected
+        Assertions.assertThrows(IOException.class, () -> newFileSystemUtil().parseDir("bytes free", "."));
+    }
+
+    @Test
     public void testFreeSpaceUnix_EmptyPath() {
         IllegalArgumentException exception = Assertions.assertThrows(IllegalArgumentException.class,
                 () -> newFileSystemUtil().freeSpaceUnix("", true, false, 0));

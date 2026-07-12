@@ -3383,7 +3383,7 @@ class ArrayStream<T> extends AbstractStream<T> {
         assertNotClosed();
         checkArgNotNegative(atLeast, cs.atLeast);
         checkArgNotNegative(atMost, cs.atMost);
-        checkArgument(atLeast <= atMost, "'atLeast' must be <= 'atMost'");
+        checkArgument(atLeast <= atMost, "'atLeast' (%s) must be <= 'atMost' (%s)", atLeast, atMost);
 
         long cnt = 0;
 
@@ -3659,6 +3659,10 @@ class ArrayStream<T> extends AbstractStream<T> {
 
                 @Override
                 public void advance(final long n) {
+                    if (n <= 0) {
+                        return;
+                    }
+
                     if (!executed) {
                         executed = true;
                         action.run();

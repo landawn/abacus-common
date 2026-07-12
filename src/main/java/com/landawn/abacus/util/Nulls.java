@@ -533,4 +533,86 @@ public final class Nulls {
         return iter != null && iter.hasNext() ? iter.next() : null;
     }
 
+    /**
+     * Returns the last element of the provided array.
+     *
+     * <p>If the array is {@code null} or empty, this method returns {@code null}. A present last
+     * element may itself be {@code null}, in which case {@code null} is returned and is
+     * indistinguishable from the empty-array case.</p>
+     *
+     * <p>Unlike {@link #lastNonNull(Object[])}, this method does <em>not</em> skip trailing
+     * {@code null} elements; it always returns the element at the last index.</p>
+     *
+     * @param <T> the type of the elements.
+     * @param a the array to read.
+     * @return the last element, which may itself be {@code null}, or {@code null} if the array is {@code null} or empty.
+     * @see #lastNonNull(Object[])
+     */
+    @MayReturnNull
+    @Beta
+    public static <T> T lastElement(final T[] a) {
+        return N.isEmpty(a) ? null : a[a.length - 1];
+    }
+
+    /**
+     * Returns the last element of the provided iterable.
+     *
+     * <p>If the iterable is {@code null} or empty, this method returns {@code null}. A present last
+     * element may itself be {@code null}, in which case {@code null} is returned and is
+     * indistinguishable from the empty-iterable case.</p>
+     *
+     * <p>Unlike {@link #lastNonNull(Iterable)}, this method does <em>not</em> skip trailing
+     * {@code null} elements. Non-random-access iterables are traversed once to their end.</p>
+     *
+     * @param <T> the type of the elements.
+     * @param c the iterable to read.
+     * @return the last element, which may itself be {@code null}, or {@code null} if the iterable is {@code null} or empty.
+     * @see #lastNonNull(Iterable)
+     */
+    @MayReturnNull
+    @Beta
+    public static <T> T lastElement(final Iterable<? extends T> c) {
+        if (c == null) {
+            return null;
+        }
+
+        if (c instanceof List && c instanceof RandomAccess) {
+            final List<T> list = (List<T>) c;
+            return list.isEmpty() ? null : list.get(list.size() - 1);
+        }
+
+        return lastElement(c.iterator());
+    }
+
+    /**
+     * Returns the last element of the provided iterator.
+     *
+     * <p>If the iterator is {@code null} or empty, this method returns {@code null}. A present last
+     * element may itself be {@code null}, in which case {@code null} is returned and is
+     * indistinguishable from the empty-iterator case.</p>
+     *
+     * <p>Unlike {@link #lastNonNull(Iterator)}, this method does <em>not</em> skip trailing
+     * {@code null} elements. It consumes the iterator fully.</p>
+     *
+     * @param <T> the type of the elements.
+     * @param iter the iterator to read.
+     * @return the last element, which may itself be {@code null}, or {@code null} if the iterator is {@code null} or empty.
+     * @see #lastNonNull(Iterator)
+     */
+    @MayReturnNull
+    @Beta
+    public static <T> T lastElement(final Iterator<? extends T> iter) {
+        if (iter == null || !iter.hasNext()) {
+            return null;
+        }
+
+        T result;
+
+        do {
+            result = iter.next();
+        } while (iter.hasNext());
+
+        return result;
+    }
+
 }

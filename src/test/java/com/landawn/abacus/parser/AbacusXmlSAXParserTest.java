@@ -49,6 +49,25 @@ public class AbacusXmlSAXParserTest extends AbstractXmlParserTest {
     }
 
     @Test
+    public void testDeserialize_ObjectArray_withoutElementType_returnsObjectArrayLikeStAX() {
+        // regression: the SAX handler (unlike its StAX/DOM siblings) forced the element type to
+        // String when the target was Object[] and no element type was configured, so the String[]
+        // placeholder array drove the final conversion and the returned array class was String[].
+        // After the fix, SAX matches StAX exactly: a true Object[] is returned.
+        // (Known deferred cross-parser divergence: the DOM parser additionally honors per-element
+        // "type" attributes here - e.g. Integer 1 instead of "1" - while StAX/SAX do not; that
+        // divergence is documented as deferred, alongside the standalone-isNull divergence.)
+        final String xml = "<array><e type=\"Integer\">1</e><e type=\"String\">two</e></array>";
+        final Object[] viaStAX = abacusXMLStAXParser.deserialize(xml, Object[].class);
+        final Object[] result = abacusXMLSAXParser.deserialize(xml, Object[].class);
+
+        assertEquals(Object[].class, result.getClass());
+        assertEquals(2, result.length);
+        assertEquals(Object[].class, viaStAX.getClass());
+        assertTrue(N.deepEquals(viaStAX, result));
+    }
+
+    @Test
     public void test_03() {
         Element e = new Element(100, "abc", N.toList(1L), N.asMap("a", BigInteger.ZERO), N.asMap("b", 2d), N.toList("Speaker"));
         Map<String, Object> map = Beans.beanToMap(e);

@@ -961,6 +961,7 @@ public final class Range<T extends Comparable<? super T>> implements Serializabl
      *
      * @param other the range to test for overlap, {@code null} returns false
      * @return {@code true} if the specified range overlaps with this range; otherwise, false
+     * @see #overlaps(Range)
      * @see #intersection(Range)
      * @see #isBeforeRange(Range)
      * @see #isAfterRange(Range)
@@ -968,6 +969,27 @@ public final class Range<T extends Comparable<? super T>> implements Serializabl
     public boolean isOverlappedBy(final Range<T> other) {
         //NOSONAR
         return other != null && !isEmpty() && !other.isEmpty() && !isAfterRange(other) && !isBeforeRange(other);
+    }
+
+    /**
+     * Checks whether this range overlaps with the specified range.
+     * This active-form alias is equivalent to {@link #isOverlappedBy(Range)}.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Range<Integer> range = Range.closed(1, 5);
+     * range.overlaps(Range.closed(3, 8));   // returns true
+     * range.overlaps(Range.closed(6, 10));  // returns false
+     * range.overlaps(null);                 // returns false
+     * }</pre>
+     *
+     * @param other the range to test for overlap, {@code null} returns false
+     * @return {@code true} if the specified range overlaps with this range; otherwise, false
+     * @see #isOverlappedBy(Range)
+     * @see #intersection(Range)
+     */
+    public boolean overlaps(final Range<T> other) {
+        return isOverlappedBy(other);
     }
 
     /**

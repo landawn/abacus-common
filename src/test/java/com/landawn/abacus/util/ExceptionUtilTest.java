@@ -499,14 +499,14 @@ public class ExceptionUtilTest extends TestBase {
         SQLException sqlEx = new SQLException("sql", ioEx);
         RuntimeException runtimeEx = new RuntimeException("runtime", sqlEx);
 
-        List<Throwable> causes = ExceptionUtil.listCause(runtimeEx);
+        List<Throwable> causes = ExceptionUtil.listCauses(runtimeEx);
         Assertions.assertEquals(3, causes.size());
         Assertions.assertEquals(runtimeEx, causes.get(0));
         Assertions.assertEquals(sqlEx, causes.get(1));
         Assertions.assertEquals(ioEx, causes.get(2));
 
         RuntimeException noCause = new RuntimeException("no cause");
-        causes = ExceptionUtil.listCause(noCause);
+        causes = ExceptionUtil.listCauses(noCause);
         Assertions.assertEquals(1, causes.size());
         Assertions.assertEquals(noCause, causes.get(0));
 
@@ -517,32 +517,32 @@ public class ExceptionUtilTest extends TestBase {
             causeField.setAccessible(true);
             causeField.set(circular1, circular2);
 
-            causes = ExceptionUtil.listCause(circular1);
+            causes = ExceptionUtil.listCauses(circular1);
             Assertions.assertTrue(causes.size() <= 3);
         } catch (Exception e) {
         }
     }
 
     @Test
-    public void testFirstCause() {
+    public void testGetRootCause() {
         IOException ioEx = new IOException("io");
         SQLException sqlEx = new SQLException("sql", ioEx);
         RuntimeException runtimeEx = new RuntimeException("runtime", sqlEx);
 
-        Throwable firstCause = ExceptionUtil.firstCause(runtimeEx);
+        Throwable firstCause = ExceptionUtil.getRootCause(runtimeEx);
         Assertions.assertEquals(ioEx, firstCause);
 
         RuntimeException noCause = new RuntimeException("no cause");
-        firstCause = ExceptionUtil.firstCause(noCause);
+        firstCause = ExceptionUtil.getRootCause(noCause);
         Assertions.assertEquals(noCause, firstCause);
 
         RuntimeException singleCause = new RuntimeException("single", ioEx);
-        firstCause = ExceptionUtil.firstCause(singleCause);
+        firstCause = ExceptionUtil.getRootCause(singleCause);
         Assertions.assertEquals(ioEx, firstCause);
     }
 
     @Test
-    public void testFirstCause_CircularReference() {
+    public void testGetRootCause_CircularReference() {
         RuntimeException circular1 = new RuntimeException("circular1");
         RuntimeException circular2 = new RuntimeException("circular2", circular1);
         try {
@@ -551,7 +551,7 @@ public class ExceptionUtilTest extends TestBase {
             causeField.set(circular1, circular2);
 
             // Should not loop forever, should terminate due to identity-based cycle detection
-            Throwable first = ExceptionUtil.firstCause(circular1);
+            Throwable first = ExceptionUtil.getRootCause(circular1);
             Assertions.assertNotNull(first);
         } catch (Exception e) {
             // Reflection may fail on some JVMs
@@ -599,6 +599,30 @@ public class ExceptionUtilTest extends TestBase {
     }
 
     @Test
+    public void testCauseQueriesDoNotTruncateDeepAcyclicChains() {
+        Throwable chain = new IOException("deep");
+
+        for (int i = 0; i < 150; i++) {
+            chain = new RuntimeException((String) null, chain);
+        }
+
+        Assertions.assertTrue(ExceptionUtil.hasCause(chain, IOException.class));
+        Assertions.assertTrue(ExceptionUtil.hasCause(chain, cause -> cause instanceof IOException));
+        Assertions.assertTrue(ExceptionUtil.hasIOCause(chain));
+        Assertions.assertTrue(ExceptionUtil.findCause(chain, IOException.class).isPresent());
+        Assertions.assertTrue(ExceptionUtil.findCause(chain, cause -> cause instanceof IOException).isPresent());
+        Assertions.assertEquals("deep", ExceptionUtil.getErrorMessage(chain));
+
+        Throwable sqlChain = new SQLException("deep-sql");
+
+        for (int i = 0; i < 150; i++) {
+            sqlChain = new RuntimeException((String) null, sqlChain);
+        }
+
+        Assertions.assertTrue(ExceptionUtil.hasSQLCause(sqlChain));
+    }
+
+    @Test
     public void testComplexExceptionChains() {
         IOException level3 = new IOException("level 3");
         SQLException level2 = new SQLException("level 2", level3);
@@ -609,10 +633,10 @@ public class ExceptionUtilTest extends TestBase {
         Assertions.assertTrue(foundIo.isPresent());
         Assertions.assertEquals(level3, foundIo.get());
 
-        Throwable first = ExceptionUtil.firstCause(level0);
+        Throwable first = ExceptionUtil.getRootCause(level0);
         Assertions.assertEquals(level3, first);
 
-        List<Throwable> causes = ExceptionUtil.listCause(level0);
+        List<Throwable> causes = ExceptionUtil.listCauses(level0);
         Assertions.assertEquals(4, causes.size());
     }
 
@@ -650,7 +674,7 @@ public class ExceptionUtilTest extends TestBase {
 
     @Test
     public void testHasCause_NullThrowable() {
-        // null Throwable should not throw NPE; consistent with firstCause/listCause
+        // null Throwable should not throw NPE; consistent with getRootCause/listCause
         Assertions.assertFalse(ExceptionUtil.hasCause((Throwable) null, IOException.class));
         Assertions.assertFalse(ExceptionUtil.hasCause((Throwable) null, ex -> true));
         Assertions.assertFalse(ExceptionUtil.hasSQLCause((Throwable) null));
@@ -806,15 +830,15 @@ public class ExceptionUtilTest extends TestBase {
     }
 
     @Test
-    public void testFirstCause_NullThrowable() {
-        // Bug fix: firstCause(null) should return null instead of NPE
-        Assertions.assertNull(ExceptionUtil.firstCause(null));
+    public void testGetRootCause_NullThrowable() {
+        // Bug fix: getRootCause(null) should return null instead of NPE
+        Assertions.assertNull(ExceptionUtil.getRootCause(null));
     }
 
     @Test
     public void testListCause_NullThrowable() {
-        // Bug fix: listCause(null) should return empty list instead of NPE
-        List<Throwable> result = ExceptionUtil.listCause(null);
+        // Bug fix: listCauses(null) should return empty list instead of NPE
+        List<Throwable> result = ExceptionUtil.listCauses(null);
         Assertions.assertNotNull(result);
         Assertions.assertTrue(result.isEmpty());
     }
@@ -831,7 +855,7 @@ public class ExceptionUtilTest extends TestBase {
         } catch (Exception ignored) {
             return;
         }
-        List<Throwable> causes = ExceptionUtil.listCause(a);
+        List<Throwable> causes = ExceptionUtil.listCauses(a);
         // Should contain a and b only (no infinite loop)
         Assertions.assertEquals(2, causes.size());
     }

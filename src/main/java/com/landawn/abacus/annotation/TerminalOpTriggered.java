@@ -22,7 +22,7 @@ import java.lang.annotation.Target;
 
 /**
  * Marks methods where intermediate operations trigger terminal operations internally,
- * resulting in the closure of the current stream and the creation of a new stream.
+ * which consumes the current stream and creates a new stream. The upstream stream may be closed as a result.
  * This annotation is used to document stream operations that break the typical lazy evaluation pattern.
  *
  * <p>Within abacus this is applied across {@code com.landawn.abacus.util.Seq} and the
@@ -32,14 +32,14 @@ import java.lang.annotation.Target;
  *
  * <p>In normal pipeline processing, intermediate operations are lazy and do not consume the
  * source until a terminal operation is invoked. Methods marked with {@code @TerminalOpTriggered}
- * break that pattern: the upstream pipeline is consumed and closed, a buffer is built, and a
+ * break that pattern: the upstream pipeline is consumed (and may be closed), a buffer is built, and a
  * fresh pipeline is returned over that buffer. Callers may keep chaining as if it were a normal
  * intermediate operation, but the lazy-evaluation guarantee no longer holds for everything
  * upstream of this call.</p>
  *
  * <p><b>What happens internally:</b></p>
  * <ul>
- *   <li>The original (upstream) stream is fully consumed and then closed.</li>
+ *   <li>The original (upstream) stream is fully consumed and may then be closed.</li>
  *   <li>Elements are buffered, reordered, grouped, or otherwise post-processed in memory.</li>
  *   <li>A new pipeline is returned over the buffered data and continues lazily from there.</li>
  *   <li>Subsequent operations work on the new pipeline, not the original one.</li>

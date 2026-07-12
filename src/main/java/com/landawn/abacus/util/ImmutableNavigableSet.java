@@ -370,6 +370,19 @@ public final class ImmutableNavigableSet<E> extends ImmutableSortedSet<E> implem
     }
 
     /**
+     * Returns an ImmutableNavigableSet containing the elements of the specified array in natural order.
+     * Duplicate elements are removed. If the array is {@code null} or empty, the cached empty set is returned.
+     *
+     * @param <E> the type of elements, which must be mutually comparable
+     * @param a the array whose elements are to be copied
+     * @return an ImmutableNavigableSet containing the array elements
+     * @throws NullPointerException if the array contains a {@code null} element
+     */
+    public static <E> ImmutableNavigableSet<E> copyOf(final E[] a) {
+        return N.isEmpty(a) ? empty() : new ImmutableNavigableSet<>(new TreeSet<>(Arrays.asList(a)));
+    }
+
+    /**
      * Returns an ImmutableNavigableSet containing the elements of the specified collection.
      * If the provided collection is already an instance of ImmutableNavigableSet, it is directly returned.
      * If the provided collection is {@code null} or empty, an empty ImmutableNavigableSet is returned.

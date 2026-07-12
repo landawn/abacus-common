@@ -185,15 +185,15 @@ public enum LockMode {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * LockMode mode = LockMode.valueOf(5);     // returns LockMode.RU
-     * LockMode mode2 = LockMode.valueOf(12);   // returns LockMode.UD
+     * LockMode mode = LockMode.of(5);     // returns LockMode.RU
+     * LockMode mode2 = LockMode.of(12);   // returns LockMode.UD
      * }</pre>
      *
      * @param intValue the integer value to convert to a LockMode
      * @return the corresponding LockMode
      * @throws IllegalArgumentException if the intValue does not correspond to a valid LockMode
      */
-    public static LockMode valueOf(final int intValue) {
+    public static LockMode of(final int intValue) {
         switch (intValue) {
             case 1:
                 return R;

@@ -60,6 +60,18 @@ public class CodeGenerationUtilTest extends TestBase {
         private String category;
     }
 
+    public static class KeywordProperty {
+        private String value;
+
+        public String getDefault() {
+            return value;
+        }
+
+        public void setDefault(final String value) {
+            this.value = value;
+        }
+    }
+
     private File tempSourceFile;
     private File tempGeneratedFile;
 
@@ -109,6 +121,14 @@ public class CodeGenerationUtilTest extends TestBase {
         assertTrue(code.contains("String id = \"id\";"));
         assertTrue(code.contains("String name = \"name\";"));
         assertFalse(code.contains("public interface x"));
+    }
+
+    @Test
+    public void test_generatePropNameTableClass_prefixesKeywordProperty() {
+        final String code = CodeGenerationUtil.generatePropNameTableClass(KeywordProperty.class, "Props");
+
+        assertTrue(code.contains("String _default = \"default\";"), code);
+        assertFalse(code.contains("String default = \"default\";"));
     }
 
     @Test

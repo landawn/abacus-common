@@ -13,6 +13,8 @@
  */
 package com.landawn.abacus.util.function;
 
+import com.landawn.abacus.util.Throwables;
+
 /**
  * Represents a function that accepts two arguments and produces a short-valued result.
  * This is the short-producing primitive specialization for {@link java.util.function.BiFunction}.
@@ -30,7 +32,7 @@ package com.landawn.abacus.util.function;
  * @param <U> the type of the second argument to the function
  */
 @FunctionalInterface
-public interface ToShortBiFunction<T, U> {
+public interface ToShortBiFunction<T, U> extends Throwables.ToShortBiFunction<T, U, RuntimeException> {
     /**
      * Applies this function to the given arguments and returns a short result.
      *
@@ -50,5 +52,16 @@ public interface ToShortBiFunction<T, U> {
      * @param u the second function argument
      * @return the function result as a primitive short
      */
+    @Override
     short applyAsShort(T t, U u);
+
+    /**
+     * Returns this object as a {@link Throwables.ToShortBiFunction} view.
+     *
+     * @param <E> the target exception type for compatibility with {@code Throwables.ToShortBiFunction}
+     * @return a {@link Throwables.ToShortBiFunction} view of this object
+     */
+    default <E extends Throwable> Throwables.ToShortBiFunction<T, U, E> toThrowable() {
+        return (Throwables.ToShortBiFunction<T, U, E>) this;
+    }
 }

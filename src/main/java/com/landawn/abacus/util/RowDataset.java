@@ -1907,7 +1907,7 @@ public final class RowDataset implements Dataset, Cloneable {
             newColumnList.add(new ArrayList<>());
         }
 
-        final boolean isNullOrIdentityKeyExtractor = keyExtractor == null || keyExtractor == Fn.identity();
+        final boolean isIdentityKeyExtractor = keyExtractor == Fn.identity();
         final Function<Object, ?> keyExtractorToUse = (Function<Object, ?>) keyExtractor;
         final Set<Object> rowSet = N.newHashSet();
         Object key = null;
@@ -1915,7 +1915,7 @@ public final class RowDataset implements Dataset, Cloneable {
 
         for (int rowIndex = 0; rowIndex < size; rowIndex++) {
             value = _columnList.get(columnIndex).get(rowIndex);
-            key = hashKey(isNullOrIdentityKeyExtractor ? value : keyExtractorToUse.apply(value));
+            key = hashKey(isIdentityKeyExtractor ? value : keyExtractorToUse.apply(value));
 
             if (rowSet.add(key)) {
                 for (int i = 0; i < columnCount; i++) {
@@ -5764,7 +5764,7 @@ public final class RowDataset implements Dataset, Cloneable {
             return new RowDataset(newColumnNameList, newColumnList, _properties);
         }
 
-        final boolean isNullOrIdentityKeyExtractor = keyExtractor == null || keyExtractor == Fn.identity();
+        final boolean isIdentityKeyExtractor = keyExtractor == Fn.identity();
         final Function<Object, ?> keyExtractorToUse = (Function<Object, ?>) keyExtractor;
         final Set<Object> rowSet = N.newHashSet();
         Object key = null;
@@ -5772,7 +5772,7 @@ public final class RowDataset implements Dataset, Cloneable {
 
         for (int rowIndex = 0; rowIndex < size; rowIndex++) {
             value = _columnList.get(columnIndex).get(rowIndex);
-            key = hashKey(isNullOrIdentityKeyExtractor ? value : keyExtractorToUse.apply(value));
+            key = hashKey(isIdentityKeyExtractor ? value : keyExtractorToUse.apply(value));
 
             if (rowSet.add(key)) {
                 for (int i = 0; i < columnCount; i++) {
@@ -5793,9 +5793,9 @@ public final class RowDataset implements Dataset, Cloneable {
     public Dataset distinctBy(final Collection<String> columnNames, final Function<? super DisposableObjArray, ?> keyExtractor) {
         N.checkArgNotNull(keyExtractor, cs.keyExtractor);
 
-        final boolean isNullOrIdentityKeyExtractor = keyExtractor == null || keyExtractor == Fn.identity();
+        final boolean isIdentityKeyExtractor = keyExtractor == Fn.identity();
 
-        if (N.size(columnNames) == 1 && isNullOrIdentityKeyExtractor) {
+        if (N.size(columnNames) == 1 && isIdentityKeyExtractor) {
             return distinctBy(columnNames.iterator().next());
         }
 
@@ -5814,14 +5814,10 @@ public final class RowDataset implements Dataset, Cloneable {
             newColumnList.add(new ArrayList<>());
         }
 
-        if (size == 0) {
-            return new RowDataset(newColumnNameList, newColumnList, _properties);
-        }
-
         final Set<Object> rowSet = N.newHashSet();
         Object[] row = Objectory.createObjectArray(columnIndexes.length);
-        Wrapper<Object[]> rowWrapper = isNullOrIdentityKeyExtractor ? Wrapper.of(row) : null;
-        final DisposableObjArray disposableArray = isNullOrIdentityKeyExtractor ? null : DisposableObjArray.wrap(row);
+        Wrapper<Object[]> rowWrapper = isIdentityKeyExtractor ? Wrapper.of(row) : null;
+        final DisposableObjArray disposableArray = isIdentityKeyExtractor ? null : DisposableObjArray.wrap(row);
         Object key = null;
 
         for (int rowIndex = 0; rowIndex < size; rowIndex++) {
@@ -5829,14 +5825,14 @@ public final class RowDataset implements Dataset, Cloneable {
                 row[i] = _columnList.get(columnIndexes[i]).get(rowIndex);
             }
 
-            key = isNullOrIdentityKeyExtractor ? rowWrapper : hashKey(keyExtractor.apply(disposableArray));
+            key = isIdentityKeyExtractor ? rowWrapper : hashKey(keyExtractor.apply(disposableArray));
 
             if (rowSet.add(key)) {
                 for (int columnIndex = 0; columnIndex < columnCount; columnIndex++) {
                     newColumnList.get(columnIndex).add(_columnList.get(columnIndex).get(rowIndex));
                 }
 
-                if (isNullOrIdentityKeyExtractor) {
+                if (isIdentityKeyExtractor) {
                     row = Objectory.createObjectArray(columnIndexes.length);
                     rowWrapper = Wrapper.of(row);
                 }
@@ -5848,7 +5844,7 @@ public final class RowDataset implements Dataset, Cloneable {
             row = null;
         }
 
-        if (isNullOrIdentityKeyExtractor) {
+        if (isIdentityKeyExtractor) {
             @SuppressWarnings("rawtypes")
             final Set<Wrapper<Object[]>> tmp = (Set) rowSet;
 

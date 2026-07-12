@@ -83,6 +83,13 @@ public class AsyncExecutorTest extends TestBase {
     }
 
     @Test
+    public void testParameterizedConstructorZeroMaximumPoolSize() {
+        Assertions.assertThrows(IllegalArgumentException.class, () -> {
+            new AsyncExecutor(0, 0, 60L, TimeUnit.SECONDS);
+        });
+    }
+
+    @Test
     public void testParameterizedConstructorNegativeKeepAliveTime() {
         Assertions.assertThrows(IllegalArgumentException.class, () -> {
             new AsyncExecutor(2, 4, -1L, TimeUnit.SECONDS);

@@ -47,7 +47,7 @@ public class PoolableTest extends TestBase {
         TestPoolable poolable = new TestPoolable(10000, 5000);
 
         assertNotNull(poolable.activityPrint());
-        assertEquals(10000, poolable.activityPrint().getLiveTime());
+        assertEquals(10000, poolable.activityPrint().getMaxLiveTime());
         assertEquals(5000, poolable.activityPrint().getMaxIdleTime());
 
         assertFalse(poolable.isDestroyed());
@@ -99,7 +99,7 @@ public class PoolableTest extends TestBase {
         assertNotNull(wrapper);
         assertEquals(testObject, wrapper.value());
         assertNotNull(wrapper.activityPrint());
-        assertEquals(Long.MAX_VALUE, wrapper.activityPrint().getLiveTime());
+        assertEquals(Long.MAX_VALUE, wrapper.activityPrint().getMaxLiveTime());
         assertEquals(Long.MAX_VALUE, wrapper.activityPrint().getMaxIdleTime());
     }
 
@@ -114,7 +114,7 @@ public class PoolableTest extends TestBase {
         assertNotNull(wrapper);
         assertEquals(testObject, wrapper.value());
         assertNotNull(wrapper.activityPrint());
-        assertEquals(liveTime, wrapper.activityPrint().getLiveTime());
+        assertEquals(liveTime, wrapper.activityPrint().getMaxLiveTime());
         assertEquals(maxIdleTime, wrapper.activityPrint().getMaxIdleTime());
     }
 

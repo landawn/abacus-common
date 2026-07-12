@@ -2017,10 +2017,10 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * }</pre>
      *
      * @param action the action to be performed for each element; must not be {@code null}
-     * @throws NullPointerException if {@code action} is {@code null}
+     * @throws IllegalArgumentException if {@code action} is {@code null}
      */
     public void forEach(final BooleanConsumer action) {
-        N.requireNonNull(action, cs.action);
+        N.checkArgNotNull(action, cs.action);
 
         forEach(0, size, action);
     }
@@ -2052,9 +2052,11 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * @throws IndexOutOfBoundsException if the effective range is out of bounds for this list
      *         (i.e., {@code min(fromIndex, max(toIndex,0)) < 0} or
      *         {@code max(fromIndex, toIndex) > size()})
+     * @throws IllegalArgumentException if {@code action} is {@code null}
      */
     public void forEach(final int fromIndex, final int toIndex, final BooleanConsumer action) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), Math.max(fromIndex, toIndex), size);
+        N.checkArgNotNull(action, cs.action);
 
         if (size > 0) {
             if (fromIndex <= toIndex) {

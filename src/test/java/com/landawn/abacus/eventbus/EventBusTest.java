@@ -622,6 +622,23 @@ public class EventBusTest extends TestBase {
         Assertions.assertEquals(1, eventBus.subscribers("testEvent", String.class).size());
     }
 
+    @Test
+    public void testTypeQueriesRejectNullDeterministically() {
+        Assertions.assertThrows(IllegalArgumentException.class, () -> eventBus.subscribers((Class<?>) null));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> eventBus.subscribers(null, (Class<?>) null));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> eventBus.stickyEvents((Class<Object>) null));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> eventBus.stickyEvents(null, (Class<Object>) null));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> eventBus.removeStickyEvents((Class<?>) null));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> eventBus.removeStickyEvents(null, (Class<?>) null));
+
+        eventBus.register(new TestSubscriber());
+        eventBus.postSticky("sticky");
+
+        Assertions.assertThrows(IllegalArgumentException.class, () -> eventBus.subscribers((Class<?>) null));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> eventBus.stickyEvents((Class<Object>) null));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> eventBus.removeStickyEvents((Class<?>) null));
+    }
+
     // ---- register(Object, ThreadMode) ----
 
     @Test

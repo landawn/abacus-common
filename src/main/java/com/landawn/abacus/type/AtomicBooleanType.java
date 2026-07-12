@@ -207,10 +207,13 @@ public class AtomicBooleanType extends AbstractAtomicType<AtomicBoolean> {
 
     /**
      * Writes an {@link java.util.concurrent.atomic.AtomicBoolean} value to a {@link CharacterWriter}.
-     * Delegates to {@link #appendTo(Appendable, AtomicBoolean)}; {@code config} is not used.
+     * Writes {@code "true"} or {@code "false"} for a non-{@code null} value. For a {@code null} value,
+     * writes {@code "false"} if {@link com.landawn.abacus.parser.JsonXmlSerConfig#isWriteNullBooleanAsFalse()}
+     * is set, or the literal {@code "null"} otherwise.
      * <p>
      * This method is specifically designed for JSON/XML serialization: it writes this type's literal form to the
-     * {@code CharacterWriter}. String quotation/escaping config is ignored.
+     * {@code CharacterWriter}. String quotation/escaping config is ignored (only the null-boolean-as-false
+     * setting is consulted).
      * <p>
      * <b>serializeTo vs. appendTo:</b> {@code serializeTo} produces machine-readable JSON/XML literal output,
      * whereas {@code appendTo} produces a plain, human-readable {@code toString()}-style rendering without JSON/XML
@@ -218,7 +221,9 @@ public class AtomicBooleanType extends AbstractAtomicType<AtomicBoolean> {
      *
      * @param writer the {@code CharacterWriter} to write to
      * @param x the {@code AtomicBoolean} value to write; may be {@code null}
-     * @param config the serialization configuration (unused for boolean values); may be {@code null}
+     * @param config the serialization configuration; if {@code x} is {@code null} and
+     *               {@link com.landawn.abacus.parser.JsonXmlSerConfig#isWriteNullBooleanAsFalse()} is set,
+     *               {@code "false"} is written instead of {@code "null"}; may be {@code null}
      * @throws IOException if an I/O error occurs during writing
      */
     @Override

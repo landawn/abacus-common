@@ -146,7 +146,7 @@ public abstract class Wrapper<T> implements Immutable {
      * in hash-based collections, enabling use cases like comparing objects by specific fields,
      * ignoring certain properties, or using custom comparison logic.</p>
      *
-     * <p><b>&#9888; Custom equality:</b> The supplied functions must obey the Java
+     * <p><b>&#9888;&#65039; Custom equality:</b> The supplied functions must obey the Java
      * {@code equals}/{@code hashCode} contract for every wrapper that may be compared with this
      * wrapper. In particular, equality must be symmetric and transitive, and values considered
      * equal by {@code equalsFunction} must produce the same hash from {@code hashFunction}.</p>
@@ -199,7 +199,7 @@ public abstract class Wrapper<T> implements Immutable {
      * This is particularly useful for complex objects where you need fine-grained control over
      * comparison logic and debugging output.</p>
      *
-     * <p><b>&#9888; Custom equality:</b> The supplied hash and equality functions must obey the
+     * <p><b>&#9888;&#65039; Custom equality:</b> The supplied hash and equality functions must obey the
      * Java {@code equals}/{@code hashCode} contract for every wrapper that may be compared with
      * this wrapper. Mixing wrappers that use incompatible custom equality functions can make
      * equality non-symmetric.</p>

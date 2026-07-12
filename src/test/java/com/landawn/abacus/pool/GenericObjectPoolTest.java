@@ -381,18 +381,18 @@ public class GenericObjectPoolTest extends TestBase {
         pool.add(p2);
         pool.add(p3);
 
-        assertEquals(p3, pool.take());
-        assertEquals(p2, pool.take());
-        assertEquals(p1, pool.take());
+        assertEquals(p3, pool.poll());
+        assertEquals(p2, pool.poll());
+        assertEquals(p1, pool.poll());
     }
 
     @Test
     public void testStats() {
         pool.add(new TestPoolable("p1"));
         pool.add(new TestPoolable("p2"));
-        pool.take();
-        pool.take();
-        pool.take();
+        pool.poll();
+        pool.poll();
+        pool.poll();
 
         PoolStats stats = pool.stats();
         assertEquals(10, stats.capacity());
@@ -404,11 +404,11 @@ public class GenericObjectPoolTest extends TestBase {
     }
 
     @Test
-    public void testTake() {
+    public void testPoll() {
         TestPoolable poolable = new TestPoolable("test1");
         pool.add(poolable);
 
-        TestPoolable taken = pool.take();
+        TestPoolable taken = pool.poll();
         assertNotNull(taken);
         assertEquals("test1", taken.getId());
         assertEquals(0, pool.size());
@@ -416,8 +416,8 @@ public class GenericObjectPoolTest extends TestBase {
     }
 
     @Test
-    public void testTakeFromEmptyPool() {
-        assertNull(pool.take());
+    public void testPollFromEmptyPool() {
+        assertNull(pool.poll());
     }
 
     @Test
@@ -437,7 +437,7 @@ public class GenericObjectPoolTest extends TestBase {
         stats = memPool.stats();
         assertEquals(200, stats.dataSize());
 
-        memPool.take();
+        memPool.poll();
         stats = memPool.stats();
         assertEquals(100, stats.dataSize());
 
@@ -451,16 +451,16 @@ public class GenericObjectPoolTest extends TestBase {
         assertTrue(pool.isEmpty());
         pool.add(new TestPoolable("p1"));
         assertFalse(pool.isEmpty());
-        pool.take();
+        pool.poll();
         assertTrue(pool.isEmpty());
     }
 
     @Test
-    public void testHitAndMissCountsOnTake() {
+    public void testHitAndMissCountsOnPoll() {
         pool.add(new TestPoolable("p1"));
 
-        pool.take(); // hit
-        pool.take(); // miss (pool empty)
+        pool.poll(); // hit
+        pool.poll(); // miss (pool empty)
 
         PoolStats stats = pool.stats();
         assertEquals(1, stats.hitCount());
@@ -468,27 +468,27 @@ public class GenericObjectPoolTest extends TestBase {
     }
 
     @Test
-    public void testTakeExpired() throws InterruptedException {
+    public void testPollExpired() throws InterruptedException {
         TestPoolable expired = new TestPoolable("expired", 50, 50);
         pool.add(expired);
 
         Thread.sleep(60);
 
-        assertNull(pool.take());
+        assertNull(pool.poll());
         assertTrue(expired.isDestroyed());
         assertEquals(Poolable.Caller.EVICT, expired.getDestroyedByCaller());
     }
 
     @Test
-    public void testTakeWithTimeout() throws InterruptedException {
+    public void testPollWithTimeout() throws InterruptedException {
         long start = System.currentTimeMillis();
-        assertNull(pool.take(100, TimeUnit.MILLISECONDS));
+        assertNull(pool.poll(100, TimeUnit.MILLISECONDS));
         long elapsed = System.currentTimeMillis() - start;
         assertTrue(elapsed >= 90);
     }
 
     @Test
-    public void testTakeWithTimeoutSuccess() throws InterruptedException {
+    public void testPollWithTimeoutSuccess() throws InterruptedException {
         CountDownLatch addLatch = new CountDownLatch(1);
 
         new Thread(() -> {
@@ -500,7 +500,7 @@ public class GenericObjectPoolTest extends TestBase {
             }
         }).start();
 
-        TestPoolable taken = pool.take(200, TimeUnit.MILLISECONDS);
+        TestPoolable taken = pool.poll(200, TimeUnit.MILLISECONDS);
         assertNotNull(taken);
         assertEquals("delayed", taken.getId());
 
@@ -527,7 +527,7 @@ public class GenericObjectPoolTest extends TestBase {
                                 addCount.incrementAndGet();
                             }
                         } else {
-                            if (pool.take() != null) {
+                            if (pool.poll() != null) {
                                 takeCount.incrementAndGet();
                             }
                         }
@@ -546,33 +546,33 @@ public class GenericObjectPoolTest extends TestBase {
     }
 
     @Test
-    public void testTakeExpiredWithTimeout() throws InterruptedException {
+    public void testPollExpiredWithTimeout() throws InterruptedException {
         TestPoolable expired = new TestPoolable("expired", 30, 30);
         pool.add(expired);
 
         Thread.sleep(50);
 
         long start = System.currentTimeMillis();
-        assertNull(pool.take(100, TimeUnit.MILLISECONDS));
+        assertNull(pool.poll(100, TimeUnit.MILLISECONDS));
         long elapsed = System.currentTimeMillis() - start;
         assertTrue(elapsed >= 90);
         assertTrue(expired.isDestroyed());
     }
 
     @Test
-    public void testTakeOnClosedPool() {
+    public void testPollOnClosedPool() {
         pool.close();
-        assertThrows(IllegalStateException.class, () -> pool.take());
+        assertThrows(IllegalStateException.class, () -> pool.poll());
     }
 
     @Test
-    public void testTakeWithTimeoutOnClosedPool() {
+    public void testPollWithTimeoutOnClosedPool() {
         pool.close();
-        assertThrows(IllegalStateException.class, () -> pool.take(100, TimeUnit.MILLISECONDS));
+        assertThrows(IllegalStateException.class, () -> pool.poll(100, TimeUnit.MILLISECONDS));
     }
 
     @Test
-    public void testTakeWithTimeout_SkipsExpiredEntryAndReturnsNext() throws InterruptedException {
+    public void testPollWithTimeout_SkipsExpiredEntryAndReturnsNext() throws InterruptedException {
         TestPoolable retained = new TestPoolable("retained");
         TestPoolable expired = new TestPoolable("expired", 10, 10);
 
@@ -580,7 +580,7 @@ public class GenericObjectPoolTest extends TestBase {
         pool.add(expired);
         Thread.sleep(20);
 
-        TestPoolable result = pool.take(50, TimeUnit.MILLISECONDS);
+        TestPoolable result = pool.poll(50, TimeUnit.MILLISECONDS);
 
         assertNotNull(result);
         assertEquals("retained", result.getId());
@@ -720,7 +720,7 @@ public class GenericObjectPoolTest extends TestBase {
         Thread.sleep(10);
         pool.add(p5);
 
-        pool.take();
+        pool.poll();
         pool.add(p1);
 
         pool.evict();
@@ -746,7 +746,7 @@ public class GenericObjectPoolTest extends TestBase {
 
         // Access some objects multiple times to increase their access count
         for (int i = 0; i < 5; i++) {
-            TestPoolable taken = countPool.take();
+            TestPoolable taken = countPool.poll();
             if (taken != null) {
                 countPool.add(taken);
             }
@@ -950,7 +950,7 @@ public class GenericObjectPoolTest extends TestBase {
         assertEquals(Poolable.Caller.CLOSE, p2.getDestroyedByCaller());
 
         assertThrows(IllegalStateException.class, () -> pool.add(new TestPoolable("p3")));
-        assertThrows(IllegalStateException.class, () -> pool.take());
+        assertThrows(IllegalStateException.class, () -> pool.poll());
     }
 
     @Test
@@ -981,10 +981,10 @@ public class GenericObjectPoolTest extends TestBase {
         pool.add(new TestPoolable("p2"));
         assertEquals(2, pool.size());
 
-        pool.take();
+        pool.poll();
         assertEquals(1, pool.size());
 
-        pool.take();
+        pool.poll();
         assertEquals(0, pool.size());
     }
 
@@ -999,17 +999,17 @@ public class GenericObjectPoolTest extends TestBase {
     }
 
     @Test
-    public void testMultipleAddAndTake() {
+    public void testMultipleAddAndPoll() {
         for (int i = 0; i < 5; i++) {
             pool.add(new TestPoolable("p" + i));
         }
         assertEquals(5, pool.size());
 
         for (int i = 0; i < 5; i++) {
-            assertNotNull(pool.take());
+            assertNotNull(pool.poll());
         }
         assertEquals(0, pool.size());
-        assertNull(pool.take());
+        assertNull(pool.poll());
     }
 
     @Test
@@ -1156,7 +1156,7 @@ public class GenericObjectPoolTest extends TestBase {
     }
 
     // ===========================================================
-    // Bug-fix tests: take(timeout) spurious missCount (Bug 2)
+    // Bug-fix tests: poll(timeout) spurious missCount (Bug 2)
     // ===========================================================
 
     /**
@@ -1164,29 +1164,29 @@ public class GenericObjectPoolTest extends TestBase {
      */
     @Test
     public void testBug2a_NormalTimeout_ExactlyOneMiss() throws InterruptedException {
-        assertNull(pool.take(20, TimeUnit.MILLISECONDS));
+        assertNull(pool.poll(20, TimeUnit.MILLISECONDS));
 
         PoolStats stats = pool.stats();
         assertEquals(0, stats.hitCount(), "No hits on empty pool");
-        assertEquals(1, stats.missCount(), "Exactly one miss for timed-out take");
+        assertEquals(1, stats.missCount(), "Exactly one miss for timed-out poll");
     }
 
     /**
-     * Bug 2b: Successful take(timeout) must count as exactly one hit with zero misses.
+     * Bug 2b: Successful poll(timeout) must count as exactly one hit with zero misses.
      */
     @Test
-    public void testBug2b_SuccessfulTake_ExactlyOneHit() throws InterruptedException {
+    public void testBug2b_SuccessfulPoll_ExactlyOneHit() throws InterruptedException {
         pool.add(new TestPoolable("p1"));
 
-        assertNotNull(pool.take(100, TimeUnit.MILLISECONDS));
+        assertNotNull(pool.poll(100, TimeUnit.MILLISECONDS));
 
         PoolStats stats = pool.stats();
         assertEquals(1, stats.hitCount(), "Exactly one hit");
-        assertEquals(0, stats.missCount(), "No misses when take succeeds");
+        assertEquals(0, stats.missCount(), "No misses when poll succeeds");
     }
 
     /**
-     * Bug 2d: Pool closed while a thread is blocked in take(timeout).
+     * Bug 2d: Pool closed while a thread is blocked in poll(timeout).
      * The resulting IllegalStateException path must NOT be counted as a miss.
      */
     @Test
@@ -1198,7 +1198,7 @@ public class GenericObjectPoolTest extends TestBase {
         Thread taker = new Thread(() -> {
             try {
                 takingLatch.countDown();
-                pool.take(10, TimeUnit.SECONDS);
+                pool.poll(10, TimeUnit.SECONDS);
             } catch (IllegalStateException e) {
                 gotIllegalState.set(true);
             } catch (InterruptedException e) {
@@ -1216,7 +1216,7 @@ public class GenericObjectPoolTest extends TestBase {
         pool.close();
 
         assertTrue(doneLatch.await(3, TimeUnit.SECONDS));
-        assertTrue(gotIllegalState.get(), "Taker must receive IllegalStateException on close");
+        assertTrue(gotIllegalState.get(), "Poller must receive IllegalStateException on close");
         // pool.stats() throws because pool is closed; we verify the exception path was taken
         // which -- after the fix -- does NOT call missCount++.
     }
@@ -1231,11 +1231,11 @@ public class GenericObjectPoolTest extends TestBase {
         }
         // 3 successful takes -> 3 hits
         for (int i = 0; i < 3; i++) {
-            assertNotNull(pool.take(50, TimeUnit.MILLISECONDS));
+            assertNotNull(pool.poll(50, TimeUnit.MILLISECONDS));
         }
-        // 2 timed-out takes on empty pool -> 2 misses
-        assertNull(pool.take(20, TimeUnit.MILLISECONDS));
-        assertNull(pool.take(20, TimeUnit.MILLISECONDS));
+        // 2 timed-out polls on empty pool -> 2 misses
+        assertNull(pool.poll(20, TimeUnit.MILLISECONDS));
+        assertNull(pool.poll(20, TimeUnit.MILLISECONDS));
 
         PoolStats stats = pool.stats();
         assertEquals(3, stats.hitCount());
@@ -1244,14 +1244,14 @@ public class GenericObjectPoolTest extends TestBase {
     }
 
     /**
-     * Regression: timed take(timeout) must keep popping expired entries instead of
+     * Regression: timed poll(timeout) must keep popping expired entries instead of
      * blocking on notEmpty.awaitNanos after each one. Before the fix, the loop
      * would await between expired pops and time out even when valid elements
      * remained behind the expired ones.
      */
     @Test
-    public void testTakeTimed_skipsExpiredAndReturnsValidImmediately() throws InterruptedException {
-        // Already-expired entries: liveTime small enough to be expired by the time we call take.
+    public void testPollTimed_skipsExpiredAndReturnsValidImmediately() throws InterruptedException {
+        // Already-expired entries: liveTime small enough to be expired by the time we call poll.
         TestPoolable expired1 = new TestPoolable("expired1", 1, 1);
         TestPoolable expired2 = new TestPoolable("expired2", 1, 1);
         TestPoolable valid = new TestPoolable("valid"); // default 10000ms live
@@ -1264,54 +1264,54 @@ public class GenericObjectPoolTest extends TestBase {
         Thread.sleep(20);
 
         long start = System.nanoTime();
-        TestPoolable result = pool.take(2, TimeUnit.SECONDS);
+        TestPoolable result = pool.poll(2, TimeUnit.SECONDS);
         long elapsedMillis = (System.nanoTime() - start) / 1_000_000;
 
         assertNotNull(result, "Should return the valid element");
         assertEquals("valid", result.getId());
         // Should return well under the 2s timeout — the bug fix means we re-check
         // the pool synchronously instead of waiting on notEmpty between expired pops.
-        assertTrue(elapsedMillis < 500, "take() must not await between expired pops, elapsed=" + elapsedMillis + "ms");
+        assertTrue(elapsedMillis < 500, "poll(timeout, unit) must not await between expired pops, elapsed=" + elapsedMillis + "ms");
 
         assertTrue(expired1.isDestroyed() || expired2.isDestroyed(), "expired entries must be destroyed");
     }
 
     /**
-     * Regression: timed take(timeout) returning null when the pool only contains
+     * Regression: timed poll(timeout) returning null when the pool only contains
      * expired entries should not consume the entire timeout — the expired ones
      * are popped synchronously, then we await briefly for a refill that never comes.
      */
     @Test
-    public void testTakeTimed_allExpired_returnsNullPromptly() throws InterruptedException {
+    public void testPollTimed_allExpired_returnsNullPromptly() throws InterruptedException {
         for (int i = 0; i < 5; i++) {
             pool.add(new TestPoolable("expired" + i, 1, 1));
         }
         Thread.sleep(20);
 
         long start = System.nanoTime();
-        TestPoolable result = pool.take(100, TimeUnit.MILLISECONDS);
+        TestPoolable result = pool.poll(100, TimeUnit.MILLISECONDS);
         long elapsedMillis = (System.nanoTime() - start) / 1_000_000;
 
         assertNull(result, "Should return null since no valid entry exists");
         // Should be roughly bounded by the timeout (~100ms), not by 5×timeout under the old bug.
-        assertTrue(elapsedMillis < 500, "take() must not multiply wait time by expired-count, elapsed=" + elapsedMillis + "ms");
+        assertTrue(elapsedMillis < 500, "poll(timeout, unit) must not multiply wait time by expired-count, elapsed=" + elapsedMillis + "ms");
     }
 
     /**
-     * Bug: take() (no timeout) checks isClosed only BEFORE acquiring the lock. A concurrent
+     * Bug: poll() (no timeout) checks isClosed only BEFORE acquiring the lock. A concurrent
      * close() can set isClosed=true and release the lock before invoking removeAll() to drain
-     * the pool. A take() that won the race for the lock between those two steps can pop and
+     * the pool. A poll() that won the race for the lock between those two steps can pop and
      * return a "live" element from a pool that is already marked closed — and the pre-snapshot
      * taken by removeAll() will not destroy it, leaking the element. The fix is to re-check
-     * assertNotClosed() inside the lock (matching what add() and take(timeout) already do).
+     * assertNotClosed() inside the lock (matching what add() and poll(timeout) already do).
      */
     @Test
-    public void testTake_raceWithClose_doesNotReturnElementFromClosedPool() throws Exception {
+    public void testPoll_raceWithClose_doesNotReturnElementFromClosedPool() throws Exception {
         final TestPoolable element = new TestPoolable("racing");
         pool.add(element);
 
         // Manually drive the close() race window by holding the pool's lock from a
-        // background thread, then mark isClosed=true while take() is parked at lock.lock(),
+        // background thread, then mark isClosed=true while poll() is parked at lock.lock(),
         // then release. This deterministically reproduces the race that close() opens
         // between releasing the lock and calling removeAll().
         final java.util.concurrent.locks.ReentrantLock poolLock = pool.lock;
@@ -1334,12 +1334,12 @@ public class GenericObjectPoolTest extends TestBase {
         holder.start();
         holderHasLock.await();
 
-        // take() will pass its outer assertNotClosed() (still false), then block on lock.lock().
+        // poll() will pass its outer assertNotClosed() (still false), then block on lock.lock().
         AtomicBoolean threwISE = new AtomicBoolean(false);
         AtomicBoolean returnedElement = new AtomicBoolean(false);
         Thread taker = new Thread(() -> {
             try {
-                TestPoolable t = pool.take();
+                TestPoolable t = pool.poll();
                 if (t != null) {
                     returnedElement.set(true);
                 }
@@ -1356,45 +1356,45 @@ public class GenericObjectPoolTest extends TestBase {
         holder.join();
         taker.join();
 
-        assertTrue(threwISE.get(), "take() must throw IllegalStateException when isClosed was set under the lock");
-        assertFalse(returnedElement.get(), "take() must not return an element from a pool already marked closed");
+        assertTrue(threwISE.get(), "poll() must throw IllegalStateException when isClosed was set under the lock");
+        assertFalse(returnedElement.get(), "poll() must not return an element from a pool already marked closed");
         // Cleanup: pool.isClosed is true; calling close() again is a no-op per idempotency contract.
     }
 
     /**
-     * Regression test for take() leaking the popped element when memoryMeasure.sizeOf() throws.
+     * Regression test for poll() leaking the popped element when memoryMeasure.sizeOf() throws.
      *
      * <p>Before the fix, an unchecked exception thrown by a user-supplied MemoryMeasure during
-     * take() propagated out of the method while the element had already been popped from the
+     * poll() propagated out of the method while the element had already been popped from the
      * internal deque — never returned to the caller, never destroyed, leaked. The fix wraps the
      * sizeOf() call in a try/catch so the popped element is still returned and the caller
      * remains responsible for it.
      */
     @Test
-    public void testTakeDoesNotLeakElementWhenMemoryMeasureThrows() {
-        // Build a measure that returns 0 on add but throws once on take.
+    public void testPollDoesNotLeakElementWhenMemoryMeasureThrows() {
+        // Build a measure that returns 0 on add but throws once on poll.
         final AtomicBoolean throwOnNext = new AtomicBoolean(false);
         final ObjectPool.MemoryMeasure<TestPoolable> conditionalMeasure = e -> {
             if (throwOnNext.get()) {
-                throw new RuntimeException("simulated sizeOf failure on take");
+                throw new RuntimeException("simulated sizeOf failure on poll");
             }
             return 0L;
         };
 
         GenericObjectPool<TestPoolable> p2 = new GenericObjectPool<>(10, 0, EvictionPolicy.LAST_ACCESS_TIME, true, 0.2f, 1024L * 1024L, conditionalMeasure);
         try {
-            TestPoolable original = new TestPoolable("memMeasureTake");
+            TestPoolable original = new TestPoolable("memMeasurePoll");
             assertTrue(p2.add(original));
             assertEquals(1, p2.size());
 
-            // Now arm the measure to throw on the next sizeOf invocation (which take() will make).
+            // Now arm the measure to throw on the next sizeOf invocation (which poll() will make).
             throwOnNext.set(true);
 
-            // Pre-fix: take() throws RuntimeException and the element is leaked (gone from pool,
-            // never returned, never destroyed). Post-fix: take() catches, returns the element.
-            TestPoolable popped = p2.take();
-            assertNotNull(popped, "take() must return the popped element even if memoryMeasure.sizeOf() throws");
-            assertEquals("memMeasureTake", popped.getId());
+            // Pre-fix: poll() throws RuntimeException and the element is leaked (gone from pool,
+            // never returned, never destroyed). Post-fix: poll() catches, returns the element.
+            TestPoolable popped = p2.poll();
+            assertNotNull(popped, "poll() must return the popped element even if memoryMeasure.sizeOf() throws");
+            assertEquals("memMeasurePoll", popped.getId());
             assertFalse(popped.isDestroyed(), "Successfully taken element must not be destroyed");
             assertEquals(0, p2.size());
         } finally {
@@ -1403,28 +1403,28 @@ public class GenericObjectPoolTest extends TestBase {
     }
 
     /**
-     * Same regression as above, but for take(timeout, unit).
+     * Same regression as above, but for poll(timeout, unit).
      */
     @Test
-    public void testTakeWithTimeoutDoesNotLeakElementWhenMemoryMeasureThrows() throws InterruptedException {
+    public void testPollWithTimeoutDoesNotLeakElementWhenMemoryMeasureThrows() throws InterruptedException {
         final AtomicBoolean throwOnNext = new AtomicBoolean(false);
         final ObjectPool.MemoryMeasure<TestPoolable> conditionalMeasure = e -> {
             if (throwOnNext.get()) {
-                throw new RuntimeException("simulated sizeOf failure on take(timeout)");
+                throw new RuntimeException("simulated sizeOf failure on poll(timeout)");
             }
             return 0L;
         };
 
         GenericObjectPool<TestPoolable> p = new GenericObjectPool<>(10, 0, EvictionPolicy.LAST_ACCESS_TIME, true, 0.2f, 1024L * 1024L, conditionalMeasure);
         try {
-            TestPoolable original = new TestPoolable("memMeasureTakeTimeout");
+            TestPoolable original = new TestPoolable("memMeasurePollTimeout");
             assertTrue(p.add(original));
 
             throwOnNext.set(true);
 
-            TestPoolable popped = p.take(1, TimeUnit.SECONDS);
-            assertNotNull(popped, "take(timeout) must return the popped element even if memoryMeasure.sizeOf() throws");
-            assertEquals("memMeasureTakeTimeout", popped.getId());
+            TestPoolable popped = p.poll(1, TimeUnit.SECONDS);
+            assertNotNull(popped, "poll(timeout) must return the popped element even if memoryMeasure.sizeOf() throws");
+            assertEquals("memMeasurePollTimeout", popped.getId());
             assertFalse(popped.isDestroyed());
             assertEquals(0, p.size());
         } finally {
@@ -1433,7 +1433,7 @@ public class GenericObjectPoolTest extends TestBase {
     }
 
     /**
-     * Regression: a thread blocked in {@code take(timeout, unit)} that aborts because the
+     * Regression: a thread blocked in {@code poll(timeout, unit)} that aborts because the
      * pool is concurrently {@code close()}d (resulting in an IllegalStateException) must NOT
      * be counted as a cache miss. Before the fix the hit/miss accounting lived in the
      * {@code finally} block and ran even when the body unwound exceptionally, recording a
@@ -1441,7 +1441,7 @@ public class GenericObjectPoolTest extends TestBase {
      * {@code stats()} throws on a closed pool.
      */
     @Test
-    public void testTakeTimed_PoolClosedWhileWaiting_NoSpuriousMissCount() throws InterruptedException {
+    public void testPollTimed_PoolClosedWhileWaiting_NoSpuriousMissCount() throws InterruptedException {
         final CountDownLatch takingLatch = new CountDownLatch(1);
         final CountDownLatch doneLatch = new CountDownLatch(1);
         final AtomicBoolean gotIllegalState = new AtomicBoolean(false);
@@ -1449,7 +1449,7 @@ public class GenericObjectPoolTest extends TestBase {
         Thread taker = new Thread(() -> {
             try {
                 takingLatch.countDown();
-                pool.take(10, TimeUnit.SECONDS);
+                pool.poll(10, TimeUnit.SECONDS);
             } catch (IllegalStateException e) {
                 gotIllegalState.set(true);
             } catch (InterruptedException e) {
@@ -1466,7 +1466,7 @@ public class GenericObjectPoolTest extends TestBase {
         pool.close(); // signals notEmpty.signalAll(); taker wakes, assertNotClosed() throws
 
         assertTrue(doneLatch.await(3, TimeUnit.SECONDS));
-        assertTrue(gotIllegalState.get(), "Taker must receive IllegalStateException on close");
+        assertTrue(gotIllegalState.get(), "Poller must receive IllegalStateException on close");
         assertEquals(0, pool.missCount.get(), "Closed-pool abort must not be counted as a miss");
         assertEquals(0, pool.hitCount.get(), "Closed-pool abort must not be counted as a hit");
     }

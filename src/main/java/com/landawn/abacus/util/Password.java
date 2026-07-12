@@ -26,7 +26,7 @@ import com.landawn.abacus.annotation.MayReturnNull;
  * digest encoded as Base64 text. It supports any algorithm available through the
  * active Java security providers.
  *
- * <p><b>&#9888; Password storage:</b> This class performs a single deterministic, unsalted,
+ * <p><b>&#9888;&#65039; Password storage:</b> This class performs a single deterministic, unsalted,
  * fast digest. It is not a password-storage key derivation function. Use a dedicated
  * password hashing algorithm with salt and work factor outside this helper for stored
  * credentials.</p>
@@ -39,8 +39,8 @@ import com.landawn.abacus.annotation.MayReturnNull;
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * Password password = new Password("SHA-256");
- * String encrypted = password.encrypt("myPassword123");
- * boolean matches = password.isEqual("myPassword123", encrypted);
+ * String digest = password.digest("myPassword123");
+ * boolean matches = password.isEqual("myPassword123", digest);
  * }</pre>
  *
  * @see MessageDigest
@@ -100,21 +100,21 @@ public final class Password {
      * the resulting digest encoded in Base64 format. This method is synchronized because
      * the underlying {@link MessageDigest} instance is reused.
      *
-     * <p><b>&#9888; Password storage:</b> The returned value is a fast unsalted digest,
+     * <p><b>&#9888;&#65039; Password storage:</b> The returned value is a fast unsalted digest,
      * not a password-storage hash.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Password password = new Password("SHA-256");
-     * String encrypted = password.encrypt("mySecretPassword");
-     * // encrypted contains the Base64-encoded hash
+     * String digest = password.digest("mySecretPassword");
+     * // digest contains the Base64-encoded hash
      * }</pre>
      *
      * @param x the plain-text password to hash; may be {@code null}
      * @return the Base64-encoded digest of {@code x}, or {@code null} if {@code x} is {@code null}
      */
     @MayReturnNull
-    public synchronized String encrypt(final String x) {
+    public synchronized String digest(final String x) {
         if (x == null) {
             return null;
         }
@@ -129,37 +129,37 @@ public final class Password {
     /**
      * Verifies whether a plain-text password matches a previously hashed password.
      * This method hashes {@code plainPassword} with the configured algorithm and compares
-     * the resulting Base64 text against {@code encryptedPassword}. The non-null comparison
+     * the resulting Base64 text against {@code encodedDigest}. The non-null comparison
      * is performed with {@link MessageDigest#isEqual(byte[], byte[])}, which runs in constant
      * time with respect to the number of matching bytes.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Password password = new Password("SHA-256");
-     * String encrypted = password.encrypt("myPassword");
+     * String digest = password.digest("myPassword");
      *
-     * boolean matches = password.isEqual("myPassword", encrypted);         // returns true
-     * boolean notMatches = password.isEqual("wrongPassword", encrypted);   // returns false
+     * boolean matches = password.isEqual("myPassword", digest);         // returns true
+     * boolean notMatches = password.isEqual("wrongPassword", digest);   // returns false
      * }</pre>
      *
      * @param plainPassword the plain-text password to verify; may be {@code null}
-     * @param encryptedPassword the Base64-encoded hashed password to compare against; may be {@code null}
-     * @return {@code true} if {@code encrypt(plainPassword)} equals {@code encryptedPassword},
+     * @param encodedDigest the Base64-encoded hashed password to compare against; may be {@code null}
+     * @return {@code true} if {@code digest(plainPassword)} equals {@code encodedDigest},
      *         or if both arguments are {@code null}; {@code false} if only one is {@code null}
      *         or if the hashes do not match
      */
-    public boolean isEqual(final String plainPassword, final String encryptedPassword) {
+    public boolean isEqual(final String plainPassword, final String encodedDigest) {
         if (plainPassword == null) {
-            return encryptedPassword == null;
+            return encodedDigest == null;
         }
 
-        if (encryptedPassword == null) {
+        if (encodedDigest == null) {
             return false;
         }
 
-        final String encrypted = encrypt(plainPassword);
+        final String digest = digest(plainPassword);
 
-        return MessageDigest.isEqual(encrypted.getBytes(Charsets.UTF_8), encryptedPassword.getBytes(Charsets.UTF_8));
+        return MessageDigest.isEqual(digest.getBytes(Charsets.UTF_8), encodedDigest.getBytes(Charsets.UTF_8));
     }
 
     /**

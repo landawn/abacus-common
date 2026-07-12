@@ -25,6 +25,13 @@ import java.util.concurrent.ExecutionException;
  * the result of a task that aborted by throwing an exception. It is commonly encountered
  * when working with {@link java.util.concurrent.Future} and other asynchronous computation APIs.</p>
  *
+ * <p><b>Name collision:</b> this type is
+ * {@code com.landawn.abacus.exception.UncheckedExecutionException}. It is unrelated to Guava's
+ * {@code com.google.common.util.concurrent.UncheckedExecutionException}. This type specifically wraps
+ * an {@link ExecutionException}, and {@link #getCause()} returns that checked wrapper covariantly;
+ * Guava's similarly named exception has a different constructor and cause contract. Use the fully
+ * qualified name when both libraries are in scope.</p>
+ *
  * <p>This exception is useful in contexts where you need to handle {@code ExecutionException} but
  * cannot change the method signature to declare it, such as in:</p>
  * <ul>

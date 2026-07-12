@@ -1278,7 +1278,7 @@ public class DigestUtil {
      * Calculates the SHA-256 digest and returns it as a 64-character hexadecimal string.
      * This is commonly used for data integrity verification.
      *
-     * <p><b>&#9888; Password storage:</b> A single fast SHA-256 digest, even with a salt, is not
+     * <p><b>&#9888;&#65039; Password storage:</b> A single fast SHA-256 digest, even with a salt, is not
      * a password-storage key derivation function. Use a dedicated password hashing algorithm
      * outside this helper for stored credentials.</p>
      *
@@ -1318,7 +1318,7 @@ public class DigestUtil {
     /**
      * Calculates the SHA-256 digest of a string and returns it as a hex string.
      *
-     * <p><b>&#9888; Password storage:</b> A single fast SHA-256 digest, even with a salt, is not
+     * <p><b>&#9888;&#65039; Password storage:</b> A single fast SHA-256 digest, even with a salt, is not
      * a password-storage key derivation function. Use a dedicated password hashing algorithm
      * outside this helper for stored credentials.</p>
      *
@@ -2379,7 +2379,7 @@ public class DigestUtil {
 
     /**
      * Reads through a File and updates the MessageDigest with its contents.
-     * The file is read using a buffered stream for efficiency (1024-byte buffer).
+     * The file is read using a buffered stream for efficiency, feeding the digest in 1024-byte chunks.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code

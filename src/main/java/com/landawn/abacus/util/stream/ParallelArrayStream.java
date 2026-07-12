@@ -238,7 +238,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
      * a worker observes a non-matching element. Once any thread observes an element that does not match the predicate,
      * all threads stop producing elements. The output order is not guaranteed to match the input order.
      *
-     * <p><b>&#9888; Parallel streams:</b> this operation does not guarantee encounter-order prefix
+     * <p><b>&#9888;&#65039; Parallel streams:</b> this operation does not guarantee encounter-order prefix
      * semantics; later matching elements may be returned.
      *
      * @param predicate a non-interfering, stateless predicate to apply to elements; once it returns
@@ -305,7 +305,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
      * non-matching element. After the drop condition is satisfied, all threads proceed concurrently
      * consuming the remainder of the stream.
      *
-     * <p><b>&#9888;</b> In parallel streams there is no guarantee of encounter-order prefix semantics:
+     * <p><b>&#9888;&#65039;</b> In parallel streams there is no guarantee of encounter-order prefix semantics:
      * because elements are pulled and tested concurrently, the boundary between dropped and kept elements
      * is not exact. An element near the boundary that satisfies the predicate may be dropped even though
      * it follows the first non-matching element. For deterministic prefix semantics, drop sequentially
@@ -2751,7 +2751,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
                         while (cursor < to && eHolder.value() == null) {
                             action.accept(elements[cursor++]);
                         }
-                    } catch (final Exception e) {
+                    } catch (final Throwable e) { // NOSONAR
                         setError(eHolder, e);
                     }
                 });
@@ -2775,7 +2775,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
 
                             action.accept(next);
                         }
-                    } catch (final Exception e) {
+                    } catch (final Throwable e) { // NOSONAR
                         setError(eHolder, e);
                     }
                 });
@@ -2850,7 +2850,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
 
                             cursor++;
                         }
-                    } catch (final Exception e) {
+                    } catch (final Throwable e) { // NOSONAR
                         setError(eHolder, e);
                     }
                 });
@@ -2881,7 +2881,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
                                 }
                             }
                         }
-                    } catch (final Exception e) {
+                    } catch (final Throwable e) { // NOSONAR
                         setError(eHolder, e);
                     }
                 });
@@ -2909,6 +2909,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
      * @param flatMapper2 a function mapping each {@code T2} value to an iterable of {@code T3}
      *        values; may return {@code null}
      * @param action a tri-consumer invoked for each {@code (t, t2, t3)} triple
+     * @throws IllegalStateException if the stream has already been closed
      * @throws E if {@code flatMapper} throws an exception
      * @throws E2 if {@code flatMapper2} throws an exception
      * @throws E3 if {@code action} throws an exception
@@ -2961,7 +2962,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
 
                             cursor++;
                         }
-                    } catch (final Exception e) {
+                    } catch (final Throwable e) { // NOSONAR
                         setError(eHolder, e);
                     }
                 });
@@ -2999,7 +3000,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
                                 }
                             }
                         }
-                    } catch (final Exception e) {
+                    } catch (final Throwable e) { // NOSONAR
                         setError(eHolder, e);
                     }
                 });
@@ -3193,7 +3194,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
                             Collectors.merge(map, keyMapper.apply(elements[cursor]), valueMapper.apply(elements[cursor]), mergeFunction);
                             cursor++;
                         }
-                    } catch (final Exception e) {
+                    } catch (final Throwable e) { // NOSONAR
                         setError(eHolder, e);
                     }
 
@@ -3220,7 +3221,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
 
                             Collectors.merge(map, keyMapper.apply(next), valueMapper.apply(next), mergeFunction);
                         }
-                    } catch (final Exception e) {
+                    } catch (final Throwable e) { // NOSONAR
                         setError(eHolder, e);
                     }
 
@@ -3350,7 +3351,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
 
                             cursor++;
                         }
-                    } catch (final Exception e) {
+                    } catch (final Throwable e) { // NOSONAR
                         setError(eHolder, e);
                     }
 
@@ -3388,7 +3389,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
 
                             downstreamAccumulator.accept(valueContainer, valueMapper.apply(next));
                         }
-                    } catch (final Exception e) {
+                    } catch (final Throwable e) { // NOSONAR
                         setError(eHolder, e);
                     }
 
@@ -3534,7 +3535,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
 
                             cursor++;
                         }
-                    } catch (final Exception e) {
+                    } catch (final Throwable e) { // NOSONAR
                         setError(eHolder, e);
                     }
 
@@ -3582,7 +3583,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
                                 }
                             }
                         }
-                    } catch (final Exception e) {
+                    } catch (final Throwable e) { // NOSONAR
                         setError(eHolder, e);
                     }
 
@@ -3699,7 +3700,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
                             map.put(keyMapper.apply(elements[cursor]), valueMapper.apply(elements[cursor]));
                             cursor++;
                         }
-                    } catch (final Exception e) {
+                    } catch (final Throwable e) { // NOSONAR
                         setError(eHolder, e);
                     }
 
@@ -3726,7 +3727,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
 
                             map.put(keyMapper.apply(next), valueMapper.apply(next));
                         }
-                    } catch (final Exception e) {
+                    } catch (final Throwable e) { // NOSONAR
                         setError(eHolder, e);
                     }
 
@@ -3817,7 +3818,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
                         while (cursor < to && eHolder.value() == null) {
                             result = accumulator.apply(result, elements[cursor++]);
                         }
-                    } catch (final Exception e) {
+                    } catch (final Throwable e) { // NOSONAR
                         setError(eHolder, e);
                     }
 
@@ -3853,7 +3854,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
 
                             result = accumulator.apply(result, next);
                         }
-                    } catch (final Exception e) {
+                    } catch (final Throwable e) { // NOSONAR
                         setError(eHolder, e);
                     }
 
@@ -3949,7 +3950,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
                         while (cursor < to && eHolder.value() == null) {
                             result = accumulator.apply(result, elements[cursor++]);
                         }
-                    } catch (final Exception e) {
+                    } catch (final Throwable e) { // NOSONAR
                         setError(eHolder, e);
                     }
 
@@ -3976,7 +3977,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
 
                             result = accumulator.apply(result, next);
                         }
-                    } catch (final Exception e) {
+                    } catch (final Throwable e) { // NOSONAR
                         setError(eHolder, e);
                     }
 
@@ -4066,7 +4067,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
                         while (cursor < to && eHolder.value() == null) {
                             accumulator.accept(container, elements[cursor++]);
                         }
-                    } catch (final Exception e) {
+                    } catch (final Throwable e) { // NOSONAR
                         setError(eHolder, e);
                     }
 
@@ -4093,7 +4094,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
 
                             accumulator.accept(container, next);
                         }
-                    } catch (final Exception e) {
+                    } catch (final Throwable e) { // NOSONAR
                         setError(eHolder, e);
                     }
 
@@ -4164,7 +4165,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
                         while (cursor < to && eHolder.value() == null) {
                             accumulator.accept(container, elements[cursor++]);
                         }
-                    } catch (final Exception e) {
+                    } catch (final Throwable e) { // NOSONAR
                         setError(eHolder, e);
                     }
 
@@ -4191,7 +4192,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
 
                             accumulator.accept(container, next);
                         }
-                    } catch (final Exception e) {
+                    } catch (final Throwable e) { // NOSONAR
                         setError(eHolder, e);
                     }
 
@@ -4355,7 +4356,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
                                 break;
                             }
                         }
-                    } catch (final Exception e) {
+                    } catch (final Throwable e) { // NOSONAR
                         setError(eHolder, e);
                     }
                 });
@@ -4382,7 +4383,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
                                 break;
                             }
                         }
-                    } catch (final Exception e) {
+                    } catch (final Throwable e) { // NOSONAR
                         setError(eHolder, e);
                     }
                 });
@@ -4437,7 +4438,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
                                 break;
                             }
                         }
-                    } catch (final Exception e) {
+                    } catch (final Throwable e) { // NOSONAR
                         setError(eHolder, e);
                     }
                 });
@@ -4464,7 +4465,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
                                 break;
                             }
                         }
-                    } catch (final Exception e) {
+                    } catch (final Throwable e) { // NOSONAR
                         setError(eHolder, e);
                     }
                 });
@@ -4519,7 +4520,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
                                 break;
                             }
                         }
-                    } catch (final Exception e) {
+                    } catch (final Throwable e) { // NOSONAR
                         setError(eHolder, e);
                     }
                 });
@@ -4546,7 +4547,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
                                 break;
                             }
                         }
-                    } catch (final Exception e) {
+                    } catch (final Throwable e) { // NOSONAR
                         setError(eHolder, e);
                     }
                 });
@@ -4580,7 +4581,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
         assertNotClosed();
         checkArgNotNegative(atLeast, cs.atLeast);
         checkArgNotNegative(atMost, cs.atMost);
-        checkArgument(atLeast <= atMost, "'atLeast' must be <= 'atMost'");
+        checkArgument(atLeast <= atMost, "'atLeast' (%s) must be <= 'atMost' (%s)", atLeast, atMost);
 
         if (canBeSequential(maxThreadNum, fromIndex, toIndex)) {
             return super.hasMatchCountBetween(atLeast, atMost, predicate);
@@ -4608,7 +4609,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
                                 break;
                             }
                         }
-                    } catch (final Exception e) {
+                    } catch (final Throwable e) { // NOSONAR
                         setError(eHolder, e);
                     }
                 });
@@ -4634,7 +4635,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
                                 break;
                             }
                         }
-                    } catch (final Exception e) {
+                    } catch (final Throwable e) { // NOSONAR
                         setError(eHolder, e);
                     }
                 });
@@ -4699,7 +4700,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
                                 break;
                             }
                         }
-                    } catch (final Exception e) {
+                    } catch (final Throwable e) { // NOSONAR
                         setError(eHolder, e);
                     }
                 });
@@ -4732,7 +4733,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
                                 break;
                             }
                         }
-                    } catch (final Exception e) {
+                    } catch (final Throwable e) { // NOSONAR
                         setError(eHolder, e);
                     }
                 });
@@ -4797,7 +4798,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
                                 break;
                             }
                         }
-                    } catch (final Exception e) {
+                    } catch (final Throwable e) { // NOSONAR
                         setError(eHolder, e);
                     }
                 });
@@ -4829,7 +4830,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
                                 break;
                             }
                         }
-                    } catch (final Exception e) {
+                    } catch (final Throwable e) { // NOSONAR
                         setError(eHolder, e);
                     }
                 });
@@ -4894,7 +4895,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
                                 break;
                             }
                         }
-                    } catch (final Exception e) {
+                    } catch (final Throwable e) { // NOSONAR
                         setError(eHolder, e);
                     }
                 });
@@ -4927,7 +4928,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
                                 break;
                             }
                         }
-                    } catch (final Exception e) {
+                    } catch (final Throwable e) { // NOSONAR
                         setError(eHolder, e);
                     }
                 });

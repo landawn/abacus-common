@@ -223,4 +223,17 @@ public class JdkOptionalLongTypeTest extends TestBase {
         optionalLongType.serializeTo(characterWriter, opt, config);
         verify(characterWriter).write(42L);
     }
+
+    @Test
+    public void testSerializeTo_HonorsWriteLongAsString() throws IOException {
+        com.landawn.abacus.util.BufferedJsonWriter writer = com.landawn.abacus.util.Objectory.createBufferedJsonWriter();
+
+        try {
+            optionalLongType.serializeTo(writer, OptionalLong.of(9007199254740993L),
+                    com.landawn.abacus.parser.JsonSerConfig.create().setWriteLongAsString(true));
+            assertEquals("\"9007199254740993\"", writer.toString());
+        } finally {
+            com.landawn.abacus.util.Objectory.recycle(writer);
+        }
+    }
 }

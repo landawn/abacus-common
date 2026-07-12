@@ -1824,9 +1824,9 @@ public interface NoCachingNoUpdating {
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * DisposableShortArray arr = DisposableShortArray.wrap(new short[] {1, 2, 3});
-         * arr.box();                                           // returns [Short.valueOf(1), Short.valueOf(2), Short.valueOf(3)]
+         * arr.box();                                           // returns [Short.valueOf((short)1), Short.valueOf((short)2), Short.valueOf((short)3)]
          * DisposableShortArray.wrap(new short[0]).box();       // returns empty Short[]
-         * DisposableShortArray.wrap(new short[] {99}).box();   // returns [Short.valueOf(99)]
+         * DisposableShortArray.wrap(new short[] {99}).box();   // returns [Short.valueOf((short)99)]
          * arr.box().length;                                    // returns 3
          * }</pre>
          *

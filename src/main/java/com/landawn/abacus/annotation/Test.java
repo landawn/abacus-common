@@ -36,6 +36,11 @@ import java.lang.annotation.Target;
  * <p>This annotation helps maintain clear boundaries between production and test code,
  * making it easier to identify code that should not be used in production contexts.</p>
  *
+ * <p><b>Name collision:</b> this is {@code com.landawn.abacus.annotation.Test}, a production-code
+ * marker for test-only APIs. It is not a test-runner annotation such as
+ * {@code org.junit.jupiter.api.Test} (JUnit Jupiter), {@code org.junit.Test} (JUnit 4), or
+ * {@code org.testng.annotations.Test} (TestNG). Check imports carefully when these APIs are used together.</p>
+ *
  * <p>Because {@code @Target} includes {@link ElementType#ANNOTATION_TYPE}, it may also annotate
  * other annotation declarations. To instead mark an API as experimental or subject to change,
  * prefer the dedicated {@link Beta} marker.

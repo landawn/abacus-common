@@ -33,6 +33,11 @@ public class LongListTest extends TestBase {
     }
 
     @Test
+    public void testRangedForEachRejectsNullActionForEmptyRange() {
+        assertThrows(IllegalArgumentException.class, () -> list.forEach(0, 0, (java.util.function.LongConsumer) null));
+    }
+
+    @Test
     public void testConstructorWithArray() {
         long[] array = { 1L, 2L, 3L };
         LongList list = new LongList(array);
@@ -2711,15 +2716,16 @@ public class LongListTest extends TestBase {
 
     @Test
     public void test_forEach_removeIf_replaceIf_null_func() {
-        // Regression: a null functional argument must throw NullPointerException even on an
-        // EMPTY list (previously silently no-op'd; now matches IntList's fail-fast guard).
+        // Regression: a null functional argument is rejected up-front even on an EMPTY list
+        // (previously silently no-op'd). forEach throws IllegalArgumentException (N.checkArgNotNull);
+        // removeIf/replaceIf throw NullPointerException (N.requireNonNull).
         final LongList empty = new LongList();
-        assertThrows(NullPointerException.class, () -> empty.forEach((com.landawn.abacus.util.function.LongConsumer) null));
+        assertThrows(IllegalArgumentException.class, () -> empty.forEach((com.landawn.abacus.util.function.LongConsumer) null));
         assertThrows(NullPointerException.class, () -> empty.removeIf((com.landawn.abacus.util.function.LongPredicate) null));
         assertThrows(NullPointerException.class, () -> empty.replaceIf((com.landawn.abacus.util.function.LongPredicate) null, 0L));
 
         final LongList nonEmpty = LongList.of(1L, 2L);
-        assertThrows(NullPointerException.class, () -> nonEmpty.forEach((com.landawn.abacus.util.function.LongConsumer) null));
+        assertThrows(IllegalArgumentException.class, () -> nonEmpty.forEach((com.landawn.abacus.util.function.LongConsumer) null));
         assertThrows(NullPointerException.class, () -> nonEmpty.removeIf((com.landawn.abacus.util.function.LongPredicate) null));
         assertThrows(NullPointerException.class, () -> nonEmpty.replaceIf((com.landawn.abacus.util.function.LongPredicate) null, 0L));
     }

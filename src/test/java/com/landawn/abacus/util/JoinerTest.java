@@ -563,6 +563,25 @@ public class JoinerTest extends AbstractTest {
     }
 
     @Test
+    public void testStripBeforeAppend() {
+        String emSpace = " ";
+
+        assertEquals("a,b,c",
+                Joiner.with(",").stripBeforeAppend().append(emSpace + "a" + emSpace).append(" b ").append((Object) (emSpace + "c" + emSpace)).toString());
+        assertEquals(emSpace + "a" + emSpace, Joiner.with(",").trimBeforeAppend().append(emSpace + "a" + emSpace).toString());
+        assertEquals("key=value",
+                Joiner.with(",").stripBeforeAppend().appendEntry(emSpace + "key" + emSpace, new StringBuilder(emSpace + "value" + emSpace)).toString());
+    }
+
+    @Test
+    public void testStripBeforeAppend_LastModeWins() {
+        String emSpace = " ";
+
+        assertEquals(emSpace + "a" + emSpace, Joiner.with(",").stripBeforeAppend().trimBeforeAppend().append(emSpace + "a" + emSpace).toString());
+        assertEquals("a", Joiner.with(",").trimBeforeAppend().stripBeforeAppend().append(emSpace + "a" + emSpace).toString());
+    }
+
+    @Test
     public void testSkipNulls() {
         Joiner joiner = Joiner.with(",").skipNulls();
         joiner.append("a").append((String) null).append("b").append((Object) null).append("c");

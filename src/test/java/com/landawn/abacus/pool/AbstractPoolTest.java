@@ -3,6 +3,7 @@ package com.landawn.abacus.pool;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -312,6 +313,15 @@ public class AbstractPoolTest extends TestBase {
     @Test
     public void testConstructorWithNegativeBalanceFactor() {
         assertThrows(IllegalArgumentException.class, () -> new TestAbstractPool(100, 3000, EvictionPolicy.LAST_ACCESS_TIME, true, -0.1f, 0));
+    }
+
+    @Test
+    public void testConstructorRejectsNonFiniteOrOversizedBalanceFactor() {
+        assertAll(
+                () -> assertThrows(IllegalArgumentException.class, () -> new TestAbstractPool(100, 3000, EvictionPolicy.LAST_ACCESS_TIME, true, Float.NaN, 0)),
+                () -> assertThrows(IllegalArgumentException.class,
+                        () -> new TestAbstractPool(100, 3000, EvictionPolicy.LAST_ACCESS_TIME, true, Float.POSITIVE_INFINITY, 0)),
+                () -> assertThrows(IllegalArgumentException.class, () -> new TestAbstractPool(100, 3000, EvictionPolicy.LAST_ACCESS_TIME, true, 1.01f, 0)));
     }
 
     @Test

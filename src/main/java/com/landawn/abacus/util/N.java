@@ -14880,7 +14880,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <pre>{@code
      * byte[] a = {0, 1, 2, 3, 4};
      * N.moveRange(a, 1, 3, 2);   // a is now [0, 3, 1, 2, 4]
-     * N.moveRange(a, 3, 5, 0);   // a is now [3, 4, 0, 1, 2] (moves last two to the front)
+     * N.moveRange(a, 3, 5, 0);   // a is now [2, 4, 0, 3, 1] (moves the last two of [0, 3, 1, 2, 4] to the front)
      * }</pre>
      *
      * @param a the original array to be modified
@@ -14921,7 +14921,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <pre>{@code
      * short[] a = {0, 1, 2, 3, 4};
      * N.moveRange(a, 1, 3, 2);   // a is now [0, 3, 1, 2, 4]
-     * N.moveRange(a, 3, 5, 0);   // a is now [3, 4, 0, 1, 2] (moves last two to the front)
+     * N.moveRange(a, 3, 5, 0);   // a is now [2, 4, 0, 3, 1] (moves the last two of [0, 3, 1, 2, 4] to the front)
      * }</pre>
      *
      * @param a the original array to be modified
@@ -14962,7 +14962,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <pre>{@code
      * int[] a = {0, 1, 2, 3, 4};
      * N.moveRange(a, 1, 3, 2);   // a is now [0, 3, 1, 2, 4]
-     * N.moveRange(a, 3, 5, 0);   // a is now [3, 4, 0, 1, 2] (moves last two to the front)
+     * N.moveRange(a, 3, 5, 0);   // a is now [2, 4, 0, 3, 1] (moves the last two of [0, 3, 1, 2, 4] to the front)
      * }</pre>
      *
      * @param a the original array to be modified
@@ -15003,7 +15003,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <pre>{@code
      * long[] a = {0L, 1L, 2L, 3L, 4L};
      * N.moveRange(a, 1, 3, 2);   // a is now [0, 3, 1, 2, 4]
-     * N.moveRange(a, 3, 5, 0);   // a is now [3, 4, 0, 1, 2] (moves last two to the front)
+     * N.moveRange(a, 3, 5, 0);   // a is now [2, 4, 0, 3, 1] (moves the last two of [0, 3, 1, 2, 4] to the front)
      * }</pre>
      *
      * @param a the original array to be modified
@@ -15044,7 +15044,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <pre>{@code
      * float[] a = {0f, 1f, 2f, 3f, 4f};
      * N.moveRange(a, 1, 3, 2);   // a is now [0.0, 3.0, 1.0, 2.0, 4.0]
-     * N.moveRange(a, 3, 5, 0);   // a is now [3.0, 4.0, 0.0, 1.0, 2.0] (moves last two to the front)
+     * N.moveRange(a, 3, 5, 0);   // a is now [2.0, 4.0, 0.0, 3.0, 1.0] (moves the last two of [0.0, 3.0, 1.0, 2.0, 4.0] to the front)
      * }</pre>
      *
      * @param a the original array to be modified
@@ -15085,7 +15085,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <pre>{@code
      * double[] a = {0d, 1d, 2d, 3d, 4d};
      * N.moveRange(a, 1, 3, 2);   // a is now [0.0, 3.0, 1.0, 2.0, 4.0]
-     * N.moveRange(a, 3, 5, 0);   // a is now [3.0, 4.0, 0.0, 1.0, 2.0] (moves last two to the front)
+     * N.moveRange(a, 3, 5, 0);   // a is now [2.0, 4.0, 0.0, 3.0, 1.0] (moves the last two of [0.0, 3.0, 1.0, 2.0, 4.0] to the front)
      * }</pre>
      *
      * @param a the original array to be modified
@@ -32650,7 +32650,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <p>For a {@link Collection} this returns {@link Collection#size()} directly; for any other {@link Iterable} the
      * elements are fully traversed to count them.</p>
      *
-     * <p><b>&#9888; Overflow:</b> this method narrows the count to {@code int} and throws {@code ArithmeticException} if a
+     * <p><b>&#9888;&#65039; Overflow:</b> this method narrows the count to {@code int} and throws {@code ArithmeticException} if a
      * non-{@code Collection} iterable yields more than {@code Integer.MAX_VALUE} (2<sup>31</sup>-1) elements.</p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -32685,7 +32685,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * // returns 3
      * }</pre>
      *
-     * <p><b>&#9888; Overflow:</b> this method narrows the matching count to {@code int} and throws {@code ArithmeticException}
+     * <p><b>&#9888;&#65039; Overflow:</b> this method narrows the matching count to {@code int} and throws {@code ArithmeticException}
      * if more than {@code Integer.MAX_VALUE} (2<sup>31</sup>-1) elements match. For potentially larger sources use
      * {@link Iterators#count(Iterator, Predicate)}, which returns a {@code long}.</p>
      *
@@ -32718,7 +32718,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * <p>Note: The iterator will be fully consumed by this operation.</p>
      *
-     * <p><b>&#9888; Overflow:</b> this method narrows the count to {@code int} and throws {@code ArithmeticException} if the
+     * <p><b>&#9888;&#65039; Overflow:</b> this method narrows the count to {@code int} and throws {@code ArithmeticException} if the
      * iterator yields more than {@code Integer.MAX_VALUE} (2<sup>31</sup>-1) elements. For potentially larger sources use
      * the domain sibling {@link Iterators#count(Iterator)}, which returns a {@code long}.</p>
      *
@@ -34996,7 +34996,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Map<String, Integer> data = Map.of("age", 25, "score", 90);
+     * Map<String, Integer> data = new LinkedHashMap<>();
+     * data.put("age", 25);
+     * data.put("score", 90);
      * String result = N.toJson(data);
      * // returns {"age":25,"score":90}
      * }</pre>
@@ -35016,7 +35018,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Map<String, Integer> data = Map.of("age", 25, "score", 90);
+     * Map<String, Integer> data = new LinkedHashMap<>();
+     * data.put("age", 25);
+     * data.put("score", 90);
      * String result = N.toJson(data, true);
      * // returns pretty-formatted JSON with line breaks and indentation
      * }</pre>
@@ -35056,7 +35060,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Map<String, Integer> data = Map.of("age", 25, "score", 90);
+     * Map<String, Integer> data = new LinkedHashMap<>();
+     * data.put("age", 25);
+     * data.put("score", 90);
      * File outputFile = new File("data.json");
      *
      * // Writes {"age":25,"score":90} to data.json
@@ -35078,7 +35084,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * JsonSerConfig config = new JsonSerConfig().setPrettyFormat(true);
-     * Map<String, Integer> data = Map.of("age", 25, "score", 90);
+     * Map<String, Integer> data = new LinkedHashMap<>();
+     * data.put("age", 25);
+     * data.put("score", 90);
      * File outputFile = new File("data.json");
      *
      * // Writes formatted JSON to data.json
@@ -35101,7 +35109,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Map<String, Integer> data = Map.of("age", 25, "score", 90);
+     * Map<String, Integer> data = new LinkedHashMap<>();
+     * data.put("age", 25);
+     * data.put("score", 90);
      * try (OutputStream out = new FileOutputStream("data.json")) {
      *     N.toJson(data, out);   // writes {"age":25,"score":90} to the stream
      * }
@@ -35123,7 +35133,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * JsonSerConfig config = new JsonSerConfig().setPrettyFormat(true);
-     * Map<String, Integer> data = Map.of("age", 25, "score", 90);
+     * Map<String, Integer> data = new LinkedHashMap<>();
+     * data.put("age", 25);
+     * data.put("score", 90);
      * try (OutputStream out = new FileOutputStream("data.json")) {
      *     N.toJson(data, config, out);   // writes pretty-formatted JSON to the stream
      * }
@@ -35145,7 +35157,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Map<String, Integer> data = Map.of("age", 25, "score", 90);
+     * Map<String, Integer> data = new LinkedHashMap<>();
+     * data.put("age", 25);
+     * data.put("score", 90);
      * try (Writer writer = new FileWriter("data.json")) {
      *     N.toJson(data, writer);   // writes {"age":25,"score":90} to the writer
      * }
@@ -35167,7 +35181,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * JsonSerConfig config = new JsonSerConfig().setPrettyFormat(true);
-     * Map<String, Integer> data = Map.of("age", 25, "score", 90);
+     * Map<String, Integer> data = new LinkedHashMap<>();
+     * data.put("age", 25);
+     * data.put("score", 90);
      * try (Writer writer = new FileWriter("data.json")) {
      *     N.toJson(data, config, writer);   // writes pretty-formatted JSON to the writer
      * }
@@ -37332,6 +37348,13 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
         fromIndex = min(c.size() - 1, fromIndex);
 
+        // Capping fromIndex (== size in a reverse call) can collapse it onto toIndex, e.g. (size, size-1);
+        // that is an empty range. The RandomAccess loops below handle it via strict bounds, but the
+        // iterator/descending paths would otherwise process one element, so bail out explicitly here.
+        if (fromIndex == toIndex) {
+            return;
+        }
+
         if (c instanceof List && c instanceof RandomAccess) {
             final List<T> list = (List<T>) c;
 
@@ -38718,6 +38741,13 @@ public final class N extends CommonUtil { // public final class N extends π imp
         }
 
         fromIndex = min(c.size() - 1, fromIndex);
+
+        // Capping fromIndex (== size in a reverse call) can collapse it onto toIndex, e.g. (size, size-1);
+        // that is an empty range. The RandomAccess loops below handle it via strict bounds, but the
+        // descending-iterator path would otherwise process one element, so bail out explicitly here.
+        if (fromIndex == toIndex) {
+            return;
+        }
 
         if (c instanceof List && c instanceof RandomAccess) {
             final List<T> list = (List<T>) c;

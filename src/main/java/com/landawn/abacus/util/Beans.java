@@ -24,6 +24,7 @@ import java.util.Calendar;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -1470,13 +1471,9 @@ public final class Beans {
                 try {
                     instance = cls.getDeclaredConstructor().newInstance();
                 } catch (final Exception e) {
-                    if (logger.isWarnEnabled()) {
-                        //noinspection StatementWithEmptyBody
-                        if (Strings.isNotEmpty(cls.getPackageName()) && cls.getPackageName().startsWith("java.")) {
-                            // ignore
-                        } else {
-                            logger.warn("Failed to new instance of class: " + cls.getCanonicalName() + " to check setter method by getter method");
-                        }
+                    if (logger.isDebugEnabled() && !(Strings.isNotEmpty(cls.getPackageName()) && cls.getPackageName().startsWith("java."))) {
+                        logger.debug(e, "Unable to instantiate {} while discovering property accessors; getter-based setter checks will be skipped",
+                                cls.getName());
                     }
 
                     if (registeredXmlBindingClassList.containsKey(cls)) {
@@ -1716,13 +1713,11 @@ public final class Beans {
                 existingSetMethodMap.putAll(propSetMethodMap);
             }
 
-            final List<String> propNameList = new ArrayList<>(propFieldMap.keySet());
-
-            for (final String propName : propGetMethodMap.keySet()) {
-                if (!propNameList.contains(propName)) {
-                    propNameList.add(propName);
-                }
-            }
+            // LinkedHashSet keeps field-then-getter order while making membership O(1)
+            // (the previous ArrayList.contains() merge was O(n²) for large beans).
+            final Set<String> propNameSet = new LinkedHashSet<>(propFieldMap.keySet());
+            propNameSet.addAll(propGetMethodMap.keySet());
+            final List<String> propNameList = new ArrayList<>(propNameSet);
 
             beanDeclaredPropNameListPool.put(cls, ImmutableList.wrap(propNameList));
 
@@ -3201,10 +3196,10 @@ public final class Beans {
      * user.setLastName("Doe");
      * Collection<String> props = Arrays.asList("firstName", "lastName");
      *
-     * Beans.beanToMap(user, props, NamingPolicy.SNAKE_CASE, HashMap::new);
+     * Beans.beanToMap(user, props, NamingPolicy.SNAKE_CASE, LinkedHashMap::new);
      * // returns {first_name=John, last_name=Doe}
      *
-     * Beans.beanToMap(user, props, NamingPolicy.SCREAMING_SNAKE_CASE, HashMap::new);
+     * Beans.beanToMap(user, props, NamingPolicy.SCREAMING_SNAKE_CASE, LinkedHashMap::new);
      * // returns {FIRST_NAME=John, LAST_NAME=Doe}
      * }</pre>
      *
@@ -3801,7 +3796,7 @@ public final class Beans {
      *
      * Collection<String> props = Arrays.asList("firstName", "homeAddress");
      * Map<String, Object> snakeMap = Beans.deepBeanToMap(user, props,
-     *     NamingPolicy.SNAKE_CASE, HashMap::new);
+     *     NamingPolicy.SNAKE_CASE, LinkedHashMap::new);
      * // snakeMap: {
      * //   first_name=John,
      * //   home_address={street_name=Main St}
@@ -6183,10 +6178,8 @@ public final class Beans {
                 }
 
                 if (targetPropInfo == null) {
-                    //    if (!ignoreUnmatchedProperty) {
-                    //        throw new IllegalArgumentException(
-                    //                "No property found by name: " + propInfo.name + " in target bean class: " + targetBean.getClass());
-                    //    }
+                    // unmatched source properties are deliberately skipped on this path
+                    // (the selectPropNames-based overload throws for explicitly selected names)
                 } else {
                     propValue = propInfo.getPropValue(sourceBean);
                     targetPropInfo.setPropValue(targetBean, objMergeFunc.apply(propValue, targetPropInfo.getPropValue(targetBean)));

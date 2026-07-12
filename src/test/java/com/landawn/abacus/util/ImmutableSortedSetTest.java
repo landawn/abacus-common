@@ -351,6 +351,18 @@ public class ImmutableSortedSetTest extends TestBase {
     }
 
     @Test
+    public void test_copyOf_withArray() {
+        String[] values = { "c", "a", "b", "a" };
+        ImmutableSortedSet<String> set = ImmutableSortedSet.copyOf(values);
+
+        assertEquals(Arrays.asList("a", "b", "c"), new ArrayList<>(set));
+        values[0] = "z";
+        assertFalse(set.contains("z"));
+        assertSame(ImmutableSortedSet.empty(), ImmutableSortedSet.copyOf(new String[0]));
+        assertSame(ImmutableSortedSet.empty(), ImmutableSortedSet.copyOf((String[]) null));
+    }
+
+    @Test
     public void test_copyOf_withList() {
         List<String> list = Arrays.asList("c", "a", "b");
         ImmutableSortedSet<String> set = ImmutableSortedSet.copyOf(list);

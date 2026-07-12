@@ -1788,4 +1788,53 @@ public class GenericKeyedObjectPoolTest extends TestBase {
         assertNotNull(actual);
         assertEquals(expected.getValue(), actual.getValue());
     }
+
+    @Test
+    public void testPut_failedReplaceWakesNotFullWaiters() throws Exception {
+        // regression: non-timed put removed the existing same-key entry then returned false
+        // without signaling notFull, stranding timed put waiters.
+        // Use a memory measure that rejects the replacement AFTER the up-front remove.
+        final KeyedObjectPool.MemoryMeasure<String, TestPoolable> measure = (k, v) -> {
+            if ("reject".equals(v.getValue())) {
+                return -1L; // triggers fail path after remove
+            }
+            return 10L;
+        };
+        final GenericKeyedObjectPool<String, TestPoolable> p = new GenericKeyedObjectPool<>(1, 0, EvictionPolicy.LAST_ACCESS_TIME, false, 0.2f, 10_000L,
+                measure);
+        try {
+            assertTrue(p.put("A", new TestPoolable("oldA")));
+
+            final CountDownLatch waiterStarted = new CountDownLatch(1);
+            final AtomicReference<Boolean> putResult = new AtomicReference<>();
+            final AtomicReference<Throwable> failure = new AtomicReference<>();
+
+            final Thread waiter = new Thread(() -> {
+                try {
+                    waiterStarted.countDown();
+                    // Blocks until capacity frees (notFull). Must succeed after failed replace of A.
+                    final boolean ok = p.put("B", new TestPoolable("vB"), 5, TimeUnit.SECONDS);
+                    putResult.set(ok);
+                } catch (final Throwable t) {
+                    failure.set(t);
+                }
+            }, "notFull-waiter");
+            waiter.start();
+
+            assertTrue(waiterStarted.await(2, TimeUnit.SECONDS));
+            Thread.sleep(150); // allow waiter to park on notFull
+
+            // Replace key A: remove succeeds, measure rejects, value not stored → must wake notFull.
+            assertFalse(p.put("A", new TestPoolable("reject")));
+
+            waiter.join(4_000);
+            assertNull(failure.get(), "waiter threw: " + failure.get());
+            assertFalse(waiter.isAlive(), "notFull waiter did not return after failed replace freed a slot");
+            assertEquals(Boolean.TRUE, putResult.get(), "timed put(B) should succeed after A was removed and not re-stored");
+            assertEquals(1, p.size());
+            assertNotNull(p.get("B"));
+        } finally {
+            p.close();
+        }
+    }
 }

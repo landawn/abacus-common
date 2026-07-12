@@ -270,6 +270,19 @@ public class ByteIteratorTest extends TestBase {
         assertThrows(IllegalArgumentException.class, () -> ByteIterator.defer(null));
     }
 
+    @Test
+    public void testDeferNullResultFailureIsStable() {
+        int[] callCount = { 0 };
+        ByteIterator iter = ByteIterator.defer(() -> {
+            callCount[0]++;
+            return null;
+        });
+
+        assertThrows(IllegalStateException.class, iter::hasNext);
+        assertThrows(IllegalStateException.class, iter::hasNext);
+        assertEquals(1, callCount[0]);
+    }
+
     // =================================================
     // generate(ByteSupplier)
     // =================================================

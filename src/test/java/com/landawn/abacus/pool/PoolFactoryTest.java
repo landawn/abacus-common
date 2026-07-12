@@ -147,7 +147,7 @@ public class PoolFactoryTest extends TestBase {
         TestPoolable obj = new TestPoolable(10000, 5000);
         assertTrue(pool.add(obj));
 
-        TestPoolable retrieved = pool.take();
+        TestPoolable retrieved = pool.poll();
         assertNotNull(retrieved);
 
         pool.close();

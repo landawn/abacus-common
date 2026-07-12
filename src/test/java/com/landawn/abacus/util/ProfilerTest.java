@@ -25,20 +25,20 @@ import com.landawn.abacus.AbstractTest;
 public class ProfilerTest extends AbstractTest {
 
     static {
-        Profiler.suspend(true);
+        Profiler.suspend();
     }
 
     private boolean isProfilerSuspended;
 
     @BeforeEach
     public void setUp() {
-        Profiler.suspend(false);
+        Profiler.resume();
         isProfilerSuspended = Profiler.isSuspended();
     }
 
     @AfterEach
     public void tearDown() {
-        Profiler.suspend(isProfilerSuspended);
+        setProfilerSuspended(isProfilerSuspended);
     }
 
     private void doWork() {
@@ -296,7 +296,7 @@ public class ProfilerTest extends AbstractTest {
         Profiler.MultiLoopsStatistics stats = Profiler.run(1, 5, 1, "loopSize", () -> {
         });
         Profiler.LoopStatistics loopStats = stats.getLoopStatisticsList().get(0);
-        assertEquals(1, loopStats.getMethodSize("loopSize"));
+        assertEquals(1, loopStats.getMethodInvocationCount("loopSize"));
     }
 
     @Test
@@ -384,7 +384,7 @@ public class ProfilerTest extends AbstractTest {
         assertNotNull(stats);
         assertEquals(1, stats.getMethodNameList().size());
         assertEquals("null", stats.getMethodNameList().get(0));
-        assertEquals(3, stats.getMethodSize("null"));
+        assertEquals(3, stats.getMethodInvocationCount("null"));
 
         StringWriter sw = new StringWriter();
         stats.writeResult(sw);
@@ -540,7 +540,7 @@ public class ProfilerTest extends AbstractTest {
     }
 
     // ============================================================
-    // Tests for MultiLoopsStatistics.addMethodStatisticsList(LoopStatistics) — source line ~1658
+    // Tests for MultiLoopsStatistics.addLoopStatistics(LoopStatistics) — source line ~1658
     // ============================================================
 
     @Test
@@ -551,7 +551,7 @@ public class ProfilerTest extends AbstractTest {
         Profiler.MultiLoopsStatistics fromRun = Profiler.run(1, 5, 1, "addTest", () -> {
         });
         Profiler.LoopStatistics loopStats = fromRun.getLoopStatisticsList().get(0);
-        stats.addMethodStatisticsList(loopStats);
+        stats.addLoopStatistics(loopStats);
 
         assertEquals(1, stats.getLoopStatisticsList().size());
     }
@@ -563,7 +563,7 @@ public class ProfilerTest extends AbstractTest {
         });
 
         for (Profiler.LoopStatistics ls : fromRun.getLoopStatisticsList()) {
-            stats.addMethodStatisticsList(ls);
+            stats.addLoopStatistics(ls);
         }
         assertEquals(fromRun.getLoopStatisticsList().size(), stats.getLoopStatisticsList().size());
     }
@@ -628,7 +628,7 @@ public class ProfilerTest extends AbstractTest {
     public void testMultiLoopsStatisticsGetMethodSize_NonEmpty() {
         Profiler.MultiLoopsStatistics stats = Profiler.run(2, 5, 1, "sizeTest", () -> {
         });
-        assertEquals(10, stats.getMethodSize("sizeTest")); // 2 threads * 5 loops
+        assertEquals(10, stats.getMethodInvocationCount("sizeTest")); // 2 threads * 5 loops
     }
 
     @Test
@@ -703,7 +703,7 @@ public class ProfilerTest extends AbstractTest {
 
         int totalMethodCalls = 0;
         for (Profiler.LoopStatistics loopStats : stats.getLoopStatisticsList()) {
-            totalMethodCalls += loopStats.getMethodSize("multiThread");
+            totalMethodCalls += loopStats.getMethodInvocationCount("multiThread");
         }
         assertEquals(30, totalMethodCalls);
     }
@@ -731,7 +731,7 @@ public class ProfilerTest extends AbstractTest {
 
         assertNotNull(stats);
         assertEquals(1, stats.getThreadNum());
-        assertEquals(1, stats.getMethodSize("single"));
+        assertEquals(1, stats.getMethodInvocationCount("single"));
         assertEquals(1, stats.getLoopStatisticsList().size());
     }
 
@@ -826,7 +826,7 @@ public class ProfilerTest extends AbstractTest {
         Profiler.MultiLoopsStatistics stats = Profiler.run(1, 5, 1, "loopSizeNotFound", () -> {
         });
         Profiler.LoopStatistics loopStats = stats.getLoopStatisticsList().get(0);
-        assertEquals(0, loopStats.getMethodSize("nonExistent"));
+        assertEquals(0, loopStats.getMethodInvocationCount("nonExistent"));
     }
 
     @Test
@@ -867,7 +867,7 @@ public class ProfilerTest extends AbstractTest {
         Method method = ClassUtil.getDeclaredMethod(ProfilerTest.class, "normal");
         Profiler.MultiLoopsStatistics stats = Profiler.run(this, method, (Object) null, 1, 0, 3, 0, 1);
         assertNotNull(stats);
-        assertEquals(3, stats.getMethodSize("normal"));
+        assertEquals(3, stats.getMethodInvocationCount("normal"));
     }
 
     @Test
@@ -1154,7 +1154,7 @@ public class ProfilerTest extends AbstractTest {
         assertTrue(avg >= stats.getMethodMinElapsedTimeInMillis("statsTest"));
         assertTrue(avg <= stats.getMethodMaxElapsedTimeInMillis("statsTest"));
 
-        assertEquals(20, stats.getMethodSize("statsTest"));
+        assertEquals(20, stats.getMethodInvocationCount("statsTest"));
 
         assertEquals(20, stats.getMethodStatisticsList("statsTest").size());
 
@@ -1204,7 +1204,7 @@ public class ProfilerTest extends AbstractTest {
     }
 
     // ============================================================
-    // Tests for Profiler.suspend(boolean) — source line ~888
+    // Tests for Profiler.suspend() / resume()
     // ============================================================
 
     @Test
@@ -1212,17 +1212,17 @@ public class ProfilerTest extends AbstractTest {
         boolean originalSuspended = false;
 
         try {
-            Profiler.suspend(true);
+            Profiler.suspend();
 
             Profiler.MultiLoopsStatistics stats = Profiler.run(5, 100, 3, "suspended", () -> doWork());
             assertNotNull(stats);
 
-            Profiler.suspend(false);
+            Profiler.resume();
 
             stats = Profiler.run(2, 5, 1, "normal", () -> doWork());
             assertNotNull(stats);
         } finally {
-            Profiler.suspend(originalSuspended);
+            setProfilerSuspended(originalSuspended);
         }
     }
 
@@ -1230,16 +1230,16 @@ public class ProfilerTest extends AbstractTest {
     public void testSuspend_ToggleMultipleTimes() {
         boolean original = Profiler.isSuspended();
         try {
-            Profiler.suspend(true);
+            Profiler.suspend();
             assertTrue(Profiler.isSuspended());
-            Profiler.suspend(false);
+            Profiler.resume();
             assertFalse(Profiler.isSuspended());
-            Profiler.suspend(true);
+            Profiler.suspend();
             assertTrue(Profiler.isSuspended());
-            Profiler.suspend(false);
+            Profiler.resume();
             assertFalse(Profiler.isSuspended());
         } finally {
-            Profiler.suspend(original);
+            setProfilerSuspended(original);
         }
     }
 
@@ -1247,7 +1247,7 @@ public class ProfilerTest extends AbstractTest {
     public void testSuspend_RunExecutesSingleIteration() {
         boolean original = Profiler.isSuspended();
         try {
-            Profiler.suspend(true);
+            Profiler.suspend();
             // When suspended, should run with 1 thread, 1 loop regardless of params
             Profiler.MultiLoopsStatistics stats = Profiler.run(10, 100, 5, "suspendedRun", () -> {
             });
@@ -1255,7 +1255,7 @@ public class ProfilerTest extends AbstractTest {
             // The loopStatisticsList should be minimal (1 iteration)
             assertEquals(1, stats.getLoopStatisticsList().size());
         } finally {
-            Profiler.suspend(original);
+            setProfilerSuspended(original);
         }
     }
 
@@ -1267,13 +1267,13 @@ public class ProfilerTest extends AbstractTest {
     public void testIsSuspended() {
         boolean original = Profiler.isSuspended();
         try {
-            Profiler.suspend(true);
+            Profiler.suspend();
             assertTrue(Profiler.isSuspended());
 
-            Profiler.suspend(false);
+            Profiler.resume();
             assertFalse(Profiler.isSuspended());
         } finally {
-            Profiler.suspend(original);
+            setProfilerSuspended(original);
         }
     }
 
@@ -1285,13 +1285,13 @@ public class ProfilerTest extends AbstractTest {
     public void testSleep_WhenNotSuspended() {
         boolean original = Profiler.isSuspended();
         try {
-            Profiler.suspend(false);
+            Profiler.resume();
             long start = System.currentTimeMillis();
             Profiler.sleep(50);
             long elapsed = System.currentTimeMillis() - start;
             assertTrue(elapsed >= 40); // Allow some tolerance
         } finally {
-            Profiler.suspend(original);
+            setProfilerSuspended(original);
         }
     }
 
@@ -1299,13 +1299,13 @@ public class ProfilerTest extends AbstractTest {
     public void testSleep_WhenSuspended() {
         boolean original = Profiler.isSuspended();
         try {
-            Profiler.suspend(true);
+            Profiler.suspend();
             long start = System.currentTimeMillis();
             Profiler.sleep(1000);
             long elapsed = System.currentTimeMillis() - start;
             assertTrue(elapsed < 500); // Should return immediately when suspended
         } finally {
-            Profiler.suspend(original);
+            setProfilerSuspended(original);
         }
     }
 
@@ -1714,13 +1714,13 @@ public class ProfilerTest extends AbstractTest {
     }
 
     // ============================================================
-    // Tests for MultiLoopsStatistics.getMethodSize(String) — source line ~1784
+    // Tests for MultiLoopsStatistics.getMethodInvocationCount(String) — source line ~1784
     // ============================================================
 
     @Test
     public void testMultiLoopsStatisticsGetMethodSizeEmpty() {
         Profiler.MultiLoopsStatistics stats = new Profiler.MultiLoopsStatistics(0, 0, 0, 0, 1);
-        assertEquals(0, stats.getMethodSize("nonexistent"));
+        assertEquals(0, stats.getMethodInvocationCount("nonexistent"));
     }
 
     // ============================================================
@@ -1846,9 +1846,9 @@ public class ProfilerTest extends AbstractTest {
     @Test
     public void testSingleLoopStatistics_AddAndGetMethodNameList() {
         Profiler.SingleLoopStatistics stats = new Profiler.SingleLoopStatistics();
-        stats.addMethodStatisticsList(makeMethodStats("alpha", 5, false));
-        stats.addMethodStatisticsList(makeMethodStats("beta", 10, false));
-        stats.addMethodStatisticsList(makeMethodStats("alpha", 15, false)); // duplicate name
+        stats.addMethodStatistics(makeMethodStats("alpha", 5, false));
+        stats.addMethodStatistics(makeMethodStats("beta", 10, false));
+        stats.addMethodStatistics(makeMethodStats("alpha", 15, false)); // duplicate name
         List<String> names = stats.getMethodNameList();
         assertEquals(2, names.size());
         assertTrue(names.contains("alpha"));
@@ -1858,9 +1858,9 @@ public class ProfilerTest extends AbstractTest {
     @Test
     public void testSingleLoopStatistics_GetMaxElapsedTimeMethod() {
         Profiler.SingleLoopStatistics stats = new Profiler.SingleLoopStatistics();
-        stats.addMethodStatisticsList(makeMethodStats("fast", 5, false));
-        stats.addMethodStatisticsList(makeMethodStats("slow", 50, false));
-        stats.addMethodStatisticsList(makeMethodStats("medium", 20, false));
+        stats.addMethodStatistics(makeMethodStats("fast", 5, false));
+        stats.addMethodStatistics(makeMethodStats("slow", 50, false));
+        stats.addMethodStatistics(makeMethodStats("medium", 20, false));
         Profiler.MethodStatistics max = stats.getMaxElapsedTimeMethod();
         assertNotNull(max);
         assertEquals("slow", max.getMethodName());
@@ -1869,8 +1869,8 @@ public class ProfilerTest extends AbstractTest {
     @Test
     public void testSingleLoopStatistics_GetMinElapsedTimeMethod() {
         Profiler.SingleLoopStatistics stats = new Profiler.SingleLoopStatistics();
-        stats.addMethodStatisticsList(makeMethodStats("fast", 5, false));
-        stats.addMethodStatisticsList(makeMethodStats("slow", 50, false));
+        stats.addMethodStatistics(makeMethodStats("fast", 5, false));
+        stats.addMethodStatistics(makeMethodStats("slow", 50, false));
         Profiler.MethodStatistics min = stats.getMinElapsedTimeMethod();
         assertNotNull(min);
         assertEquals("fast", min.getMethodName());
@@ -1886,9 +1886,9 @@ public class ProfilerTest extends AbstractTest {
     @Test
     public void testSingleLoopStatistics_GetMethodTotalElapsedTime() {
         Profiler.SingleLoopStatistics stats = new Profiler.SingleLoopStatistics();
-        stats.addMethodStatisticsList(makeMethodStats("m", 10, false));
-        stats.addMethodStatisticsList(makeMethodStats("m", 20, false));
-        stats.addMethodStatisticsList(makeMethodStats("other", 5, false));
+        stats.addMethodStatistics(makeMethodStats("m", 10, false));
+        stats.addMethodStatistics(makeMethodStats("m", 20, false));
+        stats.addMethodStatistics(makeMethodStats("other", 5, false));
         double total = stats.getMethodTotalElapsedTimeInMillis("m");
         assertTrue(total > 0);
     }
@@ -1896,8 +1896,8 @@ public class ProfilerTest extends AbstractTest {
     @Test
     public void testSingleLoopStatistics_GetMethodMaxElapsedTime() {
         Profiler.SingleLoopStatistics stats = new Profiler.SingleLoopStatistics();
-        stats.addMethodStatisticsList(makeMethodStats("m", 10, false));
-        stats.addMethodStatisticsList(makeMethodStats("m", 30, false));
+        stats.addMethodStatistics(makeMethodStats("m", 10, false));
+        stats.addMethodStatistics(makeMethodStats("m", 30, false));
         double max = stats.getMethodMaxElapsedTimeInMillis("m");
         assertTrue(max > 0);
     }
@@ -1905,8 +1905,8 @@ public class ProfilerTest extends AbstractTest {
     @Test
     public void testSingleLoopStatistics_GetMethodMinElapsedTime() {
         Profiler.SingleLoopStatistics stats = new Profiler.SingleLoopStatistics();
-        stats.addMethodStatisticsList(makeMethodStats("m", 10, false));
-        stats.addMethodStatisticsList(makeMethodStats("m", 30, false));
+        stats.addMethodStatistics(makeMethodStats("m", 10, false));
+        stats.addMethodStatistics(makeMethodStats("m", 30, false));
         double min = stats.getMethodMinElapsedTimeInMillis("m");
         assertTrue(min > 0);
         assertTrue(min <= stats.getMethodMaxElapsedTimeInMillis("m"));
@@ -1915,7 +1915,7 @@ public class ProfilerTest extends AbstractTest {
     @Test
     public void testSingleLoopStatistics_GetMethodMinElapsedTime_NoMatch() {
         Profiler.SingleLoopStatistics stats = new Profiler.SingleLoopStatistics();
-        stats.addMethodStatisticsList(makeMethodStats("other", 10, false));
+        stats.addMethodStatistics(makeMethodStats("other", 10, false));
         double min = stats.getMethodMinElapsedTimeInMillis("nonexistent");
         assertEquals(0.0, min, 0.001);
     }
@@ -1923,8 +1923,8 @@ public class ProfilerTest extends AbstractTest {
     @Test
     public void testSingleLoopStatistics_GetMethodAverageElapsedTime() {
         Profiler.SingleLoopStatistics stats = new Profiler.SingleLoopStatistics();
-        stats.addMethodStatisticsList(makeMethodStats("m", 10, false));
-        stats.addMethodStatisticsList(makeMethodStats("m", 20, false));
+        stats.addMethodStatistics(makeMethodStats("m", 10, false));
+        stats.addMethodStatistics(makeMethodStats("m", 20, false));
         double avg = stats.getMethodAverageElapsedTimeInMillis("m");
         assertTrue(avg > 0);
     }
@@ -1939,8 +1939,8 @@ public class ProfilerTest extends AbstractTest {
     @Test
     public void testSingleLoopStatistics_GetTotalElapsedTime() {
         Profiler.SingleLoopStatistics stats = new Profiler.SingleLoopStatistics();
-        stats.addMethodStatisticsList(makeMethodStats("a", 10, false));
-        stats.addMethodStatisticsList(makeMethodStats("b", 20, false));
+        stats.addMethodStatistics(makeMethodStats("a", 10, false));
+        stats.addMethodStatistics(makeMethodStats("b", 20, false));
         double total = stats.getTotalElapsedTimeInMillis();
         assertTrue(total > 0);
     }
@@ -1954,20 +1954,20 @@ public class ProfilerTest extends AbstractTest {
     @Test
     public void testSingleLoopStatistics_GetMethodSize() {
         Profiler.SingleLoopStatistics stats = new Profiler.SingleLoopStatistics();
-        stats.addMethodStatisticsList(makeMethodStats("m", 5, false));
-        stats.addMethodStatisticsList(makeMethodStats("m", 10, false));
-        stats.addMethodStatisticsList(makeMethodStats("other", 5, false));
-        assertEquals(2, stats.getMethodSize("m"));
-        assertEquals(1, stats.getMethodSize("other"));
-        assertEquals(0, stats.getMethodSize("absent"));
+        stats.addMethodStatistics(makeMethodStats("m", 5, false));
+        stats.addMethodStatistics(makeMethodStats("m", 10, false));
+        stats.addMethodStatistics(makeMethodStats("other", 5, false));
+        assertEquals(2, stats.getMethodInvocationCount("m"));
+        assertEquals(1, stats.getMethodInvocationCount("other"));
+        assertEquals(0, stats.getMethodInvocationCount("absent"));
     }
 
     @Test
     public void testSingleLoopStatistics_GetMethodStatisticsListByName() {
         Profiler.SingleLoopStatistics stats = new Profiler.SingleLoopStatistics();
-        stats.addMethodStatisticsList(makeMethodStats("m", 5, false));
-        stats.addMethodStatisticsList(makeMethodStats("m", 10, false));
-        stats.addMethodStatisticsList(makeMethodStats("other", 5, false));
+        stats.addMethodStatistics(makeMethodStats("m", 5, false));
+        stats.addMethodStatistics(makeMethodStats("m", 10, false));
+        stats.addMethodStatistics(makeMethodStats("other", 5, false));
         List<Profiler.MethodStatistics> list = stats.getMethodStatisticsList("m");
         assertEquals(2, list.size());
         for (Profiler.MethodStatistics ms : list) {
@@ -1978,9 +1978,9 @@ public class ProfilerTest extends AbstractTest {
     @Test
     public void testSingleLoopStatistics_GetFailedMethodStatisticsListByName() {
         Profiler.SingleLoopStatistics stats = new Profiler.SingleLoopStatistics();
-        stats.addMethodStatisticsList(makeMethodStats("m", 5, false));
-        stats.addMethodStatisticsList(makeMethodStats("m", 10, true));
-        stats.addMethodStatisticsList(makeMethodStats("m", 15, true));
+        stats.addMethodStatistics(makeMethodStats("m", 5, false));
+        stats.addMethodStatistics(makeMethodStats("m", 10, true));
+        stats.addMethodStatistics(makeMethodStats("m", 15, true));
         List<Profiler.MethodStatistics> failed = stats.getFailedMethodStatisticsList("m");
         assertEquals(2, failed.size());
     }
@@ -1988,7 +1988,7 @@ public class ProfilerTest extends AbstractTest {
     @Test
     public void testSingleLoopStatistics_GetFailedMethodStatisticsListByName_NoFailed() {
         Profiler.SingleLoopStatistics stats = new Profiler.SingleLoopStatistics();
-        stats.addMethodStatisticsList(makeMethodStats("m", 5, false));
+        stats.addMethodStatistics(makeMethodStats("m", 5, false));
         List<Profiler.MethodStatistics> failed = stats.getFailedMethodStatisticsList("m");
         assertEquals(0, failed.size());
     }
@@ -1996,9 +1996,9 @@ public class ProfilerTest extends AbstractTest {
     @Test
     public void testSingleLoopStatistics_GetAllFailedMethodStatisticsList() {
         Profiler.SingleLoopStatistics stats = new Profiler.SingleLoopStatistics();
-        stats.addMethodStatisticsList(makeMethodStats("a", 5, false));
-        stats.addMethodStatisticsList(makeMethodStats("b", 10, true));
-        stats.addMethodStatisticsList(makeMethodStats("c", 15, true));
+        stats.addMethodStatistics(makeMethodStats("a", 5, false));
+        stats.addMethodStatistics(makeMethodStats("b", 10, true));
+        stats.addMethodStatistics(makeMethodStats("c", 15, true));
         List<Profiler.MethodStatistics> failed = stats.getAllFailedMethodStatisticsList();
         assertEquals(2, failed.size());
     }

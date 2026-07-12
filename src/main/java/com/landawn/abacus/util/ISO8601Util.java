@@ -206,7 +206,16 @@ final class ISO8601Util {
      * @throws IllegalArgumentException if the date string cannot be parsed
      */
     public static Date parse(final String date) {
-        return parse(date, new ParsePosition(0));
+        final ParsePosition pos = new ParsePosition(0);
+        final Date result = parse(date, pos);
+
+        // Unlike parse(String, ParsePosition), this overload requires the entire input to be one
+        // complete, well-formed ISO 8601 value: reject any unparsed trailing characters.
+        if (pos.getIndex() != date.length()) {
+            throw new IllegalArgumentException("Failed to parse date \"" + date + "\": unexpected trailing characters at position: " + pos.getIndex());
+        }
+
+        return result;
     }
 
     /**
@@ -299,7 +308,13 @@ final class ISO8601Util {
                         // milliseconds can be optional in the format
                         if (checkOffset(date, offset, '.')) {
                             offset += 1;
-                            final int endOffset = indexOfNonDigit(date, offset + 1); // assume at least one digit
+                            // A fractional-seconds part must contain at least one digit after the '.';
+                            // a bare trailing '.' (or a non-digit) is malformed, not a zero fraction.
+                            if (offset >= date.length() || date.charAt(offset) < '0' || date.charAt(offset) > '9') {
+                                throw new IllegalArgumentException(
+                                        "Invalid fractional seconds: at least one digit is required after '.' in date \"" + date + "\"");
+                            }
+                            final int endOffset = indexOfNonDigit(date, offset + 1); // at least one digit (validated above)
                             final int parseEndOffset = Math.min(endOffset, offset + 3); // parse up to 3 digits
                             final int fraction = parseInt(date, offset, parseEndOffset);
                             // compensate for "missing" digits

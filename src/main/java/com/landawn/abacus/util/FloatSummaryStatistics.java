@@ -87,7 +87,11 @@ public class FloatSummaryStatistics implements FloatConsumer {
             throw new IllegalArgumentException("count must be non-negative");
         }
 
-        if (N.compare(min, max) > 0) {
+        if (count == 0) {
+            if (min != Float.POSITIVE_INFINITY || max != Float.NEGATIVE_INFINITY || sum != 0D) {
+                throw new IllegalArgumentException("Invalid empty state: min, max, and sum must be canonical");
+            }
+        } else if (N.compare(min, max) > 0) {
             throw new IllegalArgumentException("minimum is greater than maximum");
         }
 

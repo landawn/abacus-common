@@ -1547,7 +1547,7 @@ public final class Suppliers {
      *   <li>{@code Set}, {@code HashSet}, {@code AbstractSet} - returns HashSet supplier</li>
      *   <li>{@code LinkedHashSet} - returns LinkedHashSet supplier</li>
      *   <li>{@code ConcurrentSkipListSet} - returns ConcurrentSkipListSet supplier</li>
-     *   <li>{@code SortedSet}, {@code NavigableSet}, {@code TreeSet} (and other subtypes) - returns TreeSet supplier</li>
+     *   <li>{@code SortedSet}, {@code NavigableSet} interfaces (or an abstract sorted-set type) - returns TreeSet supplier; a concrete sorted-set subtype is instantiated as its own runtime type</li>
      *   <li>{@code Queue}, {@code Deque}, {@code AbstractQueue} - returns LinkedList supplier (as Deque)</li>
      *   <li>{@code BlockingQueue}, {@code LinkedBlockingQueue} - returns LinkedBlockingQueue supplier</li>
      *   <li>{@code BlockingDeque}, {@code LinkedBlockingDeque} - returns LinkedBlockingDeque supplier</li>
@@ -1590,7 +1590,9 @@ public final class Suppliers {
                 // Must precede the SortedSet branch (like ConcurrentSkipListMap in ofMap):
                 // downgrading to TreeSet would silently lose thread-safety.
                 ret = Fn.s(ConcurrentSkipListSet::new);
-            } else if (SortedSet.class.isAssignableFrom(targetType)) {
+            } else if (SortedSet.class.isAssignableFrom(targetType) && (targetType.isInterface() || Modifier.isAbstract(targetType.getModifiers()))) {
+                // Only downgrade the SortedSet/NavigableSet interfaces (or an abstract sorted-set type) to
+                // TreeSet; a concrete sorted-set subclass is instantiated below to preserve its runtime type.
                 ret = ofSortedSet();
             } else if (Queue.class.equals(targetType) || AbstractQueue.class.equals(targetType) || Deque.class.equals(targetType)) {
                 return ofDeque();
@@ -1658,7 +1660,7 @@ public final class Suppliers {
      *   <li>{@code ConcurrentMap} - returns ConcurrentHashMap supplier</li>
      *   <li>{@code LinkedHashMap} - returns LinkedHashMap supplier</li>
      *   <li>{@code ConcurrentNavigableMap}, {@code ConcurrentSkipListMap} - returns ConcurrentSkipListMap supplier</li>
-     *   <li>{@code SortedMap} (and subtypes) - returns TreeMap supplier</li>
+     *   <li>{@code SortedMap}, {@code NavigableMap} interfaces (or an abstract sorted-map type) - returns TreeMap supplier; a concrete sorted-map subtype is instantiated as its own runtime type</li>
      *   <li>{@code IdentityHashMap} (and subtypes) - returns IdentityHashMap supplier</li>
      *   <li>{@code ConcurrentHashMap} (and subtypes) - returns ConcurrentHashMap supplier</li>
      *   <li>{@code BiMap} (and subtypes) - returns BiMap supplier</li>
@@ -1694,7 +1696,9 @@ public final class Suppliers {
                 ret = ofLinkedHashMap();
             } else if (ConcurrentNavigableMap.class.equals(targetType) || ConcurrentSkipListMap.class.equals(targetType)) {
                 ret = ofConcurrentNavigableMap();
-            } else if (SortedMap.class.isAssignableFrom(targetType)) {
+            } else if (SortedMap.class.isAssignableFrom(targetType) && (targetType.isInterface() || Modifier.isAbstract(targetType.getModifiers()))) {
+                // Only downgrade the SortedMap/NavigableMap interfaces (or an abstract sorted-map type) to
+                // TreeMap; a concrete sorted-map subclass is instantiated below to preserve its runtime type.
                 ret = ofSortedMap();
             } else if (IdentityHashMap.class.isAssignableFrom(targetType)) {
                 ret = ofIdentityHashMap();

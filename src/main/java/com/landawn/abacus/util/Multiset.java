@@ -406,7 +406,8 @@ public final class Multiset<E> implements Collection<E> {
                     result.backingMap.put(e, MutableInt.of(1));
                 } else {
                     if (count.value() == Integer.MAX_VALUE) {
-                        throw new IllegalArgumentException("The total count is out of the bound of int"); //NOSONAR
+                        throw new IllegalArgumentException(
+                                "The total count for element '" + e + "' is out of the bound of int (current=" + count.value() + ")"); //NOSONAR
                     }
 
                     count.add(1);
@@ -813,7 +814,8 @@ public final class Multiset<E> implements Collection<E> {
         MutableInt count = backingMap.get(element);
 
         if (count != null && occurrencesToAdd > (Integer.MAX_VALUE - count.value())) {
-            throw new IllegalArgumentException("The total count is out of the bound of int");
+            throw new IllegalArgumentException("The total count for element '" + element + "' is out of the bound of int (current=" + count.value()
+                    + ", occurrencesToAdd=" + occurrencesToAdd + ")");
         }
 
         final int oldCount = count == null ? 0 : count.value();
@@ -853,7 +855,8 @@ public final class Multiset<E> implements Collection<E> {
         MutableInt count = backingMap.get(element);
 
         if (count != null && occurrences > (Integer.MAX_VALUE - count.value())) {
-            throw new IllegalArgumentException("The total count is out of the bound of int");
+            throw new IllegalArgumentException("The total count for element '" + element + "' is out of the bound of int (current=" + count.value()
+                    + ", occurrences=" + occurrences + ")");
         }
 
         if (count == null) {
@@ -2288,7 +2291,7 @@ public final class Multiset<E> implements Collection<E> {
 
     private static int checkOccurrences(final int occurrences) {
         if (occurrences < 0) {
-            throw new IllegalArgumentException("The specified 'occurrences' cannot be negative");
+            throw new IllegalArgumentException("The specified 'occurrences' cannot be negative: " + occurrences);
         }
 
         return occurrences;

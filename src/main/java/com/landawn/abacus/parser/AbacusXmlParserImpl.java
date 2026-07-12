@@ -1283,9 +1283,7 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * XmlParser parser = new AbacusXmlParserImpl(XmlParserType.DOM);
-     * Document doc = DocumentBuilderFactory.newInstance()
-     *     .newDocumentBuilder()
-     *     .parse(new File("user.xml"));
+     * Document doc = XmlUtil.createDOMParser().parse(new File("user.xml"));
      * User user = parser.deserialize(doc.getDocumentElement(), null, Type.of(User.class));
      * }</pre>
      *
@@ -1312,9 +1310,7 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
      * <pre>{@code
      * XmlParser parser = new AbacusXmlParserImpl(XmlParserType.DOM);
      *
-     * Document doc = DocumentBuilderFactory.newInstance()
-     *     .newDocumentBuilder()
-     *     .parse(new File("user.xml"));
+     * Document doc = XmlUtil.createDOMParser().parse(new File("user.xml"));
      *
      * User user = parser.deserialize(doc.getDocumentElement(), null, User.class);
      *
@@ -1453,9 +1449,7 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
      * nodeTypes.put("product", Type.of(Product.class));
      * nodeTypes.put("service", Type.of(Service.class));
      *
-     * Document doc = DocumentBuilderFactory.newInstance()
-     *     .newDocumentBuilder()
-     *     .parse(new File("items.xml"));
+     * Document doc = XmlUtil.createDOMParser().parse(new File("items.xml"));
      *
      * Object item = parser.deserialize(doc.getDocumentElement(), null, nodeTypes);
      * }</pre>
@@ -1476,10 +1470,10 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
             nodeName = source.getNodeName();
         }
 
-        final Type<?> targetType = nodeTypes.get(nodeName);
+        final Type<?> targetType = N.notEmpty(nodeTypes) ? nodeTypes.get(nodeName) : null;
 
         if (targetType == null) {
-            throw new ParsingException("No target class is specified");
+            throw new ParsingException("No target class is specified for xml node: " + nodeName);
         }
 
         return (T) readByDOMParser(source, config, targetType);
@@ -1535,7 +1529,7 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
                     }
 
                     if (targetType == null) {
-                        throw new ParsingException("No target type is specified");
+                        throw new ParsingException("No target type is specified for xml node: " + xmlReader.getLocalName());
                     }
 
                     return readByStreamParser(xmlReader, configToUse, targetType);
@@ -1573,7 +1567,7 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
                     }
 
                     if (targetType == null) {
-                        throw new ParsingException("No target class is specified");
+                        throw new ParsingException("No target class is specified for xml node: " + node.getNodeName());
                     }
 
                     return readByDOMParser(node, configToUse, targetType);
@@ -1640,7 +1634,7 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
                     }
 
                     if (targetType == null) {
-                        throw new ParsingException("No target type is specified");
+                        throw new ParsingException("No target type is specified for xml node: " + xmlReader.getLocalName());
                     }
 
                     return readByStreamParser(xmlReader, configToUse, targetType);
@@ -1678,7 +1672,7 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
                     }
 
                     if (targetType == null) {
-                        throw new ParsingException("No target class is specified");
+                        throw new ParsingException("No target class is specified for xml node: " + node.getNodeName());
                     }
 
                     return readByDOMParser(node, configToUse, targetType);
@@ -3407,7 +3401,9 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
                         if (config.getElementType() != null && !config.getElementType().isObject()) {
                             eleType = config.getElementType();
                         } else {
-                            eleType = targetType.isArray() && !targetType.elementType().isObject() ? targetType.elementType() : strType;
+                            // must match the StAX/DOM siblings: forcing String for an Object[] target made the
+                            // String[] placeholder drive the final conversion and dropped per-element type info.
+                            eleType = targetType.isArray() ? targetType.elementType() : strType;
                         }
                     }
 
@@ -3568,11 +3564,11 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
                 }
 
                 default:
-                    throw new ParsingException("only array, collection, map and bean nodes are supported"); //NOSONAR
+                    throw new ParsingException("only array, collection, map and bean nodes are supported: " + nodeName); //NOSONAR
             }
 
             if (isFirstCall) {
-                throw new ParsingException("only array, collection, map and bean nodes are supported");
+                throw new ParsingException("only array, collection, map and bean nodes are supported: " + nodeName);
             }
 
             nodeTypeQueue.add(nodeType);
@@ -3764,7 +3760,7 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
                     break;
 
                 default:
-                    throw new ParsingException("only array, collection, map and bean nodes are supported");
+                    throw new ParsingException("only array, collection, map and bean nodes are supported: " + nodeName);
             }
         }
 

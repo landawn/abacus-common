@@ -144,6 +144,16 @@ public class ISO8601UtilTest extends TestBase {
         }
     }
 
+    @Test
+    public void testPlainParseRequiresCompleteWellFormedInput() {
+        assertThrows(IllegalArgumentException.class, () -> ISO8601Util.parse("2023-12-25T10:30:45Zjunk"));
+        assertThrows(IllegalArgumentException.class, () -> ISO8601Util.parse("2023-12-25T10:30:45."));
+
+        ParsePosition position = new ParsePosition(0);
+        assertNotNull(ISO8601Util.parse("2023-12-25T10:30:45Zjunk", position));
+        assertEquals("2023-12-25T10:30:45Z".length(), position.getIndex());
+    }
+
     // ===== Round-trip tests =====
 
     @Test

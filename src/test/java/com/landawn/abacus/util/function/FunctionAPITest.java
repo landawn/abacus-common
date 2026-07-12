@@ -1123,6 +1123,13 @@ public class FunctionAPITest extends TestBase {
 
     @Nested
     public class ToBooleanBiFunctionTest {
+        @Test
+        public void testToThrowable() throws Exception {
+            ToBooleanBiFunction<String, String> function = String::equals;
+            Throwables.ToBooleanBiFunction<String, String, Exception> throwable = function.toThrowable();
+            assertSame(function, throwable);
+            assertTrue(throwable.applyAsBoolean("a", "a"));
+        }
     }
 
     @Nested
@@ -1137,6 +1144,13 @@ public class FunctionAPITest extends TestBase {
 
     @Nested
     public class ToByteBiFunctionTest {
+        @Test
+        public void testToThrowable() throws Exception {
+            ToByteBiFunction<Integer, Integer> function = (a, b) -> (byte) (a + b);
+            Throwables.ToByteBiFunction<Integer, Integer, Exception> throwable = function.toThrowable();
+            assertSame(function, throwable);
+            assertEquals((byte) 3, throwable.applyAsByte(1, 2));
+        }
     }
 
     @Nested
@@ -1152,6 +1166,13 @@ public class FunctionAPITest extends TestBase {
 
     @Nested
     public class ToCharBiFunctionTest {
+        @Test
+        public void testToThrowable() throws Exception {
+            ToCharBiFunction<String, Integer> function = String::charAt;
+            Throwables.ToCharBiFunction<String, Integer, Exception> throwable = function.toThrowable();
+            assertSame(function, throwable);
+            assertEquals('b', throwable.applyAsChar("abc", 1));
+        }
     }
 
     @Nested
@@ -1172,6 +1193,13 @@ public class FunctionAPITest extends TestBase {
 
     @Nested
     public class ToFloatBiFunctionTest {
+        @Test
+        public void testToThrowable() throws Exception {
+            ToFloatBiFunction<Integer, Integer> function = (a, b) -> (float) a / b;
+            Throwables.ToFloatBiFunction<Integer, Integer, Exception> throwable = function.toThrowable();
+            assertSame(function, throwable);
+            assertEquals(2.5f, throwable.applyAsFloat(5, 2));
+        }
     }
 
     @Nested
@@ -1204,6 +1232,13 @@ public class FunctionAPITest extends TestBase {
 
     @Nested
     public class ToShortBiFunctionTest {
+        @Test
+        public void testToThrowable() throws Exception {
+            ToShortBiFunction<Integer, Integer> function = (a, b) -> (short) (a + b);
+            Throwables.ToShortBiFunction<Integer, Integer, Exception> throwable = function.toThrowable();
+            assertSame(function, throwable);
+            assertEquals((short) 3, throwable.applyAsShort(1, 2));
+        }
     }
 
     @Nested

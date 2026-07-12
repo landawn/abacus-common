@@ -1608,6 +1608,42 @@ public final class Fraction extends Number implements Comparable<Fraction>, Immu
     }
 
     /**
+     * Returns whether this fraction represents zero.
+     *
+     * @return {@code true} if the numerator is zero; otherwise {@code false}
+     */
+    public boolean isZero() {
+        return numerator == 0;
+    }
+
+    /**
+     * Returns whether this fraction represents a positive value.
+     *
+     * @return {@code true} if the numerator is positive; otherwise {@code false}
+     */
+    public boolean isPositive() {
+        return numerator > 0;
+    }
+
+    /**
+     * Returns whether this fraction represents a negative value.
+     *
+     * @return {@code true} if the numerator is negative; otherwise {@code false}
+     */
+    public boolean isNegative() {
+        return numerator < 0;
+    }
+
+    /**
+     * Returns whether this fraction represents an integer value.
+     *
+     * @return {@code true} if the numerator is evenly divisible by the denominator; otherwise {@code false}
+     */
+    public boolean isInteger() {
+        return numerator % denominator == 0;
+    }
+
+    /**
      * Tests whether this fraction is equal to another object.
      * Two fractions are considered equal if and only if they have the same numerator
      * and the same denominator. This means that 1/2 and 2/4 are NOT considered equal

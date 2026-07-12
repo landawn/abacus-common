@@ -244,6 +244,19 @@ public class LongIteratorTest extends TestBase {
     }
 
     @Test
+    public void testDeferNullResultFailureIsStable() {
+        int[] callCount = { 0 };
+        LongIterator iter = LongIterator.defer(() -> {
+            callCount[0]++;
+            return null;
+        });
+
+        assertThrows(IllegalStateException.class, iter::hasNext);
+        assertThrows(IllegalStateException.class, iter::hasNext);
+        assertEquals(1, callCount[0]);
+    }
+
+    @Test
     public void testGenerate() {
         AtomicLong counter = new AtomicLong(0);
         LongIterator iter = LongIterator.generate(() -> counter.incrementAndGet());

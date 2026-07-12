@@ -1054,7 +1054,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
     static long currentTimeMillisPlus(final long amount, final TimeUnit unit) {
         N.checkArgNotNull(unit, cs.unit);
 
-        return System.currentTimeMillis() + unit.toMillis(amount);
+        return Math.addExact(System.currentTimeMillis(), toMillisExact(amount, unit));
     }
 
     /**
@@ -4008,10 +4008,12 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * @return a new date of the same type as {@code date} with the specified amount applied.
      * @throws IllegalArgumentException if {@code date} or {@code unit} is {@code null}.
      * @deprecated misleadingly named (it adds, it does not {@link Calendar#roll(int, int) roll}); use the
-     *             field-specific {@code add*} methods instead, e.g. {@link #addDays(java.util.Date, int)},
-     *             {@link #addHours(java.util.Date, int)}, {@link #addMinutes(java.util.Date, int)},
-     *             {@link #addSeconds(java.util.Date, int)}, {@link #addMilliseconds(java.util.Date, int)}.
-     *             Behavior is unchanged.
+     *             field-specific {@code add*} methods instead, e.g. {@link #addHours(java.util.Date, int)},
+     *             {@link #addMinutes(java.util.Date, int)}, {@link #addSeconds(java.util.Date, int)},
+     *             {@link #addMilliseconds(java.util.Date, int)}, which are exact replacements for this
+     *             method's plain-millisecond arithmetic. Note {@link #addDays(java.util.Date, int)} is
+     *             <i>not</i> equivalent for {@code TimeUnit.DAYS}: it uses daylight-saving-aware calendar
+     *             arithmetic and so can differ by an hour across DST transitions.
      */
     @Beta
     @Deprecated
@@ -4093,10 +4095,12 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * @return a new calendar of the same type as {@code calendar} with the specified amount applied.
      * @throws IllegalArgumentException if {@code calendar} or {@code unit} is {@code null}.
      * @deprecated misleadingly named (it adds, it does not {@link Calendar#roll(int, int) roll}); use the
-     *             field-specific {@code add*} methods instead, e.g. {@link #addDays(Calendar, int)},
-     *             {@link #addHours(Calendar, int)}, {@link #addMinutes(Calendar, int)},
-     *             {@link #addSeconds(Calendar, int)}, {@link #addMilliseconds(Calendar, int)}.
-     *             Behavior is unchanged.
+     *             field-specific {@code add*} methods instead, e.g. {@link #addHours(Calendar, int)},
+     *             {@link #addMinutes(Calendar, int)}, {@link #addSeconds(Calendar, int)},
+     *             {@link #addMilliseconds(Calendar, int)}, which are exact replacements for this
+     *             method's plain-millisecond arithmetic. Note {@link #addDays(Calendar, int)} is
+     *             <i>not</i> equivalent for {@code TimeUnit.DAYS}: it uses daylight-saving-aware calendar
+     *             arithmetic and so can differ by an hour across DST transitions.
      */
     @Beta
     @Deprecated
@@ -4181,7 +4185,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
         N.checkArgNotNull(date, cs.date);
         N.checkArgNotNull(unit, cs.unit);
 
-        return createDate(date.getTime() + unit.toMillis(amount), date.getClass());
+        return createDate(Math.addExact(date.getTime(), toMillisExact(amount, unit)), date.getClass());
     }
 
     private static <T extends java.util.Date> T addToDate(final T date, final int amount, final CalendarField unit) {
@@ -4207,7 +4211,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
         N.checkArgNotNull(calendar, cs.calendar); //NOSONAR
         N.checkArgNotNull(unit, cs.unit);
 
-        return createCalendar(calendar, calendar.getTimeInMillis() + unit.toMillis(amount));
+        return createCalendar(calendar, Math.addExact(calendar.getTimeInMillis(), toMillisExact(amount, unit)));
     }
 
     private static <T extends Calendar> T addToCalendar(final T calendar, final int amount, final CalendarField unit) {
@@ -4782,7 +4786,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * Dates.round((java.util.Date) null, CalendarField.HOUR_OF_DAY);                      // throws IllegalArgumentException
      * }</pre>
      *
-     * <p><b>&#9888;</b> {@link CalendarField#WEEK_OF_YEAR} is not supported by this overload and throws
+     * <p><b>&#9888;&#65039;</b> {@link CalendarField#WEEK_OF_YEAR} is not supported by this overload and throws
      * {@link IllegalArgumentException}; the underlying rounding algorithm supports calendar fields with
      * fixed intra-month/year ordering, not week-based boundaries.</p>
      *
@@ -4891,7 +4895,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * Dates.round((Calendar) null, CalendarField.HOUR_OF_DAY);                                 // throws IllegalArgumentException
      * }</pre>
      *
-     * <p><b>&#9888;</b> {@link CalendarField#WEEK_OF_YEAR} is not supported by this overload and throws
+     * <p><b>&#9888;&#65039;</b> {@link CalendarField#WEEK_OF_YEAR} is not supported by this overload and throws
      * {@link IllegalArgumentException}; the underlying rounding algorithm supports calendar fields with
      * fixed intra-month/year ordering, not week-based boundaries.</p>
      *
@@ -4975,7 +4979,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * Dates.truncate((java.util.Date) null, CalendarField.HOUR_OF_DAY);                       // throws IllegalArgumentException
      * }</pre>
      *
-     * <p><b>&#9888;</b> {@link CalendarField#WEEK_OF_YEAR} is not supported by this overload and throws
+     * <p><b>&#9888;&#65039;</b> {@link CalendarField#WEEK_OF_YEAR} is not supported by this overload and throws
      * {@link IllegalArgumentException}; the underlying truncation algorithm supports calendar fields with
      * fixed intra-month/year ordering, not week-based boundaries.</p>
      *
@@ -5062,7 +5066,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * Dates.truncate((Calendar) null, CalendarField.HOUR_OF_DAY);                                 // throws IllegalArgumentException
      * }</pre>
      *
-     * <p><b>&#9888;</b> {@link CalendarField#WEEK_OF_YEAR} is not supported by this overload and throws
+     * <p><b>&#9888;&#65039;</b> {@link CalendarField#WEEK_OF_YEAR} is not supported by this overload and throws
      * {@link IllegalArgumentException}; the underlying truncation algorithm supports calendar fields with
      * fixed intra-month/year ordering, not week-based boundaries.</p>
      *
@@ -5141,7 +5145,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * Dates.ceiling((java.util.Date) null, CalendarField.HOUR_OF_DAY);                       // throws IllegalArgumentException
      * }</pre>
      *
-     * <p><b>&#9888;</b> {@link CalendarField#WEEK_OF_YEAR} is not supported by this overload and throws
+     * <p><b>&#9888;&#65039;</b> {@link CalendarField#WEEK_OF_YEAR} is not supported by this overload and throws
      * {@link IllegalArgumentException}; the underlying ceiling algorithm supports calendar fields with
      * fixed intra-month/year ordering, not week-based boundaries.</p>
      *
@@ -5225,7 +5229,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * Dates.ceiling((Calendar) null, CalendarField.HOUR_OF_DAY);                                 // throws IllegalArgumentException
      * }</pre>
      *
-     * <p><b>&#9888;</b> {@link CalendarField#WEEK_OF_YEAR} is not supported by this overload and throws
+     * <p><b>&#9888;&#65039;</b> {@link CalendarField#WEEK_OF_YEAR} is not supported by this overload and throws
      * {@link IllegalArgumentException}; the underlying ceiling algorithm supports calendar fields with
      * fixed intra-month/year ordering, not week-based boundaries.</p>
      *
@@ -5675,7 +5679,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * @throws IllegalArgumentException if {@code date} is {@code null} or the fragment is not supported.
      */
     public static long getFragmentInMilliseconds(final java.util.Date date, final CalendarField fragment) {
-        return getFragment(date, fragment.value(), TimeUnit.MILLISECONDS);
+        return getFragment(date, N.checkArgNotNull(fragment, "fragment").value(), TimeUnit.MILLISECONDS);
     }
 
     /**
@@ -5724,7 +5728,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * @throws IllegalArgumentException if {@code date} is {@code null} or the fragment is not supported.
      */
     public static long getFragmentInSeconds(final java.util.Date date, final CalendarField fragment) {
-        return getFragment(date, fragment.value(), TimeUnit.SECONDS);
+        return getFragment(date, N.checkArgNotNull(fragment, "fragment").value(), TimeUnit.SECONDS);
     }
 
     /**
@@ -5773,7 +5777,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * @throws IllegalArgumentException if {@code date} is {@code null} or the fragment is not supported.
      */
     public static long getFragmentInMinutes(final java.util.Date date, final CalendarField fragment) {
-        return getFragment(date, fragment.value(), TimeUnit.MINUTES);
+        return getFragment(date, N.checkArgNotNull(fragment, "fragment").value(), TimeUnit.MINUTES);
     }
 
     /**
@@ -5822,7 +5826,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * @throws IllegalArgumentException if {@code date} is {@code null} or the fragment is not supported.
      */
     public static long getFragmentInHours(final java.util.Date date, final CalendarField fragment) {
-        return getFragment(date, fragment.value(), TimeUnit.HOURS);
+        return getFragment(date, N.checkArgNotNull(fragment, "fragment").value(), TimeUnit.HOURS);
     }
 
     /**
@@ -5871,7 +5875,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * @throws IllegalArgumentException if {@code date} is {@code null} or the fragment is not supported.
      */
     public static long getFragmentInDays(final java.util.Date date, final CalendarField fragment) {
-        return getFragment(date, fragment.value(), TimeUnit.DAYS);
+        return getFragment(date, N.checkArgNotNull(fragment, "fragment").value(), TimeUnit.DAYS);
     }
 
     /**
@@ -5941,7 +5945,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * @throws IllegalArgumentException if {@code calendar} is {@code null} or the fragment is not supported.
      */
     public static long getFragmentInMilliseconds(final Calendar calendar, final CalendarField fragment) {
-        return getFragment(calendar, fragment.value(), TimeUnit.MILLISECONDS);
+        return getFragment(calendar, N.checkArgNotNull(fragment, "fragment").value(), TimeUnit.MILLISECONDS);
     }
 
     /**
@@ -5991,7 +5995,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * @throws IllegalArgumentException if {@code calendar} is {@code null} or the fragment is not supported.
      */
     public static long getFragmentInSeconds(final Calendar calendar, final CalendarField fragment) {
-        return getFragment(calendar, fragment.value(), TimeUnit.SECONDS);
+        return getFragment(calendar, N.checkArgNotNull(fragment, "fragment").value(), TimeUnit.SECONDS);
     }
 
     /**
@@ -6041,7 +6045,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * @throws IllegalArgumentException if {@code calendar} is {@code null} or the fragment is not supported.
      */
     public static long getFragmentInMinutes(final Calendar calendar, final CalendarField fragment) {
-        return getFragment(calendar, fragment.value(), TimeUnit.MINUTES);
+        return getFragment(calendar, N.checkArgNotNull(fragment, "fragment").value(), TimeUnit.MINUTES);
     }
 
     /**
@@ -6091,7 +6095,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * @throws IllegalArgumentException if {@code calendar} is {@code null} or the fragment is not supported.
      */
     public static long getFragmentInHours(final Calendar calendar, final CalendarField fragment) {
-        return getFragment(calendar, fragment.value(), TimeUnit.HOURS);
+        return getFragment(calendar, N.checkArgNotNull(fragment, "fragment").value(), TimeUnit.HOURS);
     }
 
     /**
@@ -6143,7 +6147,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * @throws IllegalArgumentException if {@code calendar} is {@code null} or the fragment is not supported.
      */
     public static long getFragmentInDays(final Calendar calendar, final CalendarField fragment) {
-        return getFragment(calendar, fragment.value(), TimeUnit.DAYS);
+        return getFragment(calendar, N.checkArgNotNull(fragment, "fragment").value(), TimeUnit.DAYS);
     }
 
     /**
@@ -8506,4 +8510,26 @@ public abstract sealed class Dates permits Dates.DateUtil {
         }
     }
 
+    private static long toMillisExact(final long duration, final TimeUnit unit) {
+        N.checkArgNotNull(unit);
+
+        switch (unit) {
+            case NANOSECONDS:
+                return duration / 1_000_000L;
+            case MICROSECONDS:
+                return duration / 1_000L;
+            case MILLISECONDS:
+                return duration;
+            case SECONDS:
+                return Math.multiplyExact(duration, 1_000L);
+            case MINUTES:
+                return Math.multiplyExact(duration, 60_000L);
+            case HOURS:
+                return Math.multiplyExact(duration, 3_600_000L);
+            case DAYS:
+                return Math.multiplyExact(duration, 86_400_000L);
+            default:
+                throw new AssertionError(unit);
+        }
+    }
 }

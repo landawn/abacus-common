@@ -444,6 +444,60 @@ public class ImmutableMap<K, V> extends AbstractImmutableMap<K, V> {
     }
 
     /**
+     * Returns an ImmutableMap containing exactly ten key-value mappings.
+     * The returned map is immutable and will have a size of 10 (or fewer if duplicate keys are supplied).
+     * The iteration order is guaranteed to match the order of insertion.
+     * If duplicate keys are provided, the later value overwrites the earlier one.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * ImmutableMap<Integer, String> digits = ImmutableMap.of(
+     *     1, "one", 2, "two", 3, "three", 4, "four", 5, "five",
+     *     6, "six", 7, "seven", 8, "eight", 9, "nine", 10, "ten"
+     * );
+     * }</pre>
+     *
+     * @param <K> the type of the keys.
+     * @param <V> the type of the values.
+     * @param k1 the first key.
+     * @param v1 the first value.
+     * @param k2 the second key.
+     * @param v2 the second value.
+     * @param k3 the third key.
+     * @param v3 the third value.
+     * @param k4 the fourth key.
+     * @param v4 the fourth value.
+     * @param k5 the fifth key.
+     * @param v5 the fifth value.
+     * @param k6 the sixth key.
+     * @param v6 the sixth value.
+     * @param k7 the seventh key.
+     * @param v7 the seventh value.
+     * @param k8 the eighth key.
+     * @param v8 the eighth value.
+     * @param k9 the ninth key.
+     * @param v9 the ninth value.
+     * @param k10 the tenth key.
+     * @param v10 the tenth value.
+     * @return an ImmutableMap containing the specified key-value pairs.
+     */
+    public static <K, V> ImmutableMap<K, V> of(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3, final K k4, final V v4, final K k5,
+            final V v5, final K k6, final V v6, final K k7, final V v7, final K k8, final V v8, final K k9, final V v9, final K k10, final V v10) {
+        final Map<K, V> map = N.newLinkedHashMap(10);
+        map.put(k1, v1);
+        map.put(k2, v2);
+        map.put(k3, v3);
+        map.put(k4, v4);
+        map.put(k5, v5);
+        map.put(k6, v6);
+        map.put(k7, v7);
+        map.put(k8, v8);
+        map.put(k9, v9);
+        map.put(k10, v10);
+        return new ImmutableMap<>(map, false);
+    }
+
+    /**
      * Returns an ImmutableMap containing all mappings from the provided map.
      * If the provided map is already an ImmutableMap, it is returned directly without copying.
      * If the map is {@code null} or empty, an empty ImmutableMap is returned.

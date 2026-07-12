@@ -2039,9 +2039,10 @@ public final class Sheet<R, C, V> implements Cloneable {
     /**
      * Retrieves all the values in the column identified by the specified column key.
      * <p>
-     * Returns an immutable list view backed by the specified column's values, in the order
-     * corresponding to the row keys. The view reflects subsequent changes made to the column
-     * through this Sheet. The list may contain {@code null} values if cells in the column are empty.
+     * Returns an immutable list view of the specified column's values, in the order corresponding to
+     * the row keys. The view reflects subsequent value changes made to the column through this Sheet;
+     * its size is fixed to the row count at the time of the call (like {@link #rowValues(Object)}). The
+     * list may contain {@code null} values if cells in the column are empty.
      * </p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -2060,24 +2061,39 @@ public final class Sheet<R, C, V> implements Cloneable {
      * }</pre>
      *
      * @param columnKey the key identifying the column to retrieve
-     * @return an immutable view of the column's values in row order; reflects subsequent changes to the Sheet
+     * @return an immutable view of the column's values in row order; reflects subsequent value changes to the Sheet
      * @throws IllegalArgumentException if the column key does not exist in this Sheet
      * @see #rowValues(Object)
      * @see #setColumn(Object, Collection)
      * @see #columnAsMap(Object)
      */
     public ImmutableList<V> columnValues(final C columnKey) throws IllegalArgumentException {
-        // Validate the key before materializing storage: init() eagerly allocates every column's
-        // backing list (O(rowCount * columnCount)), so an invalid key must fail before that happens.
+        final int rowLength = rowCount();
+        // getColumnIndex works on uninitialized sheets too (it lazily builds the index map from the key
+        // set). Return a lazy view rather than calling init(): init() would mutate the Sheet - flipping
+        // _isInitialized and allocating every column - which a read accessor must not do, least of all on
+        // a frozen (immutable, possibly shared) Sheet. Mirrors rowValues(Object).
         final int columnIndex = getColumnIndex(columnKey);
 
-        if (!_isInitialized) {
-            init();
-        }
+        return new ImmutableList<>(new AbstractList<V>() {
+            @Override
+            public V get(final int rowIndex) {
+                if (rowIndex < 0 || rowIndex >= rowLength) {
+                    throw new IndexOutOfBoundsException("Index " + rowIndex + " out of bounds for length " + rowLength);
+                }
 
-        final List<V> column = _columnList.get(columnIndex);
+                if (!_isInitialized) {
+                    return null;
+                }
 
-        return ImmutableList.wrap(column); // ImmutableList.wrap(new ArrayList<>(column));
+                return _columnList.get(columnIndex).get(rowIndex);
+            }
+
+            @Override
+            public int size() {
+                return rowLength;
+            }
+        }, true);
     }
 
     /**
@@ -4743,7 +4759,9 @@ public final class Sheet<R, C, V> implements Cloneable {
 
                     @Override
                     public long count() {
-                        return columnLength - columnIndex; //NOSONAR
+                        final long ret = columnLength - columnIndex; //NOSONAR
+                        columnIndex = columnLength; // count() consumes the remaining elements
+                        return ret;
                     }
                 });
             }
@@ -4759,7 +4777,9 @@ public final class Sheet<R, C, V> implements Cloneable {
 
             @Override
             public long count() {
-                return toRowIndex - rowIndex; //NOSONAR
+                final long ret = toRowIndex - rowIndex; //NOSONAR
+                rowIndex = toRowIndex; // count() consumes the remaining elements
+                return ret;
             }
         });
     }
@@ -4875,7 +4895,9 @@ public final class Sheet<R, C, V> implements Cloneable {
 
             @Override
             public long count() {
-                return toColumnIndex - columnIndex; //NOSONAR
+                final long ret = toColumnIndex - columnIndex; //NOSONAR
+                columnIndex = toColumnIndex; // count() consumes the remaining elements
+                return ret;
             }
 
         });

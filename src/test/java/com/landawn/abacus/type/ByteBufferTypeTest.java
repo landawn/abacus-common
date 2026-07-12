@@ -201,4 +201,13 @@ public class ByteBufferTypeTest extends TestBase {
         assertDoesNotThrow(() -> type.set(stmt, "param", null));
     }
 
+    @Test
+    public void test_javaType_reflectsConcreteSubclass() {
+        // regression: the Class-arg constructor dropped the concrete subclass, so a handler
+        // named "MappedByteBuffer" reported javaType() == ByteBuffer.class, unlike the
+        // InputStreamType/ReaderType siblings which return the requested class.
+        assertEquals(java.nio.MappedByteBuffer.class, new ByteBufferType(java.nio.MappedByteBuffer.class).javaType());
+        assertEquals(ByteBuffer.class, new ByteBufferType().javaType());
+    }
+
 }

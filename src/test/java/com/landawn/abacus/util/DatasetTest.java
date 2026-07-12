@@ -351,6 +351,15 @@ public class DatasetTest extends AbstractTest {
     }
 
     @Test
+    public void testRowCount() {
+        Dataset dataset = Dataset.rows(Arrays.asList("id", "name"), new Object[][] { { 1, "Alice" }, { 2, "Bob" } });
+
+        assertEquals(dataset.size(), dataset.rowCount());
+        assertEquals(2, dataset.rowCount());
+        assertEquals(0, emptyDataset.rowCount());
+    }
+
+    @Test
     public void testEmptyDatasetOperations() {
         assertEquals(0, emptyDataset.size());
         assertEquals(0, emptyDataset.columnCount());

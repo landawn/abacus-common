@@ -5417,4 +5417,14 @@ public class CharStreamTest extends TestBase {
         org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class,
                 () -> CharStream.of((char) 1, (char) 2, (char) 3).debounce(com.landawn.abacus.util.Duration.ofMillis(-100)).toArray());
     }
+
+    @Test
+    public void testOfCharSequenceRange_countExhaustsIterator() {
+        // regression: the CharSequence-range iterator's count() returned the remaining count
+        // without advancing the cursor, so the iterator was not exhausted afterwards as the
+        // CharIteratorEx.count() contract requires (sole outlier of the count() overrides).
+        final CharIteratorEx iter = ((IteratorCharStream) CharStream.of("Hello", 1, 4)).iteratorEx();
+        org.junit.jupiter.api.Assertions.assertEquals(3, iter.count());
+        org.junit.jupiter.api.Assertions.assertFalse(iter.hasNext());
+    }
 }

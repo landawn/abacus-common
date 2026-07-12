@@ -38,6 +38,11 @@ public class IntListTest extends TestBase {
     }
 
     @Test
+    public void testRangedForEachRejectsNullActionForEmptyRange() {
+        assertThrows(IllegalArgumentException.class, () -> list.forEach(0, 0, (java.util.function.IntConsumer) null));
+    }
+
+    @Test
     public void test_constructor_withArray() {
         int[] arr = { 1, 2, 3, 4, 5 };
         IntList list = new IntList(arr);
@@ -2617,7 +2622,7 @@ public class IntListTest extends TestBase {
     @Test
     public void test_forEach_null() {
         IntList list = IntList.of(1, 2, 3);
-        assertThrows(NullPointerException.class, () -> list.forEach(null));
+        assertThrows(IllegalArgumentException.class, () -> list.forEach(null));
     }
 
     @Test

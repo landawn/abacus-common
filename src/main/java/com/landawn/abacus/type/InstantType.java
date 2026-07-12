@@ -120,6 +120,7 @@ public class InstantType extends AbstractTemporalType<Instant> {
      *
      * @param str the string to parse; may be {@code null} or empty
      * @return the parsed {@link Instant}, or {@code null} if {@code str} is {@code null} or a null-datetime string
+     * @throws DateTimeParseException if the string is not a recognized millisecond number nor a valid ISO-8601 representation
      * @see #valueOf(Object)
      * @see #stringOf(Instant)
      */

@@ -102,7 +102,7 @@ public class ObjectNotFoundException extends NoSuchElementException {
     public ObjectNotFoundException(final String message, final Throwable cause) {
         super(message);
 
-        initCause(cause);
+        super.initCause(cause);
     }
 
     /**
@@ -128,6 +128,6 @@ public class ObjectNotFoundException extends NoSuchElementException {
     public ObjectNotFoundException(final Throwable cause) {
         super(cause == null ? null : cause.toString());
 
-        initCause(cause);
+        super.initCause(cause);
     }
 }

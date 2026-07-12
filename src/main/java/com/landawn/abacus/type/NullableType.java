@@ -132,7 +132,7 @@ public class NullableType<T> extends AbstractOptionalType<Nullable<T>> {
      * <p>For non-null contained values, the returned string is a serializable representation designed to be parsed
      * back into an equivalent value via {@link #valueOf(String)}. This is the key distinction from
      * {@link Object#toString()}, whose result is not guaranteed to be convertible back into the original value.</p>
-     * <p><b>&#9888;</b> Serializing {@code Nullable.of(null)} and {@code Nullable.empty()} both returns {@code null};
+     * <p><b>&#9888;&#65039;</b> Serializing {@code Nullable.of(null)} and {@code Nullable.empty()} both returns {@code null};
      * {@link #valueOf(String) valueOf(null)} returns {@code Nullable.empty()}, so a present {@code null} value does
      * not round-trip through the string form.</p>
      *

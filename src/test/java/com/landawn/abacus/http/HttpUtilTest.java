@@ -798,9 +798,12 @@ public class HttpUtilTest extends TestBase {
     public void testGetInputStreamWithNullStreams() throws IOException {
         MockHttpURLConnection connection = new MockHttpURLConnection();
         connection.setThrowOnGetInputStream(true);
-        // Both input and error streams are null, should return empty input stream
-        InputStream is = HttpUtil.getInputStream(connection, ContentFormat.JSON);
-        assertNotNull(is);
+        // Both input and error streams are null: preserve the original I/O failure
+        // (do not silently return an empty body that hides the root cause).
+        final com.landawn.abacus.exception.UncheckedIOException ex = assertThrows(com.landawn.abacus.exception.UncheckedIOException.class,
+                () -> HttpUtil.getInputStream(connection, ContentFormat.JSON));
+        assertNotNull(ex.getCause());
+        assertTrue(ex.getCause() instanceof IOException);
     }
 
     @Test

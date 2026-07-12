@@ -42,32 +42,39 @@ public class ByteBufferType extends AbstractType<ByteBuffer> {
      */
     public static final String BYTE_BUFFER = "ByteBuffer";
 
+    private final Class<ByteBuffer> typeClass;
+
     /**
      * Package-private constructor for {@code ByteBufferType} using the standard {@link java.nio.ByteBuffer} class.
      * Instances are created by {@link TypeFactory}; do not instantiate directly.
      */
     ByteBufferType() {
         super(BYTE_BUFFER);
+
+        typeClass = ByteBuffer.class;
     }
 
     /**
      * Package-private constructor for {@code ByteBufferType} with a specific {@link java.nio.ByteBuffer} subclass.
      * Instances are created by {@link TypeFactory}; do not instantiate directly.
      *
-     * @param cls the specific {@code ByteBuffer} subclass to use as the type name source
+     * @param cls the specific {@code ByteBuffer} subclass represented by this type handler; also used as the type name source
      */
+    @SuppressWarnings("unchecked")
     ByteBufferType(final Class<? extends ByteBuffer> cls) {
         super(ClassUtil.getSimpleClassName(cls));
+
+        typeClass = (Class<ByteBuffer>) cls;
     }
 
     /**
      * Returns the Java class represented by this type handler.
      *
-     * @return {@code ByteBuffer.class}
+     * @return the {@code ByteBuffer} class (or the specific subclass) this handler was created for
      */
     @Override
     public Class<ByteBuffer> javaType() {
-        return ByteBuffer.class;
+        return typeClass;
     }
 
     /**

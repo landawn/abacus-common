@@ -225,6 +225,7 @@ public final class CodeGenerationUtil {
                     .append("\"} */")
                     .append(LINE_SEPARATOR)
                     .append("        String ")
+                    .append(Strings.isJavaKeyword(propName) ? "_" : "")
                     .append(propName)
                     .append(" = \"")
                     .append(propName)

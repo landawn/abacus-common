@@ -1992,6 +1992,19 @@ public class SheetTest extends AbstractTest {
     }
 
     @Test
+    public void testColumnValues_frozenSheet_notMutated() {
+        // Regression: columnValues is a read accessor and must not materialize (init()) a frozen Sheet,
+        // which would mutate a supposedly-immutable, possibly-shared instance (observable via toString()).
+        Sheet<String, String, Integer> frozen = new Sheet<>(rowKeys, columnKeys);
+        frozen.freeze();
+        final String before = frozen.toString();
+        ImmutableList<Integer> col = frozen.columnValues("col1");
+        assertEquals(rowKeys.size(), col.size());
+        assertNull(col.get(0));
+        assertEquals(before, frozen.toString(), "columnValues must not mutate a frozen Sheet");
+    }
+
+    @Test
     public void testColumnValues_InvalidKey() {
         assertThrows(IllegalArgumentException.class, () -> sheet.columnValues("invalidCol"));
     }
@@ -6245,6 +6258,31 @@ public class SheetTest extends AbstractTest {
                 .iterator();
         org.junit.jupiter.api.Assertions.assertEquals(3L, it2.count());
         org.junit.jupiter.api.Assertions.assertFalse(it2.hasNext());
+    }
+
+    @org.junit.jupiter.api.Test
+    public void testRowCellsColumnCellsCount_drainsIterator() {
+        // Regression: rowCells/columnCells iterators' count() must exhaust the iterator
+        // (IteratorEx.count() contract), matching the rowStreams/rows/columns siblings fixed earlier.
+        final Sheet<String, String, Integer> sheet = Sheet.rows(java.util.Arrays.asList("R1", "R2"), java.util.Arrays.asList("C1", "C2", "C3"),
+                new Integer[][] { { 1, 2, 3 }, { 4, 5, 6 } });
+
+        final com.landawn.abacus.util.stream.ObjIteratorEx<com.landawn.abacus.util.stream.Stream<Sheet.Cell<String, String, Integer>>> outer = (com.landawn.abacus.util.stream.ObjIteratorEx<com.landawn.abacus.util.stream.Stream<Sheet.Cell<String, String, Integer>>>) sheet
+                .rowCells(0, 2)
+                .iterator();
+        final com.landawn.abacus.util.stream.ObjIteratorEx<Sheet.Cell<String, String, Integer>> inner = (com.landawn.abacus.util.stream.ObjIteratorEx<Sheet.Cell<String, String, Integer>>) outer
+                .next()
+                .iterator();
+        org.junit.jupiter.api.Assertions.assertEquals(3L, inner.count());
+        org.junit.jupiter.api.Assertions.assertFalse(inner.hasNext());
+        org.junit.jupiter.api.Assertions.assertEquals(1L, outer.count());
+        org.junit.jupiter.api.Assertions.assertFalse(outer.hasNext());
+
+        final com.landawn.abacus.util.stream.ObjIteratorEx<com.landawn.abacus.util.stream.Stream<Sheet.Cell<String, String, Integer>>> colOuter = (com.landawn.abacus.util.stream.ObjIteratorEx<com.landawn.abacus.util.stream.Stream<Sheet.Cell<String, String, Integer>>>) sheet
+                .columnCells(0, 3)
+                .iterator();
+        org.junit.jupiter.api.Assertions.assertEquals(3L, colOuter.count());
+        org.junit.jupiter.api.Assertions.assertFalse(colOuter.hasNext());
     }
 
     // --- regression tests for 2026-06-10 deep-review fixes ---

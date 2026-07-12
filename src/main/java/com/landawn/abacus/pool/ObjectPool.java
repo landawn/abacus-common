@@ -33,14 +33,14 @@ import com.landawn.abacus.annotation.MayReturnNull;
  *
  * <p>Key features:
  * <ul>
- *   <li>Thread-safe add and take operations</li>
- *   <li>Optional timeout support for blocking operations</li>
+ *   <li>Thread-safe add and retrieval operations</li>
+ *   <li>Non-blocking polling and timeout-based blocking retrieval</li>
  *   <li>Automatic destruction of objects that fail to be added</li>
  *   <li>Memory-based capacity constraints via {@link MemoryMeasure}</li>
  * </ul>
  *
  * <p><b>API Design Note:</b> ObjectPool follows {@link java.util.concurrent.BlockingQueue} naming
- * conventions ({@code add}/{@code take}/{@code contains}) because it models an <em>unkeyed</em>
+ * conventions ({@code add}/{@code poll}/{@code contains}) because it models an <em>unkeyed</em>
  * collection of interchangeable objects — callers deposit and withdraw objects without specifying
  * an identity. This is in contrast to {@link KeyedObjectPool}, which follows {@link java.util.Map}
  * naming conventions ({@code put}/{@code get}/{@code containsKey}) because each object is
@@ -50,12 +50,13 @@ import com.landawn.abacus.annotation.MayReturnNull;
  *   <caption>Method naming comparison between ObjectPool and KeyedObjectPool</caption>
  *   <tr><th>Operation</th><th>ObjectPool (Queue-style)</th><th>KeyedObjectPool (Map-style)</th></tr>
  *   <tr><td>Insert</td><td>{@code add(E)}</td><td>{@code put(K, E)}</td></tr>
- *   <tr><td>Retrieve-and-remove</td><td>{@code take()}</td><td>{@code remove(K)}</td></tr>
+ *   <tr><td>Retrieve-and-remove immediately</td><td>{@code poll()} (non-blocking)</td><td>{@code remove(K)}</td></tr>
+ *   <tr><td>Retrieve-and-remove with wait</td><td>{@code poll(timeout, unit)} (blocks up to timeout)</td><td>(no analog)</td></tr>
  *   <tr><td>Retrieve-without-removing</td><td>(no analog)</td><td>{@code get(K)}</td></tr>
  *   <tr><td>Check</td><td>{@code contains(E)}</td><td>{@code containsKey(K)}</td></tr>
  * </table>
  *
- * <p>Note: {@code take()} <em>removes</em> the object from the pool, so its true keyed mirror is
+ * <p>Note: {@code poll()} <em>removes</em> the object from the pool, so its true keyed mirror is
  * {@link KeyedObjectPool#remove(Object)} (which also removes). {@link KeyedObjectPool#get(Object)}
  * returns the value <em>without</em> removing it and therefore has no unkeyed analog (a
  * non-removing {@code peek()} on an unkeyed pool would be ambiguous over interchangeable objects).</p>
@@ -70,8 +71,8 @@ import com.landawn.abacus.annotation.MayReturnNull;
  *     obj.destroy(Caller.PUT_ADD_FAILURE);
  * }
  *
- * // Take object from pool
- * MyPoolable borrowed = pool.take();
+ * // Poll object from pool
+ * MyPoolable borrowed = pool.poll();
  * try {
  *     // use borrowed object
  * } finally {
@@ -185,16 +186,21 @@ public interface ObjectPool<E extends Poolable> extends Pool {
     boolean add(E element, long timeout, TimeUnit unit, boolean autoDestroyOnFailedToAdd) throws InterruptedException;
 
     /**
-     * Retrieves and removes an object from the pool, or returns {@code null} if the pool is empty.
-     * The object's activity print is updated to reflect this access.
+     * Retrieves and removes an object from the pool immediately, or returns {@code null} if the pool is empty.
+     * This method never waits for an object to become available. The object's activity print is updated to reflect this access.
      *
-     * <p>Expired objects encountered during the take are destroyed (with {@link Poolable.Caller#EVICT})
+     * <p>Expired objects encountered during polling are destroyed (with {@link Poolable.Caller#EVICT})
      * and skipped over; this method only returns {@code null} once no valid object remains in the
      * pool.
      *
+     * <p><b>Contrast with {@link KeyedObjectPool}:</b> {@code poll()} <em>retrieves and removes</em> the
+     * object. The keyed pool's {@link KeyedObjectPool#get(Object)} instead <em>retrieves without
+     * removing</em> (cache semantics); its retrieve-and-remove counterpart is
+     * {@link KeyedObjectPool#remove(Object)}.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * E obj = pool.take();
+     * E obj = pool.poll();
      * if (obj != null) {
      *     try {
      *         // use the object
@@ -208,11 +214,11 @@ public interface ObjectPool<E extends Poolable> extends Pool {
      * @throws IllegalStateException if the pool has been closed
      */
     @MayReturnNull
-    E take();
+    E poll();
 
     /**
      * Retrieves and removes an object from the pool, waiting if necessary for an object to become available.
-     * This method blocks until an object is available, the timeout expires, or the thread is interrupted.
+     * Unlike {@link #poll()}, this method blocks until an object is available, the timeout expires, or the thread is interrupted.
      *
      * <p>The object's activity print is updated to reflect the access.
      * Expired objects encountered are automatically destroyed (with {@link Poolable.Caller#EVICT})
@@ -220,7 +226,7 @@ public interface ObjectPool<E extends Poolable> extends Pool {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * E obj = pool.take(10, TimeUnit.SECONDS);
+     * E obj = pool.poll(10, TimeUnit.SECONDS);
      * if (obj != null) {
      *     try {
      *         // use the object
@@ -239,7 +245,7 @@ public interface ObjectPool<E extends Poolable> extends Pool {
      * @throws IllegalStateException if the pool has been closed
      */
     @MayReturnNull
-    E take(long timeout, TimeUnit unit) throws InterruptedException;
+    E poll(long timeout, TimeUnit unit) throws InterruptedException;
 
     /**
      * Checks if the specified object is currently in the pool.

@@ -1468,7 +1468,7 @@ public final class PropertiesUtil {
      * @param srcPath the source path where the generated Java code will be saved (e.g., "src/main/java").
      * @param packageName the package name for the generated Java classes.
      * @param className the name of the generated Java class.
-     * @param isPublicField if {@code true}, the fields in the generated Java class will be public; otherwise private.
+     * @param isPublicField currently has NO effect on the generated source: properties are stored in the inherited {@code Properties} map and no fields are emitted, so the generated class is identical for {@code true} and {@code false}.
      * @throws RuntimeException if XML parsing fails, has duplicated property names, or file I/O error occurs
      */
     public static void xmlToJava(final String xml, final String srcPath, final String packageName, final String className, final boolean isPublicField) {
@@ -1498,7 +1498,7 @@ public final class PropertiesUtil {
      * @param srcPath the source path where the generated Java code will be saved (e.g., "src/main/java").
      * @param packageName the package name for the generated Java classes.
      * @param className the name of the generated Java class.
-     * @param isPublicField if {@code true}, the fields in the generated Java class will be public; otherwise private.
+     * @param isPublicField currently has NO effect on the generated source: properties are stored in the inherited {@code Properties} map and no fields are emitted, so the generated class is identical for {@code true} and {@code false}.
      * @throws RuntimeException if XML parsing fails, has duplicated property names, or file I/O error occurs
      */
     public static void xmlToJava(final File xml, final String srcPath, final String packageName, final String className, final boolean isPublicField) {
@@ -1537,7 +1537,7 @@ public final class PropertiesUtil {
      * @param srcPath the source path where the generated Java code will be saved (e.g., "src/main/java").
      * @param packageName the package name for the generated Java classes.
      * @param className the name of the generated Java class.
-     * @param isPublicField if {@code true}, the fields in the generated Java class will be public; otherwise private.
+     * @param isPublicField currently has NO effect on the generated source: properties are stored in the inherited {@code Properties} map and no fields are emitted, so the generated class is identical for {@code true} and {@code false}.
      * @throws RuntimeException if XML parsing fails, has duplicated property names, or file I/O error occurs
      */
     public static void xmlToJava(final InputStream xml, final String srcPath, final String packageName, final String className, final boolean isPublicField) {
@@ -1569,7 +1569,7 @@ public final class PropertiesUtil {
      * @param srcPath the source path where the generated Java code will be saved (e.g., "src/main/java").
      * @param packageName the package name for the generated Java classes.
      * @param className the name of the generated Java class. If {@code null}, uses the root element name from XML.
-     * @param isPublicField if {@code true}, the fields in the generated Java class will be public; otherwise private.
+     * @param isPublicField currently has NO effect on the generated source: properties are stored in the inherited {@code Properties} map and no fields are emitted, so the generated class is identical for {@code true} and {@code false}.
      * @throws RuntimeException if XML parsing fails, has duplicated property names, or file I/O error occurs
      */
     @SuppressFBWarnings("REC_CATCH_EXCEPTION")

@@ -160,7 +160,7 @@ final class ParallelIteratorCharStream extends IteratorCharStream {
      * a non-matching element. If the stream can be processed sequentially, delegates to the
      * sequential implementation; otherwise boxes elements and uses the parallel object stream.
      *
-     * <p><b>&#9888; Parallel streams:</b> this operation does not guarantee encounter-order prefix
+     * <p><b>&#9888;&#65039; Parallel streams:</b> this operation does not guarantee encounter-order prefix
      * semantics; later matching elements may be returned.
      *
      * @param predicate a non-interfering, stateless predicate applied to elements
@@ -186,7 +186,7 @@ final class ParallelIteratorCharStream extends IteratorCharStream {
      * processed sequentially, delegates to the sequential implementation; otherwise boxes
      * elements and uses the parallel object stream.
      *
-     * <p><b>&#9888; Parallel streams:</b> this operation does not guarantee encounter-order prefix/suffix
+     * <p><b>&#9888;&#65039; Parallel streams:</b> this operation does not guarantee encounter-order prefix/suffix
      * semantics; later matching elements may be dropped.
      *
      * @param predicate a non-interfering, stateless predicate applied to elements

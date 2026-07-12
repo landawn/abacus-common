@@ -243,7 +243,7 @@ public final class TypeAttrParser {
         }
 
         if (className == null) {
-            className = attr;
+            className = attr.trim(); // the generics/constructor-paren paths above both trim; a bare name must too
         }
 
         return new TypeAttrParser(className, typeParameters, parameters);

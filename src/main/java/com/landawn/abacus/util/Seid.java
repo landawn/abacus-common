@@ -688,8 +688,8 @@ public class Seid implements EntityId {
 
     /**
      * Checks if this Seid is equal to another object.
-     * Two Seids are equal if they are both {@link EntityId} instances and have the same
-     * string representation (i.e. the same entity name and identical property-value pairs).
+     * Two Seids are equal if the other object is also a {@code Seid} with the same
+     * entity name and identical property-value pairs.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code

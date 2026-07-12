@@ -839,6 +839,16 @@ public class FnTest extends TestBase {
     }
 
     @Test
+    public void testRateLimiterRejectsNullInstance() {
+        assertThrows(IllegalArgumentException.class, () -> Fn.rateLimiter((RateLimiter) null));
+    }
+
+    @Test
+    public void testFnnRateLimiterRejectsNullInstance() {
+        assertThrows(IllegalArgumentException.class, () -> Fnn.rateLimiter((RateLimiter) null));
+    }
+
+    @Test
     public void testRateLimiterWithPermitsPerSecond() throws Exception {
         Throwables.Consumer<String, RuntimeException> rateLimited = Fnn.rateLimiter(10.0);
         long start = System.currentTimeMillis();
@@ -4313,6 +4323,11 @@ public class FnTest extends TestBase {
     }
 
     @Test
+    public void testApplyIfNotNullOrEmptyRejectsNullMapper() {
+        assertThrows(IllegalArgumentException.class, () -> Fn.applyIfNotNullOrEmpty(null));
+    }
+
+    @Test
     public void applyIfNotNullOrDefault() {
         Function<String, Integer> f1 = String::length;
         Function<Integer, Integer> f2 = i -> i + 1;
@@ -6288,6 +6303,13 @@ public class FnTest extends TestBase {
         Assertions.assertEquals(java.util.Arrays.asList('t', 'e', 's', 't'), chars);
 
         Assertions.assertThrows(IllegalArgumentException.class, () -> Fnn.mc(null));
+
+        String mapperType = java.util.Arrays.stream(Fnn.class.getDeclaredMethods())
+                .filter(method -> method.getName().equals("mc"))
+                .findFirst()
+                .orElseThrow()
+                .getGenericParameterTypes()[0].getTypeName();
+        Assertions.assertTrue(mapperType.contains("? super java.util.function.Consumer<U>"), mapperType);
     }
 
     @Test
@@ -9847,6 +9869,13 @@ public class FnTest extends TestBase {
         assertEquals(Arrays.asList('a', 'b'), chars);
 
         assertThrows(IllegalArgumentException.class, () -> Fn.mc(null));
+
+        String mapperType = java.util.Arrays.stream(Fn.class.getDeclaredMethods())
+                .filter(method -> method.getName().equals("mc"))
+                .findFirst()
+                .orElseThrow()
+                .getGenericParameterTypes()[0].getTypeName();
+        assertTrue(mapperType.contains("? super java.util.function.Consumer<U>"), mapperType);
     }
 
     // --- regression tests for 2026-06-10 deep-review fixes ---

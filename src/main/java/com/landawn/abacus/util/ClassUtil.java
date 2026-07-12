@@ -821,13 +821,8 @@ public final class ClassUtil {
                             final String temp = newClassName.replace("[]", ""); //NOSONAR
 
                             if (componentTypeName.equals(temp)) {
-                                int dimensions = (newClassName.length() - temp.length()) / 2;
-                                String prefixOfArray = "";
-
-                                while (dimensions-- > 0) {
-                                    //noinspection StringConcatenationInLoop
-                                    prefixOfArray += "["; //NOSONAR
-                                }
+                                final int dimensions = (newClassName.length() - temp.length()) / 2;
+                                final String prefixOfArray = "[".repeat(dimensions);
 
                                 final String symbolOfPrimitiveArrayClassName = SYMBOL_OF_PRIMITIVE_ARRAY_CLASS_NAME.get(componentTypeName);
 
@@ -2337,12 +2332,15 @@ public final class ClassUtil {
             accessibleObject.setAccessible(flag);
         } catch (final Exception e) {
             final String msg = e.getMessage();
-            final String errorMsg = "Failed to set accessible for : " + accessibleObject + " with flag: " + flag + " due to error: " + msg;
 
+            // accessibleObject.toString() can be expensive (reflection) - only build the message
+            // when the target level is actually enabled.
             if (Strings.containsIgnoreCase(msg, "module java.base")) {
-                logger.debug(errorMsg);
-            } else {
-                logger.info(errorMsg);
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Failed to set accessible for : " + accessibleObject + " with flag: " + flag + " due to error: " + msg);
+                }
+            } else if (logger.isInfoEnabled()) {
+                logger.info("Failed to set accessible for : " + accessibleObject + " with flag: " + flag + " due to error: " + msg);
             }
 
             return false;

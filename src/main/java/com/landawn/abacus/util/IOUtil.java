@@ -68,6 +68,7 @@ import java.util.Date;
 import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.function.Consumer;
@@ -147,7 +148,7 @@ import com.landawn.abacus.util.stream.Stream;
  * <pre>{@code
  * // Basic file operations
  * IOUtil.copyFile(sourceFile, targetFile);
- * IOUtil.move(sourceFile, targetDirectory);
+ * IOUtil.moveToDirectory(sourceFile, targetDirectory);
  * boolean success = IOUtil.deleteIfExists(file);
  *
  * // Stream operations with automatic resource management
@@ -469,6 +470,8 @@ public final class IOUtil {
      */
     public static final String OS_NAME = N.defaultIfNull(System.getProperty("os.name"), "");
 
+    private static final String OS_NAME_UPPER_CASE = OS_NAME.toUpperCase(Locale.ROOT);
+
     /**
      * The operating system version.
      */
@@ -483,28 +486,28 @@ public final class IOUtil {
     /**
      * Flag indicating whether the current operating system is Windows.
      */
-    public static final boolean IS_OS_WINDOWS = OS_NAME.toUpperCase().contains("WINDOWS");
+    public static final boolean IS_OS_WINDOWS = OS_NAME_UPPER_CASE.contains("WINDOWS");
 
     /**
      * Flag indicating whether the current operating system is Mac.
      */
-    public static final boolean IS_OS_MAC = OS_NAME.toUpperCase().contains("MAC");
+    public static final boolean IS_OS_MAC = OS_NAME_UPPER_CASE.contains("MAC");
 
     /**
      * Flag indicating whether the current operating system is Mac OS X.
      */
-    public static final boolean IS_OS_MAC_OSX = OS_NAME.toUpperCase().contains("MAC OS X");
+    public static final boolean IS_OS_MAC_OSX = OS_NAME_UPPER_CASE.contains("MAC OS X");
 
     /**
      * Flag indicating whether the current operating system is Linux.
      */
-    public static final boolean IS_OS_LINUX = OS_NAME.toUpperCase().contains("LINUX");
+    public static final boolean IS_OS_LINUX = OS_NAME_UPPER_CASE.contains("LINUX");
 
     /**
      * Flag indicating whether the current platform is Android.
      */
-    public static final boolean IS_PLATFORM_ANDROID = N.defaultIfNull(System.getProperty(JAVA_VENDOR_STR), "").toUpperCase().contains(ANDROID)
-            || N.defaultIfNull(System.getProperty(JAVA_VM_VENDOR_STR), "").toUpperCase().contains(ANDROID);
+    public static final boolean IS_PLATFORM_ANDROID = N.defaultIfNull(System.getProperty(JAVA_VENDOR_STR), "").toUpperCase(Locale.ROOT).contains(ANDROID)
+            || N.defaultIfNull(System.getProperty(JAVA_VM_VENDOR_STR), "").toUpperCase(Locale.ROOT).contains(ANDROID);
 
     // ..
     /**
@@ -740,9 +743,6 @@ public final class IOUtil {
 
         if (ret == null) {
             // This may be slow on some machine. Move it from static initialization block to method.
-
-            final boolean IS_PLATFORM_ANDROID = N.defaultIfNull(System.getProperty(JAVA_VENDOR_STR), "").toUpperCase().contains(ANDROID) //NOSONAR
-                    || N.defaultIfNull(System.getProperty(JAVA_VM_VENDOR_STR), "").toUpperCase().contains(ANDROID); //NOSONAR
 
             // implementation for android support
             if (IS_PLATFORM_ANDROID) {
@@ -4525,6 +4525,7 @@ public final class IOUtil {
      *      if the file exists, it will be overwritten. if the file's parent directory doesn't exist, it will be created.
      * @return the total number of bytes written to the output file.
      * @throws IOException if an I/O error occurs.
+     * @throws IllegalArgumentException if {@code source} and {@code output} are the same file.
      */
     public static long write(final File source, final File output) throws IOException {
         return write(source, 0, Long.MAX_VALUE, output);
@@ -4547,11 +4548,14 @@ public final class IOUtil {
      *      if the file exists, it will be overwritten. if the file's parent directory doesn't exist, it will be created.
      * @return the total number of bytes written.
      * @throws IOException if an I/O error occurs.
-     * @throws IllegalArgumentException if {@code offset} or {@code count} is negative.
+     * @throws IllegalArgumentException if {@code offset} or {@code count} is negative, or if {@code source} and {@code output} are the same file.
      */
     public static long write(final File source, final long offset, final long count, final File output) throws IOException {
         N.checkArgNotNegative(offset, cs.offset);
         N.checkArgNotNegative(count, cs.count);
+        // Guard against a self-copy: opening output truncates it to 0 before source is read, wiping the
+        // file and returning 0 (data loss). Peer copyFile(...) rejects the same-file case identically.
+        requireCanonicalPathsNotEquals(source, output);
 
         OutputStream os = null;
         InputStream is = null;
@@ -5360,18 +5364,26 @@ public final class IOUtil {
      *      if the file exists, it will be appended. if the file's parent directory doesn't exist, it will be created.
      * @return the number of bytes appended to the target file.
      * @throws IOException if an I/O error occurs.
-     * @throws IllegalArgumentException if {@code offset} or {@code count} is negative.
+     * @throws IllegalArgumentException if {@code offset} or {@code count} is negative, or if {@code source} and {@code targetFile} denote the same file.
      */
     public static long append(final File source, final long offset, final long count, final File targetFile) throws IOException {
         N.checkArgNotNegative(offset, cs.offset);
         N.checkArgNotNegative(count, cs.count);
 
+        // Guard against a self-append: the target is opened in append mode while the same file is
+        // still being read from the front, so the reader keeps finding the bytes the writer just
+        // appended and the file grows without bound. Peer write(File, long, long, File) rejects
+        // the same-file case identically.
+        requireCanonicalPathsNotEquals(source, targetFile);
+
         OutputStream output = null;
         InputStream is = null;
 
         try { //NOSONAR
-            createNewFileIfNotExists(targetFile);
+              // Open/validate the source before creating the target, so a missing source does not leave
+              // a stray empty target file behind (matches the ordering in write(File, long, long, File)).
             is = IOUtil.newFileInputStream(source);
+            createNewFileIfNotExists(targetFile);
             output = new FileOutputStream(targetFile, true);
 
             return write(is, offset, count, output, true);
@@ -5853,12 +5865,10 @@ public final class IOUtil {
      *
      * Maps a file into memory, creating a MappedByteBuffer that represents the file's content.
      *
-     * <p><b>JVM Requirements:</b></p>
-     * <ul>
-     *   <li>Requires JVM flags: {@code --add-opens java.base/java.nio=ALL-UNNAMED}</li>
-     *   <li>Requires: {@code --add-opens java.base/sun.nio.ch=ALL-UNNAMED}</li>
-     *   <li>Without these flags, operations may fail with access errors</li>
-     * </ul>
+     * <p>Note: this method uses only the public {@code FileChannel.map(...)} API and requires no special
+     * JVM flags. Flags such as {@code --add-opens java.base/java.nio=ALL-UNNAMED} and
+     * {@code --add-opens java.base/sun.nio.ch=ALL-UNNAMED} are only needed if the caller wants to forcibly
+     * unmap the returned buffer via reflection into JDK internals (which this method does not do).
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -5890,12 +5900,10 @@ public final class IOUtil {
      *
      * <p>This only works for files no larger than {@link Integer#MAX_VALUE} bytes.
      *
-     * <p><b>JVM Requirements:</b></p>
-     * <ul>
-     *   <li>Requires JVM flags: {@code --add-opens java.base/java.nio=ALL-UNNAMED}</li>
-     *   <li>Requires: {@code --add-opens java.base/sun.nio.ch=ALL-UNNAMED}</li>
-     *   <li>Without these flags, operations may fail with access errors</li>
-     * </ul>
+     * <p>Note: this method uses only the public {@code FileChannel.map(...)} API and requires no special
+     * JVM flags. Flags such as {@code --add-opens java.base/java.nio=ALL-UNNAMED} and
+     * {@code --add-opens java.base/sun.nio.ch=ALL-UNNAMED} are only needed if the caller wants to forcibly
+     * unmap the returned buffer via reflection into JDK internals (which this method does not do).
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -5916,7 +5924,7 @@ public final class IOUtil {
         N.checkArgNotNull(mode, cs.mode);
 
         if (!file.exists()) {
-            throw new IllegalArgumentException(file.getName() + " is not found");
+            throw new IllegalArgumentException("File '" + file + "' is not found");
         }
 
         return map(file, mode, 0, file.length());
@@ -5936,12 +5944,10 @@ public final class IOUtil {
      *
      * <p>This only works for files no larger than {@link Integer#MAX_VALUE} bytes.
      *
-     * <p><b>JVM Requirements:</b></p>
-     * <ul>
-     *   <li>Requires JVM flags: {@code --add-opens java.base/java.nio=ALL-UNNAMED}</li>
-     *   <li>Requires: {@code --add-opens java.base/sun.nio.ch=ALL-UNNAMED}</li>
-     *   <li>Without these flags, operations may fail with access errors</li>
-     * </ul>
+     * <p>Note: this method uses only the public {@code FileChannel.map(...)} API and requires no special
+     * JVM flags. Flags such as {@code --add-opens java.base/java.nio=ALL-UNNAMED} and
+     * {@code --add-opens java.base/sun.nio.ch=ALL-UNNAMED} are only needed if the caller wants to forcibly
+     * unmap the returned buffer via reflection into JDK internals (which this method does not do).
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -7737,22 +7743,34 @@ public final class IOUtil {
         }
 
         if (preserveFileDate && !Files.isSymbolicLink(srcFile.toPath()) && !setTimes(srcFile, destFile)) {
-            throw new IOException("Cannot set the file time.");
+            throw new IOException("Cannot set the file time for '" + destFile + "' (copied from '" + srcFile + "')");
         }
     }
 
     /**
-     * Throws IllegalArgumentException if the given files' canonical representations are equal.
+     * Throws IllegalArgumentException if the two files denote the same on-disk file.
+     *
+     * <p>This rejects both the trivial case (equal canonical paths) and the case where two distinct
+     * directory entries resolve to the same file via a hard link (same inode/file key, different path).
+     * The latter is only detectable when both files actually exist, so {@link Files#isSameFile(Path, Path)}
+     * is consulted only in that case.
      *
      * @param file1 the first file to compare.
      * @param file2 the second file to compare.
      * @throws IOException if an I/O error occurs.
-     * @throws IllegalArgumentException if the given files' canonical representations are equal.
+     * @throws IllegalArgumentException if the two files denote the same on-disk file.
      */
     private static void requireCanonicalPathsNotEquals(final File file1, final File file2) throws IOException {
         final String canonicalPath = file1.getCanonicalPath();
         if (canonicalPath.equals(file2.getCanonicalPath())) {
             throw new IllegalArgumentException(String.format("File canonical paths are equal: '%s' (file1='%s', file2='%s')", canonicalPath, file1, file2));
+        }
+
+        // Distinct canonical paths can still point to the same underlying file through a hard link
+        // (same inode, different directory entry). Files.isSameFile compares file keys and detects that,
+        // but requires both files to exist, so guard the call.
+        if (file1.exists() && file2.exists() && Files.isSameFile(file1.toPath(), file2.toPath())) {
+            throw new IllegalArgumentException(String.format("Files denote the same on-disk file (hard-link alias): file1='%s', file2='%s'", file1, file2));
         }
     }
 
@@ -7979,7 +7997,7 @@ public final class IOUtil {
 
         // On Windows, the last modified time is copied by default.
         if (preserveFileDate && !Files.isSymbolicLink(srcPath) && !setTimes(srcFile, destFile)) {
-            throw new IOException("Cannot set the file time.");
+            throw new IOException("Cannot set the file time for '" + destFile + "' (copied from '" + srcFile + "')");
         }
     }
 
@@ -8153,41 +8171,76 @@ public final class IOUtil {
     /**
      * <p>Moves a file from the source location to the destination directory, creating the destination directory if it doesn't exist.</p>
      *
-     * <p>This method automatically uses {@code StandardCopyOption.REPLACE_EXISTING} as the copy option,
-     * which means it will replace any existing file with the same name at the destination.
-     * if the source is a directory, the entire directory and its contents will be moved.</p>
-     *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * // Move a file to another directory
-     * File sourceFile = new File("/path/to/source/file.txt");
-     * File targetDir = new File("/path/to/destination");
-     * IOUtil.move(sourceFile, targetDir);
-     *
-     * // The file is now at /path/to/destination/file.txt
-     * // and has been removed from the original location
-     * }</pre>
-     *
      * @param srcFile the source file or directory to be moved.
      * @param destDir the destination directory where the file or directory will be moved to.
      * @throws IllegalArgumentException if the source file does not exist, or if {@code destDir} exists but is not a directory.
      * @throws IOException if an I/O error occurs during the move operation, such as if the destination cannot be created or written to.
-     * @see #move(File, File, CopyOption...)
-     * @see java.nio.file.Files#move(Path, Path, CopyOption...)
+     * @deprecated the second argument is a destination <i>directory</i>, not a destination file (unlike
+     *             {@link #copyFile(File, File)}), which the name {@code move} does not convey.
+     *             Use {@link #moveToDirectory(File, File)} instead, or {@link #move(Path, Path, CopyOption...)}
+     *             for a file-to-file move/rename.
      */
+    @Deprecated
     public static void move(final File srcFile, final File destDir) throws IOException {
-        move(srcFile, destDir, StandardCopyOption.REPLACE_EXISTING);
+        moveToDirectory(srcFile, destDir);
     }
 
     /**
      * Moves a file from the source file to the target directory.
      * if the destination directory does not exist, it will be created.
      *
+     * @param srcFile the source file to be moved.
+     * @param destDir the target directory where the file will be moved to.
+     * @param options optional arguments that specify how the move should be done.
+     * @throws IllegalArgumentException if the source file does not exist, or if {@code destDir} exists but is not a directory.
+     * @throws IOException if an I/O error occurs, including failure to create the destination directory.
+     * @deprecated the second argument is a destination <i>directory</i>, not a destination file, which the
+     *             name {@code move} does not convey. Use {@link #moveToDirectory(File, File, CopyOption...)} instead.
+     */
+    @Deprecated
+    public static void move(final File srcFile, final File destDir, final CopyOption... options) throws IOException {
+        moveToDirectory(srcFile, destDir, options);
+    }
+
+    /**
+     * Moves a file or directory into the destination directory, keeping its own name, creating the
+     * destination directory if it doesn't exist.
+     *
+     * <p>The second argument is a destination <i>directory</i> (mirroring {@link #copyToDirectory(File, File)}),
+     * not a destination file; the source keeps its own name inside it. This method automatically uses
+     * {@code StandardCopyOption.REPLACE_EXISTING}. Use {@link #move(Path, Path, CopyOption...)} for a
+     * file-to-file move/rename.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * File sourceFile = new File("/path/to/source/file.txt");
+     * File targetDir = new File("/path/to/destination");
+     * IOUtil.moveToDirectory(sourceFile, targetDir);
+     * // The file is now at /path/to/destination/file.txt and removed from the original location
+     * }</pre>
+     *
+     * @param srcFile the source file or directory to be moved.
+     * @param destDir the destination directory where the file or directory will be moved to.
+     * @throws IllegalArgumentException if the source file does not exist, or if {@code destDir} exists but is not a directory.
+     * @throws IOException if an I/O error occurs during the move operation, such as if the destination cannot be created or written to.
+     * @see #moveToDirectory(File, File, CopyOption...)
+     * @see #copyToDirectory(File, File)
+     */
+    public static void moveToDirectory(final File srcFile, final File destDir) throws IOException {
+        moveToDirectory(srcFile, destDir, StandardCopyOption.REPLACE_EXISTING);
+    }
+
+    /**
+     * Moves a file or directory into the destination directory, keeping its own name, creating the
+     * destination directory if it doesn't exist.
+     *
+     * <p>The second argument is a destination <i>directory</i>, not a destination file.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * File srcFile = ...;   // an existing file named "data.txt"
      * File destDir = ...;   // the destination directory
-     * IOUtil.move(srcFile, destDir, StandardCopyOption.REPLACE_EXISTING);
+     * IOUtil.moveToDirectory(srcFile, destDir, StandardCopyOption.REPLACE_EXISTING);
      * // srcFile no longer exists; destDir/data.txt now holds the content
      * }</pre>
      *
@@ -8196,8 +8249,10 @@ public final class IOUtil {
      * @param options optional arguments that specify how the move should be done.
      * @throws IllegalArgumentException if the source file does not exist, or if {@code destDir} exists but is not a directory.
      * @throws IOException if an I/O error occurs, including failure to create the destination directory.
+     * @see #moveToDirectory(File, File)
+     * @see #copyToDirectory(File, File, boolean)
      */
-    public static void move(final File srcFile, final File destDir, final CopyOption... options) throws IOException {
+    public static void moveToDirectory(final File srcFile, final File destDir, final CopyOption... options) throws IOException {
         if (!srcFile.exists()) {
             throw new IllegalArgumentException("The source file does not exist: " + srcFile.getAbsolutePath());
         }
@@ -8726,7 +8781,9 @@ public final class IOUtil {
         N.checkArgNotNull(file, cs.file);
         N.checkArgNotNull(date, cs.date);
 
-        return file.lastModified() > date.getTime();
+        // A file that does not exist is never "newer" than any reference (its lastModified() is 0, which
+        // would otherwise wrongly test as newer than a pre-epoch/negative reference time).
+        return file.exists() && file.lastModified() > date.getTime();
     }
 
     /**
@@ -8748,7 +8805,9 @@ public final class IOUtil {
         N.checkArgNotNull(file, cs.file);
         N.checkArgNotNull(reference, cs.reference);
 
-        return file.lastModified() > reference.lastModified();
+        // A file that does not exist is never "newer" than the reference (its lastModified() is 0, which
+        // would otherwise wrongly test as newer than a pre-epoch/negative reference time).
+        return file.exists() && file.lastModified() > reference.lastModified();
     }
 
     /**
@@ -9187,6 +9246,9 @@ public final class IOUtil {
               // Validate the source BEFORE opening the target: newFileOutputStream creates/truncates
               // the target file, which would destroy an existing target when the source is invalid.
             checkFileExists(sourceFile, true);
+            // Reject writing the archive onto its own source (same path or hard-link alias): opening the
+            // target truncates it, destroying the source before it can be read.
+            requireCanonicalPathsNotEquals(sourceFile, targetFile);
 
             zos = new ZipOutputStream(IOUtil.newFileOutputStream(targetFile));
             zipFile(sourceFile, zos, targetFile);
@@ -9217,9 +9279,12 @@ public final class IOUtil {
 
         try { //NOSONAR
               // Validate all sources BEFORE opening the target: newFileOutputStream creates/truncates
-              // the target file, which would destroy an existing target when a source is invalid.
+              // the target file, which would destroy an existing target when a source is invalid. A source
+              // that IS the target (same path or hard-link alias) is also rejected here - it would be
+              // truncated before being read (silent data loss).
             for (final File sourceFile : sourceFiles) {
                 checkFileExists(sourceFile, true);
+                requireCanonicalPathsNotEquals(sourceFile, targetFile);
             }
 
             zos = new ZipOutputStream(IOUtil.newFileOutputStream(targetFile));
@@ -9307,11 +9372,14 @@ public final class IOUtil {
         ze.setTime(file.lastModified());
         zos.putNextEntry(ze);
 
-        final InputStream is = IOUtil.newFileInputStream(file);
-
+        // Allocate the buffer before opening the stream (and open the stream inside the try), so a
+        // failure in either step cannot leak the other resource - same ordering as split()/merge().
         final byte[] buf = Objectory.createByteArrayBuffer();
+        InputStream is = null;
 
         try {
+            is = IOUtil.newFileInputStream(file);
+
             int count = 0;
 
             while (EOF != (count = read(is, buf, 0, buf.length))) {
@@ -9837,7 +9905,9 @@ public final class IOUtil {
             String line = null;
             long bytes = 0;
             while (cnt < byReadingLineNum && (line = br.readLine()) != null) {
-                bytes += line.getBytes(DEFAULT_CHARSET).length + 1; // +1 for line separator stripped by readLine()
+                // Utf8.encodedLength avoids allocating a temporary byte[] just to measure size
+                // (DEFAULT_CHARSET is always UTF-8 in this library).
+                bytes += Utf8.encodedLength(line) + 1; // +1 for line separator stripped by readLine()
 
                 cnt++;
             }
@@ -9929,8 +9999,11 @@ public final class IOUtil {
         try {
             // Validate all sources BEFORE opening the destination: newFileOutputStream creates/truncates
             // the destination file, which would destroy an existing destination when a source is invalid.
+            // A source that IS the destination is also rejected here - it would be truncated before being
+            // read (silent data loss), or read back the freshly merged bytes instead of its old content.
             for (final File file : sourceFiles) {
                 checkFileExists(file);
+                requireCanonicalPathsNotEquals(file, destFile);
             }
 
             output = IOUtil.newFileOutputStream(destFile);
@@ -10487,6 +10560,14 @@ public final class IOUtil {
      * @throws IOException if an I/O error occurs.
      */
     public static boolean contentEquals(final File file1, final File file2) throws IOException {
+        // A directory is not a file: reject it up-front (even when both arguments are the same directory
+        // reference), consistent with the documented "@throws IllegalArgumentException when an input is not a file".
+        if (file1 != null && file1.isDirectory()) {
+            throw new IllegalArgumentException("'" + file1.getAbsolutePath() + "' is not a file");
+        } else if (file2 != null && file2.isDirectory()) {
+            throw new IllegalArgumentException("'" + file2.getAbsolutePath() + "' is not a file");
+        }
+
         if (file1 == file2) {
             return true;
         } else if (file1 == null || file2 == null) {
@@ -10554,6 +10635,14 @@ public final class IOUtil {
      * @see IOUtil#contentEqualsIgnoreEOL(Reader, Reader)
      */
     public static boolean contentEqualsIgnoreEOL(final File file1, final File file2, final String charsetName) throws IOException {
+        // A directory is not a file: reject it up-front (even when both arguments are the same directory
+        // reference), consistent with the documented "@throws IllegalArgumentException when an input is not a file".
+        if (file1 != null && file1.isDirectory()) {
+            throw new IllegalArgumentException("'" + file1.getAbsolutePath() + "' is not a file");
+        } else if (file2 != null && file2.isDirectory()) {
+            throw new IllegalArgumentException("'" + file2.getAbsolutePath() + "' is not a file");
+        }
+
         if (file1 == file2) {
             return true;
         } else if (file1 == null || file2 == null) {
@@ -11224,6 +11313,12 @@ public final class IOUtil {
             final int processThreadNum, final int queueSize, final Throwables.Consumer<? super String, E> lineAction, final Throwables.Runnable<E2> onComplete)
             throws UncheckedIOException, E, E2 {
         if (N.isEmpty(files)) {
+            // No files to read still counts as successful completion, so honor the onComplete callback
+            // (consistent with the non-empty path, where Iterators.forEach runs it after the last line).
+            if (onComplete != null) {
+                onComplete.run();
+            }
+
             return;
         }
 
@@ -11507,6 +11602,12 @@ public final class IOUtil {
             final int readThreadNum, final int processThreadNum, final int queueSize, final Throwables.Consumer<? super String, E> lineAction,
             final Throwables.Runnable<E2> onComplete) throws UncheckedIOException, E, E2 {
         if (N.isEmpty(files)) {
+            // No files to read still counts as successful completion, so honor the onComplete callback
+            // (consistent with the non-empty path, where Iterators.forEach runs it after the last line).
+            if (onComplete != null) {
+                onComplete.run();
+            }
+
             return;
         }
 

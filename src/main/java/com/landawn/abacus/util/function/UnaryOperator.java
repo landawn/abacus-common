@@ -54,7 +54,7 @@ public interface UnaryOperator<T> extends Function<T, T>, Throwables.UnaryOperat
      * Integer result2 = addTenThenDouble.apply(5);   // returns 30 ((5 + 10) * 2)
      * }</pre>
      *
-     * @param before the operator to apply before this operator is applied
+     * @param before the operator to apply before this operator is applied. Must not be {@code null}.
      * @return a composed operator that first applies the before operator and then applies this operator
      * @throws IllegalArgumentException if {@code before} is null
      * @see #andThen(java.util.function.UnaryOperator)
@@ -84,7 +84,7 @@ public interface UnaryOperator<T> extends Function<T, T>, Throwables.UnaryOperat
      * Integer result2 = doubleThenAddTen.apply(5);   // returns 20 ((5 * 2) + 10)
      * }</pre>
      *
-     * @param after the operator to apply after this operator is applied
+     * @param after the operator to apply after this operator is applied. Must not be {@code null}.
      * @return a composed operator that first applies this operator and then applies the after operator
      * @throws IllegalArgumentException if {@code after} is null
      * @see #compose(java.util.function.UnaryOperator)

@@ -21,8 +21,10 @@ import java.lang.reflect.UndeclaredThrowableException;
 import java.sql.SQLException;
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.function.Function;
@@ -87,7 +89,7 @@ public final class ExceptionUtil {
     static {
         toRuntimeExceptionFuncMap.put(RuntimeException.class, e -> (RuntimeException) e);
 
-        toRuntimeExceptionFuncMap.put(Error.class, RuntimeException::new); // right or not?
+        toRuntimeExceptionFuncMap.put(Error.class, RuntimeException::new); // deliberate: matches the documented default (throwIfItIsError == false wraps Errors instead of rethrowing)
 
         toRuntimeExceptionFuncMap.put(IOException.class, e -> new UncheckedIOException((IOException) e));
 
@@ -441,17 +443,18 @@ public final class ExceptionUtil {
             return false;
         }
 
-        int maxDepth = MAX_DEPTH_FOR_LOOP_CAUSE;
-        Throwable prevCause = null;
+        // Use identity-based cycle detection (not a fixed depth cap) so arbitrarily deep but acyclic
+        // cause chains are fully traversed while cyclic chains still terminate.
+        final Set<Throwable> seen = java.util.Collections.newSetFromMap(new IdentityHashMap<>());
         Throwable cause = e;
 
-        do {
+        while (cause != null && seen.add(cause)) {
             if (targetExceptionType.isAssignableFrom(cause.getClass())) {
                 return true;
             }
 
-            prevCause = cause;
-        } while (maxDepth-- > 0 && (cause = cause.getCause()) != null && cause != prevCause);
+            cause = cause.getCause();
+        }
 
         return false;
     }
@@ -480,17 +483,18 @@ public final class ExceptionUtil {
             return false;
         }
 
-        int maxDepth = MAX_DEPTH_FOR_LOOP_CAUSE;
-        Throwable prevCause = null;
+        // Use identity-based cycle detection (not a fixed depth cap) so arbitrarily deep but acyclic
+        // cause chains are fully traversed while cyclic chains still terminate.
+        final Set<Throwable> seen = java.util.Collections.newSetFromMap(new IdentityHashMap<>());
         Throwable cause = e;
 
-        do {
+        while (cause != null && seen.add(cause)) {
             if (targetExceptionTester.test(cause)) {
                 return true;
             }
 
-            prevCause = cause;
-        } while (maxDepth-- > 0 && (cause = cause.getCause()) != null && cause != prevCause);
+            cause = cause.getCause();
+        }
 
         return false;
     }
@@ -517,17 +521,18 @@ public final class ExceptionUtil {
             return false;
         }
 
-        int maxDepth = MAX_DEPTH_FOR_LOOP_CAUSE;
-        Throwable prevCause = null;
+        // Use identity-based cycle detection (not a fixed depth cap) so arbitrarily deep but acyclic
+        // cause chains are fully traversed while cyclic chains still terminate.
+        final Set<Throwable> seen = java.util.Collections.newSetFromMap(new IdentityHashMap<>());
         Throwable cause = e;
 
-        do {
+        while (cause != null && seen.add(cause)) {
             if (cause instanceof SQLException || UncheckedSQLExceptionClassName.equals(cause.getClass().getSimpleName())) {
                 return true;
             }
 
-            prevCause = cause;
-        } while (maxDepth-- > 0 && (cause = cause.getCause()) != null && cause != prevCause);
+            cause = cause.getCause();
+        }
 
         return false;
     }
@@ -554,17 +559,18 @@ public final class ExceptionUtil {
             return false;
         }
 
-        int maxDepth = MAX_DEPTH_FOR_LOOP_CAUSE;
-        Throwable prevCause = null;
+        // Use identity-based cycle detection (not a fixed depth cap) so arbitrarily deep but acyclic
+        // cause chains are fully traversed while cyclic chains still terminate.
+        final Set<Throwable> seen = java.util.Collections.newSetFromMap(new IdentityHashMap<>());
         Throwable cause = e;
 
-        do {
+        while (cause != null && seen.add(cause)) {
             if (cause instanceof IOException || UncheckedIOExceptionClassName.equals(cause.getClass().getSimpleName())) {
                 return true;
             }
 
-            prevCause = cause;
-        } while (maxDepth-- > 0 && (cause = cause.getCause()) != null && cause != prevCause);
+            cause = cause.getCause();
+        }
 
         return false;
     }
@@ -601,7 +607,7 @@ public final class ExceptionUtil {
      * try {
      *     complexOperation();
      * } catch (Exception e) {
-     *     List<Throwable> causes = ExceptionUtil.listCause(e);
+     *     List<Throwable> causes = ExceptionUtil.listCauses(e);
      *     for (Throwable cause : causes) {
      *         logger.error("Cause: " + cause.getClass().getName());
      *     }
@@ -612,13 +618,13 @@ public final class ExceptionUtil {
      * @return a list of all exceptions in the cause chain; an empty list if {@code e} is {@code null}.
      *         Cycles in the chain are detected via reference identity to prevent infinite loops.
      */
-    public static List<Throwable> listCause(final Throwable e) {
+    public static List<Throwable> listCauses(final Throwable e) {
         final List<Throwable> list = new ArrayList<>();
         if (e == null) {
             return list;
         }
 
-        final java.util.Set<Throwable> seen = java.util.Collections.newSetFromMap(new java.util.IdentityHashMap<>());
+        final Set<Throwable> seen = java.util.Collections.newSetFromMap(new IdentityHashMap<>());
         Throwable cause = e;
 
         while (cause != null && seen.add(cause)) {
@@ -638,20 +644,21 @@ public final class ExceptionUtil {
      * try {
      *     wrappedOperation();
      * } catch (Exception e) {
-     *     Throwable root = ExceptionUtil.firstCause(e);
+     *     Throwable root = ExceptionUtil.getRootCause(e);
      *     logger.error("Root cause: " + root.getMessage());
      * }
      * }</pre>
      *
      * @param e the exception to traverse, which may be {@code null}
      * @return the root cause or the input if no cause found; {@code null} if {@code e} is {@code null}
+     * @see #findCause(Throwable, Class)
      */
-    public static Throwable firstCause(final Throwable e) {
+    public static Throwable getRootCause(final Throwable e) {
         if (e == null) {
             return null;
         }
 
-        final java.util.Set<Throwable> seen = java.util.Collections.newSetFromMap(new java.util.IdentityHashMap<>());
+        final Set<Throwable> seen = java.util.Collections.newSetFromMap(new IdentityHashMap<>());
         seen.add(e);
         Throwable cause = e;
         Throwable result = e;
@@ -690,17 +697,18 @@ public final class ExceptionUtil {
             return Optional.empty();
         }
 
-        int maxDepth = MAX_DEPTH_FOR_LOOP_CAUSE;
-        Throwable prevCause = null;
+        // Use identity-based cycle detection (not a fixed depth cap) so arbitrarily deep but acyclic
+        // cause chains are fully traversed while cyclic chains still terminate.
+        final Set<Throwable> seen = java.util.Collections.newSetFromMap(new IdentityHashMap<>());
         Throwable cause = e;
 
-        do {
+        while (cause != null && seen.add(cause)) {
             if (targetExceptionType.isAssignableFrom(cause.getClass())) {
                 return Optional.of((E) cause);
             }
 
-            prevCause = cause;
-        } while (maxDepth-- > 0 && (cause = cause.getCause()) != null && cause != prevCause);
+            cause = cause.getCause();
+        }
 
         return Optional.empty();
     }
@@ -734,17 +742,18 @@ public final class ExceptionUtil {
             return Optional.empty();
         }
 
-        int maxDepth = MAX_DEPTH_FOR_LOOP_CAUSE;
-        Throwable prevCause = null;
+        // Use identity-based cycle detection (not a fixed depth cap) so arbitrarily deep but acyclic
+        // cause chains are fully traversed while cyclic chains still terminate.
+        final Set<Throwable> seen = java.util.Collections.newSetFromMap(new IdentityHashMap<>());
         Throwable cause = e;
 
-        do {
+        while (cause != null && seen.add(cause)) {
             if (targetExceptionTester.test(cause)) {
                 return Optional.of((E) cause);
             }
 
-            prevCause = cause;
-        } while (maxDepth-- > 0 && (cause = cause.getCause()) != null && cause != prevCause);
+            cause = cause.getCause();
+        }
 
         return Optional.empty();
     }
@@ -832,19 +841,20 @@ public final class ExceptionUtil {
         String msg = e.getMessage();
 
         if (Strings.isEmpty(msg) && e.getCause() != null) {
-            int maxDepth = MAX_DEPTH_FOR_LOOP_CAUSE;
-            Throwable prevCause = null;
+            // Use identity-based cycle detection (not a fixed depth cap) so arbitrarily deep but acyclic
+            // cause chains are fully traversed while cyclic chains still terminate.
+            final Set<Throwable> seen = java.util.Collections.newSetFromMap(new IdentityHashMap<>());
             Throwable cause = e;
 
-            do {
+            while (cause != null && seen.add(cause)) {
                 msg = cause.getMessage();
 
                 if (Strings.isNotEmpty(msg)) {
                     break;
                 }
 
-                prevCause = cause;
-            } while (maxDepth-- > 0 && (cause = cause.getCause()) != null && cause != prevCause);
+                cause = cause.getCause();
+            }
         }
 
         if (Strings.isEmpty(msg)) {
