@@ -17777,7 +17777,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Stream.of(1, 2, 3, 4, 5)
-     *       .asyncRun(s -> s.forEach(System.out::println))
+     *       .runAsync(s -> s.forEach(System.out::println))
      *       .thenRunAsync(() -> System.out.println("Done!"));
      * }</pre>
      *
@@ -17799,7 +17799,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      */
     @Beta
     @TerminalOp
-    public ContinuableFuture<Void> asyncRun(final Throwables.Consumer<? super Stream<T>, ? extends Exception> terminalAction) throws IllegalArgumentException {
+    public ContinuableFuture<Void> runAsync(final Throwables.Consumer<? super Stream<T>, ? extends Exception> terminalAction) throws IllegalArgumentException {
         checkArgNotNull(terminalAction, cs.terminalAction);
 
         return ContinuableFuture.run(() -> terminalAction.accept(Stream.this));
@@ -17816,7 +17816,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <pre>{@code
      * ExecutorService executor = Executors.newFixedThreadPool(4);
      * Stream.of(1, 2, 3, 4, 5)
-     *       .asyncRun(s -> s.forEach(System.out::println), executor)
+     *       .runAsync(s -> s.forEach(System.out::println), executor)
      *       .thenRunAsync(() -> System.out.println("Done!"));
      * }</pre>
      *
@@ -17839,7 +17839,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      */
     @Beta
     @TerminalOp
-    public ContinuableFuture<Void> asyncRun(final Throwables.Consumer<? super Stream<T>, ? extends Exception> terminalAction, final Executor executor)
+    public ContinuableFuture<Void> runAsync(final Throwables.Consumer<? super Stream<T>, ? extends Exception> terminalAction, final Executor executor)
             throws IllegalArgumentException {
         checkArgNotNull(terminalAction, cs.terminalAction);
         checkArgNotNull(executor, cs.executor);
@@ -17857,7 +17857,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Stream.of(1, 2, 3, 4, 5)
-     *       .asyncCall(s -> s.filter(x -> x > 2).count())
+     *       .callAsync(s -> s.filter(x -> x > 2).count())
      *       .thenAccept(count -> System.out.println("Count: " + count));
      * }</pre>
      *
@@ -17880,7 +17880,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      */
     @Beta
     @TerminalOp
-    public <R> ContinuableFuture<R> asyncCall(final Throwables.Function<? super Stream<T>, R, ? extends Exception> terminalAction)
+    public <R> ContinuableFuture<R> callAsync(final Throwables.Function<? super Stream<T>, R, ? extends Exception> terminalAction)
             throws IllegalArgumentException {
         checkArgNotNull(terminalAction, cs.terminalAction);
 
@@ -17898,7 +17898,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <pre>{@code
      * ExecutorService executor = Executors.newFixedThreadPool(4);
      * Stream.of(1, 2, 3, 4, 5)
-     *       .asyncCall(s -> s.filter(x -> x > 2).toList(), executor)
+     *       .callAsync(s -> s.filter(x -> x > 2).toList(), executor)
      *       .thenAccept(list -> System.out.println("Filtered list: " + list));
      * }</pre>
      *
@@ -17922,7 +17922,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      */
     @Beta
     @TerminalOp
-    public <R> ContinuableFuture<R> asyncCall(final Throwables.Function<? super Stream<T>, R, ? extends Exception> terminalAction, final Executor executor)
+    public <R> ContinuableFuture<R> callAsync(final Throwables.Function<? super Stream<T>, R, ? extends Exception> terminalAction, final Executor executor)
             throws IllegalArgumentException {
         checkArgNotNull(terminalAction, cs.terminalAction);
         checkArgNotNull(executor, cs.executor);

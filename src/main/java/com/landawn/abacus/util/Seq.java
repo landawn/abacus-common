@@ -16894,7 +16894,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * ContinuableFuture<Void> future = seq.asyncRun(s ->
+     * ContinuableFuture<Void> future = seq.runAsync(s ->
      *     s.forEach(item -> processItem(item))
      * );
      *
@@ -16922,7 +16922,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      */
     @Beta
     @TerminalOp
-    public ContinuableFuture<Void> asyncRun(final Throwables.Consumer<? super Seq<T, E>, ? extends Exception> terminalAction)
+    public ContinuableFuture<Void> runAsync(final Throwables.Consumer<? super Seq<T, E>, ? extends Exception> terminalAction)
             throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
         checkArgNotNull(terminalAction, cs.terminalAction);
@@ -16950,7 +16950,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ExecutorService customExecutor = Executors.newFixedThreadPool(4);
-     * ContinuableFuture<Void> future = seq.asyncRun(s ->
+     * ContinuableFuture<Void> future = seq.runAsync(s ->
      *     s.filter(item -> item.isValid())
      *      .forEach(item -> saveToDatabase(item)),
      *     customExecutor
@@ -16985,7 +16985,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      */
     @Beta
     @TerminalOp
-    public ContinuableFuture<Void> asyncRun(final Throwables.Consumer<? super Seq<T, E>, ? extends Exception> terminalAction, final Executor executor)
+    public ContinuableFuture<Void> runAsync(final Throwables.Consumer<? super Seq<T, E>, ? extends Exception> terminalAction, final Executor executor)
             throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
         checkArgNotNull(terminalAction, cs.terminalAction);
@@ -17013,7 +17013,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * ContinuableFuture<List<String>> future = seq.asyncCall(s ->
+     * ContinuableFuture<List<String>> future = seq.callAsync(s ->
      *     s.filter(item -> item.isValid())
      *      .map(Item::getName)
      *      .toList()
@@ -17048,7 +17048,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      */
     @Beta
     @TerminalOp
-    public <R> ContinuableFuture<R> asyncCall(final Throwables.Function<? super Seq<T, E>, R, ? extends Exception> terminalAction)
+    public <R> ContinuableFuture<R> callAsync(final Throwables.Function<? super Seq<T, E>, R, ? extends Exception> terminalAction)
             throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
         checkArgNotNull(terminalAction, cs.terminalAction);
@@ -17077,7 +17077,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ExecutorService ioExecutor = Executors.newCachedThreadPool();
-     * ContinuableFuture<Map<String, List<Item>>> future = seq.asyncCall(s ->
+     * ContinuableFuture<Map<String, List<Item>>> future = seq.callAsync(s ->
      *     s.filter(item -> item.isActive())
      *      .groupTo(Item::getCategory),
      *     ioExecutor
@@ -17115,7 +17115,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      */
     @Beta
     @TerminalOp
-    public <R> ContinuableFuture<R> asyncCall(final Throwables.Function<? super Seq<T, E>, R, ? extends Exception> terminalAction, final Executor executor)
+    public <R> ContinuableFuture<R> callAsync(final Throwables.Function<? super Seq<T, E>, R, ? extends Exception> terminalAction, final Executor executor)
             throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
         checkArgNotNull(terminalAction, cs.terminalAction);

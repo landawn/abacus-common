@@ -21878,7 +21878,7 @@ public class NTest extends AbstractParserTest {
     }
 
     @Test
-    public void asyncRun_collectionOfRunnables() {
+    public void runAsync_collectionOfRunnables() {
         List<Throwables.Runnable<Exception>> tasks = new ArrayList<>();
         AtomicInteger count = new AtomicInteger(0);
         CountDownLatch latch = new CountDownLatch(2);
@@ -21894,7 +21894,7 @@ public class NTest extends AbstractParserTest {
             latch.countDown();
         });
 
-        ObjIterator<Void> iter = N.asyncRun(tasks, executorService);
+        ObjIterator<Void> iter = N.runAsync(tasks, executorService);
         while (iter.hasNext())
             iter.next();
 
@@ -21912,7 +21912,7 @@ public class NTest extends AbstractParserTest {
         }, () -> {
         }, () -> {
         });
-        ObjIterator<Void> iter = N.asyncRun(commands);
+        ObjIterator<Void> iter = N.runAsync(commands);
         int count = 0;
         while (iter.hasNext()) {
             iter.next();
@@ -21928,7 +21928,7 @@ public class NTest extends AbstractParserTest {
             throw new RuntimeException("Test exception");
         }, counter::incrementAndGet);
 
-        ObjIterator<Void> iter = N.asyncRun(commands);
+        ObjIterator<Void> iter = N.runAsync(commands);
 
         assertTrue(iter.hasNext());
         iter.next();
@@ -21943,7 +21943,7 @@ public class NTest extends AbstractParserTest {
     @Test
     public void testAsynCall() {
         List<Callable<Integer>> commands = Arrays.asList(() -> 1, () -> 2, () -> 3);
-        ObjIterator<Integer> iter = N.asyncCall(commands);
+        ObjIterator<Integer> iter = N.callAsync(commands);
         List<Integer> results = new ArrayList<>();
         while (iter.hasNext()) {
             results.add(iter.next());
@@ -21953,7 +21953,7 @@ public class NTest extends AbstractParserTest {
     }
 
     @Test
-    public void test_asyncCall() {
+    public void test_callAsync() {
 
         {
 
@@ -21970,7 +21970,7 @@ public class NTest extends AbstractParserTest {
                 });
             }
 
-            final List<Integer> result = N.asyncCall(commands).toList();
+            final List<Integer> result = N.callAsync(commands).toList();
 
             N.println(result);
 
@@ -21999,7 +21999,7 @@ public class NTest extends AbstractParserTest {
                 });
             }
 
-            final List<Integer> result = N.asyncCall(commands).limit(2).toList();
+            final List<Integer> result = N.callAsync(commands).limit(2).toList();
 
             N.println(result);
 
@@ -22011,7 +22011,7 @@ public class NTest extends AbstractParserTest {
     }
 
     @Test
-    public void asyncCall_collectionOfCallables() {
+    public void callAsync_collectionOfCallables() {
         List<Callable<Integer>> tasks = new ArrayList<>();
         CountDownLatch latch = new CountDownLatch(2);
 
@@ -22026,7 +22026,7 @@ public class NTest extends AbstractParserTest {
             return 2;
         });
 
-        ObjIterator<Integer> iter = N.asyncCall(tasks, executorService);
+        ObjIterator<Integer> iter = N.callAsync(tasks, executorService);
         List<Integer> results = new ArrayList<>();
         while (iter.hasNext()) {
             results.add(iter.next());
@@ -24073,7 +24073,7 @@ public class NTest extends AbstractParserTest {
             return "medium";
         });
 
-        ObjIterator<String> iter = N.asyncCall(commands);
+        ObjIterator<String> iter = N.callAsync(commands);
         List<String> results = new ArrayList<>();
         while (iter.hasNext()) {
             results.add(iter.next());
@@ -24097,7 +24097,7 @@ public class NTest extends AbstractParserTest {
             });
         }
 
-        ObjIterator<Integer> iter = N.asyncCall(commands);
+        ObjIterator<Integer> iter = N.callAsync(commands);
         Set<Integer> results = new HashSet<>();
 
         while (iter.hasNext()) {

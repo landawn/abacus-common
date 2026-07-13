@@ -6361,16 +6361,16 @@ public class StreamTest extends AbstractTest {
 
 
     @Test
-    public void testAsyncCall() throws Exception {
-        com.landawn.abacus.util.ContinuableFuture<Integer> future = Stream.of(1, 2, 3).asyncCall(s -> s.reduce(0, Integer::sum));
+    public void testcallAsync() throws Exception {
+        com.landawn.abacus.util.ContinuableFuture<Integer> future = Stream.of(1, 2, 3).callAsync(s -> s.reduce(0, Integer::sum));
         assertEquals(Integer.valueOf(6), future.get());
     }
 
     @Test
-    public void testAsyncCall_WithExecutor() throws Exception {
+    public void testcallAsync_WithExecutor() throws Exception {
         ExecutorService executor = Executors.newSingleThreadExecutor();
         try {
-            Integer result = Stream.of(1, 2, 3).asyncCall(s -> s.reduce(0, Integer::sum), executor).get();
+            Integer result = Stream.of(1, 2, 3).callAsync(s -> s.reduce(0, Integer::sum), executor).get();
             assertEquals(6, result);
         } finally {
             executor.shutdown();

@@ -39900,7 +39900,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * Note: this overload accepts a {@code List} (not a {@code Collection}) because a {@code Collection} overload would
      * clash with {@link #asyncExecute(Collection)} (the {@code Callable} variant) after type erasure; callers holding a
      * non-List collection of runnables must copy it to a {@code List} first. The returned futures are in submission
-     * (encounter) order; for completion-order iteration, see {@link #asyncRun(Collection)}.
+     * (encounter) order; for completion-order iteration, see {@link #runAsync(Collection)}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -39930,7 +39930,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * Note: this overload accepts a {@code List} (not a {@code Collection}) because a {@code Collection} overload would
      * clash with {@link #asyncExecute(Collection, Executor)} (the {@code Callable} variant) after type erasure; callers
      * holding a non-List collection of runnables must copy it to a {@code List} first. The returned futures are in
-     * submission (encounter) order; for completion-order iteration, see {@link #asyncRun(Collection, Executor)}.
+     * submission (encounter) order; for completion-order iteration, see {@link #runAsync(Collection, Executor)}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -39972,7 +39972,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * This method is the collection-friendly counterpart to {@link #asyncExecute(List)}. It uses a distinct method name
      * because {@code asyncExecute(Collection<? extends Runnable>)} would clash with {@link #asyncExecute(Collection)}
      * (the {@code Callable} variant) after type erasure. The returned futures are in submission (encounter) order; for
-     * completion-order iteration, see {@link #asyncRun(Collection)}.
+     * completion-order iteration, see {@link #runAsync(Collection)}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -39987,7 +39987,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return a list of futures representing the pending completion of each command
      * @see #asyncExecuteAll(Collection, Executor)
      * @see #asyncExecute(List)
-     * @see #asyncRun(Collection)
+     * @see #runAsync(Collection)
      */
     public static List<ContinuableFuture<Void>> asyncExecuteAll(final Collection<? extends Throwables.Runnable<? extends Exception>> commands) {
         return asyncExecuteAll(commands, ASYNC_EXECUTOR.getExecutor());
@@ -40001,7 +40001,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * This method is the collection-friendly counterpart to {@link #asyncExecute(List, Executor)}. It uses a distinct
      * method name because {@code asyncExecute(Collection<? extends Runnable>, Executor)} would clash with
      * {@link #asyncExecute(Collection, Executor)} (the {@code Callable} variant) after type erasure. The returned futures
-     * are in submission (encounter) order; for completion-order iteration, see {@link #asyncRun(Collection, Executor)}.
+     * are in submission (encounter) order; for completion-order iteration, see {@link #runAsync(Collection, Executor)}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -40018,7 +40018,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return a list of futures representing the pending completion of each command
      * @see #asyncExecuteAll(Collection)
      * @see #asyncExecute(List, Executor)
-     * @see #asyncRun(Collection, Executor)
+     * @see #runAsync(Collection, Executor)
      */
     public static List<ContinuableFuture<Void>> asyncExecuteAll(final Collection<? extends Throwables.Runnable<? extends Exception>> commands,
             final Executor executor) {
@@ -40042,7 +40042,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * <br />
      * Note: the {@code Runnable} counterpart of this method ({@link #asyncExecute(List)}) accepts a {@code List} instead
      * of a {@code Collection} because the two overloads would otherwise clash after type erasure. The returned futures
-     * are in submission (encounter) order; for results yielded lazily in completion order, see {@link #asyncCall(Collection)}.
+     * are in submission (encounter) order; for results yielded lazily in completion order, see {@link #callAsync(Collection)}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -40073,7 +40073,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * Note: the {@code Runnable} counterpart of this method ({@link #asyncExecute(List, Executor)}) accepts a {@code List}
      * instead of a {@code Collection} because the two overloads would otherwise clash after type erasure. The returned
      * futures are in submission (encounter) order; for results yielded lazily in completion order, see
-     * {@link #asyncCall(Collection, Executor)}.
+     * {@link #callAsync(Collection, Executor)}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -40121,7 +40121,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *     () -> System.out.println("file2"),
      *     () -> System.out.println("file3")
      * );
-     * ObjIterator<Void> results = N.asyncRun(tasks);
+     * ObjIterator<Void> results = N.runAsync(tasks);
      *
      * // Iterate results as they complete (fastest first)
      * while (results.hasNext()) {
@@ -40139,12 +40139,12 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return an iterator that yields one {@code null} per completed command, in completion order. The caller
      *         should fully exhaust the iterator: advancing it is what drives completion handling and surfaces
      *         any command failure (see the note above).
-     * @see #asyncRun(Collection, Executor)
-     * @see #asyncCall(Collection)
+     * @see #runAsync(Collection, Executor)
+     * @see #callAsync(Collection)
      * @see #asyncExecute(List)
      */
-    public static ObjIterator<Void> asyncRun(final Collection<? extends Throwables.Runnable<? extends Exception>> commands) {
-        return asyncRun(commands, ASYNC_EXECUTOR.getExecutor());
+    public static ObjIterator<Void> runAsync(final Collection<? extends Throwables.Runnable<? extends Exception>> commands) {
+        return runAsync(commands, ASYNC_EXECUTOR.getExecutor());
     }
 
     /**
@@ -40161,7 +40161,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *     () -> System.out.println("file2"),
      *     () -> System.out.println("file3")
      * );
-     * ObjIterator<Void> results = N.asyncRun(tasks, executor);
+     * ObjIterator<Void> results = N.runAsync(tasks, executor);
      *
      * // Iterate results as they complete (fastest first)
      * while (results.hasNext()) {
@@ -40180,10 +40180,10 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return an iterator that yields one {@code null} per completed command, in completion order. The caller
      *         should fully exhaust the iterator: advancing it is what drives completion handling and surfaces
      *         any command failure (see the note above).
-     * @see #asyncRun(Collection)
-     * @see #asyncCall(Collection, Executor)
+     * @see #runAsync(Collection)
+     * @see #callAsync(Collection, Executor)
      */
-    public static ObjIterator<Void> asyncRun(final Collection<? extends Throwables.Runnable<? extends Exception>> commands, final Executor executor) {
+    public static ObjIterator<Void> runAsync(final Collection<? extends Throwables.Runnable<? extends Exception>> commands, final Executor executor) {
         if (isEmpty(commands)) {
             return ObjIterator.empty();
         }
@@ -40282,7 +40282,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *     () -> "data2",
      *     () -> "data3"
      * );
-     * ObjIterator<String> results = N.asyncCall(tasks);
+     * ObjIterator<String> results = N.callAsync(tasks);
      *
      * while (results.hasNext()) {
      *     String result = results.next();
@@ -40293,12 +40293,12 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param <R> the type of result returned by each command
      * @param commands the collection of commands to execute asynchronously
      * @return an iterator yielding results in completion order
-     * @see #asyncCall(Collection, Executor)
-     * @see #asyncRun(Collection)
+     * @see #callAsync(Collection, Executor)
+     * @see #runAsync(Collection)
      * @see #asyncExecute(Collection)
      */
-    public static <R> ObjIterator<R> asyncCall(final Collection<? extends Callable<? extends R>> commands) {
-        return asyncCall(commands, ASYNC_EXECUTOR.getExecutor());
+    public static <R> ObjIterator<R> callAsync(final Collection<? extends Callable<? extends R>> commands) {
+        return callAsync(commands, ASYNC_EXECUTOR.getExecutor());
     }
 
     /**
@@ -40317,7 +40317,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *     () -> "data2",
      *     () -> "data3"
      * );
-     * ObjIterator<String> results = N.asyncCall(tasks, executor);
+     * ObjIterator<String> results = N.callAsync(tasks, executor);
      *
      * while (results.hasNext()) {
      *     String result = results.next();
@@ -40329,10 +40329,10 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param commands the collection of commands to execute asynchronously
      * @param executor the executor to use for execution
      * @return an iterator yielding results in completion order
-     * @see #asyncCall(Collection)
-     * @see #asyncRun(Collection, Executor)
+     * @see #callAsync(Collection)
+     * @see #runAsync(Collection, Executor)
      */
-    public static <R> ObjIterator<R> asyncCall(final Collection<? extends Callable<? extends R>> commands, final Executor executor)
+    public static <R> ObjIterator<R> callAsync(final Collection<? extends Callable<? extends R>> commands, final Executor executor)
             throws IllegalArgumentException {
         if (isEmpty(commands)) {
             return ObjIterator.empty();

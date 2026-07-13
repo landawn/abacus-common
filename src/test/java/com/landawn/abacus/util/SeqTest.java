@@ -10832,15 +10832,15 @@ public class SeqTest extends AbstractTest {
     }
 
     @Test
-    public void testAsyncRun() throws Exception {
+    public void testrunAsync() throws Exception {
         AtomicInteger sum = new AtomicInteger(0);
-        ContinuableFuture<Void> future = Seq.of(1, 2, 3).asyncRun(seq -> seq.forEach(sum::addAndGet));
+        ContinuableFuture<Void> future = Seq.of(1, 2, 3).runAsync(seq -> seq.forEach(sum::addAndGet));
         future.get();
         assertEquals(6, sum.get());
     }
 
     @Test
-    public void testAsyncRunWithExecutor() throws Exception {
+    public void testrunAsyncWithExecutor() throws Exception {
         ExecutorService executor = Executors.newSingleThreadExecutor();
         try {
             List<Integer> data = Arrays.asList(1, 2, 3, 4, 5);
@@ -10848,7 +10848,7 @@ public class SeqTest extends AbstractTest {
 
             Seq<Integer, Exception> seq = Seq.of(data);
 
-            ContinuableFuture<Void> future = seq.asyncRun(s -> s.forEach(sum::addAndGet), executor);
+            ContinuableFuture<Void> future = seq.runAsync(s -> s.forEach(sum::addAndGet), executor);
 
             future.get();
             assertEquals(15, sum.get());
@@ -10858,14 +10858,14 @@ public class SeqTest extends AbstractTest {
     }
 
     @Test
-    public void testAsyncRunClosesSeqOnCompletionAndFailure() throws Exception {
+    public void testrunAsyncClosesSeqOnCompletionAndFailure() throws Exception {
         AtomicInteger closeCount = new AtomicInteger();
 
-        Seq.of(1).onClose(closeCount::incrementAndGet).asyncRun(s -> {
+        Seq.of(1).onClose(closeCount::incrementAndGet).runAsync(s -> {
         }).get();
         assertEquals(1, closeCount.get());
 
-        ContinuableFuture<Void> failed = Seq.of(1).onClose(closeCount::incrementAndGet).asyncRun(s -> {
+        ContinuableFuture<Void> failed = Seq.of(1).onClose(closeCount::incrementAndGet).runAsync(s -> {
             throw new IllegalStateException("boom");
         });
 
@@ -10875,11 +10875,11 @@ public class SeqTest extends AbstractTest {
         ExecutorService executor = Executors.newSingleThreadExecutor();
 
         try {
-            Seq.of(1).onClose(closeCount::incrementAndGet).asyncRun(s -> {
+            Seq.of(1).onClose(closeCount::incrementAndGet).runAsync(s -> {
             }, executor).get();
             assertEquals(3, closeCount.get());
 
-            failed = Seq.of(1).onClose(closeCount::incrementAndGet).asyncRun(s -> {
+            failed = Seq.of(1).onClose(closeCount::incrementAndGet).runAsync(s -> {
                 throw new IllegalStateException("boom");
             }, executor);
 
@@ -10891,25 +10891,25 @@ public class SeqTest extends AbstractTest {
     }
 
     @Test
-    public void testAsyncRunNullAction() throws Exception {
+    public void testrunAsyncNullAction() throws Exception {
         Seq<String, Exception> seq = Seq.of(Arrays.asList("a", "b"));
 
-        assertThrows(IllegalArgumentException.class, () -> seq.asyncRun(null));
+        assertThrows(IllegalArgumentException.class, () -> seq.runAsync(null));
     }
 
     @Test
-    public void testAsyncRunWithNullAction() {
+    public void testrunAsyncWithNullAction() {
         Seq<String, RuntimeException> seq = Seq.of("test");
 
-        assertThrows(IllegalArgumentException.class, () -> seq.asyncRun(null));
+        assertThrows(IllegalArgumentException.class, () -> seq.runAsync(null));
     }
 
     @Test
-    public void testAsyncRun_WithExecutor() throws Exception {
+    public void testrunAsync_WithExecutor() throws Exception {
         ExecutorService executor = Executors.newSingleThreadExecutor();
         try {
             AtomicInteger sum = new AtomicInteger(0);
-            ContinuableFuture<Void> future = Seq.of(1, 2, 3).asyncRun(seq -> seq.forEach(sum::addAndGet), executor);
+            ContinuableFuture<Void> future = Seq.of(1, 2, 3).runAsync(seq -> seq.forEach(sum::addAndGet), executor);
             future.get();
             assertEquals(6, sum.get());
         } finally {
@@ -10918,20 +10918,20 @@ public class SeqTest extends AbstractTest {
     }
 
     @Test
-    public void testAsyncCall() throws Exception {
-        ContinuableFuture<List<Integer>> future = Seq.of(1, 2, 3).asyncCall(seq -> seq.toList());
+    public void testcallAsync() throws Exception {
+        ContinuableFuture<List<Integer>> future = Seq.of(1, 2, 3).callAsync(seq -> seq.toList());
         List<Integer> result = future.get();
         assertEquals(Arrays.asList(1, 2, 3), result);
     }
 
     @Test
-    public void testAsyncCallWithExecutor() throws Exception {
+    public void testcallAsyncWithExecutor() throws Exception {
         ExecutorService executor = Executors.newSingleThreadExecutor();
         try {
             List<String> data = Arrays.asList("hello", "world");
             Seq<String, Exception> seq = Seq.of(data);
 
-            ContinuableFuture<String> future = seq.asyncCall(s -> s.join(" "), executor);
+            ContinuableFuture<String> future = seq.callAsync(s -> s.join(" "), executor);
 
             String result = future.get();
             assertEquals("hello world", result);
@@ -10941,13 +10941,13 @@ public class SeqTest extends AbstractTest {
     }
 
     @Test
-    public void testAsyncCallClosesSeqOnCompletionAndFailure() throws Exception {
+    public void testcallAsyncClosesSeqOnCompletionAndFailure() throws Exception {
         AtomicInteger closeCount = new AtomicInteger();
 
-        assertEquals("done", Seq.of(1).onClose(closeCount::incrementAndGet).asyncCall(s -> "done").get());
+        assertEquals("done", Seq.of(1).onClose(closeCount::incrementAndGet).callAsync(s -> "done").get());
         assertEquals(1, closeCount.get());
 
-        ContinuableFuture<String> failed = Seq.of(1).onClose(closeCount::incrementAndGet).asyncCall(s -> {
+        ContinuableFuture<String> failed = Seq.of(1).onClose(closeCount::incrementAndGet).callAsync(s -> {
             throw new IllegalStateException("boom");
         });
 
@@ -10957,10 +10957,10 @@ public class SeqTest extends AbstractTest {
         ExecutorService executor = Executors.newSingleThreadExecutor();
 
         try {
-            assertEquals("done", Seq.of(1).onClose(closeCount::incrementAndGet).asyncCall(s -> "done", executor).get());
+            assertEquals("done", Seq.of(1).onClose(closeCount::incrementAndGet).callAsync(s -> "done", executor).get());
             assertEquals(3, closeCount.get());
 
-            failed = Seq.of(1).onClose(closeCount::incrementAndGet).asyncCall(s -> {
+            failed = Seq.of(1).onClose(closeCount::incrementAndGet).callAsync(s -> {
                 throw new IllegalStateException("boom");
             }, executor);
 
@@ -10972,28 +10972,28 @@ public class SeqTest extends AbstractTest {
     }
 
     @Test
-    public void testAsyncCallReturningList() throws Exception {
+    public void testcallAsyncReturningList() throws Exception {
         List<Integer> data = Arrays.asList(1, 2, 3, 4, 5);
         Seq<Integer, Exception> seq = Seq.of(data);
 
-        ContinuableFuture<List<Integer>> future = seq.asyncCall(s -> s.filter(i -> i > 2).toList());
+        ContinuableFuture<List<Integer>> future = seq.callAsync(s -> s.filter(i -> i > 2).toList());
 
         List<Integer> result = future.get();
         assertEquals(Arrays.asList(3, 4, 5), result);
     }
 
     @Test
-    public void testAsyncCallWithNullAction() {
+    public void testcallAsyncWithNullAction() {
         Seq<String, RuntimeException> seq = Seq.of("test");
 
-        assertThrows(IllegalArgumentException.class, () -> seq.asyncCall(null));
+        assertThrows(IllegalArgumentException.class, () -> seq.callAsync(null));
     }
 
     @Test
-    public void testAsyncCall_WithExecutor() throws Exception {
+    public void testcallAsync_WithExecutor() throws Exception {
         ExecutorService executor = Executors.newSingleThreadExecutor();
         try {
-            ContinuableFuture<List<Integer>> future = Seq.of(1, 2, 3).asyncCall(seq -> seq.toList(), executor);
+            ContinuableFuture<List<Integer>> future = Seq.of(1, 2, 3).callAsync(seq -> seq.toList(), executor);
             assertEquals(Arrays.asList(1, 2, 3), future.get());
         } finally {
             executor.shutdown();
